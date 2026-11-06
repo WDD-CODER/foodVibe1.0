@@ -8,12 +8,14 @@ import { EventStageBarComponent } from './event-stage-bar.component'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
+import { ClientDataService } from '@services/client-data.service'
 import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import type { MenuEvent } from '@models/menu-event.model'
+import type { Client } from '@models/client.model'
 
 @Component({ selector: 'app-event-closing-dialog', standalone: true, template: '<i class="closing-stub"></i>' })
 class ClosingDialogStub {
@@ -29,6 +31,7 @@ describe('EventStageBarComponent', () => {
   let userMsg: jasmine.SpyObj<UserMsgService>
   let eventData: { allMenuEvents_: unknown; updateMenuEvent: jasmine.Spy }
   let allowed: Record<string, boolean>
+  let clients: Client[]
   let confirmAnswer: boolean
   let snapshots: { buildFor: jasmine.Spy }
   let confirmOpen: jasmine.Spy
@@ -45,6 +48,8 @@ describe('EventStageBarComponent', () => {
     eventDate: '2026-12-01'
   }
 
+  const stageLink = (key: string) =>
+    Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-link')).find((b) => b.textContent?.includes(`T:${key}`))!
   const pills = () => Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-pill'))
   const pill = (stage: string) => pills().find((p) => p.textContent?.trim() === `T:event_stage_${stage}`)!
 
@@ -58,6 +63,10 @@ describe('EventStageBarComponent', () => {
     confirmAnswer = true
     confirmOpen = jasmine.createSpy('open').and.callFake(() => Promise.resolve(confirmAnswer))
     allowed = { changeStage: true, edit: true, editMoney: true }
+    clients = [
+      { _id: 'c1', name: 'דנה', phone: '0521234567', phoneNormalized: '0521234567', clientType: 'private' },
+      { _id: 'c2', name: 'רוני', phone: '0539999999', phoneNormalized: '0539999999', clientType: 'private' }
+    ] as Client[]
     store = signal<MenuEvent[]>([base])
     snapshots = { buildFor: jasmine.createSpy('buildFor').and.returnValue(snapshot) }
     pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['changeStage', 'finish'])
@@ -76,6 +85,10 @@ describe('EventStageBarComponent', () => {
         { provide: MenuEventDataService, useValue: eventData },
         { provide: EventPipelineService, useValue: pipeline },
         { provide: PlanSnapshotService, useValue: snapshots },
+        {
+          provide: ClientDataService,
+          useValue: { allClients_: () => clients, getClientById: (id: string) => clients.find((c) => c._id === id) }
+        },
         { provide: PermissionService, useValue: { can: (action: string) => allowed[action] } },
         { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } },
         { provide: UserMsgService, useValue: userMsg },
@@ -213,22 +226,56 @@ describe('EventStageBarComponent', () => {
   it('locks the deposit fields unless the user may edit money, but keeps them visible', async () => {
     allowed['editMoney'] = false
     await setup({ ...base, deposit: { amount: 2000 } })
-    el.querySelectorAll<HTMLButtonElement>('.stage-link')[0].click()
+    stageLink('deposit_details').click()
     fixture.detectChanges()
     const amount = el.querySelector<HTMLInputElement>('#stage-deposit-amount')!
     expect(amount.disabled).toBeTrue()
     expect(amount.value).toBe('2000')
-    expect(el.querySelector<HTMLInputElement>('#stage-client-name')!.disabled).toBeFalse()
   })
 
-  it('saves the client name with only that field changed', async () => {
-    await setup()
-    el.querySelectorAll<HTMLButtonElement>('.stage-link')[0].click()
-    fixture.detectChanges()
-    const name = el.querySelector<HTMLInputElement>('#stage-client-name')!
-    name.value = ' דנה '
-    name.dispatchEvent(new Event('change'))
-    expect(eventData.updateMenuEvent).toHaveBeenCalledWith({ ...base, clientName: 'דנה' })
+  describe('client row (plan 516)', () => {
+    const chips = () => Array.from(el.querySelectorAll('.client-chip')).map((c) => c.textContent?.trim())
+    const changeButton = () => el.querySelector<HTMLButtonElement>('.client-row button')
+
+    it('shows the linked client from the client list, with the event count', async () => {
+      await setup({ ...base, clientId: 'c1', clientName: 'ישן', clientPhone: '000' })
+      expect(chips()).toEqual(['דנה', '0521234567', '1 T:client_events_count'])
+      expect(changeButton()!.textContent).toContain('T:client_change')
+    })
+
+    it('falls back to the snapshot name and phone for an unlinked event', async () => {
+      await setup({ ...base, clientName: 'שרה', clientPhone: '0501112222' })
+      expect(chips()).toEqual(['שרה', '0501112222'])
+      expect(changeButton()!.textContent).toContain('T:client_link')
+    })
+
+    it('hides the change button from staff', async () => {
+      allowed['edit'] = false
+      await setup({ ...base, clientId: 'c1' })
+      expect(changeButton()).toBeNull()
+      expect(chips().length).toBe(2)
+    })
+
+    it('saves clientId, clientName and clientPhone when a client is picked, then closes the picker', async () => {
+      await setup({ ...base, clientId: 'c1' })
+      changeButton()!.click()
+      fixture.detectChanges()
+      expect(el.querySelector('app-search-combobox')).toBeTruthy()
+      const input = el.querySelector<HTMLInputElement>('app-search-combobox input')!
+      input.value = 'רוני'
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      el.querySelector<HTMLElement>('app-search-combobox [role="option"]')!.click()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(eventData.updateMenuEvent).toHaveBeenCalledWith({
+        ...base,
+        clientId: 'c2',
+        clientName: 'רוני',
+        clientPhone: '0539999999'
+      })
+      expect(el.querySelector('app-search-combobox')).toBeNull()
+    })
   })
 
   it('lists the stage history newest first with who and when', async () => {
@@ -239,7 +286,7 @@ describe('EventStageBarComponent', () => {
         { stage: 'quote_sent', at: 2000, by: 'u1', byName: 'דן' }
       ]
     })
-    el.querySelectorAll<HTMLButtonElement>('.stage-link')[1].click()
+    stageLink('stage_history').click()
     fixture.detectChanges()
     const rows = Array.from(el.querySelectorAll('.stage-history-stage')).map((r) => r.textContent?.trim())
     expect(rows).toEqual(['T:event_stage_quote_sent', 'T:event_stage_inquiry'])

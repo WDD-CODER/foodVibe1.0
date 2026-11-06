@@ -80,7 +80,7 @@ touching any milestone.
   - Both add and update payloads.
 - [ ] Detail page: list all contacts (initials avatar, name, role, `tel:` link). Remove the hard-coded `'venue_manager'` role.
 - [ ] New `HoursEditorComponent` (`src/app/shared/hours-editor/`), with signal inputs and outputs, `ControlValueAccessor` or `model()`:
-  - Per row: 7 toggle chips (`.c-toggle-chip`, Sunday = 0 … Saturday = 6), "from" / "to" `<input type="time">`, remove-row button; plus an add-row button.
+  - Per row: 7 toggle chips (`.c-chip--toggle`, Sunday = 0 … Saturday = 6), "from" / "to" `<input type="time">`, remove-row button; plus an add-row button.
   - Validation: at least 1 day, and open < close unless the range crosses midnight (allow and show "+1").
 - [ ] `venue-hours.util.ts`:
   - `toDisplay(dayIndexes, open, close)` → `{ days: 'א׳–ה׳', time: '08:00–23:00' }`, compressing consecutive days.
@@ -108,7 +108,7 @@ touching any milestone.
 
 ## Technical Considerations
 
-- Dependencies: `VenueFormComponent`, `VenueDetailComponent`, `VenueListComponent` (card hours via the util), `.c-toggle-chip` (plan 339), `server/middleware/validate.js`.
+- Dependencies: `VenueFormComponent`, `VenueDetailComponent`, `VenueListComponent` (card hours via the util), `.c-chip--toggle` (plan 457, replaced `.c-toggle-chip`), `server/middleware/validate.js`.
 - New files: `shared/hours-editor/*` plus spec.
 - Model changes: additive optional fields only. Nothing removed from the schema, so stored docs stay valid.
 

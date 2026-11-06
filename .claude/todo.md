@@ -6,6 +6,19 @@
 
 ---
 
+## Execution order (Planner review 2026-11-05)
+
+1. **513** clients migration — finish from wt-3 staged work; phones may print (log lines avoid PII names; kit grep untouched)
+2. **517** orchestrator test runners — alone; prerequisite for 518–523
+3. **518** logistics schema → then **519 ∥ 520 ∥ 521** → then **522** → **523** (one run, 4 waves)
+4. **510** preferred supplier — independent; can run in a free slot alongside 2–3
+5. **374** venues infra/equipment → **372** venues contacts + hours
+- Closed: **490** (Human validated 2026-11-05; fixes #507, #509)
+- Parked: **373** venue videos/location (after 372, low value) · **471** exports (needs a Human walk-through session)
+- Closed: **524** (done in PR #494, main on kit v2.0.0)
+
+---
+
 ## Tech Debt (from `/nightly-maintenance` 2026-09-27)
 
 > Full plan: `plans/300-400/318-nightly-maintenance-followups-2026-09-27.plan.md`. Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`.
@@ -69,19 +82,6 @@
 - [ ] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
 - [ ] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400.
 
-### Plan 490 — Pasted ingredient lines match existing products first and Not Ready never saves (`plans/490-pasted-ingredient-lines-match-existing-products-first-and-not-ready-never-saves.plan.md`)
-
-- [x] S1: Let the AI matching answer carry a short list of options when it is unsure — `productNameMatchResponseSchema` entries get optional `options: z.array(z.number().int()).optional()` with **no `.max()` / `.min(0)` on the array or its items** (the same schema parses the model's raw answer, so one over-long or out-of-range options list must not make `safeParse` reject the whole answer; `cleanProductMatches` does the capping and range check); export `PRODUCT_MATCH_MAX_OPTIONS = 5`; run `npm run build:schemas` — shared/schemas/ai-product-match.schema.ts
-- [x] S2: Teach the server step to read names in any language and to return options instead of guessing — prompt: names come from a chef in any language (Hebrew, English, …) and may carry an amount, a pack word or a remark («קצת», «לפי הטעם») to ignore; set `product` only when exactly one product is clearly the same food (unchanged rule, still `חלב` ≠ `חלבה`); when two to five products could be that food and you cannot tell which, set `product` null and list them in `options`; otherwise null with no options; `cleanProductMatches` keeps `product` entries as today, keeps `product: null` entries only with cleaned options (in range, unique, max 5; dropped when `product` is set), and the done log line gains an `options` count; server tests as in Done-when — server/routes/ai.js, server/test/ai-match-product-names.test.js
-- [x] S3: Give the shared matcher an options result next to the links, without changing the import page — new `matchNamesWithOptions(items, options)` returning `{ linked: Map<key, NameMatchResult>, options: Map<key, Product[]> }`; `NameMatchItem` gets optional `linkable?: boolean` (default true); tier-2 `ambiguous` candidates are kept and become options when the AI does not link that name (also after an AI failure); a non-linkable item never enters `linked` (an AI `product` for it becomes a one-item option, a local exact/variant hit too); options capped at 5, in the model's order then local; `matchNames` delegates and returns `linked`; spec — product-name-matcher.service.ts, product-name-matcher.service.spec.ts
-- [x] S4: Send pasted text lines to the matcher for options only and keep each row's options — in `onPasteIngredients` queue text lines as `{ name: line.text, linkable: false }` next to the unlinked parsed lines; `linkPastedByAi_` calls `matchNamesWithOptions`, links as today, and stores options per row in a signal `rowOptions_` (a `Map<FormGroup, readonly Product[]>`, replaced not mutated) only while the row is still in the table, unlinked and its name unchanged; drop a row's options when it gets linked or cleared — recipe-ingredients-table.component.ts
-- [x] S5: Make «לא מוכן» open the search with the inventory's options instead of saving a stub product — `onUnlinkedBadgeClick` keeps the plan-485 exact-name branch; otherwise it only sets `editingNameAtRow_` to that row (no `addProduct`, no `saveProduct`); `suggestionsFor(group)` = the row's stored options, then the local `matchProductName` result for its name over `KitchenStateService.products_()` (exact/variant product, or ambiguous candidates), no duplicates, max 5; the template passes `[suggestions]` to the row's `app-ingredient-search` only for the row being edited; remove the stub code and the imports it alone used — recipe-ingredients-table.component.ts, recipe-ingredients-table.component.html
-- [x] S6: Keep the pasted amount and unit when the chef picks a product for an unlinked row — in `onItemSelected`, when the row being edited had no `referenceId` and has an amount above 0, keep its `amount_net` and `unit` (the unit dropdown already lists the row's current unit); other rows keep today's behaviour (checks 41-42) — recipe-ingredients-table.component.ts
-- [x] S7: List the inventory's options first in the ingredient search, marked as suggestions — new input `suggestions = input<readonly Product[]>([])`; the combobox `options` become suggestions (as `item_type_: 'product'`, filtered by `excludeNames`) followed by `filteredResults_()` without the same `_id`, while the trimmed query equals the trimmed `initialQuery()`; once the user types something else, only the normal search; `knownOptions` includes the suggestions so an exact name still hides the add row (rule X); each suggestion row shows a `c-chip c-chip--tag c-chip--sm` «הצעה מהמלאי» chip; the add option and quick-add flow stay as they are (saves only on the window's «שמור») — ingredient-search.component.ts, ingredient-search.component.html, ingredient-search.component.scss (only if the chip needs spacing; logical properties, cssLayer skill first)
-- [x] S8: Add the suggestion label and make the hint say what the badge now does — append `"ingredient_suggestion": "הצעה מהמלאי"` next to `ingredient_not_ready`; keep `unlinked_ingredient_hint` (it already says «לחץ לחיפוש וקישור») — public/assets/data/dictionary.json
-- [x] S9: Specs for the table, search and matcher as listed in Done-when; update the plan-463 spec "never sends a text-only line to the AI step" to "sends a text-only line for options only and never links it" — recipe-ingredients-table.component.spec.ts, ingredient-search.component.spec.ts, product-name-matcher.service.spec.ts
-- [ ] V1: Build, run every listed test, replay the cards in the browser and write the run file — `npx ng build`, the `ng test` includes, the server tests, the grep, log-query; record evidence, decisions and the five cards — docs/mvp/runs/490.md
-
 ### Plan 502 — Consistency sweep: one date field, one number format, growing textareas and one save-busy state (`plans/502-consistency-sweep-one-date-field-one-number-format-growing-textareas-and-one-save-busy-state.plan.md`)
 
 - [x] C1: Check the four lists in the Problem Statement against today's code and record the real ones — native dates, `| number` and `toFixed` uses, textareas, save buttons without a busy flag — this plan file
@@ -115,14 +115,6 @@
 - [ ] S2: Write the clients and event links safely and add a check that no event is left unlinked — `async write(db, args, result)` (`checkBackup` unless `--db`; reuse-or-insert clients validated with `parseV2('clients', doc)` from `server/utils/schema-check.js`; idempotent event `updateOne`; `migrations` upsert) and `async verify(db)`; `main()` with `parseArgs(process.argv, { write:1, verify:1, 'backup-dir':1, db:1, target:1, 'confirm-host':1 })`; `module.exports` and `if (require.main === module) main()` — files: the migration.
 - [ ] S3: Prove with a test that the migration groups correctly and can be re-run safely — `server/test/migration-0009.test.js` using the in-memory/local test DB helper the other server tests use: seed two businesses, events with shared phone in two formats (`052-1234567`, `0521234567`), one event with name only, one with neither, run `plan` + `write` twice; assert counts, `createdBy`, idempotence, and `verify` ok — files: the test.
 - [ ] V1: Rehearse on the scratch database, record the output and list the Atlas commands unrun — Atlas` with the exact commands (not executed).
-
-### Plan 516 — Show the event client as a read-only row with owner change and link on the stage bar
-- [ ] U1: Add the same Hebrew client texts so the stage bar and the dialog share one list — the 18 Contract keys under `general` in `public/assets/data/dictionary.json`, append only; skip keys already present — files: dictionary.
-- [ ] U2: Remove the editable client name and phone from the stage bar and keep the deposit fields — delete `onClientNameChange`, `onClientPhoneChange`, `isPhoneInvalid_` and the two inputs from `event-stage-bar.component.ts/html`; keep deposit inputs; relabel the toggle `deposit_details`; `detailsSummary_` → deposit summary — files: the component ts/html/scss.
-- [ ] U3: Show the event client as a read-only row with name, phone and event count — inject `ClientDataService`; add `client_`, `clientEventCount_`, `canChangeClient_`; render the chips per P0 as the first item in `.stage-links` — files: the component ts/html/scss.
-- [ ] U4: Let the owner change or link the event client from the stage bar — `isPickerOpen_` signal, owner-only button, inline `app-search-combobox` pick-only, `(picked)` → `saveFields` with the three fields, close on pick and on Escape — files: the component ts/html.
-- [ ] T1: Update the stage bar tests for the removed inputs and the new client row — remove tests for the deleted handlers; add the 3 tests named in Success Criteria with stubbed `ClientDataService`, `MenuEventDataService`, `PermissionService` — files: `event-stage-bar.component.spec.ts`.
-- [ ] V1: Run the checks, capture the three UI cards and write the evidence in the Execution Notes — Run `npm run build`, `npm run lint`, the spec, the reuse gate and the log check; produce the three `[ui]` cards; write evidence under `## Execution Notes`.
 
 ### Plan 517 — Let the orchestrator gate run FoodVibe's tests, server tests and one e2e spec without hanging
 - [ ] A1: Give the project a test runner that always exits, so the gate gets a verdict instead of a hang — spawn ng test headless, parse the Karma TOTAL line, kill the process tree, print the TEST-CI summary line — scripts/test-ci.mjs

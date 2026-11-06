@@ -1,0 +1,259 @@
+{
+  "run": "run-513-516c",
+  "branch": "orch/run-513-516c",
+  "base": "main",
+  "startedAt": "2026-11-03T20:30:03.243Z",
+  "mainShaAtStart": "b54f61e36ffc1a6a38de52a54c47765a24783a9b",
+  "plans": {
+    "513": {
+      "nnn": "513",
+      "title": "Create clients from existing menu events and link each event to its client",
+      "branch": "feat/513-migration-0009-clients-from",
+      "state": "parked",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-opus-5-5",
+          "effort": "medium"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-03T20:31:06.184Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-03T20:43:02.412Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-03T20:43:33.808Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "slot": "C:/coding projects/Cursor/foodVibe1.0-wt-3",
+      "asked": [
+        "513: phone that passes the event schema but not the client schema — Human: raw phone if it passes the client regex; digi",
+        "513: inserted client _id — default newId() from server/utils/id.js",
+        "513: drop the name/no-phone reuse branch — default"
+      ],
+      "ready": false,
+      "freeDiskGb": 12.6,
+      "reason": "replan needed: The plan requires console output with the phone and the client names: 'invalid-phone events: <n>' with raw values and 'same phone, different names: <phone> → <names>'. The pre-commit security grep (scripts/pre-commit-security-grep.mjs:19) b"
+    },
+    "516": {
+      "nnn": "516",
+      "title": "Show the event client as a read-only row with owner change and link on the stage bar",
+      "branch": "feat/516-event-stage-bar-client",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-03T20:30:59.639Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-03T20:41:59.283Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-03T20:46:57.575Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-03T20:48:23.191Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-03T20:48:33.828Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T20:53:10.991Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T20:58:19.044Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T21:00:02.642Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T21:00:11.658Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T21:00:23.558Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T21:00:33.814Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T21:00:43.294Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-03T21:03:45.614Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "ready": true,
+      "freeDiskGb": 11.7,
+      "sha": "a47d7e3b259b8476736709379be03fc23310a29c",
+      "verify": {
+        "candidates": 3,
+        "refuted": 0,
+        "refutedRules": [],
+        "byRole": {
+          "check-plan": {
+            "candidates": 1,
+            "refuted": 0,
+            "rules": []
+          },
+          "check-bugs": {
+            "candidates": 2,
+            "refuted": 0,
+            "rules": []
+          }
+        },
+        "lateLow": [],
+        "reappeared": []
+      },
+      "roundCauses": [
+        "round 1: checker: major src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html:63 Done-when [ui]: 'Staff opens an event → row shows name and phone chips only; no change/link button'"
+      ],
+      "uiCards": [
+        {
+          "card": "Owner sees a linked event's client row with name, phone and N events chips; 'החלף לקוח' opens the combobox and picking another client updates the row",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4200/",
+          "screenshots": [],
+          "round": 1
+        },
+        {
+          "card": "Owner opens a legacy unlinked event: row shows the snapshot name and phone and 'קשר ללקוח'",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4200/",
+          "screenshots": [],
+          "round": 1
+        },
+        {
+          "card": "Staff sees name and phone chips only, with no change or link button",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4200/",
+          "screenshots": [],
+          "round": 1
+        }
+      ]
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-03T20:31:06.183Z",
+      "plan": "513",
+      "text": "starts on the judgment tier: Architecture Impact names INV-2, INV-3, INV-4"
+    },
+    {
+      "at": "2026-11-03T20:41:59.281Z",
+      "plan": "516",
+      "text": "builder left undone (round 0): [ui] cards were not built or scripted. The plan gives no e2e command, and the Human runs the UI checks. log-query check not run."
+    },
+    {
+      "at": "2026-11-03T21:16:03.729Z",
+      "plan": "513",
+      "text": "runner retry: state 513 parked — first attempt: no ORCH_JSON line from: node scripts/orch-state.mjs set --run=run-513-516c --plan=513 --state=parked --round=0 --tier=judgment \"--reason=replan needed: The plan requires console output with the phone and the client names: 'invalid-phone events: <n>' with raw values and 'same phone, different names: <phone> → <names>'. The pre-commit security grep (scripts/pre-commit-security-grep.mjs:19) b\" (exit 2) — last lines: \"OUTPUT 1: cd \\\"C:\\\\coding projects\\\\Cursor\\\\foodvibe1.0\\\" && node scripts/orch-state.mjs set --run=run-513-516c --plan=513 --state=parked --round=0 --tier=judgment \\\"--reason=replan needed: The plan requires console output with the phone and the client names: 'invalid-phone events: <n>' with raw values and 'same phone, different names: <phone> → <names>'. The pre-commit security grep (scripts/pre-commit-security-grep.mjs:19) b | /usr/bin/bash: eval: line 1: unexpected EOF while looking for matching `\\\"' | (no ORCH_JSON line was printed: the shell rejected the command before node ran)\""
+    },
+    {
+      "at": "2026-11-03T21:16:03.731Z",
+      "text": "database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses"
+    },
+    {
+      "at": "2026-11-03T21:16:03.731Z",
+      "text": "dropped npx checks: 516: npx ng test --watch=false --include='**/event-stage-bar/**/*.spec.ts': no package.json script runs it — add one and write the check as pnpm run <script>"
+    },
+    {
+      "at": "2026-11-03T21:16:03.989Z",
+      "text": "slots given back when the run finished: plan 513: slot wt-3 kept — uncommitted files in the slot"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 11.7,
+  "updatedAt": "2026-11-03T21:16:03.989Z",
+  "noteIds": [
+    "1:513-1",
+    "1:516-1",
+    "1:513-2",
+    "1:run-1",
+    "1:run-2"
+  ],
+  "finishedAt": "2026-11-03T21:16:03.731Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-03T21:16:03.731Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

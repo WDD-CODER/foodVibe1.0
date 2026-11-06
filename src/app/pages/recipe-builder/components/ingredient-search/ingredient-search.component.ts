@@ -177,10 +177,6 @@ export class IngredientSearchComponent {
     ...this.searchResults_()
   ])
 
-  protected isSuggestion_(item: SearchableItem): boolean {
-    return item.item_type_ === 'product' && this.suggestionIds_().has(item._id)
-  }
-
   selectItem(item: SearchableItem) {
     this.itemSelected.emit(item)
     this.searchQuery_.set('')

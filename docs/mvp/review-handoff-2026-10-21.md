@@ -1,6 +1,6 @@
 # MVP review handoff — validation cards 1–90 (2026-10-21)
 
-Input for the Planner. The Human walked validation cards 1–90 of `docs/mvp/final-report.md` §6 on the `mvp` branch
+Input for the Planner. The Human walked validation cards 1–90 of `docs/mvp/mvp-final-report.md` §6 on the `mvp` branch
 (`cbcea5de`) and reported bugs, wanted changes and questions. This file groups every point by page or feature and
 merges overlapping points into one fix each.
 
@@ -262,4 +262,4 @@ Code: `src/app/pages/inventory/components/product-form/` (growth-frozen file: pl
 ## Card wording fixed in the final report
 
 - Card 45 (plan 436) read as "give the dish a second station". A dish has one station; the step means "open a
-  second dish and set its station to «חם»". Reworded in `final-report.md`. Stations themselves work (Human).
+  second dish and set its station to «חם»". Reworded in `mvp-final-report.md`. Stations themselves work (Human).

@@ -106,13 +106,31 @@ describe('ProductNameMatcherService', () => {
     expect(out.size).toBe(0)
   })
 
-  it('over 1000 products sends only those sharing the first two letters, capped at 1000', async () => {
-    const many = Array.from({ length: 1500 }, (_, n) => product(`x${n}`, `ת${n}`))
+  it('up to 3000 products sends all of them (1477 like a real kitchen)', async () => {
+    const many = Array.from({ length: 1475 }, (_, n) => product(`x${n}`, `ת${n}`))
+    products_.set([...many, product('s1', 'מלח ים'), product('s2', 'מלח לימון')])
+    gemini.matchProductNames.and.resolveTo([])
+    await service.matchNames([{ key: 'a', name: 'salt' }])
+    expect(gemini.matchProductNames).toHaveBeenCalledTimes(1)
+    expect(gemini.matchProductNames.calls.mostRecent().args[1].length).toBe(1477)
+  })
+
+  it('over 3000 products sends those sharing the first two letters first, then the rest up to 3000', async () => {
+    const many = Array.from({ length: 3500 }, (_, n) => product(`x${n}`, `ת${n}`))
     products_.set([...many, product('s1', 'שמן זית'), product('s2', 'שמנת')])
     gemini.matchProductNames.and.resolveTo([])
     await service.matchNames([{ key: 'a', name: 'שמן' }])
     const candidates = gemini.matchProductNames.calls.mostRecent().args[1]
-    expect(candidates.map((c) => c.name)).toEqual(['שמן זית', 'שמנת'])
+    expect(candidates.length).toBe(3000)
+    expect(candidates.slice(0, 2).map((c) => c.name)).toEqual(['שמן זית', 'שמנת'])
+  })
+
+  it('over 3000 products still asks the AI for a name in another language (no shared start)', async () => {
+    products_.set(Array.from({ length: 3500 }, (_, n) => product(`x${n}`, `ת${n}`)))
+    gemini.matchProductNames.and.resolveTo([])
+    await service.matchNames([{ key: 'a', name: 'salt' }])
+    expect(gemini.matchProductNames).toHaveBeenCalledTimes(1)
+    expect(gemini.matchProductNames.calls.mostRecent().args[1].length).toBe(3000)
   })
 
   describe('matchNamesWithOptions (plan 490)', () => {

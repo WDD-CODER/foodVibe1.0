@@ -105,7 +105,7 @@ line or file this plan names was removed, renamed or rewritten).
   export const LOGISTICS_ANSWER_TYPES = ['status', 'quantity', 'text'] as const
   export const LOGISTICS_ANSWER_STATUSES = ['unchecked', 'needed', 'not_needed', 'client_provides'] as const
   export const LOGISTICS_PAYERS = ['client', 'quoted', 'chef'] as const
-  export const LOGISTICS_TEXT_MAX = 519
+  export const LOGISTICS_TEXT_MAX = 500
   export const LOGISTICS_LABEL_MAX = 120
   export const LOGISTICS_ANSWERS_MAX = 300
   export type LogisticsPhase = (typeof LOGISTICS_PHASES)[number]  // and the same for the other four
@@ -178,3 +178,4 @@ line or file this plan names was removed, renamed or rewritten).
 - Q2 (answered a, Human 2026-10-27): master items locked to owner edits like `eventType`? → no.
 
 ## Execution Notes
+- Planner review (2026-11-05): `LOGISTICS_TEXT_MAX` was 519 (plan-number typo) → 500, matching the A5 test (501 chars invalid). Snapshot is 213 commits old; plan 512 added `clientId` (`menu-event.schema.ts:138`) — line drift only, no conflict. Runs after 517 (its checks need `test:server`, the `TEST-CI:` line and the log-query SKIP fallback).

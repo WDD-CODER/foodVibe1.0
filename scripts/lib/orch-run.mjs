@@ -342,6 +342,57 @@ export function triageView({ decisions, mode = 'shadow', stats = null, minAgreem
   return { ...view, line: `triage: ${mode} · agreement (last ${all?.last ?? 50}): ${pct} · collapsed: ${collapsed.length} · ask: ${asks.length} · follow-ups: ${rest('follow-up').length}` }
 }
 
+/**
+ * The decisions the run's command shows the Human for grading: this launch's, and every earlier launch's that has no
+ * grade row for this run yet (a launch that stopped before the Human graded, or never reached its report). Without the
+ * second part a relaunch printed `ask: 0` while status.json held the ungraded decisions of the launch before.
+ */
+export function decisionsInView(decisions, { attempt = 1, run = '', gradeRows = [] } = {}) {
+  const graded = new Set((Array.isArray(gradeRows) ? gradeRows : []).filter((g) => g && g.run === run).map((g) => String(g.id)))
+  return (Array.isArray(decisions) ? decisions : []).filter((d) => {
+    const a = d.attempt ?? 1
+    return a === attempt || (a < attempt && !graded.has(String(d.id)))
+  })
+}
+
+/**
+ * A plan file both sides changed, merged for a rerun: `theirs` (the run branch's text — a later Planner, readiness or
+ * plan-close edit) is the base; every Atomic Sub-task id ticked `[x]` in `ours` (the plan branch: the builder's work) is
+ * ticked in it, and the `## Execution Notes` lines of `ours` it lacks are added at the end of that section. Pure.
+ */
+export function mergePlanFile({ ours, theirs }) {
+  const nl = /\r\n/.test(String(theirs)) ? '\r\n' : '\n'
+  const mine = String(ours ?? '').split(/\r?\n/)
+  const out = String(theirs ?? '').split(/\r?\n/)
+  // A sub-task id: A1, B2a, R1.1.
+  const ticked = new Set(mine.map((l) => /^\s*- \[[xX]\] ([A-Z]+\d+(?:\.\d+)*[a-z]?):/.exec(l)?.[1]).filter(Boolean))
+  for (let i = 0; i < out.length; i++) {
+    const m = /^(\s*- )\[ \]( ([A-Z]+\d+(?:\.\d+)*[a-z]?):.*)$/.exec(out[i])
+    if (m && ticked.has(m[3])) out[i] = `${m[1]}[x]${m[2]}`
+  }
+  const section = (lines) => {
+    const a = lines.findIndex((l) => /^## Execution Notes\b/.test(l))
+    if (a < 0) return null
+    const b = lines.findIndex((l, i) => i > a && /^## /.test(l))
+    return { a, b: b < 0 ? lines.length : b }
+  }
+  const os = section(mine)
+  if (!os) return out.join(nl)
+  const ts = section(out)
+  const have = new Set(ts ? out.slice(ts.a + 1, ts.b).map((l) => l.trim()) : [])
+  const add = mine.slice(os.a + 1, os.b).filter((l) => l.trim() && !have.has(l.trim()))
+  if (!add.length) return out.join(nl)
+  if (!ts) {
+    const end = out.length && out[out.length - 1] === '' ? out.length - 1 : out.length
+    out.splice(end, 0, '', '## Execution Notes', ...add)
+    return out.join(nl)
+  }
+  let last = ts.b - 1
+  while (last > ts.a && !out[last].trim()) last--
+  out.splice(last + 1, 0, ...add)
+  return out.join(nl)
+}
+
 const short = (s, n) => (String(s).length > n ? `${String(s).slice(0, n - 1)}…` : String(s))
 function decisionsSection(decisions, triage) {
   const list = Array.isArray(decisions) ? decisions : []
@@ -376,6 +427,12 @@ function removalsOf(decisions, mergedSet) {
     .sort((a, b) => idNum(a) - idNum(b))
 }
 
+/** The report's "Builder tier" cell: every tier a builder of the plan ran on, in order (older status.json: the last one). */
+export function builderTiers(p) {
+  const tiers = Array.isArray(p?.tiers) && p.tiers.length ? p.tiers : p?.tier ? [p.tier] : []
+  return tiers.map((t) => String(t).replace(/\|/g, '/')).join(' → ')
+}
+
 export function formatReport({ status, merged, mainShaNow, finishedAt, runBranch, mainBranch, mainChangedFiles = null, appErrors = null, decisions = null, triage = {}, learning = null }) {
   const plans = Object.values(status.plans ?? {}).sort((a, b) => (a.nnn < b.nnn ? -1 : 1))
   const mergedSet = new Map(merged.map((m) => [m.nnn, m]))
@@ -398,7 +455,7 @@ export function formatReport({ status, merged, mainShaNow, finishedAt, runBranch
     ...plans.map((p) => {
       const m = mergedSet.get(p.nnn)
       const state = m ? 'merged' : p.state
-      return `| ${p.nnn} ${p.title ?? ''} | ${state} | ${p.round ?? 0} | ${p.tier ?? ''} | ${m ? m.sha.slice(0, 7) : ''} | ${(p.reason ?? '').replace(/\|/g, '/')} |`
+      return `| ${p.nnn} ${p.title ?? ''} | ${state} | ${p.round ?? 0} | ${builderTiers(p)} | ${m ? m.sha.slice(0, 7) : ''} | ${(p.reason ?? '').replace(/\|/g, '/')} |`
     }),
     '',
     ...flakySection(status, plans),
@@ -465,12 +522,6 @@ export function reasonKind(reason) {
   return 'other'
 }
 
-const fileKind = (file) => {
-  const f = String(file)
-  if (/\.(test|spec)\.\w+$|(^|\/)(tests?|__tests__)\//i.test(f)) return 'test file'
-  const m = /\.(\w{1,6})$/.exec(f)
-  return m ? `${m[1]} file` : 'file'
-}
 const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const clip = (s, n) => (String(s).length > n ? `${String(s).slice(0, n - 1)}…` : String(s))
 
@@ -490,37 +541,51 @@ export function commandTag(s) {
 }
 const stepTag = (s) => (/^round \d{1,2}$/.test(String(s ?? '').trim()) ? String(s).trim() : 'a step')
 
-// One fix round's cause (`round 2: checker: major src/x.ts:12 <rule>`) as lesson lines for the builder: the rule name
-// (as a tag) and the kind of file, or which stage failed.
-function causeLessons(cause) {
+// The stored cause of a fix round (plans[N].causeFacts, written by orch-state.mjs from facts the code produced: the failing
+// command, a finding id, a path of the branch diff, an INV-n id of docs/brain/invariants.md) as lesson lines for the builder.
+// No stored fact, no line: a cause that names nothing the reader could look at is not written.
+// Only the shapes the code itself makes reach a lesson line, so an agent-written id or path cannot carry words to the
+// next builder. Ids: gate-N, scope-N, ui-N, merge-N (orchestrate.js makes them) and <role>-N for a finder role
+// (check-plan-N, check-bugs-N, check-rules-N, security-N; the RULES_GROUP roles too). Paths: at most four segments of at
+// most 40 characters each, no `.` or `..` segment.
+const ID_ROLES = [...new Set(['gate', 'scope', 'ui', 'merge', 'security', ...Object.keys(RULES_GROUP)])]
+const SAFE_ID = new RegExp(`^(?:${ID_ROLES.map((r) => r.replace(/[-]/g, '\\-')).join('|')})-\\d{1,3}$`)
+const SAFE_PATH = { test: (p) => {
+  const parts = String(p).split('/')
+  return parts.length <= 4 && parts.every((s) => /^[\w@.+-]{1,40}$/.test(s) && s !== '.' && s !== '..')
+} }
+export const safeLessonId = (id) => SAFE_ID.test(String(id ?? ''))
+export const safeLessonPath = (p) => SAFE_PATH.test(String(p ?? ''))
+function causeLessons(cause, fact) {
   const m = /^round \d+:\s*(.*)$/.exec(String(cause))
   const why = (m ? m[1] : String(cause)).trim()
   if (/^checker:/.test(why)) {
-    const items = why.replace(/^checker:\s*/, '').split(/;\s+(?=(?:blocker|major|minor|nit)\s)/).map((item) => {
-      const x = /^(?:blocker|major|minor|nit)\s+(\S+?):(\d+)\s+(.+)$/.exec(item.trim())
-      return x ? `fix round caused by: ${ruleTag(x[3])} (${fileKind(x[1])})` : 'fix round caused by: a checker finding'
-    })
+    const items = (fact?.findings ?? []).filter((f) => SAFE_ID.test(String(f?.id ?? ''))).map((f) =>
+      `fix round caused by: finding ${f.id}${/^INV-\d+$/.test(String(f.inv ?? '')) ? ` (rule ${f.inv})` : ''}${SAFE_PATH.test(String(f.file ?? '')) ? ` in ${f.file}` : ''}`)
     return [...new Set(items)]
   }
-  if (/^gate/.test(why)) return [`fix round caused by: a gate check failed (${commandTag(why.replace(/^gate[^:]*:\s*/, '').split(', ')[0])})`]
+  if (/^gate/.test(why)) {
+    const cmd = fact?.cmd ?? why.replace(/^gate[^:]*:\s*/, '').split(', ')[0]
+    const kind = finalGateKind(cmd) !== 'none' ? finalGateKind(cmd) : commandTag(cmd) !== 'a check command' ? commandTag(cmd) : null
+    return kind ? [`fix round caused by: ${kind} failed${SAFE_PATH.test(String(fact?.file ?? '')) ? ` at ${fact.file}` : ''}`] : []
+  }
   if (/^ui/.test(why)) return ['fix round caused by: a [ui] card failed']
   if (/^merge/.test(why)) return ['fix round caused by: the merge into the run branch']
-  return ['fix round caused by: another failure']
+  return []
 }
-// A miss is one of two enumerated kinds (a [ui] card, the final gate); a gate event one of two kinds with a command tag.
-const missTag = (s) => (/^ui:/.test(String(s)) ? 'a [ui] card failed after the checkers passed' : /^final gate/.test(String(s)) ? 'the final gate failed after the checkers passed' : 'a later check failed after the checkers passed')
+// A miss is one enumerated kind (a [ui] card); anything else names nothing and gives no line. A gate event is one of two
+// kinds with a command of an allowed shape.
+const missTag = (s) => (/^ui:/.test(String(s)) ? 'a [ui] card failed after the checkers passed' : null)
 const gateEventTag = (s) => {
   const m = /^(timed out|env-fail rerun):\s*(.*)$/.exec(String(s))
-  return m ? `${m[1]}: ${commandTag(m[2])}` : null
+  return m && commandTag(m[2]) !== 'a check command' ? `${m[1]}: ${commandTag(m[2])}` : null
 }
-// A readiness question is filed under the kind of gap it asks about, never by its words.
-const askedKind = (q) => {
-  const t = String(q)
-  if (/\b(cancel|leave|edit|error)\b/i.test(t)) return 'behaviour on edit, leave, cancel or error'
-  if (/\bclaim\b/i.test(t)) return 'a claim about the code'
-  if (/\b(depends?|prerequisite|plan \d+)\b/i.test(t)) return 'a prerequisite plan'
-  return 'an open question'
-}
+// The code-written start (or fixed ending) of a park reason: the literals of `park()` in orchestrate.js. The model or check
+// text after it is never read; a reason that matches none gives no line.
+const PARK_LABELS = [[/^same reason twice/, 'same reason twice'], [/^agent-call limit/, 'agent-call limit'], [/^no progress/, 'no progress'], [/^replan needed/, 'replan needed'],
+  [/^hand-off file/, 'hand-off file'], [/^worktree/, 'worktree'], [/^UI environment blocked/, 'UI environment blocked'], [/^environment/, 'environment'],
+  [/\(fix rounds used: \d+ of \d+\) — needs the Human$/, 'needs the Human']]
+export const parkLabel = (reason) => PARK_LABELS.find(([re]) => re.test(String(reason ?? '').trim()))?.[1] ?? null
 
 /**
  * The lesson lines a run's status.json gives, one per fact: [{ role, text, has? }]. `role` is a lesson role
@@ -536,12 +601,15 @@ export function lessonFacts(status) {
   const add = (role, text, has) => out.push({ role, text, ...(has ? { has } : {}) })
   const plans = Object.values(status?.plans ?? {}).sort((a, b) => (String(a.nnn) < String(b.nnn) ? -1 : 1))
   for (const p of plans) {
-    for (const c of p.roundCauses ?? []) for (const t of causeLessons(c)) add('builder', t)
-    for (const e of p.escalations ?? []) add('builder', `escalated to the judgment tier at ${stepTag(e.step)}: ${commandTag(e.check)}`)
-    if (['parked', 'left-run'].includes(p.state) && p.reason) add('builder', `parked: ${reasonKind(p.reason)}`)
+    for (const c of p.roundCauses ?? []) {
+      const round = Number(/^round (\d+)/.exec(String(c))?.[1])
+      for (const t of causeLessons(c, (p.causeFacts ?? []).find((f) => f.round === round))) add('builder', t)
+    }
+    for (const e of p.escalations ?? []) if (stepTag(e.step) !== 'a step' && commandTag(e.check) !== 'a check command') add('builder', `escalated to the judgment tier at ${stepTag(e.step)}: ${commandTag(e.check)}`)
+    if (['parked', 'left-run'].includes(p.state) && parkLabel(p.reason)) add('builder', `parked: ${parkLabel(p.reason)}`)
     if (p.ready === true && p.state === 'parked' && reasonKind(p.reason) === 'environment') add('readiness', 'parked on environment after ready')
     for (const [role, v] of Object.entries(p.verify?.byRole ?? {})) {
-      const rules = (v.rules ?? []).filter(Boolean).map(ruleTag)
+      const rules = (v.rules ?? []).filter(Boolean).map(ruleTag).filter((r) => r !== 'other rule')
       if (FINDER_ROLES.includes(role) && v.refuted > 0 && rules.length) add(role, `${v.refuted} of ${v.candidates} candidates refuted: ${rules.join(', ')}`, new RegExp(`^\\d+ of \\d+ candidates refuted: ${esc(rules.join(', '))}$`))
     }
     const ran = FINDER_ROLES.filter((r) => Object.keys(p.models ?? {}).includes(`orch-${r}`))
@@ -551,16 +619,23 @@ export function lessonFacts(status) {
     const fg = status?.finalGate
     const legacy = (p.misses ?? []).filter((m) => /^final gate/.test(String(m))).map((m) => String(m).replace(/^final gate (?:failed|could not run):?\s*/, ''))
     const gateCmds = fg ? (fg.ok === false && (fg.blamed ?? []).map(String).includes(String(p.nnn)) ? [fg.command] : []) : legacy
-    if (gateCmds.length) for (const r of FINAL_GATE_ROLES[finalGateKind(gateCmds[0])] ?? []) if (r === 'readiness' || ran.includes(r)) add(r, `missed: ${missTag('final gate')}`)
-    for (const what of [...new Set((p.misses ?? []).filter((m) => !/^final gate/.test(String(m))).map(missTag))]) for (const r of ran) add(r, `missed: ${what}`)
-    if ((p.verify?.lateLow ?? []).length) add('verify', `kept with a confidence below the keep threshold, then caused a fix round: ${p.verify.lateLow.map(ruleTag).join(', ')}`)
-    if ((p.verify?.reappeared ?? []).length) add('verify', `refuted, but the problem reappeared in a later round: ${p.verify.reappeared.map(ruleTag).join(', ')}`)
+    if (gateCmds.length) {
+      const kind = finalGateKind(gateCmds[0])
+      const file = fg && SAFE_PATH.test(String(fg.file ?? '')) ? fg.file : ''
+      const detail = kind === 'none' ? '' : ` (${kind}${file ? `: ${file}` : ''})`
+      for (const r of FINAL_GATE_ROLES[kind] ?? []) if (r === 'readiness' || ran.includes(r)) add(r, `missed: the final gate failed${detail}`)
+    }
+    for (const what of [...new Set((p.misses ?? []).filter((m) => !/^final gate/.test(String(m))).map(missTag).filter(Boolean))]) for (const r of ran) add(r, `missed: ${what}`)
+    const lateLow = (p.verify?.lateLow ?? []).map(ruleTag).filter((r) => r !== 'other rule')
+    if (lateLow.length) add('verify', `kept with a confidence below the keep threshold, then caused a fix round: ${lateLow.join(', ')}`)
+    const reappeared = (p.verify?.reappeared ?? []).map(ruleTag).filter((r) => r !== 'other rule')
+    if (reappeared.length) add('verify', `refuted, but the problem reappeared in a later round: ${reappeared.join(', ')}`)
     for (const ev of p.gateEvents ?? []) {
       const t = gateEventTag(ev)
       if (t) add('gate', t)
     }
     if ((p.uiCards ?? []).some((c) => c.regressed)) add('ui', 'a [ui] card failed after it had passed')
-    for (const k of [...new Set((p.asked ?? []).map(askedKind))]) add('planner', `plan ${p.nnn} had to be asked about: ${k}`)
+    // No asked-about line: the readiness question is the agent's text and the code has no kind for it.
     if ((p.uiCards ?? []).some((c) => c.status === 'plan-drift')) add('planner', `plan ${p.nnn} drifted from its [ui] card`)
   }
   return out

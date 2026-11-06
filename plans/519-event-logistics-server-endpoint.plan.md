@@ -114,7 +114,7 @@ line or file this plan names was removed, renamed or rewritten).
 - Model changes: none (plan 518).
 - Backend / API: `PUT /api/v1/events/:id/logistics` — dedicated because the generic PUT replaces the whole event from the menu form and would drop these fields (gotcha "A form-rebuilt save payload silently drops any model field the form has no control for").
 - Auth and validation: `verifyToken` + `assertCan('editLogistics')`; Zod on the merged doc; `dataWriteLimiter` applies router-wide.
-- Security surface: new text inputs bounded by the schema (`text` ≤ 519, `label` ≤ 120, `meetingWith` ≤ 80); `server/routes` is a sensitive path (orch-security runs). No secret.
+- Security surface: new text inputs bounded by the schema (`text` ≤ 500, `label` ≤ 120, `meetingWith` ≤ 80); `server/routes` is a sensitive path (orch-security runs). No secret.
 - Data / migration: none.
 - Project checks: log-query `[auto]` present; Reuse Check present; dedicated endpoint named and justified.
 
@@ -125,3 +125,4 @@ line or file this plan names was removed, renamed or rewritten).
 - Q1 (answered b, Human 2026-10-27): who may answer → owner only, hence `editLogistics` owner-only.
 
 ## Execution Notes
+- Planner review (2026-11-05): text limit is 500, not 519 (typo, same fix as 518). Can run in parallel with 520 and 521 after 518.

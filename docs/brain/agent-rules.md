@@ -19,3 +19,9 @@ Short rules every builder reads before it starts, learned from decisions the Hum
 ## triage
 
 - [observation-not-ask] Triage: a decision that only reports what the code does (seen: with no choice to make) is not an ask, even when it names a security or permission keyword; give it noise or accept.
+
+## builder
+
+## readiness
+
+## ui

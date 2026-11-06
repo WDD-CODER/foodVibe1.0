@@ -2,7 +2,7 @@
 
 Status: draft
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
-Depends-on: 520, 521
+Depends-on: 519, 520, 521
 
 ## Problem Statement
 The shared list (plan 520) will never cover what one specific kitchen gets burned by. Each business must be able to
@@ -39,6 +39,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 src/app/pages/metadata-manager/components/logistics-item-manager/**
 src/app/pages/metadata-manager/metadata-manager.page.component.html
 src/app/pages/metadata-manager/metadata-manager.page.component.ts
+src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
 src/app/pages/breadcrumbs.md
 src/app/app.config.ts
 public/assets/data/dictionary.json
@@ -137,3 +138,4 @@ line or file this plan names was removed, renamed or rewritten).
 - Q1: May staff add own items? (a) yes — **chosen** (Human Q2 a, 2026-10-27; the kind is not locked) (b) owner only.
 
 ## Execution Notes
+- Planner review (2026-11-05): added `metadata-manager.page.component.spec.ts` to scope — it hard-codes 13 jump tabs (lines ~381-412) and the new rail entry breaks it. Added 519 to Depends-on for ordering. Runs after 522 (both append to `dictionary.json`).

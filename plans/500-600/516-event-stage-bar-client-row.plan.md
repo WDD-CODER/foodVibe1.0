@@ -1,6 +1,6 @@
 # Plan 516 — Show the event client as a read-only row with owner change and link on the stage bar
 
-Status: draft
+Status: done
 Track: code
 Snapshot: 6cfe7dc004ac51bde0aac3da99294b341d76a975
 Depends-on: 514
@@ -129,12 +129,12 @@ Decisions already taken by the Human (do not reopen):
 - Dictionary keys needed: `client`, `client_change`, `client_link`, `client_events_count`, `client_pick_placeholder`, `deposit_details` (append the full Contract list so D and E stay identical).
 
 ## Atomic Sub-tasks
-- [ ] U1: Add the same Hebrew client texts so the stage bar and the dialog share one list — the 18 Contract keys under `general` in `public/assets/data/dictionary.json`, append only; skip keys already present — files: dictionary.
-- [ ] U2: Remove the editable client name and phone from the stage bar and keep the deposit fields — delete `onClientNameChange`, `onClientPhoneChange`, `isPhoneInvalid_` and the two inputs from `event-stage-bar.component.ts/html`; keep deposit inputs; relabel the toggle `deposit_details`; `detailsSummary_` → deposit summary — files: the component ts/html/scss.
-- [ ] U3: Show the event client as a read-only row with name, phone and event count — inject `ClientDataService`; add `client_`, `clientEventCount_`, `canChangeClient_`; render the chips per P0 as the first item in `.stage-links` — files: the component ts/html/scss.
-- [ ] U4: Let the owner change or link the event client from the stage bar — `isPickerOpen_` signal, owner-only button, inline `app-search-combobox` pick-only, `(picked)` → `saveFields` with the three fields, close on pick and on Escape — files: the component ts/html.
-- [ ] T1: Update the stage bar tests for the removed inputs and the new client row — remove tests for the deleted handlers; add the 3 tests named in Success Criteria with stubbed `ClientDataService`, `MenuEventDataService`, `PermissionService` — files: `event-stage-bar.component.spec.ts`.
-- [ ] V1: Run the checks, capture the three UI cards and write the evidence in the Execution Notes — Run `npm run build`, `npm run lint`, the spec, the reuse gate and the log check; produce the three `[ui]` cards; write evidence under `## Execution Notes`.
+- [x] U1: Add the same Hebrew client texts so the stage bar and the dialog share one list — the 18 Contract keys under `general` in `public/assets/data/dictionary.json`, append only; skip keys already present — files: dictionary.
+- [x] U2: Remove the editable client name and phone from the stage bar and keep the deposit fields — delete `onClientNameChange`, `onClientPhoneChange`, `isPhoneInvalid_` and the two inputs from `event-stage-bar.component.ts/html`; keep deposit inputs; relabel the toggle `deposit_details`; `detailsSummary_` → deposit summary — files: the component ts/html/scss.
+- [x] U3: Show the event client as a read-only row with name, phone and event count — inject `ClientDataService`; add `client_`, `clientEventCount_`, `canChangeClient_`; render the chips per P0 as the first item in `.stage-links` — files: the component ts/html/scss.
+- [x] U4: Let the owner change or link the event client from the stage bar — `isPickerOpen_` signal, owner-only button, inline `app-search-combobox` pick-only, `(picked)` → `saveFields` with the three fields, close on pick and on Escape — files: the component ts/html.
+- [x] T1: Update the stage bar tests for the removed inputs and the new client row — remove tests for the deleted handlers; add the 3 tests named in Success Criteria with stubbed `ClientDataService`, `MenuEventDataService`, `PermissionService` — files: `event-stage-bar.component.spec.ts`.
+- [x] V1: Run the checks, capture the three UI cards and write the evidence in the Execution Notes — Run `npm run build`, `npm run lint`, the spec, the reuse gate and the log check; produce the three `[ui]` cards; write evidence under `## Execution Notes`.
 
 ## Technical Considerations
 - Dependencies: `ClientDataService`, `MenuEventDataService.updateMenuEvent` (via existing `saveFields`), `PermissionService.can`, `app-search-combobox`, `clientLabel`, `matchesClientQuery`.
@@ -159,3 +159,7 @@ Decisions already taken by the Human (do not reopen):
 - Validation cards (2026-11-03): the linked event and the legacy event must be given as a ready copy-paste command with a real event id from the local dev DB (five events there already have a clientId; the legacy case is one `` of clientId on a named event), never as "create one by hand".
 - Human decisions (2026-11-03): `approved: src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts` (added to the scope block above). D15: the deposit summary shows the amount with the app's money format `formatMoney` (`src/app/core/engine/rounding.ts:44`, gives `₪1,234.00`), then the date, joined by a middle dot; do not invent a new format. D19: the validation cards use the main folder's port 4200 and ready copy-paste commands (real event ids from the local dev DB), not the Human's port 4203.
 - Plan errors for the Planner (2026-11-03): (a) the scope block named `event-stage-bar/**` but no test file, while a Done-when needs the spec; (b) the test command's `--include='**/event-stage-bar/**'` also matches html and scss and fails to load in Karma (use `**/event-stage-bar/**/*.spec.ts`). Lessons: when a Done-when needs a spec change, name the spec file in the scope; write an `--include` glob that ends in `.spec.ts`.
+- Evidence (builder): pnpm run build, pnpm run lint (0 errors), pnpm run test:ci (1704 success), ng test event-stage-bar (34 success; one earlier Karma disconnect, rerun passed), kit-manifest-check ok, scope-check --reuse ok.
+- seen: combobox wiring differs from plan (pre-filter with matchesClientQuery, clientFilter false, wrapped clientLabel, pick.option) as declared. D15: deposit summary uses formatMoney then date.
+
+- Fix round 1: count chip now owner-only (`canChangeClient_()`), so staff see name and phone chips only (Done-when [ui]). behaviour: plan P0 did not exclude staff from the count chip; the Done-when item wins — reverse: drop `canChangeClient_() &&` in the html and set the staff spec back to 3 chips.

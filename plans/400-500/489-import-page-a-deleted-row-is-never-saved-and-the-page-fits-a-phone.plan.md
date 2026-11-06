@@ -15,7 +15,7 @@ As a chef, I want a row I trash in the import preview to never become a product,
 phone, so that I can import a supplier list from WhatsApp without cleaning up products afterwards or fighting the
 layout.
 
-The original cards (`docs/mvp/final-report.md:375-391`): 35 = paste `גזר 3 לק"ג` and `פטרוזיליה 2 ליחידה`, «נתח», trash
+The original cards (`docs/mvp/mvp-final-report.md:375-391`): 35 = paste `גזר 3 לק"ג` and `פטרוזיליה 2 ליחידה`, «נתח», trash
 «גזר», set «פטרוזיליה» unit to «גרם», «שמור הכל» → «1 נוצרו, 0 עודכנו, 1 דולגו», «גזר» does not exist. 37 = at
 ≤ 620 px, paste box, supplier picker and preview fit; only the preview may scroll inside its own box.
 
