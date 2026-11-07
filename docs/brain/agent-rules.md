@@ -22,6 +22,8 @@ Short rules every builder reads before it starts, learned from decisions the Hum
 
 ## builder
 
+- [fix-in-scope-stale-ref] A stale reference you find inside a file in your Read-Write Scope (a path, glob or name the plan just deleted) is fixed in the same plan, not logged as seen:. (pending — seen once)
+
 ## readiness
 
 ## ui

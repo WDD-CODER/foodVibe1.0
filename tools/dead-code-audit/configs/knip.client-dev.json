@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/main.ts", "src/app/app.config.ts", "src/app/app.routes.ts", "src/**/*.spec.ts"],
+  "project": ["src/**/*.ts"],
+  "ignore": ["scripts/**", "server/**", "e2e/**", "e2e-qa/**", "tools/**"]
+}

@@ -1,0 +1,80 @@
+shared/schemas/ai-receipt-photo.schema.ts	ReceiptPhotoRequest	
+shared/schemas/entities/business.schema.ts	BusinessBaseline	
+shared/schemas/entities/index.ts	SchemaCollection	
+shared/schemas/entities/taxonomy-term.schema.ts	REGISTRY_KIND_BY_COLLECTION	
+src/app/core/services/excel-workbook.util.ts	styleExcelBlankRow	2026-10-21 5fe1bd88 feat(437): printed prep sheets per station, category, dish or supplier
+src/app/core/services/excel-workbook.util.ts	styleExcelBlockBorder	2026-10-21 5fe1bd88 feat(437): printed prep sheets per station, category, dish or supplier
+src/app/core/utils/auth-crypto.ts	verifyPassword	2026-09-29 42b8a509 chore(server,client): single collections registry, one id generator, retire dead paths (Pl
+src/app/core/utils/event-stage-ui.util.ts	selectableStages	
+src/app/core/utils/export.util.ts	formatExportNumber	
+src/app/core/utils/list-state.util.ts	DateFieldParam	
+src/app/core/utils/product-price.util.ts	getProductUnits	2026-03-26 bb7b9d89 refactor(inventory): extract price/unit helpers into product-price.util.ts
+src/app/core/utils/venue-hours.util.ts	formatVenueHoursLines	
+src/app/core/services/activity-log.service.ts	activityLog_	
+src/app/core/services/client-data.service.ts	updateClient	
+src/app/core/services/conversion.service.ts	calculateNetCost	2026-02-08 9a2fcda4 refactor(forms): implement multi-unit purchase options and allergen chip UI
+src/app/core/services/conversion.service.ts	getWasteQuantity	2026-02-08 2991ba03 refactor(forms): implement FormArray for multi-unit purchase options
+src/app/core/services/conversion.service.ts	getWastePercent	2026-02-08 2991ba03 refactor(forms): implement FormArray for multi-unit purchase options
+src/app/core/services/menu-intelligence.service.ts	computeEventIngredientCost	2026-10-21 3d666224 feat(434): menu footer, dish costs, shopping list, preview and Excel read the one engine
+src/app/core/services/menu-intelligence.service.ts	computeFoodCostPct	2026-10-21 b455d09e feat(445): show live profit against the target while the chef builds a menu
+src/app/core/services/metadata-registry.service.ts	purgeGlobalUnit	
+src/app/core/services/product-data.service.ts	allTopCategories_	2026-02-08 e04e8b52 feat(services): migrate ledger logic to specialized product data service
+src/app/core/services/taxonomy-store.service.ts	allTerms_	
+src/app/core/services/taxonomy-store.service.ts	reorder	2026-10-22 eb348446 feat(468): rename Save/Cancel field, chip carousel jump, 375 px gutter, users card trash i
+src/app/core/services/trash.service.ts	hasAnyTrash	
+src/app/core/services/user.service.ts	businessRole_	
+src/app/core/utils/recipe-yield-manager.util.ts	updatePrimaryAmount	2026-04-02 82bf7981 fix(recipe-header): resolve merge conflict, restore template, fix build
+src/app/core/utils/recipe-yield-manager.util.ts	updateSecondaryAmount	2026-03-26 fa2acf96 refactor(recipe-header): extract yield/scaling logic into RecipeYieldManager utility class
+src/app/shared/unit-creator/unit-creator.component.ts	unitSaved	2026-02-12 990b16d7 refactor(fix): stabilize file moves and resolve directory collisions
+src/app/core/services/translation.service.ts	updateInternalDictionaries	
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts	lastPriceEdit_	
+src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts	menuSectionCategories_	
+src/app/core/services/base-entity-data.service.ts	setItems	
+src/app/core/services/conversion.service.ts	getChainConversion	
+src/app/core/services/cook-view-state.service.ts	clearLastViewed	
+src/app/core/services/metadata-registry.service.ts	reloadLabelsFromStorage	2026-08-25 f003d3cd chore(metadata-manager): remove dead Load Demo Data and Backup & Restore feature
+src/app/core/services/metadata-registry.service.ts	reloadCoursesFromStorage	
+src/app/core/services/preparation-registry.service.ts	getPreparationsByCategory_	
+src/app/core/services/product-data.service.ts	getProductById	
+src/app/core/services/translation.service.ts	hasKey	2026-04-01 362ef184 fix(security): eliminate user enumeration oracle + route Gemini through backend
+src/app/core/services/user.service.ts	currentUser	2026-10-21 f396f2ad feat(426): business name at signup, business in the header, platform screens for the platf
+src/app/core/services/user.service.ts	_clearSessionStorage	
+src/app/core/services/user.service.ts	_getLoggedInUser	
+src/app/core/utils/recipe-yield-manager.util.ts	onAmountManualChange	2026-04-02 82bf7981 fix(recipe-header): resolve merge conflict, restore template, fix build
+src/app/core/utils/recipe-yield-manager.util.ts	onPrimaryAmountKeydown	2026-03-26 fa2acf96 refactor(recipe-header): extract yield/scaling logic into RecipeYieldManager utility class
+src/app/core/utils/recipe-yield-manager.util.ts	onSecondaryAmountInput	2026-03-26 fa2acf96 refactor(recipe-header): extract yield/scaling logic into RecipeYieldManager utility class
+src/app/core/utils/recipe-yield-manager.util.ts	onSecondaryAmountKeydown	2026-03-26 fa2acf96 refactor(recipe-header): extract yield/scaling logic into RecipeYieldManager utility class
+src/app/pages/cook-view/cook-view.page.ts	replaceIngredient	
+src/app/pages/cook-view/cook-view.page.ts	toggleStepPeek	2026-04-12 97c0b447 feat(recipe): allow saving recipes with unlinked draft ingredients
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts	savingPriceId_	2026-03-04 a8ed7fc6 feat(inventory-list): migrate to list-shell, carousel, read-only cost
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts	sortIconFor_	2026-02-27 31bf1c0a feat(recipe-book,inventory): allergen expand/collapse, do-not-include filter, filter count
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts	onPriceFocus	2026-03-04 a8ed7fc6 feat(inventory-list): migrate to list-shell, carousel, read-only cost
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts	onPriceBlur	2026-03-04 a8ed7fc6 feat(inventory-list): migrate to list-shell, carousel, read-only cost
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts	onPriceChange	
+src/app/pages/inventory/components/product-form/product-form.component.ts	allergenOptions_	2026-02-12 990b16d7 refactor(fix): stabilize file moves and resolve directory collisions
+src/app/pages/inventory/components/product-form/product-form.component.ts	getValuesNeedingTranslation	2026-03-13 64062ae6 chore(guard): pending-changes guard and remove spec
+src/app/pages/inventory/components/product-form/product-form.component.ts	removeValuesNeedingTranslation	2026-03-13 64062ae6 chore(guard): pending-changes guard and remove spec
+src/app/pages/inventory/components/product-import/product-import.component.ts	maxRows	
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.ts	canEdit_	2026-11-03 c5adb54f feat(516): read-only client row with owner change/link on the stage bar
+src/app/pages/menu-intelligence/menu-intelligence.page.ts	isEditingDishField	2026-03-26 62bcf91a refactor(menu-intelligence): extract MenuDishRowComponent from page
+src/app/pages/menu-intelligence/menu-intelligence.page.ts	onViewMenuInfo	2026-04-23 79a21ba5 feat(menu-intelligence): chip header, pill toolbar, financial footnote HTML
+src/app/pages/menu-intelligence/menu-intelligence.page.ts	onExportMenuInfo	2026-04-23 79a21ba5 feat(menu-intelligence): chip header, pill toolbar, financial footnote HTML
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts	getSectionCount	2026-02-27 e0231d4f feat(menu-library): single from-date filter, sort order button, styling and tags
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts	getDishCount	2026-02-27 e0231d4f feat(menu-library): single from-date filter, sort order button, styling and tags
+src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts	hasManualLabels_	
+src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts	onPrimaryUnitChangeWrapper	2026-04-02 8b08f331 feat(recipe-builder): enhance recipe header component (Plan 219 partial)
+src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts	focusUnitAtRow	
+src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts	onUnitKeydown	2026-03-01 fdfc51ce refactor(ui): replace native selects with custom-select app-wide
+src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts	getGrossWeight	
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts	shouldShowAddCategoryPicker_	
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts	toggleAddCategoryPicker	2026-03-07 49c5bd3d feat(recipe-builder): no duplicate ingredients in search, add preparation adds empty row
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts	onAddWithCategory	2026-03-07 49c5bd3d feat(recipe-builder): no duplicate ingredients in search, add preparation adds empty row
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts	onLaborTimeKeydown	2026-04-13 b6a6037a feat(cook-view): cook timer & labor/cooking time separation (#266)
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts	onCookTimeKeydown	
+src/app/pages/venues/components/venue-form/venue-form.component.ts	equipmentName	
+src/app/pages/venues/components/venue-list/venue-list.component.ts	envTypeLabel	
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts	onClearDraft	
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts	translateUnit	2026-04-17 11868cde feat(ai-recipe-modal): replace read-only preview with interactive AiDraftEditorComponent
+src/app/shared/list-selection/list-selection.state.ts	someSelected	
+src/app/shared/rating-stars/rating-stars.component.ts	hoveredIndex	
+src/app/shared/scaling-chip/scaling-chip.component.ts	customSelect	

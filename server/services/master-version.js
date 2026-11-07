@@ -3,8 +3,8 @@
  * can skip its full multi-collection diff when nothing has changed since a user's last sync.
  *
  * Master docs (`userId: '__master__'`) are not written by any live user-facing flow — the
- * only writers are `seed-master.js` (initial seed) and the one-off scripts under
- * `server/scripts/legacy-import/`, all run manually by a developer. That makes a single
+ * only writers are `seed-master.js` (initial seed) and a manually-run fix script,
+ * both run manually by a developer. That makes a single
  * shared "last modified" timestamp sufficient: there is no concurrent-write race to reason
  * about, and no need to scan `updatedAt_` across every CLONEABLE_TYPES collection (most
  * existing master docs don't carry that field at all — backfilling it everywhere just to
