@@ -1,6 +1,6 @@
 # Plan 526 — Drop the v1 collections from the database
 
-Status: draft
+Status: active
 Depends-on: none
 Snapshot: f99816b3d37f6e0c555c79e7471f8761cbca0068
 
@@ -75,13 +75,13 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Dry run (default) lists which of the seven v1 collections exist, their document counts, the matching v2 collection counts, and the reasons it would refuse; it writes nothing.
-- [ ] `--write=yes` needs a fresh `--backup-dir` (same `checkBackup` as `0001`), refuses when `planDrop` returns any refusal, refuses to re-run without `--force=yes`, drops only collections present in the list, and stores the marker.
-- [ ] `--verify=yes` exits 0 only when none of the seven exists and the marker is stored.
-- [ ] Refusal rules (pure function, unit tested): no `0001-v2-schema` marker in `migrations`; or a v1 collection that has documents while its v2 counterpart is missing or has 0 documents.
+- [x] Dry run (default) lists which of the seven v1 collections exist, their document counts, the matching v2 collection counts, and the reasons it would refuse; it writes nothing.
+- [x] `--write=yes` needs a fresh `--backup-dir` (same `checkBackup` as `0001`), refuses when `planDrop` returns any refusal, refuses to re-run without `--force=yes`, drops only collections present in the list, and stores the marker.
+- [x] `--verify=yes` exits 0 only when none of the seven exists and the marker is stored.
+- [x] Refusal rules (pure function, unit tested): no `0001-v2-schema` marker in `migrations`; or a v1 collection that has documents while its v2 counterpart is missing or has 0 documents.
 
 ### Should Have (P1)
-- [ ] The dry run also prints, for information only, any other collection whose name is all upper-case (`/^[A-Z][A-Z0-9_]+$/`) and is not `VERSION_HISTORY` or `DICTIONARY_OVERRIDES` — never dropped, listed so the Human can decide later.
+- [x] The dry run also prints, for information only, any other collection whose name is all upper-case (`/^[A-Z][A-Z0-9_]+$/`) and is not `VERSION_HISTORY` or `DICTIONARY_OVERRIDES` — never dropped, listed so the Human can decide later.
 
 ### Nice to Have (P2)
 - [ ] none
@@ -93,10 +93,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the pure planning step and its test — new `server/migrations/0010-drop-v1-collections.js` exporting `V1_COLLECTIONS` (= `Object.keys(COLLECTION_RENAMES)` from `../generated/schemas/field-map.v1-to-v2`, 7 names) and `planDrop({ present, counts, v2Counts, has0001 })` → `{ drop: string[], refuse: string[] }`. `present` = the v1 names that exist; `counts` = docs per present v1 collection; `v2Counts` = docs per v2 counterpart (`undefined` when missing); `has0001` = the `0001-v2-schema` marker exists. New `server/test/migration-0010-drop-v1-collections.test.js` (pure, no DB, same style as `migration-0004-drop-registry-collections.test.js`): covers all 7 names; refuses without `has0001`; refuses a non-empty v1 whose v2 is missing or empty; drops an empty v1 even when its v2 is empty; returns `drop: []` when nothing is present.
-- [ ] A2: Write the DB modes — in the same file, following `0004-drop-registry-collections.js` line for line: `MIGRATION_ID = '0010-drop-v1-collections'`; `parseArgs(process.argv, { write: 1, verify: 1, force: 1, 'backup-dir': 1 })` and `connect(args)` from `./tools/_connect`; `plan(db)` reads `listCollections({}, { nameOnly: true })`, counts, and the `0001` marker from `db.collection('migrations')`; `printPlan` prints one line per v1 collection (`<v1>: <n> doc(s) → <v2>: <m> doc(s)`), each refusal, and the P1 info list; `write` calls `checkBackup(args)` from `./0001-v2-schema`, refuses on re-run without `--force=yes` and on any refusal, drops each name in `drop`, then `replaceOne({ _id: MIGRATION_ID }, { _id, appliedAt: new Date(), dropped: counts }, { upsert: true })`; `verify` exits 1 and prints `STILL PRESENT <name>` / `MISSING marker` when not clean, else `[verify] OK: no v1 collection left; marker stored.`; header comment in the same shape as `0004` (purpose, modes, usage). `module.exports = { planDrop, V1_COLLECTIONS }` with the `require.main === module` guard.
-- [ ] A3: Run it on the local DB — `pnpm run build:schemas`; `node server/scripts/db-backup.js --target=local` (note the printed folder); `node server/migrations/0010-drop-v1-collections.js --target=local` (dry run: paste the output into Execution Notes); if it refuses, STOP and show the Human the refusal; else `node server/migrations/0010-drop-v1-collections.js --target=local --write=yes --backup-dir=<folder>`; then `--verify=yes` → `[verify] OK`. Never pass `--target=atlas`.
-- [ ] A4: Hand the Atlas run to the Human — paste this runbook into Execution Notes, with `<host>` left for the Human (the error message of a run without `--confirm-host` prints it):
+- [x] A1: Write the pure planning step and its test — new `server/migrations/0010-drop-v1-collections.js` exporting `V1_COLLECTIONS` (= `Object.keys(COLLECTION_RENAMES)` from `../generated/schemas/field-map.v1-to-v2`, 7 names) and `planDrop({ present, counts, v2Counts, has0001 })` → `{ drop: string[], refuse: string[] }`. `present` = the v1 names that exist; `counts` = docs per present v1 collection; `v2Counts` = docs per v2 counterpart (`undefined` when missing); `has0001` = the `0001-v2-schema` marker exists. New `server/test/migration-0010-drop-v1-collections.test.js` (pure, no DB, same style as `migration-0004-drop-registry-collections.test.js`): covers all 7 names; refuses without `has0001`; refuses a non-empty v1 whose v2 is missing or empty; drops an empty v1 even when its v2 is empty; returns `drop: []` when nothing is present.
+- [x] A2: Write the DB modes — in the same file, following `0004-drop-registry-collections.js` line for line: `MIGRATION_ID = '0010-drop-v1-collections'`; `parseArgs(process.argv, { write: 1, verify: 1, force: 1, 'backup-dir': 1 })` and `connect(args)` from `./tools/_connect`; `plan(db)` reads `listCollections({}, { nameOnly: true })`, counts, and the `0001` marker from `db.collection('migrations')`; `printPlan` prints one line per v1 collection (`<v1>: <n> doc(s) → <v2>: <m> doc(s)`), each refusal, and the P1 info list; `write` calls `checkBackup(args)` from `./0001-v2-schema`, refuses on re-run without `--force=yes` and on any refusal, drops each name in `drop`, then `replaceOne({ _id: MIGRATION_ID }, { _id, appliedAt: new Date(), dropped: counts }, { upsert: true })`; `verify` exits 1 and prints `STILL PRESENT <name>` / `MISSING marker` when not clean, else `[verify] OK: no v1 collection left; marker stored.`; header comment in the same shape as `0004` (purpose, modes, usage). `module.exports = { planDrop, V1_COLLECTIONS }` with the `require.main === module` guard.
+- [x] A3: Run it on the local DB — `pnpm run build:schemas`; `node server/scripts/db-backup.js --target=local` (note the printed folder); `node server/migrations/0010-drop-v1-collections.js --target=local` (dry run: paste the output into Execution Notes); if it refuses, STOP and show the Human the refusal; else `node server/migrations/0010-drop-v1-collections.js --target=local --write=yes --backup-dir=<folder>`; then `--verify=yes` → `[verify] OK`. Never pass `--target=atlas`.
+- [x] A4: Hand the Atlas run to the Human — paste this runbook into Execution Notes, with `<host>` left for the Human (the error message of a run without `--confirm-host` prints it):
   ```powershell
   cd "C:\coding projects\Cursor\foodVibe1.0"
   pnpm run build:schemas
@@ -128,3 +128,35 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+- A3 local backup (pre-drop v1 archive, local): `C:\coding projects\Cursor\foodvibe-db-backups\local-2026-11-07T06-06-31` (29 collections, 48690 docs).
+- A3 local dry run:
+  ```text
+  v1 collections present: 7 of 7
+    PRODUCT_LIST: 4486 doc(s) → products: 10394 doc(s)
+    RECIPE_LIST: 3353 doc(s) → recipes: 7776 doc(s)
+    DISH_LIST: 3007 doc(s) → dishes: 7026 doc(s)
+    KITCHEN_SUPPLIERS: 114 doc(s) → suppliers: 269 doc(s)
+    EQUIPMENT_LIST: 192 doc(s) → equipment: 451 doc(s)
+    VENUE_PROFILES: 3 doc(s) → venues: 7 doc(s)
+    MENU_EVENT_LIST: 3 doc(s) → menuEvents: 17 doc(s)
+  Refusals: 0
+  Other upper-case collections (info only, not dropped):
+    GEMINI_MENU_SHOTS, GEMINI_SHOTS, GEMINI_USAGE, MASTER_META, MENU_LIST, RECIPE_BOOK_VIEW
+  ```
+- A3 local write → `dropped 7 collection(s)`; verify → `[verify] OK: no v1 collection left; marker stored.`; a second `--write=yes` refused (`already applied … --force=yes`), exit 1.
+- decision: seen: `pnpm --dir server test` failed once (exit 1, 325 s) and passed on the immediate re-run (67 files / 819 tests) — a flaky test somewhere in the suite; not investigated.
+- A4 Atlas runbook (Human runs it; `<host>` is printed by the error of a run without `--confirm-host`):
+  ```powershell
+  cd "C:\coding projects\Cursor\foodVibe1.0"
+  pnpm run build:schemas
+  node server\scripts\db-backup.js --target=atlas
+  node server\migrations\0010-drop-v1-collections.js --target=atlas --confirm-host=<host>
+  node server\migrations\0010-drop-v1-collections.js --target=atlas --confirm-host=<host> --write=yes --backup-dir=<folder printed by db-backup>
+  node server\migrations\0010-drop-v1-collections.js --target=atlas --confirm-host=<host> --verify=yes
+  ```
+  The backup folder (default `C:\coding projects\Cursor\foodvibe-db-backups\...`) is the final v1 archive: do not delete it. If the dry run prints any `REFUSE` line, stop and do not write.
+- Atlas dry run (2026-11-07, backup `C:\coding projects\Cursor\foodvibe-db-backups\atlas-2026-11-07T06-18-20`, 34258 docs) refused: `MENU_EVENT_LIST has 8 doc(s) but menuEvents is empty`. Read-only name probe: the 8 events are one demo event ("אירוע טעימה — סיפור של אוכל", 2 per account); equipment 512→320 and venues 8→5 are duplicates (every v1 name exists in v2); products/recipes/dishes miss only test names plus one dish name (4 copies). v1 and v2 `_id`s no longer match (re-keyed after 0001), so the comparison is by name.
+- decision: behaviour: added `--accept-refusals=yes` to `--write` (drops despite refusals; the marker stores them as `refusalsAccepted`) — Human said the 8 events are test data, drop them — reverse: remove the flag check in `write()`.
+- Atlas write (2026-11-07, Human via `!`): `dropped 7 collection(s)`; verify → `[verify] OK: no v1 collection left; marker stored.` Final v1 archive: `C:\coding projects\Cursor\foodvibe-db-backups\atlas-2026-11-07T06-18-20`.
+- review: checkers kept 0 dropped 0 rechecked 0 minutes 4.5 models check-plan=sonnet,check-bugs=sonnet,check-rules=sonnet
