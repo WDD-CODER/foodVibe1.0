@@ -32,7 +32,6 @@ Show all registered slash commands with short descriptions and file locations.
 
 | Command | What it does | File | Category | Scope |
 | --- | --- | --- | --- | --- |
-| `/auto-solve` | Autonomous plan executor (legacy; prefer milestone-by-milestone Contractor) | `.claude/commands/auto-solve.md` | UTIL | SHARED |
 | `/brief` | Capture or generate a session brief | `.claude/commands/brief.md` | FLOW | SHARED |
 | `/cleanup` | Session & worktree pruning | `.claude/commands/cleanup.md` | UTIL | SHARED |
 | `/commands` | List all registered slash commands, categories, and paths | `.claude/commands/commands.md` | UTIL | SHARED |

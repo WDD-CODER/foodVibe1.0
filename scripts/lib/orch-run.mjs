@@ -53,7 +53,7 @@ export function addedCodeFiles(diff, codeRe, skip = []) {
 export const SAFE_SHOT_RE = /^(?!-)(?!.*\.\.)[A-Za-z0-9_./-]+$/
 
 /** Why a [ui] card value cannot be recorded, or null: the card title does not start with `-`, the page is an http(s)
- *  URL, each screenshot matches SAFE_SHOT_RE. orchestrate.js applies the same rules before it calls `set`. */
+ *  URL, each screenshot matches SAFE_SHOT_RE. */
 export function uiCardProblem({ card, page, shots } = {}) {
   if (card !== undefined && (typeof card !== 'string' || !card.trim() || /^\s*-/.test(card))) return `card ${JSON.stringify(card)} — a title, not starting with "-"`
   if (page !== undefined && page !== '' && !/^https?:\/\/[^\s"'`$\\<>|;&]+$/.test(String(page))) return `page ${JSON.stringify(page)} — an http(s) URL`
@@ -62,14 +62,38 @@ export function uiCardProblem({ card, page, shots } = {}) {
 }
 
 /**
- * The tier a plan's first builder starts on (INV-1): judgment when Architecture Impact names any invariant other than
- * INV-none — preserves, changes, deviation or unreadable — else build. The judgment tier is a pinned strong model
- * (models.judgment, never inherit), so the plans that touch a registered invariant are built on it.
+ * The tier a plan's first builder starts on (INV-1): judgment when Architecture Impact `changes` or `deviation`s an
+ * invariant, or names one with an unreadable kind (fail safe); `preserves`, INV-none or no section start on build.
+ * Returns { tier, invariants (only those that send the plan to judgment), reason } — reason is what the dry run and
+ * the run's note print, e.g. "INV-1 changes", "INV-1 preserves", "INV-none".
  */
 export function startTier(planText) {
-  const { entries } = parseArchImpact(String(planText))
-  const named = entries.filter((e) => e.id !== 'INV-none').map((e) => e.id)
-  return { tier: named.length ? 'judgment' : 'build', invariants: named }
+  const { present, entries } = parseArchImpact(String(planText))
+  const named = entries.filter((e) => e.id !== 'INV-none')
+  const judged = named.filter((e) => e.kind !== 'preserves')
+  const label = (e) => `${e.id} ${e.kind ?? 'unreadable'}`
+  if (judged.length) return { tier: 'judgment', invariants: judged.map((e) => e.id), reason: judged.map(label).join(', ') }
+  const reason = named.length ? named.map(label).join(', ') : entries.length ? 'INV-none' : present ? 'no invariant named' : 'no Architecture Impact'
+  return { tier: 'build', invariants: [], reason }
+}
+
+/**
+ * The plan without its `## Execution Notes` section (the heading and every line up to the next `## ` heading outside a
+ * code fence): what the checkers read, so the builder's own account of its work never reaches them. Every other line is
+ * kept as it is, line endings included.
+ */
+export function planWithoutNotes(planText) {
+  const lines = String(planText).split(/(?<=\n)/)
+  const out = []
+  let inNotes = false
+  let fence = false
+  for (const line of lines) {
+    const bare = line.replace(/\r?\n$/, '')
+    if (!fence && /^##\s/.test(bare)) inNotes = /^##\s+Execution Notes\s*$/i.test(bare)
+    if (/^\s*(```|~~~)/.test(bare)) fence = !fence
+    if (!inNotes) out.push(line)
+  }
+  return out.join('')
 }
 
 /** The plan's `[human]` items (Goals / Done-when), verbatim without the tag, in file order. */
@@ -287,7 +311,7 @@ function flakySection(status, plans) {
 // ---- decision triage (docs/agent/decision-review.md §5) --------------------------------------------------------------
 export const TRIAGE_VERDICTS = ['accept', 'ask', 'follow-up', 'noise']
 // A decision that names one of these is never accepted by the triage agent: the Human sees it. `author` and
-// `authorship` do not match (`auth` alone is a word); `price` does. The workflow carries a mirror copy of this rule.
+// `authorship` do not match (`auth` alone is a word); `price` does. scripts/orch-state.mjs carries a mirror copy of this rule (SENSITIVE_CODE_RE).
 export const TRIAGE_SENSITIVE_RE = /\b(auth|authn|authz|authentication|authori[sz]\w*|login|password\w*|permission\w*|roles?|tokens?|sessions?|secur\w*|secrets?|encrypt\w*|schema\w*|migrat\w*|columns?|data shape|payments?|pay|prices?|pricing|money|billing|invoices?|currenc\w*|refunds?)\b/i
 
 /** `behaviour`, `seen`, `removes` — the type word a decision line starts with; `other` when it has none. */
@@ -545,14 +569,14 @@ const stepTag = (s) => (/^round \d{1,2}$/.test(String(s ?? '').trim()) ? String(
 // command, a finding id, a path of the branch diff, an INV-n id of docs/brain/invariants.md) as lesson lines for the builder.
 // No stored fact, no line: a cause that names nothing the reader could look at is not written.
 // Only the shapes the code itself makes reach a lesson line, so an agent-written id or path cannot carry words to the
-// next builder. Ids: gate-N, scope-N, ui-N, merge-N (orchestrate.js makes them) and <role>-N for a finder role
-// (check-plan-N, check-bugs-N, check-rules-N, security-N; the RULES_GROUP roles too). Paths: at most four segments of at
-// most 40 characters each, no `.` or `..` segment.
+// next builder. Ids: gate-N, scope-N, ui-N, merge-N (the run makes them) and <role>-N for a finder role
+// (check-plan-N, check-bugs-N, check-rules-N, security-N; the RULES_GROUP roles too). Paths: at most six segments of at
+// most 40 characters each, no `.` or `..` segment (six keeps most app paths, e.g. src/app/pages/x/x.component.ts).
 const ID_ROLES = [...new Set(['gate', 'scope', 'ui', 'merge', 'security', ...Object.keys(RULES_GROUP)])]
 const SAFE_ID = new RegExp(`^(?:${ID_ROLES.map((r) => r.replace(/[-]/g, '\\-')).join('|')})-\\d{1,3}$`)
 const SAFE_PATH = { test: (p) => {
   const parts = String(p).split('/')
-  return parts.length <= 4 && parts.every((s) => /^[\w@.+-]{1,40}$/.test(s) && s !== '.' && s !== '..')
+  return parts.length <= 6 && parts.every((s) => /^[\w@.+-]{1,40}$/.test(s) && s !== '.' && s !== '..')
 } }
 export const safeLessonId = (id) => SAFE_ID.test(String(id ?? ''))
 export const safeLessonPath = (p) => SAFE_PATH.test(String(p ?? ''))
@@ -580,7 +604,7 @@ const gateEventTag = (s) => {
   const m = /^(timed out|env-fail rerun):\s*(.*)$/.exec(String(s))
   return m && commandTag(m[2]) !== 'a check command' ? `${m[1]}: ${commandTag(m[2])}` : null
 }
-// The code-written start (or fixed ending) of a park reason: the literals of `park()` in orchestrate.js. The model or check
+// The code-written start (or fixed ending) of a park reason: the literals of the run's `park()` calls. The model or check
 // text after it is never read; a reason that matches none gives no line.
 const PARK_LABELS = [[/^same reason twice/, 'same reason twice'], [/^agent-call limit/, 'agent-call limit'], [/^no progress/, 'no progress'], [/^replan needed/, 'replan needed'],
   [/^hand-off file/, 'hand-off file'], [/^worktree/, 'worktree'], [/^UI environment blocked/, 'UI environment blocked'], [/^environment/, 'environment'],
@@ -647,7 +671,7 @@ export const RUN_LOG_KEEP = 20
 const ROW_KEYS = ['date', 'run', 'plans', 'merged', 'parked', 'reasons', 'fixRounds', 'escalations', 'gateFails', 'finalGate', 'x', 'misses', 'perPlan']
 export const RUN_LOG_INTRO = [
   '# Run log', '',
-  'One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run\'s `status.json` — never by hand. `orch-readiness` reads the last three rows, and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md`; the newest run\'s stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.',
+  'One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run\'s `status.json` — never by hand. The `✗` columns of a run are filled by the next `finish`, from `decision-log.md`; the newest run\'s stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.',
 ]
 
 const planList = (s) => String(s ?? '').split(',').map((x) => x.trim()).filter((x) => /^\d+$/.test(x)).map(Number)

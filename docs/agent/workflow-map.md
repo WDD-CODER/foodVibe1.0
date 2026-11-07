@@ -71,7 +71,6 @@ Cursor rule files (10 original + 1 role rule + 10 skill-enforcement rules added 
 | `/cleanup` | session & worktree pruning (`scripts/prune-merged-worktrees.sh`, `scripts/prune-old-sessions.sh`) |
 | `/sweep-stale-todos` | prune stale `.claude/todo.md` entries |
 | `/docs-refresh` | on-demand documentation refresh |
-| `/auto-solve` | autonomous solve loop (browse-based verification) |
 | `/skills`, `/commands` | listings |
 
 ### Commands — Cursor (`.cursor/commands/`)
