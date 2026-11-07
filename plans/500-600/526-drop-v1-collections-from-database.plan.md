@@ -145,7 +145,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
     GEMINI_MENU_SHOTS, GEMINI_SHOTS, GEMINI_USAGE, MASTER_META, MENU_LIST, RECIPE_BOOK_VIEW
   ```
 - A3 local write → `dropped 7 collection(s)`; verify → `[verify] OK: no v1 collection left; marker stored.`; a second `--write=yes` refused (`already applied … --force=yes`), exit 1.
-- decision: seen: `pnpm --dir server test` failed once (exit 1, 325 s) and passed on the immediate re-run (67 files / 819 tests) — a flaky test somewhere in the suite; not investigated.
+- decision: seen: `pnpm --dir server test` failed once (exit 1, 325 s) and passed on the immediate re-run (67 files / 819 tests) — a flaky test somewhere in the suite; not investigated. [graded D2 ok 2026-11-07]
 - A4 Atlas runbook (Human runs it; `<host>` is printed by the error of a run without `--confirm-host`):
   ```powershell
   cd "C:\coding projects\Cursor\foodVibe1.0"
@@ -157,6 +157,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   ```
   The backup folder (default `C:\coding projects\Cursor\foodvibe-db-backups\...`) is the final v1 archive: do not delete it. If the dry run prints any `REFUSE` line, stop and do not write.
 - Atlas dry run (2026-11-07, backup `C:\coding projects\Cursor\foodvibe-db-backups\atlas-2026-11-07T06-18-20`, 34258 docs) refused: `MENU_EVENT_LIST has 8 doc(s) but menuEvents is empty`. Read-only name probe: the 8 events are one demo event ("אירוע טעימה — סיפור של אוכל", 2 per account); equipment 512→320 and venues 8→5 are duplicates (every v1 name exists in v2); products/recipes/dishes miss only test names plus one dish name (4 copies). v1 and v2 `_id`s no longer match (re-keyed after 0001), so the comparison is by name.
-- decision: behaviour: added `--accept-refusals=yes` to `--write` (drops despite refusals; the marker stores them as `refusalsAccepted`) — Human said the 8 events are test data, drop them — reverse: remove the flag check in `write()`.
+- decision: behaviour: added `--accept-refusals=yes` to `--write` (drops despite refusals; the marker stores them as `refusalsAccepted`) — Human said the 8 events are test data, drop them — reverse: remove the flag check in `write()`. [graded D1 ok 2026-11-07]
 - Atlas write (2026-11-07, Human via `!`): `dropped 7 collection(s)`; verify → `[verify] OK: no v1 collection left; marker stored.` Final v1 archive: `C:\coding projects\Cursor\foodvibe-db-backups\atlas-2026-11-07T06-18-20`.
 - review: checkers kept 0 dropped 0 rechecked 0 minutes 4.5 models check-plan=sonnet,check-bugs=sonnet,check-rules=sonnet
