@@ -5,8 +5,7 @@
  * implementations that used to live in auth.js, generic.js, clone-master.js,
  * seed-master.js, and sync-master.js with this one `crypto.randomUUID()`-backed
  * generator. Existing short ids already in the DB are left as-is — this only
- * affects newly created documents from here on. Not used by
- * `server/scripts/legacy-import/**` (v1-only, retired in Phase 2b Step 4).
+ * affects newly created documents from here on.
  */
 
 const { randomUUID } = require('crypto');
