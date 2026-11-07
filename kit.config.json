@@ -61,7 +61,8 @@
       "pnpm run lint:icons",
       "pnpm run lint:no-native-select",
       "node scripts/plan-ledger-check.mjs",
-      "node scripts/breadcrumbs-check.mjs"
+      "node scripts/breadcrumbs-check.mjs",
+      "node scripts/ci-scope-check.mjs --checkout-branch"
     ]
   },
   "ci": {
@@ -178,10 +179,6 @@
     },
     {
       "path": ".claude/commands/fix.md",
-      "reason": "FoodVibe-only: runs scripts/log-query.mjs (Mongo app_logs) before reading code"
-    },
-    {
-      "path": ".claude/commands/auto-solve.md",
       "reason": "FoodVibe-only: runs scripts/log-query.mjs (Mongo app_logs) before reading code"
     },
     {

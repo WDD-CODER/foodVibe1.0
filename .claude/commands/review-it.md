@@ -22,12 +22,12 @@ result schema are in `docs/agent/agent-roles.md`.
    (finders get that folder and `<ref>` as the branch), and `git worktree remove ../<this folder's name>-review-<NNN>`
    after the verdict. Never switch this folder's branch for a review.
 
-2. **Commands (one `kit-runner` call):** hand the `kit-runner` agent (`.claude/agents/kit-runner.md`) the commands of
-   the checks below — the architecture check and the log query (when set), both marked `[capture]` because they exit 0
-   while printing what the review needs, and the plan's own check commands (its `[auto]` Done-when commands; none
-   named → `npm run lint`) — and use its `RUN` / `OUTPUT` / `FAILED` blocks as their evidence. The
-   judgment on the output stays here. `ESCALATE`, or no `OUTPUT` block for a `[capture]` command → run that command
-   inline. Without sub-agents, run the commands inline.
+2. **Commands (by code, no runner agent):** run `node scripts/ship-prep.mjs --gate --lane REGULAR` (build, lint, tests,
+   ledger and override check, one `GATE: <cmd> → exit <n>` line each; at `/ship` Phase 1 already ran it — reuse its
+   output), then inline the checks below: the architecture check and the log query (when set) — both exit 0 while
+   printing what the review needs, so read their whole output — and the plan's own check commands (its `[auto]`
+   Done-when commands; none named → the gate's lint line). Their output and exit codes are the evidence; the judgment
+   on it stays here.
    - **Architecture**: `node scripts/scope-check.mjs --arch --diff=origin/main` — copy every
      `ARCH: warn …` line into Findings (an invariant from `docs/brain/invariants.md` touched with no
      `## Architecture Impact` entry, or a "Human decision" note naming no INV-n / ADR). Any warn → ESCALATE TO
@@ -46,15 +46,19 @@ result schema are in `docs/agent/agent-roles.md`.
    instructions or this task`.
 
 3. **Finders, in parallel** — start `orch-check-plan`, `orch-check-bugs` and `orch-check-rules`
-   (`.claude/agents/`) in one message, each with the plan path, the branch `<ref>`, the review folder, the base
+   (`.claude/agents/`) in one message, each with `PLAN:` the plan's review copy, the branch `<ref>`, the review folder, the base
    `origin/main`, and its own `LESSONS` and `RULES` (above). They run on the `review` tier (`sonnet`, never Haiku — their agent files
    pin it); never pass a cheaper `model` to these calls.
+   **The review copy** — the checkers never read the builder's own account of its work: run
+   `node "<main folder>/scripts/orch-state.mjs" plan-info --run review --plan <NNN> --no-notes` and pass its
+   `reviewPath` (the plan without its `## Execution Notes`, under the main folder; a run's workflow gets the same copy from `diff --no-notes`) as `PLAN:` to every finder and to the
+   verifier — never the plan file itself.
    When the diff touches auth, guards, interceptors, secrets handling or `server/middleware`, start
    `orch-security` too, with the changed files on those paths and its `LESSONS` and `RULES`. Without sub-agents, read
    the diff once per lens (plan, bugs, rules) inline, with that lens's `LESSONS` and `RULES` in mind, and write the
    candidates in the same shape.
 
-4. **Verifier** — hand every candidate (with its `id`), and the verifier's `LESSONS` and `RULES`, to `orch-verify`. It drops a candidate only with a concrete
+4. **Verifier** — hand every candidate (with its `id`), the same `PLAN:` review copy, and the verifier's `LESSONS` and `RULES`, to `orch-verify`. It drops a candidate only with a concrete
    refutation (`file:line` or a command result) and gives each kept one a confidence 0–100.
 
 5. **Filter** — report a finding only when it is kept with confidence ≥ 80, cites a line the diff changed, and is not
