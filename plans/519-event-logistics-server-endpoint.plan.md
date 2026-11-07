@@ -11,15 +11,14 @@ event from its form (`buildEventFromForm`), so the answers must go through their
 (2026-10-27, Q1 b) that only the owner answers, so this plan adds one owner-only permission action `editLogistics`.
 
 ## Goals & Success Criteria
-- Primary: `PUT /api/v1/events/:id/logistics` merges answers for the owner (or a platform admin), stamps each changed
-  answer, refuses staff (403), other businesses (403/404) and finished events (409), and also sets the event's
-  environment (`logistics.environmentType`).
-- Success:
-  - `[auto]` `npm run build` exits 0; `npm run lint` exits 0.
-  - `[auto]` `npm run test:server` exits 0, including `server/test/events-logistics.test.js` and the new cases in `server/test/permissions.test.js` (A5).
-  - `[auto]` `npm run test:ci` → `TEST-CI: … 0 failed, exit 0` (the `permission.service.spec.ts` case of A2).
-  - `[auto]` `node scripts/scope-check.mjs --arch --plan=<this file>` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=<this file>` exits 0.
-  - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+**Primary:** `PUT /api/v1/events/:id/logistics` merges answers for the owner (or a platform admin), stamps each changed
+answer, refuses staff (403), other businesses (403/404) and finished events (409), and also sets the event's
+environment (`logistics.environmentType`).
+- [auto] `npm run build` exits 0; `npm run lint` exits 0.
+- [auto] `npm run test:server` exits 0, including `server/test/events-logistics.test.js` and the new cases in `server/test/permissions.test.js` (A5).
+- [auto] `npm run test:ci` exits 0 (the `permission.service.spec.ts` case of A2).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/519-event-logistics-server-endpoint.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/519-event-logistics-server-endpoint.plan.md` exits 0.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 
 ## Execution Mode
 - Parallel: yes — same wave as 520 and 521; no shared files.
@@ -126,3 +125,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner review (2026-11-05): text limit is 500, not 519 (typo, same fix as 518). Can run in parallel with 520 and 521 after 518.
+- Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.

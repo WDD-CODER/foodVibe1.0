@@ -1,53 +1,59 @@
-# Plan 517 — Let the orchestrator gate run FoodVibe's tests, server tests and one e2e spec without hanging
+# Plan 517 — Let the orchestrator gate run FoodVibe's server tests and the log check, and give e2e specs a signed-in session
 
 Status: draft
-Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
+Snapshot: 589524365af5ec711e860748e7f8cfbc22dfbbca
 Depends-on: none
 
 ## Problem Statement
-Run `run-412-497` (2026-10-27) parked all three plans on the environment, not on the code: `npm run test` (Karma)
-prints its TOTAL line and never exits on this machine (decisions D6, D11, D20, D36 in
-`docs/orchestrator/runs/run-412-497/report.md`), so every gate times out; server tests are not reachable from the gate
-at all (no root script, and `npm --prefix server test` is not an allowed check); `scripts/log-query.mjs --since=plan-start`
-dies without `.claude/.slot-plan-start` or a Mongo URI (D27, D30), which no builder folder has; and a `[ui]` card's test
-command must be `npm run <script>` or `node scripts/…`, so there is no allowed way to run one Playwright spec. The
-logistics plans (518–523) need all four, so this plan comes first.
+Run `run-412-497` (2026-10-27) parked all three plans on the environment, not on the code. Four blockers were found
+(decisions D6, D11, D20, D27, D30, D36 in `docs/orchestrator/runs/run-412-497/report.md`). Re-checked on 2026-11-07
+against plans 503 and 508 and kit v2.1.0 (`scripts/run-plans.mjs`), two are still open and one is half open:
+
+- **Karma never exits — solved.** Plan 503 added `"test:ci": "ng test --watch=false --browsers=ChromeHeadless"`
+  (`package.json:15`) and `kit.config.json` `commands.test` = `test:ci` (`kit.config.json:32`); verified on main
+  3cfb996a (1598 of 1598, exit 0). No wrapper is needed.
+- **Server tests unreachable from the gate — open.** There is no root `test:server` script, and the gate's allowlist
+  (`scripts/run-plans.mjs:79-93` `checkProblem`) takes only `npm|pnpm run <script>`, `node scripts/…|tools/…` and
+  `node --test`; `pnpm --dir server run test` is not allowed. Plans 518–520 need it. The suite itself is green
+  (`pnpm --dir server run test` → 67 files, 819 tests, exit 0, 2026-11-07).
+- **`log-query --since=plan-start` dies in a builder folder — open.** `scripts/log-query.mjs:56-59` calls `die()` when
+  `.claude/.slot-plan-start` is missing; `scripts/run-plans.mjs` and `scripts/orch-state.mjs` never write that marker
+  (only `scripts/take-plan.mjs:347` does). `scripts/log-query.mjs:112` dies again when no Mongo URI is configured. Every
+  plan that touches app or server code carries this check (`docs/agent/plan-checks.md` "Success criteria"), so every
+  such plan fails its gate. Plan 508 fixed only how the driver loads.
+- **One Playwright spec as a check — no longer needed as a script.** In v2.1.0 the gate does not rerun `[ui]` card tests
+  (no `uiCards` handling in `scripts/run-plans.mjs` or `scripts/lib/plan-gate.mjs`); the builder writes and runs them
+  itself with a guarded bare Bash (`scripts/lib/claude-run.mjs:55-66`). What is still missing is a signed-in session
+  helper, so each logistics card spec (522, 523) does not reinvent the QA login.
 
 ## Goals & Success Criteria
-- Primary: `npm run test:ci`, `npm run test:server`, `node scripts/log-query.mjs --since=plan-start --level=error` and
-  `node scripts/e2e-one.mjs <spec>` each exit on their own with a meaningful exit code, from a fresh worktree.
-- Success:
-  - `[auto]` `npm run build` exits 0; `npm run lint` exits 0.
-  - `[auto]` `node --test scripts/test/test-ci.test.mjs scripts/test/e2e-one.test.mjs scripts/test/log-query-fallback.test.mjs` → `# fail 0`.
-  - `[auto]` `npm run test:ci` exits (0 or 1) within 15 minutes and its last line is `TEST-CI: <n> specs, <m> failed, exit <code>`.
-  - `[auto]` `npm run test:server` exits 0.
-  - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` in a folder without `.claude/.slot-plan-start` prints a line starting with `plan-start: no marker` and exits 0 when no database is configured (`SKIP: no database`), or lists entries when one is.
-  - `[auto]` `node scripts/scope-check.mjs --arch --plan=<this file>` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=<this file>` exits 0.
-  - `[ui]` Signed in as the QA user, the page `/menu-library` shows the header's user chip with the QA user's name.
+**Primary:** `pnpm run test:server` and `node scripts/log-query.mjs --since=plan-start --level=error` exit on their own
+with a meaningful code from a fresh builder folder, and e2e specs sign in through one helper.
+- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
+- [auto] `node --test scripts/test/log-query-fallback.test.mjs` → `# fail 0`.
+- [auto] `pnpm run test:server` exits 0.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` exits 0 (in a folder without `.claude/.slot-plan-start` its first line starts with `plan-start: no marker`).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/517-orchestrator-gate-test-runners.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/517-orchestrator-gate-test-runners.plan.md` exits 0.
+- [ui] Signed in as the QA user through `signInQa`, the page `/menu-library` shows the header's user chip with the QA user's name (e2e/qa-session.spec.ts, screenshot `screens/517-1.png`).
 
 ## Execution Mode
 - Parallel: no — it changes the check commands every later plan runs.
 - Concurrent plans: none.
-- Isolated DB: no.
+- Isolated DB: no
 
 ## Read-Write Scope
 
 Always allowed regardless of the list below: this plan file itself, its own
-`docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
+`.claude/sessions/**`, `.worktree-*`, and the append-only
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
-scripts/test-ci.mjs
-scripts/e2e-one.mjs
 scripts/log-query.mjs
-scripts/test/test-ci.test.mjs
-scripts/test/e2e-one.test.mjs
 scripts/test/log-query-fallback.test.mjs
-scripts/test/fixtures/**
 package.json
-kit.config.json
 e2e/helpers/**
 e2e/qa-session.spec.ts
+screens/517-*.png
 docs/agent/plan-checks.md
 ```
 
@@ -64,11 +70,11 @@ append the path to the scope block above and retry.
 
 ## Architecture Impact
 
-- INV-none: preserves — the scope reaches no `Touches` glob; scripts, package scripts, kit commands and e2e helpers only.
+- INV-none: preserves — the scope reaches no `Touches` glob; a package script, a project-owned check script, e2e helpers and a doc paragraph.
 
 ## Reuse Check
-- `scripts/test-ci.mjs`, `scripts/e2e-one.mjs` — family: none — rung: 4 — why: project check scripts, the kind `scripts/` already holds (`check-lucide-icons.mjs`, `log-query.mjs`); no UI or app code.
-- `e2e/helpers/qa-session.ts` — family: none — rung: 4 — why: a thin TypeScript wrapper over the existing `scripts/qa/lib/qa-login.mjs` (`loginQa`, `seedQaContext`), which it reuses as is.
+- `e2e/helpers/qa-session.ts` — family: none — rung: 4 — why: a thin TypeScript wrapper over the existing `scripts/qa/lib/qa-login.mjs` (`loginQa`, `seedQaContext`, `qaCredential`), which it reuses as is; the registry covers app and server code only.
+- `resolvePlanStart` / `databaseUri` in `scripts/log-query.mjs` — family: none — rung: 4 — why: two exported helpers inside the existing script, so the test can call them without Mongo.
 
 ## Step 0 — Reality Check
 
@@ -78,20 +84,18 @@ by symbol (do not re-run the whole reality check from scratch) and print one lin
 line or file this plan names was removed, renamed or rewritten).
 
 ## User Stories
-- As a chef (and the person who runs the builds), I want an unattended run to finish with a verdict so that a feature is either merged or parked for a real reason, never for a hung test runner.
+- As a chef (and the person who runs the builds), I want an unattended run to finish with a verdict so that a feature is either merged or parked for a real reason, never for a missing marker file.
 
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `scripts/test-ci.mjs` runs `npx ng test --watch=false --browsers=ChromeHeadless`, reads its stdout line by line, and when a Karma summary line (`TOTAL: <n> FAILED, <m> SUCCESS` or `TOTAL: <m> SUCCESS` or `Executed <a> of <b> … (<n> FAILED)`) appears, stops the child and its tree (`taskkill /PID <pid> /T /F` on Windows, `kill -TERM` of the process group elsewhere), prints `TEST-CI: <specs> specs, <failed> failed, exit <code>` and exits 1 when `failed > 0`, else 0. No summary within `TEST_CI_TIMEOUT_MS` (default 900000) → kill, print `TEST-CI: timeout`, exit 1. A child exit before any summary → exit with the child's code.
-- [ ] `scripts/e2e-one.mjs <spec path>` runs `npx playwright test <spec>` (argument validated: relative path under `e2e/`, `.spec.ts`, no `..`) and exits with its exit code; any other argument → prints usage, exit 2.
-- [ ] `package.json` scripts: `"test:ci": "node scripts/test-ci.mjs"`, `"test:server": "npm --prefix server test"`; `kit.config.json` → `commands.test` = `"test:ci"`. `"test"` stays as it is (the Human's interactive run).
-- [ ] `scripts/log-query.mjs`: `--since=plan-start` without `.claude/.slot-plan-start` → the time of `git merge-base HEAD origin/main` (fallback: the first commit of the branch; fallback: 24h), printed as `plan-start: no marker, using <ISO> (<source>)`; no Mongo URI in `MONGODB_URI` / `MONGO_LOCAL_URI` / `.env` / `server/.env` → print `SKIP: no database configured` and exit 0. Every other behaviour unchanged.
-- [ ] `e2e/helpers/qa-session.ts`: `signInQa(context, { api?, app? })` → imports `scripts/qa/lib/qa-login.mjs`, calls `loginQa({ api: api ?? process.env.ORCH_UI_API_URL ?? 'http://localhost:3000', userKey: 'ORCH_QA_USER', passKey: 'ORCH_QA_PASSWORD' })` (falls back to `QA_USER` / `QA_PASS` when the `ORCH_` pair is empty), then `seedQaContext(context, session, app ?? 'http://localhost:4200')`, returns `session`; `createQaEvent(request, session, overrides?)` → `GET /api/v1/data/taxonomyTerms` with the bearer token, picks the first `eventType` and the first `menuType` term, `POST /api/v1/data/menuEvents` with `{ name: 'E2E ' + Date.now(), eventType, servingType, guestCount: 50, sections: [], ...overrides }`, returns the created `_id`; `deleteQaEvent(request, session, id)` → `DELETE /api/v1/data/menuEvents/:id`.
-- [ ] `e2e/qa-session.spec.ts`: one test — `signInQa`, `page.goto('/menu-library')`, expect the header user chip (`.user-chip`, `src/app/core/components/header/`) to contain the signed-in user's name (`session.user.name`), screenshot to `screens/517-1.png`.
+- [ ] `package.json` script `"test:server": "pnpm run build:schemas && pnpm --dir server run test"`. `test` and `test:ci` stay as they are.
+- [ ] `scripts/log-query.mjs`: `--since=plan-start` without `.claude/.slot-plan-start` → the committer time of `git merge-base HEAD origin/main` (fallback: the first commit of the branch not on `origin/main`; fallback: 24h ago), printed as the first line `plan-start: no marker, using <ISO> (<merge-base|first-commit|24h>)`. No Mongo URI after the existing dotenv loads (`MONGO_LOCAL_URI`, then `MONGO_URI`, as today at line 111; with `--remote` the existing pair) → print `SKIP: no database configured` and exit 0. Every other behaviour unchanged (including `--remote`, `--file`, `--prune-logs`).
+- [ ] `e2e/helpers/qa-session.ts`: `signInQa(context, { api?, app? })` → imports `scripts/qa/lib/qa-login.mjs`, calls `loginQa({ api: api ?? process.env.E2E_API_URL ?? 'http://localhost:3000', userKey: 'ORCH_QA_USER', passKey: 'ORCH_QA_PASSWORD' })` (falls back to `QA_USER` / `QA_PASS` when the `ORCH_` pair is empty, through `qaCredential`), then `seedQaContext(context, session, app ?? process.env.E2E_APP_URL ?? 'http://localhost:4200')`, returns `session`; `createQaEvent(request, session, overrides?)` → `GET /api/v1/data/taxonomyTerms` with the bearer token, picks the first `eventType` and the first `menuType` term, `POST /api/v1/data/menuEvents` with `{ name: 'E2E ' + Date.now(), eventType, servingType, guestCount: 50, sections: [], ...overrides }`, returns the created `_id`; `deleteQaEvent(request, session, id)` → `DELETE /api/v1/data/menuEvents/:id`. Before writing `createQaEvent`, read `shared/schemas/entities/menu-event.schema.ts` and send the fields it requires (the list above is the minimum the plan expects; match the schema, never weaken it).
+- [ ] `e2e/qa-session.spec.ts`: one test — `signInQa`, `page.goto('/menu-library')`, expect the header user chip (`.user-chip`, `src/app/core/components/header/`) to contain `session.user.name`, screenshot to `screens/517-1.png`.
 
 ### Should Have (P1)
-- [ ] `docs/agent/plan-checks.md` gets a "Checks the orchestrator can run" paragraph naming the four commands and the `[ui]` card test shape `node scripts/e2e-one.mjs e2e/ui/<NNN>-<n>.spec.ts`.
+- [ ] `docs/agent/plan-checks.md` gets a "Checks the orchestrator can run" paragraph: `pnpm run test:ci` (client), `pnpm run test:server` (server), `node scripts/log-query.mjs --since=plan-start --level=error` (works without a marker and without a database), and the `[ui]` card shape — a spec under `e2e/ui/<NNN>-<n>.spec.ts` that signs in with `signInQa`, run by the builder with `pnpm exec playwright test <spec>` (not a gate check).
 
 ### Nice to Have (P2)
 - [ ] none.
@@ -100,36 +104,38 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change. No dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Give the project a test runner that always exits, so the gate gets a verdict instead of a hang — spawn ng test headless, parse the Karma TOTAL line, kill the process tree, print the TEST-CI summary line — scripts/test-ci.mjs
-- [ ] A2: Prove the runner exits on a fake child that prints TOTAL and then hangs — the test spawns `node scripts/test/fixtures/fake-karma.mjs` (prints `TOTAL: 1 FAILED, 3 SUCCESS` then sleeps 60s) through an exported `runWithParser(cmd, args, { timeoutMs })` and asserts exit 1 and the summary line within 5s; a second fixture prints `TOTAL: 4 SUCCESS` → exit 0; a third prints nothing → timeout path exit 1 with `timeoutMs: 500` — scripts/test/test-ci.test.mjs, scripts/test/fixtures/fake-karma.mjs
-- [ ] A3: Let a card's test command run one Playwright spec through an allowlisted script — validate the argument, spawn `npx playwright test <spec>` with stdio inherited, exit with its code; test the validator (`e2e/x.spec.ts` ok, `../x.spec.ts` and `e2e/x.ts` → exit 2) — scripts/e2e-one.mjs, scripts/test/e2e-one.test.mjs
-- [ ] A4: Register the two runners as package scripts and point the kit's test command at the one that exits — `test:ci`, `test:server`; `commands.test: "test:ci"` — package.json, kit.config.json
-- [ ] A5: Make the log check survive a builder folder — plan-start fallback to the branch base time, SKIP with exit 0 when no database is configured; keep every other path as it is — scripts/log-query.mjs, scripts/test/log-query-fallback.test.mjs (unit-test the exported `resolvePlanStart(root)` and `databaseUri(root)` helpers; no Mongo)
-- [ ] A6: Give e2e specs a signed-in QA session and a throwaway event — `signInQa`, `createQaEvent`, `deleteQaEvent` over the existing qa-login helpers — e2e/helpers/qa-session.ts
-- [ ] A7: Prove the session helper against the running app with one screenshot — the `[ui]` card test — e2e/qa-session.spec.ts
-- [ ] A8: Tell plan authors which checks the gate can run — one paragraph — docs/agent/plan-checks.md
-- [ ] A9: Run every automatic check of this plan from the worktree and paste the outputs under Execution Notes
+- [ ] A1: Make server tests a check the gate may run — add `test:server` (build the schemas first, then the server suite) — package.json
+- [ ] A2: Make the log check survive a builder folder — export `resolvePlanStart(root)` (marker, else merge-base time, else first branch commit, else 24h, with its source) and `databaseUri({ remote })` (the URI or `''`); use them in place of the two `die()` paths; print the `plan-start: no marker` line and the `SKIP: no database configured` exit 0 — scripts/log-query.mjs
+- [ ] A3: Unit-test both helpers without Mongo — a temp folder with and without `.claude/.slot-plan-start` (marker wins; without it the source is `merge-base` inside this repo, `24h` in a non-git temp dir); `databaseUri` with both env vars unset → `''`, with `MONGO_LOCAL_URI` set → that value (save and restore `process.env`). Guard the CLI entry with an `import.meta.url` check so importing does not run the query — scripts/test/log-query-fallback.test.mjs, scripts/log-query.mjs
+- [ ] A4: Give e2e specs a signed-in QA session and a throwaway event — `signInQa`, `createQaEvent`, `deleteQaEvent` over the existing qa-login helpers — e2e/helpers/qa-session.ts
+- [ ] A5: Prove the session helper against the running app with one screenshot — the `[ui]` card test, run with `pnpm exec playwright test e2e/qa-session.spec.ts` — e2e/qa-session.spec.ts, screens/517-1.png
+- [ ] A6: Tell plan authors which checks the gate can run — one paragraph — docs/agent/plan-checks.md
+- [ ] A7: Run every automatic check of this plan from the worktree and paste the outputs under Execution Notes
 
 ## What happens when
-- `test:ci` finds no Chrome: ng test fails before any summary → the child's non-zero exit is passed through (no retry).
-- `e2e-one` is given a spec that does not exist: Playwright's own "no tests found" exit code is passed through.
-- `signInQa` has no credentials at all: throws `QA credentials not set (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS)`; the spec fails with that message.
+- `test:server` on a tree with a red server test: vitest's non-zero exit is passed through; no retry.
+- `log-query` in a folder that is not a git repository and has no marker: `plan-start: no marker, using <ISO> (24h)`.
+- `log-query` with a marker and a database: exactly today's behaviour.
+- `signInQa` has no credentials at all: throws `QA credentials not set (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS)`; the spec fails with that message. The helper never prints a credential or a token.
+- `createQaEvent` gets a 4xx: throws with the status and the server's error message; the spec fails, nothing is left behind.
 
 ## Technical Considerations
-- Dependencies: `scripts/qa/lib/qa-login.mjs` (`loginQa`, `seedQaContext`, `qaCredential`), `playwright.config.ts` (webServer on 4200, `reuseExistingServer`), `.github/workflows/ci.yml` line 114 (the same ng test flags).
-- New files needed: `scripts/test-ci.mjs`, `scripts/e2e-one.mjs`, `scripts/test/test-ci.test.mjs`, `scripts/test/e2e-one.test.mjs`, `scripts/test/log-query-fallback.test.mjs`, `scripts/test/fixtures/fake-karma.mjs`, `e2e/helpers/qa-session.ts`, `e2e/qa-session.spec.ts`.
+- Dependencies: `scripts/qa/lib/qa-login.mjs` (`loginQa`, `seedQaContext`, `qaCredential`), `playwright.config.ts` (webServer `npx ng serve` on 4200, `reuseExistingServer`), `scripts/run-plans.mjs` `checkProblem` (the allowlist).
+- New files needed: `scripts/test/log-query-fallback.test.mjs`, `e2e/helpers/qa-session.ts`, `e2e/qa-session.spec.ts`.
 - Model changes: none.
 - Backend / API: none.
-- Auth and validation: the e2e helper reads credentials through `qaCredential` and never prints them; `e2e-one.mjs` validates its one argument.
-- Security surface: `package.json` and `kit.config.json` change (sensitive paths → `orch-security` runs); no new dependency, no secret.
-- Data / migration: none.
+- Auth and validation: the e2e helper reads credentials through `qaCredential` and never prints them.
+- Security surface: `package.json` changes (one script, no dependency).
+- Data / migration: none. `createQaEvent` writes one event to the database the API uses and the spec deletes it.
 - Project checks: log-query `[auto]` present (and made runnable); Reuse Check present; no dictionary keys; no app code.
+- Ordering: plan B (brief 3(b), the scripts move to `--target`) also edits `scripts/log-query.mjs` and depends on this plan.
 
 ## Out of Scope
-- Fixing why Karma hangs (D6) — it is worked around, not fixed. Installing `node_modules` in builder worktrees (kit-owned `orch-state.mjs`, D4). The drift-forever check after Step 0 (kit-owned `scope-check.mjs`, D31). The intermittent server test collisions (D5).
+- A Karma wrapper, `scripts/test-ci.mjs` and the `TEST-CI:` summary line (solved by plan 503). `scripts/e2e-one.mjs` (the v2.1.0 gate does not run card tests). Fixing why Karma hangs in watch mode. Installing `node_modules` in builder folders (kit). Playwright's webServer reusing the main folder's server on 4200 when a builder runs a card spec (kit plan 080, parked until 2026-11-15). The intermittent server test collisions (D5).
 
 ## Critical Questions
-- Q1: Keep `npm run test` interactive (watch) and add `test:ci`? (a) yes — **chosen**, nothing the Human types changes (b) replace `test` itself.
-- Q2: `log-query` without a database: (a) SKIP with exit 0 — **chosen**, a builder folder has no `.env` (b) fail — would park every builder.
+- Q1: Keep `test` interactive (watch) and use `test:ci` for the gate? A: yes (plan 503 did it).
+- Q2: `log-query` without a database: A: SKIP with exit 0 — a builder folder may have no `server/.env`.
 
 ## Execution Notes
+- Planner review 2026-11-07 (brief 4): re-verified the four blockers against plans 503 and 508 and kit v2.1.0 at 5895243. Cut: `scripts/test-ci.mjs`, its test and fixtures, `scripts/e2e-one.mjs` and its test, `kit.config.json` (already `commands.test: test:ci`). Kept: `test:server`, the log-query fallback, the e2e session helper. Changed: `npm` → `pnpm` (plan 505), Done-when paths spelled out, `createQaEvent` told to follow the menu-event schema. Plans 518–523 updated to match: `npm run test:ci` exits 0 instead of the `TEST-CI:` line; 522 and 523 run card specs with `pnpm exec playwright test <spec>`. Every file in scope is project-owned (none in `.kit/install.json`).

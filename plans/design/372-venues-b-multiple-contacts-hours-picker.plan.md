@@ -15,9 +15,9 @@ The schema is strict (`z.strictObject`, enforced server-side by `server/middlewa
 
 ## Goals & Success Criteria
 
-- Primary: the form manages a list of contacts (add / remove / edit name, phone, role), and the detail page lists them all with tap-to-call.
-- Primary: each hours row is 7 day chips (א–ש) plus "from" / "to" time inputs. The display everywhere comes from `formatVenueHours` (plan 371, Venues A).
-- Success: a new venue saves with several contacts and structured hours with no validation errors. Old venues are not converted or kept working by this plan.
+**Primary:** the form manages a list of contacts (add / remove / edit name, phone, role), and the detail page lists them all with tap-to-call.
+**Primary:** each hours row is 7 day chips (א–ש) plus "from" / "to" time inputs. The display everywhere comes from `formatVenueHours` (plan 371, Venues A).
+**Success:** a new venue saves with several contacts and structured hours with no validation errors. Old venues are not converted or kept working by this plan.
 
 ## Execution Mode
 

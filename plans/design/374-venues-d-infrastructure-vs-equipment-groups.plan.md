@@ -12,9 +12,9 @@ Equipment already distinguishes them: `category === 'infrastructure'` (`Equipmen
 
 ## Goals & Success Criteria
 
-- Primary: the venue form shows two groups: "תשתיות המקום" (rows whose dropdown lists only `category === 'infrastructure'`) and "ציוד נוסף" (rows whose dropdown lists all other categories), each with its own "add row" button.
-- Primary: the equipment form explains the infrastructure category when it's selected.
-- Success: no data-shape change. `availableInfrastructure` stays one array, and existing venues load with rows placed in the right group by their equipment's category.
+**Primary:** the venue form shows two groups: "תשתיות המקום" (rows whose dropdown lists only `category === 'infrastructure'`) and "ציוד נוסף" (rows whose dropdown lists all other categories), each with its own "add row" button.
+**Primary:** the equipment form explains the infrastructure category when it's selected.
+**Success:** no data-shape change. `availableInfrastructure` stays one array, and existing venues load with rows placed in the right group by their equipment's category.
 
 ## Execution Mode
 

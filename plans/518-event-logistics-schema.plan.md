@@ -14,14 +14,13 @@ server-owned field so the menu screen's full-document save never drops it. Plans
 seed, the client services and the screens on top of these shapes.
 
 ## Goals & Success Criteria
-- Primary: `taxonomyTermSchema` accepts `kind: 'logisticsItem'`; `menuEventSchema` accepts `siteLogistics`; the generic
-  data API strips `siteLogistics` from client bodies; the client `MenuEvent` type mirrors it.
-- Success:
-  - `[auto]` `npm run build:schemas` exits 0; `npm run build` exits 0; `npm run lint` exits 0.
-  - `[auto]` `npm run test:server` exits 0, including the new cases in `server/test/taxonomy-term-schema.test.js` and `server/test/event-stage-schema.test.js` (A5).
-  - `[auto]` `npm run test:ci` → `TEST-CI: … 0 failed, exit 0` (the client conformance type still compiles and existing specs pass).
-  - `[auto]` `node scripts/scope-check.mjs --arch --plan=<this file>` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=<this file>` exits 0.
-  - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+**Primary:** `taxonomyTermSchema` accepts `kind: 'logisticsItem'`; `menuEventSchema` accepts `siteLogistics`; the generic
+data API strips `siteLogistics` from client bodies; the client `MenuEvent` type mirrors it.
+- [auto] `npm run build:schemas` exits 0; `npm run build` exits 0; `npm run lint` exits 0.
+- [auto] `npm run test:server` exits 0, including the new cases in `server/test/taxonomy-term-schema.test.js` and `server/test/event-stage-schema.test.js` (A5).
+- [auto] `npm run test:ci` exits 0 (the client conformance type still compiles and existing specs pass).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/518-event-logistics-schema.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/518-event-logistics-schema.plan.md` exits 0.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 
 ## Execution Mode
 - Parallel: no — it changes `shared/schemas`, which every later plan of the run reads.
@@ -179,3 +178,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner review (2026-11-05): `LOGISTICS_TEXT_MAX` was 519 (plan-number typo) → 500, matching the A5 test (501 chars invalid). Snapshot is 213 commits old; plan 512 added `clientId` (`menu-event.schema.ts:138`) — line drift only, no conflict. Runs after 517 (its checks need `test:server`, the `TEST-CI:` line and the log-query SKIP fallback).
+- Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.

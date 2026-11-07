@@ -1,6 +1,6 @@
 # Plan 386 — One write-ownership rule (canWrite) + "remove for me" / "rename for me" on shared terms
 
-Status: draft
+Status: closed
 Track: code — here (not design)
 Snapshot: adb954d97afb90d0874b524731ac7e63297d57d4
 
@@ -140,3 +140,6 @@ touching any milestone.
 
 ## Critical Questions
 - Q1 (resolved 2026-10-05 → **b**): a regular user can rename a shared term for himself only — display name stored on the override doc; key unchanged.
+
+## Closed (2026-11-07) — superseded by ADR 0023 (business is the tenant); Human decision
+- Its idea (a user hides or renames a shared default for themselves only) is not carried forward. ADR 0023 rejected per-user and per-business private overrides of shared data.

@@ -11,13 +11,12 @@ by phase and environment, and a pure function that turns the ticked answers into
 his quote. Keeping them out of the component makes the panel plan a UI plan only (build tier, no invariant).
 
 ## Goals & Success Criteria
-- Primary: `EventPipelineService.saveLogistics`, `LogisticsItemRegistryService` and `logistics-summary.util.ts` exist, typed against plan 518, with specs.
-- Success:
-  - `[auto]` `npm run build` exits 0; `npm run lint` exits 0.
-  - `[auto]` `npm run test:ci` → `TEST-CI: … 0 failed, exit 0`, including the new specs (A1–A3).
-  - `[auto]` `node scripts/scope-check.mjs --arch --plan=<this file>` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=<this file>` exits 0.
-  - `[auto]` `node scripts/breadcrumbs-check.mjs` exits 0.
-  - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+**Primary:** `EventPipelineService.saveLogistics`, `LogisticsItemRegistryService` and `logistics-summary.util.ts` exist, typed against plan 518, with specs.
+- [auto] `npm run build` exits 0; `npm run lint` exits 0.
+- [auto] `npm run test:ci` exits 0, including the new specs (A1–A3).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/521-event-logistics-client-services.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/521-event-logistics-client-services.plan.md` exits 0.
+- [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 
 ## Execution Mode
 - Parallel: yes — same wave as 519 and 520; no shared files.
@@ -117,3 +116,4 @@ line or file this plan names was removed, renamed or rewritten).
 - none open.
 
 ## Execution Notes
+- Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.

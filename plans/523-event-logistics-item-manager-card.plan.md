@@ -11,18 +11,17 @@ them, while the shared ones stay visible and locked. This is the learning loop's
 business; the later admin plan reads them across businesses and promotes the good ones.
 
 ## Goals & Success Criteria
-- Primary: a "שאלות לוגיסטיקה" card on the Metadata Manager lists shared and own `logisticsItem` terms by phase and
-  section, adds an own item with its four attributes, removes an own item, and marks shared items as locked (a platform
-  admin may add a shared one).
-- Success:
-  - `[auto]` `npm run build` exits 0; `npm run lint` exits 0; `npm run lint:icons` exits 0; `npm run lint:no-native-select` exits 0.
-  - `[auto]` `npm run test:ci` → `TEST-CI: … 0 failed, exit 0`, including `logistics-item-manager.component.spec.ts` (C5).
-  - `[auto]` `node scripts/scope-check.mjs --arch --plan=<this file>` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=<this file>` exits 0; `node scripts/reuse-lint.mjs --diff=origin/main` prints no `REUSE: warn` line for `logistics-item-manager`.
-  - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
-  - `[ui]` On `/metadata-manager` the card "שאלות לוגיסטיקה" shows the shared question "יש מטבח במקום?" with a lock icon (e2e/ui/523-1.spec.ts).
-  - `[ui]` Adding the question "בדיקה E2E" with phase "פגישת ספקים", section "תשתיות", type "כן/לא" shows it in the list under "תשתיות" with a remove control (e2e/ui/523-2.spec.ts).
-  - `[ui]` Removing "בדיקה E2E" and confirming makes it disappear from the list (e2e/ui/523-3.spec.ts).
-  - `[human]` The card reads well on a phone: the add form stacks, the environment chips wrap, and the shared/own split is obvious at a glance.
+**Primary:** a "שאלות לוגיסטיקה" card on the Metadata Manager lists shared and own `logisticsItem` terms by phase and
+section, adds an own item with its four attributes, removes an own item, and marks shared items as locked (a platform
+admin may add a shared one).
+- [auto] `npm run build` exits 0; `npm run lint` exits 0; `npm run lint:icons` exits 0; `npm run lint:no-native-select` exits 0.
+- [auto] `npm run test:ci` exits 0, including `logistics-item-manager.component.spec.ts` (C5).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/523-event-logistics-item-manager-card.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/523-event-logistics-item-manager-card.plan.md` exits 0; `node scripts/reuse-lint.mjs --diff=origin/main` prints no `REUSE: warn` line for `logistics-item-manager`.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+- [ui] On `/metadata-manager` the card "שאלות לוגיסטיקה" shows the shared question "יש מטבח במקום?" with a lock icon (e2e/ui/523-1.spec.ts).
+- [ui] Adding the question "בדיקה E2E" with phase "פגישת ספקים", section "תשתיות", type "כן/לא" shows it in the list under "תשתיות" with a remove control (e2e/ui/523-2.spec.ts).
+- [ui] Removing "בדיקה E2E" and confirming makes it disappear from the list (e2e/ui/523-3.spec.ts).
+- [human] The card reads well on a phone: the add form stacks, the environment chips wrap, and the shared/own split is obvious at a glance.
 
 ## Execution Mode
 - Parallel: yes — wave 4 with 522; both append to `dictionary.json` (lock group); no other shared file.
@@ -111,7 +110,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] C5: Unit-test the card with a stubbed store — `TaxonomyStore.terms('logisticsItem')` returns 1 shared + 1 own item; `isShared`, `isAdmin_` (false), `add` / `remove` spies: the shared row has the lock and no remove control; the own row has the remove control; submitting "חדש" with section `access` calls `add` with `{ phase: 'intake', section: 'access', answerType: 'status' }` and no `environments`; submitting with two environment chips checked passes `environments: ['outdoor_field', 'client_home']`; submitting the shared item's key again sets `error_` and does not call `add`; remove → confirm spy resolves true → `remove` called; `remove` rejecting with the server's in-use error → toast `metadata_logistics_in_use` — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts
 - [ ] C6: Add the Hebrew strings and the icons — the keys above, `Lock` and `ListChecks` — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] C7: Record the new piece in the maps — docs/brain/component-families.md (chip family Users), src/app/pages/breadcrumbs.md
-- [ ] C8: Write one e2e spec per UI card with the plan-517 helpers — `signInQa`, `page.goto('/metadata-manager')`, the card's action, the assertion, screenshot `screens/523-<n>.png`; 523-3 removes what 523-2 added and both clean up in `finally` by deleting any own `logisticsItem` named "בדיקה E2E" through `DELETE /api/v1/data/taxonomyTerms/:id`; run each with `node scripts/e2e-one.mjs e2e/ui/523-<n>.spec.ts` — e2e/ui/523-1.spec.ts … e2e/ui/523-3.spec.ts
+- [ ] C8: Write one e2e spec per UI card with the plan-517 helpers — `signInQa`, `page.goto('/metadata-manager')`, the card's action, the assertion, screenshot `screens/523-<n>.png`; 523-3 removes what 523-2 added and both clean up in `finally` by deleting any own `logisticsItem` named "בדיקה E2E" through `DELETE /api/v1/data/taxonomyTerms/:id`; run each with `pnpm exec playwright test e2e/ui/523-<n>.spec.ts` — e2e/ui/523-1.spec.ts … e2e/ui/523-3.spec.ts
 - [ ] C9: Run build, lint, lint:icons, lint:no-native-select, test:ci, reuse-lint and paste the outputs under Execution Notes
 
 ## What happens when
@@ -139,3 +138,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner review (2026-11-05): added `metadata-manager.page.component.spec.ts` to scope — it hard-codes 13 jump tabs (lines ~381-412) and the new rail entry breaks it. Added 519 to Depends-on for ordering. Runs after 522 (both append to `dictionary.json`).
+- Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.

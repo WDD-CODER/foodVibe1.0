@@ -1,6 +1,6 @@
 # Plan 387 — Architecture guard: invariants registry, Architecture Impact gate, invariant tests
 
-Status: active
+Status: done
 Snapshot: 81c76d6da3cc4b52b14773f237c214ff2a01becf
 
 ## Problem Statement
@@ -144,7 +144,7 @@ touching any milestone.
 - [x] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
 - [x] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
 - [x] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
-- [ ] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4). Split (Human 2026-10-06, "go with one"): INV-1 own / other-user / regular-user-on-master across 5 collections, INV-1 admin-on-master term, and INV-4 pass now; INV-1 admin-on-master for products/recipes/dishes/menuEvents and both INV-2 cases are `it.todo` until plan 386 merges.
+- [x] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4). Split (Human 2026-10-06, "go with one"): INV-1 own / other-user / regular-user-on-master across 5 collections, INV-1 admin-on-master term, and INV-4 pass now; INV-1 admin-on-master for products/recipes/dishes/menuEvents and both INV-2 cases are `it.todo` until plan 386 merges.
 - [x] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
 - [x] A9: Classify the new files in the workflow-kit manifest.
 - [x] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
@@ -179,3 +179,6 @@ touching any milestone.
 ## Critical Questions
 - Q1: Gate strength (Human 2026-10-05): **plan check blocks, diff check warns**, and only the Human's explicit `approve arch change INV-n` lets a change/deviation through. Resolved.
 - Q2: INV seed list: confirmed by the Human 2026-10-05. Resolved.
+
+## Closed (2026-11-07)
+- Verified at 5895243 against its Done-when: `scope-check --arch` on this plan → `ARCH: ok INV-1, INV-2, INV-3`; `arch-missing.plan.md` fixture → `ARCH: missing INV-1` exit 1; `arch-unapproved.plan.md` → `ARCH: unapproved INV-2` exit 1; plan 385 → `ARCH: skipped (grandfathered)`; server suite exit 0 with `INV-1 Ownership`, `INV-2 Tenancy`, `INV-4` describes and no `it.todo` left (A7: the INV-2 cases landed with plan 424 instead of 386, which is closed as superseded). ADR 0017, `docs/brain/invariants.md` and the AGENTS.md rule are on main.

@@ -14,8 +14,8 @@ and the event supplier orders (`src/app/pages/menu-intelligence/components/suppl
 `src/app/core/utils/supplier-orders.util.ts:60-92`) never say that an item is cheaper at another supplier.
 
 ## Goals & Success Criteria
-- Primary: from the recipe builder the owner picks which supplier a product comes from (default: cheapest), and the
-  event supplier orders show when another supplier sells it for less.
+**Primary:** from the recipe builder the owner picks which supplier a product comes from (default: cheapest), and the
+event supplier orders show when another supplier sells it for less.
 - [ ] [human] Recipe builder, onion line (David 4 ₪, Grocery 5 ₪): a truck icon shows; clicking it lists «דוד» 4 ₪
       marked «הזול ביותר» (checked, automatic) and «מכולת» 5 ₪.
 - [ ] [human] Picking «מכולת» changes that line's cost to the 5 ₪ price at once; reopening the recipe keeps it; a

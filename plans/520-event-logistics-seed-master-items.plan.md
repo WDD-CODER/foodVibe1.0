@@ -11,13 +11,12 @@ server boot, idempotently, the way the default stations are seeded (`ensureDefau
 reads master ∪ its own terms, so the list appears for all of them with no copy and no migration.
 
 ## Goals & Success Criteria
-- Primary: after a boot on a database with no master `logisticsItem`, 45 valid master terms exist; a second boot inserts 0.
-- Success:
-  - `[auto]` `npm run lint` exits 0 (no client change; lint is the project check).
-  - `[auto]` `npm run test:server` exits 0, including the new `ensureDefaultLogisticsItems` block in `server/test/seed-master-taxonomy.test.js` (A2).
-  - `[auto]` `node scripts/scope-check.mjs --arch --plan=<this file>` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=<this file>` exits 0.
-  - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
-  - `[human]` After the merged run branch boots the local server once, `db.taxonomyTerms.countDocuments({ kind: 'logisticsItem', businessId: '__master__' })` = 45.
+**Primary:** after a boot on a database with no master `logisticsItem`, 45 valid master terms exist; a second boot inserts 0.
+- [auto] `npm run lint` exits 0 (no client change; lint is the project check).
+- [auto] `npm run test:server` exits 0, including the new `ensureDefaultLogisticsItems` block in `server/test/seed-master-taxonomy.test.js` (A2).
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/520-event-logistics-seed-master-items.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/520-event-logistics-seed-master-items.plan.md` exits 0.
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+- [human] After the merged run branch boots the local server once, `db.taxonomyTerms.countDocuments({ kind: 'logisticsItem', businessId: '__master__' })` = 45.
 
 ## Execution Mode
 - Parallel: yes — same wave as 519 and 521; no shared files.
@@ -156,3 +155,4 @@ line or file this plan names was removed, renamed or rewritten).
 - none open (the list was approved in discussion on 2026-10-27; a wording change is a one-line edit in A1 later).
 
 ## Execution Notes
+- Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.

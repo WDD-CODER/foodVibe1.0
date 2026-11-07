@@ -1,6 +1,6 @@
 # Plan 385 — Unblock writes: per-user write rate limit, drop redundant client rename cascades
 
-Status: active
+Status: done
 Snapshot: adb954d97afb90d0874b524731ac7e63297d57d4
 
 ## Problem Statement
@@ -112,3 +112,6 @@ touching any milestone.
 
 ## Critical Questions
 - none open (Human confirmed the 429 evidence on 2026-10-05)
+
+## Closed (2026-11-07)
+- Status set to done on the Human's instruction (open-items brief 2026-11-07, "done if verified"). Merged in PR #258; the limiter lives in `server/middleware/write-limit.js` (`writeLimitKey`, `user:<id>` else `ipKeyGenerator`). Verified at 5895243: server suite exit 0 (67 files, 819 tests, incl. `data-write-limit.test.js`); `git grep -n "cascadeRename.*ForAll" -- src/app` → no output. The three `[human]` items were not re-run by the Planner.
