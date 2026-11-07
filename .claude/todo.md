@@ -8,12 +8,12 @@
 
 ## Execution order (Planner review 2026-11-07, `node scripts/plan-order.mjs` at 9c3578bb)
 
-- Wave 1: **517** gate runners (re-scoped) · **510** preferred supplier · **374** venues infra · **528** AI limiter key + drop GitHub MCP · **530** Atlas URI → `server/.env.live` (server) · **533** date field owns its styles · **535** dev catalog page
-- Wave 2: **518** logistics schema · **372** venues contacts + hours · **529** read-only local Mongo MCP · **531** DB scripts `--target` · **534** design-port family column
-- Wave 3: **519 ∥ 520 ∥ 521** logistics server / seed / client services
+- Wave 1: **517** gate runners (re-scoped) · **510** preferred supplier · **374** venues infra · **533** date field owns its styles · **535** dev catalog page
+- Wave 2: **518** logistics schema · **372** venues contacts + hours · **528** AI limiter key + drop GitHub MCP · **530** Atlas URI → `server/.env.live` (server) · **534** design-port family column
+- Wave 3: **519 ∥ 520 ∥ 521** logistics server / seed / client services · **529** read-only local Mongo MCP · **531** DB scripts `--target`
 - Wave 4: **522** logistics panel (collapsed card, Q1 = b) → **523** item manager card
 - Wave 5: **532** platform admin sees businesses' logistics items + promote
-- Lanes: 517→518→519→522 · 520→523→532 · 374→372 · 528→529 · 530→531 (531 also after 517) · 533→534 · 510, 521, 535 alone
+- Lanes: 517→518→519→522 · 520→523→532 · 374→372 · 528→529 · 530→531 (528, 530, 531 also after 517: they need `test:server`) · 533→534 · 510, 521, 535 alone
 - Hotspot / shared-file locks: `docs/workflow-kit/manifest.*` (528, 529, 530, 531, 534), `docs/brain/component-families.md` (522, 523, 533, 534, 535), `docs/brain/index.md` (529, 534), `scripts/log-query.mjs` (517 → 531), `.mcp.json` (528 → 529), `public/assets/data/dictionary.json` (522, 523, 532)
 - After 530 merges: the Human moves `MONGO_URI` out of `server/.env` (PowerShell lines in plan 530)
 - Kept: client creation owner-only (Human 2026-11-07), revisit after the pilot
