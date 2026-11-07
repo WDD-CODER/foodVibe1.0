@@ -1,7 +1,7 @@
 # Plan 530 — The live Atlas URI moves to `server/.env.live`, loaded only through one shared helper (1 of 2: the server)
 
 Status: draft
-Depends-on: none
+Depends-on: 517
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 
 ## Problem Statement
@@ -175,3 +175,4 @@ Test-Path "C:\coding projects\Cursor\foodvibe1.0\server\.env.live"
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 3(a), decisions H5 + H6). Consumers re-grepped at 5895243: `server/db.js`, `server/migrations/tools/_connect.js`, `server/scripts/{bump-master-version,db-backup,db-restore,reset-user-from-master,check-name-lengths,check-unit-weights,time-business-stats}.js`, `scripts/log-query.mjs`; the last eight go to plan 531. `MONGO_ATLAS_DIRECT_URI` no longer exists. `take-plan.mjs` never copies `server/.env` (contrary to the brief); slots have whatever `server/.env` the Human put there, hence the per-slot Human step.
+- Planner 2026-11-07: Depends-on 517 added after the dry run (`run-plans --dry-run`) dropped `pnpm run test:server` from this gate — the script only exists once 517 merges.

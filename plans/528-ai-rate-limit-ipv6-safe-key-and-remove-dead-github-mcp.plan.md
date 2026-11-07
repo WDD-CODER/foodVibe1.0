@@ -1,7 +1,7 @@
 # Plan 528 — Give the AI rate limiter an IPv6-safe key and remove the dead GitHub MCP server
 
 Status: draft
-Depends-on: none
+Depends-on: 517
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 
 ## Problem Statement
@@ -131,3 +131,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 1, items A1 + A5). Verified at 5895243: the IP fallback is unreachable today (every `aiLimiter` route runs `verifyToken` first; the only public AI route, `GET /usage` at ai.js:70, has no limiter). `.mcp.json` is kit `seed` (project-owned); `.claude/settings.json` is not in `.kit/install.json`.
+- Planner 2026-11-07: Depends-on 517 added after the dry run (`run-plans --dry-run`) dropped `pnpm run test:server` from this gate — the script only exists once 517 merges.
