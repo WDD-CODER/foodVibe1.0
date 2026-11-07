@@ -1,6 +1,6 @@
 # Plan 527 — Remove dead client code found by the 2026-11-06 audit
 
-Status: draft
+Status: active
 Depends-on: none
 Snapshot: f99816b3d37f6e0c555c79e7471f8761cbca0068
 
