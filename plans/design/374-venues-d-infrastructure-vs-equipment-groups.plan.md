@@ -111,4 +111,6 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 - [auto] `npm run build` → exit 0.
 - [human] Edit a venue: "תשתיות המקום" only offers infrastructure items in its dropdown, and "ציוד נוסף" only offers the rest. Existing rows sit in the right group. Save → reopen → unchanged.
 - [human] Equipment form → choose category תשתית → the hint appears.
+
+## Execution Notes
 - Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).
