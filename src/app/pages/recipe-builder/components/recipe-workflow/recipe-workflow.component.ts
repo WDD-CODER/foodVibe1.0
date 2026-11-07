@@ -73,7 +73,6 @@ export class RecipeWorkflowComponent {
   removeItem = output<number>()
   focusRowDone = output<void>()
 
-  shouldShowAddCategoryPicker_ = signal(false)
   /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
   protected readonly pendingAddName_ = signal('')
 
@@ -113,15 +112,6 @@ export class RecipeWorkflowComponent {
       }
       return next
     })
-  }
-
-  toggleAddCategoryPicker() {
-    this.shouldShowAddCategoryPicker_.update((v) => !v)
-  }
-
-  onAddWithCategory(category: string) {
-    this.shouldShowAddCategoryPicker_.set(false)
-    this.addItem.emit(category)
   }
 
   readonly instructionFields = viewChildren<ElementRef<HTMLTextAreaElement>>('instructionField')
@@ -281,14 +271,6 @@ export class RecipeWorkflowComponent {
     setTimeout(() => this.laborTimeInputs()[0]?.nativeElement?.focus(), 0)
   }
 
-  onLaborTimeKeydown(event: Event, group: FormGroup): void {
-    const e = event as KeyboardEvent
-    const val = (group.get('labor_time')?.value ?? 0) as number
-    if (e.key === 'ArrowDown' && val <= 0) {
-      e.preventDefault()
-    }
-  }
-
   exitLaborTimeEdit(group: FormGroup): void {
     const minutes = this.parseClockToMinutes(this.laborTimeEditStr_())
     group.get('labor_time')?.setValue(minutes)
@@ -310,14 +292,6 @@ export class RecipeWorkflowComponent {
     this.cookTimeEditStr_.set(this.formatSecsToHms(currentSecs))
     this.editingCookTimeIndex_.set(index)
     setTimeout(() => this.cookTimeInputs()[0]?.nativeElement?.focus(), 0)
-  }
-
-  onCookTimeKeydown(event: Event, group: FormGroup): void {
-    const e = event as KeyboardEvent
-    const val = (group.get('cooking_time')?.value ?? 0) as number
-    if (e.key === 'ArrowDown' && val <= 0) {
-      e.preventDefault()
-    }
   }
 
   exitCookTimeEdit(group: FormGroup): void {

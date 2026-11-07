@@ -38,12 +38,6 @@ export class ListSelectionState {
     return ids.every((id) => set.has(id))
   }
 
-  /** True if at least one id in the given list is selected. */
-  someSelected(ids: string[]): boolean {
-    const set = this.selectedIds()
-    return ids.some((id) => set.has(id))
-  }
-
   /**
    * Toggle select-all: if all visible ids are selected, clear; otherwise select all visible.
    * Call from header checkbox click.

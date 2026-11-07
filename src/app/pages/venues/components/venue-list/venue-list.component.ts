@@ -171,10 +171,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
     return formatVenueHours(item.operatingHours)
   }
 
-  protected envTypeLabel(env: EnvironmentType): string {
-    return env
-  }
-
   protected onAddPlace(): void {
     if (!this.requireAuthService.requireAuth()) return
     if (this.embeddedInDashboard) {

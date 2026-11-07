@@ -22,19 +22,10 @@ export class CookViewStateService {
 
     // Prepend to recent IDs, deduplicate, cap at MAX_RECENT
     const current = this.recentIds_()
-    const updated = [id, ...current.filter(r => r !== id)].slice(0, MAX_RECENT)
+    const updated = [id, ...current.filter((r) => r !== id)].slice(0, MAX_RECENT)
     this.recentIds_.set(updated)
     try {
       localStorage.setItem(RECENT_IDS_KEY, JSON.stringify(updated))
-    } catch {
-      // ignore
-    }
-  }
-
-  clearLastViewed(): void {
-    this.lastRecipeId_.set(null)
-    try {
-      sessionStorage.removeItem(STORAGE_KEY)
     } catch {
       // ignore
     }

@@ -94,10 +94,6 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     return this.venueForm_?.get('operatingHours') as FormArray
   }
 
-  protected get allEquipment_() {
-    return this.equipmentData.allEquipment_()
-  }
-
   protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
   protected equipmentOptions_ = computed(() =>
     this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
@@ -338,9 +334,5 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     } else {
       this.router.navigate(['/venues/list'])
     }
-  }
-
-  protected equipmentName(id: string): string {
-    return this.allEquipment_.find((e) => e._id === id)?.nameHebrew ?? id
   }
 }

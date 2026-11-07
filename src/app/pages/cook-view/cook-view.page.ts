@@ -170,8 +170,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected activeStepIndex_ = signal<number>(0)
   /** Set of step indices that have been marked done. */
   protected stepDoneSet_ = signal<Set<number>>(new Set())
-  /** Index of the step currently "peeked" (expanded preview without being active). */
-  protected peekedStepIndex_ = signal<number | null>(null)
   /** Step card that just became active and plays the one-off "grow" animation (null = none). */
   protected growStepIndex_ = signal<number | null>(null)
   private growTimeoutId_: ReturnType<typeof setTimeout> | null = null
@@ -366,7 +364,6 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.activeStepIndex_.set(0)
       this.stepDoneSet_.set(new Set())
       this.checkedIngredients_.set(new Set())
-      this.peekedStepIndex_.set(null)
       this.cookTimer.cancelAll()
       this.selectedUnit_.set(recipe.yieldUnit || 'unit')
       this.cookViewState.setLastViewedRecipeId(recipe._id)
@@ -811,26 +808,6 @@ export class CookViewPage implements OnInit, OnDestroy {
     })
   }
 
-  protected replaceIngredient(
-    index: number,
-    item: { _id: string; item_type_?: string; nameHebrew?: string; baseUnit?: string; yieldUnit?: string }
-  ): void {
-    const recipe = this.recipe_()
-    if (!recipe?.ingredients?.[index]) return
-    const type = item.item_type_ === 'recipe' ? ('recipe' as const) : ('product' as const)
-    const unit = item.baseUnit ?? (item as { yieldUnit?: string }).yieldUnit ?? 'unit'
-    const current = recipe.ingredients[index]
-    this.recipe_.update((r) => {
-      if (!r) return r
-      return {
-        ...r,
-        ingredients: r.ingredients.map((ing, i) =>
-          i === index ? { ...current, referenceId: item._id, type, unit: unit } : ing
-        )
-      }
-    })
-  }
-
   protected removeIngredient(index: number): void {
     const removed = this.recipe_()?.ingredients[index]
     if (removed) {
@@ -1004,12 +981,6 @@ export class CookViewPage implements OnInit, OnDestroy {
     const parts = text.split(':').map((p) => Number(p))
     if (parts.some((n) => !Number.isFinite(n) || n < 0)) return 0
     return parts.reduce((total, n) => total * 60 + n, 0)
-  }
-
-  /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */
-  protected toggleStepPeek(index: number): void {
-    if (index === this.activeStepIndex_()) return
-    this.peekedStepIndex_.set(this.peekedStepIndex_() === index ? null : index)
   }
 
   protected setUnitOverride(rowIndex: number, unit: string): void {

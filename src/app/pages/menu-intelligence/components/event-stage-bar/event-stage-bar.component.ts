@@ -109,7 +109,6 @@ export class EventStageBarComponent {
   protected readonly current_ = computed<EventStage>(() => this.event_()?.stage ?? 'inquiry')
   protected readonly currentIndex_ = computed(() => this.flowStages.indexOf(this.current_()))
   protected readonly canChangeStage_ = computed(() => this.can('changeStage'))
-  protected readonly canEdit_ = computed(() => this.can('edit'))
   protected readonly canEditMoney_ = computed(() => this.can('editMoney'))
   /** Why the owner's click on «הסתיים» is refused (a dictionary key), or null. One rule for the click and the pill. */
   protected readonly finishRefusal_ = computed<string | null>(() => {

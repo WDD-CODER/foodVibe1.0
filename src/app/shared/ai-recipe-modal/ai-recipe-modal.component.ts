@@ -329,31 +329,11 @@ export class AiRecipeModalComponent implements OnInit {
     this.modalService.close()
   }
 
-  onClearDraft(): void {
-    const draft = this.draft_()
-    if (draft) {
-      this.saveShot_(draft, 'rejected')
-    }
-    this.draft_.set(null)
-    this.shotWarnings_.set([])
-    this.isAwaitingWarningConfirm_.set(false)
-    this.status_.set('idle')
-    this.prompt_.set('')
-    this.imageFile_.set(null)
-    this.imagePreviewUrl_.set(null)
-    this.urlInput_.set('')
-  }
-
   onClearInput(): void {
     this.prompt_.set('')
     this.imageFile_.set(null)
     this.imagePreviewUrl_.set(null)
     this.urlInput_.set('')
-  }
-
-  /** Translate a unit key (e.g. 'gram' → 'גרם') for display. */
-  translateUnit(unit: string): string {
-    return this.translation.translate(unit)
   }
 
   // ─── Edit mode ───────────────────────────────────────────────────

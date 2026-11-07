@@ -89,7 +89,6 @@ export class ProductImportComponent {
   private readonly unitRegistry_ = inject(UnitRegistryService)
 
   // 4. SIGNALS & CONSTANTS
-  protected readonly maxRows = 200
   protected readonly text_ = signal('')
   protected readonly supplierId_ = signal('')
   protected readonly rows_ = signal<PreviewRow[]>([])

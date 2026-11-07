@@ -66,16 +66,6 @@ export class MetadataRegistryService {
     await this.taxonomy.reloadSafely(METADATA_LOAD_LOG)
   }
 
-  /** Reload labels from storage (e.g. after demo data load). */
-  reloadLabelsFromStorage(): Promise<void> {
-    return this.reloadFromStorage()
-  }
-
-  /** Reload courses from storage (e.g. after demo data load). */
-  reloadCoursesFromStorage(): Promise<void> {
-    return this.reloadFromStorage()
-  }
-
   // ── Menu types ──────────────────────────────────────────────────────────
 
   getMenuTypeFields(key: string): DishFieldKey[] {

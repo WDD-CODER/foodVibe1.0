@@ -29,14 +29,6 @@ export const NullableStringParam: ParamSerializer<string | null> = {
   fromSession: (r) => (typeof r === 'string' ? r : null)
 }
 
-/** 'created' | 'updated'; URL only when 'updated'. */
-export const DateFieldParam: ParamSerializer<'created' | 'updated'> = {
-  toUrl: (v) => (v === 'updated' ? 'updated' : null),
-  fromUrl: (r) => (r === 'updated' ? 'updated' : 'created'),
-  toSession: (v) => v,
-  fromSession: (r) => (r === 'updated' ? 'updated' : 'created')
-}
-
 export const BooleanParam: ParamSerializer<boolean> = {
   toUrl: (v) => (v ? '1' : null),
   fromUrl: (r) => r === '1',
