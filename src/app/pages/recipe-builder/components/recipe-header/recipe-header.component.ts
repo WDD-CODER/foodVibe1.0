@@ -277,11 +277,6 @@ export class RecipeHeaderComponent {
     return this.form().get('labels') as FormControl<string[]>
   }
 
-  protected hasManualLabels_ = computed(() => {
-    const arr = (this.form().get('labels')?.value ?? []) as string[]
-    return arr.length > 0
-  })
-
   protected hasAnyLabelsInContainer_ = computed(() => {
     const manual = (this.form().get('labels')?.value ?? []) as string[]
     const auto = this.autoLabels()
@@ -374,15 +369,6 @@ export class RecipeHeaderComponent {
     }
     if (this.yield.toggleType()) this.yieldManuallyChanged.emit()
     this.cdr.markForCheck()
-  }
-
-  protected onPrimaryUnitChangeWrapper(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value
-    const result = this.yield.onPrimaryUnitChange(value)
-    if (result === 'create_unit') {
-      this.onCreateUnit()
-      ;(event.target as HTMLSelectElement).value = this.yield.primaryUnitLabel_()
-    }
   }
 
   protected changeSecondaryUnitWrapper(chipIndex: number, newUnit: string): void {

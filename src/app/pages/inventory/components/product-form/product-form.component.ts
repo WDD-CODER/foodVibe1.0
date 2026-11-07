@@ -167,7 +167,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     ...this.availableUnits_().map((u) => ({ value: u, label: u })),
     { value: 'NEW_UNIT', label: 'add_new_unit' }
   ])
-  protected allergenOptions_ = computed(() => this.metadataRegistry.allAllergens_())
   protected isEditMode_ = signal<boolean>(false)
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
@@ -650,34 +649,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   get readProductForm_(): FormGroup {
     return this.productForm_
-  }
-
-  /** For pendingChangesGuard: values on this item (categories, allergens) that are not in the dictionary so we ask for English key in a modal before leaving. */
-  getValuesNeedingTranslation(): string[] {
-    if (!this.productForm_) return []
-    const raw = this.productForm_.getRawValue()
-    const categories = (raw?.categories ?? []) as string[]
-    const allergens = (raw?.allergens ?? []) as string[]
-    const combined = [...categories, ...allergens]
-      .map((v) => (v != null ? String(v).trim() : ''))
-      .filter((v) => v !== '')
-    const unique = [...new Set(combined)]
-    return unique.filter((v) => !this.translationService.hasKey(v))
-  }
-
-  /** For pendingChangesGuard: remove untranslated values from categories and allergens when user chooses "continue without saving". */
-  removeValuesNeedingTranslation(): void {
-    if (!this.productForm_) return
-    const toRemove = this.getValuesNeedingTranslation()
-    if (toRemove.length === 0) return
-    const catCtrl = this.productForm_.get('categories')
-    const allCtrl = this.productForm_.get('allergens')
-    const currentCat = ((catCtrl?.value ?? []) as string[]).filter((v) => !toRemove.includes(String(v).trim()))
-    const currentAll = ((allCtrl?.value ?? []) as string[]).filter((v) => !toRemove.includes(String(v).trim()))
-    catCtrl?.setValue(currentCat)
-    allCtrl?.setValue(currentAll)
-    catCtrl?.markAsDirty()
-    allCtrl?.markAsDirty()
   }
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the item. */

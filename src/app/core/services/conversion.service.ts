@@ -27,13 +27,6 @@ export class ConversionService {
     return total > 0 ? (quantity / total) * 100 : 0
   }
 
-  /**
-   * Calculates scaling chain logic (e.g., 1 Case = 6 Buckets)
-   */
-  getChainConversion(amount: number, factor: number): number {
-    return amount * factor
-  }
-
   /** * Logic to sync Waste % and Yield Factor
    */
   handleWasteChange(wastePercent: number | string | null): { yieldFactor: number } {

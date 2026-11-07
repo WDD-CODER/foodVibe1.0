@@ -81,10 +81,6 @@ export abstract class BaseEntityDataService<T> {
     await this.ensureLoaded()
   }
 
-  protected setItems(items: T[]): void {
-    this.store_.set(items)
-  }
-
   protected updateItems(updater: (current: T[]) => T[]): void {
     this.store_.update(updater)
   }

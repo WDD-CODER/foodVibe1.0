@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core'
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { KitchenStateService } from '@services/kitchen-state.service'
-import { MenuSectionCategoriesService } from '@services/menu-section-categories.service'
 import type { AiMenuDraft, AiMenuPatch, MatchedDish, MatchedMenu, MatchedSection } from '@models/ai-menu-draft.model'
 import { matchRecipeName } from '../../../core/utils/recipe-match.util'
 
@@ -13,7 +12,6 @@ export interface MenuAiFormRefs {
 export class MenuAiFlowService {
   private readonly fb_ = inject(FormBuilder)
   private readonly kitchenState_ = inject(KitchenStateService)
-  private readonly menuSectionCategories_ = inject(MenuSectionCategoriesService)
 
   private refs_: MenuAiFormRefs | null = null
 

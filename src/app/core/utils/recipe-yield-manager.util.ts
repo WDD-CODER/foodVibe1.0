@@ -200,14 +200,6 @@ export class RecipeYieldManager {
     this.isManualOverride_.set(true)
   }
 
-  onAmountManualChange(rawValue: string): void {
-    const parsedValue = parseFloat(rawValue)
-    if (!isNaN(parsedValue)) {
-      this.applyPrimaryUpdate(parsedValue)
-      this.isManualOverride_.set(true)
-    }
-  }
-
   onScalingChipAmountChange(value: number): void {
     this.applyPrimaryUpdate(value)
     this.isManualOverride_.set(true)
@@ -226,18 +218,6 @@ export class RecipeYieldManager {
 
     this.manualTrigger_.update((v) => v + 1)
     this.form().updateValueAndValidity({ emitEvent: true })
-  }
-
-  onPrimaryAmountKeydown(e: KeyboardEvent): void {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-    e.preventDefault()
-    const current = this.primaryAmount_()
-    const type = this.form().get('recipe_type')?.value
-    const min = type === 'dish' ? 1 : 0
-    const next =
-      e.key === 'ArrowUp' ? quantityIncrement(current, min, undefined) : quantityDecrement(current, min, undefined)
-    this.applyPrimaryUpdate(next)
-    this.isManualOverride_.set(true)
   }
 
   // --- Secondary methods ---
@@ -266,15 +246,6 @@ export class RecipeYieldManager {
     const conversions = this.form().get('yield_conversions') as FormArray
     const last = conversions.at(conversions.length - 1) as FormGroup
     last.get('amount')?.setValue(1, { emitEvent: true })
-    this.manualTrigger_.update((v) => v + 1)
-  }
-
-  onSecondaryAmountInput(group: FormGroup, rawValue: string): void {
-    const parsed = parseFloat(rawValue)
-    const amountControl = group.get('amount')
-    if (amountControl) {
-      amountControl.patchValue(isNaN(parsed) ? 0 : Math.max(0, parsed), { emitEvent: true })
-    }
     this.manualTrigger_.update((v) => v + 1)
   }
 
@@ -314,12 +285,6 @@ export class RecipeYieldManager {
     if (exists) return
     group.get('unit')?.setValue(newUnit, { emitEvent: true })
     this.manualTrigger_.update((v) => v + 1)
-  }
-
-  onSecondaryAmountKeydown(e: KeyboardEvent, index: number): void {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-    e.preventDefault()
-    this.updateSecondaryAmount(index, e.key === 'ArrowUp' ? 1 : -1)
   }
 
   removeSecondaryUnit(index: number): void {

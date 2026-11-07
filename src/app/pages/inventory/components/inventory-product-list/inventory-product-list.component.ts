@@ -46,7 +46,7 @@ import {
 } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
-import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
+import { getPricePerUnit } from 'src/app/core/utils/product-price.util'
 import { optionRateInBase } from '@utils/purchase-option-rate.util'
 import {
   getProductValidationStatus,
@@ -117,8 +117,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly dishData_ = inject(DishDataService)
   private readonly aiProductModal_ = inject(AiProductModalService)
 
-  private lastPriceEdit_ = { productId: '', unit: '', value: 0 }
-
   protected activeFilters_ = signal<Record<string, string[]>>({})
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
@@ -142,7 +140,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected shouldShowUnpricedOnly_ = signal<boolean>(false)
   protected nutritionFilter_ = signal<'all' | 'has' | 'missing'>('all')
   protected deletingId_ = signal<string | null>(null)
-  protected savingPriceId_ = signal<string | null>(null)
   protected selection = new ListSelectionState()
   protected touchSelect = new TouchRowSelection({ selection: this.selection, historyKey: 'productSelection' })
 
@@ -476,12 +473,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     this.isAllergenAllExpanded_.set(false)
   }
 
-  protected sortIconFor_(field: SortField): 'arrow-up' | 'arrow-down' | 'arrow-up-down' {
-    const current = this.sortBy_()
-    if (current !== field) return 'arrow-up-down'
-    return this.sortOrder_() === 'asc' ? 'arrow-up' : 'arrow-down'
-  }
-
   // FILTERING
   protected toggleFilter(categoryName: string, optionValue: string): void {
     this.activeFilters_.update((prev) => {
@@ -775,32 +766,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     void this.kitchenStateService.saveProduct(updated).catch(() => {})
   }
 
-  protected onPriceFocus(product: Product, displayUnit: string): void {
-    this.lastPriceEdit_ = {
-      productId: product._id ?? '',
-      unit: displayUnit,
-      value: this.getPricePerUnit(product, displayUnit)
-    }
-  }
-
-  protected async onPriceBlur(
-    product: Product,
-    displayUnit: string,
-    event: Event,
-    inputEl: HTMLInputElement
-  ): Promise<void> {
-    const newValue = parseFloat((event.target as HTMLInputElement).value) || 0
-    const originalValue = this.lastPriceEdit_.value
-    if (Math.abs(newValue - originalValue) < 0.001) return
-
-    const confirmed = await this.confirmModal.open('save_price_confirm', { saveLabel: 'save_price' })
-    if (confirmed) {
-      this.onPriceChange(product, displayUnit, newValue)
-    } else {
-      inputEl.value = String(originalValue)
-    }
-  }
-
   protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
     const field = event.field as ProductBulkField
     const products = this.kitchenStateService.products_()
@@ -825,22 +790,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       }
       void this.kitchenStateService.saveProduct(updated).catch(() => {})
     }
-  }
-
-  protected onPriceChange(product: Product, displayUnit: string, value: string | number): void {
-    if (this.opensForm_(product)) return
-    const pricePerUnit = typeof value === 'string' ? parseFloat(value) || 0 : (value as number)
-    const buyPriceGlobal = calcBuyPriceGlobal(product, displayUnit, pricePerUnit, this.unitRegistry)
-    const newSources = (product.sources ?? []).map((s) => ({ ...s, price: buyPriceGlobal }))
-    const updated: Product = {
-      ...product,
-      sources: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }]
-    }
-    this.savingPriceId_.set(product._id ?? '')
-    void this.kitchenStateService
-      .saveProduct(updated)
-      .catch(() => {})
-      .finally(() => this.savingPriceId_.set(null))
   }
 
   protected onClearSearch(input: HTMLInputElement): void {

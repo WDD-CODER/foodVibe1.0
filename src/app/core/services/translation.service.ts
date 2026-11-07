@@ -115,28 +115,6 @@ export class TranslationService {
 
   //UPDATE
 
-  private updateInternalDictionaries(key: string, label: string): void {
-    const normalizedKey = key.trim().toLowerCase()
-
-    this.masterDict.update((prev) => ({
-      ...prev,
-      [normalizedKey]: label.trim()
-    }))
-
-    const rawCache = localStorage.getItem('DICTIONARY_CACHE')
-    const cache = rawCache ? JSON.parse(rawCache) : {}
-    cache[normalizedKey] = label.trim()
-    try {
-      localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(cache))
-    } catch (err) {
-      this.logging.warn({
-        event: 'translation.cache.write_failed',
-        message: 'Dictionary cache write failed (quota or access)',
-        context: { err }
-      })
-    }
-  }
-
   /** `scope` (plan 322 M4): 'me' (default) persists to this user's own personal override doc
    *  'everyone' persists to the shared global override doc (admin-only server-side — the caller
    *  is responsible for only offering 'everyone' to an admin, same as the registry-rename push).
@@ -252,13 +230,6 @@ export class TranslationService {
     const translation = this.masterDict()[normalizedKey]
 
     return translation || key
-  }
-
-  /** True when the value exists as a key in the dictionary (so it has a translation / is a known canonical key). */
-  hasKey(key: string): boolean {
-    if (!key || !String(key).trim()) return false
-    const normalizedKey = String(key).trim().toLowerCase()
-    return this.masterDict()[normalizedKey] !== undefined
   }
 
   // --- PRIVATE HELPERS ---

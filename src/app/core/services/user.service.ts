@@ -47,10 +47,6 @@ export class UserService {
 
   public isLoggedIn = () => this._user_() !== null
 
-  get currentUser(): User | null {
-    return this._user_()
-  }
-
   /** Rehydrates all data services after auth state changes (login or logout). Lazy-resolved to avoid circular DI. */
   private async _reloadDataServices(): Promise<void> {
     // Deferred import to break the circular DI chain:
@@ -385,15 +381,6 @@ export class UserService {
   _saveUserLocal(user: User | null): void {
     this._user_.set(user && { ...user })
     this._saveUserToSession(user)
-  }
-
-  _clearSessionStorage() {
-    sessionStorage.clear()
-    this._user_.set(null)
-  }
-
-  _getLoggedInUser(): User {
-    return this._user_()!
   }
 
   private _loadUserFromSession(): User | null {

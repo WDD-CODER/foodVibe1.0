@@ -101,17 +101,6 @@ export class ProductDataService extends BaseEntityDataService<Product> {
     }
   }
 
-  async getProductById(_id: string): Promise<Product> {
-    try {
-      const Product = await this.storage.get<Product>(ENTITY, _id)
-      return Product
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.product.get_error', message: 'Failed to get product', context: { err } })
-      throw err
-    }
-  }
-
   async addProduct(newProduct: Omit<Product, '_id'>): Promise<Product> {
     try {
       const now = Date.now()

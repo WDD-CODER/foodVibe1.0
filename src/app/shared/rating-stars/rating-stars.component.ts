@@ -31,7 +31,6 @@ export class RatingStarsComponent {
 
   // SIGNALS & CONSTANTS
   private hoveredIndex_ = signal<number>(-1)
-  protected hoveredIndex = this.hoveredIndex_.asReadonly()
 
   // COMPUTED SIGNALS
   protected stars_ = computed<StarState[]>(() => {

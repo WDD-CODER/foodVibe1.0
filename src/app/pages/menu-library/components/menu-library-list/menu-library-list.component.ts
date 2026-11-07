@@ -254,14 +254,6 @@ export class MenuLibraryListComponent {
     return String(event.guestCount || 0)
   }
 
-  protected getSectionCount(event: MenuEvent): number {
-    return event.sections?.length || 0
-  }
-
-  protected getDishCount(event: MenuEvent): number {
-    return (event.sections || []).reduce((sum, s) => sum + (s.items?.length || 0), 0)
-  }
-
   /** Translation key for current sort order (א–ת, ת–א, ישן לחדש, etc.). */
   protected getSortOrderLabel(): string {
     const order = this.sortOrder_()

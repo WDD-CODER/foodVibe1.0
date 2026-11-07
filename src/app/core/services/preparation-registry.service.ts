@@ -44,16 +44,6 @@ export class PreparationRegistryService {
       .map((t) => ({ name: t.key, category: t.categoryKey ?? '' }))
   )
 
-  getPreparationsByCategory_ = computed(() => {
-    const byCategory = new Map<string, PreparationEntry[]>()
-    for (const p of this.allPreparations_()) {
-      const list = byCategory.get(p.category) ?? []
-      list.push(p)
-      byCategory.set(p.category, list)
-    }
-    return byCategory
-  })
-
   hasLoaded(): boolean {
     return this.taxonomy.isLoaded_()
   }
