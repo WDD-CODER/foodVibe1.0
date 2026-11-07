@@ -1,6 +1,6 @@
 # Plan 525 — Remove the v1-era scripts and tools, unused dev dependencies and tracked clutter
 
-Status: active
+Status: done
 Depends-on: none
 Snapshot: f99816b3d37f6e0c555c79e7471f8761cbca0068
 
