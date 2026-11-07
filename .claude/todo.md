@@ -6,13 +6,18 @@
 
 ---
 
-## Execution order (Planner review 2026-11-05)
+## Execution order (Planner review 2026-11-07, `node scripts/plan-order.mjs` at 9c3578bb)
 
-1. **513** clients migration — finish from wt-3 staged work; phones may print (log lines avoid PII names; kit grep untouched)
-2. **517** orchestrator test runners — alone; prerequisite for 518–523
-3. **518** logistics schema → then **519 ∥ 520 ∥ 521** → then **522** → **523** (one run, 4 waves)
-4. **510** preferred supplier — independent; can run in a free slot alongside 2–3
-5. **374** venues infra/equipment → **372** venues contacts + hours
+- Wave 1: **517** gate runners (re-scoped) · **510** preferred supplier · **374** venues infra · **528** AI limiter key + drop GitHub MCP · **530** Atlas URI → `server/.env.live` (server) · **533** date field owns its styles · **535** dev catalog page
+- Wave 2: **518** logistics schema · **372** venues contacts + hours · **529** read-only local Mongo MCP · **531** DB scripts `--target` · **534** design-port family column
+- Wave 3: **519 ∥ 520 ∥ 521** logistics server / seed / client services
+- Wave 4: **522** logistics panel (collapsed card, Q1 = b) → **523** item manager card
+- Wave 5: **532** platform admin sees businesses' logistics items + promote
+- Lanes: 517→518→519→522 · 520→523→532 · 374→372 · 528→529 · 530→531 (531 also after 517) · 533→534 · 510, 521, 535 alone
+- Hotspot / shared-file locks: `docs/workflow-kit/manifest.*` (528, 529, 530, 531, 534), `docs/brain/component-families.md` (522, 523, 533, 534, 535), `docs/brain/index.md` (529, 534), `scripts/log-query.mjs` (517 → 531), `.mcp.json` (528 → 529), `public/assets/data/dictionary.json` (522, 523, 532)
+- After 530 merges: the Human moves `MONGO_URI` out of `server/.env` (PowerShell lines in plan 530)
+- Kept: client creation owner-only (Human 2026-11-07), revisit after the pilot
+- Closed: **386** (superseded by ADR 0023) · **385**, **387** done (verified 2026-11-07) · **513** done
 - Closed: **490** (Human validated 2026-11-05; fixes #507, #509)
 - Parked: **373** venue videos/location (after 372, low value) · **471** exports (needs a Human walk-through session)
 - Closed: **524** (done in PR #494, main on kit v2.0.0)

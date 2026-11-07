@@ -1,6 +1,7 @@
 # Plan 372 — Venues B: multiple contacts and an interactive days/hours picker
 
 Status: draft
+Depends-on: 374
 Track: split — look in Claude Design; schema, build:schemas, old-hours parsing here
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
@@ -21,7 +22,7 @@ The schema is strict (`z.strictObject`, enforced server-side by `server/middlewa
 
 ## Execution Mode
 
-- Parallel: no. Run after plan 371 (Venues A).
+- Parallel: no. Run after plan 371 (Venues A, closed) and plan 374 (Planner order 2026-11-05; same form).
 - Concurrent plans: none touching `src/app/pages/venues/**` or `shared/schemas/**`
 - Isolated DB: yes. Schema change; verify against stored venues before Atlas.
 
@@ -134,3 +135,4 @@ touching any milestone.
 
 ## Planner edit (2026-10-26)
 Legacy/compat work removed on the Human's rule that only recipes and products are kept (venues, menus, users, businesses are test data): `parseLegacy`, the "היה:" hint, legacy contact hydrate, the `contactName` / `contactPhone` mirror, the legacy server test and the old-venue checks.
+- Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).

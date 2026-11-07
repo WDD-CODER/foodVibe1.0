@@ -1,6 +1,7 @@
 # Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form
 
 Status: draft
+Depends-on: none
 Track: design — Claude Design
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
@@ -18,7 +19,7 @@ Equipment already distinguishes them: `category === 'infrastructure'` (`Equipmen
 
 ## Execution Mode
 
-- Parallel: no. Run after plan 373 (Venues C; same form).
+- Parallel: no. Runs before plan 372 (Planner order 2026-11-05; 373 is parked). Same form as 372 and 373.
 - Concurrent plans: none touching `src/app/pages/venues/**` or equipment-form
 - Isolated DB: no
 
@@ -110,3 +111,4 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 - [auto] `npm run build` → exit 0.
 - [human] Edit a venue: "תשתיות המקום" only offers infrastructure items in its dropdown, and "ציוד נוסף" only offers the rest. Existing rows sit in the right group. Save → reopen → unchanged.
 - [human] Equipment form → choose category תשתית → the hint appears.
+- Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).
