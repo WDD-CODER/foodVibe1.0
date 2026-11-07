@@ -1,0 +1,188 @@
+class	file	reached_from	some_callers	last_commit
+ISLAND	scripts/audit-labels.mjs		.claude/todo-archive/011.md;.claude/todo-archive/014.md;.gitignore	2026-10-20
+REACHABLE	scripts/backup-before-repair.mjs	package.json	.claude/techdebt-reports/techdebt-2026-09-16.md;.claude/todo-archive/009.md;.claude/todo-archive/010.md	2026-04-07
+REACHABLE	scripts/brain-capture-comment.mjs	.github/workflows/brain-capture-reminder.yml	.claude/workflows/orchestrate.js;.github/workflows/brain-capture-reminder.yml;.kit/install.json	2026-10-17
+REACHABLE	scripts/brain-review-check.mjs	.github/workflows/brain-capture-reminder.yml	.github/workflows/brain-capture-reminder.yml;.kit/install.json;docs/agent/ship-regular.md	2026-07-12
+REACHABLE	scripts/brain.mjs	.claude/commands/orchestrate.md	.claude/commands/orchestrate.md;.claude/commands/ship.md;.github/workflows/brain-capture-reminder.yml	2026-11-01
+REACHABLE	scripts/branch-autodelete-check.mjs	.claude/commands/ship.md	.claude/commands/ship.md;.kit/install.json;docs/agent/ship-recovery.md	2026-11-01
+REACHABLE	scripts/branch-guard.sh	.claude/commands/plan.md	.claude/commands/plan.md;.claude/reports/skills-v2-diff-2026-10-10.md;.claude/settings.json	2026-10-27
+REACHABLE	scripts/breadcrumbs-check.mjs	.claude/commands/docs-refresh.md	.claude/commands/docs-refresh.md;.claude/reports/skills-v2-diff-2026-10-10.md;.claude/reports/skills-v2-verification-2026-10-10.md	2026-10-10
+REACHABLE	scripts/check-lucide-icons.mjs	package.json	docs/agent/workflow-map.md;docs/archive/workflow-audit-2026-04/snapshot-2026-04-20.md;docs/workflow-kit/manifest.json	2026-04-02
+REACHABLE	scripts/check-no-native-select.mjs	package.json	docs/agent/workflow-map.md;docs/archive/workflow-audit-2026-04/snapshot-2026-04-20.md;docs/workflow-kit/manifest.json	2026-03-16
+REACHABLE	scripts/ci-scope-check.mjs	.github/workflows/rules.yml	.claude/todo-archive/020.md;.claude/todo.md;.github/workflows/rules.yml	2026-10-29
+REACHABLE	scripts/decision-log.mjs	.claude/commands/orchestrate.md	.claude/commands/orchestrate.md;.claude/commands/plan.md;.claude/commands/ship.md	2026-11-02
+REACHABLE	scripts/design-feature-inventory.mjs	.claude/commands/design-port.md	.claude/commands/design-port.md;.claude/todo-archive/015.md;docs/brain/decisions/0019-design-port-from-handoff.md	2026-10-10
+REACHABLE	scripts/design-handoff-ingest.mjs	.claude/commands/design-port.md	.claude/commands/design-port.md;.claude/todo-archive/015.md;.interface-design/handoffs.md	2026-10-10
+REACHABLE	scripts/diagnose-broken-refs.mjs	package.json	.claude/techdebt-reports/techdebt-2026-09-16.md;.claude/todo-archive/010.md;.qa-reports/auto-solve-eval-2026-04-13T142637.md	2026-04-07
+DOCS-ONLY	scripts/fix-duplicate-names.mjs		docs/agent/workflow-map.md;docs/archive/workflow-audit-2026-04/snapshot-2026-04-20.md;docs/workflow-kit/manifest.json	2026-04-15
+REACHABLE	scripts/free-merged-slots.mjs	.claude/commands/plan.md	.claude/commands/plan.md;.claude/commands/take-plan.md;.claude/todo-archive/013.md	2026-11-01
+REACHABLE	scripts/github-sync-gate.mjs	.claude/skills/github-sync/SKILL.md	.claude/reports/skills-v2-diff-2026-10-10.md;.claude/reports/skills-v2-verification-2026-10-10.md;.claude/skills/github-sync/SKILL.md	2026-10-10
+REACHABLE	scripts/handoff-check.sh	.claude/settings.json	.claude/settings.json;.claude/todo-archive/001.md;.claude/todo-archive/012.md	2026-10-27
+DOCS-ONLY	scripts/kit-extract.mjs		.claude/reports/skills-v2-diff-2026-10-10.md;.claude/todo-archive/012.md;docs/workflow-kit/manifest.json	2026-10-10
+REACHABLE	scripts/kit-feedback.mjs	.claude/commands/kit-feedback.md	.claude/commands/kit-feedback.md;.claude/commands/ship.md;.claude/workflows/orchestrate.js	2026-11-01
+DOCS-ONLY	scripts/kit-lessons-extract.mjs		.claude/todo-archive/012.md;docs/workflow-kit/manifest.json;docs/workflow-kit/manifest.md	2026-10-04
+REACHABLE	scripts/kit-manifest-check.mjs	.claude/agents/orch-builder.md	.claude/agents/orch-builder.md;.claude/agents/orch-readiness.md;.claude/commands/plan.md	2026-10-01
+REACHABLE	scripts/kit-owned.mjs	via scripts/lib/guard.mjs	.claude/todo-archive/016.md;docs/brain/decisions/0018-kit-changes-reach-foodvibe-as-patches.md;docs/brain/decisions/0021-kit-changes-reach-foodvibe-by-release-and-kit-sync.md	2026-10-18
+REACHABLE	scripts/lib/brain-doc.mjs	via scripts/brain.mjs	.kit/install.json;docs/agent/kit-brain.md;docs/workflow-kit/manifest.json	2026-11-01
+REACHABLE	scripts/lib/db-write.mjs	via scripts/lib/guard.mjs	.claude/workflows/orchestrate.js;.kit/install.json;docs/agent/orchestrator.md	2026-11-05
+REACHABLE	scripts/lib/done-when.mjs	via scripts/orch-preflight.mjs	.kit/install.json;docs/workflow-kit/manifest.json;plans/500-600/506-remove-the-session-state-concept-from-foodvibe.plan.md	2026-11-02
+REACHABLE	scripts/lib/fe-command.mjs	via scripts/lib/slot-procs.mjs	.kit/install.json;docs/workflow-kit/kit-owned.json;docs/workflow-kit/manifest.json	2026-10-19
+REACHABLE	scripts/lib/guard.mjs	server/routes/generic.js	.claude/workflows/orchestrate.js;.kit/install.json;docs/archive/workflow-audit-2026-04/snapshot-2026-04-20.md	2026-11-05
+REACHABLE	scripts/lib/invariants.mjs	via scripts/lib/orch-run.mjs	.claude/todo-archive/014.md;.kit/install.json;docs/agent/workflow-map.md	2026-10-27
+REACHABLE	scripts/lib/log-format.mjs	via scripts/log-query.mjs	.claude/todo-archive/016.md;docs/workflow-kit/manifest.json;docs/workflow-kit/manifest.md	2026-10-17
+REACHABLE	scripts/lib/orch-folders.mjs	via scripts/free-merged-slots.mjs	.kit/install.json;docs/workflow-kit/manifest.json;plans/500-600/504-fix-the-failing-rules-check-and-script-test-after-the-kit-v1-9-0-sync.plan.md	2026-11-05
+REACHABLE	scripts/lib/orch-run.mjs	via scripts/orch-preflight.mjs	.claude/workflows/orchestrate.js;.kit/install.json;docs/agent/orchestrator.md	2026-11-05
+REACHABLE	scripts/lib/override-steps.mjs	via scripts/override-check.mjs	.kit/install.json;docs/workflow-kit/manifest.json;plans/500-600/524-sync-kit-v1-13-0-and-restore-required-workflow-steps.plan.md	2026-11-01
+REACHABLE	scripts/lib/plan-deps.mjs	.claude/skills/save-plan/SKILL.md	.claude/skills/save-plan/SKILL.md;.kit/install.json;docs/workflow-kit/manifest.json	2026-10-26
+REACHABLE	scripts/lib/plan-graph.mjs	via scripts/orch-preflight.mjs	.kit/install.json;docs/workflow-kit/manifest.json;scripts/orch-preflight.mjs	2026-10-26
+REACHABLE	scripts/lib/plan-guard-scan.mjs	via scripts/orch-preflight.mjs	.kit/install.json;docs/agent/orchestrator.md;docs/workflow-kit/manifest.json	2026-11-05
+REACHABLE	scripts/lib/plan-paths.mjs	AGENTS.md	.claude/todo-archive/015.md;.kit/install.json;AGENTS.md	2026-10-10
+REACHABLE	scripts/lib/plan-scope.mjs	.claude/skills/save-plan/SKILL.md	.claude/reports/skills-v2-diff-2026-10-10.md;.claude/skills/save-plan/SKILL.md;.kit/install.json	2026-11-05
+REACHABLE	scripts/lib/redact.mjs	server/pnpm-lock.yaml	.kit/install.json;docs/workflow-kit/manifest.json;pnpm-lock.yaml	2026-11-01
+REACHABLE	scripts/lib/registry-families.mjs	via scripts/reuse-lint.mjs	.claude/todo-archive/019.md;.claude/todo-archive/020.md;.claude/todo.md	2026-10-29
+REACHABLE	scripts/lib/remote-proxy.mjs	via scripts/remote-port.mjs	.claude/todo-archive/013.md;docs/agent/remote-port.md;docs/workflow-kit/manifest.json	2026-10-06
+DOCS-ONLY	scripts/lib/remote-proxy.test.mjs		.claude/todo-archive/013.md;docs/workflow-kit/manifest.json;plans/300-400/388-on-demand-remote-port.plan.md	2026-10-06
+REACHABLE	scripts/lib/reuse-check.mjs	via scripts/reuse-lint.mjs	.claude/todo-archive/019.md;docs/mvp/runs/450.md;docs/workflow-kit/drift-classification.md	2026-10-21
+REACHABLE	scripts/lib/scope-tests-lint.mjs	via scripts/orch-state.mjs	.kit/install.json;docs/workflow-kit/manifest.json;scripts/orch-state.mjs	2026-11-01
+REACHABLE	scripts/lib/slot-procs.mjs	via scripts/free-merged-slots.mjs	.claude/todo-archive/016.md;.kit/install.json;docs/agent/workflow-map.md	2026-11-02
+REACHABLE	scripts/lib/slot.mjs	.claude/agents/orch-readiness.md	.claude/agents/orch-readiness.md;.claude/commands/design-port.md;.claude/commands/plan.md	2026-11-01
+REACHABLE	scripts/lib/todo-parse.mjs	via scripts/plan-close.mjs	.claude/todo-archive/012.md;.claude/todo-archive/016.md;.kit/install.json	2026-10-17
+ISLAND	scripts/link-users-to-master.mjs		.claude/todo-archive/010.md;.qa-reports/auto-solve-eval-2026-04-13T142637.md;docs/agent/workflow-map.md	2026-04-07
+REACHABLE	scripts/local-excludes.mjs	.claude/skills/worktree-setup/SKILL.md	.claude/skills/worktree-setup/SKILL.md;.claude/workflows/orchestrate.js;.kit/install.json	2026-11-02
+REACHABLE	scripts/log-query.mjs	.claude/commands/auto-solve.md	.claude/commands/auto-solve.md;.claude/commands/fix.md;.claude/commands/review-it.md	2026-10-29
+DOCS-ONLY	scripts/merge-labels.mjs		.claude/todo-archive/014.md;docs/workflow-kit/manifest.json;docs/workflow-kit/manifest.md	2026-10-01
+DOCS-ONLY	scripts/migrate-labels-to-courses.mjs		.claude/todo-archive/014.md;.claude/todo-archive/015.md;docs/workflow-kit/manifest.json	2026-10-11
+ISLAND	scripts/migrate-to-master.mjs		.claude/todo-archive/010.md;.qa-reports/auto-solve-eval-2026-04-13T142637.md;docs/agent/workflow-map.md	2026-04-07
+REACHABLE	scripts/next-plan-number.mjs	.claude/commands/workflow-report.md	.claude/commands/workflow-report.md;.claude/reports/skills-v2-diff-2026-10-10.md;.claude/reports/skills-v2-verification-2026-10-10.md	2026-11-01
+REACHABLE	scripts/orch-preflight.mjs	.claude/commands/orchestrate.md	.claude/commands/orchestrate.md;.claude/workflows/orchestrate.js;.kit/install.json	2026-11-05
+REACHABLE	scripts/orch-state.mjs	.claude/agents/kit-runner.md	.claude/agents/kit-runner.md;.claude/agents/orch-report.md;.claude/commands/orchestrate.md	2026-11-05
+REACHABLE	scripts/orphan-sweep.mjs	via scripts/orch-state.mjs	.claude/todo-archive/016.md;.claude/workflows/orchestrate.js;.kit/install.json	2026-10-17
+REACHABLE	scripts/override-check.mjs	.claude/commands/ship.md	.claude/commands/ship.md;.claude/todo.md;.claude/workflows/orchestrate.js	2026-11-01
+REACHABLE	scripts/plan-close.mjs	.claude/commands/plan.md	.claude/commands/plan.md;.claude/skills/save-plan/SKILL.md;.claude/workflows/orchestrate.js	2026-11-01
+REACHABLE	scripts/plan-ledger-check.mjs	.claude/commands/ship.md	.claude/commands/ship.md;.claude/reports/todo-ledger-relevance-audit-2026-07-21.md;.claude/todo-archive/010.md	2026-10-17
+REACHABLE	scripts/plan-name-similarity.mjs	.claude/commands/plan.md	.claude/commands/plan.md;.claude/reports/skills-v2-diff-2026-10-10.md;.claude/skills/save-plan/SKILL.md	2026-11-02
+REACHABLE	scripts/plan-order.mjs	.claude/agents/orch-readiness.md	.claude/agents/orch-readiness.md;.claude/commands/plan.md;.claude/commands/take-plan.md	2026-10-26
+REACHABLE	scripts/plan-write-guard.sh	.claude/commands/plan.md	.claude/commands/plan.md;.claude/settings.json;.claude/todo-archive/012.md	2026-10-17
+REACHABLE	scripts/pre-commit-no-semi.mjs	.husky/pre-commit	.husky/pre-commit;.kit/install.json;docs/agent/workflow-map.md	2026-04-17
+REACHABLE	scripts/pre-commit-secret-scan.mjs	.claude/commands/security.md	.claude/commands/security.md;.claude/skills/save-plan/SKILL.md;.husky/pre-commit	2026-11-01
+REACHABLE	scripts/pre-commit-security-grep.mjs	.claude/skills/auth-and-logging/SKILL.md	.claude/reports/skills-v2-diff-2026-10-10.md;.claude/reports/skills-v2-verification-2026-10-10.md;.claude/skills/auth-and-logging/SKILL.md	2026-08-22
+REACHABLE	scripts/pre-compact-reminder.sh	.claude/settings.json	.claude/settings.json;.claude/todo-archive/001.md;.claude/todo-archive/009.md	2026-10-27
+REACHABLE	scripts/preflight.mjs	.claude/commands/design-port.md	.claude/commands/design-port.md;.claude/commands/orchestrate.md;.claude/reports/skills-v2-diff-2026-10-10.md	2026-10-17
+DOCS-ONLY	scripts/promote-guest-to-master.js		docs/agent/workflow-map.md;docs/archive/workflow-audit-2026-04/snapshot-2026-04-20.md;docs/workflow-kit/manifest.json	2026-04-07
+REACHABLE	scripts/prune-merged-worktrees.sh	.claude/commands/cleanup.md	.claude/commands/cleanup.md;.kit/install.json;docs/agent/workflow-map.md	2026-04-21
+REACHABLE	scripts/prune-old-sessions.sh	.claude/commands/cleanup.md	.claude/commands/cleanup.md;.claude/todo-archive/016.md;.kit/install.json	2026-10-17
+DOCS-ONLY	scripts/push-master-to-atlas.js		docs/agent/workflow-map.md;docs/workflow-kit/manifest.json;docs/workflow-kit/manifest.md	2026-04-21
+REACHABLE	scripts/qa/code-qa/api-cases.mjs	via scripts/test/code-qa-api.test.mjs	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/qa/code-qa/api-fixtures.mjs	via scripts/qa/code-qa/api-cases.mjs	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-28
+REACHABLE	scripts/qa/code-qa/api-layer.mjs	via scripts/qa/code-qa/api-cases.mjs	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/qa/code-qa/common.mjs	package.json	docs/qa/code-qa.md;docs/superpowers/plans/2026-04-17-ai-draft-editor.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/qa/code-qa/findings.mjs	via scripts/brain-capture-comment.mjs	.claude/todo-archive/016.md;.claude/workflows/orchestrate.js;docs/agent/agent-evals.md	2026-10-20
+REACHABLE	scripts/qa/code-qa/gates.mjs	.github/workflows/ci.yml	.claude/todo-archive/016.md;.github/workflows/ci.yml;.kit/install.json	2026-10-20
+REACHABLE	scripts/qa/code-qa/plan-checks.mjs	via scripts/orch-preflight.mjs	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/qa/code-qa/rotation.mjs	via scripts/qa/code-qa/run.mjs	.claude/todo-archive/016.md;.claude/todo-archive/020.md;docs/qa/code-qa-agent.md	2026-11-02
+REACHABLE	scripts/qa/code-qa/run.mjs	.claude/agents/orch-gate.md	.claude/agents/orch-gate.md;.claude/agents/orch-report.md;.claude/agents/orch-triage.md	2026-10-20
+REACHABLE	scripts/qa/code-qa/static-checks.mjs	via scripts/qa/code-qa/run.mjs	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/qa/evidence-server.mjs	via scripts/qa/qa-up.ps1	.claude/todo-archive/015.md;.claude/todo-archive/016.md;docs/qa/README.md	2026-10-20
+REACHABLE	scripts/qa/lib/qa-login.mjs	via scripts/qa/code-qa/api-layer.mjs	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/qa/morning-brief.mjs	.claude/settings.json	.claude/settings.json;.claude/todo-archive/020.md;docs/orchestrator/runs/test-512-422/report.md	2026-11-02
+REACHABLE	scripts/qa/morning-report.mjs	via scripts/test/qa-morning-report.test.mjs	.claude/todo-archive/020.md;docs/brain/decision-grades.jsonl;docs/orchestrator/runs/test-512-422/report.md	2026-11-02
+ISLAND	scripts/qa/qa-code-merge.ps1		.claude/todo-archive/016.md;docs/qa/README.md;docs/qa/code-qa.md	2026-10-20
+REACHABLE	scripts/qa/qa-down.ps1	package.json	.claude/todo-archive/015.md;docs/brain/decision-grades.jsonl;docs/orchestrator/runs/test-512-422/report.md	2026-10-10
+ISLAND	scripts/qa/qa-nightly-down.ps1		.claude/todo-archive/015.md;.claude/todo-archive/020.md;docs/brain/decision-grades.jsonl	2026-11-02
+REACHABLE	scripts/qa/qa-nightly-up.ps1	via scripts/qa/code-qa/common.mjs	.claude/todo-archive/015.md;.claude/todo-archive/016.md;.claude/todo-archive/020.md	2026-10-28
+DOCS-ONLY	scripts/qa/qa-schedule.ps1		.claude/todo-archive/015.md;.claude/todo-archive/016.md;docs/qa/README.md	2026-10-20
+REACHABLE	scripts/qa/qa-up.ps1	package.json	.claude/todo-archive/015.md;.claude/todo-archive/016.md;.gitignore	2026-10-20
+REACHABLE	scripts/remote-port.mjs	.claude/commands/remote.md	.claude/commands/remote.md;.claude/todo-archive/013.md;AGENTS.md	2026-10-06
+DOCS-ONLY	scripts/remove-trailing-semicolons.mjs		.claude/reports/audit/archive/2026-04-19-nightly-audit.md;docs/agent/workflow-map.md;docs/archive/workflow-audit-2026-04/snapshot-2026-04-20.md	2026-04-17
+REACHABLE	scripts/repair-recipe-references.mjs	package.json	.claude/techdebt-reports/techdebt-2026-09-16.md;.claude/todo-archive/009.md;.claude/todo-archive/010.md	2026-04-07
+REACHABLE	scripts/reuse-lint.mjs	AGENTS.md	.claude/todo-archive/017.md;.claude/todo-archive/019.md;AGENTS.md	2026-10-21
+REACHABLE	scripts/rule-sweep-count.mjs	kit.config.json	.claude/todo-archive/017.md;docs/agent/conventions.md;docs/mvp/runs/458.md	2026-10-22
+DOCS-ONLY	scripts/run-python.sh		.kit/install.json;docs/workflow-kit/kit-owned.json;docs/workflow-kit/manifest.json	2026-10-19
+REACHABLE	scripts/scope-check.mjs	.claude/agents/orch-builder.md	.claude/agents/orch-builder.md;.claude/agents/orch-readiness.md;.claude/commands/plan.md	2026-11-02
+REACHABLE	scripts/scope-guard.sh	.claude/commands/take-plan.md	.claude/commands/take-plan.md;.claude/settings.json;.claude/todo-archive/012.md	2026-10-26
+REACHABLE	scripts/scout/pr.mjs	.claude/commands/scout.md	.claude/commands/scout.md;.interface-design/handoffs/cook-view/assets/stamp-approved.png;.interface-design/handoffs/cook-view/designs/Cook View Refactor.html	2026-11-01
+REACHABLE	scripts/scout/render.mjs	.claude/commands/scout.md	.claude/commands/scout.md;.interface-design/source/image-slot.js;.kit/install.json	2026-11-01
+REACHABLE	scripts/session-lock.sh	via scripts/handoff-check.sh	.claude/todo-archive/012.md;.kit/install.json;docs/agent/workflow-map.md	2026-09-30
+REACHABLE	scripts/session-manifest-hook.py	.claude/settings.json	.claude/settings.json;.kit/install.json;docs/agent/workflow-map.md	2026-09-29
+REACHABLE	scripts/session-manifest-ship.py	via scripts/ship-prep.mjs	.kit/install.json;docs/agent/workflow-map.md;docs/brain/decisions/0009-planner-worker-worktrees.md	2026-10-02
+REACHABLE	scripts/session-startup.sh	.claude/settings.json	.claude/settings.json;.claude/todo-archive/001.md;.claude/todo-archive/009.md	2026-10-27
+REACHABLE	scripts/ship-prep.mjs	.claude/commands/ship.md	.claude/commands/ship.md;.claude/commands/take-plan.md;.claude/todo-archive/012.md	2026-10-29
+REACHABLE	scripts/slot-serve.mjs	.claude/commands/commands.md	.claude/commands/commands.md;.claude/commands/done.md;.claude/commands/remote.md	2026-11-02
+REACHABLE	scripts/slot-stop.mjs	.claude/commands/take-plan.md	.claude/commands/take-plan.md;.claude/settings.json;.claude/todo-archive/016.md	2026-11-02
+REACHABLE	scripts/take-plan.mjs	.claude/commands/take-plan.md	.claude/commands/take-plan.md;.claude/reports/skills-v2-diff-2026-10-10.md;.claude/skills/save-plan/SKILL.md	2026-11-01
+REACHABLE	scripts/techdebt-report.mjs	.claude/skills/techdebt/SKILL.md	.claude/reports/skills-v2-diff-2026-10-10.md;.claude/reports/skills-v2-verification-2026-10-10.md;.claude/skills/techdebt/SKILL.md	2026-10-19
+REACHABLE	scripts/test/ci-scope-check.test.mjs	package.json test:scripts glob	.claude/todo-archive/020.md;.claude/todo.md;docs/orchestrator/runs/run-412-497/report.md	2026-10-29
+REACHABLE	scripts/test/code-qa-api.test.mjs	package.json test:scripts glob	.claude/todo-archive/016.md;.claude/todo-archive/020.md;docs/mvp/review-run-report.md	2026-10-20
+REACHABLE	scripts/test/code-qa-findings.test.mjs	package.json test:scripts glob	.claude/todo-archive/016.md;.gitleaksignore;docs/brain/gotchas/ci.md	2026-10-20
+REACHABLE	scripts/test/code-qa-rotation.test.mjs	package.json test:scripts glob	.claude/todo-archive/016.md;.claude/todo-archive/020.md;docs/brain/decision-grades.jsonl	2026-11-02
+REACHABLE	scripts/test/code-qa-static.test.mjs	package.json test:scripts glob	.claude/todo-archive/016.md;docs/qa/code-qa.md;docs/workflow-kit/manifest.json	2026-10-20
+REACHABLE	scripts/test/design-feature-inventory.test.mjs	package.json test:scripts glob	.claude/todo-archive/015.md;docs/workflow-kit/manifest.json;plans/400-500/405-design-port-from-claude-design-handoff-live-app-compare.plan.md	2026-10-10
+REACHABLE	scripts/test/design-handoff-ingest.test.mjs	package.json test:scripts glob	.claude/todo-archive/015.md;docs/workflow-kit/manifest.json;plans/400-500/405-design-port-from-claude-design-handoff-live-app-compare.plan.md	2026-10-10
+REACHABLE	scripts/test/invariants.test.mjs	package.json test:scripts glob	docs/workflow-kit/manifest.json	2026-10-27
+REACHABLE	scripts/test/plan-close.test.mjs	package.json test:scripts glob	docs/workflow-kit/manifest.json	2026-10-10
+REACHABLE	scripts/test/plan-paths.test.mjs	package.json test:scripts glob	docs/workflow-kit/manifest.json;plans/400-500/406-design-plans-folder-open-claude-design-plans.plan.md	2026-11-05
+REACHABLE	scripts/test/qa-morning-report.test.mjs	package.json test:scripts glob	.claude/todo-archive/020.md;docs/brain/decision-grades.jsonl;docs/orchestrator/runs/test-512-422/report.md	2026-11-02
+REACHABLE	scripts/test/reuse-check.test.mjs	package.json test:scripts glob	.claude/todo-archive/019.md;docs/mvp/runs/450.md;docs/workflow-kit/manifest.json	2026-10-21
+REACHABLE	scripts/test/reuse-lint.test.mjs	package.json test:scripts glob	.claude/todo-archive/019.md;.claude/todo-archive/020.md;.claude/todo.md	2026-10-29
+REACHABLE	scripts/test/slot-procs.test.mjs	package.json test:scripts glob	docs/workflow-kit/manifest.json	2026-10-17
+REACHABLE	scripts/test/todo-parse.test.mjs	package.json test:scripts glob	docs/workflow-kit/manifest.json	2026-10-17
+REACHABLE	scripts/todo-archive.mjs	.claude/commands/auto-solve.md	.claude/commands/auto-solve.md;.claude/commands/done.md;.claude/commands/plan.md	2026-10-17
+REACHABLE	scripts/todo-query.mjs	.claude/commands/auto-solve.md	.claude/commands/auto-solve.md;.claude/commands/done.md;.claude/commands/plan.md	2026-10-18
+DOCS-ONLY	scripts/trim-demo-data.mjs		.claude/todo-archive/010.md;.qa-reports/auto-solve-eval-2026-04-13T142637.md;docs/agent/workflow-map.md	2026-04-07
+REACHABLE	server/migrations/0001-v2-schema.js	via server/migrations/0003-taxonomy-terms.js	plans/300-400/321-professional-foundation-refactor.plan.md;plans/400-500/424-give-every-item-and-user-a-business-and-move-existing-data-into-one-business-per.plan.md;plans/400-500/440-store-event-and-serving-coefficients-and-compute-portions-in-one-place.plan.md	2026-10-02
+DOCS-ONLY	server/migrations/0002-trash-and-history.js		plans/300-400/321-professional-foundation-refactor.plan.md	2026-10-02
+REACHABLE	server/migrations/0003-taxonomy-terms.js	server/services/seed-master.js	docs/mvp/runs/425.md;plans/300-400/321-professional-foundation-refactor.plan.md;plans/400-500/425-keep-each-business-s-data-inside-that-business-on-every-server-read-and-write.plan.md	2026-10-21
+ISLAND	server/migrations/0004-drop-registry-collections.js		plans/300-400/321-professional-foundation-refactor.plan.md;server/scripts/lib/cleanup-fixers.js;server/test/migration-0004-drop-registry-collections.test.js	2026-10-10
+DOCS-ONLY	server/migrations/0005-soft-delete-unify.js		.claude/todo-archive/016.md;docs/brain/decisions/0022-soft-delete-user-prefs.md;docs/mvp/mvp-final-report.md	2026-10-20
+DOCS-ONLY	server/migrations/0006-business-tenant.js		.claude/todo-archive/016.md;.claude/todo-archive/018.md;docs/mvp/mvp-final-report.md	2026-10-20
+REACHABLE	server/migrations/0007-coefficients.js	server/services/seed-master.js	.claude/todo-archive/019.md;docs/mvp/mvp-final-report.md;docs/mvp/runs/440.md	2026-10-21
+DOCS-ONLY	server/migrations/0008-event-stages.js		.claude/todo-archive/019.md;docs/mvp/mvp-final-report.md;docs/mvp/runs/442.md	2026-10-21
+DOCS-ONLY	server/migrations/0009-clients-from-events.js		.claude/todo-archive/020.md;docs/brain/decision-grades.jsonl;docs/brain/follow-ups.md	2026-11-06
+REACHABLE	server/migrations/tools/_connect.js	via server/migrations/0001-v2-schema.js	docs/brain/decision-log.md;docs/mvp/mvp-map.md;docs/mvp/runs/492.md	2026-10-20
+DOCS-ONLY	server/migrations/tools/field-inventory.js		docs/mvp/mvp-map.md;plans/300-400/321-professional-foundation-refactor.plan.md	2026-10-02
+DOCS-ONLY	server/migrations/tools/soft-delete-inventory.js		docs/mvp/mvp-map.md	2026-10-20
+DOCS-ONLY	server/migrations/tools/validate-all.js		.claude/todo-archive/016.md;docs/mvp/mvp-map.md;docs/mvp/runs/424.md	2026-10-02
+DOCS-ONLY	server/scripts/ai-eval-recipes.js		.claude/todo-archive/015.md;.claude/todo-archive/020.md;docs/brain/gotchas/backend.md	2026-10-19
+REACHABLE	server/scripts/bump-master-version.js	server/services/master-version.js	docs/brain/gotchas/backend.md;docs/workflow-kit/manifest.json;plans/300-400/309-optimization-loop-closeout-remaining-backlog.plan.md	2026-09-15
+DOCS-ONLY	server/scripts/check-name-lengths.js		.claude/todo-archive/016.md;plans/400-500/417-limit-name-length-on-every-saved-item.plan.md;plans/400-500/423-give-each-product-its-own-weight-for-its-purchase-units.plan.md	2026-10-20
+DOCS-ONLY	server/scripts/check-unit-weights.js		.claude/todo-archive/019.md;docs/mvp/mvp-final-report.md;docs/mvp/runs/423.md	2026-10-20
+REACHABLE	server/scripts/cleanup-dish-types.js	server/services/seed-master.js	.claude/todo-archive/015.md;docs/mvp/mvp-final-report.md;docs/mvp/validation-feedback-2026-10-26.md	2026-10-20
+ISLAND	server/scripts/cleanup-legacy-data.js		.claude/todo-archive/015.md;docs/brain/gotchas/backend.md;docs/mvp/2026-10-19-mvp-gap-audit.md	2026-10-10
+REACHABLE	server/scripts/db-backup.js	kit.config.json	.claude/todo-archive/011.md;.claude/todo-archive/012.md;.claude/todo-archive/015.md	2026-09-29
+REACHABLE	server/scripts/db-restore.js	kit.config.json	.claude/todo-archive/012.md;.claude/todo-archive/016.md;docs/agent/standards-backend.md	2026-09-29
+DOCS-ONLY	server/scripts/dedupe-business-products.js		.claude/todo-archive/019.md;docs/mvp/runs/485.md;plans/400-500/485-one-product-per-name-in-a-business-enforced-by-the-server.plan.md	2026-10-22
+ISLAND	server/scripts/dedupe-master-names.js		.claude/todo-archive/019.md;plans/300-400/379-dedupe-master-recipe-dish-names.plan.md;plans/400-500/485-one-product-per-name-in-a-business-enforced-by-the-server.plan.md	2026-10-20
+DOCS-ONLY	server/scripts/fix-supplier-refs.js		.claude/techdebt-reports/techdebt-2026-09-16.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;plans/300-400/311-deadcode-bundle-audit.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/audit-against-spec.js		.claude/todo-archive/011.md;plans/300-400/316-atlas-legacy-repair-rollout.plan.md;plans/300-400/321-professional-foundation-refactor.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/backfill-dish-prep-items.js		.claude/todo-archive/011.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;plans/300-400/314-dish-mise-en-place-checklist-import-fix.plan.md	2026-10-02
+NO-REFS	server/scripts/legacy-import/backfill-legacy-config.js			2026-10-02
+NO-REFS	server/scripts/legacy-import/backfill-name-snapshots.js			2026-10-02
+ISLAND	server/scripts/legacy-import/backfill-product-nutrition.js		.claude/todo-archive/011.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;plans/300-400/316-atlas-legacy-repair-rollout.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/backfill-quantities.js		plans/300-400/316-atlas-legacy-repair-rollout.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/backfill-supplier-phones.js		plans/300-400/316-atlas-legacy-repair-rollout.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/cost-cross-check.js		.claude/todo-archive/011.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/import-foodcomposer.js		docs/brain/gotchas/backend.md;plans/300-400/321-professional-foundation-refactor.plan.md	2026-10-02
+REACHABLE	server/scripts/legacy-import/lib/mappings.js	via server/scripts/legacy-import/lib/transform.js	plans/300-400/321-professional-foundation-refactor.plan.md;plans/300-400/376-dish-types-cleanup-remap-recipes-decision-gate.plan.md;server/scripts/legacy-import/import-foodcomposer.js	2026-08-09
+ISLAND	server/scripts/legacy-import/lib/sql-parser.js		plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;plans/300-400/307-purge-committed-scrape-artifacts.plan.md;server/scripts/legacy-import/audit-against-spec.js	2026-08-09
+REACHABLE	server/scripts/legacy-import/lib/transform.js	via scripts/design-feature-inventory.mjs	.claude/todo-archive/011.md;.interface-design/source/support.js;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md	2026-09-27
+ISLAND	server/scripts/legacy-import/repair-dish-prep-items.js		.claude/todo-archive/011.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;plans/300-400/314-dish-mise-en-place-checklist-import-fix.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/legacy-import/repair-recipe-yields.js		.claude/todo-archive/011.md;plans/300-400/315-yield-multi-measure-conversions.plan.md;plans/300-400/316-atlas-legacy-repair-rollout.plan.md	2026-10-02
+ISLAND	server/scripts/legacy-import/repair-subrecipe-refs.js		.claude/todo-archive/011.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;server/scripts/legacy-import/backfill-dish-prep-items.js	2026-10-02
+ISLAND	server/scripts/legacy-import/verify-against-source.js		.claude/todo-archive/011.md;docs/brain/gotchas/backend.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md	2026-10-02
+ISLAND	server/scripts/lib/cleanup-fixers.js		plans/400-500/475-rename-a-measurement-unit-everywhere-it-is-used-with-a-clear-name-clash-message.plan.md;server/scripts/cleanup-legacy-data.js;server/test/cleanup-legacy-data.test.js	2026-10-20
+DOCS-ONLY	server/scripts/migrate-supplier-ids.js		.claude/techdebt-reports/techdebt-2026-09-16.md;plans/200-300/300-legacy-foodcomposer-import-repair.plan.md;plans/300-400/311-deadcode-bundle-audit.plan.md	2026-10-02
+DOCS-ONLY	server/scripts/release-removed-staff-names.js		.claude/todo-archive/017.md;docs/mvp/qa-fixes-report.md;docs/mvp/runs/492.md	2026-10-24
+DOCS-ONLY	server/scripts/reset-user-from-master.js		.claude/todo-archive/011.md;.claude/todo-archive/018.md;docs/mvp/runs/425.md	2026-10-21
+DOCS-ONLY	server/scripts/time-business-stats.js		.claude/todo-archive/019.md;docs/mvp/mvp-final-report.md;docs/mvp/runs/447.md	2026-10-21
+REACHABLE	tools/catalog-seeder/config.py	server/vitest.config.js	.claude/todo-archive/001.md;.claude/todo-archive/010.md;.kit/install.json	2026-04-18
+DOCS-ONLY	tools/catalog-seeder/db_write.py		.claude/todo-archive/001.md;.claude/todo-archive/010.md;notes/session-handoffs/2026-04-04.md	2026-04-18
+REACHABLE	tools/catalog-seeder/diff.py	.claude/commands/auto-solve.md	.claude/commands/auto-solve.md;.claude/todo-archive/001.md;.claude/todo-archive/020.md	2026-04-18
+REACHABLE	tools/catalog-seeder/enrich.py	via tools/catalog-seeder/main.py	.claude/todo-archive/010.md;notes/session-handoffs/2026-04-04.md;plans/200-300/249-seeder-data-quality.plan.md	2026-04-04
+REACHABLE	tools/catalog-seeder/fetch.py	src/app/core/services/logging.service.spec.ts	.claude/todo-archive/001.md;.claude/todo-archive/017.md;docs/brain/gotchas/angular.md	2026-04-26
+REACHABLE	tools/catalog-seeder/filter.py	src/app/core/services/async-storage.service.spec.ts	.claude/todo-archive/001.md;.claude/workflows/orchestrate.js;plans/100-200/159-type-to-filter-all-dropdowns.plan.md	2026-04-18
+REACHABLE	tools/catalog-seeder/main.py	.claude/agents/orch-readiness.md	.claude/agents/orch-readiness.md;.claude/reports/skills-v2-diff-2026-10-10.md;.claude/todo-archive/001.md	2026-04-18
+DOCS-ONLY	tools/catalog-seeder/normalize.py		.claude/todo-archive/001.md;notes/session-handoffs/2026-04-04.md;plans/200-300/271-seeder-master-alignment.plan.md	2026-04-18
+NO-REFS	tools/catalog-seeder/patch_atlas_by_id.py			2026-04-26
+NO-REFS	tools/catalog-seeder/patch_nutrition.py			2026-04-26
+NO-REFS	tools/catalog-seeder/patch_nutrition_manual.py			2026-04-26
+REACHABLE	tools/catalog-seeder/review.py	.github/workflows/brain-capture-reminder.yml	.github/workflows/brain-capture-reminder.yml;.qa-reports/auto-solve-eval-2026-04-13T142637.md;docs/agent/ship-regular.md	2026-04-04

@@ -1801,9 +1801,7 @@
         {
           "key": "paths.serverRoot",
           "strings": [
-            "server/node_modules",
-            "server/scripts/legacy-import/source-data/readme.md",
-            "server/scripts/legacy-import/source-data/*.sql"
+            "server/node_modules"
           ]
         },
         {
@@ -1844,12 +1842,9 @@
         ".vscode/tasks.json",
         "README.md",
         "entities.json",
-        "scripts/audit-labels.mjs",
-        "server/node_modules/",
-        "server/scripts/legacy-import/source-data/README.md",
-        "tools/catalog-seeder/output/.gitkeep"
+        "server/node_modules/"
       ],
-      "notes": "Generic base (node, env, logs, `.worktree-*`, `.claude/sessions`) plus FoodVibe/Angular lines: `.angular/cache`, `.gstack/`, Render audit creds, local Mongo (:27018), `server/node_modules`, `src/environments/environment.slot.ts`, legacy-import data. Split in phase 2: generic base = core fragment, Angular lines = pack:angular fragment, rest stays."
+      "notes": "Generic base (node, env, logs, `.worktree-*`, `.claude/sessions`) plus FoodVibe/Angular lines: `.angular/cache`, `.gstack/`, Render audit creds, local Mongo (:27018), `server/node_modules`, `src/environments/environment.slot.ts`. Split in phase 2: generic base = core fragment, Angular lines = pack:angular fragment, rest stays."
     },
     {
       "path": ".gitleaksignore",
@@ -2756,7 +2751,6 @@
         "docs/session-state-foundation-refactor.md",
         "plans/321-professional-foundation-refactor.plan.md",
         "server/routes/generic.js",
-        "server/scripts/legacy-import/",
         "src/app/"
       ],
       "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
@@ -2938,8 +2932,7 @@
         "scripts/ship-prep.mjs",
         "scripts/take-plan.mjs",
         "scripts/todo-archive.mjs",
-        "src/styles.scss",
-        "tools/catalog-seeder/"
+        "src/styles.scss"
       ],
       "notes": "FoodVibe gotcha file; each `##` entry has a verdict in lessons-triage.md. The file itself is not copied."
     },
@@ -3319,11 +3312,8 @@
       "params": [],
       "refs": [
         "dist/food-vibe1.0/browser/",
-        "scripts/backup-before-repair.mjs",
         "scripts/check-lucide-icons.mjs",
         "scripts/check-no-native-select.mjs",
-        "scripts/diagnose-broken-refs.mjs",
-        "scripts/repair-recipe-references.mjs",
         "scripts/todo-query.mjs"
       ],
       "notes": "Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select. `dev:local` is invoked by scripts/take-plan.mjs."
@@ -3387,26 +3377,6 @@
         "scripts/branch-guard.sh"
       ],
       "notes": "Workflow manual (Planner/Worker/Reviewer). Hardcodes slot ports and `wt-N` names. STALE: line ~43 cites `.claude/rules/{angular,security,domain,backend}.md`, which do not exist (path-scoped standards now live in `.cursor/rules/*.mdc` + `docs/agent/standards-*.md`). Fix belongs to its own plan."
-    },
-    {
-      "path": "scripts/audit-labels.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/backup-before-repair.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
     },
     {
       "path": "scripts/brain-capture-comment.mjs",
@@ -3504,26 +3474,6 @@
       "params": [],
       "refs": [],
       "notes": "Bans native `<select>` in favour of `app-custom-select` (FoodVibe UI rule; `npm run lint:no-native-select`)."
-    },
-    {
-      "path": "scripts/diagnose-broken-refs.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/fix-duplicate-names.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
     },
     {
       "path": "scripts/free-merged-slots.mjs",
@@ -3726,47 +3676,6 @@
       "notes": "Todo parsing helper."
     },
     {
-      "path": "scripts/link-users-to-master.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/merge-labels.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json",
-        "plans/320-recipe-labels-fix-course-category-field.plan.md"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/migrate-labels-to-courses.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/migrate-to-master.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
       "path": "scripts/plan-ledger-check.mjs",
       "tier": "core",
       "action": "copy",
@@ -3876,18 +3785,6 @@
       "notes": "PreCompact reminder."
     },
     {
-      "path": "scripts/promote-guest-to-master.js",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "server/.env",
-        "server/node_modules/dotenv/",
-        "server/node_modules/mongoose/"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
       "path": "scripts/prune-merged-worktrees.sh",
       "tier": "core",
       "action": "parameterize",
@@ -3904,41 +3801,6 @@
         ".claude/sessions/"
       ],
       "notes": "Prunes `.claude/sessions`."
-    },
-    {
-      "path": "scripts/push-master-to-atlas.js",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "server/.env",
-        "server/node_modules/dotenv/",
-        "server/node_modules/mongoose/"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/remove-trailing-semicolons.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "src/app/",
-        "src/app/app.config.ts",
-        "src/app/app.routes.ts",
-        "src/main.ts"
-      ],
-      "notes": "One-shot sweep companion to no-semi hook; hardcodes `src/app`. Candidate to drop."
-    },
-    {
-      "path": "scripts/repair-recipe-references.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
     },
     {
       "path": "scripts/scope-check.mjs",
@@ -4186,16 +4048,6 @@
         "plans/200-300/"
       ],
       "notes": "Todo query/mark helper."
-    },
-    {
-      "path": "scripts/trim-demo-data.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
     },
     {
       "path": "server/package.json",
@@ -4472,7 +4324,7 @@
       "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
     },
     {
-      "path": "scripts/lib/remote-proxy.test.mjs",
+      "path": "scripts/test/remote-proxy.test.mjs",
       "tier": "project",
       "action": "stay",
       "params": [],

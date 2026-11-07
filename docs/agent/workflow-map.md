@@ -198,7 +198,7 @@ has no PreToolUse hook of its own.
 | `todo-query.mjs sync --plan NNN` / `sync --merged` | the todo-sync Action (`.github/workflows/todo-sync.yml`) on every push to main touching `plans/**`; the Planner protocol (`.claude/commands/plan.md`) re-runs it as a no-op |
 | `free-merged-slots.mjs` | the Planner protocol (`.claude/commands/plan.md`), step 2 — detaches a `wt-N` back to idle once its branch merges into `origin/main`, stopping its servers |
 
-Data-repair scripts (not workflow): `backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `fix-duplicate-names.mjs`, `link-users-to-master.mjs`, `migrate-to-master.mjs`, `promote-guest-to-master.js`, `push-master-to-atlas.js`, `repair-recipe-references.mjs`, `trim-demo-data.mjs`, `check-lucide-icons.mjs`, `check-no-native-select.mjs`, `remove-trailing-semicolons.mjs`, `log-server.js`.
+Data-repair scripts (not workflow): `check-lucide-icons.mjs`, `check-no-native-select.mjs`, `log-server.js`.
 
 ---
 

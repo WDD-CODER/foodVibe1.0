@@ -96,7 +96,6 @@ Notes: `feat/321-professional-foundation-refactor` carries the Windows `shell` f
 - `.cursor/mcp.json` — AGENTS.md says browser work must go through gstack /browse, never raw Playwright MCP — conflict to resolve in phase 3 (tools.browser).
 - `docs/brain/how-it-works.md` — STALE-REF [docs/brain/patterns/defer-singleton-data.md] not on disk.
 - `README_WORKFLOW.md` — STALE: line ~43 cites `.claude/rules/{angular,security,domain,backend}.md`, which do not exist (path-scoped standards now live in `.cursor/rules/*.mdc` + `docs/agent/standards-*.md`).
-- `scripts/remove-trailing-semicolons.mjs` — Candidate to drop.
 
 ### Naming collision: `_shared/` vs `shared/`
 
@@ -287,7 +286,7 @@ Full per-file detail (params, refs) is in `manifest.json`; this is the human ind
 | `.claude/references/prd-template.md` | skeleton | PRD template; lists FoodVibe hotspots, Hebrew considerations and dictionary keys. STALE-REF [.claude/rules/domain.md] not on disk. |
 | `.cursor/rules/auth-and-logging-must-use-skill.mdc` | skeleton | Glob list enumerates project paths from both stacks (`server/middleware`, `server/routes/auth.js`, `src/app/core/guards\|interceptors`). |
 | `.cursor/rules/security.mdc` | skeleton | Glob list enumerates project paths from both stacks (`server/middleware`, `server/routes/auth.js`, `src/app/core/guards\|interceptors`). |
-| `.gitignore` | skeleton | Generic base (node, env, logs, `.worktree-*`, `.claude/sessions`) plus FoodVibe/Angular lines: `.angular/cache`, `.gstack/`, Render audit creds, local Mongo (:27018), `server/node_modules`, `src/environments/environment.slot.ts`, legacy-import data. Split in phase 2: generic base = core fragment, Angular lines = pack:angular fragment, rest stays. |
+| `.gitignore` | skeleton | Generic base (node, env, logs, `.worktree-*`, `.claude/sessions`) plus FoodVibe/Angular lines: `.angular/cache`, `.gstack/`, Render audit creds, local Mongo (:27018), `server/node_modules`, `src/environments/environment.slot.ts`. Split in phase 2: generic base = core fragment, Angular lines = pack:angular fragment, rest stays. |
 | `.mcp.json` | skeleton | Claude Code MCP list: only the `github` server (token via ${GITHUB_MCP_TOKEN}, `cmd /c npx` = Windows-only launcher). Generic structure; installer should emit per-OS launcher. |
 | `.nvmrc` | skeleton | Node version pin; value is per-project. |
 | `.prettierrc.json` | skeleton | Style choices (single quotes, no semicolons) are the FoodVibe convention that the `no-semi` hook enforces; ship as a default the project may change. |
@@ -336,24 +335,11 @@ Full per-file detail (params, refs) is in `manifest.json`; this is the human ind
 | `docs/brain/patterns/split-catalog-scan-from-filter-decoration.md` | stay | FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied. |
 | `docs/brain/patterns/tombstone-soft-delete.md` | stay | FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied. |
 | `package.json` | stay | Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select. `dev:local` is invoked by scripts/take-plan.mjs. |
-| `scripts/audit-labels.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/backup-before-repair.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/check-lucide-icons.mjs` | stay | Parses `LucideAngularModule.pick()` in `app.config.ts`; FoodVibe icon policy (`npm run lint:icons`). |
 | `scripts/check-no-native-select.mjs` | stay | Bans native `<select>` in favour of `app-custom-select` (FoodVibe UI rule; `npm run lint:no-native-select`). |
-| `scripts/diagnose-broken-refs.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/fix-duplicate-names.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/link-users-to-master.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/log-server.js` | removed | Hand-started dev log server (port 9765) retired in Plan 382; logs go to Mongo `app_logs`. |
 | `scripts/log-query.mjs` | stay | FoodVibe log query for agents (Mongo `app_logs` or a slot log file). Plan 384. |
 | `scripts/lib/log-format.mjs` | stay | Shared log-line normaliser/formatter for `log-query.mjs`. Plan 384. |
-| `scripts/merge-labels.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/migrate-labels-to-courses.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/migrate-to-master.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/promote-guest-to-master.js` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/push-master-to-atlas.js` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/remove-trailing-semicolons.mjs` | stay | One-shot sweep companion to no-semi hook; hardcodes `src/app`. Candidate to drop. |
-| `scripts/repair-recipe-references.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/trim-demo-data.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `server/package.json` | stay | Backend manifest. Workflow-called scripts: `dev:local` (invoked by scripts/take-plan.mjs), `test`. NOTE (see memory): server `dev:remote` points at Atlas while root `dev:remote` points at Render — name collision, separate plan. |
 
 ## Excluded (checker ignores)

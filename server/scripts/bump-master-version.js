@@ -2,7 +2,7 @@
 /**
  * bump-master-version.js
  * Run this after any script writes/edits/removes __master__ docs (seed-master.js,
- * a legacy-import script, a manual fix script) so POST /refresh's version-gated
+ * a manually-run fix script) so POST /refresh's version-gated
  * syncMasterToUser (server/services/master-version.js) picks up the change on the
  * next refresh instead of comparing against a stale version.
  *

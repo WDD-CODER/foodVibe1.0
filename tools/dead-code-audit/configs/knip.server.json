@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["index.js!", "app.js!", "jobs/*.js!", "migrations/*.js!", "migrations/tools/*.js!", "scripts/*.js!", "test/**/*.test.js"],
+  "project": ["**/*.js!", "!generated/**", "!node_modules/**"],
+  "ignore": ["generated/**"]
+}

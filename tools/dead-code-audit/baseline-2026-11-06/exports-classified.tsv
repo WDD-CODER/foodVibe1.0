@@ -1,0 +1,130 @@
+class	kind	file	symbol	own_hits	spec_files	other_files	dev
+CHECK	exports	shared/schemas/ai-product-match.schema.ts	PRODUCT_MATCH_MAX_NAMES	1	0	src/app/core/services/product-name-matcher.service.ts	
+CHECK	exports	shared/schemas/ai-product-match.schema.ts	PRODUCT_MATCH_MAX_OPTIONS	0	0	src/app/core/services/product-name-matcher.service.ts;src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts;server/routes/ai.js	
+CHECK	exports	shared/schemas/ai-product-match.schema.ts	PRODUCT_MATCH_MAX_PRODUCTS	1	0	src/app/core/services/product-name-matcher.service.ts	
+CHECK	exports	shared/schemas/ai-product-match.schema.ts	productNameMatchRequestSchema	1	0	server/routes/ai.js	
+CHECK	exports	shared/schemas/ai-product-match.schema.ts	productNameMatchResponseSchema	1	0	server/routes/ai.js	
+DEAD	types	shared/schemas/ai-receipt-photo.schema.ts	ReceiptPhotoRequest	0	0		
+CHECK	exports	shared/schemas/ai-receipt-photo.schema.ts	receiptPhotoRequestSchema	1	0	server/routes/ai.js	
+CHECK	exports	shared/schemas/base.schema.ts	tombstoneSchema	0	1	server/migrations/0001-v2-schema.js;server/utils/schema-check.js	
+DEAD	types	shared/schemas/entities/business.schema.ts	BusinessBaseline	0	0		
+CHECK	exports	shared/schemas/entities/business.schema.ts	baselineInputSchema	2	0	server/routes/business.js	
+EXPORT-ONLY	exports	shared/schemas/entities/business.schema.ts	businessBaselineSchema	2	0		
+CHECK	exports	shared/schemas/entities/business.schema.ts	businessNameInputSchema	1	0	server/routes/business.js	
+CHECK	exports	shared/schemas/entities/business.schema.ts	businessSchema	1	0	server/services/business.js	
+CHECK	exports	shared/schemas/entities/business.schema.ts	businessSettingsSchema	2	0	server/routes/business.js	
+CHECK	exports	shared/schemas/entities/business.schema.ts	staffVisibleStagesInputSchema	1	0	server/routes/business.js	
+EXPORT-ONLY	exports	shared/schemas/entities/client.schema.ts	clientTypeSchema	1	0		
+EXPORT-ONLY	exports	shared/schemas/entities/common.schema.ts	baselineEntrySchema	2	0		
+CHECK	exports	shared/schemas/entities/event-stage.ts	EVENT_SERVER_FIELDS	0	1	server/routes/generic.js	
+CHECK	types	shared/schemas/entities/event-stage.ts	NotClosedReason	0	0	src/app/core/services/event-pipeline.service.ts;src/app/core/models/menu-event.model.ts;src/app/pages/menu-intelligence/components/not-closed-dialog/not-closed-dialog.component.ts	
+CHECK	types	shared/schemas/entities/index.ts	Client	0	4	src/app/core/services/permission.service.ts;src/app/core/services/client-data.service.ts;src/app/core/models/v2/index.ts;src/app/core/models/client.model.ts	
+CHECK	types	shared/schemas/entities/index.ts	Equipment	0	2	src/app/core/services/equipment-data.service.ts;src/app/core/resolvers/equipment.resolver.ts;src/app/core/models/equipment.model.ts;src/app/core/models/v2/index.ts	
+CHECK	types	shared/schemas/entities/index.ts	MenuEvent	0	13	src/app/shared/venue-link-chip/venue-link-chip.component.ts;src/app/core/services/menu-intelligence.service.ts;src/app/core/services/event-pipeline.service.ts;src/app/core/services/export.service.ts	
+CHECK	types	shared/schemas/entities/index.ts	Product	0	27	src/app/shared/partial-cost-badge/partial-cost-badge.component.ts;src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts;src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts;src/app/shared/unit-creator/unit-creator.component.ts	
+CHECK	types	shared/schemas/entities/index.ts	Recipe	0	22	src/app/core/services/master-push.service.ts;src/app/core/services/excel-workbook.util.ts;src/app/core/services/recipe-cost.service.ts;src/app/core/services/unlinked-ingredient-link.service.ts	
+CHECK	exports	shared/schemas/entities/index.ts	SCHEMA_BY_COLLECTION	1	1	server/utils/schema-check.js;server/utils/permissions.js;scripts/qa/code-qa/api-fixtures.mjs	
+DEAD	types	shared/schemas/entities/index.ts	SchemaCollection	0	0		
+CHECK	types	shared/schemas/entities/index.ts	Supplier	0	6	src/app/core/services/master-push.service.ts;src/app/core/services/add-supplier-flow.service.ts;src/app/core/services/supplier-data.service.ts;src/app/core/services/kitchen-state.service.ts	
+CHECK	types	shared/schemas/entities/index.ts	Venue	0	0	src/app/core/services/venue-data.service.ts;src/app/core/models/v2/index.ts;src/app/core/models/v2/conformance.ts;src/app/pages/venues/components/venue-list/venue-list.component.ts	
+CHECK	exports	shared/schemas/entities/index.ts	clientSchema	3	1	server/migrations/0009-clients-from-events.js;shared/schemas/entities/client.schema.ts	
+CHECK	exports	shared/schemas/entities/index.ts	equipmentSchema	3	0	shared/schemas/entities/equipment.schema.ts	
+CHECK	exports	shared/schemas/entities/index.ts	menuEventSchema	3	3	shared/schemas/entities/menu-event.schema.ts	
+CHECK	exports	shared/schemas/entities/index.ts	productSchema	3	0	shared/schemas/entities/product.schema.ts	
+CHECK	exports	shared/schemas/entities/index.ts	recipeSchema	4	1	shared/schemas/entities/recipe.schema.ts	
+CHECK	exports	shared/schemas/entities/index.ts	supplierSchema	3	0	shared/schemas/entities/supplier.schema.ts	
+CHECK	exports	shared/schemas/entities/index.ts	venueSchema	3	0	shared/schemas/entities/venue.schema.ts	
+TEST-ONLY	exports	shared/schemas/entities/taxonomy-term.schema.ts	REGISTRY_KIND_BY_COLLECTION	0	1		
+TEST+INTERNAL	exports	shared/schemas/entities/taxonomy-term.schema.ts	TAXONOMY_KINDS	1	1		
+CHECK	exports	shared/schemas/entities/taxonomy-term.schema.ts	TERM_REFERENCES	0	0	src/app/pages/metadata-manager/metadata-manager.page.component.ts;server/scripts/lib/cleanup-fixers.js;server/routes/generic.js	
+EXPORT-ONLY	types	src/app/core/engine/event-closing.ts	VarianceKind	1	0		dev-flagged
+CHECK	exports	src/app/core/engine/portions.ts	defaultCoefficient	3	3	src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts	
+EXPORT-ONLY	types	src/app/core/engine/units.ts	UnitFamily	1	0		
+TEST+INTERNAL	exports	src/app/core/engine/units.ts	unitFamily	2	1		
+EXPORT-ONLY	types	src/app/core/models/ai-menu-draft.model.ts	AiMenuDishDraft	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/ai-menu-draft.model.ts	AiMenuSectionDraft	1	0		dev-flagged
+TEST+INTERNAL	types	src/app/core/models/business-stats.model.ts	BusinessStatsCards	1	1		
+EXPORT-ONLY	types	src/app/core/models/business-stats.model.ts	CountCard	3	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/business-stats.model.ts	UpcomingEvent	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/equipment.model.ts	ScalingRule	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/logistics.model.ts	LogisticsSource	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/logistics.model.ts	ManualOverride	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/logistics.model.ts	ResolvedEquipmentItem	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/logistics.model.ts	ServiceOverride	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/logistics.model.ts	ServiceStyleKey	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/menu-event.model.ts	EventStageEntry	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/menu-event.model.ts	MenuFinancialTargets	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/menu-event.model.ts	MenuPerformanceTags	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/menu-event.model.ts	MenuPricingCache	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/parsed-result.model.ts	ParsedDish	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/parsed-result.model.ts	ParsedIngredient	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/parsed-result.model.ts	ParsedRecipe	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/parsed-result.model.ts	ParsedResultType	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/parsed-result.model.ts	ParsedStep	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/models/recipe.model.ts	MiseItem	1	0		dev-flagged
+CHECK	types	src/app/core/models/v2/index.ts	Client	1	4	src/app/core/services/permission.service.ts;src/app/core/services/client-data.service.ts;src/app/core/models/client.model.ts;src/app/core/utils/client-display.util.ts	dev-flagged
+CHECK	types	src/app/core/models/v2/index.ts	Equipment	0	2	src/app/core/services/equipment-data.service.ts;src/app/core/resolvers/equipment.resolver.ts;src/app/core/models/equipment.model.ts;src/app/core/models/v2/conformance.ts	
+CHECK	types	src/app/core/models/v2/index.ts	MenuEvent	0	13	src/app/shared/venue-link-chip/venue-link-chip.component.ts;src/app/core/services/menu-intelligence.service.ts;src/app/core/services/event-pipeline.service.ts;src/app/core/services/export.service.ts	
+CHECK	types	src/app/core/models/v2/index.ts	Product	0	27	src/app/shared/partial-cost-badge/partial-cost-badge.component.ts;src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts;src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts;src/app/shared/unit-creator/unit-creator.component.ts	
+CHECK	types	src/app/core/models/v2/index.ts	Recipe	0	22	src/app/core/services/master-push.service.ts;src/app/core/services/excel-workbook.util.ts;src/app/core/services/recipe-cost.service.ts;src/app/core/services/unlinked-ingredient-link.service.ts	
+CHECK	types	src/app/core/models/v2/index.ts	Supplier	0	6	src/app/core/services/master-push.service.ts;src/app/core/services/add-supplier-flow.service.ts;src/app/core/services/supplier-data.service.ts;src/app/core/services/kitchen-state.service.ts	
+CHECK	types	src/app/core/models/v2/index.ts	Venue	0	0	src/app/core/services/venue-data.service.ts;src/app/core/models/v2/conformance.ts;src/app/pages/venues/components/venue-list/venue-list.component.ts;shared/schemas/entities/index.ts	
+EXPORT-ONLY	exports	src/app/core/services/activity-log.service.ts	ACTIVITY_STORAGE_KEY	2	0		dev-flagged
+TEST+INTERNAL	types	src/app/core/services/activity-log.service.ts	ActivityAction	1	1		
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	EXCEL_BORDER_MEDIUM	4	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	EXCEL_BORDER_THIN	8	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	EXCEL_HEADER_GRAY	1	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	EXCEL_SUBTITLE_GRAY	2	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	EXCEL_TEAL	1	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	XLSX_MIME	1	0		dev-flagged
+DEAD	exports	src/app/core/services/excel-workbook.util.ts	styleExcelBlankRow	0	0		dev-flagged
+DEAD	exports	src/app/core/services/excel-workbook.util.ts	styleExcelBlockBorder	0	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/services/excel-workbook.util.ts	styleExcelSeparator	4	0		dev-flagged
+CHECK	exports	src/app/core/services/gemini-shots.service.ts	estimateGramsPerPortion	2	2	server/services/ai-recipe-helpers.js;server/scripts/ai-eval-recipes.js	
+TEST+INTERNAL	exports	src/app/core/services/keyboard-inset.service.ts	KEYBOARD_INSET_VAR	1	1		
+TEST+INTERNAL	exports	src/app/core/services/keyboard-inset.service.ts	KEYBOARD_OPEN_CLASS	1	1		
+EXPORT-ONLY	exports	src/app/core/services/keyboard-inset.service.ts	KEYBOARD_OPEN_THRESHOLD_PX	1	0		dev-flagged
+CHECK	exports	src/app/core/services/taxonomy-store.service.ts	TermInUseError	3	1	src/app/core/services/station-registry.service.ts	
+CHECK	exports	src/app/core/services/taxonomy-store.service.ts	TermReadOnlyError	3	1	src/app/core/services/station-registry.service.ts	
+EXPORT-ONLY	types	src/app/core/services/taxonomy-store.service.ts	TermReference	2	0		
+DEAD	exports	src/app/core/utils/auth-crypto.ts	verifyPassword	0	0		dev-flagged
+CHECK	exports	src/app/core/utils/client-display.util.ts	normalizePhone	2	2	server/migrations/0009-clients-from-events.js	
+TEST+INTERNAL	exports	src/app/core/utils/collapsible-categories.util.ts	COLLAPSIBLE_MOBILE_QUERY	1	1		
+TEST+INTERNAL	exports	src/app/core/utils/downscale-image.util.ts	SMALL_IMAGE_BYTES	1	1		
+TEST-ONLY	exports	src/app/core/utils/event-stage-ui.util.ts	selectableStages	0	1		
+EXPORT-ONLY	exports	src/app/core/utils/export.util.ts	EXPORT_HEADER_HE	2	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/utils/export.util.ts	ExportSummaryItem	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/utils/export.util.ts	RecipeSheetLabels	1	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/export.util.ts	UNIT_HE	2	0		dev-flagged
+DEAD	exports	src/app/core/utils/export.util.ts	formatExportNumber	0	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/export.util.ts	sanitizeFileName	2	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/utils/filter-category-counts.util.ts	FilterCategoryOption	1	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/gemini-usage.util.ts	setGeminiUsageCache	2	0		dev-flagged
+DEAD	exports	src/app/core/utils/list-state.util.ts	DateFieldParam	0	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/panel-preference.util.ts	getPanelOpen	2	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/panel-preference.util.ts	setPanelOpen	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/utils/prep-sheet-groups.util.ts	PrepSheetRow	4	0		dev-flagged
+TEST+INTERNAL	exports	src/app/core/utils/product-form-errors.util.ts	invalidFieldLabelKeys	1	1		
+EXPORT-ONLY	exports	src/app/core/utils/product-name-match.util.ts	foldProductWord	1	0		dev-flagged
+DEAD	exports	src/app/core/utils/product-price.util.ts	getProductUnits	0	0		dev-flagged
+TEST+INTERNAL	exports	src/app/core/utils/product-validation.util.ts	getProductMissingFields	2	1		
+TEST+INTERNAL	exports	src/app/core/utils/quantity-step.util.ts	getQuantityStep	2	1		
+EXPORT-ONLY	types	src/app/core/utils/recipe-match.util.ts	MatchCandidate	3	0		dev-flagged
+TEST-ONLY	exports	src/app/core/utils/venue-hours.util.ts	formatVenueHoursLines	0	1		
+EXPORT-ONLY	exports	src/app/core/utils/viewport-placement.util.ts	PLACEMENT_GAP_PX	4	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/viewport-placement.util.ts	PLACEMENT_MARGIN_PX	6	0		dev-flagged
+EXPORT-ONLY	exports	src/app/core/utils/viewport-placement.util.ts	PLACEMENT_MIN_HEIGHT_PX	1	0		dev-flagged
+EXPORT-ONLY	types	src/app/core/utils/viewport-placement.util.ts	PlacementAnchor	1	0		dev-flagged
+EXPORT-ONLY	exports	src/app/pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog.component.ts	MAX_CLOSING_PHOTOS	2	0		dev-flagged
+CHECK	exports	src/app/pages/menu-intelligence/menu-money-form.util.ts	targetTooHigh	3	1	src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html	dev-flagged
+CHECK	types	src/app/pages/menu-intelligence/services/menu-picker-search.service.ts	PickerKeydownOptions	0	1	src/app/core/utils/keyed-picker-search.util.ts	dev-flagged
+CHECK	types	src/app/pages/menu-intelligence/services/menu-picker-search.service.ts	PickerSearchKey	0	0	src/app/core/utils/keyed-picker-search.util.ts	dev-flagged
+TEST+INTERNAL	exports	src/app/pages/recipe-book/components/recipe-book-list/utils/recipe-book-list.util.ts	getRecipeProductIds	2	1		
+EXPORT-ONLY	exports	src/app/shared/column-carousel/column-carousel-swipe.ts	CAROUSEL_MEDIA_QUERY	1	0		dev-flagged
+EXPORT-ONLY	exports	src/app/shared/column-carousel/column-carousel-swipe.ts	SWIPE_THRESHOLD_PX	1	0		dev-flagged
+CHECK	exports	src/app/shared/column-carousel/index.ts	ColumnCarouselCellComponent	2	0	src/app/shared/column-carousel/column-carousel-cell.component.ts	dev-flagged
+CHECK	exports	src/app/shared/column-carousel/index.ts	ColumnCarouselGroupDirective	2	1	src/app/shared/column-carousel/column-carousel-group.directive.ts;src/app/shared/column-carousel/column-carousel-cell.component.ts;src/app/shared/column-carousel/column-carousel-header.component.ts	
+CHECK	exports	src/app/shared/column-carousel/index.ts	ColumnCarouselHeaderComponent	2	0	src/app/shared/column-carousel/column-carousel-header.component.ts	dev-flagged
+CHECK	exports	src/app/shared/column-carousel/index.ts	ColumnSlideDirective	2	0	src/app/shared/column-carousel/column-slide.directive.ts;src/app/shared/column-carousel/column-carousel-cell.component.ts;src/app/shared/column-carousel/column-carousel-header.component.ts	dev-flagged
+EXPORT-ONLY	exports	src/app/shared/list-selection/touch-row-selection.ts	LIST_KEEP_TARGETS	1	0		dev-flagged
+TEST+INTERNAL	exports	src/app/shared/scroll-rail/scroll-rail.component.ts	normalizedScrollStart	1	1		

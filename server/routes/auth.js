@@ -337,7 +337,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     // Fire-and-forget — do not block the token response on sync.
     // Login awaits sync; refresh runs every 13 min and blocking here adds 3-8s latency.
     // Version-gated (plan 309 M2): master docs are only ever written by seed-master.js or a
-    // manually-run legacy-import/fix script (see master-version.js) — never by a live user
+    // manually-run fix script (see master-version.js) — never by a live user
     // flow — so most refreshes have nothing to sync. Skip the full multi-collection diff
     // when this user's business was last synced to the current version (plan 425: gate on the business).
     Promise.all([getMasterVersion(), getBusiness(user.businessId)])
