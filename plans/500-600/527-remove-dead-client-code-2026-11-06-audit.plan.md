@@ -180,7 +180,7 @@ A2, its export line).
 - none
 
 ## Execution Notes
-- decision: behaviour: also removed `calcBuyPriceGlobal` (`product-price.util.ts`), the `allEquipment_` getter (`venue-form`) and the `peekedStepIndex_` signal plus its one reset line (`cook-view`) — each had no other reader once the listed members went (P0 "any helper or field that becomes unused") — reverse: restore them from this branch's parent commit.
-- decision: behaviour: dropped the now-unused imports `calcBuyPriceGlobal` (product list), `MenuSectionCategoriesService` (menu-ai-flow) and `viewChild` (scaling-chip), flagged by lint — reverse: re-add with the members.
+- decision: behaviour: also removed `calcBuyPriceGlobal` (`product-price.util.ts`), the `allEquipment_` getter (`venue-form`) and the `peekedStepIndex_` signal plus its one reset line (`cook-view`) — each had no other reader once the listed members went (P0 "any helper or field that becomes unused") — reverse: restore them from this branch's parent commit. [graded D1 ok 2026-11-07]
+- decision: behaviour: dropped the now-unused imports `calcBuyPriceGlobal` (product list), `MenuSectionCategoriesService` (menu-ai-flow) and `viewChild` (scaling-chip), flagged by lint — reverse: re-add with the members. [graded D2 ok 2026-11-07]
 - No false positives: every listed symbol had only its declaration as a hit; no template, spec or route was edited. `src/app/core/breadcrumbs.md` does not list `id.util`, so it was left unchanged.
 - review: checkers kept 0 dropped 0 rechecked 0 minutes 3.5 models check-plan=sonnet,check-bugs=sonnet,check-rules=sonnet,security=sonnet
