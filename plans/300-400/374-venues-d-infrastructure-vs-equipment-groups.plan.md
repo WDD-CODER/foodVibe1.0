@@ -1,6 +1,6 @@
 # Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form
 
-Status: draft
+Status: done
 Depends-on: none
 Track: design — Claude Design
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
