@@ -48,4 +48,22 @@ describe('SupplierPricesComponent', () => {
     inputs[1].dispatchEvent(new Event('change'))
     expect(emitted.at(-1)).toEqual({ a: 4, b: 6 })
   })
+
+  it('plan 510: marks the chosen supplier row «נבחר» while it has a price', () => {
+    fixture.componentRef.setInput('preferredSupplierId', 'b')
+    setup(['a', 'b'], { a: 4, b: 5 })
+    const chips = fixture.nativeElement.querySelectorAll('.supplier-prices__chosen') as NodeListOf<HTMLElement>
+    expect(chips.length).toBe(1)
+    expect(chips[0].textContent?.trim()).toBe('supplier_chosen')
+    expect(chips[0].closest('app-form-field')?.querySelector('input')?.id).toBe('supplier-price-b')
+  })
+
+  it('plan 510: marks nothing when the chosen supplier has no price or is not a row', () => {
+    fixture.componentRef.setInput('preferredSupplierId', 'b')
+    setup(['a', 'b'], { a: 4, b: null })
+    expect(fixture.nativeElement.querySelectorAll('.supplier-prices__chosen').length).toBe(0)
+    fixture.componentRef.setInput('preferredSupplierId', 'gone')
+    fixture.detectChanges()
+    expect(fixture.nativeElement.querySelectorAll('.supplier-prices__chosen').length).toBe(0)
+  })
 })

@@ -42,8 +42,9 @@
               }
             </header>
             <ul class="so-lines">
-              @for (line of card.lines; track $index) {
+              @for (line of card.lines; track $index; let li = $index) {
                 @let v = view(line);
+                @let hint = cardSavings_()[i].lines[li];
                 <li class="so-line">
                   <bdi class="so-line-name">{{ v.name }}</bdi>
                   <span class="so-line-qty"
@@ -52,6 +53,9 @@
                       ({{ v.purchase }})
                     }
                   </span>
+                  @if (hint) {
+                    <span class="so-line-cheaper">{{ cheaperText(hint) }}</span>
+                  }
                 </li>
               }
             </ul>
@@ -59,6 +63,9 @@
               {{ 'supplier_orders_est_total' | translatePipe }}: {{ money(card.total) }}
               <app-partial-cost-badge class="so-partial" [missing]="cardMissing_()[i]"></app-partial-cost-badge>
             </p>
+            @if (cardSavings_()[i].total > 0) {
+              <p class="so-saving">{{ savingText(cardSavings_()[i].total) }}</p>
+            }
             <div class="so-actions">
               <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="copyCard(card)">
                 <lucide-icon name="copy" [size]="16"></lucide-icon>

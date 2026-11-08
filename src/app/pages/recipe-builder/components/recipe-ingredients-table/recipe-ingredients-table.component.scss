@@ -176,6 +176,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 .col-cost {
+  gap: 0.25rem;
   font-weight: 700;
   color: var(--color-success);
   text-align: start;

@@ -21,9 +21,12 @@ import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cheaperElsewhere,
   describeOrderLine,
   toWhatsAppPhone,
   type OrderHeader,
+  type CardSavings,
+  type CheaperElsewhere,
   type OrderLineView,
   type SupplierOrderCard
 } from 'src/app/core/utils/supplier-orders.util'
@@ -81,6 +84,12 @@ export class SupplierOrdersComponent {
       return unpriced.filter((m) => !!m.productId && ids.has(m.productId))
     })
   })
+  /** Plan 510 (information only): per card, the lines another supplier sells for less and the possible saving. */
+  protected readonly cardSavings_ = computed<CardSavings[]>(() => {
+    const products = this.kitchenState_.productsById_()
+    const suppliers = this.kitchenState_.suppliersById_()
+    return this.orders_().cards.map((card) => cheaperElsewhere(card, products, suppliers))
+  })
   protected readonly empty_ = computed(() => this.plan_().rawLines.length === 0)
   private readonly header_ = computed<OrderHeader>(() => {
     const event = this.event()
@@ -107,6 +116,23 @@ export class SupplierOrdersComponent {
 
   protected money(n: number): string {
     return formatMoney(n)
+  }
+
+  /** «זול יותר אצל דוד: ₪4 (חיסכון ₪3)». */
+  protected cheaperText(hint: CheaperElsewhere): string {
+    return this.t_('supplier_orders_cheaper_at')
+      .replace('{supplier}', hint.name)
+      .replace('{price}', this.shortMoney(hint.price))
+      .replace('{saving}', this.shortMoney(hint.saving))
+  }
+
+  protected savingText(total: number): string {
+    return this.t_('supplier_orders_can_save').replace('{saving}', this.shortMoney(total))
+  }
+
+  /** ₪ with two decimals, a whole number without ".00". */
+  private shortMoney(n: number): string {
+    return formatMoney(n).replace(/.00$/, '')
   }
 
   protected statusKey(line: RawLine): string {

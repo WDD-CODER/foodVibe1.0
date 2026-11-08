@@ -1,5 +1,6 @@
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { formatQty } from '../engine/rounding'
+import { chooseSupplier } from '../engine/supplier-choice'
 import type { Product } from '@models/product.model'
 import type { Supplier } from '@models/supplier.model'
 
@@ -89,6 +90,52 @@ export function buildSupplierOrders(
 
   review.sort((a, b) => byName(a.name, b.name))
   return { cards, review }
+}
+
+/** Plan 510: another supplier sells a line's product for less than the supplier it is bought from. */
+export interface CheaperElsewhere {
+  supplierId: string
+  name: string
+  /** The cheaper supplier's price per base unit. */
+  price: number
+  /** (the used price − the cheaper price) × the line's quantity in base units. */
+  saving: number
+}
+
+export interface CardSavings {
+  /** One entry per card line (same order); null when no other supplier is cheaper. */
+  lines: (CheaperElsewhere | null)[]
+  /** Sum of the line savings. */
+  total: number
+}
+
+/**
+ * Plan 510 (information only): per line of a supplier card, the cheapest other known supplier of the product when
+ * it is cheaper than the price the line is bought at, and the card's total possible saving.
+ */
+export function cheaperElsewhere(
+  card: SupplierOrderCard,
+  productsById: Map<string, Product>,
+  suppliersById: Map<string, Supplier>
+): CardSavings {
+  const lines = card.lines.map((line): CheaperElsewhere | null => {
+    if (!line.supplierId || !line.productId || !(line.buyQty > 0)) return null
+    const product = productsById.get(line.productId)
+    if (!product) return null
+    const used = (product.sources ?? []).find((s) => s.supplierId === line.supplierId && s.price > 0)
+    if (!used) return null
+    const known = (product.sources ?? []).filter((s) => !!s.supplierId && suppliersById.has(s.supplierId))
+    const cheapest = chooseSupplier({ sources: known })
+    if (!cheapest.supplierId || cheapest.pricePerBaseUnit == null) return null
+    if (cheapest.supplierId === line.supplierId || !(cheapest.pricePerBaseUnit < used.price)) return null
+    return {
+      supplierId: cheapest.supplierId,
+      name: (suppliersById.get(cheapest.supplierId) as Supplier).nameHebrew,
+      price: cheapest.pricePerBaseUnit,
+      saving: (used.price - cheapest.pricePerBaseUnit) * line.buyQty
+    }
+  })
+  return { lines, total: lines.reduce((sum, l) => sum + (l?.saving ?? 0), 0) }
 }
 
 /** Israeli mobile → WhatsApp number (`9725XXXXXXXX`), anything else → null. */

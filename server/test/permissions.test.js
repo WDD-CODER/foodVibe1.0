@@ -96,3 +96,21 @@ describe('plan 449: money signature is keyed by row', () => {
     expect(moneyFieldsChanged('products', before, doc([{ supplierId: 'a', price: 5 }, { supplierId: 'b' }]))).toBe(false)
   })
 })
+
+describe('plan 510: the chosen supplier is a money field', () => {
+  const before = { nameHebrew: 'בצל', sources: [{ supplierId: 'd', price: 4 }, { supplierId: 'g', price: 5 }] }
+  it('changing, setting or clearing preferredSupplierId needs editMoney, which staff never have', () => {
+    expect(moneyFieldsChanged('products', before, { ...before, preferredSupplierId: 'g' })).toBe(true)
+    expect(moneyFieldsChanged('products', { ...before, preferredSupplierId: 'g' }, { ...before, preferredSupplierId: 'd' })).toBe(true)
+    expect(moneyFieldsChanged('products', { ...before, preferredSupplierId: 'g' }, { ...before, preferredSupplierId: '' })).toBe(true)
+    expect(can(STAFF, 'editMoney', { type: 'products', doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY' })
+    expect(can(OWNER, 'editMoney', { type: 'products', doc: own })).toEqual({ ok: true })
+  })
+  it('a staff edit that keeps the choice is not a money change', () => {
+    const chosen = { ...before, preferredSupplierId: 'g' }
+    expect(moneyFieldsChanged('products', chosen, { ...chosen, nameHebrew: 'בצל יבש' })).toBe(false)
+  })
+  it('a staff-created product is saved without a chosen supplier', () => {
+    expect(stripMoneyFields('products', { nameHebrew: 'בצל', preferredSupplierId: 'g' })).toEqual({ nameHebrew: 'בצל' })
+  })
+})

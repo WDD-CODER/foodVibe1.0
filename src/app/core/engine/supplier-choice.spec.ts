@@ -68,4 +68,38 @@ describe('chooseSupplier', () => {
       pricePerBaseUnit: null
     })
   })
+
+  describe('plan 510: the chosen supplier', () => {
+    const sources = [
+      { supplierId: 'david', price: 4 },
+      { supplierId: 'grocery', price: 5 }
+    ]
+
+    it('uses the chosen supplier even when another is cheaper', () => {
+      expect(chooseSupplier({ sources, preferredSupplierId: 'grocery' })).toEqual({
+        supplierId: 'grocery',
+        pricePerBaseUnit: 5
+      })
+    })
+
+    it('falls back to the cheapest when the chosen supplier has no price', () => {
+      expect(
+        chooseSupplier({
+          sources: [...sources, { supplierId: 'market', price: 0 }],
+          preferredSupplierId: 'market'
+        })
+      ).toEqual({ supplierId: 'david', pricePerBaseUnit: 4 })
+    })
+
+    it('falls back to the cheapest when the chosen supplier was removed from the product', () => {
+      expect(chooseSupplier({ sources, preferredSupplierId: 'gone' })).toEqual({
+        supplierId: 'david',
+        pricePerBaseUnit: 4
+      })
+    })
+
+    it('an empty choice means automatic (the cheapest)', () => {
+      expect(chooseSupplier({ sources, preferredSupplierId: '' }).supplierId).toBe('david')
+    })
+  })
 })

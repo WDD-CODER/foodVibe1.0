@@ -26,7 +26,9 @@ const TEXTS: Record<string, string> = {
   unit_short_unit: "יח'",
   kg: 'ק"ג',
   supplier_orders_copied: 'הועתק – הדבק ב-WhatsApp',
-  supplier_orders_invalid_phone: 'מספר לא תקין – הועתק להדבקה'
+  supplier_orders_invalid_phone: 'מספר לא תקין – הועתק להדבקה',
+  supplier_orders_cheaper_at: 'זול יותר אצל {supplier}: {price} (חיסכון {saving})',
+  supplier_orders_can_save: 'אפשר לחסוך {saving} אצל ספקים אחרים'
 }
 
 describe('SupplierOrdersComponent', () => {
@@ -48,8 +50,7 @@ describe('SupplierOrdersComponent', () => {
     Object.defineProperty(navigator, 'share', { value: fn, configurable: true, writable: true })
   }
 
-  function create(): void {
-    const input = buildFixtureInput()
+  function create(products = buildFixtureInput().products): void {
     const planService = jasmine.createSpyObj<EventPlanService>('EventPlanService', ['planFor'])
     planService.planFor.and.callFake(() => plan)
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
@@ -61,7 +62,7 @@ describe('SupplierOrdersComponent', () => {
         {
           provide: KitchenStateService,
           useValue: {
-            productsById_: signal(new Map(input.products.map((p) => [p._id, p]))),
+            productsById_: signal(new Map(products.map((p) => [p._id, p]))),
             suppliersById_: signal(new Map(suppliers.map((s) => [s._id, s])))
           }
         },
@@ -103,6 +104,28 @@ describe('SupplierOrdersComponent', () => {
     const names = fixture.debugElement.queryAll(By.css('.so-card-name')).map((e) => e.nativeElement.textContent.trim())
     expect(names).toEqual(['ירקן', 'ללא ספק'])
     expect(fixture.debugElement.queryAll(By.css('.c-btn-primary')).length).toBe(1)
+  })
+
+  it('plan 510: a line bought at a chosen dearer supplier says where it is cheaper, and the card shows the saving', () => {
+    const input = buildFixtureInput()
+    const products = input.products.map((p) => (p._id === 'p-tomato' ? { ...p, preferredSupplierId: 's-a' } : p))
+    plan = computeEventPlan({ ...input, products })
+    suppliers = FIXTURE_SUPPLIERS.map((s) => ({ ...s }))
+    create(products)
+    const names = fixture.debugElement.queryAll(By.css('.so-card-name')).map((e) => e.nativeElement.textContent.trim())
+    expect(names).toEqual(['ירקן', 'ספק א', 'ללא ספק'])
+    const hints = fixture.debugElement
+      .queryAll(By.css('.so-line-cheaper'))
+      .map((e) => e.nativeElement.textContent.trim())
+    expect(hints).toEqual(['זול יותר אצל ירקן: ₪5 (חיסכון ₪18.75)'])
+    const saving = fixture.debugElement.query(By.css('.so-saving')).nativeElement.textContent.trim()
+    expect(saving).toBe('אפשר לחסוך ₪18.75 אצל ספקים אחרים')
+  })
+
+  it('plan 510: no hint and no saving line when every line is at its cheapest supplier', () => {
+    create()
+    expect(fixture.debugElement.queryAll(By.css('.so-line-cheaper')).length).toBe(0)
+    expect(fixture.debugElement.queryAll(By.css('.so-saving')).length).toBe(0)
   })
 
   it('puts the partial badge only on the card that holds the unpriced lemon (plan 444)', () => {

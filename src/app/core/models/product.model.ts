@@ -29,6 +29,8 @@ export interface Product {
   nameHebrew: string
   baseUnit: string
   sources: ProductSource[]
+  /** Plan 510: the supplier the owner buys it from; absent (or unpriced) = the cheapest priced supplier. Owner-only. */
+  preferredSupplierId?: string
   purchaseOptions: PurchaseOption_[]
   categories: string[]
   yieldFactor: number

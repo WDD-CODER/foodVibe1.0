@@ -5,6 +5,7 @@ import {
   output,
   inject,
   signal,
+  computed,
   viewChildren,
   viewChild,
   effect,
@@ -56,6 +57,8 @@ import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 import { formatPct1 } from 'src/app/core/engine/rounding'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { PermissionService } from '@services/permission.service'
+import { SupplierPickerComponent } from './supplier-picker/supplier-picker.component'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -86,7 +89,8 @@ const MAX_ROW_SUGGESTIONS = 5
     CdkDragHandle,
     ClickOutSideDirective,
     NutritionBadgeComponent,
-    PasteIngredientsDialogComponent
+    PasteIngredientsDialogComponent,
+    SupplierPickerComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss',
@@ -110,6 +114,11 @@ export class RecipeIngredientsTableComponent {
   private readonly recipeFormService_ = inject(RecipeFormService)
   private readonly nameMatcher_ = inject(ProductNameMatcherService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly permission_ = inject(PermissionService)
+  /** Plan 510: the chosen supplier is a money field — staff never change it (same gate as the product form prices). */
+  protected readonly canEditMoney_ = computed(
+    () => !this.permission_.isStaff_() || this.permission_.can('editMoney', { type: 'products' })
+  )
   private readonly pastedUnitResolver_ = createUnitWordResolver({
     aliases: UNIT_ALIASES,
     translate: (token) => this.translation_.resolveUnit(token),

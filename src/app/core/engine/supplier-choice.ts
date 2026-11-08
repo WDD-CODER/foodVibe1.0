@@ -6,10 +6,16 @@ export interface SupplierChoice {
 }
 
 /**
- * Cheapest positive supplier price per base unit (a tie keeps the earlier source).
- * With no priced supplier, a source without a supplier id is the product's general price.
+ * Plan 510: the owner's chosen supplier (`preferredSupplierId`) when it still has a positive price on the product.
+ * Otherwise (no choice, chosen supplier unpriced or removed) the cheapest positive supplier price per base unit
+ * (a tie keeps the earlier source). With no priced supplier, a source without a supplier id is the general price.
  */
-export function chooseSupplier(product: Pick<Product, 'sources'>): SupplierChoice {
+export function chooseSupplier(product: Pick<Product, 'sources' | 'preferredSupplierId'>): SupplierChoice {
+  const preferred = product.preferredSupplierId
+  if (preferred) {
+    const chosen = (product.sources ?? []).find((s) => s.supplierId === preferred && s.price > 0)
+    if (chosen) return { supplierId: chosen.supplierId, pricePerBaseUnit: chosen.price }
+  }
   let best: { supplierId: string; price: number } | null = null
   let general: number | null = null
   for (const s of product.sources ?? []) {

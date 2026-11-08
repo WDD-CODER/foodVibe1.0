@@ -18,6 +18,8 @@ export const productSchema = z.strictObject({
     priceOverride: z.number().optional(),
     uom: z.string().optional()
   })),
+  /** Plan 510: the supplier the owner buys it from; absent or '' = the cheapest priced supplier. Owner-only. */
+  preferredSupplierId: z.string().optional(),
   categories: z.array(z.string()),
   yieldFactor: z.number(),
   allergens: z.array(z.string()),

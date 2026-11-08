@@ -1,0 +1,76 @@
+@if (visible_()) {
+  <span class="supplier-picker" (appClickOutside)="close()" (keydown.escape)="close()">
+    <button
+      #trigger
+      type="button"
+      class="c-icon-btn supplier-picker__trigger"
+      aria-haspopup="dialog"
+      [attr.aria-expanded]="isOpen_()"
+      [title]="currentName_()"
+      [attr.aria-label]="('supplier' | translatePipe) + ': ' + currentName_()"
+      (click)="$event.stopPropagation(); toggle()"
+    >
+      <lucide-icon name="truck" [size]="16"></lucide-icon>
+    </button>
+    @if (isOpen_()) {
+      <div
+        #popover
+        popover="manual"
+        class="supplier-picker__popover"
+        role="dialog"
+        dir="rtl"
+        [attr.aria-label]="'supplier_picker_title' | translatePipe"
+      >
+        <h4 class="supplier-picker__title">{{ 'supplier_picker_title' | translatePipe }}</h4>
+        <ul class="supplier-picker__list" role="radiogroup">
+          <li>
+            <button
+              type="button"
+              role="radio"
+              class="supplier-picker__row supplier-picker__row--auto"
+              [attr.aria-checked]="isAuto_()"
+              [disabled]="!canEdit() || saving_()"
+              (click)="pick(null)"
+            >
+              <span class="supplier-picker__check">
+                @if (isAuto_()) {
+                  <lucide-icon name="check" [size]="14"></lucide-icon>
+                }
+              </span>
+              <span class="supplier-picker__name">{{ 'supplier_auto_cheapest' | translatePipe }}</span>
+            </button>
+          </li>
+          @for (option of options_(); track option.supplierId) {
+            <li>
+              <button
+                type="button"
+                role="radio"
+                class="supplier-picker__row"
+                [attr.aria-checked]="option.supplierId === currentId_()"
+                [attr.data-supplier]="option.supplierId"
+                [disabled]="!canEdit() || saving_()"
+                (click)="pick(option.supplierId)"
+              >
+                <span class="supplier-picker__check">
+                  @if (option.supplierId === currentId_()) {
+                    <lucide-icon name="check" [size]="14"></lucide-icon>
+                  }
+                </span>
+                <bdi class="supplier-picker__name">{{ option.name }}</bdi>
+                @if (option.cheapest) {
+                  <span class="c-chip c-chip--sm supplier-picker__cheapest">{{
+                    'cheapest_supplier' | translatePipe
+                  }}</span>
+                }
+                <span class="supplier-picker__price" dir="ltr">{{ priceText(option) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+        @if (!canEdit()) {
+          <p class="supplier-picker__note">{{ 'supplier_picker_owner_only' | translatePipe }}</p>
+        }
+      </div>
+    }
+  </span>
+}

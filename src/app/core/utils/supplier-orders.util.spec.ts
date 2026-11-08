@@ -2,10 +2,12 @@ import { computeEventPlan } from '../engine/event-plan.engine'
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { FIXTURE_IDS as ID, FIXTURE_SUPPLIERS, buildFixtureInput } from '../engine/testing/event-plan.fixture'
 import type { Supplier } from '@models/supplier.model'
+import type { Product } from '@models/product.model'
 import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cheaperElsewhere,
   toWhatsAppPhone,
   type OrderHeader
 } from './supplier-orders.util'
@@ -190,5 +192,74 @@ describe('toWhatsAppPhone', () => {
     expect(toWhatsAppPhone('03-1234567')).toBeNull()
     expect(toWhatsAppPhone('')).toBeNull()
     expect(toWhatsAppPhone(undefined)).toBeNull()
+  })
+})
+
+describe('cheaperElsewhere (plan 510)', () => {
+  const suppliers: Supplier[] = [
+    { _id: 'david', nameHebrew: 'דוד' } as Supplier,
+    { _id: 'grocery', nameHebrew: 'מכולת' } as Supplier
+  ]
+  const suppliersById = new Map(suppliers.map((s) => [s._id, s]))
+  const onion = {
+    _id: 'onion',
+    nameHebrew: 'בצל',
+    baseUnit: 'kg',
+    sources: [
+      { supplierId: 'david', price: 4 },
+      { supplierId: 'grocery', price: 5 }
+    ],
+    preferredSupplierId: 'grocery'
+  } as Product
+  const salt = {
+    _id: 'salt',
+    nameHebrew: 'מלח',
+    baseUnit: 'kg',
+    sources: [{ supplierId: 'grocery', price: 2 }]
+  } as Product
+  const productsById = new Map([onion, salt].map((p) => [p._id, p]))
+  const plan = {
+    rawLines: [
+      rawLine({ productId: 'onion', name: 'בצל', buyQty: 3, supplierId: 'grocery', lineCost: 15 }),
+      rawLine({ productId: 'salt', name: 'מלח', buyQty: 1, supplierId: 'grocery', lineCost: 2 })
+    ]
+  } as EventPlan
+
+  it('gives the cheaper supplier, its price and the saving per line, and the card total', () => {
+    const card = buildSupplierOrders(plan, productsById, suppliersById, t).cards[0]
+    expect(card.name).toBe('מכולת')
+    const savings = cheaperElsewhere(card, productsById, suppliersById)
+    expect(card.lines.map((l) => l.name)).toEqual(['בצל', 'מלח'])
+    expect(savings.lines).toEqual([{ supplierId: 'david', name: 'דוד', price: 4, saving: 3 }, null])
+    expect(savings.total).toBe(3)
+  })
+
+  it('has no hint when the line is already bought at the cheapest supplier', () => {
+    const cheap = { ...onion, preferredSupplierId: undefined }
+    const byId = new Map([[cheap._id, cheap]])
+    const davidPlan = {
+      rawLines: [rawLine({ productId: 'onion', name: 'בצל', buyQty: 3, supplierId: 'david' })]
+    } as EventPlan
+    const card = buildSupplierOrders(davidPlan, byId, suppliersById, t).cards[0]
+    expect(cheaperElsewhere(card, byId, suppliersById)).toEqual({ lines: [null], total: 0 })
+  })
+
+  it('ignores a cheaper supplier that no longer exists', () => {
+    const onlyGrocery = new Map([['grocery', suppliersById.get('grocery') as Supplier]])
+    const card = buildSupplierOrders(plan, productsById, onlyGrocery, t).cards[0]
+    expect(cheaperElsewhere(card, productsById, onlyGrocery).total).toBe(0)
+  })
+
+  it('the engine puts a chosen supplier line on that supplier card', () => {
+    const input = buildFixtureInput()
+    const first = input.products.find((p) => (p.sources ?? []).filter((s) => s.price > 0 && s.supplierId).length > 1)
+    expect(first).toBeDefined()
+    const dear = [...(first as Product).sources]
+      .filter((s) => s.supplierId && s.price > 0)
+      .sort((a, b) => b.price - a.price)[0]
+    const products = input.products.map((p) => (p === first ? { ...p, preferredSupplierId: dear.supplierId } : p))
+    const plan2 = computeEventPlan({ ...input, products })
+    const line = plan2.rawLines.find((l) => l.productId === (first as Product)._id)
+    expect(line?.supplierId).toBe(dear.supplierId)
   })
 })

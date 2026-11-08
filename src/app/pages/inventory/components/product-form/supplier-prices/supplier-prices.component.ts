@@ -28,6 +28,8 @@ export class SupplierPricesComponent {
   /** The product's existing price: where the first row starts. */
   readonly seed = input(0)
   readonly baseUnit = input('')
+  /** Plan 510: the supplier the owner picked in the recipe builder; its row shows «נבחר» while it has a price. */
+  readonly preferredSupplierId = input<string | undefined>(undefined)
   /** The whole form is read-only. */
   readonly disabled = input(false)
   readonly pricesChange = output<SupplierPrices>()
@@ -36,6 +38,14 @@ export class SupplierPricesComponent {
   protected readonly locked_ = computed(
     () => this.disabled() || (this.permission.isStaff_() && !this.permission.can('editMoney', { type: 'products' }))
   )
+
+  /** The row marked «נבחר»: the chosen supplier when it is still a row with a positive price, else none. */
+  protected readonly chosenId_ = computed(() => {
+    const id = this.preferredSupplierId()
+    if (!id || !this.supplierIds().includes(id)) return null
+    const price = this.prices()[id]
+    return price != null && price > 0 ? id : null
+  })
 
   constructor() {
     // Rows follow the supplier chips: a new supplier gets a row, a removed one loses it.

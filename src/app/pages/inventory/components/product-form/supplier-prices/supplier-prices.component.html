@@ -20,6 +20,9 @@
         @if (baseUnit()) {
           <span class="supplier-prices__unit">/ {{ baseUnit() | translatePipe }}</span>
         }
+        @if (chosenId_() === id) {
+          <span class="c-chip c-chip--sm supplier-prices__chosen">{{ 'supplier_chosen' | translatePipe }}</span>
+        }
       </div>
     </app-form-field>
   }
