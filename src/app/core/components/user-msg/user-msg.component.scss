@@ -1,31 +1,45 @@
+$break-phone-max: 767px; // mirrors src/styles.scss
+
 .user-msg {
   position: fixed;
-  top: 1.25rem;
-  inset-inline-end: 1.25rem;
-  width: 250px;
-  padding: 1rem;
+  inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--space-4));
+  inset-inline-end: var(--space-4);
+  z-index: 9999;
+
+  inline-size: 16rem;
+  max-inline-size: calc(100% - 2 * var(--space-4));
+
+  overflow-wrap: anywhere;
   text-align: center;
   background: var(--bg-glass-strong);
-  border: 1px solid var(--border-glass);
+
+  padding: var(--space-4);
+  border: thin solid var(--border-glass);
   border-radius: var(--radius-lg);
+
   box-shadow: var(--shadow-card);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
-  z-index: 9999;
 
   p {
-    margin: 0 0 0.5rem 0;
+    margin-block: 0 var(--space-2);
+    margin-inline: 0;
+
     color: inherit;
   }
 
   .undo-btn {
-    padding: 0.25rem 0.75rem;
+    max-inline-size: 100%;
+
     font-size: 0.875rem;
     font-weight: 600;
     color: inherit;
     background: var(--bg-glass);
-    border: 1px solid var(--border-glass);
+
+    padding: 0.25rem 0.75rem;
+    border: thin solid var(--border-glass);
     border-radius: var(--radius-sm);
+
     cursor: pointer;
 
     &:hover {
@@ -49,5 +63,10 @@
     background: var(--border-warning);
     color: var(--color-text-on-primary);
     border-color: var(--border-glass);
+  }
+
+  @media (max-width: $break-phone-max) {
+    inset-inline: var(--space-4);
+    inline-size: auto;
   }
 }

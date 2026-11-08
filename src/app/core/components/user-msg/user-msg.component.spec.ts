@@ -79,4 +79,13 @@ describe('UserMsg', () => {
     expect(fixture.debugElement.query(By.css('.user-msg'))).toBeTruthy()
     expect(fixture.debugElement.query(By.css('p')).nativeElement.textContent).toContain('Reactive Update')
   })
+
+  it('wraps a 200-character unbroken message inside the toast', () => {
+    msgSignal.set({ txt: 'א'.repeat(200), type: 'success' })
+    fixture.detectChanges()
+
+    const el: HTMLElement = fixture.debugElement.query(By.css('.user-msg')).nativeElement
+    expect(getComputedStyle(el).overflowWrap).toBe('anywhere')
+    expect(el.scrollWidth).toBeLessThanOrEqual(el.clientWidth)
+  })
 })

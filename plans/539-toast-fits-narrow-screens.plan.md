@@ -105,9 +105,9 @@ line or file this plan names was removed, renamed or rewritten).
 - RTL: `inset-inline-end` keeps the toast on the left in Hebrew, as today. No dictionary keys, no icons.
 
 ## Atomic Sub-tasks
-- [ ] A1: Make the toast fit any width — logical properties, tokens, wrap, safe-area top, phone full-width rule (read `.claude/skills/cssLayer/SKILL.md` first) — src/app/core/components/user-msg/user-msg.component.scss
-- [ ] A2: Prove a long word wraps inside the toast — the spec case — src/app/core/components/user-msg/user-msg.component.spec.ts
-- [ ] A3: Run every `[auto]` check plus the cssLayer verify greps on the edited file, paste the outputs under Execution Notes
+- [x] A1: Make the toast fit any width — logical properties, tokens, wrap, safe-area top, phone full-width rule (read `.claude/skills/cssLayer/SKILL.md` first) — src/app/core/components/user-msg/user-msg.component.scss
+- [x] A2: Prove a long word wraps inside the toast — the spec case — src/app/core/components/user-msg/user-msg.component.spec.ts
+- [x] A3: Run every `[auto]` check plus the cssLayer verify greps on the edited file, paste the outputs under Execution Notes
 
 ## Technical Considerations
 - Dependencies: `UserMsgService` (read only), tokens `--space-2`, `--space-4` in `src/styles.scss` (read only).
@@ -128,3 +128,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-08: drafted from the Human's report; the overflow cause is read from the code, not yet seen in the browser.
+- Builder: build exit 0; lint exit 0; test:ci exit 0 (1796 SUCCESS, incl. new wrap case); grep prints the `$break-phone-max` line and the `@media (max-width: $break-phone-max)` line (the `\bwidth:` pattern matches `max-width:`; unavoidable). 1px borders written as `thin`. log-query exit 0, one entry: HTTP 409 POST /business/team (from other tests, not this plan).
