@@ -6,6 +6,8 @@ import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cardCheaperHints,
+  cheaperElsewhere,
   toWhatsAppPhone,
   type OrderHeader
 } from './supplier-orders.util'
@@ -190,5 +192,43 @@ describe('toWhatsAppPhone', () => {
     expect(toWhatsAppPhone('03-1234567')).toBeNull()
     expect(toWhatsAppPhone('')).toBeNull()
     expect(toWhatsAppPhone(undefined)).toBeNull()
+  })
+})
+
+describe('cheaperElsewhere (plan 510)', () => {
+  const sup = (id: string, name: string) => ({ _id: id, nameHebrew: name }) as Supplier
+  const suppliers = new Map([sup('d', 'דוד'), sup('g', 'מכולת')].map((x) => [x._id, x]))
+  const product = (pref?: string) =>
+    ({
+      _id: 'p',
+      sources: [
+        { supplierId: 'd', price: 4 },
+        { supplierId: 'g', price: 5 }
+      ],
+      preferredSupplierId: pref
+    }) as never
+  const line = (supplierId: string) => rawLine({ productId: 'p', supplierId, buyQty: 10, status: 'ok' })
+
+  it('reports the cheaper supplier and the saving for the line quantity', () => {
+    expect(cheaperElsewhere(line('g'), product('g'), suppliers)).toEqual({
+      supplierId: 'd',
+      supplierName: 'דוד',
+      price: 4,
+      saving: 10
+    })
+  })
+  it('says nothing when the line already sits at the cheapest supplier', () => {
+    expect(cheaperElsewhere(line('d'), product(), suppliers)).toBeNull()
+  })
+  it('says nothing without a product or a supplier', () => {
+    expect(cheaperElsewhere(line('g'), undefined, suppliers)).toBeNull()
+    expect(
+      cheaperElsewhere(rawLine({ productId: 'p', supplierId: null, status: 'ok' }), product('g'), suppliers)
+    ).toBeNull()
+  })
+  it('cardCheaperHints returns one entry per line', () => {
+    const card = { supplierId: 'g', name: 'מכולת', phone: null, lines: [line('g')], total: 0, partial: false }
+    const hints = cardCheaperHints(card, new Map([['p', product('g')]]), suppliers)
+    expect(hints.map((h) => h?.saving)).toEqual([10])
   })
 })

@@ -23,6 +23,8 @@ export const productSchema = z.strictObject({
   allergens: z.array(z.string()),
   minStockLevel: z.number(),
   expiryDaysDefault: z.number(),
+  /** Plan 510: the supplier the owner buys this product from; absent = cheapest. Owner-only (money field). */
+  preferredSupplierId: z.string().optional(),
   seeded: z.boolean().optional(),
   allergenSource: z.enum(['off', 'llm']).optional(),
   nutritionPer100g: z.strictObject({

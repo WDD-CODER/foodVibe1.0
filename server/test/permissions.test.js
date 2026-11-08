@@ -82,6 +82,17 @@ describe('money fields', () => {
   })
 })
 
+describe('plan 510: preferredSupplierId is owner-only', () => {
+  it('a change to the chosen supplier counts as a money change; staff-created products lose it', () => {
+    const before = { nameHebrew: 'a', sources: [{ supplierId: 's1', price: 5 }] }
+    expect(moneyFieldsChanged('products', before, { ...before, preferredSupplierId: 's1' })).toBe(true)
+    expect(moneyFieldsChanged('products', { ...before, preferredSupplierId: 's1' }, { ...before, preferredSupplierId: 's2' })).toBe(true)
+    expect(moneyFieldsChanged('products', { ...before, preferredSupplierId: 's1' }, { ...before })).toBe(true)
+    expect(moneyFieldsChanged('products', before, { ...before, nameHebrew: 'b' })).toBe(false)
+    expect(stripMoneyFields('products', { nameHebrew: 'a', preferredSupplierId: 's1' })).toEqual({ nameHebrew: 'a' })
+  })
+})
+
 describe('plan 449: money signature is keyed by row', () => {
   const doc = sources => ({ sources, purchaseOptions: [] })
   it('detects a price moved to another supplier or swapped between rows', () => {

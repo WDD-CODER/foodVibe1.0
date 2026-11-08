@@ -46,6 +46,11 @@ event supplier orders show when another supplier sells it for less.
 - `recipe-builder.page.ts` and `menu-intelligence.page.ts` are growth-frozen: do not touch them; all new UI lives in
   child components.
 
+- Step 0 (2026-11-08): plan 473 merged (chooseSupplier is the single rule). moneySignature handles a plain path (id '' + value); stripMoneyFields deletes a plain key. Generic PUT is a $set merge, so an omitted preferredSupplierId would not clear: «automatic» saves preferredSupplierId '' (chooseSupplier treats it as no choice).
+- Round 1 hand-off (fresh builder): P1–P4 re-applied from the first attempt (reviewed, unchanged). P5 no longer needs product-form.component.html: supplier-prices reads the edited product itself (route `:id` → KitchenStateService.products_()), so a pick in the recipe builder shows «נבחר» without a reload; an optional `preferredSupplierId` input still overrides.
+- Checks (round 1, fresh builder): orch-state prepare exit 0; pnpm run build exit 0; pnpm run lint exit 0 (0 errors, 67 warnings); pnpm run test:ci exit 0 (TOTAL: 1722 SUCCESS); server `npx vitest run` exit 0 (820 passed); kit-manifest-check ok; log-query no entries.
+- ESCALATE: scope-check --diff exit 1 — `SCOPE: test-out` for supplier-picker.component.spec.ts (P3 asks for it) and supplier-prices.component.spec.ts: test files under a broad `/**` glob need a scope line naming them, read from the run branch. Needed scope lines: `src/app/pages/recipe-builder/components/recipe-ingredients-table/supplier-picker/supplier-picker.component.spec.ts` and `src/app/pages/inventory/components/product-form/supplier-prices/supplier-prices.component.spec.ts`.
+
 ## Reuse Check
 - Price rule with a chosen supplier — family: helpers — rung: 2 — why: extend `chooseSupplier` (made the single rule by plan 473) with the product's `preferredSupplierId`
 - Cheaper-elsewhere calculation — family: event-plan — rung: 2 — why: add a pure helper next to `buildSupplierOrders` in `supplier-orders.util.ts`; the engine and plan snapshot stay as they are
@@ -126,11 +131,11 @@ strip money fields (grep `MONEY_FIELDS` in `server/`). Record findings in Execut
 - Hebrew strings via `translatePipe` + `dictionary.json` (append only).
 
 ## Atomic Sub-tasks
-- [ ] P1: Let a product remember which supplier the owner buys it from, owner-only — optional preferredSupplierId in the product schema and model; add it to MONEY_FIELDS.products; server permissions test that staff cannot change it — shared/schemas/entities/product.schema.ts, shared/schemas/money-fields.ts, src/app/core/models/product.model.ts, server/test/permissions.test.js
-- [ ] P2: Make the price rule use the chosen supplier and fall back to the cheapest — chooseSupplier honours preferredSupplierId when that source is priced; specs for chosen, chosen-unpriced and chosen-removed — src/app/core/engine/supplier-choice.ts, src/app/core/engine/supplier-choice.spec.ts
-- [ ] P3: Add a supplier icon to recipe lines so the owner can pick whose price to use — new supplier-picker child (inputs: product, can edit; output: picked supplier or automatic), with spec; saves the product through the product data service; read-only for staff — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [ ] P4: Show in the event supplier orders when an item is cheaper at another supplier — pure helper beside buildSupplierOrders returning cheaper supplier, price and saving per line and per card, with spec; render the line hint and card total — src/app/core/utils/supplier-orders.util.ts, its spec, src/app/pages/menu-intelligence/components/supplier-orders/**
-- [ ] P5: Mark the chosen supplier in the product form's price rows — src/app/pages/inventory/components/product-form/supplier-prices/**
+- [x] P1: Let a product remember which supplier the owner buys it from, owner-only — optional preferredSupplierId in the product schema and model; add it to MONEY_FIELDS.products; server permissions test that staff cannot change it — shared/schemas/entities/product.schema.ts, shared/schemas/money-fields.ts, src/app/core/models/product.model.ts, server/test/permissions.test.js
+- [x] P2: Make the price rule use the chosen supplier and fall back to the cheapest — chooseSupplier honours preferredSupplierId when that source is priced; specs for chosen, chosen-unpriced and chosen-removed — src/app/core/engine/supplier-choice.ts, src/app/core/engine/supplier-choice.spec.ts
+- [x] P3: Add a supplier icon to recipe lines so the owner can pick whose price to use — new supplier-picker child (inputs: product, can edit; output: picked supplier or automatic), with spec; saves the product through the product data service; read-only for staff — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
+- [x] P4: Show in the event supplier orders when an item is cheaper at another supplier — pure helper beside buildSupplierOrders returning cheaper supplier, price and saving per line and per card, with spec; render the line hint and card total — src/app/core/utils/supplier-orders.util.ts, its spec, src/app/pages/menu-intelligence/components/supplier-orders/**
+- [x] P5: Mark the chosen supplier in the product form's price rows — src/app/pages/inventory/components/product-form/supplier-prices/**
 - [ ] P6: Run the full checks and paste the output — ng build, headless ng test, server tests, log-query — Execution Notes
 
 ## Technical Considerations

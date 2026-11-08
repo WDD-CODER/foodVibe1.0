@@ -24,6 +24,8 @@ import {
   describeOrderLine,
   toWhatsAppPhone,
   type OrderHeader,
+  cardCheaperHints,
+  type CheaperElsewhere,
   type OrderLineView,
   type SupplierOrderCard
 } from 'src/app/core/utils/supplier-orders.util'
@@ -81,6 +83,12 @@ export class SupplierOrdersComponent {
       return unpriced.filter((m) => !!m.productId && ids.has(m.productId))
     })
   })
+  /** Plan 510: per card, per line — a cheaper priced supplier exists (information only). */
+  protected readonly cardHints_ = computed(() =>
+    this.orders_().cards.map((card) =>
+      cardCheaperHints(card, this.kitchenState_.productsById_(), this.kitchenState_.suppliersById_())
+    )
+  )
   protected readonly empty_ = computed(() => this.plan_().rawLines.length === 0)
   private readonly header_ = computed<OrderHeader>(() => {
     const event = this.event()
@@ -103,6 +111,21 @@ export class SupplierOrdersComponent {
   // 6. METHODS
   protected view(line: RawLine): OrderLineView {
     return describeOrderLine(line, this.t_)
+  }
+
+  protected hintText(h: CheaperElsewhere): string {
+    return this.t_('supplier_cheaper_elsewhere')
+      .replace('{supplier}', h.supplierName)
+      .replace('{price}', formatMoney(h.price))
+      .replace('{saving}', formatMoney(h.saving))
+  }
+
+  protected cardSaving(i: number): number {
+    return this.cardHints_()[i].reduce((sum, h) => sum + (h?.saving ?? 0), 0)
+  }
+
+  protected savingText(amount: number): string {
+    return this.t_('supplier_orders_possible_saving').replace('{amount}', formatMoney(amount))
   }
 
   protected money(n: number): string {

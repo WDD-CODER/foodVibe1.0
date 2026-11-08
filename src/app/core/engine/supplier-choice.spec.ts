@@ -69,3 +69,20 @@ describe('chooseSupplier', () => {
     })
   })
 })
+
+describe('chooseSupplier with a chosen supplier (plan 510)', () => {
+  const sources = [
+    { supplierId: 'a', price: 4 },
+    { supplierId: 'b', price: 5 },
+    { supplierId: 'c', price: 0 }
+  ]
+  it('uses the chosen supplier even when dearer', () => {
+    expect(chooseSupplier({ sources, preferredSupplierId: 'b' })).toEqual({ supplierId: 'b', pricePerBaseUnit: 5 })
+  })
+  it('falls back to the cheapest when the chosen supplier has no price', () => {
+    expect(chooseSupplier({ sources, preferredSupplierId: 'c' })).toEqual({ supplierId: 'a', pricePerBaseUnit: 4 })
+  })
+  it('falls back to the cheapest when the chosen supplier was removed', () => {
+    expect(chooseSupplier({ sources, preferredSupplierId: 'gone' })).toEqual({ supplierId: 'a', pricePerBaseUnit: 4 })
+  })
+})

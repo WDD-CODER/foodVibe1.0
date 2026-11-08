@@ -1,5 +1,6 @@
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { formatQty } from '../engine/rounding'
+import { chooseSupplier } from '../engine/supplier-choice'
 import type { Product } from '@models/product.model'
 import type { Supplier } from '@models/supplier.model'
 
@@ -89,6 +90,47 @@ export function buildSupplierOrders(
 
   review.sort((a, b) => byName(a.name, b.name))
   return { cards, review }
+}
+
+/** Plan 510 — another priced supplier sells this line's product for less (information only). */
+export interface CheaperElsewhere {
+  supplierId: string
+  supplierName: string
+  /** Price per base unit at the cheaper supplier. */
+  price: number
+  /** (current price − cheaper price) × the line's quantity in base units. */
+  saving: number
+}
+
+export function cheaperElsewhere(
+  line: RawLine,
+  product: Product | undefined,
+  suppliersById: Map<string, Supplier>
+): CheaperElsewhere | null {
+  if (!product || line.status !== 'ok' || !line.supplierId) return null
+  const current = chooseSupplier(product)
+  const cheapest = chooseSupplier({ sources: product.sources })
+  if (current.pricePerBaseUnit == null || cheapest.pricePerBaseUnit == null || !cheapest.supplierId) return null
+  if (cheapest.supplierId === line.supplierId || !(cheapest.pricePerBaseUnit < current.pricePerBaseUnit)) return null
+  const supplier = suppliersById.get(cheapest.supplierId)
+  if (!supplier) return null
+  return {
+    supplierId: cheapest.supplierId,
+    supplierName: supplier.nameHebrew,
+    price: cheapest.pricePerBaseUnit,
+    saving: (current.pricePerBaseUnit - cheapest.pricePerBaseUnit) * line.buyQty
+  }
+}
+
+/** Per line of the card (same order): the cheaper-elsewhere hint or null. */
+export function cardCheaperHints(
+  card: SupplierOrderCard,
+  productsById: Map<string, Product>,
+  suppliersById: Map<string, Supplier>
+): (CheaperElsewhere | null)[] {
+  return card.lines.map((l) =>
+    cheaperElsewhere(l, l.productId ? productsById.get(l.productId) : undefined, suppliersById)
+  )
 }
 
 /** Israeli mobile → WhatsApp number (`9725XXXXXXXX`), anything else → null. */

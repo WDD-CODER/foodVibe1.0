@@ -32,6 +32,8 @@ export interface Product {
   purchaseOptions: PurchaseOption_[]
   categories: string[]
   yieldFactor: number
+  /** Plan 510: supplier the owner buys this from (owner-only); absent or unpriced = cheapest. */
+  preferredSupplierId?: string
   allergens: string[]
   minStockLevel: number
   expiryDaysDefault: number

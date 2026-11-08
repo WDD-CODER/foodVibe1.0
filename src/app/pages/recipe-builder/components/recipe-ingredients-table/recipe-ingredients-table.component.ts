@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
   inject,
@@ -37,6 +38,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { map } from 'rxjs'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
+import { SupplierPickerComponent } from './supplier-picker/supplier-picker.component'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { TranslationService } from '@services/translation.service'
@@ -51,6 +53,7 @@ import {
   type NameMatchItem,
   type NameMatchOutcome
 } from '@services/product-name-matcher.service'
+import { PermissionService } from '@services/permission.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 import { formatPct1 } from 'src/app/core/engine/rounding'
@@ -86,7 +89,8 @@ const MAX_ROW_SUGGESTIONS = 5
     CdkDragHandle,
     ClickOutSideDirective,
     NutritionBadgeComponent,
-    PasteIngredientsDialogComponent
+    PasteIngredientsDialogComponent,
+    SupplierPickerComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss',
@@ -110,6 +114,7 @@ export class RecipeIngredientsTableComponent {
   private readonly recipeFormService_ = inject(RecipeFormService)
   private readonly nameMatcher_ = inject(ProductNameMatcherService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly permission_ = inject(PermissionService)
   private readonly pastedUnitResolver_ = createUnitWordResolver({
     aliases: UNIT_ALIASES,
     translate: (token) => this.translation_.resolveUnit(token),
@@ -200,6 +205,19 @@ export class RecipeIngredientsTableComponent {
 
   /** Pasted rows whose AI matching is still running — their badge reads «מחפש התאמה…» instead of «לא מוכן». */
   protected readonly matchingRows_ = signal<ReadonlySet<FormGroup>>(new Set())
+
+  /** Plan 510: choosing a product's supplier is a money edit — owner only. */
+  protected readonly canEditSupplier_ = computed(() => this.permission_.can('editMoney', { type: 'products' }))
+
+  /** Plan 510: save the owner's supplier choice on the product ('' = back to the cheapest); lines re-cost from the products signal. */
+  protected async onSupplierPicked(product: Product, supplierId: string): Promise<void> {
+    if (!this.canEditSupplier_()) return
+    try {
+      await this.kitchenStateService.saveProduct({ ...product, preferredSupplierId: supplierId })
+    } catch {
+      // saveProduct already told the user.
+    }
+  }
 
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {

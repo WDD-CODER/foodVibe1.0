@@ -40,6 +40,12 @@
     }
   }
 
+  .supplier-prices__chosen {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
   .supplier-prices__unit {
     white-space: nowrap;
     font-size: 0.8rem;

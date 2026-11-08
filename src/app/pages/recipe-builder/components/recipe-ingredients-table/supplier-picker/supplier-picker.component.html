@@ -1,0 +1,47 @@
+@if (visible_()) {
+  <span class="supplier-picker" (appClickOutside)="close()" (keydown.escape)="close()">
+    <button
+      type="button"
+      class="supplier-picker__btn c-icon-btn"
+      aria-haspopup="listbox"
+      [attr.aria-expanded]="open_()"
+      [title]="currentName_()"
+      [attr.aria-label]="'supplier_pick_title' | translatePipe"
+      (click)="toggle()"
+    >
+      <lucide-icon name="truck" [size]="16"></lucide-icon>
+    </button>
+    @if (open_()) {
+      <div class="supplier-picker__list" role="listbox" [attr.aria-label]="'supplier_pick_title' | translatePipe">
+        <button
+          type="button"
+          class="supplier-picker__row supplier-picker__auto"
+          role="option"
+          [attr.aria-selected]="auto_()"
+          [disabled]="!canEdit()"
+          (click)="pick('')"
+        >
+          <span class="supplier-picker__check">{{ auto_() ? '✓' : '' }}</span>
+          <span class="supplier-picker__name">{{ 'supplier_cheapest_auto' | translatePipe }}</span>
+        </button>
+        @for (row of rows_(); track row.supplierId) {
+          <button
+            type="button"
+            class="supplier-picker__row"
+            role="option"
+            [attr.aria-selected]="row.checked"
+            [disabled]="!canEdit()"
+            (click)="pick(row.supplierId)"
+          >
+            <span class="supplier-picker__check">{{ row.checked ? '✓' : '' }}</span>
+            <span class="supplier-picker__name">{{ row.name }}</span>
+            @if (row.cheapest) {
+              <span class="supplier-picker__tag">{{ 'supplier_cheapest' | translatePipe }}</span>
+            }
+            <span class="supplier-picker__price">₪{{ row.price }}</span>
+          </button>
+        }
+      </div>
+    }
+  </span>
+}

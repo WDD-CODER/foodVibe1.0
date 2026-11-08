@@ -44,6 +44,7 @@
             <ul class="so-lines">
               @for (line of card.lines; track $index) {
                 @let v = view(line);
+                @let hint = cardHints_()[i][$index];
                 <li class="so-line">
                   <bdi class="so-line-name">{{ v.name }}</bdi>
                   <span class="so-line-qty"
@@ -52,9 +53,15 @@
                       ({{ v.purchase }})
                     }
                   </span>
+                  @if (hint) {
+                    <small class="so-line-hint">{{ hintText(hint) }}</small>
+                  }
                 </li>
               }
             </ul>
+            @if (cardSaving(i) > 0) {
+              <p class="so-saving">{{ savingText(cardSaving(i)) }}</p>
+            }
             <p class="so-total">
               {{ 'supplier_orders_est_total' | translatePipe }}: {{ money(card.total) }}
               <app-partial-cost-badge class="so-partial" [missing]="cardMissing_()[i]"></app-partial-cost-badge>

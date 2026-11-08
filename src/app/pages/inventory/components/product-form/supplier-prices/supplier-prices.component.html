@@ -17,6 +17,9 @@
           />
           <span class="prefix">₪</span>
         </div>
+        @if (chosenId_() && chosenId_() === id) {
+          <span class="supplier-prices__chosen">{{ 'supplier_chosen' | translatePipe }}</span>
+        }
         @if (baseUnit()) {
           <span class="supplier-prices__unit">/ {{ baseUnit() | translatePipe }}</span>
         }
