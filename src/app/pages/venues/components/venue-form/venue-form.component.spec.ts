@@ -64,7 +64,10 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
         { provide: Router, useValue: router },
         { provide: RequireAuthService, useValue: { requireAuth: () => true } },
         { provide: CloudinaryService, useValue: {} },
-        { provide: UserMsgService, useValue: jasmine.createSpyObj('UserMsgService', ['onSetErrorMsg']) },
+        {
+          provide: UserMsgService,
+          useValue: jasmine.createSpyObj('UserMsgService', ['onSetErrorMsg', 'onLineRemoved'])
+        },
         { provide: TranslationService, useValue: translation }
       ]
     }).compileComponents()
@@ -134,6 +137,87 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
         { equipmentId: 'e2', availableQuantity: 3 },
         { equipmentId: 'gone', availableQuantity: 1 }
       ])
+    })
+  })
+
+  describe('opening hours rows (plan 537)', () => {
+    type Hours = {
+      venueForm_: { get: (k: string) => { setValue: (v: unknown) => void } }
+      addHoursRow: () => void
+      removeHoursRow: (i: number) => void
+      hoursArray: { at: (i: number) => { patchValue: (v: unknown) => void; value: unknown }; value: unknown[] }
+      hoursErrors_: () => Record<number, string>
+    }
+    const hours = () => component as unknown as Hours
+    const addRow = (row: { days?: string; open?: string; close?: string }) => {
+      hours().addHoursRow()
+      const i = hours().hoursArray.value.length - 1
+      hours().hoursArray.at(i).patchValue(row)
+    }
+    const sentHours = (spy: jasmine.Spy) => (spy.calls.mostRecent().args[0] as VenueProfile).operatingHours
+
+    it('drops an empty row and saves', async () => {
+      await setup(null)
+      setName('אולם')
+      hours().addHoursRow()
+      expect(await component.saveAndWait()).toBeTrue()
+      expect(venueData.addVenue.calls.mostRecent().args[0].operatingHours).toEqual([])
+    })
+
+    it('blocks a row with only an open time and marks it', async () => {
+      await setup(null)
+      setName('אולם')
+      addRow({ days: 'א׳', open: '10:00' })
+      expect(await component.saveAndWait()).toBeFalse()
+      expect(venueData.addVenue).not.toHaveBeenCalled()
+      expect(hours().hoursErrors_()[0]).toBe('missing_time')
+      expect(TestBed.inject(UserMsgService).onSetErrorMsg).toHaveBeenCalled()
+      fixture.detectChanges()
+      expect(fixture.nativeElement.querySelector('.hours-error')?.textContent).toContain('venue_hours_missing_time')
+    })
+
+    it('blocks equal open and close', async () => {
+      await setup(null)
+      setName('אולם')
+      addRow({ days: 'א׳', open: '18:00', close: '18:00' })
+      expect(await component.saveAndWait()).toBeFalse()
+      expect(hours().hoursErrors_()[0]).toBe('same_time')
+    })
+
+    it('saves an overnight row with no marker', async () => {
+      await setup(null)
+      setName('אולם')
+      addRow({ days: 'ה׳', open: '18:00', close: '02:00' })
+      fixture.detectChanges()
+      expect(fixture.nativeElement.querySelector('.hours-next-day')).toBeNull()
+      expect(await component.saveAndWait()).toBeTrue()
+      expect(sentHours(venueData.addVenue)).toEqual([{ days: 'ה׳', time: '18:00–02:00' }])
+    })
+
+    it('saves a valid row as days and an en-dash range', async () => {
+      await setup(null)
+      setName('אולם')
+      addRow({ days: 'א׳–ה׳', open: '08:00', close: '23:00' })
+      await component.saveAndWait()
+      expect(sentHours(venueData.addVenue)).toEqual([{ days: 'א׳–ה׳', time: '08:00–23:00' }])
+    })
+
+    it('hydrates a stored range into open and close', async () => {
+      await setup(VENUE)
+      expect(hours().hoursArray.value[0]).toEqual(
+        jasmine.objectContaining({ days: 'א׳–ה׳', open: '08:00', close: '23:00' })
+      )
+      expect(component.hasRealChanges()).toBeFalse()
+    })
+
+    it('blocks a stored time that does not parse until the row is removed', async () => {
+      await setup({ ...VENUE, operatingHours: [{ days: 'א׳', time: 'ערב' }] })
+      expect(await component.saveAndWait()).toBeFalse()
+      expect(venueData.updateVenue).not.toHaveBeenCalled()
+      expect(hours().hoursErrors_()[0]).toBe('missing_time')
+      hours().removeHoursRow(0)
+      expect(await component.saveAndWait()).toBeTrue()
+      expect(sentHours(venueData.updateVenue)).toEqual([])
     })
   })
 })

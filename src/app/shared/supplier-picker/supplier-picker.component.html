@@ -1,0 +1,63 @@
+@if (visible_()) {
+  <span class="supplier-picker" (appClickOutside)="close()" (keydown)="onKeydown($event)">
+    <button
+      #btn
+      type="button"
+      class="c-icon-btn supplier-picker__btn"
+      [class.is-active]="!auto_()"
+      aria-haspopup="listbox"
+      [attr.aria-expanded]="open_()"
+      [attr.aria-label]="'pick_supplier' | translatePipe"
+      [title]="title_()"
+      (click)="toggle()"
+    >
+      <lucide-icon name="truck" [size]="16"></lucide-icon>
+    </button>
+    @if (open_()) {
+      <ul #list class="supplier-picker__list" role="listbox" [attr.aria-label]="'pick_supplier' | translatePipe">
+        <li>
+          <button
+            type="button"
+            class="supplier-picker__row"
+            role="option"
+            [attr.aria-selected]="auto_()"
+            [disabled]="!canEdit()"
+            (click)="pick(null)"
+          >
+            <lucide-icon
+              class="supplier-picker__check"
+              [class.is-off]="!auto_()"
+              name="check"
+              [size]="14"
+            ></lucide-icon>
+            <span class="supplier-picker__name">{{ 'supplier_cheapest_auto' | translatePipe }}</span>
+          </button>
+        </li>
+        @for (row of rows_(); track row.supplierId) {
+          <li>
+            <button
+              type="button"
+              class="supplier-picker__row"
+              role="option"
+              [attr.aria-selected]="row.checked"
+              [disabled]="!canEdit()"
+              (click)="pick(row.supplierId)"
+            >
+              <lucide-icon
+                class="supplier-picker__check"
+                [class.is-off]="!row.checked"
+                name="check"
+                [size]="14"
+              ></lucide-icon>
+              <span class="supplier-picker__name">{{ row.name }}</span>
+              <span class="supplier-picker__price">{{ money(row.price) }}</span>
+              @if (row.cheapest) {
+                <span class="c-chip c-chip--tag c-chip--sm">{{ 'cheapest_supplier' | translatePipe }}</span>
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </span>
+}

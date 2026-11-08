@@ -185,11 +185,11 @@ files — `ok` when `hydrateForm()`, `addHoursRow()`, `removeHoursRow()`, `valid
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add time helpers that turn typed digits into a clean 24-hour time — `formatTimeDigits(raw)` (digits only,
+- [x] A1: Add time helpers that turn typed digits into a clean 24-hour time — `formatTimeDigits(raw)` (digits only,
   max 4, colon after 2) and `parseHm(text)` (`^([01]\d|2[0-3]):[0-5]\d$` → the text, else `null`), with specs:
   `0830`→`08:30`, `2400`→`24:00` and `parseHm('24:00')`→`null`, `parseHm('8:30')`→`null` —
   `src/app/core/utils/time-input.util.ts` (new), `src/app/core/utils/time-input.util.spec.ts` (new).
-- [ ] A2: Add the shared time field the chef can click or tap to pick a time — `TimeFieldComponent`
+- [x] A2: Add the shared time field the chef can click or tap to pick a time — `TimeFieldComponent`
   (`app-time-field`): standalone, OnPush, `model()` for `value` and `invalid`, `input()` for `inputId`,
   `ariaLabelKey`, `disabled`, `flagged`, `output()` `committed`; same structure as
   `src/app/shared/date-field/date-field.component.ts` with `type="time"` as the hidden picker; own `@layer
@@ -198,12 +198,12 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   click calls `showPicker`; `flagged` adds `c-input--invalid` without the message —
   `src/app/shared/time-field/time-field.component.{ts,html,scss}` (new),
   `src/app/shared/time-field/time-field.component.spec.ts` (new).
-- [ ] A3: Teach the venue-hours helpers to read, write and check an hours row — `parseTimeRange`, `formatTimeRange`,
+- [x] A3: Teach the venue-hours helpers to read, write and check an hours row — `parseTimeRange`, `formatTimeRange`,
   `checkHoursRow` (rules in P0) in `src/app/core/utils/venue-hours.util.ts`; spec cases: `08:00–23:00`,
   `8:00 - 23:00`, `08:00—23:00` parse; `ערב` → `null`; each of the seven results of `checkHoursRow`, including equal
   times → `same_time`, `18:00`/`02:00` → `overnight`, `formatTimeRange('18:00','02:00')` → `18:00–02:00` —
   `src/app/core/utils/venue-hours.util.spec.ts`.
-- [ ] A4: Put the time pickers and row checks into the venue form — in `venue-form.component.ts`: hours rows become
+- [x] A4: Put the time pickers and row checks into the venue form — in `venue-form.component.ts`: hours rows become
   `{ days, open, close }` FormGroups with no validators (`hoursRow_()` helper used by `addHoursRow()` and
   `hydrateForm()`); `hoursSubmitAttempted_` signal; `hoursErrors_` signal (row index → result) refreshed by
   `validateForm_()` and, after the first attempt, on `venueForm_.valueChanges` (`takeUntilDestroyed`);
@@ -219,9 +219,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   `time: 'ערב'` → blocked until removed; (6) removing the broken row → save goes through —
   `src/app/pages/venues/components/venue-form/venue-form.component.{ts,html,scss}`,
   `src/app/pages/venues/components/venue-form/venue-form.component.spec.ts`.
-- [ ] A5: Register the time field and add the Hebrew texts — form-field family bullet in
+- [x] A5: Register the time field and add the Hebrew texts — form-field family bullet in
   `docs/brain/component-families.md`; the seven dictionary keys in `public/assets/data/dictionary.json` (append only).
-- [ ] A6: Build and check — `pnpm run build`, `pnpm run test:ci`, `node scripts/reuse-lint.mjs --check-registry`,
+- [x] A6: Build and check — `pnpm run build`, `pnpm run test:ci`, `node scripts/reuse-lint.mjs --check-registry`,
   `node scripts/reuse-lint.mjs --diff=origin/main`, `node scripts/log-query.mjs --since=plan-start --level=error`;
   then hand over the cards below.
 
@@ -272,3 +272,9 @@ All on `/venues/add` (slot dev server, `ng serve -c local`):
   shown next to the end time (Human 2026-11-08). Equal start and end stays broken.
 
 ## Execution Notes
+- Step 0: drift = plans 374/535 merged; `hydrateForm()`, `addHoursRow()`, `removeHoursRow()`, `validateForm_()`, `persist_()`, `saveVenue_()` all exist → ok.
+- `formatTimeDigits('830')` returns `830` (colon only once four digits are typed), matching "830 stays 830".
+- ng test (4 specs) → exit 0, 42 SUCCESS; `pnpm run build` → 0; `pnpm run lint` → 0 errors; `pnpm run test:ci` → 0, 1791 SUCCESS.
+- reuse-lint --check-registry → ok; --diff=origin/main → ok; kit-manifest-check → ok.
+- log-query error: one `HTTP 409 POST /api/v1/business/team` entry, not from this plan (no venue or hours code).
+- Not run: `[ui]` e2e (plan has no `[ui]` items; Done-when [human] only).

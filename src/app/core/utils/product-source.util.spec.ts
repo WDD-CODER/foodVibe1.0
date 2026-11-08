@@ -57,4 +57,15 @@ describe('getEffectivePrice', () => {
     expect(getEffectivePrice(product([], 9))).toBe(9)
     expect(getEffectivePrice(product([]))).toBe(0)
   })
+
+  it('uses the chosen supplier when given, the cheapest when it is stale (plan 536)', () => {
+    const p = product([
+      { supplierId: 'a', price: 4 },
+      { supplierId: 'b', price: 5 },
+      { supplierId: 'c', price: 6 }
+    ])
+    expect(getEffectivePrice(p, 'c')).toBe(6)
+    expect(getEffectivePrice(p, 'gone')).toBe(4)
+    expect(getEffectivePrice(p, null)).toBe(4)
+  })
 })

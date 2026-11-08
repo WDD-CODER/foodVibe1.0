@@ -1,12 +1,17 @@
 import { computeEventPlan } from '../engine/event-plan.engine'
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { FIXTURE_IDS as ID, FIXTURE_SUPPLIERS, buildFixtureInput } from '../engine/testing/event-plan.fixture'
+import type { Product } from '@models/product.model'
 import type { Supplier } from '@models/supplier.model'
 import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cardSavings,
+  cheaperElsewhere,
   toWhatsAppPhone,
+  withMove,
+  withoutMove,
   type OrderHeader
 } from './supplier-orders.util'
 
@@ -43,6 +48,8 @@ function rawLine(partial: Partial<RawLine>): RawLine {
     netQty: 1,
     buyQty: 1,
     supplierId: null,
+    recipeSupplierId: null,
+    movedFrom: null,
     lineCost: null,
     dishIds: [],
     status: 'ok',
@@ -190,5 +197,80 @@ describe('toWhatsAppPhone', () => {
     expect(toWhatsAppPhone('03-1234567')).toBeNull()
     expect(toWhatsAppPhone('')).toBeNull()
     expect(toWhatsAppPhone(undefined)).toBeNull()
+  })
+})
+
+describe('cheaperElsewhere / cardSavings / moves (plan 536)', () => {
+  const product = {
+    _id: 'onion',
+    nameHebrew: 'בצל',
+    sources: [
+      { supplierId: 'david', price: 4 },
+      { supplierId: 'grocery', price: 5 },
+      { supplierId: 'shuk', price: 6 }
+    ]
+  } as unknown as Product
+  const suppliersById = new Map(
+    ['david', 'grocery', 'shuk'].map((id) => [id, { _id: id, nameHebrew: id } as unknown as Supplier])
+  )
+  const productsById = new Map([['onion', product]])
+
+  it('names the cheapest of three suppliers, its price and the saving', () => {
+    const line = rawLine({ productId: 'onion', supplierId: 'shuk', recipeSupplierId: 'shuk', buyQty: 10 })
+    expect(cheaperElsewhere(line, productsById, suppliersById)).toEqual({
+      supplierId: 'david',
+      supplierName: 'david',
+      price: 4,
+      saving: 20
+    })
+  })
+
+  it('gives nothing at the cheapest supplier, for a moved line, an unknown product or no supplier', () => {
+    expect(
+      cheaperElsewhere(rawLine({ productId: 'onion', supplierId: 'david', buyQty: 10 }), productsById, suppliersById)
+    ).toBeNull()
+    expect(
+      cheaperElsewhere(
+        rawLine({ productId: 'onion', supplierId: 'david', recipeSupplierId: 'shuk', movedFrom: 'shuk' }),
+        productsById,
+        suppliersById
+      )
+    ).toBeNull()
+    expect(cheaperElsewhere(rawLine({ productId: 'nope', supplierId: 'shuk' }), productsById, suppliersById)).toBeNull()
+    expect(cheaperElsewhere(rawLine({ productId: 'onion', supplierId: null }), productsById, suppliersById)).toBeNull()
+  })
+
+  it('sums the card saving over unmoved lines only', () => {
+    const card = {
+      supplierId: 'grocery',
+      name: 'grocery',
+      phone: null,
+      total: 0,
+      partial: false,
+      lines: [
+        rawLine({ productId: 'onion', supplierId: 'grocery', buyQty: 10 }),
+        rawLine({ productId: 'onion', supplierId: 'grocery', buyQty: 2, movedFrom: 'x' }),
+        rawLine({ productId: 'nope', supplierId: 'grocery', buyQty: 2 })
+      ]
+    }
+    const result = cardSavings(card, productsById, suppliersById)
+    expect(result.total).toBe(10)
+    expect(result.hints.map((h) => h?.saving ?? null)).toEqual([10, null, null])
+  })
+
+  it('withMove adds a move and replaces the same product + from-supplier', () => {
+    const a = withMove(undefined, { productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' }, productsById)
+    expect(a).toEqual([{ productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' }])
+    const b = withMove(a, { productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'grocery' }, productsById)
+    expect(b).toEqual([{ productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'grocery' }])
+  })
+
+  it('withoutMove removes the move and drops moves whose target lost its price', () => {
+    const moves = [
+      { productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' },
+      { productId: 'onion', fromSupplierId: 'grocery', toSupplierId: 'gone' }
+    ]
+    expect(withoutMove(moves, 'onion', 'shuk', productsById)).toEqual([])
+    expect(withoutMove(moves, 'onion', 'nobody', productsById)).toEqual([moves[0]])
   })
 })

@@ -66,6 +66,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
   `.c-modal-body` / `.c-modal-actions` inside it. Simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
   `ConfirmModalService.open(msg, { typedConfirm })` — confirm waits for an exact typed text (plan 486).
 - When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
+- Stacking: `[zIndex]` takes a `--z-*` token (`src/styles.scss`, plan 538); `[topLayer]` puts a popup in the browser top layer (the confirm popup uses both, so a question is always in front).
 - Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
@@ -136,6 +137,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
+- Times (plan 537): every time of day is `app-time-field` (`src/app/shared/time-field/`); the only `type="time"` left is its hidden picker. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
 - Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
 
 ### number-box — tap anywhere on a number box to edit the number
@@ -191,6 +193,12 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Status: stable (MVP)
 - Use: `src/app/shared/partial-cost-badge/` · `app-partial-cost-badge`.
 - When: a cost is shown that may be missing prices.
+- Known copies: none.
+
+### supplier-picker — pick one of a product's suppliers for a line
+- Status: stable (plan 536)
+- Use: `src/app/shared/supplier-picker/` · `app-supplier-picker` (inputs `product`, `value`, `canEdit`; output `picked`). Fixed popover placed with `placeInViewport`.
+- When: a line may be bought from one of several priced suppliers and the owner chooses.
 - Known copies: none.
 
 ### engine-classes — shared `.c-*` CSS engines

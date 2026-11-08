@@ -124,15 +124,16 @@
               {{ item.address }}
             </p>
           }
-          @let hours = venueHours(item);
-          @if (hours.first) {
-            <p class="venue-card-hours">
+          @let hoursLines = venueHoursLines(item);
+          @if (hoursLines.length) {
+            <div class="venue-card-hours">
               <lucide-icon name="clock" [size]="14"></lucide-icon>
-              <span class="venue-card-hours-text">{{ hours.first }}</span>
-              @if (hours.extra > 0) {
-                <span class="venue-card-hours-extra">+{{ hours.extra }}</span>
-              }
-            </p>
+              <ul class="venue-card-hours-list">
+                @for (line of hoursLines; track $index) {
+                  <li class="venue-card-hours-text">{{ line }}</li>
+                }
+              </ul>
+            </div>
           }
           <div class="venue-card-meta">
             <span class="c-chip c-chip--tag c-chip--glass">{{ item.environmentType | translatePipe }}</span>

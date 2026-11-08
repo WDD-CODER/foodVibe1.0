@@ -349,7 +349,7 @@ export class RecipeCostService {
       const product = this.kitchenState_.productsById_().get(ing.referenceId ?? '') as Product | undefined
       if (!product) return 0
       const yieldFactor = product.yieldFactor || 1
-      const price = getEffectivePrice(product)
+      const price = getEffectivePrice(product, ing.supplierId)
       const unitOption = product.purchaseOptions?.find((o) => o.unitSymbol === ing.unit)
       let normalizedAmount: number
       if (unitOption) {

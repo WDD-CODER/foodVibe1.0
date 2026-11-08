@@ -7,4 +7,6 @@ export interface Ingredient {
   note?: string
   calculatedCost?: number
   nameSnapshot?: string
+  /** Plan 536: the supplier this line is bought from; absent = automatic = cheapest. Owner-only. */
+  supplierId?: string
 }

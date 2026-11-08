@@ -86,6 +86,23 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
     expect(master.ingredients[0].referenceId).toBe('mp1');
   });
 
+  it('plan 536: the master copy has no line supplierId while the caller own recipe keeps it', async () => {
+    await testDb().collection('products').insertMany([
+      { _id: 'mp1', userId: '__master__', businessId: '__master__', nameHebrew: 'בצל' },
+      { _id: 'up1', userId: 'userA', businessId: 'b_userA', _masterId: 'mp1', nameHebrew: 'בצל' },
+    ]);
+    await testDb().collection('recipes').insertMany([
+      { _id: 'mr1', userId: '__master__', businessId: '__master__', nameHebrew: 'מרק' },
+      { _id: 'ur1', userId: 'userA', businessId: 'b_userA', _masterId: 'mr1', _userModified: true, nameHebrew: 'מרק', ingredients: [{ _id: 'l1', referenceId: 'up1', type: 'product', supplierId: 'sup1' }] },
+    ]);
+    await request(app).put('/api/v1/data/recipes/ur1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
+    const master = await testDb().collection('recipes').findOne({ _id: 'mr1' });
+    expect(master.ingredients[0].referenceId).toBe('mp1');
+    expect(master.ingredients[0]).not.toHaveProperty('supplierId');
+    const mine = await testDb().collection('recipes').findOne({ _id: 'ur1' });
+    expect(mine.ingredients[0].supplierId).toBe('sup1');
+  });
+
   it('pushing a product never adds an ingredients field to the master copy (update path)', async () => {
     await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'old' });
     await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });

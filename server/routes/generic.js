@@ -747,7 +747,7 @@ async function pushDocToMasterRecursive(type, id, businessId, visited, pusherId)
   // master copy made the strict v2 schema reject every later PUT on it and on all its clones.
   const hasIngredients = type === 'recipes' || type === 'dishes';
   const sourceIngredients = hasIngredients && Array.isArray(existing.ingredients) ? existing.ingredients : [];
-  const ingredients = await Promise.all(
+  const repointed = await Promise.all(
     sourceIngredients.map(async (ing) => {
       if (typeof ing.referenceId !== 'string' || !ing.referenceId) return ing;
       const lookupTypes = ing.type === 'recipe' ? ['recipes', 'dishes'] : ['products'];
@@ -769,6 +769,8 @@ async function pushDocToMasterRecursive(type, id, businessId, visited, pusherId)
       return ing;
     })
   );
+  // Plan 536: a line's supplier id belongs to one business; it never reaches the shared catalog.
+  const ingredients = repointed.map(({ supplierId: _s, ...rest }) => rest);
 
   // Per-user state never reaches the shared copy (plan 407): the owner's favorite mark and delete stamps.
   const { userId: _u, businessId: _bz, createdBy: _cz, _masterId: _m, _userModified: _um, _id: _i, favorite: _f, deletedAt: _da, deletedBy: _db, purgedAt: _pa, ...safeBody } = existing;

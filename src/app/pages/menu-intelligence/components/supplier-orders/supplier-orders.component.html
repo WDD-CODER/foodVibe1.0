@@ -52,6 +52,41 @@
                       ({{ v.purchase }})
                     }
                   </span>
+                  @if (line.movedFrom) {
+                    <span class="so-line-hint">
+                      {{ movedFromText(line) }}
+                      @if (canMove_()) {
+                        <button
+                          type="button"
+                          class="c-chip c-chip--tap so-move-btn"
+                          [disabled]="isSaving_() || !canSaveMove_()"
+                          [attr.aria-busy]="isSaving_()"
+                          (click)="undoMove(line)"
+                        >
+                          <lucide-icon name="undo-2" [size]="14"></lucide-icon>
+                          {{ moveBackText(line) }}
+                        </button>
+                      }
+                    </span>
+                  } @else {
+                    @if (savings_()[i].hints[$index]; as hint) {
+                      <span class="so-line-hint">
+                        {{ hintText(hint) }}
+                        @if (canMove_()) {
+                          <button
+                            type="button"
+                            class="c-chip c-chip--tap so-move-btn"
+                            [disabled]="isSaving_() || !canSaveMove_()"
+                            [attr.aria-busy]="isSaving_()"
+                            [attr.title]="canSaveMove_() ? null : ('supplier_move_save_first' | translatePipe)"
+                            (click)="moveLine(line, hint)"
+                          >
+                            {{ moveToText(hint) }}
+                          </button>
+                        }
+                      </span>
+                    }
+                  }
                 </li>
               }
             </ul>
@@ -59,6 +94,9 @@
               {{ 'supplier_orders_est_total' | translatePipe }}: {{ money(card.total) }}
               <app-partial-cost-badge class="so-partial" [missing]="cardMissing_()[i]"></app-partial-cost-badge>
             </p>
+            @if (savings_()[i].total > 0) {
+              <p class="so-saving">{{ canSaveText(savings_()[i].total) }}</p>
+            }
             <div class="so-actions">
               <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="copyCard(card)">
                 <lucide-icon name="copy" [size]="16"></lucide-icon>

@@ -27,6 +27,8 @@ interface Contribution {
   status: RawLineStatus
   /** The recipe whose ingredient row this came from. */
   recipeId: string
+  /** Plan 536: the supplier the recipes buy this from (the line's choice, else the cheapest); null = none. */
+  recipeSupplierId: string | null
 }
 
 interface LineAcc {
@@ -39,11 +41,16 @@ interface LineAcc {
   status: RawLineStatus
   dishIds: Set<string>
   recipeIds: Set<string>
+  recipeSupplierId: string | null
 }
 
 interface Price {
   supplierId: string | null
   perBase: number | null
+  /** Plan 536: the supplier the recipes use, before an event move. */
+  recipeSupplierId: string | null
+  /** Plan 536: set when the event moved this item from that supplier. */
+  movedFrom: string | null
 }
 
 interface ItemContext {
@@ -72,22 +79,46 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
   const missing: MissingItem[] = []
   const priceCache = new Map<string, Price>()
 
-  const priceOf = (product: Product): Price => {
-    const cached = priceCache.get(product._id)
+  const moves = input.event.supplierMoves ?? []
+
+  const priceOf = (product: Product, chosenSupplierId?: string | null): Price => {
+    const cacheKey = `${product._id}|${chosenSupplierId ?? ''}`
+    const cached = priceCache.get(cacheKey)
     if (cached) return cached
-    const choice = chooseSupplier(product)
-    let price: Price = { supplierId: choice.supplierId, perBase: choice.pricePerBaseUnit }
+    const choice = chooseSupplier(product, chosenSupplierId)
+    let price: Price = {
+      supplierId: choice.supplierId,
+      perBase: choice.pricePerBaseUnit,
+      recipeSupplierId: choice.supplierId,
+      movedFrom: null
+    }
     if (price.perBase == null) {
       for (const opt of product.purchaseOptions ?? []) {
         if (!(opt.priceOverride != null && opt.priceOverride > 0)) continue
         const rate = optionRateInBase(product, opt, units)
         if (rate > 0) {
-          price = { supplierId: null, perBase: opt.priceOverride / rate }
+          price = { supplierId: null, perBase: opt.priceOverride / rate, recipeSupplierId: null, movedFrom: null }
           break
         }
       }
     }
-    priceCache.set(product._id, price)
+    // Plan 536: an event move applies only when the target supplier still has a positive price on the product.
+    const recipeSupplier = price.recipeSupplierId
+    const move = recipeSupplier
+      ? moves.find((m) => m.productId === product._id && m.fromSupplierId === recipeSupplier)
+      : undefined
+    if (move) {
+      const target = (product.sources ?? []).find((src) => src.supplierId === move.toSupplierId && src.price > 0)
+      if (target) {
+        price = {
+          supplierId: move.toSupplierId,
+          perBase: target.price,
+          recipeSupplierId: recipeSupplier,
+          movedFrom: recipeSupplier
+        }
+      }
+    }
+    priceCache.set(cacheKey, price)
     return price
   }
 
@@ -143,7 +174,8 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
         unit,
         net: amount,
         status: 'unlinked',
-        recipeId: recipe._id
+        recipeId: recipe._id,
+        recipeSupplierId: null
       })
       return
     }
@@ -160,18 +192,21 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
           unit,
           net: amount,
           status: 'no_conversion',
-          recipeId: recipe._id
+          recipeId: recipe._id,
+          recipeSupplierId: null
         })
       } else {
+        const recipeSupplierId = priceOf(product, ing.supplierId).recipeSupplierId
         ctx.contributions.push({
-          key: product._id,
+          key: `${product._id}|${recipeSupplierId ?? ''}`,
           productId: product._id,
           product,
           name: product.nameHebrew,
           unit: product.baseUnit || 'gram',
           net: base,
           status: 'ok',
-          recipeId: recipe._id
+          recipeId: recipe._id,
+          recipeSupplierId
         })
       }
       return
@@ -216,7 +251,8 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
       unit,
       net: amount,
       status: 'deleted',
-      recipeId: recipe._id
+      recipeId: recipe._id,
+      recipeSupplierId: null
     })
   }
 
@@ -271,14 +307,15 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
             net: c.net,
             status: c.status,
             dishIds: new Set(),
-            recipeIds: new Set()
+            recipeIds: new Set(),
+            recipeSupplierId: c.recipeSupplierId
           })
         }
         const line = lines.get(c.key) as LineAcc
         line.dishIds.add(recipe._id)
         line.recipeIds.add(c.recipeId)
 
-        const perBase = c.status === 'ok' && c.product ? priceOf(c.product).perBase : null
+        const perBase = c.status === 'ok' && c.product ? priceOf(c.product, c.recipeSupplierId).perBase : null
         if (perBase == null || !c.product) partial = true
         else cost += (c.net / wasteDivisor(c.product)) * perBase
       }
@@ -297,6 +334,8 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
         netQty: acc.net,
         buyQty: acc.net,
         supplierId: null,
+        recipeSupplierId: null,
+        movedFrom: null,
         lineCost: null,
         dishIds,
         status: acc.status
@@ -310,7 +349,7 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
     }
     const product = acc.product
     const buyQty = acc.net / wasteDivisor(product)
-    const price = priceOf(product)
+    const price = priceOf(product, acc.recipeSupplierId)
     const line: RawLine = {
       productId: acc.productId,
       name: acc.name,
@@ -318,6 +357,8 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
       netQty: acc.net,
       buyQty,
       supplierId: price.supplierId,
+      recipeSupplierId: price.recipeSupplierId,
+      movedFrom: price.movedFrom,
       lineCost: price.perBase == null ? null : buyQty * price.perBase,
       dishIds,
       status: 'ok'

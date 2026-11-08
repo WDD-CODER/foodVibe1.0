@@ -81,7 +81,11 @@ export class RecipeFormService {
         amount_net: [item ? 1 : null, [Validators.min(0)]],
         yield_percentage: [item?.yield_percentage ?? 1],
         unit: [item?.baseUnit ?? 'gram'],
-        total_cost: [0]
+        total_cost: [0],
+        // Plan 536: the supplier this line is bought from; null = automatic (cheapest).
+        supplierId: [null as string | null],
+        // The stored line's _id, kept across saves; null for a new line.
+        lineId: [null as string | null]
       },
       { validators: (c) => this.ingredientRowValidator(c) }
     )
@@ -183,6 +187,13 @@ export class RecipeFormService {
 
   // ─── Build / Patch ────────────────────────────────────────────────
 
+  /** Plan 536: a line's supplier is saved only while that supplier still has a positive price on the product. */
+  private hasPricedSupplier(ing: { referenceId?: string; item_type?: string; supplierId?: string | null }): boolean {
+    if (!ing.supplierId || !ing.referenceId || ing.item_type === 'recipe') return false
+    const product = this.state.products_().find((p) => p._id === ing.referenceId)
+    return !!product?.sources?.some((src) => src.supplierId === ing.supplierId && src.price > 0)
+  }
+
   buildRecipeFromForm(form: FormGroup, recipeId: string | null, isApproved: boolean): Recipe {
     const raw = form.getRawValue() as Record<string, unknown>
     const isDish = raw['recipe_type'] === 'dish'
@@ -195,6 +206,8 @@ export class RecipeFormService {
       total_cost?: number
       nameSnapshot?: string
       nameHebrew?: string
+      supplierId?: string | null
+      lineId?: string | null
     }
     const rawIngredients = (raw['ingredients'] || []) as IngRow[]
     const ingredients: Ingredient[] = rawIngredients
@@ -204,7 +217,8 @@ export class RecipeFormService {
         return !!ing?.nameHebrew?.trim()
       })
       .map((ing) => ({
-        _id: 'ing_' + Math.random().toString(36).slice(2, 9),
+        // Keep a stored line's id: the server compares owner-only fields (the line supplier) row by row on _id.
+        _id: ing.lineId || 'ing_' + Math.random().toString(36).slice(2, 9),
         ...(ing.referenceId ? { referenceId: ing.referenceId } : {}),
         ...(ing.referenceId
           ? { type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe' }
@@ -212,7 +226,8 @@ export class RecipeFormService {
         amount: ing.amount_net ?? 0,
         unit: ing.unit ?? '',
         calculatedCost: ing.referenceId ? (ing.total_cost ?? 0) : 0,
-        nameSnapshot: ing.nameSnapshot || ing.nameHebrew || ''
+        nameSnapshot: ing.nameSnapshot || ing.nameHebrew || '',
+        ...(this.hasPricedSupplier(ing) ? { supplierId: ing.supplierId as string } : {})
       }))
 
     const steps: RecipeStep[] = []
@@ -424,6 +439,8 @@ export class RecipeFormService {
         unit: ing.unit,
         // Live cost when the item is known (a unit's conversion or a price may have changed
         // since the recipe was saved); the saved cost only when the item is gone (plan 377).
+        supplierId: ing.supplierId ?? null,
+        lineId: ing._id ?? null,
         total_cost: item
           ? this.recipeCost.getCostForIngredient({ ...ing, referenceId: resolvedRefId, type: resolvedType ?? ing.type })
           : (ing.calculatedCost ?? 0)

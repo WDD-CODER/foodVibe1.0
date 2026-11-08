@@ -121,7 +121,7 @@ function stripMoneyFields(type, body) {
 }
 
 /** Field that identifies a row of a money-bearing list, so a price is compared with the SAME row's price. */
-const ROW_KEY_FIELDS = { sources: 'supplierId', purchaseOptions: 'unitSymbol', suppliers: 'supplierId' }
+const ROW_KEY_FIELDS = { sources: 'supplierId', purchaseOptions: 'unitSymbol', suppliers: 'supplierId', ingredients: '_id' }
 
 /** [{ id, value }] for every value at `path`; `id` joins the stable key of each list row on the way down. */
 function keyedValuesAt(doc, path) {

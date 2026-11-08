@@ -274,3 +274,95 @@ describe('computeEventPlan', () => {
     expect(plan.partial).toBeTrue()
   })
 })
+
+describe('computeEventPlan supplier choice and moves (plan 536)', () => {
+  const onion = () =>
+    makeProduct({
+      _id: 'onion',
+      nameHebrew: 'בצל',
+      baseUnit: 'kg',
+      sources: [
+        { supplierId: 'david', price: 4, addedAt: 0 },
+        { supplierId: 'grocery', price: 5, addedAt: 0 },
+        { supplierId: 'shuk', price: 6, addedAt: 0 }
+      ]
+    })
+  const soup = makeRecipe({
+    _id: 'soup',
+    nameHebrew: 'מרק',
+    recipeType: 'dish',
+    ingredients: [{ ...productIng('onion', 2, 'kg', 'בצל'), supplierId: 'shuk' }]
+  })
+  const salad = makeRecipe({
+    _id: 'salad',
+    nameHebrew: 'סלט',
+    recipeType: 'dish',
+    ingredients: [productIng('onion', 1, 'kg', 'בצל')]
+  })
+  const plan = (
+    event = makeEvent([
+      { recipeId: 'soup', derivedPortions: 1 },
+      { recipeId: 'salad', derivedPortions: 1 }
+    ])
+  ) => computeEventPlan(makeInput(event, [onion()], [soup, salad]))
+
+  it('two recipes on two suppliers give two lines', () => {
+    const lines = plan().rawLines
+    expect(lines.length).toBe(2)
+    expect(lines.find((l) => l.supplierId === 'shuk')?.buyQty).toBe(2)
+    expect(lines.find((l) => l.supplierId === 'david')?.buyQty).toBe(1)
+    expect(lines.every((l) => l.movedFrom === null)).toBeTrue()
+  })
+
+  it('a move puts the item on the target supplier and costs its price', () => {
+    const event = {
+      ...makeEvent([{ recipeId: 'soup', derivedPortions: 1 }]),
+      supplierMoves: [{ productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' }]
+    }
+    const p = computeEventPlan(makeInput(event, [onion()], [soup]))
+    expect(p.rawLines.length).toBe(1)
+    expect(p.rawLines[0]).toEqual(
+      jasmine.objectContaining({ supplierId: 'david', recipeSupplierId: 'shuk', movedFrom: 'shuk', lineCost: 8 })
+    )
+    expect(p.eventFoodCost).toBe(8)
+    expect(p.dishCosts[0].cost).toBe(8)
+  })
+
+  it('a move whose target lost its price is ignored', () => {
+    const product = onion()
+    product.sources = product.sources.map((s) => (s.supplierId === 'david' ? { ...s, price: 0 } : s))
+    const event = {
+      ...makeEvent([{ recipeId: 'soup', derivedPortions: 1 }]),
+      supplierMoves: [{ productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' }]
+    }
+    const p = computeEventPlan(makeInput(event, [product], [soup]))
+    expect(p.rawLines[0]).toEqual(jasmine.objectContaining({ supplierId: 'shuk', movedFrom: null, lineCost: 12 }))
+  })
+
+  it('a move whose from-supplier no longer matches the recipe is ignored', () => {
+    const event = {
+      ...makeEvent([{ recipeId: 'soup', derivedPortions: 1 }]),
+      supplierMoves: [{ productId: 'onion', fromSupplierId: 'grocery', toSupplierId: 'david' }]
+    }
+    const p = computeEventPlan(makeInput(event, [onion()], [soup]))
+    expect(p.rawLines[0].supplierId).toBe('shuk')
+  })
+
+  it('a prep sub-recipe line keeps its own supplier', () => {
+    const prep = makeRecipe({
+      _id: 'prep',
+      nameHebrew: 'בסיס',
+      yieldAmount: 1,
+      yieldUnit: 'kg',
+      ingredients: [{ ...productIng('onion', 3, 'kg', 'בצל'), supplierId: 'grocery' }]
+    })
+    const dish = makeRecipe({
+      _id: 'd',
+      nameHebrew: 'מנה',
+      recipeType: 'dish',
+      ingredients: [recipeIng('prep', 1, 'kg', 'בסיס')]
+    })
+    const p = computeEventPlan(makeInput(makeEvent([{ recipeId: 'd', derivedPortions: 1 }]), [onion()], [prep, dish]))
+    expect(p.rawLines[0]).toEqual(jasmine.objectContaining({ supplierId: 'grocery', lineCost: 15 }))
+  })
+})

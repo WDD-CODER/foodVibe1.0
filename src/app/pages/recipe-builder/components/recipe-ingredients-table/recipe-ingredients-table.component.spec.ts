@@ -12,6 +12,7 @@ import { Product } from '@models/product.model'
 import { ProductUnitAdded } from '@services/unit-registry.service'
 import { GeminiService } from '@services/gemini.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { PermissionService } from '@services/permission.service'
 import { ProductDataService } from '@services/product-data.service'
 import { By } from '@angular/platform-browser'
 import { IngredientSearchComponent } from '../ingredient-search/ingredient-search.component'
@@ -400,6 +401,69 @@ describe('RecipeIngredientsTableComponent', () => {
       expect(rows()[0].get('amount_net')?.value).toBe(200)
       expect(rows()[0].get('unit')?.value).toBe('gram')
       expect(internals().suggestionsFor(rows()[0])).toEqual([])
+    })
+  })
+
+  // Plan 536 - each line keeps its own supplier; only the owner picks.
+  describe('line supplier (plan 536)', () => {
+    const onion = {
+      _id: 'onion',
+      nameHebrew: 'בצל',
+      baseUnit: 'kg',
+      yieldFactor: 1,
+      purchaseOptions: [],
+      sources: [
+        { supplierId: 'david', price: 4 },
+        { supplierId: 'shuk', price: 6 }
+      ]
+    } as unknown as Product
+    const row = () => component.ingredientsFormArray().at(0) as FormGroup
+    const pick = (id: string | null) =>
+      (component as unknown as { onSupplierPicked(g: FormGroup, id: string | null): void }).onSupplierPicked(row(), id)
+
+    beforeEach(() => {
+      spyOn(TestBed.inject(KitchenStateService), 'products_').and.returnValue([onion])
+      const arr = fb.array([
+        fb.group({
+          amount_net: [2],
+          nameHebrew: ['בצל'],
+          referenceId: ['onion'],
+          item_type: ['product'],
+          unit: ['kg'],
+          total_cost: [0],
+          supplierId: [null as string | null]
+        })
+      ])
+      fixture.componentRef.setInput('ingredientsFormArray', arr)
+      fixture.detectChanges()
+    })
+
+    it('an owner pick sets the control, makes the form dirty and re-costs the line', () => {
+      spyOn(TestBed.inject(PermissionService), 'can').and.returnValue(true)
+      pick('shuk')
+      expect(row().get('supplierId')?.value).toBe('shuk')
+      expect(row().get('supplierId')?.dirty).toBeTrue()
+      expect(component.ingredientsFormArray().dirty).toBeTrue()
+      expect(row().get('total_cost')?.value).toBe(12)
+      pick(null)
+      expect(row().get('total_cost')?.value).toBe(8)
+    })
+
+    it('staff cannot set it', () => {
+      spyOn(TestBed.inject(PermissionService), 'can').and.returnValue(false)
+      pick('shuk')
+      expect(row().get('supplierId')?.value).toBeNull()
+      expect(row().get('total_cost')?.value).toBe(8)
+    })
+
+    it('picking another product or clearing the row resets the supplier', () => {
+      spyOn(TestBed.inject(PermissionService), 'can').and.returnValue(true)
+      pick('shuk')
+      component.onItemSelected({ ...onion, item_type_: 'product' } as never, row())
+      expect(row().get('supplierId')?.value).toBeNull()
+      pick('shuk')
+      component.clearIngredient(row())
+      expect(row().get('supplierId')?.value).toBeNull()
     })
   })
 })

@@ -5,8 +5,8 @@ import { chooseSupplier } from '../engine/supplier-choice'
  * Effective base price per base_unit: the one price rule (`chooseSupplier`) — the cheapest priced supplier,
  * else the no-supplier price — then the deprecated buy_price_global_.
  */
-export function getEffectivePrice(product: Product): number {
-  return chooseSupplier(product).pricePerBaseUnit ?? product.buy_price_global_ ?? 0
+export function getEffectivePrice(product: Product, chosenSupplierId?: string | null): number {
+  return chooseSupplier(product, chosenSupplierId).pricePerBaseUnit ?? product.buy_price_global_ ?? 0
 }
 
 /**

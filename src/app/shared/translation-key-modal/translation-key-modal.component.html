@@ -1,5 +1,5 @@
 @if (isOpen_()) {
-  <app-modal-shell size="md" [titleKey]="title_()" [zIndex]="1200" (dismissed)="cancel()">
+  <app-modal-shell size="md" [titleKey]="title_()" [zIndex]="'var(--z-modal-nested-2)'" (dismissed)="cancel()">
     <div class="c-modal-body">
       <div class="c-input-stack full-width">
         <label>{{ firstFieldLabelKey_() | translatePipe }}</label>

@@ -2,7 +2,7 @@ import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { By } from '@angular/platform-browser'
 import { LucideAngularModule } from 'lucide-angular'
-import { MessageCircle } from 'lucide-angular'
+import { MessageCircle, Undo2 } from 'lucide-angular'
 import { EventPlanService } from 'src/app/core/engine/event-plan.service'
 import { computeEventPlan } from 'src/app/core/engine/event-plan.engine'
 import { FIXTURE_SUPPLIERS, buildFixtureInput, makeEvent } from 'src/app/core/engine/testing/event-plan.fixture'
@@ -14,6 +14,11 @@ import { UserMsgService } from '@services/user-msg.service'
 import { BusinessService } from '@services/business.service'
 import { UserService } from '@services/user.service'
 import { ProductDataService } from '@services/product-data.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
+import { PermissionService } from '@services/permission.service'
+import type { MenuEvent } from '@models/menu-event.model'
+import type { Product } from '@models/product.model'
+import { makeProduct, makeRecipe, makeInput, productIng } from 'src/app/core/engine/testing/event-plan.fixture'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { SupplierOrdersComponent } from './supplier-orders.component'
 
@@ -37,6 +42,10 @@ describe('SupplierOrdersComponent', () => {
   let userMsg: jasmine.SpyObj<UserMsgService>
   let writeText: jasmine.Spy
   let openSpy: jasmine.Spy
+  let storedEvents: MenuEvent[]
+  let updateMenuEvent: jasmine.Spy
+  let isOwner: boolean
+  let extraProducts: Product[]
   const sharePrev = Object.getOwnPropertyDescriptor(Navigator.prototype, 'share')
 
   const veg = (): Supplier => suppliers[1]
@@ -55,18 +64,20 @@ describe('SupplierOrdersComponent', () => {
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
     translation.translate.and.callFake((k: string | undefined) => TEXTS[k ?? ''] ?? k ?? '')
     TestBed.configureTestingModule({
-      imports: [SupplierOrdersComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, MessageCircle })],
+      imports: [SupplierOrdersComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, MessageCircle, Undo2 })],
       providers: [
         { provide: EventPlanService, useValue: planService },
         {
           provide: KitchenStateService,
           useValue: {
-            productsById_: signal(new Map(input.products.map((p) => [p._id, p]))),
+            productsById_: signal(new Map([...input.products, ...extraProducts].map((p) => [p._id, p]))),
             suppliersById_: signal(new Map(suppliers.map((s) => [s._id, s])))
           }
         },
         { provide: TranslationService, useValue: translation },
         { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
+        { provide: MenuEventDataService, useValue: { allMenuEvents_: signal(storedEvents), updateMenuEvent } },
+        { provide: PermissionService, useValue: { can: () => isOwner } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: BusinessService, useValue: { business_: signal({ name: 'מטבח בדיקה' }) } },
         { provide: UserService, useValue: { user_: signal({ name: 'שם האדם' }) } }
@@ -84,9 +95,17 @@ describe('SupplierOrdersComponent', () => {
   }
 
   beforeEach(() => {
+    storedEvents = []
+    isOwner = true
+    extraProducts = []
+    updateMenuEvent = jasmine.createSpy('updateMenuEvent').and.callFake((e: MenuEvent) => Promise.resolve(e))
     plan = computeEventPlan(buildFixtureInput())
     suppliers = FIXTURE_SUPPLIERS.map((s) => ({ ...s }))
-    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetWarningMsg'])
+    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', [
+      'onSetSuccessMsg',
+      'onSetWarningMsg',
+      'onSetErrorMsg'
+    ])
     writeText = jasmine.createSpy('writeText').and.resolveTo()
     spyOnProperty(navigator, 'clipboard', 'get').and.returnValue({ writeText } as unknown as Clipboard)
     openSpy = spyOn(window, 'open').and.returnValue(null)
@@ -189,5 +208,89 @@ describe('SupplierOrdersComponent', () => {
     expect(spy).toHaveBeenCalledTimes(1)
     click('.c-modal-overlay')
     expect(spy).toHaveBeenCalledTimes(2)
+  })
+
+  describe('cheaper elsewhere and per-event move (plan 536)', () => {
+    const onion = makeProduct({
+      _id: 'onion',
+      nameHebrew: 'בצל',
+      baseUnit: 'kg',
+      sources: [
+        { supplierId: 'david', price: 4, addedAt: 0 },
+        { supplierId: 'shuk', price: 6, addedAt: 0 }
+      ]
+    })
+    const soup = makeRecipe({
+      _id: 'soup',
+      nameHebrew: 'מרק',
+      recipeType: 'dish',
+      ingredients: [{ ...productIng('onion', 2, 'kg', 'בצל'), supplierId: 'shuk' }]
+    })
+
+    function createWithOnion(moves?: MenuEvent['supplierMoves'], withId = true): void {
+      suppliers = [
+        { _id: 'david', nameHebrew: 'דוד' } as unknown as Supplier,
+        { _id: 'shuk', nameHebrew: 'שוק' } as unknown as Supplier
+      ]
+      extraProducts = [onion]
+      const base = {
+        ...makeEvent([{ recipeId: 'soup', derivedPortions: 1 }]),
+        ...(moves ? { supplierMoves: moves } : {})
+      }
+      const event: MenuEvent = withId ? base : { ...base, _id: '' }
+      storedEvents = withId ? [event] : []
+      plan = computeEventPlan(makeInput(event, [onion], [soup]))
+      create()
+      fixture.componentRef.setInput('event', event)
+      fixture.detectChanges()
+    }
+    const text = (): string => (fixture.nativeElement as HTMLElement).textContent ?? ''
+    const buttons = (): HTMLButtonElement[] => Array.from(fixture.nativeElement.querySelectorAll('.so-move-btn'))
+
+    it('shows the hint and the move button on the dearer supplier card', () => {
+      createWithOnion()
+      expect(text()).toContain('cheaper_at_supplier')
+      expect(buttons().length).toBe(1)
+      expect(buttons()[0].disabled).toBeFalse()
+    })
+
+    it('a click saves the stored event with the move added', async () => {
+      createWithOnion()
+      buttons()[0].click()
+      await fixture.whenStable()
+      expect(updateMenuEvent).toHaveBeenCalledTimes(1)
+      const saved = updateMenuEvent.calls.mostRecent().args[0] as MenuEvent
+      expect(saved.supplierMoves).toEqual([{ productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' }])
+    })
+
+    it('a moved line shows where it came from and the undo button removes the move', async () => {
+      createWithOnion([{ productId: 'onion', fromSupplierId: 'shuk', toSupplierId: 'david' }])
+      expect(text()).toContain('supplier_moved_from')
+      expect(text()).not.toContain('cheaper_at_supplier')
+      buttons()[0].click()
+      await fixture.whenStable()
+      expect((updateMenuEvent.calls.mostRecent().args[0] as MenuEvent).supplierMoves).toEqual([])
+    })
+
+    it('staff see the hint but no move or undo button', () => {
+      isOwner = false
+      createWithOnion()
+      expect(text()).toContain('cheaper_at_supplier')
+      expect(buttons().length).toBe(0)
+    })
+
+    it('the button is disabled while the event is not saved', () => {
+      createWithOnion(undefined, false)
+      expect(buttons()[0].disabled).toBeTrue()
+    })
+
+    it('a save error shows save_failed and writes nothing else', async () => {
+      updateMenuEvent = jasmine.createSpy('updateMenuEvent').and.rejectWith(new Error('x'))
+      createWithOnion()
+      buttons()[0].click()
+      await fixture.whenStable()
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('save_failed')
+      expect(buttons().length).toBe(1)
+    })
   })
 })

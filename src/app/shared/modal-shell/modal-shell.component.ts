@@ -51,6 +51,7 @@ export class ModalShellComponent {
   private readonly shellId_ = pushModalShell()
   private readonly opener_ = this.document_.activeElement as HTMLElement | null
   private readonly card_ = viewChild.required<ElementRef<HTMLElement>>('card')
+  private readonly overlay_ = viewChild.required<ElementRef<HTMLElement>>('overlay')
 
   /** `sm` = engine default width, `md` = `.c-modal-card--md`, `fluid` = `.c-modal-card--fluid`. */
   readonly size = input<ModalShellSize>('sm')
@@ -64,8 +65,10 @@ export class ModalShellComponent {
   readonly cardClass = input<string>('')
   /** False while the popup is busy (AI generation, saving): Escape and backdrop click do nothing. */
   readonly dismissible = input(true)
-  /** Stacking order override for a popup opened from inside another popup. */
-  readonly zIndex = input<number | null>(null)
+  /** Stacking order override: a `var(--z-*)` token from `src/styles.scss`, or a number for old callers. */
+  readonly zIndex = input<number | string | null>(null)
+  /** Plan 538: puts the popup in the browser top layer (popover), so nothing can cover it. */
+  readonly topLayer = input(false)
   /** Plan 487: on a phone the popup opens as a bottom sheet (the `.m-sheet` / `.m-sheet-card` helpers). */
   readonly sheet = input(false)
   /**
@@ -84,7 +87,10 @@ export class ModalShellComponent {
   protected readonly titleId = `modal-shell-title-${++nextTitleId}`
 
   constructor() {
-    afterNextRender(() => this.moveFocusIn_())
+    afterNextRender(() => {
+      this.showTopLayer_()
+      this.moveFocusIn_()
+    })
     this.destroyRef_.onDestroy(() => {
       popModalShell(this.shellId_)
       this.restoreFocus_()
@@ -151,6 +157,12 @@ export class ModalShellComponent {
       event.preventDefault()
       first.focus()
     }
+  }
+
+  private showTopLayer_(): void {
+    if (!this.topLayer()) return
+    const el = this.overlay_().nativeElement
+    if (typeof el.showPopover === 'function' && !el.matches(':popover-open')) el.showPopover()
   }
 
   /** Focus goes into the card unless the content already focused one of its own fields. */

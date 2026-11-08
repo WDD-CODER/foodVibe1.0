@@ -723,13 +723,15 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       amount_net?: number | string
       unit?: string
       total_cost?: number
+      supplierId?: string | null
     }[]
     const ingNorm = ingredients.map((ing) => ({
       referenceId: (ing?.referenceId ?? '').toString(),
       nameHebrew: (ing?.nameHebrew ?? '').toString(),
       item_type: (ing?.item_type ?? '').toString(),
       amount_net: Number(ing?.amount_net ?? 0),
-      unit: (ing?.unit ?? '').toString()
+      unit: (ing?.unit ?? '').toString(),
+      supplierId: (ing?.supplierId ?? '').toString()
     }))
     const workflow = (raw?.['workflow_items'] ?? []) as Record<string, unknown>[]
     const workflowNorm = workflow.map((row) => {

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import type { MenuEvent } from '@models/menu-event.model'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { computeEventPlan } from './event-plan.engine'
 import type { EventPlan, EventPlanInput, UnitConversion } from './event-plan.types'
@@ -11,10 +12,16 @@ import { computePortions } from './portions'
 export class EventPlanService {
   private readonly kitchenState_ = inject(KitchenStateService)
   private readonly unitRegistry_ = inject(UnitRegistryService)
+  private readonly menuEventData_ = inject(MenuEventDataService)
 
   /** The full plan of an event; accepts the unsaved shape the menu page builds. */
   planFor(event: MenuEvent | Omit<MenuEvent, '_id'>): EventPlan {
     const full: MenuEvent = { ...event, _id: '_id' in event ? event._id : '' }
+    // Plan 536: the menu page's draft carries no supplierMoves; use the stored event's (a signal, so a move re-plans).
+    if (full._id && !('supplierMoves' in event)) {
+      const stored = this.menuEventData_.allMenuEvents_().find((e) => e._id === full._id)
+      if (stored?.supplierMoves) full.supplierMoves = stored.supplierMoves
+    }
     const portions = computePortions(full, this.kitchenState_.recipes_())
     const portionsByItem = new Map([...portions].map(([key, p]) => [key, p.portions]))
     return computeEventPlan(this.buildInput(full, portionsByItem))

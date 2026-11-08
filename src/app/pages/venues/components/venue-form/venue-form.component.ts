@@ -31,8 +31,22 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { TimeFieldComponent } from 'src/app/shared/time-field/time-field.component'
+import {
+  checkHoursRow,
+  formatTimeRange,
+  parseTimeRange,
+  type HoursRowResult
+} from 'src/app/core/utils/venue-hours.util'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
+
+type HoursRaw = { days: string; open: string; close: string; openInvalid: boolean; closeInvalid: boolean }
+
+/** A row result that blocks save and gets a mark (plan 537). */
+function isBrokenHours(result: HoursRowResult): boolean {
+  return result !== 'ok' && result !== 'overnight' && result !== 'empty'
+}
 
 @Component({
   selector: 'app-venue-form',
@@ -45,7 +59,8 @@ const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', '
     TranslatePipe,
     LoaderComponent,
     CustomSelectComponent,
-    FormFieldComponent
+    FormFieldComponent,
+    TimeFieldComponent
   ],
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
@@ -73,6 +88,10 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected readonly isSaving_ = this.saving.isSaving_
   protected envTypes = ENV_TYPES
   protected validationErrors_ = signal<Record<string, string>>({})
+  /** Plan 537: marks on hours rows appear only after the first blocked save. */
+  protected readonly hoursSubmitAttempted_ = signal(false)
+  /** Plan 537: row index -> check result, refreshed by validateForm_() and (after the first attempt) on every change. */
+  protected readonly hoursErrors_ = signal<Record<number, HoursRowResult>>({})
   /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl. */
   protected readonly photoUrl_ = signal<string | null>(null)
   protected readonly isUploadingPhoto_ = signal(false)
@@ -168,6 +187,57 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       operatingHours: this.fb.array([]),
       active: [true]
     })
+    this.venueForm_.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.hoursSubmitAttempted_()) this.refreshHoursErrors_()
+    })
+  }
+
+  /** Plan 537: one hours row; no validators (the row check runs on save). `openInvalid` / `closeInvalid` are UI only. */
+  private hoursRow_(days: string, open: string, close: string): FormGroup {
+    return this.fb.group({ days: [days], open: [open], close: [close], openInvalid: [false], closeInvalid: [false] })
+  }
+
+  private refreshHoursErrors_(): Record<number, HoursRowResult> {
+    const errors: Record<number, HoursRowResult> = {}
+    ;(this.hoursArray.getRawValue() as HoursRaw[]).forEach((row, i) => {
+      errors[i] = checkHoursRow(row)
+    })
+    this.hoursErrors_.set(errors)
+    return errors
+  }
+
+  /** The mark of a row, only after the first blocked save: broken results only. */
+  protected hoursMark_(index: number): HoursRowResult | null {
+    if (!this.hoursSubmitAttempted_()) return null
+    const result = this.hoursErrors_()[index]
+    return result && isBrokenHours(result) ? result : null
+  }
+
+  protected hoursMessageKey_(index: number): string | null {
+    switch (this.hoursMark_(index)) {
+      case 'missing_days':
+        return 'venue_hours_missing_days'
+      case 'missing_time':
+        return 'venue_hours_missing_time'
+      case 'same_time':
+        return 'venue_hours_same_time'
+      default:
+        return null
+    }
+  }
+
+  protected timeFlagged_(index: number, which: 'open' | 'close'): boolean {
+    const mark = this.hoursMark_(index)
+    if (mark === 'same_time') return true
+    if (mark !== 'missing_time') return false
+    return !this.hoursArray.at(index).get(which)?.value
+  }
+
+  protected setHoursControl_(index: number, name: string, value: string | boolean): void {
+    const ctrl = this.hoursArray.at(index)?.get(name)
+    if (!ctrl || ctrl.value === value) return
+    ctrl.setValue(value)
+    ctrl.markAsDirty()
   }
 
   private hydrateForm(v: VenueProfile): void {
@@ -190,12 +260,8 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     const hours = this.hoursArray
     hours.clear()
     ;(v.operatingHours ?? []).forEach((item) => {
-      hours.push(
-        this.fb.group({
-          days: [item.days, Validators.required],
-          time: [item.time, Validators.required]
-        })
-      )
+      const range = parseTimeRange(item.time)
+      hours.push(this.hoursRow_(item.days ?? '', range?.open ?? '', range?.close ?? ''))
     })
   }
 
@@ -241,12 +307,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   }
 
   protected addHoursRow(): void {
-    this.hoursArray.push(
-      this.fb.group({
-        days: ['', Validators.required],
-        time: ['', Validators.required]
-      })
-    )
+    this.hoursArray.push(this.hoursRow_('', '', ''))
   }
 
   protected removeHoursRow(index: number): void {
@@ -275,7 +336,9 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     const val = this.venueForm_.getRawValue()
     if (!val.nameHebrew?.trim()) errors['nameHebrew'] = 'field_name_required'
     this.validationErrors_.set(errors)
-    return Object.keys(errors).length === 0
+    const hoursBroken = Object.values(this.refreshHoursErrors_()).some(isBrokenHours)
+    if (hoursBroken) this.hoursSubmitAttempted_.set(true)
+    return Object.keys(errors).length === 0 && !hoursBroken
   }
 
   async onSubmit(): Promise<void> {
@@ -315,9 +378,12 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         equipmentId: row.equipmentId,
         availableQuantity: Number(row.availableQuantity)
       }))
-    const hours: VenueOperatingHours[] = (v.operatingHours ?? [])
-      .filter((row: { days: string; time: string }) => row.days && row.time)
-      .map((row: { days: string; time: string }) => ({ days: row.days, time: row.time }))
+    const hours: VenueOperatingHours[] = ((v.operatingHours ?? []) as HoursRaw[])
+      .filter((row) => {
+        const result = checkHoursRow(row)
+        return result === 'ok' || result === 'overnight'
+      })
+      .map((row) => ({ days: row.days.trim(), time: formatTimeRange(row.open, row.close) }))
 
     const now = Date.now()
 
