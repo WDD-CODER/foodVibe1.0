@@ -51,8 +51,7 @@
   font-weight: 600;
   color: var(--color-text-muted);
 
-  select,
-  input[type='date'] {
+  select {
     min-height: 2.25rem;
     padding-inline: 0.75rem;
     padding-block: 0.5rem;
@@ -82,12 +81,6 @@
     display: flex;
     align-items: stretch;
     cursor: pointer;
-
-    input[type='date'] {
-      flex: 1;
-      min-width: 0;
-      cursor: pointer;
-    }
   }
 }
 

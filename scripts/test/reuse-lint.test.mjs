@@ -150,3 +150,16 @@ test('the date field itself may hold a native date input', () => {
   const warnings = lintAddedLines([line('src/app/shared/date-field/date-field.component.html', '<input type="date" />')])
   assert.deepEqual(warnings, [])
 })
+
+test('family-styled-from-outside: a page rule on app-date-field or ::ng-deep .date-field-text warns; a lookalike tag does not', () => {
+  const scss = 'src/app/pages/x/x.component.scss'
+  const ids = (text) => lintAddedLines([line(scss, text)]).map((w) => w.rule ?? w.id ?? String(w))
+  assert.match(ids('app-date-field { margin: 0 }').join(), /family-styled-from-outside/)
+  assert.match(ids(':host ::ng-deep .date-field-text { color: red }').join(), /family-styled-from-outside/)
+  assert.deepEqual(lintAddedLines([line(scss, '.my-app-date-fieldish {}')]), [])
+})
+
+test('hand-drawn-modal-overlay: a c-modal-overlay class in an html file warns', () => {
+  const out = lintAddedLines([line('src/app/pages/x/x.component.html', '<div class="c-modal-overlay">')])
+  assert.match(JSON.stringify(out), /hand-drawn-modal-overlay/)
+})
