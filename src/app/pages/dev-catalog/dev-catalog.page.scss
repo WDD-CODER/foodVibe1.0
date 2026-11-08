@@ -1,0 +1,56 @@
+.dc {
+  display: block;
+  max-inline-size: 80rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.dc-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 5;
+  padding-block: 0.5rem;
+  background: var(--bg, #fff);
+}
+
+.dc-section {
+  margin-block: 1.5rem;
+  padding-block-end: 1rem;
+  border-block-end: 1px solid rgb(0 0 0 / 10%);
+  min-inline-size: 0;
+}
+
+.dc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.dc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-inline-size: 0;
+}
+
+.dc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-block: 0.5rem;
+}
+
+.dc-card {
+  padding: 1rem;
+}
+
+code {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  overflow-wrap: anywhere;
+}

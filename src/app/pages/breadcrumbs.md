@@ -7,6 +7,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
+| `dev-catalog/` | `/dev/catalog` — dev-only page that renders every shared UI family (route absent in production builds) |
 | `venues/` | `/venues` — venue list, detail and form |
 | `suppliers/` | `/suppliers` — supplier list and form |
 | `recipe-book/` | `/recipe-book` — recipe list and filters |

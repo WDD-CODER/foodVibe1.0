@@ -115,15 +115,15 @@ line or file this plan names was removed, renamed or rewritten).
 - No new dictionary keys. Icons: only ones already registered in `src/app/app.config.ts` (`lint:icons` checks).
 
 ## Atomic Sub-tasks
-- [ ] A1: Decide in one tested place whether the catalog route exists — `devCatalogRoutes` — src/app/pages/dev-catalog/dev-catalog.routes.ts
-- [ ] A2: Prove it — `devCatalogRoutes(true)` has one route with path `dev/catalog`; `devCatalogRoutes(false)` is empty — src/app/pages/dev-catalog/dev-catalog.routes.spec.ts
-- [ ] A3: Register the route for dev builds only — the import and the spread above the redirects — src/app/app.routes.ts
-- [ ] A4: Build the page class — sample signals per section, toast handlers, the sample-modal open state; read each family component's real inputs first (`input()` / `model()` in its `.ts`) and use only those — src/app/pages/dev-catalog/dev-catalog.page.ts
-- [ ] A5: Write the template and the layout SCSS — the link bar and the 13 sections in order — src/app/pages/dev-catalog/dev-catalog.page.html, src/app/pages/dev-catalog/dev-catalog.page.scss
-- [ ] A6: Unit-test the page renders — creates without errors (the providers the real components need: `provideRouter([])`, `provideHttpClient()` + `provideHttpClientTesting()`, the translation stub the other page specs use), and has 13 `section` elements whose `h2` texts are the family ids in order — src/app/pages/dev-catalog/dev-catalog.page.spec.ts
-- [ ] A7: Write the `[ui]` card test — `page.goto('/dev/catalog')`, expect the `h2` "search-combobox" and an `app-search-combobox` in its section, screenshot `screens/535-1.png`; run with `pnpm exec playwright test e2e/ui/535-1.spec.ts` — e2e/ui/535-1.spec.ts, screens/535-1.png
-- [ ] A8: Point people at it — docs/brain/component-families.md, src/app/pages/breadcrumbs.md, .claude/commands/design-port.md
-- [ ] A9: Run every `[auto]` check and paste the outputs under Execution Notes
+- [x] A1: Decide in one tested place whether the catalog route exists — `devCatalogRoutes` — src/app/pages/dev-catalog/dev-catalog.routes.ts
+- [x] A2: Prove it — `devCatalogRoutes(true)` has one route with path `dev/catalog`; `devCatalogRoutes(false)` is empty — src/app/pages/dev-catalog/dev-catalog.routes.spec.ts
+- [x] A3: Register the route for dev builds only — the import and the spread above the redirects — src/app/app.routes.ts
+- [x] A4: Build the page class — sample signals per section, toast handlers, the sample-modal open state; read each family component's real inputs first (`input()` / `model()` in its `.ts`) and use only those — src/app/pages/dev-catalog/dev-catalog.page.ts
+- [x] A5: Write the template and the layout SCSS — the link bar and the 13 sections in order — src/app/pages/dev-catalog/dev-catalog.page.html, src/app/pages/dev-catalog/dev-catalog.page.scss
+- [x] A6: Unit-test the page renders — creates without errors (the providers the real components need: `provideRouter([])`, `provideHttpClient()` + `provideHttpClientTesting()`, the translation stub the other page specs use), and has 13 `section` elements whose `h2` texts are the family ids in order — src/app/pages/dev-catalog/dev-catalog.page.spec.ts
+- [x] A7: Write the `[ui]` card test — `page.goto('/dev/catalog')`, expect the `h2` "search-combobox" and an `app-search-combobox` in its section, screenshot `screens/535-1.png`; run with `pnpm exec playwright test e2e/ui/535-1.spec.ts` — e2e/ui/535-1.spec.ts, screens/535-1.png
+- [x] A8: Point people at it — docs/brain/component-families.md, src/app/pages/breadcrumbs.md, .claude/commands/design-port.md
+- [x] A9: Run every `[auto]` check and paste the outputs under Execution Notes
 
 ## What happens when
 - `/dev/catalog` in a production, remote or gh-pages build: the route is not registered, so the `**` redirect sends it to the dashboard.
@@ -150,3 +150,6 @@ line or file this plan names was removed, renamed or rewritten).
 ## Execution Notes
 - Planner 2026-11-07 (brief 8(b), item D2, decision H4).
 - Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
+- Builder 2026-11-08: build 0, lint 0 errors, lint:icons 0, lint:no-native-select 0, breadcrumbs-check 0, test:ci 1729 SUCCESS (incl. dev-catalog specs), log-query SKIP no database, scope --arch ARCH: ok, --reuse ok.
+- Builder: e2e/ui/535-1.spec.ts written but not run green here: ng serve starts, yet the app shell renders blank without the backend (localhost:3000 refused, no database in this environment); screens/535-1.png not produced.
+- app-tab-chips is route-driven, so it shows no tabs on this page; noted in the page.

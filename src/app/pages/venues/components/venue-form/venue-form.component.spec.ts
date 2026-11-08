@@ -41,7 +41,7 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
     access.venueForm_.get('nameHebrew').setValue(value)
   }
 
-  async function setup(venue: VenueProfile | null): Promise<void> {
+  async function setup(venue: VenueProfile | null, equipment: unknown[] = []): Promise<void> {
     venueData = {
       ensureLoaded: jasmine.createSpy('ensureLoaded').and.resolveTo(),
       allVenues_: signal<VenueProfile[]>([]),
@@ -58,7 +58,7 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
         { provide: VenueDataService, useValue: venueData },
         {
           provide: EquipmentDataService,
-          useValue: { ensureLoaded: () => Promise.resolve(), allEquipment_: signal([]) }
+          useValue: { ensureLoaded: () => Promise.resolve(), allEquipment_: signal(equipment) }
         },
         { provide: ActivatedRoute, useValue: { data: of({ venue }), snapshot: { data: { venue } } } },
         { provide: Router, useValue: router },
@@ -101,5 +101,39 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
     expect(ok).toBeFalse()
     expect(component.isSubmitted).toBeFalse()
     expect(venueData.addVenue).not.toHaveBeenCalled()
+  })
+
+  describe('infrastructure vs equipment groups', () => {
+    const EQ = [
+      { _id: 'e1', nameHebrew: 'תנור', category: 'infrastructure' },
+      { _id: 'e2', nameHebrew: 'סיר', category: 'tool' }
+    ]
+    const WITH_ROWS: VenueProfile = {
+      ...VENUE,
+      availableInfrastructure: [
+        { equipmentId: 'e1', availableQuantity: 2 },
+        { equipmentId: 'e2', availableQuantity: 3 },
+        { equipmentId: 'gone', availableQuantity: 1 }
+      ]
+    }
+    type Rows = { infraArray: { value: { group: string }[] } }
+
+    it('places hydrated rows by category; unknown equipment goes to other', async () => {
+      await setup(WITH_ROWS, EQ)
+      const groups = (component as unknown as Rows).infraArray.value.map((r) => r.group)
+      expect(groups).toEqual(['infra', 'other', 'other'])
+    })
+
+    it('saves the payload without the group field', async () => {
+      await setup(WITH_ROWS, EQ)
+      setName('אולם חדש')
+      await component.saveAndWait()
+      const payload = venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile
+      expect(payload.availableInfrastructure).toEqual([
+        { equipmentId: 'e1', availableQuantity: 2 },
+        { equipmentId: 'e2', availableQuantity: 3 },
+        { equipmentId: 'gone', availableQuantity: 1 }
+      ])
+    })
   })
 })
