@@ -70,57 +70,70 @@
       </app-form-field>
     </div>
 
-    <div class="form-section infra-section" formArrayName="operatingHours">
+    <div class="form-section infra-section" formArrayName="availableInfrastructure">
       <div class="infra-header">
-        <h3>{{ 'operating_hours' | translatePipe }}</h3>
-        <button type="button" class="c-btn-ghost" (click)="addHoursRow()">
+        <h3>{{ 'venue_infrastructure_group' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addInfraRow('infra')">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
           {{ 'add_row' | translatePipe }}
         </button>
       </div>
-      @for (ctrl of hoursArray.controls; track $index; let i = $index) {
-        <div class="infra-row" [formGroupName]="i">
-          <input type="text" formControlName="days" [placeholder]="'days' | translatePipe" class="c-input" />
-          <input type="text" formControlName="time" [placeholder]="'time' | translatePipe" class="c-input" />
-          <button
-            type="button"
-            class="btn-icon"
-            (click)="removeHoursRow(i)"
-            [attr.aria-label]="'remove' | translatePipe"
-          >
-            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-          </button>
-        </div>
+      @for (ctrl of infraArray.controls; track ctrl; let i = $index) {
+        @if (ctrl.get('group')?.value === 'infra') {
+          <div class="infra-row" [formGroupName]="i">
+            <app-custom-select
+              formControlName="equipmentId"
+              [options]="infraOptions_()"
+              [placeholder]="'choose_equipment'"
+              [typeToFilter]="true"
+              [translateLabels]="false"
+            />
+            <input type="number" formControlName="availableQuantity" min="0" placeholder="0" />
+            <button
+              type="button"
+              class="btn-icon"
+              (click)="removeInfraRow(i)"
+              [attr.aria-label]="'remove' | translatePipe"
+            >
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        }
+      }
+      @if (!hasGroupRows_('infra')) {
+        <p class="infra-empty">{{ 'no_infrastructure_items' | translatePipe }}</p>
       }
     </div>
 
     <div class="form-section infra-section" formArrayName="availableInfrastructure">
       <div class="infra-header">
-        <h3>{{ 'available_infrastructure' | translatePipe }}</h3>
-        <button type="button" class="c-btn-ghost" (click)="addInfraRow()">
+        <h3>{{ 'venue_other_equipment_group' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addInfraRow('other')">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
           {{ 'add_row' | translatePipe }}
         </button>
       </div>
-      @for (ctrl of infraArray.controls; track $index; let i = $index) {
-        <div class="infra-row" [formGroupName]="i">
-          <app-custom-select
-            formControlName="equipmentId"
-            [options]="equipmentOptions_()"
-            [placeholder]="'choose_equipment'"
-            [typeToFilter]="true"
-            [translateLabels]="false"
-          />
-          <input type="number" formControlName="availableQuantity" min="0" placeholder="0" />
-          <button
-            type="button"
-            class="btn-icon"
-            (click)="removeInfraRow(i)"
-            [attr.aria-label]="'remove' | translatePipe"
-          >
-            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-          </button>
-        </div>
+      @for (ctrl of infraArray.controls; track ctrl; let i = $index) {
+        @if (ctrl.get('group')?.value === 'other') {
+          <div class="infra-row" [formGroupName]="i">
+            <app-custom-select
+              formControlName="equipmentId"
+              [options]="otherEquipmentOptions_()"
+              [placeholder]="'choose_equipment'"
+              [typeToFilter]="true"
+              [translateLabels]="false"
+            />
+            <input type="number" formControlName="availableQuantity" min="0" placeholder="0" />
+            <button
+              type="button"
+              class="btn-icon"
+              (click)="removeInfraRow(i)"
+              [attr.aria-label]="'remove' | translatePipe"
+            >
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        }
       }
     </div>
 

@@ -1595,6 +1595,10 @@
     "client_required": "חובה לבחור לקוח",
     "client_ask_owner": "לקוח חדש? בקשו מבעל העסק להוסיף אותו",
     "back_to_search": "חזרה לחיפוש",
-    "new_inquiry_event_name": "שם האירוע"
+    "new_inquiry_event_name": "שם האירוע",
+    "venue_infrastructure_group": "תשתיות המקום",
+    "venue_other_equipment_group": "ציוד נוסף",
+    "no_infrastructure_items": "אין פריטי תשתית",
+    "equipment_infrastructure_hint": "תשתית = ציוד קבוע של המקום (כיריים, תנורים, מקררים, כיורים). מופיע בנפרד בהגדרות מקום האירוע."
   }
 }

@@ -10,6 +10,7 @@ import { CloudinaryService } from '@services/cloudinary.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
+import { Equipment } from '@models/equipment.model'
 import { VenueProfile } from '@models/venue.model'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
@@ -21,6 +22,11 @@ const VENUE: VenueProfile = {
   createdAt: 1,
   operatingHours: [{ days: 'א׳–ה׳', time: '08:00–23:00' }]
 }
+
+const EQUIPMENT = [
+  { _id: 'q1', nameHebrew: 'תנור', category: 'infrastructure' },
+  { _id: 'q2', nameHebrew: 'סיר', category: 'tool' }
+] as unknown as Equipment[]
 
 /** The protected form, reached the same way the template does. */
 type FormAccess = { venueForm_: { get: (k: string) => { setValue: (v: unknown) => void } } }
@@ -58,7 +64,7 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
         { provide: VenueDataService, useValue: venueData },
         {
           provide: EquipmentDataService,
-          useValue: { ensureLoaded: () => Promise.resolve(), allEquipment_: signal([]) }
+          useValue: { ensureLoaded: () => Promise.resolve(), allEquipment_: signal(EQUIPMENT) }
         },
         { provide: ActivatedRoute, useValue: { data: of({ venue }), snapshot: { data: { venue } } } },
         { provide: Router, useValue: router },
@@ -101,5 +107,25 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
     expect(ok).toBeFalse()
     expect(component.isSubmitted).toBeFalse()
     expect(venueData.addVenue).not.toHaveBeenCalled()
+  })
+
+  it('places hydrated rows in a group by category and strips group from the payload', async () => {
+    await setup({
+      ...VENUE,
+      availableInfrastructure: [
+        { equipmentId: 'q1', availableQuantity: 1 },
+        { equipmentId: 'q2', availableQuantity: 2 },
+        { equipmentId: 'gone', availableQuantity: 3 }
+      ]
+    })
+    const rows = (component as unknown as { infraArray: { value: { group: string }[] } }).infraArray.value
+    expect(rows.map((r) => r.group)).toEqual(['infra', 'other', 'other'])
+    expect(await component.saveAndWait()).toBeTrue()
+    const payload = venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile
+    expect(payload.availableInfrastructure).toEqual([
+      { equipmentId: 'q1', availableQuantity: 1 },
+      { equipmentId: 'q2', availableQuantity: 2 },
+      { equipmentId: 'gone', availableQuantity: 3 }
+    ])
   })
 })
