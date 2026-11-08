@@ -1,0 +1,55 @@
+@layer components.time-field {
+  :host {
+    display: flex;
+    flex-direction: column;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .time-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .time-field-text {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    text-align: start;
+  }
+}
+
+/*
+ * Unlayered on purpose (exception R2, scripts/rule-sweep-count.mjs:22-25): the global `.c-input-stack input` rule is
+ * unlayered and would otherwise size the hidden picker.
+ */
+
+/*
+ * Desktop: the native time input is only the picker: invisible, no tab stop. It spans the field's bottom edge, so the
+ * browser opens its time picker right under the field instead of at one corner.
+ */
+.time-field-picker {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  inline-size: 100%;
+  block-size: 1px;
+  min-block-size: 0;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Touch: the invisible native input covers the whole field, so a tap lands on it and the phone opens its own picker. */
+.time-field-picker--touch {
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: auto;
+  cursor: pointer;
+}
