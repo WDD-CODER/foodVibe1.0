@@ -24,6 +24,7 @@
 - Merged 2026-11-08: **374**, **535** (PR #525). **510** superseded by **536** (failed hand checks, reverted)
 - New 2026-11-08: **536** recipe-line supplier + per-event move (not parallel with 518/519) · **537** venue hours pickers (after 374; 372 now after 537) · **538** save-or-leave in front · **539** toast at narrow width
 - Lanes: 374→537→372 · 536 after 518→519 or before both (shares menu-event schema/model, permissions.js)
+- New 2026-11-08: **540** show why the server refused a save (after run-536 merges: depends on 536, 537, 539)
 
 ---
 
@@ -219,3 +220,17 @@
 - [ ] A1: Make the toast fit any width — logical properties, tokens, wrap, safe-area top, phone full-width rule (read `.claude/skills/cssLayer/SKILL.md` first) — src/app/core/components/user-msg/user-msg.component.scss
 - [ ] A2: Prove a long word wraps inside the toast — the spec case — src/app/core/components/user-msg/user-msg.component.spec.ts
 - [ ] A3: Run every `[auto]` check plus the cssLayer verify greps on the edited file, paste the outputs under Execution Notes
+
+### Plan 540 — Show why the server refused a save (`plans/540-show-why-the-server-refused-a-save.plan.md`)
+- [ ] A1: Read a refused save in one place — the pure helper with `PATH_LABEL_KEYS` and the four functions — src/app/core/utils/server-refusal.util.ts
+- [ ] A2: Prove the helper — every branch listed under P1 — src/app/core/utils/server-refusal.util.spec.ts
+- [ ] A3: Add the five Hebrew texts — public/assets/data/dictionary.json
+- [ ] A4: One toast and one log line for every refused save — interceptor branch and its two spec cases — src/app/core/interceptors/auth.interceptor.ts, src/app/core/interceptors/auth.interceptor.spec.ts
+- [ ] A5: Product and recipe saves stop the second toast and the English text; recipe rethrows the original error — src/app/core/services/kitchen-state.service.ts, src/app/core/services/kitchen-state.service.spec.ts
+- [ ] A6: Product form marks the refused field — src/app/pages/inventory/components/product-form/product-form.component.ts, src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
+- [ ] A7: Equipment form marks the refused field and stops the second toast — src/app/pages/equipment/components/equipment-form/equipment-form.component.ts, src/app/pages/equipment/components/equipment-form/equipment-form.component.html, src/app/pages/equipment/components/equipment-form/equipment-form.component.spec.ts
+- [ ] A8: Supplier and venue forms show a toast when a save fails and mark the name — src/app/pages/suppliers/components/supplier-form/supplier-form.component.ts, src/app/pages/venues/components/venue-form/venue-form.component.ts, src/app/pages/venues/components/venue-form/venue-form.component.spec.ts
+- [ ] A9: Recipe builder marks the refused name / yield and stops the second toast — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.spec.ts, src/app/pages/recipe-builder/recipe-builder.page.ts
+- [ ] A10: Event save never fails silently; add-supplier popup stops the second toast — src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/core/services/add-supplier-flow.service.ts, src/app/core/services/add-supplier-flow.service.spec.ts
+- [ ] A11: Registry lines — docs/brain/component-families.md
+- [ ] A12: Run every `[auto]` check and paste the outputs under Execution Notes; prepare the Human SETUP (local supplier "בדיקת שדה ישן" with `staleTestField: true`, set through mongosh or a scratch script outside the repo; remove it after the Human replies)
