@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   inject,
   OnInit,
@@ -78,6 +79,9 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
   protected readonly isSaving_ = this.saving.isSaving_
   protected categories = CATEGORIES
   protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }))
+  private readonly category_ = signal<string>('tool')
+  /** True while the category select is 'infrastructure' — shows the explanatory hint. */
+  protected readonly isInfrastructure_ = computed(() => this.category_() === 'infrastructure')
   protected validationErrors_ = signal<Record<string, string>>({})
 
   ngOnInit(): void {
@@ -108,6 +112,10 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
       isConsumable: [false],
       notes: ['']
     })
+    this.equipmentForm_
+      .get('category')!
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((c) => this.category_.set(c ?? ''))
   }
 
   private hydrateForm(e: Equipment): void {

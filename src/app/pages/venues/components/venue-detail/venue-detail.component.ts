@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { UserService } from '@services/user.service'
+import { EquipmentDataService } from '@services/equipment-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { VenueProfile } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -21,6 +22,7 @@ export class VenueDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly menuEventData = inject(MenuEventDataService)
+  private readonly equipmentData = inject(EquipmentDataService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
 
   private readonly routeData_ = toSignal(this.route.data, { initialValue: this.route.snapshot.data })
@@ -49,8 +51,17 @@ export class VenueDetailComponent implements OnInit {
       .join('')
   })
 
+  /** Infrastructure rows split like the venue form: by the equipment's category (unknown → other). */
+  protected readonly infraCounts_ = computed(() => {
+    const cat = new Map(this.equipmentData.allEquipment_().map((eq) => [eq._id, eq.category]))
+    const rows = this.venue_()?.availableInfrastructure ?? []
+    const infra = rows.filter((r) => cat.get(r.equipmentId) === 'infrastructure').length
+    return { infra, other: rows.length - infra }
+  })
+
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
+    void this.equipmentData.ensureLoaded()
   }
 
   protected backToList(): void {

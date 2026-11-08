@@ -83,9 +83,9 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Sort venue equipment into infrastructure and regular groups behind the scenes — Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
-- [ ] A2: Show infrastructure and regular equipment as two groups on the venue pages — Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
-- [ ] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
+- [x] A1: Sort venue equipment into infrastructure and regular groups behind the scenes — Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
+- [x] A2: Show infrastructure and regular equipment as two groups on the venue pages — Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
+- [x] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
 - [ ] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400.
 
 ## Technical Considerations
@@ -114,3 +114,5 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 
 ## Execution Notes
 - Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).
+- Builder run-517 round 1 (judgment, hand-off): A1–A3 re-implemented from the base; `npm run build` → exit 0; `npx ng test --watch=false --include=venues/** --include=equipment/**` → exit 0, 18 SUCCESS; `pnpm run lint` → exit 0 (0 errors). Payload already maps rows to `{equipmentId, availableQuantity}`, so `group` never reaches the server. Added `regroupRows_()`: equipment loads after hydrate on a direct link, so rows are re-placed by category when it arrives (no unsaved change).
+- A4 not done: its specs (hydrate grouping, payload has no `group`, equipment hint) need `venue-form.component.spec.ts` and `equipment-form.component.spec.ts`; `scope-check --diff` reports `SCOPE: test-out` for both because no scope line names a test location, and test lines are read from the run branch's copy of the plan. Replan: add `src/app/pages/venues/components/venue-form/*.spec.ts` and `src/app/pages/equipment/components/equipment-form/*.spec.ts` to the scope block on the run branch. The discarded attempt e55e5cb holds ready specs.

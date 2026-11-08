@@ -96,17 +96,50 @@
 
     <div class="form-section infra-section" formArrayName="availableInfrastructure">
       <div class="infra-header">
-        <h3>{{ 'available_infrastructure' | translatePipe }}</h3>
-        <button type="button" class="c-btn-ghost" (click)="addInfraRow()">
+        <h3>{{ 'venue_infrastructure_group' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addInfraRow('infra')">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
           {{ 'add_row' | translatePipe }}
         </button>
       </div>
-      @for (ctrl of infraArray.controls; track $index; let i = $index) {
+      @if (groupIndices('infra').length === 0) {
+        <p class="infra-empty">{{ 'no_infrastructure_items' | translatePipe }}</p>
+      }
+      @for (i of groupIndices('infra'); track i) {
         <div class="infra-row" [formGroupName]="i">
           <app-custom-select
             formControlName="equipmentId"
-            [options]="equipmentOptions_()"
+            [options]="infraOptions_()"
+            [placeholder]="'choose_equipment'"
+            [typeToFilter]="true"
+            [translateLabels]="false"
+          />
+          <input type="number" formControlName="availableQuantity" min="0" placeholder="0" />
+          <button
+            type="button"
+            class="btn-icon"
+            (click)="removeInfraRow(i)"
+            [attr.aria-label]="'remove' | translatePipe"
+          >
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="form-section infra-section" formArrayName="availableInfrastructure">
+      <div class="infra-header">
+        <h3>{{ 'venue_other_equipment_group' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addInfraRow('other')">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          {{ 'add_row' | translatePipe }}
+        </button>
+      </div>
+      @for (i of groupIndices('other'); track i) {
+        <div class="infra-row" [formGroupName]="i">
+          <app-custom-select
+            formControlName="equipmentId"
+            [options]="otherEquipmentOptions_()"
             [placeholder]="'choose_equipment'"
             [typeToFilter]="true"
             [translateLabels]="false"

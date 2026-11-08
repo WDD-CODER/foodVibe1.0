@@ -41,8 +41,12 @@
         }
         <div class="detail-stats">
           <div class="detail-stat">
-            <span class="detail-stat-label">{{ 'infrastructure_items' | translatePipe }}</span>
-            <span class="detail-stat-value">{{ venue.availableInfrastructure.length }}</span>
+            <span class="detail-stat-label">{{ 'venue_infrastructure_group' | translatePipe }}</span>
+            <span class="detail-stat-value">{{ infraCounts_().infra }}</span>
+          </div>
+          <div class="detail-stat">
+            <span class="detail-stat-label">{{ 'venue_other_equipment_group' | translatePipe }}</span>
+            <span class="detail-stat-value">{{ infraCounts_().other }}</span>
           </div>
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'capacity' | translatePipe }}</span>

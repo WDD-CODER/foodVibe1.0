@@ -27,6 +27,7 @@
       <app-form-field
         label="category"
         forId="category"
+        [hint]="isInfrastructure_() ? 'equipment_infrastructure_hint' : null"
         [error]="validationErrors_()['category'] ? 'field_category_required' : null"
       >
         <app-custom-select

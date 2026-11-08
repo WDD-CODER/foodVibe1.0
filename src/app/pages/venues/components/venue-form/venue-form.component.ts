@@ -32,6 +32,8 @@ import { TranslationService } from '@services/translation.service'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
+type InfraGroup = 'infra' | 'other'
+
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 
 @Component({
@@ -95,13 +97,25 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   }
 
   protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
-  protected equipmentOptions_ = computed(() =>
-    this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
-  )
+  private readonly sortedOptions_ = (infra: boolean) =>
+    this.equipmentData
+      .allEquipment_()
+      .filter((eq) => (eq.category === 'infrastructure') === infra)
+      .map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'he'))
+  /** Fixed venue infrastructure (category 'infrastructure'), sorted by Hebrew name. */
+  protected infraOptions_ = computed(() => this.sortedOptions_(true))
+  /** All other equipment categories, sorted by Hebrew name. */
+  protected otherEquipmentOptions_ = computed(() => this.sortedOptions_(false))
+
+  /** Real FormArray indices of the rows in one group (template maps formGroupName to these). */
+  protected groupIndices(group: InfraGroup): number[] {
+    return this.infraArray.controls.map((c, i) => (c.get('group')?.value === group ? i : -1)).filter((i) => i >= 0)
+  }
 
   ngOnInit(): void {
     void this.venueData.ensureLoaded()
-    void this.equipmentData.ensureLoaded()
+    void this.equipmentData.ensureLoaded().then(() => this.regroupRows_())
     this.buildForm()
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       const venue = data['venue'] as VenueProfile | null | undefined
@@ -147,6 +161,19 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     })
   }
 
+  /** Equipment may load after hydrate (direct link): place rows by category once it arrives, without an unsaved change. */
+  private regroupRows_(): void {
+    if (!this.venueForm_) return
+    const wasClean = !this.unsaved_.hasChanges()
+    const byId = new Map(this.equipmentData.allEquipment_().map((eq) => [eq._id, eq.category]))
+    for (const row of this.infraArray.controls) {
+      const id = row.get('equipmentId')?.value as string
+      if (!id || !byId.has(id)) continue
+      row.get('group')?.setValue(byId.get(id) === 'infrastructure' ? 'infra' : 'other')
+    }
+    if (wasClean) this.unsaved_.markSaved()
+  }
+
   private hydrateForm(v: VenueProfile): void {
     this.venueForm_.patchValue({
       nameHebrew: v.nameHebrew ?? '',
@@ -161,9 +188,11 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     this.photoUrl_.set(v.photoUrl ?? null)
     const arr = this.infraArray
     arr.clear()
+    const byId = new Map(this.equipmentData.allEquipment_().map((eq) => [eq._id, eq.category]))
     ;(v.availableInfrastructure ?? []).forEach((item) => {
       arr.push(
         this.fb.group({
+          group: [byId.get(item.equipmentId) === 'infrastructure' ? 'infra' : 'other'],
           equipmentId: [item.equipmentId, Validators.required],
           availableQuantity: [item.availableQuantity, [Validators.required, Validators.min(0)]]
         })
@@ -200,9 +229,10 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       })
   }
 
-  protected addInfraRow(): void {
+  protected addInfraRow(group: InfraGroup = 'other'): void {
     this.infraArray.push(
       this.fb.group({
+        group: [group],
         equipmentId: ['', Validators.required],
         availableQuantity: [1, [Validators.required, Validators.min(0)]]
       })

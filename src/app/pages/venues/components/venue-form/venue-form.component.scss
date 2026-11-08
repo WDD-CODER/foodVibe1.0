@@ -118,6 +118,12 @@
         }
       }
 
+      .infra-empty {
+        margin: 0 0 0.5rem;
+        color: var(--color-text-muted);
+        font-size: 0.875rem;
+      }
+
       .infra-row {
         display: flex;
         align-items: center;
