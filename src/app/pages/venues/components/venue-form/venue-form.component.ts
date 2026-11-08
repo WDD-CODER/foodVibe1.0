@@ -95,9 +95,21 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   }
 
   protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
-  protected equipmentOptions_ = computed(() =>
-    this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
-  )
+  protected infraOptions_ = computed(() => this.optionsFor_((eq) => eq.category === 'infrastructure'))
+  protected otherEquipmentOptions_ = computed(() => this.optionsFor_((eq) => eq.category !== 'infrastructure'))
+
+  private optionsFor_(pick: (eq: { category?: string }) => boolean): { value: string; label: string }[] {
+    return this.equipmentData
+      .allEquipment_()
+      .filter(pick)
+      .map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'he'))
+  }
+
+  private groupOf_(equipmentId: string): 'infra' | 'other' {
+    const eq = this.equipmentData.allEquipment_().find((e) => e._id === equipmentId)
+    return eq?.category === 'infrastructure' ? 'infra' : 'other'
+  }
 
   ngOnInit(): void {
     void this.venueData.ensureLoaded()
@@ -165,7 +177,8 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       arr.push(
         this.fb.group({
           equipmentId: [item.equipmentId, Validators.required],
-          availableQuantity: [item.availableQuantity, [Validators.required, Validators.min(0)]]
+          availableQuantity: [item.availableQuantity, [Validators.required, Validators.min(0)]],
+          group: [this.groupOf_(item.equipmentId)]
         })
       )
     })
@@ -200,13 +213,18 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       })
   }
 
-  protected addInfraRow(): void {
+  protected addInfraRow(group: 'infra' | 'other' = 'other'): void {
     this.infraArray.push(
       this.fb.group({
         equipmentId: ['', Validators.required],
-        availableQuantity: [1, [Validators.required, Validators.min(0)]]
+        availableQuantity: [1, [Validators.required, Validators.min(0)]],
+        group: [group]
       })
     )
+  }
+
+  protected hasGroupRows_(group: 'infra' | 'other'): boolean {
+    return this.infraArray.controls.some((c) => c.get('group')?.value === group)
   }
 
   protected removeInfraRow(index: number): void {

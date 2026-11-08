@@ -28,6 +28,7 @@
         label="category"
         forId="category"
         [error]="validationErrors_()['category'] ? 'field_category_required' : null"
+        [hint]="equipmentForm_.get('category')?.value === 'infrastructure' ? 'equipment_infrastructure_hint' : null"
       >
         <app-custom-select
           triggerId="category"
