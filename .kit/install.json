@@ -603,7 +603,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "4c9bad03e585ff1b0869eedfc93bd15e1a6f86801afcb89f95bf32f9ba5791e7",
+      "sha256": "2574ae03d169352c845b1f861f7f0e5caafdee325ba325e5c6864c2e0a02ee40",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -1043,7 +1043,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "a6452ba4b09ec81b2eab261abb048910ba10bbce8e6ffa45bc415fa3a72f9e13",
+      "sha256": "be66ad38d5881edd0445ec15ecb51701ab9ed279fd566a07f82f661624b454cf",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
@@ -1118,7 +1118,7 @@
       "source": "core/scripts/prune-old-sessions.sh"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "35b64c5806cef71bcec8afcef514f9a4f1e17a6059006d67a8ef5cb7bc871072",
+      "sha256": "5804d1f43486c38914c52e44d2762910beaa8e3e36ab7d9531046f508e1b29f1",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },

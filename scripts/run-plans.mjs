@@ -48,7 +48,7 @@ const COMMANDS = { build: "build", lint: "lint", test: "test:ci", testCi: "" }
 const PREPARE = [{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]
 const CI_MIRROR = ["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]
 const MERGE_CHECKS_MODE = "build"
-const GATE_TIMEOUT_MIN = Number(15) || 15
+const GATE_TIMEOUT_MIN = Number(45) || 15
 // One plan at a time unless --concurrency 2 is given (goal decision: more builders on one machine made specs time
 // out); orchestrator.concurrency stays the workflow's setting.
 const CONCURRENCY = 1

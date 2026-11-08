@@ -49,6 +49,7 @@
     "mainBranch": "main"
   },
   "orchestrator": {
+    "gateTimeoutMin": 45,
     "prepare": [
       {
         "missing": "server/generated/schemas",
