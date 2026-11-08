@@ -126,7 +126,7 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 - [x] A1: Make the hidden picker immune to outside input rules — unlayered picker block, full reset, comment — src/app/shared/date-field/date-field.component.scss
-- [x] A2: Prove the picker box inside an input stack — the new spec case — src/app/shared/date-field/date-field.component.spec.ts
+- [ ] A2: Prove the picker box inside an input stack — the new spec case — src/app/shared/date-field/date-field.component.spec.ts
 - [x] A3: Delete the dead outside date rules after a usage grep — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss, src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss, src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.scss, src/app/pages/menu-intelligence/_paper-ui.scss
 - [x] A4: Warn when a page styles a shared component from outside, and repair the modal-overlay rule — scripts/lib/registry-families.mjs
 - [x] A5: Test both rules — scripts/test/reuse-lint.test.mjs
@@ -158,3 +158,5 @@ line or file this plan names was removed, renamed or rewritten).
 - Planner 2026-11-07 (brief 7, item D1). Brief 8's lint rule (item 4) is built here, generically for every shared selector; plan 534 reuses it.
 - Builder: grep of `meta-date-wrap|meta-date-display|meta-date-input|meta-date` in src/app html/ts found no use of the deleted selectors (only `meta-date-chip`, a different class, kept).
 - `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:ci` → 0 (1708 SUCCESS); `node --test scripts/test/reuse-lint.test.mjs` → pass 20, fail 0; `reuse-lint --check-registry` → 0; `--diff=origin/main` → no `family-styled-from-outside` line; scope-check --arch ok, --reuse ok; log-query: no entries.
+
+- Round 2: reverted date-field.component.spec.ts (a test file no scope line names; scope-check scope-1). A2 left undone; needs the spec path added to the scope by the Human.
