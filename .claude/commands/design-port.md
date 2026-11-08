@@ -25,6 +25,7 @@ this file needs changing, the Human decides.
   screen no handoff has covered yet. Authority rules: `.interface-design/source/MANIFEST.md`.
 - **Claude Design learns the real app through the GitHub link** set up in the design project
   (`.interface-design/source/github.md`). That is why the Human re-syncs it after each merge (§8).
+- Show Claude Design the live families: screenshot `/dev/catalog` from a slot (`node scripts/slot-serve.mjs`), or share it with `/remote`.
 - **Not used:** `/design-sync` only compiles **React** component libraries (code → design);
   FoodVibe is Angular, so it does not apply. The live claude.ai project is never read directly —
   only handoffs the Human exports.

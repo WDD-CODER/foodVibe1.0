@@ -5,6 +5,8 @@ the page-local copies that still exist. Before you create any component, util, p
 find its family here and follow the decision ladder in `docs/agent/standards-reuse.md`. ADR:
 `docs/brain/decisions/0024-reuse-layer.md`.
 
+See every UI family live at `/dev/catalog` (dev builds only, plan 535).
+
 Reuse enforced from plan: 459
 
 How this file is checked:

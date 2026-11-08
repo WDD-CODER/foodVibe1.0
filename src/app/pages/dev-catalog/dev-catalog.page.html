@@ -1,0 +1,250 @@
+<main class="dc" dir="rtl">
+  <nav class="dc-bar" aria-label="catalog">
+    @for (id of families_; track id) {
+    <a class="c-chip c-chip--tag" [href]="'#' + id">{{ id }}</a>
+    }
+  </nav>
+
+  <section id="search-combobox" class="dc-section">
+    <h2>search-combobox</h2>
+    <div class="dc-grid">
+      <div class="dc-item">
+        <code>query='', open=false</code>
+        <app-search-combobox
+          [options]="options_"
+          [labelOf]="labelOf_"
+          [keyOf]="keyOf_"
+          [(query)]="queryEmpty_"
+          [(open)]="openEmpty_"
+          placeholder="search"
+          listPosition="inline"
+        />
+      </div>
+      <div class="dc-item">
+        <code>with results, open=true</code>
+        <app-search-combobox
+          [options]="options_"
+          [labelOf]="labelOf_"
+          [keyOf]="keyOf_"
+          [(query)]="queryWith_"
+          [(open)]="openWith_"
+          placeholder="search"
+          listPosition="inline"
+        />
+      </div>
+      <div class="dc-item">
+        <code>no results, query='zzzz'</code>
+        <app-search-combobox
+          [options]="options_"
+          [labelOf]="labelOf_"
+          [keyOf]="keyOf_"
+          [(query)]="queryNone_"
+          [(open)]="openNone_"
+          emptyKey="empty_inventory"
+          placeholder="search"
+          listPosition="inline"
+        />
+      </div>
+      <div class="dc-item">
+        <code>custom-select: closed</code>
+        <app-custom-select [options]="options_" placeholder="search" />
+      </div>
+      <div class="dc-item">
+        <code>custom-select: with a value</code>
+        <app-custom-select [options]="options_" [ngModel]="selectedValue_()" placeholder="search" />
+      </div>
+      <div class="dc-item">
+        <code>custom-select: disabled</code>
+        <app-custom-select [options]="options_" [ngModel]="selectedValue_()" [disabled]="true" placeholder="search" />
+      </div>
+    </div>
+  </section>
+
+  <section id="multi-pick" class="dc-section">
+    <h2>multi-pick</h2>
+    <div class="dc-grid">
+      <div class="dc-item">
+        <code>none picked</code>
+        <app-custom-multi-select [options]="options_" placeholder="allergens" />
+      </div>
+      <div class="dc-item">
+        <code>three picked</code>
+        <app-custom-multi-select
+          [options]="options_"
+          [ngModel]="picked_()"
+          (valueChange)="picked_.set($event)"
+          placeholder="allergens"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section id="modal-shell" class="dc-section">
+    <h2>modal-shell</h2>
+    <button type="button" class="c-btn-primary" (click)="isModalOpen_.set(true)">
+      {{ 'recipes' | translatePipe }}
+    </button>
+    @if (isModalOpen_()) {
+    <app-modal-shell titleKey="recipes" (dismissed)="isModalOpen_.set(false)">
+      <div class="c-modal-body">{{ 'products' | translatePipe }}</div>
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" (click)="isModalOpen_.set(false)">
+          {{ 'close' | translatePipe }}
+        </button>
+      </div>
+    </app-modal-shell>
+    }
+  </section>
+
+  <section id="list-page" class="dc-section">
+    <h2>list-page</h2>
+    <app-page-header titleKey="recipes" [count]="3" />
+    <app-list-shell gridTemplate="1fr" mobileGridTemplate="1fr">
+      <div shell-table-body>
+        @for (row of rows_; track row) {
+        <div class="c-list-row">{{ row | translatePipe }}</div>
+        }
+      </div>
+    </app-list-shell>
+  </section>
+
+  <section id="empty-state" class="dc-section">
+    <h2>empty-state</h2>
+    <app-empty-state messageKey="empty_inventory" />
+  </section>
+
+  <section id="form-field" class="dc-section">
+    <h2>form-field</h2>
+    <div class="dc-grid">
+      <div class="dc-item">
+        <code>plain</code>
+        <app-form-field label="name" forId="dc-plain">
+          <input id="dc-plain" class="c-input" type="text" />
+        </app-form-field>
+      </div>
+      <div class="dc-item">
+        <code>hint='price'</code>
+        <app-form-field label="name" forId="dc-hint" hint="price">
+          <input id="dc-hint" class="c-input" type="text" />
+        </app-form-field>
+      </div>
+      <div class="dc-item">
+        <code>error='price'</code>
+        <app-form-field label="name" forId="dc-error" error="price">
+          <input id="dc-error" class="c-input c-input--invalid" type="text" />
+        </app-form-field>
+      </div>
+      <div class="dc-item">
+        <code>date: value=''</code>
+        <app-date-field inputId="dc-d1" [(value)]="dateEmpty_" />
+      </div>
+      <div class="dc-item">
+        <code>date: value='2026-11-08'</code>
+        <app-date-field inputId="dc-d2" [(value)]="dateWith_" />
+      </div>
+      <div class="dc-item">
+        <code>date: invalid=true</code>
+        <app-date-field inputId="dc-d3" [(value)]="dateInvalidValue_" [(invalid)]="dateInvalid_" />
+      </div>
+      <div class="dc-item">
+        <code>date: disabled=true</code>
+        <app-date-field inputId="dc-d4" [(value)]="dateDisabled_" [disabled]="true" />
+      </div>
+      <div class="dc-item">
+        <code>app-input-clear visible=true</code>
+        <div class="c-input-wrapper">
+          <input class="c-input" type="text" [value]="text_()" (input)="onText($event)" />
+          <app-input-clear [visible]="true" (clear)="text_.set('')" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="number-box" class="dc-section">
+    <h2>number-box</h2>
+    <div class="c-input-wrapper" appNumberBox>
+      <input class="c-input" type="number" value="12" />
+    </div>
+  </section>
+
+  <section id="stepper" class="dc-section">
+    <h2>stepper</h2>
+    <div class="dc-grid">
+      <div class="dc-item">
+        <code>min=0, value=5</code>
+        <app-counter [value]="counterValue_()" [min]="0" (valueChange)="counterValue_.set($event)" />
+      </div>
+      <div class="dc-item">
+        <code>min=1, value=1 (at its minimum)</code>
+        <app-counter [value]="1" [min]="1" />
+      </div>
+    </div>
+  </section>
+
+  <section id="chip" class="dc-section">
+    <h2>chip</h2>
+    <div class="c-chip-group">
+      <span class="c-chip">c-chip</span>
+      <span class="c-chip teal">teal</span>
+      <span class="c-chip amber">amber</span>
+      <span class="c-chip red">red</span>
+      <span class="c-chip c-chip--tag">--tag</span>
+      <span class="c-chip c-chip--tag c-chip--green">--tag --green</span>
+      <span class="c-chip c-chip--removable"
+        >--removable <button type="button" class="c-chip__remove" aria-label="close">×</button></span
+      >
+      <button type="button" class="c-chip c-chip--tab active">--tab</button>
+      <button type="button" class="c-chip c-chip--tab">--tab</button>
+      <label class="c-chip c-chip--toggle"><input type="checkbox" /><span>--toggle</span></label>
+      <button type="button" class="c-chip c-chip--tap">--tap</button>
+    </div>
+    <code>app-tab-chips (route-driven: it lists tabs only on the app's own routes, so it is empty here)</code>
+    <app-tab-chips />
+  </section>
+
+  <section id="feedback" class="dc-section">
+    <h2>feedback</h2>
+    <div class="dc-row">
+      <app-loader size="small" />
+      <app-loader size="medium" />
+      <app-loader size="large" />
+    </div>
+    <div class="dc-row">
+      <button type="button" class="c-btn-ghost" (click)="toast('success')">success</button>
+      <button type="button" class="c-btn-ghost" (click)="toastUndo()">success + undo</button>
+      <button type="button" class="c-btn-ghost" (click)="toast('error')">error</button>
+      <button type="button" class="c-btn-ghost" (click)="toast('warning')">warning</button>
+    </div>
+  </section>
+
+  <section id="edit-gate" class="dc-section">
+    <h2>edit-gate</h2>
+    <code>type='recipes'</code>
+    <app-edit-gate type="recipes">
+      <button type="button" class="c-btn-primary">{{ 'save' | translatePipe }}</button>
+    </app-edit-gate>
+  </section>
+
+  <section id="cost-badge" class="dc-section">
+    <h2>cost-badge</h2>
+    <code>missing=2 items</code>
+    <app-partial-cost-badge [missing]="missing_" />
+  </section>
+
+  <section id="engine-classes" class="dc-section">
+    <h2>engine-classes</h2>
+    <div class="dc-row">
+      <button type="button" class="c-btn-primary">c-btn-primary</button>
+      <button type="button" class="c-btn-primary c-btn-primary--danger">--danger</button>
+      <button type="button" class="c-btn-primary c-btn-primary--warning">--warning</button>
+      <button type="button" class="c-btn-ghost">c-btn-ghost</button>
+      <button type="button" class="c-btn-ghost c-btn-ghost--sm">c-btn-ghost--sm</button>
+    </div>
+    <div class="dc-grid">
+      <input class="c-input" type="text" value="c-input" />
+      <input class="c-input c-input--invalid" type="text" value="c-input--invalid" />
+      <div class="c-glass-card dc-card">c-glass-card</div>
+      <div class="c-glass-panel dc-card">c-glass-panel</div>
+    </div>
+  </section>
+</main>
