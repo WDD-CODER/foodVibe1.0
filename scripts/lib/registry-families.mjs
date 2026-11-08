@@ -42,8 +42,16 @@ export const REUSE_RULES = [
     family: 'modal-shell',
     files: ['src/app/**/*.html'],
     exclude: ['src/app/shared/modal-shell/**'],
-    pattern: /class="[^"]*bc-modal-overlay/,
+    pattern: /class="[^"]*\bc-modal-overlay/,
     hint: 'wrap the popup in app-modal-shell (src/app/shared/modal-shell/) instead of drawing .c-modal-overlay by hand'
+  },
+  {
+    id: 'family-styled-from-outside',
+    family: 'form-field',
+    files: ['src/app/**/*.scss'],
+    pattern:
+      /(?<![\w-])app-(?:add-option-row|chip-search-dropdown|confirm-modal|counter|custom-multi-select|custom-select|date-field|edit-gate|empty-state|form-field|input-clear|list-row-checkbox|list-shell|loader|modal-shell|page-header|partial-cost-badge|row-actions-menu|scrollable-dropdown|search-combobox|selection-bar|tab-chips)(?![\w-])|::ng-deep[^{]*\.(?:date-field|custom-select|search-combobox|counter|form-field)/,
+    hint: "a shared component is styled only through its own inputs or variants (docs/brain/component-families.md); a page rule that reaches into it is lost when the family's look changes"
   },
   {
     id: 'page-list-logic',

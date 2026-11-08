@@ -16,3 +16,4 @@ Facts from earlier runs of the builder role in this project, written by scripts 
 - 2026-11-03 run-513-516: fix round caused by: other rule (js file)
 - 2026-11-03 run-513-516: fix round caused by: another failure
 - 2026-11-03 run-513-516c: fix round caused by: other rule (html file)
+- 2026-11-08 run-517: parked: replan needed

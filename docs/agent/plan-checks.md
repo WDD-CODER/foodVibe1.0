@@ -9,6 +9,13 @@ manages.
 - Every plan that touches app or server code has this `[auto]` Done-when item:
   `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 
+## Checks the orchestrator can run
+- `pnpm run test:ci` (client) and `pnpm run test:server` (server, builds the schemas first).
+- `node scripts/log-query.mjs --since=plan-start --level=error` works without a marker (it prints
+  `plan-start: no marker, using <ISO> (<source>)`) and without a database (`SKIP: no database configured`, exit 0).
+- A `[ui]` card is a spec under `e2e/ui/<NNN>-<n>.spec.ts` that signs in with `signInQa`
+  (`e2e/helpers/qa-session.ts`), run by the builder with `pnpm exec playwright test <spec>` (not a gate check).
+
 ## Reuse Check
 - Every plan has a `## Reuse Check` section: one line per new component, util, pipe, service or `.c-*` class —
   `- <piece> — family: <id|none> — rung: <1-4> — why: <…>` — or `- none — <why>`. Families and the decision ladder:
