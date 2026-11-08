@@ -56,6 +56,8 @@ import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 import { formatPct1 } from 'src/app/core/engine/rounding'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { PermissionService } from '@services/permission.service'
+import { SupplierPickerComponent } from './supplier-picker/supplier-picker.component'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -86,7 +88,8 @@ const MAX_ROW_SUGGESTIONS = 5
     CdkDragHandle,
     ClickOutSideDirective,
     NutritionBadgeComponent,
-    PasteIngredientsDialogComponent
+    PasteIngredientsDialogComponent,
+    SupplierPickerComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss',
@@ -110,6 +113,7 @@ export class RecipeIngredientsTableComponent {
   private readonly recipeFormService_ = inject(RecipeFormService)
   private readonly nameMatcher_ = inject(ProductNameMatcherService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly permission_ = inject(PermissionService)
   private readonly pastedUnitResolver_ = createUnitWordResolver({
     aliases: UNIT_ALIASES,
     translate: (token) => this.translation_.resolveUnit(token),
@@ -206,6 +210,22 @@ export class RecipeIngredientsTableComponent {
     const refId = group.get('referenceId')?.value as string | null
     if (!refId) return null
     return this.kitchenStateService.products_().find((p) => p._id === refId) ?? null
+  }
+
+  /** Plan 510: only the owner may change which supplier a product is bought from. */
+  protected canPickSupplier_(): boolean {
+    return this.permission_.can('editMoney', { type: 'products' })
+  }
+
+  /** Plan 510: save the chosen supplier on the product (null = back to the cheapest); lines re-cost from the signal. */
+  protected async onSupplierPicked(product: Product | null, supplierId: string | null): Promise<void> {
+    if (!product || !this.canPickSupplier_()) return
+    const { preferredSupplierId: _old, ...rest } = product
+    try {
+      await this.productDataService.updateProduct(supplierId ? { ...rest, preferredSupplierId: supplierId } : rest)
+    } catch {
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('save_failed'))
+    }
   }
 
   /** Route the badge click: desktop → inline accordion; mobile → service-driven modal. */

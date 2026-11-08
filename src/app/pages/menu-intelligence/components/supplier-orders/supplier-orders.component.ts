@@ -21,8 +21,10 @@ import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cardSavings,
   describeOrderLine,
   toWhatsAppPhone,
+  type CheaperElsewhere,
   type OrderHeader,
   type OrderLineView,
   type SupplierOrderCard
@@ -73,6 +75,12 @@ export class SupplierOrdersComponent {
   protected readonly orders_ = computed(() =>
     buildSupplierOrders(this.plan_(), this.kitchenState_.productsById_(), this.kitchenState_.suppliersById_(), this.t_)
   )
+  /** Plan 510: per card, the cheaper-elsewhere hint of each line and the card's total possible saving. */
+  protected readonly savings_ = computed(() =>
+    this.orders_().cards.map((card) =>
+      cardSavings(card, this.kitchenState_.productsById_(), this.kitchenState_.suppliersById_())
+    )
+  )
   /** Per card: the plan's unpriced products that are lines of that card (plan 444). */
   protected readonly cardMissing_ = computed(() => {
     const unpriced = this.plan_().missing.filter((m) => m.kind === 'unpriced')
@@ -107,6 +115,22 @@ export class SupplierOrdersComponent {
 
   protected money(n: number): string {
     return formatMoney(n)
+  }
+
+  /** Plan 510: whole shekels shown as ₪4, otherwise up to 2 decimals. */
+  protected shekel(n: number): string {
+    return '₪' + String(Math.round(n * 100) / 100)
+  }
+
+  protected hintText(h: CheaperElsewhere): string {
+    return this.t_('cheaper_at_supplier')
+      .replace('{name}', h.supplierName)
+      .replace('{price}', this.shekel(h.price))
+      .replace('{saving}', this.shekel(h.saving))
+  }
+
+  protected canSaveText(total: number): string {
+    return this.t_('supplier_orders_can_save').replace('{amount}', this.shekel(total))
   }
 
   protected statusKey(line: RawLine): string {

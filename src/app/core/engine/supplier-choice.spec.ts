@@ -1,4 +1,4 @@
-import { chooseSupplier } from './supplier-choice'
+import { cheapestSupplier, chooseSupplier } from './supplier-choice'
 
 describe('chooseSupplier', () => {
   it('picks the cheapest positive price', () => {
@@ -66,6 +66,30 @@ describe('chooseSupplier', () => {
     expect(chooseSupplier({ sources: [{ supplierId: 'a', price: 0 }] })).toEqual({
       supplierId: null,
       pricePerBaseUnit: null
+    })
+  })
+
+  describe('with a chosen supplier (plan 510)', () => {
+    const sources = [
+      { supplierId: 'david', price: 4 },
+      { supplierId: 'grocery', price: 5 }
+    ]
+    it('uses the chosen supplier even when it is dearer', () => {
+      expect(chooseSupplier({ sources, preferredSupplierId: 'grocery' })).toEqual({
+        supplierId: 'grocery',
+        pricePerBaseUnit: 5
+      })
+    })
+    it('falls back to the cheapest when the chosen supplier has no price', () => {
+      expect(
+        chooseSupplier({ sources: [...sources, { supplierId: 'x', price: 0 }], preferredSupplierId: 'x' }).supplierId
+      ).toBe('david')
+    })
+    it('falls back to the cheapest when the chosen supplier was removed from the product', () => {
+      expect(chooseSupplier({ sources, preferredSupplierId: 'gone' }).supplierId).toBe('david')
+    })
+    it('cheapestSupplier ignores the choice', () => {
+      expect(cheapestSupplier({ sources })).toEqual({ supplierId: 'david', price: 4 })
     })
   })
 })
