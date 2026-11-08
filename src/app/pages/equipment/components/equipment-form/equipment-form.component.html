@@ -37,7 +37,7 @@
           [typeToFilter]="true"
           [class.c-input--invalid]="validationErrors_()['category']"
         />
-        @if (equipmentForm_.get('category')?.value === 'infrastructure') {
+        @if (category_() === 'infrastructure') {
           <p class="category-hint">{{ 'equipment_infrastructure_hint' | translatePipe }}</p>
         }
       </app-form-field>

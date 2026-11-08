@@ -79,9 +79,15 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
   protected categories = CATEGORIES
   protected categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }))
   protected validationErrors_ = signal<Record<string, string>>({})
+  /** Mirrors the category control so the OnPush template redraws when it changes. */
+  protected category_ = signal<string>('tool')
 
   ngOnInit(): void {
     this.buildForm()
+    const categoryCtrl = this.equipmentForm_.get('category')
+    categoryCtrl?.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value: string) => this.category_.set(value))
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       const equipment = data['equipment'] as Equipment | null | undefined
       if (equipment) {
