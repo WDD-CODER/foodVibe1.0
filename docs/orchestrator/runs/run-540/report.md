@@ -1,6 +1,6 @@
 # Orchestrator run run-540
 
-Run branch: `orch/run-540` (from `origin/main` at c8a743e) · started 2026-11-08T21:10:21.218Z · finished 2026-11-08T21:26:41.358Z
+Run branch: `orch/run-540` (from `origin/main` at c8a743e) · started 2026-11-08T21:10:21.218Z · finished 2026-11-08T21:28:55.636Z
 Result: 0 merged, 1 parked, skipped or left out, 1 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is c8a743e.
 
@@ -8,7 +8,7 @@ Result: 0 merged, 1 parked, skipped or left out, 1 in the run (counted from git 
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
-| 540 Show why the server refused a save | parked | 1 | build |  | same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1. |
+| 540 Show why the server refused a save | parked | 0 | build |  | worktree: C:\coding projects\Cursor\foodVibe1.0-orch-run-540-540 is on (no branch), not feat/540-show-why-the-server |
 
 ## App errors since the run started
 
@@ -41,7 +41,7 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 
 - nothing to validate
 
-- Decide on 540: same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1.
+- Decide on 540: worktree: C:\coding projects\Cursor\foodVibe1.0-orch-run-540-540 is on (no branch), not feat/540-show-why-the-server
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -49,6 +49,6 @@ git fetch origin
 gh pr create --base main --head orch/run-540 --title "Orchestrator run run-540" --body-file .claude\orchestrator-runs\run-540.md
 ```
 
-Context added by learning: 3.4k chars across 6 roles
+Context added by learning: 3.5k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0.25 → 1 · parked 0 → 0 → 1
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0.25 → 0 · parked 0 → 0 → 1

@@ -10,7 +10,7 @@
       "title": "Show why the server refused a save",
       "branch": "feat/540-show-why-the-server",
       "state": "parked",
-      "round": 1,
+      "round": 0,
       "tier": "build",
       "models": {},
       "humanItems": [
@@ -74,65 +74,86 @@
           "at": "2026-11-08T21:26:32.673Z",
           "state": "parked",
           "round": 1
+        },
+        {
+          "at": "2026-11-08T21:28:54.163Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "540",
+          "title": "Show why the server refused a save",
+          "branch": "feat/540-show-why-the-server",
+          "state": "parked",
+          "round": 1,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 5.2,
+          "sha": "3b204d42606dcca02fa048c74974fa7cfff95070",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 430.4,
+              "tokens": {
+                "input": 2069261,
+                "output": 25226
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 25.5,
+              "tokens": {
+                "input": 205345,
+                "output": 1677
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 84.1,
+              "tokens": {
+                "input": 62235,
+                "output": 1192
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 16.4,
+              "tokens": {
+                "input": 99077,
+                "output": 978
+              },
+              "exit": 0
+            }
+          ],
+          "checkedHead": "3b204d42606dcca02fa048c74974fa7cfff95070",
+          "roundCauses": [
+            "round 1: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1.",
+            "round 2: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1."
+          ],
+          "reason": "same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1.",
+          "park": {
+            "at": "2026-11-08T21:26:39.564Z",
+            "reason": "same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1."
+          }
         }
       ],
       "tiers": [
         "build"
       ],
-      "freeDiskGb": 5.2,
-      "sha": "3b204d42606dcca02fa048c74974fa7cfff95070",
-      "calls": [
-        {
-          "stage": "builder",
-          "model": "sonnet",
-          "seconds": 430.4,
-          "tokens": {
-            "input": 2069261,
-            "output": 25226
-          },
-          "exit": 0
-        },
-        {
-          "stage": "reviewer",
-          "model": "sonnet",
-          "seconds": 25.5,
-          "tokens": {
-            "input": 205345,
-            "output": 1677
-          },
-          "exit": 0
-        },
-        {
-          "stage": "builder fix",
-          "model": "sonnet",
-          "seconds": 84.1,
-          "tokens": {
-            "input": 62235,
-            "output": 1192
-          },
-          "exit": 0
-        },
-        {
-          "stage": "reviewer",
-          "model": "sonnet",
-          "seconds": 16.4,
-          "tokens": {
-            "input": 99077,
-            "output": 978
-          },
-          "exit": 0
-        }
-      ],
-      "checkedHead": "3b204d42606dcca02fa048c74974fa7cfff95070",
-      "roundCauses": [
-        "round 1: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1.",
-        "round 2: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1."
-      ],
-      "reason": "same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1.",
-      "park": {
-        "at": "2026-11-08T21:26:39.564Z",
-        "reason": "same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1."
-      }
+      "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-540-540 is on (no branch), not feat/540-show-why-the-server",
+      "freeDiskGb": 5.8
     }
   },
   "notes": [
@@ -147,10 +168,10 @@
       "text": "parked: nothing to save (nothing uncommitted)"
     }
   ],
-  "attempts": 1,
+  "attempts": 2,
   "phase": "finished",
-  "freeDiskGb": 5.2,
-  "updatedAt": "2026-11-08T21:26:41.360Z",
+  "freeDiskGb": 5.8,
+  "updatedAt": "2026-11-08T21:28:55.638Z",
   "decisions": [
     {
       "id": "D1",
@@ -205,5 +226,5 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-08T21:26:41.358Z"
+  "finishedAt": "2026-11-08T21:28:55.636Z"
 }
