@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { UserService } from '@services/user.service'
+import { EquipmentDataService } from '@services/equipment-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { VenueProfile } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -21,6 +22,7 @@ export class VenueDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
   private readonly menuEventData = inject(MenuEventDataService)
+  private readonly equipmentData = inject(EquipmentDataService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
 
   private readonly routeData_ = toSignal(this.route.data, { initialValue: this.route.snapshot.data })
@@ -32,6 +34,19 @@ export class VenueDetailComponent implements OnInit {
   /** design-port session 6 — reads the (currently unwired-elsewhere) logistics.venueProfileId
    * link; see MenuEvent/EventLogistics models and the new venue-link-chip on menu-intelligence. */
   /** True when at least one hours block has text — empty blocks alone show "—" (plan 371). */
+  /** Venue equipment rows split by the equipment's category; unknown equipment counts as 'other'. */
+  protected readonly infraGroups_ = computed(() => {
+    const all = this.equipmentData.allEquipment_()
+    const infra: { name: string; quantity: number }[] = []
+    const other: { name: string; quantity: number }[] = []
+    for (const row of this.venue_()?.availableInfrastructure ?? []) {
+      const eq = all.find((e) => e._id === row.equipmentId)
+      const item = { name: eq?.nameHebrew ?? row.equipmentId, quantity: row.availableQuantity }
+      ;(eq?.category === 'infrastructure' ? infra : other).push(item)
+    }
+    return { infra, other }
+  })
+
   protected readonly hasHours_ = computed(() => formatVenueHours(this.venue_()?.operatingHours).first !== '')
 
   protected readonly associatedMenus_ = computed(() => {
@@ -51,6 +66,7 @@ export class VenueDetailComponent implements OnInit {
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
+    void this.equipmentData.ensureLoaded()
   }
 
   protected backToList(): void {

@@ -95,13 +95,36 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   }
 
   protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
-  protected equipmentOptions_ = computed(() =>
-    this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
-  )
+  /** Fixed venue infrastructure (ovens, fridges, sinks…) — equipment with category 'infrastructure'. */
+  protected infraOptions_ = computed(() => this.optionsFor_(true))
+  /** Every other (portable) equipment category. */
+  protected otherEquipmentOptions_ = computed(() => this.optionsFor_(false))
+
+  private optionsFor_(infra: boolean): { value: string; label: string }[] {
+    return this.equipmentData
+      .allEquipment_()
+      .filter((eq) => (eq.category === 'infrastructure') === infra)
+      .map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'he'))
+  }
+
+  private groupFor_(equipmentId: string): 'infra' | 'other' {
+    const eq = this.equipmentData.allEquipment_().find((e) => e._id === equipmentId)
+    return eq?.category === 'infrastructure' ? 'infra' : 'other'
+  }
+
+  private infraRow_(equipmentId: string, quantity: number, group: 'infra' | 'other'): FormGroup {
+    return this.fb.group({
+      equipmentId: [equipmentId, Validators.required],
+      availableQuantity: [quantity, [Validators.required, Validators.min(0)]],
+      /** UI only — never sent to the server. */
+      group: [group]
+    })
+  }
 
   ngOnInit(): void {
     void this.venueData.ensureLoaded()
-    void this.equipmentData.ensureLoaded()
+    void this.equipmentData.ensureLoaded().then(() => this.regroupRows_())
     this.buildForm()
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       const venue = data['venue'] as VenueProfile | null | undefined
@@ -162,12 +185,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     const arr = this.infraArray
     arr.clear()
     ;(v.availableInfrastructure ?? []).forEach((item) => {
-      arr.push(
-        this.fb.group({
-          equipmentId: [item.equipmentId, Validators.required],
-          availableQuantity: [item.availableQuantity, [Validators.required, Validators.min(0)]]
-        })
-      )
+      arr.push(this.infraRow_(item.equipmentId, item.availableQuantity, this.groupFor_(item.equipmentId)))
     })
     const hours = this.hoursArray
     hours.clear()
@@ -179,6 +197,16 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         })
       )
     })
+  }
+
+  /** Equipment may finish loading after the venue was hydrated: re-place rows, only while the user has not edited. */
+  private regroupRows_(): void {
+    if (!this.venueForm_ || this.venueForm_.dirty) return
+    this.infraArray.controls.forEach((row) => {
+      const id = row.get('equipmentId')?.value as string
+      if (id) row.get('group')?.setValue(this.groupFor_(id), { emitEvent: false })
+    })
+    this.unsaved_.markSaved()
   }
 
   protected onPhotoSelected(event: Event): void {
@@ -200,13 +228,12 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       })
   }
 
-  protected addInfraRow(): void {
-    this.infraArray.push(
-      this.fb.group({
-        equipmentId: ['', Validators.required],
-        availableQuantity: [1, [Validators.required, Validators.min(0)]]
-      })
-    )
+  protected addInfraRow(group: 'infra' | 'other' = 'other'): void {
+    this.infraArray.push(this.infraRow_('', 1, group))
+  }
+
+  protected hasRowsIn(group: 'infra' | 'other'): boolean {
+    return this.infraArray.controls.some((c) => c.get('group')?.value === group)
   }
 
   protected removeInfraRow(index: number): void {

@@ -106,6 +106,42 @@
 
     <section class="detail-card c-glass-panel">
       <header class="detail-card-header">
+        <h2>{{ 'venue_infrastructure_group' | translatePipe }}</h2>
+      </header>
+      @if (infraGroups_().infra.length) {
+        <ul class="hours-list">
+          @for (item of infraGroups_().infra; track $index) {
+            <li class="hours-row">
+              <span class="hours-days">{{ item.name }}</span>
+              <span class="hours-time">{{ item.quantity }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="detail-empty">{{ 'no_infrastructure_items' | translatePipe }}</p>
+      }
+    </section>
+
+    <section class="detail-card c-glass-panel">
+      <header class="detail-card-header">
+        <h2>{{ 'venue_other_equipment_group' | translatePipe }}</h2>
+      </header>
+      @if (infraGroups_().other.length) {
+        <ul class="hours-list">
+          @for (item of infraGroups_().other; track $index) {
+            <li class="hours-row">
+              <span class="hours-days">{{ item.name }}</span>
+              <span class="hours-time">{{ item.quantity }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="detail-empty">—</p>
+      }
+    </section>
+
+    <section class="detail-card c-glass-panel">
+      <header class="detail-card-header">
         <h2>{{ 'associated_menus' | translatePipe }}</h2>
       </header>
       @if (associatedMenus_().length) {

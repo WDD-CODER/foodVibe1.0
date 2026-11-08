@@ -86,10 +86,10 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Sort venue equipment into infrastructure and regular groups behind the scenes — Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
-- [ ] A2: Show infrastructure and regular equipment as two groups on the venue pages — Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
-- [ ] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
-- [ ] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400.
+- [x] A1: Sort venue equipment into infrastructure and regular groups behind the scenes — Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
+- [x] A2: Show infrastructure and regular equipment as two groups on the venue pages — Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
+- [x] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
+- [x] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400.
 
 ## Technical Considerations
 
@@ -119,3 +119,4 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 - Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).
 - Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
 - the operating-hours section of the venue form must stay; reviewer STOP 2026-11-08
+- Builder: ng test venues+equipment specs -> exit 0, 20 SUCCESS; npm run build -> exit 0; pnpm run lint -> exit 0 (0 errors). Dictionary entries appended (hotspot).
