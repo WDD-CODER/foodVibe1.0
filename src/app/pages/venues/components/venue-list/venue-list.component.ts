@@ -32,7 +32,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
-import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
+import { formatVenueHoursLines } from 'src/app/core/utils/venue-hours.util'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { TranslationService } from '@services/translation.service'
 
@@ -166,9 +166,9 @@ export class VenueListComponent implements OnInit, OnDestroy {
     return [...list].sort((a, b) => (a.nameHebrew ?? '').localeCompare(b.nameHebrew ?? '', 'he'))
   })
 
-  /** Compact hours line for the card (plan 371). */
-  protected venueHours(item: VenueProfile): VenueHoursSummary {
-    return formatVenueHours(item.operatingHours)
+  /** Every hours row of the venue, one line each, for the card. */
+  protected venueHoursLines(item: VenueProfile): string[] {
+    return formatVenueHoursLines(item.operatingHours)
   }
 
   protected onAddPlace(): void {

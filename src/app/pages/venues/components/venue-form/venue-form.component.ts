@@ -206,12 +206,6 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     return errors
   }
 
-  /** Live result of a row (for the "+1" marker). */
-  protected liveResult_(index: number): HoursRowResult {
-    const row = this.hoursArray.at(index)?.getRawValue() as HoursRaw | undefined
-    return row ? checkHoursRow(row) : 'empty'
-  }
-
   /** The mark of a row, only after the first blocked save: broken results only. */
   protected hoursMark_(index: number): HoursRowResult | null {
     if (!this.hoursSubmitAttempted_()) return null

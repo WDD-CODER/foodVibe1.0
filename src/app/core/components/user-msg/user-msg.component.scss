@@ -1,5 +1,3 @@
-$break-phone-max: 767px; // mirrors src/styles.scss
-
 .user-msg {
   position: fixed;
   inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--space-4));
@@ -63,10 +61,5 @@ $break-phone-max: 767px; // mirrors src/styles.scss
     background: var(--border-warning);
     color: var(--color-text-on-primary);
     border-color: var(--border-glass);
-  }
-
-  @media (max-width: $break-phone-max) {
-    inset-inline: var(--space-4);
-    inline-size: auto;
   }
 }

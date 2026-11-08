@@ -184,12 +184,12 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       expect(hours().hoursErrors_()[0]).toBe('same_time')
     })
 
-    it('saves an overnight row and shows the +1 marker', async () => {
+    it('saves an overnight row with no marker', async () => {
       await setup(null)
       setName('אולם')
       addRow({ days: 'ה׳', open: '18:00', close: '02:00' })
       fixture.detectChanges()
-      expect(fixture.nativeElement.querySelector('.hours-next-day')?.textContent).toContain('+1')
+      expect(fixture.nativeElement.querySelector('.hours-next-day')).toBeNull()
       expect(await component.saveAndWait()).toBeTrue()
       expect(sentHours(venueData.addVenue)).toEqual([{ days: 'ה׳', time: '18:00–02:00' }])
     })

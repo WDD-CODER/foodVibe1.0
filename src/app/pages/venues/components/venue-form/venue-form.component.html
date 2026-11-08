@@ -105,14 +105,6 @@
               (invalidChange)="setHoursControl_(i, 'closeInvalid', $event)"
               [flagged]="timeFlagged_(i, 'close')"
             />
-            @if (liveResult_(i) === 'overnight') {
-              <span
-                class="hours-next-day"
-                [attr.aria-label]="'venue_hours_next_day' | translatePipe"
-                [title]="'venue_hours_next_day' | translatePipe"
-                >+1</span
-              >
-            }
           </div>
           <button
             type="button"
