@@ -2,6 +2,7 @@
   :host {
     display: flex;
     flex-direction: column;
+    inline-size: 100%;
     min-inline-size: 0;
   }
 
@@ -23,12 +24,15 @@
  * unlayered and would otherwise size the hidden picker.
  */
 
-/* Desktop: the native date input is only the picker: invisible, no tab stop, anchored at the field's end. */
+/*
+ * Desktop: the native date input is only the picker: invisible, no tab stop. It spans the field's bottom edge, so the
+ * browser opens its calendar right under the field instead of at one corner.
+ */
 .date-field-picker {
   position: absolute;
   inset-block-end: 0;
-  inset-inline-end: 0;
-  inline-size: 1px;
+  inset-inline: 0;
+  inline-size: 100%;
   block-size: 1px;
   min-block-size: 0;
   min-inline-size: 0;
