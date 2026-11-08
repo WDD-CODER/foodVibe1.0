@@ -94,6 +94,15 @@ describe('RecipeBuilderComponent', () => {
       expect(component.hasRealChanges()).toBeTrue()
     })
 
+    it('is true after a line supplier is picked and false again when it is set back (plan 536)', async () => {
+      await createPage()
+      const row = component.ingredientsArray.at(0) as FormGroup
+      row.get('supplierId')?.setValue('shuk')
+      expect(component.hasRealChanges()).toBeTrue()
+      row.get('supplierId')?.setValue(null)
+      expect(component.hasRealChanges()).toBeFalse()
+    })
+
     it('is true after an AI draft is applied, before saving', async () => {
       TestBed.inject(AiRecipeDraftService).set({
         nameHebrew: 'טיוטה',

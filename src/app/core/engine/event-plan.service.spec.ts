@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing'
 import type { MenuEvent } from '@models/menu-event.model'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
 import { SYSTEM_UNITS, UnitRegistryService } from '@services/unit-registry.service'
 import { computeEventPlan } from './event-plan.engine'
 import { EventPlanService } from './event-plan.service'
@@ -21,8 +22,10 @@ function viaFormula(event: MenuEvent): MenuEvent {
 describe('EventPlanService', () => {
   const input = buildFixtureInput()
   let service: EventPlanService
+  let storedEvents: MenuEvent[]
 
   beforeEach(() => {
+    storedEvents = []
     const kitchen = { products_: () => input.products, recipes_: () => input.recipes }
     const registry = {
       getConversion: (key: string): number => SYSTEM_UNITS[key] || 1,
@@ -31,6 +34,7 @@ describe('EventPlanService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: KitchenStateService, useValue: kitchen },
+        { provide: MenuEventDataService, useValue: { allMenuEvents_: () => storedEvents } },
         { provide: UnitRegistryService, useValue: registry }
       ]
     })
@@ -69,5 +73,27 @@ describe('EventPlanService', () => {
 
   it('costFor flags an unknown recipe as partial', () => {
     expect(service.costFor('missing', 10)).toEqual({ cost: 0, partial: true })
+  })
+
+  it('planFor uses the stored event supplierMoves when the draft has none (plan 536)', () => {
+    const draft = viaFormula(input.event)
+    const moves = [{ productId: ID.tomato, fromSupplierId: ID.supplierB, toSupplierId: ID.supplierA }]
+    storedEvents = [{ ...draft, supplierMoves: moves }]
+    const plan = service.planFor(draft)
+    const tomato = plan.rawLines.find((l) => l.productId === ID.tomato)
+    expect(tomato?.supplierId).toBe(ID.supplierA)
+    expect(tomato?.movedFrom).toBe(ID.supplierB)
+    storedEvents = [
+      { ...draft, supplierMoves: [{ productId: ID.tomato, fromSupplierId: 'none', toSupplierId: ID.supplierA }] }
+    ]
+    expect(service.planFor(draft)).toEqual(computeEventPlan({ ...input, event: draft }))
+  })
+
+  it('planFor keeps a draft that carries its own supplierMoves (plan 536)', () => {
+    const draft = { ...viaFormula(input.event), supplierMoves: [] }
+    storedEvents = [
+      { ...draft, supplierMoves: [{ productId: ID.tomato, fromSupplierId: ID.supplierB, toSupplierId: ID.supplierA }] }
+    ]
+    expect(service.planFor(draft)).toEqual(computeEventPlan({ ...input, event: draft }))
   })
 })

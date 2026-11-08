@@ -1599,6 +1599,14 @@
     "venue_infrastructure_group": "תשתיות המקום",
     "venue_other_equipment_group": "ציוד נוסף",
     "no_infrastructure_items": "אין פריטי תשתית",
-    "equipment_infrastructure_hint": "תשתית = ציוד קבוע של המקום (כיריים, תנורים, מקררים, כיורים). מופיע בנפרד בהגדרות מקום האירוע."
+    "equipment_infrastructure_hint": "תשתית = ציוד קבוע של המקום (כיריים, תנורים, מקררים, כיורים). מופיע בנפרד בהגדרות מקום האירוע.",
+    "pick_supplier": "בחירת ספק",
+    "supplier_cheapest_auto": "הזול ביותר (אוטומטי)",
+    "cheaper_at_supplier": "זול יותר אצל {name}: {price} (חיסכון {saving})",
+    "supplier_orders_can_save": "אפשר לחסוך {amount} אצל ספקים אחרים",
+    "supplier_move_to": "העבר ל{name}",
+    "supplier_moved_from": "הועבר מ{name} לאירוע הזה",
+    "supplier_move_back": "החזר ל{name}",
+    "supplier_move_save_first": "שמרו את האירוע כדי להעביר ספק"
   }
 }

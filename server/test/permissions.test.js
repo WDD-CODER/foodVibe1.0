@@ -96,3 +96,29 @@ describe('plan 449: money signature is keyed by row', () => {
     expect(moneyFieldsChanged('products', before, doc([{ supplierId: 'a', price: 5 }, { supplierId: 'b' }]))).toBe(false)
   })
 })
+
+describe('plan 536 supplier choice is a money field', () => {
+  const l = (id, extra = {}) => ({ _id: id, referenceId: 'p' + id, amount: 1, unit: 'kg', ...extra })
+  it('setting, changing and clearing a recipe line supplier is a money change', () => {
+    const before = { ingredients: [l('a'), l('b', { supplierId: 's1' })] }
+    expect(moneyFieldsChanged('recipes', before, { ingredients: [l('a', { supplierId: 's1' }), l('b', { supplierId: 's1' })] })).toBe(true)
+    expect(moneyFieldsChanged('recipes', before, { ingredients: [l('a'), l('b', { supplierId: 's2' })] })).toBe(true)
+    expect(moneyFieldsChanged('recipes', before, { ingredients: [l('a'), l('b')] })).toBe(true)
+    expect(moneyFieldsChanged('dishes', before, { ingredients: [l('a'), l('b')] })).toBe(true)
+  })
+  it('reordering lines or editing an amount is not a money change', () => {
+    const before = { ingredients: [l('a', { supplierId: 's1' }), l('b', { supplierId: 's2' })] }
+    expect(moneyFieldsChanged('recipes', before, { ingredients: [l('b', { supplierId: 's2' }), l('a', { supplierId: 's1' })] })).toBe(false)
+    expect(moneyFieldsChanged('recipes', before, { ingredients: [l('a', { supplierId: 's1', amount: 9 }), l('b', { supplierId: 's2' })] })).toBe(false)
+  })
+  it('supplierMoves on an event is a money field', () => {
+    const mv = { productId: 'p', fromSupplierId: 'a', toSupplierId: 'b' }
+    expect(moneyFieldsChanged('menuEvents', { name: 'x' }, { name: 'x', supplierMoves: [mv] })).toBe(true)
+    expect(moneyFieldsChanged('menuEvents', { supplierMoves: [mv] }, { supplierMoves: [] })).toBe(true)
+    expect(moneyFieldsChanged('menuEvents', { supplierMoves: [mv] }, { supplierMoves: [mv] })).toBe(false)
+  })
+  it('a staff-created recipe or event is stored without them', () => {
+    expect(stripMoneyFields('recipes', { ingredients: [l('a', { supplierId: 's1' })] })).toEqual({ ingredients: [l('a')] })
+    expect(stripMoneyFields('menuEvents', { name: 'x', supplierMoves: [{ productId: 'p', fromSupplierId: 'a', toSupplierId: 'b' }] })).toEqual({ name: 'x' })
+  })
+})

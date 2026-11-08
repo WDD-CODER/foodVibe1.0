@@ -183,6 +183,14 @@
           } @else {
             <span class="cost-value">₪{{ group.get('total_cost')?.value | number: '1.2-2' }}</span>
           }
+          @if (group.get('item_type')?.value === 'product') {
+            <app-supplier-picker
+              [product]="getProductForGroup(group)"
+              [value]="group.get('supplierId')?.value ?? null"
+              [canEdit]="canPickSupplier_()"
+              (picked)="onSupplierPicked(group, $event)"
+            />
+          }
         </div>
 
         <div class="col-actions">

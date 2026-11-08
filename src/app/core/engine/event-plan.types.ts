@@ -29,6 +29,10 @@ export interface RawLine {
   buyQty: number
   purchase?: { unit: string; count: number }
   supplierId: string | null
+  /** Plan 536: the supplier the recipes buy this from, before an event move; null = none. */
+  recipeSupplierId: string | null
+  /** Plan 536: the supplier the event moved this item away from; null = not moved. */
+  movedFrom: string | null
   lineCost: number | null
   dishIds: string[]
   status: RawLineStatus
