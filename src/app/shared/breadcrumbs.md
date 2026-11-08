@@ -23,6 +23,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `edit-gate/` | Shows its content only when the user may save the opened document, else a view-only note | EditGateComponent |
 | `form-field/` | Label + projected control + error/hint slot for entity forms (`layout`, `labelStyle`) | FormFieldComponent |
 | `date-field/` | Day/month/year text field; on touch the native date input covers it (no button); `value` is an ISO date, `invalid` flags an impossible one (plan 467) | DateFieldComponent |
+| `time-field/` | HH:mm text field; a click or tap opens the native time picker; `value` is "HH:mm", `invalid` flags an impossible time (plan 537) | TimeFieldComponent |
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |
