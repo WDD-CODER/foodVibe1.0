@@ -136,6 +136,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
+- Times (plan 537): every time of day is `app-time-field` (`src/app/shared/time-field/`); the only `type="time"` left is its hidden picker. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
 - Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
 
 ### number-box — tap anywhere on a number box to edit the number
