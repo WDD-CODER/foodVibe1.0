@@ -230,7 +230,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A9: Recipe builder marks the refused name / yield and stops the second toast — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.spec.ts, src/app/pages/recipe-builder/recipe-builder.page.ts
 - [x] A10: Event save never fails silently; add-supplier popup stops the second toast — src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/core/services/add-supplier-flow.service.ts, src/app/core/services/add-supplier-flow.service.spec.ts
 - [x] A11: Registry lines — docs/brain/component-families.md
-- [ ] A12: Run every `[auto]` check and paste the outputs under Execution Notes; prepare the Human SETUP (local supplier "בדיקת שדה ישן" with `staleTestField: true`, set through mongosh or a scratch script outside the repo; remove it after the Human replies)
+- [x] A12: Run every `[auto]` check and paste the outputs under Execution Notes; prepare the Human SETUP (local supplier "בדיקת שדה ישן" with `staleTestField: true`, set through mongosh or a scratch script outside the repo; remove it after the Human replies)
 
 ## Technical Considerations
 - Dependencies: `UserMsgService`, `TranslationService`, `LoggingService` (already resolved lazily in the interceptor
