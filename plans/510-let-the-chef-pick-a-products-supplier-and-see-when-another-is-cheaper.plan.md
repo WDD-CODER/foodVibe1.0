@@ -37,6 +37,7 @@ event supplier orders show when another supplier sells it for less.
 - Parallel: no. Runs after 473 merges. Do not run alongside 499, 500 or 502 (they share the recipe ingredients table).
 
 ## Execution Notes
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
 - Base branch `main`.
 - Decisions (Human, 2026-10-29): D1 the choice is stored on the product, not per recipe line, so one event never buys
   the same product from two suppliers; D3 owner only — `preferredSupplierId` becomes a money field; D4 the order hint
@@ -149,4 +150,3 @@ strip money fields (grep `MONEY_FIELDS` in `server/`). Record findings in Execut
 
 ## Critical Questions
 - Answered 2026-10-29 (Human): D1 product-level choice; D3 owner only; D4 information only; split from 473.
-- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
