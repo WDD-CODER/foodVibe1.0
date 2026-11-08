@@ -1,6 +1,6 @@
 # Plan 517 — Let the orchestrator gate run FoodVibe's server tests and the log check, and give e2e specs a signed-in session
 
-Status: draft
+Status: done
 Snapshot: 589524365af5ec711e860748e7f8cfbc22dfbbca
 Depends-on: none
 
@@ -108,7 +108,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [x] A2: Make the log check survive a builder folder — export `resolvePlanStart(root)` (marker, else merge-base time, else first branch commit, else 24h, with its source) and `databaseUri({ remote })` (the URI or `''`); use them in place of the two `die()` paths; print the `plan-start: no marker` line and the `SKIP: no database configured` exit 0 — scripts/log-query.mjs
 - [x] A3: Unit-test both helpers without Mongo — a temp folder with and without `.claude/.slot-plan-start` (marker wins; without it the source is `merge-base` inside this repo, `24h` in a non-git temp dir); `databaseUri` with both env vars unset → `''`, with `MONGO_LOCAL_URI` set → that value (save and restore `process.env`). Guard the CLI entry with an `import.meta.url` check so importing does not run the query — scripts/test/log-query-fallback.test.mjs, scripts/log-query.mjs
 - [x] A4: Give e2e specs a signed-in QA session and a throwaway event — `signInQa`, `createQaEvent`, `deleteQaEvent` over the existing qa-login helpers — e2e/helpers/qa-session.ts
-- [ ] A5: Prove the session helper against the running app with one screenshot — the `[ui]` card test, run with `pnpm exec playwright test e2e/qa-session.spec.ts` — e2e/qa-session.spec.ts, screens/517-1.png
+- [x] A5: Prove the session helper against the running app with one screenshot (dropped, Human 2026-11-08: QA users are not used now; the spec stays, never run) — the `[ui]` card test, run with `pnpm exec playwright test e2e/qa-session.spec.ts` — e2e/qa-session.spec.ts, screens/517-1.png
 - [x] A6: Tell plan authors which checks the gate can run — one paragraph — docs/agent/plan-checks.md
 - [x] A7: Run every automatic check of this plan from the worktree and paste the outputs under Execution Notes
 
@@ -141,3 +141,4 @@ line or file this plan names was removed, renamed or rewritten).
 - Planner review 2026-11-07 (brief 4): re-verified the four blockers against plans 503 and 508 and kit v2.1.0 at 5895243. Cut: `scripts/test-ci.mjs`, its test and fixtures, `scripts/e2e-one.mjs` and its test, `kit.config.json` (already `commands.test: test:ci`). Kept: `test:server`, the log-query fallback, the e2e session helper. Changed: `npm` → `pnpm` (plan 505), Done-when paths spelled out, `createQaEvent` told to follow the menu-event schema. Plans 518–523 updated to match: `npm run test:ci` exits 0 instead of the `TEST-CI:` line; 522 and 523 run card specs with `pnpm exec playwright test <spec>`. Every file in scope is project-owned (none in `.kit/install.json`).
 - Builder run: `node --test scripts/test/log-query-fallback.test.mjs` → exit 0, pass 4 fail 0. `pnpm run test:server` → exit 0. `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0 (`no entries`; a Mongo URI exists here). `pnpm run build` + `pnpm run lint` → exit 0. `pnpm run test:ci` → exit 0, 1707 of 1707. scope-check --arch ok, --reuse exit 0.
 - A5 not ticked: `pnpm exec playwright test e2e/qa-session.spec.ts` fails with `fetch failed` — no API on localhost:3000 in this environment, so `screens/517-1.png` is not produced. The ESM load problem (Playwright CJS cannot require the .mjs) was fixed with a native `import()` in the helper.
+- Closed 2026-11-08 (Human): A5 dropped — the `[ui]` QA-session spec needs QA credentials and nothing uses the QA users yet. Code merged in PR #522.

@@ -105,17 +105,6 @@
 - [ ] A1: Add the missing manifest entry for the native-dialog test fixture so the rules check stops failing — insert one object after the `mixed.diff` entry (alphabetical, before `registry-broken.md`) with `"path": "scripts/test/fixtures/reuse/native-dialog.diff"`, `"tier": "project"`, `"action": "stay"`, `"params": []`, `"refs": []`, `"notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."` (copy the `clean.diff` entry's shape and wording exactly) — docs/workflow-kit/manifest.json
 - [ ] A2: Prove the manifest check is green and nothing else moved — run the Done-when commands and paste the `KIT_MANIFEST: ok` line in Execution Notes; `git diff --stat` must show only `docs/workflow-kit/manifest.json` (+8 lines)
 
-### Plan 517 — Let the orchestrator gate run FoodVibe's tests, server tests and one e2e spec without hanging
-- [x] A1: Give the project a test runner that always exits, so the gate gets a verdict instead of a hang — spawn ng test headless, parse the Karma TOTAL line, kill the process tree, print the TEST-CI summary line — scripts/test-ci.mjs
-- [x] A2: Prove the runner exits on a fake child that prints TOTAL and then hangs — the test spawns `node scripts/test/fixtures/fake-karma.mjs` (prints `TOTAL: 1 FAILED, 3 SUCCESS` then sleeps 60s) through an exported `runWithParser(cmd, args, { timeoutMs })` and asserts exit 1 and the summary line within 5s; a second fixture prints `TOTAL: 4 SUCCESS` → exit 0; a third prints nothing → timeout path exit 1 with `timeoutMs: 500` — scripts/test/test-ci.test.mjs, scripts/test/fixtures/fake-karma.mjs
-- [x] A3: Let a card's test command run one Playwright spec through an allowlisted script — validate the argument, spawn `npx playwright test <spec>` with stdio inherited, exit with its code; test the validator (`e2e/x.spec.ts` ok, `../x.spec.ts` and `e2e/x.ts` → exit 2) — scripts/e2e-one.mjs, scripts/test/e2e-one.test.mjs
-- [x] A4: Register the two runners as package scripts and point the kit's test command at the one that exits — `test:ci`, `test:server`; `commands.test: "test:ci"` — package.json, kit.config.json
-- [ ] A5: Make the log check survive a builder folder — plan-start fallback to the branch base time, SKIP with exit 0 when no database is configured; keep every other path as it is — scripts/log-query.mjs, scripts/test/log-query-fallback.test.mjs (unit-test the exported `resolvePlanStart(root)` and `databaseUri(root)` helpers; no Mongo)
-- [x] A6: Give e2e specs a signed-in QA session and a throwaway event — `signInQa`, `createQaEvent`, `deleteQaEvent` over the existing qa-login helpers — e2e/helpers/qa-session.ts
-- [x] A7: Prove the session helper against the running app with one screenshot — the `[ui]` card test — e2e/qa-session.spec.ts
-- [ ] A8: Tell plan authors which checks the gate can run — one paragraph — docs/agent/plan-checks.md
-- [ ] A9: Run every automatic check of this plan from the worktree and paste the outputs under Execution Notes
-
 ### Plan 518 — Event logistics 1 of 6: the checklist-item kind and the event's answers in the shared schemas
 - [ ] A1: Define the logistics vocabulary once for client and server — phases, sections, answer types, statuses, payers and size limits — shared/schemas/entities/event-logistics.ts, shared/schemas/entities/index.ts
 - [ ] A2: Let a taxonomy term be a logistics question — new kind in the enum, the union member, the reference path — shared/schemas/entities/taxonomy-term.schema.ts
