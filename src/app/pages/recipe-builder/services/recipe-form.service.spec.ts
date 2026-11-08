@@ -228,3 +228,90 @@ describe('RecipeFormService unready ingredient rows', () => {
     expect(kept.referenceId).toBeUndefined()
   })
 })
+
+// Plan 536 — a line keeps its supplier through load and save; a stale choice is dropped.
+describe('RecipeFormService line supplier', () => {
+  const costStub = { getCostForIngredient: () => 1 }
+  let service: RecipeFormService
+  let fb: FormBuilder
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: RecipeCostService, useValue: costStub },
+        {
+          provide: KitchenStateService,
+          useValue: {
+            products_: signal([
+              {
+                _id: 'p1',
+                nameHebrew: 'בצל',
+                baseUnit: 'kg',
+                sources: [
+                  { supplierId: 'david', price: 4 },
+                  { supplierId: 'shuk', price: 6 },
+                  { supplierId: 'free', price: 0 }
+                ]
+              } as unknown as Product
+            ]),
+            recipes_: signal<Recipe[]>([])
+          }
+        }
+      ]
+    })
+    service = TestBed.inject(RecipeFormService)
+    fb = TestBed.inject(FormBuilder)
+  })
+
+  const formWith = (supplierId: string | null) => {
+    const row = service.createIngredientGroup()
+    row.patchValue({
+      referenceId: 'p1',
+      item_type: 'product',
+      nameHebrew: 'בצל',
+      amount_net: 2,
+      unit: 'kg',
+      supplierId
+    })
+    return fb.group({
+      nameHebrew: ['x'],
+      recipe_type: ['preparation'],
+      serving_portions: [1],
+      yield_conversions: fb.array([fb.group({ amount: [1], unit: ['gram'] })]),
+      ingredients: fb.array([row]),
+      workflow_items: fb.array([]),
+      total_weight_g: [0],
+      total_cost: [0],
+      labels: [[] as string[]],
+      course: ['']
+    })
+  }
+
+  it('saves a chosen supplier that still has a price', () => {
+    expect(service.buildRecipeFromForm(formWith('shuk'), 'r1', false).ingredients[0].supplierId).toBe('shuk')
+  })
+
+  it('leaves the supplier off for automatic, an unpriced supplier and a removed supplier', () => {
+    for (const id of [null, 'free', 'gone']) {
+      expect(service.buildRecipeFromForm(formWith(id), 'r1', false).ingredients[0].supplierId).toBeUndefined()
+    }
+  })
+
+  it('patches the stored line supplier into the form', () => {
+    const f = formWith(null)
+    const recipe = {
+      _id: 'r1',
+      nameHebrew: 'מרק',
+      ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 2, unit: 'kg', supplierId: 'shuk' }],
+      steps: [],
+      yieldAmount: 1,
+      yieldUnit: 'gram',
+      defaultStation: '',
+      isApproved: false
+    } as unknown as Recipe
+    service.patchFormFromRecipe(f, recipe)
+    expect((f.get('ingredients') as FormArray).at(0).get('supplierId')?.value).toBe('shuk')
+  })
+})

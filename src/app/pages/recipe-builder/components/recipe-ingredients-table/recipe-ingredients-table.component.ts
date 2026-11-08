@@ -56,6 +56,8 @@ import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 import { formatPct1 } from 'src/app/core/engine/rounding'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { PermissionService } from '@services/permission.service'
+import { SupplierPickerComponent } from 'src/app/shared/supplier-picker/supplier-picker.component'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -86,7 +88,8 @@ const MAX_ROW_SUGGESTIONS = 5
     CdkDragHandle,
     ClickOutSideDirective,
     NutritionBadgeComponent,
-    PasteIngredientsDialogComponent
+    PasteIngredientsDialogComponent,
+    SupplierPickerComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss',
@@ -110,6 +113,7 @@ export class RecipeIngredientsTableComponent {
   private readonly recipeFormService_ = inject(RecipeFormService)
   private readonly nameMatcher_ = inject(ProductNameMatcherService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly permission_ = inject(PermissionService)
   private readonly pastedUnitResolver_ = createUnitWordResolver({
     aliases: UNIT_ALIASES,
     translate: (token) => this.translation_.resolveUnit(token),
@@ -206,6 +210,24 @@ export class RecipeIngredientsTableComponent {
     const refId = group.get('referenceId')?.value as string | null
     if (!refId) return null
     return this.kitchenStateService.products_().find((p) => p._id === refId) ?? null
+  }
+
+  /** Plan 536: only the owner may change which supplier a line is bought from. */
+  protected canPickSupplier_(): boolean {
+    return this.permission_.can('editMoney', { type: 'recipes' })
+  }
+
+  /** Plan 536: store the pick on the line (null = automatic); the recipe's own Save writes it. */
+  protected onSupplierPicked(group: FormGroup, supplierId: string | null): void {
+    if (!this.canPickSupplier_()) return
+    const control = group.get('supplierId')
+    if (!control) return
+    control.setValue(supplierId)
+    control.markAsDirty()
+    group.markAsDirty()
+    this.ingredientsFormArray().markAsDirty()
+    const index = this.ingredientGroups.indexOf(group)
+    if (index !== -1) this.updateLineCalculations(index)
   }
 
   /** Route the badge click: desktop → inline accordion; mobile → service-driven modal. */
@@ -517,7 +539,8 @@ export class RecipeIngredientsTableComponent {
       referenceId: item._id,
       item_type: item.item_type_,
       unit,
-      amount_net
+      amount_net,
+      supplierId: null
     })
 
     if (index !== -1) {
@@ -577,7 +600,8 @@ export class RecipeIngredientsTableComponent {
       nameHebrew: '',
       item_type: null,
       amount_net: null,
-      unit: 'gram'
+      unit: 'gram',
+      supplierId: null
     })
     group.updateValueAndValidity()
     this.ingredientsFormArray().updateValueAndValidity()
@@ -670,7 +694,7 @@ export class RecipeIngredientsTableComponent {
     } else {
       const prod = item as Product & { calculated_cost_per_unit?: number }
       const unitOption = prod.purchaseOptions?.find((o) => o.unitSymbol === selectedUnit)
-      const effectivePrice = getEffectivePrice(prod)
+      const effectivePrice = getEffectivePrice(prod, group.get('supplierId')?.value as string | null)
 
       if (unitOption) {
         if (unitOption.priceOverride != null && unitOption.priceOverride > 0) {

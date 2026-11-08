@@ -210,7 +210,7 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Store the line's supplier and the event's moves, owner-only — `ingredientSchema` gets
+- [x] A1: Store the line's supplier and the event's moves, owner-only — `ingredientSchema` gets
   `supplierId: z.string().optional()`; `menuEventSchema` gets `supplierMoves: z.array(z.strictObject({ productId:
   z.string(), fromSupplierId: z.string(), toSupplierId: z.string() })).max(500).optional()`; `MONEY_FIELDS` gets
   `recipes: ['ingredients[].supplierId']`, `dishes: ['ingredients[].supplierId']` and `'supplierMoves'` appended to
@@ -222,21 +222,21 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   `shared/schemas/money-fields.ts`, `server/utils/permissions.js`, `src/app/core/models/ingredient.model.ts`,
   `src/app/core/models/menu-event.model.ts`, `server/test/permissions.test.js`,
   `server/test/supplier-choice-schema.test.js` (new).
-- [ ] A2: Keep a business's supplier choice out of the shared catalog — in `pushDocToMasterRecursive` drop
+- [x] A2: Keep a business's supplier choice out of the shared catalog — in `pushDocToMasterRecursive` drop
   `supplierId` from every pushed ingredient line (same place the `referenceId` is re-pointed); test that the master
   copy has no line `supplierId` while the caller's own recipe keeps it — `server/routes/generic.js`,
   `server/test/push-to-master.test.js`.
-- [ ] A3: One price rule that honours a chosen supplier and finds the cheapest among any number — port 510's
+- [x] A3: One price rule that honours a chosen supplier and finds the cheapest among any number — port 510's
   `chooseSupplier` change but take the choice as a second argument: `chooseSupplier(product, chosenSupplierId?)`;
   keep `cheapestSupplier(product)` from 510; `getEffectivePrice(product, chosenSupplierId?)` passes it through. Specs:
   3, 4 and 5 priced suppliers with the cheapest first, middle and last; a tie; chosen dearer wins; chosen with price 0
   / removed from `sources` falls back to the cheapest; no choice = cheapest — `src/app/core/engine/supplier-choice.ts`,
   `src/app/core/engine/supplier-choice.spec.ts`, `src/app/core/utils/product-source.util.ts`,
   `src/app/core/utils/product-source.util.spec.ts`.
-- [ ] A4: Recipe costs use the line's supplier — `computeIngredientCost` calls `getEffectivePrice(product,
+- [x] A4: Recipe costs use the line's supplier — `computeIngredientCost` calls `getEffectivePrice(product,
   ing.supplierId)`; spec: same product, two recipes, two suppliers, two costs — `src/app/core/services/recipe-cost.service.ts`,
   `src/app/core/services/recipe-cost.service.spec.ts`.
-- [ ] A5: The event engine keeps lines per supplier and applies the event's moves — `priceOf` caches by
+- [x] A5: The event engine keeps lines per supplier and applies the event's moves — `priceOf` caches by
   `productId|chosen`; an ok contribution's key becomes `${productId}|${recipeSupplierId ?? ''}` so one product bought
   from two suppliers gives two lines; `RawLine` gains `recipeSupplierId: string | null` (supplier from the recipes)
   and `movedFrom: string | null`; a move `{ productId, fromSupplierId === recipeSupplierId, toSupplierId }` applies
@@ -245,11 +245,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   price. Specs: two recipes on two suppliers → two lines; a move; a move whose target lost its price; a prep
   sub-recipe line keeps its own supplier — `src/app/core/engine/event-plan.engine.ts`,
   `src/app/core/engine/event-plan.types.ts`, `src/app/core/engine/event-plan.engine.spec.ts`.
-- [ ] A6: The menu page's plan sees the saved moves without touching the growth-frozen page — `planFor(event)`: when
+- [x] A6: The menu page's plan sees the saved moves without touching the growth-frozen page — `planFor(event)`: when
   the event has an `_id` and no `supplierMoves` key, use the stored event's `supplierMoves` from
   `MenuEventDataService.allMenuEvents_()` (a signal, so the page's computed plan, pricing and planning snapshot
   update after a move). Spec — `src/app/core/engine/event-plan.service.ts`, `src/app/core/engine/event-plan.service.spec.ts`.
-- [ ] A7: A shared supplier picker that always fits on screen — port 510's `supplier-picker` (template, rows, staff
+- [x] A7: A shared supplier picker that always fits on screen — port 510's `supplier-picker` (template, rows, staff
   read-only, spec) into `src/app/shared/supplier-picker/` with these changes: inputs `product: Product | null`,
   `value: string | null` (the line's chosen id; null = automatic), `canEdit: boolean`; output `picked: string | null`;
   a `value` whose supplier has no positive price shows as automatic; fixed positioning with `placeInViewport`
@@ -259,7 +259,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   (call the placement with a stubbed rect); a stale `value` shows automatic checked. Add the `supplier-picker` family
   entry to the registry and a line to the shared breadcrumbs — `src/app/shared/supplier-picker/**`,
   `docs/brain/component-families.md`, `src/app/shared/breadcrumbs.md`.
-- [ ] A8: The recipe builder line carries and saves its supplier — `createIngredientGroup` adds a `supplierId`
+- [x] A8: The recipe builder line carries and saves its supplier — `createIngredientGroup` adds a `supplierId`
   control from the stored line; the save mapping writes `supplierId` only when it is set and still has a positive
   price on the line's product (so a stale or automatic choice is left off and cleared); the ingredients table renders
   `<app-supplier-picker>` on product lines, `canEdit` = `PermissionService.can('editMoney', { type })`, on pick sets
@@ -271,13 +271,13 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   line; a pick makes `hasRealChanges()` true; changing the product clears it; staff cannot set it — `src/app/pages/recipe-builder/services/recipe-form.service.ts`,
   `src/app/pages/recipe-builder/services/recipe-form.service.spec.ts`,
   `src/app/pages/recipe-builder/components/recipe-ingredients-table/**`.
-- [ ] A8b: The unsaved-changes snapshot sees a supplier pick — `getRecipeSnapshotForComparison()` in
+- [x] A8b: The unsaved-changes snapshot sees a supplier pick — `getRecipeSnapshotForComparison()` in
   `src/app/pages/recipe-builder/recipe-builder.page.ts` normalizes ingredients to referenceId/nameHebrew/item_type/
   amount_net/unit only, so without this a pick is NOT a change and the «save or leave» question never shows. Add
   `supplierId: (ing?.supplierId ?? '').toString()` to the line type and to `ingNorm`; nothing else in the file
   changes (growth-frozen page). Spec in `src/app/pages/recipe-builder/recipe-builder.page.spec.ts`: after a load,
   setting a line's `supplierId` makes `hasRealChanges()` true; setting it back makes it false.
-- [ ] A9: Event supplier orders: hint, move and undo — port 510's `cheaperElsewhere` / `cardSavings` but compare with
+- [x] A9: Event supplier orders: hint, move and undo — port 510's `cheaperElsewhere` / `cardSavings` but compare with
   the line's `recipeSupplierId` and skip moved lines; the component shows the hint on unmoved lines and the
   «העבר ל…» button, and on moved lines «הועבר מ… לאירוע הזה» with «החזר ל…»; buttons only for the owner, disabled with
   `supplier_move_save_first` when the event has no `_id`; a click writes the stored event with the move added (or
@@ -286,7 +286,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   Specs: helper with 3 suppliers; move adds, undo removes; staff sees no button; error keeps lines —
   `src/app/core/utils/supplier-orders.util.ts`, `src/app/core/utils/supplier-orders.util.spec.ts`,
   `src/app/pages/menu-intelligence/components/supplier-orders/**`.
-- [ ] A10: Run the full checks and paste the output into Execution Notes — `npx ng build`, `pnpm run test:ci`,
+- [x] A10: Run the full checks and paste the output into Execution Notes — `npx ng build`, `pnpm run test:ci`,
   `pnpm run test:server`, `node scripts/reuse-lint.mjs --check-registry`, `node scripts/reuse-lint.mjs --diff=origin/main`,
   log-query.
 
@@ -355,3 +355,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Base branch `main`. Plan 510 is closed as superseded by this plan.
+- Step 0: drift reported (`REALITY: drift`, only the reverted 510 commits) — chooseSupplier ok, getEffectivePrice ok, computeIngredientCost ok, createIngredientGroup ok, buildSupplierOrders ok, ROW_KEY_FIELDS ok, pushDocToMasterRecursive ok, EventPlanService.planFor ok.
+- `pnpm run build` -> exit 0. `pnpm run lint` -> exit 0 (0 errors, warnings pre-existing).
+- `pnpm run test:ci` -> exit 0, 1760 of 1760 SUCCESS.
+- `pnpm run test:server` -> first run: 11 failures in test/business-stats.test.js (E11000 dup email null in a shared test DB, unrelated); rerun of that file -> 13 passed; every other file passed (incl. permissions, push-to-master, supplier-choice-schema).
+- `node scripts/reuse-lint.mjs --check-registry` -> exit 0; `--diff=origin/orch/run-536` -> ok. scope-check -> ok. kit-manifest-check -> ok.
+- log-query --since=plan-start --level=error -> one old entry (2026-11-08T11:44 POST /business/team 409, before this run, not from this plan).
+- Prices in the picker rows and the order hint use formatMoney (₪4.00), per the money-format rule.

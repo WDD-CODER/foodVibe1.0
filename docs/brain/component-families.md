@@ -193,6 +193,12 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - When: a cost is shown that may be missing prices.
 - Known copies: none.
 
+### supplier-picker — pick one of a product's suppliers for a line
+- Status: stable (plan 536)
+- Use: `src/app/shared/supplier-picker/` · `app-supplier-picker` (inputs `product`, `value`, `canEdit`; output `picked`). Fixed popover placed with `placeInViewport`.
+- When: a line may be bought from one of several priced suppliers and the owner chooses.
+- Known copies: none.
+
 ### engine-classes — shared `.c-*` CSS engines
 - Status: stable (plan 458 sweeps the copies)
 - Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).

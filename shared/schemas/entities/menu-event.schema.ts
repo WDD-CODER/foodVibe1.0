@@ -135,6 +135,12 @@ export const menuEventSchema = z.strictObject({
   planSnapshot: planSnapshotSchema.optional(),
   /** Plan 446 (money fields): what each supplier was really paid. Server-owned (events router). */
   closing: closingSchema.optional(),
+  /** Plan 536 (money field): items the chef moved to another supplier for this event only. */
+  supplierMoves: z.array(z.strictObject({
+    productId: z.string(),
+    fromSupplierId: z.string(),
+    toSupplierId: z.string()
+  })).max(500).optional(),
   /** Plan 512: the client record this event is for. clientName / clientPhone stay as a snapshot. */
   clientId: z.string().optional(),
   clientName: nameField.optional(),

@@ -121,6 +121,13 @@ export interface ClosingSupplier {
 }
 
 /** Plan 446 (C-SNAPSHOT): what was really paid. Written only through the events route `:id/closing` (`API.events`). */
+/** Plan 536: one item moved from the supplier its recipes use to another, for one event. */
+export interface SupplierMove {
+  productId: string
+  fromSupplierId: string
+  toSupplierId: string
+}
+
 export interface EventClosing {
   suppliers: ClosingSupplier[]
   actualExtraCosts?: number
@@ -170,6 +177,8 @@ export interface MenuEvent {
   /** Plan 446 */
   planSnapshot?: PlanSnapshot
   closing?: EventClosing
+  /** Plan 536: items moved to another supplier for this event only (owner-only). */
+  supplierMoves?: SupplierMove[]
   /** Plan 514: the client record this event is for. clientName / clientPhone stay as a snapshot. */
   clientId?: string
   clientName?: string

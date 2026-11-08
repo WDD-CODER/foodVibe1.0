@@ -13,6 +13,9 @@ export const MONEY_FIELDS: Record<string, readonly string[]> = {
     'closing.suppliers[].actualPaid',
     'closing.actualExtraCosts',
     'closing.actualRevenue',
+    'supplierMoves',
   ],
+  recipes: ['ingredients[].supplierId'],
+  dishes: ['ingredients[].supplierId'],
   businesses: ['settings', 'baseline'],
 }

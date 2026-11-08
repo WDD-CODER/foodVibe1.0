@@ -8,7 +8,9 @@ export const ingredientSchema = z.strictObject({
   unit: z.string(),
   note: z.string().optional(),
   calculatedCost: z.number().optional(),
-  nameSnapshot: z.string().optional()
+  nameSnapshot: z.string().optional(),
+  /** Plan 536: the supplier this line is bought from (owner-only money field); absent = automatic = cheapest. */
+  supplierId: z.string().optional()
 })
 
 export const baselineEntrySchema = z.strictObject({

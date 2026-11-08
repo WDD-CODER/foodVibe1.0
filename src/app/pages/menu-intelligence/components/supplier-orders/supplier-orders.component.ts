@@ -21,8 +21,12 @@ import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cardSavings,
   describeOrderLine,
   toWhatsAppPhone,
+  withMove,
+  withoutMove,
+  type CheaperElsewhere,
   type OrderHeader,
   type OrderLineView,
   type SupplierOrderCard
@@ -33,6 +37,9 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { BusinessService } from '@services/business.service'
 import { UserService } from '@services/user.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
+import { PermissionService } from '@services/permission.service'
+import { useSavingState } from 'src/app/core/utils/saving-state.util'
 
 /**
  * "הזמנות לספקים" (plan 435) — one order card per supplier for a menu, ready to copy or to send to the
@@ -55,6 +62,9 @@ export class SupplierOrdersComponent {
   private readonly userMsg_ = inject(UserMsgService)
   private readonly businessService_ = inject(BusinessService)
   private readonly userService_ = inject(UserService)
+  private readonly menuEventData_ = inject(MenuEventDataService)
+  private readonly permission_ = inject(PermissionService)
+  private readonly saving = useSavingState()
 
   // 2. INPUTS
   readonly event = input.required<MenuEvent>()
@@ -67,11 +77,30 @@ export class SupplierOrdersComponent {
   protected readonly manualCopy_ = signal<string | null>(null)
   private readonly manualEl_ = viewChild<ElementRef<HTMLTextAreaElement>>('manual')
   protected readonly t_ = (key: string): string => this.translation_.translate(key)
+  protected readonly isSaving_ = this.saving.isSaving_
 
   // 5. COMPUTED
-  private readonly plan_ = computed(() => this.eventPlan_.planFor(this.event()))
+  /** The saved event with this id, if any: the source of truth for supplier moves (plan 536). */
+  private readonly stored_ = computed(() => {
+    const id = this.event()._id
+    return id ? (this.menuEventData_.allMenuEvents_().find((e) => e._id === id) ?? null) : null
+  })
+  private readonly plan_ = computed(() => {
+    const event = this.event()
+    const stored = this.stored_()
+    return this.eventPlan_.planFor(stored ? { ...event, supplierMoves: stored.supplierMoves } : event)
+  })
+  /** Owner only: staff see the hint but get no move or undo button. */
+  protected readonly canMove_ = computed(() => this.permission_.can('editMoney', { type: 'menuEvents' }))
+  protected readonly canSaveMove_ = computed(() => !!this.event()._id && !!this.stored_())
   protected readonly orders_ = computed(() =>
     buildSupplierOrders(this.plan_(), this.kitchenState_.productsById_(), this.kitchenState_.suppliersById_(), this.t_)
+  )
+  /** Plan 536: per card, the cheaper-elsewhere hint of each unmoved line and the card's total possible saving. */
+  protected readonly savings_ = computed(() =>
+    this.orders_().cards.map((card) =>
+      cardSavings(card, this.kitchenState_.productsById_(), this.kitchenState_.suppliersById_())
+    )
   )
   /** Per card: the plan's unpriced products that are lines of that card (plan 444). */
   protected readonly cardMissing_ = computed(() => {
@@ -107,6 +136,58 @@ export class SupplierOrdersComponent {
 
   protected money(n: number): string {
     return formatMoney(n)
+  }
+
+  protected hintText(h: CheaperElsewhere): string {
+    return this.t_('cheaper_at_supplier')
+      .replace('{name}', h.supplierName)
+      .replace('{price}', formatMoney(h.price))
+      .replace('{saving}', formatMoney(h.saving))
+  }
+
+  protected canSaveText(total: number): string {
+    return this.t_('supplier_orders_can_save').replace('{amount}', formatMoney(total))
+  }
+
+  protected supplierName(id: string | null): string {
+    return (id && this.kitchenState_.suppliersById_().get(id)?.nameHebrew) || ''
+  }
+
+  protected movedFromText(line: RawLine): string {
+    return this.t_('supplier_moved_from').replace('{name}', this.supplierName(line.movedFrom))
+  }
+
+  protected moveToText(h: CheaperElsewhere): string {
+    return this.t_('supplier_move_to').replace('{name}', h.supplierName)
+  }
+
+  protected moveBackText(line: RawLine): string {
+    return this.t_('supplier_move_back').replace('{name}', this.supplierName(line.movedFrom))
+  }
+
+  /** Move one item to the cheaper supplier for this event only (saved on the event). */
+  protected async moveLine(line: RawLine, hint: CheaperElsewhere): Promise<void> {
+    if (!line.productId || !line.recipeSupplierId) return
+    const move = { productId: line.productId, fromSupplierId: line.recipeSupplierId, toSupplierId: hint.supplierId }
+    await this.saveMoves(withMove(this.stored_()?.supplierMoves, move, this.kitchenState_.productsById_()))
+  }
+
+  /** Undo a move: the item goes back to the supplier its recipes use. */
+  protected async undoMove(line: RawLine): Promise<void> {
+    if (!line.productId || !line.movedFrom) return
+    await this.saveMoves(
+      withoutMove(this.stored_()?.supplierMoves, line.productId, line.movedFrom, this.kitchenState_.productsById_())
+    )
+  }
+
+  private async saveMoves(moves: NonNullable<MenuEvent['supplierMoves']>): Promise<void> {
+    const stored = this.stored_()
+    if (!stored || !this.canMove_() || this.isSaving_()) return
+    try {
+      await this.saving.withSaving(() => this.menuEventData_.updateMenuEvent({ ...stored, supplierMoves: moves }))
+    } catch {
+      this.userMsg_.onSetErrorMsg(this.t_('save_failed'))
+    }
   }
 
   protected statusKey(line: RawLine): string {

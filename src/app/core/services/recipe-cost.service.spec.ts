@@ -69,6 +69,33 @@ describe('RecipeCostService', () => {
   })
 
   describe('computeRecipeCost and getCostForIngredient', () => {
+    it('costs each recipe line at its own supplier (plan 536)', () => {
+      productsSignal.set([
+        createProduct({
+          _id: 'onion',
+          baseUnit: 'gram',
+          sources: [
+            { supplierId: 'david', price: 4, addedAt: 0 },
+            { supplierId: 'shuk', price: 6, addedAt: 0 }
+          ]
+        })
+      ])
+      const line = (supplierId?: string) => ({
+        _id: 'i1',
+        referenceId: 'onion',
+        type: 'product' as const,
+        amount: 2,
+        unit: 'gram',
+        ...(supplierId ? { supplierId } : {})
+      })
+      const auto = createRecipe({ _id: 'r1', ingredients: [line()] })
+      const shuk = createRecipe({ _id: 'r2', ingredients: [line('shuk')] })
+      const stale = createRecipe({ _id: 'r3', ingredients: [line('gone')] })
+      expect(service.computeRecipeCost(auto)).toBe(8)
+      expect(service.computeRecipeCost(shuk)).toBe(12)
+      expect(service.computeRecipeCost(stale)).toBe(8)
+    })
+
     it('should return 0 for recipe with no ingredients', () => {
       const recipe = createRecipe({ _id: 'r1', ingredients: [] })
       expect(service.computeRecipeCost(recipe)).toBe(0)

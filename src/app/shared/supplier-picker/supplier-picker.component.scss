@@ -1,0 +1,68 @@
+@layer components.supplier-picker {
+  :host {
+    display: inline-block;
+  }
+
+  .supplier-picker {
+    display: inline-block;
+  }
+
+  .supplier-picker__btn.is-active {
+    color: var(--color-primary);
+  }
+
+  /* Fixed, so a scrolling table cannot clip it; top/left are set from the button's rect after render. */
+  .supplier-picker__list {
+    position: fixed;
+    z-index: 1000;
+    min-inline-size: 14rem;
+    max-inline-size: calc(100vw - 16px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-modal);
+  }
+
+  .supplier-picker__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    inline-size: 100%;
+    padding: 0.4rem 0.5rem;
+
+    font-size: var(--fs-sm);
+    font-weight: 400;
+    color: var(--color-text-main);
+    text-align: start;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--bg-hover);
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .supplier-picker__name {
+    flex: 1;
+  }
+
+  .supplier-picker__check.is-off {
+    visibility: hidden;
+  }
+
+  .supplier-picker__price {
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+}

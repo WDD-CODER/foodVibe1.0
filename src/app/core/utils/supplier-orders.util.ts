@@ -1,5 +1,7 @@
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { formatQty } from '../engine/rounding'
+import { cheapestSupplier } from '../engine/supplier-choice'
+import type { SupplierMove } from '@models/menu-event.model'
 import type { Product } from '@models/product.model'
 import type { Supplier } from '@models/supplier.model'
 
@@ -89,6 +91,81 @@ export function buildSupplierOrders(
 
   review.sort((a, b) => byName(a.name, b.name))
   return { cards, review }
+}
+
+/** Plan 536: another priced supplier sells this line's product for less (information only). */
+export interface CheaperElsewhere {
+  supplierId: string
+  supplierName: string
+  /** Price per base unit at the cheaper supplier. */
+  price: number
+  /** (this supplier's price − the cheaper price) × the line's base-unit quantity. */
+  saving: number
+}
+
+/**
+ * The cheaper supplier for one line, or null when the line is already at the cheapest priced supplier or the
+ * event already moved it. Compared from the supplier the recipes use (`recipeSupplierId`).
+ */
+export function cheaperElsewhere(
+  line: RawLine,
+  productsById: Map<string, Product>,
+  suppliersById: Map<string, Supplier>
+): CheaperElsewhere | null {
+  if (!line.productId || !line.supplierId || line.movedFrom) return null
+  const product = productsById.get(line.productId)
+  if (!product) return null
+  const current = (product.sources ?? []).find((s) => s.supplierId === line.supplierId && s.price > 0)
+  const cheapest = cheapestSupplier(product)
+  if (!current || !cheapest || cheapest.supplierId === line.supplierId || !(cheapest.price < current.price)) return null
+  const supplier = suppliersById.get(cheapest.supplierId)
+  if (!supplier) return null
+  const saving = (current.price - cheapest.price) * line.buyQty
+  if (!(saving > 0)) return null
+  return { supplierId: cheapest.supplierId, supplierName: supplier.nameHebrew, price: cheapest.price, saving }
+}
+
+/** Per line of the card its hint (or null), and the card's total possible saving (unmoved lines only). */
+export function cardSavings(
+  card: SupplierOrderCard,
+  productsById: Map<string, Product>,
+  suppliersById: Map<string, Supplier>
+): { hints: (CheaperElsewhere | null)[]; total: number } {
+  const hints = card.lines.map((l) => cheaperElsewhere(l, productsById, suppliersById))
+  return { hints, total: hints.reduce((sum, h) => sum + (h?.saving ?? 0), 0) }
+}
+
+/** A move still applies only while its target supplier has a positive price on the product. */
+function moveIsLive(move: SupplierMove, productsById: Map<string, Product>): boolean {
+  const product = productsById.get(move.productId)
+  return !!product?.sources?.some((s) => s.supplierId === move.toSupplierId && s.price > 0)
+}
+
+/** The event's moves with one added: one entry per product + from-supplier (a new move replaces the old). */
+export function withMove(
+  moves: readonly SupplierMove[] | undefined,
+  move: SupplierMove,
+  productsById: Map<string, Product>
+): SupplierMove[] {
+  return [
+    ...(moves ?? []).filter(
+      (m) =>
+        !(m.productId === move.productId && m.fromSupplierId === move.fromSupplierId) && moveIsLive(m, productsById)
+    ),
+    move
+  ]
+}
+
+/** The event's moves with the one for this product + from-supplier removed (stale entries go too). */
+export function withoutMove(
+  moves: readonly SupplierMove[] | undefined,
+  productId: string,
+  fromSupplierId: string,
+  productsById: Map<string, Product>
+): SupplierMove[] {
+  return (moves ?? []).filter(
+    (m) => !(m.productId === productId && m.fromSupplierId === fromSupplierId) && moveIsLive(m, productsById)
+  )
 }
 
 /** Israeli mobile → WhatsApp number (`9725XXXXXXXX`), anything else → null. */
