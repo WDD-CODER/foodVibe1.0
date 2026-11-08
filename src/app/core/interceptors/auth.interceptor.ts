@@ -9,6 +9,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { environment } from '../../../environments/environment'
 import { API } from '@services/http-storage.adapter'
+import { readServerRefusal, saveRefusalMessage } from '@utils/server-refusal.util'
 
 const REFRESH_URL = API.auth('refresh')
 const LOGIN_URL = API.auth('login')
@@ -109,6 +110,27 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (forbidden) {
         injector.get(UserMsgService).onSetErrorMsg(injector.get(TranslationService).translate('no_permission'))
         logging.info({ event: 'http.forbidden', message: req.method })
+      }
+
+      // Plan 540: the server refused a write (strict schema check). One Hebrew toast that says why, and one
+      // log line with the refused paths (Zod messages name the key, never a value) instead of the generic one.
+      const refusal = readServerRefusal(err)
+      const isWrite = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
+      if (refusal && isWrite) {
+        injector.get(UserMsgService).onSetErrorMsg(saveRefusalMessage(refusal, injector.get(TranslationService)))
+        const requestId = err.headers?.get('X-Request-Id') ?? undefined
+        logging.error({
+          event: 'save.refused',
+          message: 'HTTP 400',
+          context: {
+            method: req.method,
+            url: req.url.split('?')[0],
+            status: 400,
+            issues: refusal.issues.map(({ path, code, message }) => ({ path, code, message }))
+          },
+          ...(requestId ? { requestId } : {})
+        })
+        return throwError(() => err)
       }
 
       // LoggingService posts with plain fetch, so a failing log call never reaches here; the

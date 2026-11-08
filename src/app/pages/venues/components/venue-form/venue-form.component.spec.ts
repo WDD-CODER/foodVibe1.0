@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -104,6 +105,22 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
     expect(ok).toBeFalse()
     expect(component.isSubmitted).toBeFalse()
     expect(venueData.addVenue).not.toHaveBeenCalled()
+  })
+
+  it('plan 540: a 400 too_big on nameHebrew marks the name and adds no toast of its own', async () => {
+    await setup(VENUE)
+    setName('אולם חדש')
+    venueData.updateVenue.and.rejectWith(
+      new HttpErrorResponse({
+        status: 400,
+        url: '/api/v1/data/venues/v1',
+        error: { error: 'Validation failed', issues: [{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }] }
+      })
+    )
+    expect(await component.saveAndWait()).toBeFalse()
+    expect((component as unknown as { nameError(): string | null }).nameError()).toBe('server_field_too_long')
+    const msg = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>
+    expect(msg.onSetErrorMsg).not.toHaveBeenCalled()
   })
 
   describe('infrastructure vs equipment groups', () => {

@@ -90,11 +90,7 @@
         </app-form-field>
       }
 
-      <app-form-field
-        label="base_unit"
-        labelStyle="caps"
-        [error]="validationErrors_()['baseUnit'] ? 'field_unit_required' : null"
-      >
+      <app-form-field label="base_unit" labelStyle="caps" [error]="validationErrors_()['baseUnit'] || null">
         <app-custom-select
           formControlName="baseUnit"
           [options]="baseUnitOptions_()"

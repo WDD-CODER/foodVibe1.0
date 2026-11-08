@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ActivatedRoute, Router } from '@angular/router'
 import { of } from 'rxjs'
@@ -88,5 +89,22 @@ describe('EquipmentFormComponent unsaved work (plan 498)', () => {
     equipmentData.updateEquipment.and.rejectWith(new Error('boom'))
     expect(await page.saveAndWait()).toBeFalse()
     expect(page.isSubmitted).toBeFalse()
+  })
+
+  it('plan 540: a 400 too_big on nameHebrew marks the name and adds no toast of its own', async () => {
+    const page = setup(EQUIPMENT)
+    equipmentData.updateEquipment.and.rejectWith(
+      new HttpErrorResponse({
+        status: 400,
+        url: '/api/v1/data/equipment/e1',
+        error: { error: 'Validation failed', issues: [{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }] }
+      })
+    )
+    await page.onSubmit()
+    expect((page as unknown as { validationErrors_(): Record<string, string> }).validationErrors_()['nameHebrew']).toBe(
+      'server_field_too_long'
+    )
+    const msg = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>
+    expect(msg.onSetErrorMsg).not.toHaveBeenCalled()
   })
 })

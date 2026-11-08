@@ -183,6 +183,54 @@ describe('KitchenStateService', () => {
     })
   })
 
+  describe('plan 540: refused saves', () => {
+    const refusal = () =>
+      new HttpErrorResponse({
+        status: 400,
+        url: '/api/v1/data/products/p1',
+        error: { error: 'Validation failed', issues: [] }
+      })
+
+    it('a 400 on saveProduct adds no toast of its own (the interceptor shows the one)', async () => {
+      const mine = createMockProduct('p1')
+      mockAllItemsSignal.set([mine])
+      TestBed.flushEffects()
+      productDataSpy.updateProduct.and.returnValue(Promise.reject(refusal()))
+      await expectAsync(service.saveProduct({ ...mine, buy_price_global_: 5 } as Product)).toBeRejected()
+      expect(userMsgSpy.onSetErrorMsg).not.toHaveBeenCalled()
+    })
+
+    it('a 500 on saveRecipe shows the Hebrew fallback and rethrows the original error', async () => {
+      const boom = new HttpErrorResponse({ status: 500, url: '/api/v1/data/recipes', statusText: 'x' })
+      recipeDataSpy.addRecipe.and.returnValue(Promise.reject(boom))
+      const recipe = {
+        _id: '',
+        nameHebrew: 'H',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'portion'
+      } as unknown as Recipe
+      await expectAsync(service.saveRecipe(recipe)).toBeRejectedWith(boom)
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledOnceWith('error_saving_recipe')
+    })
+
+    it('a 400 on saveRecipe adds no toast and rethrows the original error', async () => {
+      const bad = refusal()
+      recipeDataSpy.addRecipe.and.returnValue(Promise.reject(bad))
+      const recipe = {
+        _id: '',
+        nameHebrew: 'H',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'portion'
+      } as unknown as Recipe
+      await expectAsync(service.saveRecipe(recipe)).toBeRejectedWith(bad)
+      expect(userMsgSpy.onSetErrorMsg).not.toHaveBeenCalled()
+    })
+  })
+
   describe('Recipe CRUD', () => {
     it('should call addRecipe for preparation and show success message', (done) => {
       const recipe = {

@@ -219,17 +219,17 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Read a refused save in one place — the pure helper with `PATH_LABEL_KEYS` and the four functions — src/app/core/utils/server-refusal.util.ts
-- [ ] A2: Prove the helper — every branch listed under P1 — src/app/core/utils/server-refusal.util.spec.ts
-- [ ] A3: Add the five Hebrew texts — public/assets/data/dictionary.json
-- [ ] A4: One toast and one log line for every refused save — interceptor branch and its two spec cases — src/app/core/interceptors/auth.interceptor.ts, src/app/core/interceptors/auth.interceptor.spec.ts
-- [ ] A5: Product and recipe saves stop the second toast and the English text; recipe rethrows the original error — src/app/core/services/kitchen-state.service.ts, src/app/core/services/kitchen-state.service.spec.ts
-- [ ] A6: Product form marks the refused field — src/app/pages/inventory/components/product-form/product-form.component.ts, src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
-- [ ] A7: Equipment form marks the refused field and stops the second toast — src/app/pages/equipment/components/equipment-form/equipment-form.component.ts, src/app/pages/equipment/components/equipment-form/equipment-form.component.html, src/app/pages/equipment/components/equipment-form/equipment-form.component.spec.ts
-- [ ] A8: Supplier and venue forms show a toast when a save fails and mark the name — src/app/pages/suppliers/components/supplier-form/supplier-form.component.ts, src/app/pages/venues/components/venue-form/venue-form.component.ts, src/app/pages/venues/components/venue-form/venue-form.component.spec.ts
-- [ ] A9: Recipe builder marks the refused name / yield and stops the second toast — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.spec.ts, src/app/pages/recipe-builder/recipe-builder.page.ts
-- [ ] A10: Event save never fails silently; add-supplier popup stops the second toast — src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/core/services/add-supplier-flow.service.ts, src/app/core/services/add-supplier-flow.service.spec.ts
-- [ ] A11: Registry lines — docs/brain/component-families.md
+- [x] A1: Read a refused save in one place — the pure helper with `PATH_LABEL_KEYS` and the four functions — src/app/core/utils/server-refusal.util.ts
+- [x] A2: Prove the helper — every branch listed under P1 — src/app/core/utils/server-refusal.util.spec.ts
+- [x] A3: Add the five Hebrew texts — public/assets/data/dictionary.json
+- [x] A4: One toast and one log line for every refused save — interceptor branch and its two spec cases — src/app/core/interceptors/auth.interceptor.ts, src/app/core/interceptors/auth.interceptor.spec.ts
+- [x] A5: Product and recipe saves stop the second toast and the English text; recipe rethrows the original error — src/app/core/services/kitchen-state.service.ts, src/app/core/services/kitchen-state.service.spec.ts
+- [x] A6: Product form marks the refused field — src/app/pages/inventory/components/product-form/product-form.component.ts, src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
+- [x] A7: Equipment form marks the refused field and stops the second toast — src/app/pages/equipment/components/equipment-form/equipment-form.component.ts, src/app/pages/equipment/components/equipment-form/equipment-form.component.html, src/app/pages/equipment/components/equipment-form/equipment-form.component.spec.ts
+- [x] A8: Supplier and venue forms show a toast when a save fails and mark the name — src/app/pages/suppliers/components/supplier-form/supplier-form.component.ts, src/app/pages/venues/components/venue-form/venue-form.component.ts, src/app/pages/venues/components/venue-form/venue-form.component.spec.ts
+- [x] A9: Recipe builder marks the refused name / yield and stops the second toast — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html, src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.spec.ts, src/app/pages/recipe-builder/recipe-builder.page.ts
+- [x] A10: Event save never fails silently; add-supplier popup stops the second toast — src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/core/services/add-supplier-flow.service.ts, src/app/core/services/add-supplier-flow.service.spec.ts
+- [x] A11: Registry lines — docs/brain/component-families.md
 - [ ] A12: Run every `[auto]` check and paste the outputs under Execution Notes; prepare the Human SETUP (local supplier "בדיקת שדה ישן" with `staleTestField: true`, set through mongosh or a scratch script outside the repo; remove it after the Human replies)
 
 ## Technical Considerations
@@ -263,3 +263,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-08: drafted from the Human's question and the `preferredSupplierId` case; refusal paths read from the code at abae4cbe, not yet reproduced in the browser. Supplier form has no spec file; it is covered by the helper spec and a Human card.
+- Builder: Step 0 drift (536/537/538/539 commits) — no conflict found; symbols named by the plan exist.
+- pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, 1818 of 1818 SUCCESS; reuse-lint --check-registry -> exit 0; log-query -> SKIP: no database configured.
+- A12 left open: the Human SETUP (local supplier with staleTestField) is a DB write, not done by the builder. add-supplier-flow.service.spec.ts unchanged (no new case needed).
+- supplier-form has no spec; covered by helper spec and Human card.
