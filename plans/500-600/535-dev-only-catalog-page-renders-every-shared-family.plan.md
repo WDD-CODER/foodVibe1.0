@@ -1,6 +1,6 @@
 # Plan 535 — A dev-only catalog page renders every shared UI family with the real components (Claude Design → Angular, 2 of 2)
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 
