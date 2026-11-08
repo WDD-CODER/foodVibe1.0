@@ -37,6 +37,7 @@ event supplier orders show when another supplier sells it for less.
 - Parallel: no. Runs after 473 merges. Do not run alongside 499, 500 or 502 (they share the recipe ingredients table).
 
 ## Execution Notes
+- Planner 2026-11-08: added product-form.component.html to scope — P5 needs one attribute there ([preferredSupplierId] on <app-supplier-prices>), per the run-517 builder escalation; the file is growth-frozen only for its .ts.
 - Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
 - Base branch `main`.
 - Decisions (Human, 2026-10-29): D1 the choice is stored on the product, not per recipe line, so one event never buys
@@ -76,6 +77,7 @@ server/test/permissions.test.js
 src/app/pages/recipe-builder/components/recipe-ingredients-table/**/*.spec.ts
 src/app/pages/menu-intelligence/components/supplier-orders/**/*.spec.ts
 src/app/pages/inventory/components/product-form/supplier-prices/**/*.spec.ts
+src/app/pages/inventory/components/product-form/product-form.component.html
 ```
 
 ## Read Scope
