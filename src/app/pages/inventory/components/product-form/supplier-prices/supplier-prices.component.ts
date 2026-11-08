@@ -27,6 +27,8 @@ export class SupplierPricesComponent {
   readonly prices = input.required<SupplierPrices>()
   /** The product's existing price: where the first row starts. */
   readonly seed = input(0)
+  /** Plan 510: the supplier the owner chose for this product; its row shows a mark. */
+  readonly preferredSupplierId = input<string | undefined>(undefined)
   readonly baseUnit = input('')
   /** The whole form is read-only. */
   readonly disabled = input(false)

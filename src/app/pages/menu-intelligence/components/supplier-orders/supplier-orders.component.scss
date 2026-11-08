@@ -86,6 +86,7 @@
 
   .so-line {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-2);
 
@@ -96,6 +97,18 @@
   .so-line-qty {
     color: var(--color-text-muted);
     white-space: nowrap;
+  }
+
+  .so-line-hint {
+    flex-basis: 100%;
+    font-size: var(--fs-xs);
+    color: var(--color-text-muted);
+  }
+
+  .so-saving {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
   }
 
   .so-total {

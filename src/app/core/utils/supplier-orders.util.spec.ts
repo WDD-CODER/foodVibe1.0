@@ -1,11 +1,14 @@
 import { computeEventPlan } from '../engine/event-plan.engine'
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { FIXTURE_IDS as ID, FIXTURE_SUPPLIERS, buildFixtureInput } from '../engine/testing/event-plan.fixture'
+import type { Product } from '@models/product.model'
 import type { Supplier } from '@models/supplier.model'
 import {
   buildAllOrdersMessage,
   buildOrderMessage,
   buildSupplierOrders,
+  cardSavings,
+  cheaperElsewhere,
   toWhatsAppPhone,
   type OrderHeader
 } from './supplier-orders.util'
@@ -190,5 +193,61 @@ describe('toWhatsAppPhone', () => {
     expect(toWhatsAppPhone('03-1234567')).toBeNull()
     expect(toWhatsAppPhone('')).toBeNull()
     expect(toWhatsAppPhone(undefined)).toBeNull()
+  })
+})
+
+describe('cheaperElsewhere / cardSavings (plan 510)', () => {
+  const product = {
+    _id: 'onion',
+    nameHebrew: 'בצל',
+    sources: [
+      { supplierId: 'david', price: 4 },
+      { supplierId: 'grocery', price: 5 }
+    ]
+  } as unknown as Product
+  const suppliersById = new Map([
+    ['david', { _id: 'david', nameHebrew: 'דוד' } as unknown as Supplier],
+    ['grocery', { _id: 'grocery', nameHebrew: 'מכולת' } as unknown as Supplier]
+  ])
+  const productsById = new Map([['onion', product]])
+
+  it('names the cheaper supplier, its price and the saving for the line quantity', () => {
+    const line = rawLine({ productId: 'onion', supplierId: 'grocery', buyQty: 10 })
+    expect(cheaperElsewhere(line, productsById, suppliersById)).toEqual({
+      supplierId: 'david',
+      supplierName: 'דוד',
+      price: 4,
+      saving: 10
+    })
+  })
+
+  it('gives nothing when the line is already at the cheapest supplier', () => {
+    const line = rawLine({ productId: 'onion', supplierId: 'david', buyQty: 10 })
+    expect(cheaperElsewhere(line, productsById, suppliersById)).toBeNull()
+  })
+
+  it('gives nothing for an unknown product or a line without a supplier', () => {
+    expect(
+      cheaperElsewhere(rawLine({ productId: 'nope', supplierId: 'grocery' }), productsById, suppliersById)
+    ).toBeNull()
+    expect(cheaperElsewhere(rawLine({ productId: 'onion', supplierId: null }), productsById, suppliersById)).toBeNull()
+  })
+
+  it('sums the card saving', () => {
+    const card = {
+      supplierId: 'grocery',
+      name: 'מכולת',
+      phone: null,
+      total: 0,
+      partial: false,
+      lines: [
+        rawLine({ productId: 'onion', supplierId: 'grocery', buyQty: 10 }),
+        rawLine({ productId: 'onion', supplierId: 'grocery', buyQty: 2 }),
+        rawLine({ productId: 'nope', supplierId: 'grocery', buyQty: 2 })
+      ]
+    }
+    const result = cardSavings(card, productsById, suppliersById)
+    expect(result.total).toBe(12)
+    expect(result.hints.map((h) => h?.saving ?? null)).toEqual([10, 2, null])
   })
 })
