@@ -116,13 +116,13 @@
 - [ ] P6: Run the full checks and paste the output — ng build, headless ng test, server tests, log-query — Execution Notes
 
 ### Plan 517 — Let the orchestrator gate run FoodVibe's tests, server tests and one e2e spec without hanging
-- [ ] A1: Give the project a test runner that always exits, so the gate gets a verdict instead of a hang — spawn ng test headless, parse the Karma TOTAL line, kill the process tree, print the TEST-CI summary line — scripts/test-ci.mjs
-- [ ] A2: Prove the runner exits on a fake child that prints TOTAL and then hangs — the test spawns `node scripts/test/fixtures/fake-karma.mjs` (prints `TOTAL: 1 FAILED, 3 SUCCESS` then sleeps 60s) through an exported `runWithParser(cmd, args, { timeoutMs })` and asserts exit 1 and the summary line within 5s; a second fixture prints `TOTAL: 4 SUCCESS` → exit 0; a third prints nothing → timeout path exit 1 with `timeoutMs: 500` — scripts/test/test-ci.test.mjs, scripts/test/fixtures/fake-karma.mjs
-- [ ] A3: Let a card's test command run one Playwright spec through an allowlisted script — validate the argument, spawn `npx playwright test <spec>` with stdio inherited, exit with its code; test the validator (`e2e/x.spec.ts` ok, `../x.spec.ts` and `e2e/x.ts` → exit 2) — scripts/e2e-one.mjs, scripts/test/e2e-one.test.mjs
-- [ ] A4: Register the two runners as package scripts and point the kit's test command at the one that exits — `test:ci`, `test:server`; `commands.test: "test:ci"` — package.json, kit.config.json
+- [x] A1: Give the project a test runner that always exits, so the gate gets a verdict instead of a hang — spawn ng test headless, parse the Karma TOTAL line, kill the process tree, print the TEST-CI summary line — scripts/test-ci.mjs
+- [x] A2: Prove the runner exits on a fake child that prints TOTAL and then hangs — the test spawns `node scripts/test/fixtures/fake-karma.mjs` (prints `TOTAL: 1 FAILED, 3 SUCCESS` then sleeps 60s) through an exported `runWithParser(cmd, args, { timeoutMs })` and asserts exit 1 and the summary line within 5s; a second fixture prints `TOTAL: 4 SUCCESS` → exit 0; a third prints nothing → timeout path exit 1 with `timeoutMs: 500` — scripts/test/test-ci.test.mjs, scripts/test/fixtures/fake-karma.mjs
+- [x] A3: Let a card's test command run one Playwright spec through an allowlisted script — validate the argument, spawn `npx playwright test <spec>` with stdio inherited, exit with its code; test the validator (`e2e/x.spec.ts` ok, `../x.spec.ts` and `e2e/x.ts` → exit 2) — scripts/e2e-one.mjs, scripts/test/e2e-one.test.mjs
+- [x] A4: Register the two runners as package scripts and point the kit's test command at the one that exits — `test:ci`, `test:server`; `commands.test: "test:ci"` — package.json, kit.config.json
 - [ ] A5: Make the log check survive a builder folder — plan-start fallback to the branch base time, SKIP with exit 0 when no database is configured; keep every other path as it is — scripts/log-query.mjs, scripts/test/log-query-fallback.test.mjs (unit-test the exported `resolvePlanStart(root)` and `databaseUri(root)` helpers; no Mongo)
-- [ ] A6: Give e2e specs a signed-in QA session and a throwaway event — `signInQa`, `createQaEvent`, `deleteQaEvent` over the existing qa-login helpers — e2e/helpers/qa-session.ts
-- [ ] A7: Prove the session helper against the running app with one screenshot — the `[ui]` card test — e2e/qa-session.spec.ts
+- [x] A6: Give e2e specs a signed-in QA session and a throwaway event — `signInQa`, `createQaEvent`, `deleteQaEvent` over the existing qa-login helpers — e2e/helpers/qa-session.ts
+- [x] A7: Prove the session helper against the running app with one screenshot — the `[ui]` card test — e2e/qa-session.spec.ts
 - [ ] A8: Tell plan authors which checks the gate can run — one paragraph — docs/agent/plan-checks.md
 - [ ] A9: Run every automatic check of this plan from the worktree and paste the outputs under Execution Notes
 
@@ -186,3 +186,12 @@
 - [ ] M3b: Show the proposed merges of the save-plan skill and the PRD template that keep the Reuse Check section — .claude/skills/save-plan/SKILL.md, .claude/references/prd-template.md
 - [ ] M3c: Show the override declarations FoodVibe's kit config would need, one path and one reason each — kit.config.json overrides
 - [ ] M3d: Stop and wait for the Human's word before any commit beyond the sync commit, and never push — none
+
+### Plan 533 — The unified date field owns its styles: nothing reaches in from outside, nothing is broken (`plans/533-date-field-owns-its-styles-nothing-reaches-in-from-outside.plan.md`)
+- [x] A1: Make the hidden picker immune to outside input rules — unlayered picker block, full reset, comment — src/app/shared/date-field/date-field.component.scss
+- [ ] A2: Prove the picker box inside an input stack — the new spec case — src/app/shared/date-field/date-field.component.spec.ts
+- [x] A3: Delete the dead outside date rules after a usage grep — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss, src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss, src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.scss, src/app/pages/menu-intelligence/_paper-ui.scss
+- [x] A4: Warn when a page styles a shared component from outside, and repair the modal-overlay rule — scripts/lib/registry-families.mjs
+- [x] A5: Test both rules — scripts/test/reuse-lint.test.mjs
+- [x] A6: Document the rules and the date field's "inside only" rule — docs/agent/standards-reuse.md, docs/brain/component-families.md
+- [x] A7: Run every `[auto]` check plus `node scripts/reuse-lint.mjs --diff=origin/main` (expect no `family-styled-from-outside` line) and paste the outputs under Execution Notes
