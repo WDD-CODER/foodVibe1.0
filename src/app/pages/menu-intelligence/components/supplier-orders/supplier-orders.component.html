@@ -52,9 +52,6 @@
                       ({{ v.purchase }})
                     }
                   </span>
-                  @if (savings_()[i].hints[$index]; as hint) {
-                    <span class="so-line-hint">{{ hintText(hint) }}</span>
-                  }
                 </li>
               }
             </ul>
@@ -62,9 +59,6 @@
               {{ 'supplier_orders_est_total' | translatePipe }}: {{ money(card.total) }}
               <app-partial-cost-badge class="so-partial" [missing]="cardMissing_()[i]"></app-partial-cost-badge>
             </p>
-            @if (savings_()[i].total > 0) {
-              <p class="so-saving">{{ canSaveText(savings_()[i].total) }}</p>
-            }
             <div class="so-actions">
               <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="copyCard(card)">
                 <lucide-icon name="copy" [size]="16"></lucide-icon>

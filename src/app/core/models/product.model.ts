@@ -30,8 +30,6 @@ export interface Product {
   baseUnit: string
   sources: ProductSource[]
   purchaseOptions: PurchaseOption_[]
-  /** Owner's chosen supplier (plan 510); absent = the cheapest priced supplier. */
-  preferredSupplierId?: string
   categories: string[]
   yieldFactor: number
   allergens: string[]

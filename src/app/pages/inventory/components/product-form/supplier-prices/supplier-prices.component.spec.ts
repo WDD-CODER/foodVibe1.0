@@ -36,15 +36,6 @@ describe('SupplierPricesComponent', () => {
     expect(inputs[1].placeholder).toBe('waiting_for_price')
   })
 
-  it('marks only the chosen supplier row (plan 510)', () => {
-    fixture.componentRef.setInput('preferredSupplierId', 'b')
-    setup(['a', 'b'], { a: 4, b: 5 })
-    const marks = fixture.nativeElement.querySelectorAll('.supplier-prices__chosen') as NodeListOf<HTMLElement>
-    expect(marks.length).toBe(1)
-    expect(marks[0].textContent?.trim()).toBe('supplier_chosen')
-    expect(marks[0].closest('app-form-field')?.querySelector('#supplier-price-b')).not.toBeNull()
-  })
-
   it('pre-fills a supplier that has no row from the first row', () => {
     setup(['a', 'b'], { a: 4 })
     expect(emitted.at(-1)).toEqual({ a: 4, b: 4 })

@@ -49,28 +49,6 @@ describe('RecipeIngredientsTableComponent', () => {
     expect(component).toBeTruthy()
   })
 
-  it('saves the picked supplier on the product and clears it for automatic (plan 510)', async () => {
-    const svc = TestBed.inject(ProductDataService)
-    const spy = spyOn(svc, 'updateProduct').and.resolveTo()
-    const product = { _id: 'p1', nameHebrew: 'בצל', sources: [], preferredSupplierId: 'old' } as unknown as Product
-    spyOn(component as unknown as { canPickSupplier_(): boolean }, 'canPickSupplier_').and.returnValue(true)
-    const c = component as unknown as { onSupplierPicked(p: Product, id: string | null): Promise<void> }
-    await c.onSupplierPicked(product, 'grocery')
-    expect(spy.calls.mostRecent().args[0].preferredSupplierId).toBe('grocery')
-    await c.onSupplierPicked(product, null)
-    expect('preferredSupplierId' in spy.calls.mostRecent().args[0]).toBeFalse()
-  })
-
-  it('does not save a picked supplier for staff (plan 510)', async () => {
-    const spy = spyOn(TestBed.inject(ProductDataService), 'updateProduct').and.resolveTo()
-    spyOn(component as unknown as { canPickSupplier_(): boolean }, 'canPickSupplier_').and.returnValue(false)
-    await (component as unknown as { onSupplierPicked(p: Product, id: string | null): Promise<void> }).onSupplierPicked(
-      { _id: 'p1' } as unknown as Product,
-      'x'
-    )
-    expect(spy).not.toHaveBeenCalled()
-  })
-
   it('a row re-inserted from outside is rendered without another user action (plan 511)', () => {
     const arr = component.ingredientsFormArray()
     const count = (): number => fixture.nativeElement.querySelectorAll('.col-unit app-custom-select').length

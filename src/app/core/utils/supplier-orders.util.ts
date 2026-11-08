@@ -1,6 +1,5 @@
 import type { EventPlan, RawLine } from '../engine/event-plan.types'
 import { formatQty } from '../engine/rounding'
-import { cheapestSupplier } from '../engine/supplier-choice'
 import type { Product } from '@models/product.model'
 import type { Supplier } from '@models/supplier.model'
 
@@ -90,45 +89,6 @@ export function buildSupplierOrders(
 
   review.sort((a, b) => byName(a.name, b.name))
   return { cards, review }
-}
-
-/** Plan 510: another priced supplier sells this line's product for less (information only). */
-export interface CheaperElsewhere {
-  supplierId: string
-  supplierName: string
-  /** Price per base unit at the cheaper supplier. */
-  price: number
-  /** (this supplier's price − the cheaper price) × the line's base-unit quantity. */
-  saving: number
-}
-
-/** The cheaper supplier for one line, or null when the line is already at the cheapest priced supplier. */
-export function cheaperElsewhere(
-  line: RawLine,
-  productsById: Map<string, Product>,
-  suppliersById: Map<string, Supplier>
-): CheaperElsewhere | null {
-  if (!line.productId || !line.supplierId) return null
-  const product = productsById.get(line.productId)
-  if (!product) return null
-  const current = (product.sources ?? []).find((s) => s.supplierId === line.supplierId && s.price > 0)
-  const cheapest = cheapestSupplier(product)
-  if (!current || !cheapest || cheapest.supplierId === line.supplierId || !(cheapest.price < current.price)) return null
-  const supplier = suppliersById.get(cheapest.supplierId)
-  if (!supplier) return null
-  const saving = (current.price - cheapest.price) * line.buyQty
-  if (!(saving > 0)) return null
-  return { supplierId: cheapest.supplierId, supplierName: supplier.nameHebrew, price: cheapest.price, saving }
-}
-
-/** Per line of the card its hint (or null), and the card's total possible saving. */
-export function cardSavings(
-  card: SupplierOrderCard,
-  productsById: Map<string, Product>,
-  suppliersById: Map<string, Supplier>
-): { hints: (CheaperElsewhere | null)[]; total: number } {
-  const hints = card.lines.map((l) => cheaperElsewhere(l, productsById, suppliersById))
-  return { hints, total: hints.reduce((sum, h) => sum + (h?.saving ?? 0), 0) }
 }
 
 /** Israeli mobile → WhatsApp number (`9725XXXXXXXX`), anything else → null. */

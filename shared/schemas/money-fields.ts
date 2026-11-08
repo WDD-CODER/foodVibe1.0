@@ -4,7 +4,7 @@
  * Paths: `a`, `a.b`, `a[].b`, `a.b[].c`. Later plans that add a money field append it here.
  */
 export const MONEY_FIELDS: Record<string, readonly string[]> = {
-  products: ['sources[].price', 'purchaseOptions[].priceOverride', 'preferredSupplierId'],
+  products: ['sources[].price', 'purchaseOptions[].priceOverride'],
   menuEvents: [
     'pricePerGuest',
     'extraCosts',

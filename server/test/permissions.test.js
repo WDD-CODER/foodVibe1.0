@@ -82,20 +82,6 @@ describe('money fields', () => {
   })
 })
 
-describe('plan 510: preferredSupplierId is an owner-only money field', () => {
-  it('a change, a set and a clear count as a money change; staff cannot make them', () => {
-    const before = { nameHebrew: 'a', preferredSupplierId: 's1' }
-    expect(moneyFieldsChanged('products', before, { ...before, preferredSupplierId: 's2' })).toBe(true)
-    expect(moneyFieldsChanged('products', { nameHebrew: 'a' }, before)).toBe(true)
-    expect(moneyFieldsChanged('products', before, { nameHebrew: 'a' })).toBe(true)
-    expect(moneyFieldsChanged('products', before, { ...before, nameHebrew: 'b' })).toBe(false)
-    expect(can(STAFF, 'editMoney', { doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY' })
-  })
-  it('a staff-created product is saved without it', () => {
-    expect(stripMoneyFields('products', { nameHebrew: 'a', preferredSupplierId: 's1' })).toEqual({ nameHebrew: 'a' })
-  })
-})
-
 describe('plan 449: money signature is keyed by row', () => {
   const doc = sources => ({ sources, purchaseOptions: [] })
   it('detects a price moved to another supplier or swapped between rows', () => {
