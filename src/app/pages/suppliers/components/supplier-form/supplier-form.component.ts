@@ -14,6 +14,7 @@ import { Supplier } from '@models/supplier.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
@@ -124,7 +125,7 @@ export class SupplierFormComponent implements OnInit, PendingChangesComponent {
   protected nameError(): string | null {
     const ctrl = this.supplierForm_.get('nameHebrew')
     if (ctrl?.errors?.['duplicateName'] && ctrl.touched) return 'duplicate_supplier_name'
-    return this.validationErrors_()['nameHebrew'] ? 'field_name_required' : null
+    return this.validationErrors_()['nameHebrew'] || null
   }
 
   private validateForm_(): boolean {
@@ -190,6 +191,9 @@ export class SupplierFormComponent implements OnInit, PendingChangesComponent {
       return payload
     } catch (e) {
       this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
+      // Plan 540: mark the refused name; the interceptor toasted a server refusal, any other failure gets one here.
+      this.validationErrors_.update((cur) => ({ ...cur, ...serverFieldErrors(e, { nameHebrew: 'nameHebrew' }) }))
+      if (!refusalShownToUser(e)) this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
       return null
     } finally {
       this.saving.setSaving(false)

@@ -60,7 +60,7 @@
           }
         }
         @if (validationErrors_()['nameHebrew']) {
-          <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
+          <span class="c-field-error">{{ validationErrors_()['nameHebrew'] | translatePipe }}</span>
         }
       </div>
     </div>
@@ -110,10 +110,10 @@
           </button>
         }
         @if (validationErrors_()['yield_amount']) {
-          <span class="c-field-error">{{ 'field_amount_required' | translatePipe }}</span>
+          <span class="c-field-error">{{ validationErrors_()['yield_amount'] | translatePipe }}</span>
         }
         @if (validationErrors_()['yield_unit']) {
-          <span class="c-field-error">{{ 'field_unit_required' | translatePipe }}</span>
+          <span class="c-field-error">{{ validationErrors_()['yield_unit'] | translatePipe }}</span>
         }
       </div>
 

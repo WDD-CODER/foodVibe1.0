@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { provideHttpClient } from '@angular/common/http'
@@ -201,6 +202,24 @@ describe('ProductFormComponent', () => {
       expect(await component.saveAndWait()).toBe(true)
       const saved = saveSpy.calls.mostRecent().args[0] as Product
       expect(saved.purchaseOptions.map((o) => o.priceOverride)).toEqual([0, 7])
+    })
+  })
+
+  describe('plan 540: server refusal', () => {
+    it('a 400 too_big on nameHebrew marks the name field', async () => {
+      const kitchen = TestBed.inject(KitchenStateService)
+      spyOn(kitchen, 'saveProduct').and.returnValue(
+        Promise.reject(
+          new HttpErrorResponse({
+            status: 400,
+            url: '/api/v1/data/products',
+            error: { error: 'Validation failed', issues: [{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }] }
+          })
+        )
+      )
+      component['productForm_'].patchValue({ productName: 'בצל', baseUnit: 'kg' })
+      expect(await component.saveAndWait()).toBe(false)
+      expect(component['validationErrors_']()['productName']).toBe('server_field_too_long')
     })
   })
 
