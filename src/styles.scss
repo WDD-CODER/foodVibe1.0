@@ -2606,3 +2606,14 @@ input[type='number']::-webkit-outer-spin-button {
   cursor: progress;
   opacity: 0.7;
 }
+
+/* Stacking order (plan 538), low to high. Existing numeric rules are not rewritten; the comments map them to the scale. */
+:root {
+  --z-header: 100; /* header */
+  --z-floating: 200; /* hero FAB, update banner, approve stamp (200-250) */
+  --z-modal: 1000; /* .c-modal-overlay; the equipment panel popup is 1001 */
+  --z-modal-nested: 1100; /* popup opened from a popup (add-item-modal) */
+  --z-modal-nested-2: 1200; /* popup over a nested popup (translation-key-modal) */
+  --z-confirm: 2000; /* the yes/no question (confirm-modal) */
+  --z-toast: 9999; /* the toast */
+}

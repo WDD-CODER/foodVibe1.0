@@ -133,13 +133,13 @@ line or file this plan names was removed, renamed or rewritten).
 - No visual change except order on screen. RTL unchanged (`dir="rtl"` on the card). No dictionary keys, no icons.
 
 ## Atomic Sub-tasks
-- [ ] A1: One named stacking scale — append the `--z-*` `:root` block with the mapping comment — src/styles.scss
-- [ ] A2: The popup shell takes a token and can go to the top layer — `zIndex` type, `topLayer` input, popover attribute and `showPopover()` — src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html
-- [ ] A3: Prove the shell — the three spec cases — src/app/shared/modal-shell/modal-shell.component.spec.ts
-- [ ] A4: The question always in front — `[zIndex]` + `[topLayer]` on the confirm popup, and its spec case — src/app/shared/confirm-modal/confirm-modal.component.html, src/app/shared/confirm-modal/confirm-modal.component.spec.ts
-- [ ] A5: Name the two nested popup layers — src/app/shared/add-item-modal/add-item-modal.component.html, src/app/shared/translation-key-modal/translation-key-modal.component.html
-- [ ] A6: Registry line for the new shell inputs — docs/brain/component-families.md
-- [ ] A7: Run every `[auto]` check and paste the outputs under Execution Notes
+- [x] A1: One named stacking scale — append the `--z-*` `:root` block with the mapping comment — src/styles.scss
+- [x] A2: The popup shell takes a token and can go to the top layer — `zIndex` type, `topLayer` input, popover attribute and `showPopover()` — src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html
+- [x] A3: Prove the shell — the three spec cases — src/app/shared/modal-shell/modal-shell.component.spec.ts
+- [x] A4: The question always in front — `[zIndex]` + `[topLayer]` on the confirm popup, and its spec case — src/app/shared/confirm-modal/confirm-modal.component.html, src/app/shared/confirm-modal/confirm-modal.component.spec.ts
+- [x] A5: Name the two nested popup layers — src/app/shared/add-item-modal/add-item-modal.component.html, src/app/shared/translation-key-modal/translation-key-modal.component.html
+- [x] A6: Registry line for the new shell inputs — docs/brain/component-families.md
+- [x] A7: Run every `[auto]` check and paste the outputs under Execution Notes
 
 ## Technical Considerations
 - Dependencies: `ConfirmModalService` (unchanged), `modal-controller.ts` stack (unchanged — the confirm shell is still pushed last, so Escape goes to it), `.c-modal-overlay[popover]` reset at `src/styles.scss:2570-2583` (read only).
@@ -162,3 +162,5 @@ line or file this plan names was removed, renamed or rewritten).
 ## Execution Notes
 - Human 2026-11-08: keep the top-layer step (the question beats the paste dialog and popovers), not tokens only.
 - Planner 2026-11-08: drafted from the Human's report; repro paths named from the code, not yet seen in the browser.
+- Builder: build exit 0; lint exit 0; test:ci exit 0 (1795 SUCCESS); reuse-lint --check-registry exit 0; grep `[zIndex]="[0-9]` prints nothing.
+- Builder: log-query printed one old 409 error on POST /business/team (localhost:3003), not from this change.

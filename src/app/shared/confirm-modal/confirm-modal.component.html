@@ -1,6 +1,8 @@
 @if (modalService.isOpen()) {
   <app-modal-shell
     [cardClass]="cardClass_()"
+    [zIndex]="'var(--z-confirm)'"
+    [topLayer]="true"
     [labelledBy]="modalService.headerKey() ? 'confirm-modal-header' : 'confirm-modal-message'"
     (dismissed)="modalService.choose('cancel')"
   >
