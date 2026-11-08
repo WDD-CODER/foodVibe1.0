@@ -14,6 +14,8 @@ import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
 import { recipeBuilderAccessGuard } from './core/guards/recipe-builder-access.guard'
 import { platformAdminGuard } from './core/guards/platform-admin.guard'
+import { environment } from '../environments/environment'
+import { devCatalogRoutes } from './pages/dev-catalog/dev-catalog.routes'
 import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
 
 export const routes: Routes = [
@@ -238,6 +240,8 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/platform-dashboard/platform-dashboard.page').then(m => m.PlatformDashboardPage),
     canActivate: [authGuard, platformAdminGuard],
   },
+  // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.
+  ...devCatalogRoutes(environment.localDev),
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ]
