@@ -84,6 +84,16 @@ describe('ConfirmModalComponent', () => {
     expect(mockModalService.choose).toHaveBeenCalledWith('confirm')
   })
 
+  it('renders the question in the top layer at --z-confirm', async () => {
+    mockModalService.isOpen.set(true)
+    fixture.detectChanges()
+    await fixture.whenStable()
+    const overlay = fixture.nativeElement.querySelector('.c-modal-overlay') as HTMLElement
+    expect(overlay.style.zIndex).toBe('var(--z-confirm)')
+    if (typeof overlay.showPopover !== 'function') return pending('popover not supported')
+    expect(overlay.matches(':popover-open')).toBeTrue()
+  })
+
   it('shows no text box without typedConfirm', () => {
     mockModalService.isOpen.set(true)
     fixture.detectChanges()

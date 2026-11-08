@@ -1,4 +1,11 @@
-<div class="c-modal-overlay" [class.m-sheet]="sheet()" [style.z-index]="zIndex()" (click)="onBackdropClick()">
+<div
+  #overlay
+  class="c-modal-overlay"
+  [class.m-sheet]="sheet()"
+  [style.z-index]="zIndex()"
+  [attr.popover]="topLayer() ? 'manual' : null"
+  (click)="onBackdropClick()"
+>
   <div
     #card
     class="c-modal-card"

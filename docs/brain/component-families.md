@@ -66,6 +66,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
   `.c-modal-body` / `.c-modal-actions` inside it. Simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
   `ConfirmModalService.open(msg, { typedConfirm })` — confirm waits for an exact typed text (plan 486).
 - When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
+- Stacking: `[zIndex]` takes a `--z-*` token (`src/styles.scss`, plan 538); `[topLayer]` puts a popup in the browser top layer (the confirm popup uses both, so a question is always in front).
 - Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.

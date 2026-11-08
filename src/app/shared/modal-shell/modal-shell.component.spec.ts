@@ -18,6 +18,8 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
         [dismissible]="dismissible_()"
         [sheet]="sheet_()"
         [hasChanges]="hasChanges_()"
+        [zIndex]="zIndex_()"
+        [topLayer]="topLayer_()"
         (dismissed)="onDismissed()"
       >
         <input id="first" type="text" />
@@ -38,6 +40,8 @@ class HostComponent {
   readonly dismissible_ = signal(true)
   readonly sheet_ = signal(false)
   readonly hasChanges_ = signal(false)
+  readonly zIndex_ = signal<number | string | null>(null)
+  readonly topLayer_ = signal(false)
   readonly dismissed_ = signal(0)
   readonly secondDismissed_ = signal(0)
 
@@ -238,5 +242,27 @@ describe('ModalShellComponent', () => {
     first.dispatchEvent(shiftTab)
     expect(shiftTab.defaultPrevented).toBeTrue()
     expect(document.activeElement).toBe(last)
+  })
+
+  it('puts a token zIndex on the overlay inline style', () => {
+    host.zIndex_.set('var(--z-modal-nested)')
+    fixture.detectChanges()
+    expect(query<HTMLElement>('.c-modal-overlay')!.style.zIndex).toBe('var(--z-modal-nested)')
+  })
+
+  it('has no popover attribute by default', () => {
+    expect(query('.c-modal-overlay')!.hasAttribute('popover')).toBeFalse()
+  })
+
+  it('opens in the top layer when topLayer is true', async () => {
+    host.open_.set(false)
+    fixture.detectChanges()
+    host.topLayer_.set(true)
+    host.open_.set(true)
+    fixture.detectChanges()
+    await fixture.whenStable()
+    const overlay = query('.c-modal-overlay')!
+    if (typeof overlay.showPopover !== 'function') return pending('popover not supported')
+    expect(overlay.matches(':popover-open')).toBeTrue()
   })
 })
