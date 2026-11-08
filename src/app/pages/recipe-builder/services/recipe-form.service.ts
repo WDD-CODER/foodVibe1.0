@@ -83,7 +83,9 @@ export class RecipeFormService {
         unit: [item?.baseUnit ?? 'gram'],
         total_cost: [0],
         // Plan 536: the supplier this line is bought from; null = automatic (cheapest).
-        supplierId: [null as string | null]
+        supplierId: [null as string | null],
+        // The stored line's _id, kept across saves; null for a new line.
+        lineId: [null as string | null]
       },
       { validators: (c) => this.ingredientRowValidator(c) }
     )
@@ -205,6 +207,7 @@ export class RecipeFormService {
       nameSnapshot?: string
       nameHebrew?: string
       supplierId?: string | null
+      lineId?: string | null
     }
     const rawIngredients = (raw['ingredients'] || []) as IngRow[]
     const ingredients: Ingredient[] = rawIngredients
@@ -214,7 +217,8 @@ export class RecipeFormService {
         return !!ing?.nameHebrew?.trim()
       })
       .map((ing) => ({
-        _id: 'ing_' + Math.random().toString(36).slice(2, 9),
+        // Keep a stored line's id: the server compares owner-only fields (the line supplier) row by row on _id.
+        _id: ing.lineId || 'ing_' + Math.random().toString(36).slice(2, 9),
         ...(ing.referenceId ? { referenceId: ing.referenceId } : {}),
         ...(ing.referenceId
           ? { type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe' }
@@ -436,6 +440,7 @@ export class RecipeFormService {
         // Live cost when the item is known (a unit's conversion or a price may have changed
         // since the recipe was saved); the saved cost only when the item is gone (plan 377).
         supplierId: ing.supplierId ?? null,
+        lineId: ing._id ?? null,
         total_cost: item
           ? this.recipeCost.getCostForIngredient({ ...ing, referenceId: resolvedRefId, type: resolvedType ?? ing.type })
           : (ing.calculatedCost ?? 0)

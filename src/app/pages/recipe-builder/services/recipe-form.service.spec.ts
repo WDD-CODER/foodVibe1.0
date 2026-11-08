@@ -314,4 +314,25 @@ describe('RecipeFormService line supplier', () => {
     service.patchFormFromRecipe(f, recipe)
     expect((f.get('ingredients') as FormArray).at(0).get('supplierId')?.value).toBe('shuk')
   })
+
+  it('keeps a stored line id across load and save, and gives a new line a fresh id', () => {
+    const f = formWith(null)
+    const recipe = {
+      _id: 'r1',
+      nameHebrew: 'מרק',
+      ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 2, unit: 'kg', supplierId: 'shuk' }],
+      steps: [],
+      yieldAmount: 1,
+      yieldUnit: 'gram',
+      defaultStation: '',
+      isApproved: false
+    } as unknown as Recipe
+    service.patchFormFromRecipe(f, recipe)
+    const added = service.createIngredientGroup()
+    added.patchValue({ referenceId: 'p1', item_type: 'product', nameHebrew: 'בצל', amount_net: 1, unit: 'kg' })
+    ;(f.get('ingredients') as FormArray).push(added)
+    const saved = service.buildRecipeFromForm(f, 'r1', false).ingredients
+    expect(saved[0]._id).toBe('i1')
+    expect(saved[1]._id).toMatch(/^ing_/)
+  })
 })
