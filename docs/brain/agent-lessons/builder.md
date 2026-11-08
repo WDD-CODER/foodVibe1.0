@@ -18,3 +18,5 @@ Facts from earlier runs of the builder role in this project, written by scripts 
 - 2026-11-03 run-513-516c: fix round caused by: other rule (html file)
 - 2026-11-08 run-517: parked: replan needed
 - 2026-11-08 run-536: fix round caused by: test failed
+- 2026-11-08 run-540: fix round caused by: the merge into the run branch
+- 2026-11-08 run-540: parked: same reason twice
