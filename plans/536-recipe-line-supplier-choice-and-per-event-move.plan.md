@@ -346,10 +346,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Last-bought or other smarter rules.
 
 ## Critical Questions
-- Q: When is a picked supplier saved — at once, or with the recipe's Save? A (Human, 2026-11-08): with the recipe's
-  Save; a pick makes the form dirty so the «save or leave» question pops when leaving unsaved.
-- Q: Staff deleting a line (on a recipe they created) that the owner gave a supplier — allowed? A (Human, 2026-11-08):
-  refused with the existing owner-only message.
+- Q: When is a picked supplier saved — at once, or with the recipe's Save? A: with the recipe's Save (Human 2026-11-08);
+  a pick makes the form dirty so the «save or leave» question pops when leaving unsaved.
+- Q: Staff deleting a line (on a recipe they created) that the owner gave a supplier — allowed? A: refused with the
+  existing owner-only message (Human 2026-11-08).
 - Answered (Human, 2026-11-08): per-recipe-line choice; no «נבחר» mark; per-event reversible move; popover inside
   the viewport; automatic for any supplier count; server-side persistence; staff read-only.
 

@@ -268,7 +268,7 @@ All on `/venues/add` (slot dev server, `ng serve -c local`):
 - Showing the time field on the dev catalog page (plan 535).
 
 ## Critical Questions
-- Q: A venue that closes after midnight (18:00 → 02:00): a) blocked as "end before start" · b) allowed now, "+1"
-  shown next to the end time. A: b) — Human 2026-11-08. Equal start and end stays broken.
+- Q: A venue that closes after midnight (18:00 → 02:00) — blocked, or allowed with "+1"? A: b) allowed now, "+1"
+  shown next to the end time (Human 2026-11-08). Equal start and end stays broken.
 
 ## Execution Notes
