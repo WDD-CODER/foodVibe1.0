@@ -1,7 +1,7 @@
 # Plan 372 — Venues B: multiple contacts and an interactive days/hours picker
 
 Status: draft
-Depends-on: 374
+Depends-on: 374, 537
 Track: split — look in Claude Design; schema, build:schemas, old-hours parsing here
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
@@ -22,7 +22,7 @@ The schema is strict (`z.strictObject`, enforced server-side by `server/middlewa
 
 ## Execution Mode
 
-- Parallel: no. Run after plan 371 (Venues A, closed) and plan 374 (Planner order 2026-11-05; same form).
+- Parallel: no. Run after plan 371 (Venues A, closed) and plan 374 (Planner order 2026-11-05; same form), and plan 537 (time pickers and hours-row checks; same form).
 - Concurrent plans: none touching `src/app/pages/venues/**` or `shared/schemas/**`
 - Isolated DB: yes. Schema change; verify against stored venues before Atlas.
 
@@ -39,6 +39,8 @@ src/app/core/models/venue.model.ts
 src/app/core/utils/venue-hours.util.ts
 src/app/core/utils/venue-hours.util.spec.ts
 src/app/shared/hours-editor/**
+src/app/shared/hours-editor/hours-editor.component.spec.ts
+src/app/pages/venues/components/venue-form/venue-form.component.spec.ts
 shared/schemas/entities/venue.schema.ts
 server/test/**
 ```
@@ -81,12 +83,12 @@ touching any milestone.
   - Both add and update payloads.
 - [ ] Detail page: list all contacts (initials avatar, name, role, `tel:` link). Remove the hard-coded `'venue_manager'` role.
 - [ ] New `HoursEditorComponent` (`src/app/shared/hours-editor/`), with signal inputs and outputs, `ControlValueAccessor` or `model()`:
-  - Per row: 7 toggle chips (`.c-chip--toggle`, Sunday = 0 … Saturday = 6), "from" / "to" `<input type="time">`, remove-row button; plus an add-row button.
-  - Validation: at least 1 day, and open < close unless the range crosses midnight (allow and show "+1").
+  - Per row: 7 toggle chips (`.c-chip--toggle`, Sunday = 0 … Saturday = 6), "from" / "to" `app-time-field` (plan 537; no native time input), remove-row button; plus an add-row button.
+  - Validation: row checks come from `checkHoursRow` (plan 537): extend its `missing_days` rule to read `dayIndexes` (at least 1 chip) instead of the free-text days; `same_time` stays broken; `overnight` (close < open) is valid and shows 537's "+1" marker (`venue_hours_next_day`). Empty rows are dropped on save, broken rows block save — as 537.
 - [ ] `venue-hours.util.ts`:
   - `toDisplay(dayIndexes, open, close)` → `{ days: 'א׳–ה׳', time: '08:00–23:00' }`, compressing consecutive days.
   - `formatVenueHours` prefers the structured fields.
-  - On save, each row writes structured fields plus generated `days` / `time`.
+  - On save, each row writes structured fields plus generated `days` / `time`; `time` is built with 537's `formatTimeRange(open, close)` (en dash, `18:00–02:00` for overnight). Hydrate structured `open` / `close` first, fall back to 537's `parseTimeRange(time)`. No second time parser.
 
 ### Should Have (P1)
 - [ ] Server test: a venue with contacts and structured hours passes validation.
@@ -97,13 +99,19 @@ touching any milestone.
 ## UI/UX Notes
 
 - Day chips show Hebrew letters (א ב ג ד ה ו ש), RTL order starting from א on the right.
-- Dictionary (append): `venue_contacts` = "אנשי קשר", `venue_add_contact` = "הוסף איש קשר", `contact_role` = "תפקיד", `venue_hours_add_row` = "הוסף שעות", `venue_hours_from` = "מ-", `venue_hours_to` = "עד", `venue_manager_role` = "מנהל המקום".
+- Dictionary (append): `venue_contacts` = "אנשי קשר", `venue_add_contact` = "הוסף איש קשר", `contact_role` = "תפקיד", `venue_hours_add_row` = "הוסף שעות", `venue_manager_role` = "מנהל המקום". `venue_hours_from` / `venue_hours_to` and the row-error keys (`venue_hours_missing_days`, `venue_hours_missing_time`, `venue_hours_same_time`, `venue_hours_next_day`, `time_invalid`) come from plan 537 — no new error keys.
+
+## Reuse Check
+
+- `HoursEditorComponent` (`src/app/shared/hours-editor/`) — family: none — rung: 4 — why: no shared piece edits a list of day-chip + time-range rows.
+- Time inputs in the editor — family: form-field — rung: 1 — why: `app-time-field` from plan 537 as is.
+- `toDisplay` in `venue-hours.util.ts` — family: helpers — rung: 3 — why: extends the helper file 537 extended.
 
 ## Atomic Sub-tasks
 
 - [ ] A1: Let a venue store several contacts and structured opening hours — Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: Show opening hours in plain Hebrew — `venue-hours.util` `toDisplay` plus spec (Hebrew range forms, midnight crossing).
-- [ ] A3: Add an interactive days-and-hours picker to the venue form — `HoursEditorComponent` plus spec; wire into the venue form; save structured hours and the generated strings (`shared/hours-editor/**`, `venue-form/**`).
+- [ ] A3: Add an interactive days-and-hours picker to the venue form — `HoursEditorComponent` plus spec, using `app-time-field` and `checkHoursRow`; move 537's row wiring (marks, message line, drop-empty) from the venue form into the editor without changing behaviour; wire into the venue form; save structured hours and the generated strings (`shared/hours-editor/**`, `venue-form/**`).
 - [ ] A4: Let the venue form add and list several contacts — Contacts FormArray, detail list (`venue-form/**`, `venue-detail/**`).
 - [ ] A5: Build and test — Build, specs; add one new venue with two contacts and structured hours and check no 400s.
 
@@ -120,6 +128,7 @@ touching any milestone.
 
 ## Critical Questions
 
+- Settled (Human 2026-11-08, via 537): overnight hours allowed with "+1"; equal open and close times are broken.
 - Week order of the day chips:
   a) א (Sunday) first (default)
   b) ב (Monday) first
@@ -130,9 +139,13 @@ touching any milestone.
 - [auto] Server tests (venue validation) → 0 failures.
 - [auto] `npx ng test --watch=false --include=src/app/shared/hours-editor/**/*.spec.ts --include=src/app/core/utils/venue-hours.util.spec.ts --include=src/app/pages/venues/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
+- [auto] `pnpm run test:ci` → exit 0 (also covers 537's time-field spec).
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [human] Hours: tap ה, 18:00 → 02:00 → "+1" shows → save → no red field.
 - [human] Add a new venue with two contacts → save → the detail page shows both with call links.
 - [human] Hours: tap א–ה, 08:00–23:00 → save → the card and detail show "א׳–ה׳ · 08:00–23:00".
 
 ## Planner edit (2026-10-26)
 Legacy/compat work removed on the Human's rule that only recipes and products are kept (venues, menus, users, businesses are test data): `parseLegacy`, the "היה:" hint, legacy contact hydrate, the `contactName` / `contactPhone` mirror, the legacy server test and the old-venue checks.
 - Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).
+- Planner review 2026-11-08: reuse plan 537's time field, row checks, time helpers and keys; Depends-on 537; Reuse Check, spec scope and test:ci/log-query Done-when added. Refresh Snapshot after 537 merges.

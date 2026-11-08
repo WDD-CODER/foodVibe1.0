@@ -21,6 +21,9 @@
 - Closed: **490** (Human validated 2026-11-05; fixes #507, #509)
 - Parked: **373** venue videos/location (after 372, low value) · **471** exports (needs a Human walk-through session)
 - Closed: **524** (done in PR #494, main on kit v2.0.0)
+- Merged 2026-11-08: **374**, **535** (PR #525). **510** superseded by **536** (failed hand checks, reverted)
+- New 2026-11-08: **536** recipe-line supplier + per-event move (not parallel with 518/519) · **537** venue hours pickers (after 374; 372 now after 537) · **538** save-or-leave in front · **539** toast at narrow width
+- Lanes: 374→537→372 · 536 after 518→519 or before both (shares menu-event schema/model, permissions.js)
 
 ---
 
@@ -100,14 +103,6 @@
 
 - [ ] A1: Add the missing manifest entry for the native-dialog test fixture so the rules check stops failing — insert one object after the `mixed.diff` entry (alphabetical, before `registry-broken.md`) with `"path": "scripts/test/fixtures/reuse/native-dialog.diff"`, `"tier": "project"`, `"action": "stay"`, `"params": []`, `"refs": []`, `"notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."` (copy the `clean.diff` entry's shape and wording exactly) — docs/workflow-kit/manifest.json
 - [ ] A2: Prove the manifest check is green and nothing else moved — run the Done-when commands and paste the `KIT_MANIFEST: ok` line in Execution Notes; `git diff --stat` must show only `docs/workflow-kit/manifest.json` (+8 lines)
-
-### Plan 510 — Let the chef pick a product's supplier and see when another is cheaper
-- [ ] P1: Let a product remember which supplier the owner buys it from, owner-only — optional preferredSupplierId in the product schema and model; add it to MONEY_FIELDS.products; server permissions test that staff cannot change it — shared/schemas/entities/product.schema.ts, shared/schemas/money-fields.ts, src/app/core/models/product.model.ts, server/test/permissions.test.js
-- [ ] P2: Make the price rule use the chosen supplier and fall back to the cheapest — chooseSupplier honours preferredSupplierId when that source is priced; specs for chosen, chosen-unpriced and chosen-removed — src/app/core/engine/supplier-choice.ts, src/app/core/engine/supplier-choice.spec.ts
-- [ ] P3: Add a supplier icon to recipe lines so the owner can pick whose price to use — new supplier-picker child (inputs: product, can edit; output: picked supplier or automatic), with spec; saves the product through the product data service; read-only for staff — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [ ] P4: Show in the event supplier orders when an item is cheaper at another supplier — pure helper beside buildSupplierOrders returning cheaper supplier, price and saving per line and per card, with spec; render the line hint and card total — src/app/core/utils/supplier-orders.util.ts, its spec, src/app/pages/menu-intelligence/components/supplier-orders/**
-- [ ] P5: Mark the chosen supplier in the product form's price rows — src/app/pages/inventory/components/product-form/supplier-prices/**
-- [ ] P6: Run the full checks and paste the output — ng build, headless ng test, server tests, log-query — Execution Notes
 
 ### Plan 517 — Let the orchestrator gate run FoodVibe's tests, server tests and one e2e spec without hanging
 - [x] A1: Give the project a test runner that always exits, so the gate gets a verdict instead of a hang — spawn ng test headless, parse the Karma TOTAL line, kill the process tree, print the TEST-CI summary line — scripts/test-ci.mjs
@@ -189,3 +184,38 @@
 - [x] A5: Test both rules — scripts/test/reuse-lint.test.mjs
 - [x] A6: Document the rules and the date field's "inside only" rule — docs/agent/standards-reuse.md, docs/brain/component-families.md
 - [x] A7: Run every `[auto]` check plus `node scripts/reuse-lint.mjs --diff=origin/main` (expect no `family-styled-from-outside` line) and paste the outputs under Execution Notes
+
+### Plan 536 — Each recipe line keeps its own supplier, and an event can move an item to a cheaper supplier (`plans/536-recipe-line-supplier-choice-and-per-event-move.plan.md`)
+- [ ] A1: Store the line's supplier and the event's moves, owner-only — `ingredientSchema` gets
+- [ ] A2: Keep a business's supplier choice out of the shared catalog — in `pushDocToMasterRecursive` drop
+- [ ] A3: One price rule that honours a chosen supplier and finds the cheapest among any number — port 510's
+- [ ] A4: Recipe costs use the line's supplier — `computeIngredientCost` calls `getEffectivePrice(product,
+- [ ] A5: The event engine keeps lines per supplier and applies the event's moves — `priceOf` caches by
+- [ ] A6: The menu page's plan sees the saved moves without touching the growth-frozen page — `planFor(event)`: when
+- [ ] A7: A shared supplier picker that always fits on screen — port 510's `supplier-picker` (template, rows, staff
+- [ ] A8: The recipe builder line carries and saves its supplier — `createIngredientGroup` adds a `supplierId`
+- [ ] A8b: The unsaved-changes snapshot sees a supplier pick — `getRecipeSnapshotForComparison()` in
+- [ ] A9: Event supplier orders: hint, move and undo — port 510's `cheaperElsewhere` / `cardSavings` but compare with
+- [ ] A10: Run the full checks and paste the output into Execution Notes — `npx ng build`, `pnpm run test:ci`,
+
+### Plan 537 — Venue opening hours: tap-to-pick times, empty rows dropped, broken rows marked and blocking save (`plans/537-venue-opening-hours-time-pickers-and-row-checks.plan.md`)
+- [ ] A1: Add time helpers that turn typed digits into a clean 24-hour time — `formatTimeDigits(raw)` (digits only,
+- [ ] A2: Add the shared time field the chef can click or tap to pick a time — `TimeFieldComponent`
+- [ ] A3: Teach the venue-hours helpers to read, write and check an hours row — `parseTimeRange`, `formatTimeRange`,
+- [ ] A4: Put the time pickers and row checks into the venue form — in `venue-form.component.ts`: hours rows become
+- [ ] A5: Register the time field and add the Hebrew texts — form-field family bullet in
+- [ ] A6: Build and check — `pnpm run build`, `pnpm run test:ci`, `node scripts/reuse-lint.mjs --check-registry`,
+
+### Plan 538 — The "save or leave" question always shows in front of every popup, panel and menu (`plans/538-save-or-leave-dialog-always-in-front.plan.md`)
+- [ ] A1: One named stacking scale — append the `--z-*` `:root` block with the mapping comment — src/styles.scss
+- [ ] A2: The popup shell takes a token and can go to the top layer — `zIndex` type, `topLayer` input, popover attribute and `showPopover()` — src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html
+- [ ] A3: Prove the shell — the three spec cases — src/app/shared/modal-shell/modal-shell.component.spec.ts
+- [ ] A4: The question always in front — `[zIndex]` + `[topLayer]` on the confirm popup, and its spec case — src/app/shared/confirm-modal/confirm-modal.component.html, src/app/shared/confirm-modal/confirm-modal.component.spec.ts
+- [ ] A5: Name the two nested popup layers — src/app/shared/add-item-modal/add-item-modal.component.html, src/app/shared/translation-key-modal/translation-key-modal.component.html
+- [ ] A6: Registry line for the new shell inputs — docs/brain/component-families.md
+- [ ] A7: Run every `[auto]` check and paste the outputs under Execution Notes
+
+### Plan 539 — The toast fits a phone screen: 16 px side gaps, long text wraps, clear of the notch (`plans/539-toast-fits-narrow-screens.plan.md`)
+- [ ] A1: Make the toast fit any width — logical properties, tokens, wrap, safe-area top, phone full-width rule (read `.claude/skills/cssLayer/SKILL.md` first) — src/app/core/components/user-msg/user-msg.component.scss
+- [ ] A2: Prove a long word wraps inside the toast — the spec case — src/app/core/components/user-msg/user-msg.component.spec.ts
+- [ ] A3: Run every `[auto]` check plus the cssLayer verify greps on the edited file, paste the outputs under Execution Notes

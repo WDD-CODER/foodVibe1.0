@@ -1,6 +1,6 @@
 # Plan 510 — Let the chef pick a product's supplier and see when another is cheaper
 
-Status: draft
+Status: superseded
 Track: code
 Depends-on: 473
 Snapshot: 2d91fb2bb7830b12d590f56dcbefbd00359ae7b9
@@ -152,3 +152,6 @@ strip money fields (grep `MONEY_FIELDS` in `server/`). Record findings in Execut
 
 ## Critical Questions
 - Answered 2026-10-29 (Human): D1 product-level choice; D3 owner only; D4 information only; split from 473.
+
+## Closed 2026-11-08
+Superseded by plan 536. Built in run-374b (merge c3a5b44), failed the Human's cards (supplier choice must be per recipe line, popup off screen, automatic broken with 3+ suppliers, choice lost on sign-out) and reverted (ce00481d) before PR #525. Branch feat/510-let-the-chef-pick (f29d3472) kept as a reference for 536.
