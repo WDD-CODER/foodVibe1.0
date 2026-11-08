@@ -12,6 +12,7 @@
  *   --remote (Atlas; needs --yes or an interactive y)   --prune-logs (delete .claude/logs/*.log older than 14d)
  */
 import { createRequire } from 'module'
+import { execFileSync } from 'child_process'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { readFileSync, existsSync, readdirSync, statSync, unlinkSync } from 'fs'
@@ -20,129 +21,160 @@ import dns from 'dns'
 import dnsPromises from 'dns/promises'
 import { normalise, formatEntry, summarise, formatSummary, levelRank, parseSince } from './lib/log-format.mjs'
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
+const SELF = fileURLToPath(import.meta.url)
+const ROOT = resolve(dirname(SELF), '..')
 const LIMIT_DEFAULT = 50
 const LIMIT_MAX = 500
 const PRUNE_DAYS = 14
 
-const args = process.argv.slice(2)
-const flag = (name) => args.find((a) => a === `--${name}` || a.startsWith(`--${name}=`))
-const val = (name) => {
-  const a = flag(name)
-  return a && a.includes('=') ? a.slice(a.indexOf('=') + 1) : null
-}
-const has = (name) => Boolean(flag(name))
-const die = (msg) => {
-  console.error(`log-query: ${msg}`)
-  process.exit(1)
+const git = (root, ...a) => {
+  try { return execFileSync('git', a, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() } catch { return '' }
 }
 
-if (has('prune-logs')) {
-  const dir = join(ROOT, '.claude', 'logs')
-  const cutoff = Date.now() - PRUNE_DAYS * 86400e3
-  let n = 0
-  if (existsSync(dir)) {
-    for (const f of readdirSync(dir)) {
-      const p = join(dir, f)
-      if (f.endsWith('.log') && statSync(p).mtimeMs < cutoff) { unlinkSync(p); n++ }
+/** The plan start: the marker, else the merge-base time with origin/main, else the first branch commit, else 24h ago. */
+export function resolvePlanStart(root = ROOT) {
+  const p = join(root, '.claude', '.slot-plan-start')
+  if (existsSync(p)) return { value: readFileSync(p, 'utf8').trim(), source: 'marker' }
+  const base = git(root, 'merge-base', 'HEAD', 'origin/main')
+  if (base) {
+    const t = git(root, 'show', '-s', '--format=%cI', base)
+    if (t) return { value: t, source: 'merge-base' }
+  }
+  const first = git(root, 'log', 'origin/main..HEAD', '--reverse', '--format=%cI').split(/\r?\n/)[0]
+  if (first) return { value: first, source: 'first-commit' }
+  return { value: new Date(Date.now() - 86400e3).toISOString(), source: '24h' }
+}
+
+/** The Mongo URI for the chosen database, or '' when none is configured (call after the dotenv loads). */
+export function databaseUri({ remote = false } = {}) {
+  return (remote ? (process.env.MONGO_REMOTE_URI || process.env.MONGO_URI) : (process.env.MONGO_LOCAL_URI || process.env.MONGO_URI)) || ''
+}
+
+async function main() {
+  const args = process.argv.slice(2)
+  const flag = (name) => args.find((a) => a === `--${name}` || a.startsWith(`--${name}=`))
+  const val = (name) => {
+    const a = flag(name)
+    return a && a.includes('=') ? a.slice(a.indexOf('=') + 1) : null
+  }
+  const has = (name) => Boolean(flag(name))
+  const die = (msg) => {
+    console.error(`log-query: ${msg}`)
+    process.exit(1)
+  }
+
+  if (has('prune-logs')) {
+    const dir = join(ROOT, '.claude', 'logs')
+    const cutoff = Date.now() - PRUNE_DAYS * 86400e3
+    let n = 0
+    if (existsSync(dir)) {
+      for (const f of readdirSync(dir)) {
+        const p = join(dir, f)
+        if (f.endsWith('.log') && statSync(p).mtimeMs < cutoff) { unlinkSync(p); n++ }
+      }
+    }
+    console.log(`pruned ${n} log file(s) older than ${PRUNE_DAYS}d`)
+    process.exit(0)
+  }
+
+  // --- filters ------------------------------------------------------------------
+  let sinceRaw = val('since') ?? '1h'
+  if (sinceRaw === 'plan-start') {
+    const ps = resolvePlanStart(ROOT)
+    if (ps.source !== 'marker') console.log(`plan-start: no marker, using ${ps.value} (${ps.source})`)
+    sinceRaw = ps.value
+  }
+  const since = parseSince(sinceRaw)
+  if (!since) die(`bad --since "${sinceRaw}" (use 15m, 2h, 3d, an ISO date or plan-start)`)
+  const until = val('until') ? parseSince(val('until')) : null
+  if (val('until') && !until) die(`bad --until "${val('until')}"`)
+  const minLevel = val('level') ?? 'info'
+  if (!['info', 'warn', 'error'].includes(minLevel)) die(`bad --level "${minLevel}"`)
+  const limit = Math.min(Math.max(Number(val('limit') ?? LIMIT_DEFAULT) || LIMIT_DEFAULT, 1), LIMIT_MAX)
+  const event = val('event')
+  const userId = val('userId')
+  const requestId = val('requestId')
+  const source = val('source')
+  const full = has('full')
+
+  const matches = (e) =>
+    (!e.time || (e.time >= since && (!until || e.time <= until))) &&
+    levelRank(e.level) >= levelRank(minLevel) &&
+    (!event || (event.endsWith('.') ? e.event.startsWith(event) : e.event === event)) &&
+    (!userId || e.userId === userId) &&
+    (!requestId || e.requestId === requestId) &&
+    (!source || e.source === source)
+
+  // --- fetch --------------------------------------------------------------------
+  async function fromFile() {
+    const path = resolve(ROOT, val('file') ?? '.claude/be.log')
+    if (!existsSync(path)) die(`log file not found: ${path}`)
+    const out = []
+    for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
+      const e = normalise(line)
+      // raw (non-JSON) lines carry no time: keep them only when no level/event filter is asked for
+      if (e && matches(e) && !(e.source === 'raw' && (minLevel !== 'info' || event || userId || requestId || source))) out.push(e)
+    }
+    return out.reverse()
+  }
+
+  async function confirmRemote() {
+    if (has('yes')) return
+    if (!process.stdin.isTTY) die('--remote reads production logs: pass --yes to confirm')
+    const rl = createInterface({ input: process.stdin, output: process.stdout })
+    const answer = await new Promise((r) => rl.question('Read Atlas (production) logs? [y/N] ', r))
+    rl.close()
+    if (!/^y/i.test(answer)) die('aborted')
+  }
+
+  async function fromMongo() {
+    const remote = has('remote')
+    const require = createRequire(resolve(ROOT, 'server', 'package.json'))
+    const { MongoClient } = require('mongoose').mongo
+    const { config } = require('dotenv')
+    config({ path: resolve(ROOT, 'server', '.env') })
+    config({ path: resolve(ROOT, '.env') })
+    const uri = databaseUri({ remote })
+    if (!uri) {
+      console.log('SKIP: no database configured')
+      process.exit(0)
+    }
+    if (remote) {
+      await confirmRemote()
+      console.log('REMOTE (Atlas)')
+    }
+    if (uri.startsWith('mongodb+srv://')) {
+      const host = (uri.match(/@([^/?]+)/) || uri.match(/:\/\/([^/?]+)/))?.[1]
+      try { await dnsPromises.resolveSrv(`_mongodb._tcp.${host}`) } catch (err) {
+        if (err.code === 'ECONNREFUSED') dns.setServers(['8.8.8.8', '1.1.1.1'])
+      }
+    }
+    const client = new MongoClient(uri, { serverSelectionTimeoutMS: 5000 })
+    try {
+      await client.connect()
+      const q = { createdAt: { $gte: since, ...(until ? { $lte: until } : {}) } }
+      if (minLevel === 'warn') q.level = { $in: ['warn', 'error'] }
+      if (minLevel === 'error') q.level = 'error'
+      // events are lowercase dotted names, so '.' is the only regex metacharacter to neutralise
+      if (event) q.event = event.endsWith('.') ? { $regex: `^${event.replaceAll('.', '[.]')}` } : event
+      if (userId) q.userId = userId
+      if (requestId) q.requestId = requestId
+      if (source) q.source = source
+      // db name comes from the URI path; app_logs lives in the app DB
+      const docs = await client.db().collection('app_logs').find(q).sort({ createdAt: -1 }).limit(has('summary') ? LIMIT_MAX * 20 : limit).toArray()
+      return docs.map(normalise).filter(Boolean)
+    } catch (err) {
+      die(`mongo query failed: ${err.message}`)
+    } finally {
+      await client.close().catch(() => {})
     }
   }
-  console.log(`pruned ${n} log file(s) older than ${PRUNE_DAYS}d`)
-  process.exit(0)
+
+  const entries = has('file') ? await fromFile() : await fromMongo()
+
+  if (has('json')) console.log(JSON.stringify(entries.slice(0, limit), null, 0))
+  else if (has('summary')) console.log(formatSummary(summarise(entries)))
+  else console.log(entries.length ? entries.slice(0, limit).map((e) => formatEntry(e, { full })).join('\n') : 'no entries')
 }
 
-// --- filters ------------------------------------------------------------------
-let sinceRaw = val('since') ?? '1h'
-if (sinceRaw === 'plan-start') {
-  const p = join(ROOT, '.claude', '.slot-plan-start')
-  if (!existsSync(p)) die('--since=plan-start: .claude/.slot-plan-start not found (take a plan first)')
-  sinceRaw = readFileSync(p, 'utf8').trim()
-}
-const since = parseSince(sinceRaw)
-if (!since) die(`bad --since "${sinceRaw}" (use 15m, 2h, 3d, an ISO date or plan-start)`)
-const until = val('until') ? parseSince(val('until')) : null
-if (val('until') && !until) die(`bad --until "${val('until')}"`)
-const minLevel = val('level') ?? 'info'
-if (!['info', 'warn', 'error'].includes(minLevel)) die(`bad --level "${minLevel}"`)
-const limit = Math.min(Math.max(Number(val('limit') ?? LIMIT_DEFAULT) || LIMIT_DEFAULT, 1), LIMIT_MAX)
-const event = val('event')
-const userId = val('userId')
-const requestId = val('requestId')
-const source = val('source')
-const full = has('full')
-
-const matches = (e) =>
-  (!e.time || (e.time >= since && (!until || e.time <= until))) &&
-  levelRank(e.level) >= levelRank(minLevel) &&
-  (!event || (event.endsWith('.') ? e.event.startsWith(event) : e.event === event)) &&
-  (!userId || e.userId === userId) &&
-  (!requestId || e.requestId === requestId) &&
-  (!source || e.source === source)
-
-// --- fetch --------------------------------------------------------------------
-async function fromFile() {
-  const path = resolve(ROOT, val('file') ?? '.claude/be.log')
-  if (!existsSync(path)) die(`log file not found: ${path}`)
-  const out = []
-  for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
-    const e = normalise(line)
-    // raw (non-JSON) lines carry no time: keep them only when no level/event filter is asked for
-    if (e && matches(e) && !(e.source === 'raw' && (minLevel !== 'info' || event || userId || requestId || source))) out.push(e)
-  }
-  return out.reverse()
-}
-
-async function confirmRemote() {
-  if (has('yes')) return
-  if (!process.stdin.isTTY) die('--remote reads production logs: pass --yes to confirm')
-  const rl = createInterface({ input: process.stdin, output: process.stdout })
-  const answer = await new Promise((r) => rl.question('Read Atlas (production) logs? [y/N] ', r))
-  rl.close()
-  if (!/^y/i.test(answer)) die('aborted')
-}
-
-async function fromMongo() {
-  const remote = has('remote')
-  const require = createRequire(resolve(ROOT, 'server', 'package.json'))
-  const { MongoClient } = require('mongoose').mongo
-  const { config } = require('dotenv')
-  config({ path: resolve(ROOT, 'server', '.env') })
-  config({ path: resolve(ROOT, '.env') })
-  const uri = remote ? (process.env.MONGO_REMOTE_URI || process.env.MONGO_URI) : (process.env.MONGO_LOCAL_URI || process.env.MONGO_URI)
-  if (!uri) die(`no MongoDB URI in .env (checked ${remote ? 'MONGO_REMOTE_URI / MONGO_URI' : 'MONGO_LOCAL_URI / MONGO_URI'})`)
-  if (remote) {
-    await confirmRemote()
-    console.log('REMOTE (Atlas)')
-  }
-  if (uri.startsWith('mongodb+srv://')) {
-    const host = (uri.match(/@([^/?]+)/) || uri.match(/:\/\/([^/?]+)/))?.[1]
-    try { await dnsPromises.resolveSrv(`_mongodb._tcp.${host}`) } catch (err) {
-      if (err.code === 'ECONNREFUSED') dns.setServers(['8.8.8.8', '1.1.1.1'])
-    }
-  }
-  const client = new MongoClient(uri, { serverSelectionTimeoutMS: 5000 })
-  try {
-    await client.connect()
-    const q = { createdAt: { $gte: since, ...(until ? { $lte: until } : {}) } }
-    if (minLevel === 'warn') q.level = { $in: ['warn', 'error'] }
-    if (minLevel === 'error') q.level = 'error'
-    // events are lowercase dotted names, so '.' is the only regex metacharacter to neutralise
-    if (event) q.event = event.endsWith('.') ? { $regex: `^${event.replaceAll('.', '[.]')}` } : event
-    if (userId) q.userId = userId
-    if (requestId) q.requestId = requestId
-    if (source) q.source = source
-    // db name comes from the URI path; app_logs lives in the app DB
-    const docs = await client.db().collection('app_logs').find(q).sort({ createdAt: -1 }).limit(has('summary') ? LIMIT_MAX * 20 : limit).toArray()
-    return docs.map(normalise).filter(Boolean)
-  } catch (err) {
-    die(`mongo query failed: ${err.message}`)
-  } finally {
-    await client.close().catch(() => {})
-  }
-}
-
-const entries = has('file') ? await fromFile() : await fromMongo()
-
-if (has('json')) console.log(JSON.stringify(entries.slice(0, limit), null, 0))
-else if (has('summary')) console.log(formatSummary(summarise(entries)))
-else console.log(entries.length ? entries.slice(0, limit).map((e) => formatEntry(e, { full })).join('\n') : 'no entries')
+if (process.argv[1] && resolve(process.argv[1]) === SELF) await main()

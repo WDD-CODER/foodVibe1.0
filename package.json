@@ -13,6 +13,7 @@
     "todo": "node scripts/todo-query.mjs",
     "test": "ng test",
     "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
+    "test:server": "pnpm run build:schemas && pnpm --dir server run test",
     "test:scripts": "node --test scripts/test/*.test.mjs",
     "test:migration-0009": "pnpm --dir server run test:migration-0009",
     "e2e": "playwright test",
