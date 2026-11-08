@@ -58,6 +58,7 @@ src/app/pages/platform-dashboard/platform-dashboard.page.ts
 src/app/pages/breadcrumbs.md
 public/assets/data/dictionary.json
 docs/brain/component-families.md
+src/app/pages/platform-dashboard/components/platform-logistics-items/platform-logistics-items.component.spec.ts
 ```
 
 ## Read Scope
@@ -154,3 +155,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 6, item B3). One plan instead of two: promote needs no new server write (the existing shared-term POST does it), so the server part is one read route.
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

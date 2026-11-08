@@ -46,6 +46,8 @@ e2e/ui/535-1.spec.ts
 screens/535-1.png
 docs/brain/component-families.md
 .claude/commands/design-port.md
+src/app/pages/dev-catalog/dev-catalog.routes.spec.ts
+src/app/pages/dev-catalog/dev-catalog.page.spec.ts
 ```
 
 ## Read Scope
@@ -147,3 +149,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 8(b), item D2, decision H4).
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

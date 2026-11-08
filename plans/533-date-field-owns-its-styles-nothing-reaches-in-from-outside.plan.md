@@ -63,6 +63,7 @@ scripts/lib/registry-families.mjs
 scripts/test/reuse-lint.test.mjs
 docs/agent/standards-reuse.md
 docs/brain/component-families.md
+src/app/shared/date-field/date-field.component.spec.ts
 ```
 
 ## Read Scope
@@ -158,5 +159,5 @@ line or file this plan names was removed, renamed or rewritten).
 - Planner 2026-11-07 (brief 7, item D1). Brief 8's lint rule (item 4) is built here, generically for every shared selector; plan 534 reuses it.
 - Builder: grep of `meta-date-wrap|meta-date-display|meta-date-input|meta-date` in src/app html/ts found no use of the deleted selectors (only `meta-date-chip`, a different class, kept).
 - `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:ci` → 0 (1708 SUCCESS); `node --test scripts/test/reuse-lint.test.mjs` → pass 20, fail 0; `reuse-lint --check-registry` → 0; `--diff=origin/main` → no `family-styled-from-outside` line; scope-check --arch ok, --reuse ok; log-query: no entries.
-
 - Round 2: reverted date-field.component.spec.ts (a test file no scope line names; scope-check scope-1). A2 left undone; needs the spec path added to the scope by the Human.
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

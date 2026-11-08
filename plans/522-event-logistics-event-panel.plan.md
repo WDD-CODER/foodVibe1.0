@@ -51,6 +51,7 @@ public/assets/data/dictionary.json
 docs/brain/component-families.md
 e2e/ui/522-*.spec.ts
 screens/522-*.png
+src/app/pages/menu-intelligence/components/event-logistics-panel/event-logistics-panel.component.spec.ts
 ```
 
 ## Read Scope
@@ -162,3 +163,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner review 2026-11-07: Human 2026-11-07: Q1 = b (recording fix). The card starts collapsed; header toggle with the open count; P0, Reuse Check, B1/B2/B7/B8, "What happens when", `[ui]` card 1 and a new `[human]` header check updated. Mechanical fixes: `maxlength` 519 → 500 (plan-number typo, matches plan 518's `LOGISTICS_TEXT_MAX`); the `TEST-CI:` line and `node scripts/e2e-one.mjs` were dropped when plan 517 was re-scoped (plan 503 already made `test:ci` exit; the v2.1.0 gate does not rerun card tests), so the check is `npm run test:ci` exits 0 and cards run with `pnpm exec playwright test <spec>`.
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

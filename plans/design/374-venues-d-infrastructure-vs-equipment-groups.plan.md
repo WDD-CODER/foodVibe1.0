@@ -34,6 +34,9 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 src/app/pages/venues/components/venue-form/**
 src/app/pages/venues/components/venue-detail/**
 src/app/pages/equipment/components/equipment-form/**
+src/app/pages/venues/components/venue-form/*.spec.ts
+src/app/pages/venues/components/venue-detail/*.spec.ts
+src/app/pages/equipment/components/equipment-form/*.spec.ts
 ```
 
 ## Read Scope
@@ -114,3 +117,5 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 
 ## Execution Notes
 - Planner review 2026-11-07: added the `Depends-on:` header the v2.1.0 readiness lint requires, matching the 2026-11-05 order in `.claude/todo.md` (374 → 372; 373 parked).
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
+- the operating-hours section of the venue form must stay; reviewer STOP 2026-11-08
