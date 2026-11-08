@@ -1,6 +1,6 @@
 # Plan 537 — Venue opening hours: tap-to-pick times, empty rows dropped, broken rows marked and blocking save
 
-Status: draft
+Status: done
 Depends-on: 374
 Track: code — no Claude Design step; the time field copies the look of `app-date-field`
 Snapshot: 1e6f0f9ca6c8c910809b2653a39d43c45e7ae544
