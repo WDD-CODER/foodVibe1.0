@@ -63,6 +63,7 @@ scripts/lib/registry-families.mjs
 scripts/test/reuse-lint.test.mjs
 docs/agent/standards-reuse.md
 docs/brain/component-families.md
+src/app/shared/date-field/date-field.component.spec.ts
 ```
 
 ## Read Scope
@@ -156,3 +157,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 7, item D1). Brief 8's lint rule (item 4) is built here, generically for every shared selector; plan 534 reuses it.
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

@@ -72,6 +72,9 @@ src/app/pages/recipe-builder/components/recipe-ingredients-table/**
 src/app/pages/menu-intelligence/components/supplier-orders/**
 src/app/pages/inventory/components/product-form/supplier-prices/**
 server/test/permissions.test.js
+src/app/pages/recipe-builder/components/recipe-ingredients-table/**/*.spec.ts
+src/app/pages/menu-intelligence/components/supplier-orders/**/*.spec.ts
+src/app/pages/inventory/components/product-form/supplier-prices/**/*.spec.ts
 ```
 
 ## Read Scope
@@ -146,3 +149,4 @@ strip money fields (grep `MONEY_FIELDS` in `server/`). Record findings in Execut
 
 ## Critical Questions
 - Answered 2026-10-29 (Human): D1 product-level choice; D3 owner only; D4 information only; split from 473.
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

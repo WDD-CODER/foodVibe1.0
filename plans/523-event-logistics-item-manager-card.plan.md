@@ -45,6 +45,7 @@ public/assets/data/dictionary.json
 docs/brain/component-families.md
 e2e/ui/523-*.spec.ts
 screens/523-*.png
+src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts
 ```
 
 ## Read Scope
@@ -139,3 +140,4 @@ line or file this plan names was removed, renamed or rewritten).
 ## Execution Notes
 - Planner review (2026-11-05): added `metadata-manager.page.component.spec.ts` to scope — it hard-codes 13 jump tabs (lines ~381-412) and the new rail entry breaks it. Added 519 to Depends-on for ordering. Runs after 522 (both append to `dictionary.json`).
 - Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.
+- Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).
