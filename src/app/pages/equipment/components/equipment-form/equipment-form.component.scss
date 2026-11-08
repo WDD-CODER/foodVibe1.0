@@ -30,6 +30,13 @@
     gap: 1.5rem;
   }
 
+  .category-hint {
+    margin: 0.25rem 0 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
   .form-section {
     display: flex;
     flex-direction: column;
