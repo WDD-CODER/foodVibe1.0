@@ -40,10 +40,17 @@ Every plan lists each new piece it creates, the family it searched, and the rung
 `node scripts/reuse-lint.mjs --diff=<base>` (or `npm run lint:reuse -- --diff=<base>`) prints
 `REUSE: warn <rule> <family> <file>:<line> — <hint>` for added lines that look like a new copy:
 
-- `<app-scrollable-dropdown>` / `<app-add-option-row>` inside `src/app/pages/**` (search combobox — use `app-search-combobox`, or `app-custom-select` for a fixed list);
-- a `.c-*` selector defined outside `src/styles.scss`;
-- `core/utils|pipes|services` imported through `../` (use `@utils/*`, `@pipes/*`, `@services/*`);
-- `onClearSearch` / `onSearchEscape` / `clearAllFilters` added to a page (list logic).
+- `page-local-combobox`: `<app-scrollable-dropdown>` / `<app-add-option-row>` inside `src/app/pages/**` (use `app-search-combobox`, or `app-custom-select` for a fixed list);
+- `engine-class-outside-styles`: a `.c-*` selector defined outside `src/styles.scss`;
+- `relative-core-import`: `core/utils|pipes|services` imported through `../` (use `@utils/*`, `@pipes/*`, `@services/*`);
+- `hand-drawn-modal-overlay`: a `c-modal-overlay` class drawn by hand in a template (use `app-modal-shell`);
+- `family-styled-from-outside`: a page SCSS rule that names a shared `app-*` component or `::ng-deep`s into it (style it through its own inputs or variants);
+- `page-list-logic`: `onClearSearch` / `onSearchEscape` / `clearAllFilters` added to a page (list logic);
+- `native-browser-dialog`: a browser `confirm` / `alert` / `prompt` (use `ConfirmModalService`);
+- `number-input-outside-number-box`: a number input without `appNumberBox`;
+- `minus-plus-outside-stepper`: a hand-built minus / plus click handler without `appStepHold` (or `app-counter`);
+- `native-date-input`: a native date input (use `app-date-field`);
+- `template-to-fixed`: `toFixed` in a template (use `core/engine/rounding.ts` or the `formatQuantity` pipe);
 
 It never blocks (exit 0). A warning is either fixed or explained in the plan's run notes. Rules are data in
 `scripts/lib/registry-families.mjs`: a plan that converges a family adds its rule there.

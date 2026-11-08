@@ -142,6 +142,25 @@ describe('DateFieldComponent', () => {
     expect(host.commits_).toEqual(['2026-12-25', '', '2026-03-04'])
   })
 
+  it('keeps the hidden picker at 1px inside an input stack', () => {
+    const style = document.createElement('style')
+    style.textContent =
+      '.c-input-stack input { inline-size: 100%; min-block-size: 2.75rem; padding: 0.5rem; border: 1px solid red; }'
+    document.head.appendChild(style)
+    const wrap = document.createElement('div')
+    wrap.className = 'c-input-stack'
+    wrap.appendChild(el)
+    document.body.appendChild(wrap)
+    try {
+      const cs = getComputedStyle(picker())
+      expect(cs.inlineSize).toBe('1px')
+      expect(cs.blockSize).toBe('1px')
+    } finally {
+      wrap.remove()
+      style.remove()
+    }
+  })
+
   it('disables the text and the native picker', () => {
     host.disabled_.set(true)
     fixture.detectChanges()
