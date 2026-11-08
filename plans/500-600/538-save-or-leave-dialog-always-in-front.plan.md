@@ -1,6 +1,6 @@
 # Plan 538 — The "save or leave" question always shows in front of every popup, panel and menu
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 1e6f0f9ca6c8c910809b2653a39d43c45e7ae544
 

@@ -1,6 +1,6 @@
 # Plan 536 — Each recipe line keeps its own supplier, and an event can move an item to a cheaper supplier
 
-Status: draft
+Status: done
 Track: code
 Depends-on: none
 Snapshot: 1e6f0f9ca6c8c910809b2653a39d43c45e7ae544

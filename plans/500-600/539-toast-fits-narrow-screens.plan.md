@@ -1,6 +1,6 @@
 # Plan 539 — The toast fits a phone screen: 16 px side gaps, long text wraps, clear of the notch
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 1e6f0f9ca6c8c910809b2653a39d43c45e7ae544
 
