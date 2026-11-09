@@ -9,7 +9,7 @@
   "packageManager": "pnpm@10.34.6",
   "scripts": {
     "start": "node index.js",
-    "dev": "cross-env NODE_ENV=production node --watch index.js",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
     "dev:local": "cross-env NODE_ENV=development node --watch index.js",
     "dev:remote": "cross-env NODE_ENV=production node --watch index.js",
     "pretest": "pnpm --dir .. run build:schemas",

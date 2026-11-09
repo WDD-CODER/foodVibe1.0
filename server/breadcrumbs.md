@@ -4,7 +4,7 @@
 | File/Dir | Purpose |
 |----------|---------|
 | `index.js` | Express app entry — middleware, route mounting, static file serving, error handler |
-| `db.js` | MongoDB connection via Mongoose (`MONGO_LOCAL_URI` dev / `MONGO_REMOTE_URI` prod) |
+| `db.js` | MongoDB connection via Mongoose; target chosen by `utils/db-target.js` (local by default; Atlas only via git-ignored `server/.env.live` or Render's env) |
 | `models/entity.model.js` | Generic entity schema: `_id` (string), `entityType`, `data` (Mixed) |
 | `routes/generic.js` | Full CRUD at `/api/v1/data/:type` — mirrors Angular's `StorageService` |
 | `routes/business.js` | The caller's business at `/api/v1/business` (plan 425; owner-only sub-routes arrive with plans 427-431) |
