@@ -80,7 +80,7 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI. The `key` is the Hebrew question text shown as is (no dictionary entry per item, same as user-added terms).
 
 ## Atomic Sub-tasks
-- [ ] A1: Write the shared question list a caterer needs before a final quote — the 45 rows below, in this order — server/services/logistics-seed-items.js
+- [x] A1: Write the shared question list a caterer needs before a final quote — the 45 rows below, in this order — server/services/logistics-seed-items.js
   Format: `key · phase · section · answerType · environments` (`*` = omit the field; codes: `kit`=professional_kitchen, `out`=outdoor_field, `home`=client_home, `pop`=popup_venue)
   ```
   intake (13):
@@ -131,8 +131,8 @@ line or file this plan names was removed, renamed or rewritten).
   שירותים לצוות · site_visit · other · status · *
   אישורי כניסה לספקים / ביטחון · site_visit · other · status · pop
   ```
-- [ ] A2: Seed the list on boot, once, next to the default stations — `ensureDefaultLogisticsItems` mirroring `ensureDefaultStations`, wired into `seedMasterData` and exported; test block `describe('ensureDefaultLogisticsItems')`: on a DB with master terms but no logistics item → inserts 45, every inserted doc passes `taxonomyTermSchema` (import from `../generated/schemas/entities`), 13 have `phase: 'intake'`, `גנרטור נדרש?` has `environments: ['outdoor_field', 'popup_venue']`; second call → 0 and the count stays 45 — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
-- [ ] A3: Run lint and test:server and paste the outputs under Execution Notes
+- [x] A2: Seed the list on boot, once, next to the default stations — `ensureDefaultLogisticsItems` mirroring `ensureDefaultStations`, wired into `seedMasterData` and exported; test block `describe('ensureDefaultLogisticsItems')`: on a DB with master terms but no logistics item → inserts 45, every inserted doc passes `taxonomyTermSchema` (import from `../generated/schemas/entities`), 13 have `phase: 'intake'`, `גנרטור נדרש?` has `environments: ['outdoor_field', 'popup_venue']`; second call → 0 and the count stays 45 — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [x] A3: Run lint and test:server and paste the outputs under Execution Notes
 
 ## What happens when
 - A business already created its own item with the same Hebrew key before the seed ran: both exist (different `businessId`); the uniqueness index is `{ kind, key, userId }`, so the insert succeeds. No fold (unlike plan 440's coefficients) — the business's item is its own.
@@ -156,3 +156,6 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.
+- npm run lint -> exit 0 (0 errors, 67 warnings, none in changed files)
+- npm run test:server -> exit 0, Test Files 72 passed, Tests 859 passed (incl. ensureDefaultLogisticsItems block)
+- decision: test validates with `parseV2('taxonomyTerms', t)` (the file's existing helper) instead of importing taxonomyTermSchema from generated/schemas.
