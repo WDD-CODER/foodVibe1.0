@@ -28,7 +28,7 @@ Verified at 5895243:
 businesses added each, and one tap makes a question part of the shared checklist for everyone.
 
 - [auto] `pnpm run test:server` exits 0, including `server/test/admin-taxonomy.test.js` (A2).
-- [auto] `pnpm run test:ci` exits 0, including `platform-logistics-items.component.spec.ts` (A6).
+- [auto] `pnpm run test:ci` exits 0, including `src/app/pages/platform-dashboard/components/platform-logistics-items/platform-logistics-items.component.spec.ts` (A6).
 - [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0; `pnpm run lint:icons` exits 0.
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` exits 0 with no entries (or `SKIP: no database configured`).

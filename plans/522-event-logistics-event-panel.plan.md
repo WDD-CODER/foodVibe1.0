@@ -16,7 +16,7 @@ many items are still open; one tap opens it to two tabs (שיחה ראשונה /
 the event's environment, autosave per answer, an open-item counter, "סיימתי את השלב" and "העתק סיכום ללקוח"; staff
 see it read-only.
 - [auto] `npm run build` exits 0; `npm run lint` exits 0; `npm run lint:icons` exits 0; `npm run lint:no-native-select` exits 0.
-- [auto] `npm run test:ci` exits 0, including `event-logistics-panel.component.spec.ts` (B7).
+- [auto] `npm run test:ci` exits 0, including `src/app/pages/menu-intelligence/components/event-logistics-panel/event-logistics-panel.component.spec.ts` (B7).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/522-event-logistics-event-panel.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/522-event-logistics-event-panel.plan.md` exits 0; `node scripts/reuse-lint.mjs --diff=origin/main` prints no `REUSE: warn` line for `event-logistics-panel`.
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).

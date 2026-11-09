@@ -15,7 +15,7 @@ business; the later admin plan reads them across businesses and promotes the goo
 section, adds an own item with its four attributes, removes an own item, and marks shared items as locked (a platform
 admin may add a shared one).
 - [auto] `npm run build` exits 0; `npm run lint` exits 0; `npm run lint:icons` exits 0; `npm run lint:no-native-select` exits 0.
-- [auto] `npm run test:ci` exits 0, including `logistics-item-manager.component.spec.ts` (C5).
+- [auto] `npm run test:ci` exits 0, including `src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts` (C5).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/523-event-logistics-item-manager-card.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/523-event-logistics-item-manager-card.plan.md` exits 0; `node scripts/reuse-lint.mjs --diff=origin/main` prints no `REUSE: warn` line for `logistics-item-manager`.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 - [ui] On `/metadata-manager` the card "שאלות לוגיסטיקה" shows the shared question "יש מטבח במקום?" with a lock icon (e2e/ui/523-1.spec.ts).
@@ -135,7 +135,7 @@ line or file this plan names was removed, renamed or rewritten).
 - Renaming or reordering items; editing a shared item (admin edits stay in the later admin plan); the cross-business admin view and "promote to shared"; the event panel (522).
 
 ## Critical Questions
-- Q1: May staff add own items? (a) yes — **chosen** (Human Q2 a, 2026-10-27; the kind is not locked) (b) owner only.
+- Q1: May staff add own items? A: (a) yes — chosen by the Human (Q2 a, 2026-10-27; the kind is not locked). Not chosen: (b) owner only.
 
 ## Execution Notes
 - Planner review (2026-11-05): added `metadata-manager.page.component.spec.ts` to scope — it hard-codes 13 jump tabs (lines ~381-412) and the new rail entry breaks it. Added 519 to Depends-on for ordering. Runs after 522 (both append to `dictionary.json`).
