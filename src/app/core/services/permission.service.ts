@@ -14,6 +14,7 @@ export type PermissionAction =
   | 'manageTeam'
   | 'editSettings'
   | 'editTaxonomy'
+  | 'editLogistics'
 
 export interface PermissionContext {
   /** Entity type (collection name), e.g. `recipes`, `products`, `menuEvents`. */
@@ -22,7 +23,13 @@ export interface PermissionContext {
   doc?: object
 }
 
-const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = ['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy']
+const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = [
+  'editMoney',
+  'manageTeam',
+  'editSettings',
+  'editTaxonomy',
+  'editLogistics'
+]
 
 /**
  * Client mirror of the server permission checker (plan 427). It only decides what the UI shows or locks

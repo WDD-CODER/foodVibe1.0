@@ -17,7 +17,8 @@ const ACTIONS: PermissionAction[] = [
   'markArrival',
   'manageTeam',
   'editSettings',
-  'editTaxonomy'
+  'editTaxonomy',
+  'editLogistics'
 ]
 
 describe('PermissionService.can', () => {
@@ -69,6 +70,10 @@ describe('PermissionService.can', () => {
       for (const kind of ['eventType', 'menuType', 'station']) {
         expect(service.can('editTaxonomy', { type: 'taxonomyTerms', doc: { kind } })).toBeFalse()
       }
+    })
+
+    it('never edits logistics answers; the owner does', () => {
+      expect(service.can('editLogistics', { type: 'menuEvents', doc: { createdBy: 's1' } })).toBeFalse()
     })
 
     it('changes the stage only of his own events, but notes and arrivals on any event', () => {
