@@ -34,11 +34,11 @@ beforeEach(async () => {
   const db = testDb()
   for (const c of ['users', 'businesses', 'usageDays', 'menuEvents']) await db.collection(c).deleteMany({})
   await db.collection('users').insertMany([
-    { _id: 'boss', name: 'boss', role: 'admin', isPlatformAdmin: true, businessId: 'bBoss', businessRole: 'owner' },
-    { _id: 'ownerA', name: 'Owner A', businessId: 'bA', businessRole: 'owner' },
-    { _id: 'staffA1', name: 's1', businessId: 'bA', businessRole: 'staff' },
-    { _id: 'staffA2', name: 's2', businessId: 'bA', businessRole: 'staff', removedAt: 5 },
-    { _id: 'ownerB', name: 'Owner B', businessId: 'bB', businessRole: 'owner' },
+    { _id: 'boss', email: 'boss@test.invalid', name: 'boss', role: 'admin', isPlatformAdmin: true, businessId: 'bBoss', businessRole: 'owner' },
+    { _id: 'ownerA', email: 'ownera@test.invalid', name: 'Owner A', businessId: 'bA', businessRole: 'owner' },
+    { _id: 'staffA1', email: 'staffa1@test.invalid', name: 's1', businessId: 'bA', businessRole: 'staff' },
+    { _id: 'staffA2', email: 'staffa2@test.invalid', name: 's2', businessId: 'bA', businessRole: 'staff', removedAt: 5 },
+    { _id: 'ownerB', email: 'ownerb@test.invalid', name: 'Owner B', businessId: 'bB', businessRole: 'owner' },
   ])
   await db.collection('businesses').insertMany([
     { _id: 'bBoss', name: 'Boss biz', ownerId: 'boss', createdAt: 1, internal: false },
