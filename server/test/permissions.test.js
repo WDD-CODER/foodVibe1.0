@@ -6,12 +6,12 @@ const { can, stripMoneyFields, moneyFieldsChanged, valuesAt } = require('../util
 const OWNER = { userId: 'o1', businessId: 'b1', businessRole: 'owner' }
 const STAFF = { userId: 's1', businessId: 'b1', businessRole: 'staff' }
 const ADMIN = { userId: 'a1', businessId: 'b0', businessRole: 'owner', isPlatformAdmin: true }
-const ACTIONS = ['create', 'edit', 'delete', 'editMoney', 'changeStage', 'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy']
+const ACTIONS = ['create', 'edit', 'delete', 'editMoney', 'changeStage', 'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics']
 const own = { businessId: 'b1', createdBy: 'o1' }
 const mine = { businessId: 'b1', createdBy: 's1' }
 
 describe('can', () => {
-  it('owner may do all 10 actions on a doc of his business', () => {
+  it('owner may do all 11 actions on a doc of his business', () => {
     for (const a of ACTIONS) expect(can(OWNER, a, { type: 'menuEvents', doc: own })).toEqual({ ok: true })
   })
   it('any role on another business doc is OTHER_BUSINESS', () => {
@@ -31,7 +31,7 @@ describe('can', () => {
     }
   })
   it('staff never get owner-only actions', () => {
-    for (const a of ['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy']) {
+    for (const a of ['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics']) {
       expect(can(STAFF, a, { doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY' })
     }
   })
@@ -55,6 +55,16 @@ describe('can', () => {
       expect(can(OWNER, a, {})).toEqual({ ok: true })
       expect(can(STAFF, a, {})).toEqual({ ok: false, reason: 'OWNER_ONLY' })
     }
+  })
+})
+
+describe('plan 519: editLogistics', () => {
+  const ctx = { type: 'menuEvents', doc: own }
+  it('owner ok, staff denied, other business denied, platform admin ok on a master doc', () => {
+    expect(can(OWNER, 'editLogistics', ctx)).toEqual({ ok: true })
+    expect(can(STAFF, 'editLogistics', ctx)).toEqual({ ok: false, reason: 'OWNER_ONLY' })
+    expect(can(OWNER, 'editLogistics', { type: 'menuEvents', doc: { businessId: 'b2' } })).toEqual({ ok: false, reason: 'OTHER_BUSINESS' })
+    expect(can(ADMIN, 'editLogistics', { type: 'menuEvents', doc: { businessId: '__master__' } })).toEqual({ ok: true })
   })
 })
 
