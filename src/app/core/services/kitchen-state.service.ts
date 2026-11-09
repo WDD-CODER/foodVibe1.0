@@ -1,4 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
+import { refusalShownToUser } from '@utils/server-refusal.util'
 import { normalizeProductName } from 'src/app/core/utils/product-name.util'
 import { Product } from '../models/product.model'
 import { Recipe } from '../models/recipe.model'
@@ -98,9 +100,14 @@ export class KitchenStateService {
       } catch (err) {
         this.logging.error({ event: 'crud.products.update_error', message: 'Product update error', context: { err } })
         // Plan 485: the server names a name clash; show it instead of the generic error.
-        this.userMsgService.onSetErrorMsg(
-          this.translation.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_update_error')
-        )
+        // Plan 540: a data-API refusal was already toasted by the interceptor.
+        if (!refusalShownToUser(err)) {
+          this.userMsgService.onSetErrorMsg(
+            this.translation.translate(
+              isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_update_error'
+            )
+          )
+        }
         throw err
       }
     }
@@ -119,9 +126,11 @@ export class KitchenStateService {
       return saved
     } catch (err) {
       this.logging.error({ event: 'crud.products.add_error', message: 'Product add error', context: { err } })
-      this.userMsgService.onSetErrorMsg(
-        this.translation.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_add_error')
-      )
+      if (!refusalShownToUser(err)) {
+        this.userMsgService.onSetErrorMsg(
+          this.translation.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_add_error')
+        )
+      }
       throw err
     }
   }
@@ -357,6 +366,11 @@ export class KitchenStateService {
       return saved
     } catch (err: unknown) {
       this.logging.error({ event: 'crud.recipes.save_error', message: 'Recipe/dish save error', context: { err } })
+      // Plan 540: the interceptor already toasted a data-API refusal; an HTTP error never shows its English text.
+      if (err instanceof HttpErrorResponse) {
+        if (!refusalShownToUser(err)) this.userMsgService.onSetErrorMsg(this.translation.translate(fallbackErrorKey))
+        throw err
+      }
       const msg =
         (err && typeof err === 'object' && (err as { error?: { message?: string } }).error?.message) ||
         (err instanceof Error ? err.message : null) ||

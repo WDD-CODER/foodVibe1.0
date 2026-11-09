@@ -30,6 +30,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
+import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TimeFieldComponent } from 'src/app/shared/time-field/time-field.component'
 import {
@@ -328,7 +329,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected nameError(): string | null {
     const ctrl = this.venueForm_.get('nameHebrew')
     if (ctrl?.errors?.['duplicateName'] && ctrl.touched) return 'duplicate_venue_name'
-    return this.validationErrors_()['nameHebrew'] ? 'field_name_required' : null
+    return this.validationErrors_()['nameHebrew'] || null
   }
 
   private validateForm_(): boolean {
@@ -362,7 +363,10 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     if (this.venueForm_.invalid) return false
     try {
       await this.saving.withSaving(() => this.saveVenue_())
-    } catch {
+    } catch (err) {
+      // Plan 540: mark the refused name; the interceptor toasted a server refusal, any other failure gets one here.
+      this.validationErrors_.update((cur) => ({ ...cur, ...serverFieldErrors(err, { nameHebrew: 'nameHebrew' }) }))
+      if (!refusalShownToUser(err)) this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
       return false
     }
     this.isSubmitted = true

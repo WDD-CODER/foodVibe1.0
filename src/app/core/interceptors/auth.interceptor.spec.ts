@@ -169,4 +169,28 @@ describe('authInterceptor — 403 no_permission (plan 428)', () => {
     expect(errorMsg).not.toHaveBeenCalled()
     expect(error).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'http.error' }))
   })
+
+  it('plan 540: a refused write gets one toast and one save.refused log with the paths, no http.error', () => {
+    http.put('/api/v1/data/products/x', {}).subscribe({ error: () => undefined })
+    backend
+      .expectOne('/api/v1/data/products/x')
+      .flush(
+        { error: 'Validation failed', issues: [{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }] },
+        { status: 400, statusText: 'Bad Request' }
+      )
+    expect(errorMsg).toHaveBeenCalledTimes(1)
+    expect(error).toHaveBeenCalledTimes(1)
+    const arg = error.calls.mostRecent().args[0]
+    expect(arg.event).toBe('save.refused')
+    expect(arg.context.issues).toEqual([{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }])
+  })
+
+  it('plan 540: a GET 400 shows no toast', () => {
+    http.get('/api/v1/data/products?x=1').subscribe({ error: () => undefined })
+    backend
+      .expectOne('/api/v1/data/products?x=1')
+      .flush({ error: 'Bad filter' }, { status: 400, statusText: 'Bad Request' })
+    expect(errorMsg).not.toHaveBeenCalled()
+    expect(error).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'http.error' }))
+  })
 })

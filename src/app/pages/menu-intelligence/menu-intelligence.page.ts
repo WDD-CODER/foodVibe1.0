@@ -70,6 +70,7 @@ import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-lin
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { refusalShownToUser } from 'src/app/core/utils/server-refusal.util'
 
 type MenuItemForm = {
   recipeId: string
@@ -428,8 +429,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       await this.persist_()
       this.isSubmitted = true
       return true
-    } catch {
-      this.userMsg.onSetErrorMsg(this.translation.translate('error_saving_menu'))
+    } catch (err) {
+      if (!refusalShownToUser(err)) this.userMsg.onSetErrorMsg(this.translation.translate('error_saving_menu'))
       return false
     }
   }
@@ -750,7 +751,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       return
     }
     await this.saving.withSaving(async () => {
-      await this.persist_()
+      try {
+        await this.persist_()
+      } catch (err) {
+        // Plan 540: a failed save never goes silent; the interceptor already toasted a server refusal.
+        if (!refusalShownToUser(err)) this.userMsg.onSetErrorMsg(this.translation.translate('error_saving_menu'))
+        return
+      }
       this.userMsg.onSetSuccessMsg(this.translation.translate('menu_saved'))
       this.router.navigate(['/menu-library'])
     })

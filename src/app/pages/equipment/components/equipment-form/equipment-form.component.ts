@@ -23,6 +23,7 @@ import { FormFieldComponent } from 'src/app/shared/form-field/form-field.compone
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
+import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
@@ -183,6 +184,12 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
         saved = true
       } catch (err) {
         this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
+        // Plan 540: the interceptor already toasted a server refusal; mark the refused field here.
+        this.validationErrors_.update((cur) => ({
+          ...cur,
+          ...serverFieldErrors(err, { nameHebrew: 'nameHebrew', category: 'category' })
+        }))
+        if (refusalShownToUser(err)) return
         const msg =
           err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
             ? this.translation.translate('duplicate_equipment_name')

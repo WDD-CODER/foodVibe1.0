@@ -6,6 +6,7 @@ import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import { AddItemModalService } from './add-item-modal.service'
+import { refusalShownToUser } from '@utils/server-refusal.util'
 
 @Injectable({ providedIn: 'root' })
 export class AddSupplierFlowService {
@@ -45,7 +46,9 @@ export class AddSupplierFlowService {
       return saved
     } catch (err) {
       this.logging.error({ event: 'crud.suppliers.add_error', message: 'Supplier add error', context: { err } })
-      this.userMsgService.onSetErrorMsg(this.translationService.translate('supplier_add_error'))
+      if (!refusalShownToUser(err)) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('supplier_add_error'))
+      }
       return null
     }
   }
