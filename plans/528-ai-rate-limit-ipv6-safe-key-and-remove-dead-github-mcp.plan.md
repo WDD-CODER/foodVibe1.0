@@ -100,11 +100,11 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change. No dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Give limiters behind `verifyToken` an IPv6-safe user key — add and export `userOrIpKey`; switch `aiLimiter` to it and update its comment — server/middleware/rate-limit.js, server/routes/ai.js
-- [ ] A2: Prove the key and the warning — vitest: `userOrIpKey({ user: { userId: 'u1' }, ip: '1.2.3.4' })` → `'user:u1'`; `userOrIpKey({ ip: '2001:db8::1' })` equals `ipKeyGenerator('2001:db8::1')` (a /56 subnet key, not the raw address); and an express app built with `createRateLimiter({ windowMs: 60000, max: 5, keyGenerator: userOrIpKey })` on one route, hit once through supertest with `console.error` and `console.warn` spied, logs no message containing `ERR_ERL_KEY_GEN_IPV6` — server/test/rate-limit-key.test.js
-- [ ] A3: Remove the GitHub MCP server — `.mcp.json` → `{ "mcpServers": {} }`; `disabledMcpjsonServers` → `["context7"]` — .mcp.json, .claude/settings.json
-- [ ] A4: Keep the kit manifest true — update the `.mcp.json` notes; run `node scripts/kit-manifest-check.mjs` and classify anything it reports — docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
-- [ ] A5: Run every `[auto]` check and paste the outputs under Execution Notes
+- [x] A1: Give limiters behind `verifyToken` an IPv6-safe user key — add and export `userOrIpKey`; switch `aiLimiter` to it and update its comment — server/middleware/rate-limit.js, server/routes/ai.js
+- [x] A2: Prove the key and the warning — vitest: `userOrIpKey({ user: { userId: 'u1' }, ip: '1.2.3.4' })` → `'user:u1'`; `userOrIpKey({ ip: '2001:db8::1' })` equals `ipKeyGenerator('2001:db8::1')` (a /56 subnet key, not the raw address); and an express app built with `createRateLimiter({ windowMs: 60000, max: 5, keyGenerator: userOrIpKey })` on one route, hit once through supertest with `console.error` and `console.warn` spied, logs no message containing `ERR_ERL_KEY_GEN_IPV6` — server/test/rate-limit-key.test.js
+- [x] A3: Remove the GitHub MCP server — `.mcp.json` → `{ "mcpServers": {} }`; `disabledMcpjsonServers` → `["context7"]` — .mcp.json, .claude/settings.json
+- [x] A4: Keep the kit manifest true — update the `.mcp.json` notes; run `node scripts/kit-manifest-check.mjs` and classify anything it reports — docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
+- [x] A5: Run every `[auto]` check and paste the outputs under Execution Notes
 
 ## What happens when
 - A signed-in user hits the AI limit: unchanged — 429 with `Too many AI requests, please try again later`; the bucket is now named `user:<id>`, so in-memory buckets reset once at the deploy (harmless).
@@ -132,3 +132,4 @@ line or file this plan names was removed, renamed or rewritten).
 ## Execution Notes
 - Planner 2026-11-07 (brief 1, items A1 + A5). Verified at 5895243: the IP fallback is unreachable today (every `aiLimiter` route runs `verifyToken` first; the only public AI route, `GET /usage` at ai.js:70, has no limiter). `.mcp.json` is kit `seed` (project-owned); `.claude/settings.json` is not in `.kit/install.json`.
 - Planner 2026-11-07: Depends-on 517 added after the dry run (`run-plans --dry-run`) dropped `pnpm run test:server` from this gate — the script only exists once 517 merges.
+- Builder: `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:server` → 826 pass; admin-businesses.test.js failed once only because a second suite ran at the same time, passed alone (6/6); rate-limit-key.test.js 3/3; kit-manifest-check → ok (381 classified); log-query → SKIP: no database configured; scope-check --arch → ARCH: ok; --reuse → exit 0.

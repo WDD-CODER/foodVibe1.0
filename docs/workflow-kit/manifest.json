@@ -1896,7 +1896,7 @@
         }
       ],
       "refs": [],
-      "notes": "Claude Code MCP list: only the `github` server (token via ${GITHUB_MCP_TOKEN}, `cmd /c npx` = Windows-only launcher). Generic structure; installer should emit per-OS launcher."
+      "notes": "Claude Code MCP list: no project MCP servers (plan 528)."
     },
     {
       "path": ".nvmrc",
