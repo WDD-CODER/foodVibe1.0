@@ -16,7 +16,7 @@ answer, refuses staff (403), other businesses (403/404) and finished events (409
 environment (`logistics.environmentType`).
 - [auto] `npm run build` exits 0; `npm run lint` exits 0.
 - [auto] `npm run test:server` exits 0, including `server/test/events-logistics.test.js` and the new cases in `server/test/permissions.test.js` (A5).
-- [auto] `npm run test:ci` exits 0 (the `permission.service.spec.ts` case of A2).
+- [auto] `npm run test:ci` exits 0 (the `src/app/core/services/permission.service.spec.ts` case of A2).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/519-event-logistics-server-endpoint.plan.md` → nothing missing; `node scripts/scope-check.mjs --reuse --plan=plans/519-event-logistics-server-endpoint.plan.md` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 
@@ -36,6 +36,8 @@ server/routes/events.js
 server/utils/permissions.js
 server/test/events-logistics.test.js
 server/test/permissions.test.js
+server/test/events-closing.test.js
+server/test/events-router.test.js
 src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts
 docs/agent/standards-backend.md
@@ -99,7 +101,7 @@ line or file this plan names was removed, renamed or rewritten).
   5. `if (!validMerged(res, { ...event, siteLogistics, ...(logistics && { logistics }) })) return`, then `writeConditional(req, res, event, { $set: { siteLogistics, ...(logistics && { logistics }), updatedAt: now } }, 'events.logistics.saved')`.
   Add the route line to the comment block at the top of the file.
 - [ ] A4: Document the new route for the next plans — one row in the §5 table (`PUT /api/v1/events/:id/logistics` · required · owner (`editLogistics`) · `BAD_LOGISTICS`, `EVENT_FINISHED` 409) — docs/agent/standards-backend.md
-- [ ] A5: Prove the door with router and permission tests — `server/test/events-logistics.test.js` (pattern `events-closing.test.js`, builders `logisticsAnswer` from `helpers/v2-docs.js`, users OWNER/STAFF/OUTSIDER as in `events-router.test.js`): owner saves 2 answers → 200, both `by: 'own1'`, `at` set; second save with 1 unchanged + 1 changed → only the changed one's `at` moves, the unchanged keeps its first stamp; a save of a third answer keeps the first two; `phaseDone: { intake: 1700 }` then `phaseDone: { intake: null }` → set then unset; staff → 403 `{ error: 'FORBIDDEN', messageKey: 'no_permission' }`; outsider → 404 (other business is not found); finished event → 409 `EVENT_FINISHED`; `answers: 'x'` → 400 `BAD_LOGISTICS`; an answer with `status: 'maybe'` → 400 `Validation failed`; `environmentType: 'outdoor_field'` on an event without `logistics` → stored `logistics: { environmentType: 'outdoor_field', resolvedItems: [] }`; generic `PUT /api/v1/data/menuEvents/:id` with `siteLogistics` in the body → stored value unchanged. `server/test/permissions.test.js`: owner `can(user, 'editLogistics', { type: 'menuEvents', doc })` ok; staff denied; other business denied; platform admin on a master doc ok — server/test/events-logistics.test.js, server/test/permissions.test.js
+- [ ] A5: Prove the door with router and permission tests — `server/test/events-logistics.test.js` (pattern `server/test/events-closing.test.js`, builders `logisticsAnswer` from `helpers/v2-docs.js`, users OWNER/STAFF/OUTSIDER as in `server/test/events-router.test.js`): owner saves 2 answers → 200, both `by: 'own1'`, `at` set; second save with 1 unchanged + 1 changed → only the changed one's `at` moves, the unchanged keeps its first stamp; a save of a third answer keeps the first two; `phaseDone: { intake: 1700 }` then `phaseDone: { intake: null }` → set then unset; staff → 403 `{ error: 'FORBIDDEN', messageKey: 'no_permission' }`; outsider → 404 (other business is not found); finished event → 409 `EVENT_FINISHED`; `answers: 'x'` → 400 `BAD_LOGISTICS`; an answer with `status: 'maybe'` → 400 `Validation failed`; `environmentType: 'outdoor_field'` on an event without `logistics` → stored `logistics: { environmentType: 'outdoor_field', resolvedItems: [] }`; generic `PUT /api/v1/data/menuEvents/:id` with `siteLogistics` in the body → stored value unchanged. `server/test/permissions.test.js`: owner `can(user, 'editLogistics', { type: 'menuEvents', doc })` ok; staff denied; other business denied; platform admin on a master doc ok — server/test/events-logistics.test.js, server/test/permissions.test.js
 - [ ] A6: Run build, lint, test:server, test:ci and paste the outputs under Execution Notes
 
 ## What happens when
