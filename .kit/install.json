@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.0.0"
+    "version": "3.0.1"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.0.0",
-  "commit": "933f61810e39ae56425dfabc92815bdaf32aab97",
+  "ref": "v3.0.1",
+  "commit": "c6a627dcaf7549adc67080c0abc4a629df71262b",
   "packs": [
     "angular",
     "node-express"
@@ -1118,7 +1118,7 @@
       "source": "core/scripts/prune-old-sessions.sh"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "64d13ed36e246373a21ad0feb7d270ce2183c8b12eccf061a0e275e6aa909b70",
+      "sha256": "028d022f79101bc21043a28cb3c5e1bab6f5a46dd80c14c7792306b098d371bf",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
@@ -1128,7 +1128,7 @@
       "source": "core/scripts/run-python.sh"
     },
     "scripts/run-supervisor.mjs": {
-      "sha256": "334531619030b54867b71702904f1dfdae15e2963f5e0fb6f72b3743fda69080",
+      "sha256": "868e0a02a37b8b15c5643879fc9803096fe6e1308e9fbfcdce04ad99ccb236e2",
       "kind": "managed",
       "source": "core/scripts/run-supervisor.mjs"
     },
