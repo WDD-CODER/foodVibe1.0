@@ -9,7 +9,7 @@
       "nnn": "540",
       "title": "Show why the server refused a save",
       "branch": "feat/540-show-why-the-server",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "build",
       "models": {},
@@ -79,6 +79,31 @@
           "at": "2026-11-08T21:28:54.163Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-08T21:31:20.972Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-08T21:35:10.142Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-08T21:37:35.569Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-08T21:38:03.764Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-08T21:39:05.495Z",
+          "state": "merged",
+          "round": 0
         }
       ],
       "earlier": [
@@ -147,13 +172,50 @@
             "at": "2026-11-08T21:26:39.564Z",
             "reason": "same reason twice: merge check failed on the merged tree: pnpm run build —  ELIFECYCLE  Command failed with exit code 1."
           }
+        },
+        {
+          "nnn": "540",
+          "title": "Show why the server refused a save",
+          "branch": "feat/540-show-why-the-server",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-540-540 is on (no branch), not feat/540-show-why-the-server",
+          "freeDiskGb": 5.8
         }
       ],
       "tiers": [
         "build"
       ],
-      "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-540-540 is on (no branch), not feat/540-show-why-the-server",
-      "freeDiskGb": 5.8
+      "freeDiskGb": 5.1,
+      "sha": "9f306e8d86168e9f4faa27e46e29ff33b1109c94",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 226.3,
+          "tokens": {
+            "input": 93927,
+            "output": 1466
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 21.5,
+          "tokens": {
+            "input": 151351,
+            "output": 1400
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "76083b2150b060e25cebcc576b139172631f351b"
     }
   },
   "notes": [
@@ -166,12 +228,17 @@
       "at": "2026-11-08T21:26:39.757Z",
       "plan": "540",
       "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-08T21:35:07.401Z",
+      "plan": "540",
+      "text": "builder left undone (round 0): Human SETUP: the local supplier with staleTestField is a database write and was left for the Worker; I did not rerun the kit-manifest check, the scope check or log-query (log-query was SKIP: no database configured in the earlier run)"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 5.8,
-  "updatedAt": "2026-11-08T21:28:55.638Z",
+  "freeDiskGb": 5.1,
+  "updatedAt": "2026-11-09T06:53:30.435Z",
   "decisions": [
     {
       "id": "D1",
@@ -226,5 +293,12 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-08T21:28:55.636Z"
+  "finishedAt": "2026-11-09T06:53:30.432Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-09T06:53:01.477Z",
+    "attempt": 1,
+    "blamed": []
+  }
 }
