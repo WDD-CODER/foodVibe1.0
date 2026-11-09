@@ -5876,6 +5876,30 @@
       "params": [],
       "refs": [],
       "notes": "Copy of the kit file docs/brain/human-decisions.md (kit PR #121). Classified project/stay until a kit release installs it through kit-sync."
+    },
+    {
+      "path": "docs/brain/decisions/0028-read-only-local-mongodb-mcp.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0028 (read-only local-only MongoDB MCP)."
+    },
+    {
+      "path": "scripts/mcp-mongo-local.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 529: local-only read-only Mongo MCP launcher"
+    },
+    {
+      "path": "scripts/test/mcp-mongo-local.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 529: local-only read-only Mongo MCP launcher"
     }
   ]
 }

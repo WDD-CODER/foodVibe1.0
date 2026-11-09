@@ -26,6 +26,7 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 - **Worker blocked outside scope (including an unmet plan Prerequisite):** offer `approved: <path>` first — per the plan's Escalation Protocol — never conclude unprompted that "this needs its own plan." That costs a full Planner round trip; a one-line `approved:` reply does not.
 - **Open design plans** (Track `design`/`split`) live in `plans/design/`; other open plans in `plans/`; closed plans always go to `plans/<range>/`. Plan tools find them through `scripts/lib/plan-paths.mjs`: `docs/brain/decisions/0020-plans-design-folder.md`.
 - **Kit-owned files** (`docs/workflow-kit/kit-owned.json`): change them in `../ai-workflow-kit` (kit branch + PR), release a kit version, then run `kit-sync -Ref vX.Y.Z -Apply` on FoodVibe and `/ship` the result. A FoodVibe-only change is an `overrides` entry in `kit.config.json`. Steps: `docs/brain/decisions/0021-kit-changes-reach-foodvibe-by-release-and-kit-sync.md`.
+- The `mongodb-local` MCP server is read-only and local-only (`scripts/mcp-mongo-local.mjs`, ADR 0028); never point it, or any MCP server, at Atlas or a production URI.
 
 ## Compact instructions
 
