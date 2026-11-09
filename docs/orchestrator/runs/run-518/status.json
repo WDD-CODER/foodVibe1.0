@@ -9,10 +9,20 @@
       "nnn": "372",
       "title": "Venues B: multiple contacts and an interactive days/hours picker",
       "branch": "feat/372-venues-b-multiple-contacts",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "build",
-      "models": {},
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T09:09:57.378Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T09:14:46.217Z"
+        }
+      },
       "humanItems": [
         "Hours: tap ה, 18:00 → 02:00 → \"+1\" shows → save → no red field.",
         "Add a new venue with two contacts → save → the detail page shows both with call links.",
@@ -42,6 +52,41 @@
         {
           "at": "2026-11-09T09:07:04.222Z",
           "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:09:57.216Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:09:57.380Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:10:35.704Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:14:40.225Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:14:46.219Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:14:58.121Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:16:26.522Z",
+          "state": "merged",
           "round": 0
         }
       ],
@@ -82,13 +127,50 @@
             "reason": "replan needed: ESCALATE: scope src/app/shared/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` reports 'hours-editor/ not mentioned' and the file is outside the Read-Write Scope. Needs one table row for hours-editor/."
           },
           "parkBranch": "park/run-518-372"
+        },
+        {
+          "nnn": "372",
+          "title": "Venues B: multiple contacts and an interactive days/hours picker",
+          "branch": "feat/372-venues-b-multiple-contacts",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-518-372 is on (no branch), not feat/372-venues-b-multiple-contacts",
+          "freeDiskGb": 11.4
         }
       ],
       "tiers": [
         "build"
       ],
-      "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-518-372 is on (no branch), not feat/372-venues-b-multiple-contacts",
-      "freeDiskGb": 11.4
+      "freeDiskGb": 10.8,
+      "sha": "6b3faf91bc5436aec10643773baca7fd1509e0dd",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 35.7,
+          "tokens": {
+            "input": 103890,
+            "output": 1947
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.7,
+          "tokens": {
+            "input": 50343,
+            "output": 1028
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "7c41e296f45a93c70e7f593ed2c553130c51e842"
     },
     "533": {
       "nnn": "533",
@@ -160,12 +242,22 @@
       "at": "2026-11-09T09:07:01.569Z",
       "plan": "372",
       "text": "scope of plan 372 extended on orch/run-518 by the answer to 372-1: src/app/shared/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-09T09:09:57.056Z",
+      "plan": "372",
+      "text": "the folder foodVibe1.0-orch-run-518-372 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T09:15:10.444Z",
+      "plan": "372",
+      "text": "the folder foodVibe1.0-orch-merge-run-518 was installed (root, scripts, server)"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 11.4,
-  "updatedAt": "2026-11-09T09:07:05.669Z",
+  "freeDiskGb": 10.8,
+  "updatedAt": "2026-11-09T09:19:25.595Z",
   "stops": [
     {
       "at": "2026-11-09T08:51:08.331Z",
@@ -173,5 +265,27 @@
       "attempt": 1
     }
   ],
-  "finishedAt": "2026-11-09T09:07:05.667Z"
+  "finishedAt": "2026-11-09T09:19:25.594Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "372",
+      "type": "behaviour",
+      "text": "behaviour: the overnight '+1' marker shows in the editor rows, as the plan says, but not on the card — reverse: drop the marker from the hours-editor template",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-09T09:19:25.595Z",
+    "attempt": 1,
+    "blamed": []
+  }
 }
