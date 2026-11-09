@@ -1896,7 +1896,7 @@
         }
       ],
       "refs": [],
-      "notes": "Claude Code MCP list: only the `github` server (token via ${GITHUB_MCP_TOKEN}, `cmd /c npx` = Windows-only launcher). Generic structure; installer should emit per-OS launcher."
+      "notes": "Claude Code MCP list: no project MCP servers (plan 528)."
     },
     {
       "path": ".nvmrc",
@@ -4527,7 +4527,7 @@
       "refs": [
         ".claude/commands/design-port.md"
       ],
-      "notes": "Plan 405 design-port: unpacks a Claude Design handoff into .interface-design/handoffs/. FoodVibe-only. Classified by plan 390."
+      "notes": "Plan 405 design-port: unpacks a Claude Design handoff into .interface-design/handoffs/; plan 534 adds family targets. FoodVibe-only. Classified by plan 390."
     },
     {
       "path": "scripts/test/design-feature-inventory.test.mjs",
@@ -4888,6 +4888,14 @@
       "params": [],
       "refs": [],
       "notes": "FoodVibe ADR 0027 (client entity above events; clients owner-only to write)."
+    },
+    {
+      "path": "docs/brain/decisions/0029-design-ports-go-through-the-family-registry.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0029 (design ports go through the family registry; plan 534)."
     },
     {
       "path": "scripts/decision-log.mjs",

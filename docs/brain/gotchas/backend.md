@@ -232,6 +232,8 @@ been killed by it.
 
 ## `npm run dev` runs as NODE_ENV=production — never gate dev behavior on NODE_ENV
 
+> Superseded by plan 530: `dev` is local (`NODE_ENV=development`) now; `dev:remote` is the production-mode one. New trap: Atlas from a local run needs `server/.env.live`; a missing file fails loudly, it never falls back. The advice below (a dedicated env var) still stands.
+
 **What hurt:** Plan 385 needed the write limiter relaxed for local work. `server/package.json`'s `dev` script sets `NODE_ENV=production`, so any `if (NODE_ENV !== 'production')` switch is dead locally too.
 
 **Why the obvious fix is wrong:** Gating on `NODE_ENV` looks like the standard dev/prod split, but here dev and prod report the same value, so the switch never fires anywhere.

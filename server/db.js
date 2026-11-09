@@ -3,18 +3,17 @@ const { CLONEABLE_TYPES } = require('./constants/cloneable-types')
 const { SEARCHABLE_ENTITY_TYPES } = require('./constants/searchable-entity-types')
 const { ensureLogIndexes } = require('./services/log-sink')
 const { logger } = require('./logger')
+const { targetFromEnv, mongoUri } = require('./utils/db-target')
 
 async function connectDb() {
-  const isLocal = process.env.NODE_ENV === 'development'
-  const uri = isLocal ? process.env.MONGO_LOCAL_URI : process.env.MONGO_URI
+  const target = targetFromEnv()
+  const uri = mongoUri(target)
 
-  if (isLocal && !uri) throw new Error('MONGO_LOCAL_URI is not set in .env')
-  if (!isLocal && !uri) throw new Error('MONGO_URI is not set in .env')
   if (!process.env.JWT_ACCESS_SECRET) throw new Error('JWT_ACCESS_SECRET is not set in .env')
   if (!process.env.JWT_REFRESH_SECRET) throw new Error('JWT_REFRESH_SECRET is not set in .env')
 
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000, minPoolSize: 1, maxPoolSize: 10 })
-  logger.info({ event: 'mongo.connection.ok', target: uri.startsWith('mongodb+srv') ? 'atlas' : 'local' })
+  logger.info({ event: 'mongo.connection.ok', target })
 
   // Runtime visibility — the initial connect() above only guards startup. Without these,
   // a mid-session Atlas drop (network blip, IP de-allowlisted, cluster maintenance) is

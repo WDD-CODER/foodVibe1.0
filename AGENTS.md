@@ -13,6 +13,7 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 - Logical CSS properties only.
 - No `any`. Single quotes and no semicolons in `.ts`. Double quotes in `.html`.
 - Gemini calls proxied through `server/routes/ai.js` only — never a client-side key.
+- Servers: in a `wt-N` slot the agent starts and stops them (`node scripts/slot-serve.mjs`); in the main folder they are the Human's - the agent asks, never starts them. Slots and builder folders are local-only: the live URI lives only in the main folder's `server/.env.live`.
 - Secrets live in `.env` only. Never read, print, hardcode, or commit them.
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser work goes through gstack `/browse`, never raw Playwright MCP. Default: hand the Human a numbered click/check list for multi-step UI checks; do single-step cheap checks yourself (DB query, log read, one screenshot).

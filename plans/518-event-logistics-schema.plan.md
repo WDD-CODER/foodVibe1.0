@@ -97,7 +97,7 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI in this plan. No dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Define the logistics vocabulary once for client and server — phases, sections, answer types, statuses, payers and size limits — shared/schemas/entities/event-logistics.ts, shared/schemas/entities/index.ts
+- [x] A1: Define the logistics vocabulary once for client and server — phases, sections, answer types, statuses, payers and size limits — shared/schemas/entities/event-logistics.ts, shared/schemas/entities/index.ts
   ```ts
   export const LOGISTICS_PHASES = ['intake', 'site_visit'] as const
   export const LOGISTICS_SECTIONS = ['infrastructure', 'space', 'service', 'rentals', 'access', 'staff', 'weather', 'food', 'other'] as const
@@ -109,7 +109,7 @@ line or file this plan names was removed, renamed or rewritten).
   export const LOGISTICS_ANSWERS_MAX = 300
   export type LogisticsPhase = (typeof LOGISTICS_PHASES)[number]  // and the same for the other four
   ```
-- [ ] A2: Let a taxonomy term be a logistics question — new kind in the enum, the union member, the reference path — shared/schemas/entities/taxonomy-term.schema.ts
+- [x] A2: Let a taxonomy term be a logistics question — new kind in the enum, the union member, the reference path — shared/schemas/entities/taxonomy-term.schema.ts
   ```ts
   z.strictObject({
     ...termShape,
@@ -123,7 +123,7 @@ line or file this plan names was removed, renamed or rewritten).
   })
   ```
   `key` is the Hebrew question text (same convention as user-added terms). Import `environmentTypeSchema` from `./common.schema`.
-- [ ] A3: Let an event store its phone-intake and site-visit answers as a server-owned field — the `siteLogistics` sub-document after `closing` — shared/schemas/entities/menu-event.schema.ts
+- [x] A3: Let an event store its phone-intake and site-visit answers as a server-owned field — the `siteLogistics` sub-document after `closing` — shared/schemas/entities/menu-event.schema.ts
   ```ts
   /** Plan <this>: phone-intake and site-visit answers. Server-owned (events router, PUT /:id/logistics — plan 519). */
   siteLogistics: z.strictObject({
@@ -150,10 +150,10 @@ line or file this plan names was removed, renamed or rewritten).
     }).optional()
   }).optional(),
   ```
-- [ ] A4: Keep the answers out of every client body on the generic data API — append `'siteLogistics'` to the server-owned field list and its JSDoc — shared/schemas/entities/event-stage.ts
-- [ ] A5: Prove the shapes with schema tests — `server/test/taxonomy-term-schema.test.js`: a `logisticsItem` with every field valid; `environments: ['moon']` invalid; `phase: 'later'` invalid; `environments` absent valid. `server/test/event-stage-schema.test.js`: an event with a full `siteLogistics` valid; an answer with `status: 'maybe'` invalid; `text` of 501 chars invalid; 301 answers invalid; `EVENT_SERVER_FIELDS` contains `'siteLogistics'`. Add `logisticsAnswer(overrides)` and `logisticsItemBody(overrides)` builders — server/test/helpers/v2-docs.js
-- [ ] A6: Mirror the shapes on the client so the next plans can type against them — `LogisticsAnswer`, `SiteLogistics`, `siteLogistics?` on `MenuEvent`, conformance tuple still green — src/app/core/models/menu-event.model.ts, src/app/core/models/v2/conformance.ts
-- [ ] A7: Run build:schemas, build, lint, test:server, test:ci and paste the outputs under Execution Notes
+- [x] A4: Keep the answers out of every client body on the generic data API — append `'siteLogistics'` to the server-owned field list and its JSDoc — shared/schemas/entities/event-stage.ts
+- [x] A5: Prove the shapes with schema tests — `server/test/taxonomy-term-schema.test.js`: a `logisticsItem` with every field valid; `environments: ['moon']` invalid; `phase: 'later'` invalid; `environments` absent valid. `server/test/event-stage-schema.test.js`: an event with a full `siteLogistics` valid; an answer with `status: 'maybe'` invalid; `text` of 501 chars invalid; 301 answers invalid; `EVENT_SERVER_FIELDS` contains `'siteLogistics'`. Add `logisticsAnswer(overrides)` and `logisticsItemBody(overrides)` builders — server/test/helpers/v2-docs.js
+- [x] A6: Mirror the shapes on the client so the next plans can type against them — `LogisticsAnswer`, `SiteLogistics`, `siteLogistics?` on `MenuEvent`, conformance tuple still green — src/app/core/models/menu-event.model.ts, src/app/core/models/v2/conformance.ts
+- [x] A7: Run build:schemas, build, lint, test:server, test:ci and paste the outputs under Execution Notes
 
 ## What happens when
 - A stored event has no `siteLogistics`: the field is optional, nothing changes for existing events.
@@ -179,3 +179,4 @@ line or file this plan names was removed, renamed or rewritten).
 ## Execution Notes
 - Planner review (2026-11-05): `LOGISTICS_TEXT_MAX` was 519 (plan-number typo) → 500, matching the A5 test (501 chars invalid). Snapshot is 213 commits old; plan 512 added `clientId` (`menu-event.schema.ts:138`) — line drift only, no conflict. Runs after 517 (its checks need `test:server`, the `TEST-CI:` line and the log-query SKIP fallback).
 - Planner review 2026-11-07: plan 517 was re-scoped (brief 4) — the `TEST-CI:` line and `scripts/e2e-one.mjs` no longer exist; checks now read `npm run test:ci` exits 0, and card specs run with `pnpm exec playwright test <spec>`. Mechanical edit only.
+- Build 2026-11-09: build:schemas, build, lint (0 errors), test:server → exit 0; test:ci exit 0 (1831 SUCCESS) on rerun — first run had 2 unrelated ExportService spec failures (order-dependent flake), rerun clean.

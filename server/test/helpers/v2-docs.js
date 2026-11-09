@@ -45,6 +45,14 @@ function menuEventBody(overrides = {}) {
   return { name: 'אירוע', eventType: 'wedding', servingType: 'plated', guestCount: 50, sections: [], ...overrides };
 }
 
+function logisticsAnswer(overrides = {}) {
+  return { itemKey: 'מקרר', phase: 'site_visit', section: 'infrastructure', status: 'needed', at: 1, by: 'u1', byName: 'דן', ...overrides };
+}
+
+function logisticsItemBody(overrides = {}) {
+  return { kind: 'logisticsItem', key: 'האם יש מקרר?', phase: 'site_visit', section: 'infrastructure', answerType: 'status', ...overrides };
+}
+
 /** A full stored doc (what is in Mongo): body + server-owned fields. */
 function stored(body, fields) {
   // Plan 425: every stored doc carries a business and a creator. Tests seed by `userId`; the business follows it.
@@ -52,4 +60,4 @@ function stored(body, fields) {
   return { schemaVersion: 2, createdAt: 1, updatedAt: 1, businessId, createdBy: fields.userId, ...body, ...fields };
 }
 
-module.exports = { productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, stored };
+module.exports = { productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, logisticsAnswer, logisticsItemBody, stored };

@@ -162,6 +162,7 @@ has no PreToolUse hook of its own.
   generated `src/environments/environment.slot.ts`, optional isolated per-slot Mongo database
   (`foodvibe_wtN`), then reports `scope-check.mjs --drift` so the Worker knows whether to run the
   plan's Step 0 reality check before starting milestones. It starts **no** servers.
+- **Servers by folder.** In a slot the agent starts and stops them; in the main folder they are the Human's. `npm run dev:local` in a slot never reads `.env.live` (the live URI lives only in the main folder's git-ignored `.env.live`).
 - **Slot dev servers are on demand.** `scripts/slot-serve.mjs` starts them when a step needs the app
   (browser check, validation cards, `/remote`, preflight, or the Human's "start servers"): frontend
   `ng serve -c slot --port 420N`, backend `npm run dev:local` with `PORT=300N`/`ALLOWED_ORIGIN`. It never

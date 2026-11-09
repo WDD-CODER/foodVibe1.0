@@ -1,6 +1,6 @@
 'use strict';
 
-const { rateLimit } = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 
 /**
  * Plan 456 â€” the one way a route builds a rate limiter. Every limiter sends the standard
@@ -21,4 +21,17 @@ function createRateLimiter({ windowMs, max, message, ...rest }) {
   });
 }
 
-module.exports = { createRateLimiter };
+/**
+ * Plan 528 — bucket key for a limiter that runs after `verifyToken`: `user:<id>`, else the
+ * IPv6-safe IP key (a /56 subnet for IPv6, so rotating addresses does not dodge the budget).
+ *
+ * @param {{ user?: { userId?: string }, ip?: string }} req
+ * @returns {string}
+ */
+function userOrIpKey(req) {
+  const userId = req.user?.userId;
+  if (userId) return `user:${userId}`;
+  return ipKeyGenerator(req.ip);
+}
+
+module.exports = { createRateLimiter, userOrIpKey };

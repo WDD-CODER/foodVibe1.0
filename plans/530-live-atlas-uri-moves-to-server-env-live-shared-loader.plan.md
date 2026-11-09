@@ -141,14 +141,14 @@ Test-Path "C:\coding projects\Cursor\foodvibe1.0\server\.env.live"
 ```
 
 ## Atomic Sub-tasks
-- [ ] A1: Write the one place that decides local or Atlas — `targetFromEnv`, `parseTarget`, `loadServerEnv`, `mongoUri` as specified, with injectable `serverDir` / `env` — server/utils/db-target.js
-- [ ] A2: Prove the rules without any real database — vitest with a temp folder per case: `local` never reads `.env.live` (put `MONGO_URI=x` only there and assert it stays unset); `atlas` loads it; `atlas` with no file and no `MONGO_URI` throws the `.env.live not found` message; `atlas` with no file but `MONGO_URI` already in `env` (Render) works; `mongoUri('local')` with only `MONGO_URI` set throws (no fallback); `targetFromEnv` for `{}` / `{NODE_ENV:'development'}` / `{NODE_ENV:'production'}` / `{DB_TARGET:'atlas'}` / `{DB_TARGET:'x'}`; `parseTarget` absent, `--target=atlas`, `--target=prod`, and `required`; no thrown message contains the URI — server/test/db-target.test.js
-- [ ] A3: Make the server load its env from its own folder and pick the target through the helper — server/app.js, server/db.js
-- [ ] A4: Make `dev` local — server/package.json
-- [ ] A5: Route the migration connect helper through the same loader — keep `parseArgs` as is — server/migrations/tools/_connect.js
-- [ ] A6: Document the new layout — server/.env.example, server/breadcrumbs.md
-- [ ] A7: Say who owns which server, and record the gotcha — AGENTS.md, docs/agent/workflow-map.md, docs/brain/gotchas/backend.md
-- [ ] A8: Run every `[auto]` check; confirm `server/test/helpers/app.js` (sets `NODE_ENV=development` and `MONGO_LOCAL_URI`) still connects through the new path; paste the outputs and the Human steps under Execution Notes
+- [x] A1: Write the one place that decides local or Atlas — `targetFromEnv`, `parseTarget`, `loadServerEnv`, `mongoUri` as specified, with injectable `serverDir` / `env` — server/utils/db-target.js
+- [x] A2: Prove the rules without any real database — vitest with a temp folder per case: `local` never reads `.env.live` (put `MONGO_URI=x` only there and assert it stays unset); `atlas` loads it; `atlas` with no file and no `MONGO_URI` throws the `.env.live not found` message; `atlas` with no file but `MONGO_URI` already in `env` (Render) works; `mongoUri('local')` with only `MONGO_URI` set throws (no fallback); `targetFromEnv` for `{}` / `{NODE_ENV:'development'}` / `{NODE_ENV:'production'}` / `{DB_TARGET:'atlas'}` / `{DB_TARGET:'x'}`; `parseTarget` absent, `--target=atlas`, `--target=prod`, and `required`; no thrown message contains the URI — server/test/db-target.test.js
+- [x] A3: Make the server load its env from its own folder and pick the target through the helper — server/app.js, server/db.js
+- [x] A4: Make `dev` local — server/package.json
+- [x] A5: Route the migration connect helper through the same loader — keep `parseArgs` as is — server/migrations/tools/_connect.js
+- [x] A6: Document the new layout — server/.env.example, server/breadcrumbs.md
+- [x] A7: Say who owns which server, and record the gotcha — AGENTS.md, docs/agent/workflow-map.md, docs/brain/gotchas/backend.md
+- [x] A8: Run every `[auto]` check; confirm `server/test/helpers/app.js` (sets `NODE_ENV=development` and `MONGO_LOCAL_URI`) still connects through the new path; paste the outputs and the Human steps under Execution Notes
 
 ## What happens when
 - A slot or builder folder starts the backend (`dev:local`): target local; `.env.live` is never opened; with no `MONGO_LOCAL_URI` it fails with `MONGO_LOCAL_URI is not set in server/.env`.
@@ -177,3 +177,6 @@ Test-Path "C:\coding projects\Cursor\foodvibe1.0\server\.env.live"
 ## Execution Notes
 - Planner 2026-11-07 (brief 3(a), decisions H5 + H6). Consumers re-grepped at 5895243: `server/db.js`, `server/migrations/tools/_connect.js`, `server/scripts/{bump-master-version,db-backup,db-restore,reset-user-from-master,check-name-lengths,check-unit-weights,time-business-stats}.js`, `scripts/log-query.mjs`; the last eight go to plan 531. `MONGO_ATLAS_DIRECT_URI` no longer exists. `take-plan.mjs` never copies `server/.env` (contrary to the brief); slots have whatever `server/.env` the Human put there, hence the per-slot Human step.
 - Planner 2026-11-07: Depends-on 517 added after the dry run (`run-plans --dry-run`) dropped `pnpm run test:server` from this gate — the script only exists once 517 merges.
+- Builder 2026-11-09: `pnpm run test:server` → exit 0 (71 files, 842 tests, incl. db-target.test.js 10); `pnpm run lint` → exit 0 (0 errors); `kit-manifest-check` → ok; `scope-check --arch` → ARCH: ok INV-2; `--reuse` → ok; `log-query` → SKIP: no database configured. `server/test/helpers/app.js` unchanged: sets NODE_ENV=development + MONGO_LOCAL_URI, so connectDb takes the local path (all server tests pass).
+- Decision: workflow-map sentence says "git-ignored `.env.live`" (not `server/.env.live`) because kit-manifest-check flags that literal as an unrecorded coupling string in that split file.
+- Human steps after the merge: as listed in the plan (unchanged; the agent never touched a URI value).

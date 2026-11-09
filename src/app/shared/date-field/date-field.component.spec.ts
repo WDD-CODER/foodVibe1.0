@@ -52,6 +52,17 @@ describe('DateFieldComponent', () => {
     await create(false)
   })
 
+  it('keeps the hidden picker 1px high inside a .c-input-stack wrapper', () => {
+    const wrap = document.createElement('div')
+    wrap.className = 'c-input-stack'
+    document.body.appendChild(wrap)
+    wrap.appendChild(el)
+    const style = getComputedStyle(picker())
+    expect(style.blockSize).toBe('1px')
+    expect(style.minBlockSize).toBe('0px')
+    wrap.remove()
+  })
+
   it('shows typed digits as day/month/year and emits the ISO date', () => {
     type('25122026')
     expect(text().value).toBe('25/12/2026')

@@ -6,6 +6,8 @@
 const { taxonomyTermSchema, TAXONOMY_KINDS, REGISTRY_KIND_BY_COLLECTION, SCHEMA_BY_COLLECTION } =
   require('../generated/schemas/entities');
 
+const { logisticsItemBody } = require('./helpers/v2-docs');
+
 const base = {
   _id: 't1',
   schemaVersion: 2,
@@ -66,5 +68,21 @@ describe('taxonomyTermSchema', () => {
     for (const kinds of Object.values(REGISTRY_KIND_BY_COLLECTION)) {
       for (const kind of [].concat(kinds)) expect(TAXONOMY_KINDS).toContain(kind);
     }
+  });
+
+  describe('logisticsItem (plan 518)', () => {
+    const item = { ...base, ...logisticsItemBody({ environments: ['client_home'], hint: 'רמז' }) };
+    test('accepts every field', () => {
+      expect(ok(item)).toBe(true);
+      expect(TAXONOMY_KINDS).toContain('logisticsItem');
+    });
+    test('accepts environments absent', () => {
+      const { environments, ...rest } = item;
+      expect(ok(rest)).toBe(true);
+    });
+    test('rejects an unknown environment and an unknown phase', () => {
+      expect(ok({ ...item, environments: ['moon'] })).toBe(false);
+      expect(ok({ ...item, phase: 'later' })).toBe(false);
+    });
   });
 });

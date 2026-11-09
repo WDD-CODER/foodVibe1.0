@@ -1,6 +1,15 @@
 import { z } from 'zod'
 import { baseDocShape, nameField } from '../base.schema'
 import { eventLogisticsSchema } from './common.schema'
+import {
+  LOGISTICS_ANSWERS_MAX,
+  LOGISTICS_ANSWER_STATUSES,
+  LOGISTICS_LABEL_MAX,
+  LOGISTICS_PAYERS,
+  LOGISTICS_PHASES,
+  LOGISTICS_SECTIONS,
+  LOGISTICS_TEXT_MAX
+} from './event-logistics'
 import { EVENT_STAGES, NOTE_MAX_LENGTH, NOT_CLOSED_REASONS } from './event-stage'
 import { coefficientSchema } from './taxonomy-term.schema'
 
@@ -135,6 +144,30 @@ export const menuEventSchema = z.strictObject({
   planSnapshot: planSnapshotSchema.optional(),
   /** Plan 446 (money fields): what each supplier was really paid. Server-owned (events router). */
   closing: closingSchema.optional(),
+  /** Plan 518: phone-intake and site-visit answers. Server-owned (events router, PUT /:id/logistics — plan 519). */
+  siteLogistics: z.strictObject({
+    answers: z.array(z.strictObject({
+      itemKey: z.string().min(1).max(LOGISTICS_LABEL_MAX),
+      /** Only on an ad-hoc item typed on the event; `itemKey` is then `adhoc:<id>`. */
+      label: z.string().min(1).max(LOGISTICS_LABEL_MAX).optional(),
+      phase: z.enum(LOGISTICS_PHASES),
+      section: z.enum(LOGISTICS_SECTIONS),
+      status: z.enum(LOGISTICS_ANSWER_STATUSES),
+      quantity: z.number().min(0).max(100000).optional(),
+      text: z.string().max(LOGISTICS_TEXT_MAX).optional(),
+      payer: z.enum(LOGISTICS_PAYERS).optional(),
+      showToClient: z.boolean().optional(),
+      at: z.number(),
+      by: z.string(),
+      byName: z.string()
+    })).max(LOGISTICS_ANSWERS_MAX),
+    meetingAt: z.string().optional(),
+    meetingWith: z.string().max(80).optional(),
+    phaseDone: z.strictObject({
+      intake: z.number().optional(),
+      site_visit: z.number().optional()
+    }).optional()
+  }).optional(),
   /** Plan 536 (money field): items the chef moved to another supplier for this event only. */
   supplierMoves: z.array(z.strictObject({
     productId: z.string(),
