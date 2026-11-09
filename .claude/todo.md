@@ -24,7 +24,7 @@
 - Merged 2026-11-08: **374**, **535** (PR #525). **510** superseded by **536** (failed hand checks, reverted)
 - New 2026-11-08: **536** recipe-line supplier + per-event move (not parallel with 518/519) · **537** venue hours pickers (after 374; 372 now after 537) · **538** save-or-leave in front · **539** toast at narrow width
 - Lanes: 374→537→372 · 536 after 518→519 or before both (shares menu-event schema/model, permissions.js)
-- New 2026-11-08: **540** show why the server refused a save (after run-536 merges: depends on 536, 537, 539)
+- Merged 2026-11-09: **540** show why the server refused a save (run-540, PR #530; Human passed 6/6 cards)
 
 ---
 
