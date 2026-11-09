@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import { baseDocShape } from '../base.schema'
+import { environmentTypeSchema } from './common.schema'
+import { LOGISTICS_ANSWER_TYPES, LOGISTICS_PHASES, LOGISTICS_SECTIONS } from './event-logistics'
 
 /**
  * Plan 321 Phase 3 — one `taxonomyTerms` collection replaces the single-doc `{ items }`
@@ -24,7 +26,8 @@ export const TAXONOMY_KINDS = [
   'eventType',
   'sectionCategory',
   'equipmentCategory',
-  'station'
+  'station',
+  'logisticsItem'
 ] as const
 
 export type TaxonomyKind = (typeof TAXONOMY_KINDS)[number]
@@ -77,7 +80,9 @@ export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | '
   /** Plan 436: a station key is stored on the recipe / dish as `defaultStation` ('' = general). */
   station: { recipes: ['defaultStation'], dishes: ['defaultStation'] },
   protein: {},
-  kosherType: {}
+  kosherType: {},
+  /** Plan 518: the answers on an event store the item's key as `siteLogistics.answers.itemKey`. */
+  logisticsItem: { menuEvents: ['siteLogistics.answers.itemKey'] }
 }
 
 const DISH_FIELD_KEYS = ['sell_price', 'food_cost_money', 'food_cost_pct', 'serving_portions', 'serving_portions_pct'] as const
@@ -131,6 +136,17 @@ export const taxonomyTermSchema = z.discriminatedUnion('kind', [
     kind: z.literal('menuType'),
     fields: z.array(z.enum(DISH_FIELD_KEYS)),
     coefficient: coefficientSchema.optional()
+  }),
+  /** Plan 518: an event-logistics question; `key` is the Hebrew question text. */
+  z.strictObject({
+    ...termShape,
+    kind: z.literal('logisticsItem'),
+    phase: z.enum(LOGISTICS_PHASES),
+    section: z.enum(LOGISTICS_SECTIONS),
+    answerType: z.enum(LOGISTICS_ANSWER_TYPES),
+    /** Empty or absent = asked in every environment. */
+    environments: z.array(environmentTypeSchema).max(4).optional(),
+    hint: z.string().max(200).optional()
   })
 ])
 

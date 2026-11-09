@@ -3,7 +3,7 @@
 
 const { menuEventSchema } = require('../generated/schemas/entities')
 const { EVENT_STAGES, EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage')
-const { menuEventBody, stored } = require('./helpers/v2-docs')
+const { menuEventBody, logisticsAnswer, stored } = require('./helpers/v2-docs')
 
 const base = () => stored(menuEventBody(), { _id: 'e1', userId: 'u1' })
 const full = () => ({
@@ -39,5 +39,24 @@ describe('menu event stage fields', () => {
     expect(EVENT_STAGES[EVENT_STAGES.length - 1]).toBe('not_closed')
     expect(EVENT_SERVER_FIELDS).toContain('stageHistory')
     expect(EVENT_SERVER_FIELDS).not.toContain('clientName')
+  })
+})
+
+describe('menu event siteLogistics (plan 518)', () => {
+  const withLogistics = answers => ({ ...base(), siteLogistics: { answers, meetingAt: '2026-11-20T10:00', meetingWith: 'דנה', phaseDone: { intake: 1, site_visit: 2 } } })
+
+  it('accepts a full siteLogistics', () => {
+    const doc = withLogistics([logisticsAnswer({ label: 'x', quantity: 2, text: 'ok', payer: 'chef', showToClient: true })])
+    expect(menuEventSchema.safeParse(doc).success).toBe(true)
+  })
+
+  it('rejects a bad status, a 501-char text and 301 answers', () => {
+    expect(menuEventSchema.safeParse(withLogistics([logisticsAnswer({ status: 'maybe' })])).success).toBe(false)
+    expect(menuEventSchema.safeParse(withLogistics([logisticsAnswer({ text: 'a'.repeat(501) })])).success).toBe(false)
+    expect(menuEventSchema.safeParse(withLogistics(Array.from({ length: 301 }, () => logisticsAnswer()))).success).toBe(false)
+  })
+
+  it('is a server-owned field', () => {
+    expect(EVENT_SERVER_FIELDS).toContain('siteLogistics')
   })
 })

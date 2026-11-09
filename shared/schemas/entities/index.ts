@@ -11,6 +11,7 @@ import { venueSchema } from './venue.schema'
 export * from './business.schema'
 export * from './client.schema'
 export * from './common.schema'
+export * from './event-logistics'
 export * from './event-stage'
 export * from './taxonomy-term.schema'
 export { clientSchema, equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }

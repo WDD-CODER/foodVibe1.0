@@ -136,6 +136,29 @@ export interface EventClosing {
   finishedBy?: string
 }
 
+/** Plan 518: one answer to a logistics checklist item. Written only through the events route (plan 519). */
+export interface LogisticsAnswer {
+  itemKey: string
+  label?: string
+  phase: 'intake' | 'site_visit'
+  section: 'infrastructure' | 'space' | 'service' | 'rentals' | 'access' | 'staff' | 'weather' | 'food' | 'other'
+  status: 'unchecked' | 'needed' | 'not_needed' | 'client_provides'
+  quantity?: number
+  text?: string
+  payer?: 'client' | 'quoted' | 'chef'
+  showToClient?: boolean
+  at: number
+  by: string
+  byName: string
+}
+
+export interface SiteLogistics {
+  answers: LogisticsAnswer[]
+  meetingAt?: string
+  meetingWith?: string
+  phaseDone?: { intake?: number; site_visit?: number }
+}
+
 export interface MenuEvent {
   _id: string
   name: string
@@ -177,6 +200,8 @@ export interface MenuEvent {
   /** Plan 446 */
   planSnapshot?: PlanSnapshot
   closing?: EventClosing
+  /** Plan 518: phone-intake and site-visit answers (server-owned) */
+  siteLogistics?: SiteLogistics
   /** Plan 536: items moved to another supplier for this event only (owner-only). */
   supplierMoves?: SupplierMove[]
   /** Plan 514: the client record this event is for. clientName / clientPhone stay as a snapshot. */
