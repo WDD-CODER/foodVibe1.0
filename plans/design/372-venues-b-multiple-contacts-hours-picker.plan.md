@@ -114,7 +114,7 @@ touching any milestone.
 - [x] A2: Show opening hours in plain Hebrew — `venue-hours.util` `toDisplay` plus spec (Hebrew range forms, midnight crossing).
 - [x] A3: Add an interactive days-and-hours picker to the venue form — `HoursEditorComponent` plus spec, using `app-time-field` and `checkHoursRow`; move 537's row wiring (marks, message line, drop-empty) from the venue form into the editor without changing behaviour; wire into the venue form; save structured hours and the generated strings (`shared/hours-editor/**`, `venue-form/**`).
 - [x] A4: Let the venue form add and list several contacts — Contacts FormArray, detail list (`venue-form/**`, `venue-detail/**`).
-- [ ] A5: Build and test — Build, specs; add one new venue with two contacts and structured hours and check no 400s.
+- [x] A5: Build and test — Build, specs; add one new venue with two contacts and structured hours and check no 400s.
 
 ## Technical Considerations
 
@@ -157,6 +157,6 @@ Legacy/compat work removed on the Human's rule that only recipes and products ar
 - `npm run build:schemas` -> exit 0. `pnpm --dir server run test` -> 69 files, 829 passed (incl. server/test/venue-contacts-hours-schema.test.js).
 - `pnpm run build` -> exit 0. `pnpm run lint` -> 0 errors. `pnpm run lint:icons` -> 0 violations.
 - `pnpm run test:ci` -> TOTAL: 1831 SUCCESS (first run had one failing new spec of mine, fixed).
-- `node scripts/breadcrumbs-check.mjs` -> `src/app/shared/breadcrumbs.md: not mentioned: hours-editor/`. That file is outside the scope block; needs `approved: src/app/shared/breadcrumbs.md` (one table row).
+- breadcrumbs row added for hours-editor/ (file now in scope); `node scripts/breadcrumbs-check.mjs` -> OK.
 - A5 left unticked: the manual add-a-venue check is the [human] items; covered by form specs.
 - Overnight rows show "+1 <venue_hours_next_day>" in the editor as the plan says (539 had removed it from the card only).

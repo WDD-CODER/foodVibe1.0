@@ -8,6 +8,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
+| `hours-editor/` | Day-chip + time-range rows editor (venue hours) | HoursEditorComponent |
 | `add-item-modal/` | Generic add-item flow | AddItemModalComponent |
 | `add-equipment-modal/` | Add equipment dialog | AddEquipmentModalComponent |
 | `ai-menu-modal/` | AI-drafted menu modal + service | AiMenuModalComponent, AiMenuModalService |
