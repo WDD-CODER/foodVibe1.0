@@ -10,6 +10,18 @@ export interface VenueInfraItem {
 export interface VenueOperatingHours {
   days: string
   time: string
+  /** Plan 372: structured form of the row — Sunday = 0 … Saturday = 6; `days` / `time` are generated from these. */
+  dayIndexes?: number[]
+  /** Plan 372: `HH:MM`. */
+  open?: string
+  close?: string
+}
+
+/** Plan 372: one contact person at a venue. */
+export interface VenueContact {
+  name: string
+  phone?: string
+  role?: string
 }
 
 export interface VenueProfile {
@@ -24,6 +36,8 @@ export interface VenueProfile {
   capacity?: number
   contactName?: string
   contactPhone?: string
+  /** Plan 372: replaces contactName / contactPhone, which stay in the schema but are no longer read or written. */
+  contacts?: VenueContact[]
   operatingHours?: VenueOperatingHours[]
   /** design-port session 6 — matches Venues.dc.html/VenueDetail.dc.html's active/inactive pill. */
   active?: boolean
