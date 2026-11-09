@@ -107,7 +107,6 @@
   },
   "enableAllProjectMcpServers": false,
   "disabledMcpjsonServers": [
-    "github",
     "context7"
   ],
   "extraKnownMarketplaces": {

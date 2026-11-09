@@ -1,22 +1,22 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
 const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
-const { createRateLimiter } = require('../middleware/rate-limit');
+const { createRateLimiter, userOrIpKey } = require('../middleware/rate-limit');
 const { badRequest, requireFields } = require('../middleware/validate');
 const dns = require('node:dns').promises;
 const { assertCan } = require('../utils/permissions');
 const { MAX_IMPORT_TEXT, normalizePriceListRows, normalizeReceiptRows } = require('../utils/price-list-import');
 
 // Plan 321 Phase 1 — strict per-user limit on the Gemini-backed AI routes (they cost
-// real money per call). Keyed by userId, not IP, since verifyToken has already run by
-// the time this middleware executes on each route below — a shared office/NAT IP must
-// not throttle every user on it together. The daily cap is Google's own per-model free
+// real money per call). Keyed by `user:<id>` (with an IPv6-safe IP fallback), not by IP,
+// since verifyToken has already run by the time this middleware executes on each route
+// below — a shared office/NAT IP must not throttle every user on it together. The daily cap is Google's own per-model free
 // quota, handled by the model chain in services/gemini-client.js (plan 395); this one
 // caps how fast any single account can burn through it.
 const aiLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
-  keyGenerator: (req) => req.user?.userId || req.ip,
+  keyGenerator: userOrIpKey,
   message: 'Too many AI requests, please try again later',
 });
 
