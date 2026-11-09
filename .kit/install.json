@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.0.1"
+    "version": "3.0.2"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.0.1",
-  "commit": "c6a627dcaf7549adc67080c0abc4a629df71262b",
+  "ref": "v3.0.2",
+  "commit": "e1291afd9389bea756e7644b814984a4e04db3dd",
   "packs": [
     "angular",
     "node-express"
@@ -18,7 +18,7 @@
       "source": "core/.claude/agents/git-agent.md"
     },
     ".claude/agents/orch-builder.md": {
-      "sha256": "2b8711a28536573c629c0ead164fc09d1a05f8685f2f4107273e94fece322244",
+      "sha256": "d474c11c1cd9c28c35565df879fdf9b8c59c6cb14cb477a13fb605be67c8941d",
       "kind": "managed",
       "source": "core/.claude/agents/orch-builder.md"
     },
@@ -943,7 +943,7 @@
       "source": "core/scripts/lib/invariants.mjs"
     },
     "scripts/lib/orch-folders.mjs": {
-      "sha256": "f3e5f3b0698c7d02362b5a7e238dd697e7381bd22f2a33d97c10e05a142b71d4",
+      "sha256": "50d56b94bce1f978dc8b624e9d0fadf792db5de5e5eab7d975bdf589244629a0",
       "kind": "managed",
       "source": "core/scripts/lib/orch-folders.mjs"
     },
@@ -1043,7 +1043,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "38cc45655d25ab2feeaba40e530911aad4b188948d00590968a8d707848a3c78",
+      "sha256": "a348c2d29e24a8cda71f8bad78a615b1068ceb426fb47d5d9b45df3c50f04c5b",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
@@ -1083,7 +1083,7 @@
       "source": "core/scripts/plan-order.mjs"
     },
     "scripts/plan-park.mjs": {
-      "sha256": "6c7b03a770cf6c4c23d0bf16fb3b72ed43021a637cabed989e038bb4c6b6d6f8",
+      "sha256": "2af8d7c221727aafe72de4e045399f0d35c1ae94d9ca1fdb3fa196e3e1f2e443",
       "kind": "managed",
       "source": "core/scripts/plan-park.mjs"
     },
@@ -1118,7 +1118,7 @@
       "source": "core/scripts/prune-old-sessions.sh"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "028d022f79101bc21043a28cb3c5e1bab6f5a46dd80c14c7792306b098d371bf",
+      "sha256": "ae0b7c5784dd8a4f84fd562f6dee31e5ede479f3134dd293e5d59b3a7981412e",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
