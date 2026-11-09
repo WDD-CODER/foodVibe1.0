@@ -6,20 +6,22 @@
  * syncMasterToUser (server/services/master-version.js) picks up the change on the
  * next refresh instead of comparing against a stale version.
  *
- * Run against local:  NODE_ENV=development node server/scripts/bump-master-version.js
- * Run against Atlas:  node server/scripts/bump-master-version.js
+ * Run against local:  node server/scripts/bump-master-version.js
+ * Run against Atlas:  node server/scripts/bump-master-version.js --target=atlas
+ * (--target=local|atlas, default local; atlas reads server/.env.live)
  */
 
 const mongoose = require('mongoose');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+const { parseTarget, loadServerEnv, mongoUri } = require('../utils/db-target');
 
-const isLocal = process.env.NODE_ENV === 'development';
-const uri = isLocal ? process.env.MONGO_LOCAL_URI : process.env.MONGO_URI;
+const target = parseTarget(process.argv);
+const isLocal = target === 'local';
 
 async function run() {
   console.log(`Connecting to ${isLocal ? 'LOCAL' : 'ATLAS'}...`);
-  await mongoose.connect(uri);
+  loadServerEnv(target);
+  await mongoose.connect(mongoUri(target));
   const { bumpMasterVersion } = require('../services/master-version');
   const version = await bumpMasterVersion();
   console.log(`Master version bumped to ${version} (${new Date(version).toISOString()})`);

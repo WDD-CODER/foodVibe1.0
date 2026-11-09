@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { spawnSync } from 'node:child_process'
 import { resolvePlanStart, databaseUri } from '../log-query.mjs'
 
 test('marker wins', () => {
@@ -26,18 +27,21 @@ test('no marker inside this repo -> merge-base (or 24h without origin/main)', ()
 })
 
 test('databaseUri', () => {
-  const keys = ['MONGO_LOCAL_URI', 'MONGO_URI', 'MONGO_REMOTE_URI']
-  const keep = Object.fromEntries(keys.map((k) => [k, process.env[k]]))
-  try {
-    for (const k of keys) delete process.env[k]
-    assert.equal(databaseUri({ remote: false }), '')
-    assert.equal(databaseUri({ remote: true }), '')
-    process.env.MONGO_LOCAL_URI = 'mongodb://x/y'
-    assert.equal(databaseUri({ remote: false }), 'mongodb://x/y')
-  } finally {
-    for (const k of keys) {
-      if (keep[k] === undefined) delete process.env[k]
-      else process.env[k] = keep[k]
-    }
-  }
+  assert.equal(databaseUri({ target: 'local', env: {} }), '')
+  assert.equal(databaseUri({ target: 'local', env: { MONGO_LOCAL_URI: 'mongodb://x/y' } }), 'mongodb://x/y')
+  assert.equal(databaseUri({ target: 'atlas', env: { MONGO_URI: 'mongodb://a/b' } }), 'mongodb://a/b')
+})
+
+test('databaseUri local never falls back to MONGO_URI', () => {
+  assert.equal(databaseUri({ target: 'local', env: { MONGO_URI: 'mongodb://atlas/x' } }), '')
+})
+
+test('databaseUri atlas without MONGO_URI throws', () => {
+  assert.throws(() => databaseUri({ target: 'atlas', env: {} }), /MONGO_URI is not set/)
+})
+
+test('--remote exits 1 with the replacement message', () => {
+  const r = spawnSync(process.execPath, [join(import.meta.dirname, '..', 'log-query.mjs'), '--remote'], { encoding: 'utf8' })
+  assert.equal(r.status, 1)
+  assert.match(r.stderr, /--remote was replaced by --target=atlas/)
 })

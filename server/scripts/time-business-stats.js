@@ -11,10 +11,11 @@
  *   node server/scripts/time-business-stats.js --target=local
  *   node server/scripts/time-business-stats.js --target=local --db=foodvibe_scratch_447
  *   node server/scripts/time-business-stats.js --target=atlas   (read-only, only on explicit request)
+ *   (atlas reads server/.env.live; no flag means local)
  */
 
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
+const { parseTarget, loadServerEnv, mongoUri } = require('../utils/db-target');
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 
 const { MongoClient } = require('mongodb');
@@ -38,15 +39,14 @@ function firstStage(explain) {
 }
 
 async function main() {
-  const target = arg('target');
-  if (target !== 'local' && target !== 'atlas') {
-    console.error('Usage: node server/scripts/time-business-stats.js --target=local|atlas [--db=<name>]');
-    process.exit(2);
-  }
-  const uri = target === 'local' ? process.env.MONGO_LOCAL_URI : process.env.MONGO_URI;
-  if (!uri) {
-    console.error(`${target === 'local' ? 'MONGO_LOCAL_URI' : 'MONGO_URI'} is not set in server/.env`);
-    process.exit(2);
+  let target, uri;
+  try {
+    target = parseTarget(process.argv, { required: true });
+    loadServerEnv(target);
+    uri = mongoUri(target);
+  } catch (err) {
+    console.error(err.message);
+    process.exit(1);
   }
 
   const client = new MongoClient(uri, { serverSelectionTimeoutMS: 8000 });

@@ -13,7 +13,7 @@ A bug report ("X didn't work", a Hebrew note) used to start from code reading, a
 3. Follow one failure end to end: `--requestId=<id>` returns the client and the server entries sharing that id.
 4. Slot dev-server output instead of Mongo: `--file` (default `.claude/be.log`; rotated runs sit in `.claude/logs/`, pruned after 14 days).
 5. Work gate: `--since=plan-start --level=error` must print `no entries`, or every entry is explained. `plan-start` is `.claude/.slot-plan-start`, written by `take-plan`.
-6. Production: add `--remote` (Atlas). It asks for `y`, or pass `--yes`. Reads `userId` only, never emails.
+6. Production: add `--target=atlas` (Atlas, reads `server/.env.live`). It asks for `y`, or pass `--yes`. Reads `userId` only, never emails.
 
 ## When to use
 

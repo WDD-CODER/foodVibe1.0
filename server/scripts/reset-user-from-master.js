@@ -17,6 +17,8 @@
  * Destructive: any genuine per-business work is lost. Intended for disposable
  * development accounts. Take a backup first (server/scripts/db-backup.js).
  *
+ * --target=local|atlas (default local); atlas reads server/.env.live.
+ *
  * Usage:
  *   node server/scripts/reset-user-from-master.js --user=dev-guest [--target=local|atlas] [--write]
  *   node server/scripts/reset-user-from-master.js --business=<businessId> [--target=local] [--write]
@@ -25,31 +27,31 @@
  */
 
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+const { parseTarget, loadServerEnv, mongoUri } = require('../utils/db-target');
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 
 const mongoose = require('mongoose');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 
 function parseArgs(argv) {
-  const args = { target: 'local' };
+  const args = {};
   for (const a of argv.slice(2)) {
     if (a.startsWith('--user=')) args.user = a.slice('--user='.length);
     else if (a.startsWith('--business=')) args.business = a.slice('--business='.length);
     else if (a === '--all-non-master') args.allNonMaster = true;
     else if (a === '--orphans') args.orphans = true;
-    else if (a.startsWith('--target=')) args.target = a.slice('--target='.length);
+    else if (a.startsWith('--target=')) continue;
     else if (a === '--write') args.write = true;
     else throw new Error(`Unknown argument: ${a}`);
   }
   if (!args.user && !args.business && !args.allNonMaster && !args.orphans) throw new Error('Pass --user=<id>, --business=<id>, --orphans, or --all-non-master');
-  if (!['local', 'atlas'].includes(args.target)) throw new Error("--target must be 'local' or 'atlas'");
+  args.target = parseTarget(argv);
   return args;
 }
 
 async function run({ user, business, allNonMaster, orphans, target, write }) {
-  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error('Mongo URI not set');
+  loadServerEnv(target);
+  const uri = mongoUri(target);
 
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 30000 });
   const db = mongoose.connection.db;
