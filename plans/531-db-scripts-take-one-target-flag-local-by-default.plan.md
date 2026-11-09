@@ -114,13 +114,13 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change. No dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] B1: Move the three "anything else is Atlas" checks onto the strict helper — check-name-lengths, check-unit-weights, time-business-stats — server/scripts/check-name-lengths.js, server/scripts/check-unit-weights.js, server/scripts/time-business-stats.js
-- [ ] B2: Move the backup, restore and reset scripts onto the helper (rules unchanged; `take-plan.mjs` keeps calling them with `--target=local`) — server/scripts/db-backup.js, server/scripts/db-restore.js, server/scripts/reset-user-from-master.js
-- [ ] B3: Make the master-version bump local by default — server/scripts/bump-master-version.js
-- [ ] B4: Replace `--remote` with `--target` in the log reader, keeping plan 517's fallbacks — scripts/log-query.mjs
-- [ ] B5: Guard the rule with a file-level test and extend the log-query tests — scripts/test/db-target-usage.test.mjs, scripts/test/log-query-fallback.test.mjs
-- [ ] B6: Update the two brain docs and the manifest — docs/brain/patterns/log-query-usage.md, docs/brain/gotchas/backend.md, docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
-- [ ] B7: Run every `[auto]` check plus `node server/scripts/check-name-lengths.js --target=prod` (expect exit 1 with the target message) and paste the outputs under Execution Notes
+- [x] B1: Move the three "anything else is Atlas" checks onto the strict helper — check-name-lengths, check-unit-weights, time-business-stats — server/scripts/check-name-lengths.js, server/scripts/check-unit-weights.js, server/scripts/time-business-stats.js
+- [x] B2: Move the backup, restore and reset scripts onto the helper (rules unchanged; `take-plan.mjs` keeps calling them with `--target=local`) — server/scripts/db-backup.js, server/scripts/db-restore.js, server/scripts/reset-user-from-master.js
+- [x] B3: Make the master-version bump local by default — server/scripts/bump-master-version.js
+- [x] B4: Replace `--remote` with `--target` in the log reader, keeping plan 517's fallbacks — scripts/log-query.mjs
+- [x] B5: Guard the rule with a file-level test and extend the log-query tests — scripts/test/db-target-usage.test.mjs, scripts/test/log-query-fallback.test.mjs
+- [x] B6: Update the two brain docs and the manifest — docs/brain/patterns/log-query-usage.md, docs/brain/gotchas/backend.md, docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
+- [x] B7: Run every `[auto]` check plus `node server/scripts/check-name-lengths.js --target=prod` (expect exit 1 with the target message) and paste the outputs under Execution Notes
 
 ## What happens when
 - A script runs with no flag: local (the two that require a target print the `--target=local|atlas is required` message and exit 1, as today).
@@ -146,3 +146,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 3(b), decision H6). The `_connect.js` users parse `--target` themselves through `parseArgs`, which plan 530 already routes through the helper.
+- Builder evidence:
+  - `node --test scripts/test/db-target-usage.test.mjs scripts/test/log-query-fallback.test.mjs` → exit 0, # pass 16, # fail 0
+  - `pnpm run test:server` → exit 0, 71 files, 848 tests passed
+  - `pnpm run lint` → exit 0 (0 errors, 67 pre-existing warnings)
+  - `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured`
+  - `node scripts/kit-manifest-check.mjs` → ok; `scope-check --arch` → `ARCH: ok INV-none`; `--reuse` → exit 0
+  - `node server/scripts/check-name-lengths.js --target=prod` → exit 1, `--target must be 'local' or 'atlas'` (run with NODE_PATH to the pnpm-store mongodb: this worktree's server/node_modules has no top-level `mongodb`, so the script's require failed before the target check otherwise)
+  - `--remote` → exit 1 `--remote was replaced by --target=atlas` (covered by log-query-fallback test)
+- Usage error for the three check-/time- scripts changed from exit 2 to exit 1 with the helper message, as the plan says.

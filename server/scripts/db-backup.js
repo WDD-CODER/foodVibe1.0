@@ -16,6 +16,8 @@
  *   node server/scripts/db-backup.js --target=local [--out=DIR]
  *   node server/scripts/db-backup.js --target=atlas [--out=DIR]
  *
+ * --target=local|atlas is required; atlas reads server/.env.live.
+ *
  * Restore a single collection with:
  *   node server/scripts/db-restore.js --target=local --file=DIR/RECIPE_LIST.json
  * (or hand the files to mongoimport --jsonArray once the tools are installed).
@@ -23,7 +25,7 @@
 
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+const { parseTarget, loadServerEnv, mongoUri } = require('../utils/db-target');
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 
 const { MongoClient } = require('mongodb');
@@ -34,19 +36,17 @@ const DEFAULT_OUT_ROOT = path.resolve(__dirname, '..', '..', '..', 'foodvibe-db-
 function parseArgs(argv) {
   const args = {};
   for (const arg of argv.slice(2)) {
-    if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
+    if (arg.startsWith('--target=')) continue;
     else if (arg.startsWith('--out=')) args.out = arg.slice('--out='.length);
     else throw new Error(`Unknown argument: ${arg}`);
   }
-  if (!['local', 'atlas'].includes(args.target)) {
-    throw new Error("--target must be 'local' or 'atlas'");
-  }
+  args.target = parseTarget(argv, { required: true });
   return args;
 }
 
 async function run({ target, out }) {
-  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error(`${target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
+  loadServerEnv(target);
+  const uri = mongoUri(target);
 
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
   const outDir = path.resolve(out || path.join(DEFAULT_OUT_ROOT, `${target}-${stamp}`));

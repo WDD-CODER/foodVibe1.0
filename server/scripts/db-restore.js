@@ -11,13 +11,15 @@
  *   node server/scripts/db-restore.js --target=local --dir=<snapshot dir> --db=<scratch db name>
  *   node server/scripts/db-restore.js --target=atlas --dir=<snapshot dir> --db=<scratch db name>
  *
+ * --target=local|atlas is required; atlas reads server/.env.live.
+ *
  * Prints a per-collection document-count comparison against the snapshot's
  * _manifest.json and exits non-zero on any mismatch.
  */
 
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+const { parseTarget, loadServerEnv, mongoUri } = require('../utils/db-target');
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 
 const { MongoClient } = require('mongodb');
@@ -26,12 +28,12 @@ const { EJSON } = require('bson');
 function parseArgs(argv) {
   const args = {};
   for (const arg of argv.slice(2)) {
-    if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
+    if (arg.startsWith('--target=')) continue;
     else if (arg.startsWith('--dir=')) args.dir = arg.slice('--dir='.length);
     else if (arg.startsWith('--db=')) args.db = arg.slice('--db='.length);
     else throw new Error(`Unknown argument: ${arg}`);
   }
-  if (!['local', 'atlas'].includes(args.target)) throw new Error("--target must be 'local' or 'atlas'");
+  args.target = parseTarget(argv, { required: true });
   if (!args.dir) throw new Error('--dir=<snapshot directory> is required');
   if (!args.db) throw new Error('--db=<scratch database name> is required');
   return args;
@@ -43,8 +45,8 @@ function sourceDbNameFromUri(uri) {
 }
 
 async function run({ target, dir, db: scratchDb }) {
-  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error(`${target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
+  loadServerEnv(target);
+  const uri = mongoUri(target);
 
   const sourceDb = sourceDbNameFromUri(uri);
   if (scratchDb === sourceDb) {

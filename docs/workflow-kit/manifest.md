@@ -313,6 +313,7 @@ Full per-file detail (params, refs) is in `manifest.json`; this is the human ind
 | `docs/brain/decisions/0028-read-only-local-mongodb-mcp.md` | stay | FoodVibe ADR 0028 (read-only local-only MongoDB MCP). |
 | `scripts/mcp-mongo-local.mjs` | stay | Plan 529: local-only read-only Mongo MCP launcher |
 | `scripts/test/mcp-mongo-local.test.mjs` | stay | Plan 529: local-only read-only Mongo MCP launcher |
+| `scripts/test/db-target-usage.test.mjs` | stay | Plan 531: every DB script chooses its database through db-target |
 | `docs/brain/decisions/0001-lean-native-workflow.md` | stay | FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied. |
 | `docs/brain/decisions/0002-file-based-memory-over-tool-memory.md` | stay | FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied. |
 | `docs/brain/decisions/0003-auto-evoke-brain-on-pr.md` | stay | FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied. |

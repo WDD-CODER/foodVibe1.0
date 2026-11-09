@@ -9,7 +9,7 @@
  *   --userId=  --requestId=  --source=client|server   --limit=<n> (default 50, max 500)
  *   --summary (group by event)   --json (raw)   --full (don't truncate context)
  *   --file[=path] (parse a JSON-lines log, default .claude/be.log)
- *   --remote (Atlas; needs --yes or an interactive y)   --prune-logs (delete .claude/logs/*.log older than 14d)
+ *   --target=local|atlas (default local; atlas reads server/.env.live, needs --yes or an interactive y)   --prune-logs (delete .claude/logs/*.log older than 14d)
  */
 import { createRequire } from 'module'
 import { execFileSync } from 'child_process'
@@ -45,9 +45,18 @@ export function resolvePlanStart(root = ROOT) {
   return { value: new Date(Date.now() - 86400e3).toISOString(), source: '24h' }
 }
 
-/** The Mongo URI for the chosen database, or '' when none is configured (call after the dotenv loads). */
-export function databaseUri({ remote = false } = {}) {
-  return (remote ? (process.env.MONGO_REMOTE_URI || process.env.MONGO_URI) : (process.env.MONGO_LOCAL_URI || process.env.MONGO_URI)) || ''
+const serverRequire = createRequire(resolve(ROOT, 'server', 'package.json'))
+const dbTarget = () => serverRequire('./utils/db-target.js')
+
+/**
+ * The Mongo URI for the chosen target, or '' when local has none configured (SKIP). Local never falls back
+ * to the Atlas URI; an atlas target without MONGO_URI throws. Call after loadServerEnv.
+ */
+export function databaseUri({ target = 'local', env = process.env } = {}) {
+  try { return dbTarget().mongoUri(target, { env }) } catch (err) {
+    if (target === 'atlas') throw err
+    return ''
+  }
 }
 
 async function main() {
@@ -62,6 +71,8 @@ async function main() {
     console.error(`log-query: ${msg}`)
     process.exit(1)
   }
+
+  if (has('remote')) die('--remote was replaced by --target=atlas')
 
   if (has('prune-logs')) {
     const dir = join(ROOT, '.claude', 'logs')
@@ -120,7 +131,7 @@ async function main() {
 
   async function confirmRemote() {
     if (has('yes')) return
-    if (!process.stdin.isTTY) die('--remote reads production logs: pass --yes to confirm')
+    if (!process.stdin.isTTY) die('--target=atlas reads production logs: pass --yes to confirm')
     const rl = createInterface({ input: process.stdin, output: process.stdout })
     const answer = await new Promise((r) => rl.question('Read Atlas (production) logs? [y/N] ', r))
     rl.close()
@@ -128,18 +139,27 @@ async function main() {
   }
 
   async function fromMongo() {
-    const remote = has('remote')
-    const require = createRequire(resolve(ROOT, 'server', 'package.json'))
-    const { MongoClient } = require('mongoose').mongo
-    const { config } = require('dotenv')
-    config({ path: resolve(ROOT, 'server', '.env') })
-    config({ path: resolve(ROOT, '.env') })
-    const uri = databaseUri({ remote })
+    const { MongoClient } = serverRequire('mongoose').mongo
+    let target, uri
+    try {
+      target = dbTarget().parseTarget(process.argv)
+      dbTarget().loadServerEnv(target)
+      // the root .env fills only what is still unset (never overrides, never the live URI)
+      const rootEnv = resolve(ROOT, '.env')
+      if (existsSync(rootEnv)) {
+        for (const [k, v] of Object.entries(serverRequire('dotenv').parse(readFileSync(rootEnv)))) {
+          if (process.env[k] === undefined) process.env[k] = v
+        }
+      }
+      uri = databaseUri({ target })
+    } catch (err) {
+      die(err.message)
+    }
     if (!uri) {
       console.log('SKIP: no database configured')
       process.exit(0)
     }
-    if (remote) {
+    if (target === 'atlas') {
       await confirmRemote()
       console.log('REMOTE (Atlas)')
     }

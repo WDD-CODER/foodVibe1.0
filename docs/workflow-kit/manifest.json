@@ -4550,6 +4550,16 @@
       "notes": "Tests for design-handoff-ingest.mjs. Classified by plan 390."
     },
     {
+      "path": "scripts/test/db-target-usage.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/utils/db-target.js"
+      ],
+      "notes": "File-level guard: every DB script chooses its database through db-target. Plan 531."
+    },
+    {
       "path": "scripts/test/log-query-fallback.test.mjs",
       "tier": "project",
       "action": "stay",
