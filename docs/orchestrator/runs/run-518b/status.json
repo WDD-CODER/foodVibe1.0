@@ -270,10 +270,20 @@
       "nnn": "533",
       "title": "The unified date field owns its styles: nothing reaches in from outside, nothing is broken",
       "branch": "feat/533-date-field-owns-its",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "build",
-      "models": {},
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T10:41:33.007Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T10:49:10.155Z"
+        }
+      },
       "humanItems": [
         "On a phone (or Chrome device mode, 390 px) and on desktop (1280 px), for each of the seven places in \"Where the date field is\" below: tapping or clicking the date opens a calendar fully on screen, the typed date reads left to right as dd/mm/yyyy inside right-to-left text, and nothing is clipped or overlaps. Report any place that fails by its number."
       ],
@@ -282,28 +292,189 @@
           "at": "2026-11-09T10:30:15.356Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-09T10:41:32.834Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:41:33.009Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:45:54.307Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:49:04.345Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:49:10.157Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:49:29.059Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:50:19.843Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "533",
+          "title": "The unified date field owns its styles: nothing reaches in from outside, nothing is broken",
+          "branch": "feat/533-date-field-owns-its",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "reason": "worktree: git worktree add C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-518b-533: fatal: 'feat/533-date-field-owns-its' is already used by worktree at 'C:/coding projects/Cursor/foodVibe1.0-orch-run-518-533'",
+          "freeDiskGb": 8.9
         }
       ],
       "tiers": [
         "build"
       ],
-      "reason": "worktree: git worktree add C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-518b-533: fatal: 'feat/533-date-field-owns-its' is already used by worktree at 'C:/coding projects/Cursor/foodVibe1.0-orch-run-518-533'",
-      "freeDiskGb": 8.9
+      "freeDiskGb": 7.9,
+      "sha": "72ac4a7737e50a8ed262cada2f2a8b00cb6fe5aa",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 258.6,
+          "tokens": {
+            "input": 164740,
+            "output": 2586
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 17.5,
+          "tokens": {
+            "input": 54223,
+            "output": 804
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "7a143980a80a7b71a0fd815c541ee903cd76ecc1"
     },
     "534": {
       "nnn": "534",
+      "title": "Design port maps every designed element to a component family (Claude Design → Angular, 1 of 2)",
+      "branch": "feat/534-design-port-maps-every",
+      "state": "merged",
       "round": 0,
-      "models": {},
-      "state": "skipped",
-      "reason": "depends on parked 533",
-      "freeDiskGb": 8.9,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T10:51:52.797Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T11:04:00.708Z"
+        }
+      },
+      "humanItems": [
+        "Read `.claude/commands/design-port.md` Step 2 and Step 6: Inventory 3 has a `Family` column, the \"Family changes\" list applies the 2026-10-22 rule in plain words, and Step 6 runs `reuse-lint` and `/review-it` before the validation cards."
+      ],
       "history": [
         {
           "at": "2026-11-09T10:30:15.647Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-09T10:51:52.627Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:51:52.800Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T10:55:40.528Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T11:03:56.061Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T11:04:00.710Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T11:04:08.398Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T11:04:44.026Z",
+          "state": "merged",
+          "round": 0
         }
-      ]
+      ],
+      "earlier": [
+        {
+          "nnn": "534",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "depends on parked 533",
+          "freeDiskGb": 8.9
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.6,
+      "sha": "97aa34b19a68399da35176a94c1666b81cb2330d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 220.8,
+          "tokens": {
+            "input": 1275762,
+            "output": 15005
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6.7,
+          "tokens": {
+            "input": 34105,
+            "output": 501
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "1682fd895d6c8fd94c86d865680ae34cbe1a9547"
     }
   },
   "notes": [
@@ -330,12 +501,22 @@
     {
       "at": "2026-11-09T10:30:15.840Z",
       "text": "wave 1 parked 533 — skipped 534; 0 later plan(s) go on"
+    },
+    {
+      "at": "2026-11-09T10:41:32.646Z",
+      "plan": "533",
+      "text": "the folder foodVibe1.0-orch-run-518b-533 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T10:51:52.470Z",
+      "plan": "534",
+      "text": "the folder foodVibe1.0-orch-run-518b-534 was installed (root, scripts, server)"
     }
   ],
-  "attempts": 1,
+  "attempts": 2,
   "phase": "finished",
-  "freeDiskGb": 8.9,
-  "updatedAt": "2026-11-09T10:32:57.878Z",
+  "freeDiskGb": 6.6,
+  "updatedAt": "2026-11-09T11:06:44.639Z",
   "decisions": [
     {
       "id": "D1",
@@ -388,13 +569,65 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "533",
+      "type": "behaviour",
+      "text": "behaviour: the new spec asserts the picker's block-size is 1px and min-block-size is 0px. It does not assert inline-size is 1px, because the picker is 100% wide by design (the plan's wording said 1px) — reverse: change the assertion if a 1px width is wanted.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "534",
+      "type": "behaviour",
+      "text": "behaviour: added a new FAMILIES_PATH constant in the ingest script for component-families.md, because the imported REGISTRY_PATH already names the screens registry — reverse: rename or merge the constants",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "534",
+      "type": "behaviour",
+      "text": "behaviour: the `Screens:` log line shows `—` when a handoff targets only families — reverse: restore the old single-form output",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "534",
+      "type": "behaviour",
+      "text": "behaviour: skipped docs/workflow-kit/manifest.md because it has no rows for the ADRs or the ingest script. The plan's P1 item mentions both files, but the check passes with manifest.json alone — reverse: add the notes to manifest.md",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-09T10:32:57.877Z",
+  "finishedAt": "2026-11-09T11:06:44.637Z",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-09T10:32:57.878Z",
+    "at": "2026-11-09T11:06:44.639Z",
     "attempt": 1,
     "blamed": []
   }
