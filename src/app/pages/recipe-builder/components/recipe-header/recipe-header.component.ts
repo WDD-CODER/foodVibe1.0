@@ -32,6 +32,7 @@ import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/c
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
+import { serverFieldErrors } from 'src/app/core/utils/server-refusal.util'
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
@@ -250,6 +251,16 @@ export class RecipeHeaderComponent {
     if (!yieldUnit?.trim()) errors['yield_unit'] = 'field_unit_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
+  }
+
+  /** Plan 540: mark the fields the server refused (the toast already came from the interceptor). */
+  markServerErrors(err: unknown): void {
+    const marks = serverFieldErrors(err, {
+      nameHebrew: 'nameHebrew',
+      yieldAmount: 'yield_amount',
+      yieldUnit: 'yield_unit'
+    })
+    this.validationErrors_.update((cur) => ({ ...cur, ...marks }))
   }
 
   isYieldManualOverride(): boolean {

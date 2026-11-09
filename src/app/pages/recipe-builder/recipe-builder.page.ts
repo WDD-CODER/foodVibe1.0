@@ -52,6 +52,7 @@ import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stam
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserService } from '@services/user.service'
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
+import { refusalShownToUser } from 'src/app/core/utils/server-refusal.util'
 import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
@@ -699,9 +700,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.saving.setSaving(false)
       this.isSubmitted = true
       return true
-    } catch {
+    } catch (err) {
       this.saving.setSaving(false)
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'))
+      // Plan 540: kitchen-state / the interceptor already showed the toast; mark the refused fields.
+      this.recipeHeaderRef_()?.markServerErrors(err)
+      if (!refusalShownToUser(err)) this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'))
       return false
     }
   }
@@ -920,9 +923,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     let saved: Recipe
     try {
       saved = await this.state_.saveRecipe(recipe)
-    } catch {
+    } catch (err) {
       this.saving.setSaving(false)
-      if (!navigateOnSuccess) this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'))
+      this.recipeHeaderRef_()?.markServerErrors(err)
+      if (!navigateOnSuccess && !refusalShownToUser(err)) {
+        this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'))
+      }
       return
     }
     this.saving.setSaving(false)

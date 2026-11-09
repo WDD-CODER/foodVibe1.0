@@ -28,6 +28,7 @@ import {
 } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ActivatedRoute, Router } from '@angular/router'
+import { serverFieldErrors } from '@utils/server-refusal.util'
 
 import { ConversionService } from '@services/conversion.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -94,6 +95,13 @@ interface ProductFormValue {
   supplierIds_?: string[]
   supplierPrices_?: SupplierPrices
   [key: string]: unknown
+}
+
+/** Schema field the server may refuse -> this form's validationErrors_ key (plan 540). */
+const SERVER_FIELD_MAP: Record<string, string> = {
+  nameHebrew: 'productName',
+  baseUnit: 'baseUnit',
+  categories: 'categories'
 }
 
 @Component({
@@ -943,8 +951,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     let saved: Product
     try {
       saved = await this.kitchenStateService.saveProduct(productToSave)
-    } catch {
+    } catch (err) {
       this.saving.setSaving(false)
+      // Plan 540: mark the field the server refused; the toast already came from the interceptor.
+      this.validationErrors_.update((cur) => ({ ...cur, ...serverFieldErrors(err, SERVER_FIELD_MAP) }))
       return false
     }
     this.saving.setSaving(false)

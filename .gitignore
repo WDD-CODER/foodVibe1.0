@@ -164,3 +164,5 @@ bugs/qa-runs/code-qa/
 .claude/qa-code.log
 # Plan 414 — qa-up.ps1 records whether the QA backend uses local or remote Mongo
 .claude/.qa-env
+# Orchestrator run state (kit v3.0.0 prerequisite; was only in .git/info/exclude)
+.claude/orchestrator-runs/

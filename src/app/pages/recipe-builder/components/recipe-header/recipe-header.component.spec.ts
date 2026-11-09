@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormArray, FormBuilder, ReactiveFormsModule } from '@angular/forms'
 import { provideHttpClient } from '@angular/common/http'
@@ -327,6 +328,19 @@ describe('RecipeHeaderComponent', () => {
     expect(conversions.length).toBe(1)
     expect(component.yield.availableSecondaryUnits_()).toContain('liter')
   })
+  it('plan 540: a refused nameHebrew shows the server message under the name', () => {
+    component.markServerErrors(
+      new HttpErrorResponse({
+        status: 400,
+        url: '/api/v1/data/recipes',
+        error: { error: 'Validation failed', issues: [{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }] }
+      })
+    )
+    fixture.detectChanges()
+    expect(component.validationErrors_()['nameHebrew']).toBe('server_field_too_long')
+    expect(fixture.nativeElement.querySelector('.c-field-error')?.textContent).toContain('server_field_too_long')
+  })
+
   describe('partial cost badge (plan 444)', () => {
     it('shows the badge for an unpriced ingredient and hides it when every row is priced', () => {
       const kitchen = TestBed.inject(KitchenStateService) as unknown as Record<string, unknown>

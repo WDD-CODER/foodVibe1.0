@@ -9,11 +9,7 @@
 
   <form [formGroup]="equipmentForm_" (ngSubmit)="onSubmit()" class="form-body">
     <div class="form-section">
-      <app-form-field
-        label="name"
-        forId="nameHebrew"
-        [error]="validationErrors_()['nameHebrew'] ? 'field_name_required' : null"
-      >
+      <app-form-field label="name" forId="nameHebrew" [error]="validationErrors_()['nameHebrew'] || null">
         <input
           #nameInput
           id="nameHebrew"
@@ -24,11 +20,7 @@
           [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
       </app-form-field>
-      <app-form-field
-        label="category"
-        forId="category"
-        [error]="validationErrors_()['category'] ? 'field_category_required' : null"
-      >
+      <app-form-field label="category" forId="category" [error]="validationErrors_()['category'] || null">
         <app-custom-select
           triggerId="category"
           formControlName="category"
