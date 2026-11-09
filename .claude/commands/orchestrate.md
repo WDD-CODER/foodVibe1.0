@@ -1,5 +1,5 @@
 ---
-description: Run saved plans unattended into one run branch with scripts/run-plans.mjs — prints the line to run, starts it on `start`, reads the result from status.json; the Human merges the run branch.
+description: Run saved plans unattended into one run branch with scripts/run-plans.mjs — starts it under the supervisor right after a dry run that says WOULD START yes, reads the result from status.json; the Human merges the run branch.
 ---
 
 # /orchestrate — run saved plans with run-plans.mjs (FoodVibe)
@@ -21,29 +21,37 @@ reviewer are model calls. This command starts no workflow and no agent; it runs 
 - `WOULD START: no — …`: stop and show the reason (an open Critical Question, a lint problem, the preflight). Fix the
   plan or the environment first; never edit around a refusal.
 
-## 2. Hand the Human the line
+## 2. Start the run at once
 
-Print the command for a PowerShell terminal in the main folder:
+After `WOULD START: yes`, start it at once (no reply asked; the dry run was the check):
+`node scripts/run-supervisor.mjs --run <run> --plans <NNN,NNN>`. It prints `SUPERVISOR_STARTED <pid>` and returns:
+the supervisor runs the run outside this session, so closing the session does not stop it. Beside a run still
+running, a second one starts only with 4 GB of free memory (`node scripts/run-supervisor.mjs --free-mem`).
+Print the watch line (one line per plan: state, round, tier and model, minutes in it, last `calls.csv` row; the run's
+own log is `.claude/orchestrator-runs/<run>.console.log`, appended):
+`cd "<main folder>"; node scripts/orch-state.mjs watch --run <run>`. To learn when it ends or asks, start this wait as
+a background shell command (one `-e 'ASK <id> '` per card already printed; none yet: `-e '^$'`):
+`until ! node scripts/orch-state.mjs watch --run <run> | grep -q '^RUNNING' || node scripts/orch-state.mjs watch --run <run> | grep '^ASK ' | grep -qv -e '^$'; do sleep 60; done`.
+When it exits while the run is still RUNNING, print the new card (3) and start the wait again; else go to 4.
 
-```
-node scripts/run-plans.mjs --run <run> --plans <NNN,NNN>
-```
+## 3. Deaths and rate limits
 
-and the line that follows the run from a second terminal:
-
-```
-node scripts/orch-state.mjs watch --run <run>
-```
-
-Then say: reply `start` to run it from here instead.
-
-## 3. `start`
-
-Run the same command with `run_in_background`. Do not poll it; when it ends, go to 4.
+The supervisor relaunches a run that died (up to 3 times, with 4 GB of free memory) and a run stopped by a rate
+limit (after the reset). This session never relaunches a run itself and never sends the Human to a terminal for it.
+A question stops only its own plan: print every `ASK` card `watch` shows as soon as it appears, without waiting for the
+run's end; the Human answers with the card's line (`node scripts/orch-state.mjs answer --run <run> --id <id> --choice <n>`).
+Never ask the Human a question the card marks "the Human or the advisor answers" when its recommendation answers it,
+unless the Human asked to be asked.
 
 ## 4. The result
 
 Read `.claude/orchestrator-runs/<run>/status.json` and print: merged, parked (each with its reason), skipped (each with
 its reason), `stopReason` when set, the report (`.claude/orchestrator-runs/<run>.md`) and `calls.csv` beside the status
-file. A run stopped with `rate-limit` is relaunched with the same command after the limit resets (merged plans are left
-out). The Human merges `orch/<run>`; never merge it, never touch `main`.
+file; every stop is in `status.json` `stops[]`. The Human merges `orch/<run>`; never merge it, never touch `main`.
+
+## 5. The cards — without being asked
+
+Right after 4, when the report lists human items: a card that needs the app → serve the run branch in an idle slot
+(`node scripts/slot-serve.mjs --ref orch/<run>`); check every card URL answers (fix a failed
+start first); print the cards (`docs/agent/job-validation.md` → Format) at once, never after a `cards` reply; when
+the Human replies, check the URLs answer again.
