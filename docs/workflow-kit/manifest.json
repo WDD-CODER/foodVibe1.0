@@ -5860,6 +5860,14 @@
       "params": [],
       "refs": [],
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.0.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "docs/brain/human-decisions.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Copy of the kit file docs/brain/human-decisions.md (kit PR #121). Classified project/stay until a kit release installs it through kit-sync."
     }
   ]
 }
