@@ -132,6 +132,33 @@ describe('EventPipelineService', () => {
     expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:server_error')
   })
 
+  describe('logistics (plan 521)', () => {
+    const patch = {
+      answers: [
+        { itemKey: 'חשמל', phase: 'site_visit' as const, section: 'infrastructure' as const, status: 'needed' as const }
+      ]
+    }
+
+    it('saveLogistics PUTs the patch and keeps the returned event', async () => {
+      const done = service.saveLogistics('ev1', patch)
+      const req = backend.expectOne(`${BASE}/api/v1/events/ev1/logistics`)
+      expect(req.request.method).toBe('PUT')
+      expect(req.request.body).toEqual(patch)
+      req.flush({ ...inquiry, _id: 'ev1', name: 'מעודכן' })
+      expect((await done).ok).toBeTrue()
+      expect(data.allMenuEvents_().find((e) => e._id === 'ev1')?.name).toBe('מעודכן')
+    })
+
+    it('a 403 returns ok false and leaves the toast to the interceptor', async () => {
+      const done = service.saveLogistics('ev1', patch)
+      backend
+        .expectOne(`${BASE}/api/v1/events/ev1/logistics`)
+        .flush({ error: 'FORBIDDEN' }, { status: 403, statusText: 'Forbidden' })
+      expect((await done).ok).toBeFalse()
+      expect(userMsg.onSetErrorMsg).not.toHaveBeenCalled()
+    })
+  })
+
   describe('closing (plan 446)', () => {
     const snapshot = { at: 1, suppliers: [], extraCosts: 0, plannedRevenue: 0, plannedProfit: 0, plannedProfitPct: 0 }
 

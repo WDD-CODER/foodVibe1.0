@@ -3,7 +3,16 @@ import { HttpClient } from '@angular/common/http'
 import { firstValueFrom, Observable } from 'rxjs'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
-import type { EventClosing, EventStage, MenuEvent, NotClosedReason, PlanSnapshot } from '@models/menu-event.model'
+import type {
+  EventClosing,
+  EventStage,
+  LogisticsAnswer,
+  MenuEvent,
+  NotClosedReason,
+  PlanSnapshot
+} from '@models/menu-event.model'
+import type { EnvironmentType } from '@models/venue.model'
+import type { LogisticsPhase } from '@schemas/entities'
 import { stageErrorKey } from '../utils/event-stage-ui.util'
 import { LoggingService } from './logging.service'
 import { MenuEventDataService } from './menu-event-data.service'
@@ -11,6 +20,16 @@ import { TranslationService } from './translation.service'
 import { UserMsgService } from './user-msg.service'
 
 const EVENTS_URL = `${environment.apiUrl}${API.events}`
+
+/** Plan 521: what one logistics save may carry; the server stamps `at`, `by` and `byName` on each answer. */
+export interface LogisticsPatch {
+  answers?: Omit<LogisticsAnswer, 'at' | 'by' | 'byName'>[]
+  environmentType?: EnvironmentType
+  venueProfileId?: string | null
+  meetingAt?: string
+  meetingWith?: string
+  phaseDone?: Partial<Record<LogisticsPhase, number | null>>
+}
 
 export interface StageChange {
   stage: EventStage
@@ -43,6 +62,13 @@ export class EventPipelineService {
   }
 
   /** Plan 446: saves the closing (amounts: owner; arrived, invoice, photos: staff too; the server decides). */
+  /** Plan 521: saves logistics answers and meeting details; the returned event lands in the store. */
+  saveLogistics(eventId: string, patch: LogisticsPatch): Promise<PipelineResult> {
+    return this.run('logistics.save', 'server_error', () =>
+      this.http.put<MenuEvent>(`${EVENTS_URL}/${eventId}/logistics`, patch)
+    )
+  }
+
   saveClosing(eventId: string, closing: EventClosing): Promise<PipelineResult> {
     return this.run('closing.save', 'server_error', () =>
       this.http.put<MenuEvent>(`${EVENTS_URL}/${eventId}/closing`, { closing })
