@@ -140,7 +140,9 @@ Always against the app **as it is right now**, never older screenshots or `visua
 
 ### Step 1 — Take EXACTLY ONE screen
 The first target of the handoff, the first `todo`, or the one the Human names. **One screen per
-session. Never two.** Status → `spec-pending-approval` once the spec is written.
+session. Never two.** A handoff can instead target **one family**: its README mapping table names the family's path
+(for example `src/app/shared/date-field/`). The ingest then prints a `families:` line; the port edits only that
+family's folder plus the re-check list, and still takes exactly one target per session. Status → `spec-pending-approval` once the spec is written.
 
 ### Step 2 — Port-spec, before any code
 Write `_claude-data/design-migration/screens/NN-<screen>.port-spec.md`: the Phase B delta list +
@@ -175,19 +177,36 @@ session.** Walk the design plus its CSS/JS (handoff `colors_and_type.css`, `desi
 `colors_and_type.css`, `mobile-pass.css`, `shell.js`). Map **every** visual decision to something
 that already exists:
 
-| Element | Design value (exact, from source) | Maps to | Notes |
-|---|---|---|---|
-| e.g. KPI card surface | `rgba(255,255,255,0.55)` + blur | `.c-glass-card` | |
-| e.g. section gap | `1.5rem` | `--space-6` | |
+| Element | Design value (exact, from source) | Maps to | Family | Notes |
+|---|---|---|---|---|
+| e.g. KPI card surface | `rgba(255,255,255,0.55)` + blur | `.c-glass-card` | `page` | |
+| e.g. date field box | `1px` border, `0.5rem` radius | `.c-input` | `form-field` | |
+| e.g. section gap | `1.5rem` | `--space-6` | `page` | |
 
 Rules:
 - Every row resolves to an existing `.c-*` engine or a named token in `src/styles.scss`, or to a new
   token the handoff README explicitly lists (append-only in `styles.scss`).
+- `Family` is one of: a family id from `docs/brain/component-families.md` (`### <id>`); `page` (screen-only
+  layout with no shared piece); or `new: <id> — <why>` (ladder rung 4, `docs/agent/standards-reuse.md`), which
+  stops for the Human like an unmapped row. An element that does the job of a family piece maps to that family —
+  never a new page-local component. Restyle the family; never style it from the page (reuse-lint
+  `family-styled-from-outside`).
 - A row that maps to nothing goes under **"Unmapped — needs a call"** and you stop for the Human.
   Never improvise a value.
 - Quote design values **exactly from the source file** — never from memory, never from an image.
 - Cover at minimum: surfaces, elevation, spacing, type scale + weight, color, border, radius, shadow,
   hover/active/focus states, and responsive behavior at every Phase B breakpoint.
+
+**Family changes** — after Inventory 3, one row per family whose look the design changes:
+
+| Family | What changes (exact values) | Base or variant | Screens to re-check |
+|---|---|---|---|
+
+By default the change goes to the family's shared base, and every screen that uses the family is listed for
+re-check — do not ask each time (Human decision 2026-10-22, ADR 0029). A change that only fits this screen becomes
+a variant input on the family (ladder rung 3), named in the row. The screens come from the family's `Users:` line
+in `docs/brain/component-families.md`, else from `git grep -l "<selector>" -- "src/app/**/*.html"`. Each re-check
+screen becomes one `[human]` card.
 
 **Human check list:** with a handoff, its README "Acceptance checklist" becomes the spec's `[human]`
 list (one card each, per `docs/agent/job-validation.md`).
@@ -208,6 +227,10 @@ treatment and no handler.
 
 ### Step 6 — Verify
 - `ng build` — 0 errors. `ng test` — no new failures.
+- **Reuse and review (before the validation cards):** run `node scripts/reuse-lint.mjs --diff=origin/main` (no
+  `REUSE: warn` line for a touched file) and `/review-it` on the branch (plan, bugs and rules finders → verifier). A
+  `blocker` stops the hand-off. When a family's look changed, add to its registry entry in
+  `docs/brain/component-families.md` the line `- Design changes: <YYYY-MM-DD> <handoff slug> — <what changed> — base | variant <name> — re-checked: <screens>`.
 - **Lost-feature gate:**
   ```
   node scripts/design-feature-inventory.mjs --screen <screen> --compare _claude-data/design-migration/screens/NN-<screen>.features.json --spec _claude-data/design-migration/screens/NN-<screen>.port-spec.md

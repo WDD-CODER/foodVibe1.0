@@ -109,13 +109,13 @@ line or file this plan names was removed, renamed or rewritten).
 - No app UI. No dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Make every designed element name its family, and write the 2026-10-22 rule — Inventory 3 column, Family changes list, Step 6 checks, one-family handoffs — .claude/commands/design-port.md
-- [ ] A2: Let the registry hold a family's design history — the `Design changes` field in the preamble — docs/brain/component-families.md
-- [ ] A3: Ingest a handoff that targets a family — `registryFamilies`, the `families` targets, the report line, the header comment — scripts/design-handoff-ingest.mjs
-- [ ] A4: Test the family targets — a README whose mapping table names `` `src/app/shared/date-field/` `` → `families: [{ family: 'form-field', path: 'src/app/shared/date-field' }]` against a registry fixture that lists that path under `### form-field`; a mixed table → both a screen and a family; a path in neither → `shell`; an existing per-screen case stays green — scripts/test/design-handoff-ingest.test.mjs
-- [ ] A5: Record the decision — ADR 0029 and the index line — docs/brain/decisions/0029-design-ports-go-through-the-family-registry.md, docs/brain/index.md
-- [ ] A6: Keep the kit manifest true — docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
-- [ ] A7: Run every `[auto]` check and paste the outputs under Execution Notes
+- [x] A1: Make every designed element name its family, and write the 2026-10-22 rule — Inventory 3 column, Family changes list, Step 6 checks, one-family handoffs — .claude/commands/design-port.md
+- [x] A2: Let the registry hold a family's design history — the `Design changes` field in the preamble — docs/brain/component-families.md
+- [x] A3: Ingest a handoff that targets a family — `registryFamilies`, the `families` targets, the report line, the header comment — scripts/design-handoff-ingest.mjs
+- [x] A4: Test the family targets — a README whose mapping table names `` `src/app/shared/date-field/` `` → `families: [{ family: 'form-field', path: 'src/app/shared/date-field' }]` against a registry fixture that lists that path under `### form-field`; a mixed table → both a screen and a family; a path in neither → `shell`; an existing per-screen case stays green — scripts/test/design-handoff-ingest.test.mjs
+- [x] A5: Record the decision — ADR 0029 and the index line — docs/brain/decisions/0029-design-ports-go-through-the-family-registry.md, docs/brain/index.md
+- [x] A6: Keep the kit manifest true — docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
+- [x] A7: Run every `[auto]` check and paste the outputs under Execution Notes
 
 ## What happens when
 - A designed element fits no family and no token: it goes under "Unmapped — needs a call" and the port stops for the Human, as today.
@@ -141,3 +141,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 8(a), item D2, decision H4). Draft items 1–4 and 6 of the 2026-10-22 chat: 1 (Family column), 2 (registry recording), 3 (family handoffs) here; 4 (lint rule) is plan 533; 6 (checker) reuses `/review-it` — `orch-check-*` and `orch-ui` still exist after the v2.1.0 sync. Item 5 (catalog) is plan 535.
+- Builder 2026-11-09: ran every [auto] check. design-handoff-ingest tests -> exit 0, pass 12 fail 0 (3 new family cases); reuse-lint --check-registry -> exit 0 (25 families); kit-manifest-check -> exit 0, 0 unclassified; scope-check --arch -> ARCH: ok INV-none; --reuse -> exit 0. FAMILIES_PATH constant added in the ingest script because REGISTRY_PATH already names the screens registry.

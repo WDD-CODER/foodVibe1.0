@@ -22,6 +22,9 @@ Each family: `Status` (`stable` = use it as is; `converging` = a refactor plan i
 path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on `origin/mvp-review`
 `1953dcb5`, 2026-10-21; the audit numbers were from `8ffda3d2`) and the plan that removes them.
 
+Optional field `Design changes`, written by `/design-port` Step 6 when a family's look changed:
+`- Design changes: <YYYY-MM-DD> <handoff slug> — <what changed> — base | variant <name> — re-checked: <screens>`.
+
 ## UI families
 
 ### search-combobox — a search box with a results list
