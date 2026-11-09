@@ -55,14 +55,17 @@ export class VenueDetailComponent implements OnInit {
     return this.menuEventData.allMenuEvents_().filter((e) => e.logistics?.venueProfileId === venueId)
   })
 
-  protected readonly contactInitials_ = computed(() => {
-    const name = this.venue_()?.contactName?.trim()
-    if (!name) return ''
-    return name
-      .split(/\s+/)
-      .map((w) => w[0])
-      .join('')
-  })
+  /** Plan 372: every contact with its initials, for the contacts card. */
+  protected readonly contacts_ = computed(() =>
+    (this.venue_()?.contacts ?? []).map((c) => ({
+      ...c,
+      initials: c.name
+        .trim()
+        .split(/\s+/)
+        .map((w) => w[0])
+        .join('')
+    }))
+  )
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()

@@ -1619,6 +1619,11 @@
     "save_refused_hidden": "השמירה נכשלה: בפריט נשמר נתון ישן שהמערכת לא מכירה. פנו לתמיכה — הפרטים נשמרו ביומן",
     "save_refused_generic": "השמירה נכשלה: המערכת דחתה את הבקשה. נסו שוב, ואם זה חוזר — פנו לתמיכה",
     "server_field_too_long": "הטקסט ארוך מדי",
-    "server_field_invalid": "ערך לא תקין"
+    "server_field_invalid": "ערך לא תקין",
+    "venue_contacts": "אנשי קשר",
+    "venue_add_contact": "הוסף איש קשר",
+    "contact_role": "תפקיד",
+    "venue_hours_add_row": "הוסף שעות",
+    "venue_manager_role": "מנהל המקום"
   }
 }

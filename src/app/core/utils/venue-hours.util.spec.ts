@@ -3,7 +3,9 @@ import {
   formatTimeRange,
   formatVenueHours,
   formatVenueHoursLines,
-  parseTimeRange
+  hoursToDraft,
+  parseTimeRange,
+  toDisplay
 } from './venue-hours.util'
 
 describe('formatVenueHours', () => {
@@ -94,5 +96,29 @@ describe('venue-hours.util (plan 537)', () => {
     it('ok', () => {
       expect(checkHoursRow(base)).toBe('ok')
     })
+  })
+})
+
+describe('toDisplay and structured hours (plan 372)', () => {
+  it('compresses consecutive days', () => {
+    expect(toDisplay([0, 1, 2, 3, 4], '08:00', '23:00')).toEqual({ days: 'א׳–ה׳', time: '08:00–23:00' })
+  })
+  it('writes a single day, a gap and the whole week', () => {
+    expect(toDisplay([4], '18:00', '02:00')).toEqual({ days: 'ה׳', time: '18:00–02:00' })
+    expect(toDisplay([0, 1, 3], '09:00', '10:00').days).toBe('א׳–ב׳, ד׳')
+    expect(toDisplay([6, 0, 1, 2, 3, 4, 5], '09:00', '10:00').days).toBe('א׳–ש׳')
+  })
+  it('formatVenueHours prefers the structured fields', () => {
+    const out = formatVenueHours([{ days: 'old', time: 'old', dayIndexes: [0, 1], open: '08:00', close: '12:00' }])
+    expect(out.first).toBe('א׳–ב׳ · 08:00–12:00')
+  })
+  it('checkHoursRow reads dayIndexes', () => {
+    expect(checkHoursRow({ dayIndexes: [], open: '08:00', close: '10:00' })).toBe('missing_days')
+    expect(checkHoursRow({ dayIndexes: [2], open: '08:00', close: '10:00' })).toBe('ok')
+  })
+  it('hoursToDraft falls back to the time string', () => {
+    expect(hoursToDraft({ days: 'א׳', time: '08:00–23:00' })).toEqual(
+      jasmine.objectContaining({ dayIndexes: [], open: '08:00', close: '23:00' })
+    )
   })
 })

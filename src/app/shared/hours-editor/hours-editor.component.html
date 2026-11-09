@@ -1,0 +1,48 @@
+<div class="hours-editor">
+  <div class="hours-editor-head">
+    <h3>{{ 'operating_hours' | translatePipe }}</h3>
+    <button type="button" class="c-btn-ghost" (click)="addRow_()">
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      {{ 'venue_hours_add_row' | translatePipe }}
+    </button>
+  </div>
+  @for (row of rows(); track $index; let i = $index) {
+    <div class="hours-row-edit">
+      <div class="c-chip-group hours-days" role="group" [class.hours-days--marked]="mark_(i) === 'missing_days'">
+        @for (letter of dayLetters; track $index; let d = $index) {
+          <label class="c-chip c-chip--toggle">
+            <input type="checkbox" [checked]="hasDay_(i, d)" (change)="toggleDay_(i, d)" />
+            <span>{{ letter }}</span>
+          </label>
+        }
+      </div>
+      <div class="hours-times">
+        <app-time-field
+          ariaLabelKey="venue_hours_from"
+          [value]="row.open"
+          (valueChange)="setTime_(i, 'open', $event)"
+          [invalid]="row.openInvalid"
+          (invalidChange)="setInvalid_(i, 'open', $event)"
+          [flagged]="timeFlagged_(i, 'open')"
+        />
+        <app-time-field
+          ariaLabelKey="venue_hours_to"
+          [value]="row.close"
+          (valueChange)="setTime_(i, 'close', $event)"
+          [invalid]="row.closeInvalid"
+          (invalidChange)="setInvalid_(i, 'close', $event)"
+          [flagged]="timeFlagged_(i, 'close')"
+        />
+        @if (isOvernight_(i)) {
+          <span class="hours-next-day">+1 {{ 'venue_hours_next_day' | translatePipe }}</span>
+        }
+      </div>
+      <button type="button" class="btn-icon" (click)="removeRow_(i)" [attr.aria-label]="'remove' | translatePipe">
+        <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+      </button>
+      @if (messageKey_(i); as key) {
+        <span class="c-field-error hours-error" role="alert">{{ key | translatePipe }}</span>
+      }
+    </div>
+  }
+</div>

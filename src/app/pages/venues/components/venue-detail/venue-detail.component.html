@@ -61,23 +61,25 @@
       <section class="detail-card c-glass-panel">
         <header class="detail-card-header">
           <lucide-icon name="phone" [size]="18"></lucide-icon>
-          <h2>{{ 'contact_name' | translatePipe }}</h2>
+          <h2>{{ 'venue_contacts' | translatePipe }}</h2>
         </header>
-        @if (venue.contactName || venue.contactPhone) {
-          <div class="contact-row">
-            @if (contactInitials_()) {
-              <span class="contact-avatar">{{ contactInitials_() }}</span>
-            }
-            <div>
-              <p class="contact-name">{{ venue.contactName || '—' }}</p>
-              <p class="contact-role">{{ 'venue_manager' | translatePipe }}</p>
+        @if (contacts_().length) {
+          @for (c of contacts_(); track $index) {
+            <div class="contact-row">
+              <span class="contact-avatar">{{ c.initials }}</span>
+              <div>
+                <p class="contact-name">{{ c.name }}</p>
+                @if (c.role) {
+                  <p class="contact-role">{{ c.role }}</p>
+                }
+              </div>
             </div>
-          </div>
-          @if (venue.contactPhone) {
-            <p class="contact-phone">
-              <lucide-icon name="phone" [size]="14"></lucide-icon>
-              {{ venue.contactPhone }}
-            </p>
+            @if (c.phone) {
+              <p class="contact-phone">
+                <lucide-icon name="phone" [size]="14"></lucide-icon>
+                <a class="contact-phone-link" [href]="'tel:' + c.phone">{{ c.phone }}</a>
+              </p>
+            }
           }
         } @else {
           <p class="detail-empty">—</p>

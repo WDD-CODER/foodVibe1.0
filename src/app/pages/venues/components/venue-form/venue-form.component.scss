@@ -143,19 +143,6 @@
           flex: 1 1 4rem;
           min-inline-size: 4rem;
         }
-
-        // Plan 537: the two time fields sit side by side; sizing lives here, never on app-time-field.
-        .hours-times {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          flex: 2 1 12rem;
-          min-inline-size: 0;
-        }
-
-        .hours-error {
-          flex: 1 1 100%;
-        }
       }
     }
   }
