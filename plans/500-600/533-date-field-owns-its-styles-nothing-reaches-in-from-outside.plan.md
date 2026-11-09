@@ -1,6 +1,6 @@
 # Plan 533 — The unified date field owns its styles: nothing reaches in from outside, nothing is broken
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 

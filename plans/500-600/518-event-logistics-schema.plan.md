@@ -1,6 +1,6 @@
 # Plan 518 — Event logistics 1 of 6: the checklist-item kind and the event's answers in the shared schemas
 
-Status: draft
+Status: done
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
 Depends-on: 517
 

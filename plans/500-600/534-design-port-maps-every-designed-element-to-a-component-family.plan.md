@@ -1,6 +1,6 @@
 # Plan 534 — Design port maps every designed element to a component family (Claude Design → Angular, 1 of 2)
 
-Status: draft
+Status: done
 Depends-on: 533
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 
