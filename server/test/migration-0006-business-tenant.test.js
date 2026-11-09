@@ -37,8 +37,8 @@ const silently = async fn => {
 async function seed() {
   const db = testDb()
   await db.collection('users').insertMany([
-    { _id: 'u1', name: 'anna', role: 'admin' },
-    { _id: 'u2', name: 'ben', role: 'user', createdAt: 42 },
+    { _id: 'u1', email: 'u1@test.invalid', name: 'anna', role: 'admin' },
+    { _id: 'u2', email: 'u2@test.invalid', name: 'ben', role: 'user', createdAt: 42 },
   ])
   await db.collection('recipes').insertMany([
     { _id: 'r1', userId: 'u1' }, { _id: 'r2', userId: 'u1' }, { _id: 'r3', userId: 'u2' },

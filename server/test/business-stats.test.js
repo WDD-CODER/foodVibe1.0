@@ -41,9 +41,9 @@ beforeEach(async () => {
   const db = testDb()
   for (const c of ['users', 'businesses', 'usageDays', 'menuEvents']) await db.collection(c).deleteMany({})
   await db.collection('users').insertMany([
-    { _id: 'ownerA', name: 'Owner A', businessId: 'bA', businessRole: 'owner' },
-    { _id: 'staffA', name: 'Staff A', businessId: 'bA', businessRole: 'staff' },
-    { _id: 'ownerN', name: 'Owner N', businessId: 'bNew', businessRole: 'owner' },
+    { _id: 'ownerA', email: 'ownera@test.invalid', name: 'Owner A', businessId: 'bA', businessRole: 'owner' },
+    { _id: 'staffA', email: 'staffa@test.invalid', name: 'Staff A', businessId: 'bA', businessRole: 'staff' },
+    { _id: 'ownerN', email: 'ownern@test.invalid', name: 'Owner N', businessId: 'bNew', businessRole: 'owner' },
   ])
   await db.collection('businesses').insertMany([
     { _id: 'bA', name: 'A', ownerId: 'ownerA', createdAt: ago(200), internal: false, baseline: BASELINE },
