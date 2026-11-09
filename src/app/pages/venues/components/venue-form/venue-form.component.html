@@ -62,64 +62,53 @@
       <app-form-field label="capacity" forId="capacity">
         <input id="capacity" type="number" formControlName="capacity" min="0" class="c-input" />
       </app-form-field>
-      <app-form-field label="contact_name" forId="contactName">
-        <input id="contactName" type="text" formControlName="contactName" class="c-input" />
-      </app-form-field>
-      <app-form-field label="contact_phone" forId="contactPhone">
-        <input id="contactPhone" type="tel" formControlName="contactPhone" class="c-input" />
-      </app-form-field>
     </div>
 
-    <div class="form-section infra-section" formArrayName="operatingHours">
+    <div class="form-section infra-section" formArrayName="contacts">
       <div class="infra-header">
-        <h3>{{ 'operating_hours' | translatePipe }}</h3>
-        <button type="button" class="c-btn-ghost" (click)="addHoursRow()">
+        <h3>{{ 'venue_contacts' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addContact()">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
-          {{ 'add_row' | translatePipe }}
+          {{ 'venue_add_contact' | translatePipe }}
         </button>
       </div>
-      @for (ctrl of hoursArray.controls; track $index; let i = $index) {
-        <div class="infra-row" [formGroupName]="i">
+      @for (ctrl of contactsArray.controls; track $index; let i = $index) {
+        <div class="infra-row contact-edit-row" [formGroupName]="i">
           <input
             type="text"
-            formControlName="days"
-            [placeholder]="'days' | translatePipe"
+            formControlName="name"
             class="c-input"
-            [class.c-input--invalid]="hoursMark_(i) === 'missing_days'"
-            [attr.aria-invalid]="hoursMark_(i) === 'missing_days' ? 'true' : null"
+            [placeholder]="'contact_name' | translatePipe"
+            [attr.aria-label]="'contact_name' | translatePipe"
+            [class.c-input--invalid]="ctrl.get('name')?.invalid && ctrl.get('name')?.touched"
           />
-          <div class="hours-times">
-            <app-time-field
-              ariaLabelKey="venue_hours_from"
-              [value]="ctrl.get('open')?.value"
-              (valueChange)="setHoursControl_(i, 'open', $event)"
-              [invalid]="ctrl.get('openInvalid')?.value"
-              (invalidChange)="setHoursControl_(i, 'openInvalid', $event)"
-              [flagged]="timeFlagged_(i, 'open')"
-            />
-            <app-time-field
-              ariaLabelKey="venue_hours_to"
-              [value]="ctrl.get('close')?.value"
-              (valueChange)="setHoursControl_(i, 'close', $event)"
-              [invalid]="ctrl.get('closeInvalid')?.value"
-              (invalidChange)="setHoursControl_(i, 'closeInvalid', $event)"
-              [flagged]="timeFlagged_(i, 'close')"
-            />
-          </div>
+          <input
+            type="tel"
+            formControlName="phone"
+            class="c-input"
+            [placeholder]="'contact_phone' | translatePipe"
+            [attr.aria-label]="'contact_phone' | translatePipe"
+          />
+          <input
+            type="text"
+            formControlName="role"
+            class="c-input"
+            [placeholder]="'contact_role' | translatePipe"
+            [attr.aria-label]="'contact_role' | translatePipe"
+          />
           <button
             type="button"
             class="btn-icon"
-            (click)="removeHoursRow(i)"
+            (click)="removeContact(i)"
             [attr.aria-label]="'remove' | translatePipe"
           >
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
-          @if (hoursMessageKey_(i); as key) {
-            <span class="c-field-error hours-error" role="alert">{{ key | translatePipe }}</span>
-          }
         </div>
       }
     </div>
+
+    <app-hours-editor [(rows)]="hoursRows_" [showMarks]="hoursSubmitAttempted_()" />
 
     <div class="form-section infra-section" formArrayName="availableInfrastructure">
       <div class="infra-header">

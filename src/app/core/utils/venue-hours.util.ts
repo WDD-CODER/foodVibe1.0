@@ -13,18 +13,73 @@ export interface VenueHoursSummary {
  * Plan 372 (Venues B) extends this for structured hours.
  */
 export function formatVenueHours(hours: readonly VenueOperatingHours[] | null | undefined): VenueHoursSummary {
-  const lines = (hours ?? [])
-    .map((h) => [h?.days?.trim(), h?.time?.trim()].filter(Boolean).join(' · '))
-    .filter((line) => line.length > 0)
+  const lines = (hours ?? []).map(hoursLine).filter((line) => line.length > 0)
   if (lines.length === 0) return { first: '', extra: 0 }
   return { first: lines[0], extra: lines.length - 1 }
 }
 
 /** Every non-empty block as "days · time", for the detail page's full list. */
 export function formatVenueHoursLines(hours: readonly VenueOperatingHours[] | null | undefined): string[] {
-  return (hours ?? [])
-    .map((h) => [h?.days?.trim(), h?.time?.trim()].filter(Boolean).join(' · '))
-    .filter((line) => line.length > 0)
+  return (hours ?? []).map(hoursLine).filter((line) => line.length > 0)
+}
+
+/** Plan 372: one block as "days · time"; the structured fields win over the stored strings. */
+function hoursLine(h: VenueOperatingHours | null | undefined): string {
+  const shown =
+    h?.dayIndexes?.length && h.open && h.close
+      ? toDisplay(h.dayIndexes, h.open, h.close)
+      : { days: h?.days?.trim(), time: h?.time?.trim() }
+  return [shown.days, shown.time].filter(Boolean).join(' · ')
+}
+
+/** Day letters, Sunday (index 0) first. */
+export const HOURS_DAY_LETTERS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'] as const
+
+/** Plan 372: `[0,1,2,3,4], '08:00', '23:00'` to `{ days: 'א׳–ה׳', time: '08:00–23:00' }`; consecutive days are compressed. */
+export function toDisplay(dayIndexes: readonly number[], open: string, close: string): { days: string; time: string } {
+  const sorted = [...new Set(dayIndexes)].filter((d) => d >= 0 && d <= 6).sort((a, b) => a - b)
+  const parts: string[] = []
+  let i = 0
+  while (i < sorted.length) {
+    let j = i
+    while (j + 1 < sorted.length && sorted[j + 1] === sorted[j] + 1) j++
+    const from = `${HOURS_DAY_LETTERS[sorted[i]]}׳`
+    parts.push(j === i ? from : `${from}–${HOURS_DAY_LETTERS[sorted[j]]}׳`)
+    i = j + 1
+  }
+  return { days: parts.join(', '), time: formatTimeRange(open, close) }
+}
+
+/** Plan 372: one row of the days-and-hours picker. */
+export interface HoursDraftRow {
+  dayIndexes: number[]
+  open: string
+  close: string
+  openInvalid: boolean
+  closeInvalid: boolean
+}
+
+/** A row result that blocks save and gets a mark (plan 537). */
+export function isBrokenHours(result: HoursRowResult): boolean {
+  return result !== 'ok' && result !== 'overnight' && result !== 'empty'
+}
+
+/** Plan 372: a picker row to the stored block: structured fields plus generated `days` / `time`. */
+export function draftToHours(row: HoursDraftRow): VenueOperatingHours {
+  const dayIndexes = [...new Set(row.dayIndexes)].sort((a, b) => a - b)
+  return { ...toDisplay(dayIndexes, row.open, row.close), dayIndexes, open: row.open, close: row.close }
+}
+
+/** Plan 372: a stored block to a picker row; structured `open` / `close` first, then the time string. */
+export function hoursToDraft(h: VenueOperatingHours): HoursDraftRow {
+  const range = h.open && h.close ? { open: h.open, close: h.close } : parseTimeRange(h.time)
+  return {
+    dayIndexes: [...(h.dayIndexes ?? [])],
+    open: range?.open ?? '',
+    close: range?.close ?? '',
+    openInvalid: false,
+    closeInvalid: false
+  }
 }
 
 /** Plan 537: result of checking one opening-hours row in the venue form. */
@@ -32,7 +87,10 @@ export type HoursRowResult =
   'empty' | 'missing_days' | 'time_invalid' | 'missing_time' | 'same_time' | 'overnight' | 'ok'
 
 export interface HoursRowInput {
-  days: string
+  /** Free-text days; ignored when `dayIndexes` is given. */
+  days?: string
+  /** Plan 372: chosen day chips (Sunday = 0); at least one is needed. */
+  dayIndexes?: readonly number[]
   open: string
   close: string
   openInvalid?: boolean
@@ -63,7 +121,7 @@ export function formatTimeRange(open: string, close: string): string {
 
 /** First match wins; see plan 537. `overnight` is valid: the venue closes the next day. */
 export function checkHoursRow(row: HoursRowInput): HoursRowResult {
-  const noDays = !row.days?.trim()
+  const noDays = row.dayIndexes ? row.dayIndexes.length === 0 : !row.days?.trim()
   const half = !!row.openInvalid || !!row.closeInvalid
   if (noDays && !row.open && !row.close && !half) return 'empty'
   if (noDays) return 'missing_days'

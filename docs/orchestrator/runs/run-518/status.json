@@ -1,0 +1,291 @@
+{
+  "run": "run-518",
+  "branch": "orch/run-518",
+  "base": "main",
+  "startedAt": "2026-11-09T08:27:59.579Z",
+  "mainShaAtStart": "cad1348c9676e9f101ff5d59152efb181d7804c3",
+  "plans": {
+    "372": {
+      "nnn": "372",
+      "title": "Venues B: multiple contacts and an interactive days/hours picker",
+      "branch": "feat/372-venues-b-multiple-contacts",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T09:09:57.378Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T09:14:46.217Z"
+        }
+      },
+      "humanItems": [
+        "Hours: tap ה, 18:00 → 02:00 → \"+1\" shows → save → no red field.",
+        "Add a new venue with two contacts → save → the detail page shows both with call links.",
+        "Hours: tap א–ה, 08:00–23:00 → save → the card and detail show \"א׳–ה׳ · 08:00–23:00\"."
+      ],
+      "history": [
+        {
+          "at": "2026-11-09T08:29:43.755Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T08:29:44.093Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T08:45:43.620Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T08:46:18.307Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:07:04.222Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:09:57.216Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:09:57.380Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:10:35.704Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:14:40.225Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:14:46.219Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:14:58.121Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T09:16:26.522Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "372",
+          "title": "Venues B: multiple contacts and an interactive days/hours picker",
+          "branch": "feat/372-venues-b-multiple-contacts",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-09T08:29:44.091Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 10.7,
+          "reason": "asking 372-1: replan needed: ESCALATE: scope src/app/shared/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` reports 'hours-editor/ not mentioned' and the file is outside the Read-Write Scope. Needs one table row for hours-editor/.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 958.3,
+              "tokens": {
+                "input": 2195439,
+                "output": 34983
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-09T08:46:00.603Z",
+            "reason": "replan needed: ESCALATE: scope src/app/shared/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` reports 'hours-editor/ not mentioned' and the file is outside the Read-Write Scope. Needs one table row for hours-editor/."
+          },
+          "parkBranch": "park/run-518-372"
+        },
+        {
+          "nnn": "372",
+          "title": "Venues B: multiple contacts and an interactive days/hours picker",
+          "branch": "feat/372-venues-b-multiple-contacts",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-run-518-372 is on (no branch), not feat/372-venues-b-multiple-contacts",
+          "freeDiskGb": 11.4
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.8,
+      "sha": "6b3faf91bc5436aec10643773baca7fd1509e0dd",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 35.7,
+          "tokens": {
+            "input": 103890,
+            "output": 1947
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.7,
+          "tokens": {
+            "input": 50343,
+            "output": 1028
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "7c41e296f45a93c70e7f593ed2c553130c51e842"
+    },
+    "533": {
+      "nnn": "533",
+      "title": "The unified date field owns its styles: nothing reaches in from outside, nothing is broken",
+      "branch": "feat/533-date-field-owns-its",
+      "state": "building",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T08:49:34.314Z"
+        }
+      },
+      "humanItems": [
+        "On a phone (or Chrome device mode, 390 px) and on desktop (1280 px), for each of the seven places in \"Where the date field is\" below: tapping or clicking the date opens a calendar fully on screen, the typed date reads left to right as dd/mm/yyyy inside right-to-left text, and nothing is clipped or overlaps. Report any place that fails by its number."
+      ],
+      "history": [
+        {
+          "at": "2026-11-09T08:49:33.501Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T08:49:34.316Z",
+          "state": "building",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.7
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-09T08:29:43.473Z",
+      "plan": "372",
+      "text": "the folder foodVibe1.0-orch-run-518-372 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T08:45:42.973Z",
+      "plan": "372",
+      "text": "builder left undone (round 0): A5: the manual 'add a venue with two contacts and structured hours, check no 400s' run was not done; it is only covered by form specs and the server schema test. The 'kit-manifest-check', 'scope-check', 'override-check', 'plan-ledger-check' and 'ci-scope-check' gate checks were not run: the kit-mani"
+    },
+    {
+      "at": "2026-11-09T08:46:17.806Z",
+      "plan": "372",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-09T08:46:18.726Z",
+      "plan": "372",
+      "text": "ask 372-1 (scope, the Human or the advisor answers): May the builder add one table row for hours-editor/ to src/app/shared/breadcrumbs.md so breadcrumbs-check passes?"
+    },
+    {
+      "at": "2026-11-09T08:49:32.653Z",
+      "plan": "533",
+      "text": "the folder foodVibe1.0-orch-run-518-533 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T09:06:50.368Z",
+      "plan": "372",
+      "text": "ask 372-1 answered by the human: approved: src/app/shared/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-09T09:07:01.569Z",
+      "plan": "372",
+      "text": "scope of plan 372 extended on orch/run-518 by the answer to 372-1: src/app/shared/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-09T09:09:57.056Z",
+      "plan": "372",
+      "text": "the folder foodVibe1.0-orch-run-518-372 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T09:15:10.444Z",
+      "plan": "372",
+      "text": "the folder foodVibe1.0-orch-merge-run-518 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 3,
+  "phase": "finished",
+  "freeDiskGb": 10.8,
+  "updatedAt": "2026-11-09T09:19:25.595Z",
+  "stops": [
+    {
+      "at": "2026-11-09T08:51:08.331Z",
+      "reason": "stopped by the Human for a kit sync",
+      "attempt": 1
+    }
+  ],
+  "finishedAt": "2026-11-09T09:19:25.594Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "372",
+      "type": "behaviour",
+      "text": "behaviour: the overnight '+1' marker shows in the editor rows, as the plan says, but not on the card — reverse: drop the marker from the hours-editor template",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-09T09:19:25.595Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
