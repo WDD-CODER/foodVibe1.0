@@ -43,6 +43,7 @@ src/app/shared/hours-editor/hours-editor.component.spec.ts
 src/app/pages/venues/components/venue-form/venue-form.component.spec.ts
 shared/schemas/entities/venue.schema.ts
 server/test/**
+src/app/shared/breadcrumbs.md
 ```
 
 ## Read Scope
