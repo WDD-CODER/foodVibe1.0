@@ -34,7 +34,7 @@ Audit at 5895243:
 **Primary:** every date field's look comes only from its own component (one place to restyle later), the picker opens
 in the same spot on every screen, and a new outside style on a shared component is warned about.
 
-- [auto] `pnpm run test:ci` exits 0, including `date-field.component.spec.ts` (A2).
+- [auto] `pnpm run test:ci` exits 0, including `src/app/shared/date-field/date-field.component.spec.ts` (A2).
 - [auto] `node --test scripts/test/reuse-lint.test.mjs` → `# fail 0`, including the new cases (A5).
 - [auto] `node scripts/reuse-lint.mjs --check-registry` exits 0.
 - [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
@@ -106,7 +106,7 @@ line or file this plan names was removed, renamed or rewritten).
 
 ### Should Have (P1)
 - [ ] `scripts/test/reuse-lint.test.mjs`: cases — `app-date-field { margin: 0 }` in `src/app/pages/x/x.component.scss` warns `family-styled-from-outside`; `:host ::ng-deep .date-field-text { color: red }` warns; `.my-app-date-fieldish {}` does not; `<div class="c-modal-overlay">` in an html file warns `hand-drawn-modal-overlay`.
-- [ ] `date-field.component.spec.ts`: one case — the host renders inside a `.c-input-stack` wrapper and the picker's computed `inline-size` / `block-size` stay `1px` on a fine pointer.
+- [ ] `src/app/shared/date-field/date-field.component.spec.ts`: one case — the host renders inside a `.c-input-stack` wrapper and the picker's computed `inline-size` / `block-size` stay `1px` on a fine pointer.
 - [ ] `docs/agent/standards-reuse.md` (lines 43-46, which describe 4 of the 10 rules): list all 11 rule ids with one line each. `docs/brain/component-families.md:136` (form-field → Dates): add "styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules".
 
 ### Nice to Have (P2)
@@ -159,5 +159,5 @@ line or file this plan names was removed, renamed or rewritten).
 - Planner 2026-11-07 (brief 7, item D1). Brief 8's lint rule (item 4) is built here, generically for every shared selector; plan 534 reuses it.
 - Builder: grep of `meta-date-wrap|meta-date-display|meta-date-input|meta-date` in src/app html/ts found no use of the deleted selectors (only `meta-date-chip`, a different class, kept).
 - `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:ci` → 0 (1708 SUCCESS); `node --test scripts/test/reuse-lint.test.mjs` → pass 20, fail 0; `reuse-lint --check-registry` → 0; `--diff=origin/main` → no `family-styled-from-outside` line; scope-check --arch ok, --reuse ok; log-query: no entries.
-- Round 2: reverted date-field.component.spec.ts (a test file no scope line names; scope-check scope-1). A2 left undone; needs the spec path added to the scope by the Human.
+- Round 2: reverted src/app/shared/date-field/date-field.component.spec.ts (a test file no scope line names; scope-check scope-1). A2 left undone; needs the spec path added to the scope by the Human.
 - Planner 2026-11-08: scope now names the test files this plan writes (run-517 parked 374, 510 and 535 because a folder glob does not list the tests under it).

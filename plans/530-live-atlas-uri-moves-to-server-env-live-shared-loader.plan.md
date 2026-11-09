@@ -49,6 +49,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 ```scope
 server/utils/db-target.js
 server/test/db-target.test.js
+server/test/helpers/app.js
 server/db.js
 server/app.js
 server/package.json

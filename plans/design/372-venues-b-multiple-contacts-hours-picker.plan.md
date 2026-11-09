@@ -137,7 +137,7 @@ touching any milestone.
 
 - [auto] `npm run build:schemas` → exit 0.
 - [auto] Server tests (venue validation) → 0 failures.
-- [auto] `npx ng test --watch=false --include=src/app/shared/hours-editor/**/*.spec.ts --include=src/app/core/utils/venue-hours.util.spec.ts --include=src/app/pages/venues/**/*.spec.ts` → 0 failures.
+- [auto] `pnpm run test:ci` → 0 failures, including the specs under `src/app/shared/hours-editor/`, `src/app/core/utils/venue-hours.util.spec.ts` and `src/app/pages/venues/`.
 - [auto] `npm run build` → exit 0.
 - [auto] `pnpm run test:ci` → exit 0 (also covers 537's time-field spec).
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
