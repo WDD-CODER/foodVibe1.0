@@ -1,6 +1,6 @@
 # Plan 528 — Give the AI rate limiter an IPv6-safe key and remove the dead GitHub MCP server
 
-Status: draft
+Status: done
 Depends-on: 517
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 

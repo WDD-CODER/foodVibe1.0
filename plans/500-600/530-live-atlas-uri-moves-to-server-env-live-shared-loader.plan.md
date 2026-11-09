@@ -1,6 +1,6 @@
 # Plan 530 — The live Atlas URI moves to `server/.env.live`, loaded only through one shared helper (1 of 2: the server)
 
-Status: draft
+Status: done
 Depends-on: 517
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 

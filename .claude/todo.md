@@ -98,15 +98,6 @@
 - [ ] A1: Add the missing manifest entry for the native-dialog test fixture so the rules check stops failing — insert one object after the `mixed.diff` entry (alphabetical, before `registry-broken.md`) with `"path": "scripts/test/fixtures/reuse/native-dialog.diff"`, `"tier": "project"`, `"action": "stay"`, `"params": []`, `"refs": []`, `"notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."` (copy the `clean.diff` entry's shape and wording exactly) — docs/workflow-kit/manifest.json
 - [ ] A2: Prove the manifest check is green and nothing else moved — run the Done-when commands and paste the `KIT_MANIFEST: ok` line in Execution Notes; `git diff --stat` must show only `docs/workflow-kit/manifest.json` (+8 lines)
 
-### Plan 518 — Event logistics 1 of 6: the checklist-item kind and the event's answers in the shared schemas
-- [ ] A1: Define the logistics vocabulary once for client and server — phases, sections, answer types, statuses, payers and size limits — shared/schemas/entities/event-logistics.ts, shared/schemas/entities/index.ts
-- [ ] A2: Let a taxonomy term be a logistics question — new kind in the enum, the union member, the reference path — shared/schemas/entities/taxonomy-term.schema.ts
-- [ ] A3: Let an event store its phone-intake and site-visit answers as a server-owned field — the `siteLogistics` sub-document after `closing` — shared/schemas/entities/menu-event.schema.ts
-- [ ] A4: Keep the answers out of every client body on the generic data API — append `'siteLogistics'` to the server-owned field list and its JSDoc — shared/schemas/entities/event-stage.ts
-- [ ] A5: Prove the shapes with schema tests — `server/test/taxonomy-term-schema.test.js`: a `logisticsItem` with every field valid; `environments: ['moon']` invalid; `phase: 'later'` invalid; `environments` absent valid. `server/test/event-stage-schema.test.js`: an event with a full `siteLogistics` valid; an answer with `status: 'maybe'` invalid; `text` of 501 chars invalid; 301 answers invalid; `EVENT_SERVER_FIELDS` contains `'siteLogistics'`. Add `logisticsAnswer(overrides)` and `logisticsItemBody(overrides)` builders — server/test/helpers/v2-docs.js
-- [ ] A6: Mirror the shapes on the client so the next plans can type against them — `LogisticsAnswer`, `SiteLogistics`, `siteLogistics?` on `MenuEvent`, conformance tuple still green — src/app/core/models/menu-event.model.ts, src/app/core/models/v2/conformance.ts
-- [ ] A7: Run build:schemas, build, lint, test:server, test:ci and paste the outputs under Execution Notes
-
 ### Plan 519 — Event logistics 2 of 6: the owner-only endpoint that saves an event's logistics answers
 - [ ] A1: Add an owner-only permission for logistics answers on the server — `'editLogistics'` in `ACTIONS` and `OWNER_ONLY_ACTIONS`; the existing `can()` flow then allows the owner and a platform admin and denies staff — server/utils/permissions.js
 - [ ] A2: Mirror the permission on the client so screens can hide what the server refuses — `'editLogistics'` in the `PermissionAction` union and `OWNER_ONLY_ACTIONS`; spec: staff `can('editLogistics')` false, owner true — src/app/core/services/permission.service.ts, src/app/core/services/permission.service.spec.ts
@@ -158,12 +149,3 @@
 - [ ] M3b: Show the proposed merges of the save-plan skill and the PRD template that keep the Reuse Check section — .claude/skills/save-plan/SKILL.md, .claude/references/prd-template.md
 - [ ] M3c: Show the override declarations FoodVibe's kit config would need, one path and one reason each — kit.config.json overrides
 - [ ] M3d: Stop and wait for the Human's word before any commit beyond the sync commit, and never push — none
-
-### Plan 533 — The unified date field owns its styles: nothing reaches in from outside, nothing is broken (`plans/533-date-field-owns-its-styles-nothing-reaches-in-from-outside.plan.md`)
-- [x] A1: Make the hidden picker immune to outside input rules — unlayered picker block, full reset, comment — src/app/shared/date-field/date-field.component.scss
-- [ ] A2: Prove the picker box inside an input stack — the new spec case — src/app/shared/date-field/date-field.component.spec.ts
-- [x] A3: Delete the dead outside date rules after a usage grep — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss, src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss, src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.scss, src/app/pages/menu-intelligence/_paper-ui.scss
-- [x] A4: Warn when a page styles a shared component from outside, and repair the modal-overlay rule — scripts/lib/registry-families.mjs
-- [x] A5: Test both rules — scripts/test/reuse-lint.test.mjs
-- [x] A6: Document the rules and the date field's "inside only" rule — docs/agent/standards-reuse.md, docs/brain/component-families.md
-- [x] A7: Run every `[auto]` check plus `node scripts/reuse-lint.mjs --diff=origin/main` (expect no `family-styled-from-outside` line) and paste the outputs under Execution Notes
