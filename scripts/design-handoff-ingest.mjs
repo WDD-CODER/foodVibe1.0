@@ -1,7 +1,7 @@
 /**
  * Design-port ingest (plan 405) — files a Claude Design "Handoff to Claude Code" bundle.
  *
- * A handoff is per screen: README.md (the spec, with a "Mapping to the codebase" table),
+ * A handoff targets one screen or one component family: README.md (the spec, with a "Mapping to the codebase" table),
  * PROMPT.md, CURRENT-STATE.md, designs/*.html + *.js, colors_and_type.css, assets/, screenshots/,
  * usually inside one wrapper folder (design_handoff_<slug>/).
  *
@@ -26,6 +26,9 @@ import { dirname, join, relative, resolve, sep } from 'path'
 import { fileURLToPath } from 'url'
 import { inflateRawSync } from 'zlib'
 import { REGISTRY_PATH } from './design-feature-inventory.mjs'
+import { parseRegistry } from './lib/reuse-check.mjs'
+
+export const FAMILIES_PATH = 'docs/brain/component-families.md'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -111,12 +114,23 @@ export function registryScreens(registryText) {
   })
 }
 
-/** README "Mapping to the codebase" table → { screens, shell, unknown }. */
-export function parseTargets(readme, registryText) {
+/** Component-families registry → [{ id, paths }] (each backticked path belongs to the nearest ### heading above it). */
+export function registryFamilies(registryText) {
+  const { families, paths } = parseRegistry(registryText)
+  return families.map((f, i) => {
+    const end = families[i + 1]?.line ?? Infinity
+    return { id: f.id, paths: paths.filter(p => p.line >= f.line && p.line < end).map(p => p.path.replace(/\/$/, '')) }
+  })
+}
+
+/** README "Mapping to the codebase" table → { screens, families, shell, unknown }. */
+export function parseTargets(readme, registryText, familiesText = '') {
   const section = readme.match(/^##\s+Mapping to the codebase\s*\n([\s\S]*?)(?=^## |(?![\s\S]))/mi)?.[1]
-  if (!section) return { screens: [], shell: [], unknown: true }
+  if (!section) return { screens: [], families: [], shell: [], unknown: true }
   const rows = registryScreens(registryText)
+  const fams = registryFamilies(familiesText).flatMap(f => f.paths.map(p => ({ family: f.id, path: p })))
   const screens = new Map()
+  const families = new Map()
   const shell = new Set()
   for (const line of section.split('\n').filter(l => l.trim().startsWith('|'))) {
     const repoCell = line.split('|').map(c => c.trim())[2] ?? ''
@@ -124,11 +138,16 @@ export function parseTargets(readme, registryText) {
       if (!token.includes('/')) continue
       const path = token.replace(/^\.?\//, '').replace(/^(src\/app\/)?/, 'src/app/')
       const hit = rows.find(r => path === r.path || path.startsWith(`${r.path}/`))
+      const clean = path.replace(/\/$/, '')
+      const famHit = /^src\/app\/(shared|core\/components)\//.test(clean)
+        ? fams.find(f => clean === f.path || clean.startsWith(`${f.path}/`))
+        : undefined
       if (hit) screens.set(hit.path, hit)
+      else if (famHit) families.set(famHit.path, famHit)
       else shell.add(token.replace(/\s+\(.*$/, ''))
     }
   }
-  return { screens: [...screens.values()], shell: [...shell], unknown: screens.size === 0 }
+  return { screens: [...screens.values()], families: [...families.values()], shell: [...shell], unknown: screens.size === 0 && families.size === 0 }
 }
 
 const sha = b => createHash('sha1').update(b).digest('hex')
@@ -171,7 +190,8 @@ export function ingest({ from, slug, url, dryRun = false, root = REPO_ROOT, isDi
   const name = deriveSlug({ root: bundleRoot, readme, slug })
   if (!name) throw new Error('could not derive a slug — pass --slug <name>')
   const regFile = join(root, REGISTRY_PATH)
-  const targets = parseTargets(readme, existsSync(regFile) ? readFileSync(regFile, 'utf8') : '')
+  const famFile = join(root, FAMILIES_PATH)
+  const targets = parseTargets(readme, existsSync(regFile) ? readFileSync(regFile, 'utf8') : '', existsSync(famFile) ? readFileSync(famFile, 'utf8') : '')
   const dest = join(root, HANDOFFS_DIR, name)
   const previous = existsSync(dest) ? readFolder(dest) : new Map()
   const diff = diffBundles(files, previous)
@@ -200,7 +220,8 @@ function entry({ slug, targets, diff }, { url, today }) {
     '',
     `## ${today} · ${slug}`,
     `- Bundle: ${url ?? '— (local file)'}`,
-    `- Screens: ${targets.unknown ? 'unknown — ask the Human' : targets.screens.map(s => `${s.screen} (\`${s.path}\`)`).join(', ')}`,
+    `- Screens: ${targets.unknown ? 'unknown — ask the Human' : targets.screens.length === 0 ? '—' : targets.screens.map(s => `${s.screen} (\`${s.path}\`)`).join(', ')}`,
+    `- Families: ${targets.families.length ? targets.families.map(f => `${f.family} (\`${f.path}\`)`).join(', ') : '—'}`,
     `- Shell: ${list(targets.shell)}`,
     `- Files: ${diff.added.length} added, ${diff.changed.length} changed, ${diff.removed.length} removed`,
     `  - changed: ${list(diff.changed)}`,
@@ -215,8 +236,9 @@ export function report(r) {
     `root: ${r.bundleRoot || '(top level)'}`,
     r.targets.unknown
       ? 'targets: unknown'
-      : `targets: ${r.targets.screens.map(s => `${s.screen} (${s.path})`).join(', ')}`,
+      : `targets: ${r.targets.screens.map(s => `${s.screen} (${s.path})`).join(', ') || '—'}`,
   ]
+  if (r.targets.families.length) lines.push(`families: ${r.targets.families.map(f => `${f.family} (${f.path})`).join(', ')}`)
   if (r.targets.shell.length) lines.push(`shell — other screens affected: ${r.targets.shell.join(', ')}`)
   lines.push(`files: ${r.diff.added.length} added, ${r.diff.changed.length} changed, ${r.diff.removed.length} removed`)
   for (const p of r.diff.changed) lines.push(`  ~ ${p}`)

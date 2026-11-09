@@ -4,7 +4,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, 
 import { tmpdir } from 'os'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import { deriveSlug, diffBundles, findBundleRoot, ingest, parseTargets, readZip } from '../design-handoff-ingest.mjs'
+import { deriveSlug, diffBundles, findBundleRoot, ingest, parseTargets, readZip, registryFamilies } from '../design-handoff-ingest.mjs'
 import { zipFolder } from './fixtures/design-port/make-zip.mjs'
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'design-port')
@@ -50,6 +50,36 @@ test('parseTargets: pages → screens, the rest → shell, none → unknown', ()
   assert.deepEqual(t.shell, ['core/components/header/header.component.scss', 'core/components/tab-chips', 'src/styles.scss'])
   assert.equal(t.unknown, false)
   assert.equal(parseTargets('# x\n\n## Overview\nno table\n', REGISTRY).unknown, true)
+})
+
+const FAMILIES = [
+  '### form-field — label, input, error',
+  '- Use: `src/app/shared/form-field/` and `src/app/shared/date-field/`',
+  '',
+  '### search-combobox — a search box',
+  '- Use: `src/app/shared/search-combobox/`',
+].join('\n')
+const table = rows => `# x\n\n## Mapping to the codebase\n| Piece | Repo |\n|---|---|\n${rows.map(r => `| p | ${r} |`).join('\n')}\n`
+
+test('registryFamilies: each path belongs to the nearest heading above it', () => {
+  assert.deepEqual(registryFamilies(FAMILIES), [
+    { id: 'form-field', paths: ['src/app/shared/form-field', 'src/app/shared/date-field'] },
+    { id: 'search-combobox', paths: ['src/app/shared/search-combobox'] },
+  ])
+})
+
+test('parseTargets: a family path → families', () => {
+  const t = parseTargets(table(['`src/app/shared/date-field/`']), REGISTRY, FAMILIES)
+  assert.deepEqual(t.families, [{ family: 'form-field', path: 'src/app/shared/date-field' }])
+  assert.deepEqual(t.screens, [])
+  assert.equal(t.unknown, false)
+})
+
+test('parseTargets: a mixed table → a screen and a family; a path in neither → shell', () => {
+  const t = parseTargets(table(['`src/app/pages/cook-view/cook-view.page.html`', '`src/app/shared/form-field/form-field.component.scss`', '`src/app/shared/other-thing/`']), REGISTRY, FAMILIES)
+  assert.deepEqual(t.screens.map(s => s.path), ['src/app/pages/cook-view'])
+  assert.deepEqual(t.families, [{ family: 'form-field', path: 'src/app/shared/form-field' }])
+  assert.deepEqual(t.shell, ['src/app/shared/other-thing/'])
 })
 
 test('diffBundles: changed / added / removed by content', () => {
