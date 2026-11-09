@@ -1,5 +1,6 @@
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
-require('dotenv').config();
+const { loadServerEnv, targetFromEnv } = require('./utils/db-target');
+loadServerEnv(targetFromEnv());
 const path = require('path');
 const express = require('express');
 const cors = require('cors');

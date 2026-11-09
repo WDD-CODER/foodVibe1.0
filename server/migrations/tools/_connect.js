@@ -7,11 +7,10 @@
  * `--db=<name>` (local only, plan 407) points a tool at a scratch copy, e.g. a restored Atlas snapshot.
  */
 
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 require('node:dns').setServers(['8.8.8.8', '8.8.4.4']);
 
 const { MongoClient } = require('mongodb');
+const { loadServerEnv, mongoUri } = require('../../utils/db-target');
 
 function parseArgs(argv, extra = {}) {
   const args = {};
@@ -30,8 +29,8 @@ function parseArgs(argv, extra = {}) {
 }
 
 async function connect(args) {
-  const uri = args.target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error(`${args.target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
+  loadServerEnv(args.target);
+  const uri = mongoUri(args.target);
   const client = new MongoClient(uri, { serverSelectionTimeoutMS: 30000 });
   await client.connect();
   const db = client.db(args.db);
