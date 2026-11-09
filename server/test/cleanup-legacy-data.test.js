@@ -154,8 +154,8 @@ describe('F6 approved test items', () => {
 describe('F7 test users', () => {
   it('local: deletes the user and every doc with their userId', async () => {
     await db.collection('users').insertMany([
-      { _id: 'u-test', name: 'test1', role: 'user' },
-      { _id: 'u-real', name: 'danwe', role: 'admin' },
+      { _id: 'u-test', email: 'u-test@test.invalid', name: 'test1', role: 'user' },
+      { _id: 'u-real', email: 'u-real@test.invalid', name: 'danwe', role: 'admin' },
     ]);
     await db.collection('recipes').insertMany([{ _id: 'a', userId: 'u-test' }, { _id: 'b', userId: 'u-real' }]);
     await db.collection('taxonomyTerms').insertOne({ _id: 't', userId: 'u-test', kind: 'label', key: 'x' });
@@ -166,14 +166,14 @@ describe('F7 test users', () => {
 
   it('atlas: refuses without --allow-atlas-users and without an admin left (A0b)', async () => {
     await db.collection('users').insertMany([
-      { _id: 'h', name: 'hhhh', role: 'admin' },
-      { _id: 'd', name: 'dan', role: 'user' },
+      { _id: 'h', email: 'h@test.invalid', name: 'hhhh', role: 'admin' },
+      { _id: 'd', email: 'd@test.invalid', name: 'dan', role: 'user' },
     ]);
     const noFlag = await F.fixTestUsers(db, { target: 'atlas' });
     expect(noFlag.blockers).toHaveLength(2);
     await expect(noFlag.apply()).rejects.toThrow(/F7 refused/);
 
-    await db.collection('users').insertOne({ _id: 'real', name: 'chef', role: 'user' });
+    await db.collection('users').insertOne({ _id: 'real', email: 'real@test.invalid', name: 'chef', role: 'user' });
     expect(await F.promoteAdmin(db, 'chef')).toBe(true);
     const ready = await F.fixTestUsers(db, { target: 'atlas', allowAtlasUsers: true });
     expect(ready.blockers).toEqual([]);
