@@ -8,6 +8,7 @@ import { LoggingService } from './logging.service'
 import { hashPassword } from '../utils/auth-crypto'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
+import { clearReturningVisitor, markReturningVisitor } from '../utils/returning-visitor.util'
 
 const SESSION_USER_KEY = 'loggedInUser'
 const TOKEN_KEY = 'fv_token'
@@ -343,6 +344,7 @@ export class UserService {
         this._stopRefreshTimer()
         this._saveUserLocal(null)
         this.clearToken()
+        clearReturningVisitor()
         this._reloadDataServices()
         this.callBackendLogout().subscribe({ error: () => {} })
         this.logging.info({ event: 'auth.logout', message: 'Logout', context: userId ? { userId } : undefined })
@@ -381,6 +383,7 @@ export class UserService {
   _saveUserLocal(user: User | null): void {
     this._user_.set(user && { ...user })
     this._saveUserToSession(user)
+    if (user) markReturningVisitor()
   }
 
   private _loadUserFromSession(): User | null {

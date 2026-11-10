@@ -109,4 +109,26 @@ describe('UserService (business model)', () => {
     expect(await run('BUSINESS_NAME_REQUIRED')).toBe('BUSINESS_NAME_REQUIRED')
     expect(await run('BUSINESS_NAME_TOO_LONG')).toBe('BUSINESS_NAME_TOO_LONG')
   })
+
+  describe('returning-visitor mark', () => {
+    beforeEach(() => localStorage.removeItem('fv_returning'))
+
+    it('is set after _saveUserLocal(user)', () => {
+      service._saveUserLocal({ _id: 'r', name: 'r', email: 'r@x' } as User)
+      expect(localStorage.getItem('fv_returning')).toBe('1')
+    })
+
+    it('stays set after _saveUserLocal(null)', () => {
+      service._saveUserLocal({ _id: 'r', name: 'r', email: 'r@x' } as User)
+      service._saveUserLocal(null)
+      expect(localStorage.getItem('fv_returning')).toBe('1')
+    })
+
+    it('is cleared by logout()', () => {
+      service._saveUserLocal({ _id: 'r', name: 'r', email: 'r@x' } as User)
+      service.logout().subscribe()
+      expect(localStorage.getItem('fv_returning')).toBeNull()
+      http.match(() => true).forEach((r) => r.flush(null))
+    })
+  })
 })
