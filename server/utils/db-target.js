@@ -5,7 +5,6 @@
  */
 const fs = require('node:fs')
 const path = require('node:path')
-const dotenv = require('dotenv')
 
 const defaultServerDir = () => path.resolve(__dirname, '..')
 
@@ -29,7 +28,8 @@ function parseTarget(argv, { required = false } = {}) {
 }
 
 function loadFile(file, env, override) {
-  const parsed = dotenv.parse(fs.readFileSync(file))
+  // Required here, not at the top: mongoUri() and the target helpers must load without the server packages installed.
+  const parsed = require('dotenv').parse(fs.readFileSync(file))
   for (const [k, v] of Object.entries(parsed)) {
     if (override || env[k] === undefined) env[k] = v
   }
