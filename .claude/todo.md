@@ -328,3 +328,20 @@
 - [ ] A6: Show the checklist to the owner on the dashboard and to the platform admin — checklist card, SetupStatus type, platform column — src/app/pages/dashboard/components/front-desk-checklist-card/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts, src/app/core/services/business.service.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
 - [ ] A7: Add the words and icons the screens use — dictionary keys, icon registration — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A8: Write the two screen checks and the backend docs row, then run every check — e2e/ui/556-1.spec.ts, e2e/ui/556-2.spec.ts, docs/agent/standards-backend.md
+
+### Plan 544 — Clients become CRM records: wider shape, phone match key, Trash instead of hard delete (`plans/544-clients-become-crm-records.plan.md`)
+- [ ] A1: Give the client record its CRM fields and one phone rule shared by server and browser — schema additions, enums, server-field list, phone.ts, staff read fields — shared/schemas/entities/client.schema.ts, shared/schemas/phone.ts, shared/schemas/index.ts, shared/schemas/staff-fields.ts
+- [ ] A2: Keep the server-owned client fields out of reach of normal saves and derive the match key — strip on POST and PUT; stamp phoneNormalized and phoneKey; phone-key index — server/routes/generic.js, server/db.js
+- [ ] A3: Send a deleted client to Trash instead of deleting it for good — softDelete flag, collection registry note — server/constants/collections.js, docs/agent/standards-backend.md
+- [ ] A4: Prove the new rules with server tests — strip per field, staff read of four fields, Trash round trip, phone key for the international form — server/test/clients.test.js, server/test/cross-business.test.js
+- [ ] A5: Fill the new fields for clients that already exist, and list possible duplicates without touching them — migration 0011 with dry run, write, verify, scratch DB, and its test — server/migrations/0011-clients-crm.js, server/test/migration-0011-clients-crm.test.js
+- [ ] A6: Run the migration locally and hand the Atlas run to Dandan — pnpm run build:schemas; node server/scripts/db-backup.js --target=local; dry run, write with --backup-dir, verify on local only; paste outputs and the Atlas runbook below into Execution Notes; never pass --target=atlas
+- [ ] A7: Show trashed clients on the Trash page — TrashType, section, data-service entry, dictionary key, spec and the ui test — src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, src/app/core/models/client.model.ts, public/assets/data/dictionary.json, e2e/ui/544-1.spec.ts
+- [ ] A8: Write down the decision — ADR 0031 verbatim and the one-line pointer in ADR 0027 — docs/brain/decisions/0031-clients-are-crm-records.md, docs/brain/decisions/0027-client-entity-above-events.md
+- [ ] A9: Run every check and hand over the cards — test:server, test:ci, server lint, build, scope-check --arch, log-query; the [ui] spec; the [human] Atlas card
+
+### Plan 569 — Put the Front Desk brief and map on main, with the contract additions the plans made (`plans/569-put-the-front-desk-brief-and-map-on-main.plan.md`)
+- [ ] A1: Copy the four front desk documents from the main folder into the repo unchanged — byte-for-byte copy — docs/frontdesk/assistant-behaviour-rules.md, docs/frontdesk/frontdesk-map.md, docs/frontdesk/frontdesk-program-brief.md, docs/frontdesk/reference-bookings-engine.md
+- [ ] A2: Mark the map as approved in its title line — docs/frontdesk/frontdesk-map.md
+- [ ] A3: List the contract additions the plans made, so the next planning round reads them — the 11 lines above — docs/frontdesk/frontdesk-map.md
+- [ ] A4: Point the brain index at the map and run the ledger and breadcrumbs checks — docs/brain/index.md
