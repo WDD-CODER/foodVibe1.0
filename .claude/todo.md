@@ -140,3 +140,12 @@
 - [x] A6: Record the two traps so the next setup does not repeat them — one gotcha entry — docs/brain/gotchas/agent-workflow.md
 - [x] A7: Run every auto check and paste the outputs, and list the three Human setup steps in the hand-off — this plan file (Execution Notes)
 - [ ] A8: After the merge, install the new package in the main folder and remove the timeout workaround — Planner only, not the builder: the two steps under After merge, then the [human] card — main folder, user environment
+
+### Plan 543 — Open one safe door for people who are not members of a business (`plans/543-open-one-safe-door-for-non-members.plan.md`)
+- [ ] A1: Give every server stamp one source for who did it — actorOf and guestActor in a shared file; events.js imports it instead of its own copy — server/utils/actor.js, server/routes/events.js
+- [ ] A2: Add the public rate limiter, the honeypot and the read-back token helper — ipAndSlugKey + publicLimiter, honeypot middleware, newPublicToken + isPublicTokenShape — server/middleware/rate-limit.js, server/middleware/honeypot.js, server/utils/public-token.js
+- [ ] A3: Test the limiter, honeypot and token on a small test app — 20 then 429, other slug free, GET not counted, no IPv6 key error; honeypot 201 with no next; 32 chars, 10,000 unique — server/test/public-guard.test.js
+- [ ] A4: Mount an empty public router that never reads a member token — GET /health probe, no-store, JSON 404 for the rest, mounted after the JSON parser — server/routes/public.js, server/app.js, server/test/public-router.test.js
+- [ ] A5: Write the guest-door rule down where the gate reads it — ADR 0030, the INV-1 sentence, Source and Touches, and the two INV-1 guest door tests — docs/brain/decisions/0030-guest-writes-have-one-door.md, docs/brain/invariants.md, server/test/invariants.test.js
+- [ ] A6: Record the new route in the backend docs and the server map — the §5 row and limiter sentence, the breadcrumbs row — docs/agent/standards-backend.md, server/breadcrumbs.md
+- [ ] A7: Run the full checks and hand Dandan the ADR to read — test:server, server lint, build, scope-check --arch, log-query; then the [human] card for ADR 0030
