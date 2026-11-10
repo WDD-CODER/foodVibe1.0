@@ -1,6 +1,6 @@
 # Plan 522 — Event logistics 5 of 6: the phone-intake and site-visit panel on the event screen
 
-Status: draft
+Status: done
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
 Depends-on: 519, 520, 521
 

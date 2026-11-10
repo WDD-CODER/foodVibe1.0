@@ -1,6 +1,6 @@
 # Plan 532 — The platform admin sees every business's own logistics items and promotes good ones to the shared list
 
-Status: draft
+Status: done
 Depends-on: 523
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 
