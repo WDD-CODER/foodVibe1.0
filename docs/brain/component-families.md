@@ -95,6 +95,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users (13 services): in `src/app/core/services/` the add-equipment, add-item, auth, confirm, global-specific,
   quick-add-product, quick-edit-product, restore-choice and translation-key `*-modal.service.ts`; in `src/app/shared/`
   the ai-menu, ai-product, ai-recipe and label-creation `*-modal/*.service.ts`.
+- Also used by `PlatformLogisticsItemsComponent` (`ConfirmModalService`, plan 532).
 - Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
 
 ### list-page — a list screen (header, search, filters, rows, selection)
@@ -129,6 +130,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/shared/empty-state/` · `app-empty-state` (+ `.c-empty-state` in `src/styles.scss`).
 - When: an empty list or a search with no results.
+- Also used by `PlatformLogisticsItemsComponent` (plan 532).
 - Known copies: not counted.
 
 ### form-field — label, input, error
@@ -185,6 +187,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/services/user-msg.service.ts` (`UserMsgService`), `src/app/core/services/logging.service.ts`
   (`logging.error`). Pattern: `logging.error(...)` + `userMsg.onSet*Msg(translate(key))`.
 - When: any wait, success or error the user must see.
+- Also used by `PlatformLogisticsItemsComponent` (`UserMsgService`, plan 532).
 - Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
 - Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 

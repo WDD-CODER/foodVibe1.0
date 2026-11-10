@@ -20,6 +20,20 @@ export interface BusinessRow {
   lastEventDate: string | null
 }
 
+/** Plan 532: one business's own term (a logistics item) as the platform admin sees it. */
+export interface AdminTermRow {
+  id: string
+  businessId: string
+  businessName: string | null
+  key: string
+  phase: 'intake' | 'site_visit' | null
+  section: string | null
+  answerType: 'status' | 'quantity' | 'text' | null
+  environments: string[] | null
+  hint: string | null
+  createdAt: number | null
+}
+
 /** Cross-business numbers for the platform admin. The server refuses everyone else. */
 @Injectable({ providedIn: 'root' })
 export class PlatformAdminService {
@@ -33,6 +47,17 @@ export class PlatformAdminService {
       this.http.get<{ rows: BusinessRow[] }>(`${environment.apiUrl}${API.admin('businesses')}`)
     )
     this._rows_.set(res.rows)
+  }
+
+  private readonly _termRows_ = signal<AdminTermRow[]>([])
+  public readonly termRows_ = this._termRows_.asReadonly()
+
+  /** Plan 532: every business's own terms of one kind (platform admin only). */
+  async loadTerms(kind: 'logisticsItem'): Promise<void> {
+    const res = await firstValueFrom(
+      this.http.get<{ rows: AdminTermRow[] }>(`${environment.apiUrl}${API.admin('taxonomy')}`, { params: { kind } })
+    )
+    this._termRows_.set(res.rows)
   }
 
   /** Optimistic: flips the row first, puts it back and rethrows when the server refuses. */

@@ -8,6 +8,7 @@ import { PlatformAdminService, type BusinessRow } from '@services/platform-admin
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { formatPctInt } from 'src/app/core/engine/rounding'
 
 export type SortKey =
@@ -52,7 +53,14 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
 @Component({
   selector: 'app-platform-dashboard-page',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, PageHeaderComponent, LoaderComponent],
+  imports: [
+    DatePipe,
+    LucideAngularModule,
+    TranslatePipe,
+    PageHeaderComponent,
+    LoaderComponent,
+    PlatformLogisticsItemsComponent
+  ],
   templateUrl: './platform-dashboard.page.html',
   styleUrl: './platform-dashboard.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

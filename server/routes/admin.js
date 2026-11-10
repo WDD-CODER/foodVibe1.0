@@ -145,4 +145,42 @@ router.put('/businesses/:id/internal', verifyToken, requirePlatformAdmin, async 
   }
 })
 
+// Plan 532: the platform admin reads every business's own terms of one allowlisted kind, to learn what to share.
+const ADMIN_TERM_KINDS = ['logisticsItem']
+
+router.get('/taxonomy', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const { kind } = req.query
+  if (typeof kind !== 'string' || !ADMIN_TERM_KINDS.includes(kind)) return res.status(400).json({ error: 'Unsupported kind' })
+  try {
+    const terms = await col('taxonomyTerms')
+      .find(
+        { kind, businessId: { $nin: ['__master__', null] }, ...LIVE },
+        { projection: { _id: 1, businessId: 1, key: 1, phase: 1, section: 1, answerType: 1, environments: 1, hint: 1, createdAt: 1 } }
+      )
+      .sort({ key: 1, createdAt: 1 })
+      .toArray()
+    const businessIds = [...new Set(terms.map(t => t.businessId))]
+    const businesses = businessIds.length
+      ? await col('businesses').find({ _id: { $in: businessIds } }, { projection: { name: 1 } }).toArray()
+      : []
+    const nameById = new Map(businesses.map(b => [b._id, b.name]))
+    const rows = terms.map(t => ({
+      id: t._id,
+      businessId: t.businessId,
+      businessName: nameById.get(t.businessId) ?? null,
+      key: t.key,
+      phase: t.phase ?? null,
+      section: t.section ?? null,
+      answerType: t.answerType ?? null,
+      environments: t.environments ?? null,
+      hint: t.hint ?? null,
+      createdAt: t.createdAt ?? null,
+    }))
+    res.json({ rows })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.taxonomy_list.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
 module.exports = router
