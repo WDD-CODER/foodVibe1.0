@@ -1682,6 +1682,15 @@
     "metadata_no_logistics_items": "אין שאלות בסעיף הזה",
     "logistics_type_status": "כן/לא",
     "logistics_type_quantity": "כמות",
-    "logistics_type_text": "טקסט"
+    "logistics_type_text": "טקסט",
+    "platform_logistics_title": "פריטי לוגיסטיקה של עסקים",
+    "platform_logistics_businesses": "עסקים",
+    "platform_logistics_promote": "הפוך למשותף",
+    "platform_logistics_promote_confirm": "להוסיף את הפריט לרשימה המשותפת של כל העסקים? העותקים הפרטיים של העסקים יתאחדו איתו.",
+    "platform_logistics_promoted": "הפריט נוסף לרשימה המשותפת",
+    "platform_logistics_promote_failed": "ההוספה לרשימה המשותפת נכשלה",
+    "platform_logistics_already_shared": "הפריט כבר קיים ברשימה המשותפת",
+    "platform_logistics_empty": "אין עדיין פריטים שעסקים הוסיפו",
+    "platform_logistics_load_failed": "טעינת הפריטים נכשלה"
   }
 }

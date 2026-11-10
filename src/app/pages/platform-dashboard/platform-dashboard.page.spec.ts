@@ -1,4 +1,4 @@
-import { signal } from '@angular/core'
+import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -7,7 +7,11 @@ import { PlatformAdminService, type BusinessRow } from '@services/platform-admin
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { PlatformDashboardPage } from './platform-dashboard.page'
+
+@Component({ selector: 'app-platform-logistics-items', standalone: true, template: '' })
+class StubLogisticsItemsComponent {}
 
 const DAY = 86_400_000
 
@@ -53,6 +57,11 @@ describe('PlatformDashboardPage', () => {
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
         provideRouter([])
       ]
+    })
+    // The logistics list (plan 532) has its own spec; here it is an empty stub.
+    TestBed.overrideComponent(PlatformDashboardPage, {
+      remove: { imports: [PlatformLogisticsItemsComponent] },
+      add: { imports: [StubLogisticsItemsComponent] }
     })
     fixture = TestBed.createComponent(PlatformDashboardPage)
     fixture.detectChanges()

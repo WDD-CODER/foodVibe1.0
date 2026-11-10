@@ -1,0 +1,42 @@
+<section class="logistics-items">
+  <h2 class="logistics-items__title">{{ 'platform_logistics_title' | translatePipe }}</h2>
+
+  @if (!isLoading_()) {
+    @if (!groups_().length) {
+      <app-empty-state messageKey="platform_logistics_empty" />
+    } @else {
+      @for (group of groups_(); track group.key) {
+        <article class="c-glass-card logistics-group">
+          <div class="logistics-group__head">
+            <h3 class="logistics-group__key">{{ group.key }}</h3>
+            <p class="logistics-group__meta">
+              @if (group.phaseKey) {
+                <span>{{ group.phaseKey | translatePipe }}</span>
+              }
+              @if (group.sectionKey) {
+                <span>· {{ group.sectionKey | translatePipe }}</span>
+              }
+              <span class="logistics-group__count">
+                · <lucide-icon name="users" [size]="14"></lucide-icon> {{ group.rows.length }}
+                {{ 'platform_logistics_businesses' | translatePipe }}
+              </span>
+            </p>
+          </div>
+          <ul class="logistics-group__businesses">
+            @for (row of group.rows; track row.id) {
+              <li class="c-chip--tag">
+                {{ row.businessName ?? row.businessId }}
+                @if (row.createdAt) {
+                  · {{ row.createdAt | date: 'dd/MM/yy' }}
+                }
+              </li>
+            }
+          </ul>
+          <button type="button" class="c-btn-primary logistics-group__promote" (click)="promote(group)">
+            {{ 'platform_logistics_promote' | translatePipe }}
+          </button>
+        </article>
+      }
+    }
+  }
+</section>

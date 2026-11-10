@@ -1,0 +1,70 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+
+@layer components.platform-logistics-items {
+  :host {
+    display: block;
+  }
+
+  .logistics-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .logistics-items__title {
+    margin: 0;
+    font-size: var(--fs-lg);
+  }
+
+  .logistics-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    padding: var(--space-3);
+  }
+
+  .logistics-group__key {
+    margin: 0;
+    font-size: var(--fs-md);
+  }
+
+  .logistics-group__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
+
+    margin: 0;
+
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+
+  .logistics-group__count {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .logistics-group__businesses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .logistics-group__promote {
+    align-self: stretch;
+  }
+
+  @media (min-width: $break-mobile) {
+    .logistics-group__promote {
+      align-self: flex-end;
+    }
+  }
+}
