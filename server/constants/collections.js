@@ -40,6 +40,8 @@ const COLLECTIONS = [
   // Plan 512: the client record above events. Owner-only to write, staff read name, phone, tags + kinds
   // (permissions.js). Not cloneable (no _masterId). Soft delete, Trash (plan 544, ADR 0031).
   { name: 'clients',                  userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: true },
+  // Plan 548 (C-PROFILE): one front desk profile per business; owner-only write, no clone, hard delete.
+  { name: 'frontDeskProfiles',        userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: false },
   // Plan 322 M4: per-user Hebrew-dictionary overrides. Not cloneable — signup starts with none;
   // the shared '__global__' pseudo-user doc (own routes, see generic.js) is the admin-editable
   // layer every user merges in at runtime, separate from this per-user personal layer.

@@ -27,6 +27,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
 | `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
+| `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
 | `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |

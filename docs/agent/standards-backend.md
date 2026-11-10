@@ -40,6 +40,7 @@ paths:
 | `VENUE_PROFILES` | Venue | Event venue profiles |
 | `MENU_EVENT_LIST` | Menu | Menu events |
 | `clients` | CRM | Clients (ADR 0027, ADR 0031): owner-only to write, staff read `name`, `phone`, `tags`, `kinds`. Soft delete (Trash). Server-owned fields, dropped from every generic write (`CLIENT_SERVER_FIELDS`): `phoneNormalized`, `phoneKey`, `kinds`, `lifecycle`, `firstSeenAt`, `lastContactAt`, `counters`, `waId`, `mergedInto`, `doNotContact` |
+| `frontDeskProfiles` | Front desk | The business's one front desk profile (plan 548, C-PROFILE): owner-only to write (`editFrontDesk`), not cloneable, hard delete. Unique `businessId` (409 `PROFILE_EXISTS`) and `slug` (409 `SLUG_TAKEN`). `PROFILE_SERVER_FIELDS` (`status`, `whatsapp`) are dropped from every generic write; reads never carry `whatsapp.phoneNumberId` |
 | `aiUsage` | System | Server-only AI ledger (plan 566, C-AIUSAGE): one row per real Gemini HTTP call — business, feature, model, tokens, latency, outcome, estimated cost. Not in the generic API, never cloned, no prompt or reply text. Read only by `GET /api/v1/admin/ai-usage` |
 | `VERSION_HISTORY` | System | Schema/version snapshots |
 | `activity_log` | System | Activity log entries (`ACTIVITY_STORAGE_KEY`) |
