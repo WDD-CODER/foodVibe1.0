@@ -336,6 +336,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
     timeoutMs: 30000,
     log: req.log,
     eventPrefix: 'ai.generate',
+    usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'recipe_generate' },
     model: requestedModel(req),
   });
   return respondFromRecipeResult(res, result);
@@ -413,6 +414,7 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
       timeoutMs: 30000,
       log: req.log,
       eventPrefix: 'ai.parse_text',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'parse_text' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -490,6 +492,7 @@ router.post('/parse-price-list', verifyToken, (req, res, next) => {
       timeoutMs: 45000,
       log: req.log,
       eventPrefix: 'ai.parse_price_list',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'parse_price_list' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -565,6 +568,7 @@ router.post('/parse-receipt-photo', verifyToken, (req, res, next) => {
       timeoutMs: 45000,
       log: req.log,
       eventPrefix: 'ai.parse_receipt_photo',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'receipt_photo' },
       needsVision: true,
       model: requestedModel(req),
     });
@@ -674,6 +678,7 @@ router.post('/match-product-names', verifyToken, aiLimiter, async (req, res) => 
       timeoutMs: 30000,
       log: req.log,
       eventPrefix: 'ai.match_product_names',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'product_match' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -780,6 +785,7 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
       timeoutMs: 30000,
       log: req.log,
       eventPrefix: 'ai.patch_recipe',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'recipe_patch' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -921,6 +927,7 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
       timeoutMs: 45000,
       log: req.log,
       eventPrefix: 'ai.generate_menu',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'menu_generate' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -1016,6 +1023,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
       timeoutMs: 45000,
       log: req.log,
       eventPrefix: 'ai.patch_menu',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'menu_patch' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -1139,6 +1147,7 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
       timeoutMs: 30000,
       log: req.log,
       eventPrefix: 'ai.generate_product',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'product_generate' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -1230,6 +1239,7 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
       timeoutMs: 45000,
       log: req.log,
       eventPrefix: 'ai.patch_product',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'product_patch' },
       model: requestedModel(req),
     });
     if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
@@ -1294,6 +1304,7 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
     timeoutMs: 30000,
     log: req.log,
     eventPrefix: 'ai.generate_from_image',
+    usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'recipe_from_image' },
     needsVision: true,
     model: requestedModel(req),
   });
@@ -1341,6 +1352,7 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
       timeoutMs: 30000,
       log: req.log,
       eventPrefix: 'ai.generate_product_from_image',
+      usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'product_from_image' },
       needsVision: true,
       model: requestedModel(req),
     });
@@ -1468,6 +1480,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     timeoutMs: 30000,
     log: req.log,
     eventPrefix: 'ai.generate_from_url',
+    usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'generate_from_url' },
     model: requestedModel(req),
   });
   return respondFromRecipeResult(res, result);
