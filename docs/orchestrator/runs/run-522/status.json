@@ -1,0 +1,615 @@
+{
+  "run": "run-522",
+  "branch": "orch/run-522",
+  "base": "main",
+  "startedAt": "2026-11-10T12:04:06.752Z",
+  "mainShaAtStart": "5702f6d1fc4a80d78426cb011932d2524eb3466f",
+  "plans": {
+    "522": {
+      "nnn": "522",
+      "title": "Event logistics 5 of 6: the phone-intake and site-visit panel on the event screen",
+      "branch": "feat/522-event-logistics-event-panel",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T12:06:24.491Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T12:30:05.608Z"
+        }
+      },
+      "humanItems": [
+        "On a phone width (≤768 px) the closed card is one header line (icon, \"לוגיסטיקה\", the open count, the chevron) that reads clearly and opens on one tap.",
+        "On a phone width (≤768 px) each item is one block — question, the four status chips wrapping, then quantity/note — with no horizontal scroll, and the panel's card matches the notes log's look.",
+        "Signed in as staff, the panel reads \"צפייה בלבד\" and nothing reacts to a tap."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T12:06:24.268Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:06:24.493Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:24:41.726Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:29:59.896Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:30:05.609Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:30:23.726Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:31:44.378Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 11.7,
+      "sha": "972d25503250e6b49c9af4fee3418bc1702f4657",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1094.3,
+          "tokens": {
+            "input": 2650604,
+            "output": 41690
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.7,
+          "tokens": {
+            "input": 120760,
+            "output": 942
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "5d82bd970147763d920a67e9cf75c670f61b966c"
+    },
+    "523": {
+      "nnn": "523",
+      "title": "Event logistics 6 of 6: let a business add and remove its own checklist questions in the Metadata Manager",
+      "branch": "feat/523-event-logistics-item-manager",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T12:33:33.201Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T12:48:31.024Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T13:09:56.105Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-10T12:53:13.605Z"
+        }
+      },
+      "humanItems": [
+        "The card reads well on a phone: the add form stacks, the environment chips wrap, and the shared/own split is obvious at a glance."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T12:33:33.045Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:33:33.203Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:44:36.905Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:48:30.752Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T12:48:30.886Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T12:48:31.026Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T12:48:59.108Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T12:52:44.861Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T12:52:49.536Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T12:53:07.790Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T12:53:13.446Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T12:53:13.607Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T13:05:39.769Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T13:09:50.566Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T13:09:56.106Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T13:10:04.806Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T13:10:41.096Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 11.1,
+      "sha": "bffa158a0f3a37e2c22d45a72cf9c3353ee619fc",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 661.2,
+          "tokens": {
+            "input": 1614163,
+            "output": 28921
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 26,
+          "tokens": {
+            "input": 82953,
+            "output": 1163
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 17.3,
+          "tokens": {
+            "input": 102688,
+            "output": 1369
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 743.9,
+          "tokens": {
+            "input": 4072763,
+            "output": 38759
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.7,
+          "tokens": {
+            "input": 52910,
+            "output": 486
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node scripts/breadcrumbs-check.mjs",
+        "round 2: review STOP: major e2e/ui/523-1.spec.ts:4 done-when: e2e spec does not parse; major e2e/ui/523-2.spec.ts:4 done-when: e2e spec does not parse; major e2e/ui/523-3.spec.ts:4 done-when: e2e spec does not parse"
+      ],
+      "escalations": [
+        {
+          "step": "round 2",
+          "check": "review"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "resetToBase": "972d25503250e6b49c9af4fee3418bc1702f4657",
+      "resetFrom": "c45174470dda44a8ff4205fdee1d24523d986e5a",
+      "checkedHead": "48b90495b6173d6a5e4c86b93a83b9074d55be2d"
+    },
+    "532": {
+      "nnn": "532",
+      "title": "The platform admin sees every business's own logistics items and promotes good ones to the shared list",
+      "branch": "feat/532-platform-admin-sees-businesses",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T13:12:12.714Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T13:28:27.757Z"
+        }
+      },
+      "humanItems": [
+        "Signed in as a business owner (not platform admin), add the own logistics item \"בדיקת קידום\" on the Metadata Manager card (plan 523). Then signed in as the platform admin, `/platform` shows the section \"פריטי לוגיסטיקה של עסקים\" with \"בדיקת קידום\" and that business's name.",
+        "As the platform admin, tap \"הפוך למשותף\" on \"בדיקת קידום\" and confirm: the toast \"הפריט נוסף לרשימה המשותפת\" shows and the row leaves the list. Signed in as the owner again, the Metadata Manager card shows \"בדיקת קידום\" as shared (no delete), and an event that answered it still shows the answer."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T13:12:12.440Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T13:12:12.716Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T13:24:44.066Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T13:28:22.727Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T13:28:27.758Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T13:28:37.277Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T13:29:11.083Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.1,
+      "sha": "2f0efb15137af6c5fcc9cbdd89668706f4a48831",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 749.3,
+          "tokens": {
+            "input": 1626150,
+            "output": 26242
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.6,
+          "tokens": {
+            "input": 46241,
+            "output": 747
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c9a2385becc0588735d1d89665f29327ac89f1e0"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-10T12:06:24.048Z",
+      "plan": "522",
+      "text": "the folder foodVibe1.0-orch-run-522-522 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T12:24:38.989Z",
+      "plan": "522",
+      "text": "builder left undone (round 0): e2e specs 522-1..6 were not run and no screenshots were taken: the API at localhost:3000 is down in this worktree"
+    },
+    {
+      "at": "2026-11-10T12:30:37.561Z",
+      "plan": "522",
+      "text": "the folder foodVibe1.0-orch-merge-run-522 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T12:33:32.865Z",
+      "plan": "523",
+      "text": "the folder foodVibe1.0-orch-run-522-523 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T12:44:34.573Z",
+      "plan": "523",
+      "text": "builder left undone (round 0): e2e/ui/523-1..3 were not run: the API at localhost:3000 did not respond in this worktree, so no screenshots were saved under screens/523-*.png"
+    },
+    {
+      "at": "2026-11-10T12:53:13.308Z",
+      "plan": "523",
+      "text": "escalated to a fresh judgment-tier builder (round 2): review STOP: major e2e/ui/523-1.spec.ts:4 done-when: e2e spec does not parse; major e2e/ui/523-2.spec.ts:4 done-when: e2e spec does not parse; major e2e/ui/523-3.spec.ts:4 done-when: e2e spec does not parse"
+    },
+    {
+      "at": "2026-11-10T13:05:37.611Z",
+      "plan": "523",
+      "text": "builder left undone (round 2): The e2e specs 523-1..3 were not run and screens/523-*.png were not taken: the API (localhost:3000) is not running for this builder worktree, and builder folders do not start servers. The gate or the Human needs to run them against a live API."
+    },
+    {
+      "at": "2026-11-10T13:12:12.296Z",
+      "plan": "532",
+      "text": "the folder foodVibe1.0-orch-run-522-532 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 10.1,
+  "updatedAt": "2026-11-10T13:31:55.808Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "522",
+      "type": "behaviour",
+      "text": "behaviour: the phase tabs are `.c-chip c-chip--tab` buttons (role=tab), because `app-tab-chips` is a route-navigation component with no phase or count inputs — reverse: swap in a shared tab component if one is added",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "522",
+      "type": "behaviour",
+      "text": "behaviour: the event is read from `allMenuEvents_()` as the notes log does, since `getMenuEventById` is async — reverse: change `event_` to another lookup",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "522",
+      "type": "behaviour",
+      "text": "behaviour: the six e2e specs carry their helpers inline, because the scope allows only `e2e/ui/522-*.spec.ts` — reverse: extract a shared helper file once scope allows it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "522",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons.ts — lacks `CircleCheckBig`; the panel spec picks it itself",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: environment chips show the existing environment dictionary labels (the full names), not new short labels — reverse: add short-label keys and use them in envLabels()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: a signed-out user sees a sign-in button in place of the add form — reverse: show the form disabled instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: the add form's phase select follows the selected tab, and can be changed on its own afterwards — reverse: lock the form phase to the tab",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: a 409 from remove() is treated as in-use even when it is not a TermInUseError — reverse: check only TermInUseError in isInUse()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: picking a phase tab also sets the add form's phase; changing the form's phase select does not switch the tab (the simplest option) — reverse: remove the setPhase call in selectPhase()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: added the dictionary key metadata_logistics_question ('שאלה') as the question field's label, because app-form-field needs a label and the plan lists none — reverse: delete the key and drop the label from the template",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: 523-3 creates its own 'בדיקה E2E' item through the API before removing it in the UI, so it does not depend on 523-2 running first — reverse: drop the POST and run 523-2 before 523-3",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "523",
+      "type": "behaviour",
+      "text": "behaviour: an add that the server rejects, or a remove that fails for a reason other than in-use, is logged through LoggingService.error as well as shown as the server_error toast (the same pattern as station-manager) — reverse: remove the logging.error calls",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "532",
+      "type": "behaviour",
+      "text": "behaviour: the component builds its promote payload with the fallbacks phase 'site_visit', section 'other', answerType 'status' when a row lacks them. Rows from a valid term always carry all three, so this should not trigger. Reverse: drop the fallbacks and make the AdminTermRow fields non-null.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "532",
+      "type": "behaviour",
+      "text": "behaviour: the section's load-error toast shows once and the list then shows the empty state, with no retry button. Reverse: add a retry button.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-10T13:31:55.806Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-10T13:31:55.808Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
