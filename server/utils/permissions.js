@@ -13,6 +13,7 @@ const { MASTER_BUSINESS_ID } = require('./business-scope')
 const ACTIONS = [
   'create', 'edit', 'delete', 'editMoney', 'changeStage',
   'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk',
+  'manageRequests',
 ]
 const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk'])
 const EVENTS = 'menuEvents'
@@ -46,6 +47,8 @@ function can(user, action, ctx = {}) {
   if (user?.businessRole !== 'staff') return deny('NO_ROLE')
 
   if (OWNER_ONLY_ACTIONS.has(action)) return deny('OWNER_ONLY')
+  // Plan 549: any member of the business works the request queue and the bookings.
+  if (action === 'manageRequests') return OK
   if (OWNER_ONLY_TYPES.has(type) && (action === 'create' || action === 'edit' || action === 'delete')) return deny('OWNER_ONLY_TYPE')
   if (action === 'create') return OK
   const isCreator = !!doc && !!user.userId && doc.createdBy === user.userId

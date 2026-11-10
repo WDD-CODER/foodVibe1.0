@@ -134,6 +134,19 @@ async function connectDb() {
   )
   logger.debug({ event: 'mongo.index.ensured', index: 'frontDeskProfiles' })
 
+  // Plan 549: requests and bookings. publicToken indexes are partial so a raw fixture doc without a token cannot break startup.
+  await db.collection('requests').createIndex({ businessId: 1, status: 1, createdAt: 1 }, { name: 'requests_business_status' })
+  await db.collection('requests').createIndex(
+    { publicToken: 1 },
+    { unique: true, name: 'requests_token_unique', partialFilterExpression: { publicToken: { $type: 'string' } } }
+  )
+  await db.collection('bookings').createIndex({ businessId: 1, startAt: 1 }, { name: 'bookings_business_start' })
+  await db.collection('bookings').createIndex(
+    { publicToken: 1 },
+    { unique: true, name: 'bookings_token_unique', partialFilterExpression: { publicToken: { $type: 'string' } } }
+  )
+  logger.debug({ event: 'mongo.index.ensured', index: 'requests' })
+
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
   await ensureLogIndexes(db)
   logger.debug({ event: 'mongo.index.ensured', index: 'app_logs' })
