@@ -80,6 +80,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "knip": "^6.35.1",
     "lint-staged": "^17.0.8",
+    "mongodb-mcp-server": "3.2.2",
     "prettier": "^3.9.5",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.63.0"

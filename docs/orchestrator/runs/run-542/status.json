@@ -1,0 +1,158 @@
+{
+  "run": "run-542",
+  "branch": "orch/run-542",
+  "base": "main",
+  "startedAt": "2026-11-10T08:42:33.710Z",
+  "mainShaAtStart": "f71782704f503492322e999813e894f5ea474626",
+  "plans": {
+    "542": {
+      "nnn": "542",
+      "title": "The local MongoDB MCP server starts from an installed package, with its last outside reach closed",
+      "branch": "feat/542-mongodb-local-mcp-starts",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T08:44:24.685Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T08:52:09.864Z"
+        }
+      },
+      "humanItems": [
+        "After the merge and the Planner's A8 steps, the Human opens a NEW terminal window, starts Claude Code in the main folder and runs `/mcp`: `mongodb-local` shows connected within ~10 s, and its tool list has no `connect`, `disconnect`, `atlas-local-*`, `search-knowledge` or `list-knowledge-sources`. (The validation card carries these steps; the Human does not need to remember them.)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T08:44:24.527Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T08:44:24.686Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T08:48:53.200Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T08:52:04.969Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T08:52:09.865Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T08:52:22.273Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T08:53:32.938Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 11.9,
+      "sha": "0e88a627b73adb94d3aa5a3fb8f173cc81d0a685",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 266,
+          "tokens": {
+            "input": 429348,
+            "output": 7905
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.3,
+          "tokens": {
+            "input": 134274,
+            "output": 302
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "3398f8fb9dff9b720686235df5ab9e31de09254b"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-10T08:44:24.376Z",
+      "plan": "542",
+      "text": "the folder foodVibe1.0-orch-run-542-542 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T08:48:50.822Z",
+      "plan": "542",
+      "text": "builder left undone (round 0): A8: after-merge steps, Planner only"
+    },
+    {
+      "at": "2026-11-10T08:48:56.630Z",
+      "plan": "542",
+      "text": "the folder foodVibe1.0-orch-run-542-542 was installed (root)"
+    },
+    {
+      "at": "2026-11-10T08:52:44.841Z",
+      "plan": "542",
+      "text": "the folder foodVibe1.0-orch-merge-run-542 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 11.9,
+  "updatedAt": "2026-11-10T08:56:13.776Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "542",
+      "type": "behaviour",
+      "text": "behaviour: the launcher resolves the package main file and walks up to its package.json, because the package's exports map hides `./package.json` and the plan's direct resolve fails — reverse: add a `./package.json` export upstream and resolve it directly",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "542",
+      "type": "behaviour",
+      "text": "behaviour: the start test runs against 127.0.0.1:1, because tools/list works with no database reachable, so it is not skipped — reverse: add the skip guard from the plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-10T08:56:13.774Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-10T08:56:13.776Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

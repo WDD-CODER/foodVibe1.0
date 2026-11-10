@@ -358,3 +358,11 @@ only the Bash tool's command text triggers it.
 2. Proof that a mod loads in *this* session: `~/.claude/plugins/store/fleet_*.json` has a row for the session id, or the day's `mods-fleet-*.log` has a `session.start` with it. A row from an older session proves nothing.
 3. Re-set the options afterwards (`/plugin configure <mod>@ai-workflow-kit-mods`); the uninstall does not keep them.
 4. `/health` hits gstack's disabled `health` skill, not fleet. Use `/fleet-health`.
+
+### A user environment variable is seen only by processes started after it; an MCP server that downloads itself on start breaks
+
+**What hurt:** `FOODVIBE_MCP_MONGO_URI` and `MCP_TIMEOUT` were set with `[Environment]::SetEnvironmentVariable(..., 'User')`, but a new tab in an already-open terminal app and a terminal inside Cursor/VS Code kept the old values. Separately, `npx -y mongodb-mcp-server` downloaded 409 packages (~90 s) at start, outlived Claude Code's ~30 s wait, and left a half-written npx cache that every Reconnect reused (`ERR_MODULE_NOT_FOUND`).
+
+**What to do instead:**
+1. After setting a user variable, open a new terminal window (not a tab, not the editor's terminal).
+2. Install an MCP server as a dependency and start it with `node`, never `npx -y` at start (plan 542).
