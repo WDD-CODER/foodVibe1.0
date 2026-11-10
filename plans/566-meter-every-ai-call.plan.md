@@ -90,6 +90,7 @@ src/app/app.config.ts
 public/assets/data/dictionary.json
 docs/agent/standards-backend.md
 server/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
 ```
 
 ## Read Scope
