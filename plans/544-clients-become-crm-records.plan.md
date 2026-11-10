@@ -219,15 +219,15 @@ Check whether owners ask for staff to add clients, and whether the `phoneKey` ru
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give the client record its CRM fields and one phone rule shared by server and browser — schema additions, enums, server-field list, phone.ts, staff read fields — shared/schemas/entities/client.schema.ts, shared/schemas/phone.ts, shared/schemas/index.ts, shared/schemas/staff-fields.ts
-- [ ] A2: Keep the server-owned client fields out of reach of normal saves and derive the match key — strip on POST and PUT; stamp phoneNormalized and phoneKey; phone-key index — server/routes/generic.js, server/db.js
-- [ ] A3: Send a deleted client to Trash instead of deleting it for good — softDelete flag, collection registry note — server/constants/collections.js, docs/agent/standards-backend.md
-- [ ] A4: Prove the new rules with server tests — strip per field, staff read of four fields, Trash round trip, phone key for the international form — server/test/clients.test.js, server/test/cross-business.test.js
-- [ ] A5: Fill the new fields for clients that already exist, and list possible duplicates without touching them — migration 0011 with dry run, write, verify, scratch DB, and its test — server/migrations/0011-clients-crm.js, server/test/migration-0011-clients-crm.test.js
-- [ ] A6: Run the migration locally and hand the Atlas run to Dandan — pnpm run build:schemas; node server/scripts/db-backup.js --target=local; dry run, write with --backup-dir, verify on local only; paste outputs and the Atlas runbook below into Execution Notes; never pass --target=atlas
-- [ ] A7: Show trashed clients on the Trash page — TrashType, section, data-service entry, dictionary key, spec and the ui test — src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, src/app/core/models/client.model.ts, public/assets/data/dictionary.json, e2e/ui/544-1.spec.ts
-- [ ] A8: Write down the decision — ADR 0031 verbatim and the one-line pointer in ADR 0027 — docs/brain/decisions/0031-clients-are-crm-records.md, docs/brain/decisions/0027-client-entity-above-events.md
-- [ ] A9: Run every check and hand over the cards — test:server, test:ci, server lint, build, scope-check --arch, log-query; the [ui] spec; the [human] Atlas card
+- [x] A1: Give the client record its CRM fields and one phone rule shared by server and browser — schema additions, enums, server-field list, phone.ts, staff read fields — shared/schemas/entities/client.schema.ts, shared/schemas/phone.ts, shared/schemas/index.ts, shared/schemas/staff-fields.ts
+- [x] A2: Keep the server-owned client fields out of reach of normal saves and derive the match key — strip on POST and PUT; stamp phoneNormalized and phoneKey; phone-key index — server/routes/generic.js, server/db.js
+- [x] A3: Send a deleted client to Trash instead of deleting it for good — softDelete flag, collection registry note — server/constants/collections.js, docs/agent/standards-backend.md
+- [x] A4: Prove the new rules with server tests — strip per field, staff read of four fields, Trash round trip, phone key for the international form — server/test/clients.test.js, server/test/cross-business.test.js
+- [x] A5: Fill the new fields for clients that already exist, and list possible duplicates without touching them — migration 0011 with dry run, write, verify, scratch DB, and its test — server/migrations/0011-clients-crm.js, server/test/migration-0011-clients-crm.test.js
+- [x] A6: Run the migration locally and hand the Atlas run to Dandan — pnpm run build:schemas; node server/scripts/db-backup.js --target=local; dry run, write with --backup-dir, verify on local only; paste outputs and the Atlas runbook below into Execution Notes; never pass --target=atlas
+- [x] A7: Show trashed clients on the Trash page — TrashType, section, data-service entry, dictionary key, spec and the ui test — src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, src/app/core/models/client.model.ts, public/assets/data/dictionary.json, e2e/ui/544-1.spec.ts
+- [x] A8: Write down the decision — ADR 0031 verbatim and the one-line pointer in ADR 0027 — docs/brain/decisions/0031-clients-are-crm-records.md, docs/brain/decisions/0027-client-entity-above-events.md
+- [x] A9: Run every check and hand over the cards — test:server, test:ci, server lint, build, scope-check --arch, log-query; the [ui] spec; the [human] Atlas card
 
 Atlas runbook for A6 (the Human runs it in PowerShell; `<host>` is printed by the error of a run without `--confirm-host`):
 
@@ -267,3 +267,11 @@ Read every `collision` line of the dry run before the write; the write never cha
 - Snapshot kept as the map's verification SHA `05741afd`; facts above re-checked on `origin/main` 5702f6d1.
 - ADR 0031 text approved by Dandan in chat 2026-11-10 ("approve ADR 0031"), including the liveKey line added for plan 545 Q1 = a. The [human] Done-when item for it is met at save time.
 - lifecycle rule (Human 2026-11-10, plan 547): new = firstSeenAt within 30 days, dormant = no contact for 180 days, active = the rest; computed in the browser, the stored field is not read.
+- 2026-11-10 builder (round 2, fresh from base 012b39bf; round 1 failed only on a left-over `test-results/` folder):
+  - scope extended: docs/workflow-kit/manifest.json — ADR 0031 entry (always-allowed regenerated file; `kit-manifest-check` → `ok — 389 classified, 0 unclassified`).
+  - `pnpm run test:server` → exit 0 (76 files, 911 tests); `pnpm run test:ci` → exit 0 (TOTAL: 1874 SUCCESS); `pnpm run build` → exit 0; `pnpm run lint` → exit 0; `pnpm --dir server run lint` → exit 0.
+  - `node scripts/scope-check.mjs --arch --plan=…` → `ARCH: ok INV-1, INV-2, INV-3, INV-4`; `--diff=origin/orch/fd-1a-data` → `SCOPE: ok`; override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check → exit 0; `log-query --since=plan-start --level=error` → `no entries`.
+  - generic.js: the staff Trash list (`GET /:type/trash`) now goes through the same `readProjection` as the other reads, so a staff member's Trash read of clients carries only name, phone, tags, kinds (test in clients.test.js).
+  - A6 (local only; `mongodb` is not a direct server dependency in this worktree, so the tools ran with `NODE_PATH` = mongoose's `node_modules`): `node server/scripts/db-backup.js --target=local` → exit 0, snapshot `foodvibe-db-backups/local-2026-11-10T15-47-12` (37754 docs). Dry run → `clients: 10, to patch: 0, phoneKey collisions: 2` + 2 collision lines (local test clients; the round-1 attempt had already filled the fields). `--write=yes --backup-dir=…` → `patched 0 clients`; a second write → `patched 0`; `--verify=yes` → `verify: ok`. Never run with `--target=atlas`.
+  - `[ui]` `e2e/ui/544-1.spec.ts`: `npx playwright test e2e/ui/544-1.spec.ts --list` → 1 test. Not run here: ports 4200/3000 serve the main folder's code, not this branch; the gate reruns it.
+  - Atlas runbook for Dandan: the four commands under "Atlas runbook for A6" above, unchanged.

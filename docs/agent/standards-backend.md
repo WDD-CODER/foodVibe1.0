@@ -39,6 +39,7 @@ paths:
 | `EQUIPMENT_LIST` | Kitchen | Kitchen equipment |
 | `VENUE_PROFILES` | Venue | Event venue profiles |
 | `MENU_EVENT_LIST` | Menu | Menu events |
+| `clients` | CRM | Clients (ADR 0027, ADR 0031): owner-only to write, staff read `name`, `phone`, `tags`, `kinds`. Soft delete (Trash). Server-owned fields, dropped from every generic write (`CLIENT_SERVER_FIELDS`): `phoneNormalized`, `phoneKey`, `kinds`, `lifecycle`, `firstSeenAt`, `lastContactAt`, `counters`, `waId`, `mergedInto`, `doNotContact` |
 | `VERSION_HISTORY` | System | Schema/version snapshots |
 | `activity_log` | System | Activity log entries (`ACTIVITY_STORAGE_KEY`) |
 | `KITCHEN_UNITS` | Registry | Unit of measure registry |

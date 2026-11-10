@@ -8,6 +8,7 @@ import { EquipmentDataService } from './equipment-data.service'
 import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
+import { ClientDataService } from './client-data.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 
@@ -18,6 +19,7 @@ describe('TrashService (plan 407)', () => {
     jasmine.createSpyObj('List', { hasLoaded: loaded, reloadFromStorage: Promise.resolve() })
   const recipes = list(true)
   const dishes = list(false)
+  const clients = list(true)
 
   beforeEach(() => {
     storage = jasmine.createSpyObj<StorageService>('StorageService', [
@@ -33,7 +35,9 @@ describe('TrashService (plan 407)', () => {
           ? [{ _id: 'e1', name: 'חתונה', deletedAt: 2 }]
           : type === 'recipes'
             ? [{ _id: 'r1', nameHebrew: 'מרק', deletedAt: 1 }]
-            : []) as unknown as (T & { deletedAt: number })[]
+            : type === 'clients'
+              ? [{ _id: 'c1', name: 'דנה כהן', phone: '050-1234567', deletedAt: 3 }]
+              : []) as unknown as (T & { deletedAt: number })[]
       )
     )
     storage.restore.and.resolveTo({})
@@ -42,6 +46,7 @@ describe('TrashService (plan 407)', () => {
     storage.emptyTrash.and.resolveTo()
     recipes.reloadFromStorage.calls.reset()
     dishes.reloadFromStorage.calls.reset()
+    clients.reloadFromStorage.calls.reset()
     TestBed.configureTestingModule({
       providers: [
         TrashService,
@@ -53,6 +58,7 @@ describe('TrashService (plan 407)', () => {
         { provide: VenueDataService, useValue: list(false) },
         { provide: MenuEventDataService, useValue: list(false) },
         { provide: SupplierDataService, useValue: list(false) },
+        { provide: ClientDataService, useValue: clients },
         { provide: UserMsgService, useValue: jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg']) },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
@@ -83,6 +89,16 @@ describe('TrashService (plan 407)', () => {
     expect(storage.removePermanently).toHaveBeenCalledWith('suppliers', 's1')
     expect(storage.restoreAll).toHaveBeenCalledWith('venues')
     expect(storage.emptyTrash).toHaveBeenCalledWith('equipment')
+  })
+
+  it('plan 544: clients have the last Trash section, shown by name, and restore refreshes the client list', async () => {
+    expect(TRASH_SECTIONS[TRASH_SECTIONS.length - 1]).toEqual({ type: 'clients', titleKey: 'trash_clients' })
+    await service.loadTrash()
+    expect(storage.trash).toHaveBeenCalledWith('clients')
+    expect(service.items().clients).toEqual([{ _id: 'c1', name: 'דנה כהן', deletedAt: 3 }])
+    await service.restore('clients', 'c1')
+    expect(storage.restore).toHaveBeenCalledWith('clients', 'c1')
+    expect(clients.reloadFromStorage).toHaveBeenCalled()
   })
 
   it('restoreFor maps a version-history type onto its Trash type', async () => {

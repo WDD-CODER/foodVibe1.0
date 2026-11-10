@@ -7,12 +7,14 @@ import { EquipmentDataService } from './equipment-data.service'
 import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
+import { ClientDataService } from './client-data.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import type { VersionEntityType } from './version-history.service'
 
 /** Every collection with a Trash (plan 407: deleted items keep `deletedAt` on the doc itself). */
-export type TrashType = 'dishes' | 'recipes' | 'products' | 'equipment' | 'venues' | 'menuEvents' | 'suppliers'
+export type TrashType =
+  'dishes' | 'recipes' | 'products' | 'equipment' | 'venues' | 'menuEvents' | 'suppliers' | 'clients'
 
 export interface TrashItem {
   _id: string
@@ -35,7 +37,8 @@ export const TRASH_SECTIONS: readonly TrashSection[] = [
   { type: 'equipment', titleKey: 'trash_equipment' },
   { type: 'venues', titleKey: 'trash_venues' },
   { type: 'menuEvents', titleKey: 'trash_menu_events' },
-  { type: 'suppliers', titleKey: 'trash_suppliers' }
+  { type: 'suppliers', titleKey: 'trash_suppliers' },
+  { type: 'clients', titleKey: 'trash_clients' }
 ]
 
 const TYPE_BY_HISTORY: Record<VersionEntityType, TrashType> = { dish: 'dishes', recipe: 'recipes', product: 'products' }
@@ -49,7 +52,8 @@ const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
   equipment: [],
   venues: [],
   menuEvents: [],
-  suppliers: []
+  suppliers: [],
+  clients: []
 })
 
 @Injectable({ providedIn: 'root' })
@@ -66,7 +70,8 @@ export class TrashService {
     equipment: inject(EquipmentDataService),
     venues: inject(VenueDataService),
     menuEvents: inject(MenuEventDataService),
-    suppliers: inject(SupplierDataService)
+    suppliers: inject(SupplierDataService),
+    clients: inject(ClientDataService)
   }
 
   private readonly items_ = signal<Record<TrashType, TrashItem[]>>(emptyTrash())
