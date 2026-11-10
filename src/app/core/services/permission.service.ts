@@ -2,7 +2,7 @@ import { computed, inject, Injectable } from '@angular/core'
 import { Recipe } from '../models/recipe.model'
 import { UserService } from './user.service'
 
-/** The 10 actions of contract C-PERM (mirrors `server/utils/permissions.js`). */
+/** The 12 actions of contract C-PERM (mirrors `server/utils/permissions.js`). */
 export type PermissionAction =
   | 'create'
   | 'edit'
@@ -15,6 +15,7 @@ export type PermissionAction =
   | 'editSettings'
   | 'editTaxonomy'
   | 'editLogistics'
+  | 'editFrontDesk'
 
 export interface PermissionContext {
   /** Entity type (collection name), e.g. `recipes`, `products`, `menuEvents`. */
@@ -28,7 +29,8 @@ const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = [
   'manageTeam',
   'editSettings',
   'editTaxonomy',
-  'editLogistics'
+  'editLogistics',
+  'editFrontDesk'
 ]
 
 /**

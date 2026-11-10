@@ -11,6 +11,7 @@ const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
 const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
+const { PROFILE_SERVER_FIELDS } = require('../generated/schemas/entities/front-desk-profile.schema');
 const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
@@ -79,12 +80,19 @@ const termScope = term => (term.businessId === MASTER ? { $exists: true } : term
 
 const EVENTS = 'menuEvents';
 const CLIENTS = 'clients';
+const PROFILES = 'frontDeskProfiles';
+const PROFILE_EXISTS = { error: 'PROFILE_EXISTS' };
+const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
 /** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS]);
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES]);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
-const readProjection = (req, type) => (req.user?.businessRole === 'staff' ? staffProjection(type) : null) || undefined;
+const readProjection = (req, type) => {
+  const trimmed = (req.user?.businessRole === 'staff' ? staffProjection(type) : null) || undefined;
+  // Plan 548: the business-routing WhatsApp id never leaves the server, for any caller.
+  return type === PROFILES ? { ...trimmed, 'whatsapp.phoneNumberId': 0 } : trimmed;
+};
 
 /**
  * Plan 512 / 544: a client's `phoneNormalized` is always the digits of its `phone` and its `phoneKey` the match key
@@ -99,6 +107,13 @@ function withPhoneNormalized(doc) {
 function withoutServerClientFields(body) {
   const copy = { ...body };
   for (const key of CLIENT_SERVER_FIELDS) delete copy[key];
+  return copy;
+}
+
+/** Plan 548: `body` without the profile fields only the server writes (PROFILE_SERVER_FIELDS). */
+function withoutServerProfileFields(body) {
+  const copy = { ...body };
+  for (const key of PROFILE_SERVER_FIELDS) delete copy[key];
   return copy;
 }
 
@@ -532,6 +547,8 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === EVENTS) safeEntity = withSavedSnapshot(withoutServerEventFields(safeEntity), null);
     // Plan 544: a client never sets its own match key, kinds, counters, consent history or do-not-contact flag.
     if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
+    // Plan 548: a client never sets a profile's status or WhatsApp routing; every profile starts as a draft.
+    if (entityType === PROFILES) safeEntity = withoutServerProfileFields(safeEntity);
     if (shared && !isPlatformAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -565,6 +582,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     }
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
+    if (entityType === PROFILES) doc.status = 'draft';
     // Plan 545: a client the owner adds starts with the server-owned defaults.
     if (entityType === CLIENTS) {
       doc.source = typeof doc.source === 'string' && doc.source ? doc.source : 'manual';
@@ -601,6 +619,11 @@ router.post('/:type', verifyToken, async (req, res) => {
       return res.status(created ? 201 : 200).json(client);
     }
 
+    // Plan 548: one live profile per business.
+    if (entityType === PROFILES && await col(PROFILES).findOne({ businessId: doc.businessId }, { projection: { _id: 1 } })) {
+      return res.status(409).json(PROFILE_EXISTS);
+    }
+
     await col(entityType).insertOne(doc);
     if (entityType === EVENTS) await refreshClientEvents(mongoose.connection.db, doc.businessId, [doc.clientId]);
     // A new shared term covers users' own terms with the same key — fold them into it.
@@ -609,6 +632,9 @@ router.post('/:type', verifyToken, async (req, res) => {
     }
     res.status(201).json(doc);
   } catch (err) {
+    if (err.code === 11000 && req.params.type === PROFILES) {
+      return res.status(409).json(/businessId/.test(err.message) ? PROFILE_EXISTS : SLUG_TAKEN);
+    }
     if (err.code === 11000) {
       return res.status(409).json({ error: 'Entity already exists' });
     }
@@ -688,6 +714,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     let updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
     // Plan 544: the server-owned client fields survive a client PUT unchanged (`merged` keeps the stored values).
     if (req.params.type === CLIENTS) updatable = withoutServerClientFields(updatable);
+    // Plan 548: the stored `status` and `whatsapp` survive a client PUT unchanged.
+    if (req.params.type === PROFILES) updatable = withoutServerProfileFields(updatable);
     let rekeyed = null;
     let previousEventClientId;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
@@ -779,9 +807,12 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     if (req.params.type === EVENTS) {
       await refreshClientEvents(mongoose.connection.db, result.businessId, [previousEventClientId, result.clientId]);
     }
+    // Plan 548: the WhatsApp routing id is not sent back either.
+    if (req.params.type === PROFILES && result.whatsapp) delete result.whatsapp.phoneNumberId;
     res.json(result);
   } catch (err) {
     if (err.code === 11000 && req.params.type === CLIENTS) return res.status(409).json(PHONE_TAKEN);
+    if (err.code === 11000 && req.params.type === PROFILES) return res.status(409).json(SLUG_TAKEN);
     if (err.code === 11000) return res.status(409).json({ error: 'Entity already exists' });
     req.log.error({ err, event: 'data.put.failed' });
     res.status(500).json({ error: 'Server error' });

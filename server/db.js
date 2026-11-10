@@ -122,6 +122,18 @@ async function connectDb() {
   )
   logger.debug({ event: 'mongo.index.ensured', index: 'clients' })
 
+  // Plan 548: one front desk profile per business, and one public slug per profile. Partial on `slug` (every real
+  // profile has one) so a raw fixture doc without it cannot break startup or the cleanup tests.
+  await db.collection('frontDeskProfiles').createIndex(
+    { slug: 1 },
+    { unique: true, name: 'frontdesk_slug_unique', partialFilterExpression: { slug: { $type: 'string' } } }
+  )
+  await db.collection('frontDeskProfiles').createIndex(
+    { businessId: 1 },
+    { unique: true, name: 'frontdesk_business_unique', partialFilterExpression: { slug: { $type: 'string' } } }
+  )
+  logger.debug({ event: 'mongo.index.ensured', index: 'frontDeskProfiles' })
+
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
   await ensureLogIndexes(db)
   logger.debug({ event: 'mongo.index.ensured', index: 'app_logs' })

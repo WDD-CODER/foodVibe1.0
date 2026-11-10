@@ -12,12 +12,12 @@ const { MASTER_BUSINESS_ID } = require('./business-scope')
 
 const ACTIONS = [
   'create', 'edit', 'delete', 'editMoney', 'changeStage',
-  'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics',
+  'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk',
 ]
-const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics'])
+const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk'])
 const EVENTS = 'menuEvents'
 /** Plan 512: types only an owner may create, edit or delete (staff read them through `staffProjection`). */
-const OWNER_ONLY_TYPES = new Set(['clients'])
+const OWNER_ONLY_TYPES = new Set(['clients', 'frontDeskProfiles'])
 /** Fields every stored document carries; a staff projection never hides them. */
 const BASE_FIELDS = ['_id', 'schemaVersion', 'userId', 'businessId', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt', 'deletedBy']
 
