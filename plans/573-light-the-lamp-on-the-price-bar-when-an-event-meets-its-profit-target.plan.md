@@ -95,10 +95,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Keep every number of the price bar at a fixed width while digits change — the shared digits class on seven number elements — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
-- [ ] A2: Show the amber ready line under the profit percent only when the price meets the target — one class binding on the bar value and one on the phone sheet summary — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
-- [ ] A3: Test that the line appears on target, disappears below it, and the digits class is on every number — three cases — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
-- [ ] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
+- [x] A1: Keep every number of the price bar at a fixed width while digits change — the shared digits class on seven number elements — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
+- [x] A2: Show the amber ready line under the profit percent only when the price meets the target — one class binding on the bar value and one on the phone sheet summary — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
+- [x] A3: Test that the line appears on target, disappears below it, and the digits class is on every number — three cases — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
+- [x] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: `.c-num` and `.c-pass-line` (plan 572). If plan 572 is not merged the classes do nothing and the tests still pass, but the line is not visible: that is why `Depends-on: 572`.
@@ -118,3 +118,6 @@ line or file this plan names was removed, renamed or rewritten).
 - none
 
 ## Execution Notes
+- pnpm run test:ci -> exit 0, 1876 of 1876 SUCCESS (3 new cases)
+- pnpm run lint -> exit 0; pnpm run build -> exit 0
+- node scripts/log-query.mjs --since=plan-start --level=error -> no entries (SKIP: no database configured)
