@@ -1,6 +1,6 @@
 # Plan 521 — Event logistics 4 of 6: the client services that read the checklist, save answers and write the client summary
 
-Status: draft
+Status: done
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
 Depends-on: 518
 

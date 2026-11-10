@@ -1,6 +1,6 @@
 # Plan 519 — Event logistics 2 of 6: the owner-only endpoint that saves an event's logistics answers
 
-Status: draft
+Status: done
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
 Depends-on: 518
 

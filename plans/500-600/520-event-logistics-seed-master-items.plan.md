@@ -1,6 +1,6 @@
 # Plan 520 — Event logistics 3 of 6: seed the 45 shared checklist questions every business starts with
 
-Status: draft
+Status: done
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
 Depends-on: 518
 
