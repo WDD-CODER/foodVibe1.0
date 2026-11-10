@@ -1665,6 +1665,23 @@
     "logistics_section_staff": "צוות",
     "logistics_section_weather": "מזג אוויר",
     "logistics_section_food": "אוכל וכשרות",
-    "logistics_section_other": "שונות"
+    "logistics_section_other": "שונות",
+    "metadata_logistics_title": "שאלות לוגיסטיקה",
+    "metadata_logistics_desc": "השאלות שהשף עובר עליהן בשיחה הראשונה ובפגישת הספקים. המשותפות נעולות; אפשר להוסיף משלכם.",
+    "metadata_logistics_placeholder": "שאלה חדשה, למשל: יש מקום לרכב קירור?",
+    "metadata_logistics_question": "שאלה",
+    "metadata_logistics_phase": "שלב",
+    "metadata_logistics_section": "סעיף",
+    "metadata_logistics_type": "סוג תשובה",
+    "metadata_logistics_environments": "רלוונטי ל…",
+    "metadata_logistics_shared": "משותף לכולם",
+    "metadata_logistics_added": "השאלה נוספה",
+    "metadata_logistics_duplicate": "שאלה כזו כבר קיימת בשלב הזה",
+    "metadata_logistics_remove_confirm": "למחוק את השאלה? תשובות שכבר ניתנו לאירועים יישמרו.",
+    "metadata_logistics_in_use": "אי אפשר למחוק: השאלה כבר נענתה באירוע",
+    "metadata_no_logistics_items": "אין שאלות בסעיף הזה",
+    "logistics_type_status": "כן/לא",
+    "logistics_type_quantity": "כמות",
+    "logistics_type_text": "טקסט"
   }
 }

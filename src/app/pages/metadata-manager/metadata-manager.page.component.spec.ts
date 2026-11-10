@@ -6,7 +6,7 @@ import { MetadataManagerComponent } from './metadata-manager.page.component'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { ProductDataService } from '@services/product-data.service'
-import { LucideAngularModule } from 'lucide-angular'
+import { LucideAngularModule, ListChecks } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { signal } from '@angular/core'
 import { TranslationService } from '@services/translation.service'
@@ -63,7 +63,7 @@ describe('MetadataManagerPageComponent', () => {
     })
 
     await TestBed.configureTestingModule({
-      imports: [MetadataManagerComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [MetadataManagerComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ListChecks })],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -76,7 +76,7 @@ describe('MetadataManagerPageComponent', () => {
 
     fixture = TestBed.createComponent(MetadataManagerComponent)
     component = fixture.componentInstance
-    // The page lists all 13 sections for an owner who is the platform admin; plan 426 / 477 tests below flip this.
+    // The page lists all 14 sections for an owner who is the platform admin; plan 426 / 477 tests below flip this.
     TestBed.inject(UserService)._saveUserLocal({
       _id: 'u1',
       name: 'u',
@@ -390,13 +390,14 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-preparation',
     'mm-sec-section',
     'mm-sec-station',
+    'mm-sec-logistics',
     'mm-sec-user',
     'mm-sec-ai-models'
   ]
 
-  it('should render exactly 13 jump-nav tabs in page order', () => {
+  it('should render exactly 14 jump-nav tabs in page order', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
-    expect(tabs.length).toBe(13)
+    expect(tabs.length).toBe(14)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
       'metadata_product_categories_title',
@@ -409,12 +410,13 @@ describe('MetadataManagerPageComponent', () => {
       'metadata_prep_categories',
       'metadata_section_categories_title',
       'metadata_stations_title',
+      'metadata_logistics_title',
       'user_management',
       'ai_model_manager'
     ])
   })
 
-  it('should give each of the 13 sections a matching stable id', () => {
+  it('should give each of the 14 sections a matching stable id', () => {
     for (const id of JUMP_SECTION_IDS) {
       expect(fixture.debugElement.query(By.css(`#${id}`)))
         .withContext(id)
@@ -463,7 +465,7 @@ describe('MetadataManagerPageComponent', () => {
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
     const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
     expect(rail).not.toBeNull()
-    expect(rail.queryAll(By.css('.c-chip--tab')).length).toBe(13)
+    expect(rail.queryAll(By.css('.c-chip--tab')).length).toBe(14)
     expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

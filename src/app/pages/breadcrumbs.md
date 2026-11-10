@@ -15,7 +15,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `cook-view/` | `/cook/:id` — step-by-step cook workflow |
 | `menu-library/` | `/menu-library` — menu list and filters |
 | `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views; the event-logistics-panel component = collapsed phone-intake / site-visit checklist under the notes log (plan 522) |
-| `metadata-manager/` | Categories, allergens, units, preparations (`metadata-manager/metadata-manager.page.component.ts`) |
+| `metadata-manager/` | Categories, allergens, units, preparations, event-logistics questions (`metadata-manager/components/logistics-item-manager/`, plan 523) (`metadata-manager/metadata-manager.page.component.ts`) |
 | `trash/` | `/trash` — soft-deleted items and restore |
 | `platform-dashboard/` | `/platform` — platform-admin-only table of every business (activity, events, internal flag) |
 | `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |

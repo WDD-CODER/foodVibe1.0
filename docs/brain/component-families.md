@@ -174,6 +174,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `--solid` = light text on a data color). Data-colored value chip: `--colored` (background/color inline).
 - When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
 - Users (plan 522): `event-logistics-panel` — toggle header (`--tap`), phase tabs (`--tab`), status/payer radios (`--toggle`).
+- Users (plan 523): `logistics-item-manager` — phase tabs (`--tab`), shared item (`--tag` + lock), own item (`--removable`), environment and shared choices (`--toggle`).
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
   header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
