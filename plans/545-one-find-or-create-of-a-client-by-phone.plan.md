@@ -156,14 +156,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write down the phone examples both sides must agree on — the vectors file with the seven rows — shared/schemas/testing/phone-vectors.ts
-- [ ] A2: Put the one find-or-create in a server file and let the database guarantee one live client per phone — client-upsert.js helpers, liveKey in the schema and the server-field list, the unique partial index — server/utils/client-upsert.js, shared/schemas/entities/client.schema.ts, server/db.js
-- [ ] A3: Test it alone — vectors, five parallel calls, a trashed match not revived, other business never matched, bad phone refused — server/test/client-upsert.test.js
-- [ ] A4: Make the owner's add, phone change, delete and restore of a client use the same rule — POST 200/201, PUT 409, liveKey unset on delete, restore and restore-all checks — server/routes/generic.js, server/test/clients.test.js
-- [ ] A5: Keep each client's event count and event-client kind right whenever an event moves, is deleted or comes back — refreshClientEvents calls in the event write paths and their tests — server/routes/generic.js, server/test/clients.test.js
-- [ ] A6: Use the same phone rule in the browser and tell the owner when a phone already exists or a restore is refused — util re-export, addClient replace and toast, Trash refusal toast, dictionary keys, specs — src/app/core/utils/client-display.util.ts, src/app/core/utils/client-display.util.spec.ts, src/app/core/services/client-data.service.ts, src/app/core/services/client-data.service.spec.ts, src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, public/assets/data/dictionary.json
-- [ ] A7: Note the new behaviour in the backend contract and add the ui test — the §5 sentence, the inquiry-dialog spec — docs/agent/standards-backend.md, e2e/ui/545-1.spec.ts
-- [ ] A8: Run every check — test:server, test:ci, server lint, build, scope-check --arch, log-query, the ui spec
+- [x] A1: Write down the phone examples both sides must agree on — the vectors file with the seven rows — shared/schemas/testing/phone-vectors.ts
+- [x] A2: Put the one find-or-create in a server file and let the database guarantee one live client per phone — client-upsert.js helpers, liveKey in the schema and the server-field list, the unique partial index — server/utils/client-upsert.js, shared/schemas/entities/client.schema.ts, server/db.js
+- [x] A3: Test it alone — vectors, five parallel calls, a trashed match not revived, other business never matched, bad phone refused — server/test/client-upsert.test.js
+- [x] A4: Make the owner's add, phone change, delete and restore of a client use the same rule — POST 200/201, PUT 409, liveKey unset on delete, restore and restore-all checks — server/routes/generic.js, server/test/clients.test.js
+- [x] A5: Keep each client's event count and event-client kind right whenever an event moves, is deleted or comes back — refreshClientEvents calls in the event write paths and their tests — server/routes/generic.js, server/test/clients.test.js
+- [x] A6: Use the same phone rule in the browser and tell the owner when a phone already exists or a restore is refused — util re-export, addClient replace and toast, Trash refusal toast, dictionary keys, specs — src/app/core/utils/client-display.util.ts, src/app/core/utils/client-display.util.spec.ts, src/app/core/services/client-data.service.ts, src/app/core/services/client-data.service.spec.ts, src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, public/assets/data/dictionary.json
+- [x] A7: Note the new behaviour in the backend contract and add the ui test — the §5 sentence, the inquiry-dialog spec — docs/agent/standards-backend.md, e2e/ui/545-1.spec.ts
+- [x] A8: Run every check — test:server, test:ci, server lint, build, scope-check --arch, log-query, the ui spec
 
 ## Technical Considerations
 - Dependencies: plan 543 (`actorOf`, `guestActor`), plan 544 (`phoneKey`, `CLIENT_SERVER_FIELDS`, `CLIENT_SOURCES`, `shared/schemas/phone.ts`, clients soft delete). `pnpm run build:schemas` before the server tests (the vectors and phone rule are read from `server/generated/schemas`).
@@ -189,3 +189,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - For the map's "Contract extensions (run)" (Q1 = a): `- plan 545 · clients gain server-only liveKey (= phoneKey while live and unmerged) with a unique partial index { businessId, liveKey }; 551's merge and every delete $unset it · one live client per phone under concurrent creates`.
 - Added beyond the card, because the counters plan 544 backfills would go stale at once otherwise: `refreshClientEvents` on generic event writes (A5); a PUT that changes the phone is checked like a restore.
 - Snapshot kept as the map's verification SHA `05741afd`; facts above re-checked on `origin/main` 5702f6d1.
+- Evidence: pnpm run test:server -> exit 0 (78 files; clients.test.js 52 pass, client-upsert.test.js 15 pass); pnpm run test:ci -> exit 0, 1888 of 1888; pnpm run build -> 0; pnpm run lint -> 0 errors; scope-check --arch -> ok; override, ledger, breadcrumbs, lint:icons, lint:no-native-select -> 0.
+- behaviour notes: bulk DELETE of clients is a hard delete today (not soft), so it frees the live key with the doc and needs no $unset; readServerRefusal only reads data-API 400s, so trash.service.ts reads the 409 messageKey itself (server-refusal.util.ts is outside scope); a lazy liveKey fill is skipped when another live client has the same key (an old twin keeps no key and can still be edited).
+- e2e/ui/545-1.spec.ts written, not run here (needs the dev servers and QA login).

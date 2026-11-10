@@ -18,6 +18,8 @@ const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../uti
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
 const { withEventVisibility } = require('../utils/event-visibility');
 const { PRODUCT_NAME_TAKEN, findProductNameClash, isRename } = require('../utils/product-name-guard');
+// Plan 545: one find-or-create of a client by phone (R-01) and the event counter on each client.
+const { PHONE_TAKEN, findLiveClientByPhoneKey, insertClientOrJoin, refreshClientEvents } = require('../utils/client-upsert');
 const { assertCan, staffProjection, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
 
 const router = Router();
@@ -412,10 +414,37 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
       }
       return res.json({ ok: true, restored, skipped });
     }
+    if (req.params.type === CLIENTS) {
+      // Plan 545: a trashed client whose phone a live client now has stays in Trash.
+      const trashed = await col(CLIENTS).find(trashFilter).toArray();
+      let restored = 0;
+      const skipped = [];
+      for (const doc of trashed) {
+        if (await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, doc.phoneKey, doc._id)) {
+          skipped.push({ _id: doc._id, name: doc.name });
+          continue;
+        }
+        try {
+          const r = await col(CLIENTS).updateOne(
+            { ...trashFilter, _id: doc._id },
+            { $unset: { deletedAt: '', deletedBy: '' }, ...(doc.phoneKey && !doc.mergedInto && { $set: { liveKey: doc.phoneKey } }) }
+          );
+          restored += r.modifiedCount;
+        } catch (err) {
+          if (err.code !== 11000) throw err;
+          skipped.push({ _id: doc._id, name: doc.name });
+        }
+      }
+      return res.json({ ok: true, restored, skipped });
+    }
+    const trashedClientIds = req.params.type === EVENTS
+      ? (await col(EVENTS).find(trashFilter, { projection: { clientId: 1 } }).toArray()).map(d => d.clientId)
+      : [];
     const result = await col(req.params.type).updateMany(
       trashFilter,
       { $unset: { deletedAt: '', deletedBy: '' } }
     );
+    if (req.params.type === EVENTS) await refreshClientEvents(mongoose.connection.db, scopeFilter(req).businessId, trashedClientIds);
     res.json({ ok: true, restored: result.modifiedCount });
   } catch (err) {
     req.log.error({ err, event: 'data.trash_restore_all.failed' });
@@ -433,14 +462,24 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
     if (req.params.type === 'products' && await findProductNameClash(col('products'), scopeFilter(req), inTrash.nameHebrew, inTrash._id)) {
       return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: inTrash.nameHebrew });
     }
+    // Plan 545: a client comes back only while no live client has its phone; the restore re-takes the live key.
+    const isClient = req.params.type === CLIENTS;
+    if (isClient && await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, inTrash.phoneKey, inTrash._id)) {
+      return res.status(409).json(PHONE_TAKEN);
+    }
     const restored = await col(req.params.type).findOneAndUpdate(
       trashFilter,
-      { $unset: { deletedAt: '', deletedBy: '' } },
+      {
+        $unset: { deletedAt: '', deletedBy: '' },
+        ...(isClient && inTrash.phoneKey && !inTrash.mergedInto && { $set: { liveKey: inTrash.phoneKey } }),
+      },
       { returnDocument: 'after' }
     );
     if (!restored) return res.status(404).json({ error: `Item ${req.params.id} is not in Trash` });
+    if (req.params.type === EVENTS) await refreshClientEvents(mongoose.connection.db, scopeFilter(req).businessId, [restored.clientId]);
     res.json(restored);
   } catch (err) {
+    if (err.code === 11000 && req.params.type === CLIENTS) return res.status(409).json(PHONE_TAKEN);
     req.log.error({ err, event: 'data.trash_restore.failed' });
     res.status(500).json({ error: 'Server error' });
   }
@@ -526,6 +565,12 @@ router.post('/:type', verifyToken, async (req, res) => {
     }
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
+    // Plan 545: a client the owner adds starts with the server-owned defaults.
+    if (entityType === CLIENTS) {
+      doc.source = typeof doc.source === 'string' && doc.source ? doc.source : 'manual';
+      doc.firstSeenAt = now;
+      doc.counters = { requests: 0, bookings: 0, events: 0, noShows: 0, conversations: 0 };
+    }
 
     // Plan 512: derived from `phone` just before the schema check (the schema requires the field), never taken from the client.
     const toStore = entityType === CLIENTS ? withPhoneNormalized(doc) : doc;
@@ -548,7 +593,16 @@ router.post('/:type', verifyToken, async (req, res) => {
       return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: doc.nameHebrew });
     }
 
+    // Plan 545: the same phone is the same client — answer with the existing one and write nothing.
+    if (entityType === CLIENTS) {
+      const existing = await findLiveClientByPhoneKey(col(CLIENTS), doc.businessId, doc.phoneKey);
+      if (existing) return res.status(200).json(existing);
+      const { client, created } = await insertClientOrJoin(col(CLIENTS), doc);
+      return res.status(created ? 201 : 200).json(client);
+    }
+
     await col(entityType).insertOne(doc);
+    if (entityType === EVENTS) await refreshClientEvents(mongoose.connection.db, doc.businessId, [doc.clientId]);
     // A new shared term covers users' own terms with the same key — fold them into it.
     if (entityType === TAXONOMY && shared) {
       await col(TAXONOMY).deleteMany({ kind: doc.kind, key: doc.key, businessId: { $ne: MASTER } });
@@ -635,6 +689,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // Plan 544: the server-owned client fields survive a client PUT unchanged (`merged` keeps the stored values).
     if (req.params.type === CLIENTS) updatable = withoutServerClientFields(updatable);
     let rekeyed = null;
+    let previousEventClientId;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
     // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one
     // legacy null blocked every save of that doc. They are left out of the validated doc and
@@ -661,6 +716,18 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (!authorizeEdit(req, res, req.params.type, current, merged)) return;
       const check = checkStoredDoc(req.params.type, merged);
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
+      if (req.params.type === EVENTS) previousEventClientId = current.clientId;
+      if (req.params.type === CLIENTS && !current.mergedInto) {
+        // Plan 545: a phone change that would make a second live client is refused; the live key follows the phone.
+        const taken = () => findLiveClientByPhoneKey(col(CLIENTS), current.businessId, merged.phoneKey, current._id);
+        if (merged.phoneKey !== current.phoneKey) {
+          if (await taken()) return res.status(409).json(PHONE_TAKEN);
+          updatable = { ...updatable, liveKey: merged.phoneKey };
+        } else if (!current.liveKey && merged.phoneKey && !(await taken())) {
+          // Lazy fill for a client made before plan 545 (an old twin keeps no key rather than blocking its own edits).
+          updatable = { ...updatable, liveKey: merged.phoneKey };
+        }
+      }
       // Plan 485: renaming a product to a name another live product of the business has is refused.
       // Keeping the saved name is always allowed (old twins must not block price or unit saves).
       if (req.params.type === 'products' && isRename(current.nameHebrew, merged.nameHebrew)
@@ -709,8 +776,12 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
         await col(TAXONOMY).deleteMany({ kind: result.kind, key: result.key, businessId: { $ne: MASTER } });
       }
     }
+    if (req.params.type === EVENTS) {
+      await refreshClientEvents(mongoose.connection.db, result.businessId, [previousEventClientId, result.clientId]);
+    }
     res.json(result);
   } catch (err) {
+    if (err.code === 11000 && req.params.type === CLIENTS) return res.status(409).json(PHONE_TAKEN);
     if (err.code === 11000) return res.status(409).json({ error: 'Entity already exists' });
     req.log.error({ err, event: 'data.put.failed' });
     res.status(500).json({ error: 'Server error' });
@@ -1199,7 +1270,11 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
       }
     }
 
+    const deletedEventClientIds = req.params.type === EVENTS
+      ? (await col(EVENTS).find(bulkFilter, { projection: { clientId: 1 } }).toArray()).map(d => d.clientId)
+      : [];
     const result = await col(req.params.type).deleteMany(bulkFilter);
+    if (req.params.type === EVENTS) await refreshClientEvents(mongoose.connection.db, scopeFilter(req).businessId, deletedEventClientIds);
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
     if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(scopeFilter(req).businessId, ids);
 
@@ -1281,8 +1356,13 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     } else if (permanent) {
       await disposeDoc(col(type), existing);
     } else {
-      await col(type).updateOne({ _id: existing._id, businessId: existing.businessId }, { $set: deleteStamp(req.user.userId) });
+      // Plan 545: a deleted client gives its phone back (the live key goes with it).
+      await col(type).updateOne(
+        { _id: existing._id, businessId: existing.businessId },
+        { $set: deleteStamp(req.user.userId), ...(type === CLIENTS && { $unset: { liveKey: '' } }) }
+      );
     }
+    if (type === EVENTS) await refreshClientEvents(mongoose.connection.db, existing.businessId, [existing.clientId]);
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
     if (type === 'suppliers' && existing.deletedAt === undefined) {
       await unlinkSuppliersFromProducts(scopeFilter(req).businessId, [req.params.id]);

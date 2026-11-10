@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
@@ -44,6 +45,13 @@ export const TRASH_SECTIONS: readonly TrashSection[] = [
 const TYPE_BY_HISTORY: Record<VersionEntityType, TrashType> = { dish: 'dishes', recipe: 'recipes', product: 'products' }
 
 type TrashDoc = { _id: string; deletedAt: number; nameHebrew?: string; name?: string }
+
+/** The `messageKey` of a 409 refusal body (`{ error, messageKey }`), or null for any other error. */
+function refusalMessageKey(err: unknown): string | null {
+  if (!(err instanceof HttpErrorResponse) || err.status !== 409) return null
+  const key = (err.error as { messageKey?: unknown } | null)?.messageKey
+  return typeof key === 'string' && key ? key : null
+}
 
 const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
   dishes: [],
@@ -93,7 +101,16 @@ export class TrashService {
   }
 
   async restore(type: TrashType, _id: string): Promise<void> {
-    await this.storage.restore(type, _id)
+    try {
+      await this.storage.restore(type, _id)
+    } catch (err) {
+      // Plan 545: a refused restore (a client whose phone is taken) names its reason; nothing is restored.
+      const key = refusalMessageKey(err)
+      if (!key) throw err
+      this.userMsg.onSetErrorMsg(this.translation.translate(key))
+      await this.loadTrash()
+      return
+    }
     await this.afterRestore(type, 'trash_restored_msg')
   }
 

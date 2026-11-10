@@ -123,6 +123,8 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
 | `GET` | `/api/v1/public/health` | none | Plan 543: public router probe; the public door for non-members (ADR 0030, C-GUEST). No member token is read under /api/v1/public. |
 
+`POST /api/v1/data/clients` finds-or-creates by `phoneKey` (plan 545): 201 new, 200 existing; restore or a phone change that would make a second live client → 409 `PHONE_TAKEN`.
+
 Every later public write route under `/api/v1/public` carries `publicLimiter` (`server/middleware/rate-limit.js`), the
 `honeypot` (`server/middleware/honeypot.js`) and, when the guest may read back, a token from `newPublicToken`
 (`server/utils/public-token.js`) — all three in the plan that adds the route.

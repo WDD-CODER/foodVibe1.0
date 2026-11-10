@@ -3,12 +3,15 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ClientDataService } from './client-data.service'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
+import { UserMsgService } from './user-msg.service'
+import { TranslationService } from './translation.service'
 import { Client } from '../models/client.model'
 
 describe('ClientDataService', () => {
   let service: ClientDataService
   let storageSpy: jasmine.SpyObj<StorageService>
   let loggingSpy: jasmine.SpyObj<LoggingService>
+  let userMsgSpy: jasmine.SpyObj<UserMsgService>
 
   const ENTITY = 'clients'
 
@@ -20,13 +23,16 @@ describe('ClientDataService', () => {
   beforeEach(fakeAsync(() => {
     storageSpy = jasmine.createSpyObj('StorageService', ['query', 'get', 'post', 'put', 'remove'])
     loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info', 'debug'])
+    userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     storageSpy.query.and.returnValue(Promise.resolve(mockClients))
 
     TestBed.configureTestingModule({
       providers: [
         ClientDataService,
         { provide: StorageService, useValue: storageSpy },
-        { provide: LoggingService, useValue: loggingSpy }
+        { provide: LoggingService, useValue: loggingSpy },
+        { provide: UserMsgService, useValue: userMsgSpy },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     })
 
@@ -65,6 +71,27 @@ describe('ClientDataService', () => {
       expect(storageSpy.post).toHaveBeenCalledWith(ENTITY, jasmine.objectContaining({ name: 'Noa' }))
       expect(result).toEqual(saved)
       expect(service.allClients_().length).toBe(3)
+    }))
+
+    it('an existing phone keeps one list entry, replaces it and shows the info toast', fakeAsync(() => {
+      const existing: Client = { ...mockClients[0], name: 'Dana (saved)' }
+      storageSpy.post.and.returnValue(Promise.resolve(existing))
+      let result: Client | undefined
+      service.addClient({ name: 'Other', phone: '+972 52 123 4567' }).then((r) => (result = r))
+      tick()
+      expect(result).toEqual(existing)
+      expect(service.allClients_().length).toBe(2)
+      expect(service.getClientById('c1')?.name).toBe('Dana (saved)')
+      expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledOnceWith('client_existing_selected')
+    }))
+
+    it('a new client shows no toast', fakeAsync(() => {
+      storageSpy.post.and.returnValue(
+        Promise.resolve({ _id: 'c9', name: 'Noa', phone: '050-1112222', phoneNormalized: '0501112222' })
+      )
+      service.addClient({ name: 'Noa', phone: '050-1112222' })
+      tick()
+      expect(userMsgSpy.onSetSuccessMsg).not.toHaveBeenCalled()
     }))
 
     it('re-throws a 401 without logging', fakeAsync(() => {

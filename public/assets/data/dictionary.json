@@ -1608,6 +1608,8 @@
     "client": "לקוח",
     "client_pick_placeholder": "שם או טלפון",
     "client_new": "לקוח חדש",
+    "client_phone_taken": "לא ניתן לשחזר: כבר יש לקוח פעיל עם מספר הטלפון הזה",
+    "client_existing_selected": "כבר יש לקוח עם מספר הטלפון הזה — הוא נבחר",
     "client_change": "החלף לקוח",
     "client_link": "קשר ללקוח",
     "client_events_count": "אירועים",

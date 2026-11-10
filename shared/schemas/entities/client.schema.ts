@@ -28,7 +28,8 @@ export const CLIENT_SERVER_FIELDS = [
   'counters',
   'waId',
   'mergedInto',
-  'doNotContact'
+  'doNotContact',
+  'liveKey'
 ] as const
 
 const counterField = z.number().int().min(0).optional()
@@ -46,6 +47,8 @@ export const clientSchema = z.strictObject({
   phoneNormalized: z.string().max(30),
   /** Match key (R-01): last 9 digits of `phoneNormalized`; server-derived on every write. */
   phoneKey: z.string().max(30).optional(),
+  /** Plan 545: server-only; equals `phoneKey` while the client is live and unmerged (unique per business), absent otherwise. */
+  liveKey: z.string().max(30).optional(),
   clientType: clientTypeSchema.default('private'),
   companyName: z.string().max(200).optional(),
   email: z.string().max(200).optional(),
