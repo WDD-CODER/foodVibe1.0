@@ -50,6 +50,10 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+front-desk-status.test.js
+data-export-card.component.spec.ts
+front-desk-status-banner.component.spec.ts
+front-desk-admin-dialog.component.spec.ts
 shared/schemas/front-desk-admin.schema.ts
 shared/schemas/index.ts
 shared/schemas/entities/front-desk-profile.schema.ts

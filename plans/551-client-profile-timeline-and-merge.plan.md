@@ -177,7 +177,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Deleting a client from the profile (the list or Trash flow; not asked for in FD-02).
 
 ## Critical Questions
-- Q1: What does "notes" mean in the client's timeline? (a) each linked event's notes (author, date, the event's name), plus the owner's client notes shown in the details card, not in the timeline — recommended / (b) only the owner's client notes, as one item at the top / (c) both, event notes and the client notes as one timeline item. A: a (Human 2026-11-10)
+- Q1: What does "notes" mean in the client's timeline? (a) each linked event's notes (author, date, the event's name), plus the owner's client notes shown in the details card, not in the timeline — recommended / (b) only the owner's client notes, as one item at the top / (c) both, event notes and the client notes as one timeline item. A: (Human, 2026-11-10) a
 
 ## Execution Notes
 - Map row 9, renumbered +2 on 2026-11-10 (old 549 → 551).

@@ -57,6 +57,7 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+frontdesk-week-card.component.spec.ts
 server/services/frontdesk-stats.js
 server/services/business-stats.js
 server/routes/stats.js

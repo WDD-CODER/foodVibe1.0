@@ -44,6 +44,7 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+baseline-tab.component.spec.ts
 shared/schemas/entities/business.schema.ts
 server/services/business-stats.js
 server/test/business-baseline.test.js

@@ -43,6 +43,8 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+tab-chips.component.spec.ts
+header.component.spec.ts
 src/app/pages/clients/**
 src/app/core/components/tab-chips/**
 src/app/core/components/header/**

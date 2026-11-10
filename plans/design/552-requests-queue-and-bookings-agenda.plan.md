@@ -54,6 +54,11 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+e2e/ui/552-1..5
+requests.page.spec.ts
+request-card.component.spec.ts
+bookings.page.spec.ts
+e2e/ui/552-*.spec.ts
 src/app/pages/requests/**
 src/app/pages/bookings/**
 src/app/pages/breadcrumbs.md

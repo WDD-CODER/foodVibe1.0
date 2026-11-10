@@ -53,6 +53,9 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+client-display.util.spec.ts
+client-data.service.spec.ts
+trash.service.spec.ts
 server/utils/client-upsert.js
 server/routes/generic.js
 server/db.js
@@ -179,7 +182,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Any change to the inquiry dialog's look; the shared picker is plan 546.
 
 ## Critical Questions
-- Q1: How is "one live client per phone" guaranteed when two creates race (e.g. the public form and a WhatsApp message in the same second)? Choices: (a) a server-only field `liveKey` (= `phoneKey` while the client is live and not merged, removed on delete and merge) with a unique partial index — the database refuses the second insert and the server returns the first client; adds one name to the frozen `CLIENT_SERVER_FIELDS` list and plan 551's merge must remove it (recommended: correct under any timing, no migration, restore conflicts fall out of the index) / (b) no new field: insert, then re-read and keep the oldest — matches the contract word for word, but two inserts in the same millisecond can still both survive, to be joined later by the merge. A: a (Human 2026-11-10)
+- Q1: How is "one live client per phone" guaranteed when two creates race (e.g. the public form and a WhatsApp message in the same second)? Choices: (a) a server-only field `liveKey` (= `phoneKey` while the client is live and not merged, removed on delete and merge) with a unique partial index — the database refuses the second insert and the server returns the first client; adds one name to the frozen `CLIENT_SERVER_FIELDS` list and plan 551's merge must remove it (recommended: correct under any timing, no migration, restore conflicts fall out of the index) / (b) no new field: insert, then re-read and keep the oldest — matches the contract word for word, but two inserts in the same millisecond can still both survive, to be joined later by the merge. A: (Human, 2026-11-10) a
 
 ## Execution Notes
 - Plan number: map row 3, renumbered +2 on 2026-11-10 (old 543 → 545).

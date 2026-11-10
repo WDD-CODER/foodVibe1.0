@@ -49,6 +49,10 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+e2e/ui/553-1..3
+frontdesk-settings.page.spec.ts
+request-kind-card.component.spec.ts
+e2e/ui/553-*.spec.ts
 src/app/pages/frontdesk/frontdesk-settings/**
 src/app/pages/frontdesk/breadcrumbs.md
 src/app/pages/breadcrumbs.md

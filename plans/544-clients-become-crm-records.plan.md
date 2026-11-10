@@ -257,7 +257,7 @@ Read every `collision` line of the dry run before the write; the write never cha
 - Changing who may write clients (D2: owner-only stays).
 
 ## Critical Questions
-- Q1: The contract's `phoneKey` rule (last 9 digits) joins Israeli mobiles across `05…` and `9725…`, but not landlines: `03-123 4567` → `031234567`, `+972 3 123 4567` → `231234567` (two clients for one number). Choices: (a) keep the contract rule as frozen — WhatsApp numbers are mobiles, landlines come only from the form, the merge in 551 fixes the rare pair (recommended: no contract change, no map edit) / (b) change the rule to "drop a leading `972` or a leading `0`, then the last 9 digits" — joins landlines too, but changes the frozen C-CONTACT text and R-01 for every later plan. A: a (Human 2026-11-10)
+- Q1: The contract's `phoneKey` rule (last 9 digits) joins Israeli mobiles across `05…` and `9725…`, but not landlines: `03-123 4567` → `031234567`, `+972 3 123 4567` → `231234567` (two clients for one number). Choices: (a) keep the contract rule as frozen — WhatsApp numbers are mobiles, landlines come only from the form, the merge in 551 fixes the rare pair (recommended: no contract change, no map edit) / (b) change the rule to "drop a leading `972` or a leading `0`, then the last 9 digits" — joins landlines too, but changes the frozen C-CONTACT text and R-01 for every later plan. A: (Human, 2026-11-10) a
 
 ## Execution Notes
 - Plan number: map row 2, renumbered +2 on 2026-11-10 (old 542 → 544).

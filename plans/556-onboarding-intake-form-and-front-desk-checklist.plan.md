@@ -53,6 +53,10 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+front-desk-intake.test.js
+front-desk-setup.test.js
+front-desk-onboarding.component.spec.ts
+front-desk-checklist-card.component.spec.ts
 shared/schemas/front-desk-intake.schema.ts
 shared/schemas/index.ts
 server/routes/business.js
@@ -247,8 +251,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Importing an existing customer list, unless Critical Question 1 says otherwise.
 
 ## Critical Questions
-- Q1: Appendix A item 9 says an existing customer list is "imported as clients". Nothing in Wave 1a imports clients. (a) leave it out of this plan — Dandan adds the few important clients by hand at `/clients`, and a later small plan adds a CSV import if the pilot business has a real list — recommended / (b) add a CSV upload to this form that creates clients through `upsertClientByPhone` (`source: 'manual'`) on a new owner-only server route — adds about a day of work and a privacy check. A: a (Human 2026-11-10)
-- Q2: What does approving a test request create? (a) nothing — the test request becomes "approved", no event and no booking are made, no decision is logged, so the pipeline, the agenda and the numbers stay clean — recommended / (b) the real event inquiry or booking, which the owner deletes afterwards. A: a (Human 2026-11-10)
+- Q1: Appendix A item 9 says an existing customer list is "imported as clients". Nothing in Wave 1a imports clients. (a) leave it out of this plan — Dandan adds the few important clients by hand at `/clients`, and a later small plan adds a CSV import if the pilot business has a real list — recommended / (b) add a CSV upload to this form that creates clients through `upsertClientByPhone` (`source: 'manual'`) on a new owner-only server route — adds about a day of work and a privacy check. A: (Human, 2026-11-10) a
+- Q2: What does approving a test request create? (a) nothing — the test request becomes "approved", no event and no booking are made, no decision is logged, so the pipeline, the agenda and the numbers stay clean — recommended / (b) the real event inquiry or booking, which the owner deletes afterwards. A: (Human, 2026-11-10) a
 
 ## Execution Notes
 - Map row 14. Depends-on adds 550 to the map's 553, 554, 567: the test request needs the manual create (549) and approve (550) in `requests.js`, and 553 → 548 does not reach 549/550.

@@ -57,6 +57,14 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+e2e/ui/555-1..3
+server/test/helpers/log-capture.js
+logging.service.spec.ts
+layout-mode.service.spec.ts
+public-request.page.spec.ts
+public-request-status.page.spec.ts
+app.component.spec.ts
+e2e/ui/555-*.spec.ts
 server/routes/public.js
 server/routes/requests.js
 server/utils/request-create.js
@@ -237,9 +245,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - The WhatsApp webhook (plan 560).
 
 ## Critical Questions
-- Q1: How does a profile become public before plan 557 adds the platform-admin status switch? (a) a server script `set-front-desk-status.js` (local by default, `--target=atlas` for the pilot) that Dandan runs, and the e2e specs use — recommended / (b) treat `draft` as public until 557 merges, and 557 makes `draft` private / (c) move the status switch into this plan. A: a (Human 2026-11-10)
-- Q2: When the details break a rule (too many guests, too soon, a closed day), what does the form do? (a) show the allowed window (R-10) and still let the customer send; the request arrives as "לא מתאים" with its reasons — recommended / (b) block sending until the details fit. A: a (Human 2026-11-10)
-- Q3: What does a customer see on the status page when the request is declined? (a) "{name} לא יכולים לקבל את הבקשה הזאת" plus the reason for `full`, `date_taken`, `out_of_area`, `below_minimum` (never the member's free text; nothing for `other`) — recommended / (b) only the generic sentence, never a reason. A: a (Human 2026-11-10)
+- Q1: How does a profile become public before plan 557 adds the platform-admin status switch? (a) a server script `set-front-desk-status.js` (local by default, `--target=atlas` for the pilot) that Dandan runs, and the e2e specs use — recommended / (b) treat `draft` as public until 557 merges, and 557 makes `draft` private / (c) move the status switch into this plan. A: (Human, 2026-11-10) a
+- Q2: When the details break a rule (too many guests, too soon, a closed day), what does the form do? (a) show the allowed window (R-10) and still let the customer send; the request arrives as "לא מתאים" with its reasons — recommended / (b) block sending until the details fit. A: (Human, 2026-11-10) a
+- Q3: What does a customer see on the status page when the request is declined? (a) "{name} לא יכולים לקבל את הבקשה הזאת" plus the reason for `full`, `date_taken`, `out_of_area`, `below_minimum` (never the member's free text; nothing for `other`) — recommended / (b) only the generic sentence, never a reason. A: (Human, 2026-11-10) a
 
 ## Execution Notes
 - Map row 13, renumbered +2 on 2026-11-10 (old 553 → 555).

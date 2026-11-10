@@ -44,6 +44,8 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+event-stage-bar.component.spec.ts
+e2e/helpers/qa-session.ts
 src/app/shared/client-picker/**
 src/app/shared/client-form/**
 src/app/shared/new-inquiry-dialog/**
@@ -146,7 +148,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `menu-intelligence.page.ts` (not touched).
 
 ## Critical Questions
-- Q1: What does the event stage bar's client row show once it becomes "a chip + change"? (a) one name chip and the phone chip as today, drop the events-count chip (the count moves to the client profile, plan 551) — recommended / (b) the name chip only (the phone is one tap away on the profile after plan 551) / (c) keep all three chips as today. A: b — name chip only (Human 2026-11-10)
+- Q1: What does the event stage bar's client row show once it becomes "a chip + change"? (a) one name chip and the phone chip as today, drop the events-count chip (the count moves to the client profile, plan 551) — recommended / (b) the name chip only (the phone is one tap away on the profile after plan 551) / (c) keep all three chips as today. A: (Human, 2026-11-10) b — name chip only
 
 ## Execution Notes
 - Map row 4, renumbered +2 on 2026-11-10 (old 544 → 546). `Depends-on: 522` added because the map says run this after plan 522 merges (522 was running in `run-522` when this plan was written).

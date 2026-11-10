@@ -54,6 +54,7 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+report.page.spec.ts
 server/services/business-report.js
 server/constants/report.js
 server/routes/stats.js

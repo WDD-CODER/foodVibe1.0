@@ -48,6 +48,7 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/test/events-router.test.js
 server/routes/public.js
 server/app.js
 server/middleware/rate-limit.js

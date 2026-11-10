@@ -351,3 +351,12 @@
 - [ ] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
 - [ ] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
 - [ ] A4: Run the ten screen checks against the slot's app, then build, lint and log-query
+
+### Run 522 — hand checks left open after merge (PR #545, agreed 2026-11-10)
+- [ ] V1: The closed logistics card reads as one header line on a phone-size window and opens on one tap — /menu-intelligence/e0df992a-399f-428c-a5c1-b37157ab4f59
+- [ ] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
+- [ ] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
+- [ ] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
+- [ ] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
+- [ ] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
+- [ ] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
