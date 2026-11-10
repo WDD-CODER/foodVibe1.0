@@ -215,6 +215,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).
 - When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
 - Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
+- Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ## Logic families

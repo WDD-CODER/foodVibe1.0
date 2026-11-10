@@ -24,11 +24,11 @@
   padding: 5px 14px;
 
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #d0c8b4;
+  border: 1px solid var(--paper-border);
   border-radius: 20px;
   font-family: var(--font-serif);
   font-size: 0.7rem;
-  color: #5a4a2a;
+  color: var(--paper-brown);
   cursor: pointer;
   transition:
     background 0.15s,
@@ -36,8 +36,8 @@
   white-space: nowrap;
 
   &:hover:not(:disabled) {
-    background: #fff;
-    border-color: #8a7450;
+    background: var(--paper-bg);
+    border-color: var(--paper-gold);
   }
 
   &:disabled {
@@ -46,13 +46,13 @@
   }
 
   &.pill--save {
-    background: #1a1a1a;
-    color: #fff;
-    border-color: #1a1a1a;
+    background: var(--paper-edge);
+    color: var(--paper-bg);
+    border-color: var(--paper-edge);
 
     &:hover:not(:disabled) {
-      background: #333;
-      border-color: #333;
+      background: var(--paper-edge-hover);
+      border-color: var(--paper-edge-hover);
     }
   }
 }
@@ -83,7 +83,7 @@
   }
 
   .paper-inner {
-    border: 1px solid #1a1a1a;
+    border: 1px solid var(--paper-edge);
     padding: 32px;
   }
 

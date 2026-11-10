@@ -125,14 +125,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Make buttons, links and active states the logo's teal so white text on them is readable — two token values and the comment in the light root block — src/styles.scss
-- [ ] A2: Add the lamp colour, the guest typeface and the paper palette as tokens — thirteen new tokens in the light block, the lamp in the kitchen block — src/styles.scss
-- [ ] A3: Add one shared class for exact-looking numbers and one for the amber ready line — two engine classes at the end of the file, registered in the family list — src/styles.scss, docs/brain/component-families.md
-- [ ] A4: Make the menu paper read its colours from the tokens instead of typed values — the eleven value swaps, nothing else — src/app/pages/menu-intelligence/_paper-ui.scss, src/app/pages/menu-intelligence/_toolbar.scss
-- [ ] A5: Set the menu title and section titles in a real Hebrew serif — two font-family lines and the font link — src/app/pages/menu-intelligence/_paper-ui.scss, src/index.html
-- [ ] A6: Add a check that fails if a theme token is lost or a typed colour returns to the paper files — tools/theme/check-tokens.mjs
-- [ ] A7: Write the theme into the design notes so the next design port follows it — system.md tokens and The Pass rules, divergence 7 — .interface-design/system.md, .interface-design/divergences.md
-- [ ] A8: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
+- [x] A1: Make buttons, links and active states the logo's teal so white text on them is readable — two token values and the comment in the light root block — src/styles.scss
+- [x] A2: Add the lamp colour, the guest typeface and the paper palette as tokens — thirteen new tokens in the light block, the lamp in the kitchen block — src/styles.scss
+- [x] A3: Add one shared class for exact-looking numbers and one for the amber ready line — two engine classes at the end of the file, registered in the family list — src/styles.scss, docs/brain/component-families.md
+- [x] A4: Make the menu paper read its colours from the tokens instead of typed values — the eleven value swaps, nothing else — src/app/pages/menu-intelligence/_paper-ui.scss, src/app/pages/menu-intelligence/_toolbar.scss
+- [x] A5: Set the menu title and section titles in a real Hebrew serif — two font-family lines and the font link — src/app/pages/menu-intelligence/_paper-ui.scss, src/index.html
+- [x] A6: Add a check that fails if a theme token is lost or a typed colour returns to the paper files — tools/theme/check-tokens.mjs
+- [x] A7: Write the theme into the design notes so the next design port follows it — system.md tokens and The Pass rules, divergence 7 — .interface-design/system.md, .interface-design/divergences.md
+- [x] A8: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: every component that reads `--color-primary` (241 lines) changes colour through the token; no component file is edited for that.
@@ -157,3 +157,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-10: contrast of white on `#0f766e` is about 5.5:1 and on `#115e59` about 7.6:1; on the old `#14b8a6` about 2.5:1.
+- Builder: `node tools/theme/check-tokens.mjs` → exit 0, `THEME_TOKENS: ok`; `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:ci` → 1873 SUCCESS; `reuse-lint --check-registry` → ok; `log-query` → exit 0, no entries.

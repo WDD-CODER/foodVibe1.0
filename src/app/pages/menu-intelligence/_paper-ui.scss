@@ -7,8 +7,8 @@
   width: 100%;
   margin: 0 auto;
   padding: 7px;
-  background: #fdfdfa;
-  border: 2px solid #1a1a1a;
+  background: var(--paper-sheet);
+  border: 2px solid var(--paper-edge);
   border-radius: 16px;
   box-shadow: 4px 6px 20px rgba(0, 0, 0, 0.16);
 }
@@ -17,7 +17,7 @@
   position: relative;
   min-height: 320px;
   padding: 28px 32px 24px;
-  border: 1px solid #1a1a1a;
+  border: 1px solid var(--paper-edge);
   border-radius: 12px;
   background: transparent;
 
@@ -36,7 +36,7 @@
     content: '— ✦ —';
     font-family: var(--font-serif);
     font-size: 0.62rem;
-    color: #8a7450;
+    color: var(--paper-gold);
     letter-spacing: 9px;
     font-weight: 400;
   }
@@ -62,14 +62,14 @@
   gap: 6px;
   margin: 18px 0 22px;
   font-size: 0.65rem;
-  color: #c8b890;
+  color: var(--paper-gold-line);
 
   &::before,
   &::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: linear-gradient(to right, transparent, #c8b890, transparent);
+    background: linear-gradient(to right, transparent, var(--paper-gold-line), transparent);
   }
 }
 
@@ -250,9 +250,9 @@
   min-width: 220px;
   max-inline-size: min(18rem, calc(100vw - 2rem));
 
-  background: #fdfdfa;
+  background: var(--paper-sheet);
 
-  border: 1px solid #d0c8b4;
+  border: 1px solid var(--paper-border);
   border-radius: 8px;
 
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
@@ -263,7 +263,7 @@
   --search-combobox-input-padding: 8px 12px;
   --search-combobox-input-font: var(--font-serif);
   --search-combobox-input-font-size: 0.85rem;
-  --search-combobox-field-border-block-end: 1px solid #e8e0d0;
+  --search-combobox-field-border-block-end: 1px solid var(--paper-field-line);
   --search-combobox-option-font: var(--font-serif);
   --search-combobox-highlight-ring: inset 0 0 0 1px var(--border-focus);
 }
@@ -312,14 +312,14 @@
   gap: 6px;
   margin: 14px 0 18px;
   font-size: 0.65rem;
-  color: #c8b890;
+  color: var(--paper-gold-line);
 
   &::before,
   &::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: linear-gradient(to right, transparent, #c8b890, transparent);
+    background: linear-gradient(to right, transparent, var(--paper-gold-line), transparent);
   }
 }
 
@@ -330,7 +330,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.24em;
-  color: #5a4a2a;
+  color: var(--paper-brown);
   margin: 0;
   padding: 4px 0;
   background: transparent;
@@ -342,7 +342,7 @@
   width: 100%;
 
   &:hover {
-    color: #8a7450;
+    color: var(--paper-gold);
   }
 
   &:focus {
@@ -352,7 +352,7 @@
 }
 
 .section-title {
-  font-family: var(--font-serif);
+  font-family: var(--font-guest);
   font-size: 1.3rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -463,7 +463,7 @@
   font-family: var(--font-serif);
   font-size: 0.72rem;
   letter-spacing: 0.06em;
-  color: #b0a080;
+  color: var(--paper-gold-mute);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -471,7 +471,7 @@
   text-align: center;
 
   &:hover {
-    color: #8a7450;
+    color: var(--paper-gold);
   }
 }
 
@@ -482,7 +482,7 @@
   font-family: var(--font-serif);
   font-size: 0.78rem;
   letter-spacing: 0.06em;
-  color: #b0a080;
+  color: var(--paper-gold-mute);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -490,7 +490,7 @@
   text-align: center;
 
   &:hover {
-    color: #8a7450;
+    color: var(--paper-gold);
   }
 }
 
@@ -516,7 +516,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #8a7450;
+  color: var(--paper-gold);
   cursor: pointer;
   transition: background 0.15s;
   outline: none;
@@ -524,7 +524,7 @@
   &:hover,
   &:focus {
     background: rgba(138, 116, 80, 0.1);
-    border-bottom-color: #c8b890;
+    border-bottom-color: var(--paper-gold-line);
   }
 }
 
@@ -538,7 +538,7 @@
 }
 
 .event-chip-sep {
-  color: #c8b890;
+  color: var(--paper-gold-line);
   margin: 0 4px;
   font-size: 0.6rem;
   letter-spacing: normal;
@@ -556,7 +556,7 @@
   font-size: 0.6rem;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #8a7450;
+  color: var(--paper-gold);
   cursor: pointer;
   transition: background 0.15s;
   min-height: unset;
@@ -566,7 +566,7 @@
   &:hover,
   &:focus {
     background: rgba(138, 116, 80, 0.1);
-    border-bottom-color: #c8b890;
+    border-bottom-color: var(--paper-gold-line);
     box-shadow: none;
   }
 }
@@ -575,10 +575,10 @@
   display: block;
   width: 100%;
   text-align: center;
-  font-family: var(--font-serif);
+  font-family: var(--font-guest);
   font-size: 1.85rem;
   font-style: italic;
-  color: #1a1a1a;
+  color: var(--paper-edge);
   background: transparent;
   border: none;
   outline: none;
@@ -586,7 +586,7 @@
   padding: 0;
 
   &::placeholder {
-    color: #c8b890;
+    color: var(--paper-gold-line);
     font-style: italic;
   }
 
@@ -604,7 +604,7 @@
   margin-bottom: 4px;
   font-family: var(--font-serif);
   font-size: 0.78rem;
-  color: #7a6a50;
+  color: var(--paper-brown-mute);
 }
 
 .event-meta-chip {
@@ -617,12 +617,12 @@
   transition: background 0.15s;
   font-family: var(--font-serif);
   font-size: 0.78rem;
-  color: #7a6a50;
+  color: var(--paper-brown-mute);
   position: relative;
 
   &:hover {
     background: rgba(138, 116, 80, 0.08);
-    border-bottom-color: #c8b890;
+    border-bottom-color: var(--paper-gold-line);
   }
 }
 
@@ -648,7 +648,7 @@
   width: 4ch;
   font-family: var(--font-serif);
   font-size: 0.78rem;
-  color: #7a6a50;
+  color: var(--paper-brown-mute);
   background: transparent;
   border: none;
   outline: none;
