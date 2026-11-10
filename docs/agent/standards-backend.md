@@ -118,6 +118,11 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
+| `GET` | `/api/v1/public/health` | none | Plan 543: public router probe; the public door for non-members (ADR 0030, C-GUEST). No member token is read under /api/v1/public. |
+
+Every later public write route under `/api/v1/public` carries `publicLimiter` (`server/middleware/rate-limit.js`), the
+`honeypot` (`server/middleware/honeypot.js`) and, when the guest may read back, a token from `newPublicToken`
+(`server/utils/public-token.js`) — all three in the plan that adds the route.
 
 Why a dedicated `/api/v1/events` router (plan 442): an event's stage history, `closedAt` and notes are server-owned.
 The actor (`by`, `byName`) comes from the token and each change is one atomic write (`$push` / `$pull` / `$set`

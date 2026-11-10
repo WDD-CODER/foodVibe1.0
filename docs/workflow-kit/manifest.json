@@ -4908,6 +4908,14 @@
       "notes": "FoodVibe ADR 0029 (design ports go through the family registry; plan 534)."
     },
     {
+      "path": "docs/brain/decisions/0030-guest-writes-have-one-door.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0030 (guest writes have one door: /api/v1/public; INV-1 amended; plan 543)."
+    },
+    {
       "path": "scripts/decision-log.mjs",
       "tier": "project",
       "action": "stay",
