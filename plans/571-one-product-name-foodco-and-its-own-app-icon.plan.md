@@ -118,12 +118,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Show the name foodCo in the browser tab and in the installed app — title, apple title, theme colour, apple icon link; manifest name, short name and two colours — src/index.html, public/manifest.webmanifest
-- [ ] A2: Say foodCo in the two sentences and the logo label that still use an old name — two dictionary values, the mark's label and title — public/assets/data/dictionary.json, public/assets/style/img/fc-mark.svg
-- [ ] A3: Add a script that draws every app icon from the design's own pot mark — Playwright Chromium renders Art A and Art B, the script writes the ICO container — tools/brand-icons/make-icons.mjs
-- [ ] A4: Replace the ten Angular icon files with the pot mark — run the script once and commit its output — public/icons/**, public/favicon.ico
-- [ ] A5: Add two checks that fail if an old name or an Angular icon comes back — sizes, ICO header, old md5 values; the name search — tools/brand-icons/check-icons.mjs, tools/brand-icons/check-names.mjs
-- [ ] A6: Run the two checks, build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
+- [x] A1: Show the name foodCo in the browser tab and in the installed app — title, apple title, theme colour, apple icon link; manifest name, short name and two colours — src/index.html, public/manifest.webmanifest
+- [x] A2: Say foodCo in the two sentences and the logo label that still use an old name — two dictionary values, the mark's label and title — public/assets/data/dictionary.json, public/assets/style/img/fc-mark.svg
+- [x] A3: Add a script that draws every app icon from the design's own pot mark — Playwright Chromium renders Art A and Art B, the script writes the ICO container — tools/brand-icons/make-icons.mjs
+- [x] A4: Replace the ten Angular icon files with the pot mark — run the script once and commit its output — public/icons/**, public/favicon.ico
+- [x] A5: Add two checks that fail if an old name or an Angular icon comes back — sizes, ICO header, old md5 values; the name search — tools/brand-icons/check-icons.mjs, tools/brand-icons/check-names.mjs
+- [x] A6: Run the two checks, build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: `@playwright/test` (already a dev dependency) and its Chromium. When Chromium is not at Playwright's default place, the script honours `PLAYWRIGHT_BROWSERS_PATH`, which Playwright reads by itself.
@@ -145,3 +145,6 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-10: the Human approved the name in chat ("Foodco") and the theme board; this plan was written and reviewed in a cloud session on branch `ccr-cf91e66d-y8sqjx`, not from the main folder.
+- Evidence: `node tools/brand-icons/make-icons.mjs` → exit 0, `BRAND_ICONS: wrote 10 files` (run with `BRAND_ICONS_CHROMIUM` pointing at the installed Chromium; the script honours that optional env var because the sandbox's Playwright browser build differed).
+- `node tools/brand-icons/check-icons.mjs` → exit 0, `BRAND_ICONS: ok (10 files)`; `check-names.mjs` → exit 0, `BRAND_NAMES: ok`.
+- `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:ci` → 0; log-query → `SKIP: no database configured`.
