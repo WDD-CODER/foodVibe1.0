@@ -359,3 +359,44 @@
 - [ ] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md
 - [ ] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
 - [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
+
+### Plan 571 — One product name, foodCo, and its own app icon instead of the Angular logo (`plans/571-one-product-name-foodco-and-its-own-app-icon.plan.md`)
+- [ ] A1: Show the name foodCo in the browser tab and in the installed app — title, apple title, theme colour, apple icon link; manifest name, short name and two colours — src/index.html, public/manifest.webmanifest
+- [ ] A2: Say foodCo in the two sentences and the logo label that still use an old name — two dictionary values, the mark's label and title — public/assets/data/dictionary.json, public/assets/style/img/fc-mark.svg
+- [ ] A3: Add a script that draws every app icon from the design's own pot mark — Playwright Chromium renders Art A and Art B, the script writes the ICO container — tools/brand-icons/make-icons.mjs
+- [ ] A4: Replace the ten Angular icon files with the pot mark — run the script once and commit its output — public/icons/**, public/favicon.ico
+- [ ] A5: Add two checks that fail if an old name or an Angular icon comes back — sizes, ICO header, old md5 values; the name search — tools/brand-icons/check-icons.mjs, tools/brand-icons/check-names.mjs
+- [ ] A6: Run the two checks, build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
+
+### Plan 572 — The Pass theme tokens: brand teal, lamp amber, paper colours and a guest typeface (`plans/572-the-pass-theme-tokens-brand-teal-lamp-amber-paper-colours-and-a-guest-typeface.plan.md`)
+- [ ] A1: Make buttons, links and active states the logo's teal so white text on them is readable — two token values and the comment in the light root block — src/styles.scss
+- [ ] A2: Add the lamp colour, the guest typeface and the paper palette as tokens — thirteen new tokens in the light block, the lamp in the kitchen block — src/styles.scss
+- [ ] A3: Add one shared class for exact-looking numbers and one for the amber ready line — two engine classes at the end of the file, registered in the family list — src/styles.scss, docs/brain/component-families.md
+- [ ] A4: Make the menu paper read its colours from the tokens instead of typed values — the eleven value swaps, nothing else — src/app/pages/menu-intelligence/_paper-ui.scss, src/app/pages/menu-intelligence/_toolbar.scss
+- [ ] A5: Set the menu title and section titles in a real Hebrew serif — two font-family lines and the font link — src/app/pages/menu-intelligence/_paper-ui.scss, src/index.html
+- [ ] A6: Add a check that fails if a theme token is lost or a typed colour returns to the paper files — tools/theme/check-tokens.mjs
+- [ ] A7: Write the theme into the design notes so the next design port follows it — system.md tokens and The Pass rules, divergence 7 — .interface-design/system.md, .interface-design/divergences.md
+- [ ] A8: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
+
+### Plan 573 — Light the lamp on the price bar when an event meets its profit target, and line up its numbers (`plans/573-light-the-lamp-on-the-price-bar-when-an-event-meets-its-profit-target.plan.md`)
+- [ ] A1: Keep every number of the price bar at a fixed width while digits change — the shared digits class on seven number elements — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
+- [ ] A2: Show the amber ready line under the profit percent only when the price meets the target — one class binding on the bar value and one on the phone sheet summary — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
+- [ ] A3: Test that the line appears on target, disappears below it, and the digits class is on every number — three cases — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
+- [ ] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
+
+### Plan 574 — A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard (`plans/574-a-welcome-screen-for-first-time-visitors.plan.md`)
+- [ ] A1: Remember on the device that someone has signed in here, and forget it on sign-out — the util with its spec; two lines in the user service with three spec cases — src/app/core/utils/returning-visitor.util.ts, src/app/core/utils/returning-visitor.util.spec.ts, src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
+- [ ] A2: Decide where the site's bare address leads: welcome for a first-time visitor, dashboard for everyone else — the redirect function and the guard, each with its spec — src/app/pages/welcome/home-redirect.ts, src/app/pages/welcome/home-redirect.spec.ts, src/app/core/guards/welcome.guard.ts, src/app/core/guards/welcome.guard.spec.ts
+- [ ] A3: Build the welcome screen with the mark, the promise, two buttons and the three rooms — the page's four files — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/welcome.page.html, src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
+- [ ] A4: Add the ten Hebrew texts of the welcome screen — public/assets/data/dictionary.json
+- [ ] A5: Connect the screen to the address bar — the welcome route and the one rewritten home entry — src/app/app.routes.ts
+- [ ] A6: Hide the floating add button on the welcome screen — one signal, one wrapper, one spec case — src/app/core/components/hero-fab/hero-fab.component.ts, src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.spec.ts
+- [ ] A7: Record the new page, guard and util in the folder maps — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md
+- [ ] A8: Run build, lint, the icon lint, the unit tests, the breadcrumbs check and the log query, and paste the output lines under Execution Notes
+
+### Plan 575 — Seed one demo catering business into a local database so every demo starts with full screens (`plans/575-seed-one-demo-catering-business-into-a-local-database.plan.md`)
+- [ ] A1: Write the demo business's data as one pure builder so it can be tested without a database — suppliers, products, recipes, dishes, venues, clients, events with their money, usage days, baseline — server/scripts/lib/demo-data.js
+- [ ] A2: Add the command that writes that data into a local database, safely and only once — arguments, local-only refusal, password from the environment, validate then insert what is missing — server/scripts/seed-demo-business.js
+- [ ] A3: Test the data's shape and links, the money formula, the dashboard numbers, the second run and the local-only rule — server/test/seed-demo-business.test.js
+- [ ] A4: List the new command in the server map — server/breadcrumbs.md
+- [ ] A5: Run the server tests, the server lint, the build and the log query, and paste the output lines under Execution Notes
