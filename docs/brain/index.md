@@ -29,6 +29,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | About to port a Claude Design handoff | `.claude/commands/design-port.md` — every designed element names its family, family changes go to the base with every user screen re-checked; why in [[0029-design-ports-go-through-the-family-registry]] |
 | Building or changing a dropdown / search picker | `patterns/dropdown-add-option.md` — one add option + shared `KeyedPickerSearch`; the add-option rule lives in `docs/agent/standards-domain.md` |
 | Inspecting the local database from a session (MCP) | `scripts/mcp-mongo-local.mjs` — read-only, local-only, never Atlas or production; why in [[0028-read-only-local-mongodb-mcp]] |
+| Front Desk program (bookings, requests, assistant) | `docs/frontdesk/frontdesk-map.md` — the Front Desk program map: plans, frozen contracts and their extensions |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |
 

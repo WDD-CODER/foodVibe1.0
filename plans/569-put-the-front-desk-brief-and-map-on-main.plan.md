@@ -91,10 +91,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Copy the four front desk documents from the main folder into the repo unchanged — byte-for-byte copy — docs/frontdesk/assistant-behaviour-rules.md, docs/frontdesk/frontdesk-map.md, docs/frontdesk/frontdesk-program-brief.md, docs/frontdesk/reference-bookings-engine.md
-- [ ] A2: Mark the map as approved in its title line — docs/frontdesk/frontdesk-map.md
-- [ ] A3: List the contract additions the plans made, so the next planning round reads them — the 11 lines above — docs/frontdesk/frontdesk-map.md
-- [ ] A4: Point the brain index at the map and run the ledger and breadcrumbs checks — docs/brain/index.md
+- [x] A1: Copy the four front desk documents from the main folder into the repo unchanged — byte-for-byte copy — docs/frontdesk/assistant-behaviour-rules.md, docs/frontdesk/frontdesk-map.md, docs/frontdesk/frontdesk-program-brief.md, docs/frontdesk/reference-bookings-engine.md
+- [x] A2: Mark the map as approved in its title line — docs/frontdesk/frontdesk-map.md
+- [x] A3: List the contract additions the plans made, so the next planning round reads them — the 11 lines above — docs/frontdesk/frontdesk-map.md
+- [x] A4: Point the brain index at the map and run the ledger and breadcrumbs checks — docs/brain/index.md
 
 ## Technical Considerations
 - Dependencies: none.
@@ -115,3 +115,5 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - The main folder's copies stay untracked until this merges; after the merge the Human (or the Planner after `git pull`) deletes the untracked copies only if `git status` shows them identical — git refuses the pull otherwise ("untracked working tree files would be overwritten"); move them aside first.
+- Evidence: node scripts/plan-ledger-check.mjs → exit 0; node scripts/breadcrumbs-check.mjs → exit 0; map line 1 has no DRAFT, 11 `- plan NNN ·` lines under Contract extensions.
+- The main copy of the map's title already read "APPROVED by Dandan…"; replaced with the plan's exact line.
