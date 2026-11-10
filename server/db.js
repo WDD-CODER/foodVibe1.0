@@ -145,6 +145,8 @@ async function connectDb() {
     { publicToken: 1 },
     { unique: true, name: 'bookings_token_unique', partialFilterExpression: { publicToken: { $type: 'string' } } }
   )
+  // Plan 550: the decision log, read by business over time.
+  await db.collection('decisionLog').createIndex({ businessId: 1, at: 1 }, { name: 'decisionlog_business_at' })
   logger.debug({ event: 'mongo.index.ensured', index: 'requests' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).

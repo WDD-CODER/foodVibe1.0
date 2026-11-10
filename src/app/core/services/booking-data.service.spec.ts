@@ -55,4 +55,32 @@ describe('BookingDataService', () => {
     expect(service.all_()).toEqual([stored])
     expect(logging.warn).toHaveBeenCalled()
   }))
+
+  it('day reads the day load from the bookings router and keeps the store alone', fakeAsync(() => {
+    let result: unknown
+    void service.day('2026-12-24').then((r) => (result = r))
+    const req = http.expectOne((r) => r.method === 'GET' && r.url.endsWith('/api/v1/bookings/day'))
+    expect(req.request.params.get('date')).toBe('2026-12-24')
+    req.flush({ bookings: [stored], coversByHour: { '19': 10 } })
+    tick()
+    expect(result).toEqual({ bookings: [stored], coversByHour: { '19': 10 } })
+    expect(service.all_()).toEqual([])
+  }))
+
+  it('day returns null when the server refuses the date', fakeAsync(() => {
+    let result: unknown = 'unset'
+    void service.day('24-12').then((r) => (result = r))
+    http
+      .expectOne((r) => r.url.endsWith('/api/v1/bookings/day'))
+      .flush({ error: 'BAD_DATE' }, { status: 400, statusText: 'Bad Request' })
+    tick()
+    expect(result).toBeNull()
+    expect(logging.warn).toHaveBeenCalled()
+  }))
+
+  it('addServerCreated adds a booking once', () => {
+    service.addServerCreated(stored)
+    service.addServerCreated(stored)
+    expect(service.all_()).toEqual([stored])
+  })
 })

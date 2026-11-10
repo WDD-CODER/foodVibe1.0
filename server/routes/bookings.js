@@ -1,7 +1,7 @@
 'use strict'
 /**
  * Plan 549 (contract C-REQUEST): the one door for a booking's status. The generic data API only reads `bookings`
- * (writes answer 405 USE_ROUTER). Plan 550 adds GET /day and creates bookings when a request is approved.
+ * (writes answer 405 USE_ROUTER). Plan 550 adds GET /day; a booking is created when a request is approved (requests.js).
  */
 const { Router } = require('express')
 const mongoose = require('mongoose')
@@ -32,6 +32,30 @@ function fail(req, res, name, err) {
   req.log.error({ err, event: `bookings.${name}.failed` })
   res.status(500).json({ error: 'Server error' })
 }
+
+const COVERING = ['confirmed', 'seated', 'finished']
+
+// GET /api/v1/bookings/day?date=YYYY-MM-DD -> { bookings, coversByHour }  (Wave 1 manual stand-in for availability)
+router.get('/day', verifyToken, async (req, res) => {
+  try {
+    const { date } = req.query
+    if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'BAD_DATE' })
+    if (!assertCan(req, res, 'manageRequests', { type: TYPE })) return
+    const bookings = await db().collection(TYPE)
+      .find({ ...scopeFilter(req), ...LIVE, date, status: { $ne: 'cancelled' } })
+      .sort({ startAt: 1 })
+      .toArray()
+    const coversByHour = {}
+    for (const b of bookings) {
+      if (!COVERING.includes(b.status)) continue
+      const hour = b.time.slice(0, 2)
+      coversByHour[hour] = (coversByHour[hour] ?? 0) + b.partySize
+    }
+    res.json({ bookings, coversByHour })
+  } catch (err) {
+    fail(req, res, 'day', err)
+  }
+})
 
 // PUT /api/v1/bookings/:id/status  { status, note? }
 router.put('/:id/status', verifyToken, async (req, res) => {

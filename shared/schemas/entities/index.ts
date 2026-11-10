@@ -1,6 +1,7 @@
 import type { z } from 'zod'
 import { bookingSchema } from './booking.schema'
 import { clientSchema } from './client.schema'
+import { decisionLogSchema } from './decision-log.schema'
 import { equipmentSchema } from './equipment.schema'
 import { frontDeskProfileSchema } from './front-desk-profile.schema'
 import { menuEventSchema } from './menu-event.schema'
@@ -15,6 +16,7 @@ export * from './booking.schema'
 export * from './business.schema'
 export * from './client.schema'
 export * from './common.schema'
+export * from './decision-log.schema'
 export * from './event-logistics'
 export * from './event-stage'
 export * from './front-desk-profile.schema'
@@ -35,7 +37,8 @@ export const SCHEMA_BY_COLLECTION = {
   clients: clientSchema,
   frontDeskProfiles: frontDeskProfileSchema,
   requests: requestSchema,
-  bookings: bookingSchema
+  bookings: bookingSchema,
+  decisionLog: decisionLogSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION
