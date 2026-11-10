@@ -81,6 +81,8 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `unlinked-ingredient-link.service.ts` | Turns a free-text ingredient into a product-linked one in the stored recipes and dishes (plan 466) | UnlinkedIngredientLinkService, LinkUnlinkedRequest |
 | `user-admin.service.ts` | User admin management | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
+| `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
+| `booking-data.service.ts` | Booking status moves through the server routes (plan 549) | BookingDataService |
 
 ## Architecture Context
 

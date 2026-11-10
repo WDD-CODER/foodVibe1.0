@@ -29,6 +29,8 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `business-stats.model.ts` | Dashboard read model of the business stats route (plan 447) | StatsPeriod, BusinessStats, BusinessStatsCards, CountCard, FunnelStage, UpcomingEvent |
 | `parsed-result.model.ts` | Parsed recipe/dish import result | ParsedResult, ParsedResultType, ParsedRecipe, ParsedDish, ParsedIngredient, ParsedStep |
 | `v2/` | v2 entity types inferred from the shared Zod schemas; `v2/conformance.ts` locks them to the client interfaces at compile time | V2ConformsToClient |
+| `request.model.ts` | Customer request type (plan 549) | FrontDeskRequest, ManualRequestInput, DECLINE_REASONS |
+| `booking.model.ts` | Booking type (plan 549) | Booking |
 
 ## Architecture Context
 
