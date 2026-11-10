@@ -9,12 +9,12 @@ const { hasSchema: hasV2Schema } = require('../utils/schema-check');
 const { checkStoredDoc } = require('../middleware/validate');
 const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
-const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
 const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
 const { PROFILE_SERVER_FIELDS } = require('../generated/schemas/entities/front-desk-profile.schema');
 const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
 const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
 const { expireDue } = require('../utils/request-expiry');
+const { buildNewEventDoc, withoutServerEventFields, withSavedSnapshot } = require('../utils/event-create');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
@@ -133,27 +133,6 @@ function withoutServerProfileFields(body) {
   const copy = { ...body };
   for (const key of PROFILE_SERVER_FIELDS) delete copy[key];
   return copy;
-}
-
-/** Plan 442: `body` without the event fields only the server writes (stage, history, notes ...). */
-function withoutServerEventFields(body) {
-  const copy = { ...body };
-  for (const key of EVENT_SERVER_FIELDS) delete copy[key];
-  return copy;
-}
-
-/**
- * Plan 446: the planning snapshot a client may send with a save. Only a stored snapshot that is not frozen is
- * replaced, and a client never sets `frozenAt` (the events router freezes). `stored` is the doc being updated, or
- * null on a create (a new event has no plan to snapshot yet).
- */
-function withSavedSnapshot(body, stored) {
-  if (!('planSnapshot' in body)) return body;
-  const { planSnapshot, ...rest } = body;
-  if (!stored || stored.planSnapshot?.frozenAt !== undefined) return rest;
-  if (!planSnapshot || typeof planSnapshot !== 'object') return rest;
-  const { frozenAt: _ignored, ...content } = planSnapshot;
-  return { ...rest, planSnapshot: content };
 }
 
 /** Plan 427: permission action for changing or deleting a stored doc (locked taxonomy kinds are owner-only). */
@@ -561,8 +540,6 @@ router.post('/:type', verifyToken, async (req, res) => {
     let shared = false;
     let safeEntity = body;
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
-    // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
-    if (entityType === EVENTS) safeEntity = withSavedSnapshot(withoutServerEventFields(safeEntity), null);
     // Plan 544: a client never sets its own match key, kinds, counters, consent history or do-not-contact flag.
     if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
     // Plan 548: a client never sets a profile's status or WhatsApp routing; every profile starts as a draft.
@@ -581,23 +558,26 @@ router.post('/:type', verifyToken, async (req, res) => {
     }
 
     const now = Date.now();
-    const doc = stampNew(req, {
-      ...safeEntity,
-      _id,
-      userId: shared ? MASTER : req.user.userId,
-      ...(!NO_LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
-      ...(hasV2Schema(entityType) && {
-        schemaVersion: 2,
-        // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
-        createdAt: typeof safeEntity.createdAt === 'number' ? safeEntity.createdAt : now,
-        updatedAt: now,
-      }),
-    });
-    if (entityType === EVENTS) {
-      doc.stage = 'inquiry';
-      doc.stageHistory = [{ stage: 'inquiry', at: now, by: req.user.userId, byName: req.user.name ?? '' }];
-      doc.notes = [];
-    }
+    // Plan 442 / 550: a new event comes from the shared builder (no client stage, history or notes; it starts in "inquiry").
+    const doc = stampNew(req, entityType === EVENTS
+      ? buildNewEventDoc(safeEntity, {
+        actor: { userId: req.user.userId, name: req.user.name ?? '' },
+        businessId: req.user.businessId,
+        _id,
+        now,
+      })
+      : {
+        ...safeEntity,
+        _id,
+        userId: shared ? MASTER : req.user.userId,
+        ...(!NO_LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
+        ...(hasV2Schema(entityType) && {
+          schemaVersion: 2,
+          // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
+          createdAt: typeof safeEntity.createdAt === 'number' ? safeEntity.createdAt : now,
+          updatedAt: now,
+        }),
+      });
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
     if (entityType === PROFILES) doc.status = 'draft';

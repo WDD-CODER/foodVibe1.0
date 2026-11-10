@@ -47,6 +47,9 @@ const COLLECTIONS = [
   // through server/routes/requests.js and server/routes/bookings.js.
   { name: 'requests',                 userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: false, routerWrites: true },
   { name: 'bookings',                 userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: false, routerWrites: true },
+  // Plan 550 (C-REQUEST): one row per approve / decline / ask, ids and numbers only. Server-only (no generic API); read later by
+  // stats (559, 563). backup is false: the collections test requires userData for a backup entry.
+  { name: 'decisionLog',              userData: false, cloneable: false, backup: false, searchable: false, softDelete: false },
   // Plan 322 M4: per-user Hebrew-dictionary overrides. Not cloneable — signup starts with none;
   // the shared '__global__' pseudo-user doc (own routes, see generic.js) is the admin-editable
   // layer every user merges in at runtime, separate from this per-user personal layer.

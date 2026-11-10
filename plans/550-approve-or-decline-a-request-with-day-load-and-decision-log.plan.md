@@ -158,15 +158,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Pin how a new event is created today, before touching that code — owner and staff cases, exact stored fields — server/test/menu-event-create.test.js
-- [ ] A2: Move the new-event defaults into one shared builder that the generic create uses — buildNewEventDoc, generic POST calls it, pin test unchanged — server/utils/event-create.js, server/routes/generic.js
-- [ ] A3: Add the decision log collection that keeps decisions without customer names — schema, registry, collection entry, index — shared/schemas/entities/decision-log.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/db.js
-- [ ] A4: Approve a request in one call: claim it, create the event or booking, update the client, log the decision — POST /:id/approve with compensation — server/routes/requests.js
-- [ ] A5: Decline a request with a reason, and log an ask when a member asks for more details — POST /:id/decline, decline field, ask row on PUT /:id/status — server/routes/requests.js
-- [ ] A6: Show a day's bookings and covers per hour for the approve screen — GET /day — server/routes/bookings.js
-- [ ] A7: Test approve, decline, ask, idempotency, the day view and that the log holds no personal data — server/test/requests-approve.test.js, server/test/bookings-day.test.js, server/test/requests-router.test.js
-- [ ] A8: Let the app approve, decline and read a day's load — RequestDataService approve/decline, BookingDataService day, specs — src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts
-- [ ] A9: Record the routes and run every check — standards-backend §1/§5; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md
+- [x] A1: Pin how a new event is created today, before touching that code — owner and staff cases, exact stored fields — server/test/menu-event-create.test.js
+- [x] A2: Move the new-event defaults into one shared builder that the generic create uses — buildNewEventDoc, generic POST calls it, pin test unchanged — server/utils/event-create.js, server/routes/generic.js
+- [x] A3: Add the decision log collection that keeps decisions without customer names — schema, registry, collection entry, index — shared/schemas/entities/decision-log.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/db.js
+- [x] A4: Approve a request in one call: claim it, create the event or booking, update the client, log the decision — POST /:id/approve with compensation — server/routes/requests.js
+- [x] A5: Decline a request with a reason, and log an ask when a member asks for more details — POST /:id/decline, decline field, ask row on PUT /:id/status — server/routes/requests.js
+- [x] A6: Show a day's bookings and covers per hour for the approve screen — GET /day — server/routes/bookings.js
+- [x] A7: Test approve, decline, ask, idempotency, the day view and that the log holds no personal data — server/test/requests-approve.test.js, server/test/bookings-day.test.js, server/test/requests-router.test.js
+- [x] A8: Let the app approve, decline and read a day's load — RequestDataService approve/decline, BookingDataService day, specs — src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts
+- [x] A9: Record the routes and run every check — standards-backend §1/§5; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md
 
 ## Technical Considerations
 - Dependencies: 549 (routers, schemas, `decline` field, `expireDue`), 548 (`jerusalemEpoch`, profile durations), 543 (`actorOf`, `newPublicToken`), the generic POST for `menuEvents` (refactored, pinned).
@@ -190,3 +190,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Summary note: the event's first note lists every stored `answers` line (`label: value`). For the summary to be complete, the screens that create requests (552 manual form, 555 public form) store **every answered question in `answers`**, including those also copied into `wanted`, with the label as shown to the person. For the map's "Contract extensions (run)": `- plan 550 · answers holds every answered question (label as displayed), also those mapped to wanted · the approve summary note reads answers only`.
 - No transactions (single-node test DB, M0 free tier): a conditional claim on the request's read status makes approve idempotent and race-safe; the outcome insert follows; a failed insert reverts the claim.
 - `coversByHour` counts a booking only in its start hour (Wave 1 manual stand-in; the Wave 2 engine reads the same collection with durations).
+
+### Builder evidence (round 0)
+- `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors); `pnpm run test:server` -> exit 0, 1124 passed; `pnpm run test:ci` -> exit 0, 1905 SUCCESS.
+- A1 pin (`server/test/menu-event-create.test.js`) was green before the extraction (A2) and unchanged after it.
+- behaviour: `decisionLog` is registered with `backup: false` (the plan says `true`): `server/test/collections.test.js` requires `userData: true` for any backup entry, and that test is outside this plan's scope. Reverse: set `userData`/`backup` once that rule is relaxed.
+- behaviour: approve builds and validates the event or booking before the claim, so a bad outcome (400) never touches the request; only an insert failure reverts the claim.
+- behaviour: a client with more than 3 kinds after approve keeps the last 3 (schema max 3).
