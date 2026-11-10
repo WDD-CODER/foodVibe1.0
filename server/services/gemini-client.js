@@ -16,6 +16,8 @@
  */
 
 const mongoose = require('mongoose');
+const { isAiFeature } = require('../constants/ai-features');
+const { recordAiUsage } = require('./ai-usage');
 
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -382,7 +384,8 @@ function allExhausted(candidates) {
 }
 
 /**
- * Sends `body` to ONE model — never more than one Gemini call per request (plan 395, Human
+ * Every real HTTP call writes one ledger row (plan 566); `usage: { businessId, userId?, feature }`
+ * is required (a call without it throws under vitest). Sends `body` to ONE model — never more than one Gemini call per request (plan 395, Human
  * 2026-10-09: switching models is the user's decision, not the server's). The model is
  * `model` when the user picked one (it must be an enabled chain model), else the first in
  * the chain. If that model is out of its daily quota — known already, or learned from this
@@ -396,7 +399,13 @@ function allExhausted(candidates) {
  *   { kind: 'gemini_error', model, status, message }
  *   { kind: 'timeout' | 'network', model }
  */
-async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, model: requested }) {
+async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, model: requested, usage }) {
+  let meter = true;
+  if (!usage || !isAiFeature(usage.feature)) {
+    if (process.env.VITEST) throw new Error('callGemini: usage.feature required');
+    log.error({ event: 'ai.usage.missing', eventPrefix });
+    meter = false;
+  }
   await ensureLoaded();
   if (typeof requested === 'string' && !isCatalogModel(requested)) {
     log.warn({ event: `${eventPrefix}.model_removed`, model: requested });
@@ -413,6 +422,13 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };
   }
 
+  // One ledger row per real HTTP call (plan 566); fire-and-forget, never changes the result.
+  const startedAt = Date.now();
+  const record = (ok, errorCode, data) => {
+    if (!meter) return;
+    recordAiUsage({ usage, model, ok, errorCode, data, body, latencyMs: Date.now() - startedAt, log });
+  };
+
   await incrementUsage(model);
   log.info({ event: `${eventPrefix}.gemini_call`, model });
 
@@ -426,9 +442,11 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      record(false, 'timeout');
       log.warn({ event: `${eventPrefix}.timeout`, model });
       return { kind: 'timeout', model };
     }
+    record(false, 'network');
     log.error({ err, event: `${eventPrefix}.failed`, model });
     return { kind: 'network', model };
   }
@@ -436,23 +454,29 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));
     if (res.status === 429 && isDailyQuota(errBody)) {
+      record(false, 'quota');
       const resetAt = markExhausted(model, now);
       const nextModel = firstUsable(candidates, now);
       log.warn({ event: 'ai.model.exhausted', model, nextModel, resetAt: resetAt.toISOString() });
       if (!nextModel) return allExhausted(candidates);
       return { kind: 'model_exhausted', model, nextModel, resetAt: resetAt.toISOString() };
     }
+    record(false, `http_${res.status}`);
     const message = errBody?.error?.message ?? '';
     log.error({ event: `${eventPrefix}.gemini_failed`, model, status: res.status, geminiMessage: message });
     return { kind: 'gemini_error', model, status: res.status, message };
   }
 
+  let data;
   try {
-    return { kind: 'ok', model, data: await res.json() };
+    data = await res.json();
   } catch {
+    record(false, 'unreadable');
     log.error({ event: `${eventPrefix}.gemini_failed`, model, status: res.status, geminiMessage: 'unreadable response body' });
     return { kind: 'gemini_error', model, status: res.status, message: 'unreadable response body' };
   }
+  record(true, undefined, data);
+  return { kind: 'ok', model, data };
 }
 
 /** The text of the first candidate's first part, or '' — what every route parses. */

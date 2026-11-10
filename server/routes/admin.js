@@ -6,6 +6,8 @@ const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types')
 const { LIVE } = require('../jobs/purge-deleted')
 const { jerusalemDate } = require('../middleware/usage')
 const { activeDaysByBusiness } = require('../utils/usage-stats')
+const { aggregateAiUsage } = require('../services/ai-usage')
+const { PRICES_AS_OF } = require('../constants/ai-prices')
 
 const router = Router()
 
@@ -179,6 +181,54 @@ router.get('/taxonomy', verifyToken, requirePlatformAdmin, async (req, res) => {
     res.json({ rows })
   } catch (err) {
     req.log.error({ err, event: 'admin.taxonomy_list.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+/**
+ * Plan 566: AI usage ledger totals for the platform admin. Never returns prompts or replies —
+ * the ledger holds none. Default range: the current Asia/Jerusalem month.
+ */
+const AI_GROUP_BY = ['business', 'feature', 'model', 'day']
+const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
+const AI_CSV_COLUMNS = ['key', 'label', 'calls', 'failedCalls', 'inputTokens', 'outputTokens', 'totalTokens', 'estCostUsd']
+
+function csvCell(value) {
+  const text = value == null ? '' : String(value)
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+}
+
+function monthRange(todayStr) {
+  const [y, m] = todayStr.split('-').map(Number)
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate()
+  const mm = String(m).padStart(2, '0')
+  return { from: `${y}-${mm}-01`, to: `${y}-${mm}-${String(last).padStart(2, '0')}` }
+}
+
+router.get('/ai-usage', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const q = req.query
+    const groupBy = q.groupBy === undefined ? 'business' : q.groupBy
+    if (!AI_GROUP_BY.includes(groupBy)) return res.status(400).json({ error: 'Bad groupBy', code: 'BAD_GROUP_BY' })
+    const month = monthRange(jerusalemDate(Date.now()))
+    const from = q.from === undefined ? month.from : q.from
+    const to = q.to === undefined ? month.to : q.to
+    const spanDays = DAY_RE.test(from) && DAY_RE.test(to) ? (Date.parse(to) - Date.parse(from)) / DAY_MS : NaN
+    if (!Number.isFinite(spanDays) || spanDays < 0 || spanDays > 365) {
+      return res.status(400).json({ error: 'Bad range', code: 'BAD_RANGE' })
+    }
+    const businessId = typeof q.businessId === 'string' && q.businessId ? q.businessId : undefined
+    const { rows, totals } = await aggregateAiUsage(mongoose.connection.db, { from, to, groupBy, businessId })
+    if (q.format === 'csv') {
+      const lines = [AI_CSV_COLUMNS.join(',')]
+      for (const r of rows) lines.push(AI_CSV_COLUMNS.map(c => csvCell(r[c])).join(','))
+      res.set('Content-Type', 'text/csv; charset=utf-8')
+      res.set('Content-Disposition', `attachment; filename="ai-usage-${from}-${to}.csv"`)
+      return res.send(lines.join('\n') + '\n')
+    }
+    res.json({ from, to, groupBy, pricesAsOf: PRICES_AS_OF, rows, totals })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.ai_usage.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

@@ -44,6 +44,8 @@ const COLLECTIONS = [
   // the shared '__global__' pseudo-user doc (own routes, see generic.js) is the admin-editable
   // layer every user merges in at runtime, separate from this per-user personal layer.
   { name: 'DICTIONARY_OVERRIDES',     userData: true,  cloneable: false, backup: true,  searchable: false },
+  // server-only AI ledger (plan 566, C-AIUSAGE)
+  { name: 'aiUsage',                  userData: false, cloneable: false, backup: false, searchable: false, softDelete: false },
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

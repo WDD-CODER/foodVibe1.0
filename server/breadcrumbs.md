@@ -11,6 +11,9 @@
 | `routes/auth.js` | Login, signup, refresh, logout at `/api/v1/auth` — JWT + rate limiting |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text |
 | `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token |
+| `services/ai-usage.js` | The AI ledger (plan 566): `recordAiUsage` (one `aiUsage` row per Gemini call, fire-and-forget), `estimateCostUsd`, `aggregateAiUsage` |
+| `constants/ai-features.js` | `AI_FEATURES` closed list of AI feature keys, `isAiFeature` (plan 566) |
+| `constants/ai-prices.js` | `AI_PRICES` USD per 1M tokens per model, `PRICES_AS_OF`, `PRICES_SOURCE` (plan 566) |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
 
 ## Key Patterns
