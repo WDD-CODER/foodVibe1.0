@@ -38,7 +38,7 @@ default MCP wait, offers only tools that read the local database, and its messag
 - [auto] `node scripts/kit-manifest-check.mjs` exits 0.
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/542-mongodb-local-mcp-starts-from-installed-package.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/542-mongodb-local-mcp-starts-from-installed-package.plan.md` exits 0.
 - [auto] `pnpm run build` exits 0 (the root install with the new dev dependency still builds).
-- [human] After `pnpm install` in the main folder, the Human removes `MCP_TIMEOUT` (setup step 2 below), starts Claude Code from a new terminal window, and `/mcp` shows `mongodb-local` connected within ~10 s; its tool list has no `connect`, `disconnect`, `atlas-local-*`, `search-knowledge` or `list-knowledge-sources`.
+- [human] After the merge and the Planner's A8 steps, the Human opens a NEW terminal window, starts Claude Code in the main folder and runs `/mcp`: `mongodb-local` shows connected within ~10 s, and its tool list has no `connect`, `disconnect`, `atlas-local-*`, `search-knowledge` or `list-knowledge-sources`. (The validation card carries these steps; the Human does not need to remember them.)
 
 ## Execution Mode
 - Parallel: yes, after 529 (merged). No open plan shares these files (overlap search 2026-11-10).
@@ -117,6 +117,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] A5: Prove it starts fast, offers only local read tools, and never uses npx — source test plus initialize/tools-list start test — scripts/test/mcp-mongo-local.test.mjs
 - [ ] A6: Record the two traps so the next setup does not repeat them — one gotcha entry — docs/brain/gotchas/agent-workflow.md
 - [ ] A7: Run every auto check and paste the outputs, and list the three Human setup steps in the hand-off — this plan file (Execution Notes)
+- [ ] A8: After the merge, install the new package in the main folder and remove the timeout workaround — Planner only, not the builder: the two steps under After merge, then the [human] card — main folder, user environment
 
 ## UI/UX Notes
 - No app UI. No dictionary keys.
@@ -132,10 +133,10 @@ line or file this plan names was removed, renamed or rewritten).
 ## Out of Scope
 - A version bump of `mongodb-mcp-server`. Editing ADR 0028 (its decision stands: pinned 3.2.2, read-only, local-only; this plan changes how the pinned package is started, not the decision). Plan 529's own file (closed as is). Cursor's `.cursor/mcp.json`. Render MCP.
 
-## Human setup (after merge — never done by an agent)
-1. In the main folder: `pnpm install`.
-2. Remove the workaround: `[Environment]::SetEnvironmentVariable("MCP_TIMEOUT", $null, "User")`.
-3. Open a NEW terminal window, start Claude Code in the main folder, run `/mcp`.
+## After merge (the Planner does it — the Human only opens a new terminal window)
+1. The Planner, in the main folder on `main`: `pnpm install` (installs the new dev dependency).
+2. The Planner clears the workaround variable: `[Environment]::SetEnvironmentVariable("MCP_TIMEOUT", $null, "User")`.
+3. The Planner hands over the `[human]` card above, whose first line tells the Human to open a NEW terminal window.
 
 ## Critical Questions
 - none
