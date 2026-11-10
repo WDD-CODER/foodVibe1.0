@@ -79,6 +79,8 @@ src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts
 docs/brain/invariants.md
 docs/agent/standards-backend.md
+src/app/core/services/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
 ```
 
 ## Read Scope
