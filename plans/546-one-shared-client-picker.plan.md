@@ -44,6 +44,9 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
+src/app/core/services/breadcrumbs.md
 event-stage-bar.component.spec.ts
 e2e/helpers/qa-session.ts
 src/app/shared/client-picker/**
