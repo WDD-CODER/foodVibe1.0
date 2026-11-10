@@ -15,7 +15,7 @@ Verified on `origin/main` (4ba8887c, 2026-11-10):
 - `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html`: the bar's numbers are six `<span class="fin-value" dir="ltr">` elements inside `.meter-numbers` (food cost, revenue, profit per guest, profit %, the "—" fallback has no `dir`, minimum price); the phone sheet's summary has `<span class="summary-price" dir="ltr">` and `<span class="summary-pct" dir="ltr">`. The profit % value is `<span class="fin-value" dir="ltr">{{ profitPct_() }}</span>` right after the label `'profit_pct' | translatePipe`.
 - The verdict already exists in the component: `hasProfitPct_()` and `result_().meetsTarget` (`src/app/core/engine/event-pricing.ts:89` `meetsTarget = profitPct !== null && profitPct >= target`).
 - `pricing-meter.component.scss` `.fin-value` sets colour, size and weight only; no tabular digits.
-- `pricing-meter.component.spec.ts` has the cases `'green verdict when the price meets the target'` (line 71) and `'red verdict with the shortfall per guest when the price is too low'` (line 78), built with the file's `create(ev, plan)` helper.
+- `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts` has the cases `'green verdict when the price meets the target'` (line 71) and `'red verdict with the shortfall per guest when the price is too low'` (line 78), built with the file's `create(ev, plan)` helper.
 - `src/app/pages/dashboard/components/business-performance/business-performance.component.scss:101` already sets `font-variant-numeric: tabular-nums` on `.perf-card__value`; the dashboard needs no change.
 - The staff view renders nothing of the meter (`@if (!isMoneyHidden_())`, plan 487); this plan changes nothing about who sees money.
 
@@ -23,7 +23,7 @@ Verified on `origin/main` (4ba8887c, 2026-11-10):
 **Primary:** on the event screen, the profit % carries the amber line exactly when the price meets the target, and
 every number of the price bar keeps its width while digits change.
 
-- [auto] `pnpm run test:ci` passes, including three new cases in `pricing-meter.component.spec.ts`: (1) when the price meets the target, the profit % `.fin-value` has the class `c-pass-line`; (2) when the price is too low, no element in the component has the class `c-pass-line`; (3) every `.fin-value` that has `dir="ltr"` has the class `c-num`.
+- [auto] `pnpm run test:ci` passes, including three new cases in `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts`: (1) when the price meets the target, the profit % `.fin-value` has the class `c-pass-line`; (2) when the price is too low, no element in the component has the class `c-pass-line`; (3) every `.fin-value` that has `dir="ltr"` has the class `c-num`.
 - [auto] `pnpm run build` passes.
 - [auto] `pnpm run lint` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
@@ -81,7 +81,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] `pricing-meter.component.html`: add the class `c-num` to every `<span class="fin-value" dir="ltr">` in `.meter-numbers` (food cost, revenue, profit per guest, profit %, minimum price) and to `.summary-price` and `.summary-pct`. Write it as a second class in the `class` attribute (`class="fin-value c-num"`); the existing `[class.fin-value--bad]` binding stays.
 - [ ] `pricing-meter.component.html`: on the profit % value (`{{ profitPct_() }}` under the `profit_pct` label) and on `.summary-pct`, add `[class.c-pass-line]="hasProfitPct_() && result_().meetsTarget"`.
 - [ ] No change to the `.ts` or `.scss` file: both classes are global engines from `src/styles.scss`.
-- [ ] `pricing-meter.component.spec.ts`: add the three cases named in the Done-when list, using the same event and plan values the cases at lines 71 and 78 use. Find the profit % value as the `.fin-value` inside the `.fin-metric` whose `.fin-label` holds the `profit_pct` text (or the key itself when the spec stubs translation).
+- [ ] `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts`: add the three cases named in the Done-when list, using the same event and plan values the cases at lines 71 and 78 use. Find the profit % value as the `.fin-value` inside the `.fin-metric` whose `.fin-label` holds the `profit_pct` text (or the key itself when the spec stubs translation).
 
 ### Should Have (P1)
 - none
