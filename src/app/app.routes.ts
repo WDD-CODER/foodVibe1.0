@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router'
+import { welcomeGuard } from './core/guards/welcome.guard'
+import { homeRedirect } from './pages/welcome/home-redirect'
 import { productResolver } from './core/resolvers/product.resolver'
 import { recipeResolver } from './core/resolvers/recipe.resolver'
 import { equipmentResolver } from './core/resolvers/equipment.resolver'
@@ -240,8 +242,9 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/platform-dashboard/platform-dashboard.page').then(m => m.PlatformDashboardPage),
     canActivate: [authGuard, platformAdminGuard],
   },
+  { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
   // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.
   ...devCatalogRoutes(environment.localDev),
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: homeRedirect, pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ]

@@ -4,6 +4,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 
 | Entry | Purpose |
 | --- | --- |
+| `welcome/` | `/welcome` — the signed-out front door: the mark, the promise, sign-up and sign-in; `/` leads here for a first-time visitor (home-redirect.ts) |
 | `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
@@ -21,7 +22,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |
 
 ## Key exports
-`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`, `PlatformDashboardPage`, `SettingsPage`
+`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`, `PlatformDashboardPage`, `SettingsPage`, `WelcomePage`
 
 ---
 *Updated by: breadcrumbs*

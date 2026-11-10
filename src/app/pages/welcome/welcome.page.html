@@ -1,0 +1,33 @@
+<main class="welcome" dir="rtl">
+  <div class="welcome__brand">
+    <img src="/assets/style/img/fc-mark.svg" alt="" width="56" height="56" />
+    <span class="welcome__name">foodCo</span>
+  </div>
+
+  <h1 class="welcome__promise">
+    <span class="c-pass-line">{{ 'welcome_promise' | translatePipe }}</span>
+  </h1>
+
+  <p class="welcome__sub">{{ 'welcome_sub' | translatePipe }}</p>
+
+  <div class="welcome__actions">
+    <button type="button" class="c-btn-primary" data-testid="welcome-sign-up" (click)="signUp()">
+      {{ 'welcome_start' | translatePipe }}
+    </button>
+    <button type="button" class="c-btn-ghost" data-testid="welcome-sign-in" (click)="signIn()">
+      {{ 'sign_in' | translatePipe }}
+    </button>
+  </div>
+
+  <ul class="welcome__rooms">
+    @for (room of rooms; track room.icon) {
+    <li class="c-glass-panel welcome-room" data-testid="welcome-room">
+      <lucide-icon [name]="room.icon" [size]="22" />
+      <h2>{{ room.titleKey | translatePipe }}</h2>
+      <p>{{ room.textKey | translatePipe }}</p>
+    </li>
+    }
+  </ul>
+
+  <p class="welcome__for">{{ 'welcome_for' | translatePipe }}</p>
+</main>
