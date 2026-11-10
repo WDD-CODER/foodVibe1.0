@@ -1,0 +1,442 @@
+{
+  "run": "pass-theme",
+  "branch": "orch/pass-theme",
+  "base": "main",
+  "startedAt": "2026-11-10T22:10:16.008Z",
+  "mainShaAtStart": "4ba88875a7e4ca6e2d63e496b663fa86fbf7fb4e",
+  "plans": {
+    "571": {
+      "nnn": "571",
+      "title": "One product name, foodCo, and its own app icon instead of the Angular logo",
+      "branch": "feat/571-one-product-name-foodco",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T22:10:24.704Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T22:13:59.618Z"
+        }
+      },
+      "humanItems": [
+        "On a phone, \"Add to Home Screen\" shows the teal pot icon with the name foodCo, and the icon is not cut at the corners.",
+        "The browser tab shows the pot icon and the title foodCo."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T22:10:24.649Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:10:24.705Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:12:47.328Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:13:58.712Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:13:59.619Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:14:05.901Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:14:33.225Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 29.8,
+      "sha": "a851fa50155fe5c1bb0b1cecb6187c98c8386ee5",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 142.2,
+          "tokens": {
+            "input": 157905,
+            "output": 5744
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6.1,
+          "tokens": {
+            "input": 58344,
+            "output": 291
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "821a8fc346fbe983186fcd03f5e3c53521913925"
+    },
+    "572": {
+      "nnn": "572",
+      "title": "The Pass theme tokens: brand teal, lamp amber, paper colours and a guest typeface",
+      "branch": "feat/572-the-pass-theme-tokens",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T22:14:42.621Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T22:18:18.102Z"
+        }
+      },
+      "humanItems": [
+        "The main buttons, active tabs and links are the same deep teal as the logo, and nothing became hard to read on the light screens.",
+        "On the event menu screen the menu title and the section titles are in the serif typeface and every other control still reads well; the paper colours look the same as before.",
+        "Cook View in its dark mode looks the same as before."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T22:14:42.567Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:14:42.621Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:17:09.345Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:18:17.277Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:18:18.102Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:18:27.187Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:18:43.400Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 29.1,
+      "sha": "302d7a9e4de205b473efbb1c302177dae92f99d2",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 146.2,
+          "tokens": {
+            "input": 217012,
+            "output": 6110
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9,
+          "tokens": {
+            "input": 31377,
+            "output": 662
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "f766940ba58a16fc175021cdf8e620b5d71e8bd7"
+    },
+    "573": {
+      "nnn": "573",
+      "title": "Light the lamp on the price bar when an event meets its profit target, and line up its numbers",
+      "branch": "feat/573-light-the-lamp-on",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T22:18:52.390Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T22:22:20.056Z"
+        }
+      },
+      "humanItems": [
+        "On an event whose price meets the target, the profit % in the price bar has a clear amber line under it; lowering the price below the target removes the line at once.",
+        "Typing a price does not make the numbers in the bar jump sideways."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T22:18:52.337Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:18:52.390Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:21:08.760Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:22:19.182Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:22:20.056Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:22:26.079Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:22:42.064Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 28.4,
+      "sha": "de33677142251b010febe6a193f81f78bbb20658",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 135.8,
+          "tokens": {
+            "input": 148452,
+            "output": 3869
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.9,
+          "tokens": {
+            "input": 22443,
+            "output": 303
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "beb654b1e6d756dce7322e8e45840069ac90b274"
+    },
+    "574": {
+      "nnn": "574",
+      "title": "A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard",
+      "branch": "feat/574-a-welcome-screen-for",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T22:22:50.959Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T22:27:09.266Z"
+        }
+      },
+      "humanItems": [
+        "In a private browser window on the live address (or a build with `autoLoginGuest: false`), opening `/` shows the welcome screen; it reads well on a phone and on a laptop, and the amber line sits under the promise.",
+        "From the welcome screen, signing in lands on the dashboard. After that, opening `/` in a new tab goes to the dashboard without showing the welcome screen. After \"התנתקות\", opening `/` shows the welcome screen again."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T22:22:50.907Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:22:50.959Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:25:54.192Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:27:08.405Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:27:09.266Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:27:16.620Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T22:27:35.433Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 27.6,
+      "sha": "d2da0788190bb32becc431fa9cfa7b8b7c775bdf",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 182.7,
+          "tokens": {
+            "input": 536010,
+            "output": 12265
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.2,
+          "tokens": {
+            "input": 38976,
+            "output": 483
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c825245d4bba67f1d2ce19b838fcee14cff4854c"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-10T22:10:24.591Z",
+      "plan": "571",
+      "text": "the folder foodVibe1.0-orch-pass-theme-571 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T22:14:10.078Z",
+      "plan": "571",
+      "text": "the folder foodVibe1.0-orch-merge-pass-theme was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T22:14:42.514Z",
+      "plan": "572",
+      "text": "the folder foodVibe1.0-orch-pass-theme-572 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T22:18:52.285Z",
+      "plan": "573",
+      "text": "the folder foodVibe1.0-orch-pass-theme-573 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T22:22:50.850Z",
+      "plan": "574",
+      "text": "the folder foodVibe1.0-orch-pass-theme-574 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 27.6,
+  "updatedAt": "2026-11-10T22:29:18.217Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "571",
+      "type": "behaviour",
+      "text": "behaviour: make-icons.mjs reads an optional BRAND_ICONS_CHROMIUM env var for the Chromium path. The sandbox's installed Chromium did not match Playwright's expected build, so I added it to generate the icons; it is unused when unset — reverse: remove the executablePath option from the chromium.launch call",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "573",
+      "type": "behaviour",
+      "text": "behaviour: the \"—\" fallback span has no dir=\"ltr\", so it did not get c-num (the plan lists only the dir=\"ltr\" values) — reverse: add c-num to it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "573",
+      "type": "seen",
+      "text": "seen: the commit hook ran lint-staged and the plan-ledger check, which reported 21 advisory duplicate plan numbers (scripts/plan-ledger-check.mjs output); no action taken",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-10T22:29:18.217Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-10T22:29:18.217Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
