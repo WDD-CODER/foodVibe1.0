@@ -345,3 +345,9 @@
 - [ ] A2: Mark the map as approved in its title line — docs/frontdesk/frontdesk-map.md
 - [ ] A3: List the contract additions the plans made, so the next planning round reads them — the 11 lines above — docs/frontdesk/frontdesk-map.md
 - [ ] A4: Point the brain index at the map and run the ledger and breadcrumbs checks — docs/brain/index.md
+
+### Plan 570 — Keep the logistics panel's buttons out from under the price bar on wide screens (`plans/570-logistics-panel-not-hidden-under-the-price-bar.plan.md`)
+- [ ] A1: Leave room for the price bar on every wide screen, not only up to 1030 px — widen the plan 494 media query — src/app/pages/menu-intelligence/menu-intelligence.page.scss
+- [ ] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
+- [ ] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
+- [ ] A4: Run the ten screen checks against the slot's app, then build, lint and log-query
