@@ -13,9 +13,9 @@ test('545-1: adding a client with an existing phone selects the existing client 
   const id = (await created.json())._id as string
   try {
     await page.goto('/menu-library')
-    await page.getByRole('button', { name: 'פנייה חדשה' }).click()
+    await page.locator('.header-inquiry-btn').click()
     await page.locator('#inquiry-client').fill('E2E חדש')
-    await page.getByText('לקוח חדש').first().click()
+    await page.getByRole('option', { name: /^הוסף/ }).click()
     await page.locator('#inquiry-name').fill('E2E חדש ' + Date.now())
     await page.locator('#inquiry-phone').fill(phone)
     await page.getByRole('button', { name: 'שמור', exact: true }).click()
