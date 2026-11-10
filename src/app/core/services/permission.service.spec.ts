@@ -83,6 +83,11 @@ describe('PermissionService.can', () => {
       expect(service.can('editFrontDesk', { type: 'frontDeskProfiles' })).toBeTrue()
     })
 
+    it('may manage requests and bookings, own or not (plan 549)', () => {
+      expect(service.can('manageRequests', { type: 'requests' })).toBeTrue()
+      expect(service.can('manageRequests', { type: 'bookings', doc: { createdBy: 'o1' } })).toBeTrue()
+    })
+
     it('changes the stage only of his own events, but notes and arrivals on any event', () => {
       expect(service.can('changeStage', { type: 'menuEvents', doc: { createdBy: 's1' } })).toBeTrue()
       expect(service.can('changeStage', { type: 'menuEvents', doc: { createdBy: 'o1' } })).toBeFalse()

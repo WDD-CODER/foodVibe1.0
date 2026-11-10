@@ -58,6 +58,17 @@ describe('can', () => {
   })
 })
 
+describe('plan 549: manageRequests', () => {
+  it('any member of the business may, with or without a doc; another business and no role may not', () => {
+    for (const u of [OWNER, STAFF]) {
+      expect(can(u, 'manageRequests', { type: 'requests' })).toEqual({ ok: true })
+      expect(can(u, 'manageRequests', { type: 'bookings', doc: { businessId: 'b1', createdBy: 'someone-else' } })).toEqual({ ok: true })
+    }
+    expect(can(STAFF, 'manageRequests', { type: 'requests', doc: { businessId: 'b2' } })).toEqual({ ok: false, reason: 'OTHER_BUSINESS' })
+    expect(can({ userId: 'x', businessId: 'b1' }, 'manageRequests', { type: 'requests' })).toEqual({ ok: false, reason: 'NO_ROLE' })
+  })
+})
+
 describe('plan 548: front desk profiles', () => {
   it('editFrontDesk is owner-only', () => {
     expect(can(OWNER, 'editFrontDesk', { type: 'frontDeskProfiles', doc: own })).toEqual({ ok: true })

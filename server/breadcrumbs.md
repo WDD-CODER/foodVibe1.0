@@ -9,6 +9,8 @@
 | `routes/generic.js` | Full CRUD at `/api/v1/data/:type` — mirrors Angular's `StorageService` |
 | `routes/business.js` | The caller's business at `/api/v1/business` (plan 425; owner-only sub-routes arrive with plans 427-431) |
 | `routes/auth.js` | Login, signup, refresh, logout at `/api/v1/auth` — JWT + rate limiting |
+| `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests` |
+| `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text |
 | `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token |
 | `services/ai-usage.js` | The AI ledger (plan 566): `recordAiUsage` (one `aiUsage` row per Gemini call, fire-and-forget), `estimateCostUsd`, `aggregateAiUsage` |

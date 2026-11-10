@@ -13,7 +13,8 @@ const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-sta
 const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
 const { PROFILE_SERVER_FIELDS } = require('../generated/schemas/entities/front-desk-profile.schema');
 const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
-const { SOFT_DELETE_TYPES } = require('../constants/collections');
+const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
+const { expireDue } = require('../utils/request-expiry');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
@@ -40,6 +41,23 @@ router.use('/:type', (req, res, next) => {
   }
   next();
 });
+
+// Plan 549: requests and bookings are read here, written only by their own routers (server/routes/requests.js, bookings.js).
+const ROUTER_WRITES = new Set(ROUTER_WRITE_TYPES);
+router.param('type', (req, res, next, type) => {
+  if (req.method !== 'GET' && ROUTER_WRITES.has(type)) return res.status(405).json({ error: 'USE_ROUTER' });
+  next();
+});
+
+/** Plan 549: a read of requests first expires the business's stale ones (lazy, no timer). */
+async function expireRequestsOnRead(req, res, next) {
+  try {
+    if (req.params.type === 'requests' && req.user?.businessId) await expireDue(mongoose.connection.db, req.user.businessId, Date.now());
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
 
 /**
  * Returns the native MongoDB collection for the given entity type.
@@ -242,7 +260,7 @@ async function masterHasTerm(kind, key) {
 // Anonymous (no token) → returns __master__ documents (shared/public data).
 // Optional ?filterEntityType=&filterEntityId= narrow the find (e.g. VERSION_HISTORY).
 // ---------------------------------------------------------------------------
-router.get('/:type', optionalToken, async (req, res) => {
+router.get('/:type', optionalToken, expireRequestsOnRead, async (req, res) => {
   // 1c perf instrumentation — a `debug` event (LOG_LEVEL=debug; the default outside
   // production). JSON.stringify-ing the response purely to measure its size is real CPU on
   // a 0.1-shared-CPU Render instance, so it only runs when debug is enabled.
@@ -505,7 +523,7 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
 // Authenticated → returns one document by _id scoped to the user.
 // Anonymous → returns one document by _id from __master__.
 // ---------------------------------------------------------------------------
-router.get('/:type/:id', optionalToken, async (req, res) => {
+router.get('/:type/:id', optionalToken, expireRequestsOnRead, async (req, res) => {
   try {
     const doc = await col(req.params.type).findOne(await withEventVisibility(req, req.params.type, {
       _id: req.params.id,
