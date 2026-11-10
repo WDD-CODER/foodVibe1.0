@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.0.2"
+    "version": "3.1.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.0.2",
-  "commit": "e1291afd9389bea756e7644b814984a4e04db3dd",
+  "ref": "v3.1.0",
+  "commit": "dab54165a49f85eb8b895e7b438a3fe5f2c3252f",
   "packs": [
     "angular",
     "node-express"
@@ -603,7 +603,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "05b145df4b21045c528e98d95ae067211db607802166b7278769c52e89ba7c35",
+      "sha256": "48649c6b69869626fd5d7eea9b9882721af06e73c08ccd1232ae2cfce1716520",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -913,7 +913,7 @@
       "source": "core/scripts/lib/brain-doc.mjs"
     },
     "scripts/lib/claude-run.mjs": {
-      "sha256": "69b2870d79a20f0fbaf2cfa08e2376099d5c6a7c8133d1f68ca3cab318a401c6",
+      "sha256": "61edc193d733cf9ceccca5153301614a711ce3f6cf46143cf79bf919f46ad8c9",
       "kind": "managed",
       "source": "core/scripts/lib/claude-run.mjs"
     },
@@ -963,7 +963,7 @@
       "source": "core/scripts/lib/plan-deps.mjs"
     },
     "scripts/lib/plan-gate.mjs": {
-      "sha256": "571e798ea15fa36b8fd21e8a76f65893c48f4b0351aaceb5cf011fd36255fb65",
+      "sha256": "5e2960991354ad6989daf89409263412b95714e27609f3422d2718e531920e5a",
       "kind": "managed",
       "source": "core/scripts/lib/plan-gate.mjs"
     },
@@ -1001,6 +1001,11 @@
       "sha256": "ebbde39de060ebf84644a5e0d6a95f27525d6b84774b37f22ecff6778b4dbc4b",
       "kind": "managed",
       "source": "core/scripts/lib/redact.mjs"
+    },
+    "scripts/lib/run-live.mjs": {
+      "sha256": "e006774cd7731cddf2661b221a2acf9f4d67ac1380667053c3a7fd51ecacf700",
+      "kind": "managed",
+      "source": "core/scripts/lib/run-live.mjs"
     },
     "scripts/lib/run-order.mjs": {
       "sha256": "995e06f29f04c13d190f4530d7de51a84b814f04498a85b463c1c0fa3be78018",
@@ -1118,7 +1123,7 @@
       "source": "core/scripts/prune-old-sessions.sh"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "ae0b7c5784dd8a4f84fd562f6dee31e5ede479f3134dd293e5d59b3a7981412e",
+      "sha256": "660dd20430d2d87bcf06c2f17c232b5257915f6261650725761a2a013ccaa158",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },

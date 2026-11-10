@@ -5822,6 +5822,14 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 2.1.0). Classified project/stay here so the kit-owned list stays as is."
     },
     {
+      "path": "scripts/lib/run-live.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.1.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
       "path": "scripts/lib/plan-merge.mjs",
       "tier": "project",
       "action": "stay",
