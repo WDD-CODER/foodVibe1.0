@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing'
+import { HttpErrorResponse } from '@angular/common/http'
 import { TrashService, TRASH_SECTIONS } from './trash.service'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
@@ -15,6 +16,7 @@ import { TranslationService } from './translation.service'
 describe('TrashService (plan 407)', () => {
   let service: TrashService
   let storage: jasmine.SpyObj<StorageService>
+  let userMsg: jasmine.SpyObj<UserMsgService>
   const list = (loaded: boolean) =>
     jasmine.createSpyObj('List', { hasLoaded: loaded, reloadFromStorage: Promise.resolve() })
   const recipes = list(true)
@@ -47,6 +49,7 @@ describe('TrashService (plan 407)', () => {
     recipes.reloadFromStorage.calls.reset()
     dishes.reloadFromStorage.calls.reset()
     clients.reloadFromStorage.calls.reset()
+    userMsg = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     TestBed.configureTestingModule({
       providers: [
         TrashService,
@@ -59,7 +62,7 @@ describe('TrashService (plan 407)', () => {
         { provide: MenuEventDataService, useValue: list(false) },
         { provide: SupplierDataService, useValue: list(false) },
         { provide: ClientDataService, useValue: clients },
-        { provide: UserMsgService, useValue: jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg']) },
+        { provide: UserMsgService, useValue: userMsg },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     })
@@ -80,6 +83,23 @@ describe('TrashService (plan 407)', () => {
     expect(recipes.reloadFromStorage).toHaveBeenCalled()
     await service.restore('dishes', 'd1')
     expect(dishes.reloadFromStorage).not.toHaveBeenCalled()
+  })
+
+  it('a 409 restore shows its messageKey as an error, no success toast, and reloads Trash', async () => {
+    storage.restore.and.rejectWith(
+      new HttpErrorResponse({ status: 409, error: { error: 'PHONE_TAKEN', messageKey: 'client_phone_taken' } })
+    )
+    await service.restore('clients', 'c1')
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledOnceWith('client_phone_taken')
+    expect(userMsg.onSetSuccessMsg).not.toHaveBeenCalled()
+    expect(clients.reloadFromStorage).not.toHaveBeenCalled()
+    expect(storage.trash).toHaveBeenCalled()
+  })
+
+  it('another restore error is thrown as before', async () => {
+    storage.restore.and.rejectWith(new HttpErrorResponse({ status: 500 }))
+    await expectAsync(service.restore('clients', 'c1')).toBeRejected()
+    expect(userMsg.onSetErrorMsg).not.toHaveBeenCalled()
   })
 
   it('dispose, restore-all and empty go to the matching Trash calls', async () => {

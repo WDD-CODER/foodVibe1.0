@@ -115,6 +115,11 @@ async function connectDb() {
 
   // Plan 544: find a client by its phone match key (R-01). Not unique: a trashed or merged client keeps its phone.
   await db.collection('clients').createIndex({ businessId: 1, phoneKey: 1 }, { name: 'client_phone_key' })
+  // Plan 545: one live, unmerged client per phone key per business. Old clients have no liveKey, so this builds on any data.
+  await db.collection('clients').createIndex(
+    { businessId: 1, liveKey: 1 },
+    { unique: true, partialFilterExpression: { liveKey: { $exists: true } }, name: 'client_live_key_unique' }
+  )
   logger.debug({ event: 'mongo.index.ensured', index: 'clients' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).

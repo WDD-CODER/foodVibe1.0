@@ -227,6 +227,7 @@ const SENT_SERVER_VALUES = {
   waId: '972500000000',
   mergedInto: 'other',
   doNotContact: { at: 7, reason: 'x', via: 'member' },
+  liveKey: '999999999',
 };
 
 describe('clients: the server-owned fields are dropped from generic writes', () => {
@@ -242,11 +243,14 @@ describe('clients: the server-owned fields are dropped from generic writes', () 
       const row = await testDb().collection('clients').findOne({ _id: res.body._id });
       expect(row.phoneNormalized).toBe('0501234567');
       expect(row.phoneKey).toBe('501234567');
-      if (field !== 'phoneNormalized' && field !== 'phoneKey') expect(row).not.toHaveProperty(field);
+      if (field === 'firstSeenAt') expect(row.firstSeenAt).not.toBe(value);
+      else if (field === 'counters') expect(row.counters).toEqual({ requests: 0, bookings: 0, events: 0, noShows: 0, conversations: 0 });
+      else if (field === 'liveKey') expect(row.liveKey).toBe('501234567');
+      else if (field !== 'phoneNormalized' && field !== 'phoneKey') expect(row).not.toHaveProperty(field);
     });
 
     it(`PUT with ${field} keeps the stored value`, async () => {
-      const before = await seedClient('c1', { phoneKey: '501234567', kinds: ['diner'], counters: { events: 1 } });
+      const before = await seedClient('c1', { phoneKey: '501234567', liveKey: '501234567', kinds: ['diner'], counters: { events: 1 } });
       const res = await request(app).put('/api/v1/data/clients/c1').set(as(OWNER)).send({ notes: 'חדש', [field]: value });
       expect(res.status).toBe(200);
       const row = await testDb().collection('clients').findOne({ _id: 'c1' });
@@ -271,7 +275,7 @@ describe('clients: a delete goes to Trash', () => {
 
     const restored = await request(app).put('/api/v1/data/clients/c1/restore').set(as(OWNER));
     expect(restored.status).toBe(200);
-    expect(await testDb().collection('clients').findOne({ _id: 'c1' })).toEqual(before);
+    expect(await testDb().collection('clients').findOne({ _id: 'c1' })).toEqual({ ...before, liveKey: '501234567' });
     expect((await request(app).get('/api/v1/data/clients').set(as(OWNER))).body.map(d => d._id)).toEqual(['c1']);
   });
 
@@ -295,5 +299,115 @@ describe('menuEvents: clientId', () => {
     });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ clientId: 'c1', clientName: 'דנה כהן', clientPhone: '050-123 4567' });
+  });
+});
+
+// Plan 545: one find-or-create by phone on the owner POST; PUT and restore refuse a second live client for a phone.
+const clientsCol = () => testDb().collection('clients');
+const PHONE_TAKEN_BODY = { error: 'PHONE_TAKEN', messageKey: 'client_phone_taken' };
+const phoneBody = (phone, overrides = {}) => ({ name: 'דנה כהן', phone, ...overrides });
+const postClient = (body, user = OWNER) => request(app).post('/api/v1/data/clients').set(as(user)).send(body);
+
+describe('clients: one client per phone (plan 545)', () => {
+  it('POST a new phone -> 201 with server defaults; the same phone in another format -> 200 with the same client', async () => {
+    const first = await postClient(phoneBody('052-123 4567', { notes: 'x' }));
+    expect(first.status).toBe(201);
+    expect(first.body).toMatchObject({ phoneKey: '521234567', liveKey: '521234567', source: 'manual', notes: 'x', counters: { events: 0 } });
+    const again = await postClient(phoneBody('+972 52 123 4567', { name: 'שם אחר' }));
+    expect(again.status).toBe(200);
+    expect(again.body._id).toBe(first.body._id);
+    expect(again.body.name).toBe('דנה כהן');
+    expect(await clientsCol().countDocuments()).toBe(1);
+  });
+
+  it('POST finds an old client that has no liveKey yet (by phoneKey)', async () => {
+    await seedClient('c1', { phoneKey: '501234567' });
+    const res = await postClient(phoneBody('0501234567'));
+    expect(res.status).toBe(200);
+    expect(res.body._id).toBe('c1');
+    expect(await clientsCol().countDocuments()).toBe(1);
+  });
+
+  it('a client in another business with the same phone is not matched', async () => {
+    await postClient(phoneBody('0521234567'));
+    const other = await postClient(phoneBody('0521234567'), { userId: 'userB', role: 'user' });
+    expect(other.status).toBe(201);
+  });
+
+  it('a trashed client is not revived; its restore then answers 409 PHONE_TAKEN and it stays in Trash', async () => {
+    const old = await postClient(phoneBody('0521234567'));
+    expect((await request(app).delete(`/api/v1/data/clients/${old.body._id}`).set(as(OWNER))).status).toBe(200);
+    expect(await clientsCol().findOne({ _id: old.body._id })).not.toHaveProperty('liveKey');
+    const fresh = await postClient(phoneBody('+972 52 123 4567'));
+    expect(fresh.status).toBe(201);
+    expect(fresh.body._id).not.toBe(old.body._id);
+    const restore = await request(app).put(`/api/v1/data/clients/${old.body._id}/restore`).set(as(OWNER));
+    expect(restore.status).toBe(409);
+    expect(restore.body).toEqual(PHONE_TAKEN_BODY);
+    expect((await clientsCol().findOne({ _id: old.body._id })).deletedAt).toEqual(expect.any(Number));
+  });
+
+  it('restore-all skips a client whose phone is taken and restores the others', async () => {
+    const a = await postClient(phoneBody('0521234567'));
+    const b = await postClient(phoneBody('0547770000'));
+    for (const c of [a, b]) await request(app).delete(`/api/v1/data/clients/${c.body._id}`).set(as(OWNER));
+    await postClient(phoneBody('0521234567'));
+    const res = await request(app).put('/api/v1/data/clients/trash/restore-all').set(as(OWNER));
+    expect(res.status).toBe(200);
+    expect(res.body.restored).toBe(1);
+    expect(res.body.skipped.map(s => s._id)).toEqual([a.body._id]);
+  });
+
+  it('PUT that changes the phone to another live client phone -> 409 PHONE_TAKEN and nothing changes', async () => {
+    await postClient(phoneBody('0521234567'));
+    const other = await postClient(phoneBody('0547770000', { name: 'אבי' }));
+    const before = await clientsCol().findOne({ _id: other.body._id });
+    const res = await request(app).put(`/api/v1/data/clients/${other.body._id}`).set(as(OWNER)).send(phoneBody('+972 52 123 4567', { name: 'אבי' }));
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual(PHONE_TAKEN_BODY);
+    expect(await clientsCol().findOne({ _id: other.body._id })).toEqual(before);
+  });
+
+  it('PUT to a free phone moves the live key; PUT that keeps the phone fills a missing liveKey', async () => {
+    const made = await postClient(phoneBody('0521234567'));
+    const moved = await request(app).put(`/api/v1/data/clients/${made.body._id}`).set(as(OWNER)).send(phoneBody('0547770000'));
+    expect(moved.status).toBe(200);
+    expect(moved.body).toMatchObject({ phoneKey: '547770000', liveKey: '547770000' });
+    await seedClient('old', { phone: '050-999 8888', phoneKey: '509998888' });
+    const saved = await request(app).put('/api/v1/data/clients/old').set(as(OWNER)).send({ name: 'חדש', phone: '050-999 8888' });
+    expect(saved.status).toBe(200);
+    expect(saved.body.liveKey).toBe('509998888');
+  });
+});
+
+describe('clients: events counter (plan 545)', () => {
+  const eventBody = (clientId) => ({
+    name: 'חתונה', eventType: 'wedding', servingType: 'buffet', guestCount: 100, sections: [],
+    financialTargets: { targetFoodCostPct: 30 }, performanceTags: { foodCostPct: 0, primaryServingStyle: 'buffet' },
+    clientId,
+  });
+  const state = async (id) => {
+    const c = await clientsCol().findOne({ _id: id });
+    const live = await testDb().collection('menuEvents').countDocuments({ clientId: id, deletedAt: { $exists: false } });
+    return { events: c.counters.events, live, kind: (c.kinds ?? []).includes('event_client') };
+  };
+
+  it('stays equal to the live events through post, move, delete and restore', async () => {
+    const c1 = (await postClient(phoneBody('0521234567'))).body._id;
+    const c2 = (await postClient(phoneBody('0547770000'))).body._id;
+    const ev = await request(app).post('/api/v1/data/menuEvents').set(as(OWNER)).send(eventBody(c1));
+    expect(ev.status).toBe(201);
+    expect(await state(c1)).toEqual({ events: 1, live: 1, kind: true });
+
+    const moved = await request(app).put(`/api/v1/data/menuEvents/${ev.body._id}`).set(as(OWNER)).send(eventBody(c2));
+    expect(moved.status).toBe(200);
+    expect(await state(c1)).toEqual({ events: 0, live: 0, kind: false });
+    expect(await state(c2)).toEqual({ events: 1, live: 1, kind: true });
+
+    expect((await request(app).delete(`/api/v1/data/menuEvents/${ev.body._id}`).set(as(OWNER))).status).toBe(200);
+    expect(await state(c2)).toEqual({ events: 0, live: 0, kind: false });
+
+    expect((await request(app).put(`/api/v1/data/menuEvents/${ev.body._id}/restore`).set(as(OWNER))).status).toBe(200);
+    expect(await state(c2)).toEqual({ events: 1, live: 1, kind: true });
   });
 });
