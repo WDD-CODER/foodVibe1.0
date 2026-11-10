@@ -1,6 +1,6 @@
 # Plan 529 — A read-only MongoDB MCP server, local database only, for ad-hoc inspection
 
-Status: draft
+Status: done
 Depends-on: 528
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 

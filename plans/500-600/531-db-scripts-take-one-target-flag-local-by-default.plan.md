@@ -1,6 +1,6 @@
 # Plan 531 — Every DB script takes one `--target=local|atlas` flag, local by default (2 of 2: the scripts)
 
-Status: draft
+Status: done
 Depends-on: 530, 517
 Snapshot: aa120120a5005d07e35cd64bc3284f9e40daf446
 
