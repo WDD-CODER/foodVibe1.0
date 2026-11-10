@@ -1,0 +1,155 @@
+<section class="manager-card c-glass-panel">
+  <div class="card-title">
+    <lucide-icon name="list-checks" class="icon-primary"></lucide-icon>
+    <h2>{{ 'metadata_logistics_title' | translatePipe }}</h2>
+  </div>
+  <p class="card-desc">{{ 'metadata_logistics_desc' | translatePipe }}</p>
+
+  <div class="c-chip-group logistics-tabs" role="tablist">
+    @for (p of phases; track p) {
+      <button
+        type="button"
+        role="tab"
+        class="c-chip c-chip--tab"
+        [class.active]="phase() === p"
+        [attr.aria-selected]="phase() === p"
+        (click)="selectPhase(p)"
+      >
+        {{ phaseTabKey[p] | translatePipe }}
+      </button>
+    }
+  </div>
+
+  <div class="logistics-sections">
+    @for (group of sections(); track group.section) {
+      <div class="logistics-section" [attr.data-section]="group.section">
+        <h3 class="list-title">{{ group.labelKey | translatePipe }}</h3>
+        @if (group.rows.length > 0) {
+          <ul class="logistics-items">
+            @for (row of group.rows; track row.term._id) {
+              <li class="logistics-item" [attr.data-shared]="row.shared">
+                @if (row.shared) {
+                  <span class="c-chip c-chip--tag" [attr.title]="'taxonomy_shared_admin_only' | translatePipe">
+                    {{ row.term.key | translatePipe }}
+                    <lucide-icon
+                      name="lock"
+                      [size]="14"
+                      [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+                    ></lucide-icon>
+                  </span>
+                } @else {
+                  <span class="c-chip c-chip--removable">
+                    {{ row.term.key | translatePipe }}
+                    <button
+                      type="button"
+                      class="c-chip__remove"
+                      [attr.aria-label]="'delete' | translatePipe"
+                      [attr.title]="'delete' | translatePipe"
+                      (click)="onRemove(row.term)"
+                    >
+                      <lucide-icon name="x" [size]="12"></lucide-icon>
+                    </button>
+                  </span>
+                }
+                <span class="logistics-item-meta">
+                  {{ row.typeKey | translatePipe }}
+                  @for (env of row.environmentKeys; track env) {
+                    · {{ env | translatePipe }}
+                  }
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="logistics-empty">{{ 'metadata_no_logistics_items' | translatePipe }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  @if (isLoggedIn()) {
+    <div class="logistics-add">
+      <app-form-field
+        class="logistics-add-text"
+        label="metadata_logistics_question"
+        forId="logistics-item-text"
+        [error]="error()"
+      >
+        <input
+          id="logistics-item-text"
+          type="text"
+          class="c-input"
+          autocomplete="off"
+          required
+          [maxlength]="textMax"
+          [class.c-input--invalid]="error()"
+          [attr.aria-invalid]="error() ? 'true' : null"
+          [placeholder]="'metadata_logistics_placeholder' | translatePipe"
+          [ngModel]="draft().text"
+          (ngModelChange)="setText($event)"
+          (keyup.enter)="onAdd()"
+        />
+      </app-form-field>
+
+      <div class="logistics-add-selects">
+        <app-form-field label="metadata_logistics_phase">
+          <app-custom-select
+            class="logistics-add-phase"
+            [options]="phaseOptions"
+            [ngModel]="draft().phase"
+            (ngModelChange)="setPhase($event)"
+          />
+        </app-form-field>
+        <app-form-field label="metadata_logistics_section">
+          <app-custom-select
+            class="logistics-add-section"
+            [options]="sectionOptions"
+            [ngModel]="draft().section"
+            (ngModelChange)="setSection($event)"
+          />
+        </app-form-field>
+        <app-form-field label="metadata_logistics_type">
+          <app-custom-select
+            class="logistics-add-type"
+            [options]="typeOptions"
+            [ngModel]="draft().answerType"
+            (ngModelChange)="setAnswerType($event)"
+          />
+        </app-form-field>
+      </div>
+
+      <div class="logistics-add-envs">
+        <span class="logistics-add-label">{{ 'metadata_logistics_environments' | translatePipe }}</span>
+        <div class="c-chip-group">
+          @for (env of environments; track env) {
+            <label class="c-chip c-chip--toggle" [attr.data-env]="env">
+              <input
+                type="checkbox"
+                [checked]="draft().environments.includes(env)"
+                (change)="toggleEnvironment(env, $any($event.target).checked)"
+              />
+              <span>{{ env | translatePipe }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      @if (isAdmin()) {
+        <div class="c-chip-group logistics-add-shared">
+          <label class="c-chip c-chip--toggle">
+            <input type="checkbox" [checked]="draft().shared" (change)="setShared($any($event.target).checked)" />
+            <span>{{ 'metadata_logistics_shared' | translatePipe }}</span>
+          </label>
+        </div>
+      }
+
+      <button type="button" class="c-btn-primary logistics-add-submit" [disabled]="saving()" (click)="onAdd()">
+        {{ 'metadata_add' | translatePipe }}
+      </button>
+    </div>
+  } @else {
+    <button type="button" class="c-btn-primary logistics-sign-in" (click)="requireSignIn()">
+      {{ 'sign_in_to_use' | translatePipe }}
+    </button>
+  }
+</section>
