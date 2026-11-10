@@ -47,8 +47,10 @@ Teal (herb) + amber (pass lamp) + sky (steel reflection). Do not remove or simpl
 
 | Token | Value | Why |
 |---|---|---|
-| `--color-primary` | `#14b8a6` | Herb green / patinated copper |
-| `--color-primary-hover` | `#0d9488` | Deeper copper when active |
+| `--color-primary` | `#0f766e` | Patina teal — the logo's colour |
+| `--color-primary-hover` | `#115e59` | Deeper teal when active |
+| `--color-lamp` | `#f59e0b` | The pass lamp: only on what is ready to go out |
+| `--font-guest` | `'Frank Ruhl Libre', 'Heebo', serif` | Guest-facing paper titles only |
 | `--color-primary-soft` | `rgba(20,184,166,0.12)` | Tinted surface tint |
 | `--color-primary-glow` | `rgba(20,184,166,0.25)` | Focus glow |
 | `--color-accent-gold` | `#a0833f` | Pass lamp amber / saffron |
@@ -108,6 +110,13 @@ All borders use `rgba` — never solid hex. Solid hex borders are harsh. The rul
 | `--shadow-nav-footer` | Bottom nav top shadow |
 
 ---
+
+## The Pass (plan 572)
+
+1. One lamp: amber (`--color-lamp`, `.c-pass-line`) marks only what is ready to go out.
+2. One mark everywhere: buttons, links and active states are the logo's teal.
+3. Three rooms never mixed: glass = office, dark = kitchen, paper = guest.
+4. Numbers are the hero: use `.c-num` for tabular digits.
 
 ## Depth Strategy
 

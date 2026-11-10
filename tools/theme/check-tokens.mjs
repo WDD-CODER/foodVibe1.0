@@ -1,0 +1,22 @@
+// Plan 572: fails when a Pass theme token is lost or a typed colour returns to the paper files.
+import { readFileSync } from 'node:fs';
+const read = (p) => readFileSync(p, 'utf8');
+const fails = [];
+const styles = read('src/styles.scss');
+const must = [
+  '--color-primary: #0f766e;', '--color-primary-hover: #115e59;', '--color-lamp: #f59e0b;',
+  '--color-lamp: #fbbf24;', "--font-guest: 'Frank Ruhl Libre', 'Heebo', serif;", '--paper-sheet: #fdfdfa;',
+  '.c-num {', '.c-pass-line {', '--color-primary: #2dd4bf;', '--color-primary-glow: rgba(20, 184, 166, 0.25);',
+];
+for (const m of must) if (!styles.includes(m)) fails.push(`src/styles.scss missing: ${m}`);
+if (styles.includes('--color-primary: #14b8a6;')) fails.push('src/styles.scss still has --color-primary: #14b8a6;');
+const dir = 'src/app/pages/menu-intelligence/';
+for (const f of ['_paper-ui.scss', '_toolbar.scss']) {
+  const hit = read(dir + f).match(/#[0-9a-fA-F]{3,8}\b/);
+  if (hit) fails.push(`${dir}${f} has a typed colour: ${hit[0]}`);
+}
+const n = read(dir + '_paper-ui.scss').split('var(--font-guest)').length - 1;
+if (n !== 2) fails.push(`_paper-ui.scss var(--font-guest) count is ${n}, expected 2`);
+if (!read('src/index.html').includes('Frank+Ruhl+Libre')) fails.push('src/index.html missing Frank+Ruhl+Libre');
+if (fails.length) { console.log(fails.join('\n')); process.exit(1); }
+console.log('THEME_TOKENS: ok');
