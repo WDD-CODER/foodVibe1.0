@@ -28,6 +28,7 @@ import { TaxonomyKindManagerComponent } from './components/taxonomy-kind-manager
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { StationManagerComponent } from './components/station-manager/station-manager.component'
+import { LogisticsItemManagerComponent } from './components/logistics-item-manager/logistics-item-manager.component'
 import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
 import { StaffStagesManagerComponent } from './components/staff-stages-manager/staff-stages-manager.component'
 import { PermissionService } from '@services/permission.service'
@@ -61,6 +62,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
     StationManagerComponent,
+    LogisticsItemManagerComponent,
     CoefficientManagerComponent,
     StaffStagesManagerComponent,
     UserManagementComponent,
@@ -162,6 +164,7 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
     { id: 'mm-sec-station', labelKey: 'metadata_stations_title' },
+    { id: 'mm-sec-logistics', labelKey: 'metadata_logistics_title' },
     { id: 'mm-sec-user', labelKey: 'user_management' },
     { id: 'mm-sec-ai-models', labelKey: 'ai_model_manager' }
   ] as const

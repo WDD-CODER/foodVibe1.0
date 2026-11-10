@@ -1,0 +1,227 @@
+<section class="logistics" dir="rtl" [attr.aria-label]="'logistics_title' | translatePipe">
+  <button
+    type="button"
+    class="c-chip c-chip--tap logistics-toggle"
+    [attr.aria-expanded]="open_()"
+    [attr.aria-label]="'logistics_toggle' | translatePipe"
+    (click)="open_.set(!open_())"
+  >
+    <lucide-icon name="clipboard-list" [size]="18"></lucide-icon>
+    <span class="logistics-title">{{ 'logistics_title' | translatePipe }}</span>
+    @if (totalOpen_() > 0) {
+      <span class="c-chip__count">{{ totalOpen_() }}</span>
+    }
+    @if (!canEdit_()) {
+      <span class="logistics-readonly">{{ 'logistics_read_only' | translatePipe }}</span>
+    }
+    <lucide-icon class="logistics-chevron" [class.is-open]="open_()" name="chevron-down" [size]="18"></lucide-icon>
+  </button>
+
+  @if (open_()) {
+    <div class="logistics-body">
+      <div class="c-chip-group logistics-tabs" role="tablist">
+        @for (p of phases; track p) {
+          <button
+            type="button"
+            role="tab"
+            class="c-chip c-chip--tab"
+            [class.active]="phase_() === p"
+            [attr.aria-selected]="phase_() === p"
+            (click)="selectPhase(p)"
+          >
+            {{ (p === 'intake' ? 'logistics_tab_intake' : 'logistics_tab_site_visit') | translatePipe }}
+            <span class="c-chip__count" [class.c-chip__count--zero]="openCounts_()[p] === 0">{{
+              openCounts_()[p]
+            }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="logistics-profile">
+        <app-custom-select
+          [options]="environmentOptions"
+          [placeholder]="'logistics_environment'"
+          [ngModel]="environment_() ?? ''"
+          [disabled]="!canEdit_()"
+          (ngModelChange)="setEnvironment($event)"
+        />
+        @if (phase_() === 'site_visit') {
+          <label class="logistics-field">
+            <span class="logistics-field-label">{{ 'logistics_meeting_at' | translatePipe }}</span>
+            <app-date-field
+              [value]="event_()?.siteLogistics?.meetingAt ?? ''"
+              [disabled]="!canEdit_()"
+              ariaLabelKey="logistics_meeting_at"
+              (committed)="setMeetingAt($event)"
+            />
+          </label>
+          <label class="logistics-field">
+            <span class="logistics-field-label">{{ 'logistics_meeting_with' | translatePipe }}</span>
+            <input
+              type="text"
+              class="c-input"
+              maxlength="80"
+              [value]="event_()?.siteLogistics?.meetingWith ?? ''"
+              [disabled]="!canEdit_()"
+              (blur)="setMeetingWith($event)"
+            />
+          </label>
+        }
+      </div>
+
+      @for (s of sections_(); track s.section) {
+        <details class="logistics-section" open>
+          <summary class="logistics-section-title">
+            <span>{{ 'logistics_section_' + s.section | translatePipe }}</span>
+            @if (s.openCount > 0) {
+              <span class="c-chip__count">{{ s.openCount }}</span>
+            }
+          </summary>
+
+          @for (row of s.rows; track row.key) {
+            <div class="logistics-row">
+              <div class="logistics-row-head">
+                <span class="logistics-label">{{ row.label }}</span>
+                @if (row.hint) {
+                  <small class="logistics-hint">{{ row.hint }}</small>
+                }
+              </div>
+              <div class="c-chip-group logistics-status" role="radiogroup">
+                @for (st of statuses; track st) {
+                  <label class="c-chip c-chip--toggle">
+                    <input
+                      type="radio"
+                      [name]="'status-' + row.key"
+                      [checked]="row.status === st"
+                      [disabled]="!canEdit_()"
+                      (change)="setStatus(row, st)"
+                    />
+                    <span>{{ 'logistics_status_' + st | translatePipe }}</span>
+                  </label>
+                }
+              </div>
+
+              @if (row.status === 'needed') {
+                <div class="logistics-detail">
+                  @if (row.answerType === 'quantity') {
+                    <app-counter
+                      [value]="row.answer?.quantity ?? 0"
+                      [min]="0"
+                      [max]="100000"
+                      [disabled]="!canEdit_()"
+                      (valueChange)="setQuantity(row, $event)"
+                    />
+                  }
+                  @if (row.answerType !== 'text' && !showNote(row)) {
+                    <button
+                      type="button"
+                      class="c-chip c-chip--tap"
+                      [disabled]="!canEdit_()"
+                      (click)="toggleNote(row.key)"
+                    >
+                      {{ 'logistics_note' | translatePipe }}
+                    </button>
+                  }
+                  @if (showNote(row)) {
+                    <input
+                      type="text"
+                      class="c-input logistics-note"
+                      [attr.maxlength]="textMax"
+                      [value]="row.answer?.text ?? ''"
+                      [disabled]="!canEdit_()"
+                      [attr.aria-label]="'logistics_note' | translatePipe"
+                      (input)="setText(row, $any($event.target).value)"
+                    />
+                  }
+                </div>
+                <div
+                  class="c-chip-group logistics-payer"
+                  role="radiogroup"
+                  [attr.aria-label]="'logistics_payer' | translatePipe"
+                >
+                  @for (payer of payers; track payer) {
+                    <label class="c-chip c-chip--toggle">
+                      <input
+                        type="radio"
+                        [name]="'payer-' + row.key"
+                        [checked]="row.answer?.payer === payer"
+                        [disabled]="!canEdit_()"
+                        (change)="setPayer(row, payer)"
+                      />
+                      <span>{{ 'logistics_payer_' + payer | translatePipe }}</span>
+                    </label>
+                  }
+                  <label class="c-chip c-chip--toggle">
+                    <input
+                      type="checkbox"
+                      [checked]="row.answer?.showToClient === true"
+                      [disabled]="!canEdit_()"
+                      (change)="setShowToClient(row, $any($event.target).checked)"
+                    />
+                    <span>{{ 'logistics_show_to_client' | translatePipe }}</span>
+                  </label>
+                </div>
+              }
+
+              @if (row.answer?.at) {
+                <small class="logistics-stamp" dir="ltr"
+                  >{{ row.answer?.byName }} · {{ row.answer?.at | date: 'dd.MM.yy HH:mm' }}</small
+                >
+              }
+            </div>
+          }
+
+          @if (canEdit_()) {
+            <div class="logistics-add">
+              <input
+                type="text"
+                class="c-input"
+                [attr.maxlength]="labelMax"
+                [value]="addDraft_()[s.section] ?? ''"
+                [placeholder]="'logistics_add_item_placeholder' | translatePipe"
+                [attr.aria-label]="'logistics_add_item' | translatePipe"
+                (input)="onAddInput(s.section, $event)"
+                (keydown.enter)="addAdhoc(s.section)"
+              />
+              <button type="button" class="c-btn-ghost" (click)="addAdhoc(s.section)">
+                {{ 'logistics_add_item' | translatePipe }}
+              </button>
+            </div>
+          }
+        </details>
+      }
+
+      <div class="logistics-footer">
+        <button
+          type="button"
+          class="c-chip c-chip--tap"
+          [class.active]="openOnly_()"
+          [attr.aria-pressed]="openOnly_()"
+          (click)="toggleOpenOnly()"
+        >
+          {{ openCount_() }} {{ 'logistics_open_count_suffix' | translatePipe }}
+        </button>
+        @if (phaseDoneAt_()) {
+          <span class="logistics-done-at">
+            {{ 'logistics_phase_done_at' | translatePipe }} · {{ phaseDoneAt_() | date: 'dd.MM.yy HH:mm' }}
+          </span>
+          @if (canEdit_()) {
+            <button type="button" class="c-btn-ghost" (click)="reopenPhase()">
+              <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+              {{ 'logistics_phase_reopen' | translatePipe }}
+            </button>
+          }
+        } @else if (canEdit_()) {
+          <button type="button" class="c-btn-ghost" (click)="phaseDone()">
+            <lucide-icon name="circle-check-big" [size]="16"></lucide-icon>
+            {{ 'logistics_phase_done' | translatePipe }}
+          </button>
+        }
+        <button type="button" class="c-btn-primary" (click)="copySummary()">
+          <lucide-icon name="copy" [size]="16"></lucide-icon>
+          {{ 'logistics_copy_summary' | translatePipe }}
+        </button>
+      </div>
+    </div>
+  }
+</section>

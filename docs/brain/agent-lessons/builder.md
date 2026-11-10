@@ -21,3 +21,4 @@ Facts from earlier runs of the builder role in this project, written by scripts 
 - 2026-11-08 run-540: fix round caused by: the merge into the run branch
 - 2026-11-08 run-540: parked: same reason twice
 - 2026-11-08 run-540: parked: worktree
+- 2026-11-10 run-522: fix round caused by: node scripts/breadcrumbs-check.mjs failed

@@ -53,6 +53,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { EventStageBarComponent } from './components/event-stage-bar/event-stage-bar.component'
 import { EventNotesLogComponent } from './components/event-notes-log/event-notes-log.component'
+import { EventLogisticsPanelComponent } from './components/event-logistics-panel/event-logistics-panel.component'
 import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
 import { PrepSheetsComponent, type PrepSheetsMode } from './components/prep-sheets/prep-sheets.component'
@@ -110,7 +111,8 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
     SupplierOrdersComponent,
     VenueLinkChipComponent,
     EventStageBarComponent,
-    EventNotesLogComponent
+    EventNotesLogComponent,
+    EventLogisticsPanelComponent
   ],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',

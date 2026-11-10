@@ -238,6 +238,8 @@
 
   @if (editingId_()) {
   <app-event-notes-log [eventId]="editingId_()" />
+  } @if (editingId_()) {
+  <app-event-logistics-panel [eventId]="editingId_()" />
   }
 
   <app-pricing-meter
