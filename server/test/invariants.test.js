@@ -189,6 +189,26 @@ describe('INV-1 Ownership', () => {
   });
 });
 
+// Plan 543 (ADR 0030): a non-member writes only through the public door, which never reads a member token.
+describe('INV-1 guest door', () => {
+  it('INV-1 guest door: public.js never reads a member token', () => {
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const source = fs.readFileSync(path.join(__dirname, '..', 'routes', 'public.js'), 'utf8');
+    for (const word of ['verifyToken', 'verifyAccessToken', 'decodeAccessToken', 'req.user', 'recordUsage']) {
+      expect(source, `public.js must not contain ${word}`).not.toContain(word);
+    }
+  });
+
+  it('INV-1 guest door: a member token gives nothing extra on /api/v1/public', async () => {
+    const anonymous = await request(app).get('/api/v1/public/health');
+    const member = await request(app).get('/api/v1/public/health').set(as(USER_A));
+    expect(member.status).toBe(anonymous.status);
+    expect(member.body).toEqual(anonymous.body);
+    expect(member.headers['cache-control']).toBe(anonymous.headers['cache-control']);
+  });
+});
+
 describe('INV-2 Tenancy', () => {
   it('INV-2 a business never reads another business items; its own term is invisible to others while master terms reach both', async () => {
     await seed('products', 'userB', 'theirs');

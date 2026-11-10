@@ -10,6 +10,7 @@
 | `routes/business.js` | The caller's business at `/api/v1/business` (plan 425; owner-only sub-routes arrive with plans 427-431) |
 | `routes/auth.js` | Login, signup, refresh, logout at `/api/v1/auth` — JWT + rate limiting |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text |
+| `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
 
 ## Key Patterns

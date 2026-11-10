@@ -18,6 +18,7 @@ const statsRouter = require('./routes/stats');
 const eventsRouter = require('./routes/events');
 const productImportRouter = require('./routes/product-import');
 const logRouter = require('./routes/log');
+const publicRouter = require('./routes/public');
 const { logger } = require('./logger');
 
 const app = express();
@@ -202,6 +203,8 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/business', businessRouter);
 app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/product-import', productImportRouter);
+// Plan 543 (ADR 0030): the public door for non-members — never behind verifyToken, so no usage is recorded.
+app.use('/api/v1/public', publicRouter);
 
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
