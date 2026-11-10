@@ -75,6 +75,8 @@ src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts
 public/assets/data/dictionary.json
 docs/agent/standards-backend.md
+src/app/core/services/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
 ```
 
 ## Read Scope
