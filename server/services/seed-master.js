@@ -118,14 +118,42 @@ async function ensureDefaultStations() {
 }
 
 /**
- * Seeds the master taxonomy terms and default stations. Idempotent.
+ * Plan 520: inserts the 45 shared master `logisticsItem` terms when none exists. Idempotent.
+ * Never touches an existing document.
+ * @returns {Promise<number>} terms inserted (0 if skipped)
+ */
+async function ensureDefaultLogisticsItems() {
+  const col = mongoose.connection.db.collection('taxonomyTerms');
+  if (await col.findOne({ kind: 'logisticsItem', businessId: '__master__' })) return 0;
+  const { LOGISTICS_SEED_ITEMS } = require('./logistics-seed-items');
+  const now = Date.now();
+  const terms = LOGISTICS_SEED_ITEMS.map((item, sortOrder) => ({
+    _id: makeId(),
+    schemaVersion: 2,
+    kind: 'logisticsItem',
+    ...item,
+    sortOrder,
+    userId: '__master__',
+    businessId: '__master__',
+    createdBy: '__master__',
+    createdAt: now,
+    updatedAt: now,
+  }));
+  await col.insertMany(terms, { ordered: false });
+  logger.info({ event: 'seed.master.logistics_items_seeded', count: terms.length });
+  return terms.length;
+}
+
+/**
+ * Seeds the master taxonomy terms, default stations and logistics items. Idempotent.
  *
  * @returns {Promise<number>} total documents seeded (0 if nothing was missing)
  */
 async function seedMasterData() {
-  const seeded = (await seedMasterTaxonomy()) + (await ensureDefaultStations());
+  const seeded =
+    (await seedMasterTaxonomy()) + (await ensureDefaultStations()) + (await ensureDefaultLogisticsItems());
   logger.info({ event: 'seed.master.done', totalSeeded: seeded });
   return seeded;
 }
 
-module.exports = { seedMasterData, seedMasterTaxonomy, ensureDefaultStations };
+module.exports = { seedMasterData, seedMasterTaxonomy, ensureDefaultStations, ensureDefaultLogisticsItems };

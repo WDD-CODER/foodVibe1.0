@@ -28,6 +28,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | About to build a component, util, pipe, service or `.c-*` class | `component-families.md` — which shared piece to use for each job, and its known copies; ladder in `docs/agent/standards-reuse.md`, why in [[0024-reuse-layer]] |
 | About to port a Claude Design handoff | `.claude/commands/design-port.md` — every designed element names its family, family changes go to the base with every user screen re-checked; why in [[0029-design-ports-go-through-the-family-registry]] |
 | Building or changing a dropdown / search picker | `patterns/dropdown-add-option.md` — one add option + shared `KeyedPickerSearch`; the add-option rule lives in `docs/agent/standards-domain.md` |
+| Inspecting the local database from a session (MCP) | `scripts/mcp-mongo-local.mjs` — read-only, local-only, never Atlas or production; why in [[0028-read-only-local-mongodb-mcp]] |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |
 

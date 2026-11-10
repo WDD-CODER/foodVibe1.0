@@ -84,6 +84,29 @@ describe('ensureDefaultStations (plan 436)', () => {
   });
 });
 
+describe('ensureDefaultLogisticsItems (plan 520)', () => {
+  const items = () => testDb().collection('taxonomyTerms').find({ kind: 'logisticsItem' }).sort({ sortOrder: 1 }).toArray();
+
+  it('inserts 45 valid master items when master terms exist but no logistics item', async () => {
+    const { ensureDefaultLogisticsItems } = require('../services/seed-master');
+    await seedMasterTaxonomy();
+    expect(await items()).toHaveLength(0);
+    expect(await ensureDefaultLogisticsItems()).toBe(45);
+    const terms = await items();
+    expect(terms).toHaveLength(45);
+    expect(terms.every(t => t.businessId === '__master__' && parseV2('taxonomyTerms', t).success)).toBe(true);
+    expect(terms.filter(t => t.phase === 'intake')).toHaveLength(13);
+    expect(terms.find(t => t.key === 'גנרטור נדרש?').environments).toEqual(['outdoor_field', 'popup_venue']);
+  });
+
+  it('inserts 0 on a second run and the count stays 45', async () => {
+    const { ensureDefaultLogisticsItems } = require('../services/seed-master');
+    await ensureDefaultLogisticsItems();
+    expect(await ensureDefaultLogisticsItems()).toBe(0);
+    expect(await items()).toHaveLength(45);
+  });
+});
+
 describe('seedMasterData (plan 431)', () => {
   it('seeds the master taxonomy on an empty database and logs no seed.master.file_skipped', async () => {
     const { logger } = require('../logger');

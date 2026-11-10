@@ -3,6 +3,7 @@
  * Plan 442 (contract C-STAGES): the one door for an event's stage moves and notes.
  * Stage history, `closedAt` and notes are written only here, with the actor taken from the token, so a
  * client can never rewrite them (the generic data API strips them). Plan 446 adds closing / finish / reopen.
+ * Plan 519: PUT /:id/logistics saves the owner's site-logistics answers (stamped by the server, `editLogistics`).
  */
 const { Router } = require('express')
 const mongoose = require('mongoose')
@@ -282,6 +283,63 @@ router.post('/:id/refresh-plan', verifyToken, async (req, res) => {
     await writeConditional(req, res, event, { $set: set }, 'events.plan.refreshed')
   } catch (err) {
     fail(req, res, 'refresh', err)
+  }
+})
+
+const LOGISTICS_DIFF_KEYS = ['status', 'quantity', 'text', 'payer', 'showToClient', 'label']
+const isStr = v => typeof v === 'string'
+const validAnswer = a => a && typeof a === 'object' && isStr(a.itemKey) && isStr(a.phase) && isStr(a.section) && isStr(a.status)
+
+// PUT /api/v1/events/:id/logistics  { answers?, environmentType?, venueProfileId?, meetingAt?, meetingWith?, phaseDone? }
+// Owner only (editLogistics). Answers are merged by itemKey; a new or changed one is stamped with the actor and now.
+router.put('/:id/logistics', verifyToken, async (req, res) => {
+  try {
+    const event = await loadEvent(req, res)
+    if (!event) return
+    if (event.stage === 'finished') return finishedLocked(res)
+    if (!assertCan(req, res, 'editLogistics', { type: TYPE, doc: event })) return
+    const body = req.body ?? {}
+    if ('answers' in body && body.answers !== undefined && (!Array.isArray(body.answers) || !body.answers.every(validAnswer))) {
+      return res.status(400).json({ error: 'BAD_LOGISTICS' })
+    }
+    const now = Date.now()
+    const { userId, name } = actorOf(req)
+    const base = event.siteLogistics ?? { answers: [] }
+    const answers = [...(base.answers ?? [])]
+    for (const incoming of body.answers ?? []) {
+      const { at: _at, by: _by, byName: _byName, ...clean } = incoming
+      const idx = answers.findIndex(a => a.itemKey === clean.itemKey)
+      const changed = idx < 0 || LOGISTICS_DIFF_KEYS.some(k => answers[idx][k] !== clean[k])
+      if (!changed) continue
+      const next = { ...clean, at: now, by: userId, byName: name }
+      if (idx < 0) answers.push(next)
+      else answers[idx] = next
+    }
+    const siteLogistics = { ...base, answers }
+    if ('meetingAt' in body) siteLogistics.meetingAt = body.meetingAt
+    if ('meetingWith' in body) siteLogistics.meetingWith = body.meetingWith
+    if (body.phaseDone && typeof body.phaseDone === 'object') {
+      const phaseDone = { ...(base.phaseDone ?? {}) }
+      for (const [k, v] of Object.entries(body.phaseDone)) {
+        if (v === null) delete phaseDone[k]
+        else phaseDone[k] = v
+      }
+      siteLogistics.phaseDone = phaseDone
+    }
+    let logistics
+    if (body.environmentType !== undefined || body.venueProfileId !== undefined) {
+      logistics = {
+        ...(event.logistics ?? { resolvedItems: [] }),
+        environmentType: body.environmentType ?? event.logistics?.environmentType,
+        venueProfileId: body.venueProfileId,
+      }
+      if (body.venueProfileId === null || body.venueProfileId === undefined) delete logistics.venueProfileId
+      if (logistics.environmentType === undefined) delete logistics.environmentType
+    }
+    if (!validMerged(res, { ...event, siteLogistics, ...(logistics && { logistics }) })) return
+    await writeConditional(req, res, event, { $set: { siteLogistics, ...(logistics && { logistics }), updatedAt: now } }, 'events.logistics.saved')
+  } catch (err) {
+    fail(req, res, 'logistics', err)
   }
 })
 

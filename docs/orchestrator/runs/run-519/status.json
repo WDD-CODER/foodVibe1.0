@@ -1,0 +1,617 @@
+{
+  "run": "run-519",
+  "branch": "orch/run-519",
+  "base": "main",
+  "startedAt": "2026-11-09T19:54:44.107Z",
+  "mainShaAtStart": "5ee074916bd3a60ffcb717bb880966a0d7a50b37",
+  "plans": {
+    "519": {
+      "nnn": "519",
+      "title": "Event logistics 2 of 6: the owner-only endpoint that saves an event's logistics answers",
+      "branch": "feat/519-event-logistics-server-endpoint",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T20:19:58.972Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T20:39:12.692Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-09T20:19:58.800Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:19:58.974Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:30:57.458Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:39:06.633Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:39:12.694Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:39:21.690Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:40:13.834Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.5,
+      "sha": "dd5d240af6e888de3a4d580ee428b24790ac9bd8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 655.5,
+          "tokens": {
+            "input": 474273,
+            "output": 9527
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8,
+          "tokens": {
+            "input": 40917,
+            "output": 621
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "8f222760e6cffb42efa5d55c2f8cd1b32362e92c"
+    },
+    "520": {
+      "nnn": "520",
+      "title": "Event logistics 3 of 6: seed the 45 shared checklist questions every business starts with",
+      "branch": "feat/520-event-logistics-seed-master",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T20:41:39.684Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T20:50:24.539Z"
+        }
+      },
+      "humanItems": [
+        "After the merged run branch boots the local server once, `db.taxonomyTerms.countDocuments({ kind: 'logisticsItem', businessId: '__master__' })` = 45."
+      ],
+      "history": [
+        {
+          "at": "2026-11-09T20:41:39.514Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:41:39.686Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:45:13.219Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:50:19.779Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:50:24.540Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:50:31.265Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:51:05.604Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.3,
+      "sha": "11811fd4ea9c6dc44b729304cc8558445eb6fda7",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 211.6,
+          "tokens": {
+            "input": 197484,
+            "output": 7220
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.8,
+          "tokens": {
+            "input": 32312,
+            "output": 408
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "a9bc596e39f3e06c6febf2efcd316e8099d210c9"
+    },
+    "521": {
+      "nnn": "521",
+      "title": "Event logistics 4 of 6: the client services that read the checklist, save answers and write the client summary",
+      "branch": "feat/521-event-logistics-client-services",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T20:52:19.746Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T21:01:36.850Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-09T20:52:19.595Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:52:19.748Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:57:43.436Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T21:01:32.267Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T21:01:36.851Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T21:01:45.040Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T21:02:20.163Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.4,
+      "sha": "574bcdc807a3bb384780696287955c5bc2b197a8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 321.7,
+          "tokens": {
+            "input": 405766,
+            "output": 15942
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.4,
+          "tokens": {
+            "input": 37036,
+            "output": 608
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "5731547040544aee323c0daff02bcd7bd8cb1a37"
+    },
+    "529": {
+      "nnn": "529",
+      "title": "A read-only MongoDB MCP server, local database only, for ad-hoc inspection",
+      "branch": "feat/529-read-only-local-mongodb",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T19:56:21.832Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T20:02:54.325Z"
+        }
+      },
+      "humanItems": [
+        "After the two setup steps under \"Human setup\", a new session in the main folder runs `/mcp` and shows `mongodb-local` as connected; asking \"list the collections in the local database\" returns names such as `taxonomyTerms` and `menuEvents`.",
+        "Asking the session to insert or delete a document through `mongodb-local` fails: no write tool exists."
+      ],
+      "history": [
+        {
+          "at": "2026-11-09T19:56:21.606Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T19:56:21.835Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T19:59:03.589Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:02:46.800Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:02:54.328Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:03:02.686Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:03:55.824Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10,
+      "sha": "353d5e5330b70c45e8f2f1aa9573779ae9d42d3c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 158.8,
+          "tokens": {
+            "input": 666633,
+            "output": 11193
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.5,
+          "tokens": {
+            "input": 31879,
+            "output": 513
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "963386d32777a503381caff6b772435badf8506a"
+    },
+    "531": {
+      "nnn": "531",
+      "title": "Every DB script takes one `--target=local|atlas` flag, local by default (2 of 2: the scripts)",
+      "branch": "feat/531-db-scripts-take-one",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-09T20:04:54.833Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-09T20:17:43.660Z"
+        }
+      },
+      "humanItems": [
+        "In the main folder (after plan 530's Human steps), `node scripts/log-query.mjs --since=1h --target=atlas --yes` prints `REMOTE (Atlas)` and entries; `node scripts/log-query.mjs --since=1h --remote` prints `--remote was replaced by --target=atlas` and exits 1."
+      ],
+      "history": [
+        {
+          "at": "2026-11-09T20:04:54.701Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:04:54.834Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:11:53.491Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:17:37.843Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:17:43.663Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:18:00.842Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-09T20:18:42.969Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 9.1,
+      "sha": "d5dc497365e88c51d898b9597ef9938ba5bc2e48",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 415.4,
+          "tokens": {
+            "input": 1185969,
+            "output": 15247
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.2,
+          "tokens": {
+            "input": 80636,
+            "output": 797
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c176afbd31b1e1e8a036a043245ef152d4710232"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-09T19:56:21.108Z",
+      "plan": "529",
+      "text": "the folder foodVibe1.0-orch-run-519-529 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T20:03:10.282Z",
+      "plan": "529",
+      "text": "the folder foodVibe1.0-orch-merge-run-519 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T20:04:54.568Z",
+      "plan": "531",
+      "text": "the folder foodVibe1.0-orch-run-519-531 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T20:19:58.630Z",
+      "plan": "519",
+      "text": "the folder foodVibe1.0-orch-run-519-519 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T20:41:39.348Z",
+      "plan": "520",
+      "text": "the folder foodVibe1.0-orch-run-519-520 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-09T20:52:19.434Z",
+      "plan": "521",
+      "text": "the folder foodVibe1.0-orch-run-519-521 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 10.4,
+  "updatedAt": "2026-11-09T21:05:03.925Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "529",
+      "type": "behaviour",
+      "text": "behaviour: the launcher checks for multiple hosts on the raw URI text before parsing, because new URL() throws on a multi-host mongodb:// string; this is what gives the multi-host reason — reverse: parse first and map the parse error to not-a-url",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "529",
+      "type": "behaviour",
+      "text": "behaviour: a mongodb:// URI with an unrelated userinfo such as 127.0.0.1@evil.example is judged by the real host after the last @, so it is refused as not-local — reverse: drop the userinfo handling",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "531",
+      "type": "behaviour",
+      "text": "behaviour: check-name-lengths, check-unit-weights and time-business-stats now exit 1 (was 2) on a missing or bad --target, printing the parseTarget message, as the plan says — reverse: restore process.exit(2) in the catch block",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "531",
+      "type": "behaviour",
+      "text": "behaviour: log-query.mjs fills unset settings from the root .env by parsing the file (dotenv.parse, never overriding) instead of dotenv config(), so the new no-config( file test holds — reverse: call dotenv config() there and relax the test",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "531",
+      "type": "seen",
+      "text": "seen: server/scripts/check-name-lengths.js:19 — require('mongodb') runs before the target is validated, and this worktree's server/node_modules has no top-level mongodb, so a bad --target fails with MODULE_NOT_FOUND instead of the target message",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "519",
+      "type": "behaviour",
+      "text": "behaviour: PUT /logistics with `answers: undefined` or absent is treated as no answers (nothing changes except updatedAt) — reverse: return 400 BAD_LOGISTICS when the key is missing",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "519",
+      "type": "behaviour",
+      "text": "behaviour: a `phaseDone` that is not an object is ignored — reverse: return 400 BAD_LOGISTICS for it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "520",
+      "type": "behaviour",
+      "text": "behaviour: the test checks each inserted doc with the file's existing parseV2('taxonomyTerms', doc) helper, not the taxonomyTermSchema import from ../generated/schemas/entities that A2 names. server/generated/schemas does not exist in this worktree until build:schemas runs. — reverse: swap in taxonomyTermSchema.safeParse",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "521",
+      "type": "behaviour",
+      "text": "behaviour: a 403 on saveLogistics shows no toast from the service because run() leaves it to the interceptor, as for saveClosing; the plan's wording about an 'error key' does not match, since run() returns { ok: false, code } — reverse: add a toast in run()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "521",
+      "type": "behaviour",
+      "text": "behaviour: LogisticsItemTerm is exported from logistics-item-registry.service.ts as TaxonomyTermOf<'logisticsItem'>, because no other module exports it — reverse: move the type to the models",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-09T21:05:03.924Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-09T21:05:03.925Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

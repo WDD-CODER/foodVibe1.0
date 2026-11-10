@@ -114,6 +114,7 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `PUT` | `/api/v1/events/:id/stage` | required | Plan 442: move an event to another stage `{ stage, reason?, reasonText? }`. C-PERM `changeStage` (owner, or the event's creator). Errors: `BAD_STAGE`, `EVENT_FINISHED` (409), `USE_FINISH`, `NOT_CLOSED_FROM_STAGE`, `REASON_REQUIRED`, `DATE_REQUIRED` |
 | `POST` | `/api/v1/events/:id/notes` | required | Plan 442: add a note `{ text }` (1 to 2,000 chars; `NOTE_EMPTY`, `NOTE_TOO_LONG`). C-PERM `addNote` (any member) |
 | `PUT` / `DELETE` | `/api/v1/events/:id/notes/:noteId` | required | Plan 442: edit (`editedAt` set) or delete a note - its author only (403 otherwise) |
+| `PUT` | `/api/v1/events/:id/logistics` | required | Plan 519: save site-logistics answers `{ answers?, environmentType?, venueProfileId?, meetingAt?, meetingWith?, phaseDone? }`, merged and stamped (`by`/`at`) by the server. C-PERM `editLogistics` (owner only). Errors: `BAD_LOGISTICS`, `EVENT_FINISHED` (409) |
 | `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |

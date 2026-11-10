@@ -71,6 +71,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
 | `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |
 | `server-heartbeat.service.ts` | Server availability heartbeat | ServerHeartbeatService |
+| `logistics-item-registry.service.ts` | Event-logistics checklist items (taxonomy kind `logisticsItem`) by phase and environment (plan 521) | LogisticsItemRegistryService |
 | `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
 | `business-stats.service.ts` | The dashboard numbers for the signed-in business, computed by the server (plan 447) | BusinessStatsService |
 | `plan-snapshot.service.ts` | Builds an event's planning snapshot from today's prices and the supplier orders (plan 446) | PlanSnapshotService, LivePlan |

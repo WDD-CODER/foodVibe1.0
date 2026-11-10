@@ -109,12 +109,12 @@ line or file this plan names was removed, renamed or rewritten).
 2. Close and reopen the terminal, start Claude Code in the main folder, run `/mcp` and approve `mongodb-local`.
 
 ## Atomic Sub-tasks
-- [ ] A1: Write the local-only launcher — `checkLocalUri`, the stderr refusal, the spawn with the cleaned env and the four `MDB_MCP_*` settings, signal forwarding; confirm the env names against the 3.2.2 README first — scripts/mcp-mongo-local.mjs
-- [ ] A2: Prove the guard — `node:test` cases: `mongodb://127.0.0.1:27017/foodvibe` ok; `mongodb://localhost/foodvibe` ok; `''` → `unset`; `mongodb+srv://x.mongodb.net/db` → `srv-scheme`; `mongodb://a:1,b:2/db` → `multi-host`; `mongodb://10.0.0.5:27017/db` → `not-local`; `not a url` → `not-a-url`; and running the script with `FOODVIBE_MCP_MONGO_URI=mongodb+srv://x.mongodb.net/db` (spawned with `process.execPath`) exits 2 with `refused (srv-scheme)` on stderr and nothing on stdout — scripts/test/mcp-mongo-local.test.mjs
-- [ ] A3: Register the server without a value in git — the `mongodb-local` entry; confirm `settings.json` needs no change and leave it untouched if so — .mcp.json, .claude/settings.json
-- [ ] A4: Record the decision — ADR 0028, the AGENTS.md hard-rule line, the brain index line — docs/brain/decisions/0028-read-only-local-mongodb-mcp.md, AGENTS.md, docs/brain/index.md
-- [ ] A5: Keep the kit manifest true — classify the new files; `node scripts/kit-manifest-check.mjs` exits 0 — docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
-- [ ] A6: Run every `[auto]` check and paste the outputs under Execution Notes; list the two Human setup steps in the hand-off
+- [x] A1: Write the local-only launcher — `checkLocalUri`, the stderr refusal, the spawn with the cleaned env and the four `MDB_MCP_*` settings, signal forwarding; confirm the env names against the 3.2.2 README first — scripts/mcp-mongo-local.mjs
+- [x] A2: Prove the guard — `node:test` cases: `mongodb://127.0.0.1:27017/foodvibe` ok; `mongodb://localhost/foodvibe` ok; `''` → `unset`; `mongodb+srv://x.mongodb.net/db` → `srv-scheme`; `mongodb://a:1,b:2/db` → `multi-host`; `mongodb://10.0.0.5:27017/db` → `not-local`; `not a url` → `not-a-url`; and running the script with `FOODVIBE_MCP_MONGO_URI=mongodb+srv://x.mongodb.net/db` (spawned with `process.execPath`) exits 2 with `refused (srv-scheme)` on stderr and nothing on stdout — scripts/test/mcp-mongo-local.test.mjs
+- [x] A3: Register the server without a value in git — the `mongodb-local` entry; confirm `settings.json` needs no change and leave it untouched if so — .mcp.json, .claude/settings.json
+- [x] A4: Record the decision — ADR 0028, the AGENTS.md hard-rule line, the brain index line — docs/brain/decisions/0028-read-only-local-mongodb-mcp.md, AGENTS.md, docs/brain/index.md
+- [x] A5: Keep the kit manifest true — classify the new files; `node scripts/kit-manifest-check.mjs` exits 0 — docs/workflow-kit/manifest.json, docs/workflow-kit/manifest.md
+- [x] A6: Run every `[auto]` check and paste the outputs under Execution Notes; list the two Human setup steps in the hand-off
 
 ## What happens when
 - The variable is unset or points anywhere but the local machine: the launcher exits 2 with the reason on stderr; `/mcp` shows `mongodb-local` as failed; nothing connects.
@@ -140,3 +140,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-07 (brief 2, item A6). Chose a launcher script over a plain `.mcp.json` entry so that "cannot reach Atlas even if `MONGO_URI` is set" holds by construction (a `${VAR}` entry passes any string through). The local database name is not in any tracked file (`server/.env.example` has no `MONGO_*` line; plan 530 adds it), so the Human fills `<db>` in setup step 1.
+- Builder 2026-11-09: README of mongodb-mcp-server@3.2.2 (from `npm pack`) confirms `MDB_MCP_CONNECTION_STRING`, `MDB_MCP_READ_ONLY`, `MDB_MCP_DISABLED_TOOLS`; `MDB_MCP_TELEMETRY` appears too. No name differed.
+- `node --test scripts/test/mcp-mongo-local.test.mjs` → exit 0, pass 3, fail 0
+- `node scripts/kit-manifest-check.mjs` → exit 0, `KIT_MANIFEST: ok — 385 classified, 0 unclassified`
+- `pnpm run lint` → exit 0 (0 errors, 67 existing warnings)
+- `scope-check --arch` → `ARCH: ok INV-none`; `--reuse` → exit 0
+- `.claude/settings.json` untouched (`enableAllProjectMcpServers` not set to true).
+- Human setup (not done): 1) set user env `FOODVIBE_MCP_MONGO_URI` to the local URI; 2) reopen terminal, run `/mcp`, approve `mongodb-local`.

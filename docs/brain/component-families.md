@@ -236,6 +236,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/taxonomy-store.service.ts` · `TaxonomyStore`.
 - When: a page reads or adds a category, unit, label or kind.
 - Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
+- Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
