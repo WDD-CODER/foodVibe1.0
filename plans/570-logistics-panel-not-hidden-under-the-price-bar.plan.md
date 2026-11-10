@@ -35,6 +35,7 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+e2e/ui/522-5.spec.ts
 src/app/pages/menu-intelligence/menu-intelligence.page.scss
 e2e/ui/523-1.spec.ts
 e2e/ui/523-2.spec.ts
