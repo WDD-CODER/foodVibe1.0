@@ -2,6 +2,8 @@
 /**
  * Plan 512: the clients collection. Owner-only writes (staff get 403), staff reads trimmed to name + phone,
  * `phoneNormalized` derived by the server, and `menuEvents.clientId` accepted.
+ * Plan 544: staff also read tags + kinds; the server-owned fields (CLIENT_SERVER_FIELDS) are dropped from every
+ * generic write; `phoneKey` is derived; a delete goes to Trash and comes back.
  */
 
 const request = require('supertest');
@@ -26,7 +28,17 @@ beforeEach(async () => {
 const as = (user) => ({ Authorization: `Bearer ${signTestToken(user)}` });
 const OWNER = { userId: 'userA', role: 'user' };
 const STAFF = { userId: 'staffA', role: 'user', businessId: 'b_userA', businessRole: 'staff' };
-const OWNER_ONLY_FIELDS = ['email', 'notes', 'source', 'clientType', 'companyName'];
+const OWNER_ONLY_FIELDS = ['email', 'notes', 'source', 'clientType', 'companyName', 'consent', 'doNotContact', 'counters', 'phoneKey'];
+
+// Plan 544: the CRM fields of a stored client, owner-only to read except tags and kinds.
+const CRM_FIELDS = {
+  phoneKey: '501234567',
+  tags: ['vip'],
+  kinds: ['event_client'],
+  consent: { terms: 1 },
+  doNotContact: { at: 1, reason: 'asked', via: 'guest' },
+  counters: { events: 2 },
+};
 
 const clientBody = (overrides = {}) => ({
   name: 'דנה כהן',
@@ -88,22 +100,24 @@ describe('clients: staff cannot write', () => {
   });
 });
 
-describe('clients: staff reads are trimmed to name and phone', () => {
-  it('staff GET / carries name + phone and none of the owner-only fields', async () => {
-    await seedClient();
+describe('clients: staff reads are trimmed to name, phone, tags and kinds', () => {
+  it('staff GET / carries name, phone, tags, kinds and none of the owner-only fields', async () => {
+    await seedClient('c1', CRM_FIELDS);
     const res = await request(app).get('/api/v1/data/clients').set(as(STAFF));
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject({ _id: 'c1', name: 'דנה כהן', phone: '050-123 4567', businessId: 'b_userA' });
+    expect(res.body[0]).toMatchObject({
+      _id: 'c1', name: 'דנה כהן', phone: '050-123 4567', tags: ['vip'], kinds: ['event_client'], businessId: 'b_userA',
+    });
     for (const field of OWNER_ONLY_FIELDS) expect(res.body[0]).not.toHaveProperty(field);
     expect(res.body[0]).not.toHaveProperty('phoneNormalized');
   });
 
-  it('staff GET /:id carries name + phone and none of the owner-only fields', async () => {
-    await seedClient();
+  it('staff GET /:id carries name, phone, tags, kinds and none of the owner-only fields', async () => {
+    await seedClient('c1', CRM_FIELDS);
     const res = await request(app).get('/api/v1/data/clients/c1').set(as(STAFF));
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ _id: 'c1', name: 'דנה כהן', phone: '050-123 4567' });
+    expect(res.body).toMatchObject({ _id: 'c1', name: 'דנה כהן', phone: '050-123 4567', tags: ['vip'], kinds: ['event_client'] });
     for (const field of OWNER_ONLY_FIELDS) expect(res.body).not.toHaveProperty(field);
   });
 
@@ -172,20 +186,103 @@ describe('clients: owner writes and the derived phone', () => {
     expect((await testDb().collection('clients').findOne({ _id: 'c1' })).phoneNormalized).toBe('972527654321');
   });
 
-  it('owner PUT of another field keeps phoneNormalized; owner DELETE removes the client', async () => {
+  it('owner PUT of another field keeps phoneNormalized', async () => {
     await seedClient();
     const edited = await request(app).put('/api/v1/data/clients/c1').set(as(OWNER)).send({ notes: 'חדש' });
     expect(edited.status).toBe(200);
     expect(edited.body).toMatchObject({ notes: 'חדש', phoneNormalized: '0501234567' });
-    const removed = await request(app).delete('/api/v1/data/clients/c1').set(as(OWNER));
-    expect(removed.status).toBe(200);
-    expect(await testDb().collection('clients').countDocuments()).toBe(0);
+  });
+
+  it('the stored phoneKey of +972 52 123 4567 is 521234567, the same as for 052-1234567', async () => {
+    const intl = await request(app).post('/api/v1/data/clients').set(as(OWNER)).send(clientBody({ phone: '+972 52 123 4567' }));
+    const local = await request(app).post('/api/v1/data/clients').set(as(OWNER)).send(clientBody({ phone: '052-1234567' }));
+    expect(intl.status).toBe(201);
+    expect((await testDb().collection('clients').findOne({ _id: intl.body._id })).phoneKey).toBe('521234567');
+    expect(local.body.phoneKey).toBe('521234567');
+  });
+
+  it('owner PUT of the phone re-derives phoneKey', async () => {
+    await seedClient('c1', { phoneKey: '501234567' });
+    const res = await request(app).put('/api/v1/data/clients/c1').set(as(OWNER)).send({ phone: '+972 52-765 4321' });
+    expect(res.status).toBe(200);
+    expect((await testDb().collection('clients').findOne({ _id: 'c1' })).phoneKey).toBe('527654321');
   });
 
   it('a client with only name and phone is accepted and stored with clientType private', async () => {
     const res = await request(app).post('/api/v1/data/clients').set(as(OWNER)).send({ name: 'דנה', phone: '050-123 4567' });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ name: 'דנה', phoneNormalized: '0501234567', clientType: 'private' });
+  });
+});
+
+// Plan 544: one value per CLIENT_SERVER_FIELDS key, each valid for the schema so only the strip can drop it.
+const SENT_SERVER_VALUES = {
+  phoneNormalized: '111',
+  phoneKey: '111111111',
+  kinds: ['lead'],
+  lifecycle: 'dormant',
+  firstSeenAt: 5,
+  lastContactAt: 6,
+  counters: { events: 99 },
+  waId: '972500000000',
+  mergedInto: 'other',
+  doNotContact: { at: 7, reason: 'x', via: 'member' },
+};
+
+describe('clients: the server-owned fields are dropped from generic writes', () => {
+  it('every server-owned field has a case', () => {
+    const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
+    expect(Object.keys(SENT_SERVER_VALUES).sort()).toEqual([...CLIENT_SERVER_FIELDS].sort());
+  });
+
+  for (const [field, value] of Object.entries(SENT_SERVER_VALUES)) {
+    it(`POST with ${field} stores none of the sent value`, async () => {
+      const res = await request(app).post('/api/v1/data/clients').set(as(OWNER)).send(clientBody({ [field]: value }));
+      expect(res.status).toBe(201);
+      const row = await testDb().collection('clients').findOne({ _id: res.body._id });
+      expect(row.phoneNormalized).toBe('0501234567');
+      expect(row.phoneKey).toBe('501234567');
+      if (field !== 'phoneNormalized' && field !== 'phoneKey') expect(row).not.toHaveProperty(field);
+    });
+
+    it(`PUT with ${field} keeps the stored value`, async () => {
+      const before = await seedClient('c1', { phoneKey: '501234567', kinds: ['diner'], counters: { events: 1 } });
+      const res = await request(app).put('/api/v1/data/clients/c1').set(as(OWNER)).send({ notes: 'חדש', [field]: value });
+      expect(res.status).toBe(200);
+      const row = await testDb().collection('clients').findOne({ _id: 'c1' });
+      expect(row.notes).toBe('חדש');
+      expect(row.phoneNormalized).toBe('0501234567');
+      expect(row.phoneKey).toBe('501234567');
+      expect(row[field]).toEqual(before[field]);
+    });
+  }
+});
+
+describe('clients: a delete goes to Trash', () => {
+  it('owner DELETE -> gone from the list, listed in Trash, restore brings it back unchanged', async () => {
+    const before = await seedClient('c1', CRM_FIELDS);
+    const removed = await request(app).delete('/api/v1/data/clients/c1').set(as(OWNER));
+    expect(removed.status).toBe(200);
+    expect((await request(app).get('/api/v1/data/clients').set(as(OWNER))).body).toEqual([]);
+
+    const trash = await request(app).get('/api/v1/data/clients/trash').set(as(OWNER));
+    expect(trash.status).toBe(200);
+    expect(trash.body.map(d => d._id)).toEqual(['c1']);
+
+    const restored = await request(app).put('/api/v1/data/clients/c1/restore').set(as(OWNER));
+    expect(restored.status).toBe(200);
+    expect(await testDb().collection('clients').findOne({ _id: 'c1' })).toEqual(before);
+    expect((await request(app).get('/api/v1/data/clients').set(as(OWNER))).body.map(d => d._id)).toEqual(['c1']);
+  });
+
+  it('staff cannot restore a trashed client, and their Trash read is trimmed', async () => {
+    await seedClient('c1', { ...CRM_FIELDS, deletedAt: Date.now(), deletedBy: 'userA' });
+    const restore = await request(app).put('/api/v1/data/clients/c1/restore').set(as(STAFF));
+    expect(restore.status).toBe(403);
+    const trash = await request(app).get('/api/v1/data/clients/trash').set(as(STAFF));
+    expect(trash.status).toBe(200);
+    expect(trash.body[0]).toMatchObject({ _id: 'c1', name: 'דנה כהן', tags: ['vip'] });
+    for (const field of OWNER_ONLY_FIELDS) expect(trash.body[0]).not.toHaveProperty(field);
   });
 });
 

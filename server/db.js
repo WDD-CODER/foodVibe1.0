@@ -109,6 +109,10 @@ async function connectDb() {
   await db.collection('taxonomyTerms').createIndex({ businessId: 1, kind: 1, sortOrder: 1 }, { name: 'business_kind_order' })
   logger.debug({ event: 'mongo.index.ensured', index: 'taxonomyTerms' })
 
+  // Plan 544: find a client by its phone match key (R-01). Not unique: a trashed or merged client keeps its phone.
+  await db.collection('clients').createIndex({ businessId: 1, phoneKey: 1 }, { name: 'client_phone_key' })
+  logger.debug({ event: 'mongo.index.ensured', index: 'clients' })
+
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
   await ensureLogIndexes(db)
   logger.debug({ event: 'mongo.index.ensured', index: 'app_logs' })

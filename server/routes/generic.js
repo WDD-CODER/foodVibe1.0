@@ -10,6 +10,8 @@ const { checkStoredDoc } = require('../middleware/validate');
 const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
+const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
+const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
@@ -82,8 +84,21 @@ const NO_LINEAGE = new Set([TAXONOMY, CLIENTS]);
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
 const readProjection = (req, type) => (req.user?.businessRole === 'staff' ? staffProjection(type) : null) || undefined;
 
-/** Plan 512: a client's `phoneNormalized` is always the digits of its `phone`; a client-sent value is ignored. */
-const withPhoneNormalized = doc => ({ ...doc, phoneNormalized: String(doc.phone ?? '').replace(/\D/g, '') });
+/**
+ * Plan 512 / 544: a client's `phoneNormalized` is always the digits of its `phone` and its `phoneKey` the match key
+ * derived from them (R-01); client-sent values are ignored.
+ */
+function withPhoneNormalized(doc) {
+  const digits = normalizePhone(doc.phone ?? '');
+  return { ...doc, phoneNormalized: digits, phoneKey: phoneKey(digits) };
+}
+
+/** Plan 544: `body` without the client fields only the server writes (CLIENT_SERVER_FIELDS). */
+function withoutServerClientFields(body) {
+  const copy = { ...body };
+  for (const key of CLIENT_SERVER_FIELDS) delete copy[key];
+  return copy;
+}
 
 /** Plan 442: `body` without the event fields only the server writes (stage, history, notes ...). */
 function withoutServerEventFields(body) {
@@ -366,7 +381,8 @@ router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
   try {
     await purgeExpired(mongoose.connection.db, { businessIds: [scopeFilter(req).businessId, MASTER], types: [req.params.type] });
     const docs = await col(req.params.type)
-      .find(await withEventVisibility(req, req.params.type, { ...scopeFilter(req), ...IN_TRASH }))
+      // Plan 544: a staff member's Trash read is trimmed like any other read (STAFF_READ_FIELDS).
+      .find(await withEventVisibility(req, req.params.type, { ...scopeFilter(req), ...IN_TRASH }), { projection: readProjection(req, req.params.type) })
       .sort({ deletedAt: -1 })
       .toArray();
     res.json(docs);
@@ -475,6 +491,8 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
     // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
     if (entityType === EVENTS) safeEntity = withSavedSnapshot(withoutServerEventFields(safeEntity), null);
+    // Plan 544: a client never sets its own match key, kinds, counters, consent history or do-not-contact flag.
+    if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
     if (shared && !isPlatformAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -515,6 +533,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
     if (toStore !== doc) {
       doc.phoneNormalized = toStore.phoneNormalized;
+      doc.phoneKey = toStore.phoneKey;
       // Plan 512 (D14): checkStoredDoc does not store the parsed default, so stamp it for consistent stored clients.
       if (!doc.clientType) doc.clientType = 'private';
     }
@@ -613,6 +632,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const { createdAt: _ca, ...clientUpdatable } = safeBody;
     // Plan 442: stage, history, closedAt and notes survive a client PUT unchanged (the events router owns them).
     let updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
+    // Plan 544: the server-owned client fields survive a client PUT unchanged (`merged` keeps the stored values).
+    if (req.params.type === CLIENTS) updatable = withoutServerClientFields(updatable);
     let rekeyed = null;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
     // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one
@@ -632,10 +653,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
       let merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];
-      // Plan 512: re-derived from the merged phone on every client write; a client-sent value is ignored.
+      // Plan 512 / 544: re-derived from the merged phone on every client write; a client-sent value is ignored.
       if (req.params.type === CLIENTS) {
         merged = withPhoneNormalized(merged);
-        updatable = { ...updatable, phoneNormalized: merged.phoneNormalized };
+        updatable = { ...updatable, phoneNormalized: merged.phoneNormalized, phoneKey: merged.phoneKey };
       }
       if (!authorizeEdit(req, res, req.params.type, current, merged)) return;
       const check = checkStoredDoc(req.params.type, merged);

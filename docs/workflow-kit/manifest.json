@@ -4916,6 +4916,14 @@
       "notes": "FoodVibe ADR 0030 (guest writes have one door: /api/v1/public; INV-1 amended; plan 543)."
     },
     {
+      "path": "docs/brain/decisions/0031-clients-are-crm-records.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0031 (clients are CRM records: soft delete, phoneKey, server-owned fields; plan 544)."
+    },
+    {
       "path": "scripts/decision-log.mjs",
       "tier": "project",
       "action": "stay",
