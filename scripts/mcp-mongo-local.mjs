@@ -1,8 +1,12 @@
 // Plan 529 / ADR 0028: starts the read-only MongoDB MCP server against the LOCAL database only.
 // Reads its URI only from FOODVIBE_MCP_MONGO_URI (never a .env file, MONGO_URI or MONGO_LOCAL_URI).
+// Set FOODVIBE_MCP_MONGO_URI to the value of MONGO_LOCAL_URI in server/.env (login included), then open a NEW
+// terminal window: a terminal opened before the variable was set does not see it.
 // stdout is the MCP channel: every message from this launcher goes to stderr.
 import { spawn } from 'node:child_process';
-import { resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const LOCAL_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
@@ -28,7 +32,7 @@ function main() {
   const check = checkLocalUri(uri);
   if (!check.ok) {
     process.stderr.write(
-      `mcp-mongo-local: refused (${check.reason}) — set FOODVIBE_MCP_MONGO_URI to the local mongodb://127.0.0.1:27017/<db> URI\n`,
+      `mcp-mongo-local: refused (${check.reason}) — set the user variable FOODVIBE_MCP_MONGO_URI to the value of MONGO_LOCAL_URI in server/.env (login included), then open a NEW terminal window\n`,
     );
     process.exit(2);
   }
@@ -39,16 +43,31 @@ function main() {
   Object.assign(env, {
     MDB_MCP_CONNECTION_STRING: uri,
     MDB_MCP_READ_ONLY: 'true',
-    MDB_MCP_DISABLED_TOOLS: 'atlas',
+    MDB_MCP_DISABLED_TOOLS:
+      'atlas,connect,disconnect,atlas-local-list-deployments,atlas-local-connect-deployment,search-knowledge,list-knowledge-sources',
     MDB_MCP_TELEMETRY: 'disabled',
     DO_NOT_TRACK: '1',
   });
-  const win = process.platform === 'win32';
-  const child = spawn(win ? 'npx.cmd' : 'npx', ['-y', 'mongodb-mcp-server@3.2.2'], {
-    stdio: 'inherit',
-    env,
-    shell: win,
-  });
+  let entry;
+  try {
+    // the package's exports map hides package.json, so resolve the main file and walk up to the package root
+    let dir = dirname(createRequire(import.meta.url).resolve('mongodb-mcp-server'));
+    while (
+      !existsSync(resolve(dir, 'package.json')) ||
+      JSON.parse(readFileSync(resolve(dir, 'package.json'), 'utf8')).name !== 'mongodb-mcp-server'
+    ) {
+      const up = dirname(dir);
+      if (up === dir) throw new Error('package root not found');
+      dir = up;
+    }
+    const pkgPath = resolve(dir, 'package.json');
+    const bin = JSON.parse(readFileSync(pkgPath, 'utf8')).bin;
+    entry = resolve(dirname(pkgPath), typeof bin === 'string' ? bin : bin['mongodb-mcp-server']);
+  } catch {
+    process.stderr.write('mcp-mongo-local: mongodb-mcp-server is not installed — run pnpm install in this folder\n');
+    process.exit(2);
+  }
+  const child = spawn(process.execPath, [entry], { stdio: 'inherit', env });
   for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => child.kill(sig));
   child.on('error', (e) => {
     process.stderr.write(`mcp-mongo-local: could not start (${e.code ?? 'error'})\n`);
