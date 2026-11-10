@@ -349,3 +349,13 @@
 - [ ] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
 - [ ] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
 - [ ] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
+
+### Run fd-1a-data — hand checks left open (PR #547)
+- [ ] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md
+- [ ] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges
+- [ ] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes
+- [ ] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
+- [ ] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
+- [ ] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md
+- [ ] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
+- [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
