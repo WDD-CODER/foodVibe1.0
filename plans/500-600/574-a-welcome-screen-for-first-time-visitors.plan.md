@@ -1,6 +1,6 @@
 # Plan 574 — A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard
 
-Status: draft
+Status: done
 Depends-on: 572
 Snapshot: 4ba8887cc16eb5c1c3d3ccd4a0bbb9b63cb6c3c9
 

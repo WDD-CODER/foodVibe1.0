@@ -1,6 +1,6 @@
 # Plan 571 — One product name, foodCo, and its own app icon instead of the Angular logo
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 4ba8887cc16eb5c1c3d3ccd4a0bbb9b63cb6c3c9
 
