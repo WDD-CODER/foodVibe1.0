@@ -106,6 +106,12 @@ describe('BusinessPerformanceComponent', () => {
       expect(byId(`stat-${key}`)).not.toBeNull()
   })
 
+  it('makes the revenue card the hero and no other card (plan 578)', async () => {
+    await setup(stats())
+    expect(byId('stat-revenue')?.classList.contains('perf-card--hero')).toBeTrue()
+    expect(el().querySelectorAll('.perf-card--hero').length).toBe(1)
+  })
+
   it('writes a rise against the opening baseline with a plus', async () => {
     await setup(stats())
     expect(changeOf('inquiries')).toBe('+67% מול לפני')

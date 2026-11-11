@@ -116,12 +116,12 @@ line says otherwise; the `:root.theme-kitchen` block keeps every value it has.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Put the app's content on white surfaces over a flat tinted page — surface, border, text, radius and shadow token values; the page wash removed — src/styles.scss
-- [ ] A2: Add the colours of the dark bar that the price bar and the dashboard will use — five new tokens — src/styles.scss
-- [ ] A3: Give buttons and inputs the new shape and fill — primary button solid with 14 px corners; inputs, selects and input wrappers filled, white with a teal border on focus; invalid still red — src/styles.scss
-- [ ] A4: Draw status tags as a white tag with a coloured dot, leaving pressable chips alone — one rule group after the allergen chip — src/styles.scss
-- [ ] A5: Guard the new theme and write it down — the token check, the design notes, the chip family line — tools/theme/check-tokens.mjs, .interface-design/system.md, docs/brain/component-families.md
-- [ ] A6: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
+- [x] A1: Put the app's content on white surfaces over a flat tinted page — surface, border, text, radius and shadow token values; the page wash removed — src/styles.scss
+- [x] A2: Add the colours of the dark bar that the price bar and the dashboard will use — five new tokens — src/styles.scss
+- [x] A3: Give buttons and inputs the new shape and fill — primary button solid with 14 px corners; inputs, selects and input wrappers filled, white with a teal border on focus; invalid still red — src/styles.scss
+- [x] A4: Draw status tags as a white tag with a coloured dot, leaving pressable chips alone — one rule group after the allergen chip — src/styles.scss
+- [x] A5: Guard the new theme and write it down — the token check, the design notes, the chip family line — tools/theme/check-tokens.mjs, .interface-design/system.md, docs/brain/component-families.md
+- [x] A6: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: every component that reads these tokens or engines changes look through them; no component file is edited.
@@ -144,3 +144,5 @@ line says otherwise; the `:root.theme-kitchen` block keeps every value it has.
 
 ## Execution Notes
 - Planner 2026-11-11: design source is the canvas boards "ליטוש 2 · עומק" and "ליטוש 1 · חד" (chips and spacing), shown to and chosen by the Human in chat; no Claude Design handoff file exists for it.
+- Built by the Planner directly in the cloud session on 2026-11-11, not by an orchestrator builder: after `origin/main` was merged in, the preflight refuses a run from a folder that is not on `main`. Checks run by hand on the result: `THEME_TOKENS: ok`, lint 0 errors, build passes, `TOTAL: 1929 SUCCESS`, `REUSE: registry ok`. No independent reviewer read this diff.
+- Deviation: the check looks for the status-dot comment by its opening words, because the comment has two more lines.

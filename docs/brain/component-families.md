@@ -180,6 +180,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
   header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
+- Status look (plan 577): a colour chip on a `span` renders as a white tag with a dot; a pressable chip is a `button` or carries `--toggle` / `--tap` / `--filter` / `--tab` / `--removable`, and keeps its own look.
 
 ### feedback — loading, toasts, errors shown to the user
 - Status: stable — plan 456 moved every toast text into the dictionary

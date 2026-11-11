@@ -104,10 +104,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Make the price bar a dark teal bar with light text that stays readable — bar surface and the colours of everything on it, scoped so the phone sheet stays light — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.scss
-- [ ] A2: Make the month's revenue the one large dark tile that leads the dashboard — one class binding, the six-column grid and the hero rules — src/app/pages/dashboard/components/business-performance/business-performance.component.html, src/app/pages/dashboard/components/business-performance/business-performance.component.scss
-- [ ] A3: Test that only the revenue card is the hero — two cases — src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
-- [ ] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
+- [x] A1: Make the price bar a dark teal bar with light text that stays readable — bar surface and the colours of everything on it, scoped so the phone sheet stays light — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.scss
+- [x] A2: Make the month's revenue the one large dark tile that leads the dashboard — one class binding, the six-column grid and the hero rules — src/app/pages/dashboard/components/business-performance/business-performance.component.html, src/app/pages/dashboard/components/business-performance/business-performance.component.scss
+- [x] A3: Test that only the revenue card is the hero — two cases — src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
+- [x] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: tokens `--bg-bar`, `--border-bar`, `--color-on-bar`, `--color-on-bar-muted`, `--color-on-bar-bad` (plan 577); `--color-lamp`, `--color-primary-light`, `--color-primary-hover` (existing).
@@ -129,3 +129,5 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-11: design source is the canvas board "ליטוש 2 · עומק", chosen by the Human in chat.
+- Built by the Planner directly in the cloud session on 2026-11-11 (same reason as plan 577). Checks: lint 0 errors, build passes, `TOTAL: 1929 SUCCESS`. No independent reviewer read this diff.
+- Deviations found from screenshots: both component style files are cascade layers, so an unlayered engine rule wins over them. The hero tile therefore drops `c-glass-panel` in the template (`[class.c-glass-panel]="card.key !== 'revenue'"`) and sets its own border and radius; on the price bar the target chip's colour and border are marked `!important`; the input boxes keep the engine fill, which reads well on the dark bar.

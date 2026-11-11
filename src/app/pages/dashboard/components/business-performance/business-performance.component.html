@@ -28,7 +28,12 @@
     @if (cards().length) {
       <div class="perf__cards" [class.is-loading]="loading()">
         @for (card of cards(); track card.key) {
-          <article class="perf-card c-glass-panel" [attr.data-testid]="'stat-' + card.key">
+          <article
+            class="perf-card"
+            [class.c-glass-panel]="card.key !== 'revenue'"
+            [class.perf-card--hero]="card.key === 'revenue'"
+            [attr.data-testid]="'stat-' + card.key"
+          >
             <div class="perf-card__top">
               <span class="perf-card__icon"><lucide-icon [name]="card.icon" [size]="13" /></span>
               <h3 class="perf-card__label">{{ card.labelKey | translatePipe }}</h3>
