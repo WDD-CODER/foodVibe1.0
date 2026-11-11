@@ -562,3 +562,11 @@
   font-size: var(--fs-sm);
   color: var(--color-text-muted);
 }
+
+// Phone density (2026-11-11): less air between the page title, the numbers and the lists.
+@media (max-width: 767px) {
+  .dashboard-overview,
+  .dashboard-main {
+    gap: 0.75rem;
+  }
+}

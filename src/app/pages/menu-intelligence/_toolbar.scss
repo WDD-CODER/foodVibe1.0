@@ -91,3 +91,16 @@
     display: none;
   }
 }
+
+// Phone density (2026-11-11): a lower button row above the paper.
+@media (max-width: 620px) {
+  .pill-row {
+    gap: 6px;
+
+    margin-bottom: 8px;
+  }
+
+  .pill {
+    min-height: 2.5rem;
+  }
+}

@@ -57,4 +57,29 @@
       padding-block-start: 1rem;
     }
   }
+
+  /* Phone density (2026-11-11): contact and phone share a row, and so do minimum order and lead time. */
+  @media (max-width: 620px) {
+    .supplier-form-container {
+      padding: 0.875rem;
+
+      .form-header {
+        margin-block-end: 0.75rem;
+      }
+
+      .form-body {
+        gap: 0.875rem;
+      }
+
+      .form-section:not(.days-section) {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.625rem;
+
+        > :first-child {
+          grid-column: 1 / -1;
+        }
+      }
+    }
+  }
 }

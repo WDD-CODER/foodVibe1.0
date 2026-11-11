@@ -30,3 +30,10 @@
   margin: 0 auto;
   flex-shrink: 0;
 }
+
+// Phone density (2026-11-11): the menu paper starts higher and uses the full width.
+@media (max-width: 620px) {
+  .menu-editor-shell {
+    padding: 0.5rem 0.625rem 6rem;
+  }
+}
