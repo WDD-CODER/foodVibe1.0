@@ -1,7 +1,7 @@
 # Orchestrator run pass-theme
 
-Run branch: `orch/pass-theme` (from `origin/main` at 4ba8887) · started 2026-11-10T22:10:16.008Z · finished 2026-11-10T22:29:18.217Z
-Result: 4 merged, 0 parked, skipped or left out, 4 in the run (counted from git and status.json).
+Run branch: `orch/pass-theme` (from `origin/main` at 4ba8887) · started 2026-11-10T22:10:16.008Z · finished 2026-11-11T05:52:48.628Z
+Result: 5 merged, 0 parked, skipped or left out, 5 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 4ba8887.
 
 Final gate: ok (attempt 1)
@@ -14,6 +14,7 @@ Final gate: ok (attempt 1)
 | 572 The Pass theme tokens: brand teal, lamp amber, paper colours and a guest typeface | merged | 0 | build | 302d7a9 |  |
 | 573 Light the lamp on the price bar when an event meets its profit target, and line up its numbers | merged | 0 | build | de33677 |  |
 | 574 A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard | merged | 0 | build | d2da078 |  |
+| 576 Polish The Pass theme: the welcome underline on phones, the logo in Cook View, and the sign-in window | merged | 0 | build | ab1d30a |  |
 
 ## App errors since the run started
 
@@ -41,6 +42,7 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 572: the folder foodVibe1.0-orch-pass-theme-572 was installed (root, scripts, server)
 - 573: the folder foodVibe1.0-orch-pass-theme-573 was installed (root, scripts, server)
 - 574: the folder foodVibe1.0-orch-pass-theme-574 was installed (root, scripts, server)
+- 576: the folder foodVibe1.0-orch-pass-theme-576 was installed (root, scripts, server)
 
 ## Models per agent
 
@@ -52,6 +54,8 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 573 reviewer: sonnet
 - 574 builder: sonnet
 - 574 reviewer: sonnet
+- 576 builder: sonnet
+- 576 reviewer: sonnet
 
 ## What only the Human can do
 
@@ -66,6 +70,9 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 7. 573 Light the lamp on the price bar when an event meets its profit target, and line up its numbers: Typing a price does not make the numbers in the bar jump sideways.
 8. 574 A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard: In a private browser window on the live address (or a build with `autoLoginGuest: false`), opening `/` shows the welcome screen; it reads well on a phone and on a laptop, and the amber line sits under the promise.
 9. 574 A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard: From the welcome screen, signing in lands on the dashboard. After that, opening `/` in a new tab goes to the dashboard without showing the welcome screen. After "התנתקות", opening `/` shows the welcome screen again.
+10. 576 Polish The Pass theme: the welcome underline on phones, the logo in Cook View, and the sign-in window: On a phone, the welcome promise has one amber line under the whole sentence and no line touches a letter.
+11. 576 Polish The Pass theme: the welcome underline on phones, the logo in Cook View, and the sign-in window: In Cook View the pot mark is clearly visible in the header, and outside Cook View it is still the teal mark.
+12. 576 Polish The Pass theme: the welcome underline on phones, the logo in Cook View, and the sign-in window: The sign-in and sign-up windows open with the mark, the name foodCo and the heading, on a phone and on a laptop, and still fit the screen.
 
 - Review and merge the run branch (PowerShell, one line each):
 

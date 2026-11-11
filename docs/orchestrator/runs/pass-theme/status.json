@@ -357,6 +357,95 @@
         }
       ],
       "checkedHead": "c825245d4bba67f1d2ce19b838fcee14cff4854c"
+    },
+    "576": {
+      "nnn": "576",
+      "title": "Polish The Pass theme: the welcome underline on phones, the logo in Cook View, and the sign-in window",
+      "branch": "feat/576-polish-the-pass-theme",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-11T05:47:55.143Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-11T05:51:14.332Z"
+        }
+      },
+      "humanItems": [
+        "On a phone, the welcome promise has one amber line under the whole sentence and no line touches a letter.",
+        "In Cook View the pot mark is clearly visible in the header, and outside Cook View it is still the teal mark.",
+        "The sign-in and sign-up windows open with the mark, the name foodCo and the heading, on a phone and on a laptop, and still fit the screen."
+      ],
+      "history": [
+        {
+          "at": "2026-11-11T05:47:55.088Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-11T05:47:55.143Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-11T05:50:06.972Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-11T05:51:13.511Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-11T05:51:14.333Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-11T05:51:20.514Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-11T05:51:39.906Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 29,
+      "sha": "ab1d30a220e295bfb6d57ad786058829c15bbb8a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 131.3,
+          "tokens": {
+            "input": 215761,
+            "output": 4281
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6.1,
+          "tokens": {
+            "input": 24204,
+            "output": 319
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "e3d3f01f2a015bc1d41dfc45ef3ccf96cb90db2f"
     }
   },
   "notes": [
@@ -384,12 +473,17 @@
       "at": "2026-11-10T22:22:50.850Z",
       "plan": "574",
       "text": "the folder foodVibe1.0-orch-pass-theme-574 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-11T05:47:55.027Z",
+      "plan": "576",
+      "text": "the folder foodVibe1.0-orch-pass-theme-576 was installed (root, scripts, server)"
     }
   ],
-  "attempts": 1,
+  "attempts": 2,
   "phase": "finished",
-  "freeDiskGb": 27.6,
-  "updatedAt": "2026-11-10T22:29:18.217Z",
+  "freeDiskGb": 29,
+  "updatedAt": "2026-11-11T05:52:48.629Z",
   "decisions": [
     {
       "id": "D1",
@@ -431,11 +525,11 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-10T22:29:18.217Z",
+  "finishedAt": "2026-11-11T05:52:48.628Z",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-10T22:29:18.217Z",
+    "at": "2026-11-11T05:52:48.628Z",
     "attempt": 1,
     "blamed": []
   }
