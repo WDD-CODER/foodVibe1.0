@@ -280,7 +280,8 @@
 - [x] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
 - [x] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
-- [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
+- [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2 — Planner 2026-11-11: 11 of 12 pass; 544-1 fails because the spec never clicks the "לשחזר פריט זה?" confirm (the app restores fine, API 200) — fix the spec (A5), then re-run
+- [ ] A5: Fix e2e/ui/544-1.spec.ts — after the row's "שחזר מהאשפה" click, confirm in the modal before expecting the row to leave
 
 ### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
 - [ ] F1: Owners and the platform admin can remove logistics questions, like recipes — admin adds or removes for everybody or only himself; an owner only for his business
@@ -296,7 +297,7 @@
 
 ### AI menu — failure is not explained (Human 2026-11-11)
 - [ ] B1: "Create menu with AI" shows only "שגיאה ביצירת התפריט. נסה שוב." for every failure — show the cause (no dishes found in the text, guest count missing, AI busy or out of quota, server down, timed out) and what to change. Logs 12:56: 8 tries, all rejected by our check (sections empty; once guestCount missing)
-- [ ] B2: When the text describes an event but lists no dishes, the prompt forbids adding dishes, so Gemini returns an empty menu and we reject it — decide: suggest dishes, or ask the user to list them
+- [ ] B2: When the text lists no dishes, the AI suggests dishes ONLY from the business's own recipe book (never invented ones), and builds the menu from those real dishes with matching section titles so every line links to its recipe — A: (Human, 2026-11-11) suggest from the recipe book
 - [ ] B3: The platform AI-usage table counts a call as successful when Gemini answered, even when our check rejected the result — record the outcome (accepted / rejected) so rejected calls show as failed
 - [ ] B4: Log the raw AI answer on ai.generate_menu.validation_failed (the route logs only the error list today)
 
