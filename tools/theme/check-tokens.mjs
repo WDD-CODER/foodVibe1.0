@@ -19,5 +19,8 @@ const n = read(dir + '_paper-ui.scss').split('var(--font-guest)').length - 1;
 if (n !== 2) fails.push(`_paper-ui.scss var(--font-guest) count is ${n}, expected 2`);
 if (!read('src/index.html').includes('Frank+Ruhl+Libre')) fails.push('src/index.html missing Frank+Ruhl+Libre');
 if (!styles.includes(':root.theme-kitchen .brand-mark img {')) fails.push('src/styles.scss missing the kitchen brand mark rule');
+for (const m of ['--bg-body: #e6eeee;', '--bg-glass: #ffffff;', '--bg-glass-strong: #ffffff;', '--radius-lg: 1.5rem;', '--bg-bar: rgba(13, 92, 86, 0.92);', '/* ---- Depth theme (plan 577): status dot ----', '--bg-body: #0a1614;']) {
+  if (!styles.includes(m)) fails.push(`src/styles.scss missing: ${m}`);
+}
 if (fails.length) { console.log(fails.join('\n')); process.exit(1); }
 console.log('THEME_TOKENS: ok');

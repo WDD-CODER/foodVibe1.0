@@ -273,3 +273,16 @@ Rules from the validation of plan 515 (run test-514-515). No orchestrator agent 
 - Ad-hoc spacing values outside the 4px grid
 - Large border-radius on small elements
 - Mixing depth strategies (no shadows + solid borders on same surface)
+
+## Depth (plan 577)
+
+Chosen by the Human on 2026-11-11 from the design canvas ("ליטוש 2 · עומק" with the tags and spacing of "ליטוש 1 · חד").
+
+- Glass only on navigation chrome (header, tab bar). Content sits on solid white: `--bg-glass`, `--bg-glass-strong`, `--bg-glass-hover` and `--bg-glass-dense` are now `#ffffff` (the names stay for compatibility).
+- The page is flat `--bg-body: #e6eeee`; the light colour washes are gone. Depth comes from the layered shadows `--shadow-glass` / `--shadow-card` / `--shadow-hover`.
+- Corners: `--radius-md: 0.875rem` (buttons, inputs), `--radius-lg: 1.5rem` (cards and panels).
+- Inputs are filled (`--bg-muted`) with no visible border; on focus they turn white with a `--color-primary` border.
+- One dark hero tile per screen at most, and the price bar: `--bg-bar`, `--border-bar`, `--color-on-bar`, `--color-on-bar-muted`, `--color-on-bar-bad`.
+- A status is a white tag with a dot (a colour chip on a `span`); colour never carries meaning alone. Pressable chips keep their own look.
+- Spacing only from the `--space-*` scale.
+- The dark kitchen theme and the paper tokens are untouched.
