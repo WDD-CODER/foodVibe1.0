@@ -18,6 +18,7 @@
 | `constants/ai-prices.js` | `AI_PRICES` USD per 1M tokens per model, `PRICES_AS_OF`, `PRICES_SOURCE` (plan 566) |
 | `jobs/retention.js` | `purgeRetained(db, businessId, now)` — lazy 24-month delete of final requests and bookings, 12 months of messages; throttled to once a day per business; run from the generic GET (plan 558) |
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
+| `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
 
 ## Key Patterns
