@@ -400,3 +400,9 @@
 - [ ] A3: Test the data's shape and links, the money formula, the dashboard numbers, the second run and the local-only rule — server/test/seed-demo-business.test.js
 - [ ] A4: List the new command in the server map — server/breadcrumbs.md
 - [ ] A5: Run the server tests, the server lint, the build and the log query, and paste the output lines under Execution Notes
+
+### Plan 576 — Polish The Pass theme (`plans/576-polish-the-pass-theme-welcome-underline-on-phones-cook-view-logo-and-the-sign-in-window.plan.md`)
+- [ ] A1: Put one amber line under the whole welcome promise on a phone — block the highlighted span and balance its lines — src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
+- [ ] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
+- [ ] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
+- [ ] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
