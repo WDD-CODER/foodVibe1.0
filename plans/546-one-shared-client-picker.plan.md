@@ -47,7 +47,8 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 server/breadcrumbs.md
 src/app/core/models/breadcrumbs.md
 src/app/core/services/breadcrumbs.md
-event-stage-bar.component.spec.ts
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
+src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts
 e2e/helpers/qa-session.ts
 src/app/shared/client-picker/**
 src/app/shared/client-form/**
