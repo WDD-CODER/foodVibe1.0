@@ -5,8 +5,39 @@
   <app-loader />
   } @else if (!rows_().length) {
   <p class="platform-empty">{{ "platform_no_businesses" | translatePipe }}</p>
-  } @else {
-  <div class="table-scroll">
+  } @else { @let totals = totals_();
+  <div class="platform-totals" data-testid="platform-totals" [attr.aria-label]="'platform_totals' | translatePipe">
+    <div class="total-tile total-tile--hero">
+      <span class="total-tile__label">{{ "platform_col_business" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ totals.businesses }}</strong>
+    </div>
+    <div class="total-tile c-glass-panel">
+      <span class="total-tile__label">{{ "platform_col_staff" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ totals.staff }}</strong>
+    </div>
+    <div class="total-tile c-glass-panel">
+      <span class="total-tile__label">{{ "platform_col_events_total" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ totals.total }}</strong>
+    </div>
+    <div class="total-tile c-glass-panel">
+      <span class="total-tile__label">{{ "platform_col_events_active" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ totals.active }}</strong>
+    </div>
+    <div class="total-tile c-glass-panel">
+      <span class="total-tile__label">{{ "platform_col_events_closed" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ totals.closed }}</strong>
+    </div>
+    <div class="total-tile c-glass-panel">
+      <span class="total-tile__label">{{ "platform_col_events_finished" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ totals.finished }}</strong>
+    </div>
+    <div class="total-tile c-glass-panel">
+      <span class="total-tile__label">{{ "platform_col_close_rate" | translatePipe }}</span>&ngsp;
+      <strong class="total-tile__value c-num">{{ rate(totals.closeRate) }}</strong>
+    </div>
+  </div>
+
+  <div class="table-scroll c-glass-panel">
     <table class="platform-table">
       <thead>
         <tr>
@@ -60,18 +91,9 @@
     </table>
   </div>
 
-  @let totals = totals_();
-  <p class="platform-totals">
-    {{ "platform_totals" | translatePipe }}: {{ "platform_col_business" | translatePipe }} {{ totals.businesses }} · {{
-    "platform_col_staff" | translatePipe }} {{ totals.staff }} · {{ "platform_col_events_total" | translatePipe }} {{
-    totals.total }} · {{ "platform_col_events_active" | translatePipe }} {{ totals.active }} · {{
-    "platform_col_events_closed" | translatePipe }} {{ totals.closed }} · {{ "platform_col_events_finished" |
-    translatePipe }} {{ totals.finished }} · {{ "platform_col_close_rate" | translatePipe }} {{ rate(totals.closeRate)
-    }}
-  </p>
   }
 
-  <section class="ai-usage" aria-labelledby="ai-usage-title">
+  <section class="ai-usage c-glass-panel" aria-labelledby="ai-usage-title">
     <h2 id="ai-usage-title" class="ai-usage-title">{{ "platform_ai_usage_title" | translatePipe }}</h2>
     @if (aiLoading_()) {
     <app-loader />
@@ -116,8 +138,8 @@
         </tbody>
       </table>
     </div>
-    <p class="platform-totals">{{ "platform_ai_cost_note" | translatePipe }} {{ report.pricesAsOf }}</p>
-    <button type="button" class="ai-export" (click)="exportAiCsv()">
+    <p class="platform-note">{{ "platform_ai_cost_note" | translatePipe }} {{ report.pricesAsOf }}</p>
+    <button type="button" class="ai-export c-btn-ghost--sm" (click)="exportAiCsv()">
       <lucide-icon name="download" [size]="14"></lucide-icon>
       {{ "platform_ai_export_csv" | translatePipe }}
     </button>
