@@ -268,18 +268,18 @@
 - [x] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
 - [x] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
 - [x] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
-- [ ] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
-- [ ] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
-- [ ] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
+- [x] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
+- [x] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
+- [x] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
 
 ### Run fd-1a-data — hand checks left open (PR #547)
 - [ ] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md
 - [ ] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges
 - [ ] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes
-- [ ] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
-- [ ] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
+- [x] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
+- [x] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
 - [ ] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md
-- [ ] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
+- [x] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
 - [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
 
 ### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
@@ -290,3 +290,12 @@
 - [ ] F5: Status chips — drop the default "unchecked" chip; clarify with the Human whether status becomes one "needed" toggle that opens the payer options
 - [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected
 - [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
+- [ ] F8: Logistics questions get Edit next to Remove, like recipes — Edit loads the question with all its data into the add form, scrolls there, and the user saves it as an update (Human 2026-11-11, card V5)
+- [ ] F9: Editing while the add form already holds an unsaved question opens the save / discard modal first (Human 2026-11-11, card V5)
+- [ ] F10: A question that is added or promoted to shared later must not appear on events that already exist and were saved — today the event screen reads the live list, so it shows up there unanswered (Human 2026-11-11, card V7; confirmed in event-logistics-panel)
+
+### AI menu — failure is not explained (Human 2026-11-11)
+- [ ] B1: "Create menu with AI" shows only "שגיאה ביצירת התפריט. נסה שוב." for every failure — show the cause (no dishes found in the text, guest count missing, AI busy or out of quota, server down, timed out) and what to change. Logs 12:56: 8 tries, all rejected by our check (sections empty; once guestCount missing)
+- [ ] B2: When the text describes an event but lists no dishes, the prompt forbids adding dishes, so Gemini returns an empty menu and we reject it — decide: suggest dishes, or ask the user to list them
+- [ ] B3: The platform AI-usage table counts a call as successful when Gemini answered, even when our check rejected the result — record the outcome (accepted / rejected) so rejected calls show as failed
+- [ ] B4: Log the raw AI answer on ai.generate_menu.validation_failed (the route logs only the error list today)
