@@ -274,7 +274,7 @@
 
 ### Run fd-1a-data — hand checks left open (PR #547)
 - [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
-- [ ] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges
+- [x] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges — Human 2026-11-11: backup atlas-2026-11-11T14-40-06, 0 clients patched, "verify: ok"
 - [x] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
 - [x] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
