@@ -1,3 +1,26 @@
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+
+  margin-block-end: var(--space-4);
+
+  .auth-brand__name {
+    color: var(--color-primary);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-extrabold);
+  }
+
+  .auth-brand__title {
+    margin: 0;
+
+    color: var(--color-text-main);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+  }
+}
+
 .auth-tabs {
   display: flex;
   gap: 0.5rem;

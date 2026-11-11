@@ -285,6 +285,12 @@ $break-tablet-max: 1023px;
   background: var(--bg-glass-dense);
 }
 
+// Plan 576: the teal pot disappears on the dark kitchen header; show it light there.
+:root.theme-kitchen .brand-mark img {
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
 @media (max-width: $break-mobile) {
   :root {
     --blur-glass: blur(10px);

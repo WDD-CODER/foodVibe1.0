@@ -41,6 +41,11 @@ describe('WelcomePage', () => {
     expect(el.querySelectorAll('button').length).toBe(2)
   })
 
+  it('makes the highlighted promise span inline-block so one amber line sits under it', () => {
+    const span = el.querySelector('.welcome__promise .c-pass-line') as HTMLElement
+    expect(getComputedStyle(span).display).toBe('inline-block')
+  })
+
   it('sign-in button opens the sign-in modal returning to /dashboard', () => {
     ;(el.querySelector('[data-testid="welcome-sign-in"]') as HTMLButtonElement).click()
     expect(open).toHaveBeenCalledWith('sign-in', '/dashboard')
