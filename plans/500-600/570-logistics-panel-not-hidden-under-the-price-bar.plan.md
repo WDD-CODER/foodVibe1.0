@@ -1,6 +1,6 @@
 # Plan 570 — Keep the logistics panel's buttons out from under the price bar on wide screens
 
-Status: draft
+Status: done
 Depends-on: 522, 523
 Snapshot: 2ecb0006be23a265123a05ef1b05259d24894d18
 
