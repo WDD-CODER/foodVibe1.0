@@ -102,10 +102,10 @@
 
   .nutrition-filter-option {
     &--has lucide-icon {
-      color: var(--color-success, #16a34a);
+      color: var(--color-success-emphasis);
     }
     &--missing lucide-icon {
-      color: var(--color-muted, #6b7280);
+      color: var(--color-text-muted);
     }
   }
 

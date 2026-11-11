@@ -32,7 +32,7 @@
   border: none;
   background: transparent;
   cursor: default;
-  color: var(--color-border, #d1d5db);
+  color: var(--border-strong);
   transition:
     color 150ms ease,
     transform 100ms ease;
@@ -54,7 +54,7 @@
     }
 
     &:focus-visible {
-      outline: 2px solid var(--color-primary, #2563eb);
+      outline: 2px solid var(--color-primary);
       outline-offset: 2px;
       border-radius: 2px;
     }

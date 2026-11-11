@@ -1,3 +1,6 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+$break-desktop: 1200px; // mirrors src/styles.scss
+
 @layer components.platform-dashboard {
   :host {
     display: block;
@@ -11,14 +14,79 @@
     max-inline-size: 90rem;
 
     margin-inline: auto;
-    padding: var(--space-4);
+    padding: var(--space-3);
+
+    @media (min-width: $break-mobile) {
+      gap: var(--space-5);
+
+      padding: var(--space-6);
+    }
+  }
+
+  /* Plan 577 follow-up (Depth): the totals are tiles, the first one dark. */
+  .platform-totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+
+    @media (min-width: $break-mobile) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    @media (min-width: $break-desktop) {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+
+  .total-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-2);
+
+    min-inline-size: 0;
+
+    padding-block: var(--space-4);
+    padding-inline: var(--space-4);
+  }
+
+  .total-tile__label {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-medium);
+  }
+
+  .total-tile__value {
+    color: var(--color-text-main);
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-extrabold);
+    line-height: var(--lh-tight);
+  }
+
+  /* The hero does not carry the panel engine: this file is a cascade layer and the engine would win. */
+  .total-tile--hero {
+    grid-column: span 2;
+
+    color: var(--color-on-bar);
+
+    background: var(--color-primary-hover);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-card);
+
+    .total-tile__label {
+      color: var(--color-on-bar-muted);
+    }
+
+    .total-tile__value {
+      color: var(--color-on-bar);
+      font-size: var(--fs-3xl);
+    }
   }
 
   .table-scroll {
     overflow-x: auto;
-
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
   }
 
   .platform-table {
@@ -37,8 +105,22 @@
       white-space: nowrap;
     }
 
+    thead th {
+      color: var(--color-text-muted);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+
+      padding-block: var(--space-3);
+      background: var(--bg-muted);
+    }
+
+    tbody th,
+    tbody td {
+      padding-block: var(--space-3);
+    }
+
     tbody tr {
-      border-block-start: 1px solid var(--border-default);
+      border-block-start: 1px solid var(--border-row);
     }
 
     .sticky-col {
@@ -83,10 +165,19 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+
+    padding: var(--space-4);
+
+    @media (min-width: $break-mobile) {
+      padding: var(--space-6);
+    }
   }
 
   .ai-usage-title {
-    font-size: var(--fs-md);
+    margin: 0;
+
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
   }
 
   .ai-table {
@@ -111,22 +202,9 @@
 
   .ai-export {
     align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-
-    padding-block: var(--space-1);
-    padding-inline: var(--space-3);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
   }
 
-  .platform-totals,
+  .platform-note,
   .platform-empty {
     color: var(--color-text-secondary);
     font-size: var(--fs-sm);
