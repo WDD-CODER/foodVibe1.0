@@ -25,6 +25,7 @@ export class HeroFabComponent {
   readonly isExpanded_ = signal(false)
   readonly isOnMenuIntelligence_ = signal(false)
   readonly isOnRecipeBuilder_ = signal(false)
+  readonly isOnWelcome_ = signal(false)
 
   /** Actions to show: page-specific only; empty when no page has registered actions. */
   protected readonly effectiveActions_ = computed(() => {
@@ -41,6 +42,7 @@ export class HeroFabComponent {
       const url = this.router.url
       this.isOnMenuIntelligence_.set(url.includes('menu-intelligence'))
       this.isOnRecipeBuilder_.set(url.includes('recipe-builder'))
+      this.isOnWelcome_.set(url.startsWith('/welcome'))
     }
     setRoute()
     this.router.events
@@ -52,7 +54,7 @@ export class HeroFabComponent {
   }
 
   toggle(): void {
-    this.isExpanded_.update(v => !v)
+    this.isExpanded_.update((v) => !v)
   }
 
   collapse(): void {

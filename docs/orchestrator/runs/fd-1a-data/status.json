@@ -1,0 +1,1886 @@
+{
+  "run": "fd-1a-data",
+  "branch": "orch/fd-1a-data",
+  "base": "main",
+  "startedAt": "2026-11-10T14:47:12.845Z",
+  "mainShaAtStart": "fab1912db5d22e25f83ec0306eda6107e3e8f1f9",
+  "plans": {
+    "543": {
+      "nnn": "543",
+      "title": "Open one safe door for people who are not members of a business",
+      "branch": "feat/543-open-one-safe-door",
+      "state": "merged",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-10T14:48:44.495Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T15:04:52.772Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads ADR 0030 and the new INV-1 sentence in `docs/brain/invariants.md` and confirms they say what he approved on 2026-11-10 (D1)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T14:48:44.354Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T14:48:44.497Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:01:10.520Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:04:46.275Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:04:52.773Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:04:59.253Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:06:01.944Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "judgment"
+      ],
+      "freeDiskGb": 11.5,
+      "sha": "c09a04a4369a9717af506380518abcbe09f6b125",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 743.6,
+          "tokens": {
+            "input": 1211901,
+            "output": 20110
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.5,
+          "tokens": {
+            "input": 41725,
+            "output": 354
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "e1a74d4c1b4be0eee86ce9c92baabb0ddd72dee2"
+    },
+    "544": {
+      "nnn": "544",
+      "title": "Clients become CRM records: wider shape, phone match key, Trash instead of hard delete",
+      "branch": "feat/544-clients-become-crm-records",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T15:22:28.606Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T15:33:20.020Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-10T15:37:09.889Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T15:53:57.751Z"
+        }
+      },
+      "humanItems": [
+        "Dandan approved the ADR 0031 text below before this plan was saved (map Human gate).",
+        "Atlas: Dandan ran the A6 runbook (backup → dry run → write → verify); the verify run printed `verify: ok`, and every `phoneKey` collision group the dry run listed was read before the write."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T15:22:28.479Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:22:28.608Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:33:04.565Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:33:19.736Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:33:19.882Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T15:33:20.022Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T15:37:04.114Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T15:37:09.762Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T15:37:09.891Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T15:49:35.818Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T15:53:50.216Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T15:53:57.753Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T15:54:13.202Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-10T15:54:59.918Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 6.3,
+      "sha": "b7def9cfe448609f84aad324e0f1c5a9dc317f9e",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 633.4,
+          "tokens": {
+            "input": 2006499,
+            "output": 30291
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 223.9,
+          "tokens": {
+            "input": 893562,
+            "output": 9615
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 743.6,
+          "tokens": {
+            "input": 5692712,
+            "output": 47673
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.8,
+          "tokens": {
+            "input": 119749,
+            "output": 549
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [auto] Staff `POST`, `PUT` and `DELETE` on `clients` still answer 403 and change nothing (existing cases in `server/test/clients.test.js` stay green).",
+        "round 2: builder left uncommitted files: test-results/"
+      ],
+      "escalations": [
+        {
+          "step": "round 2",
+          "check": "builder left uncommitted files: test-results/"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "resetToBase": "012b39bf545f32c23d98b9e449cbca49652f7848",
+      "resetFrom": "c607fdb0fa75122344faee6246ae4d089eb9144e",
+      "checkedHead": "3859c913fcaee58e32e71276f22d2e5571942a20"
+    },
+    "545": {
+      "nnn": "545",
+      "title": "One find-or-create of a client by phone, so one person is one client on every channel",
+      "branch": "feat/545-one-find-or-create",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T16:40:54.042Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T16:51:33.631Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T17:01:00.079Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-10T16:15:16.175Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:40:53.832Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:40:54.043Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:51:33.083Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:51:33.311Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:51:33.484Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T16:51:33.632Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T16:56:52.205Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T17:00:54.400Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T17:01:00.080Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T17:01:13.518Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-10T17:01:53.073Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "545",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 566-1",
+          "freeDiskGb": 5
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.8,
+      "sha": "d1b7d9532da4358e36e2d6e852cdb07e1e8f35e4",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 635.5,
+          "tokens": {
+            "input": 3571684,
+            "output": 38583
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 315.7,
+          "tokens": {
+            "input": 780585,
+            "output": 8989
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.4,
+          "tokens": {
+            "input": 54022,
+            "output": 1158
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [ui] In the menu library, as the QA owner, \"פנייה חדשה\" → add a new client with the phone of a client that already exists → the toast \"כבר יש לקוח עם מספר הטלפון הזה — הוא נבחר\" shows and the existing"
+      ],
+      "checkedHead": "54366386c1873ff8b5626f7fc319438266ab70fb"
+    },
+    "548": {
+      "nnn": "548",
+      "title": "Give every business one front desk profile, with a template per business type and the fit rules",
+      "branch": "feat/548-front-desk-profile-per",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T17:33:34.983Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T17:50:19.730Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads the three templates' Hebrew questions and starting limits (rendered list in the plan's Execution Notes after A3) and says they fit a catering business, a private chef and a restaurant."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T16:15:16.345Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:03:15.969Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:03:16.174Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:19:42.727Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:20:57.867Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:33:33.658Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:33:34.989Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:36:25.971Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:50:13.152Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:50:19.732Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:50:40.438Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:51:22.046Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "548",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 566-1",
+          "freeDiskGb": 5
+        },
+        {
+          "nnn": "548",
+          "title": "Give every business one front desk profile, with a template per business type and the fit rules",
+          "branch": "feat/548-front-desk-profile-per",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-10T17:03:16.172Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 4.5,
+          "reason": "asking 548-1: replan needed: ESCALATE: scope node scripts/breadcrumbs-check.mjs -> exit 1 (2 seams: front-desk-profile-data.service.ts and front-desk-profile.model.ts not mentioned); needs src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md, outside the plan's scope",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 986.2,
+              "tokens": {
+                "input": 3307352,
+                "output": 45585
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-10T17:20:46.709Z",
+            "reason": "replan needed: ESCALATE: scope node scripts/breadcrumbs-check.mjs -> exit 1 (2 seams: front-desk-profile-data.service.ts and front-desk-profile.model.ts not mentioned); needs src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md, outside the plan's scope"
+          },
+          "parkBranch": "park/fd-1a-data-548"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 548-1: replan needed: ESCALATE: scope node scripts/breadcrumbs-check.mjs -> exit 1 (2 seams: front-desk-profile-data.service.ts and front-desk-",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 2.3,
+      "sha": "436e920086a47acbbbf2ef5f6ddfa321de7c47a7",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 162.8,
+          "tokens": {
+            "input": 101673,
+            "output": 1657
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 19.4,
+          "tokens": {
+            "input": 130710,
+            "output": 1340
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "cea651fd16dbcf03b68273b80376e2ada128fd9c"
+    },
+    "549": {
+      "nnn": "549",
+      "title": "Store customer requests and bookings on the server: manual request, status moves, lazy expiry",
+      "branch": "feat/549-requests-and-bookings-on",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T18:08:10.067Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T18:13:31.570Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-10T16:15:16.588Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:20:58.780Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:52:49.211Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:52:49.376Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:05:06.563Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:05:51.390Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:08:09.866Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:08:10.069Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:08:45.821Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:13:26.612Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:13:31.571Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:13:48.339Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:14:26.649Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "549",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 548-1",
+          "freeDiskGb": 4.5
+        },
+        {
+          "nnn": "549",
+          "title": "Store customer requests and bookings on the server: manual request, status moves, lazy expiry",
+          "branch": "feat/549-requests-and-bookings-on",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-10T17:52:49.374Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 6.9,
+          "reason": "asking 549-1: replan needed: ESCALATE: scope — `node scripts/breadcrumbs-check.mjs` exit 1 (2 seams: not mentioned booking-data.service.ts, request-data.service.ts, booking.model.ts, request.model.ts); the fix needs one row in each of src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md, which are outside",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 736.7,
+              "tokens": {
+                "input": 3903198,
+                "output": 52439
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-10T18:05:44.622Z",
+            "reason": "replan needed: ESCALATE: scope — `node scripts/breadcrumbs-check.mjs` exit 1 (2 seams: not mentioned booking-data.service.ts, request-data.service.ts, booking.model.ts, request.model.ts); the fix needs one row in each of src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md, which are outside"
+          },
+          "parkBranch": "park/fd-1a-data-549"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 549-1: replan needed: ESCALATE: scope — `node scripts/breadcrumbs-check.mjs` exit 1 (2 seams: not mentioned booking-data.service.ts, request-da",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.3,
+      "sha": "559b769b4f18e166bb158d9d04ec3bb5228745d9",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 33.7,
+          "tokens": {
+            "input": 150986,
+            "output": 2080
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.9,
+          "tokens": {
+            "input": 127173,
+            "output": 995
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "a86395d609562f84596b19b93dd2527fb1cf7a4b"
+    },
+    "550": {
+      "nnn": "550",
+      "title": "Approve or decline a request in one tap: the event or booking is created, the day's load is shown, every decision is logged",
+      "branch": "feat/550-approve-or-decline-a",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T18:15:36.112Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T18:31:32.788Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-10T16:15:16.754Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T17:20:59.068Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:05:51.815Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:15:35.963Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:15:36.114Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:27:35.194Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:31:28.122Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:31:32.789Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:31:45.156Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T18:32:22.847Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "550",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 549-1",
+          "freeDiskGb": 6.9
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5.6,
+      "sha": "18a1364640e15da88fb1fdecf2b54f6850dd2be9",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 717.1,
+          "tokens": {
+            "input": 3090668,
+            "output": 46295
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.5,
+          "tokens": {
+            "input": 57288,
+            "output": 1136
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "cf6ab5f8cb033afd1bf7d7a65cf4c4a865ef07f7"
+    },
+    "566": {
+      "nnn": "566",
+      "title": "Meter every AI call so pricing can be set from real numbers",
+      "branch": "feat/566-meter-every-ai-call",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T16:21:36.525Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T16:38:32.646Z"
+        }
+      },
+      "humanItems": [
+        "On `/platform`, signed in as the platform admin, the \"שימוש ב-AI החודש\" table shows this month's calls, tokens and estimated cost per business, and a row opens the per-feature breakdown.",
+        "Dandan makes one real AI call (e.g. a recipe from text), then compares its row's tokens with the usage shown in Google AI Studio for that minute; the numbers match."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T15:57:26.248Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:57:26.481Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:14:28.665Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:15:15.579Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:21:36.260Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:21:36.527Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:33:57.817Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:38:27.287Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:38:32.647Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:38:47.808Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T16:39:25.282Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "566",
+          "title": "Meter every AI call so pricing can be set from real numbers",
+          "branch": "feat/566-meter-every-ai-call",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-10T15:57:26.479Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 5,
+          "reason": "asking 566-1: ESCALATE scope: ESCALATE: scope src/app/core/models/breadcrumbs.md — node scripts/breadcrumbs-check.mjs exits 1 with 'src/app/core/models/breadcrumbs.md: not mentioned: ai-usage.model.ts'; the fix is one table row in that file.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1021.8,
+              "tokens": {
+                "input": 3522793,
+                "output": 45889
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-10T16:15:07.757Z",
+            "reason": "ESCALATE scope: ESCALATE: scope src/app/core/models/breadcrumbs.md — node scripts/breadcrumbs-check.mjs exits 1 with 'src/app/core/models/breadcrumbs.md: not mentioned: ai-usage.model.ts'; the fix is one table row in that file."
+          },
+          "parkBranch": "park/fd-1a-data-566"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 566-1: ESCALATE scope: ESCALATE: scope src/app/core/models/breadcrumbs.md — node scripts/breadcrumbs-check.mjs exits 1 with 'src/app/core/model",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.1,
+      "sha": "190516856df4b7e640d7a7b0fe538b79abaf880d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 738.9,
+          "tokens": {
+            "input": 27818,
+            "output": 111
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 14.1,
+          "tokens": {
+            "input": 122028,
+            "output": 723
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "a933b38bf263eafb36d1e55b58540bbabc3c4918"
+    },
+    "569": {
+      "nnn": "569",
+      "title": "Put the Front Desk brief and map on main, with the contract additions the plans made",
+      "branch": "feat/569-put-the-front-desk",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T15:07:35.900Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T15:12:36.679Z"
+        }
+      },
+      "humanItems": [
+        "Dandan skims the map's Contract extensions and confirms nothing in them contradicts what he decided."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T15:07:35.751Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:07:35.902Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:08:28.003Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:12:28.333Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:12:36.680Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:12:44.651Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:13:25.264Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.4,
+      "sha": "2dd1234da04c9d7df4d2b5bf5469d79f84cfd0d3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 49.4,
+          "tokens": {
+            "input": 149753,
+            "output": 3970
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6.6,
+          "tokens": {
+            "input": 47250,
+            "output": 351
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "01e2ab6cedba1502a210ae7af727575900cb0fc9"
+    },
+    "570": {
+      "nnn": "570",
+      "title": "Keep the logistics panel's buttons out from under the price bar on wide screens",
+      "branch": "feat/570-logistics-panel-not-hidden",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-10T15:15:38.522Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-10T15:20:15.679Z"
+        }
+      },
+      "humanItems": [
+        "On a laptop screen (about 1280 px wide), the event screen's last card and the notes are fully visible above the price bar, and the page does not look padded too much at the bottom."
+      ],
+      "history": [
+        {
+          "at": "2026-11-10T15:15:38.304Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:15:38.524Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:17:34.382Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:20:10.766Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:20:15.680Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:20:22.478Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-10T15:20:56.939Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.2,
+      "sha": "012b39bf545f32c23d98b9e449cbca49652f7848",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 113.5,
+          "tokens": {
+            "input": 146239,
+            "output": 3327
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.5,
+          "tokens": {
+            "input": 24378,
+            "output": 259
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "105f7c69edce85a2ae87952a1ec086d34f94344b"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-10T14:48:37.171Z",
+      "plan": "543",
+      "text": "starts on the judgment tier: INV-1 changes"
+    },
+    {
+      "at": "2026-11-10T14:48:44.198Z",
+      "plan": "543",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-543 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T15:05:08.614Z",
+      "plan": "543",
+      "text": "the folder foodVibe1.0-orch-merge-fd-1a-data was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T15:07:35.588Z",
+      "plan": "569",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-569 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T15:15:38.072Z",
+      "plan": "570",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-570 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T15:17:32.182Z",
+      "plan": "570",
+      "text": "builder left undone (round 0): A4: specs 522-1…6, 523-1…3 and 570-1 not run against a slot app (no slot app or backend in this worktree). Build and lint were run; log-query and the other gate checks are left to the gate. The sub-task is left unticked."
+    },
+    {
+      "at": "2026-11-10T15:22:28.346Z",
+      "plan": "544",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-544 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T15:33:02.165Z",
+      "plan": "544",
+      "text": "builder left undone (round 0): A6: node server/migrations/0011-clients-crm.js --target=local failed with 'Cannot find module mongodb' in this worktree, so the local dry run, write and verify did not run. The in-memory migration test covers the logic.; [ui] e2e/ui/544-1.spec.ts was written but not run: it needs the dev servers and"
+    },
+    {
+      "at": "2026-11-10T15:33:19.595Z",
+      "plan": "544",
+      "text": "[auto] Staff `POST`, `PUT` and `DELETE` on `clients` still answer 403 and change nothing (existing cases in `server/test: the main folder's backend was started"
+    },
+    {
+      "at": "2026-11-10T15:37:09.611Z",
+      "plan": "544",
+      "text": "escalated to a fresh judgment-tier builder (round 2): builder left uncommitted files: test-results/"
+    },
+    {
+      "at": "2026-11-10T15:57:26.100Z",
+      "plan": "566",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-566 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T16:14:28.490Z",
+      "plan": "566",
+      "text": "builder left undone (round 0): A9: breadcrumbs-check still fails (needs a row in src/app/core/models/breadcrumbs.md), so the full check set is not green; the two [human] cards are not handed over yet"
+    },
+    {
+      "at": "2026-11-10T16:15:15.400Z",
+      "plan": "566",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-10T16:15:15.789Z",
+      "plan": "566",
+      "text": "ask 566-1 (scope, the Human or the advisor answers): May the builder add one row for ai-usage.model.ts to src/app/core/models/breadcrumbs.md, which is outside the plan's scope, so breadcrumbs-check passes?"
+    },
+    {
+      "at": "2026-11-10T16:15:16.939Z",
+      "text": "plan 566 asks 566-1 — 545, 548, 549, 550 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-10T16:19:47.236Z",
+      "plan": "566",
+      "text": "ask 566-1 answered by the human: approved: src/app/core/models/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-10T16:20:00.626Z",
+      "plan": "566",
+      "text": "scope of plan 566 extended on orch/fd-1a-data by the answer to 566-1: src/app/core/models/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-10T16:21:26.287Z",
+      "plan": "566",
+      "text": "resumed from park/fd-1a-data-566: round 0, tier build, after: asking 566-1: ESCALATE scope: ESCALATE: scope src/app/core/models/breadcrumbs.md — node scripts/breadcrumbs-check.mjs exits 1 with 'src/app/core/models/breadcru"
+    },
+    {
+      "at": "2026-11-10T16:21:36.072Z",
+      "plan": "566",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-566 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T16:40:53.704Z",
+      "plan": "545",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-545 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T16:51:29.725Z",
+      "plan": "545",
+      "text": "builder left undone (round 0): e2e/ui/545-1.spec.ts was written but not run here (needs the dev servers and the QA login)"
+    },
+    {
+      "at": "2026-11-10T17:03:15.831Z",
+      "plan": "548",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-548 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T17:19:42.496Z",
+      "plan": "548",
+      "text": "builder left undone (round 0): breadcrumbs-check passes: needs one-line entries in src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md (out of scope); [human] item: Dandan reads the Hebrew templates (rendered list is in the plan's Execution Notes)"
+    },
+    {
+      "at": "2026-11-10T17:20:57.610Z",
+      "plan": "548",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-10T17:20:58.130Z",
+      "plan": "548",
+      "text": "ask 548-1 (scope, the Human or the advisor answers): Add src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md to plan 548's scope so one line each can list the new data service and model, which breadcrumbs-check requires?"
+    },
+    {
+      "at": "2026-11-10T17:29:00.890Z",
+      "plan": "548",
+      "text": "ask 548-1 answered by the human: approved: src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-10T17:29:18.851Z",
+      "plan": "548",
+      "text": "scope of plan 548 extended on orch/fd-1a-data by the answer to 548-1: src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-10T17:32:23.273Z",
+      "plan": "548",
+      "text": "resumed from park/fd-1a-data-548: round 0, tier build, after: asking 548-1: replan needed: ESCALATE: scope node scripts/breadcrumbs-check.mjs -> exit 1 (2 seams: front-desk-profile-data.service.ts and front-desk-profile.mo"
+    },
+    {
+      "at": "2026-11-10T17:33:32.710Z",
+      "plan": "548",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-548 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T17:52:48.976Z",
+      "plan": "549",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-549 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T18:05:06.331Z",
+      "plan": "549",
+      "text": "builder left undone (round 0): breadcrumbs rows in src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md (outside scope; approve the two paths and the gate goes green)"
+    },
+    {
+      "at": "2026-11-10T18:05:51.258Z",
+      "plan": "549",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-10T18:05:51.517Z",
+      "plan": "549",
+      "text": "ask 549-1 (scope, the Human or the advisor answers): Allow one breadcrumbs row each in src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md, as plan 548 did, so breadcrumbs-check passes?"
+    },
+    {
+      "at": "2026-11-10T18:06:52.062Z",
+      "plan": "549",
+      "text": "ask 549-1 answered by the human: approved: src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-10T18:07:00.065Z",
+      "plan": "549",
+      "text": "scope of plan 549 extended on orch/fd-1a-data by the answer to 549-1: src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-10T18:08:04.299Z",
+      "plan": "549",
+      "text": "resumed from park/fd-1a-data-549: round 0, tier build, after: asking 549-1: replan needed: ESCALATE: scope — `node scripts/breadcrumbs-check.mjs` exit 1 (2 seams: not mentioned booking-data.service.ts, request-data.service"
+    },
+    {
+      "at": "2026-11-10T18:08:09.723Z",
+      "plan": "549",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-549 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-10T18:15:35.814Z",
+      "plan": "550",
+      "text": "the folder foodVibe1.0-orch-fd-1a-data-550 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 5.6,
+  "updatedAt": "2026-11-10T18:35:14.916Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "543",
+      "type": "behaviour",
+      "text": "behaviour: server/middleware/rate-limit.js was saved in Windows-1252 (one em dash in the plan 528 comment), and the edit tools could not change it, so I rewrote it as UTF-8 with the same text plus the new exports. Reverse: git checkout the old file and re-add the plan 543 exports in Windows-1252.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "543",
+      "type": "behaviour",
+      "text": "behaviour: the honeypot passes through any website value that is not a non-empty string (a number or an object) and does not treat it as a bot. Reverse: in server/middleware/honeypot.js, answer 201 for any truthy website value.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "543",
+      "type": "behaviour",
+      "text": "behaviour: added the ADR 0030 entry to docs/workflow-kit/manifest.json (this file is always allowed by scope-check) so kit-manifest-check passes. Reverse: remove that entry.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "569",
+      "type": "behaviour",
+      "text": "behaviour: the main folder's map title already read 'APPROVED by Dandan 2026-11-10 (map + contracts)…'. I replaced it with the plan's exact title line, so the extra 'Arch: approve arch change INV-1 given 2026-11-10' note on that line is gone — reverse: restore the old first line from the main folder's copy.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "569",
+      "type": "behaviour",
+      "text": "behaviour: the brain index has no list of links, so I added the pointer as a row in its 'When to read what' table — reverse: delete that row.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: the dry run prints the 9-digit phoneKey in each collision line, because the plan specifies that line format. Printing the key rather than the full phone is what keeps phones out of the output. Reverse: print only the ids and names.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: the e2e spec deletes the client again in its cleanup, so the QA client ends in Trash, not purged. Reverse: purge it from Trash in cleanup.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: the local migration ran with NODE_PATH pointing at the main folder's server/node_modules (the worktree has no top-level mongodb) and a copy of the main folder's gitignored server/.env, which I left in the worktree — reverse: delete server/.env",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: for the [ui] run I temporarily pointed environment.local.ts at port 3100 and added a throwaway Playwright config; both are removed and nothing of them is committed. The gate's default config uses :4200 and :3000, which are the main folder's servers, so those would run the old backend — reverse: n/a",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "544",
+      "type": "seen",
+      "text": "seen: the migration scripts require 'mongodb' through server/migrations/tools/_connect.js:12, which pnpm does not resolve in a worktree — a worktree run needs NODE_PATH",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: staff reads of the Trash list now get the same trimmed fields as their other reads (GET /:type/trash in server/routes/generic.js). Without it, staff would have seen the notes, email and consent of trashed clients — reverse: remove the projection option from that find().",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: the migration 0011 dry-run summary uses the Functional Requirements format 'clients: <n>, to patch: <m>, phoneKey collisions: <k>'. The Done-when line gives a shorter form without 'to patch' — reverse: drop the to-patch part in printPlan().",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "544",
+      "type": "behaviour",
+      "text": "behaviour: migration 0011 leaves updatedAt unchanged on the clients it fills, and its collision list skips clients that have mergedInto set — reverse: add updatedAt to the $set in write(), and remove the mergedInto skip in collisions().",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "544",
+      "type": "seen",
+      "text": "seen: server/routes/generic.js:151 trashOwnerFilter lets staff restore-all or empty Trash for docs whose createdBy is their own id. Once plan 545 stores a staff actor as createdBy on clients, staff could restore or purge those clients even though clients are owner-only.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "544",
+      "type": "seen",
+      "text": "seen: server/scripts/db-backup.js:31 and server/migrations/tools/_connect.js require('mongodb'), which is not a direct dependency in server/package.json. In this worktree the migration tools only ran with NODE_PATH pointing at mongoose's node_modules.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "566",
+      "type": "behaviour",
+      "text": "behaviour: the CSV export button fetches the file with the session token as a blob and saves it, because a plain link cannot send the Bearer header — reverse: change exportAiCsv and downloadAiUsageCsv in platform-admin.service.ts to open a URL",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "566",
+      "type": "behaviour",
+      "text": "behaviour: the per-business totals use a metered row's businessId as the key, with `__platform__` shown by its raw key when the business has no name — reverse: map `__platform__` to a label in aggregateAiUsage",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "566",
+      "type": "behaviour",
+      "text": "behaviour: I did not re-read the Google pricing page (no network lookup in this run) and used the plan's prices unchanged, including the Human-chosen gemini-3.8-flash 0.375 / 1.875 — reverse: edit server/constants/ai-prices.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "545",
+      "type": "behaviour",
+      "text": "behaviour: bulk DELETE of clients is a hard delete in the code today, not soft, so I left it alone (the live key goes with the doc) — reverse: add a $unset of liveKey if bulk delete becomes soft",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "545",
+      "type": "behaviour",
+      "text": "behaviour: a PUT that keeps the phone only fills a missing liveKey when no other live client has that key, so an old twin stays editable — reverse: always set liveKey and answer 409 on E11000",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "545",
+      "type": "behaviour",
+      "text": "behaviour: trash.service.ts reads the 409 messageKey itself, because readServerRefusal only handles 400s — reverse: widen readServerRefusal (outside this plan's scope) and call it instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "545",
+      "type": "behaviour",
+      "text": "behaviour: owner POST of a client keeps the sent source and defaults it to 'manual' when none is sent — reverse: force 'manual'",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "545",
+      "type": "seen",
+      "text": "seen: server/test/clients.test.js:~213 — the existing server-field and restore tests had to change: liveKey became a server field, POST now sets firstSeenAt and counters, and restore now sets liveKey",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "545",
+      "type": "behaviour",
+      "text": "behaviour: used a throwaway server on port 3101, ng serve on 4201 and an /api proxy through wt.localhost, plus a temp playwright config and a copy of server/.env, because the dev servers on 3000/4200 run the main checkout. I removed the temp files and stopped the servers afterwards — reverse: nothing to undo.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "545",
+      "type": "seen",
+      "text": "seen: e2e/helpers/qa-session.ts:~20 — Node fetch to `localhost:3000` gets ECONNRESET on this machine, because the API listens on IPv4 only and `localhost` resolves to ::1 first. `E2E_API_URL=http://127.0.0.1:3000` works around it.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "545",
+      "type": "seen",
+      "text": "seen: playwright.config.ts — with the default config the spec tests whatever is on :4200/:3000. In this setup that is the main checkout, so the gate's rerun of the spec needs servers started from this branch. Otherwise it fails with the toast missing.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "548",
+      "type": "behaviour",
+      "text": "behaviour: the unique indexes `frontdesk_slug_unique` and `frontdesk_business_unique` are partial on `slug` being a string, so raw fixture docs without a slug (server/test/admin-business.test.js inserts two docs per business into every collection) cannot break startup or the cleanup tests — reverse: drop `partialFilterExpression` in server/db.js and give that test's fixtures a",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D28",
+      "plan": "548",
+      "type": "behaviour",
+      "text": "behaviour: `requestKinds` uses `z.partialRecord` because zod 4 `z.record(enum)` requires all four kinds — reverse: switch to `z.record` and fill all four kinds in every profile",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D29",
+      "plan": "548",
+      "type": "behaviour",
+      "text": "behaviour: the PUT response also drops `whatsapp.phoneNumberId`, not only reads — reverse: remove the delete line in the PUT handler of generic.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D30",
+      "plan": "548",
+      "type": "behaviour",
+      "text": "behaviour: `qualify` skips the opening-hours check only when `ctx.kind` is `'event'`; with no `ctx.kind` it checks the hours — reverse: require `ctx.kind` in the check",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D31",
+      "plan": "548",
+      "type": "behaviour",
+      "text": "behaviour: the client mirror `permission.service.ts` does not mirror `OWNER_ONLY_TYPES`, so the UI can still show create for staff on frontDeskProfiles while the server refuses — reverse: add a type check in `can()`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D32",
+      "plan": "549",
+      "type": "behaviour",
+      "text": "behaviour: the publicToken unique indexes on requests and bookings are partial (publicToken is a string), so a raw fixture doc without a token cannot break startup, as with the profile slug index — reverse: drop the partialFilterExpression in server/db.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D33",
+      "plan": "549",
+      "type": "behaviour",
+      "text": "behaviour: a request with an unfit verdict but no missing answer is stored `qualified`, per the plan's rule that only a missing required answer gives needs_info — reverse: map verdict unfit to another status in runQualify in server/routes/requests.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D34",
+      "plan": "549",
+      "type": "behaviour",
+      "text": "behaviour: the client data services return error codes and log them, with no toast, per the plan's 'codes only' note — reverse: add UserMsgService calls in the run() helper",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D35",
+      "plan": "549",
+      "type": "behaviour",
+      "text": "behaviour: I did not tick the 15 unticked items left in the plan's list around lines 127–166. They read as spec items, not sub-tasks, and the plan file was not changed this round — reverse: tick them in the plan file.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D36",
+      "plan": "550",
+      "type": "behaviour",
+      "text": "behaviour: decisionLog is registered with backup:false although the plan says backup:true, because server/test/collections.test.js (outside scope) requires userData:true for any backup entry — reverse: set backup:true once that rule is relaxed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D37",
+      "plan": "550",
+      "type": "behaviour",
+      "text": "behaviour: approve builds and validates the event or booking before the claim, so a 400 never touches the request; only an insert failure reverts the claim — reverse: move the build after the claim",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "550",
+      "type": "behaviour",
+      "text": "behaviour: a client with more than 3 kinds after approve keeps the last 3 (the schema maximum) — reverse: change the slice in requests.js approve",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "550",
+      "type": "behaviour",
+      "text": "behaviour: RequestDataService.approve reloads the menu events store when it is loaded, because MenuEventDataService has no public add method and is outside scope — reverse: add a method there and call it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-10T18:35:14.914Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-10T18:35:14.915Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

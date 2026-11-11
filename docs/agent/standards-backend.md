@@ -39,6 +39,12 @@ paths:
 | `EQUIPMENT_LIST` | Kitchen | Kitchen equipment |
 | `VENUE_PROFILES` | Venue | Event venue profiles |
 | `MENU_EVENT_LIST` | Menu | Menu events |
+| `clients` | CRM | Clients (ADR 0027, ADR 0031): owner-only to write, staff read `name`, `phone`, `tags`, `kinds`. Soft delete (Trash). Server-owned fields, dropped from every generic write (`CLIENT_SERVER_FIELDS`): `phoneNormalized`, `phoneKey`, `kinds`, `lifecycle`, `firstSeenAt`, `lastContactAt`, `counters`, `waId`, `mergedInto`, `doNotContact` |
+| `frontDeskProfiles` | Front desk | The business's one front desk profile (plan 548, C-PROFILE): owner-only to write (`editFrontDesk`), not cloneable, hard delete. Unique `businessId` (409 `PROFILE_EXISTS`) and `slug` (409 `SLUG_TAKEN`). `PROFILE_SERVER_FIELDS` (`status`, `whatsapp`) are dropped from every generic write; reads never carry `whatsapp.phoneNumberId` |
+| `requests` | Front desk | Customer requests (plan 549, C-REQUEST): router writes only (`routerWrites`; generic POST / PUT / DELETE → 405 `USE_ROUTER`), generic GET lists and runs lazy expiry. Any member (`manageRequests`). Not cloneable, hard delete. `REQUEST_SERVER_FIELDS` are written only by `/api/v1/requests` |
+| `bookings` | Front desk | Calendar records of an approved table, tasting or consultation (plan 549, C-REQUEST): router writes only (`routerWrites`), generic GET reads. Any member (`manageRequests`). Not cloneable, hard delete. `BOOKING_SERVER_FIELDS` are written only by `/api/v1/bookings` |
+| `decisionLog` | Front desk | One row per approve / decline / ask on a request (plan 550, C-REQUEST): ids, enums and numbers only, never a name, phone or free text. Server-only (not in the generic API), never cloned, `backup: false` (the collections test ties backup to userData). Index `decisionlog_business_at`. Read later by stats (559, 563) |
+| `aiUsage` | System | Server-only AI ledger (plan 566, C-AIUSAGE): one row per real Gemini HTTP call — business, feature, model, tokens, latency, outcome, estimated cost. Not in the generic API, never cloned, no prompt or reply text. Read only by `GET /api/v1/admin/ai-usage` |
 | `VERSION_HISTORY` | System | Schema/version snapshots |
 | `activity_log` | System | Activity log entries (`ACTIVITY_STORAGE_KEY`) |
 | `KITCHEN_UNITS` | Registry | Unit of measure registry |
@@ -111,13 +117,28 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `PUT` | `/api/v1/data/:type` | required | Replace all (requires `X-Confirm-Replace: true` header) — restricted (Plan 321 Phase 1) to `REPLACEABLE_TYPES` in `generic.js`, not every entity type |
 | `DELETE` | `/api/v1/data/:type/bulk` | required | Remove many by id |
 | `DELETE` | `/api/v1/data/:type/:id` | required | Remove one |
+| `GET` | `/api/v1/admin/ai-usage` | platform admin | Plan 566: AI call totals `?from&to&groupBy=business|feature|model|day&businessId&format=csv` (default: this Jerusalem month). Errors: `BAD_GROUP_BY`, `BAD_RANGE` (366 days max) |
 | `PUT` | `/api/v1/events/:id/stage` | required | Plan 442: move an event to another stage `{ stage, reason?, reasonText? }`. C-PERM `changeStage` (owner, or the event's creator). Errors: `BAD_STAGE`, `EVENT_FINISHED` (409), `USE_FINISH`, `NOT_CLOSED_FROM_STAGE`, `REASON_REQUIRED`, `DATE_REQUIRED` |
 | `POST` | `/api/v1/events/:id/notes` | required | Plan 442: add a note `{ text }` (1 to 2,000 chars; `NOTE_EMPTY`, `NOTE_TOO_LONG`). C-PERM `addNote` (any member) |
 | `PUT` / `DELETE` | `/api/v1/events/:id/notes/:noteId` | required | Plan 442: edit (`editedAt` set) or delete a note - its author only (403 otherwise) |
 | `PUT` | `/api/v1/events/:id/logistics` | required | Plan 519: save site-logistics answers `{ answers?, environmentType?, venueProfileId?, meetingAt?, meetingWith?, phaseDone? }`, merged and stamped (`by`/`at`) by the server. C-PERM `editLogistics` (owner only). Errors: `BAD_LOGISTICS`, `EVENT_FINISHED` (409) |
+| `POST` | `/api/v1/requests` | required | Plan 549: record a phone request `{ kind, clientId? | guestName + guestPhone, wanted, answers? }`; finds or creates the client, runs `qualify`, 201. C-PERM `manageRequests` (any member). Errors: `BAD_REQUEST_INPUT` (400), `NO_PROFILE` (409), `CLIENT_NOT_FOUND` (404) |
+| `PUT` | `/api/v1/requests/:id/status` | required | Plan 549: move a request `{ status, note? }` along `new | qualified | needs_info` → `qualified | needs_info | cancelled`. Errors: `BAD_STATUS`, `STATUS_CHANGED` (409) |
+| `PUT` | `/api/v1/requests/:id/wanted` | required | Plan 549: edit what the customer wants `{ wanted, answers? }`, re-qualified by the rules; only while open. Errors: `ALREADY_DECIDED`, `NO_PROFILE`, `STATUS_CHANGED` (409) |
+| `POST` | `/api/v1/requests/:id/approve` | required | Plan 550: approve once `{ wanted?, note? }`: claims the request, creates a `menuEvents` inquiry (kind event, via `buildNewEventDoc`) or a confirmed booking, updates the client's kinds and counters, writes a `decisionLog` row; 200 `{ request, outcome }`. C-PERM `manageRequests`. Errors: `ALREADY_DECIDED` (409), `BAD_REQUEST_INPUT`, `MISSING_BOOKING_FIELDS` (400) |
+| `POST` | `/api/v1/requests/:id/decline` | required | Plan 550: decline `{ reason, text? }` (`reason` in `DECLINE_REASONS`, `text` at most 500), stores `decline`, writes a `decisionLog` row. Errors: `BAD_REASON`, `BAD_REQUEST_INPUT` (400), `ALREADY_DECIDED` (409) |
+| `GET` | `/api/v1/bookings/day?date=YYYY-MM-DD` | required | Plan 550: the business's non-cancelled bookings of that day by `startAt`, and `coversByHour` (party sizes of confirmed / seated / finished bookings by start hour). Error: `BAD_DATE` (400) |
+| `PUT` | `/api/v1/bookings/:id/status` | required | Plan 549: `confirmed → seated → finished`, `confirmed → no_show` (only after `startAt`; adds 1 to the client's `counters.noShows`), `confirmed | seated → cancelled`. Errors: `BAD_STATUS`, `STATUS_CHANGED` (409) |
 | `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
+| `GET` | `/api/v1/public/health` | none | Plan 543: public router probe; the public door for non-members (ADR 0030, C-GUEST). No member token is read under /api/v1/public. |
+
+`POST /api/v1/data/clients` finds-or-creates by `phoneKey` (plan 545): 201 new, 200 existing; restore or a phone change that would make a second live client → 409 `PHONE_TAKEN`.
+
+Every later public write route under `/api/v1/public` carries `publicLimiter` (`server/middleware/rate-limit.js`), the
+`honeypot` (`server/middleware/honeypot.js`) and, when the guest may read back, a token from `newPublicToken`
+(`server/utils/public-token.js`) — all three in the plan that adds the route.
 
 Why a dedicated `/api/v1/events` router (plan 442): an event's stage history, `closedAt` and notes are server-owned.
 The actor (`by`, `byName`) comes from the token and each change is one atomic write (`$push` / `$pull` / `$set`

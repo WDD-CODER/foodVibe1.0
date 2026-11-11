@@ -37,7 +37,7 @@ test('523-3: removing an own question and confirming takes it off the list', asy
     })
     expect(created.ok()).toBeTruthy()
 
-    await page.goto('/metadata-manager')
+    await page.goto('/dashboard?tab=metadata')
     await card(page).getByRole('tab', { name: 'פגישת ספקים' }).click()
     const row = card(page).locator('.logistics-item', { hasText: NAME })
     await expect(row).toBeVisible()

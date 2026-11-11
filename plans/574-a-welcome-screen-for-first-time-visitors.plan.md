@@ -131,14 +131,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Remember on the device that someone has signed in here, and forget it on sign-out — the util with its spec; two lines in the user service with three spec cases — src/app/core/utils/returning-visitor.util.ts, src/app/core/utils/returning-visitor.util.spec.ts, src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
-- [ ] A2: Decide where the site's bare address leads: welcome for a first-time visitor, dashboard for everyone else — the redirect function and the guard, each with its spec — src/app/pages/welcome/home-redirect.ts, src/app/pages/welcome/home-redirect.spec.ts, src/app/core/guards/welcome.guard.ts, src/app/core/guards/welcome.guard.spec.ts
-- [ ] A3: Build the welcome screen with the mark, the promise, two buttons and the three rooms — the page's four files — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/welcome.page.html, src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
-- [ ] A4: Add the ten Hebrew texts of the welcome screen — public/assets/data/dictionary.json
-- [ ] A5: Connect the screen to the address bar — the welcome route and the one rewritten home entry — src/app/app.routes.ts
-- [ ] A6: Hide the floating add button on the welcome screen — one signal, one wrapper, one spec case — src/app/core/components/hero-fab/hero-fab.component.ts, src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.spec.ts
-- [ ] A7: Record the new page, guard and util in the folder maps — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md
-- [ ] A8: Run build, lint, the icon lint, the unit tests, the breadcrumbs check and the log query, and paste the output lines under Execution Notes
+- [x] A1: Remember on the device that someone has signed in here, and forget it on sign-out — the util with its spec; two lines in the user service with three spec cases — src/app/core/utils/returning-visitor.util.ts, src/app/core/utils/returning-visitor.util.spec.ts, src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
+- [x] A2: Decide where the site's bare address leads: welcome for a first-time visitor, dashboard for everyone else — the redirect function and the guard, each with its spec — src/app/pages/welcome/home-redirect.ts, src/app/pages/welcome/home-redirect.spec.ts, src/app/core/guards/welcome.guard.ts, src/app/core/guards/welcome.guard.spec.ts
+- [x] A3: Build the welcome screen with the mark, the promise, two buttons and the three rooms — the page's four files — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/welcome.page.html, src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
+- [x] A4: Add the ten Hebrew texts of the welcome screen — public/assets/data/dictionary.json
+- [x] A5: Connect the screen to the address bar — the welcome route and the one rewritten home entry — src/app/app.routes.ts
+- [x] A6: Hide the floating add button on the welcome screen — one signal, one wrapper, one spec case — src/app/core/components/hero-fab/hero-fab.component.ts, src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.spec.ts
+- [x] A7: Record the new page, guard and util in the folder maps — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md
+- [x] A8: Run build, lint, the icon lint, the unit tests, the breadcrumbs check and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: `UserService`, `AuthModalService`, the header (unchanged), `.c-pass-line` (plan 572).
@@ -162,3 +162,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-10: no `[ui]` card on purpose. The dev build signs the guest in at start, so a script cannot reach the signed-out state without blocking the sign-in requests; the unit specs cover each decision and the two `[human]` cards cover the real flow.
+- Builder: `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0, TOTAL: 1894 SUCCESS; `pnpm run lint:icons` → exit 0; `node scripts/breadcrumbs-check.mjs` → exit 0, "BREADCRUMBS: clean" (row for welcome/ written without backticks around home-redirect.ts, which the check read as a stale entry); `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (SKIP: no database configured).

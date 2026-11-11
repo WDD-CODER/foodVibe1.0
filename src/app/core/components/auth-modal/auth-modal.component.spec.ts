@@ -131,4 +131,15 @@ describe('AuthModalComponent (business name and block messages)', () => {
   it('Error USER_REMOVED -> user_removed', () => {
     expect(signInWith('USER_REMOVED')).toBe('user_removed')
   })
+
+  it('opens with the mark, the name and the heading for each mode', () => {
+    const brand = (): HTMLElement =>
+      (fixture.nativeElement as HTMLElement).ownerDocument.querySelector('[data-testid="auth-brand"]') as HTMLElement
+    expect(brand().querySelector('img')).not.toBeNull()
+    expect(brand().textContent).toContain('foodCo')
+    expect(brand().querySelector('h2')?.textContent?.trim()).toBe('welcome_start')
+    TestBed.inject(AuthModalService).mode.set('sign-in')
+    fixture.detectChanges()
+    expect(brand().querySelector('h2')?.textContent?.trim()).toBe('welcome_back')
+  })
 })

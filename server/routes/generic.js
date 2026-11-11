@@ -9,13 +9,19 @@ const { hasSchema: hasV2Schema } = require('../utils/schema-check');
 const { checkStoredDoc } = require('../middleware/validate');
 const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
-const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
-const { SOFT_DELETE_TYPES } = require('../constants/collections');
+const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
+const { PROFILE_SERVER_FIELDS } = require('../generated/schemas/entities/front-desk-profile.schema');
+const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
+const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
+const { expireDue } = require('../utils/request-expiry');
+const { buildNewEventDoc, withoutServerEventFields, withSavedSnapshot } = require('../utils/event-create');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
 const { withEventVisibility } = require('../utils/event-visibility');
 const { PRODUCT_NAME_TAKEN, findProductNameClash, isRename } = require('../utils/product-name-guard');
+// Plan 545: one find-or-create of a client by phone (R-01) and the event counter on each client.
+const { PHONE_TAKEN, findLiveClientByPhoneKey, insertClientOrJoin, refreshClientEvents } = require('../utils/client-upsert');
 const { assertCan, staffProjection, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
 
 const router = Router();
@@ -35,6 +41,23 @@ router.use('/:type', (req, res, next) => {
   }
   next();
 });
+
+// Plan 549: requests and bookings are read here, written only by their own routers (server/routes/requests.js, bookings.js).
+const ROUTER_WRITES = new Set(ROUTER_WRITE_TYPES);
+router.param('type', (req, res, next, type) => {
+  if (req.method !== 'GET' && ROUTER_WRITES.has(type)) return res.status(405).json({ error: 'USE_ROUTER' });
+  next();
+});
+
+/** Plan 549: a read of requests first expires the business's stale ones (lazy, no timer). */
+async function expireRequestsOnRead(req, res, next) {
+  try {
+    if (req.params.type === 'requests' && req.user?.businessId) await expireDue(mongoose.connection.db, req.user.businessId, Date.now());
+    next();
+  } catch (err) {
+    next(err);
+  }
+}
 
 /**
  * Returns the native MongoDB collection for the given entity type.
@@ -75,35 +98,41 @@ const termScope = term => (term.businessId === MASTER ? { $exists: true } : term
 
 const EVENTS = 'menuEvents';
 const CLIENTS = 'clients';
+const PROFILES = 'frontDeskProfiles';
+const PROFILE_EXISTS = { error: 'PROFILE_EXISTS' };
+const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
 /** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS]);
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES]);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
-const readProjection = (req, type) => (req.user?.businessRole === 'staff' ? staffProjection(type) : null) || undefined;
+const readProjection = (req, type) => {
+  const trimmed = (req.user?.businessRole === 'staff' ? staffProjection(type) : null) || undefined;
+  // Plan 548: the business-routing WhatsApp id never leaves the server, for any caller.
+  return type === PROFILES ? { ...trimmed, 'whatsapp.phoneNumberId': 0 } : trimmed;
+};
 
-/** Plan 512: a client's `phoneNormalized` is always the digits of its `phone`; a client-sent value is ignored. */
-const withPhoneNormalized = doc => ({ ...doc, phoneNormalized: String(doc.phone ?? '').replace(/\D/g, '') });
+/**
+ * Plan 512 / 544: a client's `phoneNormalized` is always the digits of its `phone` and its `phoneKey` the match key
+ * derived from them (R-01); client-sent values are ignored.
+ */
+function withPhoneNormalized(doc) {
+  const digits = normalizePhone(doc.phone ?? '');
+  return { ...doc, phoneNormalized: digits, phoneKey: phoneKey(digits) };
+}
 
-/** Plan 442: `body` without the event fields only the server writes (stage, history, notes ...). */
-function withoutServerEventFields(body) {
+/** Plan 544: `body` without the client fields only the server writes (CLIENT_SERVER_FIELDS). */
+function withoutServerClientFields(body) {
   const copy = { ...body };
-  for (const key of EVENT_SERVER_FIELDS) delete copy[key];
+  for (const key of CLIENT_SERVER_FIELDS) delete copy[key];
   return copy;
 }
 
-/**
- * Plan 446: the planning snapshot a client may send with a save. Only a stored snapshot that is not frozen is
- * replaced, and a client never sets `frozenAt` (the events router freezes). `stored` is the doc being updated, or
- * null on a create (a new event has no plan to snapshot yet).
- */
-function withSavedSnapshot(body, stored) {
-  if (!('planSnapshot' in body)) return body;
-  const { planSnapshot, ...rest } = body;
-  if (!stored || stored.planSnapshot?.frozenAt !== undefined) return rest;
-  if (!planSnapshot || typeof planSnapshot !== 'object') return rest;
-  const { frozenAt: _ignored, ...content } = planSnapshot;
-  return { ...rest, planSnapshot: content };
+/** Plan 548: `body` without the profile fields only the server writes (PROFILE_SERVER_FIELDS). */
+function withoutServerProfileFields(body) {
+  const copy = { ...body };
+  for (const key of PROFILE_SERVER_FIELDS) delete copy[key];
+  return copy;
 }
 
 /** Plan 427: permission action for changing or deleting a stored doc (locked taxonomy kinds are owner-only). */
@@ -210,7 +239,7 @@ async function masterHasTerm(kind, key) {
 // Anonymous (no token) → returns __master__ documents (shared/public data).
 // Optional ?filterEntityType=&filterEntityId= narrow the find (e.g. VERSION_HISTORY).
 // ---------------------------------------------------------------------------
-router.get('/:type', optionalToken, async (req, res) => {
+router.get('/:type', optionalToken, expireRequestsOnRead, async (req, res) => {
   // 1c perf instrumentation — a `debug` event (LOG_LEVEL=debug; the default outside
   // production). JSON.stringify-ing the response purely to measure its size is real CPU on
   // a 0.1-shared-CPU Render instance, so it only runs when debug is enabled.
@@ -366,7 +395,8 @@ router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
   try {
     await purgeExpired(mongoose.connection.db, { businessIds: [scopeFilter(req).businessId, MASTER], types: [req.params.type] });
     const docs = await col(req.params.type)
-      .find(await withEventVisibility(req, req.params.type, { ...scopeFilter(req), ...IN_TRASH }))
+      // Plan 544: a staff member's Trash read is trimmed like any other read (STAFF_READ_FIELDS).
+      .find(await withEventVisibility(req, req.params.type, { ...scopeFilter(req), ...IN_TRASH }), { projection: readProjection(req, req.params.type) })
       .sort({ deletedAt: -1 })
       .toArray();
     res.json(docs);
@@ -396,10 +426,37 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
       }
       return res.json({ ok: true, restored, skipped });
     }
+    if (req.params.type === CLIENTS) {
+      // Plan 545: a trashed client whose phone a live client now has stays in Trash.
+      const trashed = await col(CLIENTS).find(trashFilter).toArray();
+      let restored = 0;
+      const skipped = [];
+      for (const doc of trashed) {
+        if (await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, doc.phoneKey, doc._id)) {
+          skipped.push({ _id: doc._id, name: doc.name });
+          continue;
+        }
+        try {
+          const r = await col(CLIENTS).updateOne(
+            { ...trashFilter, _id: doc._id },
+            { $unset: { deletedAt: '', deletedBy: '' }, ...(doc.phoneKey && !doc.mergedInto && { $set: { liveKey: doc.phoneKey } }) }
+          );
+          restored += r.modifiedCount;
+        } catch (err) {
+          if (err.code !== 11000) throw err;
+          skipped.push({ _id: doc._id, name: doc.name });
+        }
+      }
+      return res.json({ ok: true, restored, skipped });
+    }
+    const trashedClientIds = req.params.type === EVENTS
+      ? (await col(EVENTS).find(trashFilter, { projection: { clientId: 1 } }).toArray()).map(d => d.clientId)
+      : [];
     const result = await col(req.params.type).updateMany(
       trashFilter,
       { $unset: { deletedAt: '', deletedBy: '' } }
     );
+    if (req.params.type === EVENTS) await refreshClientEvents(mongoose.connection.db, scopeFilter(req).businessId, trashedClientIds);
     res.json({ ok: true, restored: result.modifiedCount });
   } catch (err) {
     req.log.error({ err, event: 'data.trash_restore_all.failed' });
@@ -417,14 +474,24 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
     if (req.params.type === 'products' && await findProductNameClash(col('products'), scopeFilter(req), inTrash.nameHebrew, inTrash._id)) {
       return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: inTrash.nameHebrew });
     }
+    // Plan 545: a client comes back only while no live client has its phone; the restore re-takes the live key.
+    const isClient = req.params.type === CLIENTS;
+    if (isClient && await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, inTrash.phoneKey, inTrash._id)) {
+      return res.status(409).json(PHONE_TAKEN);
+    }
     const restored = await col(req.params.type).findOneAndUpdate(
       trashFilter,
-      { $unset: { deletedAt: '', deletedBy: '' } },
+      {
+        $unset: { deletedAt: '', deletedBy: '' },
+        ...(isClient && inTrash.phoneKey && !inTrash.mergedInto && { $set: { liveKey: inTrash.phoneKey } }),
+      },
       { returnDocument: 'after' }
     );
     if (!restored) return res.status(404).json({ error: `Item ${req.params.id} is not in Trash` });
+    if (req.params.type === EVENTS) await refreshClientEvents(mongoose.connection.db, scopeFilter(req).businessId, [restored.clientId]);
     res.json(restored);
   } catch (err) {
+    if (err.code === 11000 && req.params.type === CLIENTS) return res.status(409).json(PHONE_TAKEN);
     req.log.error({ err, event: 'data.trash_restore.failed' });
     res.status(500).json({ error: 'Server error' });
   }
@@ -435,7 +502,7 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
 // Authenticated → returns one document by _id scoped to the user.
 // Anonymous → returns one document by _id from __master__.
 // ---------------------------------------------------------------------------
-router.get('/:type/:id', optionalToken, async (req, res) => {
+router.get('/:type/:id', optionalToken, expireRequestsOnRead, async (req, res) => {
   try {
     const doc = await col(req.params.type).findOne(await withEventVisibility(req, req.params.type, {
       _id: req.params.id,
@@ -473,8 +540,10 @@ router.post('/:type', verifyToken, async (req, res) => {
     let shared = false;
     let safeEntity = body;
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
-    // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
-    if (entityType === EVENTS) safeEntity = withSavedSnapshot(withoutServerEventFields(safeEntity), null);
+    // Plan 544: a client never sets its own match key, kinds, counters, consent history or do-not-contact flag.
+    if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
+    // Plan 548: a client never sets a profile's status or WhatsApp routing; every profile starts as a draft.
+    if (entityType === PROFILES) safeEntity = withoutServerProfileFields(safeEntity);
     if (shared && !isPlatformAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -489,25 +558,35 @@ router.post('/:type', verifyToken, async (req, res) => {
     }
 
     const now = Date.now();
-    const doc = stampNew(req, {
-      ...safeEntity,
-      _id,
-      userId: shared ? MASTER : req.user.userId,
-      ...(!NO_LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
-      ...(hasV2Schema(entityType) && {
-        schemaVersion: 2,
-        // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
-        createdAt: typeof safeEntity.createdAt === 'number' ? safeEntity.createdAt : now,
-        updatedAt: now,
-      }),
-    });
-    if (entityType === EVENTS) {
-      doc.stage = 'inquiry';
-      doc.stageHistory = [{ stage: 'inquiry', at: now, by: req.user.userId, byName: req.user.name ?? '' }];
-      doc.notes = [];
-    }
+    // Plan 442 / 550: a new event comes from the shared builder (no client stage, history or notes; it starts in "inquiry").
+    const doc = stampNew(req, entityType === EVENTS
+      ? buildNewEventDoc(safeEntity, {
+        actor: { userId: req.user.userId, name: req.user.name ?? '' },
+        businessId: req.user.businessId,
+        _id,
+        now,
+      })
+      : {
+        ...safeEntity,
+        _id,
+        userId: shared ? MASTER : req.user.userId,
+        ...(!NO_LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
+        ...(hasV2Schema(entityType) && {
+          schemaVersion: 2,
+          // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
+          createdAt: typeof safeEntity.createdAt === 'number' ? safeEntity.createdAt : now,
+          updatedAt: now,
+        }),
+      });
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
+    if (entityType === PROFILES) doc.status = 'draft';
+    // Plan 545: a client the owner adds starts with the server-owned defaults.
+    if (entityType === CLIENTS) {
+      doc.source = typeof doc.source === 'string' && doc.source ? doc.source : 'manual';
+      doc.firstSeenAt = now;
+      doc.counters = { requests: 0, bookings: 0, events: 0, noShows: 0, conversations: 0 };
+    }
 
     // Plan 512: derived from `phone` just before the schema check (the schema requires the field), never taken from the client.
     const toStore = entityType === CLIENTS ? withPhoneNormalized(doc) : doc;
@@ -515,6 +594,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
     if (toStore !== doc) {
       doc.phoneNormalized = toStore.phoneNormalized;
+      doc.phoneKey = toStore.phoneKey;
       // Plan 512 (D14): checkStoredDoc does not store the parsed default, so stamp it for consistent stored clients.
       if (!doc.clientType) doc.clientType = 'private';
     }
@@ -529,13 +609,30 @@ router.post('/:type', verifyToken, async (req, res) => {
       return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: doc.nameHebrew });
     }
 
+    // Plan 545: the same phone is the same client — answer with the existing one and write nothing.
+    if (entityType === CLIENTS) {
+      const existing = await findLiveClientByPhoneKey(col(CLIENTS), doc.businessId, doc.phoneKey);
+      if (existing) return res.status(200).json(existing);
+      const { client, created } = await insertClientOrJoin(col(CLIENTS), doc);
+      return res.status(created ? 201 : 200).json(client);
+    }
+
+    // Plan 548: one live profile per business.
+    if (entityType === PROFILES && await col(PROFILES).findOne({ businessId: doc.businessId }, { projection: { _id: 1 } })) {
+      return res.status(409).json(PROFILE_EXISTS);
+    }
+
     await col(entityType).insertOne(doc);
+    if (entityType === EVENTS) await refreshClientEvents(mongoose.connection.db, doc.businessId, [doc.clientId]);
     // A new shared term covers users' own terms with the same key — fold them into it.
     if (entityType === TAXONOMY && shared) {
       await col(TAXONOMY).deleteMany({ kind: doc.kind, key: doc.key, businessId: { $ne: MASTER } });
     }
     res.status(201).json(doc);
   } catch (err) {
+    if (err.code === 11000 && req.params.type === PROFILES) {
+      return res.status(409).json(/businessId/.test(err.message) ? PROFILE_EXISTS : SLUG_TAKEN);
+    }
     if (err.code === 11000) {
       return res.status(409).json({ error: 'Entity already exists' });
     }
@@ -613,7 +710,12 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const { createdAt: _ca, ...clientUpdatable } = safeBody;
     // Plan 442: stage, history, closedAt and notes survive a client PUT unchanged (the events router owns them).
     let updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
+    // Plan 544: the server-owned client fields survive a client PUT unchanged (`merged` keeps the stored values).
+    if (req.params.type === CLIENTS) updatable = withoutServerClientFields(updatable);
+    // Plan 548: the stored `status` and `whatsapp` survive a client PUT unchanged.
+    if (req.params.type === PROFILES) updatable = withoutServerProfileFields(updatable);
     let rekeyed = null;
+    let previousEventClientId;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
     // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one
     // legacy null blocked every save of that doc. They are left out of the validated doc and
@@ -632,14 +734,26 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
       let merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];
-      // Plan 512: re-derived from the merged phone on every client write; a client-sent value is ignored.
+      // Plan 512 / 544: re-derived from the merged phone on every client write; a client-sent value is ignored.
       if (req.params.type === CLIENTS) {
         merged = withPhoneNormalized(merged);
-        updatable = { ...updatable, phoneNormalized: merged.phoneNormalized };
+        updatable = { ...updatable, phoneNormalized: merged.phoneNormalized, phoneKey: merged.phoneKey };
       }
       if (!authorizeEdit(req, res, req.params.type, current, merged)) return;
       const check = checkStoredDoc(req.params.type, merged);
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
+      if (req.params.type === EVENTS) previousEventClientId = current.clientId;
+      if (req.params.type === CLIENTS && !current.mergedInto) {
+        // Plan 545: a phone change that would make a second live client is refused; the live key follows the phone.
+        const taken = () => findLiveClientByPhoneKey(col(CLIENTS), current.businessId, merged.phoneKey, current._id);
+        if (merged.phoneKey !== current.phoneKey) {
+          if (await taken()) return res.status(409).json(PHONE_TAKEN);
+          updatable = { ...updatable, liveKey: merged.phoneKey };
+        } else if (!current.liveKey && merged.phoneKey && !(await taken())) {
+          // Lazy fill for a client made before plan 545 (an old twin keeps no key rather than blocking its own edits).
+          updatable = { ...updatable, liveKey: merged.phoneKey };
+        }
+      }
       // Plan 485: renaming a product to a name another live product of the business has is refused.
       // Keeping the saved name is always allowed (old twins must not block price or unit saves).
       if (req.params.type === 'products' && isRename(current.nameHebrew, merged.nameHebrew)
@@ -688,8 +802,15 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
         await col(TAXONOMY).deleteMany({ kind: result.kind, key: result.key, businessId: { $ne: MASTER } });
       }
     }
+    if (req.params.type === EVENTS) {
+      await refreshClientEvents(mongoose.connection.db, result.businessId, [previousEventClientId, result.clientId]);
+    }
+    // Plan 548: the WhatsApp routing id is not sent back either.
+    if (req.params.type === PROFILES && result.whatsapp) delete result.whatsapp.phoneNumberId;
     res.json(result);
   } catch (err) {
+    if (err.code === 11000 && req.params.type === CLIENTS) return res.status(409).json(PHONE_TAKEN);
+    if (err.code === 11000 && req.params.type === PROFILES) return res.status(409).json(SLUG_TAKEN);
     if (err.code === 11000) return res.status(409).json({ error: 'Entity already exists' });
     req.log.error({ err, event: 'data.put.failed' });
     res.status(500).json({ error: 'Server error' });
@@ -1178,7 +1299,11 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
       }
     }
 
+    const deletedEventClientIds = req.params.type === EVENTS
+      ? (await col(EVENTS).find(bulkFilter, { projection: { clientId: 1 } }).toArray()).map(d => d.clientId)
+      : [];
     const result = await col(req.params.type).deleteMany(bulkFilter);
+    if (req.params.type === EVENTS) await refreshClientEvents(mongoose.connection.db, scopeFilter(req).businessId, deletedEventClientIds);
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
     if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(scopeFilter(req).businessId, ids);
 
@@ -1260,8 +1385,13 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     } else if (permanent) {
       await disposeDoc(col(type), existing);
     } else {
-      await col(type).updateOne({ _id: existing._id, businessId: existing.businessId }, { $set: deleteStamp(req.user.userId) });
+      // Plan 545: a deleted client gives its phone back (the live key goes with it).
+      await col(type).updateOne(
+        { _id: existing._id, businessId: existing.businessId },
+        { $set: deleteStamp(req.user.userId), ...(type === CLIENTS && { $unset: { liveKey: '' } }) }
+      );
     }
+    if (type === EVENTS) await refreshClientEvents(mongoose.connection.db, existing.businessId, [existing.clientId]);
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
     if (type === 'suppliers' && existing.deletedAt === undefined) {
       await unlinkSuppliersFromProducts(scopeFilter(req).businessId, [req.params.id]);

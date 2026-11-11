@@ -1,4 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
@@ -7,12 +8,14 @@ import { EquipmentDataService } from './equipment-data.service'
 import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
+import { ClientDataService } from './client-data.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import type { VersionEntityType } from './version-history.service'
 
 /** Every collection with a Trash (plan 407: deleted items keep `deletedAt` on the doc itself). */
-export type TrashType = 'dishes' | 'recipes' | 'products' | 'equipment' | 'venues' | 'menuEvents' | 'suppliers'
+export type TrashType =
+  'dishes' | 'recipes' | 'products' | 'equipment' | 'venues' | 'menuEvents' | 'suppliers' | 'clients'
 
 export interface TrashItem {
   _id: string
@@ -35,12 +38,20 @@ export const TRASH_SECTIONS: readonly TrashSection[] = [
   { type: 'equipment', titleKey: 'trash_equipment' },
   { type: 'venues', titleKey: 'trash_venues' },
   { type: 'menuEvents', titleKey: 'trash_menu_events' },
-  { type: 'suppliers', titleKey: 'trash_suppliers' }
+  { type: 'suppliers', titleKey: 'trash_suppliers' },
+  { type: 'clients', titleKey: 'trash_clients' }
 ]
 
 const TYPE_BY_HISTORY: Record<VersionEntityType, TrashType> = { dish: 'dishes', recipe: 'recipes', product: 'products' }
 
 type TrashDoc = { _id: string; deletedAt: number; nameHebrew?: string; name?: string }
+
+/** The `messageKey` of a 409 refusal body (`{ error, messageKey }`), or null for any other error. */
+function refusalMessageKey(err: unknown): string | null {
+  if (!(err instanceof HttpErrorResponse) || err.status !== 409) return null
+  const key = (err.error as { messageKey?: unknown } | null)?.messageKey
+  return typeof key === 'string' && key ? key : null
+}
 
 const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
   dishes: [],
@@ -49,7 +60,8 @@ const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
   equipment: [],
   venues: [],
   menuEvents: [],
-  suppliers: []
+  suppliers: [],
+  clients: []
 })
 
 @Injectable({ providedIn: 'root' })
@@ -66,7 +78,8 @@ export class TrashService {
     equipment: inject(EquipmentDataService),
     venues: inject(VenueDataService),
     menuEvents: inject(MenuEventDataService),
-    suppliers: inject(SupplierDataService)
+    suppliers: inject(SupplierDataService),
+    clients: inject(ClientDataService)
   }
 
   private readonly items_ = signal<Record<TrashType, TrashItem[]>>(emptyTrash())
@@ -88,7 +101,16 @@ export class TrashService {
   }
 
   async restore(type: TrashType, _id: string): Promise<void> {
-    await this.storage.restore(type, _id)
+    try {
+      await this.storage.restore(type, _id)
+    } catch (err) {
+      // Plan 545: a refused restore (a client whose phone is taken) names its reason; nothing is restored.
+      const key = refusalMessageKey(err)
+      if (!key) throw err
+      this.userMsg.onSetErrorMsg(this.translation.translate(key))
+      await this.loadTrash()
+      return
+    }
     await this.afterRestore(type, 'trash_restored_msg')
   }
 

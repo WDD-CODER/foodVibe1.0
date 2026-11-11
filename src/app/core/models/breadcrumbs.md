@@ -18,6 +18,8 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `logistics.model.ts` | Event/dish logistics | EventLogistics, DishLogistics, BaselineEntry, ServiceOverride, etc. |
 | `menu-event.model.ts` | Menu builder event model | MenuEvent, MenuSection, MenuTypeDefinition, ALL_DISH_FIELDS |
 | `client.model.ts` | Client entity (who an event is for), mirror of the client schema | Client, ClientType, CLIENT_TYPES |
+| `front-desk-profile.model.ts` | Front desk profile type and constants, mirror of the profile schema | FrontDeskProfile, BUSINESS_TYPES, FRONT_DESK_STATUSES |
+| `ai-usage.model.ts` | AI usage ledger report shapes (platform admin) | AiUsageRow, AiUsageReport, AiUsageParams, AiUsageGroupBy |
 | `user.model.ts` | User/session | User |
 | `msg.model.ts` | User message / toast | Msg |
 | `label.model.ts` | Label definitions for UI | LabelDefinition, LABEL_COLOR_PALETTE |
@@ -27,6 +29,8 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `business-stats.model.ts` | Dashboard read model of the business stats route (plan 447) | StatsPeriod, BusinessStats, BusinessStatsCards, CountCard, FunnelStage, UpcomingEvent |
 | `parsed-result.model.ts` | Parsed recipe/dish import result | ParsedResult, ParsedResultType, ParsedRecipe, ParsedDish, ParsedIngredient, ParsedStep |
 | `v2/` | v2 entity types inferred from the shared Zod schemas; `v2/conformance.ts` locks them to the client interfaces at compile time | V2ConformsToClient |
+| `request.model.ts` | Customer request type (plan 549) | FrontDeskRequest, ManualRequestInput, DECLINE_REASONS |
+| `booking.model.ts` | Booking type (plan 549) | Booking |
 
 ## Architecture Context
 

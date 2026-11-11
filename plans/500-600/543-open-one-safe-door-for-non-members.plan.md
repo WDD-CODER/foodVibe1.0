@@ -1,6 +1,6 @@
 # Plan 543 — Open one safe door for people who are not members of a business
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
@@ -136,13 +136,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give every server stamp one source for who did it — actorOf and guestActor in a shared file; events.js imports it instead of its own copy — server/utils/actor.js, server/routes/events.js
-- [ ] A2: Add the public rate limiter, the honeypot and the read-back token helper — ipAndSlugKey + publicLimiter, honeypot middleware, newPublicToken + isPublicTokenShape — server/middleware/rate-limit.js, server/middleware/honeypot.js, server/utils/public-token.js
-- [ ] A3: Test the limiter, honeypot and token on a small test app — 20 then 429, other slug free, GET not counted, no IPv6 key error; honeypot 201 with no next; 32 chars, 10,000 unique — server/test/public-guard.test.js
-- [ ] A4: Mount an empty public router that never reads a member token — GET /health probe, no-store, JSON 404 for the rest, mounted after the JSON parser — server/routes/public.js, server/app.js, server/test/public-router.test.js
-- [ ] A5: Write the guest-door rule down where the gate reads it — ADR 0030, the INV-1 sentence, Source and Touches, and the two INV-1 guest door tests — docs/brain/decisions/0030-guest-writes-have-one-door.md, docs/brain/invariants.md, server/test/invariants.test.js
-- [ ] A6: Record the new route in the backend docs and the server map — the §5 row and limiter sentence, the breadcrumbs row — docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A7: Run the full checks and hand Dandan the ADR to read — test:server, server lint, build, scope-check --arch, log-query; then the [human] card for ADR 0030
+- [x] A1: Give every server stamp one source for who did it — actorOf and guestActor in a shared file; events.js imports it instead of its own copy — server/utils/actor.js, server/routes/events.js
+- [x] A2: Add the public rate limiter, the honeypot and the read-back token helper — ipAndSlugKey + publicLimiter, honeypot middleware, newPublicToken + isPublicTokenShape — server/middleware/rate-limit.js, server/middleware/honeypot.js, server/utils/public-token.js
+- [x] A3: Test the limiter, honeypot and token on a small test app — 20 then 429, other slug free, GET not counted, no IPv6 key error; honeypot 201 with no next; 32 chars, 10,000 unique — server/test/public-guard.test.js
+- [x] A4: Mount an empty public router that never reads a member token — GET /health probe, no-store, JSON 404 for the rest, mounted after the JSON parser — server/routes/public.js, server/app.js, server/test/public-router.test.js
+- [x] A5: Write the guest-door rule down where the gate reads it — ADR 0030, the INV-1 sentence, Source and Touches, and the two INV-1 guest door tests — docs/brain/decisions/0030-guest-writes-have-one-door.md, docs/brain/invariants.md, server/test/invariants.test.js
+- [x] A6: Record the new route in the backend docs and the server map — the §5 row and limiter sentence, the breadcrumbs row — docs/agent/standards-backend.md, server/breadcrumbs.md
+- [x] A7: Run the full checks and hand Dandan the ADR to read — test:server, server lint, build, scope-check --arch, log-query; then the [human] card for ADR 0030
 
 ## Technical Considerations
 - Dependencies: `server/app.js` mount order; `server/routes/events.js` (one import line swapped for the inline `actorOf`).
@@ -167,3 +167,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Plan number: map row 1, renumbered +2 on 2026-11-10 (old 541 → 543; 541 and 542 were taken). Brief revision 2 Part 0.5 D1 is the arch approval; the Human's `approve arch change INV-1` was given in chat on 2026-11-10 (map line 3).
 - Snapshot kept as the map's verification SHA `05741afd`; facts above re-checked on `origin/main` 5702f6d1.
+- Build (orch fd-1a-data, 2026-11-10):
+  - Step 0: `scope-check --drift` → `REALITY: drift`, one commit. `8f222760` (plan 519, events.js logistics route) → ok: the inline `actorOf` was still at `server/routes/events.js:31`. Snapshot line not advanced.
+  - `server/middleware/rate-limit.js` was saved in Windows-1252 (one em dash in the plan 528 comment); rewritten as UTF-8 with the same text plus the plan 543 exports.
+  - `docs/workflow-kit/manifest.json`: entry for ADR 0030 (always-allowed regenerated file; `kit-manifest-check` → `ok — 388 classified, 0 unclassified`).
+  - `npx vitest run` on public-guard, public-router, invariants, events-router, rate-limit-key → exit 0, 5 files, 63 tests passed.
+  - `pnpm run test:server` → exit 0. `pnpm --dir server run lint` → exit 0 (0 errors, warnings only). `pnpm run lint` → exit 0. `pnpm run lint:icons` → exit 0. `pnpm run lint:no-native-select` → exit 0.
+  - `pnpm run build` → exit 0. `pnpm run test:ci` → exit 0, TOTAL 1873 SUCCESS.

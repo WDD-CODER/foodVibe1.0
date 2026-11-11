@@ -52,7 +52,7 @@ function fakeLog() {
 }
 
 const call = (log, extra = {}) =>
-  callGemini({ body: { contents: [] }, timeoutMs: 1000, log, eventPrefix: 'ai.test', ...extra });
+  callGemini({ body: { contents: [] }, timeoutMs: 1000, log, eventPrefix: 'ai.test', usage: { businessId: 'b1', feature: 'parse_text' }, ...extra });
 
 let fetchMock;
 

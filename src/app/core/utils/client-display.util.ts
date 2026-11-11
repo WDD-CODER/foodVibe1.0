@@ -1,9 +1,8 @@
 import { Client } from '@models/client.model'
+import { normalizePhone } from '@schemas/phone'
 
-/** Plan 514: the digits of a phone number (`052-123 4567` → `0521234567`). */
-export function normalizePhone(s: string): string {
-  return (s ?? '').replace(/\D/g, '')
-}
+/** Plan 545 (R-01): the one phone rule, shared with the server (`normalizePhone`, `phoneKey`). */
+export { normalizePhone, phoneKey } from '@schemas/phone'
 
 /** `name · phone`, plus ` · <count> <word>` when the client has events. */
 export function clientLabel(c: Client, eventCount: number, countWord: string): string {

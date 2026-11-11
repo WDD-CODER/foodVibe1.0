@@ -13,7 +13,7 @@ const {
 } = require('./helpers/v2-docs')
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types')
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types')
-const { SOFT_DELETE_TYPES } = require('../constants/collections')
+const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections')
 
 let app
 
@@ -47,6 +47,10 @@ const BODY = {
   menuEvents: () => menuEventBody({ name: 'אירוע X' }),
   taxonomyTerms: () => ({ kind: 'allergen', key: 'lupinx', sortOrder: 0 }),
   clients: () => ({ name: 'לקוח X', phone: '050-111 2222' }),
+  frontDeskProfiles: () => ({ businessType: 'other', slug: 'cross-x', displayName: 'עסק X', hours: [], requestKinds: {}, assistant: { level: 0, tone: 'warm' } }),
+  // requests / bookings are written only by their routers: the generic describe skips them, the router one below covers them.
+  requests: () => ({}),
+  bookings: () => ({}),
   VERSION_HISTORY: () => ({ entityType: 'recipes', entityId: 'entity-X', note: 'x' }),
   activity_log: () => ({ action: 'x', at: 1 }),
   DICTIONARY_OVERRIDES: () => ({ items: { a: 'b' } }),
@@ -56,7 +60,7 @@ it('covers every type of ALL_USER_ENTITY_TYPES', () => {
   expect(Object.keys(BODY).sort()).toEqual([...ALL_USER_ENTITY_TYPES].sort())
 })
 
-describe.each(ALL_USER_ENTITY_TYPES)('%s: business Y cannot reach business X', type => {
+describe.each(ALL_USER_ENTITY_TYPES.filter(t => !ROUTER_WRITE_TYPES.includes(t)))('%s: business Y cannot reach business X', type => {
   let id
   let before
 
@@ -136,6 +140,52 @@ describe.each(ALL_USER_ENTITY_TYPES)('%s: business Y cannot reach business X', t
       await unchanged()
     })
   }
+})
+
+describe('requests and bookings (router-written): business Y cannot reach business X', () => {
+  const HOUR = 3_600_000
+  let requestId
+  let bookingId
+
+  beforeEach(async () => {
+    const db = testDb()
+    await db.collection('frontDeskProfiles').insertOne({
+      _id: 'pX', schemaVersion: 2, businessId: 'biz_X', createdBy: 'userX', createdAt: 1, updatedAt: 1, businessType: 'restaurant',
+      slug: 'cross-rb-x', displayName: 'עסק X', hours: [], assistant: { level: 0, tone: 'warm' }, status: 'draft',
+      requestKinds: { table: { enabled: true, questions: [], rules: {}, expireAfterHours: 24 } },
+    })
+    const made = await request(app).post('/api/v1/requests').set(as(X)).send({ kind: 'table', guestName: 'דנה', guestPhone: '052-123 4567', wanted: {}, answers: [] })
+    expect(made.status).toBe(201)
+    requestId = made.body._id
+    bookingId = 'bk_X'
+    const startAt = Date.now() - HOUR
+    await db.collection('bookings').insertOne({
+      _id: bookingId, schemaVersion: 2, businessId: 'biz_X', createdBy: 'userX', createdAt: 1, updatedAt: 1, kind: 'table', status: 'confirmed',
+      source: 'request', date: '2026-12-01', time: '19:00', startAt, endAt: startAt + 60 * 60000, durationMinutes: 60, partySize: 2,
+      clientId: made.body.clientId, guestName: 'דנה', guestPhone: '0521234567',
+      statusHistory: [{ status: 'confirmed', at: 1, by: 'userX', byName: '', via: 'server' }], publicToken: 'K'.repeat(32),
+    })
+  })
+
+  it('Y lists neither, reads neither by id (404) and cannot move or edit them (404)', async () => {
+    for (const type of ['requests', 'bookings']) {
+      const list = await request(app).get(url(type)).set(as(Y))
+      expect(list.status).toBe(200)
+      expect(list.body).toEqual([])
+    }
+    expect((await request(app).get(url('requests', `/${requestId}`)).set(as(Y))).status).toBe(404)
+    expect((await request(app).get(url('bookings', `/${bookingId}`)).set(as(Y))).status).toBe(404)
+    expect((await request(app).put(`/api/v1/requests/${requestId}/status`).set(as(Y)).send({ status: 'cancelled' })).status).toBe(404)
+    expect((await request(app).put(`/api/v1/requests/${requestId}/wanted`).set(as(Y)).send({ wanted: { partySize: 3 } })).status).toBe(404)
+    expect((await request(app).put(`/api/v1/bookings/${bookingId}/status`).set(as(Y)).send({ status: 'seated' })).status).toBe(404)
+    expect((await testDb().collection('requests').findOne({ _id: requestId })).status).toBe('qualified')
+    expect((await testDb().collection('bookings').findOne({ _id: bookingId })).status).toBe('confirmed')
+  })
+
+  it('X sees both through the generic API', async () => {
+    expect((await request(app).get(url('requests')).set(as(X))).body.map(d => d._id)).toEqual([requestId])
+    expect((await request(app).get(url('bookings')).set(as(X))).body.map(d => d._id)).toEqual([bookingId])
+  })
 })
 
 describe('owner and staff of one business share one copy', () => {

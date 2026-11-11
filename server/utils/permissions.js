@@ -12,12 +12,13 @@ const { MASTER_BUSINESS_ID } = require('./business-scope')
 
 const ACTIONS = [
   'create', 'edit', 'delete', 'editMoney', 'changeStage',
-  'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics',
+  'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk',
+  'manageRequests',
 ]
-const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics'])
+const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk'])
 const EVENTS = 'menuEvents'
 /** Plan 512: types only an owner may create, edit or delete (staff read them through `staffProjection`). */
-const OWNER_ONLY_TYPES = new Set(['clients'])
+const OWNER_ONLY_TYPES = new Set(['clients', 'frontDeskProfiles'])
 /** Fields every stored document carries; a staff projection never hides them. */
 const BASE_FIELDS = ['_id', 'schemaVersion', 'userId', 'businessId', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt', 'deletedBy']
 
@@ -46,6 +47,8 @@ function can(user, action, ctx = {}) {
   if (user?.businessRole !== 'staff') return deny('NO_ROLE')
 
   if (OWNER_ONLY_ACTIONS.has(action)) return deny('OWNER_ONLY')
+  // Plan 549: any member of the business works the request queue and the bookings.
+  if (action === 'manageRequests') return OK
   if (OWNER_ONLY_TYPES.has(type) && (action === 'create' || action === 'edit' || action === 'delete')) return deny('OWNER_ONLY_TYPE')
   if (action === 'create') return OK
   const isCreator = !!doc && !!user.userId && doc.createdBy === user.userId

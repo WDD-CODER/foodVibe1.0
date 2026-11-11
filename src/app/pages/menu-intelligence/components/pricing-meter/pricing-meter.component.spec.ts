@@ -82,6 +82,29 @@ describe('PricingMeterComponent', () => {
     expect(text()).toContain('16.7%')
   })
 
+  const profitPctValue = () => {
+    const metrics = Array.from(fixture.nativeElement.querySelectorAll('.fin-metric')) as HTMLElement[]
+    const metric = metrics.find((m) => m.querySelector('.fin-label')?.textContent?.includes('profit_pct'))!
+    return metric.querySelector('.fin-value') as HTMLElement
+  }
+
+  it('the profit % carries the pass line when the price meets the target', () => {
+    create(event({ pricePerGuest: 200 }))
+    expect(profitPctValue().classList.contains('c-pass-line')).toBe(true)
+  })
+
+  it('no pass line anywhere when the price is too low', () => {
+    create(event({ pricePerGuest: 120 }))
+    expect(fixture.nativeElement.querySelector('.c-pass-line')).toBeNull()
+  })
+
+  it('every ltr fin-value has the c-num class', () => {
+    create(event({ pricePerGuest: 200 }))
+    const values = Array.from(fixture.nativeElement.querySelectorAll('.fin-value[dir="ltr"]')) as HTMLElement[]
+    expect(values.length).toBeGreaterThan(0)
+    for (const v of values) expect(v.classList.contains('c-num')).toBe(true)
+  })
+
   it('an own target of 15 turns the verdict green', () => {
     create(event({ pricePerGuest: 120, targetsOverride: { profitTargetPct: 15 } }))
     expect(fixture.nativeElement.querySelector('.meter-numbers .verdict.ok')).toBeTruthy()

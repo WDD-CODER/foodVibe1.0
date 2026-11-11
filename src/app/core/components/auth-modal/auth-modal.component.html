@@ -5,6 +5,12 @@
     [dismissible]="!isSubmitting() && !isUploadingImage_()"
     (dismissed)="onClose()"
   >
+    <div class="auth-brand" data-testid="auth-brand">
+      <img src="/assets/style/img/fc-mark.svg" alt="" width="40" height="40" />
+      <span class="auth-brand__name">foodCo</span>
+      <h2 class="auth-brand__title">{{ (isSignUp ? 'welcome_start' : 'welcome_back') | translatePipe }}</h2>
+    </div>
+
     <div class="auth-tabs">
       <button type="button" class="auth-tab" [class.active]="!isSignUp" (click)="switchMode('sign-in')">
         {{ 'sign_in' | translatePipe }}
