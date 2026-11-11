@@ -1812,3 +1812,43 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   margin: 0;
   padding: 1rem;
 }
+
+/* Phone density (2026-11-11): more ingredients per screen. The tabs above the pane already name it and
+   show its count, so the pane's own heading is dropped; rows, the tick box and the scale chips are lower. */
+@media (max-width: $cv-phone-max) {
+  .cv-pane-head {
+    display: none;
+  }
+
+  .cv-scale-bar {
+    gap: var(--space-2);
+
+    margin-block-end: var(--space-3);
+  }
+
+  .cv-mult-chip {
+    block-size: 2.25rem;
+    min-inline-size: 2.25rem;
+  }
+
+  .cv-ing-list {
+    gap: 6px;
+  }
+
+  .cv-ing-main {
+    gap: 10px;
+
+    min-block-size: 48px;
+
+    font-size: 1rem;
+
+    padding-inline: 12px;
+  }
+
+  .cv-ing-check {
+    inline-size: 24px;
+    block-size: 24px;
+
+    border-radius: 7px;
+  }
+}

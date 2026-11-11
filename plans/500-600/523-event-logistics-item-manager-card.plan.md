@@ -1,6 +1,6 @@
 # Plan 523 — Event logistics 6 of 6: let a business add and remove its own checklist questions in the Metadata Manager
 
-Status: draft
+Status: done
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
 Depends-on: 519, 520, 521
 
