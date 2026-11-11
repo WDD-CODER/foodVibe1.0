@@ -31,8 +31,10 @@
         </button>
       </div>
       <div class="sheet-summary">
-        <span class="summary-price" dir="ltr">{{ pricePerGuest_() }}</span>
-        <span class="summary-pct" dir="ltr">{{ profitPct_() }}</span>
+        <span class="summary-price c-num" dir="ltr">{{ pricePerGuest_() }}</span>
+        <span class="summary-pct c-num" dir="ltr" [class.c-pass-line]="hasProfitPct_() && result_().meetsTarget">{{
+          profitPct_()
+        }}</span>
         @if (hasProfitPct_()) {
           @if (result_().meetsTarget) {
             <span class="verdict ok"
@@ -176,19 +178,19 @@
     <div class="meter-numbers">
       <div class="fin-metric">
         <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
-        <span class="fin-value" dir="ltr">{{ foodCost_() }}</span>
+        <span class="fin-value c-num" dir="ltr">{{ foodCost_() }}</span>
         <app-partial-cost-badge [missing]="plan().missing" placement="above"></app-partial-cost-badge>
       </div>
       <div class="fin-metric">
         <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
-        <span class="fin-value" dir="ltr">{{ revenue_() }}</span>
+        <span class="fin-value c-num" dir="ltr">{{ revenue_() }}</span>
         @if (revenueNotSet_()) {
           <span class="partial-tag">{{ 'revenue_not_set' | translatePipe }}</span>
         }
       </div>
       <div class="fin-metric">
         <span class="fin-label">{{ 'profit_per_guest' | translatePipe }}</span>
-        <span class="fin-value" dir="ltr" [class.fin-value--bad]="result_().profitPerGuest < 0">{{
+        <span class="fin-value c-num" dir="ltr" [class.fin-value--bad]="result_().profitPerGuest < 0">{{
           profitPerGuest_()
         }}</span>
         @if (partial_()) {
@@ -197,7 +199,9 @@
       </div>
       <div class="fin-metric">
         <span class="fin-label">{{ 'profit_pct' | translatePipe }}</span>
-        <span class="fin-value" dir="ltr">{{ profitPct_() }}</span>
+        <span class="fin-value c-num" dir="ltr" [class.c-pass-line]="hasProfitPct_() && result_().meetsTarget">{{
+          profitPct_()
+        }}</span>
         @if (partial_()) {
           <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
         }
@@ -219,7 +223,7 @@
       </div>
       <div class="fin-metric">
         <span class="fin-label">{{ 'min_price_per_guest' | translatePipe }}</span>
-        <span class="fin-value" dir="ltr">{{ minPrice_() }}</span>
+        <span class="fin-value c-num" dir="ltr">{{ minPrice_() }}</span>
         @if (partial_()) {
           <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
         }

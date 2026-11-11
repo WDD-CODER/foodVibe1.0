@@ -16,10 +16,44 @@ $break-tabbar: 620px; // mirrors header.component.scss (the phone bottom tab bar
 
     padding-inline: var(--space-6);
     padding-block: var(--space-2);
-    background: var(--bg-glass-strong);
-    border-block-start: 1px solid var(--border-default);
-    box-shadow: var(--shadow-nav);
+    color: var(--color-on-bar);
+
+    background: var(--bg-bar);
+    border-block-start: 1px solid var(--border-bar);
+    box-shadow: var(--shadow-card);
     backdrop-filter: var(--blur-glass);
+
+    /* Plan 578 (Depth): the bar is dark teal. These colours apply only on the bar; the phone sheet
+       renders the same body on a light surface and keeps the rules below. */
+    .fin-label,
+    .margin-hint {
+      color: var(--color-on-bar-muted);
+    }
+
+    .fin-value {
+      color: var(--color-on-bar);
+    }
+
+    .fin-value--bad,
+    .verdict.bad,
+    .field-error {
+      color: var(--color-on-bar-bad);
+    }
+
+    .verdict.ok {
+      color: var(--color-primary-light);
+    }
+
+    .partial-reasons {
+      color: var(--color-lamp);
+    }
+
+    /* The chip engine is unlayered and would win over this layer, so these two are marked important. */
+    .targets-toggle {
+      color: var(--color-on-bar) !important;
+
+      border-color: var(--border-bar) !important;
+    }
   }
 
   .meter-body {

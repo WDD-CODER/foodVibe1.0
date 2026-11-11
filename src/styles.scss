@@ -68,35 +68,35 @@ $break-tablet-max: 1023px;
   --space-12: 3rem;    /* 48 */
 
   /* ---- Surfaces ---- */
-  --bg-body: #f0f4f8;
+  --bg-body: #e6eeee;
   --bg-pure: #ffffff;
-  --bg-glass: rgba(255, 255, 255, 0.55);
-  --bg-glass-strong: rgba(255, 255, 255, 0.72);
-  --bg-glass-hover: rgba(255, 255, 255, 0.82);
-  --bg-subtle: rgba(255, 255, 255, 0.35);
-  --bg-muted: rgba(241, 245, 249, 0.6);
+  --bg-glass: #ffffff;
+  --bg-glass-strong: #ffffff;
+  --bg-glass-hover: #ffffff;
+  --bg-subtle: rgba(255, 255, 255, 0.6);
+  --bg-muted: #f0f5f5;
   --bg-frosted-nav: rgba(255, 255, 255, 0.6);
-  --bg-glass-dense: rgba(255, 255, 255, 0.85);
+  --bg-glass-dense: #ffffff;
 
   /* ---- Borders ---- */
-  --border-glass: rgba(255, 255, 255, 0.45);
-  --border-default: rgba(226, 232, 240, 0.6);
-  --border-strong: rgba(203, 213, 225, 0.7);
+  --border-glass: rgba(11, 31, 29, 0.06);
+  --border-default: #dbe5e4;
+  --border-strong: #c5d3d1;
   --border-focus: rgba(20, 184, 166, 0.5);
-  --border-row: rgba(241, 245, 249, 0.4);
+  --border-row: #edf2f2;
   --border-glass-strong: rgba(255, 255, 255, 0.95);
 
   /* ---- Text ---- */
-  --color-text-main: #0f172a;
-  --color-text-secondary: #1e293b;
-  --color-text-muted: #64748b;
-  --color-text-muted-light: #94a3b8;
+  --color-text-main: #0b1f1d;
+  --color-text-secondary: #24403c;
+  --color-text-muted: #4a5f5c;
+  --color-text-muted-light: #7c8f8c;
   --color-text-on-primary: #ffffff;
 
-  /* ---- Primary (teal) ---- */
-  --color-primary: #14b8a6;
+  /* ---- Primary (patina teal — the logo's colour; plan 572) ---- */
+  --color-primary: #0f766e;
   --color-primary-light: #2dd4bf;
-  --color-primary-hover: #0d9488;
+  --color-primary-hover: #115e59;
   --color-primary-soft: rgba(20, 184, 166, 0.12);
   --color-primary-glow: rgba(20, 184, 166, 0.25);
   --color-primary-glow-strong: rgba(20, 184, 166, 0.28);
@@ -134,18 +134,18 @@ $break-tablet-max: 1023px;
   /* ---- Radii ---- */
   --radius-xs: 0.25rem;
   --radius-sm: 0.375rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.25rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 1.75rem;
   --radius-full: 999px;
 
   /* ---- Shadows ---- */
-  --shadow-glass: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-glass: 0 1px 2px rgba(11, 31, 29, 0.06), 0 16px 32px -22px rgba(11, 31, 29, 0.35);
+  --shadow-card: 0 1px 2px rgba(11, 31, 29, 0.06), 0 20px 40px -22px rgba(11, 31, 29, 0.4);
   --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 20px rgba(20, 184, 166, 0.15);
+  --shadow-glow: 0 10px 18px -10px rgba(15, 118, 110, 0.55);
   --shadow-focus: 0 0 0 3px rgba(20, 184, 166, 0.2);
-  --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 2px 4px rgba(11, 31, 29, 0.06), 0 24px 44px -22px rgba(11, 31, 29, 0.45);
   --shadow-nav: 0 1px 8px rgba(0, 0, 0, 0.04);
   --shadow-nav-footer: 0 -1px 8px rgba(0, 0, 0, 0.03);
   --shadow-soft: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 2px 6px rgba(15, 23, 42, 0.05), 0 16px 40px -22px rgba(15, 23, 42, 0.20);
@@ -190,7 +190,7 @@ $break-tablet-max: 1023px;
   --bg-card-solid: #ffffff;
   --color-warning-ink: #b45309;
   --bg-warning-tint: rgba(245, 158, 11, 0.16);
-  --bg-header: rgba(255, 255, 255, 0.70);
+  --bg-header: rgba(255, 255, 255, 0.62);
   --border-header: rgba(15, 23, 42, 0.08);
   --shadow-header: 0 1px 8px rgba(0, 0, 0, 0.05);
   --bg-chrome: rgba(255, 255, 255, 0.80);
@@ -209,6 +209,30 @@ $break-tablet-max: 1023px;
   --paper-line: rgba(15, 23, 42, 0.10);
   --paper-soft: #f1f5f9;
   --paper-pri: #0f766e;
+
+  /* ---- The Pass (plan 572): lamp, guest typeface, paper palette ---- */
+  --color-lamp: #f59e0b;
+  --color-lamp-ink: #b45309;
+  --font-guest: 'Frank Ruhl Libre', 'Heebo', serif;
+  --paper-sheet: #fdfdfa;
+  --paper-edge: #1a1a1a;
+  --paper-edge-hover: #333333;
+  --paper-gold: #8a7450;
+  --paper-gold-line: #c8b890;
+  --paper-gold-mute: #b0a080;
+  --paper-border: #d0c8b4;
+  --paper-field-line: #e8e0d0;
+  --paper-brown: #5a4a2a;
+  --paper-brown-mute: #7a6a50;
+
+  /* ---- Depth theme (plan 577): the dark bar ---- */
+  --bg-bar: rgba(13, 92, 86, 0.92);
+  --border-bar: rgba(255, 255, 255, 0.28);
+  --color-on-bar: #ffffff;
+  --color-on-bar-muted: #cfe9e5;
+  --color-on-bar-bad: #fecaca;
+  /* Pressable chips (toggle, tap, filter, tab) are squarer than status tags, which stay round. */
+  --radius-chip: 0.625rem;
 }
 
 /* Kitchen dark mode — set on <html> by CookViewPage while Cook View is open (plan 404).
@@ -261,11 +285,19 @@ $break-tablet-max: 1023px;
 
   // Solid dark surface for form fields that default to white (workflow category / unit selects, search fields).
   --bg-pure: #14302d;
+  --color-lamp: #fbbf24;
+  --color-lamp-ink: #fbbf24;
 }
 
 // Dropdown panels must be opaque on the dark page, or the rows behind show through the options.
 :root.theme-kitchen .c-dropdown {
   background: var(--bg-glass-dense);
+}
+
+// Plan 576: the teal pot disappears on the dark kitchen header; show it light there.
+:root.theme-kitchen .brand-mark img {
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
 }
 
 @media (max-width: $break-mobile) {
@@ -310,11 +342,8 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background:
-    radial-gradient(ellipse 900px 700px at 8% -5%, rgba(20, 184, 166, 0.22), transparent 55%),
-    radial-gradient(ellipse 700px 600px at 100% 105%, rgba(245, 158, 11, 0.14), transparent 55%),
-    radial-gradient(ellipse 400px 300px at 50% 50%, rgba(14, 165, 233, 0.06), transparent);
-  background-attachment: fixed;
+  /* Plan 577 (Depth): the page is flat; the light colour washes are gone. */
+  background: none;
   pointer-events: none;
 }
 
@@ -450,7 +479,7 @@ lucide-icon {
   @media (hover: hover) {
     &:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-hover), 0 4px 16px rgba(20, 184, 166, 0.08);
+      box-shadow: var(--shadow-hover);
     }
   }
 }
@@ -481,9 +510,9 @@ lucide-icon {
   font-size: 0.875rem;
   white-space: nowrap;
 
-  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-hover));
+  background: var(--color-primary);
   border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   cursor: pointer;
   box-shadow: var(--shadow-glow);
   transition: transform 0.18s var(--ease-spring), box-shadow 0.18s ease;
@@ -545,10 +574,10 @@ lucide-icon {
 .c-input {
   padding-inline: 0.75rem;
   padding-block: 0.625rem;
-  background: var(--bg-glass);
+  background: var(--bg-muted);
   color: var(--color-text-main);
   font-size: 0.875rem;
-  border: 1px solid var(--border-default);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   backdrop-filter: var(--blur-glass);
   outline: none;
@@ -559,7 +588,8 @@ lucide-icon {
   }
 
   &:focus {
-    border-color: var(--border-focus);
+    background: var(--bg-pure);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-focus);
   }
 }
@@ -576,14 +606,15 @@ textarea.c-input {
   gap: 0.5rem;
   padding-inline: 0.75rem;
   padding-block: 0.5rem;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-default);
+  background: var(--bg-muted);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   backdrop-filter: var(--blur-glass);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus-within {
-    border-color: var(--border-focus);
+    background: var(--bg-pure);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-focus);
   }
 
@@ -627,17 +658,18 @@ textarea.c-input {
 .c-select {
   padding-inline: 0.75rem;
   padding-block: 0.625rem;
-  background: var(--bg-glass);
+  background: var(--bg-muted);
   color: var(--color-text-main);
   font-size: 0.875rem;
-  border: 1px solid var(--border-default);
+  border: 1px solid transparent;
   border-radius: var(--radius-md);
   backdrop-filter: var(--blur-glass);
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
   &:focus {
-    border-color: var(--border-focus);
+    background: var(--bg-pure);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-focus);
   }
 }
@@ -2144,7 +2176,7 @@ body.kb-open {
   padding-inline: 0.75rem;
   padding-block: 0.25rem;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   cursor: pointer;
   transition:
@@ -2219,7 +2251,7 @@ body.kb-open {
   padding-inline: 0.75rem;
   padding-block: 0.25rem;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   cursor: pointer;
   transition:
@@ -2271,7 +2303,7 @@ body.kb-open {
   padding-inline: 0.625rem;
   padding-block: 0.25rem;
   border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s var(--ease-spring);
@@ -2300,7 +2332,7 @@ body.kb-open {
   padding-inline: 0.875rem;
   padding-block: 0.4375rem;
   border: 1px solid var(--border-chrome);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   backdrop-filter: var(--blur-glass);
   cursor: pointer;
@@ -2508,6 +2540,49 @@ button.c-chip--removable {
   border-color: color-mix(in srgb, var(--color-allergen-text) 20%, transparent);
 }
 
+/* ---- Depth theme (plan 577): status dot ----
+   A colour chip on a <span> (a status, never a control) is a white tag with a small dot.
+   Pressable and data-coloured chips keep their own look. */
+span:is(.c-chip--teal, .c-chip--amber, .c-chip--red, .c-chip--green, .c-chip--allergen, .c-chip.teal, .c-chip.amber, .c-chip.red):not(.c-chip--toggle, .c-chip--tap, .c-chip--filter, .c-chip--tab, .c-chip--removable, .c-chip--solid, .c-chip--colored) {
+  color: var(--color-text-main);
+
+  background: var(--bg-pure);
+
+  border-color: var(--border-default);
+
+  &::before {
+    content: '';
+    flex: none;
+
+    inline-size: 0.4375rem;
+    block-size: 0.4375rem;
+
+    background: var(--color-primary);
+
+    border-radius: var(--radius-full);
+  }
+
+  &:is(.c-chip--amber, .amber)::before {
+    background: var(--color-warning);
+  }
+
+  &:is(.c-chip--red, .red)::before {
+    background: var(--color-danger);
+  }
+
+  &.c-chip--green::before {
+    background: var(--color-success-emphasis);
+  }
+
+  &.c-chip--allergen::before {
+    background: var(--color-allergen-text);
+
+    border-radius: 1px;
+
+    transform: rotate(45deg);
+  }
+}
+
 .c-chip--glass {
   background: var(--bg-glass-strong);
 }
@@ -2616,4 +2691,41 @@ input[type='number']::-webkit-outer-spin-button {
   --z-modal-nested-2: 1200; /* popup over a nested popup (translation-key-modal) */
   --z-confirm: 2000; /* the yes/no question (confirm-modal) */
   --z-toast: 9999; /* the toast */
+}
+
+/* ---- The Pass (plan 572): engine classes ---- */
+.c-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.c-pass-line {
+  padding-block-end: 0.125rem;
+  border-block-end: 3px solid var(--color-lamp);
+}
+
+/* ---- Depth theme: density by screen (the Human, 2026-11-11: "items are really big for the viewport").
+   Almost every size in the app is in rem, so the root size is the one lever. It steps down only where
+   a mouse is used on a laptop-size screen (often at 125–150% Windows scaling); phones and tablets keep
+   16px for touch, and large monitors (1700px and wider) keep 16px too.
+   Cook View sets `cv-page-scroll` on <html>: it keeps its 16px type and is scaled as a whole instead,
+   because its spacing is in px and it is read from a distance. ---- */
+@media (pointer: fine) and (min-width: $break-tablet-max + 1) and (max-width: 1699px) {
+  html:not(.cv-page-scroll) {
+    font-size: 87.5%; /* 14px */
+  }
+
+  html.cv-page-scroll app-cook-view-page {
+    zoom: 0.9;
+  }
+
+  /* The header and the tab row keep the same size as on every other page. */
+  html.cv-page-scroll :is(app-header, app-tab-chips) {
+    zoom: 0.875;
+  }
+}
+
+/* The smallest chip text never drops under 11px when the root size steps down. */
+.c-chip {
+  font-size: max(0.71875rem, 11px);
 }

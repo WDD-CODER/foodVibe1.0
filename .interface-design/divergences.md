@@ -88,3 +88,11 @@ approved/not-approved states to the same two image assets rather than building a
 - **file:line:** `RecipeBuilder.dc.html:510-515`
 - **Assets:** `.interface-design/source/assets/stamp-approved.png`,
   `.interface-design/source/assets/stamp-not-approved.png`
+
+## 7. Guest typeface — Frank Ruhl Libre on paper titles only (amends 1)
+
+Heebo stays the app's typeface. `--font-guest` is used only on guest-facing paper titles. Decided by the Human
+2026-11-10 with the theme board.
+
+- **Value:** `font-family: var(--font-guest);` (`--font-guest: 'Frank Ruhl Libre', 'Heebo', serif`)
+- **file:line:** `src/app/pages/menu-intelligence/_paper-ui.scss:355` (`.section-title`), `:578` (`.menu-title-input`)

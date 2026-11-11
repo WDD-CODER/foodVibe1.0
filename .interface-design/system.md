@@ -47,8 +47,10 @@ Teal (herb) + amber (pass lamp) + sky (steel reflection). Do not remove or simpl
 
 | Token | Value | Why |
 |---|---|---|
-| `--color-primary` | `#14b8a6` | Herb green / patinated copper |
-| `--color-primary-hover` | `#0d9488` | Deeper copper when active |
+| `--color-primary` | `#0f766e` | Patina teal — the logo's colour |
+| `--color-primary-hover` | `#115e59` | Deeper teal when active |
+| `--color-lamp` | `#f59e0b` | The pass lamp: only on what is ready to go out |
+| `--font-guest` | `'Frank Ruhl Libre', 'Heebo', serif` | Guest-facing paper titles only |
 | `--color-primary-soft` | `rgba(20,184,166,0.12)` | Tinted surface tint |
 | `--color-primary-glow` | `rgba(20,184,166,0.25)` | Focus glow |
 | `--color-accent-gold` | `#a0833f` | Pass lamp amber / saffron |
@@ -108,6 +110,13 @@ All borders use `rgba` — never solid hex. Solid hex borders are harsh. The rul
 | `--shadow-nav-footer` | Bottom nav top shadow |
 
 ---
+
+## The Pass (plan 572)
+
+1. One lamp: amber (`--color-lamp`, `.c-pass-line`) marks only what is ready to go out.
+2. One mark everywhere: buttons, links and active states are the logo's teal.
+3. Three rooms never mixed: glass = office, dark = kitchen, paper = guest.
+4. Numbers are the hero: use `.c-num` for tabular digits.
 
 ## Depth Strategy
 
@@ -264,3 +273,16 @@ Rules from the validation of plan 515 (run test-514-515). No orchestrator agent 
 - Ad-hoc spacing values outside the 4px grid
 - Large border-radius on small elements
 - Mixing depth strategies (no shadows + solid borders on same surface)
+
+## Depth (plan 577)
+
+Chosen by the Human on 2026-11-11 from the design canvas ("ליטוש 2 · עומק" with the tags and spacing of "ליטוש 1 · חד").
+
+- Glass only on navigation chrome (header, tab bar). Content sits on solid white: `--bg-glass`, `--bg-glass-strong`, `--bg-glass-hover` and `--bg-glass-dense` are now `#ffffff` (the names stay for compatibility).
+- The page is flat `--bg-body: #e6eeee`; the light colour washes are gone. Depth comes from the layered shadows `--shadow-glass` / `--shadow-card` / `--shadow-hover`.
+- Corners: `--radius-md: 0.875rem` (buttons, inputs), `--radius-lg: 1.5rem` (cards and panels).
+- Inputs are filled (`--bg-muted`) with no visible border; on focus they turn white with a `--color-primary` border.
+- One dark hero tile per screen at most, and the price bar: `--bg-bar`, `--border-bar`, `--color-on-bar`, `--color-on-bar-muted`, `--color-on-bar-bad`.
+- A status is a white tag with a dot (a colour chip on a `span`); colour never carries meaning alone. Pressable chips keep their own look.
+- Spacing only from the `--space-*` scale.
+- The dark kitchen theme and the paper tokens are untouched.

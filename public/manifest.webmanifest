@@ -1,11 +1,13 @@
 {
-  "name": "FoodVibe",
-  "short_name": "FoodVibe",
+  "name": "foodCo",
+  "short_name": "foodCo",
   "dir": "rtl",
   "lang": "he",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
+  "theme_color": "#115e59",
+  "background_color": "#f0f4f8",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
