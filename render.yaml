@@ -33,5 +33,16 @@ services:
       # Set in Render dashboard — never commit the value
       - key: GEMINI_API_KEY
         sync: false
+      # Front desk (plans 558, 560). Set in the Render dashboard by hand - never commit a value.
+      # The service's public https address; used for links the server builds.
+      - key: PUBLIC_BASE_URL
+        sync: false
+      # WhatsApp (Wave 1b, plan 560).
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
       - key: ALLOWED_ORIGIN
         value: https://foodvibe1-0-1-frankfurt.onrender.com,https://wdd-coder.github.io,http://localhost:4200
