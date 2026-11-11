@@ -1,6 +1,6 @@
 # Plan 544 — Clients become CRM records: wider shape, phone match key, Trash instead of hard delete
 
-Status: draft
+Status: done
 Depends-on: 543
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

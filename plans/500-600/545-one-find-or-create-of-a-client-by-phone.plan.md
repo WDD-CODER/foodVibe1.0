@@ -1,6 +1,6 @@
 # Plan 545 — One find-or-create of a client by phone, so one person is one client on every channel
 
-Status: draft
+Status: done
 Depends-on: 544
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

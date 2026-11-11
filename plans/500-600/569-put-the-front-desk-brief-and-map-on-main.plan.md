@@ -1,6 +1,6 @@
 # Plan 569 — Put the Front Desk brief and map on main, with the contract additions the plans made
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 5702f6d1fc4a80d78426cb011932d2524eb3466f
 

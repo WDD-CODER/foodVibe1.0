@@ -1,6 +1,6 @@
 # Plan 543 — Open one safe door for people who are not members of a business
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
