@@ -18,6 +18,7 @@ const {
   initClosing, finishRefusal, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 } = require('../utils/closing-rules')
 const { newId } = require('../utils/id')
+const { actorOf } = require('../utils/actor')
 const { LIVE } = require('../jobs/purge-deleted')
 
 const TYPE = 'menuEvents'
@@ -28,7 +29,6 @@ const router = Router()
 router.use(dataWriteLimiter)
 
 const events = () => mongoose.connection.db.collection(TYPE)
-const actorOf = req => ({ userId: req.user.userId, name: req.user.name ?? '' })
 const scopeOf = req => ({ _id: req.params.id, ...scopeFilter(req), ...LIVE })
 
 /** Loads the caller's event or sends 404. Plan 477: an event in a stage hidden from this staff member is "not found" too. */

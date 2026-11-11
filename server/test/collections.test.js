@@ -5,7 +5,7 @@
  * SEARCHABLE_ENTITY_TYPES, and BACKUP_ENTITY_TYPES) comes from.
  */
 
-const { COLLECTIONS, ALL_USER_ENTITY_TYPES, CLONEABLE_TYPES, SEARCHABLE_ENTITY_TYPES, BACKUP_ENTITY_TYPES } = require('../constants/collections');
+const { COLLECTIONS, ALL_USER_ENTITY_TYPES, CLONEABLE_TYPES, SEARCHABLE_ENTITY_TYPES, BACKUP_ENTITY_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
 
 describe('server/constants/collections.js', () => {
   it('every entry declares all four flags as booleans', () => {
@@ -37,6 +37,14 @@ describe('server/constants/collections.js', () => {
     expect(CLONEABLE_TYPES).toEqual(COLLECTIONS.filter(c => c.cloneable).map(c => c.name));
     expect(SEARCHABLE_ENTITY_TYPES).toEqual(COLLECTIONS.filter(c => c.searchable).map(c => c.name));
     expect(BACKUP_ENTITY_TYPES).toEqual(COLLECTIONS.filter(c => c.backup).map(c => c.name));
+  });
+
+  it('routerWrites is a boolean when present and ROUTER_WRITE_TYPES matches it (requests, bookings)', () => {
+    for (const entry of COLLECTIONS) {
+      if ('routerWrites' in entry) expect(typeof entry.routerWrites).toBe('boolean');
+    }
+    expect(ROUTER_WRITE_TYPES).toEqual(COLLECTIONS.filter(c => c.routerWrites).map(c => c.name));
+    expect(ROUTER_WRITE_TYPES).toEqual(['requests', 'bookings']);
   });
 
   it('suppliers precedes products in CLONEABLE_TYPES (supplierIdMap ordering)', () => {

@@ -1,6 +1,8 @@
-import { Injectable, Signal } from '@angular/core'
+import { Injectable, Signal, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { BaseEntityDataService } from './base-entity-data.service'
+import { UserMsgService } from './user-msg.service'
+import { TranslationService } from './translation.service'
 import { Client } from '@models/client.model'
 
 const ENTITY = 'clients'
@@ -11,6 +13,9 @@ const ENTITY = 'clients'
  */
 @Injectable({ providedIn: 'root' })
 export class ClientDataService extends BaseEntityDataService<Client> {
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+
   /** Domain alias for the base-class signal. */
   readonly allClients_: Signal<Client[]> = this.all_
 
@@ -31,7 +36,12 @@ export class ClientDataService extends BaseEntityDataService<Client> {
   async addClient(body: Omit<Client, '_id' | 'phoneNormalized'>): Promise<Client> {
     try {
       const saved = await this.storage.post<Client>(ENTITY, body as Client)
-      this.updateItems((clients) => [...clients, saved])
+      // Plan 545: the server answers with the existing client when the phone is already one — keep one entry and say so.
+      const existed = this.currentItems().some((c) => c._id === saved._id)
+      this.updateItems((clients) =>
+        existed ? clients.map((c) => (c._id === saved._id ? saved : c)) : [...clients, saved]
+      )
+      if (existed) this.userMsg.onSetSuccessMsg(this.translation.translate('client_existing_selected'))
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err

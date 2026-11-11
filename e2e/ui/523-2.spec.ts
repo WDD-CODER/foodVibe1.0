@@ -32,7 +32,7 @@ test('523-2: adding an own question shows it under its section with a remove con
   const session = await signInQa(context)
   await cleanup(request, session)
   try {
-    await page.goto('/metadata-manager')
+    await page.goto('/dashboard?tab=metadata')
     await card(page).getByRole('tab', { name: 'פגישת ספקים' }).click()
     await card(page).locator('#logistics-item-text').fill(NAME)
     await choose(page, '.logistics-add-phase', 'פגישת ספקים')

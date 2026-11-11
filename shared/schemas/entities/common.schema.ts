@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+/** One row of opening hours (venues and front desk profiles share it; plan 548). `dayIndexes` 0 = Sunday. */
+export const operatingHoursRowSchema = z.strictObject({
+  days: z.string(),
+  time: z.string(),
+  dayIndexes: z.array(z.number().int().min(0).max(6)).optional(),
+  open: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  close: z.string().regex(/^\d{2}:\d{2}$/).optional()
+})
+export type OperatingHoursRow = z.infer<typeof operatingHoursRowSchema>
+
 export const ingredientSchema = z.strictObject({
   _id: z.string(),
   referenceId: z.string().optional(),

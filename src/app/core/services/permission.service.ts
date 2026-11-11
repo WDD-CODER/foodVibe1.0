@@ -2,7 +2,7 @@ import { computed, inject, Injectable } from '@angular/core'
 import { Recipe } from '../models/recipe.model'
 import { UserService } from './user.service'
 
-/** The 10 actions of contract C-PERM (mirrors `server/utils/permissions.js`). */
+/** The 13 actions of contract C-PERM (mirrors `server/utils/permissions.js`). */
 export type PermissionAction =
   | 'create'
   | 'edit'
@@ -15,6 +15,8 @@ export type PermissionAction =
   | 'editSettings'
   | 'editTaxonomy'
   | 'editLogistics'
+  | 'editFrontDesk'
+  | 'manageRequests'
 
 export interface PermissionContext {
   /** Entity type (collection name), e.g. `recipes`, `products`, `menuEvents`. */
@@ -28,7 +30,8 @@ const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = [
   'manageTeam',
   'editSettings',
   'editTaxonomy',
-  'editLogistics'
+  'editLogistics',
+  'editFrontDesk'
 ]
 
 /**
@@ -51,6 +54,8 @@ export class PermissionService {
     if (user.businessRole !== 'staff') return false
 
     if (OWNER_ONLY_ACTIONS.includes(action)) return false
+    // Plan 549: any member works the request queue and the bookings.
+    if (action === 'manageRequests') return true
     if (action === 'create') return true
 
     const isCreator = !!ctx.doc && !!user._id && (ctx.doc as { createdBy?: string }).createdBy === user._id

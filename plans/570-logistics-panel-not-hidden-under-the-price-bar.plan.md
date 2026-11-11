@@ -84,9 +84,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Leave room for the price bar on every wide screen, not only up to 1030 px — widen the plan 494 media query — src/app/pages/menu-intelligence/menu-intelligence.page.scss
-- [ ] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
-- [ ] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
+- [x] A1: Leave room for the price bar on every wide screen, not only up to 1030 px — widen the plan 494 media query — src/app/pages/menu-intelligence/menu-intelligence.page.scss
+- [x] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
+- [x] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
 - [ ] A4: Run the ten screen checks against the slot's app, then build, lint and log-query
 
 ## Technical Considerations
@@ -108,3 +108,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Evidence 2026-11-10 (Planner, wt-2 on orch/run-522 @ 0bb23f01): at 1440×900, 522-1…4 and the three 523 specs with the corrected URL passed; 522-5 and 522-6 failed on "app-pricing-meter subtree intercepts pointer events".
+- 2026-11-10 builder: pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors). Screen specs 522-1…6, 523-1…3, 570-1 NOT run (no slot app/backend in this worktree); A4 left unticked for the gate/Human.

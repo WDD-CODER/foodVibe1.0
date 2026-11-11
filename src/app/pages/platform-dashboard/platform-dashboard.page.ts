@@ -4,6 +4,8 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import type { AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -59,6 +61,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     TranslatePipe,
     PageHeaderComponent,
     LoaderComponent,
+    EmptyStateComponent,
     PlatformLogisticsItemsComponent
   ],
   templateUrl: './platform-dashboard.page.html',
@@ -76,6 +79,10 @@ export class PlatformDashboardPage implements OnInit {
   protected readonly sortKey_ = signal<SortKey>('lastActivityAt')
   protected readonly sortDir_ = signal<SortDir>('desc')
   protected readonly isLoading_ = signal(true)
+  /** Plan 566: this month's AI usage per business, and the per-feature breakdown of the open row. */
+  protected readonly aiUsage_ = signal<AiUsageReport | null>(null)
+  protected readonly aiDrill_ = signal<{ businessId: string; rows: AiUsageRow[] } | null>(null)
+  protected readonly aiLoading_ = signal(true)
   protected readonly columns: Column[] = [
     { key: 'name', labelKey: 'platform_col_business' },
     { key: 'ownerName', labelKey: 'platform_col_owner' },
@@ -129,6 +136,7 @@ export class PlatformDashboardPage implements OnInit {
 
   // 6. METHODS
   async ngOnInit(): Promise<void> {
+    void this.loadAiUsage()
     try {
       await this.platformAdmin.load()
     } catch (err) {
@@ -141,6 +149,57 @@ export class PlatformDashboardPage implements OnInit {
     } finally {
       this.isLoading_.set(false)
     }
+  }
+
+  private async loadAiUsage(): Promise<void> {
+    try {
+      this.aiUsage_.set(await this.platformAdmin.getAiUsage({ groupBy: 'business' }))
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.ai_usage_failed',
+        message: 'Loading the AI usage table failed',
+        context: { err: String(err) }
+      })
+      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
+    } finally {
+      this.aiLoading_.set(false)
+    }
+  }
+
+  /** Opens the per-feature rows of one business; a second click on the same row closes it. */
+  protected async toggleAiDrill(businessId: string): Promise<void> {
+    if (this.aiDrill_()?.businessId === businessId) {
+      this.aiDrill_.set(null)
+      return
+    }
+    try {
+      const report = await this.platformAdmin.getAiUsage({ groupBy: 'feature', businessId })
+      this.aiDrill_.set({ businessId, rows: report.rows })
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.ai_usage_drill_failed',
+        message: 'Loading the AI usage breakdown failed',
+        context: { err: String(err) }
+      })
+      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
+    }
+  }
+
+  protected async exportAiCsv(): Promise<void> {
+    try {
+      await this.platformAdmin.downloadAiUsageCsv({ groupBy: 'business' })
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.ai_usage_csv_failed',
+        message: 'Downloading the AI usage CSV failed',
+        context: { err: String(err) }
+      })
+      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
+    }
+  }
+
+  protected cost(value: number): string {
+    return value.toFixed(4)
   }
 
   protected sortBy(key: SortKey): void {

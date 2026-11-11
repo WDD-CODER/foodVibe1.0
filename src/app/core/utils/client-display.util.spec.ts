@@ -1,5 +1,6 @@
 import { Client } from '@models/client.model'
-import { clientLabel, matchesClientQuery, normalizePhone } from './client-display.util'
+import { PHONE_VECTORS } from '@schemas/testing/phone-vectors'
+import { clientLabel, matchesClientQuery, normalizePhone, phoneKey } from './client-display.util'
 
 describe('client-display.util', () => {
   const dana: Client = {
@@ -14,6 +15,13 @@ describe('client-display.util', () => {
     expect(normalizePhone('(052) 123-45 67')).toBe('0521234567')
     expect(normalizePhone('abc')).toBe('')
   })
+
+  for (const v of PHONE_VECTORS) {
+    it(`shared vector ${JSON.stringify(v.input)} gives the same normalized phone and key as the server`, () => {
+      expect(normalizePhone(v.input)).toBe(v.normalized)
+      expect(phoneKey(normalizePhone(v.input))).toBe(v.key)
+    })
+  }
 
   it('matches on a name hit, any case', () => {
     expect(matchesClientQuery(dana, 'cohen')).toBeTrue()

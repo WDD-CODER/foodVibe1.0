@@ -90,6 +90,7 @@ src/app/app.config.ts
 public/assets/data/dictionary.json
 docs/agent/standards-backend.md
 server/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -173,15 +174,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Name every AI feature and price every model in two fixed lists — the 19 feature keys and the price table with its date and source — server/constants/ai-features.js, server/constants/ai-prices.js
-- [ ] A2: Add the ledger that writes one row per real model call without ever slowing or breaking it — recordAiUsage, estimateCostUsd, aggregateAiUsage; collection entry and two indexes — server/services/ai-usage.js, server/constants/collections.js, server/db.js
-- [ ] A3: Make the Gemini caller require a feature and write a ledger row on success and every failure — usage parameter, throw under vitest, no row when no call was made; update the test helper — server/services/gemini-client.js, server/test/gemini-client.test.js
-- [ ] A4: Tag each of the thirteen AI routes with its feature so every call is counted — the table in the Problem Statement; fix the route tests that call these routes if they now need usage — server/routes/ai.js, server/test/ai-match-product-names.test.js, server/test/ai-receipt-photo.test.js, server/test/price-list-prompt.test.js, server/test/product-import-route.test.js
-- [ ] A5: Test the ledger end to end — tokens and cost, each failure kind, no-call cases, retry gives two rows, failed insert is silent, stored fields, every route tagged — server/test/ai-usage.test.js
-- [ ] A6: Let the platform admin read totals by business, feature, model or day, also as a file — GET /ai-usage with ranges, drill-down and CSV; tests for totals, 403 and CSV — server/routes/admin.js, server/test/ai-usage.test.js
-- [ ] A7: Show this month's AI usage per business on the platform dashboard with a per-feature breakdown — model, service method, table, drill-down, CSV button, dictionary keys, spec cases — src/app/pages/platform-dashboard/platform-dashboard.page.ts, .html, .scss, .spec.ts, src/app/core/services/platform-admin.service.ts, src/app/core/models/ai-usage.model.ts, public/assets/data/dictionary.json
-- [ ] A8: Record the new collection and route in the backend docs and the server map — docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A9: Run the full checks and hand Dandan the two hand checks — test:server, test:ci, both lints, lint:icons, build, log-query; then the [human] cards
+- [x] A1: Name every AI feature and price every model in two fixed lists — the 19 feature keys and the price table with its date and source — server/constants/ai-features.js, server/constants/ai-prices.js
+- [x] A2: Add the ledger that writes one row per real model call without ever slowing or breaking it — recordAiUsage, estimateCostUsd, aggregateAiUsage; collection entry and two indexes — server/services/ai-usage.js, server/constants/collections.js, server/db.js
+- [x] A3: Make the Gemini caller require a feature and write a ledger row on success and every failure — usage parameter, throw under vitest, no row when no call was made; update the test helper — server/services/gemini-client.js, server/test/gemini-client.test.js
+- [x] A4: Tag each of the thirteen AI routes with its feature so every call is counted — the table in the Problem Statement; fix the route tests that call these routes if they now need usage — server/routes/ai.js, server/test/ai-match-product-names.test.js, server/test/ai-receipt-photo.test.js, server/test/price-list-prompt.test.js, server/test/product-import-route.test.js
+- [x] A5: Test the ledger end to end — tokens and cost, each failure kind, no-call cases, retry gives two rows, failed insert is silent, stored fields, every route tagged — server/test/ai-usage.test.js
+- [x] A6: Let the platform admin read totals by business, feature, model or day, also as a file — GET /ai-usage with ranges, drill-down and CSV; tests for totals, 403 and CSV — server/routes/admin.js, server/test/ai-usage.test.js
+- [x] A7: Show this month's AI usage per business on the platform dashboard with a per-feature breakdown — model, service method, table, drill-down, CSV button, dictionary keys, spec cases — src/app/pages/platform-dashboard/platform-dashboard.page.ts, .html, .scss, .spec.ts, src/app/core/services/platform-admin.service.ts, src/app/core/models/ai-usage.model.ts, public/assets/data/dictionary.json
+- [x] A8: Record the new collection and route in the backend docs and the server map — docs/agent/standards-backend.md, server/breadcrumbs.md
+- [x] A9: Run the full checks and hand Dandan the two hand checks — test:server, test:ci, both lints, lint:icons, build, log-query; then the [human] cards
 
 ## Technical Considerations
 - Dependencies: `gemini-client.js` return contract unchanged (every route keeps working); `GEMINI_USAGE` quota counter unchanged.
@@ -207,3 +208,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Contract extension (map "Contract extensions (run)"): plan 566 · `AI_FEATURES` gains `recipe_patch`, `menu_generate`, `menu_patch`, `product_generate`, `product_patch`, `recipe_from_image` · the C-AIUSAGE list named 7 existing-route keys but `server/routes/ai.js` has 13 Gemini routes; R-21 requires every call metered.
 - Prices looked up 2026-11-10 on https://ai.google.dev/gemini-api/docs/pricing (Standard tier). `gemini-3.8-flash`: Google's "What's new in Gemini 3.8 Flash" page gives an introductory $0.75 / $3.75 through 2026-12-31 ($1.50 / $7.50 from 2027-01-01) while the pricing page showed $0.375 / $1.875 — Human chose the pricing-page value $0.375 / $1.875 (2026-11-10); re-check at build.
 - Plan number: map row 3b, renumbered +2 on 2026-11-10 (old 564 → 566).
+- Prices re-read 2026-11-10: no network lookup of the pricing page was possible in this run; the plan's values (incl. gemini-3.8-flash 0.375 / 1.875, the Human's choice) were used unchanged.
+- CSV: the page fetches the CSV with the session token (blob) and saves it, because a plain link cannot carry the Bearer header.
+- Evidence: pnpm run test:server -> exit 0 (77 files, 934 tests); pnpm run test:ci -> exit 0 (1877 SUCCESS); pnpm run lint / lint:icons / lint:no-native-select / server lint / build -> exit 0; kit-manifest-check ok; override-check ok; plan-ledger-check OK.
+- BLOCKED: node scripts/breadcrumbs-check.mjs -> exit 1 ("src/app/core/models/breadcrumbs.md ... not mentioned: ai-usage.model.ts"). The fix is one row in src/app/core/models/breadcrumbs.md, which is outside the Read-Write Scope. Needs `approved: src/app/core/models/breadcrumbs.md`.
+- scope extended: src/app/core/models/breadcrumbs.md — row for ai-usage.model.ts (approved by the Human, ask 566-1); node scripts/breadcrumbs-check.mjs -> exit 0 (BREADCRUMBS: clean).

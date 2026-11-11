@@ -6,12 +6,12 @@ const { can, stripMoneyFields, moneyFieldsChanged, valuesAt } = require('../util
 const OWNER = { userId: 'o1', businessId: 'b1', businessRole: 'owner' }
 const STAFF = { userId: 's1', businessId: 'b1', businessRole: 'staff' }
 const ADMIN = { userId: 'a1', businessId: 'b0', businessRole: 'owner', isPlatformAdmin: true }
-const ACTIONS = ['create', 'edit', 'delete', 'editMoney', 'changeStage', 'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics']
+const ACTIONS = ['create', 'edit', 'delete', 'editMoney', 'changeStage', 'addNote', 'markArrival', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk']
 const own = { businessId: 'b1', createdBy: 'o1' }
 const mine = { businessId: 'b1', createdBy: 's1' }
 
 describe('can', () => {
-  it('owner may do all 11 actions on a doc of his business', () => {
+  it('owner may do all 12 actions on a doc of his business', () => {
     for (const a of ACTIONS) expect(can(OWNER, a, { type: 'menuEvents', doc: own })).toEqual({ ok: true })
   })
   it('any role on another business doc is OTHER_BUSINESS', () => {
@@ -31,7 +31,7 @@ describe('can', () => {
     }
   })
   it('staff never get owner-only actions', () => {
-    for (const a of ['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics']) {
+    for (const a of ['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk']) {
       expect(can(STAFF, a, { doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY' })
     }
   })
@@ -54,6 +54,29 @@ describe('can', () => {
     for (const a of ['manageTeam', 'editSettings']) {
       expect(can(OWNER, a, {})).toEqual({ ok: true })
       expect(can(STAFF, a, {})).toEqual({ ok: false, reason: 'OWNER_ONLY' })
+    }
+  })
+})
+
+describe('plan 549: manageRequests', () => {
+  it('any member of the business may, with or without a doc; another business and no role may not', () => {
+    for (const u of [OWNER, STAFF]) {
+      expect(can(u, 'manageRequests', { type: 'requests' })).toEqual({ ok: true })
+      expect(can(u, 'manageRequests', { type: 'bookings', doc: { businessId: 'b1', createdBy: 'someone-else' } })).toEqual({ ok: true })
+    }
+    expect(can(STAFF, 'manageRequests', { type: 'requests', doc: { businessId: 'b2' } })).toEqual({ ok: false, reason: 'OTHER_BUSINESS' })
+    expect(can({ userId: 'x', businessId: 'b1' }, 'manageRequests', { type: 'requests' })).toEqual({ ok: false, reason: 'NO_ROLE' })
+  })
+})
+
+describe('plan 548: front desk profiles', () => {
+  it('editFrontDesk is owner-only', () => {
+    expect(can(OWNER, 'editFrontDesk', { type: 'frontDeskProfiles', doc: own })).toEqual({ ok: true })
+    expect(can(STAFF, 'editFrontDesk', { type: 'frontDeskProfiles', doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY' })
+  })
+  it('staff may not create, edit or delete a profile, even their own', () => {
+    for (const a of ['create', 'edit', 'delete']) {
+      expect(can(STAFF, a, { type: 'frontDeskProfiles', doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY_TYPE' })
     }
   })
 })

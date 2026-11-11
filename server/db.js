@@ -98,6 +98,10 @@ async function connectDb() {
   // Plan 430: per-user-per-day activity records; dashboards read them by business and date. No TTL.
   await db.collection('usageDays').createIndex({ businessId: 1, date: 1 }, { name: 'business_date' })
 
+  // Plan 566: server-only AI ledger, read by the platform admin per business, day and feature.
+  await db.collection('aiUsage').createIndex({ businessId: 1, day: 1 }, { name: 'ai_usage_business_day' })
+  await db.collection('aiUsage').createIndex({ day: 1, feature: 1 }, { name: 'ai_usage_day_feature' })
+
   // Plan 321 Phase 3: one term per (kind, key, owner); same names as migration 0003 so both are idempotent.
   await db.collection('taxonomyTerms').createIndex({ kind: 1, key: 1, userId: 1 }, { unique: true, name: 'kind_key_user_unique' })
   await db.collection('taxonomyTerms').createIndex({ userId: 1, kind: 1, sortOrder: 1 }, { name: 'user_kind_order' })
@@ -108,6 +112,42 @@ async function connectDb() {
   )
   await db.collection('taxonomyTerms').createIndex({ businessId: 1, kind: 1, sortOrder: 1 }, { name: 'business_kind_order' })
   logger.debug({ event: 'mongo.index.ensured', index: 'taxonomyTerms' })
+
+  // Plan 544: find a client by its phone match key (R-01). Not unique: a trashed or merged client keeps its phone.
+  await db.collection('clients').createIndex({ businessId: 1, phoneKey: 1 }, { name: 'client_phone_key' })
+  // Plan 545: one live, unmerged client per phone key per business. Old clients have no liveKey, so this builds on any data.
+  await db.collection('clients').createIndex(
+    { businessId: 1, liveKey: 1 },
+    { unique: true, partialFilterExpression: { liveKey: { $exists: true } }, name: 'client_live_key_unique' }
+  )
+  logger.debug({ event: 'mongo.index.ensured', index: 'clients' })
+
+  // Plan 548: one front desk profile per business, and one public slug per profile. Partial on `slug` (every real
+  // profile has one) so a raw fixture doc without it cannot break startup or the cleanup tests.
+  await db.collection('frontDeskProfiles').createIndex(
+    { slug: 1 },
+    { unique: true, name: 'frontdesk_slug_unique', partialFilterExpression: { slug: { $type: 'string' } } }
+  )
+  await db.collection('frontDeskProfiles').createIndex(
+    { businessId: 1 },
+    { unique: true, name: 'frontdesk_business_unique', partialFilterExpression: { slug: { $type: 'string' } } }
+  )
+  logger.debug({ event: 'mongo.index.ensured', index: 'frontDeskProfiles' })
+
+  // Plan 549: requests and bookings. publicToken indexes are partial so a raw fixture doc without a token cannot break startup.
+  await db.collection('requests').createIndex({ businessId: 1, status: 1, createdAt: 1 }, { name: 'requests_business_status' })
+  await db.collection('requests').createIndex(
+    { publicToken: 1 },
+    { unique: true, name: 'requests_token_unique', partialFilterExpression: { publicToken: { $type: 'string' } } }
+  )
+  await db.collection('bookings').createIndex({ businessId: 1, startAt: 1 }, { name: 'bookings_business_start' })
+  await db.collection('bookings').createIndex(
+    { publicToken: 1 },
+    { unique: true, name: 'bookings_token_unique', partialFilterExpression: { publicToken: { $type: 'string' } } }
+  )
+  // Plan 550: the decision log, read by business over time.
+  await db.collection('decisionLog').createIndex({ businessId: 1, at: 1 }, { name: 'decisionlog_business_at' })
+  logger.debug({ event: 'mongo.index.ensured', index: 'requests' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
   await ensureLogIndexes(db)

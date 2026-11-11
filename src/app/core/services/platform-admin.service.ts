@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
+import type { AiUsageParams, AiUsageReport } from '../models/ai-usage.model'
 
 /** One line of the platform admin's table (plan 448): counts and dates only, never a business's content. */
 export interface BusinessRow {
@@ -58,6 +59,30 @@ export class PlatformAdminService {
       this.http.get<{ rows: AdminTermRow[] }>(`${environment.apiUrl}${API.admin('taxonomy')}`, { params: { kind } })
     )
     this._termRows_.set(res.rows)
+  }
+
+  /** Plan 566: AI call totals for the platform admin, grouped by business, feature, model or day. */
+  async getAiUsage(params: AiUsageParams = {}): Promise<AiUsageReport> {
+    const query: Record<string, string> = {}
+    for (const [key, value] of Object.entries(params)) if (value) query[key] = value
+    return firstValueFrom(
+      this.http.get<AiUsageReport>(`${environment.apiUrl}${API.admin('ai-usage')}`, { params: query })
+    )
+  }
+
+  /** Plan 566: the same report as a CSV file (fetched with the session, then saved by the browser). */
+  async downloadAiUsageCsv(params: AiUsageParams = {}): Promise<void> {
+    const query: Record<string, string> = { format: 'csv' }
+    for (const [key, value] of Object.entries(params)) if (value) query[key] = value
+    const blob = await firstValueFrom(
+      this.http.get(`${environment.apiUrl}${API.admin('ai-usage')}`, { params: query, responseType: 'blob' })
+    )
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `ai-usage-${params.from ?? 'month'}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
   }
 
   /** Optimistic: flips the row first, puts it back and rethrows when the server refuses. */

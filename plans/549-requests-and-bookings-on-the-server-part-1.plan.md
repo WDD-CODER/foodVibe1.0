@@ -83,6 +83,8 @@ src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts
 docs/brain/invariants.md
 docs/agent/standards-backend.md
+src/app/core/services/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -180,15 +182,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Define the request and booking shapes once, shared by server and app — enums, schemas, server-field lists, manual input schema, registry, types — shared/schemas/entities/request.schema.ts, shared/schemas/entities/booking.schema.ts, shared/schemas/entities/index.ts
-- [ ] A2: Register both collections as read-through-generic, write-through-router, with their indexes and the new member action — collections flag, generic 405 and expiry hook, manageRequests, indexes — server/constants/collections.js, server/routes/generic.js, server/utils/permissions.js, server/db.js
-- [ ] A3: Let a member record a phone request that finds or creates the client and checks it against the rules — POST / with upsert, qualify, counters, token, history — server/routes/requests.js, server/app.js
-- [ ] A4: Let members move a request's status and edit what the customer wants, only along allowed paths — PUT /:id/status table, PUT /:id/wanted re-qualify, conditional writes — server/routes/requests.js
-- [ ] A5: Let members move a booking through confirmed, seated, finished, no-show and cancelled — PUT /:id/status, no-show counter — server/routes/bookings.js, server/app.js
-- [ ] A6: Expire stale requests when the list is read, not on a timer — expireDue and the generic GET hook — server/utils/request-expiry.js, server/routes/generic.js
-- [ ] A7: Test every move, the manual create, expiry and tenant isolation — server/test/requests-router.test.js, server/test/bookings-router.test.js, server/test/request-expiry.test.js, server/test/cross-business.test.js, server/test/permissions.test.js, server/test/collections.test.js
-- [ ] A8: Give the app request and booking data services that call the routers — models, API paths, two services + specs, permission mirror — src/app/core/models/request.model.ts, src/app/core/models/booking.model.ts, src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts, src/app/core/services/http-storage.adapter.ts, src/app/core/services/permission.service.ts
-- [ ] A9: Record the new collections and routes and run every check — standards-backend §1/§5, invariants Touches, breadcrumbs; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md, docs/brain/invariants.md, server/breadcrumbs.md
+- [x] A1: Define the request and booking shapes once, shared by server and app — enums, schemas, server-field lists, manual input schema, registry, types — shared/schemas/entities/request.schema.ts, shared/schemas/entities/booking.schema.ts, shared/schemas/entities/index.ts
+- [x] A2: Register both collections as read-through-generic, write-through-router, with their indexes and the new member action — collections flag, generic 405 and expiry hook, manageRequests, indexes — server/constants/collections.js, server/routes/generic.js, server/utils/permissions.js, server/db.js
+- [x] A3: Let a member record a phone request that finds or creates the client and checks it against the rules — POST / with upsert, qualify, counters, token, history — server/routes/requests.js, server/app.js
+- [x] A4: Let members move a request's status and edit what the customer wants, only along allowed paths — PUT /:id/status table, PUT /:id/wanted re-qualify, conditional writes — server/routes/requests.js
+- [x] A5: Let members move a booking through confirmed, seated, finished, no-show and cancelled — PUT /:id/status, no-show counter — server/routes/bookings.js, server/app.js
+- [x] A6: Expire stale requests when the list is read, not on a timer — expireDue and the generic GET hook — server/utils/request-expiry.js, server/routes/generic.js
+- [x] A7: Test every move, the manual create, expiry and tenant isolation — server/test/requests-router.test.js, server/test/bookings-router.test.js, server/test/request-expiry.test.js, server/test/cross-business.test.js, server/test/permissions.test.js, server/test/collections.test.js
+- [x] A8: Give the app request and booking data services that call the routers — models, API paths, two services + specs, permission mirror — src/app/core/models/request.model.ts, src/app/core/models/booking.model.ts, src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts, src/app/core/services/http-storage.adapter.ts, src/app/core/services/permission.service.ts
+- [x] A9: Record the new collections and routes and run every check — standards-backend §1/§5, invariants Touches, breadcrumbs; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md, docs/brain/invariants.md, server/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: 545 (`upsertClientByPhone`), 548 (`qualify`, profile, `FRONT_DESK_REQUEST_KINDS`), 543 (`actorOf`, `newPublicToken`), 544 (client `counters`, `kinds`, `lastContactAt` as server fields).
@@ -212,3 +214,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Generic writes refused (405 `USE_ROUTER`) rather than "accepted with server fields stripped": the brief says requests and bookings are read through the generic API and written only through these routers; the Done-when seed "generic write of `status` is ignored" holds because nothing is written. Kept as this plan's choice.
 - Contract extension (for the map's "Contract extensions (run)"): `- plan 549 · requests gain server-owned `decline { reason, text?, at, by }` (in REQUEST_SERVER_FIELDS) · 550 writes it, 559 counts declines by reason`.
 - A new client made by a manual request gets `kinds: ['lead']`; plan 550 adds `diner` / `event_client` on approve.
+- Evidence: `pnpm run build` exit 0; `pnpm run lint` 0 errors; `pnpm --dir server run lint` exit 0 (0 errors); `pnpm run test:server` exit 0, 83 files / 1106 tests pass (incl. requests-router, bookings-router, request-expiry, cross-business, permissions, collections); `pnpm run test:ci` exit 0, 1899 SUCCESS.
+- Choice: the `publicToken` unique indexes are partial (`publicToken` is a string) so a raw fixture doc without a token cannot break startup (same as the profile slug index). Reverse: drop the `partialFilterExpression`.
+- Blocked on one gate check: `node scripts/breadcrumbs-check.mjs` exit 1 — `src/app/core/services/breadcrumbs.md` and `src/app/core/models/breadcrumbs.md` do not mention the four new files (request/booking data services and models). Both files are outside the Read-Write Scope; escalated with `approved: <path>` (one row each, as plan 548 did).

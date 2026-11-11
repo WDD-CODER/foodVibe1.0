@@ -13,7 +13,7 @@ const { resetForTests, isVisionModel, getUsageCount } = require('../services/gem
 const { normalizeReceiptRows } = require('../utils/price-list-import');
 
 // The AI usage counters (the shared Gemini budget and the per-day usage rows) are the only thing a call may touch.
-const USAGE_COLLECTIONS = ['GEMINI_USAGE', 'usageDays'];
+const USAGE_COLLECTIONS = ['GEMINI_USAGE', 'usageDays', 'aiUsage'];
 
 let app;
 let fetchMock;
