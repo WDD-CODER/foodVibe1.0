@@ -46,6 +46,47 @@
 
 > Audit says: do these.
 
+### Run fd-1a-data — hand checks left open (PR #547)
+- [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
+- [x] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges — Human 2026-11-11: backup atlas-2026-11-11T14-40-06, 0 clients patched, "verify: ok"
+- [x] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes — checked by the Planner at the Human's request 2026-11-11: pass
+- [x] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
+- [x] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
+- [x] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md — checked by the Planner at the Human's request 2026-11-11: pass
+- [x] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
+- [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2 — Planner 2026-11-11: 11 of 12 pass; 544-1 fails because the spec never clicks the "לשחזר פריט זה?" confirm (the app restores fine, API 200) — fix the spec (A5), then re-run
+- [ ] A5: Fix e2e/ui/544-1.spec.ts — after the row's "שחזר מהאשפה" click, confirm in the modal before expecting the row to leave
+
+### Logistics feedback — Human 2026-11-11 → plans 579 (F2, F5-F7, F10, A5), 581 (F1-F4, F8, F9), 580 (B1-B5)
+- [ ] F1: Owners and the platform admin can remove logistics questions, like recipes — admin adds or removes for everybody or only himself; an owner only for his business
+- [ ] F2: A remove icon beside each question in the metadata card and on each event screen — event screen removes for that event only; metadata removes from the business's default list for new events — A: (Human, 2026-11-11) on one event: hide it, keep the answer; admin "remove for everybody": only future events
+- [ ] F3: Adding a question in metadata asks which environments it is for — all environment chips start selected; no separate "relevant to everybody" button — A: (Human, 2026-11-11) yes; admin picks "רק לעסק שלי" (default) or "לכל העסקים"
+- [ ] F4: Owners and the admin can add logistics sections (metadata_logistics_section), same everybody / only-me rule — A: (Human, 2026-11-11) businesses only add their own sections; shared ones stay locked
+- [ ] F5: Status chips — drop the default "unchecked" chip; status becomes one "needed" toggle that opens the payer options — A: (Human, 2026-11-11)
+- [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected — A: (Human, 2026-11-11) one "needed" toggle; when on, two options: "עלינו" (default) / "באחריות הלקוח"; the client summary lists the "באחריות הלקוח" items; no separate ללקוח checkbox
+- [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
+- [ ] F8: Logistics questions get Edit next to Remove, like recipes — Edit loads the question with all its data into the add form, scrolls there, and the user saves it as an update (Human 2026-11-11, card V5)
+- [ ] F9: Editing while the add form already holds an unsaved question opens the save / discard modal first (Human 2026-11-11, card V5)
+- [ ] F10: A question that is added or promoted to shared later must not appear on events that already exist and were saved — today the event screen reads the live list, so it shows up there unanswered (Human 2026-11-11, card V7; confirmed in event-logistics-panel)
+
+### AI menu — failure is not explained (Human 2026-11-11)
+- [ ] B1: "Create menu with AI" shows only "שגיאה ביצירת התפריט. נסה שוב." for every failure — show the cause (no dishes found in the text, guest count missing, AI busy or out of quota, server down, timed out) and what to change. Logs 12:56: 8 tries, all rejected by our check (sections empty; once guestCount missing) — A: (Human, 2026-11-11) any limit reads "limit reached" (upsell), never "AI busy"; the modal shows how many uses are left, no long text
+- [ ] B2: When the text lists no dishes, the AI suggests dishes ONLY from the business's own recipe book (never invented ones), and builds the menu from those real dishes with matching section titles so every line links to its recipe — A: (Human, 2026-11-11) suggest from every dish in the business's recipe book, shared dishes included
+- [ ] B3: The platform AI-usage table counts a call as successful when Gemini answered, even when our check rejected the result — record the outcome (accepted / rejected) so rejected calls show as failed — A: (Human, 2026-11-11) yes, plus a tooltip that splits the failures by reason
+- [ ] B4: Log the raw AI answer on ai.generate_menu.validation_failed (the route logs only the error list today)
+- [ ] B5: AI menu examples leak between businesses — getApprovedMenuShots reads every business's saved shots into every prompt (INV-1) — A: (Human, 2026-11-11) fix in plan 580
+- [ ] B6: Recipe AI examples (GEMINI_SHOTS) are also read across businesses (INV-1) — needs its own small plan, same fix as B5
+
+### Front desk templates — Planner review suggestions (W3, 2026-11-11; the Human picks)
+- [ ] T1: Restaurant "יש סיבה למסיבה?" reads as a joke — suggest "אירוע מיוחד? (יום הולדת, יום נישואין…)"
+- [ ] T2: Add a kashrut question ("דרישות כשרות") for catering and private chef
+- [ ] T3: Add a dietary / allergy question to catering events (only private chef asks it)
+- [ ] T4: Ask a start time on private chef and catering events
+- [ ] T5: Make the catering venue required (out-of-area declines depend on it), and say "בופה" instead of "מזנון"
+- [ ] T6: Check the catering event-type question still works when a business has no event types (options come from the taxonomy)
+- [ ] T7: A restaurant request stays open 4 h but the lead time is only 2 h — a short-notice request can still be waiting after its own time
+- [ ] T8: ADR 0031 and the map (line 118) still list a stored lifecycle field the server writes, but plan 547 computes lifecycle in the browser — drop the field or the doc line
+
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions.
@@ -77,47 +118,6 @@
 - [ ] A2: Add tour videos with a visit date to the venue form and detail page — Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
-
-### Plan 502 — Consistency sweep: one date field, one number format, growing textareas and one save-busy state (`plans/502-consistency-sweep-one-date-field-one-number-format-growing-textareas-and-one-save-busy-state.plan.md`)
-
-- [x] C1: Check the four lists in the Problem Statement against today's code and record the real ones — native dates, `| number` and `toFixed` uses, textareas, save buttons without a busy flag — this plan file
-- [x] C2: Replace the native date inputs with the shared date field and add a from / to variant only if the list filters need it — recipe-book-list, menu-library-list, menu-intelligence page — src/app/shared/date-field/**, the page folders in scope
-- [x] C3: Show numbers through one rule: pick the pipe for quantity, money and percent, move the other uses onto it and remove `toFixed` in templates — record the rule and any value that changes — src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [x] C4: Make every multi-line free-text box grow as the user types, and list the ones that stay fixed — extend the directive's selector so it cannot be forgotten — src/app/core/directives/textarea-auto-grow.directive.ts, the templates in scope
-- [x] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
-- [x] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [x] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
-
-- [ ] A1: Delete the 140 old per-branch state files from git and the local pointer file so no agent reads stale status again — git rm the 140 tracked state files under docs/; delete the untracked pointer file under .claude/ — docs/ (the old per-branch state files)
-- [ ] A2: Rebuild the two kit-override files from kit v1.9.0 and put only the reuse layer back, so they stop allowing a state file and gain the kit's newer checks — render placeholders by hand; keep import + --reuse dispatch; keep ## Reuse Check block; update override reasons — scripts/scope-check.mjs, .claude/references/prd-template.md, kit.config.json
-- [ ] A3: Rewrite the rules and brain docs so they say where work status lives now instead of naming the old file — AGENTS.md compaction rule with the kit's wording; brain points to plans, todo, git and PR; gitignore lines 62 and 73–78 removed; workflow map rows for dead scripts removed — AGENTS.md, .gitignore, docs/brain/index.md, docs/brain/glossary.md, docs/brain/projectbrief.md, docs/brain/how-it-works.md, docs/brain/gotchas.md, docs/brain/gotchas/agent-workflow.md, docs/brain/gotchas/git-workflow.md, docs/agent/workflow-map.md, docs/workflow-kit/parameters.md
-- [ ] A4: Make the CI scope-check test prove the branch naming without relying on a state file being allowed — header comment reworded; test at line 145 commits an in-scope fixture file — scripts/ci-scope-check.mjs, scripts/test/ci-scope-check.test.mjs
-- [ ] A5: Clean the two plans from the live run only if they are still open after the run merges — Always-allowed line only; closed plans in plans/<range>/ stay untouched — plans/419-*.plan.md, plans/497-*.plan.md
-- [ ] A6: Prove nothing FoodVibe owns still names the old file and the build and script tests pass — run the Done-when grep, pnpm run build, pnpm run test:scripts, the --deps/--reuse checks and the two kit diffs; paste outputs — this plan file (Execution Notes)
-
-- [ ] A1: Add the missing manifest entry for the native-dialog test fixture so the rules check stops failing — insert one object after the `mixed.diff` entry (alphabetical, before `registry-broken.md`) with `"path": "scripts/test/fixtures/reuse/native-dialog.diff"`, `"tier": "project"`, `"action": "stay"`, `"params": []`, `"refs": []`, `"notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."` (copy the `clean.diff` entry's shape and wording exactly) — docs/workflow-kit/manifest.json
-- [ ] A2: Prove the manifest check is green and nothing else moved — run the Done-when commands and paste the `KIT_MANIFEST: ok` line in Execution Notes; `git diff --stat` must show only `docs/workflow-kit/manifest.json` (+8 lines)
-
-### Plan 523 — Event logistics 6 of 6: let a business add and remove its own checklist questions in the Metadata Manager
-- [x] C1: Build the manager that lists shared and own logistics questions and adds or removes own ones — component class per the Angular skill: OnPush, `inject()` (`TaxonomyStore`, `LogisticsItemRegistryService`, `ConfirmModalService`, `UserMsgService`, `TranslationService`, `UserService.isLoggedIn`, `AuthModalService`), signals `phase_`, `draft_` (text, phase, section, answerType, environments, shared), `error_`, computed `sections_` (grouped rows for the selected phase) — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.ts
-- [x] C2: Write the card template — tabs, grouped rows (locked tag vs removable chip), the add form, the empty state per section — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.html
-- [x] C3: Style the card like its siblings, mobile first — component-local SCSS, breakpoint mirror, no new `.c-*` — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.scss
-- [x] C4: Mount the card and give it a rail entry — the tag after `app-station-manager`, the import and `imports` entry, the `_allJumpSections` line — src/app/pages/metadata-manager/metadata-manager.page.component.html, src/app/pages/metadata-manager/metadata-manager.page.component.ts
-- [x] C5: Unit-test the card with a stubbed store — `TaxonomyStore.terms('logisticsItem')` returns 1 shared + 1 own item; `isShared`, `isAdmin_` (false), `add` / `remove` spies: the shared row has the lock and no remove control; the own row has the remove control; submitting "חדש" with section `access` calls `add` with `{ phase: 'intake', section: 'access', answerType: 'status' }` and no `environments`; submitting with two environment chips checked passes `environments: ['outdoor_field', 'client_home']`; submitting the shared item's key again sets `error_` and does not call `add`; remove → confirm spy resolves true → `remove` called; `remove` rejecting with the server's in-use error → toast `metadata_logistics_in_use` — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts
-- [x] C6: Add the Hebrew strings and the icons — the keys above, `Lock` and `ListChecks` — public/assets/data/dictionary.json, src/app/app.config.ts
-- [x] C7: Record the new piece in the maps — docs/brain/component-families.md (chip family Users), src/app/pages/breadcrumbs.md
-- [x] C8: Write one e2e spec per UI card with the plan-517 helpers — `signInQa`, `page.goto('/metadata-manager')`, the card's action, the assertion, screenshot `screens/523-<n>.png`; 523-3 removes what 523-2 added and both clean up in `finally` by deleting any own `logisticsItem` named "בדיקה E2E" through `DELETE /api/v1/data/taxonomyTerms/:id`; run each with `node scripts/e2e-one.mjs e2e/ui/523-<n>.spec.ts` — e2e/ui/523-1.spec.ts … e2e/ui/523-3.spec.ts
-- [x] C9: Run build, lint, lint:icons, lint:no-native-select, test:ci, reuse-lint and paste the outputs under Execution Notes
-
-- [ ] M1a: Take the plan, then check the dry-run of the kit sync and show the Human its summary line — run kit-sync with ref v1.13.0 and no apply flag from the kit folder against the slot — kit folder, slot root
-- [ ] M1b: Apply the kit sync after the Human's word and commit it alone as "sync kit v1.13.0" — kit-sync with the apply flag, then one commit of its output only — whole sync output incl. .kit/install.json
-- [ ] M2a: Run the override check on the real files and report which workflow files fail and why — node scripts/override-check.mjs, full output — no writes
-- [ ] M2b: Show for each failing file the exact required step from the kit template and the diff that adds it, keeping FoodVibe jobs unchanged — kit core/.github/workflows/*.yml vs .github/workflows/ci.yml and security.yml — diffs only, nothing committed
-- [ ] M2c: Tell the Human what ADR 0021 and the kit change loop say about a kit-side fix instead of a local override — docs/brain/decisions/0021-*.md, kit docs/CHANGE-LOOP.md — report only
-- [ ] M3a: Show the proposed merge of the kit version with FoodVibe's Reuse additions in the scope check script — keep the reuse flag and Reuse gate — scripts/scope-check.mjs
-- [ ] M3b: Show the proposed merges of the save-plan skill and the PRD template that keep the Reuse Check section — .claude/skills/save-plan/SKILL.md, .claude/references/prd-template.md
-- [ ] M3c: Show the override declarations FoodVibe's kit config would need, one path and one reason each — kit.config.json overrides
-- [ ] M3d: Stop and wait for the Human's word before any commit beyond the sync commit, and never push — none
 
 ### Plan 542 — The local MongoDB MCP server starts from an installed package, with its last outside reach closed (`plans/542-mongodb-local-mcp-starts-from-installed-package.plan.md`)
 
@@ -257,89 +257,12 @@
 - [ ] A7: Add the words and icons the screens use — dictionary keys, icon registration — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A8: Write the two screen checks and the backend docs row, then run every check — e2e/ui/556-1.spec.ts, e2e/ui/556-2.spec.ts, docs/agent/standards-backend.md
 
-### Plan 570 — Keep the logistics panel's buttons out from under the price bar on wide screens (`plans/570-logistics-panel-not-hidden-under-the-price-bar.plan.md`)
-- [x] A1: Leave room for the price bar on every wide screen, not only up to 1030 px — widen the plan 494 media query — src/app/pages/menu-intelligence/menu-intelligence.page.scss
-- [x] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
-- [x] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
-- [x] A4: Run the ten screen checks against the slot's app, then build, lint and log-query (merged in PR #547; closed by the Human 2026-11-11)
-
-### Run 522 — hand checks left open after merge (PR #545, agreed 2026-11-10)
-- [x] V1: The closed logistics card reads as one header line on a phone-size window and opens on one tap — /menu-intelligence/e0df992a-399f-428c-a5c1-b37157ab4f59
-- [x] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
-- [x] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
-- [x] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
-- [x] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
-- [x] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
-- [x] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
-
-### Run fd-1a-data — hand checks left open (PR #547)
-- [ ] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md
-- [ ] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges
-- [ ] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes
-- [ ] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
-- [ ] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
-- [ ] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md
-- [ ] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
-- [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
-
 ### Plan 575 — Seed one demo catering business into a local database so every demo starts with full screens (`plans/575-seed-one-demo-catering-business-into-a-local-database.plan.md`)
 - [ ] A1: Write the demo business's data as one pure builder so it can be tested without a database — suppliers, products, recipes, dishes, venues, clients, events with their money, usage days, baseline — server/scripts/lib/demo-data.js
 - [ ] A2: Add the command that writes that data into a local database, safely and only once — arguments, local-only refusal, password from the environment, validate then insert what is missing — server/scripts/seed-demo-business.js
 - [ ] A3: Test the data's shape and links, the money formula, the dashboard numbers, the second run and the local-only rule — server/test/seed-demo-business.test.js
 - [ ] A4: List the new command in the server map — server/breadcrumbs.md
 - [ ] A5: Run the server tests, the server lint, the build and the log query, and paste the output lines under Execution Notes
-
-### Plan 576 — Polish The Pass theme (`plans/576-polish-the-pass-theme-welcome-underline-on-phones-cook-view-logo-and-the-sign-in-window.plan.md`)
-- [x] A1: Put one amber line under the whole welcome promise on a phone — block the highlighted span and balance its lines — src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
-- [x] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
-- [x] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
-- [x] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
-### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
-- [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
-- [x] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges — Human 2026-11-11: backup atlas-2026-11-11T14-40-06, 0 clients patched, "verify: ok"
-- [x] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes — checked by the Planner at the Human's request 2026-11-11: pass
-- [x] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
-- [x] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
-- [x] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md — checked by the Planner at the Human's request 2026-11-11: pass
-- [x] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
-- [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2 — Planner 2026-11-11: 11 of 12 pass; 544-1 fails because the spec never clicks the "לשחזר פריט זה?" confirm (the app restores fine, API 200) — fix the spec (A5), then re-run
-- [ ] A5: Fix e2e/ui/544-1.spec.ts — after the row's "שחזר מהאשפה" click, confirm in the modal before expecting the row to leave
-
-### Logistics feedback — Human 2026-11-11 → plans 579 (F2, F5-F7, F10, A5), 581 (F1-F4, F8, F9), 580 (B1-B5)
-- [ ] F1: Owners and the platform admin can remove logistics questions, like recipes — admin adds or removes for everybody or only himself; an owner only for his business
-- [ ] F2: A remove icon beside each question in the metadata card and on each event screen — event screen removes for that event only; metadata removes from the business's default list for new events — A: (Human, 2026-11-11) on one event: hide it, keep the answer; admin "remove for everybody": only future events
-- [ ] F3: Adding a question in metadata asks which environments it is for — all environment chips start selected; no separate "relevant to everybody" button — A: (Human, 2026-11-11) yes; admin picks "רק לעסק שלי" (default) or "לכל העסקים"
-- [ ] F4: Owners and the admin can add logistics sections (metadata_logistics_section), same everybody / only-me rule — A: (Human, 2026-11-11) businesses only add their own sections; shared ones stay locked
-- [ ] F5: Status chips — drop the default "unchecked" chip; status becomes one "needed" toggle that opens the payer options — A: (Human, 2026-11-11)
-- [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected — A: (Human, 2026-11-11) one "needed" toggle; when on, two options: "עלינו" (default) / "באחריות הלקוח"; the client summary lists the "באחריות הלקוח" items; no separate ללקוח checkbox
-- [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
-
-### Plan 578 — Depth theme: the dark price bar and one hero tile on the dashboard (`plans/578-depth-theme-the-dark-price-bar-and-one-hero-tile-on-the-dashboard.plan.md`)
-- [x] A1: Make the price bar a dark teal bar with light text that stays readable — bar surface and the colours of everything on it, scoped so the phone sheet stays light — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.scss
-- [x] A2: Make the month's revenue the one large dark tile that leads the dashboard — one class binding, the six-column grid and the hero rules — src/app/pages/dashboard/components/business-performance/business-performance.component.html, src/app/pages/dashboard/components/business-performance/business-performance.component.scss
-- [x] A3: Test that only the revenue card is the hero — two cases — src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
-- [x] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
-- [ ] F8: Logistics questions get Edit next to Remove, like recipes — Edit loads the question with all its data into the add form, scrolls there, and the user saves it as an update (Human 2026-11-11, card V5)
-- [ ] F9: Editing while the add form already holds an unsaved question opens the save / discard modal first (Human 2026-11-11, card V5)
-- [ ] F10: A question that is added or promoted to shared later must not appear on events that already exist and were saved — today the event screen reads the live list, so it shows up there unanswered (Human 2026-11-11, card V7; confirmed in event-logistics-panel)
-
-### AI menu — failure is not explained (Human 2026-11-11)
-- [ ] B1: "Create menu with AI" shows only "שגיאה ביצירת התפריט. נסה שוב." for every failure — show the cause (no dishes found in the text, guest count missing, AI busy or out of quota, server down, timed out) and what to change. Logs 12:56: 8 tries, all rejected by our check (sections empty; once guestCount missing) — A: (Human, 2026-11-11) any limit reads "limit reached" (upsell), never "AI busy"; the modal shows how many uses are left, no long text
-- [ ] B2: When the text lists no dishes, the AI suggests dishes ONLY from the business's own recipe book (never invented ones), and builds the menu from those real dishes with matching section titles so every line links to its recipe — A: (Human, 2026-11-11) suggest from every dish in the business's recipe book, shared dishes included
-- [ ] B3: The platform AI-usage table counts a call as successful when Gemini answered, even when our check rejected the result — record the outcome (accepted / rejected) so rejected calls show as failed — A: (Human, 2026-11-11) yes, plus a tooltip that splits the failures by reason
-- [ ] B4: Log the raw AI answer on ai.generate_menu.validation_failed (the route logs only the error list today)
-- [ ] B5: AI menu examples leak between businesses — getApprovedMenuShots reads every business's saved shots into every prompt (INV-1) — A: (Human, 2026-11-11) fix in plan 580
-- [ ] B6: Recipe AI examples (GEMINI_SHOTS) are also read across businesses (INV-1) — needs its own small plan, same fix as B5
-
-### Front desk templates — Planner review suggestions (W3, 2026-11-11; the Human picks)
-- [ ] T1: Restaurant "יש סיבה למסיבה?" reads as a joke — suggest "אירוע מיוחד? (יום הולדת, יום נישואין…)"
-- [ ] T2: Add a kashrut question ("דרישות כשרות") for catering and private chef
-- [ ] T3: Add a dietary / allergy question to catering events (only private chef asks it)
-- [ ] T4: Ask a start time on private chef and catering events
-- [ ] T5: Make the catering venue required (out-of-area declines depend on it), and say "בופה" instead of "מזנון"
-- [ ] T6: Check the catering event-type question still works when a business has no event types (options come from the taxonomy)
-- [ ] T7: A restaurant request stays open 4 h but the lead time is only 2 h — a short-notice request can still be waiting after its own time
-- [ ] T8: ADR 0031 and the map (line 118) still list a stored lifecycle field the server writes, but plan 547 computes lifecycle in the browser — drop the field or the doc line
 
 ### Plan 579 — Logistics questions: per-event list, hide on one event, one needed toggle and tighter chips (`plans/579-logistics-per-event-list-hide-needed-toggle-tight-chips.plan.md`)
 - [ ] A1: Add the schema fields for hide lists, removal dates, own sections and the "ours" provider — `event-logistics.ts`: append `'ours'` to `LOGISTICS_PAYERS`, add `logisticsSectionKeySchema` and `type LogisticsSectionKey = string`; `taxonomy-term.schema.ts`: append `'logisticsSection'` to `TAXONOMY_KINDS` and `plainKinds`, `logisticsItem.section` → `logisticsSectionKeySchema`, `removedAt: z.number().int().min(0).optional()`, `foldedAt: z.number().optional()`, `TERM_REFERENCES.logisticsItem.menuEvents` += `'siteLogistics.hiddenKeys[]'`, `logisticsSection: {}`; `menu-event.schema.ts`: `answers[].section` → `logisticsSectionKeySchema`, `siteLogistics.hiddenKeys` optional; `business.schema.ts`: `hiddenLogisticsKeys` optional + `logisticsHiddenInputSchema = z.strictObject({ keys: z.array(z.string().min(1).max(LOGISTICS_LABEL_MAX)).max(300) })`; tests: a `logisticsSection` term validates; a `logisticsItem` with section "סעיף שלי", `removedAt: 0` and `foldedAt` validates; a 121-char section fails; `TAXONOMY_KINDS` contains `logisticsSection` — shared/schemas/entities/event-logistics.ts, shared/schemas/entities/taxonomy-term.schema.ts, shared/schemas/entities/menu-event.schema.ts, shared/schemas/entities/business.schema.ts, server/test/taxonomy-term-schema.test.js, server/test/helpers/v2-docs.js

@@ -1,6 +1,6 @@
 # Plan 576 — Polish The Pass theme: the welcome underline on phones, the logo in Cook View, and the sign-in window
 
-Status: draft
+Status: done
 Depends-on: 571, 572, 574
 Snapshot: eea6788003969ad697266b4083729f162ed3a5f6
 

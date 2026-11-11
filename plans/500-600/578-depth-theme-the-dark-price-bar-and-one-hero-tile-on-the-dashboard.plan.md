@@ -1,6 +1,6 @@
 # Plan 578 — Depth theme: the dark price bar and one hero tile on the dashboard
 
-Status: draft
+Status: done
 Depends-on: 573, 577
 Snapshot: 5e9247bc3ed5ed2beeb061d926550d87998f5227
 

@@ -618,3 +618,30 @@
     }
   }
 }
+
+// Phone density (2026-11-11): the price and the base unit share a row; the title block is shorter.
+@media (max-width: 620px) {
+  .form-container .form-header {
+    margin-block-end: var(--space-3);
+    padding-block-end: var(--space-3);
+
+    .subtitle {
+      display: none;
+    }
+  }
+
+  .form-container .form-section.form-section--mandatory {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    // Name, category and the lock note take a full row; the price and the base unit pair up.
+    > :nth-child(-n + 2),
+    > app-product-price-lock {
+      grid-column: 1 / -1;
+    }
+
+    // With no note to show, the lock component must not hold an empty row.
+    > app-product-price-lock:empty {
+      display: none;
+    }
+  }
+}
