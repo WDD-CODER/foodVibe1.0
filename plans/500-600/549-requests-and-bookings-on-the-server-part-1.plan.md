@@ -1,6 +1,6 @@
 # Plan 549 — Store customer requests and bookings on the server: manual request, status moves, lazy expiry
 
-Status: draft
+Status: done
 Depends-on: 545, 548
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

@@ -1,6 +1,6 @@
 # Plan 566 — Meter every AI call so pricing can be set from real numbers
 
-Status: draft
+Status: done
 Depends-on: 543, 532
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

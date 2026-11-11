@@ -1,6 +1,6 @@
 # Plan 550 — Approve or decline a request in one tap: the event or booking is created, the day's load is shown, every decision is logged
 
-Status: draft
+Status: done
 Depends-on: 549
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

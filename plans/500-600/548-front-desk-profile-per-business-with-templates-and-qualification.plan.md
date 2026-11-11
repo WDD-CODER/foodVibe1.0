@@ -1,6 +1,6 @@
 # Plan 548 — Give every business one front desk profile, with a template per business type and the fit rules
 
-Status: draft
+Status: done
 Depends-on: 545
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
