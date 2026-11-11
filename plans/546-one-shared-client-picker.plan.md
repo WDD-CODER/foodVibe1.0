@@ -127,13 +127,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Pin today's client behaviour in both hosts before moving anything — run the dialog and stage-bar specs green and note which cases cover picking, adding, clearing and Escape — src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
-- [ ] A2: Build the shared add-client form with today's fields and checks — inputs initialName/initialPhone, outputs saved/cancelled, addClient, error toasts; spec — src/app/shared/client-form/**
-- [ ] A3: Build the shared client picker on the search box, with the selected name inside the field — selected/picked/cleared/addingChange/back(), owner add row, staff ask-owner line; spec covers pick, clear, add with typed name or phone, staff without add, Escape one step back — src/app/shared/client-picker/**
-- [ ] A4: Move the new-inquiry dialog to the shared folder and let it use the picker — delete its own client code, title swap and one-step Escape through the picker; fix the menu library import; move and update the spec — src/app/shared/new-inquiry-dialog/**, src/app/pages/menu-library/components/new-inquiry-dialog/**, src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts
-- [ ] A5: Let the event stage bar use the same picker and simplify its client row — picker in the existing block, delete its own search code, client row per Q1; update the spec — src/app/pages/menu-intelligence/components/event-stage-bar/**
-- [ ] A6: Register the new family and refresh the folder maps — client-picker family, search-combobox users, breadcrumbs — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md
-- [ ] A7: Write the two screen checks and run every check — e2e/ui/546-1.spec.ts, e2e/ui/546-2.spec.ts (`signInQa` from e2e/helpers/qa-session.ts, `createQaEvent` for 546-2); test:ci, build, lint, reuse-lint, breadcrumbs-check, line counts, log-query
+- [x] A1: Pin today's client behaviour in both hosts before moving anything — run the dialog and stage-bar specs green and note which cases cover picking, adding, clearing and Escape — src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
+- [x] A2: Build the shared add-client form with today's fields and checks — inputs initialName/initialPhone, outputs saved/cancelled, addClient, error toasts; spec — src/app/shared/client-form/**
+- [x] A3: Build the shared client picker on the search box, with the selected name inside the field — selected/picked/cleared/addingChange/back(), owner add row, staff ask-owner line; spec covers pick, clear, add with typed name or phone, staff without add, Escape one step back — src/app/shared/client-picker/**
+- [x] A4: Move the new-inquiry dialog to the shared folder and let it use the picker — delete its own client code, title swap and one-step Escape through the picker; fix the menu library import; move and update the spec — src/app/shared/new-inquiry-dialog/**, src/app/pages/menu-library/components/new-inquiry-dialog/**, src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts
+- [x] A5: Let the event stage bar use the same picker and simplify its client row — picker in the existing block, delete its own search code, client row per Q1; update the spec — src/app/pages/menu-intelligence/components/event-stage-bar/**
+- [x] A6: Register the new family and refresh the folder maps — client-picker family, search-combobox users, breadcrumbs — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [x] A7: Write the two screen checks and run every check — e2e/ui/546-1.spec.ts, e2e/ui/546-2.spec.ts (`signInQa` from e2e/helpers/qa-session.ts, `createQaEvent` for 546-2); test:ci, build, lint, reuse-lint, breadcrumbs-check, line counts, log-query
 
 ## Technical Considerations
 - Dependencies: `ClientDataService`, `PermissionService.isOwner_`, `MenuEventDataService.allMenuEvents_` (event counts in labels), `app-search-combobox`.
@@ -156,3 +156,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Map row 4, renumbered +2 on 2026-11-10 (old 544 → 546). `Depends-on: 522` added because the map says run this after plan 522 merges (522 was running in `run-522` when this plan was written).
+- scope: the dialog's own client cases stayed in its spec (ids renamed to client-form-*); the picker and form specs cover the same cases at their level.
+- Evidence: pnpm run test:ci -> exit 0, 1944 SUCCESS; pnpm run build -> 0; pnpm run lint -> 0 (0 errors); reuse-lint --check-registry -> 0; reuse-lint --diff=origin/main -> 0 (2 warns on moved code: number input in the dialog, .c-input-stack:last-child in the form scss); breadcrumbs-check -> 0; lint:icons -> 0; lint:no-native-select -> 0; log-query -> skipped (no database); numstat -M: stage bar 3+/23-, dialog 10+/143-.
+- e2e/ui/546-1 and 546-2 written, not run by the builder (no dev server in the worktree).
+- Contract extension: app-client-picker also has closeOnOutsideClick input and escaped / outsideClick outputs, so the stage bar keeps Escape / outside click closing the picker.

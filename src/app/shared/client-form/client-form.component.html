@@ -1,0 +1,105 @@
+<div class="c-input-stack">
+  <label for="client-form-name">{{ 'client_name' | translatePipe }}</label>
+  <input
+    id="client-form-name"
+    type="text"
+    autocomplete="off"
+    [maxLength]="nameMax"
+    [class.c-input--invalid]="isTouched_() && !nameValid_()"
+    [ngModel]="name_()"
+    (ngModelChange)="nameEdit_.set($event)"
+    (keydown.enter)="onNameEnter($event)"
+  />
+  @if (isTouched_() && !nameValid_()) {
+    <span class="c-field-error">{{ 'field_required' | translatePipe }}</span>
+  }
+</div>
+<div class="c-input-stack">
+  <label for="client-form-phone">{{ 'client_phone' | translatePipe }}</label>
+  <input
+    id="client-form-phone"
+    type="tel"
+    dir="ltr"
+    autocomplete="off"
+    maxlength="20"
+    [class.c-input--invalid]="(isTouched_() || phone_().trim() !== '') && !phoneValid_()"
+    [ngModel]="phone_()"
+    (ngModelChange)="phoneEdit_.set($event)"
+    (keydown.enter)="onPhoneEnter($event)"
+  />
+  @if ((isTouched_() || phone_().trim() !== '') && !phoneValid_()) {
+    <span class="c-field-error">{{ 'client_phone_invalid' | translatePipe }}</span>
+  }
+</div>
+<button
+  type="button"
+  class="c-chip c-chip--tap client-form-more-toggle"
+  [attr.aria-expanded]="isMoreOpen_()"
+  (click)="isMoreOpen_.set(!isMoreOpen_())"
+>
+  {{ 'client_more_details' | translatePipe }}
+</button>
+@if (isMoreOpen_()) {
+  <div class="client-form-more">
+    <div class="c-input-stack">
+      <label>{{ 'client_type' | translatePipe }}</label>
+      <app-custom-select
+        [ngModel]="clientType_()"
+        (ngModelChange)="clientType_.set($event)"
+        [options]="clientTypeOptions"
+        placeholder="client_type"
+      />
+    </div>
+    <div class="c-input-stack">
+      <label for="client-form-company">{{ 'client_company_name' | translatePipe }}</label>
+      <input
+        id="client-form-company"
+        type="text"
+        autocomplete="off"
+        [maxLength]="nameMax"
+        [ngModel]="companyName_()"
+        (ngModelChange)="companyName_.set($event)"
+      />
+    </div>
+    <div class="c-input-stack">
+      <label for="client-form-email">{{ 'client_email' | translatePipe }}</label>
+      <input
+        id="client-form-email"
+        type="email"
+        dir="ltr"
+        autocomplete="off"
+        [maxLength]="nameMax"
+        [ngModel]="email_()"
+        (ngModelChange)="email_.set($event)"
+      />
+    </div>
+    <div class="c-input-stack">
+      <label for="client-form-source">{{ 'client_source' | translatePipe }}</label>
+      <input
+        id="client-form-source"
+        type="text"
+        autocomplete="off"
+        maxlength="100"
+        [ngModel]="source_()"
+        (ngModelChange)="source_.set($event)"
+      />
+    </div>
+    <div class="c-input-stack">
+      <label for="client-form-notes">{{ 'client_notes' | translatePipe }}</label>
+      <textarea
+        id="client-form-notes"
+        class="c-input"
+        rows="2"
+        maxlength="2000"
+        [ngModel]="notes_()"
+        (ngModelChange)="notes_.set($event)"
+      ></textarea>
+    </div>
+  </div>
+}
+<div class="c-modal-actions">
+  <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
+  <button type="button" class="c-btn-primary" [disabled]="isSaving_()" (click)="onSave()">
+    {{ 'save' | translatePipe }}
+  </button>
+</div>
