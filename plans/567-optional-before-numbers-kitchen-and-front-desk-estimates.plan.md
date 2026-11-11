@@ -138,12 +138,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the baseline hold eleven more optional estimates, and name the field groups once — schema fields with ranges, the three field-list constants — shared/schemas/entities/business.schema.ts
-- [ ] A2: Keep the dashboard cards comparing only their four numbers — import the card list into business-stats instead of the literal — server/services/business-stats.js
-- [ ] A3: Prove the server stores the new fields, refuses bad ones and leaves the cards alone — round trip, 400 on 120%, kitchen-only keeps hasBaseline false — server/test/business-baseline.test.js
-- [ ] A4: Show the new estimates in two closed groups on the baseline tab — group buttons, hints, fields, filledAt and canSave over all fields, dictionary keys — src/app/pages/settings/components/baseline-tab/**, public/assets/data/dictionary.json
-- [ ] A5: Test the tab and the save flow — component spec cases, one e2e card — src/app/pages/settings/components/baseline-tab/baseline-tab.component.spec.ts, e2e/ui/567-1.spec.ts
-- [ ] A6: Note the new fields in the backend docs and run every check — standards-backend line; test:server, test:ci, build, lint, lint:icons, log-query — docs/agent/standards-backend.md
+- [x] A1: Let the baseline hold eleven more optional estimates, and name the field groups once — schema fields with ranges, the three field-list constants — shared/schemas/entities/business.schema.ts
+- [x] A2: Keep the dashboard cards comparing only their four numbers — import the card list into business-stats instead of the literal — server/services/business-stats.js
+- [x] A3: Prove the server stores the new fields, refuses bad ones and leaves the cards alone — round trip, 400 on 120%, kitchen-only keeps hasBaseline false — server/test/business-baseline.test.js
+- [x] A4: Show the new estimates in two closed groups on the baseline tab — group buttons, hints, fields, filledAt and canSave over all fields, dictionary keys — src/app/pages/settings/components/baseline-tab/**, public/assets/data/dictionary.json
+- [x] A5: Test the tab and the save flow — component spec cases, one e2e card — src/app/pages/settings/components/baseline-tab/baseline-tab.component.spec.ts, e2e/ui/567-1.spec.ts
+- [x] A6: Note the new fields in the backend docs and run every check — standards-backend line; test:server, test:ci, build, lint, lint:icons, log-query — docs/agent/standards-backend.md
 
 ## Technical Considerations
 - Dependencies: `baselineInputSchema` is also the input type `BaselineInput` used by `BusinessService.saveBaseline` (`src/app/core/services/business.service.ts:56`) — it widens automatically.
@@ -165,3 +165,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Map row 15b (renumbered +2: old 565 → 567). Front desk baseline fields moved here from FD-09 per FD-14.
+- pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run lint:icons -> exit 0
+- pnpm run test:server -> exit 0, 1142 passed (new cases in business-baseline.test.js)
+- pnpm run test:ci -> exit 0, 1948 SUCCESS (new baseline-tab spec cases)
+- breadcrumbs-check -> clean; log-query -> SKIP: no database configured
+- e2e/ui/567-1.spec.ts written, not run here (needs QA login and a running app); the gate runs it.
+- No server/routes change needed; standards-backend got a `PUT /business/baseline` row.

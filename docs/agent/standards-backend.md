@@ -131,6 +131,7 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `GET` | `/api/v1/bookings/day?date=YYYY-MM-DD` | required | Plan 550: the business's non-cancelled bookings of that day by `startAt`, and `coversByHour` (party sizes of confirmed / seated / finished bookings by start hour). Error: `BAD_DATE` (400) |
 | `PUT` | `/api/v1/bookings/:id/status` | required | Plan 549: `confirmed → seated → finished`, `confirmed → no_show` (only after `startAt`; adds 1 to the client's `counters.noShows`), `confirmed | seated → cancelled`. Errors: `BAD_STATUS`, `STATUS_CHANGED` (409) |
 | `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
+| `PUT` | `/api/v1/business/baseline` | owner | Plans 431, 567: the opening baseline, whole replace, `filledAt` server-set. Every field optional: four card numbers plus eleven kitchen and front desk estimates (`BASELINE_KITCHEN_FIELDS`, `BASELINE_FRONTDESK_FIELDS`); `hasBaseline` looks at the card fields only |
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
 | `GET` | `/api/v1/public/health` | none | Plan 543: public router probe; the public door for non-members (ADR 0030, C-GUEST). No member token is read under /api/v1/public. |

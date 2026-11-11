@@ -8,7 +8,8 @@ import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
-import type { BaselineInput } from '@schemas/entities'
+import { BASELINE_FRONTDESK_FIELDS, BASELINE_KITCHEN_FIELDS, type BaselineInput } from '@schemas/entities'
+import { LucideAngularModule } from 'lucide-angular'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 
@@ -24,7 +25,14 @@ interface FieldDef {
 @Component({
   selector: 'app-baseline-tab',
   standalone: true,
-  imports: [NumberBoxDirective, ReactiveFormsModule, TranslatePipe, DatePipe, SelectOnFocusDirective],
+  imports: [
+    LucideAngularModule,
+    NumberBoxDirective,
+    ReactiveFormsModule,
+    TranslatePipe,
+    DatePipe,
+    SelectOnFocusDirective
+  ],
   templateUrl: './baseline-tab.component.html',
   styleUrl: './baseline-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -46,7 +54,19 @@ export class BaselineTabComponent {
     eventsClosedPerMonth: this.fb.control<number | null>(null, [Validators.min(0)]),
     avgRevenuePerEvent: this.fb.control<number | null>(null, [Validators.min(0)]),
     // The server accepts only values strictly between -100 and 100.
-    estProfitPct: this.fb.control<number | null>(null, [Validators.min(-99.99), Validators.max(99.99)])
+    estProfitPct: this.fb.control<number | null>(null, [Validators.min(-99.99), Validators.max(99.99)]),
+    // Plan 567: optional estimates, ranges as in the schema.
+    foodCostPct: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(100)]),
+    hoursPerWeekOrdering: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(168)]),
+    hoursPerWeekQuotes: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(168)]),
+    wastePct: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(100)]),
+    supplierOverrunPct: this.fb.control<number | null>(null, [Validators.min(-99.99), Validators.max(99.99)]),
+    phoneInquiriesPerDay: this.fb.control<number | null>(null, [Validators.min(0)]),
+    messagesPerDay: this.fb.control<number | null>(null, [Validators.min(0)]),
+    avgResponseMinutes: this.fb.control<number | null>(null, [Validators.min(0)]),
+    hostHoursPerWeek: this.fb.control<number | null>(null, [Validators.min(0), Validators.max(168)]),
+    noShowsPerWeek: this.fb.control<number | null>(null, [Validators.min(0)]),
+    missedInquiriesPerWeek: this.fb.control<number | null>(null, [Validators.min(0)])
   })
   readonly fields: FieldDef[] = [
     { key: 'inquiriesPerMonth', labelKey: 'baseline_inquiries_per_month', suffix: '' },
@@ -54,6 +74,27 @@ export class BaselineTabComponent {
     { key: 'avgRevenuePerEvent', labelKey: 'baseline_avg_revenue_per_event', suffix: '₪' },
     { key: 'estProfitPct', labelKey: 'baseline_est_profit_pct', suffix: '%' }
   ]
+  readonly kitchenFields: FieldDef[] = [
+    { key: 'foodCostPct', labelKey: 'baseline_food_cost_pct', suffix: '%' },
+    { key: 'hoursPerWeekOrdering', labelKey: 'baseline_hours_per_week_ordering', suffix: '' },
+    { key: 'hoursPerWeekQuotes', labelKey: 'baseline_hours_per_week_quotes', suffix: '' },
+    { key: 'wastePct', labelKey: 'baseline_waste_pct', suffix: '%' },
+    { key: 'supplierOverrunPct', labelKey: 'baseline_supplier_overrun_pct', suffix: '%' }
+  ]
+  readonly frontDeskFields: FieldDef[] = [
+    { key: 'phoneInquiriesPerDay', labelKey: 'baseline_phone_inquiries_per_day', suffix: '' },
+    { key: 'messagesPerDay', labelKey: 'baseline_messages_per_day', suffix: '' },
+    { key: 'avgResponseMinutes', labelKey: 'baseline_avg_response_minutes', suffix: '' },
+    { key: 'hostHoursPerWeek', labelKey: 'baseline_host_hours_per_week', suffix: '' },
+    { key: 'noShowsPerWeek', labelKey: 'baseline_no_shows_per_week', suffix: '' },
+    { key: 'missedInquiriesPerWeek', labelKey: 'baseline_missed_inquiries_per_week', suffix: '' }
+  ]
+  /** The groups below the four main fields; `open` is set from the stored baseline, then only by the owner. */
+  protected readonly groups = [
+    { id: 'kitchen', labelKey: 'baseline_group_kitchen', fields: this.kitchenFields, open: signal(false) },
+    { id: 'frontdesk', labelKey: 'baseline_group_frontdesk', fields: this.frontDeskFields, open: signal(false) }
+  ]
+  private readonly allFields: FieldDef[] = [...this.fields, ...this.kitchenFields, ...this.frontDeskFields]
   protected readonly isSaving_ = signal(false)
   private readonly queryParams_ = toSignal(this.route.queryParams, { initialValue: {} as Record<string, string> })
   private readonly value_ = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() })
@@ -65,12 +106,14 @@ export class BaselineTabComponent {
   /** The date the numbers were stored, or null when the baseline is missing or was skipped (no numbers). */
   protected readonly filledAt = computed(() => {
     const stored = this.stored()
-    return stored && this.fields.some((field) => stored[field.key] !== undefined) ? stored.filledAt : null
+    return stored && this.allFields.some((field) => stored[field.key] !== undefined) ? stored.filledAt : null
   })
   protected readonly canSave = computed(() => {
     const value = this.value_()
     return (
-      !this.isSaving_() && this.form.valid && (this.form.dirty || this.fields.some((field) => value[field.key] != null))
+      !this.isSaving_() &&
+      this.form.valid &&
+      (this.form.dirty || this.allFields.some((field) => value[field.key] != null))
     )
   })
 
@@ -84,8 +127,15 @@ export class BaselineTabComponent {
           inquiriesPerMonth: stored?.inquiriesPerMonth ?? null,
           eventsClosedPerMonth: stored?.eventsClosedPerMonth ?? null,
           avgRevenuePerEvent: stored?.avgRevenuePerEvent ?? null,
-          estProfitPct: stored?.estProfitPct ?? null
+          estProfitPct: stored?.estProfitPct ?? null,
+          ...Object.fromEntries(
+            [...BASELINE_KITCHEN_FIELDS, ...BASELINE_FRONTDESK_FIELDS].map((key) => [key, stored?.[key] ?? null])
+          )
         })
+        // A group opens by itself when the stored baseline has a value in it; it never closes by itself.
+        for (const group of this.groups) {
+          if (group.fields.some((field) => stored?.[field.key] !== undefined)) group.open.set(true)
+        }
       })
     })
   }
@@ -102,7 +152,7 @@ export class BaselineTabComponent {
     if (!this.canSave()) return false
     const raw = this.form.getRawValue()
     const input: BaselineInput = {}
-    for (const field of this.fields) {
+    for (const field of this.allFields) {
       const value = raw[field.key]
       if (value != null) input[field.key] = value
     }

@@ -72,6 +72,29 @@ describe('PUT /api/v1/business/baseline', () => {
     expect((await testDb().collection('businesses').findOne({ _id: 'b1' })).baseline).toBeUndefined()
   })
 
+  it('stores all fifteen fields and returns them', async () => {
+    const body = {
+      inquiriesPerMonth: 20, eventsClosedPerMonth: 4, avgRevenuePerEvent: 12000, estProfitPct: 15,
+      foodCostPct: 30, hoursPerWeekOrdering: 5, hoursPerWeekQuotes: 6, wastePct: 8, supplierOverrunPct: -2,
+      phoneInquiriesPerDay: 10, messagesPerDay: 25, avgResponseMinutes: 45, hostHoursPerWeek: 12, noShowsPerWeek: 2, missedInquiriesPerWeek: 3,
+    }
+    expect((await put(body)).status).toBe(200)
+    expect((await getBusiness()).body.baseline).toEqual({ ...body, filledAt: expect.any(Number) })
+  })
+
+  it('rejects foodCostPct 120 with 400 and stores nothing', async () => {
+    const res = await put({ foodCostPct: 120 })
+    expect(res.status).toBe(400)
+    expect((await testDb().collection('businesses').findOne({ _id: 'b1' })).baseline).toBeUndefined()
+  })
+
+  it('kitchen-only fields are stored and the dashboard still says hasBaseline false', async () => {
+    expect((await put({ foodCostPct: 30, wastePct: 5 })).status).toBe(200)
+    const stats = await request(app).get('/api/v1/stats/business').set(as(OWNER))
+    expect(stats.status).toBe(200)
+    expect(stats.body.hasBaseline).toBe(false)
+  })
+
   it('ignores a client-sent filledAt', async () => {
     const res = await put({ eventsClosedPerMonth: 2, filledAt: 5 })
     expect(res.status).toBe(200)
