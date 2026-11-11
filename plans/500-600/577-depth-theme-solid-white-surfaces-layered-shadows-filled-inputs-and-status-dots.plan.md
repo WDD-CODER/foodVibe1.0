@@ -1,6 +1,6 @@
 # Plan 577 — Depth theme: solid white surfaces, layered shadows, filled inputs and status dots across the app
 
-Status: draft
+Status: done
 Depends-on: 572, 576
 Snapshot: 5e9247bc3ed5ed2beeb061d926550d87998f5227
 

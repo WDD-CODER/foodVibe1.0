@@ -1,6 +1,6 @@
 # Plan 573 — Light the lamp on the price bar when an event meets its profit target, and line up its numbers
 
-Status: draft
+Status: done
 Depends-on: 572
 Snapshot: 4ba8887cc16eb5c1c3d3ccd4a0bbb9b63cb6c3c9
 
