@@ -86,6 +86,8 @@ public/assets/data/dictionary.json
 e2e/ui/556-1.spec.ts
 e2e/ui/556-2.spec.ts
 docs/agent/standards-backend.md
+shared/schemas/front-desk-templates.ts
+server/test/front-desk-profile.test.js
 ```
 
 ## Read Scope
@@ -236,7 +238,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A5: Add the test-request button and the save, print and skipped-answers messages — src/app/pages/frontdesk/frontdesk-onboarding/**
 - [ ] A6: Show the checklist to the owner on the dashboard and to the platform admin — checklist card, SetupStatus type, platform column — src/app/pages/dashboard/components/front-desk-checklist-card/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts, src/app/core/services/business.service.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
 - [ ] A7: Add the words and icons the screens use — dictionary keys, icon registration — public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A8: Write the two screen checks and the backend docs row, then run every check — e2e/ui/556-1.spec.ts, e2e/ui/556-2.spec.ts, docs/agent/standards-backend.md
+- [ ] A8: Reword the restaurant occasion question so it does not read as a joke — `fd_q_occasion` value "אירוע מיוחד? (יום הולדת, יום נישואין…)" — public/assets/data/dictionary.json (Planner review of plan 548 templates, W3 2026-11-11)
+- [ ] A9: Add a kashrut question ("דרישות כשרות") to the catering and private chef templates — new `fd_q_kashrut` question and key — shared/schemas/front-desk-templates.ts, public/assets/data/dictionary.json, server/test/front-desk-profile.test.js
+- [ ] A10: Add a dietary / allergy question to catering events (today only private chef asks it) — reuse the private chef question key — shared/schemas/front-desk-templates.ts, server/test/front-desk-profile.test.js
+- [ ] A11: Ask a start time on private chef and catering events — `timeQ()` in both kinds — shared/schemas/front-desk-templates.ts, server/test/front-desk-profile.test.js
+- [ ] A12: Make the catering venue question required (out-of-area declines depend on it) and say "בופה" instead of "מזנון" — shared/schemas/front-desk-templates.ts, public/assets/data/dictionary.json
+- [ ] A13: Prove the catering event-type question still works when a business has no event types (its options come from the taxonomy) — one test case — server/test/front-desk-profile.test.js
+- [ ] A14: Keep a request from waiting past its own time — a restaurant request stays open 4 h but its lead time is only 2 h, so a short-notice request can still be waiting after the time it asked for; a request expires at the earlier of expireAfterHours and its requested start, with a test for the short-notice case — shared/schemas/front-desk-templates.ts, server/test/front-desk-profile.test.js (ask the Human with approved: if the expiry code lives outside this scope)
+- [ ] A15: Write the two screen checks and the backend docs row, then run every check — e2e/ui/556-1.spec.ts, e2e/ui/556-2.spec.ts, docs/agent/standards-backend.md
 
 ## Technical Considerations
 - Dependencies: 548 profile schema and `templateFor`, 549/550 requests router, 553 frontdesk page folder, 554 knowledge items, 567 baseline fields.

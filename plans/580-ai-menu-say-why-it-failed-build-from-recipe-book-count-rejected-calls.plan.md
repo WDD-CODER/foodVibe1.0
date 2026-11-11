@@ -1,7 +1,7 @@
 # Plan 580 — AI menu: say why it failed, build it from the recipe book, count rejected calls as failed
 
 Status: draft
-Depends-on: 566, 554
+Depends-on: 566
 Snapshot: 8d4f043ffd5ded749cf5c78836d241b87ada6f86
 
 ## Problem Statement
@@ -40,7 +40,7 @@ Found 2026-11-11 in the local logs at 12:56: the Human tried "צור עם AI" on
 - [human] On `/menu-library`, "צור עם AI" with a text that has no guest count (for example "בופה עם חומוס וסלט ירקות") shows "חסר מספר האורחים…"; then on `/platform`, in "שימוש ב-AI החודש", your business's "נכשלו" number went up by one, and resting the mouse on that number shows the reasons, including "חסר מספר אורחים: 1".
 
 ## Execution Mode
-- Parallel: no — edits `server/routes/ai.js` and `server/services/ai-usage.js`; runs after plan 554 (run fd-1a-ui), which also edits `server/routes/ai.js`.
+- Parallel: no — edits `server/routes/ai.js` and `server/services/ai-usage.js`; runs before plan 554 (Planner reorder 2026-11-11), which also edits `server/routes/ai.js` and builds its `knowledge_import` call on this plan's `usageOf(req)`.
 - Concurrent plans: none
 - Isolated DB: no
 
@@ -148,7 +148,7 @@ line or file this plan names was removed, renamed or rewritten).
   - `trackAiOutcome(req, res, next)` middleware: sets `req.aiUsageIds = []`; wraps `res.json` to remember a string `body.code` in `res.locals.aiRejectCode`; on `res` `'finish'`: status ≥ 400 and ids present → `markAiUsageRejected({ ids: req.aiUsageIds, code: res.locals.aiRejectCode ?? 'http_' + res.statusCode, log: req.log })`; status < 400 and more than one id (the recipe retry) → mark all but the last id with `code: 'retried'`.
   - `aggregateAiUsage`: `failedCalls` counts `{ $or: [{ $eq: ['$ok', false] }, { $eq: ['$outcome', 'rejected'] }] }`; the `$group` also collects `failReasons: { $push: { $cond: [<that condition>, { $ifNull: ['$rejectCode', { $ifNull: ['$errorCode', 'unknown'] }] }, '$$REMOVE'] } }`, which the JS mapping turns into `row.failures: { [reason]: count }` (omitted when empty). `totals` gets no `failures`. A row without `outcome` counts as accepted, so no migration. The CSV columns stay the same.
   - Exports `trackAiOutcome`, `markAiUsageRejected` beside the existing exports.
-- [ ] **Wire it (B3).** `server/routes/ai.js`: `router.use(trackAiOutcome)` right after `const router = Router()`; `function usageOf(req) { return { businessId: req.user.businessId, userId: req.user.userId, ids: req.aiUsageIds } }`; every `usage: { businessId: req.user.businessId, userId: req.user.userId, feature: '<key>' }` (13 today, 14 after plan 554's `knowledge_import`) becomes `usage: { ...usageOf(req), feature: '<key>' }` — the feature keys are unchanged, so plan 566's static test still matches.
+- [ ] **Wire it (B3).** `server/routes/ai.js`: `router.use(trackAiOutcome)` right after `const router = Router()`; `function usageOf(req) { return { businessId: req.user.businessId, userId: req.user.userId, ids: req.aiUsageIds } }`; every `usage: { businessId: req.user.businessId, userId: req.user.userId, feature: '<key>' }` (13 today; plan 554 adds `knowledge_import` later, already in this shape) becomes `usage: { ...usageOf(req), feature: '<key>' }` — the feature keys are unchanged, so plan 566's static test still matches.
 - [ ] **Failure breakdown on `/platform` (B3).** `src/app/core/models/ai-usage.model.ts`: `AiUsageRow` gains `/** plan 580: failed calls per reason (rejectCode or Gemini errorCode) */ failures?: Record<string, number>`. `platform-dashboard.page.ts`: `protected failureTitle(row: AiUsageRow): string | null` → null when `failures` is missing or empty; else the entries sorted by count (desc), each `translate('ai_fail_' + reason)` when that key exists (the translated text differs from the key), else `translate('ai_fail_other') + ' (' + reason + ')'`, then `': ' + count`, joined with `' · '`. `platform-dashboard.page.html`: both failed cells (business row line 103 and feature row line 111) get `[attr.title]="failureTitle(row)"` / `[attr.title]="failureTitle(feature)"`.
 - [ ] **Raw answer in the log (B4).** `/generate-menu`'s refused-draft log becomes `req.log.error({ event: 'ai.generate_menu.validation_failed', model: call.model, code, validationErrors, raw: raw.slice(0, RAW_LOG_CHARS) })`.
 - [ ] **Docs.** `docs/agent/standards-backend.md` §1 `aiUsage` row: add "`outcome` (`accepted` / `rejected`, plan 580) and `rejectCode`; a missing `outcome` means accepted"; §5 `GET /api/v1/admin/ai-usage` row: add "rows carry `failures` per reason (plan 580)". `docs/frontdesk/frontdesk-map.md` "Contract extensions (run)": `- plan 580 · C-AIUSAGE rows gain outcome ('accepted' | 'rejected', only when ok) and rejectCode; failedCalls counts ok:false or outcome:'rejected'; report rows gain failures {reason: count}; missing outcome = accepted · a call whose answer the route refused was counted as a success`. `server/breadcrumbs.md` `services/ai-usage.js` row: add `trackAiOutcome`, `markAiUsageRejected`.
@@ -188,7 +188,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A13: Run the checks and hand over the two hand checks — test:server, test:ci, both lints, lint:icons, build, breadcrumbs-check, log-query, specs 580-1…3 against the slot app; then the [human] cards
 
 ## Technical Considerations
-- Dependencies: plan 566's ledger and `/platform` table; plan 554's `knowledge_import` call site (wired by A2); `callGemini`'s return contract is unchanged; `validateMenuDraft` keeps serving `/save-menu-shot`; `GET /api/v1/ai/usage` unchanged.
+- Dependencies: plan 566's ledger and `/platform` table; plan 554 runs after this plan and writes its `knowledge_import` call with `usageOf(req)`; `callGemini`'s return contract is unchanged; `validateMenuDraft` keeps serving `/save-menu-shot`; `GET /api/v1/ai/usage` unchanged.
 - New files needed: `server/test/ai-menu.test.js`, `src/app/core/utils/recipe-match.util.spec.ts`, `e2e/ui/580-1.spec.ts`, `e2e/ui/580-2.spec.ts`, `e2e/ui/580-3.spec.ts`.
 - Model changes: `AiMenuDishDraft.dishId?: string`, `AiUsageRow.failures?: Record<string, number>` (client); `aiUsage` rows gain `outcome?`, `rejectCode?`; `GEMINI_MENU_SHOTS` docs gain `businessId`.
 - Backend / API: `/generate-menu` reads the caller's book and returns `code` on errors; all AI routes' Gemini-failure answers gain `code`; `GET /api/v1/admin/ai-usage` rows gain `failures`. No new endpoint.

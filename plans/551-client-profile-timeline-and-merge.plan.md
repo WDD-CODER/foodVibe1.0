@@ -75,6 +75,7 @@ server/breadcrumbs.md
 docs/brain/component-families.md
 e2e/ui/551-1.spec.ts
 e2e/ui/551-2.spec.ts
+docs/frontdesk/frontdesk-map.md
 ```
 
 ## Read Scope
@@ -161,7 +162,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A6: Show one timeline of the client's requests, bookings, events and notes — newest first, links to events, empty state; spec cases — src/app/pages/clients/components/client-profile/**
 - [ ] A7: Add the profile actions: new inquiry, merge a duplicate, do not contact — dialog with the client picked, merge picker + confirm + navigate, reason window; spec cases — src/app/pages/clients/components/client-profile/**, src/app/shared/new-inquiry-dialog/**
 - [ ] A8: Link the client list rows and the event screen's client chip to the profile — src/app/pages/clients/components/client-list/**, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
-- [ ] A9: Register icons and words, update the family list, write the screen checks and run every check — app.config.ts, dictionary.json, component-families.md (client-picker family: edit mode, initialClient, allowAdd), e2e/ui/551-1.spec.ts, e2e/ui/551-2.spec.ts; test:server, test:ci, server lint, build, lint, lint:icons, reuse-lint, scope-check --arch, log-query
+- [ ] A9: Make the front desk map agree with plan 547 on client lifecycle — in docs/frontdesk/frontdesk-map.md lines 116 and 118, mark `lifecycle` as a stored field nothing reads (lifecycle is computed in the browser by `clientLifecycle`, plan 547; see line 198). ADR 0031 is not edited (decisions are superseded, never edited in place); no schema or server change — docs/frontdesk/frontdesk-map.md (Planner review W3, 2026-11-11)
+- [ ] A10: Register icons and words, update the family list, write the screen checks and run every check — app.config.ts, dictionary.json, component-families.md (client-picker family: edit mode, initialClient, allowAdd), e2e/ui/551-1.spec.ts, e2e/ui/551-2.spec.ts; test:server, test:ci, server lint, build, lint, lint:icons, reuse-lint, scope-check --arch, log-query
 
 ## Technical Considerations
 - Dependencies: `scopeFilter`, `assertCan`, `actorOf` (543), `dataWriteLimiter`, the generic Trash routes, `ClientDataService`, `MenuEventDataService`, `RequestDataService` / `BookingDataService` (549), `app-client-picker` / `app-client-form` / `NewInquiryDialogComponent` (546), `ConfirmModalService`, `stageLabelKey`.
