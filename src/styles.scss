@@ -2729,3 +2729,29 @@ input[type='number']::-webkit-outer-spin-button {
 .c-chip {
   font-size: max(0.71875rem, 11px);
 }
+
+/* ---- Depth theme: phone density (the Human, 2026-11-11: "in the mobile view everything is too big").
+   On a phone the root steps down one notch and the larger spacing, corner and heading tokens shrink,
+   so cards hold more and less of the screen is padding. Tap targets stay 44px (`--tap` is in px). ---- */
+@media (max-width: $break-phone-max) {
+  html {
+    font-size: 93.75%; /* 15px */
+  }
+
+  :root {
+    --space-4: 0.75rem;
+    --space-5: 0.875rem;
+    --space-6: 1rem;
+    --space-8: 1.25rem;
+    --space-10: 1.5rem;
+    --space-12: 2rem;
+
+    --radius-lg: 1.125rem;
+    --radius-xl: 1.25rem;
+
+    --fs-lg: 1.0625rem;
+    --fs-xl: 1.25rem;
+    --fs-2xl: 1.5rem;
+    --fs-3xl: 1.875rem;
+  }
+}

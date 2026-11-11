@@ -575,3 +575,44 @@
     height: 20px;
   }
 }
+
+// Phone density (2026-11-11): the header card took a whole screen before the first ingredient.
+// The picture and the cost box become two low boxes side by side, the rating sits beside the labels,
+// and the course and station pickers share one row.
+@media (max-width: 40.625rem) {
+  .header-dashboard-container {
+    grid-template-areas:
+      'title title'
+      'img metrics'
+      'scaling scaling'
+      'rating labels'
+      'course station';
+    gap: 0.75rem;
+
+    padding: 0.875rem;
+  }
+
+  .image-square,
+  .metrics-square {
+    inline-size: 100%;
+    block-size: 5rem;
+    aspect-ratio: auto;
+  }
+
+  .metrics-square {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    gap: 0.5rem;
+
+    padding: 0.5rem;
+  }
+
+  .header-rating {
+    justify-self: start;
+  }
+
+  .secondary-units-container {
+    padding-block-end: 0.5rem;
+  }
+}
