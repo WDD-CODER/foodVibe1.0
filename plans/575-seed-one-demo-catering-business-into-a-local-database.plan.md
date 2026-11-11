@@ -144,7 +144,7 @@ line or file this plan names was removed, renamed or rewritten).
 - Front Desk data (requests, bookings, knowledge base): those collections arrive with plans 548–554.
 
 ## Critical Questions
-- Q: Local database only, or also the live site? A: local only in this plan — the script refuses Atlas in code; a live demo business is a separate decision for the Human.
+- Q: Local database only, or also the live site? A: Human 2026-11-11: local only. Local only in this plan — the script refuses Atlas in code; a live demo business is a separate decision for the Human.
 - Q: Where does the demo owner's password come from? A: the environment variable `DEMO_OWNER_PASSWORD`, set by the person who runs the script; never committed and never printed.
 
 ## Execution Notes
