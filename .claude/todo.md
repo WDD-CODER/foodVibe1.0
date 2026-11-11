@@ -336,3 +336,17 @@
 - [ ] F5: Status chips — drop the default "unchecked" chip; clarify with the Human whether status becomes one "needed" toggle that opens the payer options
 - [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected
 - [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
+
+### Plan 577 — Depth theme: solid white surfaces, layered shadows, filled inputs and status dots across the app (`plans/577-depth-theme-solid-white-surfaces-layered-shadows-filled-inputs-and-status-dots.plan.md`)
+- [ ] A1: Put the app's content on white surfaces over a flat tinted page — surface, border, text, radius and shadow token values; the page wash removed — src/styles.scss
+- [ ] A2: Add the colours of the dark bar that the price bar and the dashboard will use — five new tokens — src/styles.scss
+- [ ] A3: Give buttons and inputs the new shape and fill — primary button solid with 14 px corners; inputs, selects and input wrappers filled, white with a teal border on focus; invalid still red — src/styles.scss
+- [ ] A4: Draw status tags as a white tag with a coloured dot, leaving pressable chips alone — one rule group after the allergen chip — src/styles.scss
+- [ ] A5: Guard the new theme and write it down — the token check, the design notes, the chip family line — tools/theme/check-tokens.mjs, .interface-design/system.md, docs/brain/component-families.md
+- [ ] A6: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
+
+### Plan 578 — Depth theme: the dark price bar and one hero tile on the dashboard (`plans/578-depth-theme-the-dark-price-bar-and-one-hero-tile-on-the-dashboard.plan.md`)
+- [ ] A1: Make the price bar a dark teal bar with light text that stays readable — bar surface and the colours of everything on it, scoped so the phone sheet stays light — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.scss
+- [ ] A2: Make the month's revenue the one large dark tile that leads the dashboard — one class binding, the six-column grid and the hero rules — src/app/pages/dashboard/components/business-performance/business-performance.component.html, src/app/pages/dashboard/components/business-performance/business-performance.component.scss
+- [ ] A3: Test that only the revenue card is the hero — two cases — src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
+- [ ] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
