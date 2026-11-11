@@ -29,7 +29,12 @@ $break-tablet: 900px; // mirrors src/styles.scss
   .welcome__promise {
     font-size: var(--fs-xl);
     font-weight: var(--fw-extrabold);
-    line-height: var(--lh-tight);
+    line-height: var(--lh-snug);
+
+    .c-pass-line {
+      display: inline-block;
+      text-wrap: balance;
+    }
 
     @media (min-width: $break-tablet) {
       font-size: var(--fs-3xl);

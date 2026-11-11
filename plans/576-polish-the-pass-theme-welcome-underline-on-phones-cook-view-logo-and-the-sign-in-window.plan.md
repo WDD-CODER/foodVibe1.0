@@ -104,10 +104,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Put one amber line under the whole welcome promise on a phone — block the highlighted span and balance its lines — src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
-- [ ] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
-- [ ] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
-- [ ] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
+- [x] A1: Put one amber line under the whole welcome promise on a phone — block the highlighted span and balance its lines — src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
+- [x] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
+- [x] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
+- [x] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: plans 571 (name), 572 (tokens, `tools/theme/check-tokens.mjs`), 574 (welcome page).
@@ -129,3 +129,4 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-11: written from screenshots of `orch/pass-theme` served locally (welcome and sign-in at 1280×800 and 390×844, Cook View at 1280×800 and 390×844).
+- Builder: test:ci -> exit 0 (1896 SUCCESS); check-tokens -> THEME_TOKENS: ok; build -> 0; lint -> 0 (0 errors); lint:icons -> 0; log-query -> exit 0 (no DB, skipped).
