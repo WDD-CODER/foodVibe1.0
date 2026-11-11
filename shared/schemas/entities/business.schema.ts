@@ -25,8 +25,35 @@ export const baselineInputSchema = z.strictObject({
   inquiriesPerMonth: z.number().min(0).optional(),
   eventsClosedPerMonth: z.number().min(0).optional(),
   avgRevenuePerEvent: z.number().min(0).optional(),
-  estProfitPct: z.number().gt(-100).lt(100).optional()
+  estProfitPct: z.number().gt(-100).lt(100).optional(),
+  // Plan 567: optional owner estimates of the kitchen (never required).
+  foodCostPct: z.number().min(0).max(100).optional(),
+  hoursPerWeekOrdering: z.number().min(0).max(168).optional(),
+  hoursPerWeekQuotes: z.number().min(0).max(168).optional(),
+  wastePct: z.number().min(0).max(100).optional(),
+  supplierOverrunPct: z.number().gt(-100).lt(100).optional(),
+  // Plan 567: optional owner estimates of the front desk (never required).
+  phoneInquiriesPerDay: z.number().min(0).optional(),
+  messagesPerDay: z.number().min(0).optional(),
+  avgResponseMinutes: z.number().min(0).optional(),
+  hostHoursPerWeek: z.number().min(0).max(168).optional(),
+  noShowsPerWeek: z.number().min(0).optional(),
+  missedInquiriesPerWeek: z.number().min(0).optional()
 })
+
+/** Plan 567: the four numbers the dashboard cards compare. */
+export const BASELINE_CARD_FIELDS = ['inquiriesPerMonth', 'eventsClosedPerMonth', 'avgRevenuePerEvent', 'estProfitPct'] as const
+/** Plan 567: the optional kitchen estimates. */
+export const BASELINE_KITCHEN_FIELDS = ['foodCostPct', 'hoursPerWeekOrdering', 'hoursPerWeekQuotes', 'wastePct', 'supplierOverrunPct'] as const
+/** Plan 567: the optional front desk estimates. */
+export const BASELINE_FRONTDESK_FIELDS = [
+  'phoneInquiriesPerDay',
+  'messagesPerDay',
+  'avgResponseMinutes',
+  'hostHoursPerWeek',
+  'noShowsPerWeek',
+  'missedInquiriesPerWeek'
+] as const
 
 /** The stored baseline: the input plus the time the server saved it. An empty baseline (only `filledAt`) means "skipped". */
 export const businessBaselineSchema = baselineInputSchema.extend({ filledAt: z.number() })
