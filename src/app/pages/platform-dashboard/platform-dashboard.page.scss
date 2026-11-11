@@ -79,6 +79,53 @@
     font-size: var(--fs-xs);
   }
 
+  .ai-usage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .ai-usage-title {
+    font-size: var(--fs-md);
+  }
+
+  .ai-table {
+    .ai-row {
+      cursor: pointer;
+    }
+
+    .ai-drill-row {
+      background: var(--bg-card-solid);
+
+      th {
+        padding-inline-start: var(--space-6);
+        font-weight: normal;
+      }
+    }
+
+    .num {
+      direction: ltr;
+      text-align: end;
+    }
+  }
+
+  .ai-export {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    padding-block: var(--space-1);
+    padding-inline: var(--space-3);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
   .platform-totals,
   .platform-empty {
     color: var(--color-text-secondary);

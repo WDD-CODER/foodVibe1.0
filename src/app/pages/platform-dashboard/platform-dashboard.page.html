@@ -71,5 +71,58 @@
   </p>
   }
 
+  <section class="ai-usage" aria-labelledby="ai-usage-title">
+    <h2 id="ai-usage-title" class="ai-usage-title">{{ "platform_ai_usage_title" | translatePipe }}</h2>
+    @if (aiLoading_()) {
+    <app-loader />
+    } @else if (!aiUsage_()?.rows?.length) {
+    <app-empty-state messageKey="platform_ai_empty" />
+    } @else { @let report = aiUsage_()!;
+    <div class="table-scroll">
+      <table class="platform-table ai-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ "platform_col_business" | translatePipe }}</th>
+            <th scope="col">{{ "platform_ai_col_calls" | translatePipe }}</th>
+            <th scope="col">{{ "platform_ai_col_failed" | translatePipe }}</th>
+            <th scope="col">{{ "platform_ai_col_tokens" | translatePipe }}</th>
+            <th scope="col">{{ "platform_ai_col_cost" | translatePipe }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of report.rows; track row.key) {
+          <tr
+            class="ai-row"
+            tabindex="0"
+            [attr.aria-expanded]="aiDrill_()?.businessId === row.key"
+            (click)="toggleAiDrill(row.key)"
+            (keydown.enter)="toggleAiDrill(row.key)"
+          >
+            <th scope="row">{{ row.label ?? row.key }}</th>
+            <td class="num">{{ row.calls }}</td>
+            <td class="num">{{ row.failedCalls }}</td>
+            <td class="num">{{ row.totalTokens }}</td>
+            <td class="num">{{ cost(row.estCostUsd) }}</td>
+          </tr>
+          @if (aiDrill_()?.businessId === row.key) { @for (feature of aiDrill_()!.rows; track feature.key) {
+          <tr class="ai-drill-row">
+            <th scope="row">{{ "ai_feature_" + feature.key | translatePipe }}</th>
+            <td class="num">{{ feature.calls }}</td>
+            <td class="num">{{ feature.failedCalls }}</td>
+            <td class="num">{{ feature.totalTokens }}</td>
+            <td class="num">{{ cost(feature.estCostUsd) }}</td>
+          </tr>
+          } } }
+        </tbody>
+      </table>
+    </div>
+    <p class="platform-totals">{{ "platform_ai_cost_note" | translatePipe }} {{ report.pricesAsOf }}</p>
+    <button type="button" class="ai-export" (click)="exportAiCsv()">
+      <lucide-icon name="download" [size]="14"></lucide-icon>
+      {{ "platform_ai_export_csv" | translatePipe }}
+    </button>
+    }
+  </section>
+
   <app-platform-logistics-items />
 </section>

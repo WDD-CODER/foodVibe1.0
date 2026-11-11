@@ -130,57 +130,6 @@
 - [x] A7: Run every auto check and paste the outputs, and list the three Human setup steps in the hand-off — this plan file (Execution Notes)
 - [ ] A8: After the merge, install the new package in the main folder and remove the timeout workaround — Planner only, not the builder: the two steps under After merge, then the [human] card — main folder, user environment
 
-### Plan 543 — Open one safe door for people who are not members of a business (`plans/543-open-one-safe-door-for-non-members.plan.md`)
-- [ ] A1: Give every server stamp one source for who did it — actorOf and guestActor in a shared file; events.js imports it instead of its own copy — server/utils/actor.js, server/routes/events.js
-- [ ] A2: Add the public rate limiter, the honeypot and the read-back token helper — ipAndSlugKey + publicLimiter, honeypot middleware, newPublicToken + isPublicTokenShape — server/middleware/rate-limit.js, server/middleware/honeypot.js, server/utils/public-token.js
-- [ ] A3: Test the limiter, honeypot and token on a small test app — 20 then 429, other slug free, GET not counted, no IPv6 key error; honeypot 201 with no next; 32 chars, 10,000 unique — server/test/public-guard.test.js
-- [ ] A4: Mount an empty public router that never reads a member token — GET /health probe, no-store, JSON 404 for the rest, mounted after the JSON parser — server/routes/public.js, server/app.js, server/test/public-router.test.js
-- [ ] A5: Write the guest-door rule down where the gate reads it — ADR 0030, the INV-1 sentence, Source and Touches, and the two INV-1 guest door tests — docs/brain/decisions/0030-guest-writes-have-one-door.md, docs/brain/invariants.md, server/test/invariants.test.js
-- [ ] A6: Record the new route in the backend docs and the server map — the §5 row and limiter sentence, the breadcrumbs row — docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A7: Run the full checks and hand Dandan the ADR to read — test:server, server lint, build, scope-check --arch, log-query; then the [human] card for ADR 0030
-
-### Plan 566 — Meter every AI call so pricing can be set from real numbers (`plans/566-meter-every-ai-call.plan.md`)
-- [ ] A1: Name every AI feature and price every model in two fixed lists — the 19 feature keys and the price table with its date and source — server/constants/ai-features.js, server/constants/ai-prices.js
-- [ ] A2: Add the ledger that writes one row per real model call without ever slowing or breaking it — recordAiUsage, estimateCostUsd, aggregateAiUsage; collection entry and two indexes — server/services/ai-usage.js, server/constants/collections.js, server/db.js
-- [ ] A3: Make the Gemini caller require a feature and write a ledger row on success and every failure — usage parameter, throw under vitest, no row when no call was made; update the test helper — server/services/gemini-client.js, server/test/gemini-client.test.js
-- [ ] A4: Tag each of the thirteen AI routes with its feature so every call is counted — the table in the Problem Statement; fix the route tests that call these routes if they now need usage — server/routes/ai.js, server/test/ai-match-product-names.test.js, server/test/ai-receipt-photo.test.js, server/test/price-list-prompt.test.js, server/test/product-import-route.test.js
-- [ ] A5: Test the ledger end to end — tokens and cost, each failure kind, no-call cases, retry gives two rows, failed insert is silent, stored fields, every route tagged — server/test/ai-usage.test.js
-- [ ] A6: Let the platform admin read totals by business, feature, model or day, also as a file — GET /ai-usage with ranges, drill-down and CSV; tests for totals, 403 and CSV — server/routes/admin.js, server/test/ai-usage.test.js
-- [ ] A7: Show this month's AI usage per business on the platform dashboard with a per-feature breakdown — model, service method, table, drill-down, CSV button, dictionary keys, spec cases — src/app/pages/platform-dashboard/platform-dashboard.page.ts, .html, .scss, .spec.ts, src/app/core/services/platform-admin.service.ts, src/app/core/models/ai-usage.model.ts, public/assets/data/dictionary.json
-- [ ] A8: Record the new collection and route in the backend docs and the server map — docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A9: Run the full checks and hand Dandan the two hand checks — test:server, test:ci, both lints, lint:icons, build, log-query; then the [human] cards
-
-### Plan 548 — Give every business one front desk profile, with a template per business type and the fit rules (`plans/548-front-desk-profile-per-business-with-templates-and-qualification.plan.md`)
-- [ ] A1: Define the front desk profile shape once and share the opening-hours row with venues — schema, constants, hours row extracted, registry entry, types — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/common.schema.ts, shared/schemas/entities/venue.schema.ts, shared/schemas/entities/index.ts
-- [ ] A2: Write the pure fit rules and the local-time helper, with a table test of twenty or more cases — qualify, parseReason, hoursCheck, jerusalemEpoch, weekdayOf — shared/schemas/front-desk/qualify.ts, shared/schemas/front-desk/local-time.ts, server/test/qualify.test.js
-- [ ] A3: Add the starting templates for restaurant, private chef, catering and other, with their Hebrew labels — templateFor, WANTED_QUESTION_KEYS, dictionary keys; paste the rendered Hebrew question list into Execution Notes for Dandan — shared/schemas/front-desk-templates.ts, shared/schemas/index.ts, public/assets/data/dictionary.json
-- [ ] A4: Store profiles: one per business, owner-only, status and WhatsApp id kept by the server — collection entry, editFrontDesk, OWNER_ONLY_TYPES, generic strip and keep, 409 codes, read projection, indexes — server/constants/collections.js, server/utils/permissions.js, server/routes/generic.js, server/db.js
-- [ ] A5: Test the stored profile end to end and keep tenant isolation covered — server/test/front-desk-profile.test.js, server/test/cross-business.test.js, server/test/permissions.test.js
-- [ ] A6: Give the app a profile data service and the new permission in its mirror — model, data service + spec, permission service + spec — src/app/core/models/front-desk-profile.model.ts, src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts, src/app/core/services/permission.service.ts, src/app/core/services/permission.service.spec.ts
-- [ ] A7: Record the new collection and run every check — standards-backend §1 row; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md
-
-### Plan 549 — Store customer requests and bookings on the server: manual request, status moves, lazy expiry (`plans/549-requests-and-bookings-on-the-server-part-1.plan.md`)
-- [ ] A1: Define the request and booking shapes once, shared by server and app — enums, schemas, server-field lists, manual input schema, registry, types — shared/schemas/entities/request.schema.ts, shared/schemas/entities/booking.schema.ts, shared/schemas/entities/index.ts
-- [ ] A2: Register both collections as read-through-generic, write-through-router, with their indexes and the new member action — collections flag, generic 405 and expiry hook, manageRequests, indexes — server/constants/collections.js, server/routes/generic.js, server/utils/permissions.js, server/db.js
-- [ ] A3: Let a member record a phone request that finds or creates the client and checks it against the rules — POST / with upsert, qualify, counters, token, history — server/routes/requests.js, server/app.js
-- [ ] A4: Let members move a request's status and edit what the customer wants, only along allowed paths — PUT /:id/status table, PUT /:id/wanted re-qualify, conditional writes — server/routes/requests.js
-- [ ] A5: Let members move a booking through confirmed, seated, finished, no-show and cancelled — PUT /:id/status, no-show counter — server/routes/bookings.js, server/app.js
-- [ ] A6: Expire stale requests when the list is read, not on a timer — expireDue and the generic GET hook — server/utils/request-expiry.js, server/routes/generic.js
-- [ ] A7: Test every move, the manual create, expiry and tenant isolation — server/test/requests-router.test.js, server/test/bookings-router.test.js, server/test/request-expiry.test.js, server/test/cross-business.test.js, server/test/permissions.test.js, server/test/collections.test.js
-- [ ] A8: Give the app request and booking data services that call the routers — models, API paths, two services + specs, permission mirror — src/app/core/models/request.model.ts, src/app/core/models/booking.model.ts, src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts, src/app/core/services/http-storage.adapter.ts, src/app/core/services/permission.service.ts
-- [ ] A9: Record the new collections and routes and run every check — standards-backend §1/§5, invariants Touches, breadcrumbs; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md, docs/brain/invariants.md, server/breadcrumbs.md
-
-### Plan 550 — Approve or decline a request in one tap: the event or booking is created, the day's load is shown, every decision is logged (`plans/550-approve-or-decline-a-request-with-day-load-and-decision-log.plan.md`)
-- [ ] A1: Pin how a new event is created today, before touching that code — owner and staff cases, exact stored fields — server/test/menu-event-create.test.js
-- [ ] A2: Move the new-event defaults into one shared builder that the generic create uses — buildNewEventDoc, generic POST calls it, pin test unchanged — server/utils/event-create.js, server/routes/generic.js
-- [ ] A3: Add the decision log collection that keeps decisions without customer names — schema, registry, collection entry, index — shared/schemas/entities/decision-log.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/db.js
-- [ ] A4: Approve a request in one call: claim it, create the event or booking, update the client, log the decision — POST /:id/approve with compensation — server/routes/requests.js
-- [ ] A5: Decline a request with a reason, and log an ask when a member asks for more details — POST /:id/decline, decline field, ask row on PUT /:id/status — server/routes/requests.js
-- [ ] A6: Show a day's bookings and covers per hour for the approve screen — GET /day — server/routes/bookings.js
-- [ ] A7: Test approve, decline, ask, idempotency, the day view and that the log holds no personal data — server/test/requests-approve.test.js, server/test/bookings-day.test.js, server/test/requests-router.test.js
-- [ ] A8: Let the app approve, decline and read a day's load — RequestDataService approve/decline, BookingDataService day, specs — src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts
-- [ ] A9: Record the routes and run every check — standards-backend §1/§5; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md
-
 ### Plan 547 — Give clients their own section: list, add, search, filters and a navigation group (`plans/547-clients-get-their-own-section.plan.md`)
 - [ ] A1: Add the Front Desk group to the navigation — frontdesk tab group with the clients chip, header link on desktop and phone; update both specs — src/app/core/components/tab-chips/**, src/app/core/components/header/**
 - [ ] A2: Build the client list on the shared list frame — rows, columns for owner and staff, search, kind/tag/lifecycle filters, sort, empty states; spec — src/app/pages/clients/components/client-list/**
@@ -266,16 +215,6 @@
 - [ ] A6: Give the platform admin the numbers per business and the download — three columns, CSV button, service method — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/core/services/platform-admin.service.ts
 - [ ] A7: Test the dashboard card end to end, update the docs, run every check — one e2e card, standards-backend rows; test:server, test:ci, build, lint, lint:icons, log-query — e2e/ui/559-1.spec.ts, docs/agent/standards-backend.md
 
-### Plan 545 — One find-or-create of a client by phone, so one person is one client on every channel (`plans/545-one-find-or-create-of-a-client-by-phone.plan.md`)
-- [ ] A1: Write down the phone examples both sides must agree on — the vectors file with the seven rows — shared/schemas/testing/phone-vectors.ts
-- [ ] A2: Put the one find-or-create in a server file and let the database guarantee one live client per phone — client-upsert.js helpers, liveKey in the schema and the server-field list, the unique partial index — server/utils/client-upsert.js, shared/schemas/entities/client.schema.ts, server/db.js
-- [ ] A3: Test it alone — vectors, five parallel calls, a trashed match not revived, other business never matched, bad phone refused — server/test/client-upsert.test.js
-- [ ] A4: Make the owner's add, phone change, delete and restore of a client use the same rule — POST 200/201, PUT 409, liveKey unset on delete, restore and restore-all checks — server/routes/generic.js, server/test/clients.test.js
-- [ ] A5: Keep each client's event count and event-client kind right whenever an event moves, is deleted or comes back — refreshClientEvents calls in the event write paths and their tests — server/routes/generic.js, server/test/clients.test.js
-- [ ] A6: Use the same phone rule in the browser and tell the owner when a phone already exists or a restore is refused — util re-export, addClient replace and toast, Trash refusal toast, dictionary keys, specs — src/app/core/utils/client-display.util.ts, src/app/core/utils/client-display.util.spec.ts, src/app/core/services/client-data.service.ts, src/app/core/services/client-data.service.spec.ts, src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, public/assets/data/dictionary.json
-- [ ] A7: Note the new behaviour in the backend contract and add the ui test — the §5 sentence, the inquiry-dialog spec — docs/agent/standards-backend.md, e2e/ui/545-1.spec.ts
-- [ ] A8: Run every check — test:server, test:ci, server lint, build, scope-check --arch, log-query, the ui spec
-
 ### Plan 546 — One shared client picker instead of two copies inside the menu screens (`plans/546-one-shared-client-picker.plan.md`)
 - [ ] A1: Pin today's client behaviour in both hosts before moving anything — run the dialog and stage-bar specs green and note which cases cover picking, adding, clearing and Escape — src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
 - [ ] A2: Build the shared add-client form with today's fields and checks — inputs initialName/initialPhone, outputs saved/cancelled, addClient, error toasts; spec — src/app/shared/client-form/**
@@ -318,34 +257,17 @@
 - [ ] A7: Add the words and icons the screens use — dictionary keys, icon registration — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A8: Write the two screen checks and the backend docs row, then run every check — e2e/ui/556-1.spec.ts, e2e/ui/556-2.spec.ts, docs/agent/standards-backend.md
 
-### Plan 544 — Clients become CRM records: wider shape, phone match key, Trash instead of hard delete (`plans/544-clients-become-crm-records.plan.md`)
-- [ ] A1: Give the client record its CRM fields and one phone rule shared by server and browser — schema additions, enums, server-field list, phone.ts, staff read fields — shared/schemas/entities/client.schema.ts, shared/schemas/phone.ts, shared/schemas/index.ts, shared/schemas/staff-fields.ts
-- [ ] A2: Keep the server-owned client fields out of reach of normal saves and derive the match key — strip on POST and PUT; stamp phoneNormalized and phoneKey; phone-key index — server/routes/generic.js, server/db.js
-- [ ] A3: Send a deleted client to Trash instead of deleting it for good — softDelete flag, collection registry note — server/constants/collections.js, docs/agent/standards-backend.md
-- [ ] A4: Prove the new rules with server tests — strip per field, staff read of four fields, Trash round trip, phone key for the international form — server/test/clients.test.js, server/test/cross-business.test.js
-- [ ] A5: Fill the new fields for clients that already exist, and list possible duplicates without touching them — migration 0011 with dry run, write, verify, scratch DB, and its test — server/migrations/0011-clients-crm.js, server/test/migration-0011-clients-crm.test.js
-- [ ] A6: Run the migration locally and hand the Atlas run to Dandan — pnpm run build:schemas; node server/scripts/db-backup.js --target=local; dry run, write with --backup-dir, verify on local only; paste outputs and the Atlas runbook below into Execution Notes; never pass --target=atlas
-- [ ] A7: Show trashed clients on the Trash page — TrashType, section, data-service entry, dictionary key, spec and the ui test — src/app/core/services/trash.service.ts, src/app/core/services/trash.service.spec.ts, src/app/core/models/client.model.ts, public/assets/data/dictionary.json, e2e/ui/544-1.spec.ts
-- [ ] A8: Write down the decision — ADR 0031 verbatim and the one-line pointer in ADR 0027 — docs/brain/decisions/0031-clients-are-crm-records.md, docs/brain/decisions/0027-client-entity-above-events.md
-- [ ] A9: Run every check and hand over the cards — test:server, test:ci, server lint, build, scope-check --arch, log-query; the [ui] spec; the [human] Atlas card
-
-### Plan 569 — Put the Front Desk brief and map on main, with the contract additions the plans made (`plans/569-put-the-front-desk-brief-and-map-on-main.plan.md`)
-- [ ] A1: Copy the four front desk documents from the main folder into the repo unchanged — byte-for-byte copy — docs/frontdesk/assistant-behaviour-rules.md, docs/frontdesk/frontdesk-map.md, docs/frontdesk/frontdesk-program-brief.md, docs/frontdesk/reference-bookings-engine.md
-- [ ] A2: Mark the map as approved in its title line — docs/frontdesk/frontdesk-map.md
-- [ ] A3: List the contract additions the plans made, so the next planning round reads them — the 11 lines above — docs/frontdesk/frontdesk-map.md
-- [ ] A4: Point the brain index at the map and run the ledger and breadcrumbs checks — docs/brain/index.md
-
 ### Plan 570 — Keep the logistics panel's buttons out from under the price bar on wide screens (`plans/570-logistics-panel-not-hidden-under-the-price-bar.plan.md`)
-- [ ] A1: Leave room for the price bar on every wide screen, not only up to 1030 px — widen the plan 494 media query — src/app/pages/menu-intelligence/menu-intelligence.page.scss
-- [ ] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
-- [ ] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
+- [x] A1: Leave room for the price bar on every wide screen, not only up to 1030 px — widen the plan 494 media query — src/app/pages/menu-intelligence/menu-intelligence.page.scss
+- [x] A2: Point the three logistics-card checks at the page that really shows the card — goto /dashboard?tab=metadata — e2e/ui/523-1.spec.ts, e2e/ui/523-2.spec.ts, e2e/ui/523-3.spec.ts
+- [x] A3: Add a laptop-size check that the logistics card opens with the price bar showing — e2e/ui/570-1.spec.ts
 - [ ] A4: Run the ten screen checks against the slot's app, then build, lint and log-query
 
 ### Run 522 — hand checks left open after merge (PR #545, agreed 2026-11-10)
-- [ ] V1: The closed logistics card reads as one header line on a phone-size window and opens on one tap — /menu-intelligence/e0df992a-399f-428c-a5c1-b37157ab4f59
-- [ ] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
-- [ ] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
-- [ ] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
+- [x] V1: The closed logistics card reads as one header line on a phone-size window and opens on one tap — /menu-intelligence/e0df992a-399f-428c-a5c1-b37157ab4f59
+- [x] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
+- [x] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
+- [x] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
 - [ ] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
 - [ ] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
 - [ ] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
@@ -406,3 +328,11 @@
 - [ ] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
 - [ ] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
 - [ ] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
+### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
+- [ ] F1: Owners and the platform admin can remove logistics questions, like recipes — admin adds or removes for everybody or only himself; an owner only for his business
+- [ ] F2: A remove icon beside each question in the metadata card and on each event screen — event screen removes for that event only; metadata removes from the business's default list for new events
+- [ ] F3: Adding a question in metadata asks which environments it is for — all environment chips start selected; no separate "relevant to everybody" button
+- [ ] F4: Owners and the admin can add logistics sections (metadata_logistics_section), same everybody / only-me rule
+- [ ] F5: Status chips — drop the default "unchecked" chip; clarify with the Human whether status becomes one "needed" toggle that opens the payer options
+- [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected
+- [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right

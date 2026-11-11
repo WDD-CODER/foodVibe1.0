@@ -18,7 +18,8 @@ const ACTIONS: PermissionAction[] = [
   'manageTeam',
   'editSettings',
   'editTaxonomy',
-  'editLogistics'
+  'editLogistics',
+  'editFrontDesk'
 ]
 
 describe('PermissionService.can', () => {
@@ -74,6 +75,17 @@ describe('PermissionService.can', () => {
 
     it('never edits logistics answers; the owner does', () => {
       expect(service.can('editLogistics', { type: 'menuEvents', doc: { createdBy: 's1' } })).toBeFalse()
+    })
+
+    it('never edits the front desk profile; the owner does (plan 548)', () => {
+      expect(service.can('editFrontDesk', { type: 'frontDeskProfiles' })).toBeFalse()
+      user_.set(OWNER)
+      expect(service.can('editFrontDesk', { type: 'frontDeskProfiles' })).toBeTrue()
+    })
+
+    it('may manage requests and bookings, own or not (plan 549)', () => {
+      expect(service.can('manageRequests', { type: 'requests' })).toBeTrue()
+      expect(service.can('manageRequests', { type: 'bookings', doc: { createdBy: 'o1' } })).toBeTrue()
     })
 
     it('changes the stage only of his own events, but notes and arrivals on any event', () => {

@@ -3,6 +3,7 @@ status: accepted
 date: 2026-11-02
 review-by: 2027-05-02
 supersedes: 0023-business-is-the-tenant (INV-1 member rule, for the clients collection only)
+superseded-in-part-by: 0031-clients-are-crm-records (staff read fields; soft delete)
 ---
 
 # 0027. The client is a record above events; only the owner writes it and staff read name and phone

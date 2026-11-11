@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
+import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
@@ -36,8 +37,37 @@ describe('PlatformDashboardPage', () => {
   let fixture: ComponentFixture<PlatformDashboardPage>
   let rows_: ReturnType<typeof signal<BusinessRow[]>>
 
-  async function setup(rows: BusinessRow[]): Promise<void> {
+  const aiRow = (key: string, extra: Partial<AiUsageRow> = {}): AiUsageRow => ({
+    key,
+    calls: 2,
+    failedCalls: 1,
+    inputTokens: 10,
+    outputTokens: 5,
+    totalTokens: 15,
+    estCostUsd: 0.00123,
+    ...extra
+  })
+  const report = (groupBy: 'business' | 'feature', rows: AiUsageRow[]): AiUsageReport => ({
+    from: '2026-11-01',
+    to: '2026-11-30',
+    groupBy,
+    pricesAsOf: '2026-11-10',
+    rows,
+    totals: { calls: 0, failedCalls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, estCostUsd: 0 }
+  })
+  let getAiUsage: jasmine.Spy<(params?: AiUsageParams) => Promise<AiUsageReport>>
+
+  async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
     rows_ = signal(rows)
+    getAiUsage = jasmine
+      .createSpy('getAiUsage')
+      .and.callFake((params?: AiUsageParams) =>
+        Promise.resolve(
+          params?.groupBy === 'feature'
+            ? report('feature', [aiRow('parse_text', { calls: 3 }), aiRow('recipe_generate')])
+            : report('business', aiRows)
+        )
+      )
     TestBed.configureTestingModule({
       imports: [PlatformDashboardPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
@@ -46,6 +76,8 @@ describe('PlatformDashboardPage', () => {
           useValue: {
             rows_: rows_.asReadonly(),
             load: () => Promise.resolve(),
+            getAiUsage,
+            downloadAiUsageCsv: jasmine.createSpy('downloadAiUsageCsv').and.resolveTo(),
             setInternal: jasmine.createSpy('setInternal').and.resolveTo()
           }
         },
@@ -133,5 +165,42 @@ describe('PlatformDashboardPage', () => {
       tr.querySelectorAll('td')[9].textContent?.trim()
     )
     expect(cells).toEqual(['57%', '—'])
+  })
+
+  describe('AI usage table (plan 566)', () => {
+    const aiTrs = (): HTMLElement[] =>
+      Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.ai-table tbody tr'))
+
+    it('shows one row per business with calls, failed, tokens and a 4-decimal cost', async () => {
+      await setup([row('a')], [aiRow('b1', { label: 'Alpha' }), aiRow('b2', { label: 'Beta', estCostUsd: 1.5 })])
+      expect(getAiUsage).toHaveBeenCalledWith({ groupBy: 'business' })
+      const cells = aiTrs().map((tr) => Array.from(tr.children).map((cell) => (cell.textContent ?? '').trim()))
+      expect(cells).toEqual([
+        ['Alpha', '2', '1', '15', '0.0012'],
+        ['Beta', '2', '1', '15', '1.5000']
+      ])
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain('2026-11-10')
+    })
+
+    it('opens the per-feature rows of a clicked business, one at a time', async () => {
+      await setup([row('a')], [aiRow('b1', { label: 'Alpha' }), aiRow('b2', { label: 'Beta' })])
+      aiTrs()[0].click()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(getAiUsage).toHaveBeenCalledWith({ groupBy: 'feature', businessId: 'b1' })
+      expect(aiTrs().map((tr) => tr.className)).toEqual(['ai-row', 'ai-drill-row', 'ai-drill-row', 'ai-row'])
+      expect(aiTrs()[1].textContent).toContain('ai_feature_parse_text')
+      aiTrs()[3].click()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(aiTrs().map((tr) => tr.className)).toEqual(['ai-row', 'ai-row', 'ai-drill-row', 'ai-drill-row'])
+    })
+
+    it('shows the empty state when there are no calls', async () => {
+      await setup([row('a')], [])
+      const host = fixture.nativeElement as HTMLElement
+      expect(host.querySelector('.ai-table')).toBeNull()
+      expect(host.querySelector('.ai-usage app-empty-state')?.textContent).toContain('platform_ai_empty')
+    })
   })
 })

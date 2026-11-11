@@ -1,6 +1,6 @@
 # Plan 548 — Give every business one front desk profile, with a template per business type and the fit rules
 
-Status: draft
+Status: done
 Depends-on: 545
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
@@ -75,6 +75,8 @@ src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts
 public/assets/data/dictionary.json
 docs/agent/standards-backend.md
+src/app/core/services/breadcrumbs.md
+src/app/core/models/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -169,13 +171,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Define the front desk profile shape once and share the opening-hours row with venues — schema, constants, hours row extracted, registry entry, types — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/common.schema.ts, shared/schemas/entities/venue.schema.ts, shared/schemas/entities/index.ts
-- [ ] A2: Write the pure fit rules and the local-time helper, with a table test of twenty or more cases — qualify, parseReason, hoursCheck, jerusalemEpoch, weekdayOf — shared/schemas/front-desk/qualify.ts, shared/schemas/front-desk/local-time.ts, server/test/qualify.test.js
-- [ ] A3: Add the starting templates for restaurant, private chef, catering and other, with their Hebrew labels — templateFor, WANTED_QUESTION_KEYS, dictionary keys; paste the rendered Hebrew question list into Execution Notes for Dandan — shared/schemas/front-desk-templates.ts, shared/schemas/index.ts, public/assets/data/dictionary.json
-- [ ] A4: Store profiles: one per business, owner-only, status and WhatsApp id kept by the server — collection entry, editFrontDesk, OWNER_ONLY_TYPES, generic strip and keep, 409 codes, read projection, indexes — server/constants/collections.js, server/utils/permissions.js, server/routes/generic.js, server/db.js
-- [ ] A5: Test the stored profile end to end and keep tenant isolation covered — server/test/front-desk-profile.test.js, server/test/cross-business.test.js, server/test/permissions.test.js
-- [ ] A6: Give the app a profile data service and the new permission in its mirror — model, data service + spec, permission service + spec — src/app/core/models/front-desk-profile.model.ts, src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts, src/app/core/services/permission.service.ts, src/app/core/services/permission.service.spec.ts
-- [ ] A7: Record the new collection and run every check — standards-backend §1 row; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md
+- [x] A1: Define the front desk profile shape once and share the opening-hours row with venues — schema, constants, hours row extracted, registry entry, types — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/common.schema.ts, shared/schemas/entities/venue.schema.ts, shared/schemas/entities/index.ts
+- [x] A2: Write the pure fit rules and the local-time helper, with a table test of twenty or more cases — qualify, parseReason, hoursCheck, jerusalemEpoch, weekdayOf — shared/schemas/front-desk/qualify.ts, shared/schemas/front-desk/local-time.ts, server/test/qualify.test.js
+- [x] A3: Add the starting templates for restaurant, private chef, catering and other, with their Hebrew labels — templateFor, WANTED_QUESTION_KEYS, dictionary keys; paste the rendered Hebrew question list into Execution Notes for Dandan — shared/schemas/front-desk-templates.ts, shared/schemas/index.ts, public/assets/data/dictionary.json
+- [x] A4: Store profiles: one per business, owner-only, status and WhatsApp id kept by the server — collection entry, editFrontDesk, OWNER_ONLY_TYPES, generic strip and keep, 409 codes, read projection, indexes — server/constants/collections.js, server/utils/permissions.js, server/routes/generic.js, server/db.js
+- [x] A5: Test the stored profile end to end and keep tenant isolation covered — server/test/front-desk-profile.test.js, server/test/cross-business.test.js, server/test/permissions.test.js
+- [x] A6: Give the app a profile data service and the new permission in its mirror — model, data service + spec, permission service + spec — src/app/core/models/front-desk-profile.model.ts, src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts, src/app/core/services/permission.service.ts, src/app/core/services/permission.service.spec.ts
+- [x] A7: Record the new collection and run every check — standards-backend §1 row; test:server, test:ci, server lint, build, scope-check --arch, log-query — docs/agent/standards-backend.md
 
 ## Technical Considerations
 - Dependencies: generic API, permissions, the schema package build; plan 544's server-field strip in `generic.js` (follow its pattern, do not add a second mechanism).
@@ -201,3 +203,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `FRONT_DESK_REQUEST_KINDS` is defined here (the profile needs the kind keys first); plan 549's `REQUEST_KINDS` re-exports it so the two lists cannot drift.
 - `whatsapp` read rule: only `phoneNumberId` is hidden on reads (it routes inbound messages to a business); `ownerAlertPhone` / `ownerAlertOptIn` stay readable by members so 553/564 can show them. Writes of the whole `whatsapp` block stay server-only here.
 - Verdict rule (fit / borderline / unfit with the 10 % margin) and the starting limits are this plan's defaults; the owner changes limits per business in 553. Dandan's `[human]` check covers the Hebrew and the numbers.
+- Evidence (builder, round 0): `pnpm run build:schemas` -> 0; `pnpm run build` -> 0; `pnpm run lint` -> 0 (0 errors); `pnpm run test:server` -> 0, 80 files / 1025 tests pass (incl. front-desk-profile, qualify (36-row table), cross-business, permissions); `pnpm run test:ci` -> 0, 1892 of 1892 SUCCESS; `pnpm --dir server run lint` -> 0; scope-check --arch, kit-manifest-check, override-check, lint:icons, lint:no-native-select, plan-ledger-check, ci-scope-check, log-query -> 0.
+- Indexes are partial on `slug` (string): a raw fixture doc without a slug (server/test/admin-business.test.js inserts two docs per business into every user-data collection) would otherwise break startup; every real profile has a slug (schema-required).
+- `requestKinds` uses `z.partialRecord` (zod 4: `z.record(enum)` is exhaustive and would demand all four kinds).
+- `breadcrumbs-check` reports `not mentioned: front-desk-profile-data.service.ts` and `front-desk-profile.model.ts` (src/app/core/services/breadcrumbs.md and src/app/core/models/breadcrumbs.md are outside the scope).
+- Rendered templates for Dandan ([human] item): restaurant / table: תאריך*, שעה*, מספר סועדים*, העדפת ישיבה (בפנים/בחוץ/בר), יש סיבה למסיבה?; עד 12 סועדים, 2 שעות מראש, עד 60 יום, 120 דק', תוקף 4 שעות. private_chef / consultation (also `other`): תאריך*, שעה*, במה נוכל לעזור?; 24 שעות מראש, עד 90 יום, 30 דק', תוקף 24 שעות; event: תאריך*, מספר אורחים*, איפה יתקיים האירוע?*, יש מטבח במקום? (כן/לא), העדפות ומגבלות תזונה, תקציב לאורח (₪); 2-40 אורחים, 72 שעות מראש, עד 365 יום, תוקף 48 שעות. catering / event: תאריך*, מספר אורחים*, סוג האירוע* (מהטקסונומיה), מקום האירוע (אולם או כתובת), סגנון הגשה (מזנון/הגשה לשולחן/קוקטייל), תקציב לאורח (₪); מינימום 30 אורחים, 336 שעות מראש, עד 540 יום, תוקף 72 שעות; tasting: תאריך*, שעה*, מספר משתתפים*; עד 6, 48 שעות מראש, עד 120 יום, 60 דק', תוקף 48 שעות. (* = חובה)
