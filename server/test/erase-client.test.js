@@ -82,8 +82,24 @@ describe('parseArgs', () => {
   it('atlas without --confirm-host is refused by connect (before any connection to Atlas is kept)', async () => {
     const args = parseArgs(['node', 'x', '--target=atlas', '--business=b1', '--phone=1']);
     expect(args['confirm-host']).toBeUndefined();
-    const { parseArgs: connectArgs } = require('../migrations/tools/_connect');
-    expect(connectArgs(['node', 'x', '--target=atlas']).target).toBe('atlas');
+    const mongodb = require('mongodb');
+    const dbTarget = require('../utils/db-target');
+    const connectSpy = vi.spyOn(mongodb.MongoClient.prototype, 'connect').mockResolvedValue(undefined);
+    const closeSpy = vi.spyOn(mongodb.MongoClient.prototype, 'close').mockResolvedValue(undefined);
+    const envSpy = vi.spyOn(dbTarget, 'loadServerEnv').mockImplementation(() => {});
+    const uriSpy = vi.spyOn(dbTarget, 'mongoUri').mockReturnValue('mongodb://atlas-host.example:27017/');
+    const connectPath = require.resolve('../migrations/tools/_connect');
+    delete require.cache[connectPath];
+    try {
+      const { connect } = require('../migrations/tools/_connect');
+      await expect(connect(args)).rejects.toThrow(/confirm-host/);
+      expect(closeSpy).toHaveBeenCalled();
+      await expect(connect({ ...args, 'confirm-host': 'wrong.example' })).rejects.toThrow(/confirm-host/);
+      expect(connectSpy).toHaveBeenCalled();
+    } finally {
+      delete require.cache[connectPath];
+      for (const spy of [connectSpy, closeSpy, envSpy, uriSpy]) spy.mockRestore();
+    }
   });
 });
 
