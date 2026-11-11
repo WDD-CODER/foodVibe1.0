@@ -72,36 +72,58 @@
       @for (s of sections_(); track s.section) {
         <details class="logistics-section" open>
           <summary class="logistics-section-title">
-            <span>{{ 'logistics_section_' + s.section | translatePipe }}</span>
+            <span>{{ registry.sectionLabel(s.section) | translatePipe }}</span>
             @if (s.openCount > 0) {
               <span class="c-chip__count">{{ s.openCount }}</span>
             }
           </summary>
 
           @for (row of s.rows; track row.key) {
-            <div class="logistics-row">
+            <div class="logistics-row" [class.is-hidden]="row.hidden">
               <div class="logistics-row-head">
-                <span class="logistics-label">{{ row.label }}</span>
-                @if (row.hint) {
-                  <small class="logistics-hint">{{ row.hint }}</small>
+                <div class="logistics-row-text">
+                  <span class="logistics-label">{{ row.label }}</span>
+                  @if (row.hint) {
+                    <small class="logistics-hint">{{ row.hint }}</small>
+                  }
+                </div>
+                @if (canEdit_()) {
+                  @if (row.hidden) {
+                    <button
+                      type="button"
+                      class="c-icon-btn logistics-show"
+                      [attr.aria-label]="'logistics_show_item' | translatePipe"
+                      [attr.title]="'logistics_show_item' | translatePipe"
+                      (click)="showRow(row)"
+                    >
+                      <lucide-icon name="undo-2" [size]="16"></lucide-icon>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="c-icon-btn logistics-hide"
+                      [attr.aria-label]="'logistics_hide_item' | translatePipe"
+                      [attr.title]="'logistics_hide_item' | translatePipe"
+                      (click)="hideRow(row)"
+                    >
+                      <lucide-icon name="eye-off" [size]="16"></lucide-icon>
+                    </button>
+                  }
                 }
               </div>
-              <div class="c-chip-group logistics-status" role="radiogroup">
-                @for (st of statuses; track st) {
-                  <label class="c-chip c-chip--toggle">
-                    <input
-                      type="radio"
-                      [name]="'status-' + row.key"
-                      [checked]="row.status === st"
-                      [disabled]="!canEdit_()"
-                      (change)="setStatus(row, st)"
-                    />
-                    <span>{{ 'logistics_status_' + st | translatePipe }}</span>
-                  </label>
-                }
+              <div class="c-chip-group c-chip-group--tight logistics-status">
+                <label class="c-chip c-chip--toggle">
+                  <input
+                    type="checkbox"
+                    [checked]="isNeeded(row)"
+                    [disabled]="!canEdit_() || row.hidden"
+                    (change)="setNeeded(row, $any($event.target).checked)"
+                  />
+                  <span>{{ 'logistics_status_needed' | translatePipe }}</span>
+                </label>
               </div>
 
-              @if (row.status === 'needed') {
+              @if (isNeeded(row)) {
                 <div class="logistics-detail">
                   @if (row.answerType === 'quantity') {
                     <app-counter
@@ -135,30 +157,29 @@
                   }
                 </div>
                 <div
-                  class="c-chip-group logistics-payer"
+                  class="c-chip-group c-chip-group--tight logistics-payer"
                   role="radiogroup"
                   [attr.aria-label]="'logistics_payer' | translatePipe"
                 >
-                  @for (payer of payers; track payer) {
-                    <label class="c-chip c-chip--toggle">
-                      <input
-                        type="radio"
-                        [name]="'payer-' + row.key"
-                        [checked]="row.answer?.payer === payer"
-                        [disabled]="!canEdit_()"
-                        (change)="setPayer(row, payer)"
-                      />
-                      <span>{{ 'logistics_payer_' + payer | translatePipe }}</span>
-                    </label>
-                  }
                   <label class="c-chip c-chip--toggle">
                     <input
-                      type="checkbox"
-                      [checked]="row.answer?.showToClient === true"
-                      [disabled]="!canEdit_()"
-                      (change)="setShowToClient(row, $any($event.target).checked)"
+                      type="radio"
+                      [name]="'payer-' + row.key"
+                      [checked]="providerOf(row) === 'ours'"
+                      [disabled]="!canEdit_() || row.hidden"
+                      (change)="setProvider(row, 'ours')"
                     />
-                    <span>{{ 'logistics_show_to_client' | translatePipe }}</span>
+                    <span>{{ 'logistics_payer_ours' | translatePipe }}</span>
+                  </label>
+                  <label class="c-chip c-chip--toggle">
+                    <input
+                      type="radio"
+                      [name]="'payer-' + row.key"
+                      [checked]="providerOf(row) === 'client'"
+                      [disabled]="!canEdit_() || row.hidden"
+                      (change)="setProvider(row, 'client')"
+                    />
+                    <span>{{ 'logistics_payer_client_care' | translatePipe }}</span>
                   </label>
                 </div>
               }
@@ -215,6 +236,17 @@
           <button type="button" class="c-btn-ghost" (click)="phaseDone()">
             <lucide-icon name="circle-check-big" [size]="16"></lucide-icon>
             {{ 'logistics_phase_done' | translatePipe }}
+          </button>
+        }
+        @if (hiddenCount_() > 0) {
+          <button
+            type="button"
+            class="c-chip c-chip--tap"
+            [class.active]="showHidden_()"
+            [attr.aria-pressed]="showHidden_()"
+            (click)="toggleShowHidden()"
+          >
+            {{ hiddenCount_() }} {{ 'logistics_hidden_count' | translatePipe }}
           </button>
         }
         <button type="button" class="c-btn-primary" (click)="copySummary()">

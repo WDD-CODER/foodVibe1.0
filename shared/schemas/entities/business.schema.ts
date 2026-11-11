@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { nameField } from '../base.schema'
 import { EVENT_STAGES } from './event-stage'
+import { LOGISTICS_LABEL_MAX } from './event-logistics'
 
 /** Plan 429: the three numbers that belong to the business. Defaults apply on read when a business has none stored. */
 export const BUSINESS_SETTINGS_DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 } as const
@@ -69,6 +70,10 @@ export const staffVisibleStagesInputSchema = z.strictObject({ stages: staffVisib
 
 export type StaffVisibleStagesInput = z.infer<typeof staffVisibleStagesInputSchema>
 
+/** Plan 579: the owner's whole list of hidden logistics keys. */
+export const logisticsHiddenInputSchema = z.strictObject({ keys: z.array(z.string().min(1).max(LOGISTICS_LABEL_MAX)).max(300) })
+export type LogisticsHiddenInput = z.infer<typeof logisticsHiddenInputSchema>
+
 /** Plan 424: one document per business (the tenant). Lives in the `businesses` collection, not the generic data pipe. */
 export const businessSchema = z.strictObject({
   _id: z.string().min(1),
@@ -82,7 +87,9 @@ export const businessSchema = z.strictObject({
   /** Plan 431: absent until the owner fills or skips the opening details. */
   baseline: businessBaselineSchema.optional(),
   /** Plan 477: stages staff may see (events they created always stay visible). Absent = every stage. */
-  staffVisibleStages: staffVisibleStagesField.optional()
+  staffVisibleStages: staffVisibleStagesField.optional(),
+  /** Plan 579: shared logistics questions this business hid, with the time it hid them. */
+  hiddenLogisticsKeys: z.array(z.strictObject({ key: z.string().min(1).max(LOGISTICS_LABEL_MAX), at: z.number() })).max(300).optional()
 })
 
 export type Business = z.infer<typeof businessSchema>

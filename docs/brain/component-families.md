@@ -201,6 +201,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `--solid` = light text on a data color). Data-colored value chip: `--colored` (background/color inline).
 - When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
 - Users (plan 522): `event-logistics-panel` — toggle header (`--tap`), phase tabs (`--tab`), status/payer radios (`--toggle`).
+- Tight group (plan 579): `.c-chip-group.c-chip-group--tight` — no block padding, `--space-1` gap, small chips; user: `event-logistics-panel` (one "נדרש" toggle + the two provider radios); plan 581 uses it too.
 - Users (plan 523): `logistics-item-manager` — phase tabs (`--tab`), shared item (`--tag` + lock), own item (`--removable`), environment and shared choices (`--toggle`).
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
@@ -277,6 +278,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a page reads or adds a category, unit, label or kind.
 - Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
 - Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
+- Plan 579: kind `logisticsSection` (a business's own sections); `logisticsItem` gains `removedAt` (removed from that date, older events keep it) and `foldedAt` (server-written when promoted: the business's own copy is kept, not deleted, so it still dates the question). `LogisticsItemRegistryService` adds `allItems_`, `hiddenAt_`, `defaultItems_`, `sections_`, `sectionLabel()` and `forEvent()` (the date rule); `items_` is the live list.
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens

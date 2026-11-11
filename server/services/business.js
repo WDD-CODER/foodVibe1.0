@@ -77,4 +77,14 @@ async function setStaffVisibleStages(id, stages) {
   return { matchedCount: result.matchedCount, staffVisibleStages }
 }
 
-module.exports = { setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+/** Plan 579: replaces the business's hidden logistics keys; a key already listed keeps its `at`, a new one gets now. */
+async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
+  const business = await col().findOne({ _id: String(id) }, { projection: { hiddenLogisticsKeys: 1 } })
+  if (!business) return { matchedCount: 0, hiddenLogisticsKeys: [] }
+  const old = new Map((business.hiddenLogisticsKeys ?? []).map(e => [e.key, e.at]))
+  const hiddenLogisticsKeys = [...new Set(keys.map(k => k.trim()).filter(Boolean))].map(key => ({ key, at: old.get(key) ?? now }))
+  const result = await col().updateOne({ _id: String(id) }, { $set: { hiddenLogisticsKeys } })
+  return { matchedCount: result.matchedCount, hiddenLogisticsKeys }
+}
+
+module.exports = { setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

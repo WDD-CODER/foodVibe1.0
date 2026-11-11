@@ -24,6 +24,7 @@ const EVENTS_URL = `${environment.apiUrl}${API.events}`
 /** Plan 521: what one logistics save may carry; the server stamps `at`, `by` and `byName` on each answer. */
 export interface LogisticsPatch {
   answers?: Omit<LogisticsAnswer, 'at' | 'by' | 'byName'>[]
+  hiddenKeys?: string[]
   environmentType?: EnvironmentType
   venueProfileId?: string | null
   meetingAt?: string

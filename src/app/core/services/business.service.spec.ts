@@ -169,4 +169,17 @@ describe('BusinessService', () => {
     await expectAsync(done).toBeRejected()
     expect(service.business_()?.staffVisibleStages).toBeUndefined()
   })
+
+  it('updateHiddenLogisticsKeys PUTs the keys and puts the stored list into business_', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.updateHiddenLogisticsKeys(['a'])
+    const req = http.expectOne(`${URL}/logistics-hidden`)
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual({ keys: ['a'] })
+    req.flush({ hiddenLogisticsKeys: [{ key: 'a', at: 5 }] })
+    await done
+    expect(service.business_()?.hiddenLogisticsKeys).toEqual([{ key: 'a', at: 5 }])
+  })
 })

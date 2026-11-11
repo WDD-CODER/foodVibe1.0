@@ -15,7 +15,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `recipe-builder/` | `/recipe-builder/:id` — single-recipe editor with local `services/` and `utils/` |
 | `cook-view/` | `/cook/:id` — step-by-step cook workflow |
 | `menu-library/` | `/menu-library` — menu list and filters |
-| `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views; the event-logistics-panel component = collapsed phone-intake / site-visit checklist under the notes log (plan 522) |
+| `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views; the event-logistics-panel component = collapsed phone-intake / site-visit checklist under the notes log (plan 522; plan 579: questions by event date, hide on one event, one "נדרש" toggle + "עלינו" / "באחריות הלקוח") |
 | `metadata-manager/` | Categories, allergens, units, preparations, event-logistics questions (`metadata-manager/components/logistics-item-manager/`, plan 523) (`metadata-manager/metadata-manager.page.component.ts`) |
 | `trash/` | `/trash` — soft-deleted items and restore |
 | `platform-dashboard/` | `/platform` — platform-admin-only table of every business (activity, events, internal flag) + the logistics-items list (plan 532: each business's own logistics items grouped, promote to shared) |

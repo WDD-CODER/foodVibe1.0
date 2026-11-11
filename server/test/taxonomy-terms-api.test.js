@@ -224,6 +224,15 @@ describe('shared terms are admin-only (Human, 2026-10-05)', () => {
     expect(all.map(t => t.userId)).toEqual(['__master__']);
   });
 
+  it('plan 579: a shared logisticsItem POST keeps the own term marked foldedAt with its createdAt', async () => {
+    await testDb().collection('taxonomyTerms').insertOne(term('userA', 'logisticsItem', 'מטבח?', { createdAt: 77, phase: 'site_visit', section: 'space', answerType: 'status' }));
+    const res = await admin(request(app).post(URL)).send({ kind: 'logisticsItem', key: 'מטבח?', sortOrder: 0, phase: 'site_visit', section: 'space', answerType: 'status', shared: true });
+    expect(res.status).toBe(201);
+    const own = await testDb().collection('taxonomyTerms').findOne({ userId: 'userA', key: 'מטבח?' });
+    expect(own.createdAt).toBe(77);
+    expect(own.foldedAt).toBeGreaterThan(0);
+  });
+
   it('an admin re-keys a shared term: every user\'s docs follow', async () => {
     const db = testDb();
     await db.collection('taxonomyTerms').insertOne(term('__master__', 'ingredientCategory', 'veg'));

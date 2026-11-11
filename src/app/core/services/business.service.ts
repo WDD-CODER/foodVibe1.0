@@ -7,6 +7,7 @@ import type {
   BusinessNameInput,
   BusinessSettings,
   EventStage,
+  LogisticsHiddenInput,
   StaffVisibleStagesInput
 } from '@schemas/entities'
 import { environment } from '../../../environments/environment'
@@ -63,6 +64,11 @@ export class BusinessService {
     return this._put('staff-visible-stages', { stages })
   }
 
+  /** Owner only (plan 579): the whole list of shared logistics questions this business hides; puts the stored list into `business_`. Throws on any refusal. */
+  updateHiddenLogisticsKeys(keys: string[]): Promise<void> {
+    return this._put('logistics-hidden', { keys })
+  }
+
   /** Owner only: which setup steps are done. Not cached: the setup card asks every time it is created. */
   loadSetupStatus(): Promise<SetupStatus> {
     return firstValueFrom(this.http.get<SetupStatus>(`${environment.apiUrl}${API.business('setup-status')}`))
@@ -70,8 +76,8 @@ export class BusinessService {
 
   /** PUTs one owner-only part of the business and puts the stored reply into `business_`. */
   private async _put(
-    path: 'name' | 'settings' | 'baseline' | 'staff-visible-stages',
-    body: BusinessNameInput | BusinessSettings | BaselineInput | StaffVisibleStagesInput
+    path: 'name' | 'settings' | 'baseline' | 'staff-visible-stages' | 'logistics-hidden',
+    body: BusinessNameInput | BusinessSettings | BaselineInput | StaffVisibleStagesInput | LogisticsHiddenInput
   ): Promise<void> {
     const res = await firstValueFrom(
       this.http.put<Partial<Business>>(`${environment.apiUrl}${API.business(path)}`, body)

@@ -66,5 +66,8 @@ describe('GET /api/v1/admin/taxonomy', () => {
     expect(post.status, JSON.stringify(post.body)).toBe(201)
     const res = await request(app).get(`${URL}?kind=logisticsItem`).set(as(ADMIN))
     expect(res.body.rows).toEqual([])
+    const kept = await testDb().collection('taxonomyTerms').find({ kind: 'logisticsItem', key: 'own item', businessId: { $ne: '__master__' } }).toArray()
+    expect(kept).toHaveLength(2)
+    expect(kept.every(t => t.foldedAt > 0 && typeof t.createdAt === 'number')).toBe(true)
   })
 })
