@@ -81,6 +81,7 @@ When a feature needs a new persisted entity type:
 4. **Generic routes need no new code** — `server/routes/generic.js` calls `mongoose.connection.db.collection(type)` directly, scopes every query by `businessId` (`scopeFilter`) and checks permissions with `assertCan`. Add per-type rules only where the type needs them: owner-only writes (`OWNER_ONLY_TYPES` in `server/utils/permissions.js`), a trimmed staff read (`STAFF_READ_FIELDS` in `shared/schemas/staff-fields.ts`), money fields (`shared/schemas/money-fields.ts`).
 5. Add a server test that covers the owner path, the staff path and a second business (`server/test/cross-business.test.js` lists a body for every type).
 6. If the new entity needs a dedicated endpoint beyond generic CRUD, add it to `server/routes/` and document it in this file.
+7. **Retention and erase (plan 558).** A new collection that holds a customer's personal data (names, phones, messages) joins `server/jobs/retention.js` (a lazy delete after its retention period) and `server/scripts/erase-client.js` (`planErase` / `runErase`), in the same plan. Logs never carry phones, names or tokens.
 
 ---
 

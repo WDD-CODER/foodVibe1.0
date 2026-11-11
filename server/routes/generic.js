@@ -15,6 +15,7 @@ const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
 const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
 const { expireDue } = require('../utils/request-expiry');
 const { buildNewEventDoc, withoutServerEventFields, withSavedSnapshot } = require('../utils/event-create');
+const { purgeRetained } = require('../jobs/retention');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
@@ -49,10 +50,13 @@ router.param('type', (req, res, next, type) => {
   next();
 });
 
-/** Plan 549: a read of requests first expires the business's stale ones (lazy, no timer). */
+/** Plan 549: a read of requests first expires the business's stale ones (lazy, no timer). Plan 558: requests and bookings reads also run the retention sweep. */
 async function expireRequestsOnRead(req, res, next) {
   try {
-    if (req.params.type === 'requests' && req.user?.businessId) await expireDue(mongoose.connection.db, req.user.businessId, Date.now());
+    const businessId = req.user?.businessId;
+    if (req.params.type === 'requests' && businessId) await expireDue(mongoose.connection.db, businessId, Date.now());
+    // Plan 558: the lazy retention sweep, for the caller's own business only (throttled to once per 24 hours).
+    if ((req.params.type === 'requests' || req.params.type === 'bookings') && businessId) await purgeRetained(mongoose.connection.db, businessId, Date.now());
     next();
   } catch (err) {
     next(err);
