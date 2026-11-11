@@ -21,6 +21,7 @@ test('544-1: a deleted client is listed under "לקוחות" in Trash and comes 
     await page.screenshot({ path: 'screens/544-1.png' })
 
     await item.getByRole('button', { name: 'שחזר מהאשפה' }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'שחזר מהאשפה' }).click()
     await expect(item).toHaveCount(0)
     const live = await request.get(`${API}/api/v1/data/clients/${id}`, { headers })
     expect(live.ok()).toBeTruthy()

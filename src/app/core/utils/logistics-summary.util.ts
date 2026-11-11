@@ -1,26 +1,38 @@
-import { LOGISTICS_SECTIONS } from '@schemas/entities'
 import type { LogisticsAnswer } from '@models/menu-event.model'
 import type { LogisticsItemTerm } from '../services/logistics-item-registry.service'
 
-/** Plan 521: the Hebrew text the chef pastes into a quote — only ticked answers shown to the client, grouped by section. */
+/** Plan 579: an answer the customer must bring: needed and "באחריות הלקוח" (payer `client`, or the old status `client_provides`). */
+export function isClientProvided(a: Pick<LogisticsAnswer, 'status' | 'payer'>): boolean {
+  return a.status === 'client_provides' || (a.status === 'needed' && a.payer === 'client')
+}
+
+/**
+ * Plan 579: the Hebrew text the chef pastes into a quote — what the client must bring, grouped by section in the
+ * event's section order (`sections` carry the heading text). The caller leaves out answers hidden on the event.
+ */
 export function buildClientSummary(
   answers: LogisticsAnswer[],
   items: LogisticsItemTerm[],
-  t: (key: string) => string
+  sections: { key: string; label: string }[]
 ): string {
-  const shown = answers.filter((a) => a.showToClient === true && a.status !== 'unchecked')
+  const shown = answers.filter(isClientProvided)
+  const known = new Set(sections.map((s) => s.key))
+  const order = [
+    ...sections,
+    ...[...new Set(shown.map((a) => a.section))].filter((k) => !known.has(k)).map((k) => ({ key: k, label: k }))
+  ]
   const groups: string[] = []
-  for (const section of LOGISTICS_SECTIONS) {
+  for (const section of order) {
     const lines = shown
-      .filter((a) => a.section === section)
+      .filter((a) => a.section === section.key)
       .map((a) => {
         const label = a.label ?? items.find((i) => i.key === a.itemKey)?.key ?? a.itemKey
-        const parts = [`${label}: ${t(`logistics_status_${a.status}`)}`]
+        const parts = [label]
         if (a.quantity !== undefined) parts.push(String(a.quantity))
         if (a.text) parts.push(a.text)
         return `• ${parts.join(' · ')}`
       })
-    if (lines.length) groups.push([t(`logistics_section_${section}`), ...lines].join('\n'))
+    if (lines.length) groups.push([section.label, ...lines].join('\n'))
   }
   return groups.join('\n\n')
 }
