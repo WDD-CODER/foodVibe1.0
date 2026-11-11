@@ -282,40 +282,6 @@
 - [ ] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
 - [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
 
-### Plan 571 — One product name, foodCo, and its own app icon instead of the Angular logo (`plans/571-one-product-name-foodco-and-its-own-app-icon.plan.md`)
-- [ ] A1: Show the name foodCo in the browser tab and in the installed app — title, apple title, theme colour, apple icon link; manifest name, short name and two colours — src/index.html, public/manifest.webmanifest
-- [ ] A2: Say foodCo in the two sentences and the logo label that still use an old name — two dictionary values, the mark's label and title — public/assets/data/dictionary.json, public/assets/style/img/fc-mark.svg
-- [ ] A3: Add a script that draws every app icon from the design's own pot mark — Playwright Chromium renders Art A and Art B, the script writes the ICO container — tools/brand-icons/make-icons.mjs
-- [ ] A4: Replace the ten Angular icon files with the pot mark — run the script once and commit its output — public/icons/**, public/favicon.ico
-- [ ] A5: Add two checks that fail if an old name or an Angular icon comes back — sizes, ICO header, old md5 values; the name search — tools/brand-icons/check-icons.mjs, tools/brand-icons/check-names.mjs
-- [ ] A6: Run the two checks, build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
-
-### Plan 572 — The Pass theme tokens: brand teal, lamp amber, paper colours and a guest typeface (`plans/572-the-pass-theme-tokens-brand-teal-lamp-amber-paper-colours-and-a-guest-typeface.plan.md`)
-- [ ] A1: Make buttons, links and active states the logo's teal so white text on them is readable — two token values and the comment in the light root block — src/styles.scss
-- [ ] A2: Add the lamp colour, the guest typeface and the paper palette as tokens — thirteen new tokens in the light block, the lamp in the kitchen block — src/styles.scss
-- [ ] A3: Add one shared class for exact-looking numbers and one for the amber ready line — two engine classes at the end of the file, registered in the family list — src/styles.scss, docs/brain/component-families.md
-- [ ] A4: Make the menu paper read its colours from the tokens instead of typed values — the eleven value swaps, nothing else — src/app/pages/menu-intelligence/_paper-ui.scss, src/app/pages/menu-intelligence/_toolbar.scss
-- [ ] A5: Set the menu title and section titles in a real Hebrew serif — two font-family lines and the font link — src/app/pages/menu-intelligence/_paper-ui.scss, src/index.html
-- [ ] A6: Add a check that fails if a theme token is lost or a typed colour returns to the paper files — tools/theme/check-tokens.mjs
-- [ ] A7: Write the theme into the design notes so the next design port follows it — system.md tokens and The Pass rules, divergence 7 — .interface-design/system.md, .interface-design/divergences.md
-- [ ] A8: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
-
-### Plan 573 — Light the lamp on the price bar when an event meets its profit target, and line up its numbers (`plans/573-light-the-lamp-on-the-price-bar-when-an-event-meets-its-profit-target.plan.md`)
-- [ ] A1: Keep every number of the price bar at a fixed width while digits change — the shared digits class on seven number elements — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
-- [ ] A2: Show the amber ready line under the profit percent only when the price meets the target — one class binding on the bar value and one on the phone sheet summary — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
-- [ ] A3: Test that the line appears on target, disappears below it, and the digits class is on every number — three cases — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
-- [ ] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
-
-### Plan 574 — A welcome screen: a first-time visitor sees the promise and a way in, not an empty dashboard (`plans/574-a-welcome-screen-for-first-time-visitors.plan.md`)
-- [ ] A1: Remember on the device that someone has signed in here, and forget it on sign-out — the util with its spec; two lines in the user service with three spec cases — src/app/core/utils/returning-visitor.util.ts, src/app/core/utils/returning-visitor.util.spec.ts, src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
-- [ ] A2: Decide where the site's bare address leads: welcome for a first-time visitor, dashboard for everyone else — the redirect function and the guard, each with its spec — src/app/pages/welcome/home-redirect.ts, src/app/pages/welcome/home-redirect.spec.ts, src/app/core/guards/welcome.guard.ts, src/app/core/guards/welcome.guard.spec.ts
-- [ ] A3: Build the welcome screen with the mark, the promise, two buttons and the three rooms — the page's four files — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/welcome.page.html, src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
-- [ ] A4: Add the ten Hebrew texts of the welcome screen — public/assets/data/dictionary.json
-- [ ] A5: Connect the screen to the address bar — the welcome route and the one rewritten home entry — src/app/app.routes.ts
-- [ ] A6: Hide the floating add button on the welcome screen — one signal, one wrapper, one spec case — src/app/core/components/hero-fab/hero-fab.component.ts, src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.spec.ts
-- [ ] A7: Record the new page, guard and util in the folder maps — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md
-- [ ] A8: Run build, lint, the icon lint, the unit tests, the breadcrumbs check and the log query, and paste the output lines under Execution Notes
-
 ### Plan 575 — Seed one demo catering business into a local database so every demo starts with full screens (`plans/575-seed-one-demo-catering-business-into-a-local-database.plan.md`)
 - [ ] A1: Write the demo business's data as one pure builder so it can be tested without a database — suppliers, products, recipes, dishes, venues, clients, events with their money, usage days, baseline — server/scripts/lib/demo-data.js
 - [ ] A2: Add the command that writes that data into a local database, safely and only once — arguments, local-only refusal, password from the environment, validate then insert what is missing — server/scripts/seed-demo-business.js
@@ -324,10 +290,10 @@
 - [ ] A5: Run the server tests, the server lint, the build and the log query, and paste the output lines under Execution Notes
 
 ### Plan 576 — Polish The Pass theme (`plans/576-polish-the-pass-theme-welcome-underline-on-phones-cook-view-logo-and-the-sign-in-window.plan.md`)
-- [ ] A1: Put one amber line under the whole welcome promise on a phone — block the highlighted span and balance its lines — src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
-- [ ] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
-- [ ] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
-- [ ] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
+- [x] A1: Put one amber line under the whole welcome promise on a phone — block the highlighted span and balance its lines — src/app/pages/welcome/welcome.page.scss, src/app/pages/welcome/welcome.page.spec.ts
+- [x] A2: Show the logo in light colour while Cook View is open — one kitchen rule next to the existing kitchen rules, and the check that guards it — src/styles.scss, tools/theme/check-tokens.mjs
+- [x] A3: Open the sign-in and sign-up windows with the mark, the name and a heading — one block, its styles and two spec cases — src/app/core/components/auth-modal/auth-modal.component.html, src/app/core/components/auth-modal/auth-modal.component.scss, src/app/core/components/auth-modal/auth-modal.component.spec.ts
+- [x] A4: Run the theme check, build, lint, the icon lint, the unit tests and the log query, and paste the output lines under Execution Notes
 ### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
 - [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges — Human 2026-11-11: backup atlas-2026-11-11T14-40-06, 0 clients patched, "verify: ok"
@@ -348,19 +314,11 @@
 - [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected — A: (Human, 2026-11-11) one "needed" toggle; when on, two options: "עלינו" (default) / "באחריות הלקוח"; the client summary lists the "באחריות הלקוח" items; no separate ללקוח checkbox
 - [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
 
-### Plan 577 — Depth theme: solid white surfaces, layered shadows, filled inputs and status dots across the app (`plans/577-depth-theme-solid-white-surfaces-layered-shadows-filled-inputs-and-status-dots.plan.md`)
-- [ ] A1: Put the app's content on white surfaces over a flat tinted page — surface, border, text, radius and shadow token values; the page wash removed — src/styles.scss
-- [ ] A2: Add the colours of the dark bar that the price bar and the dashboard will use — five new tokens — src/styles.scss
-- [ ] A3: Give buttons and inputs the new shape and fill — primary button solid with 14 px corners; inputs, selects and input wrappers filled, white with a teal border on focus; invalid still red — src/styles.scss
-- [ ] A4: Draw status tags as a white tag with a coloured dot, leaving pressable chips alone — one rule group after the allergen chip — src/styles.scss
-- [ ] A5: Guard the new theme and write it down — the token check, the design notes, the chip family line — tools/theme/check-tokens.mjs, .interface-design/system.md, docs/brain/component-families.md
-- [ ] A6: Run the token check, build, lint, the unit tests, the registry check and the log query, and paste the output lines under Execution Notes
-
 ### Plan 578 — Depth theme: the dark price bar and one hero tile on the dashboard (`plans/578-depth-theme-the-dark-price-bar-and-one-hero-tile-on-the-dashboard.plan.md`)
-- [ ] A1: Make the price bar a dark teal bar with light text that stays readable — bar surface and the colours of everything on it, scoped so the phone sheet stays light — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.scss
-- [ ] A2: Make the month's revenue the one large dark tile that leads the dashboard — one class binding, the six-column grid and the hero rules — src/app/pages/dashboard/components/business-performance/business-performance.component.html, src/app/pages/dashboard/components/business-performance/business-performance.component.scss
-- [ ] A3: Test that only the revenue card is the hero — two cases — src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
-- [ ] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
+- [x] A1: Make the price bar a dark teal bar with light text that stays readable — bar surface and the colours of everything on it, scoped so the phone sheet stays light — src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.scss
+- [x] A2: Make the month's revenue the one large dark tile that leads the dashboard — one class binding, the six-column grid and the hero rules — src/app/pages/dashboard/components/business-performance/business-performance.component.html, src/app/pages/dashboard/components/business-performance/business-performance.component.scss
+- [x] A3: Test that only the revenue card is the hero — two cases — src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
+- [x] A4: Run build, lint, the unit tests and the log query, and paste the output lines under Execution Notes
 - [ ] F8: Logistics questions get Edit next to Remove, like recipes — Edit loads the question with all its data into the add form, scrolls there, and the user saves it as an update (Human 2026-11-11, card V5)
 - [ ] F9: Editing while the add form already holds an unsaved question opens the save / discard modal first (Human 2026-11-11, card V5)
 - [ ] F10: A question that is added or promoted to shared later must not appear on events that already exist and were saved — today the event screen reads the live list, so it shows up there unanswered (Human 2026-11-11, card V7; confirmed in event-logistics-panel)

@@ -1,6 +1,6 @@
 # Plan 572 — The Pass theme tokens: brand teal, lamp amber, paper colours and a guest typeface
 
-Status: draft
+Status: done
 Depends-on: 571
 Snapshot: 4ba8887cc16eb5c1c3d3ccd4a0bbb9b63cb6c3c9
 
