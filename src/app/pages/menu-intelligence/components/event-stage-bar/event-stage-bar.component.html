@@ -54,14 +54,6 @@
       <div class="client-row">
         @if (client_()?.name ?? event.clientName; as name) {
           <span class="c-chip--tag client-chip">{{ name }}</span>
-          @if (client_()?.phone ?? event.clientPhone; as phone) {
-            <span class="c-chip--tag client-chip" dir="ltr">{{ phone }}</span>
-          }
-          @if (canChangeClient_() && client_() && clientEventCount_() > 0) {
-            <span class="c-chip--tag client-chip"
-              >{{ clientEventCount_() }} {{ 'client_events_count' | translatePipe }}</span
-            >
-          }
         } @else {
           <span class="client-row-empty">{{ 'client' | translatePipe }}</span>
         }
@@ -102,16 +94,10 @@
 
     @if (isPickerOpen_() && canChangeClient_()) {
       <div class="client-picker">
-        <app-search-combobox
+        <app-client-picker
           variant="plain"
           inputId="stage-client-pick"
-          placeholder="client_pick_placeholder"
-          [options]="clientOptions_()"
-          [(query)]="query_"
-          [clientFilter]="false"
-          [labelOf]="clientLabelOf"
-          [keyOf]="clientKeyOf"
-          [minChars]="2"
+          [selected]="null"
           [closeOnOutsideClick]="true"
           (picked)="onClientPicked($event)"
           (escaped)="closePicker()"

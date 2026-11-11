@@ -45,8 +45,8 @@ describe('NewInquiryDialogComponent', () => {
   function startNewClient(name = 'לקוח חדש', phone = '050-1234567'): void {
     combobox().addChosen.emit({ typed: '', source: 'pointer' })
     fixture.detectChanges()
-    type('#inquiry-name', name)
-    type('#inquiry-phone', phone)
+    type('#client-form-name', name)
+    type('#client-form-phone', phone)
   }
 
   function type(selector: string, value: string): void {
@@ -171,7 +171,7 @@ describe('NewInquiryDialogComponent', () => {
 
   it('picking an existing client does not create a client', async () => {
     pickExisting()
-    expect(el.querySelector('.inquiry-client-picked')?.textContent).toContain('דנה כהן')
+    expect(el.querySelector('.client-picker-picked')?.textContent).toContain('דנה כהן')
     saveButton().click()
     await fixture.whenStable()
     expect(clientData.addClient).not.toHaveBeenCalled()
@@ -189,7 +189,7 @@ describe('NewInquiryDialogComponent', () => {
       jasmine.objectContaining({ name: 'לקוח חדש', phone: '050-1234567', clientType: 'private' })
     )
     expect(eventData.addMenuEvent).not.toHaveBeenCalled()
-    expect(el.querySelector('.inquiry-client-picked')?.textContent).toContain('לקוח חדש')
+    expect(el.querySelector('.client-picker-picked')?.textContent).toContain('לקוח חדש')
     saveButton().click()
     await fixture.whenStable()
     expect(order).toEqual(['client', 'event'])
@@ -199,24 +199,24 @@ describe('NewInquiryDialogComponent', () => {
 
   it('Enter in the new client name moves to the phone field and saves nothing', () => {
     startNewClient('', '')
-    const phone = el.querySelector<HTMLInputElement>('#inquiry-phone')!
-    enter('#inquiry-name')
+    const phone = el.querySelector<HTMLInputElement>('#client-form-phone')!
+    enter('#client-form-name')
     expect(document.activeElement).toBe(phone)
     expect(clientData.addClient).not.toHaveBeenCalled()
   })
 
   it('Enter in the phone field saves the client when the name is filled and the phone is valid', async () => {
     startNewClient()
-    enter('#inquiry-phone')
+    enter('#client-form-phone')
     await fixture.whenStable()
     fixture.detectChanges()
     expect(clientData.addClient).toHaveBeenCalledTimes(1)
-    expect(el.querySelector('.inquiry-client-picked')).toBeTruthy()
+    expect(el.querySelector('.client-picker-picked')).toBeTruthy()
   })
 
   it('Enter in the phone field with an empty name shows the required error and saves nothing', async () => {
     startNewClient('', '050-1234567')
-    enter('#inquiry-phone')
+    enter('#client-form-phone')
     await fixture.whenStable()
     fixture.detectChanges()
     expect(clientData.addClient).not.toHaveBeenCalled()
@@ -228,7 +228,7 @@ describe('NewInquiryDialogComponent', () => {
     el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
     fixture.detectChanges()
     expect(el.querySelector('#inquiry-client')).toBeTruthy()
-    expect(el.querySelector('#inquiry-name')).toBeNull()
+    expect(el.querySelector('#client-form-name')).toBeNull()
     saveButton().click()
     await fixture.whenStable()
     expect(clientData.addClient).not.toHaveBeenCalled()
@@ -238,7 +238,7 @@ describe('NewInquiryDialogComponent', () => {
   it('Escape goes one step back: add-client view, then the dialog', () => {
     startNewClient()
     escape()
-    expect(el.querySelector('#inquiry-name')).toBeNull()
+    expect(el.querySelector('#client-form-name')).toBeNull()
     expect(cancels).toBe(0)
     escape()
     expect(cancels).toBe(1)
@@ -250,8 +250,8 @@ describe('NewInquiryDialogComponent', () => {
       fixture.detectChanges()
       await fixture.whenStable()
       fixture.detectChanges()
-      expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe(typed)
-      expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe('')
+      expect(el.querySelector<HTMLInputElement>('#client-form-name')!.value).toBe(typed)
+      expect(el.querySelector<HTMLInputElement>('#client-form-phone')!.value).toBe('')
       el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
       fixture.detectChanges()
     }
@@ -263,8 +263,8 @@ describe('NewInquiryDialogComponent', () => {
       fixture.detectChanges()
       await fixture.whenStable()
       fixture.detectChanges()
-      expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe(typed)
-      expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe('')
+      expect(el.querySelector<HTMLInputElement>('#client-form-phone')!.value).toBe(typed)
+      expect(el.querySelector<HTMLInputElement>('#client-form-name')!.value).toBe('')
       el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
       fixture.detectChanges()
     }
@@ -277,7 +277,7 @@ describe('NewInquiryDialogComponent', () => {
 
   it('a picked client shows only its name, no phone', () => {
     pickExisting()
-    const picked = el.querySelector('.inquiry-client-picked')!
+    const picked = el.querySelector('.client-picker-picked')!
     expect(picked.textContent).toContain('דנה כהן')
     expect(picked.textContent).not.toContain('052-1111111')
   })
@@ -285,25 +285,25 @@ describe('NewInquiryDialogComponent', () => {
   it('the more-details control is a chip button that opens and closes the extra fields', () => {
     startNewClient()
     expect(el.querySelector('details')).toBeNull()
-    const toggle = el.querySelector<HTMLButtonElement>('.inquiry-more-toggle')!
+    const toggle = el.querySelector<HTMLButtonElement>('.client-form-more-toggle')!
     expect(toggle.classList).toContain('c-chip--tap')
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
-    expect(el.querySelector('.inquiry-more')).toBeNull()
+    expect(el.querySelector('.client-form-more')).toBeNull()
     toggle.click()
     fixture.detectChanges()
     expect(toggle.getAttribute('aria-expanded')).toBe('true')
-    expect(el.querySelector('.inquiry-more')).toBeTruthy()
+    expect(el.querySelector('.client-form-more')).toBeTruthy()
     toggle.click()
     fixture.detectChanges()
-    expect(el.querySelector('.inquiry-more')).toBeNull()
+    expect(el.querySelector('.client-form-more')).toBeNull()
   })
 
   it('the extra fields stay inside the container when opened', () => {
     startNewClient()
-    el.querySelector<HTMLButtonElement>('.inquiry-more-toggle')!.click()
+    el.querySelector<HTMLButtonElement>('.client-form-more-toggle')!.click()
     fixture.detectChanges()
     const bodyRect = el.querySelector<HTMLElement>('.c-modal-body')!.getBoundingClientRect()
-    const fields = Array.from(el.querySelectorAll<HTMLElement>('.inquiry-more input, .inquiry-more textarea'))
+    const fields = Array.from(el.querySelectorAll<HTMLElement>('.client-form-more input, .client-form-more textarea'))
     expect(fields.length).toBeGreaterThan(0)
     for (const f of fields) {
       const r = f.getBoundingClientRect()
@@ -315,27 +315,27 @@ describe('NewInquiryDialogComponent', () => {
   it('text typed in the search goes to the name, digits to the phone, after an earlier client was saved', async () => {
     startNewClient()
     await saveClientView()
-    el.querySelector<HTMLButtonElement>('.inquiry-client-picked button')!.click()
+    el.querySelector<HTMLButtonElement>('.client-picker-picked button')!.click()
     fixture.detectChanges()
     combobox().addChosen.emit({ typed: 'אאאא', source: 'pointer' })
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe('אאאא')
-    expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe('')
+    expect(el.querySelector<HTMLInputElement>('#client-form-name')!.value).toBe('אאאא')
+    expect(el.querySelector<HTMLInputElement>('#client-form-phone')!.value).toBe('')
     el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
     fixture.detectChanges()
     combobox().addChosen.emit({ typed: '0521234567', source: 'pointer' })
     fixture.detectChanges()
     await fixture.whenStable()
-    expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe('0521234567')
-    expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe('')
+    expect(el.querySelector<HTMLInputElement>('#client-form-phone')!.value).toBe('0521234567')
+    expect(el.querySelector<HTMLInputElement>('#client-form-name')!.value).toBe('')
   })
 
   it('the X removes the picked client so another can be chosen', () => {
     pickExisting()
-    el.querySelector<HTMLButtonElement>('.inquiry-client-picked button')!.click()
+    el.querySelector<HTMLButtonElement>('.client-picker-picked button')!.click()
     fixture.detectChanges()
-    expect(el.querySelector('.inquiry-client-picked')).toBeNull()
+    expect(el.querySelector('.client-picker-picked')).toBeNull()
     expect(el.querySelector('#inquiry-client')).toBeTruthy()
   })
 

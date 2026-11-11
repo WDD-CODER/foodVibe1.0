@@ -35,8 +35,7 @@ import { DateFieldComponent } from 'src/app/shared/date-field/date-field.compone
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import type { Client } from '@models/client.model'
-import { clientLabel, matchesClientQuery } from 'src/app/core/utils/client-display.util'
-import { SearchComboboxComponent, SearchPick } from 'src/app/shared/search-combobox/search-combobox.component'
+import { ClientPickerComponent } from 'src/app/shared/client-picker/client-picker.component'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
 import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-dialog/deposit-paid-dialog.component'
@@ -59,7 +58,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     TranslatePipe,
     ScrollRailComponent,
     DateFieldComponent,
-    SearchComboboxComponent,
+    ClientPickerComponent,
     NotClosedDialogComponent,
     EventClosingDialogComponent,
     DepositPaidDialogComponent
@@ -99,7 +98,6 @@ export class EventStageBarComponent {
   protected readonly isDetailsOpen_ = signal(false)
   protected readonly isHistoryOpen_ = signal(false)
   protected readonly isPickerOpen_ = signal(false)
-  protected readonly query_ = signal('')
   protected readonly isBusy_ = signal(false)
 
   // 5. COMPUTED
@@ -139,15 +137,7 @@ export class EventStageBarComponent {
     const id = this.event_()?.clientId
     return id ? (this.clientData.getClientById(id) ?? null) : null
   })
-  protected readonly clientEventCount_ = computed(() => {
-    const id = this.event_()?.clientId
-    return id ? this.eventData.allMenuEvents_().filter((e) => e.clientId === id).length : 0
-  })
   protected readonly canChangeClient_ = computed(() => this.permission.can('edit', { type: 'clients' }))
-  /** Clients matching the typed text; the combobox gets them already filtered (its own filter is off). */
-  protected readonly clientOptions_ = computed(() =>
-    this.clientData.allClients_().filter((c) => matchesClientQuery(c, this.query_()))
-  )
 
   constructor() {
     // On a phone the rail scrolls: bring the current stage to the middle when the screen opens and when the stage changes.
@@ -221,16 +211,7 @@ export class EventStageBarComponent {
     await this.move(event, { stage: 'not_closed', reason: answer.reason, reasonText: answer.reasonText })
   }
 
-  protected readonly clientLabelOf = (c: Client): string =>
-    clientLabel(
-      c,
-      this.eventData.allMenuEvents_().filter((e) => e.clientId === c._id).length,
-      this.translation.translate('client_events_count')
-    )
-  protected readonly clientKeyOf = (c: Client): string => c._id
-
   protected togglePicker(): void {
-    this.query_.set('')
     this.isPickerOpen_.update((open) => !open)
   }
 
@@ -238,9 +219,8 @@ export class EventStageBarComponent {
     this.isPickerOpen_.set(false)
   }
 
-  protected async onClientPicked(pick: SearchPick<Client>): Promise<void> {
+  protected async onClientPicked(c: Client): Promise<void> {
     const event = this.event_()
-    const c = pick.option
     this.isPickerOpen_.set(false)
     if (!event) return
     await this.saveFields(event, { clientId: c._id, clientName: c.name, clientPhone: c.phone })

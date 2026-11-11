@@ -89,7 +89,7 @@ describe('EventStageBarComponent', () => {
           provide: ClientDataService,
           useValue: { allClients_: () => clients, getClientById: (id: string) => clients.find((c) => c._id === id) }
         },
-        { provide: PermissionService, useValue: { can: (action: string) => allowed[action] } },
+        { provide: PermissionService, useValue: { can: (action: string) => allowed[action], isOwner_: () => true } },
         { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: ConfirmModalService, useValue: { open: confirmOpen } }
@@ -237,15 +237,15 @@ describe('EventStageBarComponent', () => {
     const chips = () => Array.from(el.querySelectorAll('.client-chip')).map((c) => c.textContent?.trim())
     const changeButton = () => el.querySelector<HTMLButtonElement>('.client-row button')
 
-    it('shows the linked client from the client list, with the event count', async () => {
+    it('shows the linked client from the client list as one name chip', async () => {
       await setup({ ...base, clientId: 'c1', clientName: 'ישן', clientPhone: '000' })
-      expect(chips()).toEqual(['דנה', '0521234567', '1 T:client_events_count'])
+      expect(chips()).toEqual(['דנה'])
       expect(changeButton()!.textContent).toContain('T:client_change')
     })
 
-    it('falls back to the snapshot name and phone for an unlinked event', async () => {
+    it('falls back to the snapshot name for an unlinked event', async () => {
       await setup({ ...base, clientName: 'שרה', clientPhone: '0501112222' })
-      expect(chips()).toEqual(['שרה', '0501112222'])
+      expect(chips()).toEqual(['שרה'])
       expect(changeButton()!.textContent).toContain('T:client_link')
     })
 
@@ -253,14 +253,14 @@ describe('EventStageBarComponent', () => {
       allowed['edit'] = false
       await setup({ ...base, clientId: 'c1' })
       expect(changeButton()).toBeNull()
-      expect(chips().length).toBe(2)
+      expect(chips().length).toBe(1)
     })
 
     it('saves clientId, clientName and clientPhone when a client is picked, then closes the picker', async () => {
       await setup({ ...base, clientId: 'c1' })
       changeButton()!.click()
       fixture.detectChanges()
-      expect(el.querySelector('app-search-combobox')).toBeTruthy()
+      expect(el.querySelector('app-client-picker app-search-combobox')).toBeTruthy()
       const input = el.querySelector<HTMLInputElement>('app-search-combobox input')!
       input.value = 'רוני'
       input.dispatchEvent(new Event('input'))
