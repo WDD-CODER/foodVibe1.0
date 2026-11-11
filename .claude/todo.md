@@ -283,12 +283,12 @@
 - [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2 — Planner 2026-11-11: 11 of 12 pass; 544-1 fails because the spec never clicks the "לשחזר פריט זה?" confirm (the app restores fine, API 200) — fix the spec (A5), then re-run
 - [ ] A5: Fix e2e/ui/544-1.spec.ts — after the row's "שחזר מהאשפה" click, confirm in the modal before expecting the row to leave
 
-### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
+### Logistics feedback — Human 2026-11-11, to plan next (plans 579 + 580 — 571-578 are taken on the theme branch; Critical Questions for the unclear points)
 - [ ] F1: Owners and the platform admin can remove logistics questions, like recipes — admin adds or removes for everybody or only himself; an owner only for his business
-- [ ] F2: A remove icon beside each question in the metadata card and on each event screen — event screen removes for that event only; metadata removes from the business's default list for new events
+- [ ] F2: A remove icon beside each question in the metadata card and on each event screen — event screen removes for that event only; metadata removes from the business's default list for new events — A: (Human, 2026-11-11) on one event: hide it, keep the answer; admin "remove for everybody": only future events
 - [ ] F3: Adding a question in metadata asks which environments it is for — all environment chips start selected; no separate "relevant to everybody" button
-- [ ] F4: Owners and the admin can add logistics sections (metadata_logistics_section), same everybody / only-me rule
-- [ ] F5: Status chips — drop the default "unchecked" chip; clarify with the Human whether status becomes one "needed" toggle that opens the payer options
+- [ ] F4: Owners and the admin can add logistics sections (metadata_logistics_section), same everybody / only-me rule — A: (Human, 2026-11-11) businesses only add their own sections; shared ones stay locked
+- [ ] F5: Status chips — drop the default "unchecked" chip; status becomes one "needed" toggle that opens the payer options — A: (Human, 2026-11-11)
 - [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected
 - [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
 - [ ] F8: Logistics questions get Edit next to Remove, like recipes — Edit loads the question with all its data into the add form, scrolls there, and the user saves it as an update (Human 2026-11-11, card V5)
