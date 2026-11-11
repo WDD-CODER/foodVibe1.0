@@ -264,10 +264,10 @@
 - [ ] A4: Run the ten screen checks against the slot's app, then build, lint and log-query
 
 ### Run 522 — hand checks left open after merge (PR #545, agreed 2026-11-10)
-- [ ] V1: The closed logistics card reads as one header line on a phone-size window and opens on one tap — /menu-intelligence/e0df992a-399f-428c-a5c1-b37157ab4f59
-- [ ] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
-- [ ] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
-- [ ] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
+- [x] V1: The closed logistics card reads as one header line on a phone-size window and opens on one tap — /menu-intelligence/e0df992a-399f-428c-a5c1-b37157ab4f59
+- [x] V2: Each logistics question reads as one block on a phone-size window, with no sideways scroll — same event
+- [x] V3: A staff member sees the logistics card as read-only — same event, signed in as staff
+- [x] V4: The logistics questions card stacks and wraps on a phone-size window — /dashboard?tab=metadata
 - [ ] V5: The owner adds their own question "בדיקת קידום" — /dashboard?tab=metadata
 - [ ] V6: The platform admin sees "בדיקת קידום" with the business name — /platform
 - [ ] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
@@ -281,3 +281,12 @@
 - [ ] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md
 - [ ] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
 - [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
+
+### Logistics feedback — Human 2026-11-11, to plan next (plan 571; Critical Questions for the unclear points)
+- [ ] F1: Owners and the platform admin can remove logistics questions, like recipes — admin adds or removes for everybody or only himself; an owner only for his business
+- [ ] F2: A remove icon beside each question in the metadata card and on each event screen — event screen removes for that event only; metadata removes from the business's default list for new events
+- [ ] F3: Adding a question in metadata asks which environments it is for — all environment chips start selected; no separate "relevant to everybody" button
+- [ ] F4: Owners and the admin can add logistics sections (metadata_logistics_section), same everybody / only-me rule
+- [ ] F5: Status chips — drop the default "unchecked" chip; clarify with the Human whether status becomes one "needed" toggle that opens the payer options
+- [ ] F6: Payer chips — rename "ללקוח" to "customer provides", add "provided by us", default "provided by us", exactly one always selected
+- [ ] F7: Make the logistics chips smaller and tighter so they take as little space as they can and still look right
