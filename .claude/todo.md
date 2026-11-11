@@ -273,12 +273,12 @@
 - [x] V7: Promoting it shows the toast, removes the row, and the owner sees it locked — /platform
 
 ### Run fd-1a-data — hand checks left open (PR #547)
-- [ ] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md
+- [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
 - [ ] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges
-- [ ] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes
+- [x] W3: The three front desk templates' Hebrew questions and limits fit catering, private chef and restaurant — plan 548 Execution Notes — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W4: The platform AI-usage table shows this month's calls, tokens and cost per business — /platform
 - [x] W5: One real AI call's tokens match Google AI Studio for that minute — /platform and AI Studio
-- [ ] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md
+- [x] W6: The map's Contract extensions don't contradict any decision — docs/frontdesk/frontdesk-map.md — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W7: On a laptop screen the event screen's last card is fully above the price bar — event screen
 - [ ] W8: The 12 screen specs of runs 522 and fd-1a-data pass against the merged app — Planner runs them in wt-2
 
@@ -299,3 +299,13 @@
 - [ ] B2: When the text describes an event but lists no dishes, the prompt forbids adding dishes, so Gemini returns an empty menu and we reject it — decide: suggest dishes, or ask the user to list them
 - [ ] B3: The platform AI-usage table counts a call as successful when Gemini answered, even when our check rejected the result — record the outcome (accepted / rejected) so rejected calls show as failed
 - [ ] B4: Log the raw AI answer on ai.generate_menu.validation_failed (the route logs only the error list today)
+
+### Front desk templates — Planner review suggestions (W3, 2026-11-11; the Human picks)
+- [ ] T1: Restaurant "יש סיבה למסיבה?" reads as a joke — suggest "אירוע מיוחד? (יום הולדת, יום נישואין…)"
+- [ ] T2: Add a kashrut question ("דרישות כשרות") for catering and private chef
+- [ ] T3: Add a dietary / allergy question to catering events (only private chef asks it)
+- [ ] T4: Ask a start time on private chef and catering events
+- [ ] T5: Make the catering venue required (out-of-area declines depend on it), and say "בופה" instead of "מזנון"
+- [ ] T6: Check the catering event-type question still works when a business has no event types (options come from the taxonomy)
+- [ ] T7: A restaurant request stays open 4 h but the lead time is only 2 h — a short-notice request can still be waiting after its own time
+- [ ] T8: ADR 0031 and the map (line 118) still list a stored lifecycle field the server writes, but plan 547 computes lifecycle in the browser — drop the field or the doc line
