@@ -231,6 +231,8 @@ $break-tablet-max: 1023px;
   --color-on-bar: #ffffff;
   --color-on-bar-muted: #cfe9e5;
   --color-on-bar-bad: #fecaca;
+  /* Pressable chips (toggle, tap, filter, tab) are squarer than status tags, which stay round. */
+  --radius-chip: 0.625rem;
 }
 
 /* Kitchen dark mode — set on <html> by CookViewPage while Cook View is open (plan 404).
@@ -2174,7 +2176,7 @@ body.kb-open {
   padding-inline: 0.75rem;
   padding-block: 0.25rem;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   cursor: pointer;
   transition:
@@ -2249,7 +2251,7 @@ body.kb-open {
   padding-inline: 0.75rem;
   padding-block: 0.25rem;
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   cursor: pointer;
   transition:
@@ -2301,7 +2303,7 @@ body.kb-open {
   padding-inline: 0.625rem;
   padding-block: 0.25rem;
   border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   cursor: pointer;
   transition: background 0.15s ease, transform 0.1s var(--ease-spring);
@@ -2330,7 +2332,7 @@ body.kb-open {
   padding-inline: 0.875rem;
   padding-block: 0.4375rem;
   border: 1px solid var(--border-chrome);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-chip);
 
   backdrop-filter: var(--blur-glass);
   cursor: pointer;
@@ -2700,4 +2702,30 @@ input[type='number']::-webkit-outer-spin-button {
 .c-pass-line {
   padding-block-end: 0.125rem;
   border-block-end: 3px solid var(--color-lamp);
+}
+
+/* ---- Depth theme: density by screen (the Human, 2026-11-11: "items are really big for the viewport").
+   Almost every size in the app is in rem, so the root size is the one lever. It steps down only where
+   a mouse is used on a laptop-size screen (often at 125–150% Windows scaling); phones and tablets keep
+   16px for touch, and large monitors (1700px and wider) keep 16px too.
+   Cook View sets `cv-page-scroll` on <html>: it keeps its 16px type and is scaled as a whole instead,
+   because its spacing is in px and it is read from a distance. ---- */
+@media (pointer: fine) and (min-width: $break-tablet-max + 1) and (max-width: 1699px) {
+  html:not(.cv-page-scroll) {
+    font-size: 87.5%; /* 14px */
+  }
+
+  html.cv-page-scroll app-cook-view-page {
+    zoom: 0.9;
+  }
+
+  /* The header and the tab row keep the same size as on every other page. */
+  html.cv-page-scroll :is(app-header, app-tab-chips) {
+    zoom: 0.875;
+  }
+}
+
+/* The smallest chip text never drops under 11px when the root size steps down. */
+.c-chip {
+  font-size: max(0.71875rem, 11px);
 }
