@@ -27,6 +27,7 @@ import { AddEquipmentModalComponent } from 'src/app/shared/add-equipment-modal/a
 import { HeroFabComponent } from '../core/components/hero-fab/hero-fab.component'
 import { LabelCreationModalComponent } from 'src/app/shared/label-creation-modal/label-creation-modal.component'
 import { AuthModalComponent } from '../core/components/auth-modal/auth-modal.component'
+import { TermsGateComponent } from '../core/components/terms-gate/terms-gate.component'
 import { AiRecipeModalComponent } from '../shared/ai-recipe-modal/ai-recipe-modal.component'
 import { AiMenuModalComponent } from '../shared/ai-menu-modal/ai-menu-modal.component'
 import { AiProductModalComponent } from '../shared/ai-product-modal/ai-product-modal.component'
@@ -69,6 +70,7 @@ import { KeyboardInsetService } from '@services/keyboard-inset.service'
     LoaderComponent,
     HeroFabComponent,
     AuthModalComponent,
+    TermsGateComponent,
     AiRecipeModalComponent,
     AiMenuModalComponent,
     AiProductModalComponent,

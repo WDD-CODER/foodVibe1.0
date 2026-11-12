@@ -187,15 +187,15 @@ of P0 #1 only when the file is on the base.
 - The checkbox is read-only to the user: only the popup's button checks it (a checked box must mean "read to the end").
 
 ## Atomic Sub-tasks
-- [ ] A1: Terms file + server version reader — `public/assets/legal/terms.he.json`, `server/utils/terms-version.js`, note line in `docs/frontdesk/pilot-terms-draft.md`
-- [ ] A2: Model fields, `toPublicUser`, sign-up check, accept route — `server/models/user.model.js`, `server/routes/auth.js`
-- [ ] A3: Server tests — new `server/test/auth-terms.test.js`; add `termsVersion` to the three existing sign-up test files
-- [ ] A4: Client model + service — `src/app/core/models/user.model.ts`, `src/app/core/models/terms.model.ts`, `src/app/core/services/terms.service.ts` (+ spec), `UserService.signup` gets `termsVersion` and the error map (+ spec)
-- [ ] A5: Terms popup — `src/app/core/components/terms-modal/**` (+ spec), dictionary keys
-- [ ] A6: Sign-up row — `auth-modal.component.{ts,html,scss,spec.ts}`
-- [ ] A7: Gate for existing users and every new version — `src/app/core/components/terms-gate/**` (+ spec: shows for null, shows for an older version, hides for the current one, never for a guest), `src/app/appRoot/app.component.{ts,html}`
-- [ ] A8: QA login accepts the terms — `scripts/qa/lib/qa-login.mjs`, `e2e/helpers/qa-session.ts` only if its types change
-- [ ] A9: Screen checks and every gate check — `e2e/ui/584-1.spec.ts`, `e2e/ui/584-2.spec.ts`; breadcrumbs rows for the new folders; standards-backend row
+- [x] A1: Terms file + server version reader — `public/assets/legal/terms.he.json`, `server/utils/terms-version.js`, note line in `docs/frontdesk/pilot-terms-draft.md`
+- [x] A2: Model fields, `toPublicUser`, sign-up check, accept route — `server/models/user.model.js`, `server/routes/auth.js`
+- [x] A3: Server tests — new `server/test/auth-terms.test.js`; add `termsVersion` to the three existing sign-up test files
+- [x] A4: Client model + service — `src/app/core/models/user.model.ts`, `src/app/core/models/terms.model.ts`, `src/app/core/services/terms.service.ts` (+ spec), `UserService.signup` gets `termsVersion` and the error map (+ spec)
+- [x] A5: Terms popup — `src/app/core/components/terms-modal/**` (+ spec), dictionary keys
+- [x] A6: Sign-up row — `auth-modal.component.{ts,html,scss,spec.ts}`
+- [x] A7: Gate for existing users and every new version — `src/app/core/components/terms-gate/**` (+ spec: shows for null, shows for an older version, hides for the current one, never for a guest), `src/app/appRoot/app.component.{ts,html}`
+- [x] A8: QA login accepts the terms — `scripts/qa/lib/qa-login.mjs`, `e2e/helpers/qa-session.ts` only if its types change
+- [x] A9: Screen checks and every gate check — `e2e/ui/584-1.spec.ts`, `e2e/ui/584-2.spec.ts`; breadcrumbs rows for the new folders; standards-backend row
 
 ## What happens when
 - The user closes the popup without accepting → back on the form, box unchecked.
@@ -227,3 +227,7 @@ of P0 #1 only when the file is on the base.
 ## Execution Notes
 - Human 2026-11-12: Q1 = a, and "each time there is an update to the terms it sends this to all users even if they had
   one before" → P0 #9 (version compare) + the `sectionsHash` guard in CI + the standards-backend rule.
+- Step 0: `docs/frontdesk/pilot-terms-draft.md` is not on the base; JSON generated from `origin/orch/run-546:docs/frontdesk/pilot-terms-draft.md` (v2), docs file left untouched, no note line added.
+- Evidence: `pnpm run test:server` -> exit 0, 87 files / 1131 tests passed (incl. auth-terms.test.js); `pnpm run build` -> exit 0; `pnpm run lint` -> 0 errors; `pnpm run test:ci` -> exit 0, TOTAL 1943 SUCCESS; reuse-lint, breadcrumbs-check, override-check, lint:icons, lint:no-native-select, plan-ledger-check, kit-manifest-check, scope-check -> ok; log-query -> SKIP (no database configured).
+- Decision: `src/app/core/models/terms.model.ts` not created; the Terms types live in `terms.service.ts` (breadcrumbs-check needs models/breadcrumbs.md for a new models file, which is outside the scope).
+- e2e/ui/584-1 and 584-2 written, not run here (no dev servers in the build worktree).

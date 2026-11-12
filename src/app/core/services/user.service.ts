@@ -187,7 +187,8 @@ export class UserService {
   private callBackendSignup(
     newUser: User,
     hashedPassword: string,
-    businessName: string
+    businessName: string,
+    termsVersion: string
   ): Observable<{ token: string; user: User }> {
     return this.http.post<{ token: string; user: User }>(
       `${this.authBase}${API.auth('signup')}`,
@@ -196,7 +197,8 @@ export class UserService {
         email: newUser.email,
         imgUrl: newUser.imgUrl,
         password: hashedPassword,
-        businessName
+        businessName,
+        termsVersion
       },
       { withCredentials: true }
     )
@@ -311,9 +313,9 @@ export class UserService {
   // Public auth methods
   // -------------------------------------------------------------------------
 
-  public signup(newUser: User, password: string, businessName: string) {
+  public signup(newUser: User, password: string, businessName: string, termsVersion: string) {
     return from(hashPassword(password)).pipe(
-      switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword, businessName)),
+      switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword, businessName, termsVersion)),
       tap(({ token, user }) => {
         this.storeToken(token)
         this._saveUserLocal(user)
@@ -330,6 +332,7 @@ export class UserService {
         if (body === 'INVALID_EMAIL') return throwError(() => new Error('INVALID_EMAIL'))
         if (body === 'BUSINESS_NAME_REQUIRED') return throwError(() => new Error('BUSINESS_NAME_REQUIRED'))
         if (body === 'BUSINESS_NAME_TOO_LONG') return throwError(() => new Error('BUSINESS_NAME_TOO_LONG'))
+        if (body === 'TERMS_NOT_ACCEPTED') return throwError(() => new Error('TERMS_NOT_ACCEPTED'))
         // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
         // problem — never assume it means the username is taken.
         return throwError(() => new Error('SERVER_ERROR'))

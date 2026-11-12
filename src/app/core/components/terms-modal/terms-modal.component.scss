@@ -1,0 +1,50 @@
+.terms-title {
+  margin-block: 0 var(--space-1);
+
+  color: var(--color-text-main);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
+}
+
+.terms-updated {
+  margin-block: 0 var(--space-3);
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.terms-body {
+  max-block-size: 50dvh;
+  overflow-y: auto;
+
+  color: var(--color-text-main);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.terms-heading {
+  margin-block: var(--space-4) var(--space-2);
+
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+}
+
+.terms-heading:first-child {
+  margin-block-start: 0;
+}
+
+.terms-paragraph {
+  margin-block: 0 var(--space-2);
+}
+
+.terms-error {
+  color: var(--color-danger);
+}
+
+.terms-hint {
+  margin-block: var(--space-2) 0;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-align: center;
+}

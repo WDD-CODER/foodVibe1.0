@@ -241,6 +241,26 @@
               <p class="auth-warn">{{ errorKey()! | translatePipe }}</p>
             }
           </div>
+
+          <!-- Terms acceptance (plan 584): the box is filled only by the popup's confirm button -->
+          <div class="c-input-stack auth-terms" data-testid="auth-terms-row">
+            <div class="auth-terms__row">
+              <input
+                id="auth-terms-box"
+                type="checkbox"
+                disabled
+                [checked]="termsVersion_() !== null"
+                [attr.aria-invalid]="errorKey() === 'terms_required' ? true : null"
+              />
+              <span>{{ 'terms_accept_row' | translatePipe }}</span>
+              <button type="button" class="auth-terms__link" data-testid="auth-terms-link" (click)="openTerms()">
+                {{ 'terms_link' | translatePipe }}
+              </button>
+            </div>
+            @if (errorKey() === 'terms_required') {
+              <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+            }
+          </div>
         }
       </div>
     </form>
@@ -268,4 +288,7 @@
       </button>
     </div>
   </app-modal-shell>
+  @if (isTermsOpen_()) {
+    <app-terms-modal (accepted)="onTermsAccepted($event)" (closed)="onTermsClosed()" />
+  }
 }

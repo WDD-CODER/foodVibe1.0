@@ -5,6 +5,7 @@ const crypto = require('crypto')
 const request = require('supertest')
 const { productBody: baseProduct } = require('./helpers/v2-docs')
 const jwt = require('jsonwebtoken')
+const { currentTermsVersion } = require('../utils/terms-version')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
 const { _resetUsageThrottle } = require('../middleware/usage')
 
@@ -269,7 +270,7 @@ describe('plan 492 - a removed staff member frees the username', () => {
   it('sign-up with a released name -> 201', async () => {
     const id = (await addO('cook1')).body._id
     await del(id)
-    const res = await request(app).post('/api/v1/auth/signup').send({ name: 'cook1', email: 'new@x.com', password: HASH, businessName: 'biz' })
+    const res = await request(app).post('/api/v1/auth/signup').send({ name: 'cook1', email: 'new@x.com', password: HASH, businessName: 'biz', termsVersion: currentTermsVersion() })
     expect(res.status).toBe(201)
   })
 })

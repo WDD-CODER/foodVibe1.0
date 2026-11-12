@@ -53,6 +53,28 @@ function refreshCookieOf(response) {
   return null
 }
 
+/** Plan 584: the version of the terms file the app shows ('' when unreadable). */
+function currentTermsVersion(root) {
+  try {
+    return JSON.parse(readFileSync(join(root, 'public', 'assets', 'legal', 'terms.he.json'), 'utf8')).version || ''
+  } catch {
+    return ''
+  }
+}
+
+/** Plan 584: accepts the current terms for the QA user when the login answer says they are not accepted, so no spec meets the popup. */
+async function acceptCurrentTerms(api, token, user, root) {
+  const version = currentTermsVersion(root)
+  if (!version || user.termsAcceptedVersion === version) return user
+  const r = await fetch(`${api.replace(/\/+$/, '')}/api/v1/auth/accept-terms`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+    body: JSON.stringify({ termsVersion: version })
+  })
+  if (!r.ok) throw new Error(`accept-terms failed: HTTP ${r.status}`)
+  return (await r.json()).user ?? user
+}
+
 /**
  * Signs in once. `userKey` / `passKey` name the credential (QA_USER / QA_PASS by default; QA_USER2 /
  * QA_PASS2 for the second account). Throws 'QA_USER / QA_PASS are not set' or 'login failed: HTTP <n>'.
@@ -67,8 +89,11 @@ export async function loginQa({ api, userKey = 'QA_USER', passKey = 'QA_PASS', r
     body: JSON.stringify({ name, password })
   })
   if (!r.ok) throw new Error(`login failed: HTTP ${r.status}`)
-  const { token, user } = await r.json()
+  const body = await r.json()
+  const { token } = body
+  let user = body.user
   if (!token || !user) throw new Error('login failed: response has no token/user')
+  user = await acceptCurrentTerms(api, token, user, root)
   return { token, user, exp: tokenExp(token), refreshCookie: refreshCookieOf(r) }
 }
 
