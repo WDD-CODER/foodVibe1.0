@@ -20,7 +20,7 @@ interface TabChip {
   home?: boolean
 }
 
-type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus'
+type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk'
 
 /** Longest-prefix-wins route → tab-group map. Mirrors `UI refactor/shell.js` PARENT. */
 const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
@@ -33,7 +33,8 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/recipe-builder', 'recipes'],
   ['/cook', 'recipes'],
   ['/menu-library', 'menus'],
-  ['/menu-intelligence', 'menus']
+  ['/menu-intelligence', 'menus'],
+  ['/clients', 'frontdesk']
 ]
 
 const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
@@ -60,7 +61,8 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
   menus: [
     { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library' },
     { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'clipboard-list', path: '/menu-intelligence' }
-  ]
+  ],
+  frontdesk: [{ id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' }]
 }
 
 /** Replaces the current dashboard sub-page's chip, in the same position (plan 367). */

@@ -148,6 +148,12 @@ export const routes: Routes = [
     resolve: { kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
   },
   {
+    path: 'clients',
+    loadComponent: () => import('./pages/clients/components/client-list/client-list.component').then(m => m.ClientListComponent),
+    canActivate: [authGuard],
+    resolve: { clientsLoaded: clientsEnsureLoadedResolver },
+  },
+  {
     path: 'menu-library',
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
     resolve: {
