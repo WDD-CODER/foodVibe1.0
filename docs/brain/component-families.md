@@ -217,6 +217,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`logging.error`). Pattern: `logging.error(...)` + `userMsg.onSet*Msg(translate(key))`.
 - When: any wait, success or error the user must see.
 - Also used by `PlatformLogisticsItemsComponent` (`UserMsgService`, plan 532).
+- `app-front-desk-status-banner` (`src/app/shared/front-desk-status-banner/`): the persistent amber notice for a suspended front desk, on the dashboard and `/frontdesk/settings` (plan 557).
 - Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
 - Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 
@@ -299,6 +300,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
 
 ### http — talking to the server

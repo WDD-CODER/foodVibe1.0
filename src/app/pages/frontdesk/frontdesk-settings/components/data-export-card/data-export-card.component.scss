@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.de-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.de-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.de-hint {
+  margin: 0;
+}
+
+.de-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
