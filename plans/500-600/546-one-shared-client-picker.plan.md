@@ -1,6 +1,6 @@
 # Plan 546 — One shared client picker instead of two copies inside the menu screens
 
-Status: draft
+Status: done
 Depends-on: 544, 522
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
