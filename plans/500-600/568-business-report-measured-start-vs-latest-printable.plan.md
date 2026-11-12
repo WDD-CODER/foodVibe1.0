@@ -1,6 +1,6 @@
 # Plan 568 — Business report: where the business stands and how it moved since it started with FoodVibe
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 567
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
