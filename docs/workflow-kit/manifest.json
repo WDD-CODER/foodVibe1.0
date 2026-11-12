@@ -5704,6 +5704,14 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
     },
     {
+      "path": "scripts/route-guard-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 589: fails when a top-level route in src/app/app.routes.ts lacks authGuard (except welcome, cook/:id, redirects)."
+    },
+    {
       "path": "scripts/scout/page-template.html",
       "tier": "project",
       "action": "stay",
