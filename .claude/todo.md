@@ -9,8 +9,9 @@
 ## Execution order (Planner review 2026-11-11, `node scripts/plan-order.mjs` at d4e904bb)
 
 Orchestrator chain (Human 2026-11-11; each run branch starts from the previous one; the Human validates and merges them in this order):
-- batch-1 · run-546: **546, 558, 567, 575, 579** — running; `orch/run-546` is the base of batch-2
-- batch-2 · `orch/batch-2`: **580, 581, 547, 568** (542 left out: only its Planner-only A8 is open)
+- batch-1 · run-546: **546, 558, 567, 575, 579** — built, all 5 merged into `orch/run-546` (429e7314); hand checks ①–⑦ done 2026-11-12 (H1 below), ⑧ pilot terms reworked; waits on the Human's merge · base of batch-2
+- batch-2 · running since 2026-11-12 (547 retried after `approved:` for its header spec)
+- batch-2 · `orch/batch-2`: **580, 581, 547, 568** (dependency markers for 546/567/579 added on the branch) (542 left out: only its Planner-only A8 is open)
 - batch-3 · `orch/batch-3`: **553, 554, 551, 552**
 - batch-4 · `orch/batch-4`: **556, 555**
 - batch-5 · `orch/batch-5`: **557, 559**
@@ -40,6 +41,13 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ## 1. EXECUTE — real unfinished work
 
 > Audit says: do these.
+
+### Run run-546 (batch 1) — hand checks, Human 2026-11-12
+- [x] H1: Cards ①–⑥ (demo business, inquiry dialog, event client picker, logistics on phone and laptop, optional baseline) — Human 2026-11-12: ok
+- [x] H2: Card ⑦ "an event made before plan 579 still shows its full shared checklist" — marked done by the Human 2026-11-12 without checking; **re-check some day**: open an event created before 2026-11-12 → logistics card → nothing missing
+- [ ] H3: Card ⑧ — Human reads the reworked `docs/frontdesk/pilot-terms-draft.md` (v2), fills the privacy e-mail, and sends it to a lawyer
+- [ ] H4: Render — set `PUBLIC_BASE_URL` on the live service and create the free uptime monitor on `/api/v1/health` every 10 min (`docs/security-go-live.md` §uptime)
+- [ ] H5: Fix `e2e/ui/545-1.spec.ts` — old selectors #inquiry-name / #inquiry-phone / .inquiry-client-picked__name → #client-form-name / #client-form-phone / .client-picker-picked__name (run-546 D5)
 
 ### Run fd-1a-data — hand checks left open (PR #547)
 - [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
