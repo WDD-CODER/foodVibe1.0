@@ -60,6 +60,7 @@ describe('knowledge import', () => {
   it('meters one aiUsage row with feature knowledge_import per Gemini call', async () => {
     fetchMock.mockResolvedValueOnce(reply([good(1)]))
     await post({ text: 'טקסט' })
+    await require('../services/ai-usage')._waitForUsageWritesForTests()
     const rows = await testDb().collection('aiUsage').find({}).toArray()
     expect(rows).toHaveLength(1)
     expect(rows[0].feature).toBe('knowledge_import')
