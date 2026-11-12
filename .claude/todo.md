@@ -310,11 +310,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
 - [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
 
-### Plan 590 — Date tests pass on any PC: specs that type into a date field fix the pointer type instead of reading the machine's (`plans/590-date-tests-do-not-depend-on-the-pc-having-a-touch-screen.plan.md`)
-- [ ] A1: Add one shared helper that makes a spec see a mouse, not a touch screen — src/testing/fine-pointer.ts, src/testing/fine-pointer.spec.ts
-- [ ] A2: Use it in the three specs that type a date, so they pass on any PC — src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/deposit-paid-dialog/deposit-paid-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
-- [ ] A3: Write the trap down so the next date spec does the same — docs/brain/gotchas.md
-
 ### Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page (`plans/591-signing-out-goes-to-the-welcome-page.plan.md`)
 - [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
 - [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
