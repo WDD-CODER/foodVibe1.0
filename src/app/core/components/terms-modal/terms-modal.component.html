@@ -1,0 +1,39 @@
+<app-modal-shell size="md" [labelKey]="'terms_link'" [dismissible]="dismissible()" (dismissed)="onClose()">
+  @if (terms_(); as terms) {
+    <h3 class="terms-title" data-testid="terms-title">{{ terms.title }}</h3>
+    <p class="terms-updated">{{ 'terms_updated_on' | translatePipe }} {{ terms.updated }}</p>
+  }
+
+  <div #body class="terms-body" data-testid="terms-body" tabindex="0" (scroll)="onScroll()">
+    @if (terms_(); as terms) {
+      @for (section of terms.sections; track section.heading) {
+        <h3 class="terms-heading">{{ section.heading }}</h3>
+        @for (paragraph of section.paragraphs; track $index) {
+          <p class="terms-paragraph">{{ paragraph }}</p>
+        }
+      }
+    } @else if (hasLoadError_()) {
+      <p class="terms-error" data-testid="terms-load-error">{{ 'terms_load_error' | translatePipe }}</p>
+    }
+  </div>
+
+  <div class="c-modal-actions">
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="terms-accept"
+      [disabled]="!terms_() || !isAtEnd_() || busy()"
+      (click)="onAccept()"
+    >
+      {{ 'terms_accept' | translatePipe }}
+    </button>
+    @if (dismissible()) {
+      <button type="button" class="c-btn-ghost" data-testid="terms-close" (click)="onClose()">
+        {{ 'terms_close' | translatePipe }}
+      </button>
+    }
+  </div>
+  @if (!isAtEnd_()) {
+    <p class="terms-hint" data-testid="terms-hint">{{ 'terms_scroll_hint' | translatePipe }}</p>
+  }
+</app-modal-shell>

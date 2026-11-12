@@ -86,10 +86,11 @@ describe('UserService (business model)', () => {
   })
 
   it('signup posts businessName', async () => {
-    service.signup({ name: 'neo', email: 'n@x.com' }, 'Password1', 'מטבח בדיקה').subscribe()
+    service.signup({ name: 'neo', email: 'n@x.com' }, 'Password1', 'מטבח בדיקה', 'v-test').subscribe()
     await new Promise((r) => setTimeout(r, 500))
     const req = http.expectOne(SIGNUP_URL)
     expect(req.request.body.businessName).toBe('מטבח בדיקה')
+    expect(req.request.body.termsVersion).toBe('v-test')
     req.flush({
       token: 'tok',
       user: { _id: 'n', name: 'neo', email: 'n@x.com', businessId: 'b', businessRole: 'owner' }
@@ -100,7 +101,7 @@ describe('UserService (business model)', () => {
     const run = async (code: string): Promise<string> => {
       let message = ''
       service
-        .signup({ name: 'neo', email: 'n@x.com' }, 'Password1', 'x')
+        .signup({ name: 'neo', email: 'n@x.com' }, 'Password1', 'x', 'v-test')
         .subscribe({ error: (e: Error) => (message = e.message) })
       await new Promise((r) => setTimeout(r, 500))
       http.expectOne(SIGNUP_URL).flush({ error: code }, { status: 400, statusText: 'Bad Request' })
@@ -108,6 +109,7 @@ describe('UserService (business model)', () => {
     }
     expect(await run('BUSINESS_NAME_REQUIRED')).toBe('BUSINESS_NAME_REQUIRED')
     expect(await run('BUSINESS_NAME_TOO_LONG')).toBe('BUSINESS_NAME_TOO_LONG')
+    expect(await run('TERMS_NOT_ACCEPTED')).toBe('TERMS_NOT_ACCEPTED')
   })
 
   describe('returning-visitor mark', () => {

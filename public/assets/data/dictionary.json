@@ -1786,6 +1786,14 @@
     "fd_reason_outside_hours": "מחוץ לשעות הפעילות — {open}–{close}",
     "fd_reason_too_soon": "מוקדם מדי — צריך לפחות {hours} שעות מראש",
     "fd_reason_too_far": "רחוק מדי — עד {days} ימים מראש",
-    "fd_slug_taken": "השם הזה לקישור כבר תפוס"
+    "fd_slug_taken": "השם הזה לקישור כבר תפוס",
+    "terms_link": "תנאי השימוש",
+    "terms_accept_row": "קראתי ואני מסכים/ה ל",
+    "terms_accept": "אני מסכים/ה",
+    "terms_scroll_hint": "יש לגלול עד סוף התנאים",
+    "terms_required": "יש לקרוא ולאשר את תנאי השימוש",
+    "terms_updated_on": "עודכן בתאריך",
+    "terms_close": "סגור",
+    "terms_load_error": "לא ניתן לטעון את תנאי השימוש, נסה שוב"
   }
 }

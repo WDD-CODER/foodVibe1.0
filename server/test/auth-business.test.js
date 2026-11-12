@@ -3,6 +3,7 @@
 
 const request = require('supertest')
 const jwt = require('jsonwebtoken')
+const { currentTermsVersion } = require('../utils/terms-version')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
 
 let app
@@ -28,7 +29,7 @@ const decode = token => jwt.decode(token)
 const FIELDS = ['userId', 'name', 'businessId', 'businessRole', 'isPlatformAdmin']
 
 async function signup(name = 'chefone', businessName = `העסק של ${name}`) {
-  return request(app).post('/api/v1/auth/signup').send({ name, email: `${name}@x.com`, password: HASH, businessName })
+  return request(app).post('/api/v1/auth/signup').send({ name, email: `${name}@x.com`, password: HASH, businessName, termsVersion: currentTermsVersion() })
 }
 
 describe('signup', () => {
@@ -62,7 +63,7 @@ describe('signup', () => {
 describe('login, refresh and guest', () => {
   it('login and refresh tokens carry the business fields', async () => {
     const agent = request.agent(app)
-    const su = await agent.post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH, businessName: 'מטבח' })
+    const su = await agent.post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH, businessName: 'מטבח', termsVersion: currentTermsVersion() })
     expect(su.status).toBe(201)
     const login = await request(app).post('/api/v1/auth/login').send({ name: 'chefone', password: 'pw' })
     expect(login.status).toBe(200)

@@ -21,11 +21,12 @@ import { validateUsername, validateEmail, validatePassword } from '../../utils/a
 import { take } from 'rxjs/operators'
 import { NAME_MAX_LENGTH } from '@schemas/base.schema'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
+import { TermsModalComponent } from '../terms-modal/terms-modal.component'
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe, ModalShellComponent],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe, ModalShellComponent, TermsModalComponent],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -63,6 +64,9 @@ export class AuthModalComponent {
   protected isEmailTouched_ = signal(false)
   protected isPasswordTouched_ = signal(false)
   protected isConfirmTouched_ = signal(false)
+  /** Plan 584: the terms popup is open / the version the user read to the end and confirmed (null = not accepted). */
+  protected isTermsOpen_ = signal(false)
+  protected termsVersion_ = signal<string | null>(null)
 
   protected readonly isDev = environment.localDev
 
@@ -80,7 +84,21 @@ export class AuthModalComponent {
 
   protected switchMode(mode: 'sign-in' | 'sign-up'): void {
     this.modalService.mode.set(mode)
-    this._reset()
+    this._reset(true)
+  }
+
+  protected openTerms(): void {
+    this.isTermsOpen_.set(true)
+  }
+
+  protected onTermsAccepted(version: string): void {
+    this.termsVersion_.set(version)
+    this.isTermsOpen_.set(false)
+    if (this.errorKey() === 'terms_required') this.errorKey.set(null)
+  }
+
+  protected onTermsClosed(): void {
+    this.isTermsOpen_.set(false)
   }
 
   protected onFileSelected(event: Event): void {
@@ -168,6 +186,11 @@ export class AuthModalComponent {
         this.errorKey.set('passwords_do_not_match')
         return
       }
+
+      if (!this.termsVersion_()) {
+        this.errorKey.set('terms_required')
+        return
+      }
     } else {
       if (!this.password.trim()) {
         this.errorKey.set('password_required')
@@ -187,7 +210,8 @@ export class AuthModalComponent {
             imgUrl: this.imgCloudinaryUrl ?? undefined
           },
           this.password.trim(),
-          this.businessName.trim()
+          this.businessName.trim(),
+          this.termsVersion_()!
         )
         .subscribe({
           next: () => this._onSuccess(),
@@ -236,6 +260,9 @@ export class AuthModalComponent {
       this.errorKey.set('username_invalid_chars')
     } else if (err.message === 'INVALID_EMAIL') {
       this.errorKey.set('email_invalid')
+    } else if (err.message === 'TERMS_NOT_ACCEPTED') {
+      this.termsVersion_.set(null)
+      this.errorKey.set('terms_required')
     } else if (err.message === 'BUSINESS_NAME_REQUIRED') {
       this.errorKey.set('business_name_required')
     } else if (err.message === 'BUSINESS_NAME_TOO_LONG') {
@@ -259,7 +286,11 @@ export class AuthModalComponent {
     }
   }
 
-  private _reset(): void {
+  private _reset(keepTerms = false): void {
+    if (!keepTerms) {
+      this.termsVersion_.set(null)
+      this.isTermsOpen_.set(false)
+    }
     this.name = ''
     this.businessName = ''
     this.email = ''
