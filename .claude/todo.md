@@ -58,7 +58,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [x] V1: run-584 cards ①–⑥ (terms popup, sign-up blocked, phone reading, existing account, no repeat, guest) — Human 2026-11-12: ok; follow-ups → plan 585 (desktop scroll, cancel signs out)
 - [x] V2: batch-2 cards ②, ⑥, ⑦ (report print, admin removal choice, card on phone) — Human 2026-11-12: ok
 - [x] V4: plan 585 cards ①–③ (desktop scroll to end, close signs out, popup returns) — Human 2026-11-12: ok
-- [ ] V5: Human idea 2026-11-12: a signed-out visitor sees only the welcome page (no local auto-guest) — needs a plan; questions asked
+- [x] V6: batch-2-fix cards ①–④ (clients on phone, AI menu dishes only, missing guests, removed questions) — Human 2026-11-12: all done
+- [x] V7: plans 589 + 591 cards ①–④ — Human 2026-11-12: done; ④ shared recipe went to welcome, and the Human wants that → plan 592
+- [x] V5: Human idea 2026-11-12: a signed-out visitor sees only the welcome page (no local auto-guest) — needs a plan; questions asked
 - [x] V3: batch-2 cards ①, ③, ④, ⑤ — Human 2026-11-12: works, with changes → plans 586 (clients list on phone), 587 (AI menu portions + guest count), 588 (removed questions leave after the visit)
 
 ### Run fd-1a-data — hand checks left open (PR #547)
@@ -314,3 +316,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
 - [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
 - [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
+
+### Plan 592 — Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions (`plans/592-shared-recipe-links-also-need-signing-in.plan.md`)
+- [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
+- [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
+- [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
