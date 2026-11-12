@@ -1,6 +1,6 @@
 # Plan 586 — The clients list on a phone works like the other list pages: name fixed, other columns in the column carousel
 
-Status: draft
+Status: done
 Depends-on: 547
 Snapshot: 84a63416b39f6ee635f9921904af63d4db131a45
 
@@ -94,9 +94,9 @@ Open `/suppliers` at 390×844 and note how the carousel header and cells behave;
 - RTL; the carousel component already handles direction.
 
 ## Atomic Sub-tasks
-- [ ] A1: Move the clients list's extra columns into the shared column carousel on phones — src/app/pages/clients/components/client-list/client-list.component.html, .scss, .ts
-- [ ] A2: Test the carousel header and keep every old case passing — src/app/pages/clients/components/client-list/client-list.component.spec.ts
-- [ ] A3: Phone-size screen check and the family registry line — e2e/ui/586-1.spec.ts, docs/brain/component-families.md
+- [x] A1: Move the clients list's extra columns into the shared column carousel on phones — src/app/pages/clients/components/client-list/client-list.component.html, .scss, .ts
+- [x] A2: Test the carousel header and keep every old case passing — src/app/pages/clients/components/client-list/client-list.component.spec.ts
+- [x] A3: Phone-size screen check and the family registry line — e2e/ui/586-1.spec.ts, docs/brain/component-families.md
 
 ## What happens when
 - A staff member (not owner) opens the list on a phone → the carousel offers only the columns staff see.
@@ -115,3 +115,6 @@ Open `/suppliers` at 390×844 and note how the carousel header and cells behave;
 
 ## Execution Notes
 - Human 2026-11-12, batch-2 card ①: phone layout must match the other list pages (column carousel).
+- pnpm run build -> exit 0; pnpm run lint -> exit 0 (warnings only); pnpm run test:ci -> exit 0, 2007 SUCCESS
+- reuse-lint --diff=origin/main -> exit 0 (warnings in untouched files only)
+- e2e/ui/586-1.spec.ts written (not run here: needs QA login/server); mobileGridTemplate '1fr 1.4fr'.

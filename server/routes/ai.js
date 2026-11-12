@@ -879,7 +879,7 @@ Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON
   "eventType": "<type of event in Hebrew, e.g. חתונה, בר מצווה, ימי הולדת>",
   "eventDate": "<ISO 8601 date string, e.g. 2025-12-31, or null if not specified>",
   "servingType": "<one of: plated_course | buffet | finger_food | family_style>",
-  "guestCount": <integer number of guests>,
+  "guestCount": <integer number of guests the user wrote, or null>,
   "sections": [
     {
       "category": "<section name in Hebrew, e.g. ראשונות, עיקריות, קינוחים>",
@@ -887,9 +887,7 @@ Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON
         {
           "nameHebrew": "<dish name exactly as the user mentioned it, in Hebrew>",
           "dishId": "<id from the RECIPE BOOK, only under rule 2>",
-          "predictedTakeRate": <number between 0 and 1 representing expected take rate, or null>,
-          "serving_portions": <integer number of portions needed, or null>,
-          "sell_price": <number in ILS per portion, or null>
+          "predictedTakeRate": <number between 0 and 1 representing expected take rate, or null>
         }
       ]
     }
@@ -903,7 +901,8 @@ Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON
 - Follow 'Where dishes come from' for which items each section has
 - All dish names in Hebrew
 - predictedTakeRate is a fraction 0–1 (e.g. 0.8 means 80% of guests will take this dish)
-- guestCount must be a positive integer
+- guestCount is the number of guests the user wrote; if the text has no guest number, return null. Never guess.
+- Never add portions or prices to a dish: only the dish name (and dishId)
 - If eventDate is not specified, return null`;
 
 const DISH_BOOK_CAP = 300;
@@ -944,6 +943,17 @@ function applyDishBook(menu, book, log) {
     return sec.items.length > 0;
   });
   if (dropped > 0) log.warn({ event: 'ai.generate_menu.unknown_dish_ids', dropped });
+}
+
+/** Plan 587: the AI picks dishes only; drop any portions or price it still sends. */
+function stripDishNumbers(sections) {
+  if (!Array.isArray(sections)) return;
+  for (const sec of sections) {
+    if (!sec || !Array.isArray(sec.items)) continue;
+    for (const item of sec.items) {
+      if (item && typeof item === 'object') { delete item.serving_portions; delete item.sell_price; }
+    }
+  }
 }
 
 function menuRejectCode(menu, bookSize) {
@@ -1004,6 +1014,7 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
     }
 
     applyDishBook(parsed.value, book, req.log);
+    if (parsed.value) stripDishNumbers(parsed.value.sections);
     const code = menuRejectCode(parsed.value, book.length);
     if (code) {
       const validationErrors = validateMenuDraft(parsed.value);
@@ -1052,7 +1063,7 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 
 ### sections format (when included — full replacement):
 [
-  { "category": "<Hebrew section name>", "items": [{ "nameHebrew": "<Hebrew>", "predictedTakeRate": <0-1 or null>, "serving_portions": <number or null>, "sell_price": <number or null> }] }
+  { "category": "<Hebrew section name>", "items": [{ "nameHebrew": "<Hebrew>", "predictedTakeRate": <0-1 or null> }] }
 ]
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.
@@ -1106,6 +1117,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned invalid patch format', code: 'invalid_patch' });
     }
 
+    stripDishNumbers(parsed.value.changes.sections);
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
     req.log.error({ err, event: 'ai.patch_menu.failed' });

@@ -125,6 +125,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
 - When: any screen that lists entities.
 - Users today (5): equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
+- Users today (5): client list, equipment, inventory products, recipe book, suppliers.
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).

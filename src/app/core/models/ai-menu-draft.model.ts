@@ -4,8 +4,10 @@ export interface AiMenuDishDraft {
   dishId?: string
   /** @deprecated plan 441: the AI may still send it; nothing reads it */
   predictedTakeRate?: number | null
-  serving_portions: number | null
-  sell_price: number | null
+  /** @deprecated plan 587: the server removes it; nothing reads it */
+  serving_portions?: number | null
+  /** @deprecated plan 587: the server removes it; nothing reads it */
+  sell_price?: number | null
 }
 
 export interface AiMenuSectionDraft {

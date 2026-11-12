@@ -1,6 +1,6 @@
 # Plan 547 — Give clients their own section: list, add, search, filters and a navigation group
 
-Status: draft
+Status: done
 Depends-on: 546
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

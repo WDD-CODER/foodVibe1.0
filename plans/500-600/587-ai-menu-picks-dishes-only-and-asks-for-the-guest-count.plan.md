@@ -1,6 +1,6 @@
 # Plan 587 — The AI menu picks dishes only (no portions or prices), and asks for the guest count instead of guessing one
 
-Status: draft
+Status: done
 Depends-on: 580
 Snapshot: 84a63416b39f6ee635f9921904af63d4db131a45
 
@@ -103,9 +103,9 @@ Confirm the two prompt blocks and lines 176-177 of the modal still read as above
 - No visible change apart from the correct quantities and the existing "חסר מספר האורחים…" message.
 
 ## Atomic Sub-tasks
-- [ ] A1: Stop the AI from setting portions or prices, and stop it guessing a guest count — server/routes/ai.js (both prompts + answer clean-up)
-- [ ] A2: Stop the menu popup from copying portions and prices into the dish lines — src/app/shared/ai-menu-modal/ai-menu-modal.component.ts, src/app/core/models/ai-menu-draft.model.ts
-- [ ] A3: Prove both on the server and in the popup — server/test/ai-menu.test.js, src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts
+- [x] A1: Stop the AI from setting portions or prices, and stop it guessing a guest count — server/routes/ai.js (both prompts + answer clean-up)
+- [x] A2: Stop the menu popup from copying portions and prices into the dish lines — src/app/shared/ai-menu-modal/ai-menu-modal.component.ts, src/app/core/models/ai-menu-draft.model.ts
+- [x] A3: Prove both on the server and in the popup — server/test/ai-menu.test.js, src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts
 
 ## What happens when
 - The user writes "120 אורחים" → guestCount 120 as today.
@@ -126,3 +126,5 @@ Confirm the two prompt blocks and lines 176-177 of the modal still read as above
 
 ## Execution Notes
 - Human 2026-11-12, batch-2 cards ③ and ④ (quoted in the Problem Statement).
+- pnpm run test:server → exit 0, 1184 passed (incl. 3 new ai-menu cases); pnpm run test:ci → 2008 SUCCESS; pnpm run build → exit 0; pnpm run lint → 0 errors.
+- seen: src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts:37-38 still copies dish.serving_portions/sell_price (out of scope; harmless now, the server strips them).

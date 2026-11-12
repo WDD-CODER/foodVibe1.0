@@ -9,6 +9,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { CLIENT_KINDS, CLIENT_LIFECYCLES, RESERVED_CLIENT_TAGS, type Client } from '@models/client.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
@@ -38,6 +39,7 @@ const RESERVED_TAGS: readonly string[] = RESERVED_CLIENT_TAGS
     RouterLink,
     LucideAngularModule,
     TranslatePipe,
+    ...COLUMN_CAROUSEL,
     ListShellComponent,
     EmptyStateComponent,
     ModalShellComponent,

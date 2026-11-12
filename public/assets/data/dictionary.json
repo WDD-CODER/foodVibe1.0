@@ -1738,6 +1738,7 @@
     "logistics_payer_client_care": "באחריות הלקוח",
     "logistics_hide_item": "הסר מהאירוע הזה",
     "logistics_show_item": "החזר לאירוע",
+    "logistics_removed_count": "הוסרו ({{count}})",
     "logistics_hidden_count": "מוסתרות",
     "logistics_note": "הערה",
     "logistics_quantity": "כמות",

@@ -122,6 +122,45 @@ describe('POST /generate-menu reason codes', () => {
   });
 });
 
+describe('POST /generate-menu dish numbers and guest count (plan 587)', () => {
+  const sections = [{ category: 'א', items: [{ nameHebrew: 'חומוס', serving_portions: 100, sell_price: 50, predictedTakeRate: 0.5 }] }];
+
+  it('removes serving_portions and sell_price from every item', async () => {
+    fetchMock.mockResolvedValue(modelAnswer(draft({ sections })));
+    const res = await post({ rawText: 'בופה ל-50 עם חומוס' });
+    expect(res.status).toBe(200);
+    expect(res.body.menu.sections[0].items[0]).toEqual({ nameHebrew: 'חומוס', predictedTakeRate: 0.5 });
+  });
+
+  it('guestCount null -> no_guest_count and the call is counted as failed', async () => {
+    fetchMock.mockResolvedValue(modelAnswer(draft({ guestCount: null, sections })));
+    const res = await post({ rawText: 'בופה עם חומוס' });
+    expect(res.status).toBe(502);
+    expect(res.body).toMatchObject({ code: 'no_guest_count' });
+    expect(logs.byEvent('ai.generate_menu.validation_failed')[0].code).toBe('no_guest_count');
+  });
+
+  it('the prompt asks for no portions or prices and for null without a guest number', async () => {
+    fetchMock.mockResolvedValue(modelAnswer(draft({ sections })));
+    await post({ rawText: 'בופה ל-50 עם חומוס' });
+    const sent = sentText();
+    expect(sent).not.toContain('serving_portions');
+    expect(sent).not.toContain('sell_price');
+    expect(sent).toContain('return null');
+  });
+});
+
+describe('POST /patch-menu dish numbers (plan 587)', () => {
+  it('removes serving_portions and sell_price from every item of the patch', async () => {
+    const changes = { sections: [{ category: 'א', items: [{ nameHebrew: 'חומוס', serving_portions: 100, sell_price: 50 }] }] };
+    fetchMock.mockResolvedValue(modelAnswer(JSON.stringify({ changes })));
+    const res = await request(app).post('/api/v1/ai/patch-menu').set('Authorization', `Bearer ${tokenA()}`)
+      .send({ currentMenu: { sections: [] }, instruction: 'הוסף חומוס' });
+    expect(res.status).toBe(200);
+    expect(res.body.changes.sections[0].items[0]).toEqual({ nameHebrew: 'חומוס' });
+  });
+});
+
 describe('POST /generate-menu recipe book', () => {
   it('sends only the live dishes of the caller and keeps only own dish ids', async () => {
     await testDb().collection('dishes').insertMany([
