@@ -219,16 +219,16 @@ schema, its `slug` index and the status default on create; `qualify`; where plan
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Define what a stranger may send and which profile fields they may see — public input schema, guest scope, public profile view — shared/schemas/public/**, shared/schemas/index.ts, server/utils/business-scope.js, server/utils/public-profile.js, server/test/business-scope-util.test.js
-- [ ] A2: Give manual and public requests one creation path — reuse or move plan 549's create logic with stamps passed in, manual route tests unchanged — server/utils/request-create.js, server/routes/requests.js
-- [ ] A3: Add the four public routes behind the limiter and honeypot — profile view, answer check, send, read by token, cancel by token, error codes — server/routes/public.js, server/test/public-requests.test.js
-- [ ] A4: Keep phone numbers and tokens out of every log — URL masking on the server and in the browser log, log capture tests — server/utils/redact-url.js, server/app.js, server/test/redact-url.test.js, src/app/core/services/logging.service.ts, src/app/core/services/logging.service.spec.ts
-- [ ] A5: Let the pilot profile go live before the admin switch exists — status script with a local default target — server/scripts/set-front-desk-status.js
-- [ ] A6: Show public pages without the app's header, tabs and quick-add button — layout signal from route data, shell wrap, specs — src/app/core/services/layout-mode.service.ts, src/app/core/services/layout-mode.service.spec.ts, src/app/appRoot/app.component.html, src/app/appRoot/app.component.ts, src/app/appRoot/app.component.spec.ts
-- [ ] A7: Build the request form in three steps with a done page — kind, details with the rule note, contact and consent, send, errors, reference, status link, WhatsApp link, footer — src/app/pages/public-request/**, src/app/core/services/http-storage.adapter.ts, src/app/core/utils/wa-link.util.ts, src/app/app.routes.ts
-- [ ] A8: Build the guest's own status page with cancel — status wording, booking details, cancel with confirm, not found — src/app/pages/public-request/public-request-status/**
-- [ ] A9: Add every Hebrew string and record the new routes and pieces — dictionary keys, backend standards rows, breadcrumbs, families — public/assets/data/dictionary.json, docs/agent/standards-backend.md, server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
-- [ ] A10: Write the screen checks and run the full checks — e2e/ui/555-1..3, test:server, test:ci, build, lint, server lint, lint:icons, lint:no-native-select, scope-check --arch, log-query — e2e/ui/555-1.spec.ts, e2e/ui/555-2.spec.ts, e2e/ui/555-3.spec.ts
+- [x] A1: Define what a stranger may send and which profile fields they may see — public input schema, guest scope, public profile view — shared/schemas/public/**, shared/schemas/index.ts, server/utils/business-scope.js, server/utils/public-profile.js, server/test/business-scope-util.test.js
+- [x] A2: Give manual and public requests one creation path — reuse or move plan 549's create logic with stamps passed in, manual route tests unchanged — server/utils/request-create.js, server/routes/requests.js
+- [x] A3: Add the four public routes behind the limiter and honeypot — profile view, answer check, send, read by token, cancel by token, error codes — server/routes/public.js, server/test/public-requests.test.js
+- [x] A4: Keep phone numbers and tokens out of every log — URL masking on the server and in the browser log, log capture tests — server/utils/redact-url.js, server/app.js, server/test/redact-url.test.js, src/app/core/services/logging.service.ts, src/app/core/services/logging.service.spec.ts
+- [x] A5: Let the pilot profile go live before the admin switch exists — status script with a local default target — server/scripts/set-front-desk-status.js
+- [x] A6: Show public pages without the app's header, tabs and quick-add button — layout signal from route data, shell wrap, specs — src/app/core/services/layout-mode.service.ts, src/app/core/services/layout-mode.service.spec.ts, src/app/appRoot/app.component.html, src/app/appRoot/app.component.ts, src/app/appRoot/app.component.spec.ts
+- [x] A7: Build the request form in three steps with a done page — kind, details with the rule note, contact and consent, send, errors, reference, status link, WhatsApp link, footer — src/app/pages/public-request/**, src/app/core/services/http-storage.adapter.ts, src/app/core/utils/wa-link.util.ts, src/app/app.routes.ts
+- [x] A8: Build the guest's own status page with cancel — status wording, booking details, cancel with confirm, not found — src/app/pages/public-request/public-request-status/**
+- [x] A9: Add every Hebrew string and record the new routes and pieces — dictionary keys, backend standards rows, breadcrumbs, families — public/assets/data/dictionary.json, docs/agent/standards-backend.md, server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
+- [x] A10: Write the screen checks and run the full checks — e2e/ui/555-1..3, test:server, test:ci, build, lint, server lint, lint:icons, lint:no-native-select, scope-check --arch, log-query — e2e/ui/555-1.spec.ts, e2e/ui/555-2.spec.ts, e2e/ui/555-3.spec.ts
 
 ## Technical Considerations
 - Dependencies: plan 543 (door, limiter, honeypot, token, actor), 545 (`upsertClientByPhone`), 548 (profile, `qualify`), 549 / 550 (request schema, create, approve outcome), 553 (`fd_kind_*` keys, a real profile).
@@ -257,3 +257,12 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Map row 13, renumbered +2 on 2026-11-10 (old 553 → 555).
 - Contract extension for the map (to add under "Contract extensions (run)"): plan 555 · request `reference` = first 8 characters of the request `_id`, upper case, no dashes; the done page's WhatsApp text is `בקשה <reference> · <slug>` · why: plan 560's `resolveBusiness` step 3 reads a reference or slug from that text.
 - Contract extension: plan 555 · `app.component.html` also hides `<app-hero-fab />` in bare mode · why: it is the app's quick-add button and must not show to a customer.
+
+### Builder evidence (round 0)
+- `pnpm run test:server` → exit 0, 98 files / 1256 tests passed (incl. `public-requests.test.js` 20 tests, `redact-url.test.js`, `business-scope-util.test.js`, `requests-router.test.js` unchanged).
+- `pnpm run test:ci` → exit 0, 2123 of 2123 SUCCESS (incl. layout-mode, public-request, public-request-status, app.component, logging specs).
+- `pnpm run build` → exit 0; initial total 585.61 kB (budget warning at 570 kB shown; not compared with the base build — added to the initial bundle only `LayoutModeService` and a few lines in `logging.service.ts`); the public pages are lazy chunks.
+- `pnpm run lint` / `lint:icons` / `lint:no-native-select` / `pnpm --dir server run lint` → exit 0 (0 errors).
+- kit-manifest-check, override-check, plan-ledger-check, breadcrumbs-check, `scope-check --arch` → ok; `log-query` → SKIP (no database configured).
+- e2e `e2e/ui/555-1..3.spec.ts` written and listed by `playwright test --list`; not run by the builder (the dev servers on 3000/4200 are not this worktree's).
+- Decisions: the done page and the status page hide nothing extra; the QA specs enable the `tasting` kind on the QA profile if it is off and set it to `pilot` with the new script.

@@ -1,0 +1,229 @@
+<main class="pb-page" dir="rtl" lang="he">
+  @switch (state_()) { @case ('loading') {
+  <p class="pb-loading" aria-busy="true" data-testid="pb-loading">{{ 'pb_loading' | translatePipe }}</p>
+  @if (waking_()) {
+  <p class="pb-waking" data-testid="pb-waking">{{ 'pb_waking' | translatePipe }}</p>
+  } } @case ('not_found') {
+  <app-empty-state messageKey="pb_not_found" icon="clipboard-check" />
+  } @case ('failed') {
+  <app-empty-state messageKey="pb_load_failed" icon="clipboard-check" ctaLabelKey="pb_retry" (ctaClick)="load()" />
+  } @case ('unavailable') {
+  <div class="c-empty-state" data-testid="pb-unavailable">
+    <p class="c-empty-state__msg">{{ unavailableText_() }}</p>
+    @if (telLink_(); as tel) {
+    <a class="c-btn-primary" [href]="tel">
+      <lucide-icon name="phone" [size]="16"></lucide-icon>
+      {{ profile_()?.phone }}
+    </a>
+    }
+  </div>
+  } @case ('done') {
+  <app-public-brand [name]="profile_()?.displayName ?? ''" [logoUrl]="profile_()?.logoUrl" />
+  <section class="pb-card pb-done" data-testid="pb-done">
+    <lucide-icon name="check-circle" [size]="40" class="pb-done-icon"></lucide-icon>
+    <h2 class="pb-title">{{ 'pb_done_title' | translatePipe }}</h2>
+    <p>{{ doneText_() }}</p>
+    <p class="pb-reference" data-testid="pb-reference">{{ referenceText_() }}</p>
+    <div class="pb-actions">
+      <a class="c-btn-primary" data-testid="pb-status-link" [routerLink]="statusLink_()"
+        >{{ 'pb_status_link' | translatePipe }}</a
+      >
+      <button type="button" class="c-btn-ghost" data-testid="pb-copy" (click)="copyLink()">
+        <lucide-icon name="copy" [size]="16"></lucide-icon>
+        {{ 'pb_copy' | translatePipe }}
+      </button>
+      @if (whatsappLink_(); as wa) {
+      <a class="c-btn-ghost" [href]="wa" target="_blank" rel="noopener">
+        <lucide-icon name="message-circle" [size]="16"></lucide-icon>
+        {{ 'pb_whatsapp' | translatePipe }}
+      </a>
+      }
+    </div>
+  </section>
+  } @case ('ready') {
+  <app-public-brand [name]="profile_()!.displayName" [logoUrl]="profile_()!.logoUrl" />
+  @if (profile_()!.address || profile_()!.serviceArea) {
+  <p class="pb-sub">{{ profile_()!.address || profile_()!.serviceArea }}</p>
+  } @if (last_(); as last) {
+  <p class="pb-last" data-testid="pb-last">
+    {{ 'pb_last_request' | translatePipe }}:
+    <a [routerLink]="'/book/' + slug + '/r/' + last.token">{{ last.reference }}</a>
+  </p>
+  }
+
+  <form class="pb-card" (ngSubmit)="submit()" novalidate>
+    @if (step_() > (hasKindStep_() ? 1 : 2)) {
+    <button type="button" class="c-btn-ghost pb-back" data-testid="pb-back" (click)="goBack()">
+      <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+      {{ 'back' | translatePipe }}
+    </button>
+    } @if (step_() === 1) {
+    <fieldset class="pb-kinds" data-testid="pb-step-kind">
+      <legend class="pb-title">{{ 'rq_kind' | translatePipe }}</legend>
+      <div class="c-chip-group">
+        @for (k of profile_()!.kinds; track k.kind) {
+        <label class="c-chip c-chip--toggle pb-kind">
+          <input type="radio" name="pb-kind" [checked]="kind_() === k.kind" (change)="setKind(k.kind)" />
+          <span>{{ kindLabel(k.kind) | translatePipe }}</span>
+        </label>
+        }
+      </div>
+      @if (touched_() && !kind_()) {
+      <span class="c-field-error" role="alert">{{ 'rq_kind_required' | translatePipe }}</span>
+      }
+    </fieldset>
+    <button type="button" class="c-btn-primary pb-next" data-testid="pb-next" (click)="goNext()">
+      {{ 'pb_next' | translatePipe }}
+    </button>
+    } @if (step_() === 2) {
+    <div class="pb-fields" data-testid="pb-step-details">
+      <app-form-field label="fd_q_date" forId="pb-date" [error]="missing('date', date_()) ? 'rq_field_required' : null">
+        <app-date-field inputId="pb-date" [value]="date_()" (valueChange)="date_.set($event)" />
+      </app-form-field>
+      @if (timeBound_()) {
+      <app-form-field label="fd_q_time" forId="pb-time" [error]="missing('time', time_()) ? 'rq_field_required' : null">
+        <app-time-field inputId="pb-time" [value]="time_()" (valueChange)="time_.set($event)" />
+      </app-form-field>
+      } @if (hasParty_()) {
+      <div class="c-input-stack">
+        <label for="pb-party">{{ 'fd_q_party_size' | translatePipe }}</label>
+        <app-counter
+          [value]="party_()"
+          [min]="partyMin_()"
+          [max]="partyMax_()"
+          [stepOptions]="{ integerOnly: true }"
+          (valueChange)="party_.set($event)"
+        />
+      </div>
+      } @for (q of extraQuestions_(); track q.key) {
+      <div class="c-input-stack">
+        <label [attr.for]="'pb-q-' + q.key"
+          >{{ q.text }} @if (q.required) {
+          <span aria-hidden="true"> *</span>
+          }
+        </label>
+        @switch (q.type) { @case ('choice') {
+        <app-custom-select
+          [triggerId]="'pb-q-' + q.key"
+          [options]="q.choices"
+          [translateLabels]="false"
+          [ngModel]="answerOf(q.key)"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="setAnswer(q.key, $event)"
+        />
+        } @case ('date') {
+        <app-date-field
+          [inputId]="'pb-q-' + q.key"
+          [value]="answerOf(q.key)"
+          (valueChange)="setAnswer(q.key, $event)"
+        />
+        } @case ('time') {
+        <app-time-field
+          [inputId]="'pb-q-' + q.key"
+          [value]="answerOf(q.key)"
+          (valueChange)="setAnswer(q.key, $event)"
+        />
+        } @default {
+        <input
+          class="c-input"
+          maxlength="500"
+          [id]="'pb-q-' + q.key"
+          [name]="'pb-q-' + q.key"
+          [type]="q.type === 'number' ? 'number' : 'text'"
+          [attr.inputmode]="q.type === 'number' ? 'numeric' : null"
+          [ngModel]="answerOf(q.key)"
+          (ngModelChange)="setAnswer(q.key, '' + $event)"
+        />
+        } } @if (touched_() && q.required && !(answerOf(q.key)).trim()) {
+        <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
+        }
+      </div>
+      } @if (notes_().length) {
+      <ul class="pb-notes" data-testid="pb-notes" role="status">
+        @for (note of notes_(); track note) {
+        <li>{{ note }}</li>
+        }
+      </ul>
+      }
+    </div>
+    <button type="button" class="c-btn-primary pb-next" data-testid="pb-next" (click)="goNext()">
+      {{ 'pb_next' | translatePipe }}
+    </button>
+    } @if (step_() === 3) {
+    <div class="pb-fields" data-testid="pb-step-contact">
+      <div class="c-input-stack">
+        <label for="pb-name">{{ 'pb_name' | translatePipe }}</label>
+        <input
+          id="pb-name"
+          name="pb-name"
+          class="c-input"
+          type="text"
+          autocomplete="name"
+          maxlength="200"
+          [ngModel]="name_()"
+          (ngModelChange)="name_.set($event)"
+        />
+        @if ((touched_() && name_().trim().length < 2) || fieldErrors_()['guestName']) {
+        <span class="c-field-error" role="alert">{{ 'pb_invalid_field' | translatePipe }}</span>
+        }
+      </div>
+      <div class="c-input-stack">
+        <label for="pb-phone">{{ 'pb_phone' | translatePipe }}</label>
+        <input
+          id="pb-phone"
+          name="pb-phone"
+          class="c-input"
+          type="tel"
+          dir="ltr"
+          autocomplete="tel"
+          maxlength="30"
+          [ngModel]="phone_()"
+          (ngModelChange)="phone_.set($event)"
+        />
+        @if ((touched_() && phoneDigits_() < 7) || fieldErrors_()['guestPhone']) {
+        <span class="c-field-error" role="alert">{{ 'pb_invalid_field' | translatePipe }}</span>
+        }
+      </div>
+      <label class="c-chip c-chip--toggle pb-consent">
+        <input
+          type="checkbox"
+          name="pb-consent"
+          data-testid="pb-consent"
+          [checked]="consent_()"
+          (change)="consent_.set($any($event.target).checked)"
+        />
+        <span>{{ consentText_() }}</span>
+      </label>
+      @if (touched_() && !consent_()) {
+      <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
+      }
+      <input
+        class="pb-trap"
+        type="text"
+        name="website"
+        tabindex="-1"
+        autocomplete="off"
+        aria-hidden="true"
+        [ngModel]="website_()"
+        (ngModelChange)="website_.set($event)"
+      />
+    </div>
+    @switch (sendError_()) { @case ('too_many') {
+    <span class="c-field-error" role="alert">{{ 'pb_too_many' | translatePipe }}</span>
+    } @case ('failed') {
+    <span class="c-field-error" role="alert">{{ 'pb_send_failed' | translatePipe }}</span>
+    } }
+    <button
+      type="submit"
+      class="c-btn-primary pb-next"
+      data-testid="pb-submit"
+      [disabled]="isSaving_()"
+      [attr.aria-busy]="isSaving_()"
+    >
+      {{ 'pb_submit' | translatePipe }}
+    </button>
+    }
+  </form>
+  } }
+  <footer class="pb-footer">{{ 'pb_powered_by' | translatePipe }}</footer>
+</main>

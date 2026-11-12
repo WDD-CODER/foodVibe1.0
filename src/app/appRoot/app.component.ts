@@ -49,6 +49,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { AppUpdateService } from '@services/app-update.service'
 import { UpdateBannerComponent } from '../core/components/update-banner/update-banner.component'
 import { KeyboardInsetService } from '@services/keyboard-inset.service'
+import { LayoutModeService } from '@services/layout-mode.service'
 
 @Component({
   selector: 'app-root',
@@ -87,6 +88,7 @@ export class AppComponent {
   private readonly serverHeartbeat_ = inject(ServerHeartbeatService)
   private readonly keyboardInset_ = inject(KeyboardInsetService)
   protected readonly loading_ = inject(LoadingService)
+  protected readonly layout = inject(LayoutModeService)
 
   // Open signals for @defer (when …) — services stay root singletons; only the modal component chunks defer.
   protected readonly aiRecipeModal = inject(AiRecipeModalService)

@@ -284,6 +284,18 @@ export const routes: Routes = [
   { path: 'report', loadComponent: () => import('./pages/report/report.page').then(m => m.ReportPage), canActivate: [authGuard] },
   // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.
   ...devCatalogRoutes(environment.localDev),
+  // Plan 555: the public request pages. `bare` hides the app header, tabs and quick-add button; no guard, no resolver.
+  {
+    path: 'book/:slug',
+    loadComponent: () => import('./pages/public-request/public-request.page').then(m => m.PublicRequestPage),
+    data: { bare: true },
+  },
+  {
+    path: 'book/:slug/r/:token',
+    loadComponent: () =>
+      import('./pages/public-request/public-request-status/public-request-status.page').then(m => m.PublicRequestStatusPage),
+    data: { bare: true },
+  },
   { path: '', redirectTo: homeRedirect, pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ]

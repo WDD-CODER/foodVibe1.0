@@ -22,6 +22,7 @@ const knowledgeRouter = require('./routes/knowledge');
 const bookingsRouter = require('./routes/bookings');
 const productImportRouter = require('./routes/product-import');
 const logRouter = require('./routes/log');
+const { redactUrl } = require('./utils/redact-url')
 const publicRouter = require('./routes/public');
 const { logger } = require('./logger');
 
@@ -105,7 +106,7 @@ app.use(pinoHttp({
   },
   // method/url/status only — no headers, no IP (PII rule, auth-and-logging skill).
   serializers: {
-    req: req => ({ method: req.method, url: req.url }),
+    req: req => ({ method: req.method, url: redactUrl(req.url) }),
     res: res => ({ statusCode: res.statusCode }),
   },
   customProps: req => (req.user?.userId ? { userId: req.user.userId } : {}),

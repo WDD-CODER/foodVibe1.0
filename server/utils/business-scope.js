@@ -33,4 +33,10 @@ function stampNew(req, doc) {
   }
 }
 
-module.exports = { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew }
+/** Plan 555: scope for a business the server resolved itself (a public slug); never the master and never empty. */
+function guestScope(businessId) {
+  if (typeof businessId !== 'string' || !businessId || businessId === MASTER_BUSINESS_ID) throw new Error('NO_BUSINESS_FOR_GUEST')
+  return { businessId }
+}
+
+module.exports = { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew, guestScope }
