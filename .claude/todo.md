@@ -281,3 +281,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Plan 593 — The terms popup shows once per user (and again only after a terms change), not once per new browser (`plans/593-terms-popup-shows-once-per-user-not-once-per-browser.plan.md`)
 - [ ] A1: Send the full signed-in user back when a session is restored — server/routes/auth.js, server/test/auth-terms.test.js
 - [ ] A2: Use that user in the app so an accepted terms version is remembered in every new browser — src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
+
+### Plan 594 — The demo seed makes 21 different usage days even when the window crosses a clock change (`plans/594-demo-seed-usage-days-safe-across-clock-change.plan.md`)
+- [ ] A1: Make the seed's 21 usage days always 21 different calendar days — server/scripts/lib/demo-data.js
+- [ ] A2: Prove it with the times that broke it, around both clock changes — server/test/seed-demo-business.test.js
