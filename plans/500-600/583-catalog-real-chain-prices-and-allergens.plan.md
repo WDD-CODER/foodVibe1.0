@@ -1,6 +1,6 @@
 # Plan 583 — Give every shared product real shelf prices from three or more chains and corrected allergens, checked by a script
 
-Status: active
+Status: done
 Depends-on: none
 Snapshot: 95f937b661645aec7ee7e097c9aa705e6453074d
 
