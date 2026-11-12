@@ -118,6 +118,10 @@ export class LogisticsItemManagerComponent {
   /** The term the form is editing, or null when it adds. */
   private readonly editing_ = signal<LogisticsItemTerm | null>(null)
   readonly editing = this.editing_.asReadonly()
+  /** Plan 588: keys of shared questions removed during this visit; they stay dimmed in their section until the page is left. */
+  private readonly removedThisVisit_ = signal<Set<string>>(new Set())
+  private readonly removedOpen_ = signal(false)
+  readonly removedOpen = this.removedOpen_.asReadonly()
 
   // 5. COMPUTED
   /** The section select's options: built-in, shared and own sections, then the add option last. */
@@ -134,7 +138,11 @@ export class LogisticsItemManagerComponent {
   readonly sections = computed<LogisticsSectionGroup[]>(() => {
     const phase = this.phase_()
     const hiddenAt = this.registry.hiddenAt_()
-    const items = this.registry.items_().filter((t) => t.phase === phase)
+    const visit = this.removedThisVisit_()
+    const items = this.registry
+      .items_()
+      .filter((t) => t.phase === phase)
+      .filter((t) => !(this.taxonomy.isShared(t) && hiddenAt.has(t.key) && !visit.has(t.key)))
     return this.registry.sections_().map((section) => ({
       section,
       labelKey: this.registry.sectionLabel(section),
@@ -156,7 +164,22 @@ export class LogisticsItemManagerComponent {
     }))
   })
 
+  /** Plan 588: the selected phase's removed shared questions, listed behind the small "removed (N)" link. */
+  readonly removedRows = computed<LogisticsItemTerm[]>(() => {
+    const phase = this.phase_()
+    const hiddenAt = this.registry.hiddenAt_()
+    return this.registry.items_().filter((t) => t.phase === phase && this.taxonomy.isShared(t) && hiddenAt.has(t.key))
+  })
+
+  protected readonly removedLabel = computed(() =>
+    this.translation.translate('logistics_removed_count').replace('{{count}}', String(this.removedRows().length))
+  )
+
   // 6. METHODS
+  toggleRemoved(): void {
+    this.removedOpen_.update((v) => !v)
+  }
+
   requireSignIn(): boolean {
     if (this.isLoggedIn()) return true
     this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'))
@@ -359,6 +382,7 @@ export class LogisticsItemManagerComponent {
     if (!this.requireSignIn()) return
     const keys = [...this.registry.hiddenAt_().keys()].filter((k) => k !== term.key)
     await this.run('restore', () => this.business.updateHiddenLogisticsKeys(keys))
+    this.removedThisVisit_.update((set) => new Set([...set].filter((k) => k !== term.key)))
   }
 
   //UPDATE (the draft)
@@ -417,6 +441,7 @@ export class LogisticsItemManagerComponent {
 
   private hide(key: string): Promise<void> {
     const keys = [...this.registry.hiddenAt_().keys()].filter((k) => k !== key)
+    this.removedThisVisit_.update((set) => new Set(set).add(key))
     return this.run('hide', () => this.business.updateHiddenLogisticsKeys([...keys, key]))
   }
 

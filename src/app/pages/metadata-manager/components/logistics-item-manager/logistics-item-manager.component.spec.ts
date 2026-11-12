@@ -288,7 +288,37 @@ describe('LogisticsItemManagerComponent', () => {
     expect(business.updateHiddenLogisticsKeys).toHaveBeenCalledTimes(1)
   })
 
-  it('a hidden shared row is dimmed with restore, and restore drops the key', async () => {
+  it('a row hidden before the component was created is not in the sections', () => {
+    hiddenAt.set(new Map([[shared.key, 5]]))
+    fixture.detectChanges()
+    expect(rowOf(shared.key)?.closest('.logistics-sections')).toBeUndefined()
+    expect(component.sections().some((g) => g.rows.some((r) => r.term.key === shared.key))).toBeFalse()
+  })
+
+  it('the removed link shows N, opens the rows and restoring puts the row back', async () => {
+    hiddenAt.set(new Map([[shared.key, 5]]))
+    fixture.detectChanges()
+    const toggle = host().querySelector<HTMLButtonElement>('.logistics-removed-toggle')!
+    expect(toggle.textContent).toContain('logistics_removed_count')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(component.removedRows().length).toBe(1)
+    toggle.click()
+    fixture.detectChanges()
+    const li = host().querySelector<HTMLElement>('.logistics-removed-list .logistics-item')!
+    expect(li.querySelector('lucide-icon[name="undo-2"]')).not.toBeNull()
+    li.querySelector<HTMLButtonElement>('button')!.click()
+    expect(business.updateHiddenLogisticsKeys).toHaveBeenCalledOnceWith([])
+    hiddenAt.set(new Map())
+    fixture.detectChanges()
+    expect(host().querySelector('.logistics-removed')).toBeNull()
+    expect(rowOf(shared.key)).toBeDefined()
+  })
+
+  it('a row hidden during this visit stays dimmed with restore, and restore drops the key', async () => {
+    canEditSettings = true
+    await setup(false)
+    await component.onRemove(shared as never)
+    expect(business.updateHiddenLogisticsKeys).toHaveBeenCalledOnceWith([shared.key])
     hiddenAt.set(new Map([[shared.key, 5]]))
     fixture.detectChanges()
     const row = rowOf(shared.key)
@@ -296,7 +326,7 @@ describe('LogisticsItemManagerComponent', () => {
     expect(row.textContent).toContain('metadata_logistics_hidden')
     expect(row.querySelector('lucide-icon[name="undo-2"]')).not.toBeNull()
     await component.onRestore(shared as never)
-    expect(business.updateHiddenLogisticsKeys).toHaveBeenCalledOnceWith([])
+    expect(business.updateHiddenLogisticsKeys.calls.mostRecent().args[0]).toEqual([])
   })
 
   it('re-adding the text of a removed own question updates it with removedAt 0', async () => {
