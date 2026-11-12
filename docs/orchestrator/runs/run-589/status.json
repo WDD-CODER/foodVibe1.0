@@ -105,11 +105,10 @@
       "text": "the folder foodVibe1.0-orch-merge-run-589 was installed (root, scripts, server)"
     }
   ],
-  "attempts": 1,
-  "phase": "stopped",
-  "freeDiskGb": 13.7,
-  "updatedAt": "2026-11-12T11:53:18.644Z",
-  "stopReason": "final gate failed: pnpm run test:ci — ✔ Browser application bundle generation complete. / ✔ Browser application bundle generation complete. /  ELIFECYCLE  Command failed with exit code 1.",
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 12.3,
+  "updatedAt": "2026-11-12T12:48:53.696Z",
   "stops": [
     {
       "at": "2026-11-12T11:53:15.733Z",
@@ -171,11 +170,11 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-12T11:53:18.640Z",
+  "finishedAt": "2026-11-12T12:48:53.694Z",
   "finalGate": {
-    "ok": false,
-    "command": "pnpm run test:ci",
-    "at": "2026-11-12T11:53:18.643Z",
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T12:48:53.696Z",
     "attempt": 1,
     "blamed": []
   }
