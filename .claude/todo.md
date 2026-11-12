@@ -54,6 +54,11 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] R2: Fix e2e/ui/584-2.spec.ts — waits only 5 s for app-header while the QA login shows "רגע, מכינים הכל..."; wait for the loading screen to end
 - [ ] R3: After run-546 merges, add the note line to docs/frontdesk/pilot-terms-draft.md (the app shows public/assets/legal/terms.he.json; change both and bump version) — run-584 D1
 
+### Hand checks — Human 2026-11-12 (runs 584 and batch-2)
+- [x] V1: run-584 cards ①–⑥ (terms popup, sign-up blocked, phone reading, existing account, no repeat, guest) — Human 2026-11-12: ok; follow-ups → plan 585 (desktop scroll, cancel signs out)
+- [x] V2: batch-2 cards ②, ⑥, ⑦ (report print, admin removal choice, card on phone) — Human 2026-11-12: ok
+- [x] V3: batch-2 cards ①, ③, ④, ⑤ — Human 2026-11-12: works, with changes → plans 586 (clients list on phone), 587 (AI menu portions + guest count), 588 (removed questions leave after the visit)
+
 ### Run fd-1a-data — hand checks left open (PR #547)
 - [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges — Human 2026-11-11: backup atlas-2026-11-11T14-40-06, 0 clients patched, "verify: ok"
@@ -339,3 +344,23 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Gate for existing users and every new version — `src/app/core/components/terms-gate/**` (+ spec: shows for null, shows for an older version, hides for the current one, never for a guest), `src/app/appRoot/app.component.{ts,html}`
 - [ ] A8: QA login accepts the terms — `scripts/qa/lib/qa-login.mjs`, `e2e/helpers/qa-session.ts` only if its types change
 - [ ] A9: Screen checks and every gate check — `e2e/ui/584-1.spec.ts`, `e2e/ui/584-2.spec.ts`; breadcrumbs rows for the new folders; standards-backend row
+
+### Plan 585 — Terms popup: read to the end on every screen, and cancelling an unaccepted popup signs the user out (`plans/585-terms-popup-read-to-end-on-desktop-and-cancel-signs-out.plan.md`)
+- [ ] A1: Make the terms text the only scrolling box so desktop also needs a scroll to the end — terms-modal.component.{ts,html,scss}
+- [ ] A2: Let the gate popup be closed, and sign the user out to the welcome page when they do — terms-gate.component.{ts,html}
+- [ ] A3: Prove both in unit tests and one desktop-size screen check — terms-modal.component.spec.ts, terms-gate.component.spec.ts, e2e/ui/585-1.spec.ts
+
+### Plan 586 — The clients list on a phone works like the other list pages: name fixed, other columns in the column carousel (`plans/586-clients-list-on-a-phone-uses-the-column-carousel.plan.md`)
+- [ ] A1: Move the clients list's extra columns into the shared column carousel on phones — client-list.component.{html,scss,ts}
+- [ ] A2: Test the carousel header and keep every old case passing — client-list.component.spec.ts
+- [ ] A3: Phone-size screen check and the family registry line — e2e/ui/586-1.spec.ts, docs/brain/component-families.md
+
+### Plan 587 — The AI menu picks dishes only (no portions or prices), and asks for the guest count instead of guessing one (`plans/587-ai-menu-picks-dishes-only-and-asks-for-the-guest-count.plan.md`)
+- [ ] A1: Stop the AI from setting portions or prices, and stop it guessing a guest count — server/routes/ai.js (both prompts + answer clean-up)
+- [ ] A2: Stop the menu popup from copying portions and prices into the dish lines — ai-menu-modal.component.ts, ai-menu-draft.model.ts
+- [ ] A3: Prove both on the server and in the popup — server/test/ai-menu.test.js, ai-menu-modal.component.spec.ts
+
+### Plan 588 — A removed logistics question leaves the card after the visit, and sits behind a small "removed (N)" link (`plans/588-removed-logistics-questions-leave-the-card-after-the-visit.plan.md`)
+- [ ] A1: Show a removed question only during the visit it was removed in — logistics-item-manager.component.ts
+- [ ] A2: Add the small removed-count link that lists removed questions with restore — logistics-item-manager.component.{html,scss}, dictionary key
+- [ ] A3: Test it and keep the screen checks in line — logistics-item-manager.component.spec.ts, e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts
