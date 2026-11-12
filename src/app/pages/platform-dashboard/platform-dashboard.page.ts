@@ -200,6 +200,21 @@ export class PlatformDashboardPage implements OnInit {
     }
   }
 
+  /** Plan 580: hover text of a failed-calls cell: the reasons, most frequent first. */
+  protected failureTitle(row: AiUsageRow): string | null {
+    const entries = Object.entries(row.failures ?? {})
+    if (entries.length === 0) return null
+    return entries
+      .sort((a, b) => b[1] - a[1])
+      .map(([reason, count]) => {
+        const key = 'ai_fail_' + reason
+        const text = this.translation.translate(key)
+        const label = text && text !== key ? text : this.translation.translate('ai_fail_other') + ' (' + reason + ')'
+        return label + ': ' + count
+      })
+      .join(' · ')
+  }
+
   protected cost(value: number): string {
     return value.toFixed(4)
   }

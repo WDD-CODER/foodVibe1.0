@@ -98,3 +98,19 @@ export function matchRecipeName<T extends { _id: string; nameHebrew: string }>(
 
   return { bestMatch: best, candidates: top3, status }
 }
+
+/** Plan 580: a dish the AI picked from the recipe book carries its id; otherwise match by name. */
+export function matchMenuDish<T extends { _id: string; nameHebrew: string }>(
+  dish: { nameHebrew: string; dishId?: string },
+  records: T[]
+): MatchResult {
+  const known = dish.dishId ? records.find((r) => r._id === dish.dishId) : undefined
+  if (known) {
+    return {
+      status: 'matched',
+      bestMatch: { recipeId: known._id, name: known.nameHebrew, confidence: 1 },
+      candidates: []
+    }
+  }
+  return matchRecipeName(dish.nameHebrew, records)
+}

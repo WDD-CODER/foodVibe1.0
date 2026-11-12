@@ -132,7 +132,7 @@
           >
             <th scope="row">{{ row.label ?? row.key }}</th>
             <td class="num">{{ row.calls }}</td>
-            <td class="num">{{ row.failedCalls }}</td>
+            <td class="num" [attr.title]="failureTitle(row)">{{ row.failedCalls }}</td>
             <td class="num">{{ row.totalTokens }}</td>
             <td class="num">{{ cost(row.estCostUsd) }}</td>
           </tr>
@@ -140,7 +140,7 @@
           <tr class="ai-drill-row">
             <th scope="row">{{ "ai_feature_" + feature.key | translatePipe }}</th>
             <td class="num">{{ feature.calls }}</td>
-            <td class="num">{{ feature.failedCalls }}</td>
+            <td class="num" [attr.title]="failureTitle(feature)">{{ feature.failedCalls }}</td>
             <td class="num">{{ feature.totalTokens }}</td>
             <td class="num">{{ cost(feature.estCostUsd) }}</td>
           </tr>
