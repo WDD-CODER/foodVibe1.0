@@ -40,7 +40,8 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/menu-intelligence', 'menus'],
   ['/requests', 'frontdesk'],
   ['/bookings', 'frontdesk'],
-  ['/clients', 'frontdesk']
+  ['/clients', 'frontdesk'],
+  ['/frontdesk', 'frontdesk']
 ]
 
 const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
@@ -71,7 +72,8 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
   frontdesk: [
     { id: 'requests', labelKey: 'fd_chip_requests', icon: 'clipboard-check', path: '/requests', badge: true },
     { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings' },
-    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' }
+    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' },
+    { id: 'settings', labelKey: 'fd_chip_settings', icon: 'settings', path: '/frontdesk/settings' }
   ]
 }
 

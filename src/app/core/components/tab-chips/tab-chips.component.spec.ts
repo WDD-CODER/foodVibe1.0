@@ -2,7 +2,7 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { CalendarDays, ClipboardCheck, LucideAngularModule, Wrench } from 'lucide-angular'
+import { CalendarDays, ClipboardCheck, LucideAngularModule, Settings, Wrench } from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -36,7 +36,7 @@ describe('TabChipsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TabChipsComponent,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays })
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings })
       ],
       providers: [
         provideRouter([
@@ -124,7 +124,7 @@ describe('TabChipsComponent', () => {
   it('maps /clients to the frontdesk group with the clients chip active (plan 547)', async () => {
     await router.navigateByUrl('/clients')
     fixture.detectChanges()
-    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients'])
+    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients', '/frontdesk/settings'])
     await fixture.whenStable()
     fixture.detectChanges()
     const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
@@ -166,7 +166,7 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
   beforeEach(async () => {
     user_.set(null)
     await TestBed.configureTestingModule({
-      imports: [TabChipsComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings })],
       providers: [
         provideRouter([
           { path: 'cook/:id', component: BlankStubComponent },

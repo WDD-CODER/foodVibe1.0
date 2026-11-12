@@ -1,0 +1,295 @@
+<section class="fs-page" dir="rtl">
+  <app-page-header titleKey="fd_chip_settings"></app-page-header>
+
+  @if (isLoading_()) {
+  <p class="fs-loading" aria-busy="true">{{ 'fd_loading' | translatePipe }}</p>
+  } @else if (loadFailed_()) {
+  <app-empty-state
+    messageKey="fd_profile_load_failed"
+    icon="settings"
+    ctaLabelKey="retry"
+    (ctaClick)="load()"
+    data-testid="load-failed"
+  />
+  } @else if (!profile_()) { @if (!canEdit_()) {
+  <app-empty-state messageKey="fd_no_profile_staff" icon="settings" data-testid="no-profile-staff" />
+  } @else {
+  <section class="fs-card c-glass-card" data-testid="type-picker">
+    <h2 class="fs-card-title">{{ 'fd_pick_type' | translatePipe }}</h2>
+    <div class="fs-grid">
+      <app-form-field label="fd_business_type" [error]="createTried_() && !newType_() ? 'field_required' : null">
+        <app-custom-select
+          triggerId="fd-new-type"
+          placeholder="fd_business_type"
+          [options]="typeOptions"
+          [ngModel]="newType_()"
+          (ngModelChange)="newType_.set($event)"
+        />
+      </app-form-field>
+      <app-form-field
+        label="fd_display_name"
+        forId="fd-new-name"
+        [error]="createTried_() && !newName_().trim() ? 'field_required' : null"
+      >
+        <input
+          id="fd-new-name"
+          class="c-input"
+          type="text"
+          maxlength="200"
+          [value]="newName_()"
+          (input)="newName_.set($any($event.target).value)"
+        />
+      </app-form-field>
+      <app-form-field
+        label="fd_slug"
+        forId="fd-new-slug"
+        hint="fd_slug_hint"
+        [error]="createSlugTaken_() ? 'fd_slug_taken' : newSlug_() && newSlugInvalid_() ? 'fd_slug_invalid' : createTried_() && newSlugInvalid_() ? 'fd_slug_invalid' : null"
+      >
+        <input
+          id="fd-new-slug"
+          class="c-input"
+          type="text"
+          dir="ltr"
+          maxlength="40"
+          autocomplete="off"
+          [value]="newSlug_()"
+          (input)="newSlug_.set($any($event.target).value); createSlugTaken_.set(false)"
+        />
+      </app-form-field>
+    </div>
+    <div class="fs-actions">
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="create-profile"
+        [disabled]="isCreating_()"
+        [attr.aria-busy]="isCreating_()"
+        (click)="create()"
+      >
+        {{ (isCreating_() ? 'saving' : 'fd_create_profile') | translatePipe }}
+      </button>
+    </div>
+  </section>
+  } } @else { @if (draft_(); as d) { @if (!canEdit_()) {
+  <p class="fs-banner" role="note" data-testid="owner-only">
+    <lucide-icon name="lock" [size]="16"></lucide-icon>
+    <span>{{ 'fd_settings_owner_only' | translatePipe }}</span>
+  </p>
+  }
+
+  <fieldset class="fs-fieldset" [disabled]="!canEdit_()">
+    <!-- Card 1: business and link -->
+    <section class="fs-card c-glass-card" data-testid="card-business">
+      <h2 class="fs-card-title">{{ 'fd_card_business' | translatePipe }}</h2>
+      <p class="fs-type">{{ 'fd_type_label' | translatePipe }}: {{ typeKey_() | translatePipe }}</p>
+      <div class="fs-grid">
+        <app-form-field
+          label="fd_display_name"
+          forId="fd-name"
+          [error]="fieldError('displayName') ?? (showErrors_() && !d.displayName.trim() ? 'field_required' : null)"
+        >
+          <input
+            id="fd-name"
+            class="c-input"
+            type="text"
+            maxlength="200"
+            [value]="d.displayName"
+            (input)="patch({ displayName: $any($event.target).value })"
+          />
+        </app-form-field>
+        <app-form-field
+          label="fd_slug"
+          forId="fd-slug"
+          hint="fd_slug_hint"
+          [error]="slugTaken_() ? 'fd_slug_taken' : (fieldError('slug') ?? (slugInvalid_() ? 'fd_slug_invalid' : null))"
+        >
+          <input
+            id="fd-slug"
+            class="c-input"
+            type="text"
+            dir="ltr"
+            maxlength="40"
+            autocomplete="off"
+            [value]="d.slug"
+            (input)="patch({ slug: $any($event.target).value })"
+          />
+          @if (d.slug !== profile_()!.slug) {
+          <span class="fs-warning" role="note">{{ 'fd_slug_change_warning' | translatePipe }}</span>
+          }
+        </app-form-field>
+        <app-form-field label="phone" forId="fd-phone" [error]="fieldError('phone')">
+          <input
+            id="fd-phone"
+            class="c-input"
+            type="tel"
+            maxlength="30"
+            [value]="d.phone"
+            (input)="patch({ phone: $any($event.target).value })"
+          />
+        </app-form-field>
+        <app-form-field label="address" forId="fd-address" [error]="fieldError('address')">
+          <input
+            id="fd-address"
+            class="c-input"
+            type="text"
+            maxlength="200"
+            [value]="d.address"
+            (input)="patch({ address: $any($event.target).value })"
+          />
+        </app-form-field>
+        <app-form-field label="fd_service_area" forId="fd-area" [error]="fieldError('serviceArea')">
+          <input
+            id="fd-area"
+            class="c-input"
+            type="text"
+            maxlength="200"
+            [value]="d.serviceArea"
+            (input)="patch({ serviceArea: $any($event.target).value })"
+          />
+        </app-form-field>
+        <app-form-field label="fd_logo_url" forId="fd-logo" [error]="fieldError('logoUrl')">
+          <input
+            id="fd-logo"
+            class="c-input"
+            type="url"
+            dir="ltr"
+            maxlength="500"
+            [value]="d.logoUrl"
+            (input)="patch({ logoUrl: $any($event.target).value })"
+          />
+        </app-form-field>
+      </div>
+      <div class="fs-link">
+        <span class="fs-link-text" dir="ltr" data-testid="public-link">{{ publicLink_() }}</span>
+        <button type="button" class="c-btn-ghost" data-testid="copy-link" (click)="copyLink()">
+          <lucide-icon name="copy" [size]="16"></lucide-icon>
+          <span class="btn-label">{{ 'fd_copy_link' | translatePipe }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Card 2: opening hours -->
+    <section class="fs-card c-glass-card" data-testid="card-hours">
+      <h2 class="fs-card-title">
+        <lucide-icon name="clock" [size]="18"></lucide-icon>
+        {{ 'fd_card_hours' | translatePipe }}
+      </h2>
+      <app-hours-editor [rows]="d.hoursRows" (rowsChange)="patch({ hoursRows: $event })" [showMarks]="showErrors_()" />
+      <div class="fs-closed">
+        <h3 class="fs-sub">{{ 'fd_closed_dates' | translatePipe }}</h3>
+        <div class="fs-chips">
+          @for (date of d.closedDates; track date) {
+          <span class="c-chip c-chip--removable">
+            <span dir="ltr">{{ date }}</span>
+            <button
+              type="button"
+              class="c-chip__remove"
+              [attr.aria-label]="'remove' | translatePipe"
+              (click)="removeClosedDate(date)"
+            >
+              ×
+            </button>
+          </span>
+          }
+        </div>
+        <div class="fs-add-date">
+          <app-date-field
+            ariaLabelKey="fd_closed_dates"
+            [value]="newClosed_()"
+            (valueChange)="newClosed_.set($event)"
+          />
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="add-closed-date"
+            [disabled]="!newClosed_()"
+            (click)="addClosedDate()"
+          >
+            <lucide-icon name="plus" [size]="16"></lucide-icon>
+            <span class="btn-label">{{ 'fd_add_closed_date' | translatePipe }}</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards 3-6: one per request kind -->
+    @for (kind of kinds; track kind) {
+    <app-request-kind-card
+      [kind]="kind"
+      [config]="d.kinds[kind]"
+      (configChange)="setKind(kind, $event)"
+      [disabled]="!canEdit_()"
+      [showErrors]="showErrors_()"
+    />
+    }
+
+    <!-- Card 7: assistant -->
+    <section class="fs-card c-glass-card" data-testid="card-assistant">
+      <h2 class="fs-card-title">{{ 'fd_card_assistant' | translatePipe }}</h2>
+      <p class="fs-level">{{ levelKey_() | translatePipe }}</p>
+      <p class="fs-note">{{ 'fd_assistant_level_admin' | translatePipe }}</p>
+      <div class="fs-grid">
+        <app-form-field label="fd_tone">
+          <app-custom-select [options]="toneOptions" [ngModel]="d.tone" (ngModelChange)="patch({ tone: $event })" />
+        </app-form-field>
+        <app-form-field label="fd_greeting" forId="fd-greeting" layout="full">
+          <textarea
+            id="fd-greeting"
+            class="c-input"
+            rows="2"
+            maxlength="400"
+            [value]="d.greeting"
+            (input)="patch({ greeting: $any($event.target).value })"
+          ></textarea>
+        </app-form-field>
+        <app-form-field label="fd_handoff_text" forId="fd-handoff" layout="full">
+          <textarea
+            id="fd-handoff"
+            class="c-input"
+            rows="2"
+            maxlength="400"
+            [value]="d.handoffText"
+            (input)="patch({ handoffText: $any($event.target).value })"
+          ></textarea>
+        </app-form-field>
+      </div>
+      <label class="c-chip c-chip--toggle">
+        <input type="checkbox" [checked]="d.activeSame" (change)="patch({ activeSame: $any($event.target).checked })" />
+        <span>{{ 'fd_active_same_as_hours' | translatePipe }}</span>
+      </label>
+      @if (!d.activeSame) {
+      <app-hours-editor
+        [rows]="d.activeRows"
+        (rowsChange)="patch({ activeRows: $event })"
+        [showMarks]="showErrors_()"
+      />
+      }
+    </section>
+
+    <!-- Card 8: status -->
+    <section class="fs-card c-glass-card" data-testid="card-status">
+      <h2 class="fs-card-title">{{ 'fd_card_status' | translatePipe }}</h2>
+      <p class="fs-level">{{ statusKey_() | translatePipe }}</p>
+      <p class="fs-note">{{ 'fd_status_admin' | translatePipe }}</p>
+    </section>
+  </fieldset>
+
+  @if (canEdit_()) {
+  <div class="fs-savebar">
+    <button type="button" class="c-btn-ghost" data-testid="discard" [disabled]="isSaving_()" (click)="discard()">
+      {{ 'fd_discard_changes' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="save"
+      [disabled]="isSaving_()"
+      [attr.aria-busy]="isSaving_()"
+      (click)="save()"
+    >
+      {{ (isSaving_() ? 'saving' : 'fd_save') | translatePipe }}
+    </button>
+  </div>
+  } } }
+</section>
