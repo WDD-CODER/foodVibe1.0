@@ -94,8 +94,8 @@ Open `/suppliers` at 390×844 and note how the carousel header and cells behave;
 - RTL; the carousel component already handles direction.
 
 ## Atomic Sub-tasks
-- [ ] A1: Move the clients list's extra columns into the shared column carousel on phones — client-list.component.{html,scss,ts}
-- [ ] A2: Test the carousel header and keep every old case passing — client-list.component.spec.ts
+- [ ] A1: Move the clients list's extra columns into the shared column carousel on phones — src/app/pages/clients/components/client-list/client-list.component.html, .scss, .ts
+- [ ] A2: Test the carousel header and keep every old case passing — src/app/pages/clients/components/client-list/client-list.component.spec.ts
 - [ ] A3: Phone-size screen check and the family registry line — e2e/ui/586-1.spec.ts, docs/brain/component-families.md
 
 ## What happens when
