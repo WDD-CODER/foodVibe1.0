@@ -1,5 +1,7 @@
 export interface AiMenuDishDraft {
   nameHebrew: string
+  /** plan 580: id of a dish from the business's recipe book, set only when the AI picked from it */
+  dishId?: string
   /** @deprecated plan 441: the AI may still send it; nothing reads it */
   predictedTakeRate?: number | null
   serving_portions: number | null

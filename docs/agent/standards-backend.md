@@ -44,7 +44,7 @@ paths:
 | `requests` | Front desk | Customer requests (plan 549, C-REQUEST): router writes only (`routerWrites`; generic POST / PUT / DELETE → 405 `USE_ROUTER`), generic GET lists and runs lazy expiry. Any member (`manageRequests`). Not cloneable, hard delete. `REQUEST_SERVER_FIELDS` are written only by `/api/v1/requests` |
 | `bookings` | Front desk | Calendar records of an approved table, tasting or consultation (plan 549, C-REQUEST): router writes only (`routerWrites`), generic GET reads. Any member (`manageRequests`). Not cloneable, hard delete. `BOOKING_SERVER_FIELDS` are written only by `/api/v1/bookings` |
 | `decisionLog` | Front desk | One row per approve / decline / ask on a request (plan 550, C-REQUEST): ids, enums and numbers only, never a name, phone or free text. Server-only (not in the generic API), never cloned, `backup: false` (the collections test ties backup to userData). Index `decisionlog_business_at`. Read later by stats (559, 563) |
-| `aiUsage` | System | Server-only AI ledger (plan 566, C-AIUSAGE): one row per real Gemini HTTP call — business, feature, model, tokens, latency, outcome, estimated cost. Not in the generic API, never cloned, no prompt or reply text. Read only by `GET /api/v1/admin/ai-usage` |
+| `aiUsage` | System | Server-only AI ledger (plan 566, C-AIUSAGE): one row per real Gemini HTTP call — business, feature, model, tokens, latency, outcome, estimated cost; `outcome` (`accepted` / `rejected`, plan 580) and `rejectCode`, a missing `outcome` means accepted. Not in the generic API, never cloned, no prompt or reply text. Read only by `GET /api/v1/admin/ai-usage` |
 | `VERSION_HISTORY` | System | Schema/version snapshots |
 | `activity_log` | System | Activity log entries (`ACTIVITY_STORAGE_KEY`) |
 | `KITCHEN_UNITS` | Registry | Unit of measure registry |
@@ -119,7 +119,7 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `PUT` | `/api/v1/data/:type` | required | Replace all (requires `X-Confirm-Replace: true` header) — restricted (Plan 321 Phase 1) to `REPLACEABLE_TYPES` in `generic.js`, not every entity type |
 | `DELETE` | `/api/v1/data/:type/bulk` | required | Remove many by id |
 | `DELETE` | `/api/v1/data/:type/:id` | required | Remove one |
-| `GET` | `/api/v1/admin/ai-usage` | platform admin | Plan 566: AI call totals `?from&to&groupBy=business|feature|model|day&businessId&format=csv` (default: this Jerusalem month). Errors: `BAD_GROUP_BY`, `BAD_RANGE` (366 days max) |
+| `GET` | `/api/v1/admin/ai-usage` | platform admin | Plan 566: AI call totals `?from&to&groupBy=business|feature|model|day&businessId&format=csv` (default: this Jerusalem month). Errors: `BAD_GROUP_BY`, `BAD_RANGE` (366 days max). Rows carry `failures` per reason (plan 580) |
 | `PUT` | `/api/v1/events/:id/stage` | required | Plan 442: move an event to another stage `{ stage, reason?, reasonText? }`. C-PERM `changeStage` (owner, or the event's creator). Errors: `BAD_STAGE`, `EVENT_FINISHED` (409), `USE_FINISH`, `NOT_CLOSED_FROM_STAGE`, `REASON_REQUIRED`, `DATE_REQUIRED` |
 | `POST` | `/api/v1/events/:id/notes` | required | Plan 442: add a note `{ text }` (1 to 2,000 chars; `NOTE_EMPTY`, `NOTE_TOO_LONG`). C-PERM `addNote` (any member) |
 | `PUT` / `DELETE` | `/api/v1/events/:id/notes/:noteId` | required | Plan 442: edit (`editedAt` set) or delete a note - its author only (403 otherwise) |

@@ -1846,6 +1846,27 @@
     "client_lifecycle_dormant": "רדום",
     "client_last_contact": "קשר אחרון",
     "client_requests_count": "בקשות",
-    "sort_by_last_contact": "לפי קשר אחרון"
+    "sort_by_last_contact": "לפי קשר אחרון",
+    "ai_menu_error_no_dishes": "לא נמצאו מנות לתפריט. כתבו אילו מנות להגיש.",
+    "ai_menu_error_no_recipes": "אין מנות בספר המתכונים. הוסיפו מנות או כתבו אילו מנות להגיש.",
+    "ai_menu_error_no_guest_count": "חסר מספר האורחים. כתבו לכמה אורחים האירוע.",
+    "ai_menu_error_busy": "שירות ה-AI לא זמין כרגע. נסו שוב בעוד רגע.",
+    "ai_menu_error_not_configured": "ה-AI לא מוגדר בשרת.",
+    "ai_menu_error_timeout": "ה-AI לא ענה בזמן. נסו שוב.",
+    "ai_menu_error_unreadable": "תשובת ה-AI לא הייתה קריאה. נסו שוב.",
+    "ai_limit_reached": "הגעת למגבלת השימוש ב-AI.",
+    "ai_uses_left_today": "נותרו {n} שימושים היום",
+    "ai_fail_no_sections": "לא נמצאו מנות",
+    "ai_fail_no_recipes": "אין מנות בספר",
+    "ai_fail_no_guest_count": "חסר מספר אורחים",
+    "ai_fail_invalid_draft": "טיוטה לא תקינה",
+    "ai_fail_unreadable": "תשובה לא קריאה",
+    "ai_fail_empty_response": "תשובה ריקה",
+    "ai_fail_invalid_patch": "שינוי לא תקין",
+    "ai_fail_retried": "נוסה שוב",
+    "ai_fail_timeout": "ה-AI לא ענה בזמן",
+    "ai_fail_network": "תקלת רשת",
+    "ai_fail_quota": "מכסה יומית",
+    "ai_fail_other": "אחר"
   }
 }
