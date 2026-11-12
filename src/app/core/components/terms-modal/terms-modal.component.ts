@@ -5,6 +5,7 @@ import {
   ElementRef,
   inject,
   input,
+  HostListener,
   OnInit,
   output,
   signal,
@@ -34,7 +35,7 @@ export class TermsModalComponent implements OnInit {
   private readonly termsService_ = inject(TermsService)
   private readonly destroyRef_ = inject(DestroyRef)
 
-  /** False for the gate: no close button, no Escape. */
+  /** False hides the close button and turns off Escape and click outside. */
   readonly dismissible = input(true)
   /** Emits the version of the text the user read to the end and confirmed. */
   readonly accepted = output<string>()
@@ -61,11 +62,13 @@ export class TermsModalComponent implements OnInit {
       })
   }
 
+  @HostListener('window:resize')
   protected onScroll(): void {
     const el = this.body_()?.nativeElement
     if (!el || !this.terms_()) return
     const remaining = el.scrollHeight - el.scrollTop - el.clientHeight
     if (remaining <= END_TOLERANCE_PX) this.isAtEnd_.set(true)
+    // once read, a resize never un-reads it (the signal is only ever set to true)
   }
 
   protected onAccept(): void {

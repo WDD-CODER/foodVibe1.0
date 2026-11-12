@@ -14,8 +14,14 @@
 }
 
 .terms-body {
-  max-block-size: 50dvh;
+  max-block-size: min(60dvh, 36rem);
+  margin-block-end: var(--space-4);
+  padding: var(--space-4);
   overflow-y: auto;
+
+  background: var(--bg-glass);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
 
   color: var(--color-text-main);
   font-size: 1rem;

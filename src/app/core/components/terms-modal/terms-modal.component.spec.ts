@@ -91,4 +91,25 @@ describe('TermsModalComponent (plan 584)', () => {
     fixture.detectChanges()
     expect(host().querySelector('[data-testid="terms-close"]')).toBeNull()
   })
+
+  it('stays disabled at load when the box is capped and the text overflows it (any screen width)', async () => {
+    const load = new Subject<Terms>()
+    await create(load)
+    body().style.maxHeight = 'min(60dvh, 36rem)'
+    body().style.overflowY = 'auto'
+    const pad = document.createElement('div')
+    pad.style.height = '4000px'
+    body().appendChild(pad)
+    load.next(TERMS)
+    await new Promise((r) => setTimeout(r, 10))
+    fixture.detectChanges()
+    window.dispatchEvent(new Event('resize'))
+    fixture.detectChanges()
+    expect(body().scrollHeight).toBeGreaterThan(body().clientHeight + 100)
+    expect(acceptBtn().disabled).toBeTrue()
+    body().scrollTop = body().scrollHeight
+    window.dispatchEvent(new Event('resize'))
+    fixture.detectChanges()
+    expect(acceptBtn().disabled).toBeFalse()
+  })
 })
