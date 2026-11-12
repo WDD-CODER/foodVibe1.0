@@ -38,3 +38,11 @@ When `/ship` or the Post-push Merge Gate proposes a new gotcha, write it (verbat
 ```
 
 See also `docs/brain/how-it-works.md` for the visual tour and `docs/brain/index.md` for the full second-brain reading order.
+
+## A spec that types into `app-date-field` fails on a PC with a touch input
+
+**What hurt:** `new-inquiry-dialog`, `deposit-paid-dialog` and `event-stage-bar` specs failed locally (`Expected '' to be '25/12/2026'`) while GitHub CI passed. `date-field.component.ts` switches to the phone picker when `matchMedia('(pointer: coarse)')` matches; on a PC with an active touch input the text field is read-only and typed digits are ignored.
+
+**Why the obvious fix is wrong:** The component is correct; changing it or the expected values hides a machine difference, and it passes again on a PC without touch.
+
+**What to do instead:** Call `stubFinePointer()` (`src/testing/fine-pointer.ts`) in the spec's `beforeEach`, before the component is created.

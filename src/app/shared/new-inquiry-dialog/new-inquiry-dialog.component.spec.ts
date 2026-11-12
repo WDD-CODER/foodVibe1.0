@@ -3,6 +3,7 @@ import { signal } from '@angular/core'
 import { By } from '@angular/platform-browser'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { stubFinePointer } from 'src/testing/fine-pointer'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { NewInquiryDialogComponent } from './new-inquiry-dialog.component'
@@ -71,6 +72,7 @@ describe('NewInquiryDialogComponent', () => {
   }
 
   beforeEach(async () => {
+    stubFinePointer()
     eventData = jasmine.createSpyObj<MenuEventDataService>('MenuEventDataService', ['addMenuEvent'], {
       allMenuEvents_: signal<MenuEvent[]>([])
     })

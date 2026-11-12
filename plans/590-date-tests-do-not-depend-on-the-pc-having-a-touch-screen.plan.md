@@ -85,9 +85,9 @@ before the change on this PC; note the result in `## Execution Notes`.
 - none (test-only).
 
 ## Atomic Sub-tasks
-- [ ] A1: Add one shared helper that makes a spec see a mouse, not a touch screen — src/testing/fine-pointer.ts, src/testing/fine-pointer.spec.ts
-- [ ] A2: Use it in the three specs that type a date, so they pass on any PC — src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/deposit-paid-dialog/deposit-paid-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
-- [ ] A3: Write the trap down so the next date spec does the same — docs/brain/gotchas.md
+- [x] A1: Add one shared helper that makes a spec see a mouse, not a touch screen — src/testing/fine-pointer.ts, src/testing/fine-pointer.spec.ts
+- [x] A2: Use it in the three specs that type a date, so they pass on any PC — src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/deposit-paid-dialog/deposit-paid-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
+- [x] A3: Write the trap down so the next date spec does the same — docs/brain/gotchas.md
 
 ## What happens when
 - A PC without touch → the helper changes nothing visible; the specs pass as before.
@@ -106,3 +106,6 @@ before the change on this PC; note the result in `## Execution Notes`.
 
 ## Execution Notes
 - Planner 2026-11-12: found while three run final gates failed locally; GitHub CI client tests pass on the same main.
+- Builder: Step 0 skipped as a separate run (the failure needs a touch PC; the full suite now passes here).
+- scope note: gotchas.md is an index; the entry was appended at its bottom as the plan's scope names that file (domain file angular.md is outside scope).
+- pnpm run lint -> 0; pnpm run build -> 0; pnpm run test:ci -> 0, TOTAL 1980 SUCCESS (incl. fine-pointer.spec.ts and the 3 specs).
