@@ -20,13 +20,7 @@ export class SignedOutRedirectService {
       if (wasSignedIn !== true || isSignedIn) return
       untracked(() => {
         const url = this.router_.url
-        if (
-          url === '/welcome' ||
-          url.startsWith('/welcome?') ||
-          url.startsWith('/welcome#') ||
-          url.startsWith('/cook/')
-        )
-          return
+        if (url === '/welcome' || url.startsWith('/welcome?') || url.startsWith('/welcome#')) return
         void this.router_.navigate(['/welcome'])
       })
     })
