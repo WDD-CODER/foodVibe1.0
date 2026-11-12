@@ -191,7 +191,7 @@ async function saveShot(prompt, draft, status, source, userId) {
     const count = await shotsCol().countDocuments();
     if (count > SHOTS_CAP) {
       const oldest = await shotsCol()
-        .find(own)
+        .find({})
         .sort({ createdAt: 1 })
         .limit(count - SHOTS_CAP)
         .toArray();
@@ -1615,7 +1615,7 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
     const count = await menuShotsCol().countDocuments(own);
     if (count > 50) {
       const oldest = await menuShotsCol()
-        .find({})
+        .find(own)
         .sort({ createdAt: 1 })
         .limit(count - 50)
         .toArray();
