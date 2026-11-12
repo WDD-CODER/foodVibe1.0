@@ -270,6 +270,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — save/delete methods return Promises (plan 454)
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
+- `FrontDeskBadgeService` (`front-desk-badge.service.ts`): app-wide count signal for the front desk badge (plan 552).
 - Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
@@ -297,6 +298,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
 
 ### http — talking to the server
 

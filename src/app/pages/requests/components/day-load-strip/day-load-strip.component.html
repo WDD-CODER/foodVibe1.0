@@ -1,0 +1,16 @@
+@if (failed_()) {
+  <p class="strip-failed" data-testid="day-load-failed">{{ 'rq_day_load_failed' | translatePipe }}</p>
+} @else if (load()) {
+  <div class="strip" data-testid="day-load">
+    <div class="strip-bars" dir="ltr">
+      @for (bar of bars_(); track bar.hour) {
+        <div class="strip-col" [class.strip-col--requested]="bar.requested">
+          <span class="strip-covers">{{ bar.covers }}</span>
+          <span class="strip-bar" [style.block-size.%]="bar.pct"></span>
+          <span class="strip-hour">{{ bar.hour }}</span>
+        </div>
+      }
+    </div>
+    <p class="strip-summary">{{ summary_() }}</p>
+  </div>
+}

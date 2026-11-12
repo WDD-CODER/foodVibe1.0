@@ -194,16 +194,16 @@ with `needs_info` + note — use what exists), `PUT /api/v1/bookings/:id/status`
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Make sure the page can call every decision route and build a WhatsApp link — add any approve, decline, ask or day method plan 550 left out, waLink with its vectors, specs — src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts, src/app/core/utils/wa-link.util.ts, src/app/core/utils/wa-link.util.spec.ts
-- [ ] A2: Add the requests and bookings pages to the app's navigation — two lazy routes, two tab chips, three new icons, breadcrumbs — src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/app.config.ts, src/app/pages/breadcrumbs.md
-- [ ] A3: Show the waiting queue with one card per request and its fit verdict — tabs, card, verdict and reasons, answers, empty states — src/app/pages/requests/**
-- [ ] A4: Show how full the day already is beside time-bound requests — day load strip with its own loading and error state — src/app/pages/requests/components/day-load-strip/**
-- [ ] A5: Let a member approve, ask or decline, with edits before approving — edit mode, approve sequence, ask and decline dialogs, outcome links, conflict and failure handling — src/app/pages/requests/**
-- [ ] A6: Let a host type a phone request into the same queue — new request dialog with client picker for owners and name and phone for staff, kind questions, no-profile state — src/app/pages/requests/components/new-request-dialog/**
-- [ ] A7: Show approved bookings as a day and week agenda with arrival actions — date navigation, view switch, rows, status buttons, cancel confirm — src/app/pages/bookings/**
-- [ ] A8: Show how many requests are waiting on the navigation — badge service, focus refresh, count on the requests chip and the header entry — src/app/core/services/front-desk-badge.service.ts, src/app/core/services/front-desk-badge.service.spec.ts, src/app/core/components/tab-chips/**, src/app/core/components/header/**
-- [ ] A9: Add every Hebrew string and register the new pieces — dictionary keys listed above, component families note — public/assets/data/dictionary.json, docs/brain/component-families.md
-- [ ] A10: Write the unit specs and the five screen checks, then run the full checks — specs, e2e/ui/552-1..5, test:ci, build, lint, lint:icons, lint:no-native-select, reuse-lint --check-registry, log-query — e2e/ui/552-1.spec.ts, e2e/ui/552-2.spec.ts, e2e/ui/552-3.spec.ts, e2e/ui/552-4.spec.ts, e2e/ui/552-5.spec.ts
+- [x] A1: Make sure the page can call every decision route and build a WhatsApp link — add any approve, decline, ask or day method plan 550 left out, waLink with its vectors, specs — src/app/core/services/request-data.service.ts, src/app/core/services/booking-data.service.ts, src/app/core/utils/wa-link.util.ts, src/app/core/utils/wa-link.util.spec.ts
+- [x] A2: Add the requests and bookings pages to the app's navigation — two lazy routes, two tab chips, three new icons, breadcrumbs — src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/app.config.ts, src/app/pages/breadcrumbs.md
+- [x] A3: Show the waiting queue with one card per request and its fit verdict — tabs, card, verdict and reasons, answers, empty states — src/app/pages/requests/**
+- [x] A4: Show how full the day already is beside time-bound requests — day load strip with its own loading and error state — src/app/pages/requests/components/day-load-strip/**
+- [x] A5: Let a member approve, ask or decline, with edits before approving — edit mode, approve sequence, ask and decline dialogs, outcome links, conflict and failure handling — src/app/pages/requests/**
+- [x] A6: Let a host type a phone request into the same queue — new request dialog with client picker for owners and name and phone for staff, kind questions, no-profile state — src/app/pages/requests/components/new-request-dialog/**
+- [x] A7: Show approved bookings as a day and week agenda with arrival actions — date navigation, view switch, rows, status buttons, cancel confirm — src/app/pages/bookings/**
+- [x] A8: Show how many requests are waiting on the navigation — badge service, focus refresh, count on the requests chip and the header entry — src/app/core/services/front-desk-badge.service.ts, src/app/core/services/front-desk-badge.service.spec.ts, src/app/core/components/tab-chips/**, src/app/core/components/header/**
+- [x] A9: Add every Hebrew string and register the new pieces — dictionary keys listed above, component families note — public/assets/data/dictionary.json, docs/brain/component-families.md
+- [x] A10: Write the unit specs and the five screen checks, then run the full checks — specs, e2e/ui/552-1..5, test:ci, build, lint, lint:icons, lint:no-native-select, reuse-lint --check-registry, log-query — e2e/ui/552-1.spec.ts, e2e/ui/552-2.spec.ts, e2e/ui/552-3.spec.ts, e2e/ui/552-4.spec.ts, e2e/ui/552-5.spec.ts
 
 ## Technical Considerations
 - Dependencies: plans 546 (picker), 547 (nav group, header entry), 548 (profile service, kind labels), 549 (data services, types), 550 (decision routes, day load); plan 553 adds the `fd_kind_*` keys — if 552 merges first it adds them itself with the same Hebrew values (append-only, no duplicate key).
@@ -229,3 +229,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Human 2026-11-12 (batch-3 ASK 552-1): approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts. Planner also added test globs for the plan's own pages (the bare spec names above match nothing in the run's test-file gate).
 - Map row 10, renumbered +2 on 2026-11-10 (old 550 → 552).
 - Decision (Planner): the badge refreshes the requests list on window focus instead of a new server count endpoint, so the plan touches no server file; revisit if a business has more than a few hundred open requests.
+- Built by orch-builder (batch-3). Evidence:
+  - `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run lint:icons` → exit 0; `pnpm run lint:no-native-select` → exit 0.
+  - `pnpm run test:ci` → exit 0, 2056 of 2056 SUCCESS (new: wa-link, front-desk-badge, request-card, requests.page, bookings.page specs; tab-chips spec updated for the new chips).
+  - `node scripts/reuse-lint.mjs --check-registry` → exit 0; `node scripts/breadcrumbs-check.mjs` → clean; kit-manifest-check → ok; scope-check → ok; log-query → SKIP (no database configured).
+  - e2e/ui/552-1..5 are written and listed by Playwright (`npx playwright test --list` → 5 tests); not run here: no server serves this branch (the running 3000/4200 are the main folder's). The gate reruns them.
+  - A1: plan 550 already shipped `approve`, `decline`, `day` on the services; `ask` = `setStatus(id, 'needs_info', note)` (what the server has), so no service method was added.
+  - scope extended: src/app/core/components/tab-chips/tab-chips.component.spec.ts, src/app/core/services/breadcrumbs.md — a spec beside a scoped file, and the breadcrumbs row the check demands for the new service.

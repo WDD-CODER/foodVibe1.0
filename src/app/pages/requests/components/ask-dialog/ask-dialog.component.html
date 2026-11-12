@@ -1,0 +1,35 @@
+<app-modal-shell size="sm" titleKey="rq_ask_title" [sheet]="true" [hasChanges]="dirty_()" (dismissed)="onClose()">
+  <div class="c-modal-body">
+    <div class="c-input-stack">
+      <label for="ask-note">{{ 'rq_ask_title' | translatePipe }}</label>
+      <textarea
+        id="ask-note"
+        class="c-input"
+        rows="3"
+        data-testid="ask-note"
+        [maxLength]="noteMax"
+        [ngModel]="note_()"
+        (ngModelChange)="onNote($event)"
+      ></textarea>
+      @if (touched_() && !note_().trim()) {
+        <span class="c-field-error" role="alert">{{ 'rq_ask_required' | translatePipe }}</span>
+      }
+    </div>
+    @if (phone()) {
+      <div class="ask-links">
+        <a class="c-btn-ghost" [href]="'tel:' + phone()">{{ 'rq_call' | translatePipe }}</a>
+        @if (wa_(); as href) {
+          <a class="c-btn-ghost" [href]="href" target="_blank" rel="noopener noreferrer">{{
+            'rq_whatsapp' | translatePipe
+          }}</a>
+        }
+      </div>
+    }
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+    <button type="button" class="c-btn-primary" data-testid="ask-save" (click)="onSave()">
+      {{ 'save' | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>
