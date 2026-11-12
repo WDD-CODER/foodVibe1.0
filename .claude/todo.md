@@ -49,6 +49,11 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] H4: Render — set `PUBLIC_BASE_URL` on the live service and create the free uptime monitor on `/api/v1/health` every 10 min (`docs/security-go-live.md` §uptime)
 - [ ] H5: Fix `e2e/ui/545-1.spec.ts` — old selectors #inquiry-name / #inquiry-phone / .inquiry-client-picked__name → #client-form-name / #client-form-phone / .client-picker-picked__name (run-546 D5)
 
+### Run run-584 — fallout, Planner 2026-11-12
+- [ ] R1: Fix e2e/ui/584-1.spec.ts — on a local/slot app the dev guest auto-login moves /welcome to /dashboard before the sign-up click; sign out first or open the auth modal another way
+- [ ] R2: Fix e2e/ui/584-2.spec.ts — waits only 5 s for app-header while the QA login shows "רגע, מכינים הכל..."; wait for the loading screen to end
+- [ ] R3: After run-546 merges, add the note line to docs/frontdesk/pilot-terms-draft.md (the app shows public/assets/legal/terms.he.json; change both and bump version) — run-584 D1
+
 ### Run fd-1a-data — hand checks left open (PR #547)
 - [x] W1: ADR 0030 and the new INV-1 sentence say what was approved on 2026-11-10 — docs/brain/decisions/0030-guest-writes-have-one-door.md — checked by the Planner at the Human's request 2026-11-11: pass
 - [x] W2: Atlas migration 0011 run by the Human: backup, dry run, write, verify prints "verify: ok" — after PR #547 merges — Human 2026-11-11: backup atlas-2026-11-11T14-40-06, 0 clients patched, "verify: ok"
