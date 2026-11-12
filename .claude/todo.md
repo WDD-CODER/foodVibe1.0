@@ -314,3 +314,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A1: Add one shared helper that makes a spec see a mouse, not a touch screen — src/testing/fine-pointer.ts, src/testing/fine-pointer.spec.ts
 - [ ] A2: Use it in the three specs that type a date, so they pass on any PC — src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/deposit-paid-dialog/deposit-paid-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
 - [ ] A3: Write the trap down so the next date spec does the same — docs/brain/gotchas.md
+
+### Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page (`plans/591-signing-out-goes-to-the-welcome-page.plan.md`)
+- [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
+- [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
+- [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
