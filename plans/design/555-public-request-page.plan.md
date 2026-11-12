@@ -2,7 +2,8 @@
 
 Status: draft
 Track: design
-Depends-on: 543, 550, 553
+Depends-on: 543, 550, 553, 558
+Prerequisite: plan 558 (privacy erase by phone + retention) is merged first — the public page collects customer data, so erase and retention must already exist. 558 is in run-546 (Planner reorder 2026-11-11).
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
 ## Problem Statement
