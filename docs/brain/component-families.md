@@ -10,6 +10,7 @@ See every UI family live at `/dev/catalog` (dev builds only, plan 535).
 Reuse enforced from plan: 459
 
 How this file is checked:
+
 - `node scripts/reuse-lint.mjs --check-registry` fails when a backticked repo path below no longer exists, or when a
   lint rule in `scripts/lib/registry-families.mjs` names a family that has no `###` heading here. A plan that
   renames, moves or removes a listed piece (451–458) updates this file in the same branch.
@@ -28,6 +29,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ## UI families
 
 ### search-combobox — a search box with a results list
+
 - Status: stable — plan 452 moved the six page-local shells onto it
 - Use: `src/app/shared/search-combobox/` · `app-search-combobox` — a text field, a clear (X), a listbox of results and one
   add option. It owns the keyboard (rule K: first row highlighted, arrows stop at the ends, Enter picks, Escape closes,
@@ -51,9 +53,22 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`,
   `src/app/pages/recipe-builder/recipe-builder.page.html` (with
   `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`). The page-local dish text store is
-  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`.
+  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`. Also `src/app/shared/client-picker/`
+  (`app-client-picker`, plan 546).
+
+### client-picker — find, show or add one client
+
+- Status: stable (plan 546)
+- Use: `src/app/shared/client-picker/` · `app-client-picker` (built on `app-search-combobox`: search by name/phone, the picked client
+  as a name inside the field with an X, and for an owner the add-client view); the add fields live in
+  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`).
+- When: any screen that links a record to a client (new-inquiry dialog, event stage bar, the client section).
+- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`; outputs `picked`, `cleared`,
+  `addingChange`, `escaped`, `outsideClick`; method `back()` (leave the add view, true when it did).
+- Known copies: none.
 
 ### multi-pick — pick several values, shown as chips
+
 - Status: converging — plan 452 kept both bases; `chip-search-dropdown` is deprecated pending the Human's answer (ADR 0025)
 - Use: `src/app/shared/custom-multi-select/` · `app-custom-multi-select` (CVA) — the base for new code.
 - Second base (same job, **deprecated**): `src/app/shared/chip-search-dropdown/` · `app-chip-search-dropdown` (product form:
@@ -62,6 +77,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none page-local; two bases for one job.
 
 ### modal-shell — the popup frame
+
 - Status: converged (plan 451) for the engine-based popups; 7 hand-drawn dialogs remain (follow-up plan)
 - Use: `src/app/shared/modal-shell/` · `app-modal-shell` (role=dialog, aria-modal, Escape for the top-most
   popup only, focus in / trap / restore, `dismissible` while busy, `[hasChanges]` = Escape / backdrop ask before discarding typed edits (plan 498; the popup's own Cancel / X never asks), `titleKey` / `labelledBy` / `labelKey` for the
@@ -79,13 +95,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/menu-intelligence/components/not-closed-dialog/`,
   `src/app/pages/menu-intelligence/components/prep-sheets/`,
   `src/app/pages/menu-intelligence/components/supplier-orders/`,
-  `src/app/pages/menu-library/components/new-inquiry-dialog/`,
+  `src/app/shared/new-inquiry-dialog/`,
   `src/app/pages/recipe-builder/components/paste-ingredients-dialog/`,
   `src/app/pages/equipment/components/equipment-list/` (side panel).
   Not engine-based (own `role="dialog"` + Escape, kept off the shell to keep their look):
   `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`.
 
 ### modal-controller — open a popup and get its answer
+
 - Status: converged (plan 451)
 - Use: `ModalController<TResult>` in `src/app/core/services/modal-controller.ts` — each popup service creates
   `new ModalController<Result>(cancelValue)`, exposes its read-only `isOpen_`, and calls `open()` (a Promise of the
@@ -99,6 +116,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
 
 ### list-page — a list screen (header, search, filters, rows, selection)
+
 - Status: converging — plan 453 adds a cards layout and moves the remaining pages on
 - Use: `src/app/shared/list-shell/` · `app-list-shell` (named slots) with `src/app/shared/page-header/`
   (`app-page-header`), `src/app/shared/selection-bar/` (`app-selection-bar`), `src/app/shared/row-actions-menu/`
@@ -111,6 +129,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (card grids need a `layout: 'cards'` first).
 
 ### list-logic — search / sort / filter state of a list
+
 - Status: converging — plan 453 adds a shared list-controls helper
 - Use: `src/app/core/utils/list-state.util.ts` · `useListState()` (URL-synced list state); search matching:
   `normalizeHebrew` in `src/app/core/utils/recipe-match.util.ts`; option filtering:
@@ -127,6 +146,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/venues/components/venue-list/venue-list.component.ts`.
 
 ### empty-state — nothing here / no results
+
 - Status: stable
 - Use: `src/app/shared/empty-state/` · `app-empty-state` (+ `.c-empty-state` in `src/styles.scss`).
 - When: an empty list or a search with no results.
@@ -134,6 +154,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: not counted.
 
 ### form-field — label, input, error
+
 - Status: stable — plan 455 built `app-form-field`; the equipment, supplier, venue and product forms are on it
 - Use: `src/app/shared/form-field/` · `app-form-field` (`label`, `forId`, `error`, `hint`, `layout`, `labelStyle`; the control is projected) on the
   CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
@@ -147,18 +168,21 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
 
 ### number-box — tap anywhere on a number box to edit the number
+
 - Status: stable — plan 499 built `appNumberBox`; pricing meter, counter, product form, recipe quantity, cook view, settings, event dialogs and the AI / quick-add / unit modals are on it
 - Use: `src/app/core/directives/number-box.directive.ts` · `appNumberBox` on the container of ONE `input[type=number]` (label, suffix, padding); it focuses the number and `SelectOnFocusDirective` selects all. Buttons, chips, other fields, disabled / read-only numbers and an already-focused number are left alone.
 - When: a box whose only content is an editable number. Not for rows that mix free text and numbers.
 - Known copies: none for boxes. Left without it on purpose (outside plan 499 scope): `event-stage-bar` deposit amount, `menu-dish-row` inline prices, equipment / supplier / venue forms (`app-form-field` rows), `product-import` purchase qty (shares a row with a text field), `ai-draft-editor` ingredient rows.
 
 ### stepper — the + / − buttons around a number
+
 - Status: stable — plan 500 built `appStepHold`; counter, menu guest count, cook-view amounts, recipe ingredient quantity and labor / cook time are on it
 - Use: `src/app/shared/counter/step-hold.directive.ts` · `appStepHold` on a minus or plus button: `(stepHold)="step($event)"` (`false` first press, `true` repeat), `[stepHoldStop]` at the minimum; pointer events (touch and mouse), stops on pointerup / pointerleave / pointercancel. Step rules: `src/app/core/utils/quantity-step.util.ts` (`quantityIncrement` / `quantityDecrement`). A whole counter (value box + both buttons): `app-counter` (`src/app/shared/counter/`).
 - When: any +/− button that changes a number. The page keeps its own skin (cook-view ink set, menu paper pill).
 - Known copies: none. Kept on purpose: `scaling-chip` and `recipe-builder.page` use `app-counter` already.
 
 ### entity-form — name validation and unsaved-changes check
+
 - Status: stable — plan 455 built one unsaved-changes helper
 - Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra?, isSubmitted? })` (also registers the browser's reload / tab-close dialog, `warnBeforeUnload`); each page keeps `hasRealChanges()` as a one-line
   delegation; equipment, supplier and settings (tab switch via `?tab=`) are on it too (plan 498); `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
@@ -167,6 +191,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none.
 
 ### chip — chips, badges, pills
+
 - Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
 - Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
   `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
@@ -176,6 +201,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `--solid` = light text on a data color). Data-colored value chip: `--colored` (background/color inline).
 - When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
 - Users (plan 522): `event-logistics-panel` — toggle header (`--tap`), phase tabs (`--tab`), status/payer radios (`--toggle`).
+- Tight group (plan 579): `.c-chip-group.c-chip-group--tight` — no block padding, `--space-1` gap, small chips; user: `event-logistics-panel` (one "נדרש" toggle + the two provider radios); plan 581 uses it too.
 - Users (plan 523): `logistics-item-manager` — phase tabs (`--tab`), shared item (`--tag` + lock), own item (`--removable`), environment and shared choices (`--toggle`).
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
@@ -183,6 +209,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status look (plan 577): a colour chip on a `span` renders as a white tag with a dot; a pressable chip is a `button` or carries `--toggle` / `--tap` / `--filter` / `--tab` / `--removable`, and keeps its own look.
 
 ### feedback — loading, toasts, errors shown to the user
+
 - Status: stable — plan 456 moved every toast text into the dictionary
 - Use: `src/app/shared/loader/` (`app-loader`), `src/app/core/services/loading.service.ts` (`LoadingService`),
   `src/app/core/services/user-msg.service.ts` (`UserMsgService`), `src/app/core/services/logging.service.ts`
@@ -193,6 +220,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 
 ### edit-gate — show a save button only to someone who may save
+
 - Status: stable (MVP, plan 428)
 - Use: `src/app/shared/edit-gate/` · `app-edit-gate`; rules: `src/app/core/services/permission.service.ts`
   (`PermissionService`). The server still decides every write (`server/utils/permissions.js`).
@@ -200,18 +228,21 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none.
 
 ### cost-badge — partial / missing cost warning
+
 - Status: stable (MVP)
 - Use: `src/app/shared/partial-cost-badge/` · `app-partial-cost-badge`.
 - When: a cost is shown that may be missing prices.
 - Known copies: none.
 
 ### supplier-picker — pick one of a product's suppliers for a line
+
 - Status: stable (plan 536)
 - Use: `src/app/shared/supplier-picker/` · `app-supplier-picker` (inputs `product`, `value`, `canEdit`; output `picked`). Fixed popover placed with `placeInViewport`.
 - When: a line may be bought from one of several priced suppliers and the owner chooses.
 - Known copies: none.
 
 ### engine-classes — shared `.c-*` CSS engines
+
 - Status: stable (plan 458 sweeps the copies)
 - Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).
 - When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
@@ -222,6 +253,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ## Logic families
 
 ### entity-data-service — load and save one entity type
+
 - Status: stable — plan 454 moved the last copies onto the base
 - Use: `src/app/core/services/base-entity-data.service.ts` · `BaseEntityDataService<T>` (users:
   `src/app/core/services/equipment-data.service.ts`, `src/app/core/services/supplier-data.service.ts`,
@@ -233,26 +265,31 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none.
 
 ### kitchen-state — app-wide signal state
+
 - Status: stable — save/delete methods return Promises (plan 454)
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
 - Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
+
 - Status: stable
 - Use: `src/app/core/services/taxonomy-store.service.ts` · `TaxonomyStore`.
 - When: a page reads or adds a category, unit, label or kind.
 - Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
 - Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
+- Plan 579: kind `logisticsSection` (a business's own sections); `logisticsItem` gains `removedAt` (removed from that date, older events keep it) and `foldedAt` (server-written when promoted: the business's own copy is kept, not deleted, so it still dates the question). `LogisticsItemRegistryService` adds `allItems_`, `hiddenAt_`, `defaultItems_`, `sections_`, `sectionLabel()` and `forEvent()` (the date rule); `items_` is the live list.
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
+
 - Status: stable
 - Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`.
 - When: a route needs its collection loaded first.
 - Known copies: none.
 
 ### helpers — pure functions
+
 - Status: stable
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
@@ -261,6 +298,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 
 ### http — talking to the server
+
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
@@ -269,6 +307,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
 
 ### event-plan — event costing and planning engine
+
 - Status: stable (MVP)
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
   `src/app/core/engine/units.ts`; portions: `src/app/core/engine/portions.ts`.
@@ -276,6 +315,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none.
 
 ### server-auth — who is calling the server
+
 - Status: converging — plan 458 (rule sweep) decides
 - Use: `server/middleware/auth.js` (token check), `server/utils/business-scope.js` (the only tenant-scoping path,
   ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`.

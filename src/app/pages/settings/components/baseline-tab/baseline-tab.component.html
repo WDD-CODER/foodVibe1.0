@@ -25,6 +25,48 @@
         }
       </label>
     }
+    @for (group of groups; track group.id) {
+      <button
+        type="button"
+        class="c-chip c-chip--tap baseline-group__toggle"
+        [attr.data-testid]="'baseline-group-' + group.id"
+        [attr.aria-expanded]="group.open()"
+        [attr.aria-controls]="'baseline-group-' + group.id + '-body'"
+        (click)="group.open.set(!group.open())"
+      >
+        <span>{{ group.labelKey | translatePipe }}</span>
+        <lucide-icon [name]="group.open() ? 'chevron-up' : 'chevron-down'" [size]="18"></lucide-icon>
+      </button>
+      @if (group.open()) {
+        <div class="baseline-group" [id]="'baseline-group-' + group.id + '-body'">
+          <p class="baseline-intro">{{ 'baseline_group_hint' | translatePipe }}</p>
+          @for (field of group.fields; track field.key) {
+            <label class="baseline-field" appNumberBox>
+              <span class="baseline-field__label">{{ field.labelKey | translatePipe }}</span>
+              <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
+                <input
+                  type="number"
+                  inputmode="decimal"
+                  step="any"
+                  dir="ltr"
+                  [formControlName]="field.key"
+                  [attr.data-testid]="'baseline-' + field.key"
+                  [attr.aria-invalid]="hasError(field.key)"
+                />
+                @if (field.suffix) {
+                  <span class="baseline-field__suffix" aria-hidden="true">{{ field.suffix }}</span>
+                }
+              </span>
+              @if (hasError(field.key)) {
+                <span class="c-field-error" role="alert" [attr.data-testid]="'baseline-error-' + field.key">
+                  {{ 'baseline_value_invalid' | translatePipe }}
+                </span>
+              }
+            </label>
+          }
+        </div>
+      }
+    }
     <p class="baseline-updated" data-testid="baseline-updated">
       @if (filledAt(); as at) {
         {{ 'baseline_updated_at' | translatePipe }}{{ at | date: 'dd/MM/yyyy' }}

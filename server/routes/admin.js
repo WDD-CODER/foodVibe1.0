@@ -156,7 +156,7 @@ router.get('/taxonomy', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const terms = await col('taxonomyTerms')
       .find(
-        { kind, businessId: { $nin: ['__master__', null] }, ...LIVE },
+        { kind, businessId: { $nin: ['__master__', null] }, foldedAt: { $exists: false }, ...LIVE },
         { projection: { _id: 1, businessId: 1, key: 1, phase: 1, section: 1, answerType: 1, environments: 1, hint: 1, createdAt: 1 } }
       )
       .sort({ key: 1, createdAt: 1 })

@@ -6,6 +6,7 @@
  */
 const { LIVE } = require('../jobs/purge-deleted')
 const { EVENT_STAGES } = require('../generated/schemas/entities/event-stage')
+const { BASELINE_CARD_FIELDS } = require('../generated/schemas/entities')
 const { jerusalemDate } = require('../middleware/usage')
 
 const DAY_MS = 86400000
@@ -102,7 +103,7 @@ const numOrNull = v => (typeof v === 'number' && Number.isFinite(v) ? v : null)
 /** (value − baseline) ÷ baseline in percent; null without a usable baseline. */
 const changePct = (value, baseline) => (baseline === null || baseline === 0 ? null : ((value - baseline) / baseline) * 100)
 
-const BASELINE_FIELDS = ['inquiriesPerMonth', 'eventsClosedPerMonth', 'avgRevenuePerEvent', 'estProfitPct']
+const BASELINE_FIELDS = BASELINE_CARD_FIELDS
 
 /** The response of `GET /api/v1/stats/business`. `cards` only for the owner. */
 function shapeStats(facet, usage, business, isOwner, period, bounds) {

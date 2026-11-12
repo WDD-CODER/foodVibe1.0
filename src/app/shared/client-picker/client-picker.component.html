@@ -1,0 +1,34 @@
+@if (isAdding_()) {
+  <app-client-form
+    [initialName]="initialName_()"
+    [initialPhone]="initialPhone_()"
+    (saved)="onFormSaved($event)"
+    (cancelled)="back()"
+  />
+} @else if (selected()) {
+  <div class="c-input-wrapper client-picker-picked">
+    <span class="client-picker-picked__name">{{ selected()?.name }}</span>
+    <button type="button" class="c-btn-ghost" [attr.aria-label]="'remove' | translatePipe" (click)="onClear()">
+      <lucide-icon name="x" [size]="16"></lucide-icon>
+    </button>
+  </div>
+} @else {
+  <app-search-combobox
+    [variant]="variant()"
+    [inputId]="inputId()"
+    placeholder="client_pick_placeholder"
+    [options]="options_()"
+    [(query)]="query_"
+    [clientFilter]="false"
+    [labelOf]="labelOf"
+    [keyOf]="keyOf"
+    [minChars]="2"
+    [closeOnOutsideClick]="closeOnOutsideClick()"
+    [emptyKey]="canCreate_() ? null : 'client_ask_owner'"
+    [addLabelKey]="canCreate_() ? 'client_new' : null"
+    (picked)="onPicked($event)"
+    (addChosen)="onAddChosen($event)"
+    (escaped)="escaped.emit()"
+    (outsideClick)="outsideClick.emit()"
+  />
+}

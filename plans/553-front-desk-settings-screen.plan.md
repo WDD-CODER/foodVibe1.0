@@ -54,8 +54,8 @@ src/app/shared/breadcrumbs.md
 src/app/core/models/breadcrumbs.md
 src/app/core/services/breadcrumbs.md
 e2e/ui/553-1..3
-frontdesk-settings.page.spec.ts
-request-kind-card.component.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/request-kind-card.component.spec.ts
 e2e/ui/553-*.spec.ts
 src/app/pages/frontdesk/frontdesk-settings/**
 src/app/pages/frontdesk/breadcrumbs.md
@@ -63,6 +63,7 @@ src/app/pages/breadcrumbs.md
 src/app/app.routes.ts
 src/app/app.config.ts
 src/app/core/components/tab-chips/tab-chips.component.ts
+src/app/core/components/tab-chips/tab-chips.component.spec.ts
 public/assets/data/dictionary.json
 src/styles.scss
 e2e/ui/553-1.spec.ts
@@ -192,5 +193,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- Human 2026-11-12 (batch-3 ASK 553-1): approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts. Planner wrote the two bare spec names as full paths (they matched nothing in the run's test-file gate).
 - Map row 11, renumbered +2 on 2026-11-10 (old 551 → 553).
 - Decision (Planner): staff see the screen read-only instead of a hidden chip, so `tab-chips.component.ts` stays an append-only change.

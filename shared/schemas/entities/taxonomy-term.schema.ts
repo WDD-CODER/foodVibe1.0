@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { baseDocShape } from '../base.schema'
 import { environmentTypeSchema } from './common.schema'
-import { LOGISTICS_ANSWER_TYPES, LOGISTICS_PHASES, LOGISTICS_SECTIONS } from './event-logistics'
+import { LOGISTICS_ANSWER_TYPES, LOGISTICS_PHASES, logisticsSectionKeySchema } from './event-logistics'
 
 /**
  * Plan 321 Phase 3 — one `taxonomyTerms` collection replaces the single-doc `{ items }`
@@ -27,7 +27,8 @@ export const TAXONOMY_KINDS = [
   'sectionCategory',
   'equipmentCategory',
   'station',
-  'logisticsItem'
+  'logisticsItem',
+  'logisticsSection'
 ] as const
 
 export type TaxonomyKind = (typeof TAXONOMY_KINDS)[number]
@@ -82,7 +83,9 @@ export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | '
   protein: {},
   kosherType: {},
   /** Plan 518: the answers on an event store the item's key as `siteLogistics.answers.itemKey`. */
-  logisticsItem: { menuEvents: ['siteLogistics.answers.itemKey'] }
+  logisticsItem: { menuEvents: ['siteLogistics.answers.itemKey', 'siteLogistics.hiddenKeys[]'] },
+  /** Plan 579: a business's own logistics section; nothing references it by key. */
+  logisticsSection: {}
 }
 
 const DISH_FIELD_KEYS = ['sell_price', 'food_cost_money', 'food_cost_pct', 'serving_portions', 'serving_portions_pct'] as const
@@ -109,7 +112,8 @@ const plainKinds = [
   'prepCategory',
   'sectionCategory',
   'equipmentCategory',
-  'station'
+  'station',
+  'logisticsSection'
 ] as const
 
 export const taxonomyTermSchema = z.discriminatedUnion('kind', [
@@ -142,11 +146,15 @@ export const taxonomyTermSchema = z.discriminatedUnion('kind', [
     ...termShape,
     kind: z.literal('logisticsItem'),
     phase: z.enum(LOGISTICS_PHASES),
-    section: z.enum(LOGISTICS_SECTIONS),
+    section: logisticsSectionKeySchema,
     answerType: z.enum(LOGISTICS_ANSWER_TYPES),
     /** Empty or absent = asked in every environment. */
     environments: z.array(environmentTypeSchema).max(4).optional(),
-    hint: z.string().max(200).optional()
+    hint: z.string().max(200).optional(),
+    /** Plan 579: > 0 = removed from this date on (older events keep it); 0 or absent = live. */
+    removedAt: z.number().int().min(0).optional(),
+    /** Plan 579: server-written when the question was promoted to shared; the business's own copy keeps its first date. */
+    foldedAt: z.number().optional()
   })
 ])
 

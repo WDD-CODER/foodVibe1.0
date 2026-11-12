@@ -1,6 +1,6 @@
 # Plan 558 — Privacy and go-live: erase a customer by phone, keep data only as long as needed, and the go-live docs
 
-Status: draft
+Status: done
 Depends-on: 550
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
@@ -156,13 +156,13 @@ Also check by symbol that the dependencies landed: `phoneKey` and `normalizePhon
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Work out everything to erase for one person in one business, without touching anything yet — planErase and parseArgs with unit tests — server/scripts/erase-client.js, server/test/erase-client.test.js
-- [ ] A2: Run the erase as a dry run by default and apply it only with the write flag — runErase, connect, counts-only output, integration test on the in-memory database — server/scripts/erase-client.js, server/test/erase-client.test.js
-- [ ] A3: Clear old requests, bookings and messages on their own when the lists are read — the retention job, its throttle and the generic read hook — server/jobs/retention.js, server/routes/generic.js, server/test/retention.test.js
-- [ ] A4: Write the go-live section on the public door, limits, retention, erase and keeping the server awake — docs/security-go-live.md
-- [ ] A5: Document the new environment settings without any value — render.yaml, server/.env.example
-- [ ] A6: Draft the one-page Hebrew pilot terms for the lawyer — docs/frontdesk/pilot-terms-draft.md
-- [ ] A7: Record the new job and script in the backend docs and the server map, then run every check — docs/agent/standards-backend.md, server/breadcrumbs.md
+- [x] A1: Work out everything to erase for one person in one business, without touching anything yet — planErase and parseArgs with unit tests — server/scripts/erase-client.js, server/test/erase-client.test.js
+- [x] A2: Run the erase as a dry run by default and apply it only with the write flag — runErase, connect, counts-only output, integration test on the in-memory database — server/scripts/erase-client.js, server/test/erase-client.test.js
+- [x] A3: Clear old requests, bookings and messages on their own when the lists are read — the retention job, its throttle and the generic read hook — server/jobs/retention.js, server/routes/generic.js, server/test/retention.test.js
+- [x] A4: Write the go-live section on the public door, limits, retention, erase and keeping the server awake — docs/security-go-live.md
+- [x] A5: Document the new environment settings without any value — render.yaml, server/.env.example
+- [x] A6: Draft the one-page Hebrew pilot terms for the lawyer — docs/frontdesk/pilot-terms-draft.md
+- [x] A7: Record the new job and script in the backend docs and the server map, then run every check — docs/agent/standards-backend.md, server/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: 544 (`phoneKey`, `mergedInto`, soft delete), 545 (`normalizePhone`, `phoneKey`), 549 (`requests`, `bookings`, `expireDue` call site), 550 (`decisionLog`); Wave 1b collections are read if present.
@@ -187,3 +187,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Map row 16. Erase removes clients, requests, bookings, conversations and messages, and anonymises events (keeps the event, its money and history; drops `clientId`, `clientName`, `clientPhone`). This reads the brief's "removes or anonymises" so the kitchen's accounts stay whole.
 - Retention counts a request from its last change and only once it is final, so an open request is never cleared under the owner's feet.
+- Evidence: `vitest run test/erase-client.test.js test/retention.test.js test/request-expiry.test.js` -> 18 passed. Full checks run below.
+- decisions: behaviour: the sweep hook reuses the existing `expireRequestsOnRead` middleware (requests list and by id; bookings list and by id) — reverse: remove the `purgeRetained` line there. behaviour: the pilot terms' contact line is a placeholder for Dandan to fill — reverse: edit the file.

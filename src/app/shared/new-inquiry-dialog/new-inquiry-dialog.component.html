@@ -1,0 +1,91 @@
+<app-modal-shell
+  size="md"
+  [titleKey]="adding_() ? 'client_new' : 'new_inquiry'"
+  [dismissible]="!isSaving_()"
+  [sheet]="true"
+  (dismissed)="onDismissed()"
+>
+  <div class="c-modal-body">
+    <div class="inquiry-field">
+      @if (!adding_()) {
+        <label for="inquiry-client">{{ 'client' | translatePipe }}</label>
+      }
+      <app-client-picker
+        inputId="inquiry-client"
+        [selected]="selectedClient_()"
+        (picked)="selectedClient_.set($event)"
+        (cleared)="selectedClient_.set(null)"
+        (addingChange)="adding_.set($event)"
+      />
+      @if (!adding_() && isTouched_() && !clientValid_()) {
+        <span class="c-field-error">{{ 'client_required' | translatePipe }}</span>
+      }
+    </div>
+
+    @if (!adding_()) {
+      <div class="c-input-stack inquiry-event-name">
+        <label for="inquiry-event-name">{{ 'new_inquiry_event_name' | translatePipe }}</label>
+        <input
+          id="inquiry-event-name"
+          type="text"
+          autocomplete="off"
+          [maxLength]="nameMax"
+          [ngModel]="eventName_()"
+          (ngModelChange)="eventName_.set($event)"
+        />
+      </div>
+
+      <div class="inquiry-row">
+        <div class="c-input-stack">
+          <label for="inquiry-date">{{ 'date_filter' | translatePipe }}</label>
+          <app-date-field inputId="inquiry-date" [(value)]="date_" [(invalid)]="dateInvalid_" />
+        </div>
+        <div class="c-input-stack" appNumberBox>
+          <label for="inquiry-guests">{{ 'menu_guest_count' | translatePipe }}</label>
+          <input
+            id="inquiry-guests"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            dir="ltr"
+            [class.c-input--invalid]="!guestsValid_()"
+            [ngModel]="guests_()"
+            (ngModelChange)="guests_.set($event === null ? '' : '' + $event)"
+          />
+        </div>
+      </div>
+
+      <div class="c-input-stack">
+        <label>{{ 'menu_event_type' | translatePipe }}</label>
+        <app-custom-select
+          [ngModel]="eventType_()"
+          (ngModelChange)="eventType_.set($event)"
+          [options]="eventTypeOptions_()"
+          placeholder="menu_event_type"
+          [typeToFilter]="true"
+        />
+      </div>
+
+      <div class="c-input-stack">
+        <label for="inquiry-note">{{ 'first_note' | translatePipe }}</label>
+        <textarea
+          id="inquiry-note"
+          class="c-input"
+          rows="3"
+          [maxLength]="noteMax"
+          [ngModel]="note_()"
+          (ngModelChange)="note_.set($event)"
+        ></textarea>
+      </div>
+    }
+  </div>
+  @if (!adding_()) {
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
+      <button type="button" class="c-btn-primary" [disabled]="isSaving_()" (click)="onSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  }
+</app-modal-shell>

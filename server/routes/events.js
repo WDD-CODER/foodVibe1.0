@@ -290,7 +290,7 @@ const LOGISTICS_DIFF_KEYS = ['status', 'quantity', 'text', 'payer', 'showToClien
 const isStr = v => typeof v === 'string'
 const validAnswer = a => a && typeof a === 'object' && isStr(a.itemKey) && isStr(a.phase) && isStr(a.section) && isStr(a.status)
 
-// PUT /api/v1/events/:id/logistics  { answers?, environmentType?, venueProfileId?, meetingAt?, meetingWith?, phaseDone? }
+// PUT /api/v1/events/:id/logistics  { answers?, hiddenKeys?, environmentType?, venueProfileId?, meetingAt?, meetingWith?, phaseDone? }
 // Owner only (editLogistics). Answers are merged by itemKey; a new or changed one is stamped with the actor and now.
 router.put('/:id/logistics', verifyToken, async (req, res) => {
   try {
@@ -304,6 +304,9 @@ router.put('/:id/logistics', verifyToken, async (req, res) => {
     }
     const now = Date.now()
     const { userId, name } = actorOf(req)
+    if ('hiddenKeys' in body && body.hiddenKeys !== undefined && (!Array.isArray(body.hiddenKeys) || !body.hiddenKeys.every(isStr))) {
+      return res.status(400).json({ error: 'BAD_LOGISTICS' })
+    }
     const base = event.siteLogistics ?? { answers: [] }
     const answers = [...(base.answers ?? [])]
     for (const incoming of body.answers ?? []) {
@@ -316,6 +319,7 @@ router.put('/:id/logistics', verifyToken, async (req, res) => {
       else answers[idx] = next
     }
     const siteLogistics = { ...base, answers }
+    if (Array.isArray(body.hiddenKeys)) siteLogistics.hiddenKeys = [...new Set(body.hiddenKeys)]
     if ('meetingAt' in body) siteLogistics.meetingAt = body.meetingAt
     if ('meetingWith' in body) siteLogistics.meetingWith = body.meetingWith
     if (body.phaseDone && typeof body.phaseDone === 'object') {

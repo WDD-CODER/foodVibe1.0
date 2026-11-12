@@ -15,6 +15,7 @@ const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
 const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
 const { expireDue } = require('../utils/request-expiry');
 const { buildNewEventDoc, withoutServerEventFields, withSavedSnapshot } = require('../utils/event-create');
+const { purgeRetained } = require('../jobs/retention');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
@@ -29,6 +30,17 @@ const router = Router();
 // Write routes (POST/PUT/DELETE) require a valid JWT. Reads are public.
 
 // Writes share one rate limit with the events router (server/middleware/write-limit.js).
+/**
+ * Plan 579: a shared term covers businesses' own terms of the same kind + key. A `logisticsItem` own term is kept
+ * marked `foldedAt` (it dates when that business first had the question); every other kind is deleted.
+ */
+async function foldOwnTerms(kind, key) {
+  const filter = { kind, key, businessId: { $ne: MASTER } };
+  if (kind !== 'logisticsItem') return col(TAXONOMY).deleteMany(filter);
+  const now = Date.now();
+  return col(TAXONOMY).updateMany({ ...filter, foldedAt: { $exists: false } }, { $set: { foldedAt: now, updatedAt: now } });
+}
+
 router.use(dataWriteLimiter);
 
 // Only known user-data entity types may be read/written through the generic data API.
@@ -49,10 +61,13 @@ router.param('type', (req, res, next, type) => {
   next();
 });
 
-/** Plan 549: a read of requests first expires the business's stale ones (lazy, no timer). */
+/** Plan 549: a read of requests first expires the business's stale ones (lazy, no timer). Plan 558: requests and bookings reads also run the retention sweep. */
 async function expireRequestsOnRead(req, res, next) {
   try {
-    if (req.params.type === 'requests' && req.user?.businessId) await expireDue(mongoose.connection.db, req.user.businessId, Date.now());
+    const businessId = req.user?.businessId;
+    if (req.params.type === 'requests' && businessId) await expireDue(mongoose.connection.db, businessId, Date.now());
+    // Plan 558: the lazy retention sweep, for the caller's own business only (throttled to once per 24 hours).
+    if ((req.params.type === 'requests' || req.params.type === 'bookings') && businessId) await purgeRetained(mongoose.connection.db, businessId, Date.now());
     next();
   } catch (err) {
     next(err);
@@ -626,7 +641,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === EVENTS) await refreshClientEvents(mongoose.connection.db, doc.businessId, [doc.clientId]);
     // A new shared term covers users' own terms with the same key — fold them into it.
     if (entityType === TAXONOMY && shared) {
-      await col(TAXONOMY).deleteMany({ kind: doc.kind, key: doc.key, businessId: { $ne: MASTER } });
+      await foldOwnTerms(doc.kind, doc.key);
     }
     res.status(201).json(doc);
   } catch (err) {
@@ -799,7 +814,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     if (rekeyed) {
       await renameTermEverywhere(rekeyed, result.key);
       if (rekeyed.businessId === MASTER) {
-        await col(TAXONOMY).deleteMany({ kind: result.kind, key: result.key, businessId: { $ne: MASTER } });
+        await foldOwnTerms(result.kind, result.key);
       }
     }
     if (req.params.type === EVENTS) {

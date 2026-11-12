@@ -16,14 +16,10 @@ import { UserMsgService } from '@services/user-msg.service'
 import { buildClientSummary } from 'src/app/core/utils/logistics-summary.util'
 import {
   LOGISTICS_LABEL_MAX,
-  LOGISTICS_PAYERS,
-  LOGISTICS_SECTIONS,
   LOGISTICS_TEXT_MAX,
   type LogisticsAnswerStatus,
   type LogisticsAnswerType,
-  type LogisticsPayer,
-  type LogisticsPhase,
-  type LogisticsSection
+  type LogisticsPhase
 } from '@schemas/entities'
 import type { LogisticsAnswer } from '@models/menu-event.model'
 import type { EnvironmentType } from '@models/venue.model'
@@ -35,17 +31,19 @@ interface LogisticsRow {
   key: string
   label: string
   hint?: string
-  section: LogisticsSection
+  section: string
   phase: LogisticsPhase
   answerType: LogisticsAnswerType
   adhoc: boolean
   answer: LogisticsAnswer | undefined
   status: LogisticsAnswerStatus
   open: boolean
+  /** Hidden on this event (`siteLogistics.hiddenKeys`): out of the list and the open count. */
+  hidden: boolean
 }
 
 interface LogisticsSectionView {
-  section: LogisticsSection
+  section: string
   rows: LogisticsRow[]
   openCount: number
 }
@@ -78,7 +76,7 @@ export class EventLogisticsPanelComponent {
   // 1. INJECTED
   private readonly eventData = inject(MenuEventDataService)
   private readonly pipeline = inject(EventPipelineService)
-  private readonly registry = inject(LogisticsItemRegistryService)
+  protected readonly registry = inject(LogisticsItemRegistryService)
   private readonly permission = inject(PermissionService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly userMsg = inject(UserMsgService)
@@ -90,8 +88,6 @@ export class EventLogisticsPanelComponent {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly phases = PHASES
-  protected readonly payers = LOGISTICS_PAYERS
-  protected readonly statuses: LogisticsAnswerStatus[] = ['unchecked', 'needed', 'not_needed', 'client_provides']
   protected readonly environmentOptions = ENVIRONMENTS.map((value) => ({ value, label: value }))
   protected readonly textMax = LOGISTICS_TEXT_MAX
   protected readonly labelMax = LOGISTICS_LABEL_MAX
@@ -100,8 +96,9 @@ export class EventLogisticsPanelComponent {
   protected readonly openOnly_ = signal(false)
   protected readonly pending_ = signal<Map<string, DraftAnswer>>(new Map())
   protected readonly envDraft_ = signal<EnvironmentType | null>(null)
+  protected readonly showHidden_ = signal(false)
   protected readonly noteOpen_ = signal<ReadonlySet<string>>(new Set())
-  protected readonly addDraft_ = signal<Partial<Record<LogisticsSection, string>>>({})
+  protected readonly addDraft_ = signal<Partial<Record<string, string>>>({})
   private timer: ReturnType<typeof setTimeout> | null = null
 
   // 5. COMPUTED
@@ -134,23 +131,28 @@ export class EventLogisticsPanelComponent {
   protected readonly openCounts_ = computed<Record<LogisticsPhase, number>>(() => {
     const rows = this.rowsByPhase_()
     return {
-      intake: rows.intake.filter((r) => r.open).length,
-      site_visit: rows.site_visit.filter((r) => r.open).length
+      intake: rows.intake.filter((r) => r.open && !r.hidden).length,
+      site_visit: rows.site_visit.filter((r) => r.open && !r.hidden).length
     }
   })
+  protected readonly hiddenCount_ = computed(() => this.rowsByPhase_()[this.phase_()].filter((r) => r.hidden).length)
   protected readonly totalOpen_ = computed(() => this.openCounts_().intake + this.openCounts_().site_visit)
   protected readonly openCount_ = computed(() => this.openCounts_()[this.phase_()])
   protected readonly sections_ = computed<LogisticsSectionView[]>(() => {
-    const rows = this.rowsByPhase_()[this.phase_()]
+    const rows = this.rowsByPhase_()[this.phase_()].filter((r) => !r.hidden || this.showHidden_())
     const onlyOpen = this.openOnly_()
-    return LOGISTICS_SECTIONS.map((section) => {
-      const inSection = rows.filter((r) => r.section === section)
-      return {
-        section,
-        rows: onlyOpen ? inSection.filter((r) => r.open) : inSection,
-        openCount: inSection.filter((r) => r.open).length
-      }
-    }).filter((s) => s.rows.length > 0)
+    const keys = this.registry.sections_()
+    const order = [...keys, ...new Set(rows.map((r) => r.section).filter((s) => !keys.includes(s)))]
+    return order
+      .map((section) => {
+        const inSection = rows.filter((r) => r.section === section)
+        return {
+          section,
+          rows: onlyOpen ? inSection.filter((r) => r.open || r.hidden) : inSection,
+          openCount: inSection.filter((r) => r.open && !r.hidden).length
+        }
+      })
+      .filter((s) => s.rows.length > 0)
   })
   protected readonly phaseDoneAt_ = computed(() => this.event_()?.siteLogistics?.phaseDone?.[this.phase_()])
 
@@ -165,9 +167,16 @@ export class EventLogisticsPanelComponent {
   // 6. METHODS
   private buildRows(phase: LogisticsPhase): LogisticsRow[] {
     const answers = this.answers_()
-    const items = this.registry.forPhase(phase, this.environment_())()
-    const known = new Set(this.registry.items_().map((i) => i.key))
-    const rows: LogisticsRow[] = items.map((item) => {
+    const environment = this.environment_()
+    const hiddenKeys = new Set(this.event_()?.siteLogistics?.hiddenKeys ?? [])
+    const items = this.registry.forEvent(this.event_()?.createdAt, phase, environment)
+    const all = this.registry.allItems_()
+    const toRow = (item: {
+      key: string
+      hint?: string
+      section: string
+      answerType: LogisticsAnswerType
+    }): LogisticsRow => {
       const answer = answers.find((a) => a.itemKey === item.key)
       const status = answer?.status ?? 'unchecked'
       return {
@@ -180,14 +189,23 @@ export class EventLogisticsPanelComponent {
         adhoc: false,
         answer,
         status,
-        open: status === 'unchecked'
+        open: status === 'unchecked',
+        hidden: hiddenKeys.has(item.key)
       }
-    })
+    }
+    const rows: LogisticsRow[] = items.map(toRow)
     for (const answer of answers) {
       if (answer.phase !== phase || items.some((i) => i.key === answer.itemKey)) continue
       const adhoc = answer.itemKey.startsWith('adhoc:')
-      // An item the environment filter hides keeps its answer; only an answer whose item is gone shows as a row.
-      if (!adhoc && known.has(answer.itemKey)) continue
+      // An answered question always shows (plan 579), unless the environment filter hides its item.
+      const term = adhoc
+        ? undefined
+        : (all.find((i) => i.key === answer.itemKey && !i.foldedAt) ?? all.find((i) => i.key === answer.itemKey))
+      if (term) {
+        if (term.environments?.length && environment && !term.environments.includes(environment)) continue
+        rows.push(toRow(term))
+        continue
+      }
       rows.push({
         key: answer.itemKey,
         label: answer.label ?? answer.itemKey,
@@ -197,7 +215,8 @@ export class EventLogisticsPanelComponent {
         adhoc,
         answer,
         status: answer.status,
-        open: answer.status === 'unchecked'
+        open: answer.status === 'unchecked',
+        hidden: hiddenKeys.has(answer.itemKey)
       })
     }
     return rows
@@ -224,20 +243,44 @@ export class EventLogisticsPanelComponent {
     return row.answerType === 'text' || this.noteOpen_().has(row.key) || !!row.answer?.text
   }
 
-  protected setStatus(row: LogisticsRow, status: LogisticsAnswerStatus): void {
-    this.update(row, { status })
+  /** The row asks for the thing (status needed, or the old client_provides). */
+  protected isNeeded(row: LogisticsRow): boolean {
+    return row.status === 'needed' || row.status === 'client_provides'
+  }
+
+  /** Who provides it: the client for payer `client` or the old `client_provides` status, else "us". */
+  protected providerOf(row: LogisticsRow): 'ours' | 'client' {
+    return row.answer?.payer === 'client' || row.status === 'client_provides' ? 'client' : 'ours'
+  }
+
+  protected setNeeded(row: LogisticsRow, on: boolean): void {
+    if (on) this.update(row, { status: 'needed', payer: this.providerOf(row) })
+    else this.update(row, { status: 'not_needed' })
+  }
+
+  protected setProvider(row: LogisticsRow, payer: 'ours' | 'client'): void {
+    this.update(row, { status: 'needed', payer })
+  }
+
+  protected toggleShowHidden(): void {
+    this.showHidden_.update((v) => !v)
+  }
+
+  protected hideRow(row: LogisticsRow): void {
+    const keys = this.event_()?.siteLogistics?.hiddenKeys ?? []
+    if (keys.includes(row.key)) return
+    void this.saveNow({ hiddenKeys: [...keys, row.key] })
+  }
+
+  protected showRow(row: LogisticsRow): void {
+    const keys = this.event_()?.siteLogistics?.hiddenKeys ?? []
+    void this.saveNow({ hiddenKeys: keys.filter((k) => k !== row.key) })
   }
   protected setQuantity(row: LogisticsRow, quantity: number): void {
     this.update(row, { quantity })
   }
   protected setText(row: LogisticsRow, text: string): void {
     this.update(row, { text })
-  }
-  protected setPayer(row: LogisticsRow, payer: LogisticsPayer): void {
-    this.update(row, { payer })
-  }
-  protected setShowToClient(row: LogisticsRow, showToClient: boolean): void {
-    this.update(row, { showToClient })
   }
 
   private update(row: LogisticsRow, patch: Partial<DraftAnswer>): void {
@@ -259,7 +302,6 @@ export class EventLogisticsPanelComponent {
     if (a?.quantity !== undefined) draft.quantity = a.quantity
     if (a?.text !== undefined) draft.text = a.text
     if (a?.payer !== undefined) draft.payer = a.payer
-    if (a?.showToClient !== undefined) draft.showToClient = a.showToClient
     return draft
   }
 
@@ -317,12 +359,12 @@ export class EventLogisticsPanelComponent {
     void this.saveNow({ meetingWith: value })
   }
 
-  protected onAddInput(section: LogisticsSection, event: Event): void {
+  protected onAddInput(section: string, event: Event): void {
     const value = (event.target as HTMLInputElement).value
     this.addDraft_.update((d) => ({ ...d, [section]: value }))
   }
 
-  protected addAdhoc(section: LogisticsSection): void {
+  protected addAdhoc(section: string): void {
     const label = (this.addDraft_()[section] ?? '').trim()
     if (!label || !this.canEdit_()) return
     const itemKey = 'adhoc:' + crypto.randomUUID()
@@ -337,7 +379,7 @@ export class EventLogisticsPanelComponent {
     const phase = this.phase_()
     if (this.openCount_() > 0) {
       const phaseRows = this.rowsByPhase_()[phase]
-      const labels = phaseRows.filter((r) => r.open).map((r) => r.label)
+      const labels = phaseRows.filter((r) => r.open && !r.hidden).map((r) => r.label)
       const message = this.translation.translate('logistics_phase_done_confirm') + '\n' + labels.join(' · ')
       if (!(await this.confirmModal.open(message))) return
     }
@@ -351,7 +393,16 @@ export class EventLogisticsPanelComponent {
   }
 
   protected async copySummary(): Promise<void> {
-    const text = buildClientSummary(this.answers_(), this.registry.items_(), (k) => this.translation.translate(k))
+    const hidden = new Set(this.event_()?.siteLogistics?.hiddenKeys ?? [])
+    const sections = this.registry.sections_().map((key) => ({
+      key,
+      label: this.translation.translate(this.registry.sectionLabel(key))
+    }))
+    const text = buildClientSummary(
+      this.answers_().filter((a) => !hidden.has(a.itemKey)),
+      this.registry.allItems_(),
+      sections
+    )
     if (!text) {
       this.userMsg.onSetWarningMsg(this.translation.translate('logistics_nothing_to_copy'))
       return

@@ -7,8 +7,8 @@ import {
   LOGISTICS_LABEL_MAX,
   LOGISTICS_PAYERS,
   LOGISTICS_PHASES,
-  LOGISTICS_SECTIONS,
-  LOGISTICS_TEXT_MAX
+  LOGISTICS_TEXT_MAX,
+  logisticsSectionKeySchema
 } from './event-logistics'
 import { EVENT_STAGES, NOTE_MAX_LENGTH, NOT_CLOSED_REASONS } from './event-stage'
 import { coefficientSchema } from './taxonomy-term.schema'
@@ -151,7 +151,7 @@ export const menuEventSchema = z.strictObject({
       /** Only on an ad-hoc item typed on the event; `itemKey` is then `adhoc:<id>`. */
       label: z.string().min(1).max(LOGISTICS_LABEL_MAX).optional(),
       phase: z.enum(LOGISTICS_PHASES),
-      section: z.enum(LOGISTICS_SECTIONS),
+      section: logisticsSectionKeySchema,
       status: z.enum(LOGISTICS_ANSWER_STATUSES),
       quantity: z.number().min(0).max(100000).optional(),
       text: z.string().max(LOGISTICS_TEXT_MAX).optional(),
@@ -161,6 +161,8 @@ export const menuEventSchema = z.strictObject({
       by: z.string(),
       byName: z.string()
     })).max(LOGISTICS_ANSWERS_MAX),
+    /** Plan 579: questions hidden on this event only (answers stay). */
+    hiddenKeys: z.array(z.string().min(1).max(LOGISTICS_LABEL_MAX)).max(LOGISTICS_ANSWERS_MAX).optional(),
     meetingAt: z.string().optional(),
     meetingWith: z.string().max(80).optional(),
     phaseDone: z.strictObject({

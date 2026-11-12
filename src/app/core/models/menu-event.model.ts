@@ -141,11 +141,12 @@ export interface LogisticsAnswer {
   itemKey: string
   label?: string
   phase: 'intake' | 'site_visit'
-  section: 'infrastructure' | 'space' | 'service' | 'rentals' | 'access' | 'staff' | 'weather' | 'food' | 'other'
+  /** One of the nine built-in section keys or a business's own (plan 579). */
+  section: string
   status: 'unchecked' | 'needed' | 'not_needed' | 'client_provides'
   quantity?: number
   text?: string
-  payer?: 'client' | 'quoted' | 'chef'
+  payer?: 'client' | 'quoted' | 'chef' | 'ours'
   showToClient?: boolean
   at: number
   by: string
@@ -154,6 +155,8 @@ export interface LogisticsAnswer {
 
 export interface SiteLogistics {
   answers: LogisticsAnswer[]
+  /** Plan 579: questions hidden on this event only. */
+  hiddenKeys?: string[]
   meetingAt?: string
   meetingWith?: string
   phaseDone?: { intake?: number; site_visit?: number }

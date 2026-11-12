@@ -1,0 +1,26 @@
+@layer components.client-form {
+  :host {
+    display: block;
+  }
+
+  /* Same pattern as the inquiry row grid. */
+  .client-form-more {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-3);
+
+    .c-input-stack:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  textarea {
+    inline-size: 100%;
+    resize: vertical;
+  }
+}
+
+/* Outside any @layer so it beats the unlayered button reset (margin: 0) in styles.scss */
+.client-form-more-toggle {
+  margin-block: var(--space-2);
+}
