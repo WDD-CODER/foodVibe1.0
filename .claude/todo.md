@@ -58,7 +58,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [x] V1: run-584 cards ①–⑥ (terms popup, sign-up blocked, phone reading, existing account, no repeat, guest) — Human 2026-11-12: ok; follow-ups → plan 585 (desktop scroll, cancel signs out)
 - [x] V2: batch-2 cards ②, ⑥, ⑦ (report print, admin removal choice, card on phone) — Human 2026-11-12: ok
 - [x] V4: plan 585 cards ①–③ (desktop scroll to end, close signs out, popup returns) — Human 2026-11-12: ok
-- [ ] V5: Human idea 2026-11-12: a signed-out visitor sees only the welcome page (no local auto-guest) — needs a plan; questions asked
+- [x] V6: batch-2-fix cards ①–④ (clients on phone, AI menu dishes only, missing guests, removed questions) — Human 2026-11-12: all done
+- [x] V7: plans 589 + 591 cards ①–④ — Human 2026-11-12: done; ④ shared recipe went to welcome, and the Human wants that → plan 592
+- [x] V5: Human idea 2026-11-12: a signed-out visitor sees only the welcome page (no local auto-guest) — needs a plan; questions asked
 - [x] V3: batch-2 cards ①, ③, ④, ⑤ — Human 2026-11-12: works, with changes → plans 586 (clients list on phone), 587 (AI menu portions + guest count), 588 (removed questions leave after the visit)
 
 ### Run fd-1a-data — hand checks left open (PR #547)
@@ -310,12 +312,12 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
 - [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
 
-### Plan 590 — Date tests pass on any PC: specs that type into a date field fix the pointer type instead of reading the machine's (`plans/590-date-tests-do-not-depend-on-the-pc-having-a-touch-screen.plan.md`)
-- [ ] A1: Add one shared helper that makes a spec see a mouse, not a touch screen — src/testing/fine-pointer.ts, src/testing/fine-pointer.spec.ts
-- [ ] A2: Use it in the three specs that type a date, so they pass on any PC — src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/deposit-paid-dialog/deposit-paid-dialog.component.spec.ts, src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
-- [ ] A3: Write the trap down so the next date spec does the same — docs/brain/gotchas.md
-
 ### Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page (`plans/591-signing-out-goes-to-the-welcome-page.plan.md`)
 - [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
 - [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
 - [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
+
+### Plan 592 — Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions (`plans/592-shared-recipe-links-also-need-signing-in.plan.md`)
+- [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
+- [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
+- [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
