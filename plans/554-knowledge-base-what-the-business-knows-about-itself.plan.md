@@ -183,9 +183,9 @@ line or file this plan names was removed, renamed or rewritten).
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
 - [ ] A1: Add the knowledge item as a new business-owned record only the owner may change — schema, registry, collection entry, owner-only type, cross-business body — shared/schemas/entities/knowledge-item.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/utils/permissions.js, server/test/cross-business.test.js
-- [ ] A2: Build the one fact source the assistant will read, in a fixed order and size — profile facts first, approved public items by topic, 6,000-character cap at a whole line — server/services/knowledge.js, server/test/knowledge.test.js
-- [ ] A3: Let the owner approve many drafts in one request — the approve route, mounted; tests for scope, staff and limits — server/routes/knowledge.js, server/app.js, server/test/knowledge.test.js
-- [ ] A4: Turn a pasted text or a web page into draft facts with one metered AI call — English prompt, text-or-link checks, 60-item cap, schema check per item — server/services/knowledge-import-prompt.js, server/routes/ai.js, server/test/knowledge-import.test.js
+- [x] A2: Build the one fact source the assistant will read, in a fixed order and size — profile facts first, approved public items by topic, 6,000-character cap at a whole line — server/services/knowledge.js, server/test/knowledge.test.js
+- [x] A3: Let the owner approve many drafts in one request — the approve route, mounted; tests for scope, staff and limits — server/routes/knowledge.js, server/app.js, server/test/knowledge.test.js
+- [x] A4: Turn a pasted text or a web page into draft facts with one metered AI call — English prompt, text-or-link checks, 60-item cap, schema check per item — server/services/knowledge-import-prompt.js, server/routes/ai.js, server/test/knowledge-import.test.js
 - [ ] A5: Give the screen a data service that loads, imports and approves — model and service with spec — src/app/core/models/knowledge-item.model.ts, src/app/core/services/knowledge-item-data.service.ts, src/app/core/services/knowledge-item-data.service.spec.ts
 - [ ] A6: Build the knowledge screen grouped by topic with add, edit, import and bulk approve — page, dialogs, route, chip, dictionary keys, spec — src/app/pages/frontdesk/knowledge/**, src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/core/components/tab-chips/tab-chips.component.spec.ts, public/assets/data/dictionary.json
 - [ ] A7: Prove an owner can add a fact on the real screen — one e2e test that saves a screenshot — e2e/ui/554-1.spec.ts
@@ -213,6 +213,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- A1 blocked: generic POST on `knowledgeItems` stamps `_masterId` / `_userModified` (server/routes/generic.js:595, `NO_LINEAGE` at :121) and the strict schema rejects them -> 400; needs `server/routes/generic.js` (add `'knowledgeItems'` to `NO_LINEAGE`) and `server/test/invariants.test.js` if it lists all types. Not in scope: escalated.
+- `npx vitest run test/knowledge.test.js test/knowledge-import.test.js` -> A2/A3/A4 cases pass; generic-API cases (and cross-business `knowledgeItems`) fail with 400 for the reason above.
 - Plan number: map row 12, renumbered +2 on 2026-11-10 (old 552 → 554).
 - Depends-on adds 547 to the map's 548, 566: the `/frontdesk/knowledge` chip hangs from the `frontdesk` tab group that 547 creates (same reason the map gives for 553).
 - Decided while drafting: import stores the drafts on the server in the same request (one `insertMany`) instead of returning them for the browser to save one by one (INV-3); `softDelete: true` for `knowledgeItems`; a fact the owner types is saved approved (only AI drafts wait).

@@ -19,6 +19,7 @@ const eventsRouter = require('./routes/events');
 const requestsRouter = require('./routes/requests');
 const clientsRouter = require('./routes/clients');
 const bookingsRouter = require('./routes/bookings');
+const knowledgeRouter = require('./routes/knowledge');
 const productImportRouter = require('./routes/product-import');
 const logRouter = require('./routes/log');
 const publicRouter = require('./routes/public');
@@ -204,6 +205,7 @@ app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/clients', clientsRouter);
 app.use('/api/v1/requests', requestsRouter);
 app.use('/api/v1/bookings', bookingsRouter);
+app.use('/api/v1/knowledge', knowledgeRouter);
 app.use('/api/v1/ai', aiRouter)
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/business', businessRouter);
