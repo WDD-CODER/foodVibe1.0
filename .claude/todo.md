@@ -302,3 +302,10 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A1: Show a removed question only during the visit it was removed in — logistics-item-manager.component.ts
 - [ ] A2: Add the small removed-count link that lists removed questions with restore — logistics-item-manager.component.{html,scss}, dictionary key
 - [ ] A3: Test it and keep the screen checks in line — logistics-item-manager.component.spec.ts, e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts
+
+### Plan 589 — A signed-out visitor sees only the welcome page; no automatic guest sign-in on the PC and in the slots (`plans/589-signed-out-visitors-see-only-the-welcome-page.plan.md`)
+- [ ] A1: Stop signing a guest in by itself on the PC and in the slots — src/environments/environment.local.ts, src/environments/environment.ts
+- [ ] A2: Send a signed-out visitor to the welcome page from every page but the shared recipe link — src/app/core/guards/auth.guard.ts, src/app/app.routes.ts
+- [ ] A3: After signing in on the welcome page, return to the page the visitor wanted — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/home-redirect.ts
+- [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
+- [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
