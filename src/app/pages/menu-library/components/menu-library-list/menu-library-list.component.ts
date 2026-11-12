@@ -21,7 +21,7 @@ import { useListState, StringParam, ParamSerializer } from 'src/app/core/utils/l
 import { EVENT_STAGE_ORDER, isActiveStage, stageLabelKey } from 'src/app/core/utils/event-stage-ui.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
-import { NewInquiryDialogComponent } from '../new-inquiry-dialog/new-inquiry-dialog.component'
+import { NewInquiryDialogComponent } from 'src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'

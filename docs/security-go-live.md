@@ -37,6 +37,58 @@ Nothing to start. `LoggingService` sends every `warn` / `error` to **`POST /api/
 
 ---
 
+## Front desk: public door and customer data
+
+### Public endpoints
+- `/api/v1/public` (plans 543, 555): no member token. Writes go through `publicLimiter` (20 per 15 minutes per IP + slug) and a honeypot field `website`. A guest reads a request back only with its 32-character token. Guest text is stored as plain text and never rendered as HTML.
+
+### Webhook (plan 560, before it goes live)
+- `GET` answers the verify token. `POST` is checked with the `X-Hub-Signature-256` HMAC over the raw body with `WHATSAPP_APP_SECRET`, and is idempotent on the provider message id.
+
+### Rate limits
+| Surface | Limit |
+| --- | --- |
+| Data writes | 300 / 15 min |
+| AI calls | 20 / 15 min per user |
+| Public writes | 20 / 15 min per IP + slug |
+
+### Data retention
+| Data | Kept | How |
+| --- | --- | --- |
+| `requests` (final status: approved, declined, cancelled, expired) | 24 months from the last change | lazy sweep, `server/jobs/retention.js` |
+| `bookings` | 24 months after `startAt` | same sweep |
+| `messages` | 12 months | same sweep (collection arrives in plan 560) |
+| `decisionLog` | kept (no personal fields) | — |
+| clients | until erased | `erase-client.js` |
+| Trash | purged after 30 days | `server/jobs/purge-deleted.js` |
+
+The sweep runs on a read of `requests` or `bookings` for the caller's own business, at most once per business per 24 hours. An open request is never cleared.
+
+### Erase a customer by phone
+Dry run first (counts only, nothing written):
+
+    node server/scripts/erase-client.js --target=local --business=<businessId> --phone=<number>
+
+Apply locally (`--db=<scratch>` for a copy), then on Atlas after a backup:
+
+    node server/scripts/erase-client.js --target=local --business=<businessId> --phone=<number> --write
+    node server/scripts/db-backup.js --target=atlas
+    node server/scripts/erase-client.js --target=atlas --confirm-host=<host> --business=<businessId> --phone=<number>
+    node server/scripts/erase-client.js --target=atlas --confirm-host=<host> --business=<businessId> --phone=<number> --write
+
+It deletes the person's clients (live, in Trash and merged), requests, bookings, conversations and messages, and removes `clientId`, `clientName` and `clientPhone` from their events (the event, its money and history stay). The phone `052-123 4567`, `+972 52 123 4567` and `972521234567` are the same person. Free-text event notes may still name the person: check them by hand.
+
+### Logging
+- Phones, names and tokens are never written to logs or to the script's output.
+
+### Keeping the server awake (D6)
+The free Render tier sleeps after idle time, and a sleeping server misses webhooks and makes the public page slow. An external free uptime monitor keeps it awake; no code is involved.
+1. In Render, set `PUBLIC_BASE_URL` on the live service to its public `https://…onrender.com` address and save.
+2. In a free uptime service, create an HTTP monitor for `GET <PUBLIC_BASE_URL>/api/v1/health`, interval 10 minutes.
+3. Check that it reports "up" (the answer is `{ ok: true, ts }`).
+
+---
+
 ## References
 
 - Auth, logging and security rules for agents: [.claude/skills/auth-and-logging/SKILL.md](../.claude/skills/auth-and-logging/SKILL.md)

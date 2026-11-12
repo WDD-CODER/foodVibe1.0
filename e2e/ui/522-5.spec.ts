@@ -26,7 +26,7 @@ test('522-5: copy summary shows the copied toast', async ({ page, context, reque
     await openCard(page, 'פגישת ספקים')
     const row = rowOf(page, "צ'ילרים להבאה")
     await row.getByText('נדרש', { exact: true }).click()
-    await row.getByText('ללקוח', { exact: true }).click()
+    await row.getByText('באחריות הלקוח', { exact: true }).click()
     await panel(page).getByRole('button', { name: 'העתק סיכום ללקוח' }).click()
     await expect(page.getByText('הועתק', { exact: true })).toBeVisible()
     await page.screenshot({ path: 'screens/522-5.png' })

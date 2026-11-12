@@ -1,0 +1,24 @@
+@layer components.client-picker {
+  :host {
+    display: block;
+    min-inline-size: 0;
+  }
+
+  /* A chosen client: only the name, slightly bold; the X at the end. */
+  .client-picker-picked {
+    display: grid;
+    grid-template-columns: 2rem 1fr 2rem;
+    align-items: center;
+    justify-content: space-between;
+
+    &::before {
+      content: '';
+    }
+  }
+
+  .client-picker-picked__name {
+    text-align: center;
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+  }
+}

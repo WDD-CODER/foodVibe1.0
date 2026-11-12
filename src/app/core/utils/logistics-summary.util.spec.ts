@@ -2,7 +2,6 @@ import type { LogisticsAnswer } from '@models/menu-event.model'
 import type { LogisticsItemTerm } from '../services/logistics-item-registry.service'
 import { buildClientSummary, openItems } from './logistics-summary.util'
 
-const t = (key: string) => `T:${key}`
 const item = (key: string): LogisticsItemTerm =>
   ({
     _id: key,
@@ -22,53 +21,66 @@ const answer = (over: Partial<LogisticsAnswer>): LogisticsAnswer => ({
   phase: 'site_visit',
   section: 'space',
   status: 'needed',
-  showToClient: true,
+  payer: 'client',
   at: 1,
   by: 'u',
   byName: 'U',
   ...over
 })
 
+const sections = [
+  { key: 'infrastructure', label: 'H:infra' },
+  { key: 'space', label: 'H:space' },
+  { key: 'food', label: 'H:food' }
+]
+
 describe('logistics-summary.util', () => {
-  it('leaves out answers without showToClient or unchecked', () => {
+  it('lists needed answers with payer client; leaves out ours, chef, none, not_needed and unchecked', () => {
     const out = buildClientSummary(
       [
         answer({ itemKey: 'a' }),
-        answer({ itemKey: 'b', showToClient: false }),
-        answer({ itemKey: 'c', status: 'unchecked' })
+        answer({ itemKey: 'b', payer: 'ours' }),
+        answer({ itemKey: 'c', payer: 'chef' }),
+        answer({ itemKey: 'd', payer: undefined }),
+        answer({ itemKey: 'e', status: 'not_needed' }),
+        answer({ itemKey: 'f', status: 'unchecked' })
       ],
-      [item('a'), item('b'), item('c')],
-      t
+      [],
+      sections
     )
-    expect(out).toBe('T:logistics_section_space\n• a: T:logistics_status_needed')
+    expect(out).toBe(['H:space', '• a'].join('\n'))
   })
 
-  it('orders sections canonically with translated headings, groups split by a blank line', () => {
+  it('lists the old client_provides status', () => {
+    expect(buildClientSummary([answer({ status: 'client_provides', payer: undefined })], [item('a')], sections)).toBe(
+      ['H:space', '• a'].join('\n')
+    )
+  })
+
+  it('follows the section order, groups split by a blank line', () => {
     const out = buildClientSummary(
       [answer({ itemKey: 'x', section: 'food' }), answer({ itemKey: 'y', section: 'infrastructure' })],
       [item('x'), item('y')],
-      t
+      sections
     )
-    expect(out).toBe(
-      'T:logistics_section_infrastructure\n• y: T:logistics_status_needed\n\nT:logistics_section_food\n• x: T:logistics_status_needed'
-    )
+    expect(out).toBe(['H:infra', '• y', '', 'H:food', '• x'].join('\n'))
   })
 
-  it('renders quantity and text, and falls back to itemKey for a deleted item', () => {
+  it('a custom section prints its key; quantity and text are appended', () => {
     const out = buildClientSummary(
-      [answer({ itemKey: 'gone', quantity: 2, text: 'הערה', status: 'client_provides' })],
+      [answer({ itemKey: 'gone', section: 'סעיף שלי', quantity: 2, text: 'הערה' })],
       [],
-      t
+      sections
     )
-    expect(out).toBe('T:logistics_section_space\n• gone: T:logistics_status_client_provides · 2 · הערה')
+    expect(out).toBe(['סעיף שלי', '• gone · 2 · הערה'].join('\n'))
   })
 
   it('prefers the answer label', () => {
-    expect(buildClientSummary([answer({ label: 'תווית' })], [item('a')], t)).toContain('• תווית:')
+    expect(buildClientSummary([answer({ label: 'תווית' })], [item('a')], sections)).toContain('• תווית')
   })
 
   it('returns empty text when nothing qualifies', () => {
-    expect(buildClientSummary([answer({ showToClient: false })], [item('a')], t)).toBe('')
+    expect(buildClientSummary([answer({ payer: 'ours' })], [item('a')], sections)).toBe('')
   })
 
   it('openItems counts items with no answer and unchecked ones', () => {

@@ -175,4 +175,41 @@ describe('BaselineTabComponent', () => {
     await tab.save()
     expect(tab.hasRealChanges()).toBeFalse()
   })
+
+  describe('optional groups (plan 567)', () => {
+    const group = (id: string) => el().querySelector(`[data-testid="baseline-group-${id}"]`) as HTMLButtonElement
+
+    it('both groups start closed when nothing is stored', () => {
+      setup()
+      expect(group('kitchen').getAttribute('aria-expanded')).toBe('false')
+      expect(group('frontdesk').getAttribute('aria-expanded')).toBe('false')
+      expect(input('wastePct')).toBeNull()
+    })
+
+    it('a group opens on its own when the stored baseline has a value in it', () => {
+      setup()
+      business_.set({ ...BUSINESS, baseline: { messagesPerDay: 20, filledAt: 1700000000000 } })
+      fixture.detectChanges()
+      expect(group('frontdesk').getAttribute('aria-expanded')).toBe('true')
+      expect(group('kitchen').getAttribute('aria-expanded')).toBe('false')
+      expect(input('messagesPerDay').value).toBe('20')
+    })
+
+    it('saving with only wastePct filled sends { wastePct }', async () => {
+      setup()
+      group('kitchen').click()
+      fixture.detectChanges()
+      type('wastePct', '7')
+      expect(saveBtn().disabled).toBeFalse()
+      await fixture.componentInstance.save()
+      expect(updateBaseline).toHaveBeenCalledOnceWith({ wastePct: 7 })
+    })
+
+    it('"updated on" shows when only a group field is stored', () => {
+      setup()
+      business_.set({ ...BUSINESS, baseline: { foodCostPct: 30, filledAt: 1700000000000 } })
+      fixture.detectChanges()
+      expect(el().querySelector('[data-testid="baseline-updated"]')?.textContent).toContain('baseline_updated_at')
+    })
+  })
 })

@@ -40,6 +40,9 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `page-header/` | Standard page title bar: title, subtitle, result-count pill, back link | PageHeaderComponent |
 | `supplier-picker/` | Truck button + popover: pick which priced supplier a line is bought from (owner only) | SupplierPickerComponent |
 | `search-combobox/` | Search box with a results list, keyboard (rule K) and one add option (family search-combobox) | SearchComboboxComponent, SearchPick, SearchAddPick |
+| `client-picker/` | Find, show or add one client (family client-picker), on the search box | ClientPickerComponent |
+| `client-form/` | The add-client fields (name, phone, more details) used by the picker | ClientFormComponent |
+| `new-inquiry-dialog/` | "פנייה חדשה" dialog (moved from the menu library, plan 546); uses the client picker | NewInquiryDialogComponent |
 | `add-option-row/` | Icon + label of a dropdown's single add option | AddOptionRowComponent |
 | `quick-add-product-modal/` | Quick add product | QuickAddProductModalComponent |
 | `quick-edit-product-modal/` | Quick edit product modal | QuickEditProductModalComponent |

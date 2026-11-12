@@ -84,5 +84,13 @@ describe('taxonomyTermSchema', () => {
       expect(ok({ ...item, environments: ['moon'] })).toBe(false);
       expect(ok({ ...item, phase: 'later' })).toBe(false);
     });
+    test('plan 579: own section, removedAt 0 and foldedAt validate; a 121-char section fails', () => {
+      expect(ok({ ...item, section: 'סעיף שלי', removedAt: 0, foldedAt: 5 })).toBe(true);
+      expect(ok({ ...item, section: 'א'.repeat(121) })).toBe(false);
+    });
+    test('plan 579: logisticsSection is a plain kind', () => {
+      expect(TAXONOMY_KINDS).toContain('logisticsSection');
+      expect(ok({ ...base, kind: 'logisticsSection', key: 'סעיף שלי' })).toBe(true);
+    });
   });
 });

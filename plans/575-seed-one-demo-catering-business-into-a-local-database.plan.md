@@ -121,11 +121,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Write the demo business's data as one pure builder so it can be tested without a database — suppliers, products, recipes, dishes, venues, clients, events with their money, usage days, baseline — server/scripts/lib/demo-data.js
-- [ ] A2: Add the command that writes that data into a local database, safely and only once — arguments, local-only refusal, password from the environment, validate then insert what is missing — server/scripts/seed-demo-business.js
-- [ ] A3: Test the data's shape and links, the money formula, the dashboard numbers, the second run and the local-only rule — server/test/seed-demo-business.test.js
-- [ ] A4: List the new command in the server map — server/breadcrumbs.md
-- [ ] A5: Run the server tests, the server lint, the build and the log query, and paste the output lines under Execution Notes
+- [x] A1: Write the demo business's data as one pure builder so it can be tested without a database — suppliers, products, recipes, dishes, venues, clients, events with their money, usage days, baseline — server/scripts/lib/demo-data.js
+- [x] A2: Add the command that writes that data into a local database, safely and only once — arguments, local-only refusal, password from the environment, validate then insert what is missing — server/scripts/seed-demo-business.js
+- [x] A3: Test the data's shape and links, the money formula, the dashboard numbers, the second run and the local-only rule — server/test/seed-demo-business.test.js
+- [x] A4: List the new command in the server map — server/breadcrumbs.md
+- [x] A5: Run the server tests, the server lint, the build and the log query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: `server/migrations/tools/_connect.js`, `server/utils/schema-check.js`, `server/services/business.js`, `server/utils/closing-rules.js`, `server/services/seed-master.js`.
@@ -149,3 +149,5 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Execution Notes
 - Planner 2026-11-10: written in a cloud session where the in-memory test database cannot be downloaded (HTTP 403), so `pnpm run test:server` could not be run there; this plan is meant for a run on the Human's machine.
+- Builder: `pnpm run test:server` -> exit 0, 89 files / 1148 tests passed (incl. seed-demo-business.test.js, 6 tests); `pnpm --dir server run lint` -> exit 0 (0 errors); `pnpm run build` -> exit 0; breadcrumbs-check ok.
+- Builder: seedDemoBusiness writes the business with `businessSchema` validation directly (not `createBusinessFor`, which needs the mongoose connection the script does not open).

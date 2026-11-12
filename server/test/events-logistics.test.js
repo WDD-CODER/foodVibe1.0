@@ -121,4 +121,25 @@ describe('PUT /api/v1/events/:id/logistics', () => {
       .send({ ...menuEventBody({ eventDate: '2026-12-01' }), siteLogistics: { answers: [ans('zzz')] } })
     expect((await raw('e1')).siteLogistics).toEqual(before)
   })
+
+  it('plan 579: hiddenKeys replaces, dedupes and survives a later answer save', async () => {
+    await seed('e1')
+    const res = await save('e1', OWNER, { hiddenKeys: ['a', 'b', 'a'] })
+    expect(res.status).toBe(200)
+    expect((await raw('e1')).siteLogistics.hiddenKeys).toEqual(['a', 'b'])
+    await save('e1', OWNER, { answers: [ans('c')] })
+    expect((await raw('e1')).siteLogistics.hiddenKeys).toEqual(['a', 'b'])
+    await save('e1', OWNER, { hiddenKeys: ['b'] })
+    expect((await raw('e1')).siteLogistics.hiddenKeys).toEqual(['b'])
+  })
+
+  it('plan 579: a non-array or non-string hiddenKeys is 400 BAD_LOGISTICS; staff 403', async () => {
+    await seed('e1')
+    for (const hiddenKeys of ['x', [1]]) {
+      const res = await save('e1', OWNER, { hiddenKeys })
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('BAD_LOGISTICS')
+    }
+    expect((await save('e1', STAFF, { hiddenKeys: ['a'] })).status).toBe(403)
+  })
 })
