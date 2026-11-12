@@ -65,6 +65,8 @@ bookings.page.spec.ts
 e2e/ui/552-*.spec.ts
 src/app/pages/requests/**
 src/app/pages/bookings/**
+src/app/pages/requests/**/*.spec.ts
+src/app/pages/bookings/**/*.spec.ts
 src/app/pages/breadcrumbs.md
 src/app/core/services/request-data.service.ts
 src/app/core/services/request-data.service.spec.ts
@@ -76,6 +78,7 @@ src/app/core/utils/wa-link.util.ts
 src/app/core/utils/wa-link.util.spec.ts
 src/app/core/components/tab-chips/tab-chips.component.ts
 src/app/core/components/tab-chips/tab-chips.component.html
+src/app/core/components/tab-chips/tab-chips.component.spec.ts
 src/app/core/components/header/header.component.ts
 src/app/core/components/header/header.component.html
 src/app/app.routes.ts
@@ -223,5 +226,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- Human 2026-11-12 (batch-3 ASK 552-1): approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts. Planner also added test globs for the plan's own pages (the bare spec names above match nothing in the run's test-file gate).
 - Map row 10, renumbered +2 on 2026-11-10 (old 550 → 552).
 - Decision (Planner): the badge refreshes the requests list on window focus instead of a new server count endpoint, so the plan touches no server file; revisit if a business has more than a few hundred open requests.
