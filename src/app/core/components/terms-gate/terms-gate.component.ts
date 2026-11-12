@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core'
+import { Router } from '@angular/router'
 import { UserService } from '../../services/user.service'
 import { TermsService } from '../../services/terms.service'
 import { TranslationService } from '../../services/translation.service'
@@ -9,7 +10,7 @@ import { TermsModalComponent } from '../terms-modal/terms-modal.component'
 const DEV_GUEST_ID = 'dev-guest'
 
 /**
- * Plan 584: shows the terms popup, with no close button, to a signed-in user whose accepted version is not the
+ * Plan 584: shows the terms popup, to a signed-in user whose accepted version is not the
  * current one: an account that never accepted, and every account after each new `version` of the terms file.
  */
 @Component({
@@ -24,6 +25,7 @@ export class TermsGateComponent {
   private readonly termsService_ = inject(TermsService)
   private readonly translation_ = inject(TranslationService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly router_ = inject(Router)
 
   /** The version of the terms file, read when a real user is signed in. */
   protected readonly currentVersion_ = signal<string | null>(null)
@@ -50,6 +52,12 @@ export class TermsGateComponent {
         })
       )
     })
+  }
+
+  /** Close, Escape or a click outside: no terms accepted means only the welcome page, so sign out. */
+  protected onClosed(): void {
+    if (this.isPosting_()) return
+    this.userService_.logout().subscribe(() => void this.router_.navigate(['/welcome']))
   }
 
   protected onAccepted(version: string): void {

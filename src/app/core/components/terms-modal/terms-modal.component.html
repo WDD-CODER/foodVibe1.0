@@ -4,7 +4,7 @@
     <p class="terms-updated">{{ 'terms_updated_on' | translatePipe }} {{ terms.updated }}</p>
   }
 
-  <div #body class="c-modal-body terms-body" data-testid="terms-body" tabindex="0" (scroll)="onScroll()">
+  <div #body class="terms-body" data-testid="terms-body" tabindex="0" (scroll)="onScroll()">
     @if (terms_(); as terms) {
       @for (section of terms.sections; track section.heading) {
         <h3 class="terms-heading">{{ section.heading }}</h3>
