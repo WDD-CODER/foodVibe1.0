@@ -25,6 +25,15 @@ const COLLECTIONS = ['suppliers', 'products', 'recipes', 'dishes', 'venues', 'cl
 const HASH = 'a'.repeat(32) + ':' + 'b'.repeat(64)
 
 describe('buildDemoData', () => {
+  it.each(['2026-11-12T21:21:00Z', '2026-03-28T21:30:00Z', '2026-10-25T00:30:00Z'])('makes 21 different usage days, ending today in Jerusalem, at %s', iso => {
+    const now = Date.parse(iso)
+    const days = buildDemoData({ now, ownerId: 'demo_owner', businessId: 'demo_business' }).usageDays
+    const dates = days.map(u => u.date)
+    expect(days).toHaveLength(21)
+    expect(new Set(dates).size).toBe(21)
+    expect(dates[0]).toBe(require('../middleware/usage').jerusalemDate(now))
+  })
+
   it('returns the planned counts and every document passes its schema', () => {
     expect(Object.fromEntries(Object.entries(data).filter(([k]) => k !== 'baseline').map(([k, v]) => [k, v.length]))).toEqual({
       suppliers: 4, products: 30, recipes: 6, dishes: 10, venues: 2, clients: 6, menuEvents: 7, usageDays: 21,
