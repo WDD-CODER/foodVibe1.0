@@ -130,11 +130,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the Front Desk group to the navigation — frontdesk tab group with the clients chip, header link on desktop and phone; update both specs — src/app/core/components/tab-chips/**, src/app/core/components/header/**
-- [ ] A2: Build the client list on the shared list frame — rows, columns for owner and staff, search, kind/tag/lifecycle filters, sort, empty states; spec — src/app/pages/clients/components/client-list/**
-- [ ] A3: Let the owner add a client from the list — button, window with the shared client form, toast; hidden for staff; spec cases — src/app/pages/clients/components/client-list/**
-- [ ] A4: Register the route, the icon and the words — /clients route with the clients resolver, UserPlus, dictionary keys, breadcrumbs — src/app/app.routes.ts, src/app/app.config.ts, public/assets/data/dictionary.json, src/app/pages/breadcrumbs.md
-- [ ] A5: Write the two screen checks and run every check — e2e/ui/547-1.spec.ts, e2e/ui/547-2.spec.ts (`signInQa`); test:ci, build, lint, lint:icons, reuse-lint, breadcrumbs-check, log-query
+- [x] A1: Add the Front Desk group to the navigation — frontdesk tab group with the clients chip, header link on desktop and phone; update both specs — src/app/core/components/tab-chips/**, src/app/core/components/header/**
+- [x] A2: Build the client list on the shared list frame — rows, columns for owner and staff, search, kind/tag/lifecycle filters, sort, empty states; spec — src/app/pages/clients/components/client-list/**
+- [x] A3: Let the owner add a client from the list — button, window with the shared client form, toast; hidden for staff; spec cases — src/app/pages/clients/components/client-list/**
+- [x] A4: Register the route, the icon and the words — /clients route with the clients resolver, UserPlus, dictionary keys, breadcrumbs — src/app/app.routes.ts, src/app/app.config.ts, public/assets/data/dictionary.json, src/app/pages/breadcrumbs.md
+- [x] A5: Write the two screen checks and run every check — e2e/ui/547-1.spec.ts, e2e/ui/547-2.spec.ts (`signInQa`); test:ci, build, lint, lint:icons, reuse-lint, breadcrumbs-check, log-query
 
 ## Technical Considerations
 - Dependencies: `ClientDataService`, `clientsEnsureLoadedResolver`, `PermissionService`, `app-list-shell`, `useListState`, `app-client-form` (546), the widened `Client` model (544).
@@ -158,3 +158,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Map row 5, renumbered +2 on 2026-11-10 (old 545 → 547).
 - Planning card said "the stage-bar chip from 546 becomes a link" here; moved to plan 551 because `/clients/:id` does not exist until 551 (a link to a missing route would open the dashboard fallback).
+- Evidence (builder): `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm run lint:icons` → 0; `pnpm run test:ci` → 0, 1982 SUCCESS (client-list, client-lifecycle.util, tab-chips, header specs included); reuse-lint, breadcrumbs-check, override-check, plan-ledger-check, kit-manifest-check, scope-check → 0; log-query → SKIP (no database configured).
+- `e2e/ui/547-1` and `547-2` written but not run here: no API on :3000, so the QA sign-in cannot work in this worktree; the gate reruns them.
+- Step 0: drift reported; the symbols this plan names (tab-chips, header NAV_LINKS, clientsEnsureLoadedResolver, client-form, matchesClientQuery) all exist → ok.
+- The unit specs set `UserPlus` in their own icon pick because `src/testing/test-lucide-icons` is outside the scope.

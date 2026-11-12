@@ -12,7 +12,8 @@ const NAV_LINKS = [
   { path: '/dashboard', key: 'dashboard', icon: 'layout-dashboard' },
   { path: '/inventory', key: 'inventory', icon: 'package' },
   { path: '/recipe-book', key: 'recipe_book', icon: 'book-open' },
-  { path: '/menu-library', key: 'menu_library', icon: 'library' }
+  { path: '/menu-library', key: 'menu_library', icon: 'library' },
+  { path: '/clients', key: 'frontdesk_section', icon: 'users' }
 ]
 /** Only the business owner gets this one (plan 428). */
 const SETTINGS_LINK = { path: '/settings', key: 'settings', icon: 'sliders-vertical' }

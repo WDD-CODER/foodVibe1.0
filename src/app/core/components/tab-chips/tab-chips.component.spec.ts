@@ -42,7 +42,8 @@ describe('TabChipsComponent', () => {
           { path: 'trash', component: BlankStubComponent },
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
-          { path: 'settings', component: BlankStubComponent }
+          { path: 'settings', component: BlankStubComponent },
+          { path: 'clients', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation }
       ]
@@ -113,6 +114,17 @@ describe('TabChipsComponent', () => {
     await router.navigateByUrl('/dashboard')
     fixture.detectChanges()
     expect(chipIds()[1]).toBe('/dashboard?tab=metadata')
+  })
+
+  it('maps /clients to the frontdesk group with the clients chip active (plan 547)', async () => {
+    await router.navigateByUrl('/clients')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual(['/clients'])
+    await fixture.whenStable()
+    fixture.detectChanges()
+    const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
+    expect(active).not.toBeNull()
+    expect(active.injector.get(RouterLink).href).toBe('/clients')
   })
 
   it('should render nothing on a route with no mapped chip group', async () => {

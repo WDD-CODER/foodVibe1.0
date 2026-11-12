@@ -59,11 +59,12 @@ describe('HeaderComponent', () => {
     expect(hrefs).toContain('/inventory')
     expect(hrefs).toContain('/recipe-book')
     expect(hrefs).toContain('/menu-library')
+    expect(hrefs).toContain('/clients')
   })
 
-  it('should have 4 navigation links', () => {
+  it('should have 5 navigation links (the Front Desk link included, plan 547)', () => {
     const navLinks = fixture.nativeElement.querySelectorAll('li a')
-    expect(navLinks.length).toBe(4)
+    expect(navLinks.length).toBe(5)
   })
 })
 
