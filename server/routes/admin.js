@@ -6,6 +6,7 @@ const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types')
 const { LIVE } = require('../jobs/purge-deleted')
 const { jerusalemDate } = require('../middleware/usage')
 const { activeDaysByBusiness } = require('../utils/usage-stats')
+const { frontDeskSetup } = require('../services/front-desk-setup')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
 
@@ -74,12 +75,12 @@ const DAY_MS = 86400000
 
 /**
  * Plan 448: one row per business - members, activity and event-pipeline counts, never content.
- * Five grouped queries, no per-business loop. Legacy and deleted events never count.
+ * Six grouped queries; the front desk checklist runs only for businesses that have a profile (plan 556). Legacy and deleted events never count.
  */
 router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const now = Date.now()
-    const [businesses, members, usage, activeDays, events] = await Promise.all([
+    const [businesses, members, usage, activeDays, events, profiles] = await Promise.all([
       col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1 } }).toArray(),
       col('users').aggregate([
         { $match: { businessId: { $type: 'string' } } },
@@ -103,7 +104,14 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
           lastEventDate: { $max: '$eventDate' },
         } },
       ]).toArray(),
+      col('frontDeskProfiles').find({ ...LIVE }).toArray(),
     ])
+    const profileBy = new Map(profiles.map(p => [p.businessId, p]))
+    const frontDeskBy = new Map()
+    for (const [businessId, profile] of profileBy) {
+      const setup = await frontDeskSetup(mongoose.connection.db, businessId, profile)
+      frontDeskBy.set(businessId, { status: profile.status, done: setup.done, total: setup.total })
+    }
     const memberBy = new Map(members.map(m => [m._id, m]))
     const usageBy = new Map(usage.map(u => [u._id, u.lastActivityAt]))
     const eventsBy = new Map(events.map(e => [e._id, e]))
@@ -124,6 +132,7 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
         events: { total: e?.total ?? 0, active: e?.active ?? 0, closed, finished: e?.finished ?? 0 },
         closeRate: closed + notClosed > 0 ? closed / (closed + notClosed) : null,
         lastEventDate: e?.lastEventDate ?? null,
+        frontDesk: frontDeskBy.get(b._id) ?? null,
       }
     })
     res.json({ rows })

@@ -22,7 +22,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `requests/` | `/requests` — Front Desk work queue: one card per request with fit verdict, approve / ask / decline, phone request dialog, day load strip (plan 552) |
 | `bookings/` | `/bookings` — Front Desk agenda: day / week bookings with arrival actions (plan 552) |
 | `public-request/` | `/book/:slug` (the guest request form, three steps) and `/book/:slug/r/:token` (the guest's status page with cancel) — bare routes, no app header (plan 555); `PublicRequestService` is page-scoped |
-| `frontdesk/` | `/frontdesk/*` — Front Desk settings screen (`/frontdesk/settings`, plan 553): the owner's profile editor; knowledge base (`/frontdesk/knowledge`, plan 554) |
+| `frontdesk/` | `/frontdesk/*` — Front Desk settings screen (`/frontdesk/settings`, plan 553): the owner's profile editor; knowledge base (`/frontdesk/knowledge`, plan 554); the printable onboarding intake form (`/frontdesk/onboarding`, plan 556) |
 | `trash/` | `/trash` — soft-deleted items and restore |
 | `platform-dashboard/` | `/platform` — platform-admin-only table of every business (activity, events, internal flag) + the logistics-items list (plan 532: each business's own logistics items grouped, promote to shared) |
 | `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |

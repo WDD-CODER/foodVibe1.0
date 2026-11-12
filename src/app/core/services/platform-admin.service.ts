@@ -19,6 +19,8 @@ export interface BusinessRow {
   /** closed / (closed + not closed), 0..1; null when there is nothing to divide. */
   closeRate: number | null
   lastEventDate: string | null
+  /** Plan 556: the front desk checklist progress; null while the business has no profile. */
+  frontDesk: { status: 'draft' | 'pilot' | 'active' | 'suspended'; done: number; total: number } | null
 }
 
 /** Plan 532: one business's own term (a logistics item) as the platform admin sees it. */
