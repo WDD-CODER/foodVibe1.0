@@ -92,6 +92,36 @@
     }
   </div>
 
+  @if (removedRows().length > 0) {
+    <div class="logistics-removed">
+      <button
+        type="button"
+        class="c-chip c-chip--tap logistics-removed-toggle"
+        [attr.aria-expanded]="removedOpen()"
+        (click)="toggleRemoved()"
+      >
+        {{ removedLabel() }}
+      </button>
+      @if (removedOpen()) {
+        <ul class="logistics-items logistics-removed-list">
+          @for (term of removedRows(); track term._id) {
+            <li class="logistics-item is-hidden">
+              <span class="c-chip c-chip--tag">{{ term.key | translatePipe }}</span>
+              @if (isLoggedIn()) {
+                <span class="logistics-item-actions">
+                  <button type="button" class="c-icon-btn" (click)="onRestore(term)">
+                    <lucide-icon name="undo-2" [size]="16"></lucide-icon>
+                    <span>{{ 'metadata_logistics_restore' | translatePipe }}</span>
+                  </button>
+                </span>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
   @if (isLoggedIn()) {
     <div class="logistics-add" #addForm>
       <app-form-field

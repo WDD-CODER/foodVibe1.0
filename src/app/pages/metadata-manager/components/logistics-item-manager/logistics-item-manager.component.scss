@@ -87,6 +87,18 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     opacity: 0.55;
   }
 
+  .logistics-removed {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .logistics-removed-toggle {
+    align-self: flex-start;
+  }
+
   .logistics-item-actions {
     display: inline-flex;
     align-items: center;
