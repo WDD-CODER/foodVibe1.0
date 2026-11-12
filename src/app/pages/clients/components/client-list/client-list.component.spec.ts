@@ -164,4 +164,26 @@ describe('ClientListComponent (plan 547)', () => {
     expect(el().querySelector('app-empty-state')).toBeNull()
     expect(el().textContent).toContain('clients_no_results')
   })
+
+  it('puts the non-name columns in the column carousel header (owner: six slides)', () => {
+    setup([client('1', 'א')])
+    const header = el().querySelector('app-column-carousel-header')
+    expect(header).not.toBeNull()
+    const labels = Array.from(header!.querySelectorAll('[appColumnSlide]')).map((d) => d.textContent?.trim())
+    expect(labels).toEqual([
+      'client_phone',
+      'client_kinds',
+      'client_tags',
+      'client_last_contact',
+      'client_events_count',
+      'client_requests_count'
+    ])
+    expect(el().querySelectorAll('app-column-carousel-cell').length).toBe(1)
+  })
+
+  it('offers staff only phone, kinds and tags in the carousel', () => {
+    setup([client('1', 'א')], false)
+    const header = el().querySelector('app-column-carousel-header')!
+    expect(header.querySelectorAll('[appColumnSlide]').length).toBe(3)
+  })
 })
