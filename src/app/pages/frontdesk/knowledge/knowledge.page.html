@@ -1,0 +1,286 @@
+<app-list-shell
+  [isPanelOpen]="false"
+  [gridTemplate]="'1fr'"
+  [mobileGridTemplate]="'1fr'"
+  [resultCount]="filteredItems_().length"
+  [resultTotal]="allItems_().length"
+>
+  <ng-container shell-title>{{ 'knowledge_title' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="knowledge-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="knowledge-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    @if (isOwner_()) {
+    <button type="button" class="c-btn-primary" data-testid="knowledge-add" (click)="openAdd()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'knowledge_add' | translatePipe }}</span>
+    </button>
+    <button type="button" class="c-btn-ghost" data-testid="knowledge-import" (click)="openImport()">
+      <lucide-icon name="sparkles" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'knowledge_import' | translatePipe }}</span>
+    </button>
+    }
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="c-grid-header-cell filter-row" role="columnheader">
+      @for (f of filters; track f) {
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        [class.active]="filter_() === f"
+        [attr.aria-pressed]="filter_() === f"
+        [attr.data-testid]="'knowledge-filter-' + f"
+        (click)="setFilter(f)"
+      >
+        {{ 'knowledge_filter_' + f | translatePipe }}
+      </button>
+      } @if (isOwner_()) {
+      <button
+        type="button"
+        class="c-btn-ghost--sm"
+        data-testid="knowledge-approve-selected"
+        [disabled]="selected_().size === 0 || isBusy_()"
+        (click)="approveSelected()"
+      >
+        <lucide-icon name="check" [size]="16"></lucide-icon>
+        {{ 'knowledge_approve_selected' | translatePipe }}
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost--sm"
+        data-testid="knowledge-approve-all"
+        [disabled]="draftsInView_().length === 0 || isBusy_()"
+        (click)="approveAllDrafts()"
+      >
+        <lucide-icon name="check" [size]="16"></lucide-icon>
+        {{ 'knowledge_approve_all_drafts' | translatePipe }}
+      </button>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (groups_().length === 0) {
+    <div class="no-results">
+      @if (isEmptyList_()) {
+      <app-empty-state
+        messageKey="knowledge_empty"
+        icon="book-open"
+        [ctaLabelKey]="isOwner_() ? 'knowledge_add' : null"
+        (ctaClick)="openAdd()"
+      />
+      } @else { {{ 'knowledge_no_results' | translatePipe }} }
+    </div>
+    } @for (group of groups_(); track group.topic) {
+    <div class="topic-header c-list-row" role="row" [attr.data-testid]="'knowledge-topic-' + group.topic">
+      <lucide-icon name="book-open" [size]="16"></lucide-icon>
+      <strong>{{ 'knowledge_topic_' + group.topic | translatePipe }}</strong>
+    </div>
+    @for (item of group.items; track item._id) {
+    <div class="knowledge-row c-list-row" role="row" data-testid="knowledge-row">
+      @if (isOwner_() && item.status === 'draft') {
+      <input
+        type="checkbox"
+        class="row-select"
+        [checked]="selected_().has(item._id)"
+        [attr.aria-label]="item.question"
+        (change)="toggleSelected(item._id)"
+      />
+      }
+      <div class="row-text">
+        <span class="row-question">{{ item.question }}</span>
+        <span class="row-answer">{{ item.answer }}</span>
+      </div>
+      <div class="row-chips">
+        <span class="c-chip--tag c-chip--sm" [class.c-chip--amber]="item.status === 'draft'"
+          >{{ 'knowledge_status_' + item.status | translatePipe }}</span
+        >
+        @if (item.visibility === 'internal') {
+        <span class="c-chip--tag c-chip--sm">
+          <lucide-icon name="eye-off" [size]="12"></lucide-icon>
+          {{ 'knowledge_visibility_internal' | translatePipe }}
+        </span>
+        }
+      </div>
+      @if (isOwner_()) {
+      <div class="row-actions">
+        <button
+          type="button"
+          class="c-icon-btn"
+          [attr.aria-label]="'knowledge_edit' | translatePipe"
+          (click)="openEdit(item)"
+        >
+          <lucide-icon name="pencil" [size]="16"></lucide-icon>
+        </button>
+        <button type="button" class="c-icon-btn" [attr.aria-label]="'delete' | translatePipe" (click)="remove(item)">
+          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+        </button>
+      </div>
+      }
+    </div>
+    } }
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (isFormOpen_()) {
+    <app-modal-shell
+      size="md"
+      [titleKey]="editing_() ? 'knowledge_edit' : 'knowledge_add'"
+      [sheet]="true"
+      (dismissed)="closeForm()"
+    >
+      <div class="knowledge-form">
+        <app-form-field [label]="'knowledge_topic' | translatePipe">
+          <app-custom-select
+            [ngModel]="formTopic_()"
+            (ngModelChange)="formTopic_.set($event)"
+            [options]="topicOptions"
+            placeholder="knowledge_topic"
+          />
+        </app-form-field>
+        <app-form-field
+          [label]="'knowledge_question' | translatePipe"
+          forId="knowledge-question"
+          [error]="isFormTouched_() && !formQuestion_().trim() ? ('field_required' | translatePipe) : null"
+        >
+          <input
+            id="knowledge-question"
+            type="text"
+            autocomplete="off"
+            [maxLength]="questionMax"
+            [ngModel]="formQuestion_()"
+            (ngModelChange)="formQuestion_.set($event)"
+          />
+        </app-form-field>
+        <app-form-field
+          [label]="'knowledge_answer' | translatePipe"
+          forId="knowledge-answer"
+          [error]="isFormTouched_() && !formAnswer_().trim() ? ('field_required' | translatePipe) : null"
+        >
+          <textarea
+            id="knowledge-answer"
+            rows="4"
+            [maxLength]="answerMax"
+            [ngModel]="formAnswer_()"
+            (ngModelChange)="formAnswer_.set($event)"
+          ></textarea>
+        </app-form-field>
+        <label class="c-chip c-chip--toggle">
+          <input type="checkbox" [ngModel]="formPublic_()" (ngModelChange)="formPublic_.set($event)" />
+          <span>{{ 'knowledge_visibility_toggle' | translatePipe }}</span>
+        </label>
+        <div class="variations">
+          <span class="variations-label">{{ 'knowledge_variations' | translatePipe }}</span>
+          @for (v of formVariations_(); track $index) {
+          <span class="c-chip c-chip--removable">
+            <input
+              type="text"
+              autocomplete="off"
+              [maxLength]="questionMax"
+              [attr.aria-label]="'knowledge_variations' | translatePipe"
+              [ngModel]="v"
+              (ngModelChange)="setVariation($index, $event)"
+            />
+            <button type="button" class="c-chip__remove" aria-label="×" (click)="removeVariation($index)">×</button>
+          </span>
+          } @if (formVariations_().length < maxVariations) {
+          <button type="button" class="c-chip c-chip--tap" (click)="addVariation()">
+            {{ 'knowledge_add_variation' | translatePipe }}
+          </button>
+          }
+        </div>
+        <div class="c-modal-actions">
+          <button type="button" class="c-btn-ghost" (click)="closeForm()">{{ 'cancel' | translatePipe }}</button>
+          <button
+            type="button"
+            class="c-btn-primary"
+            data-testid="knowledge-save"
+            [disabled]="isBusy_()"
+            (click)="saveForm()"
+          >
+            {{ 'save' | translatePipe }}
+          </button>
+        </div>
+      </div>
+    </app-modal-shell>
+    } @if (isImportOpen_()) {
+    <app-modal-shell size="md" titleKey="knowledge_import" [sheet]="true" (dismissed)="closeImport()">
+      <div class="knowledge-form">
+        <div class="import-tabs">
+          <button
+            type="button"
+            class="c-chip c-chip--tab"
+            [class.active]="importTab_() === 'text'"
+            (click)="setImportTab('text')"
+          >
+            {{ 'knowledge_import_tab_text' | translatePipe }}
+          </button>
+          <button
+            type="button"
+            class="c-chip c-chip--tab"
+            [class.active]="importTab_() === 'url'"
+            (click)="setImportTab('url')"
+          >
+            <lucide-icon name="link" [size]="15"></lucide-icon>
+            {{ 'knowledge_import_tab_url' | translatePipe }}
+          </button>
+        </div>
+        @if (importTab_() === 'text') {
+        <textarea
+          rows="8"
+          data-testid="knowledge-import-text"
+          [maxLength]="importTextMax"
+          [placeholder]="'knowledge_import_text_placeholder' | translatePipe"
+          [ngModel]="importText_()"
+          (ngModelChange)="importText_.set($event)"
+        ></textarea>
+        } @else {
+        <input
+          type="url"
+          dir="ltr"
+          autocomplete="off"
+          data-testid="knowledge-import-url"
+          [placeholder]="'knowledge_import_url_placeholder' | translatePipe"
+          [ngModel]="importUrl_()"
+          (ngModelChange)="importUrl_.set($event)"
+        />
+        } @if (importError_(); as errorKey) {
+        <span class="c-field-error" role="alert">{{ errorKey | translatePipe }}</span>
+        }
+        <div class="c-modal-actions">
+          <button type="button" class="c-btn-ghost" [disabled]="isImporting_()" (click)="closeImport()">
+            {{ 'cancel' | translatePipe }}
+          </button>
+          <button
+            type="button"
+            class="c-btn-primary"
+            data-testid="knowledge-import-submit"
+            [disabled]="!canImport()"
+            (click)="submitImport()"
+          >
+            <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+            {{ 'knowledge_import_submit' | translatePipe }}
+          </button>
+        </div>
+      </div>
+    </app-modal-shell>
+    }
+  </ng-container>
+</app-list-shell>
