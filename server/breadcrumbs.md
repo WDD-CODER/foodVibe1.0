@@ -32,6 +32,7 @@
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
+| `scripts/catalog-enrichment/` | Plan 583: local-only master catalog pricing from the chains' published price files — `inventory`, `fetch-price-files`, `build-candidates`, `batch-view`, `merge-decisions`, `audit-sheet`, `apply-enrichment` (dry run unless `--write`), `merge-rescue`, `worksheet`, `stage-c-sheets`, `apply-worklist` (stage C + Dan's product fixes), `fix-line-units` (recipe/dish line units, backup + `--restore`), `report`, `verify-enrichment`; work folder `../foodvibe-catalog-work` beside the main checkout |
 
 ## Key Patterns
 - **One model, many types**: All domain data (products, recipes, menus, etc.) uses the generic `Entity` model with `entityType` as discriminator (e.g. `PRODUCT_LIST`, `RECIPE_LIST`).
