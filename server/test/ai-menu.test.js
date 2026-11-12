@@ -150,6 +150,17 @@ describe('POST /generate-menu dish numbers and guest count (plan 587)', () => {
   });
 });
 
+describe('POST /patch-menu dish numbers (plan 587)', () => {
+  it('removes serving_portions and sell_price from every item of the patch', async () => {
+    const changes = { sections: [{ category: 'א', items: [{ nameHebrew: 'חומוס', serving_portions: 100, sell_price: 50 }] }] };
+    fetchMock.mockResolvedValue(modelAnswer(JSON.stringify({ changes })));
+    const res = await request(app).post('/api/v1/ai/patch-menu').set('Authorization', `Bearer ${tokenA()}`)
+      .send({ currentMenu: { sections: [] }, instruction: 'הוסף חומוס' });
+    expect(res.status).toBe(200);
+    expect(res.body.changes.sections[0].items[0]).toEqual({ nameHebrew: 'חומוס' });
+  });
+});
+
 describe('POST /generate-menu recipe book', () => {
   it('sends only the live dishes of the caller and keeps only own dish ids', async () => {
     await testDb().collection('dishes').insertMany([

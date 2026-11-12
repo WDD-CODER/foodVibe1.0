@@ -815,7 +815,6 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini response missing "changes" key' });
     }
 
-    stripDishNumbers(parsed.value.changes.sections);
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
     req.log.error({ err, event: 'ai.patch_recipe.failed' });
@@ -1118,6 +1117,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned invalid patch format', code: 'invalid_patch' });
     }
 
+    stripDishNumbers(parsed.value.changes.sections);
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
     req.log.error({ err, event: 'ai.patch_menu.failed' });
