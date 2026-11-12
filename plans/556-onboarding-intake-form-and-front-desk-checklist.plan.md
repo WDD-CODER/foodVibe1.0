@@ -88,6 +88,10 @@ e2e/ui/556-2.spec.ts
 docs/agent/standards-backend.md
 shared/schemas/front-desk-templates.ts
 server/test/front-desk-profile.test.js
+server/test/admin-businesses.test.js
+server/test/business-baseline.test.js
+server/test/qualify.test.js
+server/utils/request-expiry.js
 ```
 
 ## Read Scope
