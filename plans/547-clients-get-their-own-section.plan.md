@@ -47,8 +47,8 @@ server/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 src/app/core/models/breadcrumbs.md
 src/app/core/services/breadcrumbs.md
-tab-chips.component.spec.ts
-header.component.spec.ts
+src/app/core/components/tab-chips/tab-chips.component.spec.ts
+src/app/core/components/header/header.component.spec.ts
 src/app/pages/clients/**
 src/app/core/components/tab-chips/**
 src/app/core/components/header/**
