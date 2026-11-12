@@ -1,6 +1,5 @@
 import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { Router } from '@angular/router'
 import { of } from 'rxjs'
 import { TermsGateComponent } from './terms-gate.component'
 import { Terms, TermsService } from '../../services/terms.service'
@@ -15,11 +14,9 @@ describe('TermsGateComponent (plan 584)', () => {
   let fixture: ComponentFixture<TermsGateComponent>
   const user_ = signal<User | null>(null)
   let logout: jasmine.Spy
-  let navigate: jasmine.Spy
 
   beforeEach(() => {
     logout = jasmine.createSpy('logout').and.returnValue(of(null))
-    navigate = jasmine.createSpy('navigate').and.resolveTo(true)
   })
 
   async function show(user: User | null): Promise<boolean> {
@@ -28,7 +25,6 @@ describe('TermsGateComponent (plan 584)', () => {
       imports: [TermsGateComponent],
       providers: [
         { provide: UserService, useValue: { user_: user_.asReadonly(), logout: logout } },
-        { provide: Router, useValue: { navigate: navigate } },
         { provide: TermsService, useValue: { load: () => of(TERMS), accept: () => of({}) } },
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
         { provide: UserMsgService, useValue: { onSetErrorMsg: () => {} } }
@@ -67,6 +63,5 @@ describe('TermsGateComponent (plan 584)', () => {
     expect(close).not.toBeNull()
     close.click()
     expect(logout).toHaveBeenCalledTimes(1)
-    expect(navigate).toHaveBeenCalledWith(['/welcome'])
   })
 })

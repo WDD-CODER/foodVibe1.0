@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core'
-import { Router } from '@angular/router'
 import { UserService } from '../../services/user.service'
 import { TermsService } from '../../services/terms.service'
 import { TranslationService } from '../../services/translation.service'
@@ -25,7 +24,6 @@ export class TermsGateComponent {
   private readonly termsService_ = inject(TermsService)
   private readonly translation_ = inject(TranslationService)
   private readonly userMsg_ = inject(UserMsgService)
-  private readonly router_ = inject(Router)
 
   /** The version of the terms file, read when a real user is signed in. */
   protected readonly currentVersion_ = signal<string | null>(null)
@@ -54,10 +52,10 @@ export class TermsGateComponent {
     })
   }
 
-  /** Close, Escape or a click outside: no terms accepted means only the welcome page, so sign out. */
+  /** Close, Escape or a click outside: no terms accepted means only the welcome page, so sign out (SignedOutRedirectService then moves to the welcome page). */
   protected onClosed(): void {
     if (this.isPosting_()) return
-    this.userService_.logout().subscribe(() => void this.router_.navigate(['/welcome']))
+    this.userService_.logout().subscribe()
   }
 
   protected onAccepted(version: string): void {

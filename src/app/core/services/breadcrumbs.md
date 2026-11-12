@@ -50,6 +50,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `restore-choice-modal.service.ts` | Restore-from-trash choice | RestoreChoiceModalService |
 | `translation-key-modal.service.ts` | English key + Hebrew modal | TranslationKeyModalService |
 | `user.service.ts` | User/session | UserService, LoginCredentials |
+| `signed-out-redirect.service.ts` | Moves a signed-out visitor to /welcome (not on /welcome or /cook/) | SignedOutRedirectService |
 | `util.service.ts` | Shared utilities | UtilService |
 | `hero-fab.service.ts` | Floating action button state per route | HeroFabService |
 | `export.service.ts` | Data export orchestration | ExportService |
