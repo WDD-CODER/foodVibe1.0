@@ -52,7 +52,7 @@ the exact change, and why it can't be done in-scope; offer `approved: <path>`; t
 append the path to the scope block above and retry.
 
 ## Architecture Impact
-- INV-none: preserves — test files only.
+- INV-6: preserves — test files only; the `*ai*` glob matches `deposit-paid-dialog` by its name, no AI call is touched.
 
 ## Reuse Check
 - `stubFinePointer()` in `src/testing/fine-pointer.ts` — family: none — rung: 4 — why: one test helper; the date-field
