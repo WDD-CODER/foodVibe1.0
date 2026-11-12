@@ -1,0 +1,61 @@
+<main class="pb-page" dir="rtl" lang="he">
+  @switch (state_()) { @case ('loading') {
+  <p class="pb-loading" aria-busy="true">{{ 'pb_loading' | translatePipe }}</p>
+  } @case ('not_found') {
+  <app-empty-state messageKey="pb_request_not_found" icon="clipboard-check" />
+  } @case ('failed') {
+  <app-empty-state messageKey="pb_load_failed" icon="clipboard-check" ctaLabelKey="pb_retry" (ctaClick)="load()" />
+  } @case ('ready') { @if (status_(); as s) {
+  <app-public-brand [name]="s.displayName" />
+  <section class="pb-card" data-testid="pb-status">
+    <p class="pb-reference" data-testid="pb-reference">{{ referenceText_() }}</p>
+    <p class="pb-sub">{{ wantedLine_() }}</p>
+
+    @switch (s.status) { @case ('approved') {
+    <h2 class="pb-title" data-testid="pb-status-text">{{ 'pb_status_approved' | translatePipe }}</h2>
+    @if (bookingLine_()) {
+    <p data-testid="pb-booking">{{ bookingLine_() }}</p>
+    } @if (s.eventOpened) {
+    <p>{{ eventText_() }}</p>
+    }
+    <p>{{ 'pb_change_contact' | translatePipe }}</p>
+    <div class="pb-actions">
+      @if (telLink_(); as tel) {
+      <a class="c-btn-ghost" [href]="tel">
+        <lucide-icon name="phone" [size]="16"></lucide-icon>
+        {{ phone_() }}
+      </a>
+      } @if (whatsappLink_(); as wa) {
+      <a class="c-btn-ghost" [href]="wa" target="_blank" rel="noopener">
+        <lucide-icon name="message-circle" [size]="16"></lucide-icon>
+        {{ 'pb_whatsapp' | translatePipe }}
+      </a>
+      }
+    </div>
+    } @case ('declined') {
+    <h2 class="pb-title" data-testid="pb-status-text">{{ declinedText_() }}</h2>
+    @if (s.declineReason) {
+    <p>{{ 'pb_decline_' + s.declineReason | translatePipe }}</p>
+    } } @case ('cancelled') {
+    <h2 class="pb-title" data-testid="pb-status-text">{{ 'pb_status_cancelled' | translatePipe }}</h2>
+    } @case ('expired') {
+    <h2 class="pb-title" data-testid="pb-status-text">{{ 'pb_status_expired' | translatePipe }}</h2>
+    <a class="c-btn-primary" [routerLink]="'/book/' + slug">{{ 'pb_new_request' | translatePipe }}</a>
+    } @default {
+    <h2 class="pb-title" data-testid="pb-status-text">{{ 'pb_status_waiting' | translatePipe }}</h2>
+    } } @if (waiting_()) {
+    <button
+      type="button"
+      class="c-btn-ghost"
+      data-testid="pb-cancel"
+      [disabled]="isCancelling_()"
+      [attr.aria-busy]="isCancelling_()"
+      (click)="cancel()"
+    >
+      {{ 'pb_cancel' | translatePipe }}
+    </button>
+    }
+  </section>
+  } } }
+  <footer class="pb-footer">{{ 'pb_powered_by' | translatePipe }}</footer>
+</main>

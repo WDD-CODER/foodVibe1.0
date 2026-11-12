@@ -143,6 +143,10 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
 | `GET` | `/api/v1/public/health` | none | Plan 543: public router probe; the public door for non-members (ADR 0030, C-GUEST). No member token is read under /api/v1/public. |
+| `GET` | `/api/v1/public/:slug` | none | Plan 555: the public view of a front desk profile (`publicView`: no `businessId`, `whatsapp`, `assistant`, `status`, budget or areas). 404 `NOT_FOUND`; draft or suspended → 200 `{ available: false, displayName }`. |
+| `POST` | `/api/v1/public/:slug/requests` | none, `publicLimiter` + `honeypot` | Plan 555: a guest sends a request (strict `publicRequestSchema`, `consentTerms: true`). 201 `{ reference, token }`; 400 `BAD_REQUEST_INPUT` (+ `issues`), `KIND_DISABLED`, `UNKNOWN_QUESTION`; 403 `NOT_AVAILABLE`; 404 `NOT_FOUND`; 429. Honeypot `website` filled → silent 201, nothing written. |
+| `GET` | `/api/v1/public/:slug/requests/:token` | none (token) | Plan 555: the guest's own request by its 32-char token. A malformed token or a token of another slug → 404 `NOT_FOUND` (no read for a malformed one). No phone, answers or decline text. |
+| `POST` | `/api/v1/public/:slug/requests/:token/cancel` | none (token), `publicLimiter` | Plan 555: `new`, `qualified`, `needs_info` → `cancelled` (`via: 'guest'`); any other status → 409 `ALREADY_DECIDED`; 404 `NOT_FOUND`; 429. |
 
 `POST /api/v1/data/clients` finds-or-creates by `phoneKey` (plan 545): 201 new, 200 existing; restore or a phone change that would make a second live client → 409 `PHONE_TAKEN`.
 

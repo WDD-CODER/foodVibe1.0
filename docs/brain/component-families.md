@@ -271,6 +271,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
 - `FrontDeskBadgeService` (`front-desk-badge.service.ts`): app-wide count signal for the front desk badge (plan 552).
+- `LayoutModeService` (`layout-mode.service.ts`): root signal `bare_` from the deepest route's `data.bare`; the shell hides header, tabs and quick-add on the public pages (plan 555).
 - Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
@@ -305,6 +306,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `PublicRequestService` (`pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.

@@ -25,6 +25,13 @@ const FLOOD_MAX = 30
 const MESSAGE_MAX = 500
 const CONTEXT_MAX_BYTES = 4096
 const URL_MAX = 300
+// Plan 555: a guest's read-back token is a bearer secret. It is masked in every URL the browser log sends.
+const TOKEN_URLS = [/(\/api\/v1\/public\/[^/?#]+\/requests\/)[^/?#]+/, /(\/book\/[^/?#]+\/r\/)[^/?#]+/]
+
+/** Replaces the token segment of a public request URL with `:token`. */
+export function maskTokenUrl(url: string): string {
+  return TOKEN_URLS.reduce((acc, re) => acc.replace(re, '$1:token'), url)
+}
 
 @Injectable({ providedIn: 'root' })
 export class LoggingService {
@@ -47,9 +54,9 @@ export class LoggingService {
       level,
       event: event.event,
       message: event.message.slice(0, MESSAGE_MAX),
-      ...(event.context ? { context: this.fitContext_(event.context) } : {}),
+      ...(event.context ? { context: this.fitContext_(this.maskContextUrl_(event.context)) } : {}),
       ...(event.requestId ? { requestId: event.requestId } : {}),
-      url: typeof location === 'undefined' ? undefined : location.pathname.slice(0, URL_MAX),
+      url: typeof location === 'undefined' ? undefined : maskTokenUrl(location.pathname).slice(0, URL_MAX),
       timestamp: new Date(now).toISOString()
     }
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
@@ -70,6 +77,10 @@ export class LoggingService {
       .catch(() => {
         this.pausedUntil_ = Date.now() + BACKOFF_MS
       })
+  }
+
+  private maskContextUrl_(context: Record<string, unknown>): Record<string, unknown> {
+    return typeof context['url'] === 'string' ? { ...context, url: maskTokenUrl(context['url']) } : context
   }
 
   /** Max FLOOD_MAX events per window; the first event of the next window reports the drops. */
