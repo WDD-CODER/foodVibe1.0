@@ -1,0 +1,182 @@
+{
+  "run": "run-589",
+  "branch": "orch/run-589",
+  "base": "main",
+  "startedAt": "2026-11-12T11:23:28.666Z",
+  "mainShaAtStart": "a12c771809569528b32c8d84581d8873ec337551",
+  "plans": {
+    "589": {
+      "nnn": "589",
+      "title": "A signed-out visitor sees only the welcome page; no automatic guest sign-in on the PC and in the slots",
+      "branch": "feat/589-signed-out-visitors-see",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T11:26:54.813Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T11:41:45.854Z"
+        }
+      },
+      "humanItems": [
+        "On the PC (`http://localhost:4200`) with no one signed in, the app opens on the welcome page, and every other"
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T11:26:53.581Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:26:54.817Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:36:14.317Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:41:37.400Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:41:45.856Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:42:00.882Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:43:53.147Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.7,
+      "sha": "8d00078029f5483916b9f856f5e51c6ab67be4a5",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 552.3,
+          "tokens": {
+            "input": 782948,
+            "output": 11742
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13,
+          "tokens": {
+            "input": 29916,
+            "output": 961
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "8741bb33cf5a685a72c13b3a9fe358d803d3de5e"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T11:26:52.983Z",
+      "plan": "589",
+      "text": "the folder foodVibe1.0-orch-run-589-589 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T11:42:19.979Z",
+      "plan": "589",
+      "text": "the folder foodVibe1.0-orch-merge-run-589 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 13.7,
+  "updatedAt": "2026-11-12T11:53:18.644Z",
+  "stopReason": "final gate failed: pnpm run test:ci — ✔ Browser application bundle generation complete. / ✔ Browser application bundle generation complete. /  ELIFECYCLE  Command failed with exit code 1.",
+  "stops": [
+    {
+      "at": "2026-11-12T11:53:15.733Z",
+      "reason": "final gate failed: pnpm run test:ci — ✔ Browser application bundle generation complete. / ✔ Browser application bundle generation complete. /  ELIFECYCLE  Command failed with exit code 1.",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "589",
+      "type": "behaviour",
+      "text": "behaviour: after sign-in the welcome page sends the visitor to the in-app returnUrl, otherwise /dashboard. This applies to the modal's returnUrl and to the effect that leaves /welcome once a user exists — reverse: restore the fixed '/dashboard' in welcome.page.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "589",
+      "type": "behaviour",
+      "text": "behaviour: the dev-only 'dev/catalog' route (spread from devCatalogRoutes in dev-catalog.routes.ts, outside the plan scope) stays unguarded and is not covered by route-guard-check — reverse: add authGuard in dev-catalog.routes.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "589",
+      "type": "behaviour",
+      "text": "behaviour: the auth guard no longer shows the 'sign_in_to_use' toast or opens the popup, per the plan — reverse: restore both lines in auth.guard.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "589",
+      "type": "seen",
+      "text": "seen: e2e/cook-view.spec.ts:4 relies on the guest auto-login; it will fail until it signs in (a follow-up in the plan)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T11:53:18.640Z",
+  "finalGate": {
+    "ok": false,
+    "command": "pnpm run test:ci",
+    "at": "2026-11-12T11:53:18.643Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
