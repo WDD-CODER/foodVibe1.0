@@ -5,7 +5,7 @@ const API = (process.env['E2E_API_URL'] ?? 'http://localhost:3000').replace(/\/$
 const NAME = 'בדיקה E2E'
 const card = (page: Page) => page.locator('app-logistics-item-manager')
 
-/** Deletes every own `logisticsItem` term named NAME (left over from this run or an earlier one). */
+/** Deletes every own `logisticsItem` term named NAME, removed (`removedAt`) ones too (left over from this run or an earlier one). */
 async function cleanup(request: APIRequestContext, session: QaSession): Promise<void> {
   const headers = { authorization: `Bearer ${session.token}` }
   const res = await request.get(`${API}/api/v1/data/taxonomyTerms`, { headers })
@@ -41,7 +41,7 @@ test('523-3: removing an own question and confirming takes it off the list', asy
     await card(page).getByRole('tab', { name: 'פגישת ספקים' }).click()
     const row = card(page).locator('.logistics-item', { hasText: NAME })
     await expect(row).toBeVisible()
-    await row.locator('.c-chip__remove').click()
+    await row.getByRole('button', { name: 'מחיקה' }).click()
     await page.locator('.c-modal-actions .c-btn-primary').last().click()
 
     await expect(card(page).locator('.logistics-item', { hasText: NAME })).toHaveCount(0)
