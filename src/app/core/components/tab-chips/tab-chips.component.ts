@@ -73,6 +73,7 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'requests', labelKey: 'fd_chip_requests', icon: 'clipboard-check', path: '/requests', badge: true },
     { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings' },
     { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' },
+    { id: 'knowledge', labelKey: 'knowledge_chip', icon: 'book-open', path: '/frontdesk/knowledge' },
     { id: 'settings', labelKey: 'fd_chip_settings', icon: 'settings', path: '/frontdesk/settings' }
   ]
 }

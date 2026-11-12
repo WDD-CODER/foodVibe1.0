@@ -4,6 +4,7 @@ import { clientSchema } from './client.schema'
 import { decisionLogSchema } from './decision-log.schema'
 import { equipmentSchema } from './equipment.schema'
 import { frontDeskProfileSchema } from './front-desk-profile.schema'
+import { knowledgeItemSchema } from './knowledge-item.schema'
 import { menuEventSchema } from './menu-event.schema'
 import { productSchema } from './product.schema'
 import { recipeSchema } from './recipe.schema'
@@ -20,6 +21,7 @@ export * from './decision-log.schema'
 export * from './event-logistics'
 export * from './event-stage'
 export * from './front-desk-profile.schema'
+export * from './knowledge-item.schema'
 export * from './request.schema'
 export * from './taxonomy-term.schema'
 export { clientSchema, equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
@@ -36,6 +38,7 @@ export const SCHEMA_BY_COLLECTION = {
   taxonomyTerms: taxonomyTermSchema,
   clients: clientSchema,
   frontDeskProfiles: frontDeskProfileSchema,
+  knowledgeItems: knowledgeItemSchema,
   requests: requestSchema,
   bookings: bookingSchema,
   decisionLog: decisionLogSchema

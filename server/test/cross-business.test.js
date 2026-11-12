@@ -48,6 +48,7 @@ const BODY = {
   taxonomyTerms: () => ({ kind: 'allergen', key: 'lupinx', sortOrder: 0 }),
   clients: () => ({ name: 'לקוח X', phone: '050-111 2222' }),
   frontDeskProfiles: () => ({ businessType: 'other', slug: 'cross-x', displayName: 'עסק X', hours: [], requestKinds: {}, assistant: { level: 0, tone: 'warm' } }),
+  knowledgeItems: () => ({ topic: 'policy', question: 'חניה?', answer: 'יש', status: 'approved', source: 'manual', visibility: 'public' }),
   // requests / bookings are written only by their routers: the generic describe skips them, the router one below covers them.
   requests: () => ({}),
   bookings: () => ({}),
