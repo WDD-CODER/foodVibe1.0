@@ -20,7 +20,13 @@ export interface BusinessRow {
   closeRate: number | null
   lastEventDate: string | null
   /** Plan 556: the front desk checklist progress; null while the business has no profile. */
-  frontDesk: { status: 'draft' | 'pilot' | 'active' | 'suspended'; done: number; total: number } | null
+  frontDesk: {
+    status: 'draft' | 'pilot' | 'active' | 'suspended'
+    done: number
+    total: number
+    /** Plan 557: the assistant level; absent means 0 (the server sends it only when raised). */
+    assistantLevel?: number
+  } | null
 }
 
 /** Plan 557: body of the platform admin's front desk change; `reason` is required and kept on the profile. */

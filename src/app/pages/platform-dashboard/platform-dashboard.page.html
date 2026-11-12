@@ -79,7 +79,8 @@
           <td>{{ rate(row.closeRate) }}</td>
           <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
           <td data-testid="frontdesk-cell">
-            @if (row.frontDesk; as fd) { {{ fd.done }}/{{ fd.total }} · {{ "fd_status_" + fd.status | translatePipe }}
+            @if (row.frontDesk; as fd) { {{ fd.done }}/{{ fd.total }} · {{ "fd_status_" + fd.status | translatePipe }} ·
+            <span data-testid="fd-level">{{ "fd_assistant_level_" + (fd.assistantLevel ?? 0) | translatePipe }}</span>
             <button type="button" class="c-btn-ghost" data-testid="fd-edit" (click)="editFrontDesk(row)">
               <lucide-icon name="pencil" [size]="14"></lucide-icon>
               <span class="btn-label">{{ "platform_fd_edit" | translatePipe }}</span>

@@ -181,7 +181,18 @@ describe('PlatformDashboardPage', () => {
     const cells = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="frontdesk-cell"]')
     ).map((td) => (td.textContent ?? '').replace(/\s+/g, ' ').trim())
-    expect(cells).toEqual(['3/8 · fd_status_pilot platform_fd_edit', '—'])
+    expect(cells).toEqual(['3/8 · fd_status_pilot · fd_assistant_level_0platform_fd_edit', '—'])
+  })
+
+  it('shows the assistant level next to the status on each front desk row (plan 557)', async () => {
+    await setup([
+      row('a', { frontDesk: { status: 'active', done: 8, total: 8, assistantLevel: 1 }, lastActivityAt: Date.now() }),
+      row('b', { frontDesk: { status: 'pilot', done: 2, total: 8 }, lastActivityAt: Date.now() - DAY })
+    ])
+    const levels = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="fd-level"]')).map(
+      (el) => (el.textContent ?? '').trim()
+    )
+    expect(levels).toEqual(['fd_assistant_level_1', 'fd_assistant_level_0'])
   })
 
   it('opens the front desk dialog on the row state when the edit button is clicked (plan 557)', async () => {

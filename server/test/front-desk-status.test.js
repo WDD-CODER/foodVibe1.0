@@ -54,6 +54,13 @@ describe('PUT /admin/businesses/:id/front-desk', () => {
     expect((await profile()).adminHistory).toHaveLength(2)
   })
 
+  it('the platform list row carries the assistant level next to the status', async () => {
+    const list = async () => (await request(app).get('/api/v1/admin/businesses').set(as(ADMIN))).body.rows.find(r => r._id === 'b1')
+    expect((await list()).frontDesk).toEqual({ status: 'draft', done: expect.any(Number), total: expect.any(Number) })
+    expect((await put('b1', { assistantLevel: 1, reason: 'earned' })).status).toBe(200)
+    expect((await list()).frontDesk).toMatchObject({ status: 'draft', assistantLevel: 1 })
+  })
+
   it('refuses a non-admin, a bad body, an unknown business and a business with no profile', async () => {
     expect((await put('b1', { status: 'pilot', reason: 'x' }, OWNER)).status).toBe(403)
     expect((await put('b1', { status: 'pilot' })).status).toBe(400)

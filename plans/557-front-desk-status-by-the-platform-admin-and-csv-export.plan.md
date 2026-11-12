@@ -229,3 +229,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `pnpm run build`, `pnpm run lint` (0 errors), `pnpm --dir server run lint`, `lint:icons`, `lint:no-native-select` -> exit 0.
 - `pnpm run test:ci` -> exit 0, 2161 SUCCESS; `pnpm run test:server` -> exit 0, 102 files, 1328 passed.
 - kit-manifest-check -> ok, 0 unclassified; scope-check --diff=origin/orch/batch-5 -> `SCOPE: ok`; override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+
+### Builder evidence (resume after ask 557-3)
+- Reviewer finding fixed (platform row shows the assistant level): `server/routes/admin.js` list rows add `frontDesk.assistantLevel` only when the stored level is above 0, so the pinned row shape in `server/test/front-desk-setup.test.js:126` (level 0 template) still holds; `platform-dashboard.page.html` shows `fd_assistant_level_<level ?? 0>` next to the status (`data-testid="fd-level"`). `BusinessRow.frontDesk.assistantLevel?` added.
+- Tests: `platform-dashboard.page.spec.ts` new case asserts `fd_assistant_level_1` / `fd_assistant_level_0` per row; `server/test/front-desk-status.test.js` new case asserts the list row is level-free at 0 and carries `assistantLevel: 1` after the admin raises it.
+- `pnpm run test:server` -> exit 0, 1329 passed; `pnpm run test:ci` -> exit 0, 2162 SUCCESS; `pnpm run build`, `pnpm run lint` (0 errors), server lint, `lint:icons`, `lint:no-native-select` -> exit 0.
+- kit-manifest-check -> ok, 0 unclassified; scope-check --diff=origin/orch/batch-5 -> `SCOPE: ok`; override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+- `e2e/ui/557-1.spec.ts`: written, not run (no running app or QA login in this worktree), per the Human's answer to ask 557-3.

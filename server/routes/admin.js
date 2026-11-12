@@ -112,7 +112,10 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
     const frontDeskBy = new Map()
     for (const [businessId, profile] of profileBy) {
       const setup = await frontDeskSetup(mongoose.connection.db, businessId, profile)
-      frontDeskBy.set(businessId, { status: profile.status, done: setup.done, total: setup.total })
+      const row = { status: profile.status, done: setup.done, total: setup.total }
+      // Plan 557: the assistant level the platform admin raised; left out at 0 (the default), the page shows it as 0.
+      if (typeof profile.assistant?.level === 'number' && profile.assistant.level > 0) row.assistantLevel = profile.assistant.level
+      frontDeskBy.set(businessId, row)
     }
     const memberBy = new Map(members.map(m => [m._id, m]))
     const usageBy = new Map(usage.map(u => [u._id, u.lastActivityAt]))
