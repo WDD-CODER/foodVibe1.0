@@ -1,6 +1,6 @@
 # Plan 584 — Sign-up asks the new owner to read and accept the terms, and stores the acceptance
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 1742a056da003dc6e06edc20739484fe50464b28
 

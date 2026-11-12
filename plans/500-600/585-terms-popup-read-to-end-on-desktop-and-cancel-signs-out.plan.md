@@ -1,6 +1,6 @@
 # Plan 585 — Terms popup: read to the end on every screen, and cancelling an unaccepted popup signs the user out
 
-Status: draft
+Status: done
 Depends-on: 584
 Snapshot: 4e1b4b12512f797265d97c9f89a87c54679dab8d
 
