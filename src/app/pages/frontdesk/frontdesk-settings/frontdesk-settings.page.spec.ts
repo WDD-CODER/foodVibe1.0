@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
-import { signal, WritableSignal } from '@angular/core'
+import { Component, signal, WritableSignal } from '@angular/core'
 import { provideRouter } from '@angular/router'
 import { LucideAngularModule, Settings } from 'lucide-angular'
 import { FrontdeskSettingsPage } from './frontdesk-settings.page'
+import { DataExportCardComponent } from './components/data-export-card/data-export-card.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
 import { PermissionService } from '@services/permission.service'
@@ -13,6 +14,9 @@ import { UserMsgService } from '@services/user-msg.service'
 import { templateFor } from '@schemas/front-desk-templates'
 import type { FrontDeskProfile } from '@models/front-desk-profile.model'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+
+@Component({ selector: 'app-data-export-card', standalone: true, template: '' })
+class StubExportCardComponent {}
 
 const profile = (): FrontDeskProfile =>
   ({
@@ -74,6 +78,10 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
         { provide: UserMsgService, useValue: userMsg },
         { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(true) } }
       ]
+    })
+    TestBed.overrideComponent(FrontdeskSettingsPage, {
+      remove: { imports: [DataExportCardComponent] },
+      add: { imports: [StubExportCardComponent] }
     })
     fixture = TestBed.createComponent(FrontdeskSettingsPage)
     await settle()

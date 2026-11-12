@@ -34,6 +34,8 @@ import {
   type RequestKindConfig
 } from '@models/front-desk-profile.model'
 import type { FrontDeskRequestKind } from '@schemas/entities/front-desk-profile.schema'
+import { DataExportCardComponent } from './components/data-export-card/data-export-card.component'
+import { FrontDeskStatusBannerComponent } from 'src/app/shared/front-desk-status-banner/front-desk-status-banner.component'
 import {
   RequestKindCardComponent,
   choiceNeedsOptions,
@@ -86,7 +88,9 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
     DateFieldComponent,
     HoursEditorComponent,
     TextareaAutoGrowDirective,
-    RequestKindCardComponent
+    RequestKindCardComponent,
+    DataExportCardComponent,
+    FrontDeskStatusBannerComponent
   ],
   templateUrl: './frontdesk-settings.page.html',
   styleUrl: './frontdesk-settings.page.scss',
@@ -284,7 +288,7 @@ export class FrontdeskSettingsPage {
         })
         .map(draftToHours)
     const text = (v: string) => v.trim() || undefined
-    const { status: _status, whatsapp: _whatsapp, ...base } = p
+    const { status: _status, whatsapp: _whatsapp, adminHistory: _history, ...base } = p
     const assistant: FrontDeskProfile['assistant'] = {
       level: p.assistant.level,
       tone: d.tone,

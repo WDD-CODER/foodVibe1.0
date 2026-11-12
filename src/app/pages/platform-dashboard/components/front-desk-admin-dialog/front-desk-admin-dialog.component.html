@@ -1,0 +1,58 @@
+<app-modal-shell size="sm" titleKey="platform_fd_dialog_title" [dismissible]="!isSaving_()" (dismissed)="cancel()">
+  <div class="fda-body" data-testid="fd-admin-dialog">
+    <p class="fda-name">{{ target()?.name }}</p>
+    <app-form-field label="platform_fd_status">
+      <app-custom-select
+        triggerId="fda-status"
+        [options]="statusOptions"
+        [ngModel]="status_()"
+        (ngModelChange)="status_.set($event)"
+      />
+    </app-form-field>
+    <app-form-field label="platform_fd_level">
+      <app-custom-select
+        triggerId="fda-level"
+        [options]="levelOptions"
+        [ngModel]="level_()"
+        (ngModelChange)="level_.set($event)"
+      />
+    </app-form-field>
+    <app-form-field label="platform_fd_plan">
+      <app-custom-select
+        triggerId="fda-plan"
+        [options]="planOptions"
+        [ngModel]="plan_()"
+        (ngModelChange)="plan_.set($event)"
+      />
+    </app-form-field>
+    <app-form-field
+      label="platform_fd_reason"
+      forId="fda-reason"
+      [error]="reasonError_() ?? (tried_() && reasonMissing_() ? 'field_required' : null)"
+    >
+      <textarea
+        id="fda-reason"
+        class="c-input"
+        rows="2"
+        [attr.maxlength]="reasonMax"
+        [value]="reason_()"
+        (input)="reason_.set($any($event.target).value); reasonError_.set(null)"
+      ></textarea>
+    </app-form-field>
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" data-testid="fd-admin-cancel" [disabled]="isSaving_()" (click)="cancel()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="fd-admin-save"
+      [disabled]="isSaving_() || !hasChange_()"
+      [attr.aria-busy]="isSaving_()"
+      (click)="save()"
+    >
+      {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>

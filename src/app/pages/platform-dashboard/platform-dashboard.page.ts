@@ -11,6 +11,8 @@ import { PlatformAdminService, type BusinessRow } from '@services/platform-admin
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { FrontDeskAdminDialogComponent } from './components/front-desk-admin-dialog/front-desk-admin-dialog.component'
+import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { formatPctInt } from 'src/app/core/engine/rounding'
 
@@ -64,7 +66,8 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     PageHeaderComponent,
     LoaderComponent,
     EmptyStateComponent,
-    PlatformLogisticsItemsComponent
+    PlatformLogisticsItemsComponent,
+    FrontDeskAdminDialogComponent
   ],
   templateUrl: './platform-dashboard.page.html',
   styleUrl: './platform-dashboard.page.scss',
@@ -76,6 +79,7 @@ export class PlatformDashboardPage implements OnInit {
   private readonly logging = inject(LoggingService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
+  protected readonly fdDialog = inject(FrontDeskAdminDialogService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly sortKey_ = signal<SortKey>('lastActivityAt')
@@ -256,5 +260,16 @@ export class PlatformDashboardPage implements OnInit {
       })
       this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     }
+  }
+
+  /** Plan 557: opens the front desk dialog for one row; the table reloads in the service after a save. */
+  protected async editFrontDesk(row: BusinessRow): Promise<void> {
+    const fd = row.frontDesk
+    if (!fd) return
+    await this.fdDialog.open({
+      businessId: row._id,
+      name: row.name,
+      status: fd.status
+    })
   }
 }

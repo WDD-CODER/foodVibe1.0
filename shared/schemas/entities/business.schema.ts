@@ -89,7 +89,9 @@ export const businessSchema = z.strictObject({
   /** Plan 477: stages staff may see (events they created always stay visible). Absent = every stage. */
   staffVisibleStages: staffVisibleStagesField.optional(),
   /** Plan 579: shared logistics questions this business hid, with the time it hid them. */
-  hiddenLogisticsKeys: z.array(z.strictObject({ key: z.string().min(1).max(LOGISTICS_LABEL_MAX), at: z.number() })).max(300).optional()
+  hiddenLogisticsKeys: z.array(z.strictObject({ key: z.string().min(1).max(LOGISTICS_LABEL_MAX), at: z.number() })).max(300).optional(),
+  /** Server-written by the platform admin (plan 557); reserved so later features can check it. */
+  frontDeskPlan: z.enum(['pilot', 'basic', 'pro']).optional()
 })
 
 export type Business = z.infer<typeof businessSchema>

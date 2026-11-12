@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.fd-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-warning);
+  border-radius: 0.5rem;
+  background: var(--bg-warning);
+  color: var(--text-warning);
+  font-size: 0.9rem;
+}

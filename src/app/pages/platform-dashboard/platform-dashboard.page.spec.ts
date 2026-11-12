@@ -9,6 +9,7 @@ import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
+import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformDashboardPage } from './platform-dashboard.page'
 
 @Component({ selector: 'app-platform-logistics-items', standalone: true, template: '' })
@@ -180,7 +181,15 @@ describe('PlatformDashboardPage', () => {
     const cells = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="frontdesk-cell"]')
     ).map((td) => (td.textContent ?? '').replace(/\s+/g, ' ').trim())
-    expect(cells).toEqual(['3/8 · fd_status_pilot', '—'])
+    expect(cells).toEqual(['3/8 · fd_status_pilot platform_fd_edit', '—'])
+  })
+
+  it('opens the front desk dialog on the row state when the edit button is clicked (plan 557)', async () => {
+    await setup([row('a', { frontDesk: { status: 'pilot', done: 3, total: 8 } })])
+    const dialog = TestBed.inject(FrontDeskAdminDialogService)
+    const open = spyOn(dialog, 'open').and.resolveTo(false)
+    ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="fd-edit"]') as HTMLButtonElement).click()
+    expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
   })
 
   describe('AI usage table (plan 566)', () => {

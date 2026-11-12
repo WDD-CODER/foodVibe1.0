@@ -2,6 +2,7 @@
   <app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />
 
   <main class="dashboard-main">
+    <app-front-desk-status-banner />
     @if (needsOpeningDetails_()) {
       <app-opening-details-banner />
     } @else {

@@ -7,6 +7,8 @@ const { LIVE } = require('../jobs/purge-deleted')
 const { jerusalemDate } = require('../middleware/usage')
 const { activeDaysByBusiness } = require('../utils/usage-stats')
 const { frontDeskSetup } = require('../services/front-desk-setup')
+const { actorOf } = require('../utils/actor')
+const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-admin.schema')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
 
@@ -152,6 +154,47 @@ router.put('/businesses/:id/internal', verifyToken, requirePlatformAdmin, async 
     res.json({ ok: true, internal })
   } catch (err) {
     req.log.error({ err, event: 'admin.business_internal.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 557: the platform admin moves one business's front desk (status, assistant level, plan) and the reason is kept.
+router.put('/businesses/:id/front-desk', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const parsed = frontDeskAdminUpdateSchema.safeParse(req.body ?? {})
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message }))
+    })
+  }
+  const { status, assistantLevel, plan, reason } = parsed.data
+  try {
+    const business = await col('businesses').findOne({ _id: req.params.id }, { projection: { _id: 1 } })
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    const profile = await col('frontDeskProfiles').findOne({ businessId: req.params.id, ...LIVE })
+    if (!profile) return res.status(404).json({ error: 'NO_PROFILE' })
+    const now = Date.now()
+    const actor = actorOf(req)
+    const row = { at: now, by: actor.userId, byName: String(actor.name).slice(0, 80), reason }
+    const $set = { updatedAt: now }
+    if (status !== undefined) { $set.status = status; row.status = status }
+    if (assistantLevel !== undefined) { $set['assistant.level'] = assistantLevel; row.assistantLevel = assistantLevel }
+    if (plan !== undefined) row.plan = plan
+    await col('frontDeskProfiles').updateOne(
+      { _id: profile._id },
+      { $set, $push: { adminHistory: { $each: [row], $slice: -50 } } }
+    )
+    if (plan !== undefined) await col('businesses').updateOne({ _id: req.params.id }, { $set: { frontDeskPlan: plan } })
+    const changed = Object.keys(row).filter(k => !['at', 'by', 'byName', 'reason'].includes(k))
+    req.log.info({ event: 'admin.front_desk.updated', businessId: req.params.id, changed })
+    res.json({
+      ok: true,
+      status: status ?? profile.status,
+      assistantLevel: assistantLevel ?? profile.assistant?.level ?? 0,
+      plan: plan ?? null
+    })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.front_desk.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
