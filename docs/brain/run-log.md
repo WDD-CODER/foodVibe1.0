@@ -23,3 +23,4 @@ One row per orchestrator run, written by `node scripts/orch-state.mjs finish` fr
 | 2026-11-12 | run-584 | 584 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-585 | 584,585 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-589 | 589 | 1 | 0 | - | 0 | 0 | 0 | failed | - | - | - |
+| 2026-11-12 | run-590 | 590 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
