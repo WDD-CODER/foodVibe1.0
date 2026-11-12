@@ -47,7 +47,8 @@ describe('TabChipsComponent', () => {
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
-          { path: 'clients', component: BlankStubComponent }
+          { path: 'clients', component: BlankStubComponent },
+          { path: 'frontdesk/knowledge', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation },
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
@@ -124,12 +125,22 @@ describe('TabChipsComponent', () => {
   it('maps /clients to the frontdesk group with the clients chip active (plan 547)', async () => {
     await router.navigateByUrl('/clients')
     fixture.detectChanges()
-    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients', '/frontdesk/settings'])
+    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients', '/frontdesk/knowledge', '/frontdesk/settings'])
     await fixture.whenStable()
     fixture.detectChanges()
     const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
     expect(active).not.toBeNull()
     expect(active.injector.get(RouterLink).href).toBe('/clients')
+  })
+
+  it('maps /frontdesk/knowledge to the frontdesk group with the knowledge chip active (plan 554)', async () => {
+    await router.navigateByUrl('/frontdesk/knowledge')
+    fixture.detectChanges()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
+    expect(active).not.toBeNull()
+    expect(active.injector.get(RouterLink).href).toBe('/frontdesk/knowledge')
   })
 
   it('should render nothing on a route with no mapped chip group', async () => {

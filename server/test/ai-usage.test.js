@@ -227,8 +227,8 @@ describe('static checks', () => {
     const src = fs.readFileSync(path.join(__dirname, '../routes/ai.js'), 'utf8');
     const sites = src.match(/await callGemini\(\{\r?\n|await callGeminiForRecipeWithRetry\(requestBody, \{/g) ?? [];
     const features = [...src.matchAll(/usage: \{ [^}]*feature: '(\w+)' \}/g)].map(m => m[1]);
-    expect(sites).toHaveLength(13);
-    expect(features).toHaveLength(13);
+    expect(sites).toHaveLength(14);
+    expect(features).toHaveLength(14);
     for (const f of features) expect(isAiFeature(f), f).toBe(true);
   });
 });

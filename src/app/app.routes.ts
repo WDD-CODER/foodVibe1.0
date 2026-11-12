@@ -1,3 +1,4 @@
+import { inject } from '@angular/core'
 import { Routes } from '@angular/router'
 import { welcomeGuard } from './core/guards/welcome.guard'
 import { homeRedirect } from './pages/welcome/home-redirect'
@@ -19,6 +20,7 @@ import { platformAdminGuard } from './core/guards/platform-admin.guard'
 import { environment } from '../environments/environment'
 import { devCatalogRoutes } from './pages/dev-catalog/dev-catalog.routes'
 import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
+import { KnowledgeItemDataService } from './core/services/knowledge-item-data.service'
 
 export const routes: Routes = [
   // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
@@ -171,6 +173,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/frontdesk/frontdesk-settings/frontdesk-settings.page').then(m => m.FrontdeskSettingsPage),
     canActivate: [authGuard],
     canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'frontdesk/knowledge',
+    loadComponent: () => import('./pages/frontdesk/knowledge/knowledge.page').then(m => m.KnowledgePage),
+    canActivate: [authGuard],
+    resolve: { knowledgeLoaded: () => inject(KnowledgeItemDataService).ensureLoaded().then(() => true) },
   },
   {
     path: 'bookings',
