@@ -172,9 +172,7 @@ export class AiMenuModalComponent implements OnInit {
           status,
           recipeId: status === 'matched' ? (bestMatch?.recipeId ?? null) : null,
           candidates,
-          predictedTakeRate: dish.predictedTakeRate,
-          servingPortions: dish.serving_portions,
-          sellPrice: dish.sell_price
+          predictedTakeRate: dish.predictedTakeRate
         }
       })
       return { category: section.category, items }
