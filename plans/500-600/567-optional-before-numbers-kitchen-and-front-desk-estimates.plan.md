@@ -1,6 +1,6 @@
 # Plan 567 — Optional "before" numbers: kitchen and front desk estimates the owner may skip
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
