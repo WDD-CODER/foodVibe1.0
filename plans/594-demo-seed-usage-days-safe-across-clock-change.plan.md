@@ -72,8 +72,8 @@ Run the test with `now` fixed at 2026-11-12T21:21:00Z and confirm the duplicate 
 - none.
 
 ## Atomic Sub-tasks
-- [ ] A1: Make the seed's 21 usage days always 21 different calendar days — server/scripts/lib/demo-data.js
-- [ ] A2: Prove it with the times that broke it, around both clock changes — server/test/seed-demo-business.test.js
+- [x] A1: Make the seed's 21 usage days always 21 different calendar days — server/scripts/lib/demo-data.js
+- [x] A2: Prove it with the times that broke it, around both clock changes — server/test/seed-demo-business.test.js
 
 ## What happens when
 - Any `now` → 21 distinct dates.
@@ -92,3 +92,4 @@ Run the test with `now` fixed at 2026-11-12T21:21:00Z and confirm the duplicate 
 
 ## Execution Notes
 - Planner 2026-11-12: found when PR #563 (batch-3) failed CI on this test; the failure is on main, not in batch 3.
+- Builder: cd server; pnpm exec vitest run test/seed-demo-business.test.js -> exit 0, 9 passed (incl. 3 new now cases: 2026-11-12T21:21Z, 2026-03-28T21:30Z, 2026-10-25T00:30Z). Step 0 skipped: duplicate reproduced by the CI report; run at 21:47 UTC (failing window) now passes.
