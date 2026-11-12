@@ -21,12 +21,13 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `clients/` | Front Desk: the client list (plan 547), profile (`/clients/:id`) from plan 551 |
 | `requests/` | `/requests` — Front Desk work queue: one card per request with fit verdict, approve / ask / decline, phone request dialog, day load strip (plan 552) |
 | `bookings/` | `/bookings` — Front Desk agenda: day / week bookings with arrival actions (plan 552) |
+| `frontdesk/` | `/frontdesk/*` — Front Desk settings screen (`/frontdesk/settings`, plan 553): the owner's profile editor |
 | `trash/` | `/trash` — soft-deleted items and restore |
 | `platform-dashboard/` | `/platform` — platform-admin-only table of every business (activity, events, internal flag) + the logistics-items list (plan 532: each business's own logistics items grouped, promote to shared) |
 | `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |
 
 ## Key exports
-`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`, `PlatformDashboardPage`, `SettingsPage`, `WelcomePage`, `RequestsPage`, `BookingsPage`
+`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`, `PlatformDashboardPage`, `SettingsPage`, `WelcomePage`, `RequestsPage`, `BookingsPage`, `FrontdeskSettingsPage`
 
 ---
 *Updated by: breadcrumbs*
