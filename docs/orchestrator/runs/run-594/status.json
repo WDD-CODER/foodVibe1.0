@@ -1,0 +1,146 @@
+{
+  "run": "run-594",
+  "branch": "orch/run-594",
+  "base": "main",
+  "startedAt": "2026-11-12T21:36:36.933Z",
+  "mainShaAtStart": "01ec33967bb4a3944b83b18f7604cff6e1c29a63",
+  "plans": {
+    "594": {
+      "nnn": "594",
+      "title": "The demo seed makes 21 different usage days even when the window crosses a clock change",
+      "branch": "feat/594-demo-seed-usage-days",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T21:41:12.162Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T22:05:14.912Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-12T21:41:11.007Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:41:12.165Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:48:42.063Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:05:04.613Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:05:14.914Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:05:24.272Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:08:56.002Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5.2,
+      "sha": "80fe71e1182342181405be628be921bf34b05c55",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 440.9,
+          "tokens": {
+            "input": 149953,
+            "output": 3070
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.1,
+          "tokens": {
+            "input": 23692,
+            "output": 239
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "de795a9e166a80232b0be586e860bb1f39ada308"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T21:41:09.820Z",
+      "plan": "594",
+      "text": "the folder foodVibe1.0-orch-run-594-594 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T22:05:50.645Z",
+      "plan": "594",
+      "text": "the folder foodVibe1.0-orch-merge-run-594 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 5.2,
+  "updatedAt": "2026-11-12T22:15:55.015Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "594",
+      "type": "behaviour",
+      "text": "behaviour: skipped Step 0 (running the test with `now` fixed to see the duplicate before the change) — the CI failure on PR #563 already showed the duplicate, and the new test covers that time — reverse: stash the demo-data.js change and run the new test to see it fail",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "594",
+      "type": "behaviour",
+      "text": "behaviour: did not run the full gate checks (build, lint, test:ci, full test:server); the orchestrator gate runs them — reverse: run the listed CHECKS by hand",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T22:15:55.011Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T22:15:55.014Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
