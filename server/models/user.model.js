@@ -21,6 +21,10 @@ const userSchema = new Schema(
     // Plan 492: the username a removed staff member had; `name` then holds a tombstone (releasedUsername).
     removedName: { type: String },
     createdAt: { type: Number, default: null },
+    // Plan 584: proof of the terms the user accepted (version, time, address). Time and address never reach the client.
+    termsAcceptedVersion: { type: String, default: null },
+    termsAcceptedAt: { type: Number, default: null },
+    termsAcceptedIp: { type: String, default: null },
   },
   { timestamps: false }
 );
