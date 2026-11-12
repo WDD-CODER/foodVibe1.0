@@ -1,0 +1,3 @@
+@if (isVisible_()) {
+  <app-terms-modal [dismissible]="false" [busy]="isPosting_()" (accepted)="onAccepted($event)" />
+}

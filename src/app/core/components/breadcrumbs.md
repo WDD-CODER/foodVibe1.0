@@ -11,6 +11,8 @@ Global shell UI: header (primary nav), floating hero FAB, auth modal, and global
 | `header/` | Top bar, route links | HeaderComponent |
 | `hero-fab/` | Contextual primary FAB | HeroFabComponent |
 | `auth-modal/` | Sign-in / registration UI | AuthModalComponent |
+| `terms-modal/` | Terms popup: scroll to the end to enable confirm (plan 584) | TermsModalComponent |
+| `terms-gate/` | Shows the terms popup to users who have not accepted the current version | TermsGateComponent |
 | `user-msg/` | Toast / user message strip | UserMsg |
 | `tab-chips/` | Tab-style chip navigation | TabChipsComponent |
 | `update-banner/` | App-update available banner | UpdateBannerComponent |

@@ -8,6 +8,7 @@
 const request = require('supertest')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const { currentTermsVersion } = require('../utils/terms-version')
 const { buildTestApp, teardownTestApp, testDb } = require('./helpers/app')
 
 let app
@@ -27,7 +28,7 @@ beforeEach(async () => {
 
 const SALT = 'b'.repeat(32)
 const HASH = SALT + ':' + crypto.pbkdf2Sync('pw', Buffer.from(SALT, 'hex'), 100000, 32, 'sha256').toString('hex')
-const post = body => request(app).post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH, ...body })
+const post = body => request(app).post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH, termsVersion: currentTermsVersion(), ...body })
 
 describe('signup businessName (plan 426)', () => {
   it('missing or blank -> 201 and the business is named after the username (plan 472)', async () => {
