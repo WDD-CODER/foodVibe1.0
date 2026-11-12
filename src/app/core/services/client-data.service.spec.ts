@@ -6,6 +6,11 @@ import { LoggingService } from './logging.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { Client } from '../models/client.model'
+import { provideHttpClient } from '@angular/common/http'
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
+import { MenuEventDataService } from './menu-event-data.service'
+import { RequestDataService } from './request-data.service'
+import { BookingDataService } from './booking-data.service'
 
 describe('ClientDataService', () => {
   let service: ClientDataService
@@ -28,6 +33,8 @@ describe('ClientDataService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         ClientDataService,
         { provide: StorageService, useValue: storageSpy },
         { provide: LoggingService, useValue: loggingSpy },
@@ -146,6 +153,63 @@ describe('ClientDataService', () => {
       expect(caught).toBe(err)
       expect(loggingSpy.error).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'crud.client.update_error' }))
       expect(service.getClientById('c1')?.name).toBe('Dana')
+    }))
+  })
+
+  describe('mergeClient', () => {
+    it('posts once, drops the merged client, replaces the target and reloads events, requests and bookings', fakeAsync(() => {
+      const http = TestBed.inject(HttpTestingController)
+      const reloads = [MenuEventDataService, RequestDataService, BookingDataService].map((token) => {
+        const svc = TestBed.inject(token as never) as { reloadFromStorage: () => Promise<void> }
+        return spyOn(svc, 'reloadFromStorage').and.returnValue(Promise.resolve())
+      })
+      const target: Client = { ...mockClients[1], name: 'Avi merged' }
+      let result: Client | undefined
+      service.mergeClient('c1', 'c2').then((r) => (result = r))
+      const req = http.expectOne((r) => r.url.endsWith('/api/v1/clients/c1/merge'))
+      expect(req.request.method).toBe('POST')
+      expect(req.request.body).toEqual({ intoId: 'c2' })
+      req.flush({ ok: true, client: target })
+      tick()
+      expect(result).toEqual(target)
+      expect(service.getClientById('c1')).toBeUndefined()
+      expect(service.getClientById('c2')?.name).toBe('Avi merged')
+      reloads.forEach((spy) => expect(spy).toHaveBeenCalledTimes(1))
+      http.verify()
+    }))
+
+    it('re-throws a refusal and keeps the list', fakeAsync(() => {
+      const http = TestBed.inject(HttpTestingController)
+      let caught: unknown
+      service.mergeClient('c1', 'c2').catch((e) => (caught = e))
+      http
+        .expectOne((r) => r.url.endsWith('/api/v1/clients/c1/merge'))
+        .flush({ error: 'ALREADY_MERGED' }, { status: 409, statusText: 'Conflict' })
+      tick()
+      expect((caught as HttpErrorResponse).status).toBe(409)
+      expect(service.allClients_().length).toBe(2)
+    }))
+  })
+
+  describe('setDoNotContact', () => {
+    it('puts the flag with its reason and keeps the answer in the list', fakeAsync(() => {
+      const http = TestBed.inject(HttpTestingController)
+      service.setDoNotContact('c1', true, 'asked')
+      const req = http.expectOne((r) => r.url.endsWith('/api/v1/clients/c1/do-not-contact'))
+      expect(req.request.method).toBe('PUT')
+      expect(req.request.body).toEqual({ on: true, reason: 'asked' })
+      req.flush({ ...mockClients[0], doNotContact: { at: 1, reason: 'asked', via: 'member' } })
+      tick()
+      expect(service.getClientById('c1')?.doNotContact?.reason).toBe('asked')
+    }))
+
+    it('sends only { on: false } to clear it', fakeAsync(() => {
+      const http = TestBed.inject(HttpTestingController)
+      service.setDoNotContact('c1', false)
+      const req = http.expectOne((r) => r.url.endsWith('/do-not-contact'))
+      expect(req.request.body).toEqual({ on: false })
+      req.flush(mockClients[0])
+      tick()
     }))
   })
 })

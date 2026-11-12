@@ -154,6 +154,13 @@ export const routes: Routes = [
     resolve: { clientsLoaded: clientsEnsureLoadedResolver },
   },
   {
+    path: 'clients/:id',
+    loadComponent: () => import('./pages/clients/components/client-profile/client-profile.component').then(m => m.ClientProfileComponent),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+    resolve: { clientsLoaded: clientsEnsureLoadedResolver, menuEventsLoaded: menuEventsEnsureLoadedResolver },
+  },
+  {
     path: 'menu-library',
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
     resolve: {

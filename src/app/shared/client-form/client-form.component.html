@@ -35,7 +35,7 @@
   type="button"
   class="c-chip c-chip--tap client-form-more-toggle"
   [attr.aria-expanded]="isMoreOpen_()"
-  (click)="isMoreOpen_.set(!isMoreOpen_())"
+  (click)="moreEdit_.set(!isMoreOpen_())"
 >
   {{ 'client_more_details' | translatePipe }}
 </button>
@@ -45,7 +45,7 @@
       <label>{{ 'client_type' | translatePipe }}</label>
       <app-custom-select
         [ngModel]="clientType_()"
-        (ngModelChange)="clientType_.set($event)"
+        (ngModelChange)="typeEdit_.set($event)"
         [options]="clientTypeOptions"
         placeholder="client_type"
       />
@@ -58,7 +58,7 @@
         autocomplete="off"
         [maxLength]="nameMax"
         [ngModel]="companyName_()"
-        (ngModelChange)="companyName_.set($event)"
+        (ngModelChange)="companyEdit_.set($event)"
       />
     </div>
     <div class="c-input-stack">
@@ -70,7 +70,7 @@
         autocomplete="off"
         [maxLength]="nameMax"
         [ngModel]="email_()"
-        (ngModelChange)="email_.set($event)"
+        (ngModelChange)="emailEdit_.set($event)"
       />
     </div>
     <div class="c-input-stack">
@@ -81,7 +81,7 @@
         autocomplete="off"
         maxlength="100"
         [ngModel]="source_()"
-        (ngModelChange)="source_.set($event)"
+        (ngModelChange)="sourceEdit_.set($event)"
       />
     </div>
     <div class="c-input-stack">
@@ -92,7 +92,7 @@
         rows="2"
         maxlength="2000"
         [ngModel]="notes_()"
-        (ngModelChange)="notes_.set($event)"
+        (ngModelChange)="notesEdit_.set($event)"
       ></textarea>
     </div>
   </div>

@@ -61,9 +61,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable (plan 546)
 - Use: `src/app/shared/client-picker/` · `app-client-picker` (built on `app-search-combobox`: search by name/phone, the picked client
   as a name inside the field with an X, and for an owner the add-client view); the add fields live in
-  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`).
+  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`, or through `updateClient()` in edit mode when it gets a `client` input, plan 551).
+  `NewInquiryDialogComponent` takes `initialClient` to open with a client picked (plan 551).
 - When: any screen that links a record to a client (new-inquiry dialog, event stage bar, the client section).
-- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`; outputs `picked`, `cleared`,
+- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`, `allowAdd` (false: no add row, a merge target), `exclude` (client ids left out); outputs `picked`, `cleared`,
   `addingChange`, `escaped`, `outsideClick`; method `back()` (leave the add view, true when it did).
 - Known copies: none.
 
