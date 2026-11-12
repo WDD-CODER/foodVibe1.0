@@ -1,0 +1,100 @@
+@layer components.front-desk-checklist-card {
+  :host {
+    display: block;
+  }
+
+  .fd-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    padding-block: var(--space-4);
+    padding-inline: var(--space-5);
+  }
+
+  .fd-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .fd-card__icon {
+    display: inline-flex;
+
+    color: var(--color-primary);
+  }
+
+  .fd-card__title {
+    margin: 0;
+
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+  }
+
+  .fd-card__progress {
+    margin-inline-start: auto;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .fd-card__none {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .fd-card__start {
+    align-self: flex-start;
+  }
+
+  .fd-card__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .fd-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    color: var(--color-text-main);
+    font-size: var(--fs-sm);
+  }
+
+  .fd-row--done {
+    color: var(--color-text-muted);
+  }
+
+  .fd-row__mark {
+    display: inline-flex;
+    flex-shrink: 0;
+
+    color: var(--color-success);
+  }
+
+  .fd-row__mark--open {
+    color: var(--border-strong);
+  }
+
+  .fd-row__link {
+    padding-block: var(--space-1);
+
+    color: inherit;
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

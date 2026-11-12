@@ -1,0 +1,315 @@
+<section class="ob-page" dir="rtl">
+  <app-page-header titleKey="onboarding_title"></app-page-header>
+
+  @if (isLoading_()) {
+  <p class="ob-loading" aria-busy="true">{{ 'fd_loading' | translatePipe }}</p>
+  } @else if (loadFailed_()) {
+  <app-empty-state
+    messageKey="onboarding_load_failed"
+    icon="settings"
+    ctaLabelKey="retry"
+    (ctaClick)="load()"
+    data-testid="load-failed"
+  />
+  } @else if (!canEdit_()) {
+  <app-empty-state messageKey="onboarding_owner_only" icon="lock" data-testid="owner-only" />
+  } @else {
+  <form class="ob-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <!-- One text / number / flag field; the question text is `onboarding_q_<key>`. -->
+    <ng-template #field let-key let-long="long" let-kind="kind" let-dir="dir">
+      <app-form-field [label]="'onboarding_q_' + key" [forId]="'ob-' + key">
+        @if (kind === 'flag') {
+        <label class="ob-flag">
+          <input type="checkbox" [id]="'ob-' + key" [formControlName]="key" />
+          <span>{{ 'onboarding_q_' + key | translatePipe }}</span>
+        </label>
+        } @else if (kind === 'number') {
+        <input class="c-input" type="number" min="0" inputmode="decimal" [id]="'ob-' + key" [formControlName]="key" />
+        } @else if (long) {
+        <textarea
+          class="c-input"
+          rows="2"
+          maxlength="1200"
+          appTextareaAutoGrow
+          [id]="'ob-' + key"
+          [formControlName]="key"
+        ></textarea>
+        } @else {
+        <input
+          class="c-input"
+          type="text"
+          maxlength="1200"
+          [attr.dir]="dir"
+          [id]="'ob-' + key"
+          [formControlName]="key"
+        />
+        }
+      </app-form-field>
+    </ng-template>
+
+    <section class="ob-card c-glass-card">
+      <div class="ob-grid">
+        <app-form-field label="onboarding_business_type" [error]="showErrors_() && !type_() ? 'field_required' : null">
+          <app-custom-select
+            triggerId="ob-type"
+            placeholder="onboarding_business_type"
+            [options]="typeOptions"
+            formControlName="type"
+          />
+        </app-form-field>
+      </div>
+    </section>
+
+    @if (type_()) {
+    <!-- Every business: basics -->
+    <section class="ob-card c-glass-card" data-testid="sec-basics">
+      <h2 class="ob-title">{{ 'onboarding_sec_basics' | translatePipe }}</h2>
+      <div class="ob-grid">
+        <app-form-field
+          label="fd_display_name"
+          forId="ob-display_name"
+          [error]="showErrors_() && !profile_() && !form.controls['display_name'].value ? 'field_required' : null"
+        >
+          <input class="c-input" type="text" maxlength="200" id="ob-display_name" formControlName="display_name" />
+        </app-form-field>
+        <app-form-field
+          label="fd_slug"
+          forId="ob-slug"
+          hint="fd_slug_hint"
+          [error]="slugTaken_() ? 'fd_slug_taken' : showErrors_() && slugInvalid_() && !profile_() ? 'fd_slug_invalid' : null"
+        >
+          <input
+            class="c-input"
+            type="text"
+            dir="ltr"
+            maxlength="40"
+            autocomplete="off"
+            id="ob-slug"
+            formControlName="slug"
+          />
+        </app-form-field>
+        @for (key of basicsFields; track key) {
+        <ng-container
+          *ngTemplateOutlet="field; context: { $implicit: key, dir: key === 'logo_url' ? 'ltr' : null }"
+        ></ng-container>
+        } @for (f of basicsItems; track f.key) {
+        <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
+        }
+      </div>
+    </section>
+
+    <!-- Hours and dates -->
+    <section class="ob-card c-glass-card" data-testid="sec-hours">
+      <h2 class="ob-title">{{ 'onboarding_sec_hours' | translatePipe }}</h2>
+      <app-hours-editor [rows]="hoursRows_()" (rowsChange)="hoursRows_.set($event)" [showMarks]="showErrors_()" />
+      <h3 class="ob-sub">{{ 'fd_closed_dates' | translatePipe }}</h3>
+      <div class="ob-add-date">
+        <app-date-field ariaLabelKey="fd_closed_dates" [value]="newClosed_()" (valueChange)="newClosed_.set($event)" />
+        <button type="button" class="c-btn-secondary" (click)="addClosedDate()">
+          <lucide-icon name="plus" [size]="14"></lucide-icon>
+          <span>{{ 'add' | translatePipe }}</span>
+        </button>
+      </div>
+      <ul class="ob-dates">
+        @for (d of closedDates_(); track d) {
+        <li>
+          <span dir="ltr">{{ d }}</span>
+          <button
+            type="button"
+            class="c-btn-ghost--sm ob-no-print"
+            [attr.aria-label]="'delete' | translatePipe"
+            (click)="removeClosedDate(d)"
+          >
+            <lucide-icon name="x" [size]="14"></lucide-icon>
+          </button>
+        </li>
+        }
+      </ul>
+      @for (f of hoursItems; track f.key) {
+      <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
+      }
+    </section>
+
+    <!-- Who answers today -->
+    <section class="ob-card c-glass-card" data-testid="sec-channels">
+      <h2 class="ob-title">{{ 'onboarding_sec_channels' | translatePipe }}</h2>
+      <div class="ob-grid">
+        @for (key of channelKeys; track key) {
+        <ng-container *ngTemplateOutlet="field; context: { $implicit: key }"></ng-container>
+        }
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="ob-card c-glass-card" data-testid="sec-faq">
+      <h2 class="ob-title">{{ 'onboarding_sec_faq' | translatePipe }}</h2>
+      @for (i of faqIndexes; track i) {
+      <div class="ob-faq-row">
+        <app-form-field label="onboarding_q_faq_question" [forId]="'ob-faq-q-' + i">
+          <input
+            class="c-input"
+            type="text"
+            maxlength="200"
+            [id]="'ob-faq-q-' + i"
+            [value]="faqRows_()[i].question"
+            (input)="setFaq(i, { question: $any($event.target).value })"
+          />
+        </app-form-field>
+        <app-form-field label="onboarding_q_faq_answer" [forId]="'ob-faq-a-' + i">
+          <textarea
+            class="c-input"
+            rows="2"
+            maxlength="1200"
+            appTextareaAutoGrow
+            [id]="'ob-faq-a-' + i"
+            [value]="faqRows_()[i].answer"
+            (input)="setFaq(i, { answer: $any($event.target).value })"
+          ></textarea>
+        </app-form-field>
+        <app-form-field label="onboarding_q_faq_topic">
+          <app-custom-select
+            [triggerId]="'ob-faq-t-' + i"
+            [options]="topicOptions"
+            [ngModel]="faqRows_()[i].topic"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="setFaq(i, { topic: $event })"
+          />
+        </app-form-field>
+      </div>
+      }
+    </section>
+
+    <!-- Policies -->
+    <section class="ob-card c-glass-card" data-testid="sec-policies">
+      <h2 class="ob-title">{{ 'onboarding_sec_policies' | translatePipe }}</h2>
+      @for (f of policyItems; track f.key) {
+      <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
+      }
+    </section>
+
+    <!-- Tone -->
+    <section class="ob-card c-glass-card" data-testid="sec-tone">
+      <h2 class="ob-title">{{ 'onboarding_sec_tone' | translatePipe }}</h2>
+      <app-form-field label="onboarding_q_tone">
+        <app-custom-select
+          triggerId="ob-tone"
+          placeholder="onboarding_q_tone"
+          [options]="toneOptions"
+          formControlName="tone"
+        />
+      </app-form-field>
+      <ng-container *ngTemplateOutlet="field; context: { $implicit: 'greeting' }"></ng-container>
+      <ng-container *ngTemplateOutlet="field; context: { $implicit: 'handoff_text' }"></ng-container>
+      @for (f of toneItems; track f.key) {
+      <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
+      }
+    </section>
+
+    <!-- Approvals -->
+    <section class="ob-card c-glass-card" data-testid="sec-approvals">
+      <h2 class="ob-title">{{ 'onboarding_sec_approvals' | translatePipe }}</h2>
+      <div class="ob-grid">
+        @for (key of approvalKeys; track key) {
+        <ng-container *ngTemplateOutlet="field; context: { $implicit: key }"></ng-container>
+        }
+      </div>
+    </section>
+
+    <!-- The chosen type's own section -->
+    @if (typeSection_(); as ts) {
+    <section class="ob-card c-glass-card" [attr.data-testid]="'sec-' + type_()">
+      <h2 class="ob-title">{{ 'onboarding_sec_' + type_() | translatePipe }}</h2>
+      <div class="ob-grid">
+        @for (key of ts.flags; track key) {
+        <ng-container *ngTemplateOutlet="field; context: { $implicit: key, kind: 'flag' }"></ng-container>
+        } @for (key of ts.numbers; track key) {
+        <ng-container *ngTemplateOutlet="field; context: { $implicit: key, kind: 'number' }"></ng-container>
+        } @for (key of ts.texts; track key) {
+        <ng-container *ngTemplateOutlet="field; context: { $implicit: key }"></ng-container>
+        }
+      </div>
+      @if (type_() === 'catering') {
+      <app-form-field label="onboarding_q_event_types">
+        <app-custom-multi-select
+          triggerId="ob-event-types"
+          placeholder="onboarding_q_event_types"
+          [options]="eventTypeOptions_()"
+          [translateLabels]="false"
+          formControlName="event_types"
+        />
+      </app-form-field>
+      } @for (f of ts.items; track f.key) {
+      <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
+      } @if (type_() === 'catering') {
+      <a class="ob-link ob-no-print" routerLink="/venues">{{ 'onboarding_venues_link' | translatePipe }}</a>
+      }
+    </section>
+    }
+
+    <!-- Baseline (D15): collapsed, optional -->
+    <section class="ob-card c-glass-card" data-testid="sec-baseline">
+      <button
+        type="button"
+        class="c-chip c-chip--tap ob-baseline-toggle"
+        data-testid="baseline-toggle"
+        [attr.aria-expanded]="baselineOpen_()"
+        (click)="toggleBaseline()"
+      >
+        {{ 'onboarding_sec_baseline' | translatePipe }}
+      </button>
+      <div class="ob-baseline" [class.ob-baseline--closed]="!baselineOpen_()" data-testid="baseline-group">
+        <p class="ob-hint">{{ 'onboarding_baseline_hint' | translatePipe }}</p>
+        <div class="ob-grid">
+          @for (key of baselineKeys; track key) {
+          <app-form-field [label]="baselineLabels[key]" [forId]="'ob-bl-' + key">
+            <input
+              class="c-input"
+              type="number"
+              min="0"
+              inputmode="decimal"
+              [id]="'ob-bl-' + key"
+              [formControlName]="key"
+            />
+          </app-form-field>
+          }
+        </div>
+        <button
+          type="button"
+          class="c-chip c-chip--tap ob-no-print"
+          data-testid="baseline-skip"
+          (click)="skipBaseline()"
+        >
+          {{ 'onboarding_baseline_skip' | translatePipe }}
+        </button>
+      </div>
+    </section>
+    }
+
+    <div class="ob-actions ob-no-print">
+      <button
+        type="submit"
+        class="c-btn-primary"
+        data-testid="onboarding-save"
+        [disabled]="isSaving_()"
+        [attr.aria-busy]="isSaving_()"
+      >
+        {{ (isSaving_() ? 'saving' : 'onboarding_save') | translatePipe }}
+      </button>
+      <button type="button" class="c-btn-secondary" data-testid="onboarding-print" (click)="print()">
+        <lucide-icon name="printer" [size]="14"></lucide-icon>
+        <span>{{ 'onboarding_print' | translatePipe }}</span>
+      </button>
+      <button
+        type="button"
+        class="c-btn-secondary"
+        data-testid="onboarding-test-request"
+        [disabled]="!testKind_() || isSendingTest_()"
+        (click)="sendTestRequest()"
+      >
+        <lucide-icon name="send" [size]="14"></lucide-icon>
+        <span>{{ 'onboarding_test_request' | translatePipe }}</span>
+      </button>
+    </div>
+  </form>
+  }
+</section>

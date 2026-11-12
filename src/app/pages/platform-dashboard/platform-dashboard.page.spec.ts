@@ -33,6 +33,7 @@ function row(id: string, extra: Partial<BusinessRow> = {}, events: Partial<Busin
     events: { total: 0, active: 0, closed: 0, finished: 0, ...events },
     closeRate: null,
     lastEventDate: null,
+    frontDesk: null,
     ...extra
   }
 }
@@ -169,6 +170,17 @@ describe('PlatformDashboardPage', () => {
       tr.querySelectorAll('td')[9].textContent?.trim()
     )
     expect(cells).toEqual(['57%', '—'])
+  })
+
+  it('shows the front desk progress and status, or a dash without a profile (plan 556)', async () => {
+    await setup([
+      row('a', { frontDesk: { status: 'pilot', done: 3, total: 8 }, lastActivityAt: Date.now() }),
+      row('b', { lastActivityAt: Date.now() - DAY })
+    ])
+    const cells = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="frontdesk-cell"]')
+    ).map((td) => (td.textContent ?? '').replace(/\s+/g, ' ').trim())
+    expect(cells).toEqual(['3/8 · fd_status_pilot', '—'])
   })
 
   describe('AI usage table (plan 566)', () => {

@@ -5,6 +5,11 @@ const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { getBusiness, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
+const { checkStoredDoc } = require('../middleware/validate')
+const { actorOf } = require('../utils/actor')
+const { frontDeskSetup } = require('../services/front-desk-setup')
+const { frontDeskIntakeSchema } = require('../generated/schemas/front-desk-intake.schema')
+const { templateFor } = require('../generated/schemas/front-desk-templates')
 const { isValidUsername, isValidPasswordHash, releasedUsername } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
@@ -136,6 +141,114 @@ router.put('/baseline', verifyToken, async (req, res) => {
   }
 })
 
+/** Plan 556: the kind config the intake starts from: the stored one, else the type's template, else a switched-off shell. */
+function intakeKindBase(existing, template) {
+  return JSON.parse(JSON.stringify(existing ?? template ?? { enabled: false, questions: [], rules: {}, expireAfterHours: 24 }))
+}
+
+/** Plan 556: the intake `requestKinds` merged over the stored kinds (enabled, rules, sitting length, event types only). */
+function mergeIntakeKinds(stored, template, incoming) {
+  const kinds = { ...stored }
+  for (const kind of Object.keys(template)) if (!kinds[kind]) kinds[kind] = intakeKindBase(null, template[kind])
+  for (const [kind, change] of Object.entries(incoming ?? {})) {
+    const cfg = intakeKindBase(kinds[kind], template[kind])
+    if (change.enabled !== undefined) cfg.enabled = change.enabled
+    if (change.rules) cfg.rules = { ...cfg.rules, ...change.rules }
+    if (change.defaultDurationMinutes !== undefined) cfg.defaultDurationMinutes = change.defaultDurationMinutes
+    if (change.eventTypeOptions) {
+      cfg.questions = cfg.questions.map(q => (q.key === 'event_type' ? { ...q, options: change.eventTypeOptions } : q))
+    }
+    kinds[kind] = cfg
+  }
+  return kinds
+}
+
+const hasBaselineValue = baseline => !!baseline && Object.values(baseline).some(v => v !== undefined)
+
+// POST /api/v1/business/front-desk-intake — the owner's whole onboarding form in one save (plan 556): profile, draft knowledge items, optional baseline.
+router.post('/front-desk-intake', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editFrontDesk', { type: 'frontDeskProfiles' })) return
+    const parsed = frontDeskIntakeSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.front_desk_intake.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const { businessType, profile: input, knowledge, baseline } = parsed.data
+    const { businessId } = scopeFilter(req)
+    const db = mongoose.connection.db
+    const actor = actorOf(req)
+    const now = Date.now()
+    const template = templateFor(businessType)
+    const stored = await db.collection('frontDeskProfiles').findOne({ businessId, ...LIVE })
+    if (!stored && !input.slug) return res.status(400).json({ error: 'SLUG_REQUIRED' })
+
+    // 1. Profile: build the stored document, check it, write it later.
+    const { requestKinds: incomingKinds, assistant: incomingAssistant, ...plain } = input
+    const set = {}
+    for (const [key, value] of Object.entries(plain)) if (value !== undefined) set[key] = value
+    const base = stored ?? { _id: newId(), schemaVersion: 2, userId: actor.userId, businessId, createdBy: actor.userId, createdAt: now, ...template }
+    const merged = {
+      ...base,
+      ...set,
+      businessType,
+      requestKinds: mergeIntakeKinds(stored?.requestKinds ?? {}, template.requestKinds, incomingKinds),
+      assistant: { ...base.assistant, ...(incomingAssistant && Object.fromEntries(Object.entries(incomingAssistant).filter(([, v]) => v !== undefined))) },
+      updatedAt: now,
+    }
+    const profileCheck = checkStoredDoc('frontDeskProfiles', merged)
+    if (!profileCheck.ok) return res.status(400).json({ error: 'Validation failed', issues: profileCheck.issues })
+
+    // 2. Knowledge: new items are drafts, a draft match is updated, an approved match is left alone.
+    const items = db.collection('knowledgeItems')
+    const existing = await items.find({ businessId, ...LIVE }, { projection: { _id: 1, question: 1, status: 1 } }).toArray()
+    const byQuestion = new Map(existing.map(i => [i.question, i]))
+    const writes = { create: [], update: [], skipped: 0 }
+    for (const item of knowledge) {
+      const match = byQuestion.get(item.question)
+      if (!match) {
+        const doc = { _id: newId(), schemaVersion: 2, userId: actor.userId, businessId, createdBy: actor.userId, createdAt: now, updatedAt: now, ...item, status: 'draft', source: 'manual' }
+        const check = checkStoredDoc('knowledgeItems', doc)
+        if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues })
+        writes.create.push(doc)
+        byQuestion.set(item.question, { _id: doc._id, question: item.question, status: 'draft' })
+      } else if (match.status === 'draft') {
+        writes.update.push({ _id: match._id, $set: { answer: item.answer, topic: item.topic, visibility: item.visibility, updatedAt: now } })
+      } else {
+        writes.skipped += 1
+      }
+    }
+
+    try {
+      if (stored) {
+        const { _id, ...fields } = merged
+        await db.collection('frontDeskProfiles').updateOne({ _id, businessId }, { $set: fields })
+      } else {
+        await db.collection('frontDeskProfiles').insertOne(merged)
+      }
+    } catch (err) {
+      if (err.code === 11000) return res.status(409).json({ error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' })
+      throw err
+    }
+    if (writes.create.length) await items.insertMany(writes.create)
+    for (const u of writes.update) await items.updateOne({ _id: u._id, businessId }, { $set: u.$set })
+
+    // 3. Baseline only when the owner filled at least one number (D15); otherwise it stays as it is.
+    let baselineResult = 'skipped'
+    if (hasBaselineValue(baseline)) {
+      const clean = Object.fromEntries(Object.entries(baseline).filter(([, v]) => v !== undefined))
+      await setBusinessBaseline(businessId, { ...clean, filledAt: now })
+      baselineResult = 'saved'
+    }
+    const knowledgeCounts = { created: writes.create.length, updated: writes.update.length, skipped: writes.skipped }
+    req.log.info({ event: 'business.front_desk_intake.saved', ...knowledgeCounts, baseline: baselineResult })
+    res.json({ profileId: merged._id, knowledge: knowledgeCounts, baseline: baselineResult })
+  } catch (err) {
+    req.log.error({ err, event: 'business.front_desk_intake.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
 /** The card shows at most "5 of 5" (priced-products goal, plan 469), so no count goes past this. */
 const SETUP_COUNT_CAP = 5
 
@@ -155,7 +268,8 @@ router.get('/setup-status', verifyToken, async (req, res) => {
       count('menuEvents'),
       User.countDocuments({ businessId: req.user.businessId, businessRole: 'staff', removedAt: null }).limit(SETUP_COUNT_CAP)
     ])
-    res.json({ pricedProducts, suppliers, recipes: recipes + dishes, events, staff })
+    const frontDesk = await frontDeskSetup(db, req.user.businessId)
+    res.json({ pricedProducts, suppliers, recipes: recipes + dishes, events, staff, frontDesk })
   } catch (err) {
     req.log.error({ err, event: 'business.setup_status.failed' })
     res.status(500).json({ error: 'Server error' })

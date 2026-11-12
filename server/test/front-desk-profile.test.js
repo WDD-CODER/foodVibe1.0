@@ -130,3 +130,71 @@ describe('reads never carry the WhatsApp routing id', () => {
     expect(JSON.stringify(res.body)).not.toContain('phoneNumberId')
   })
 })
+
+describe('plan 556: template questions for catering and private chef', () => {
+  const { qualify } = require('../generated/schemas/front-desk/qualify')
+  const questions = (type, kind) => templateFor(type).requestKinds[kind].questions
+  const byKey = (type, kind, key) => questions(type, kind).find(q => q.key === key)
+
+  it('private chef and catering events ask a kashrut question and an optional start time', () => {
+    for (const type of ['private_chef', 'catering']) {
+      expect(byKey(type, 'event', 'kashrut')).toMatchObject({ label: 'fd_q_kashrut', required: false })
+      expect(byKey(type, 'event', 'time')).toMatchObject({ type: 'time', required: false })
+      expect(questions(type, 'event').length).toBeLessThanOrEqual(12)
+    }
+  })
+
+  it('catering events ask the dietary question the private chef already asks', () => {
+    expect(byKey('catering', 'event', 'dietary')).toEqual(byKey('private_chef', 'event', 'dietary'))
+  })
+
+  it('the catering venue question is required, so a request without it needs more information', () => {
+    expect(byKey('catering', 'event', 'location')).toMatchObject({ label: 'fd_q_venue', required: true })
+    const kind = templateFor('catering').requestKinds.event
+    const out = qualify(kind, { date: '2030-01-01', partySize: 50, eventTypeKey: 'wedding' }, {}, { kind: 'event' })
+    expect(out.reasons).toContain('fd_reason_missing_answer|q=location')
+  })
+
+  it('the catering event-type question works for a business with no event types', () => {
+    const kind = templateFor('catering').requestKinds.event
+    expect(byKey('catering', 'event', 'event_type').options).toEqual([])
+    const without = qualify(kind, { date: '2030-01-01', partySize: 50, location: 'תל אביב' }, {}, { kind: 'event' })
+    expect(without.reasons).toContain('fd_reason_missing_answer|q=event_type')
+    const given = qualify(kind, { date: '2030-01-01', partySize: 50, eventTypeKey: 'wedding', location: 'תל אביב' }, {}, { kind: 'event' })
+    expect(given.reasons.some(r => r.includes('event_type'))).toBe(false)
+  })
+})
+
+describe('plan 556: a request expires at the earlier of its expiry and its requested start', () => {
+  const { expireDue } = require('../utils/request-expiry')
+  const { jerusalemDate } = require('../middleware/usage')
+  const DAY = 86_400_000
+
+  const seedRequest = (id, wanted, createdAt, status = 'new') =>
+    testDb().collection('requests').insertOne({
+      _id: id, schemaVersion: 2, businessId: 'b1', createdBy: 'o', createdAt, updatedAt: createdAt, kind: 'table', status, channel: 'manual',
+      clientId: 'c1', guestName: 'דנה', guestPhone: '0521234567', wanted, answers: [],
+      statusHistory: [{ status, at: createdAt, by: 'o', byName: '', via: 'member' }], publicToken: id.padEnd(32, 'x'),
+    })
+
+  it('a short-notice restaurant request is expired once its own time has passed, though it is younger than 4 hours', async () => {
+    const now = Date.now()
+    await testDb().collection('requests').deleteMany({})
+    await testDb().collection('frontDeskProfiles').insertOne({
+      _id: 'p556', schemaVersion: 2, businessId: 'b1', createdBy: 'o', createdAt: 1, updatedAt: 1,
+      ...templateFor('restaurant'), slug: 'place-556', displayName: 'מקום',
+    })
+    expect(templateFor('restaurant').requestKinds.table.expireAfterHours).toBe(4)
+    await seedRequest('past', { date: jerusalemDate(now - 2 * DAY), time: '12:00', partySize: 2 }, now - 3_600_000)
+    await seedRequest('future', { date: jerusalemDate(now + 5 * DAY), time: '12:00', partySize: 2 }, now - 3_600_000)
+    await seedRequest('qualified_past', { date: jerusalemDate(now - 2 * DAY), time: '12:00', partySize: 2 }, now - 3_600_000, 'qualified')
+    const count = await expireDue(testDb(), 'b1', now)
+    expect(count).toBe(1)
+    const status = async id => (await testDb().collection('requests').findOne({ _id: id })).status
+    expect(await status('past')).toBe('expired')
+    expect(await status('future')).toBe('new')
+    expect(await status('qualified_past')).toBe('qualified')
+    await testDb().collection('requests').deleteMany({})
+    await testDb().collection('frontDeskProfiles').deleteMany({})
+  })
+})

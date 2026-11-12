@@ -105,10 +105,16 @@ export const manualRequestInputSchema = z
     guestName: nameField.min(1).optional(),
     guestPhone: z.string().min(7).max(30).optional(),
     wanted: wantedSchema,
-    answers: requestAnswersSchema.default([])
+    answers: requestAnswersSchema.default([]),
+    /** Plan 556: a test request (onboarding): no client is made or touched; needs a name and a phone. */
+    test: z.boolean().optional()
   })
   .refine((v) => !!v.clientId || (!!v.guestName && !!v.guestPhone), {
     message: 'clientId, or guestName and guestPhone, is required',
     path: ['clientId']
+  })
+  .refine((v) => !v.test || (!!v.guestName && !!v.guestPhone), {
+    message: 'a test request needs guestName and guestPhone',
+    path: ['guestName']
   })
 export type ManualRequestInput = z.infer<typeof manualRequestInputSchema>

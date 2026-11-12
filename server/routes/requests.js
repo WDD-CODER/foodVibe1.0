@@ -174,6 +174,25 @@ function bookingOutcome(request, wanted, profile, ctx) {
   }
 }
 
+/** Plan 556 (R-19): a test request touches no client: `clientId` is the placeholder `__test__`, no counter moves. */
+const TEST_CLIENT_ID = '__test__'
+
+async function createTestRequest(businessId, profile, input, actor) {
+  const now = Date.now()
+  const { status, qualification } = runQualify(profile, input.kind, input.wanted, input.answers, now)
+  const doc = {
+    _id: newId(), schemaVersion: 2, userId: actor.userId, businessId, createdBy: actor.userId, createdAt: now, updatedAt: now,
+    kind: input.kind, status, channel: 'manual', clientId: TEST_CLIENT_ID, guestName: input.guestName, guestPhone: input.guestPhone,
+    wanted: input.wanted, answers: input.answers, qualification,
+    statusHistory: [{ status, at: now, by: actor.userId, byName: actor.name, via: 'member' }],
+    publicToken: newPublicToken(), test: true,
+  }
+  const check = checkStoredDoc(TYPE, doc)
+  if (!check.ok) throw Object.assign(new Error('INVALID_DOC'), { code: 'INVALID_DOC', issues: check.issues })
+  await db().collection(TYPE).insertOne(doc)
+  return doc
+}
+
 // POST /api/v1/requests/:id/approve  { wanted?, note? }  - one call: claim, create the event or booking, update the client, log
 router.post('/:id/approve', verifyToken, async (req, res) => {
   try {
@@ -190,6 +209,18 @@ router.post('/:id/approve', verifyToken, async (req, res) => {
     if (!current) return
     if (!assertCan(req, res, 'manageRequests', { type: TYPE, doc: current })) return
     if (!OPEN.includes(current.status)) return res.status(409).json({ error: 'ALREADY_DECIDED' })
+
+    if (current.test === true) {
+      // Plan 556 (R-19): a test request is only marked approved; no event, booking, client change or decision row.
+      const actor = actorOf(req)
+      const entry = { status: 'approved', at: now, by: actor.userId, byName: actor.name, via: 'member', ...(note && { note }) }
+      const after = { ...current, status: 'approved', updatedAt: now, statusHistory: [...current.statusHistory, entry] }
+      if (!validMerged(res, after)) return
+      const result = await writeConditional(req, res, current, { status: 'approved', updatedAt: now }, entry)
+      if (!result) return
+      req.log.info({ event: 'requests.approved', kind: current.kind, test: true })
+      return res.json({ ok: true, request: result, test: true })
+    }
 
     const wanted = { ...current.wanted, ...overrides.data }
     const editedFields = Object.keys(overrides.data).filter(k => JSON.stringify(overrides.data[k]) !== JSON.stringify(current.wanted?.[k]))
@@ -276,7 +307,7 @@ router.post('/:id/decline', verifyToken, async (req, res) => {
       { returnDocument: 'after' },
     )
     if (!result) return res.status(409).json({ error: 'ALREADY_DECIDED' })
-    await writeDecision(req, current, 'decline', [], now)
+    if (current.test !== true) await writeDecision(req, current, 'decline', [], now)
     req.log.info({ event: 'requests.declined', kind: current.kind, reason })
     res.json(result)
   } catch (err) {
@@ -302,7 +333,9 @@ router.post('/', verifyToken, async (req, res) => {
 
     let created
     try {
-      created = await createRequest(db(), businessId, profile, input, { channel: 'manual', actor: actorOf(req), via: 'member' })
+      created = input.test === true
+        ? { request: await createTestRequest(businessId, profile, input, actorOf(req)) }
+        : await createRequest(db(), businessId, profile, input, { channel: 'manual', actor: actorOf(req), via: 'member' })
     } catch (err) {
       if (err?.code === 'CLIENT_NOT_FOUND') return res.status(404).json({ error: 'CLIENT_NOT_FOUND' })
       if (err?.code === 'BAD_CLIENT') return res.status(400).json({ error: 'BAD_REQUEST_INPUT', issues: err.issues ?? [] })
@@ -335,7 +368,7 @@ router.put('/:id/status', verifyToken, async (req, res) => {
     if (!validMerged(res, { ...current, status, updatedAt: now, statusHistory: [...current.statusHistory, entry] })) return
     const result = await writeConditional(req, res, current, { status, updatedAt: now }, entry)
     if (!result) return
-    if (status === 'needs_info') await writeDecision(req, current, 'ask', [], now)
+    if (status === 'needs_info' && current.test !== true) await writeDecision(req, current, 'ask', [], now)
     req.log.info({ event: 'requests.status.changed', from: current.status, to: status })
     res.json(result)
   } catch (err) {

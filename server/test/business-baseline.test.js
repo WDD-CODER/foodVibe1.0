@@ -25,6 +25,7 @@ const URL = '/api/v1/business'
 const put = (body, who = OWNER) => request(app).put(`${URL}/baseline`).set(as(who)).send(body)
 const getBusiness = (who = OWNER) => request(app).get(URL).set(as(who))
 const status = (who = OWNER) => request(app).get(`${URL}/setup-status`).set(as(who))
+const NO_FRONT_DESK = { businessType: null, items: [], done: 0, total: 0 }
 const FORBIDDEN = { error: 'FORBIDDEN', messageKey: 'no_permission' }
 
 beforeEach(async () => {
@@ -130,7 +131,7 @@ describe('GET /api/v1/business/setup-status', () => {
     await db.collection('suppliers').insertMany([doc('s1', { _masterId: 'm2' })])
     await db.collection('recipes').insertMany([doc('r1', { _masterId: 'm3' })])
     await db.collection('menuEvents').insertMany([doc('e1', { _masterId: 'm4' })])
-    expect((await status()).body).toEqual({ pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 })
+    expect((await status()).body).toEqual({ pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0, frontDesk: NO_FRONT_DESK })
   })
 
   it('counts items the owner creates through the data API and a staff member added through the team route', async () => {
@@ -154,7 +155,7 @@ describe('GET /api/v1/business/setup-status', () => {
     await db.collection('users').insertOne({ _id: 'st-gone', name: 'gone', email: 'g@x', businessId: 'b1', businessRole: 'staff', removedAt: 9 })
     const res = await status()
     expect(res.status).toBe(200)
-    expect(res.body).toEqual({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 1, staff: 1 })
+    expect(res.body).toEqual({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 1, staff: 1, frontDesk: NO_FRONT_DESK })
   })
 
   it('caps the priced-product count at the setup goal: exactly 5 gives 5, 4 gives 4', async () => {
@@ -175,6 +176,6 @@ describe('GET /api/v1/business/setup-status', () => {
     ])
     await db.collection('dishes').insertMany([own('d1')])
     await db.collection('recipes').insertMany([own('r1')])
-    expect((await status()).body).toEqual({ pricedProducts: 2, suppliers: 0, recipes: 2, events: 0, staff: 0 })
+    expect((await status()).body).toEqual({ pricedProducts: 2, suppliers: 0, recipes: 2, events: 0, staff: 0, frontDesk: NO_FRONT_DESK })
   })
 })

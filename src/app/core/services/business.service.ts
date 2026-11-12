@@ -10,10 +10,20 @@ import type {
   LogisticsHiddenInput,
   StaffVisibleStagesInput
 } from '@schemas/entities'
+import type { BusinessType } from '@schemas/entities/front-desk-profile.schema'
+import type { FrontDeskIntake } from '@schemas/front-desk-intake.schema'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
 import { UserService } from './user.service'
+
+/** Plan 556: what the front desk still needs; `businessType` is null (and `items` empty) while the business has no profile. */
+export interface FrontDeskSetup {
+  businessType: BusinessType | null
+  items: { key: string; done: boolean }[]
+  done: number
+  total: number
+}
 
 /** What the owner has set up so far (plan 431); the server caps each count at 5. */
 export interface SetupStatus {
@@ -22,6 +32,14 @@ export interface SetupStatus {
   recipes: number
   events: number
   staff: number
+  frontDesk?: FrontDeskSetup
+}
+
+/** Plan 556: the answer of the one-call onboarding save. */
+export interface FrontDeskIntakeResult {
+  profileId: string
+  knowledge: { created: number; updated: number; skipped: number }
+  baseline: 'saved' | 'skipped'
 }
 
 /** The signed-in user's business (name, settings). Loaded once per sign-in, cleared on sign-out. */
@@ -72,6 +90,13 @@ export class BusinessService {
   /** Owner only: which setup steps are done. Not cached: the setup card asks every time it is created. */
   loadSetupStatus(): Promise<SetupStatus> {
     return firstValueFrom(this.http.get<SetupStatus>(`${environment.apiUrl}${API.business('setup-status')}`))
+  }
+
+  /** Owner only (plan 556): the whole onboarding form in one save. Throws on any refusal. */
+  saveFrontDeskIntake(body: FrontDeskIntake): Promise<FrontDeskIntakeResult> {
+    return firstValueFrom(
+      this.http.post<FrontDeskIntakeResult>(`${environment.apiUrl}${API.business('front-desk-intake')}`, body)
+    )
   }
 
   /** PUTs one owner-only part of the business and puts the stored reply into `business_`. */

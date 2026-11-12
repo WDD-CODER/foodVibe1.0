@@ -49,6 +49,7 @@
             </button>
           </th>
           }
+          <th scope="col">{{ "platform_frontdesk_col" | translatePipe }}</th>
           <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
           <th scope="col">{{ "platform_col_report" | translatePipe }}</th>
         </tr>
@@ -77,6 +78,10 @@
           <td>{{ row.events.finished }}</td>
           <td>{{ rate(row.closeRate) }}</td>
           <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
+          <td data-testid="frontdesk-cell">
+            @if (row.frontDesk; as fd) { {{ fd.done }}/{{ fd.total }} · {{ "fd_status_" + fd.status | translatePipe }} }
+            @else { — }
+          </td>
           <td>
             <a
               class="report-link"

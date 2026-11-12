@@ -175,6 +175,12 @@ export const routes: Routes = [
     canDeactivate: [pendingChangesGuard],
   },
   {
+    path: 'frontdesk/onboarding',
+    loadComponent: () => import('./pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding.page').then(m => m.FrontDeskOnboardingComponent),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
     path: 'frontdesk/knowledge',
     loadComponent: () => import('./pages/frontdesk/knowledge/knowledge.page').then(m => m.KnowledgePage),
     canActivate: [authGuard],

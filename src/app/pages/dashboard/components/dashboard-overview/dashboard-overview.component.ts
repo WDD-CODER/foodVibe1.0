@@ -17,6 +17,7 @@ import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { DashboardTab } from '../../dashboard.page'
 import { SetupChecklistCardComponent } from '../setup-checklist-card/setup-checklist-card.component'
+import { FrontDeskChecklistCardComponent } from '../front-desk-checklist-card/front-desk-checklist-card.component'
 import { BusinessPerformanceComponent } from '../business-performance/business-performance.component'
 import { OpeningDetailsBannerComponent } from '../opening-details-banner/opening-details-banner.component'
 
@@ -43,6 +44,7 @@ interface ActivityDayGroup {
     ScrollIndicatorsDirective,
     PageHeaderComponent,
     SetupChecklistCardComponent,
+    FrontDeskChecklistCardComponent,
     BusinessPerformanceComponent,
     OpeningDetailsBannerComponent
   ],
