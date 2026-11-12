@@ -41,6 +41,7 @@ paths:
 | `MENU_EVENT_LIST` | Menu | Menu events |
 | `clients` | CRM | Clients (ADR 0027, ADR 0031): owner-only to write, staff read `name`, `phone`, `tags`, `kinds`. Soft delete (Trash). Server-owned fields, dropped from every generic write (`CLIENT_SERVER_FIELDS`): `phoneNormalized`, `phoneKey`, `kinds`, `lifecycle`, `firstSeenAt`, `lastContactAt`, `counters`, `waId`, `mergedInto`, `doNotContact` |
 | `frontDeskProfiles` | Front desk | The business's one front desk profile (plan 548, C-PROFILE): owner-only to write (`editFrontDesk`), not cloneable, hard delete. Unique `businessId` (409 `PROFILE_EXISTS`) and `slug` (409 `SLUG_TAKEN`). `PROFILE_SERVER_FIELDS` (`status`, `whatsapp`) are dropped from every generic write; reads never carry `whatsapp.phoneNumberId` |
+| `knowledgeItems` | Front desk | Short facts the business knows about itself (plan 554, C-KB): `topic`, `question`, `answer`, `status` (`draft` / `approved`), `source`, `visibility` (`public` / `internal`), `variations?`. Owner-only to write (`OWNER_ONLY_TYPES`), staff read all fields. Not cloneable, no clone lineage, soft delete (Trash). Only `approved` + `public` items reach a customer, through `services/knowledge.js` `publicFacts()` |
 | `requests` | Front desk | Customer requests (plan 549, C-REQUEST): router writes only (`routerWrites`; generic POST / PUT / DELETE → 405 `USE_ROUTER`), generic GET lists and runs lazy expiry. Any member (`manageRequests`). Not cloneable, hard delete. `REQUEST_SERVER_FIELDS` are written only by `/api/v1/requests` |
 | `bookings` | Front desk | Calendar records of an approved table, tasting or consultation (plan 549, C-REQUEST): router writes only (`routerWrites`), generic GET reads. Any member (`manageRequests`). Not cloneable, hard delete. `BOOKING_SERVER_FIELDS` are written only by `/api/v1/bookings` |
 | `decisionLog` | Front desk | One row per approve / decline / ask on a request (plan 550, C-REQUEST): ids, enums and numbers only, never a name, phone or free text. Server-only (not in the generic API), never cloned, `backup: false` (the collections test ties backup to userData). Index `decisionlog_business_at`. Read later by stats (559, 563) |
@@ -56,6 +57,8 @@ paths:
 | `MENU_SECTION_CATEGORIES` | Registry | Menu section category registry |
 
 **22 entity types total.**
+
+**User terms acceptance (plan 584).** The `users` document (not an entity type) holds `termsAcceptedVersion`, `termsAcceptedAt`, `termsAcceptedIp`, written only by `server/routes/auth.js` (`POST /signup`, `POST /accept-terms`); the client sees only the version. Any change to the text in `public/assets/legal/terms.he.json` needs a new `version` and `sectionsHash` (CI checks the hash); every user then accepts again at the next sign-in.
 
 ---
 
@@ -133,6 +136,8 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `PUT` | `/api/v1/bookings/:id/status` | required | Plan 549: `confirmed → seated → finished`, `confirmed → no_show` (only after `startAt`; adds 1 to the client's `counters.noShows`), `confirmed | seated → cancelled`. Errors: `BAD_STATUS`, `STATUS_CHANGED` (409) |
 | `POST` | `/api/v1/clients/:id/merge` | owner | Plan 551: fold a duplicate client into another `{ intoId }` in one request: re-keys `clientId` on `menuEvents`, `requests`, `bookings` and `conversations` (when it exists) of the business, sums counters, unions kinds / tags, stamps `mergedInto` + `deletedAt` on the merged-away client and unsets its `liveKey`; 200 `{ ok, client, moved }`. C-PERM `edit` on `clients` (owner). Errors: `SAME_CLIENT` (400), `ALREADY_MERGED`, `TARGET_NOT_LIVE` (409), 404 for an id of another business |
 | `PUT` | `/api/v1/clients/:id/do-not-contact` | required | Plan 551 (R-02): `{ on, reason? }`. On: any member (`manageRequests`), `reason` 1–200 chars, stores `doNotContact { at, reason, via: 'member' }`; off: owner only, removes it. Returns the client (staff: trimmed to `STAFF_READ_FIELDS`). Errors: `REASON_REQUIRED`, `BAD_BODY` (400) |
+| `POST` | `/api/v1/ai/knowledge-import` | owner | Plan 554: `{ text }` or `{ url }` (exactly one, else 400 `TEXT_OR_URL`; text over 20,000 chars 400 `TEXT_TOO_LONG`; private-network url 400; fetch failure 502 / no text 422). One metered Gemini call (`knowledge_import`) stores up to 60 `draft` / `ai_import` items; 201 `{ items, dropped }`. `aiLimiter`; staff 403 |
+| `PUT` | `/api/v1/knowledge/approve` | owner | Plan 554: `{ ids }` (1–200, else 400 `NO_IDS` / `TOO_MANY_IDS`): one `updateMany` moves the caller business's live `draft` items to `approved`; 200 `{ approved }`. C-PERM `edit` on `knowledgeItems`; staff 403 |
 | `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
 | `PUT` | `/api/v1/business/baseline` | owner | Plans 431, 567: the opening baseline, whole replace, `filledAt` server-set. Every field optional: four card numbers plus eleven kitchen and front desk estimates (`BASELINE_KITCHEN_FIELDS`, `BASELINE_FRONTDESK_FIELDS`); `hasBaseline` looks at the card fields only |
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |

@@ -25,7 +25,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   const db = testDb();
-  for (const c of ['taxonomyTerms', 'products', 'recipes', 'dishes', 'menuEvents', 'clients']) await db.collection(c).deleteMany({});
+  for (const c of ['taxonomyTerms', 'products', 'recipes', 'dishes', 'menuEvents', 'clients', 'knowledgeItems']) await db.collection(c).deleteMany({});
 });
 
 const MASTER = '__master__';
@@ -56,10 +56,12 @@ const COLLECTIONS = [
   { type: 'taxonomyTerms', body: () => ({ kind: 'allergen', key: 'lupin', sortOrder: 0 }), edit: { sortOrder: 5 } },
   // Plan 512: owner-only to write (staff create -> 403); no clone lineage, like taxonomyTerms.
   { type: 'clients', body: () => ({ name: 'דנה', phone: '050-123 4567' }), edit: { notes: 'x' }, ownerOnly: true },
+  // Plan 554: owner-only to write; no clone lineage.
+  { type: 'knowledgeItems', body: () => ({ topic: 'policy', question: 'חניה?', answer: 'יש', status: 'approved', source: 'manual', visibility: 'public' }), edit: { answer: 'אין' }, ownerOnly: true },
 ];
 
 // Collections whose documents carry no `_masterId` / `_userModified`.
-const NO_LINEAGE = ['taxonomyTerms', 'clients'];
+const NO_LINEAGE = ['taxonomyTerms', 'clients', 'knowledgeItems'];
 
 // A stored doc owned by `userId`, inserted straight into Mongo.
 async function seed(type, userId, _id) {

@@ -1,50 +1,41 @@
 'use strict'
 /**
- * Plan 554 (C-KB): the one source of business facts the assistant may be given (rule R-08).
- * Only approved, public, live items plus the profile's own facts; fixed order; at most MAX_FACTS_CHARS characters.
+ * Plan 554 (C-KB): `publicFacts` is the one source of business facts the assistant may be given. Server-only; it
+ * returns only the profile's own facts and the business's live, approved, public knowledge items, in a fixed order.
  */
-const { KNOWLEDGE_TOPICS } = require('../generated/schemas/entities/knowledge-item.schema')
+const { KNOWLEDGE_TOPICS } = require('../generated/schemas/entities')
 
-const MAX_FACTS_CHARS = 6000
+const MAX_CHARS = 6000
 
-/** A line break inside a stored value becomes one space. */
-const oneLine = value => String(value).replace(/\s*[\r\n]+\s*/g, ' ').trim()
+/** A value on one line: any run of line breaks becomes a single space. */
+const oneLine = value => String(value).replace(/[\r\n]+/g, ' ').trim()
 
-/** `[<tag>] label: value` lines of the profile, only for fields that have a value. */
 function profileLines(profile) {
   if (!profile) return []
   const lines = []
-  const add = (id, label, value) => {
-    if (value === undefined || value === null) return
-    const text = oneLine(value)
-    if (text) lines.push({ id: null, text: `[${id}] ${label}: ${text}` })
-  }
-  add('profile.displayName', 'name', profile.displayName)
-  add('profile.phone', 'phone', profile.phone)
-  add('profile.address', 'address', profile.address)
-  add('profile.serviceArea', 'service area', profile.serviceArea)
+  if (profile.displayName) lines.push({ line: `[profile.displayName] name: ${oneLine(profile.displayName)}` })
+  if (profile.phone) lines.push({ line: `[profile.phone] phone: ${oneLine(profile.phone)}` })
+  if (profile.address) lines.push({ line: `[profile.address] address: ${oneLine(profile.address)}` })
+  if (profile.serviceArea) lines.push({ line: `[profile.serviceArea] service area: ${oneLine(profile.serviceArea)}` })
   if (Array.isArray(profile.hours) && profile.hours.length) {
-    add('profile.hours', 'opening hours', profile.hours.map(h => oneLine(`${h.days} ${h.time}`)).join('; '))
+    const rows = profile.hours.map(row => oneLine(`${row.days} ${row.time}`)).join('; ')
+    lines.push({ line: `[profile.hours] opening hours: ${rows}` })
   }
   if (Array.isArray(profile.closedDates) && profile.closedDates.length) {
-    add('profile.closedDates', 'closed on', profile.closedDates.join(', '))
+    lines.push({ line: `[profile.closedDates] closed on: ${profile.closedDates.map(oneLine).join(', ')}` })
   }
   return lines
 }
 
-function itemLine(item) {
-  const also = Array.isArray(item.variations) && item.variations.length
-    ? ` | also asked: ${item.variations.map(oneLine).join('; ')}`
-    : ''
-  return {
-    id: item._id,
-    text: `[${item._id}] ${item.topic}: Q: ${oneLine(item.question)} | A: ${oneLine(item.answer)}${also}`
-  }
-}
-
-const topicRank = topic => {
+const topicIndex = topic => {
   const i = KNOWLEDGE_TOPICS.indexOf(topic)
   return i === -1 ? KNOWLEDGE_TOPICS.length : i
+}
+
+function itemLine(item) {
+  const base = `[${item._id}] ${item.topic}: Q: ${oneLine(item.question)} | A: ${oneLine(item.answer)}`
+  const variations = Array.isArray(item.variations) ? item.variations.map(oneLine).filter(Boolean) : []
+  return { id: String(item._id), line: variations.length ? `${base} | also asked: ${variations.join('; ')}` : base }
 }
 
 /**
@@ -53,28 +44,28 @@ const topicRank = topic => {
  * @returns {Promise<{ text: string, factIds: string[] }>}
  */
 async function publicFacts(db, businessId) {
-  const profile = await db.collection('frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } })
+  const profile = await db.collection('frontDeskProfiles').findOne({ businessId })
   const items = await db.collection('knowledgeItems')
     .find({ businessId, status: 'approved', visibility: 'public', deletedAt: { $exists: false } })
     .toArray()
   items.sort((a, b) =>
-    topicRank(a.topic) - topicRank(b.topic)
-    || (a.createdAt ?? 0) - (b.createdAt ?? 0)
-    || String(a._id).localeCompare(String(b._id)))
+    topicIndex(a.topic) - topicIndex(b.topic) ||
+    (a.createdAt ?? 0) - (b.createdAt ?? 0) ||
+    (String(a._id) < String(b._id) ? -1 : String(a._id) > String(b._id) ? 1 : 0))
 
   const lines = [...profileLines(profile), ...items.map(itemLine)]
   const kept = []
   let length = 0
-  for (const line of lines) {
-    const next = length + (kept.length ? 1 : 0) + line.text.length
-    if (next > MAX_FACTS_CHARS) break
-    kept.push(line)
+  for (const entry of lines) {
+    const next = length + (kept.length ? 1 : 0) + entry.line.length
+    if (next > MAX_CHARS) break
+    kept.push(entry)
     length = next
   }
   return {
-    text: kept.map(l => l.text).join('\n'),
-    factIds: kept.map(l => l.text.slice(1, l.text.indexOf(']')))
+    text: kept.map(entry => entry.line).join('\n'),
+    factIds: kept.map(entry => entry.id ?? entry.line.slice(1, entry.line.indexOf(']'))),
   }
 }
 
-module.exports = { publicFacts, MAX_FACTS_CHARS }
+module.exports = { publicFacts, MAX_FACTS_CHARS: MAX_CHARS }

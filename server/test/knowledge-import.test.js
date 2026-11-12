@@ -1,5 +1,5 @@
 'use strict'
-/** Plan 554 - POST /api/v1/ai/knowledge-import with Gemini mocked by stubbing global fetch. */
+/** Plan 554 - POST /api/v1/ai/knowledge-import with Gemini mocked by a stubbed global fetch. */
 
 const request = require('supertest')
 
@@ -32,65 +32,68 @@ afterEach(() => {
 })
 
 const jsonResponse = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body })
-const reply = items => jsonResponse(200, { candidates: [{ content: { parts: [{ text: JSON.stringify({ items }) }] } }] })
+const modelAnswer = text => jsonResponse(200, { candidates: [{ content: { parts: [{ text }] } }] })
+const reply = items => modelAnswer(JSON.stringify({ items }))
+const good = n => ({ topic: 'faq', question: `שאלה ${n}?`, answer: `תשובה ${n}`, variations: ['עוד ניסוח'] })
 
-let userSeq = 0
-const ownerToken = () => signTestToken({ userId: `kiOwner${++userSeq}`, businessId: 'b554', businessRole: 'owner' })
-const staffToken = () => signTestToken({ userId: `kiStaff${++userSeq}`, businessId: 'b554', businessRole: 'staff' })
+let seq = 0
+const ownerToken = () => signTestToken({ userId: `kiOwner${++seq}`, name: 'o', businessId: 'kib1', businessRole: 'owner' })
+const staffToken = () => signTestToken({ userId: `kiStaff${++seq}`, name: 's', businessId: 'kib1', businessRole: 'staff' })
 const post = (body, token = ownerToken()) =>
   request(app).post('/api/v1/ai/knowledge-import').set('Authorization', `Bearer ${token}`).send(body)
-const good = i => ({ topic: 'policy', question: `שאלה ${i}`, answer: `תשובה ${i}`, variations: [`ניסוח ${i}`] })
 
 describe('knowledge import', () => {
-  it('stores exactly 60 of 75 valid items as drafts of the caller business', async () => {
-    fetchMock.mockResolvedValueOnce(reply(Array.from({ length: 75 }, (_, i) => good(i))))
+  it('stores 60 of 75 valid items as drafts of the caller business and counts invalid ones', async () => {
+    const items = [...Array.from({ length: 75 }, (_, i) => good(i)), { topic: 'nope', question: 'x', answer: 'y' }]
+    fetchMock.mockResolvedValueOnce(reply(items))
     const res = await post({ text: 'טקסט על העסק' })
     expect(res.status).toBe(201)
     expect(res.body.items).toHaveLength(60)
-    expect(res.body.dropped).toBe(0)
+    expect(res.body.dropped).toBe(1)
     const stored = await testDb().collection('knowledgeItems').find({}).toArray()
     expect(stored).toHaveLength(60)
-    for (const d of stored) {
-      expect(d).toMatchObject({ status: 'draft', source: 'ai_import', businessId: 'b554', visibility: 'public' })
+    for (const s of stored) {
+      expect(s).toEqual(expect.objectContaining({ status: 'draft', source: 'ai_import', visibility: 'public', businessId: 'kib1' }))
     }
   })
 
-  it('drops an item that fails the schema and counts it', async () => {
-    fetchMock.mockResolvedValueOnce(reply([good(1), { topic: 'nope', question: 'q', answer: 'a' }, { topic: 'faq', question: '', answer: 'a' }, good(2)]))
-    const res = await post({ text: 'x' })
-    expect(res.status).toBe(201)
-    expect(res.body.items).toHaveLength(2)
-    expect(res.body.dropped).toBe(2)
+  it('meters one aiUsage row with feature knowledge_import per Gemini call', async () => {
+    fetchMock.mockResolvedValueOnce(reply([good(1)]))
+    await post({ text: 'טקסט' })
+    const rows = await testDb().collection('aiUsage').find({}).toArray()
+    expect(rows).toHaveLength(1)
+    expect(rows[0].feature).toBe('knowledge_import')
   })
 
-  it('answers 400 TEXT_TOO_LONG, TEXT_OR_URL and a private-network URL', async () => {
-    const long = await post({ text: 'א'.repeat(20001) })
-    expect(long.status).toBe(400)
-    expect(long.body.error).toBe('TEXT_TOO_LONG')
+  it('text over 20,000 characters -> 400 TEXT_TOO_LONG', async () => {
+    const res = await post({ text: 'א'.repeat(20001) })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('TEXT_TOO_LONG')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('both or neither of text / url -> 400 TEXT_OR_URL', async () => {
     const both = await post({ text: 'x', url: 'https://example.com' })
     expect(both.status).toBe(400)
     expect(both.body.error).toBe('TEXT_OR_URL')
     const neither = await post({})
+    expect(neither.status).toBe(400)
     expect(neither.body.error).toBe('TEXT_OR_URL')
-    const priv = await post({ url: 'http://127.0.0.1/secret' })
-    expect(priv.status).toBe(400)
+  })
+
+  it('a private-network url -> 400', async () => {
+    const res = await post({ url: 'http://127.0.0.1/secret' })
+    expect(res.status).toBe(400)
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('staff get 403 and no model call is made', async () => {
+  it('staff -> 403 and nothing is called', async () => {
     const res = await post({ text: 'x' }, staffToken())
     expect(res.status).toBe(403)
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('writes one aiUsage row with feature knowledge_import per Gemini call', async () => {
-    fetchMock.mockResolvedValueOnce(reply([good(1)]))
-    await post({ text: 'x' })
-    const rows = await testDb().collection('aiUsage').find({ feature: 'knowledge_import' }).toArray()
-    expect(rows).toHaveLength(1)
-  })
-
-  it('the prompt is English (no Hebrew letter)', () => {
+  it('the import prompt has no Hebrew letter', () => {
     expect(/[֐-׿]/.test(KNOWLEDGE_IMPORT_PROMPT)).toBe(false)
   })
 })

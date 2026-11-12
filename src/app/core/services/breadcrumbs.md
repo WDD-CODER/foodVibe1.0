@@ -27,6 +27,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
 | `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
+| `knowledge-item-data.service.ts` | Knowledge items CRUD plus `importDrafts` (AI import) and `approve` (bulk), on BaseEntityDataService (plan 554) | KnowledgeItemDataService |
 | `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
@@ -83,6 +84,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `user-admin.service.ts` | User admin management | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 | `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
+| `terms.service.ts` | Loads the terms file, posts the acceptance (plan 584) | TermsService |
 | `booking-data.service.ts` | Booking status moves through the server routes (plan 549) | BookingDataService |
 | `front-desk-badge.service.ts` | Waiting-requests count for the header and tab chips; reloads on focus (plan 552) | FrontDeskBadgeService |
 

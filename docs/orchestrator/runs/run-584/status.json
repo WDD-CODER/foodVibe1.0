@@ -1,0 +1,206 @@
+{
+  "run": "run-584",
+  "branch": "orch/run-584",
+  "base": "main",
+  "startedAt": "2026-11-12T07:16:57.595Z",
+  "mainShaAtStart": "3c764420625b7bd6180a9631b925e9bd9401b4c7",
+  "plans": {
+    "584": {
+      "nnn": "584",
+      "title": "Sign-up asks the new owner to read and accept the terms, and stores the acceptance",
+      "branch": "feat/584-signup-read-and-accept",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T07:18:22.931Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T07:50:25.984Z"
+        }
+      },
+      "humanItems": [
+        "On a phone, the terms popup reads well in Hebrew (headings, numbered clauses, scrolls smoothly) and the",
+        "An existing account that never accepted signs in and sees the terms popup with no close button; after"
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T07:18:22.799Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:18:22.932Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:43:28.599Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:50:15.434Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:50:25.986Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:50:59.883Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:52:44.372Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.8,
+      "sha": "11520af84185ae13b0120c57a17192ac04981ffc",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1499.2,
+          "tokens": {
+            "input": 5085974,
+            "output": 37641
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 31.7,
+          "tokens": {
+            "input": 244380,
+            "output": 1637
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "be744cb1b185e85b12384ce6530c9ebdbfdc045c"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T07:18:22.667Z",
+      "plan": "584",
+      "text": "the folder foodVibe1.0-orch-run-584-584 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T07:43:22.428Z",
+      "plan": "584",
+      "text": "builder left undone (round 0): e2e/ui/584-1 and 584-2 were not run (no dev servers in the worktree); no screenshots were taken"
+    },
+    {
+      "at": "2026-11-12T07:51:23.817Z",
+      "plan": "584",
+      "text": "the folder foodVibe1.0-orch-merge-run-584 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.8,
+  "updatedAt": "2026-11-12T07:57:28.589Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "584",
+      "type": "behaviour",
+      "text": "behaviour: docs/frontdesk/pilot-terms-draft.md is not on this base, so I built terms.he.json from origin/orch/run-546 and left the docs file untouched, with no note line — reverse: add the note line to the docs file once run-546 is merged",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "584",
+      "type": "behaviour",
+      "text": "behaviour: src/app/core/models/terms.model.ts was not created; the Terms types live in terms.service.ts, because breadcrumbs-check needs src/app/core/models/breadcrumbs.md for a new models file and that file is outside the scope — reverse: add that path to the scope and move the types into terms.model.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "584",
+      "type": "behaviour",
+      "text": "behaviour: the terms popup uses modal-shell size md, because the shell has no lg size — reverse: add an lg size to the shell",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "584",
+      "type": "behaviour",
+      "text": "behaviour: the gate treats user _id 'dev-guest' as the guest, since the client has no other guest flag — reverse: change the DEV_GUEST_ID check in terms-gate.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "584",
+      "type": "behaviour",
+      "text": "behaviour: added the dictionary key terms_load_error for the popup's load-error message, which is not in the plan's key list — reverse: remove that key and use an existing one",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "584",
+      "type": "behaviour",
+      "text": "behaviour: the gate reads the terms version by fetching the terms file once per signed-in user — reverse: have the server send the current version with the user",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T07:57:28.587Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T07:57:28.589Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

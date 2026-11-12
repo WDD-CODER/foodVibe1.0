@@ -43,6 +43,7 @@ const COLLECTIONS = [
   { name: 'clients',                  userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: true },
   // Plan 548 (C-PROFILE): one front desk profile per business; owner-only write, no clone, hard delete.
   { name: 'frontDeskProfiles',        userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: false },
+  // Plan 554 (C-KB): short owner-approved facts about the business; owner-only write, no clone, soft delete (Trash).
   { name: 'knowledgeItems',           userData: true,  cloneable: false, backup: true,  searchable: false, softDelete: true },
   // Plan 549 (C-REQUEST): customer requests and the bookings they become. The generic API reads them; every write goes
   // through server/routes/requests.js and server/routes/bookings.js.
