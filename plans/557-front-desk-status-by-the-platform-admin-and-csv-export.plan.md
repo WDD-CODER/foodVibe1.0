@@ -223,3 +223,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `pnpm run test:server` -> exit 0, 102 files, 1328 passed; `pnpm run test:ci` -> exit 0, 2161 SUCCESS.
 - override-check, plan-ledger-check, breadcrumbs-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
 - `e2e/ui/557-1.spec.ts`: not run here; per the Human's answer to ask 557-1, the gate's rerun is the evidence.
+
+### Builder evidence (resume after ask 557-2)
+- Per the Human's answer to ask 557-2: `e2e/ui/557-1.spec.ts` is written, not run (needs the running app and the QA login); `npx playwright test e2e/ui/557-1.spec.ts --list` -> exit 0, 1 test listed (compiles). It signs in with `signInQa` and clears profiles in `finally`. The Planner runs it against the served batch branch.
+- `pnpm run build`, `pnpm run lint` (0 errors), `pnpm --dir server run lint`, `lint:icons`, `lint:no-native-select` -> exit 0.
+- `pnpm run test:ci` -> exit 0, 2161 SUCCESS; `pnpm run test:server` -> exit 0, 102 files, 1328 passed.
+- kit-manifest-check -> ok, 0 unclassified; scope-check --diff=origin/orch/batch-5 -> `SCOPE: ok`; override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
