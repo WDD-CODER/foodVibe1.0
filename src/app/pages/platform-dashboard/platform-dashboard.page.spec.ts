@@ -67,21 +67,19 @@ describe('PlatformDashboardPage', () => {
 
   async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
     rows_ = signal(rows)
-    getFrontDeskStats = jasmine
-      .createSpy('getFrontDeskStats')
-      .and.resolveTo([
-        {
-          businessId: 'a',
-          name: 'a',
-          requests: 7,
-          afterHoursPct: null,
-          approved: 3,
-          declined: 1,
-          medianMinutesToDecision: 12.5,
-          noShowRatePct: null,
-          eventsFromRequests: 0
-        }
-      ])
+    getFrontDeskStats = jasmine.createSpy('getFrontDeskStats').and.resolveTo([
+      {
+        businessId: 'a',
+        name: 'a',
+        requests: 7,
+        afterHoursPct: null,
+        approved: 3,
+        declined: 1,
+        medianMinutesToDecision: 12.5,
+        noShowRatePct: null,
+        eventsFromRequests: 0
+      }
+    ])
     downloadFrontDeskCsv = jasmine.createSpy('downloadFrontDeskCsv').and.resolveTo()
     getAiUsage = jasmine
       .createSpy('getAiUsage')
