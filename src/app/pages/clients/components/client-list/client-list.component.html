@@ -86,8 +86,6 @@
           <a class="client-name" [routerLink]="['/clients', item._id]" (click)="$event.stopPropagation()">{{
             item.name
           }}</a>
-          <span class="phone-inline" dir="ltr">{{ item.phone }}</span>
-          <span class="client-name">{{ item.name }}</span>
         </div>
         <app-column-carousel-cell>
           <div class="col-phone c-list-body-cell" appColumnSlide [label]="'client_phone' | translatePipe" dir="ltr">
