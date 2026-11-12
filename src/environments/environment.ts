@@ -7,7 +7,7 @@ export const environment = {
   localDev: true,
   apiUrl: 'http://localhost:3000',
   authApiUrl: 'http://localhost:3000',
-  autoLoginGuest: true,
+  autoLoginGuest: false,
   cloudinaryCloudName: 'dsxi4o2gb',
   cloudinaryUploadPreset: 'foodvibe',
 }
