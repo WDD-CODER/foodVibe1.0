@@ -8,7 +8,7 @@ export const environment = {
   localDev: true,
   apiUrl: viaRemote ? '' : 'http://localhost:3000',
   authApiUrl: viaRemote ? '' : 'http://localhost:3000',
-  autoLoginGuest: true,
+  autoLoginGuest: false,
   cloudinaryCloudName: 'dsxi4o2gb',
   cloudinaryUploadPreset: 'foodvibe',
 }

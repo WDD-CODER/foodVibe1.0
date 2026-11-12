@@ -28,6 +28,7 @@ export const routes: Routes = [
   { path: 'equipment/edit/:id', redirectTo: 'inventory/equipment/edit/:id', pathMatch: 'full' },
   {
     path: 'venues',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/venues/venues.page').then(m => m.VenuesPage),
     resolve: { venuesLoaded: venuesEnsureLoadedResolver },
     children: [
@@ -62,6 +63,7 @@ export const routes: Routes = [
   },
   {
     path: 'inventory',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/inventory/inventory.page').then(m => m.InventoryPage),
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
@@ -144,11 +146,13 @@ export const routes: Routes = [
   },
   {
     path: 'recipe-book',
+    canActivate: [authGuard],
     loadComponent: () => import('@pages/recipe-book/recipe-book.page').then(m => m.RecipeBookPage),
     resolve: { kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
   },
   {
     path: 'menu-library',
+    canActivate: [authGuard],
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
     resolve: {
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
@@ -184,6 +188,7 @@ export const routes: Routes = [
   },
   {
     path: 'cook',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
     resolve: { kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
   },
@@ -195,6 +200,7 @@ export const routes: Routes = [
   },
   {
     path: 'suppliers',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/suppliers/suppliers.page').then(m => m.SuppliersPage),
     children: [
       { path: '', redirectTo: 'list', pathMatch: 'full' },
@@ -219,6 +225,7 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
     // Plan 482: unsaved coefficients ask before leaving; query-param changes count so a ?tab= switch asks too.
     canDeactivate: [pendingChangesGuard],
