@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
-import { TaxonomyStore, TermInUseError } from '@services/taxonomy-store.service'
+import { TaxonomyStore } from '@services/taxonomy-store.service'
 import { LogisticsItemRegistryService, type LogisticsItemTerm } from '@services/logistics-item-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -12,13 +12,15 @@ import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
+import { BusinessService } from '@services/business.service'
+import { PermissionService } from '@services/permission.service'
+import { AddItemModalService } from '@services/add-item-modal.service'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import {
   LOGISTICS_ANSWER_TYPES,
   LOGISTICS_LABEL_MAX,
-  LOGISTICS_SECTIONS,
   type LogisticsAnswerType,
-  type LogisticsPhase,
-  type LogisticsSection
+  type LogisticsPhase
 } from '@schemas/entities'
 import type { EnvironmentType } from '@models/venue.model'
 
@@ -26,25 +28,29 @@ import type { EnvironmentType } from '@models/venue.model'
 export interface LogisticsItemDraft {
   text: string
   phase: LogisticsPhase
-  section: LogisticsSection
+  section: string
   answerType: LogisticsAnswerType
   environments: EnvironmentType[]
-  shared: boolean
+  scope: 'mine' | 'everyone'
 }
 
 interface LogisticsItemRow {
   term: LogisticsItemTerm
   shared: boolean
+  hidden: boolean
   typeKey: string
   environmentKeys: EnvironmentType[]
+  canEdit: boolean
+  canRemove: boolean
 }
 
 interface LogisticsSectionGroup {
-  section: LogisticsSection
+  section: string
   labelKey: string
   rows: LogisticsItemRow[]
 }
 
+const ADD_SECTION = '__add_section__'
 const PHASES: readonly LogisticsPhase[] = ['intake', 'site_visit']
 const ENVIRONMENTS: readonly EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 const PHASE_TAB_KEY: Record<LogisticsPhase, string> = {
@@ -53,9 +59,10 @@ const PHASE_TAB_KEY: Record<LogisticsPhase, string> = {
 }
 
 /**
- * Plan 523: the Metadata Manager card for the event-logistics checklist (`logisticsItem` terms). Lists the shared
- * questions (locked) and the business's own (removable) by phase and section, and adds an own question with its
- * phase, section, answer type and environments. Every write is one `TaxonomyStore.add / remove`.
+ * Plans 523, 581: the Metadata Manager card for the event-logistics checklist (`logisticsItem` terms). Lists the
+ * shared and own questions by phase and section; adds, edits, removes (own: `removedAt`; shared: hidden for the
+ * business, or `removedAt` for everybody by the platform admin) and restores them, and adds own sections.
+ * Every write is one call.
  */
 @Component({
   selector: 'app-logistics-item-manager',
@@ -75,14 +82,20 @@ export class LogisticsItemManagerComponent {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
+  private readonly business = inject(BusinessService)
+  private readonly permission = inject(PermissionService)
+  private readonly addItemModal = inject(AddItemModalService)
+
+  // 2. VIEW CHILDREN
+  private readonly formRef = viewChild<ElementRef<HTMLElement>>('addForm')
 
   // 4. SIGNALS & CONSTANTS
   protected readonly phases = PHASES
   protected readonly environments = ENVIRONMENTS
   protected readonly phaseTabKey = PHASE_TAB_KEY
   protected readonly textMax = LOGISTICS_LABEL_MAX
+  protected readonly addSectionValue = ADD_SECTION
   protected readonly phaseOptions = PHASES.map((p) => ({ value: p, label: PHASE_TAB_KEY[p] }))
-  protected readonly sectionOptions = LOGISTICS_SECTIONS.map((s) => ({ value: s, label: `logistics_section_${s}` }))
   protected readonly typeOptions = LOGISTICS_ANSWER_TYPES.map((t) => ({ value: t, label: `logistics_type_${t}` }))
   protected readonly isAdmin = this.taxonomy.isAdmin_
 
@@ -93,8 +106,8 @@ export class LogisticsItemManagerComponent {
     phase: 'intake',
     section: 'other',
     answerType: 'status',
-    environments: [],
-    shared: false
+    environments: [...ENVIRONMENTS],
+    scope: 'mine'
   })
   readonly draft = this.draft_.asReadonly()
   /** Translation key of the inline error under the question field, or null. */
@@ -102,27 +115,71 @@ export class LogisticsItemManagerComponent {
   readonly error = this.error_.asReadonly()
   private readonly saving_ = signal(false)
   readonly saving = this.saving_.asReadonly()
+  /** The term the form is editing, or null when it adds. */
+  private readonly editing_ = signal<LogisticsItemTerm | null>(null)
+  readonly editing = this.editing_.asReadonly()
+  /** Plan 588: keys of shared questions removed during this visit; they stay dimmed in their section until the page is left. */
+  private readonly removedThisVisit_ = signal<Set<string>>(new Set())
+  private readonly removedOpen_ = signal(false)
+  readonly removedOpen = this.removedOpen_.asReadonly()
 
   // 5. COMPUTED
-  /** The selected phase's items, grouped by section in `LOGISTICS_SECTIONS` order (every section, empty or not). */
+  /** The section select's options: built-in, shared and own sections, then the add option last. */
+  protected readonly sectionOptions = computed(() => [
+    ...this.registry.sections_().map((s) => ({ value: s, label: this.registry.sectionLabel(s) })),
+    { value: ADD_SECTION, label: 'add_new_logistics_section' }
+  ])
+
+  private readonly isOwner = computed(
+    () => !this.isAdmin() && this.permission.can('editSettings', { type: 'businesses' })
+  )
+
+  /** The selected phase's items (hidden shared ones dimmed), grouped by section in `registry.sections_()` order. */
   readonly sections = computed<LogisticsSectionGroup[]>(() => {
     const phase = this.phase_()
-    const items = this.registry.items_().filter((t) => t.phase === phase)
-    return LOGISTICS_SECTIONS.map((section) => ({
+    const hiddenAt = this.registry.hiddenAt_()
+    const visit = this.removedThisVisit_()
+    const items = this.registry
+      .items_()
+      .filter((t) => t.phase === phase)
+      .filter((t) => !(this.taxonomy.isShared(t) && hiddenAt.has(t.key) && !visit.has(t.key)))
+    return this.registry.sections_().map((section) => ({
       section,
-      labelKey: `logistics_section_${section}`,
+      labelKey: this.registry.sectionLabel(section),
       rows: items
         .filter((t) => t.section === section)
-        .map((term) => ({
-          term,
-          shared: this.taxonomy.isShared(term),
-          typeKey: `logistics_type_${term.answerType}`,
-          environmentKeys: ENVIRONMENTS.filter((e) => term.environments?.includes(e))
-        }))
+        .map((term) => {
+          const shared = this.taxonomy.isShared(term)
+          const hidden = shared && hiddenAt.has(term.key)
+          return {
+            term,
+            shared,
+            hidden,
+            typeKey: `logistics_type_${term.answerType}`,
+            environmentKeys: ENVIRONMENTS.filter((e) => term.environments?.includes(e)),
+            canEdit: this.taxonomy.canEdit(term) && !hidden,
+            canRemove: !hidden && (!shared || this.isAdmin() || this.isOwner())
+          }
+        })
     }))
   })
 
+  /** Plan 588: the selected phase's removed shared questions, listed behind the small "removed (N)" link. */
+  readonly removedRows = computed<LogisticsItemTerm[]>(() => {
+    const phase = this.phase_()
+    const hiddenAt = this.registry.hiddenAt_()
+    return this.registry.items_().filter((t) => t.phase === phase && this.taxonomy.isShared(t) && hiddenAt.has(t.key))
+  })
+
+  protected readonly removedLabel = computed(() =>
+    this.translation.translate('logistics_removed_count').replace('{{count}}', String(this.removedRows().length))
+  )
+
   // 6. METHODS
+  toggleRemoved(): void {
+    this.removedOpen_.update((v) => !v)
+  }
+
   requireSignIn(): boolean {
     if (this.isLoggedIn()) return true
     this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'))
@@ -130,70 +187,202 @@ export class LogisticsItemManagerComponent {
     return false
   }
 
-  //CREATE
+  //CREATE / UPDATE (the form)
   async onAdd(): Promise<void> {
-    if (!this.requireSignIn() || this.saving_()) return
+    await this.onSubmit()
+  }
+
+  /** Adds, re-adds a removed own question, or saves the edit. Resolves true when it stored. */
+  async onSubmit(): Promise<boolean> {
+    if (!this.requireSignIn() || this.saving_()) return false
     const draft = this.draft_()
     const key = draft.text.trim()
-    if (!key) return
+    if (!key) return false
+    const editing = this.editing_()
 
-    const duplicate = this.registry.items_().some((t) => t.phase === draft.phase && t.key.trim() === key)
+    if (!draft.environments.length) {
+      this.error_.set('metadata_logistics_env_required')
+      return false
+    }
+    const envs = ENVIRONMENTS.filter((e) => draft.environments.includes(e))
+    const environments = envs.length === ENVIRONMENTS.length ? [] : envs
+
+    const removedOwn = editing
+      ? undefined
+      : this.registry
+          .allItems_()
+          .find(
+            (t) =>
+              !this.taxonomy.isShared(t) &&
+              !t.foldedAt &&
+              !!t.removedAt &&
+              t.removedAt > 0 &&
+              t.phase === draft.phase &&
+              t.key.trim() === key
+          )
+    const duplicate = this.registry
+      .items_()
+      .some((t) => t._id !== editing?._id && t.phase === draft.phase && t.key.trim() === key)
     if (duplicate) {
       this.error_.set('metadata_logistics_duplicate')
-      return
+      return false
     }
     this.error_.set(null)
 
-    const envs = ENVIRONMENTS.filter((e) => draft.environments.includes(e))
     this.saving_.set(true)
+    const event = editing ? 'update' : 'add'
     try {
-      await this.taxonomy.add(
-        'logisticsItem',
-        key,
-        {
+      if (editing) {
+        await this.taxonomy.update(editing, {
+          key,
           phase: draft.phase,
           section: draft.section,
           answerType: draft.answerType,
-          ...(envs.length && { environments: envs })
-        },
-        { shared: draft.shared && this.isAdmin() }
-      )
-      this.draft_.update((d) => ({ ...d, text: '', environments: [] }))
-      this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_logistics_added'))
+          environments
+        } as never)
+        this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_logistics_updated'))
+      } else if (removedOwn) {
+        await this.taxonomy.update(removedOwn, {
+          removedAt: 0,
+          section: draft.section,
+          answerType: draft.answerType,
+          environments
+        } as never)
+        this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_logistics_added'))
+      } else {
+        await this.taxonomy.add(
+          'logisticsItem',
+          key,
+          {
+            phase: draft.phase,
+            section: draft.section,
+            answerType: draft.answerType,
+            ...(environments.length && { environments })
+          } as never,
+          { shared: this.isAdmin() && draft.scope === 'everyone' }
+        )
+        this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_logistics_added'))
+      }
+      this.editing_.set(null)
+      this.draft_.update((d) => ({ ...d, text: '', environments: [...ENVIRONMENTS] }))
+      return true
     } catch (err) {
-      this.logging.error({
-        event: 'crud.logistics_items.add_error',
-        message: 'Failed to add logistics item',
-        context: { err }
-      })
-      this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      this.fail(`crud.logistics_items.${event}_error`, `Failed to ${event} logistics item`, err)
+      return false
     } finally {
       this.saving_.set(false)
     }
   }
 
-  //DELETE
+  /** Adds an own (the admin's "everyone": shared) section from the section list's add option. */
+  async onAddSection(typed: string): Promise<void> {
+    if (!this.requireSignIn()) return
+    const result = await this.addItemModal.open({
+      title: 'add_new_logistics_section',
+      label: 'metadata_logistics_section',
+      saveLabel: 'metadata_add',
+      initialValue: typed
+    })
+    const name = (result ?? '').trim().slice(0, LOGISTICS_LABEL_MAX)
+    if (!name) return
+    const existing = this.registry
+      .sections_()
+      .find((s) => this.translation.translate(this.registry.sectionLabel(s)).trim() === name)
+    if (existing) {
+      this.setSection(existing)
+      return
+    }
+    try {
+      const created = await this.taxonomy.add(
+        'logisticsSection',
+        name,
+        {},
+        { shared: this.isAdmin() && this.draft_().scope === 'everyone' }
+      )
+      this.setSection(created.key)
+      notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), name)
+    } catch (err) {
+      this.fail('crud.logistics_items.add_section_error', 'Failed to add logistics section', err)
+    }
+  }
+
+  //EDIT
+  /** Loads a term into the form; asks first when the form holds an unsaved question (F9). */
+  async onEdit(term: LogisticsItemTerm): Promise<void> {
+    if (!this.requireSignIn()) return
+    if (this.isDirty()) {
+      const choice = await this.confirmModal.openTernary(
+        this.translation.translate('metadata_logistics_unsaved_confirm'),
+        { variant: 'warning', saveButtonLabel: 'save', saveLabel: 'metadata_logistics_discard' }
+      )
+      if (choice === 'cancel') return
+      if (choice === 'save' && !(await this.onSubmit())) return
+    }
+    this.editing_.set(term)
+    this.phase_.set(term.phase)
+    this.draft_.set(this.draftOf(term))
+    this.error_.set(null)
+    const form = this.formRef()?.nativeElement
+    form?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+    form?.querySelector<HTMLInputElement>('#logistics-item-text')?.focus()
+  }
+
+  cancelEdit(): void {
+    this.editing_.set(null)
+    this.draft_.update((d) => ({ ...d, text: '', environments: [...ENVIRONMENTS] }))
+    this.error_.set(null)
+  }
+
+  /** True when the form holds work: typed text when adding, any changed field when editing. */
+  isDirty(): boolean {
+    const editing = this.editing_()
+    const d = this.draft_()
+    if (!editing) return d.text.trim() !== ''
+    const base = this.draftOf(editing)
+    return (
+      d.text.trim() !== base.text ||
+      d.phase !== base.phase ||
+      d.section !== base.section ||
+      d.answerType !== base.answerType ||
+      d.environments.length !== base.environments.length ||
+      base.environments.some((e) => !d.environments.includes(e))
+    )
+  }
+
+  //REMOVE / RESTORE
   async onRemove(term: LogisticsItemTerm): Promise<void> {
     if (!this.requireSignIn()) return
-    const confirmed = await this.confirmModal.open(this.translation.translate('metadata_logistics_remove_confirm'), {
-      variant: 'warning'
-    })
-    if (!confirmed) return
-
-    try {
-      await this.taxonomy.remove(term)
-    } catch (err) {
-      if (err instanceof TermInUseError) {
-        this.userMsg.onSetErrorMsg(this.translation.translate('metadata_logistics_in_use'))
-        return
-      }
-      this.logging.error({
-        event: 'crud.logistics_items.remove_error',
-        message: 'Failed to remove logistics item',
-        context: { err }
+    if (!this.taxonomy.isShared(term)) {
+      const ok = await this.confirmModal.open(this.translation.translate('metadata_logistics_remove_confirm'), {
+        variant: 'warning'
       })
-      this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      if (ok) await this.run('remove', () => this.taxonomy.update(term, { removedAt: Date.now() } as never))
+      return
     }
+    if (this.isAdmin()) {
+      const choice = await this.confirmModal.openTernary(
+        this.translation.translate('metadata_logistics_remove_scope_confirm'),
+        {
+          variant: 'warning',
+          saveButtonLabel: 'metadata_logistics_scope_everyone',
+          saveLabel: 'metadata_logistics_scope_mine'
+        }
+      )
+      if (choice === 'save')
+        await this.run('remove', () => this.taxonomy.update(term, { removedAt: Date.now() } as never))
+      else if (choice === 'confirm') await this.hide(term.key)
+      return
+    }
+    if (!this.isOwner()) return
+    const ok = await this.confirmModal.open(this.translation.translate('metadata_logistics_hide_confirm'))
+    if (ok) await this.hide(term.key)
+  }
+
+  async onRestore(term: LogisticsItemTerm): Promise<void> {
+    if (!this.requireSignIn()) return
+    const keys = [...this.registry.hiddenAt_().keys()].filter((k) => k !== term.key)
+    await this.run('restore', () => this.business.updateHiddenLogisticsKeys(keys))
+    this.removedThisVisit_.update((set) => new Set([...set].filter((k) => k !== term.key)))
   }
 
   //UPDATE (the draft)
@@ -209,8 +398,8 @@ export class LogisticsItemManagerComponent {
   }
 
   setSection(value: string): void {
-    if (!LOGISTICS_SECTIONS.includes(value as LogisticsSection)) return
-    this.draft_.update((d) => ({ ...d, section: value as LogisticsSection }))
+    if (value === ADD_SECTION || !this.registry.sections_().includes(value)) return
+    this.draft_.update((d) => ({ ...d, section: value }))
   }
 
   setAnswerType(value: string): void {
@@ -223,10 +412,11 @@ export class LogisticsItemManagerComponent {
       ...d,
       environments: on ? [...d.environments.filter((e) => e !== env), env] : d.environments.filter((e) => e !== env)
     }))
+    if (this.error_() === 'metadata_logistics_env_required') this.error_.set(null)
   }
 
-  setShared(on: boolean): void {
-    this.draft_.update((d) => ({ ...d, shared: on }))
+  setScope(scope: 'mine' | 'everyone'): void {
+    this.draft_.update((d) => ({ ...d, scope }))
   }
 
   // UI handlers
@@ -234,5 +424,37 @@ export class LogisticsItemManagerComponent {
   selectPhase(phase: LogisticsPhase): void {
     this.phase_.set(phase)
     this.setPhase(phase)
+  }
+
+  // 7. PRIVATE
+  private draftOf(term: LogisticsItemTerm): LogisticsItemDraft {
+    const envs = ENVIRONMENTS.filter((e) => term.environments?.includes(e))
+    return {
+      text: term.key,
+      phase: term.phase,
+      section: term.section,
+      answerType: term.answerType,
+      environments: envs.length ? envs : [...ENVIRONMENTS],
+      scope: this.taxonomy.isShared(term) ? 'everyone' : 'mine'
+    }
+  }
+
+  private hide(key: string): Promise<void> {
+    const keys = [...this.registry.hiddenAt_().keys()].filter((k) => k !== key)
+    this.removedThisVisit_.update((set) => new Set(set).add(key))
+    return this.run('hide', () => this.business.updateHiddenLogisticsKeys([...keys, key]))
+  }
+
+  private async run(event: string, action: () => Promise<unknown>): Promise<void> {
+    try {
+      await action()
+    } catch (err) {
+      this.fail(`crud.logistics_items.${event}_error`, `Failed to ${event} logistics item`, err)
+    }
+  }
+
+  private fail(event: string, message: string, err: unknown): void {
+    this.logging.error({ event, message, context: { err } })
+    this.userMsg.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? this.translation.translate('server_error'))
   }
 }

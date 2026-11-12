@@ -17,13 +17,9 @@
 
     <!-- Usage indicator -->
     <div class="ai-menu-usage-bar" [attr.data-status]="usageColor_()">
-      <span class="ai-menu-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-      <span class="ai-menu-usage-count">
-        {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-        @if (modelsAvailableLabel_()) {
-          · {{ modelsAvailableLabel_() }}
-        }
-      </span>
+      @if (geminiUsage_().budget > 0) {
+        <span class="ai-menu-usage-count">{{ usesLeftLabel_() }}</span>
+      }
       <div class="ai-menu-usage-track">
         <div class="ai-menu-usage-fill" [style.width.%]="usageFillPercent_()"></div>
       </div>

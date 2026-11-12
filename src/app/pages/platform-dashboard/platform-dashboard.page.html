@@ -50,6 +50,7 @@
           </th>
           }
           <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_report" | translatePipe }}</th>
         </tr>
       </thead>
       <tbody>
@@ -76,6 +77,15 @@
           <td>{{ row.events.finished }}</td>
           <td>{{ rate(row.closeRate) }}</td>
           <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
+          <td>
+            <a
+              class="report-link"
+              data-testid="report-link"
+              routerLink="/report"
+              [queryParams]="{ businessId: row._id }"
+              >{{ "platform_col_report" | translatePipe }}</a
+            >
+          </td>
           <td>
             <input
               type="checkbox"
@@ -122,7 +132,7 @@
           >
             <th scope="row">{{ row.label ?? row.key }}</th>
             <td class="num">{{ row.calls }}</td>
-            <td class="num">{{ row.failedCalls }}</td>
+            <td class="num" [attr.title]="failureTitle(row)">{{ row.failedCalls }}</td>
             <td class="num">{{ row.totalTokens }}</td>
             <td class="num">{{ cost(row.estCostUsd) }}</td>
           </tr>
@@ -130,7 +140,7 @@
           <tr class="ai-drill-row">
             <th scope="row">{{ "ai_feature_" + feature.key | translatePipe }}</th>
             <td class="num">{{ feature.calls }}</td>
-            <td class="num">{{ feature.failedCalls }}</td>
+            <td class="num" [attr.title]="failureTitle(feature)">{{ feature.failedCalls }}</td>
             <td class="num">{{ feature.totalTokens }}</td>
             <td class="num">{{ cost(feature.estCostUsd) }}</td>
           </tr>

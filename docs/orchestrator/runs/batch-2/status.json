@@ -1,0 +1,925 @@
+{
+  "run": "batch-2",
+  "branch": "orch/batch-2",
+  "base": "main",
+  "startedAt": "2026-11-12T05:53:31.987Z",
+  "mainShaAtStart": "ea0493b5e69ba5a8e6fef2647d944c66fd77f202",
+  "plans": {
+    "546": {
+      "nnn": "546",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "9ed16e29ebc27664b9a877e73ad2dc2250fc49ef"
+    },
+    "547": {
+      "nnn": "547",
+      "title": "Give clients their own section: list, add, search, filters and a navigation group",
+      "branch": "feat/547-clients-get-their-own",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T06:36:23.146Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T06:43:31.674Z"
+        }
+      },
+      "humanItems": [
+        "The list reads well in Hebrew on a phone and on a desktop: columns, chips for kinds and tags, the filter panel."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T05:55:41.207Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T05:55:41.503Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T06:09:05.374Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T06:11:01.909Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T06:11:03.501Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T06:11:03.750Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:11:03.922Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:11:37.340Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:13:40.488Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:13:41.938Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:13:42.125Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:14:29.708Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:36:22.991Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:36:23.148Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:39:27.207Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:43:14.468Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:43:31.676Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:43:47.424Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T06:46:01.969Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "547",
+          "title": "Give clients their own section: list, add, search, filters and a navigation group",
+          "branch": "feat/547-clients-get-their-own",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T05:55:41.501Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T06:11:03.920Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 17.2,
+          "sha": "3c7e48590fba83d41401f0e1565fcf5100984ae9",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 801.7,
+              "tokens": {
+                "input": 2362416,
+                "output": 36533
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 31.5,
+              "tokens": {
+                "input": 91374,
+                "output": 1654
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: scope: src/app/core/components/header/header.component.spec.ts",
+            "round 2: scope: src/app/core/components/header/header.component.spec.ts"
+          ],
+          "reason": "asking 547-1: same reason twice: scope: src/app/core/components/header/header.component.spec.ts",
+          "park": {
+            "at": "2026-11-12T06:14:22.243Z",
+            "reason": "same reason twice: scope: src/app/core/components/header/header.component.spec.ts"
+          },
+          "parkBranch": "park/batch-2-547"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 547-1: same reason twice: scope: src/app/core/components/header/header.component.spec.ts",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.5,
+      "sha": "5fe2e68b4082dcc07fd0d6c63c9a20b64ab5b70d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 180.7,
+          "tokens": {
+            "input": 86643,
+            "output": 1470
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.4,
+          "tokens": {
+            "input": 45207,
+            "output": 925
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "d7ad6e1261937652e71ca756d1f4968ad06056b5"
+    },
+    "567": {
+      "nnn": "567",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "cfeba39259727e38a406d5c7f6c9f32ab855f1cb"
+    },
+    "568": {
+      "nnn": "568",
+      "title": "Business report: where the business stands and how it moved since it started with FoodVibe",
+      "branch": "feat/568-business-report-measured-start",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T06:48:21.876Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T07:09:33.681Z"
+        }
+      },
+      "humanItems": [
+        "Dandan prints `/report` for a seeded business: one A4 page, RTL, readable, measured numbers clearly apart from the owner's estimates."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T06:14:30.247Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T06:48:21.581Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T06:48:21.878Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:04:27.429Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:09:27.909Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:09:33.682Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:09:50.340Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:10:26.823Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "568",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 547-1",
+          "freeDiskGb": 17.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.4,
+      "sha": "3aac89d66a7f6482f46020d4043fab636f8f079e",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 963.2,
+          "tokens": {
+            "input": 3609680,
+            "output": 58715
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.7,
+          "tokens": {
+            "input": 180239,
+            "output": 987
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "3577199f1133c3c99e08bd5aed21710b03181ffa"
+    },
+    "579": {
+      "nnn": "579",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "5890c3853564c1f21fe6e64933ffedaadee21c17"
+    },
+    "580": {
+      "nnn": "580",
+      "title": "AI menu: say why it failed, build it from the recipe book, count rejected calls as failed",
+      "branch": "feat/580-ai-menu-say-why",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T07:12:42.403Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T07:52:20.943Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T07:38:27.034Z"
+        }
+      },
+      "humanItems": [
+        "On `/menu-library`, \"צור עם AI\" with a text that names no dish (for example \"חתונה ל-120 אורחים, בופה, ביום חמישי הבא\") gives a menu whose dishes all come from your recipe book and are all marked \"זוהה\"; after \"החל\", every line of the new menu opens the existing dish.",
+        "On `/menu-library`, \"צור עם AI\" with a text that has no guest count (for example \"בופה עם חומוס וסלט ירקות\") shows \"חסר מספר האורחים…\"; then on `/platform`, in \"שימוש ב-AI החודש\", your business's \"נכשלו\" number went up by one, and resting the mouse on that number shows the reasons, including \"חסר מספר אורחים: 1\"."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T06:14:30.399Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:12:42.238Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:12:42.405Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:29:40.151Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:38:00.094Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:38:06.671Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:38:26.616Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:38:26.833Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T07:38:27.039Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T07:45:41.073Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T07:52:14.630Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T07:52:20.945Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T07:52:42.474Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T07:53:32.720Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "580",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 547-1",
+          "freeDiskGb": 17.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.6,
+      "sha": "5173ce6bf01ea64e30699495acc71c86ffe3d575",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1014.3,
+          "tokens": {
+            "input": 2667893,
+            "output": 38946
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.3,
+          "tokens": {
+            "input": 127379,
+            "output": 1152
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 431.4,
+          "tokens": {
+            "input": 87610,
+            "output": 1412
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 20.1,
+          "tokens": {
+            "input": 132747,
+            "output": 758
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: review STOP: major server/routes/ai.js:1621 wrong result: /save-menu-shot prunes across all businesses; major server/routes/ai.js:194 crash: ReferenceError from the wrong function edited"
+      ],
+      "checkedHead": "77fb97b9582ccbe29e765f104462b26403434368"
+    },
+    "581": {
+      "nnn": "581",
+      "title": "Metadata card: edit and remove logistics questions, own sections, everybody or only-me",
+      "branch": "feat/581-metadata-card-edit-remove",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T07:56:06.603Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T08:09:34.040Z"
+        }
+      },
+      "humanItems": [
+        "Signed in as an owner (not platform admin), removing a shared question asks once and then shows it dimmed with \"הוסרה מהעסק שלך\" and \"החזר\"; a new event does not list it, an event created before still does; \"החזר\" brings it back.",
+        "Signed in as the platform admin, removing a shared question asks \"לכל העסקים\" or \"רק לעסק שלי\"; \"לכל העסקים\" takes it off the card for every business while an event created before still shows it; \"רק לעסק שלי\" hides it only for the admin's business.",
+        "On a phone-size window the card's rows with their pencil and trash buttons, the environment chips and the admin's scope chips read well and are easy to tap."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T06:14:30.543Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:56:06.413Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T07:56:06.604Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:07:09.641Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:09:28.955Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:09:34.042Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:09:58.252Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:10:42.191Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "581",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 547-1",
+          "freeDiskGb": 17.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16,
+      "sha": "6951d49dc70009781a1890d700c1b4c6ef316af1",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 660.9,
+          "tokens": {
+            "input": 2495266,
+            "output": 42704
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 22.3,
+          "tokens": {
+            "input": 173499,
+            "output": 1566
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c68c77a967294366c1ba680c865e8bbb9816ba47"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T05:55:41.015Z",
+      "plan": "547",
+      "text": "the folder foodVibe1.0-orch-batch-2-547 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T06:09:03.340Z",
+      "plan": "547",
+      "text": "builder left undone (round 0): e2e/ui/547-1 and 547-2 were not run here: nothing answered on :3000, so the QA sign-in cannot work in this worktree. The gate reruns them."
+    },
+    {
+      "at": "2026-11-12T06:14:29.500Z",
+      "plan": "547",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T06:14:29.887Z",
+      "plan": "547",
+      "text": "ask 547-1 (technical, the Human or the advisor answers): Plan 547 failed twice for the same reason (scope: src/app/core/components/header/header.component.spec.ts). Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-12T06:34:31.357Z",
+      "plan": "547",
+      "text": "ask 547-1 answered by the human: retry: the Human approved src/app/core/components/header/header.component.spec.ts. Plan 547's scope now names it (and src/app/core/components/tab-chips/tab-chips.component.spec.ts) by full path, on orch/batch-2 at 806e3e2a. Edit those two spec files as the plan's Done-when asks."
+    },
+    {
+      "at": "2026-11-12T06:36:15.679Z",
+      "plan": "547",
+      "text": "resumed from park/batch-2-547: round 1, tier build, after: asking 547-1: same reason twice: scope: src/app/core/components/header/header.component.spec.ts"
+    },
+    {
+      "at": "2026-11-12T06:36:22.833Z",
+      "plan": "547",
+      "text": "the folder foodVibe1.0-orch-batch-2-547 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T06:44:16.440Z",
+      "plan": "547",
+      "text": "the folder foodVibe1.0-orch-merge-batch-2 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T06:48:21.381Z",
+      "plan": "568",
+      "text": "the folder foodVibe1.0-orch-batch-2-568 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T07:12:42.086Z",
+      "plan": "580",
+      "text": "the folder foodVibe1.0-orch-batch-2-580 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T07:29:37.021Z",
+      "plan": "580",
+      "text": "builder left undone (round 0): A13: the e2e specs 580-1..3 were not run (no slot app here); the two [human] cards are left for the Human"
+    },
+    {
+      "at": "2026-11-12T07:56:06.241Z",
+      "plan": "581",
+      "text": "the folder foodVibe1.0-orch-batch-2-581 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T08:07:07.666Z",
+      "plan": "581",
+      "text": "builder left undone (round 0): A7: e2e/ui/581-1..4.spec.ts written and 523-2/523-3 updated, but not run, so no screenshots and 523-1/523-2 not re-run. localhost:3000 is down, and no slot ports are set for this worktree."
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 16,
+  "updatedAt": "2026-11-12T08:16:13.990Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "547",
+      "type": "behaviour",
+      "text": "behaviour: sort is a radio pair in the filter panel (last contact by default, or name), kept in the `sort` URL param — reverse: drop the sort category from client-list.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "547",
+      "type": "behaviour",
+      "text": "behaviour: kind, tag and lifecycle filters are multi-select chips, and a client matches when it has any selected value — reverse: change the filter in filteredClients_ to require all",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "547",
+      "type": "behaviour",
+      "text": "behaviour: the owner-only lifecycle filter is ignored for staff even if `life` is in the URL — reverse: drop the isOwner_() guard in filteredClients_",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "547",
+      "type": "behaviour",
+      "text": "behaviour: on a phone the row shows the name with the phone under it, and the other owner columns are hidden by CSS (display: none) — reverse: remove the max-width: 768px block in client-list.component.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "547",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons does not include user-plus, which is outside this plan's scope; the client-list spec adds UserPlus to its own icon pick",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "547",
+      "type": "behaviour",
+      "text": "behaviour: kept header.component.spec.ts and named it by full path in the plan's scope block, instead of reverting it, because the plan's Done-when requires the header spec update — reverse: remove the line and revert the spec",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "547",
+      "type": "behaviour",
+      "text": "behaviour: the unit specs set UserPlus in their own icon pick, because src/testing/test-lucide-icons is outside the plan's scope — reverse: add UserPlus to the shared test icons and drop the local pick",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "568",
+      "type": "behaviour",
+      "text": "behaviour: the revenue rule (actual -> planned -> pricing) is re-written in JS in business-report.js instead of imported, because business-stats.js is outside the scope and holds it as a Mongo expression — reverse: export it from business-stats.js in a scoped plan and import it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "568",
+      "type": "behaviour",
+      "text": "behaviour: the report page lists up to 3 findings and shows each one's evidence count as a second line; the plan did not fix the wording — reverse: edit the finding block in report.page.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "568",
+      "type": "behaviour",
+      "text": "behaviour: change is returned as { changePct: null } or { changePts: null } when either side is not enough, and the UI hides it — reverse: omit the key on the server",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "568",
+      "type": "behaviour",
+      "text": "behaviour: added the dictionary keys report_evidence, report_estimates_only, report_est_hours_ordering, report_est_hours_quotes and report_est_waste, which the plan did not list — reverse: delete them and the lines that use them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "580",
+      "type": "behaviour",
+      "text": "behaviour: /generate-menu's per-user limiter 429 carries no code, so the client maps any 429 without a code to ai_limit_reached (as the plan says) — reverse: add a code in rate-limit.js and a key in ERROR_KEYS",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "580",
+      "type": "behaviour",
+      "text": "behaviour: the daily-limit test in ai-menu.test.js uses its own user so the 20-per-15-minutes limiter is not hit by the other tests — reverse: none needed, test-only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "580",
+      "type": "behaviour",
+      "text": "behaviour: aggregateAiUsage omits failures on the totals row, as the plan says — reverse: sum row.failures in the totals loop",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "581",
+      "type": "behaviour",
+      "text": "behaviour: the cancel button while editing uses c-btn-ghost, because there is no c-btn-secondary class — reverse: swap the class in the template",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "581",
+      "type": "behaviour",
+      "text": "behaviour: a hidden shared row shows no pencil or trash, only 'החזר' (restore) — reverse: change canEdit/canRemove in the sections computed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "581",
+      "type": "behaviour",
+      "text": "behaviour: e2e/ui/523-2.spec.ts now asserts the trash button instead of `.c-chip--removable`, which no longer exists — reverse: restore the old assertion",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "581",
+      "type": "behaviour",
+      "text": "behaviour: the admin's scope radios stay visible but disabled while editing (the plan says disabled) — reverse: hide them with @if (!editing())",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T08:16:13.987Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T08:16:13.990Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

@@ -75,6 +75,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `logistics-item-registry.service.ts` | Event-logistics checklist items (taxonomy kind `logisticsItem`) by phase and environment (plan 521); plan 579: the date rule `forEvent`, removed / folded terms, the business hide list, own sections | LogisticsItemRegistryService |
 | `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
 | `business-stats.service.ts` | The dashboard numbers for the signed-in business, computed by the server (plan 447) | BusinessStatsService |
+| `business-stats.service.ts` (getReport) | Plan 568: `getReport(months, businessId?)` reads the business report | BusinessStatsService |
 | `plan-snapshot.service.ts` | Builds an event's planning snapshot from today's prices and the supplier orders (plan 446) | PlanSnapshotService, LivePlan |
 | `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448) | PlatformAdminService, BusinessRow |
 | `product-import.service.ts` | Supplier price-list import: cleaned rows from the server, then apply (plan 432) | ProductImportService, ImportRow, ApplyRow, ApplyResult |

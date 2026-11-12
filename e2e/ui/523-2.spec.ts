@@ -42,7 +42,7 @@ test('523-2: adding an own question shows it under its section with a remove con
 
     const row = card(page).locator('[data-section="infrastructure"] .logistics-item', { hasText: NAME })
     await expect(row).toBeVisible()
-    await expect(row.locator('.c-chip--removable .c-chip__remove')).toBeVisible()
+    await expect(row.getByRole('button', { name: 'מחיקה' })).toBeVisible()
     await row.scrollIntoViewIfNeeded()
     await page.screenshot({ path: 'screens/523-2.png' })
   } finally {

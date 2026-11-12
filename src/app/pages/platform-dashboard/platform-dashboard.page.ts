@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { DatePipe } from '@angular/common'
+import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
@@ -57,6 +58,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
   standalone: true,
   imports: [
     DatePipe,
+    RouterLink,
     LucideAngularModule,
     TranslatePipe,
     PageHeaderComponent,
@@ -196,6 +198,21 @@ export class PlatformDashboardPage implements OnInit {
       })
       this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     }
+  }
+
+  /** Plan 580: hover text of a failed-calls cell: the reasons, most frequent first. */
+  protected failureTitle(row: AiUsageRow): string | null {
+    const entries = Object.entries(row.failures ?? {})
+    if (entries.length === 0) return null
+    return entries
+      .sort((a, b) => b[1] - a[1])
+      .map(([reason, count]) => {
+        const key = 'ai_fail_' + reason
+        const text = this.translation.translate(key)
+        const label = text && text !== key ? text : this.translation.translate('ai_fail_other') + ' (' + reason + ')'
+        return label + ': ' + count
+      })
+      .join(' · ')
   }
 
   protected cost(value: number): string {

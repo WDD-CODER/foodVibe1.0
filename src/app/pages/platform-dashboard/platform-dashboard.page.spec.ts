@@ -15,6 +15,10 @@ import { PlatformDashboardPage } from './platform-dashboard.page'
 class StubLogisticsItemsComponent {}
 
 const DAY = 86_400_000
+const FAIL_TEXTS: Record<string, string> = {
+  ai_fail_no_sections: 'לא נמצאו מנות',
+  ai_fail_timeout: 'ה-AI לא ענה בזמן'
+}
 
 function row(id: string, extra: Partial<BusinessRow> = {}, events: Partial<BusinessRow['events']> = {}): BusinessRow {
   return {
@@ -86,7 +90,7 @@ describe('PlatformDashboardPage', () => {
           provide: UserMsgService,
           useValue: jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg'])
         },
-        { provide: TranslationService, useValue: { translate: (key: string) => key } },
+        { provide: TranslationService, useValue: { translate: (key: string) => FAIL_TEXTS[key] ?? key } },
         provideRouter([])
       ]
     })
@@ -194,6 +198,16 @@ describe('PlatformDashboardPage', () => {
       await fixture.whenStable()
       fixture.detectChanges()
       expect(aiTrs().map((tr) => tr.className)).toEqual(['ai-row', 'ai-row', 'ai-drill-row', 'ai-drill-row'])
+    })
+
+    it('puts the failure reasons in the failed cell title (plan 580)', async () => {
+      await setup(
+        [row('a')],
+        [aiRow('b1', { label: 'Alpha', failures: { timeout: 1, no_sections: 2 } }), aiRow('b2', { label: 'Beta' })]
+      )
+      const failedCell = (i: number): HTMLElement => aiTrs()[i].children[2] as HTMLElement
+      expect(failedCell(0).getAttribute('title')).toBe('לא נמצאו מנות: 2 · ה-AI לא ענה בזמן: 1')
+      expect(failedCell(1).hasAttribute('title')).toBe(false)
     })
 
     it('shows the empty state when there are no calls', async () => {

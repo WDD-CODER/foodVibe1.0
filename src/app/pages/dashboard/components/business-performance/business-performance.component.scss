@@ -335,3 +335,10 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     color: var(--color-text-muted);
   }
 }
+
+.perf__report-link {
+  margin-inline-start: auto;
+  font-size: var(--fs-sm);
+  color: var(--color-primary);
+  text-decoration: underline;
+}

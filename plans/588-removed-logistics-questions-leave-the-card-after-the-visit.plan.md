@@ -85,9 +85,9 @@ Confirm `sections` (or its computed) is the single place the card's rows come fr
 - The link sits at the end of the card, small and muted; RTL.
 
 ## Atomic Sub-tasks
-- [ ] A1: Show a removed question only during the visit it was removed in — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.ts
-- [ ] A2: Add the small removed-count link that lists removed questions with restore — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.html, .scss, dictionary key
-- [ ] A3: Test it and keep the screen checks in line — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts, e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts
+- [x] A1: Show a removed question only during the visit it was removed in — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.ts
+- [x] A2: Add the small removed-count link that lists removed questions with restore — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.html, .scss, dictionary key
+- [x] A3: Test it and keep the screen checks in line — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts, e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts
 
 ## What happens when
 - No hidden rows → no link.
@@ -107,3 +107,6 @@ Confirm `sections` (or its computed) is the single place the card's rows come fr
 
 ## Execution Notes
 - Human 2026-11-12, batch-2 card ⑤ (quoted in the Problem Statement).
+- pnpm run build → 0; pnpm run lint → 0; pnpm run test:ci → 0 (2010 SUCCESS; first run disconnected in an unrelated ExportService spec, rerun clean).
+- e2e 581-1/581-2 do not assert the dimmed row after reload; left unchanged.
+- behaviour: the "הוסרו (N)" list counts the selected phase's hidden rows, including ones still dimmed in their section this visit — reverse: filter them out of removedRows.

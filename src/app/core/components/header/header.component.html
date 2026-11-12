@@ -168,4 +168,8 @@
     <lucide-icon name="library" [size]="22"></lucide-icon>
     <span>{{ 'menu_library' | translatePipe }}</span>
   </a>
+  <a routerLink="/clients" routerLinkActive="active" (click)="closeMobileMenu()">
+    <lucide-icon name="users" [size]="22"></lucide-icon>
+    <span>{{ 'frontdesk_section' | translatePipe }}</span>
+  </a>
 </nav>

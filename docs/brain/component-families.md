@@ -112,7 +112,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users (13 services): in `src/app/core/services/` the add-equipment, add-item, auth, confirm, global-specific,
   quick-add-product, quick-edit-product, restore-choice and translation-key `*-modal.service.ts`; in `src/app/shared/`
   the ai-menu, ai-product, ai-recipe and label-creation `*-modal/*.service.ts`.
-- Also used by `PlatformLogisticsItemsComponent` (`ConfirmModalService`, plan 532).
+- Also used by `PlatformLogisticsItemsComponent` (`ConfirmModalService`, plan 532) and `logistics-item-manager` (`open` / `openTernary` choices: remove, hide, unsaved question, plan 581).
 - Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
 
 ### list-page — a list screen (header, search, filters, rows, selection)
@@ -123,7 +123,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
   `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
 - When: any screen that lists entities.
-- Users today (4): equipment, inventory products, recipe book, suppliers.
+- Users today (5): client list, equipment, inventory products, recipe book, suppliers.
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
@@ -202,7 +202,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
 - Users (plan 522): `event-logistics-panel` — toggle header (`--tap`), phase tabs (`--tab`), status/payer radios (`--toggle`).
 - Tight group (plan 579): `.c-chip-group.c-chip-group--tight` — no block padding, `--space-1` gap, small chips; user: `event-logistics-panel` (one "נדרש" toggle + the two provider radios); plan 581 uses it too.
-- Users (plan 523): `logistics-item-manager` — phase tabs (`--tab`), shared item (`--tag` + lock), own item (`--removable`), environment and shared choices (`--toggle`).
+- Users (plans 523, 581): `logistics-item-manager` — phase tabs (`--tab`), every question row a `--tag` (shared + lock), environment chips and the admin's scope radios (`--toggle` in `--tight` groups).
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
   header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.

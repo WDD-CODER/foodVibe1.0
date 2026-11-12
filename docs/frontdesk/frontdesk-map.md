@@ -193,6 +193,7 @@ Overridden by the Front Desk brief (the reference text is wrong for Wave 1 on th
 ## Contract extensions (run)
 
 Workers append here: `- plan NNN · <extension> · why`.
+- plan 580 · C-AIUSAGE rows gain outcome ('accepted' | 'rejected', only when ok) and rejectCode; failedCalls counts ok:false or outcome:'rejected'; report rows gain failures {reason: count}; missing outcome = accepted · a call whose answer the route refused was counted as a success
 - plan 545 · clients gain the server-only field liveKey (= phoneKey while live and not merged; removed on delete and merge) with a unique partial index { businessId, liveKey }; it is in CLIENT_SERVER_FIELDS; 551's merge unsets it on the merged-away client · race-safe "one live client per phone" (Human Q1 = a)
 - plan 546 · C-PICKER gains inputs inputId, variant and outputs cleared, addingChange, plus a back() method · Escape steps back one view and the dialog title follows the add view
 - plan 547 · client lifecycle is computed in the browser by clientLifecycle(client, now): new = firstSeenAt within 30 days, dormant = no contact for 180 days, active = the rest; the stored lifecycle field is not read · no rule existed (Human 2026-11-10)

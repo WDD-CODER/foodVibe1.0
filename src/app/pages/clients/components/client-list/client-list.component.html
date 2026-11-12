@@ -1,0 +1,270 @@
+<app-list-shell
+  appColumnCarouselGroup
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [gridTemplate]="gridTemplate_()"
+  [mobileGridTemplate]="'1fr 1.4fr'"
+  [resultCount]="filteredClients_().length"
+  [resultTotal]="baseClients_().length"
+>
+  <ng-container shell-title>{{ 'clients' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="client-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="client-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (keydown.escape)="onSearchEscape($event, searchInput)"
+      />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    @if (isOwner_()) {
+      <button type="button" class="c-btn-primary" data-testid="add-client" (click)="openAdd()">
+        <lucide-icon name="user-plus" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'add_new_client' | translatePipe }}</span>
+      </button>
+    }
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="col-name c-grid-header-cell" role="columnheader">{{ 'client_name' | translatePipe }}</div>
+    <app-column-carousel-header>
+      <div class="col-phone c-grid-header-cell" appColumnSlide label="client_phone" role="presentation">
+        {{ 'client_phone' | translatePipe }}
+      </div>
+      <div class="col-kinds c-grid-header-cell" appColumnSlide label="client_kinds" role="presentation">
+        {{ 'client_kinds' | translatePipe }}
+      </div>
+      <div class="col-tags c-grid-header-cell" appColumnSlide label="client_tags" role="presentation">
+        {{ 'client_tags' | translatePipe }}
+      </div>
+      @if (isOwner_()) {
+        <div class="col-last c-grid-header-cell" appColumnSlide label="client_last_contact" role="presentation">
+          {{ 'client_last_contact' | translatePipe }}
+        </div>
+        <div class="col-events c-grid-header-cell" appColumnSlide label="client_events_count" role="presentation">
+          {{ 'client_events_count' | translatePipe }}
+        </div>
+        <div class="col-requests c-grid-header-cell" appColumnSlide label="client_requests_count" role="presentation">
+          {{ 'client_requests_count' | translatePipe }}
+        </div>
+      }
+    </app-column-carousel-header>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (filteredClients_().length === 0) {
+      <div class="no-results">
+        @if (isEmptyList_()) {
+          <app-empty-state
+            messageKey="clients_empty"
+            icon="users"
+            [ctaLabelKey]="isOwner_() ? 'add_new_client' : null"
+            (ctaClick)="openAdd()"
+          />
+        } @else {
+          {{ 'clients_no_results' | translatePipe }}
+        }
+      </div>
+    }
+    @for (item of filteredClients_(); track item._id) {
+      <div class="client-grid-row c-list-row" role="row">
+        <div class="col-name c-list-body-cell" role="cell">
+          <span class="client-name">{{ item.name }}</span>
+        </div>
+        <app-column-carousel-cell>
+          <div class="col-phone c-list-body-cell" appColumnSlide [label]="'client_phone' | translatePipe" dir="ltr">
+            {{ item.phone }}
+          </div>
+          <div class="col-kinds c-list-body-cell chip-cell" appColumnSlide [label]="'client_kinds' | translatePipe">
+            @for (kind of item.kinds ?? []; track kind) {
+              <span class="c-chip--tag c-chip--sm">{{ 'client_kind_' + kind | translatePipe }}</span>
+            }
+          </div>
+          <div class="col-tags c-list-body-cell chip-cell" appColumnSlide [label]="'client_tags' | translatePipe">
+            @for (tag of item.tags ?? []; track tag) {
+              <span
+                class="c-chip--tag c-chip--sm"
+                [class.c-chip--amber]="tagTone(tag) === 'amber'"
+                [class.c-chip--red]="tagTone(tag) === 'red'"
+                >{{ tagLabel(tag) }}</span
+              >
+            }
+          </div>
+          @if (isOwner_()) {
+            <div class="col-last c-list-body-cell" appColumnSlide [label]="'client_last_contact' | translatePipe">
+              {{ item.lastContactAt ? (item.lastContactAt | date: 'd.M.yy') : '' }}
+            </div>
+            <div class="col-events c-list-body-cell" appColumnSlide [label]="'client_events_count' | translatePipe">
+              {{ item.counters?.events ?? 0 }}
+            </div>
+            <div class="col-requests c-list-body-cell" appColumnSlide [label]="'client_requests_count' | translatePipe">
+              {{ item.counters?.requests ?? 0 }}
+            </div>
+          }
+        </app-column-carousel-cell>
+      </div>
+    }
+  </ng-container>
+
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="c-filter-section">
+      <div class="c-filter-category">
+        <button
+          type="button"
+          class="c-filter-category-header"
+          [class.expanded]="filterCategories.isExpanded('sort')"
+          (click)="filterCategories.toggle('sort')"
+        >
+          <span>{{ 'sort' | translatePipe }}</span>
+          <lucide-icon
+            [name]="filterCategories.isExpanded('sort') ? 'chevron-down' : 'chevron-left'"
+            [size]="16"
+          ></lucide-icon>
+        </button>
+        @if (filterCategories.isExpanded('sort')) {
+          <div class="c-chip-group">
+            <label class="c-chip c-chip--toggle">
+              <input
+                type="radio"
+                name="client-sort"
+                [checked]="sortBy_() !== 'name'"
+                (change)="setSort('last_contact')"
+              />
+              <span>{{ 'sort_by_last_contact' | translatePipe }}</span>
+            </label>
+            <label class="c-chip c-chip--toggle">
+              <input type="radio" name="client-sort" [checked]="sortBy_() === 'name'" (change)="setSort('name')" />
+              <span>{{ 'sort_by_name' | translatePipe }}</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      <div class="c-filter-category">
+        <button
+          type="button"
+          class="c-filter-category-header"
+          [class.expanded]="filterCategories.isExpanded('client_kinds')"
+          (click)="filterCategories.toggle('client_kinds')"
+        >
+          <span>{{ 'client_kinds' | translatePipe }}</span>
+          @if (selectedKinds_().size > 0) {
+            <span class="c-filter-category-count" aria-hidden="true">{{ selectedKinds_().size }}</span>
+          }
+          <lucide-icon
+            [name]="filterCategories.isExpanded('client_kinds') ? 'chevron-down' : 'chevron-left'"
+            [size]="16"
+          ></lucide-icon>
+        </button>
+        @if (filterCategories.isExpanded('client_kinds')) {
+          <div class="c-chip-group">
+            @for (kind of kinds; track kind) {
+              <label class="c-chip c-chip--toggle">
+                <input
+                  type="checkbox"
+                  [checked]="selectedKinds_().has(kind)"
+                  (change)="toggleIn(selectedKinds_, kind)"
+                />
+                <span>{{ 'client_kind_' + kind | translatePipe }}</span>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      @if (allTags_().length > 0) {
+        <div class="c-filter-category">
+          <button
+            type="button"
+            class="c-filter-category-header"
+            [class.expanded]="filterCategories.isExpanded('client_tags')"
+            (click)="filterCategories.toggle('client_tags')"
+          >
+            <span>{{ 'client_tags' | translatePipe }}</span>
+            @if (selectedTags_().size > 0) {
+              <span class="c-filter-category-count" aria-hidden="true">{{ selectedTags_().size }}</span>
+            }
+            <lucide-icon
+              [name]="filterCategories.isExpanded('client_tags') ? 'chevron-down' : 'chevron-left'"
+              [size]="16"
+            ></lucide-icon>
+          </button>
+          @if (filterCategories.isExpanded('client_tags')) {
+            <div class="c-chip-group">
+              @for (tag of allTags_(); track tag) {
+                <label class="c-chip c-chip--toggle">
+                  <input type="checkbox" [checked]="selectedTags_().has(tag)" (change)="toggleIn(selectedTags_, tag)" />
+                  <span>{{ tagLabel(tag) }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (isOwner_()) {
+        <div class="c-filter-category">
+          <button
+            type="button"
+            class="c-filter-category-header"
+            [class.expanded]="filterCategories.isExpanded('client_lifecycle')"
+            (click)="filterCategories.toggle('client_lifecycle')"
+          >
+            <span>{{ 'client_lifecycle' | translatePipe }}</span>
+            @if (selectedLifecycles_().size > 0) {
+              <span class="c-filter-category-count" aria-hidden="true">{{ selectedLifecycles_().size }}</span>
+            }
+            <lucide-icon
+              [name]="filterCategories.isExpanded('client_lifecycle') ? 'chevron-down' : 'chevron-left'"
+              [size]="16"
+            ></lucide-icon>
+          </button>
+          @if (filterCategories.isExpanded('client_lifecycle')) {
+            <div class="c-chip-group">
+              @for (life of lifecycles; track life) {
+                <label class="c-chip c-chip--toggle">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedLifecycles_().has(life)"
+                    (change)="toggleIn(selectedLifecycles_, life)"
+                  />
+                  <span>{{ 'client_lifecycle_' + life | translatePipe }}</span>
+                </label>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (isAddOpen_()) {
+      <app-modal-shell size="md" titleKey="client_new" [sheet]="true" (dismissed)="closeAdd()">
+        <app-client-form (saved)="onSaved()" (cancelled)="closeAdd()" />
+      </app-modal-shell>
+    }
+  </ng-container>
+</app-list-shell>
