@@ -87,8 +87,6 @@ e2e/ui/554-1.spec.ts
 docs/agent/standards-backend.md
 docs/brain/component-families.md
 server/breadcrumbs.md
-server/routes/generic.js
-server/test/invariants.test.js
 ```
 
 ## Read Scope
