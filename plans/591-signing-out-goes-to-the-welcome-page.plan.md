@@ -56,8 +56,7 @@ append the path to the scope block above and retry.
 - INV-none: preserves — client navigation only; no data, server or schema path.
 
 ## Reuse Check
-- `SignedOutRedirectService` (`src/app/core/services/signed-out-redirect.service.ts`) — family: none — rung: 4 — why:
-  one place that reacts to the user signal going from signed-in to signed-out; no service does this today.
+- `SignedOutRedirectService` (`src/app/core/services/signed-out-redirect.service.ts`) — family: none — rung: 4 — why: one place that reacts to the user signal going from signed-in to signed-out; no service does this today.
 
 ## Step 0 — Reality Check
 Confirm the three `logout()` callers above and that `UserService` exposes the signed-in user as a signal.
