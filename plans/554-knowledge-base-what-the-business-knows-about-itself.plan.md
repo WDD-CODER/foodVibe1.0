@@ -87,6 +87,7 @@ e2e/ui/554-1.spec.ts
 docs/agent/standards-backend.md
 docs/brain/component-families.md
 server/breadcrumbs.md
+server/test/ai-usage.test.js
 ```
 
 ## Read Scope
