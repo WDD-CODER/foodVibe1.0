@@ -3,6 +3,7 @@ import { Component, input, output, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { provideRouter } from '@angular/router'
+import { stubFinePointer } from 'src/testing/fine-pointer'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { EventStageBarComponent } from './event-stage-bar.component'
@@ -61,6 +62,7 @@ describe('EventStageBarComponent', () => {
   }
 
   beforeEach(async () => {
+    stubFinePointer()
     confirmAnswer = true
     confirmOpen = jasmine.createSpy('open').and.callFake(() => Promise.resolve(confirmAnswer))
     allowed = { changeStage: true, edit: true, editMoney: true }
