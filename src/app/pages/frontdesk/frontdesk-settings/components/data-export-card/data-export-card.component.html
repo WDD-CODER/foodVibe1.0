@@ -1,0 +1,41 @@
+@if (isOwner_()) {
+  <section class="de-card c-glass-card" data-testid="card-export">
+    <h2 class="de-title">
+      <lucide-icon name="download" [size]="18"></lucide-icon>
+      {{ 'fd_export_title' | translatePipe }}
+    </h2>
+    <p class="de-hint">{{ 'fd_export_hint' | translatePipe }}</p>
+    <div class="de-actions">
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="export-clients"
+        [disabled]="busy_() !== null"
+        (click)="export('clients')"
+      >
+        <lucide-icon name="download" [size]="16"></lucide-icon>
+        <span class="btn-label">{{ 'fd_export_clients' | translatePipe }}</span>
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="export-requests"
+        [disabled]="busy_() !== null"
+        (click)="export('requests')"
+      >
+        <lucide-icon name="download" [size]="16"></lucide-icon>
+        <span class="btn-label">{{ 'fd_export_requests' | translatePipe }}</span>
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="export-bookings"
+        [disabled]="busy_() !== null"
+        (click)="export('bookings')"
+      >
+        <lucide-icon name="download" [size]="16"></lucide-icon>
+        <span class="btn-label">{{ 'fd_export_bookings' | translatePipe }}</span>
+      </button>
+    </div>
+  </section>
+}

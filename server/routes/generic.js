@@ -566,6 +566,10 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
     // Plan 548: a client never sets a profile's status or WhatsApp routing; every profile starts as a draft.
     if (entityType === PROFILES) safeEntity = withoutServerProfileFields(safeEntity);
+    // Plan 557: only the platform admin raises the assistant level; a new profile starts at 0.
+    if (entityType === PROFILES && safeEntity.assistant && typeof safeEntity.assistant === 'object') {
+      safeEntity = { ...safeEntity, assistant: { ...safeEntity.assistant, level: 0 } };
+    }
     if (shared && !isPlatformAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -753,6 +757,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       }
       // Plan 446: a frozen planning snapshot survives a client save unchanged.
       if (req.params.type === EVENTS) updatable = withSavedSnapshot(updatable, current);
+      // Plan 557: the stored assistant level survives a client PUT (adminHistory is already dropped above).
+      if (req.params.type === PROFILES && updatable.assistant && typeof updatable.assistant === 'object') {
+        updatable = { ...updatable, assistant: { ...updatable.assistant, level: current.assistant?.level ?? 0 } };
+      }
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
       let merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];

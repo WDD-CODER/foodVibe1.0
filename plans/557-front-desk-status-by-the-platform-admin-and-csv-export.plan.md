@@ -174,13 +174,13 @@ public "not available" answer (555), `BusinessRow.frontDesk` (556), `RequestData
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the profile and business keep the admin's changes and reasons — adminHistory, frontDeskPlan, the admin body schema, level and history kept on owner writes — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/business.schema.ts, shared/schemas/front-desk-admin.schema.ts, shared/schemas/index.ts, server/routes/generic.js
-- [ ] A2: Give the platform admin one route to set status, assistant level and plan with a reason — server/routes/admin.js
-- [ ] A3: Test the route, the owner-write guard and that a suspended page is closed but its data still readable — server/test/front-desk-status.test.js
-- [ ] A4: Let the platform admin change a business's front desk from the platform page — row status and level, the dialog and its service call — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/platform-dashboard/components/front-desk-admin-dialog/**, src/app/core/services/platform-admin.service.ts
-- [ ] A5: Tell members when their front desk is suspended — the shared banner on the dashboard and the settings page — src/app/shared/front-desk-status-banner/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts, src/app/pages/frontdesk/frontdesk-settings/**
-- [ ] A6: Let the owner download clients, requests and bookings as files Excel opens in Hebrew — CSV helper and the export card — src/app/core/utils/csv.util.ts, src/app/core/utils/csv.util.spec.ts, src/app/pages/frontdesk/frontdesk-settings/**
-- [ ] A7: Add the words, icon, registry and docs rows, the download check, and run every check — public/assets/data/dictionary.json, src/app/app.config.ts, docs/brain/component-families.md, docs/agent/standards-backend.md, src/app/pages/frontdesk/breadcrumbs.md, e2e/ui/557-1.spec.ts
+- [x] A1: Let the profile and business keep the admin's changes and reasons — adminHistory, frontDeskPlan, the admin body schema, level and history kept on owner writes — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/business.schema.ts, shared/schemas/front-desk-admin.schema.ts, shared/schemas/index.ts, server/routes/generic.js
+- [x] A2: Give the platform admin one route to set status, assistant level and plan with a reason — server/routes/admin.js
+- [x] A3: Test the route, the owner-write guard and that a suspended page is closed but its data still readable — server/test/front-desk-status.test.js
+- [x] A4: Let the platform admin change a business's front desk from the platform page — row status and level, the dialog and its service call — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/platform-dashboard/components/front-desk-admin-dialog/**, src/app/core/services/platform-admin.service.ts
+- [x] A5: Tell members when their front desk is suspended — the shared banner on the dashboard and the settings page — src/app/shared/front-desk-status-banner/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts, src/app/pages/frontdesk/frontdesk-settings/**
+- [x] A6: Let the owner download clients, requests and bookings as files Excel opens in Hebrew — CSV helper and the export card — src/app/core/utils/csv.util.ts, src/app/core/utils/csv.util.spec.ts, src/app/pages/frontdesk/frontdesk-settings/**
+- [x] A7: Add the words, icon, registry and docs rows, the download check, and run every check — public/assets/data/dictionary.json, src/app/app.config.ts, docs/brain/component-families.md, docs/agent/standards-backend.md, src/app/pages/frontdesk/breadcrumbs.md, e2e/ui/557-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: 548 profile schema and strip/keep step, 549 data services, 553 settings page and keys, 555 public "not available", 556 admin row `frontDesk`.
@@ -206,3 +206,12 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Plan 555's bridge script `server/scripts/set-front-desk-status.js` stays (e2e setup and local use); the admin route is the in-app way and the only one that keeps a reason.
 - Assistant level is set here because brief D7 gives it to the platform admin and plan 553 shows it read-only pointing to this plan.
 - Platform admin and INV-1: the write is a platform-admin route into one named business, the pattern of `PUT /admin/businesses/:id/internal` (plan 448); members can never write these fields.
+
+### Builder evidence (round 0)
+- `pnpm run build` -> exit 0; `pnpm run lint` / `lint:icons` / `lint:no-native-select` -> exit 0 (0 errors).
+- `pnpm run test:server` -> exit 0, 102 files, 1328 tests (incl. `front-desk-status.test.js`).
+- `pnpm run test:ci` -> exit 0, 2161 SUCCESS (incl. csv.util, data-export-card, front-desk-status-banner, front-desk-admin-dialog specs).
+- breadcrumbs-check, override-check, plan-ledger-check, kit-manifest-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+- `e2e/ui/557-1.spec.ts` written; not run here (needs the running app and QA login); the gate reruns it.
+- Not done as written: the row's assistant level (see below); `src/app/pages/frontdesk/breadcrumbs.md` (breadcrumbs-check flags a file outside the seams; the rows went into `src/app/pages/breadcrumbs.md` instead).
+- `server/routes/admin.js` list rows are unchanged: `server/test/front-desk-setup.test.js:126` and `server/test/admin-businesses.test.js` pin the exact row shape and are outside the scope, so the table does not show the assistant level; the dialog's level select starts on "ללא שינוי".

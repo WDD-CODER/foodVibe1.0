@@ -23,6 +23,14 @@ export interface BusinessRow {
   frontDesk: { status: 'draft' | 'pilot' | 'active' | 'suspended'; done: number; total: number } | null
 }
 
+/** Plan 557: body of the platform admin's front desk change; `reason` is required and kept on the profile. */
+export interface FrontDeskAdminBody {
+  status?: 'draft' | 'pilot' | 'active' | 'suspended'
+  assistantLevel?: 0 | 1
+  plan?: 'pilot' | 'basic' | 'pro'
+  reason: string
+}
+
 /** Plan 532: one business's own term (a logistics item) as the platform admin sees it. */
 export interface AdminTermRow {
   id: string
@@ -99,5 +107,11 @@ export class PlatformAdminService {
       this._rows_.set(before)
       throw err
     }
+  }
+
+  /** Plan 557: sets one business's front desk status, assistant level and plan, then reloads the table. */
+  async updateFrontDesk(id: string, body: FrontDeskAdminBody): Promise<void> {
+    await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/front-desk`)}`, body))
+    await this.load()
   }
 }
