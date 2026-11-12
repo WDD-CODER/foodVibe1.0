@@ -104,8 +104,8 @@ Confirm the two prompt blocks and lines 176-177 of the modal still read as above
 
 ## Atomic Sub-tasks
 - [ ] A1: Stop the AI from setting portions or prices, and stop it guessing a guest count — server/routes/ai.js (both prompts + answer clean-up)
-- [ ] A2: Stop the menu popup from copying portions and prices into the dish lines — ai-menu-modal.component.ts, ai-menu-draft.model.ts
-- [ ] A3: Prove both on the server and in the popup — server/test/ai-menu.test.js, ai-menu-modal.component.spec.ts
+- [ ] A2: Stop the menu popup from copying portions and prices into the dish lines — src/app/shared/ai-menu-modal/ai-menu-modal.component.ts, src/app/core/models/ai-menu-draft.model.ts
+- [ ] A3: Prove both on the server and in the popup — server/test/ai-menu.test.js, src/app/shared/ai-menu-modal/ai-menu-modal.component.spec.ts
 
 ## What happens when
 - The user writes "120 אורחים" → guestCount 120 as today.

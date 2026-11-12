@@ -85,9 +85,9 @@ Confirm `sections` (or its computed) is the single place the card's rows come fr
 - The link sits at the end of the card, small and muted; RTL.
 
 ## Atomic Sub-tasks
-- [ ] A1: Show a removed question only during the visit it was removed in — logistics-item-manager.component.ts
-- [ ] A2: Add the small removed-count link that lists removed questions with restore — logistics-item-manager.component.{html,scss}, dictionary key
-- [ ] A3: Test it and keep the screen checks in line — logistics-item-manager.component.spec.ts, e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts
+- [ ] A1: Show a removed question only during the visit it was removed in — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.ts
+- [ ] A2: Add the small removed-count link that lists removed questions with restore — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.html, .scss, dictionary key
+- [ ] A3: Test it and keep the screen checks in line — src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.spec.ts, e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts
 
 ## What happens when
 - No hidden rows → no link.

@@ -103,9 +103,9 @@ clientHeight`). Write the finding in `## Execution Notes`. To test the gate by h
   closing signs out, because there is no step behind it.
 
 ## Atomic Sub-tasks
-- [ ] A1: Make the terms text the only scrolling box so desktop also needs a scroll to the end — terms-modal.component.{ts,html,scss}
-- [ ] A2: Let the gate popup be closed, and sign the user out to the welcome page when they do — terms-gate.component.{ts,html}
-- [ ] A3: Prove both in unit tests and one desktop-size screen check — terms-modal.component.spec.ts, terms-gate.component.spec.ts, e2e/ui/585-1.spec.ts
+- [ ] A1: Make the terms text the only scrolling box so desktop also needs a scroll to the end — src/app/core/components/terms-modal/terms-modal.component.ts, .html, .scss
+- [ ] A2: Let the gate popup be closed, and sign the user out to the welcome page when they do — src/app/core/components/terms-gate/terms-gate.component.ts, .html
+- [ ] A3: Prove both in unit tests and one desktop-size screen check — src/app/core/components/terms-modal/terms-modal.component.spec.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts, e2e/ui/585-1.spec.ts
 
 ## What happens when
 - The user closes the gate popup while the accept request is in flight → the close is ignored until it finishes.
