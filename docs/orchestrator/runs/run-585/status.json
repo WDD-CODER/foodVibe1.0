@@ -1,0 +1,156 @@
+{
+  "run": "run-585",
+  "branch": "orch/run-585",
+  "base": "main",
+  "startedAt": "2026-11-12T09:54:13.082Z",
+  "mainShaAtStart": "d30e8c9901235b2abb1d3a266de539d427e99de3",
+  "plans": {
+    "584": {
+      "nnn": "584",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "3b76abf33746158671f7780a6d568d6014e1617c"
+    },
+    "585": {
+      "nnn": "585",
+      "title": "Terms popup: read to the end on every screen, and cancelling an unaccepted popup signs the user out",
+      "branch": "feat/585-terms-popup-read-to",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T09:57:56.673Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T10:17:23.677Z"
+        }
+      },
+      "humanItems": [
+        "On a desktop and on a phone, the terms popup cannot be confirmed before scrolling to the end.",
+        "Signed in as an account that never accepted (for example `demo_chef` after resetting it, see Step 0), pressing"
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T09:57:55.547Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:57:56.677Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:10:19.849Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:17:08.840Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:17:23.679Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:17:36.938Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:21:34.573Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.9,
+      "sha": "8db419e1e567158235c31b5e587ea43cb178524a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 738.4,
+          "tokens": {
+            "input": 247888,
+            "output": 6310
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.4,
+          "tokens": {
+            "input": 26335,
+            "output": 527
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "9c0ed6b6d0b54b8e46b320d2b87271478de7a799"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T09:57:54.734Z",
+      "plan": "585",
+      "text": "the folder foodVibe1.0-orch-run-585-585 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T10:18:35.623Z",
+      "plan": "585",
+      "text": "the folder foodVibe1.0-orch-merge-run-585 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 13.9,
+  "updatedAt": "2026-11-12T10:40:20.458Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "585",
+      "type": "behaviour",
+      "text": "behaviour: Step 0 was not measured in a browser at 1440x900. I assumed .c-modal-body on #body was the cause and dropped it, without editing the engine class — reverse: restore class=\"c-modal-body terms-body\" and remove the box styles from .terms-body",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "585",
+      "type": "behaviour",
+      "text": "behaviour: closing the gate popup while the accept request is in flight is ignored, as the plan says — reverse: remove the isPosting_ guard in onClosed()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T10:40:20.455Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T10:40:20.457Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

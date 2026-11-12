@@ -16,6 +16,8 @@ type Internals = {
   confirmPassword: string
   businessName: string
   errorKey: () => string | null
+  termsVersion_: { (): string | null; set: (v: string | null) => void }
+  onTermsAccepted: (v: string) => void
   onSubmit: () => void
 }
 
@@ -46,6 +48,7 @@ describe('AuthModalComponent (business name and block messages)', () => {
     c.email = 'neo@x.com'
     c.password = 'Password1'
     c.confirmPassword = 'Password1'
+    c.termsVersion_.set('v-test')
   })
 
   it('shows the business name field in sign-up mode only', () => {
@@ -62,7 +65,12 @@ describe('AuthModalComponent (business name and block messages)', () => {
     c.businessName = '   '
     c.onSubmit()
     expect(c.errorKey()).toBeNull()
-    expect(userService.signup).toHaveBeenCalledWith(jasmine.objectContaining({ name: 'neo' }), 'Password1', '')
+    expect(userService.signup).toHaveBeenCalledWith(
+      jasmine.objectContaining({ name: 'neo' }),
+      'Password1',
+      '',
+      'v-test'
+    )
   })
 
   it('the business name box is not required and its placeholder follows the typed username', () => {
@@ -104,8 +112,35 @@ describe('AuthModalComponent (business name and block messages)', () => {
     expect(userService.signup).toHaveBeenCalledWith(
       jasmine.objectContaining({ name: 'neo', email: 'neo@x.com' }),
       'Password1',
-      'מטבח בדיקה'
+      'מטבח בדיקה',
+      'v-test'
     )
+  })
+
+  it('sign-up submit without accepting the terms shows terms_required and calls no signup', () => {
+    c.termsVersion_.set(null)
+    c.onSubmit()
+    expect(c.errorKey()).toBe('terms_required')
+    expect(userService.signup).not.toHaveBeenCalled()
+  })
+
+  it('after accepting, signup is called with the version; the box shows checked', () => {
+    c.termsVersion_.set(null)
+    userService.signup.and.returnValue(of({ name: 'neo', email: 'neo@x.com' }))
+    c.onTermsAccepted('v-9')
+    fixture.detectChanges()
+    const box = (fixture.nativeElement as HTMLElement).querySelector('#auth-terms-box') as HTMLInputElement
+    expect(box.checked).toBeTrue()
+    expect(box.disabled).toBeTrue()
+    c.onSubmit()
+    expect(userService.signup).toHaveBeenCalledWith(jasmine.objectContaining({ name: 'neo' }), 'Password1', '', 'v-9')
+  })
+
+  it('TERMS_NOT_ACCEPTED from the server -> terms_required and the box is unchecked', () => {
+    userService.signup.and.returnValue(throwError(() => new Error('TERMS_NOT_ACCEPTED')))
+    c.onSubmit()
+    expect(c.errorKey()).toBe('terms_required')
+    expect(c.termsVersion_()).toBeNull()
   })
 
   it('maps the server business-name error', () => {

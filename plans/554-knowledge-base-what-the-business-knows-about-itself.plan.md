@@ -56,6 +56,8 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/routes/generic.js
+server/test/invariants.test.js
 src/app/pages/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 src/app/core/models/breadcrumbs.md
@@ -213,6 +215,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- Human 2026-11-12 (batch-3 ASK 554-1): approved: server/routes/generic.js (one line: knowledgeItems in NO_LINEAGE), server/test/invariants.test.js.
 - Plan number: map row 12, renumbered +2 on 2026-11-10 (old 552 → 554).
 - Depends-on adds 547 to the map's 548, 566: the `/frontdesk/knowledge` chip hangs from the `frontdesk` tab group that 547 creates (same reason the map gives for 553).
 - Decided while drafting: import stores the drafts on the server in the same request (one `insertMany`) instead of returning them for the browser to save one by one (INV-3); `softDelete: true` for `knowledgeItems`; a fact the owner types is saved approved (only AI drafts wait).

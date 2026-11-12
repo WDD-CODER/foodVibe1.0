@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { stubFinePointer } from 'src/testing/fine-pointer'
 import { todayIso } from 'src/app/core/utils/date-input.util'
 import { TranslationService } from '@services/translation.service'
 import { DepositPaidAnswer, DepositPaidDialogComponent } from './deposit-paid-dialog.component'
@@ -35,6 +36,7 @@ describe('DepositPaidDialogComponent', () => {
   }
 
   beforeEach(async () => {
+    stubFinePointer()
     await TestBed.configureTestingModule({
       imports: [DepositPaidDialogComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [{ provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } }]

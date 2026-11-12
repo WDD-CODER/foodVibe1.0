@@ -9,6 +9,8 @@ const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
 const { isValidUsername, isValidPasswordHash } = require('../utils/username');
 const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
+const { currentTermsVersion } = require('../utils/terms-version');
+const { verifyToken } = require('../middleware/auth');
 const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
 
 const router = Router();
@@ -89,6 +91,7 @@ function toPublicUser(user) {
     businessId: user.businessId ?? null,
     businessRole: user.businessRole ?? null,
     isPlatformAdmin: user.isPlatformAdmin === true,
+    termsAcceptedVersion: user.termsAcceptedVersion ?? null,
   };
 }
 
@@ -144,7 +147,10 @@ function verifyPbkdf2(plain, stored) {
 
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
-    const { name, email, imgUrl, password, businessName } = req.body;
+    const { name, email, imgUrl, password, businessName, termsVersion } = req.body;
+
+    // Plan 584: no account without accepting the current terms; checked before any write.
+    if (termsVersion !== currentTermsVersion()) return res.status(400).json({ error: 'TERMS_NOT_ACCEPTED' });
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email, and password are required' });
@@ -186,7 +192,10 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const passwordHash = password;
     const _id = newId();
     const masterVersion = await getMasterVersion();
-    const created = await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
+    const created = await User.create({
+      _id, name, email, imgUrl: imgUrl || '', passwordHash,
+      termsAcceptedVersion: termsVersion, termsAcceptedAt: Date.now(), termsAcceptedIp: req.ip || null,
+    });
     const user = created.toObject();
 
     // Plan 424: every new user starts as the owner of their own business.
@@ -355,6 +364,28 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     return res.json({ token });
   } catch (err) {
     req.log.error({ err, event: 'auth.refresh.failed' });
+    if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /accept-terms
+// Signed-in user records acceptance of the current terms (existing accounts, and everyone after a terms change).
+// ---------------------------------------------------------------------------
+
+router.post('/accept-terms', refreshLimiter, verifyToken, async (req, res) => {
+  try {
+    if (req.body?.termsVersion !== currentTermsVersion()) return res.status(400).json({ error: 'TERMS_NOT_ACCEPTED' });
+    const updated = await User.findByIdAndUpdate(
+      req.user.userId,
+      { termsAcceptedVersion: currentTermsVersion(), termsAcceptedAt: Date.now(), termsAcceptedIp: req.ip || null },
+      { new: true }
+    ).lean();
+    if (!updated) return res.status(401).json({ error: 'USER_NOT_FOUND' });
+    return res.json({ user: toPublicUser(updated) });
+  } catch (err) {
+    req.log.error({ err, event: 'auth.accept_terms.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }

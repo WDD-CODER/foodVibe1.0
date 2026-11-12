@@ -1880,6 +1880,14 @@
     "metadata_logistics_hidden": "הוסרה מהעסק שלך",
     "metadata_logistics_restore": "החזר",
     "metadata_logistics_env_required": "בחרו לפחות סביבה אחת",
-    "add_new_logistics_section": "הוסף סעיף חדש"
+    "add_new_logistics_section": "הוסף סעיף חדש",
+    "terms_link": "תנאי השימוש",
+    "terms_accept_row": "קראתי ואני מסכים/ה ל",
+    "terms_accept": "אני מסכים/ה",
+    "terms_scroll_hint": "יש לגלול עד סוף התנאים",
+    "terms_required": "יש לקרוא ולאשר את תנאי השימוש",
+    "terms_updated_on": "עודכן בתאריך",
+    "terms_close": "סגור",
+    "terms_load_error": "לא ניתן לטעון את תנאי השימוש, נסה שוב"
   }
 }

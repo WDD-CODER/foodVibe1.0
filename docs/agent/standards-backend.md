@@ -57,6 +57,8 @@ paths:
 
 **22 entity types total.**
 
+**User terms acceptance (plan 584).** The `users` document (not an entity type) holds `termsAcceptedVersion`, `termsAcceptedAt`, `termsAcceptedIp`, written only by `server/routes/auth.js` (`POST /signup`, `POST /accept-terms`); the client sees only the version. Any change to the text in `public/assets/legal/terms.he.json` needs a new `version` and `sectionsHash` (CI checks the hash); every user then accepts again at the next sign-in.
+
 ---
 
 ## 2 — When This Applies
