@@ -54,8 +54,8 @@ src/app/shared/breadcrumbs.md
 src/app/core/models/breadcrumbs.md
 src/app/core/services/breadcrumbs.md
 e2e/ui/553-1..3
-frontdesk-settings.page.spec.ts
-request-kind-card.component.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/request-kind-card.component.spec.ts
 e2e/ui/553-*.spec.ts
 src/app/pages/frontdesk/frontdesk-settings/**
 src/app/pages/frontdesk/breadcrumbs.md
@@ -193,6 +193,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- Human 2026-11-12 (batch-3 ASK 553-1): approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts. Planner wrote the two bare spec names as full paths (they matched nothing in the run's test-file gate).
 - Map row 11, renumbered +2 on 2026-11-10 (old 551 → 553).
 - scope extended: src/app/core/components/tab-chips/tab-chips.component.spec.ts — the new `settings` chip changes its chip list and needs the Settings icon in the spec's icon pick.
 - Decision: `src/app/pages/frontdesk/breadcrumbs.md` was not kept: `scripts/breadcrumbs-check.mjs` flags it as STRAY (leaf folders carry no breadcrumbs file); the `frontdesk/` row in `src/app/pages/breadcrumbs.md` documents the folder.
