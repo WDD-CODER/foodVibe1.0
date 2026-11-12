@@ -6,6 +6,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import type { FrontDeskAdminRow } from 'src/app/core/models/frontdesk-stats.model'
 import type { AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
@@ -89,6 +90,8 @@ export class PlatformDashboardPage implements OnInit {
   protected readonly aiUsage_ = signal<AiUsageReport | null>(null)
   protected readonly aiDrill_ = signal<{ businessId: string; rows: AiUsageRow[] } | null>(null)
   protected readonly aiLoading_ = signal(true)
+  /** Plan 559: front desk numbers (30 days) by business id; a failed load leaves the cells empty. */
+  protected readonly fdRows_ = signal<Map<string, FrontDeskAdminRow>>(new Map())
   protected readonly columns: Column[] = [
     { key: 'name', labelKey: 'platform_col_business' },
     { key: 'ownerName', labelKey: 'platform_col_owner' },
@@ -143,6 +146,7 @@ export class PlatformDashboardPage implements OnInit {
   // 6. METHODS
   async ngOnInit(): Promise<void> {
     void this.loadAiUsage()
+    void this.loadFrontDeskStats()
     try {
       await this.platformAdmin.load()
     } catch (err) {
@@ -154,6 +158,38 @@ export class PlatformDashboardPage implements OnInit {
       this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     } finally {
       this.isLoading_.set(false)
+    }
+  }
+
+  private async loadFrontDeskStats(): Promise<void> {
+    try {
+      const rows = await this.platformAdmin.getFrontDeskStats()
+      this.fdRows_.set(new Map(rows.map((r) => [r.businessId, r])))
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.frontdesk_stats_failed',
+        message: 'Loading the front desk numbers failed',
+        context: { err: String(err) }
+      })
+    }
+  }
+
+  /** One front desk number of a business as text; an empty cell for a number the server left out. */
+  protected fdNumber(businessId: string, key: 'requests' | 'medianMinutesToDecision' | 'noShowRatePct'): string {
+    const value = this.fdRows_().get(businessId)?.[key]
+    return value === null || value === undefined ? '—' : String(Math.round(value * 10) / 10)
+  }
+
+  protected async exportFrontDeskCsv(): Promise<void> {
+    try {
+      await this.platformAdmin.downloadFrontDeskCsv()
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.frontdesk_csv_failed',
+        message: 'Downloading the front desk CSV failed',
+        context: { err: String(err) }
+      })
+      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     }
   }
 

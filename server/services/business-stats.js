@@ -97,6 +97,12 @@ function usagePipeline(scope, bounds, todayIL) {
   ]
 }
 
+/** The same revenue rule as the pipeline above (actual, planned, pricing), for one event in JS (plan 559). */
+function closedRevenue(e) {
+  if (typeof e.closing?.finishedAt === 'number') return e.closing.actualRevenue ?? e.planSnapshot?.plannedRevenue ?? 0
+  return e.pricing?.revenue ?? 0
+}
+
 const first = (rows, key) => (rows?.[0]?.[key] ?? 0)
 const numOrNull = v => (typeof v === 'number' && Number.isFinite(v) ? v : null)
 
@@ -157,5 +163,5 @@ function shapeStats(facet, usage, business, isOwner, period, bounds) {
 }
 
 module.exports = {
-  PERIODS, FUNNEL_STAGES, UPCOMING_DAYS, periodBounds, eventsPipeline, usagePipeline, shapeStats,
+  PERIODS, FUNNEL_STAGES, UPCOMING_DAYS, periodBounds, eventsPipeline, usagePipeline, shapeStats, closedRevenue,
 }

@@ -9,6 +9,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { BusinessStatsService } from '@services/business-stats.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
+import type { FrontDeskStats } from '@models/frontdesk-stats.model'
 import type {
   BusinessReport,
   ReportFinding,
@@ -52,6 +53,13 @@ interface Tile {
   change: { icon: string; text: string } | null
   estimate: string | null
 }
+interface FrontDeskTile {
+  key: string
+  labelKey: string
+  text: string
+  detail: string | null
+  estimate: string | null
+}
 interface TrendRow {
   key: ReportMetricKey
   labelKey: string
@@ -87,6 +95,9 @@ export class ReportPage {
   readonly report = this.report_.asReadonly()
   readonly forbidden = this.forbidden_.asReadonly()
   readonly loading = this.loading_.asReadonly()
+  private readonly frontDesk_ = signal<FrontDeskStats | null>(null)
+  /** Plan 559: shown only when the report's range holds at least one request. */
+  readonly frontDesk = computed(() => (this.frontDesk_()?.requests.total ? this.frontDesk_() : null))
   private requestId = 0
 
   // 5. COMPUTED
@@ -145,6 +156,55 @@ export class ReportPage {
       }
     })
   })
+  protected readonly frontDeskTiles = computed<FrontDeskTile[]>(() => {
+    const f = this.frontDesk()
+    if (!f) return []
+    const est = (key: string): string | null => {
+      const row = f.baseline?.[key]
+      return row ? formatDecimal1(row.estimate) : null
+    }
+    const pct = (v: number | null): string => (v === null ? EMPTY : formatPct1(v))
+    const channels = (['manual', 'public_form', 'whatsapp'] as const)
+      .map((c) => `${this.t('rq_channel_' + c)} ${f.requests.byChannel[c]}`)
+      .join(' · ')
+    return [
+      {
+        key: 'requests',
+        labelKey: 'frontdesk_stat_requests',
+        text: String(f.requests.total),
+        detail: channels,
+        estimate: est('phoneInquiriesPerDay')
+      },
+      {
+        key: 'afterHours',
+        labelKey: 'frontdesk_stat_after_hours_pct',
+        text: pct(f.afterHoursPct),
+        detail: null,
+        estimate: null
+      },
+      {
+        key: 'medianDecision',
+        labelKey: 'frontdesk_stat_median_decision',
+        text: f.medianMinutesToDecision === null ? EMPTY : formatDecimal1(f.medianMinutesToDecision),
+        detail: null,
+        estimate: est('avgResponseMinutes')
+      },
+      {
+        key: 'noShow',
+        labelKey: 'frontdesk_stat_no_show_pct',
+        text: pct(f.bookings.noShowRatePct),
+        detail: null,
+        estimate: est('noShowsPerWeek')
+      },
+      {
+        key: 'eventsFromRequests',
+        labelKey: 'frontdesk_stat_events_from_requests',
+        text: String(f.eventsFromRequests.count),
+        detail: null,
+        estimate: null
+      }
+    ]
+  })
   protected readonly findings = computed(() =>
     (this.report()?.findings ?? []).map((f) => ({ ...f, text: this.findingText(f) }))
   )
@@ -176,7 +236,10 @@ export class ReportPage {
     this.forbidden_.set(false)
     try {
       const report = await this.stats.getReport(months, businessId)
-      if (id === this.requestId) this.report_.set(report)
+      if (id === this.requestId) {
+        this.report_.set(report)
+        void this.loadFrontDesk(report, businessId, id)
+      }
     } catch (err) {
       if (id !== this.requestId) return
       this.report_.set(null)
@@ -184,6 +247,20 @@ export class ReportPage {
       else this.logging.error({ event: 'report.load.failed', message: 'Could not load the business report' })
     } finally {
       if (id === this.requestId) this.loading_.set(false)
+    }
+  }
+
+  /** Plan 559: the front desk numbers over the report's range (its first month to today). A failure only hides the block. */
+  private async loadFrontDesk(report: BusinessReport, businessId: string | undefined, id: number): Promise<void> {
+    const firstMonth = report.series.inquiries?.[0]?.month
+    if (!firstMonth) return
+    try {
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date())
+      const stats = await this.stats.getFrontDesk({ from: `${firstMonth}-01`, to: today }, businessId)
+      if (id === this.requestId) this.frontDesk_.set(stats)
+    } catch {
+      if (id === this.requestId) this.frontDesk_.set(null)
+      this.logging.warn('Front desk numbers for the report could not be loaded')
     }
   }
 

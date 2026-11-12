@@ -62,9 +62,25 @@ describe('PlatformDashboardPage', () => {
     totals: { calls: 0, failedCalls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, estCostUsd: 0 }
   })
   let getAiUsage: jasmine.Spy<(params?: AiUsageParams) => Promise<AiUsageReport>>
+  let getFrontDeskStats: jasmine.Spy
+  let downloadFrontDeskCsv: jasmine.Spy
 
   async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
     rows_ = signal(rows)
+    getFrontDeskStats = jasmine.createSpy('getFrontDeskStats').and.resolveTo([
+      {
+        businessId: 'a',
+        name: 'a',
+        requests: 7,
+        afterHoursPct: null,
+        approved: 3,
+        declined: 1,
+        medianMinutesToDecision: 12.5,
+        noShowRatePct: null,
+        eventsFromRequests: 0
+      }
+    ])
+    downloadFrontDeskCsv = jasmine.createSpy('downloadFrontDeskCsv').and.resolveTo()
     getAiUsage = jasmine
       .createSpy('getAiUsage')
       .and.callFake((params?: AiUsageParams) =>
@@ -83,6 +99,8 @@ describe('PlatformDashboardPage', () => {
             rows_: rows_.asReadonly(),
             load: () => Promise.resolve(),
             getAiUsage,
+            getFrontDeskStats,
+            downloadFrontDeskCsv,
             downloadAiUsageCsv: jasmine.createSpy('downloadAiUsageCsv').and.resolveTo(),
             setInternal: jasmine.createSpy('setInternal').and.resolveTo()
           }
@@ -201,6 +219,18 @@ describe('PlatformDashboardPage', () => {
     const open = spyOn(dialog, 'open').and.resolveTo(false)
     ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="fd-edit"]') as HTMLButtonElement).click()
     expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
+  })
+
+  it('shows the front desk numbers of each business and downloads the CSV (plan 559)', async () => {
+    await setup([row('a'), row('b')])
+    const el = fixture.nativeElement as HTMLElement
+    const cells = (id: string): string[] =>
+      Array.from(el.querySelectorAll(`[data-testid="${id}"]`)).map((c) => (c.textContent ?? '').trim())
+    expect(cells('fd-requests').sort()).toEqual(['7', '—'])
+    expect(cells('fd-median').sort()).toEqual(['12.5', '—'])
+    expect(cells('fd-no-show')).toEqual(['—', '—'])
+    ;(el.querySelector('[data-testid="fd-export"]') as HTMLButtonElement).click()
+    expect(downloadFrontDeskCsv).toHaveBeenCalledTimes(1)
   })
 
   describe('AI usage table (plan 566)', () => {
