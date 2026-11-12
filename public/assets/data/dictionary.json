@@ -2063,6 +2063,14 @@
     "fd_discard_changes": "ביטול שינויים",
     "fd_discard_confirm": "לבטל את כל השינויים מאז השמירה האחרונה?",
     "fd_settings_owner_only": "רק בעל העסק יכול לשנות את ההגדרות",
-    "fd_profile_load_failed": "לא הצלחנו לטעון את ההגדרות"
+    "fd_profile_load_failed": "לא הצלחנו לטעון את ההגדרות",
+    "terms_link": "תנאי השימוש",
+    "terms_accept_row": "קראתי ואני מסכים/ה ל",
+    "terms_accept": "אני מסכים/ה",
+    "terms_scroll_hint": "יש לגלול עד סוף התנאים",
+    "terms_required": "יש לקרוא ולאשר את תנאי השימוש",
+    "terms_updated_on": "עודכן בתאריך",
+    "terms_close": "סגור",
+    "terms_load_error": "לא ניתן לטעון את תנאי השימוש, נסה שוב"
   }
 }

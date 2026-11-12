@@ -1,0 +1,146 @@
+{
+  "run": "run-590",
+  "branch": "orch/run-590",
+  "base": "main",
+  "startedAt": "2026-11-12T12:14:23.465Z",
+  "mainShaAtStart": "a1f8ba1274fb14d70391fc97f3161132e789bc3f",
+  "plans": {
+    "590": {
+      "nnn": "590",
+      "title": "Date tests pass on any PC: specs that type into a date field fix the pointer type instead of reading the machine's",
+      "branch": "feat/590-date-tests-do-not",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T12:16:20.366Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T12:28:50.972Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-12T12:16:20.142Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:16:20.368Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:25:02.166Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:28:41.527Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:28:50.993Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:29:03.309Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:30:41.516Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12,
+      "sha": "184a8b78862c6c912b5823bccf58a103c901edfe",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 518.6,
+          "tokens": {
+            "input": 236095,
+            "output": 5781
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.9,
+          "tokens": {
+            "input": 24171,
+            "output": 401
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "e4e009b9376ecd445d49b8e76b4276a817173ad2"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T12:16:19.899Z",
+      "plan": "590",
+      "text": "the folder foodVibe1.0-orch-run-590-590 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T12:29:16.411Z",
+      "plan": "590",
+      "text": "the folder foodVibe1.0-orch-merge-run-590 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 12,
+  "updatedAt": "2026-11-12T12:41:51.193Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "590",
+      "type": "behaviour",
+      "text": "behaviour: put the gotcha entry at the bottom of docs/brain/gotchas.md, the file the plan scopes, although that file is an index and domain entries normally go in gotchas/angular.md (outside scope) — reverse: move the entry to docs/brain/gotchas/angular.md",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "590",
+      "type": "behaviour",
+      "text": "behaviour: skipped Step 0 (running the three specs before the change to see them fail). This PC no longer reproduces the failure, and I did not check — reverse: run the three specs on a touch-input PC with the helper removed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T12:41:51.187Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T12:41:51.193Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

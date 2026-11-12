@@ -1,0 +1,3 @@
+@if (isVisible_()) {
+  <app-terms-modal [busy]="isPosting_()" (accepted)="onAccepted($event)" (closed)="onClosed()" />
+}

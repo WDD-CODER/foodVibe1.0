@@ -83,6 +83,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `user-admin.service.ts` | User admin management | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 | `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
+| `terms.service.ts` | Loads the terms file, posts the acceptance (plan 584) | TermsService |
 | `booking-data.service.ts` | Booking status moves through the server routes (plan 549) | BookingDataService |
 | `front-desk-badge.service.ts` | Waiting-requests count for the header and tab chips; reloads on focus (plan 552) | FrontDeskBadgeService |
 

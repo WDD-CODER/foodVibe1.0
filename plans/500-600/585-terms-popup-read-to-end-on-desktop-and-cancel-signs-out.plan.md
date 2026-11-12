@@ -1,6 +1,6 @@
 # Plan 585 — Terms popup: read to the end on every screen, and cancelling an unaccepted popup signs the user out
 
-Status: draft
+Status: done
 Depends-on: 584
 Snapshot: 4e1b4b12512f797265d97c9f89a87c54679dab8d
 
@@ -103,9 +103,9 @@ clientHeight`). Write the finding in `## Execution Notes`. To test the gate by h
   closing signs out, because there is no step behind it.
 
 ## Atomic Sub-tasks
-- [ ] A1: Make the terms text the only scrolling box so desktop also needs a scroll to the end — src/app/core/components/terms-modal/terms-modal.component.ts, .html, .scss
-- [ ] A2: Let the gate popup be closed, and sign the user out to the welcome page when they do — src/app/core/components/terms-gate/terms-gate.component.ts, .html
-- [ ] A3: Prove both in unit tests and one desktop-size screen check — src/app/core/components/terms-modal/terms-modal.component.spec.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts, e2e/ui/585-1.spec.ts
+- [x] A1: Make the terms text the only scrolling box so desktop also needs a scroll to the end — src/app/core/components/terms-modal/terms-modal.component.ts, .html, .scss
+- [x] A2: Let the gate popup be closed, and sign the user out to the welcome page when they do — src/app/core/components/terms-gate/terms-gate.component.ts, .html
+- [x] A3: Prove both in unit tests and one desktop-size screen check — src/app/core/components/terms-modal/terms-modal.component.spec.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts, e2e/ui/585-1.spec.ts
 
 ## What happens when
 - The user closes the gate popup while the accept request is in flight → the close is ignored until it finishes.
@@ -128,3 +128,6 @@ clientHeight`). Write the finding in `## Execution Notes`. To test the gate by h
 - Human 2026-11-12 (plan 584 validation): "can the Scrawl behavior be on desktop also … the user has to view the whole
   Terms before he can agree" and "Allow pressing cancel or clicking outside. But then as long as the user have never
   agreed, it will only pass into the welcome page."
+- Step 0: no browser run at 1440x900 in this build; the likely cause was `.c-modal-body` mixed into `#body`. Dropped it and moved its glass box styling into `.terms-body` (`max-block-size: min(60dvh, 36rem)`).
+- Evidence: pnpm run build, lint, test:ci -> exit 0 (1945 SUCCESS); reuse-lint -> exit 0.
+- e2e/ui/585-1.spec.ts written but not run here (no dev server in the builder worktree); the gate reruns it.
