@@ -1,6 +1,6 @@
 # Plan 579 — Logistics questions: per-event list, hide on one event, one needed toggle and tighter chips
 
-Status: draft
+Status: done
 Depends-on: 522, 523, 532, 570
 Snapshot: 8d4f043ffd5ded749cf5c78836d241b87ada6f86
 

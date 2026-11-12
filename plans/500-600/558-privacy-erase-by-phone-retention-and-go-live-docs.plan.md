@@ -1,6 +1,6 @@
 # Plan 558 — Privacy and go-live: erase a customer by phone, keep data only as long as needed, and the go-live docs
 
-Status: draft
+Status: done
 Depends-on: 550
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
