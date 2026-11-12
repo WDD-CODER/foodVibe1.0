@@ -1,0 +1,446 @@
+{
+  "run": "batch-2-fix",
+  "branch": "orch/batch-2-fix",
+  "base": "main",
+  "startedAt": "2026-11-12T09:54:46.642Z",
+  "mainShaAtStart": "d30e8c9901235b2abb1d3a266de539d427e99de3",
+  "plans": {
+    "547": {
+      "nnn": "547",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "46db11f81ed92d53a840c914ec6f8edcaf02ae92"
+    },
+    "580": {
+      "nnn": "580",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "c7c1a6f3e263c668451336abf5fcb5e849453694"
+    },
+    "581": {
+      "nnn": "581",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "47a5bd688daf10b4dfb064cb60c39600519ce553"
+    },
+    "586": {
+      "nnn": "586",
+      "title": "The clients list on a phone works like the other list pages: name fixed, other columns in the column carousel",
+      "branch": "feat/586-clients-list-on-a",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T09:59:02.996Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T10:18:11.165Z"
+        }
+      },
+      "humanItems": [
+        "On a phone the clients list looks and moves like the suppliers list."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T09:59:02.636Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:59:02.998Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:10:27.170Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:17:51.571Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:18:11.169Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:18:36.668Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:22:26.875Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.5,
+      "sha": "b7be0f291248aca4b01899b51957976b57d26f47",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 678.9,
+          "tokens": {
+            "input": 282965,
+            "output": 6328
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 22.1,
+          "tokens": {
+            "input": 53618,
+            "output": 523
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "0a9e713be84987b64480e5fd46aeb9a07896e310"
+    },
+    "587": {
+      "nnn": "587",
+      "title": "The AI menu picks dishes only (no portions or prices), and asks for the guest count instead of guessing one",
+      "branch": "feat/587-ai-menu-picks-dishes",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T10:28:50.934Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T11:16:38.679Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T11:04:06.860Z"
+        }
+      },
+      "humanItems": [
+        "On `/menu-library`, \"צור עם AI\" with \"חתונה ל-120 אורחים, בופה, ביום חמישי הבא\" gives dishes from the recipe",
+        "\"בופה עם חומוס וסלט ירקות\" shows \"חסר מספר האורחים…\", and `/platform`'s AI-usage table counts that call as a"
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T10:28:49.341Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:28:50.937Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:53:15.852Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:03:30.050Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:03:40.195Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:04:05.868Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:04:06.215Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:04:06.864Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:05:40.432Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:16:24.872Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:16:38.682Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:17:11.506Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:18:56.689Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.8,
+      "sha": "06041450c648f5762dbb02d6bb7cea76c94c1591",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1448.1,
+          "tokens": {
+            "input": 668334,
+            "output": 7701
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 23.3,
+          "tokens": {
+            "input": 90413,
+            "output": 1171
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 90.6,
+          "tokens": {
+            "input": 145758,
+            "output": 3098
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 29.7,
+          "tokens": {
+            "input": 58691,
+            "output": 451
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: review STOP: major server/routes/ai.js:818 P0: server clean-up applied to /patch-recipe instead of /patch-menu"
+      ],
+      "checkedHead": "61fddec4ab6924414a499ce4653ea0ed947b78bc"
+    },
+    "588": {
+      "nnn": "588",
+      "title": "A removed logistics question leaves the card after the visit, and sits behind a small \"removed (N)\" link",
+      "branch": "feat/588-removed-logistics-questions-leave",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T11:26:11.175Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T11:45:35.464Z"
+        }
+      },
+      "humanItems": [
+        "As an owner, remove a shared question: it shows dimmed with \"החזר\" while you stay; leave the page and come back"
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T11:26:10.675Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:26:11.179Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:40:52.282Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:45:26.565Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:45:35.466Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:45:49.341Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:47:35.995Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.5,
+      "sha": "73ae0d34a02b666605a401dadc7363ce394f86d4",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 874.9,
+          "tokens": {
+            "input": 467116,
+            "output": 7094
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.3,
+          "tokens": {
+            "input": 25138,
+            "output": 753
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "053e7cc536fbd66963a53df0bb55dc3e97ee179a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T09:59:02.215Z",
+      "plan": "586",
+      "text": "the folder foodVibe1.0-orch-batch-2-fix-586 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T10:19:12.683Z",
+      "plan": "586",
+      "text": "the folder foodVibe1.0-orch-merge-batch-2-fix was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T10:28:48.090Z",
+      "plan": "587",
+      "text": "the folder foodVibe1.0-orch-batch-2-fix-587 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T11:26:10.248Z",
+      "plan": "588",
+      "text": "the folder foodVibe1.0-orch-batch-2-fix-588 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 14.5,
+  "updatedAt": "2026-11-12T11:57:37.548Z",
+  "stopReason": "final gate failed: pnpm run test:ci — ✔ Browser application bundle generation complete. / ✔ Browser application bundle generation complete. /  ELIFECYCLE  Command failed with exit code 1.",
+  "stops": [
+    {
+      "at": "2026-11-12T11:57:33.534Z",
+      "reason": "final gate failed: pnpm run test:ci — ✔ Browser application bundle generation complete. / ✔ Browser application bundle generation complete. /  ELIFECYCLE  Command failed with exit code 1.",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "586",
+      "type": "behaviour",
+      "text": "behaviour: chose mobileGridTemplate '1fr 1.4fr' (name plus one carousel column; the client list has no actions or select column) — reverse: change the template string in client-list.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "587",
+      "type": "seen",
+      "text": "seen: src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts:37 — still copies dish.serving_portions and sell_price into the matched dish; out of scope, harmless now that the server strips them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "587",
+      "type": "removes",
+      "text": "removes: the stripDishNumbers call on /patch-recipe answers, which this diff had added — recipe patches carry no menu dishes and the plan names only the menu path — reverse: re-add stripDishNumbers(parsed.value.changes.sections) before the return in /patch-recipe",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "588",
+      "type": "behaviour",
+      "text": "behaviour: the \"הוסרו (N)\" list counts the selected phase's hidden shared rows, including ones still dimmed in their section this visit — reverse: filter those out of removedRows in logistics-item-manager.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T11:57:37.545Z",
+  "finalGate": {
+    "ok": false,
+    "command": "pnpm run test:ci",
+    "at": "2026-11-12T11:57:37.547Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
