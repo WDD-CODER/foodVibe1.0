@@ -48,14 +48,14 @@ describe('SignedOutRedirectService (plan 591)', () => {
     expect(navigate).not.toHaveBeenCalled()
   })
 
-  it('stays on /cook/<id>', () => {
+  it('goes to /welcome when the user becomes null on /cook/<id>', () => {
     start(signedIn, '/cook/abc')
     user_.set(null)
     TestBed.flushEffects()
-    expect(navigate).not.toHaveBeenCalled()
+    expect(navigate).toHaveBeenCalledWith(['/welcome'])
   })
 
-  it('stays when never signed in on /cook/<id>', () => {
+  it('leaves a never-signed-in visitor on /cook/<id> to the guard', () => {
     start(null, '/cook/abc')
     TestBed.flushEffects()
     expect(navigate).not.toHaveBeenCalled()

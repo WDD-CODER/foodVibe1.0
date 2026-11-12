@@ -194,6 +194,7 @@ export const routes: Routes = [
   },
   {
     path: 'cook/:id',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/cook-view/cook-view.page').then(m => m.CookViewPage),
     resolve: { recipe: recipeResolver, kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
     canDeactivate: [pendingChangesGuard],

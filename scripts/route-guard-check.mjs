@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 // Plan 589: every top-level route in src/app/app.routes.ts needs `canActivate: [authGuard...]`,
-// except `welcome`, `cook/:id` and redirects. Prints ROUTE_GUARDS: ok, or lists the breakers and exits 1.
+// except `welcome` and redirects. Prints ROUTE_GUARDS: ok, or lists the breakers and exits 1.
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const root = process.argv.find((a) => a.startsWith('--root='))?.slice(7) ?? process.cwd()
 const src = readFileSync(resolve(root, 'src/app/app.routes.ts'), 'utf8')
 const BS = String.fromCharCode(92)
-const ALLOW =new Set(['welcome', 'cook/:id'])
+const ALLOW = new Set(['welcome'])
 
 const start = src.indexOf('export const routes')
 const open = src.indexOf('[', src.indexOf('=', start))
