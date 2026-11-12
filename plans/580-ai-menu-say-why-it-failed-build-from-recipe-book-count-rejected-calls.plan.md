@@ -55,6 +55,8 @@ server/routes/ai.js
 server/services/ai-usage.js
 server/test/ai-menu.test.js
 server/test/ai-usage.test.js
+server/test/ai-match-product-names.test.js
+server/test/helpers/log-capture.js
 src/app/shared/ai-menu-modal/ai-menu-modal.component.ts
 src/app/shared/ai-menu-modal/ai-menu-modal.component.html
 src/app/core/models/ai-menu-draft.model.ts
