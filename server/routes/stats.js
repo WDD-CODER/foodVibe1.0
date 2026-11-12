@@ -13,6 +13,8 @@ const { PERIODS, UPCOMING_DAYS, periodBounds, eventsPipeline, usagePipeline, sha
 const { buildReport } = require('../services/business-report')
 const { REPORT_MONTHS, REPORT_DEFAULT_MONTHS } = require('../constants/report')
 
+const { frontDeskStats, resolveRange } = require('../services/frontdesk-stats')
+
 const router = Router()
 const DAY_MS = 86400000
 
@@ -59,6 +61,26 @@ router.get('/report', verifyToken, async (req, res) => {
     res.json(await buildReport(mongoose.connection.db, business, months))
   } catch (err) {
     req.log.error({ err, event: 'stats.report.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 559: GET /api/v1/stats/frontdesk?from&to[&businessId=] — owner of the business, or the platform admin with businessId.
+router.get('/frontdesk', verifyToken, async (req, res) => {
+  try {
+    const admin = isPlatformAdmin(req)
+    const wanted = req.query.businessId
+    if (wanted !== undefined && !admin) return res.status(403).json({ error: 'Owner only' })
+    if (wanted === undefined && !can(req.user, 'editMoney', { type: 'menuEvents' }).ok) return res.status(403).json({ error: 'Owner only' })
+    const now = Date.now()
+    const range = resolveRange(req.query, 7, now)
+    if (range.error) return res.status(400).json({ error: range.error })
+    const business = await getBusiness(wanted === undefined ? req.user.businessId : String(wanted))
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    const stats = await frontDeskStats(mongoose.connection.db, business._id, { fromMs: range.fromMs, toMs: range.toMs, nowMs: now })
+    res.json({ from: range.from, to: range.to, ...stats })
+  } catch (err) {
+    req.log.error({ err, event: 'stats.frontdesk.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

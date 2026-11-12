@@ -1,3 +1,4 @@
+import type { FrontDeskStats } from '@models/frontdesk-stats.model'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router'
@@ -19,6 +20,27 @@ const DICTIONARY: Record<string, string> = {
   report_finding_below_profit_target: '{{n}} אירועים נסגרו מתחת ליעד הרווח',
   report_finding_top_not_closed_reason: 'הסיבה הנפוצה: {{reason}}',
   not_closed_reason_price: 'מחיר'
+}
+
+function fdStats(total: number, extra: Partial<FrontDeskStats> = {}): FrontDeskStats {
+  return {
+    from: '2026-09-01',
+    to: '2026-11-12',
+    requests: {
+      total,
+      perDay: total / 10,
+      byChannel: { manual: 1, public_form: Math.max(total - 1, 0), whatsapp: 0 },
+      byKind: { table: total, event: 0, tasting: 0, consultation: 0 }
+    },
+    afterHoursPct: 25,
+    outcomes: { approved: 0, declined: 0, expired: 0, cancelled: 0, waiting: total },
+    declinesByReason: { full: 0, out_of_area: 0, below_minimum: 0, date_taken: 0, other: 0 },
+    medianMinutesToDecision: 12,
+    bookings: { total: 0, noShowRatePct: null, enough: false },
+    eventsFromRequests: { count: 2, revenue: 0 },
+    baseline: null,
+    ...extra
+  }
 }
 
 const KEYS: ReportMetricKey[] = [
@@ -68,18 +90,24 @@ function report(over: Partial<BusinessReport> = {}): BusinessReport {
 describe('ReportPage', () => {
   let fixture: ComponentFixture<ReportPage>
   let getReport: jasmine.Spy
+  let getFrontDesk: jasmine.Spy
   let query$: BehaviorSubject<ReturnType<typeof convertToParamMap>>
 
-  async function setup(result: BusinessReport | HttpErrorResponse, query: Record<string, string> = {}): Promise<void> {
+  async function setup(
+    result: BusinessReport | HttpErrorResponse,
+    query: Record<string, string> = {},
+    frontDesk: FrontDeskStats = fdStats(0)
+  ): Promise<void> {
     getReport = jasmine
       .createSpy('getReport')
       .and.callFake(() => (result instanceof HttpErrorResponse ? Promise.reject(result) : Promise.resolve(result)))
+    getFrontDesk = jasmine.createSpy('getFrontDesk').and.returnValue(Promise.resolve(frontDesk))
     query$ = new BehaviorSubject(convertToParamMap(query))
     TestBed.configureTestingModule({
       imports: [ReportPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp, TrendingDown })],
       providers: [
         provideRouter([]),
-        { provide: BusinessStatsService, useValue: { getReport } },
+        { provide: BusinessStatsService, useValue: { getReport, getFrontDesk } },
         {
           provide: LoggingService,
           useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error', 'warn'])
@@ -133,6 +161,29 @@ describe('ReportPage', () => {
     await setup(report())
     expect(text('trend-inquiries')).toContain('—')
     expect(text('finding-below_profit_target')).toContain('2 אירועים נסגרו מתחת ליעד הרווח')
+  })
+
+  it('shows the front desk block from the server numbers, in the report range, with the owner estimate', async () => {
+    await setup(
+      report(),
+      { businessId: 'bX' },
+      fdStats(5, { baseline: { avgResponseMinutes: { estimate: 30, measured: 12 } } })
+    )
+    expect(getFrontDesk).toHaveBeenCalledWith(jasmine.objectContaining({ from: '2026-09-01' }), 'bX')
+    expect(byId('report-frontdesk')).not.toBeNull()
+    expect(text('fd-value-requests')).toBe('5')
+    expect(text('fd-value-afterHours')).toBe('25.0%')
+    expect(text('fd-value-noShow')).toBe('—')
+    expect(text('fd-value-eventsFromRequests')).toBe('2')
+    const estimates = el().querySelectorAll('[data-testid="report-fd-estimate"]')
+    expect(estimates.length).toBe(1)
+    expect(estimates[0].textContent).toContain('הערכת בעל העסק')
+    expect(estimates[0].textContent).toContain('30')
+  })
+
+  it('does not show the front desk block when the range has no requests', async () => {
+    await setup(report())
+    expect(byId('report-frontdesk')).toBeNull()
   })
 
   it('shows the owner-only message on a 403', async () => {

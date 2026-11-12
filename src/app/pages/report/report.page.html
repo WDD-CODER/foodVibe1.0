@@ -114,7 +114,29 @@
     </table>
   </section>
 
-  @if (findings().length) {
+  @if (frontDesk()) {
+  <section class="report__frontdesk c-glass-panel" data-testid="report-frontdesk" aria-labelledby="report-fd-title">
+    <h2 id="report-fd-title" class="report__h2">{{ 'report_frontdesk_title' | translatePipe }}</h2>
+    <div class="report__tiles">
+      @for (tile of frontDeskTiles(); track tile.key) {
+      <article class="tile" [attr.data-testid]="'fd-' + tile.key">
+        <h3 class="tile__label">{{ tile.labelKey | translatePipe }}</h3>
+        <p class="tile__values">
+          <span class="tile__start" dir="ltr" [attr.data-testid]="'fd-value-' + tile.key">{{ tile.text }}</span>
+        </p>
+        @if (tile.detail) {
+        <p class="report__muted" [attr.data-testid]="'fd-detail-' + tile.key">{{ tile.detail }}</p>
+        } @if (tile.estimate !== null) {
+        <p class="tile__estimate" data-testid="report-fd-estimate">
+          <span class="tile__estimate-label">{{ 'report_owner_estimate' | translatePipe }}</span>
+          <span dir="ltr">{{ tile.estimate }}</span>
+        </p>
+        }
+      </article>
+      }
+    </div>
+  </section>
+  } @if (findings().length) {
   <section class="report__findings" data-testid="report-findings" aria-labelledby="report-findings-title">
     <h2 id="report-findings-title" class="report__h2">{{ 'report_findings_title' | translatePipe }}</h2>
     @for (f of findings(); track f.key) {

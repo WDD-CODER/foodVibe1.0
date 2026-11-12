@@ -173,13 +173,13 @@ Also confirm, in the merged code of 549/550, where the decline reason is stored 
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Pin the front desk numbers with seeded requests before writing the code — two businesses, test requests, after-hours cases, decision log, bookings, events from requests, access cases — server/test/frontdesk-stats.test.js
-- [ ] A2: Compute the front desk numbers on the server, never counting test requests — the service with its after-hours helper and baseline twins — server/services/frontdesk-stats.js, server/services/business-stats.js
-- [ ] A3: Serve the numbers to the owner and to the platform admin, also as a file — owner route with range and businessId; admin route with rows and CSV; admin tests — server/routes/stats.js, server/routes/admin.js, server/test/admin-frontdesk-stats.test.js
-- [ ] A4: Show this week's front desk numbers as a card on the dashboard — model, service method, card, mount, dictionary keys, spec — src/app/core/models/frontdesk-stats.model.ts, src/app/core/services/business-stats.service.ts, src/app/pages/dashboard/components/frontdesk-week-card/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, public/assets/data/dictionary.json
-- [ ] A5: Add the front desk block to the business report — section, estimates beside measured numbers, spec cases — src/app/pages/report/**
-- [ ] A6: Give the platform admin the numbers per business and the download — three columns, CSV button, service method — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/core/services/platform-admin.service.ts
-- [ ] A7: Test the dashboard card end to end, update the docs, run every check — one e2e card, standards-backend rows; test:server, test:ci, build, lint, lint:icons, log-query — e2e/ui/559-1.spec.ts, docs/agent/standards-backend.md
+- [x] A1: Pin the front desk numbers with seeded requests before writing the code — two businesses, test requests, after-hours cases, decision log, bookings, events from requests, access cases — server/test/frontdesk-stats.test.js
+- [x] A2: Compute the front desk numbers on the server, never counting test requests — the service with its after-hours helper and baseline twins — server/services/frontdesk-stats.js, server/services/business-stats.js
+- [x] A3: Serve the numbers to the owner and to the platform admin, also as a file — owner route with range and businessId; admin route with rows and CSV; admin tests — server/routes/stats.js, server/routes/admin.js, server/test/admin-frontdesk-stats.test.js
+- [x] A4: Show this week's front desk numbers as a card on the dashboard — model, service method, card, mount, dictionary keys, spec — src/app/core/models/frontdesk-stats.model.ts, src/app/core/services/business-stats.service.ts, src/app/pages/dashboard/components/frontdesk-week-card/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, public/assets/data/dictionary.json
+- [x] A5: Add the front desk block to the business report — section, estimates beside measured numbers, spec cases — src/app/pages/report/**
+- [x] A6: Give the platform admin the numbers per business and the download — three columns, CSV button, service method — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/core/services/platform-admin.service.ts
+- [x] A7: Test the dashboard card end to end, update the docs, run every check — one e2e card, standards-backend rows; test:server, test:ci, build, lint, lint:icons, log-query — e2e/ui/559-1.spec.ts, docs/agent/standards-backend.md
 
 ## Technical Considerations
 - Dependencies: plans 549/550 (requests, bookings, decisionLog), 548 (profile hours), 556 (`test: true` requests), 567 (front desk baseline fields), 568 (report page, `REPORT_MIN_EVENTS`).
@@ -203,3 +203,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Map row 17 (renumbered +2: old 557 → 559). Decisions made while drafting (Planner): after-hours share counts only guest channels (a manual request is typed by a member at any hour); the median comes from `decisionLog.secondsToDecision` (one definition with plan 550); the owner's weekly card replaces the brief's "/frontdesk home" because C-NAV has no home chip; the platform CSV follows plan 566's `format=csv` pattern instead of a client-side CSV helper.
+- Evidence (builder, round 0):
+  - `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors); `pnpm run lint:icons` -> ok; `pnpm --dir server run lint` -> 0 errors.
+  - `server/test/frontdesk-stats.test.js` + `server/test/admin-frontdesk-stats.test.js` -> 15 passed, 0 failed.
+  - `pnpm run test:ci` -> exit 0, 2168 SUCCESS (incl. frontdesk-week-card spec, report and platform page specs).
+  - `pnpm run test:server` -> 1343 passed, 1 failed: `seed-demo-business.test.js` (duplicate usageDays _id demo_owner:2026-10-25, a DST day; the seed script is not touched by this plan).
+  - kit-manifest-check, override-check, plan-ledger-check, breadcrumbs-check -> ok; log-query -> SKIP (no database configured).
+  - Reused the existing `rq_channel_*` labels instead of adding `frontdesk_channel_*`; `download` icon was already registered.
+  - [ui] 559-1 e2e written (`e2e/ui/559-1.spec.ts`); not run here (needs the QA login and running servers).

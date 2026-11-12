@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
+import type { FrontDeskAdminRow } from '../models/frontdesk-stats.model'
 import type { AiUsageParams, AiUsageReport } from '../models/ai-usage.model'
 
 /** One line of the platform admin's table (plan 448): counts and dates only, never a business's content. */
@@ -97,6 +98,30 @@ export class PlatformAdminService {
     const link = document.createElement('a')
     link.href = url
     link.download = `ai-usage-${params.from ?? 'month'}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  /** Plan 559: front desk numbers per business over the last 30 days. */
+  async getFrontDeskStats(): Promise<FrontDeskAdminRow[]> {
+    const res = await firstValueFrom(
+      this.http.get<{ rows: FrontDeskAdminRow[] }>(`${environment.apiUrl}${API.admin('frontdesk-stats')}`)
+    )
+    return res.rows
+  }
+
+  /** Plan 559: the same table as a CSV file (fetched with the session, then saved by the browser). */
+  async downloadFrontDeskCsv(): Promise<void> {
+    const blob = await firstValueFrom(
+      this.http.get(`${environment.apiUrl}${API.admin('frontdesk-stats')}`, {
+        params: { format: 'csv' },
+        responseType: 'blob'
+      })
+    )
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'frontdesk-30-days.csv'
     link.click()
     URL.revokeObjectURL(url)
   }

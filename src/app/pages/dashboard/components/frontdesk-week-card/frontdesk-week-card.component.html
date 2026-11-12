@@ -1,0 +1,17 @@
+@if (visible_()) {
+  <section
+    class="fdw-card c-glass-panel"
+    data-testid="frontdesk-week-card"
+    dir="rtl"
+    [attr.aria-label]="'frontdesk_week_title' | translatePipe"
+  >
+    <header class="fdw-card__head">
+      <span class="fdw-card__icon"><lucide-icon name="clipboard-check" [size]="16" /></span>
+      <h2 class="fdw-card__title">{{ 'frontdesk_week_title' | translatePipe }}</h2>
+    </header>
+    <p class="fdw-card__sentence" data-testid="frontdesk-week-sentence">{{ sentence_() }}</p>
+    <a class="fdw-card__link" routerLink="/requests" data-testid="frontdesk-week-link">
+      {{ 'frontdesk_week_all_requests' | translatePipe }}
+    </a>
+  </section>
+}

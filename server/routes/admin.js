@@ -11,6 +11,7 @@ const { actorOf } = require('../utils/actor')
 const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-admin.schema')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
+const { frontDeskStats, resolveRange } = require('../services/frontdesk-stats')
 
 const router = Router()
 
@@ -284,6 +285,44 @@ router.get('/ai-usage', verifyToken, requirePlatformAdmin, async (req, res) => {
     res.json({ from, to, groupBy, pricesAsOf: PRICES_AS_OF, rows, totals })
   } catch (err) {
     req.log.error({ err, event: 'admin.ai_usage.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 559: GET /api/v1/admin/frontdesk-stats?from&to[&format=csv] — one row per business; numbers and business names only.
+const FD_CSV_COLUMNS = ['businessId', 'name', 'requests', 'afterHoursPct', 'approved', 'declined', 'medianMinutesToDecision', 'noShowRatePct', 'eventsFromRequests']
+
+router.get('/frontdesk-stats', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const now = Date.now()
+    const range = resolveRange(req.query, 30, now)
+    if (range.error) return res.status(400).json({ error: range.error, code: 'BAD_RANGE' })
+    const businesses = await col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1 } }).toArray()
+    const rows = []
+    for (const b of businesses) {
+      const s = await frontDeskStats(mongoose.connection.db, b._id, { fromMs: range.fromMs, toMs: range.toMs, nowMs: now })
+      rows.push({
+        businessId: b._id,
+        name: b.name ?? '',
+        requests: s.requests.total,
+        afterHoursPct: s.afterHoursPct,
+        approved: s.outcomes.approved,
+        declined: s.outcomes.declined,
+        medianMinutesToDecision: s.medianMinutesToDecision,
+        noShowRatePct: s.bookings.noShowRatePct,
+        eventsFromRequests: s.eventsFromRequests.count,
+      })
+    }
+    if (req.query.format === 'csv') {
+      const lines = [FD_CSV_COLUMNS.join(',')]
+      for (const r of rows) lines.push(FD_CSV_COLUMNS.map(c => csvCell(r[c])).join(','))
+      res.set('Content-Type', 'text/csv; charset=utf-8')
+      res.set('Content-Disposition', 'attachment; filename="frontdesk-' + range.from + '-' + range.to + '.csv"')
+      return res.send(lines.join('\n') + '\n')
+    }
+    res.json({ from: range.from, to: range.to, rows })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.frontdesk_stats.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
