@@ -12,15 +12,16 @@ test('551-1: a click on the client row opens the profile with the event in the t
   expect(res.ok()).toBeTruthy()
   const clientId = (await res.json())._id as string
   const eventName = 'אירוע פרופיל ' + stamp
-  const eventId = await createQaEvent(request, session, { clientId, clientName: name, name: eventName })
+  let eventId: string | undefined
   try {
+    eventId = await createQaEvent(request, session, { clientId, clientName: name, name: eventName })
     await page.goto('/clients')
     await page.locator('.client-grid-row', { hasText: name }).first().click()
     await expect(page).toHaveURL(new RegExp('/clients/' + clientId))
     await expect(page.getByTestId('client-timeline')).toContainText(eventName)
     await page.screenshot({ path: 'screens/551-1.png' })
   } finally {
-    await deleteQaEvent(request, session, eventId)
+    if (eventId) await deleteQaEvent(request, session, eventId)
     await request.delete(`${API}/api/v1/data/clients/${clientId}?permanent=true`, { headers })
   }
 })
