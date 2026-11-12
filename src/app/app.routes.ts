@@ -161,6 +161,17 @@ export const routes: Routes = [
     resolve: { clientsLoaded: clientsEnsureLoadedResolver, menuEventsLoaded: menuEventsEnsureLoadedResolver },
   },
   {
+    path: 'requests',
+    loadComponent: () => import('./pages/requests/requests.page').then(m => m.RequestsPage),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'bookings',
+    loadComponent: () => import('./pages/bookings/bookings.page').then(m => m.BookingsPage),
+    canActivate: [authGuard],
+  },
+  {
     path: 'menu-library',
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
     resolve: {

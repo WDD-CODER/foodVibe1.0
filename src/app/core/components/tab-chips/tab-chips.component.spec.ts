@@ -2,13 +2,14 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule, Wrench } from 'lucide-angular'
+import { CalendarDays, ClipboardCheck, LucideAngularModule, Wrench } from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserService } from '@services/user.service'
+import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import type { Recipe } from '@models/recipe.model'
 import type { User } from '@models/user.model'
 
@@ -33,7 +34,10 @@ describe('TabChipsComponent', () => {
     mockTranslation.translate.and.callFake((k: string) => k)
 
     await TestBed.configureTestingModule({
-      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench })],
+      imports: [
+        TabChipsComponent,
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays })
+      ],
       providers: [
         provideRouter([
           { path: 'dashboard', component: BlankStubComponent },
@@ -45,7 +49,8 @@ describe('TabChipsComponent', () => {
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent }
         ]),
-        { provide: TranslationService, useValue: mockTranslation }
+        { provide: TranslationService, useValue: mockTranslation },
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
       ]
     }).compileComponents()
 
@@ -119,7 +124,7 @@ describe('TabChipsComponent', () => {
   it('maps /clients to the frontdesk group with the clients chip active (plan 547)', async () => {
     await router.navigateByUrl('/clients')
     fixture.detectChanges()
-    expect(chipIds()).toEqual(['/clients'])
+    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients'])
     await fixture.whenStable()
     fixture.detectChanges()
     const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
@@ -168,6 +173,7 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
           { path: 'recipe-builder/:id', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
         {
           provide: KitchenStateService,
           useValue: { recipesById_: computed(() => new Map(recipes.map((r) => [r._id, r]))) }

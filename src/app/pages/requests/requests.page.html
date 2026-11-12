@@ -1,0 +1,62 @@
+<section class="rq-page" dir="rtl">
+  <app-page-header titleKey="fd_chip_requests">
+    <ng-container header-actions>
+      <button type="button" class="c-btn-primary" data-testid="new-request" (click)="openNew()">
+        <lucide-icon name="plus" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'rq_new' | translatePipe }}</span>
+      </button>
+    </ng-container>
+  </app-page-header>
+
+  <div class="rq-tabs" role="tablist">
+    @for (tab of tabs; track tab) {
+    <button
+      type="button"
+      role="tab"
+      class="c-chip c-chip--tab"
+      [class.active]="tab_() === tab"
+      [attr.aria-selected]="tab_() === tab"
+      [attr.data-testid]="'tab-' + tab"
+      (click)="setTab(tab)"
+    >
+      {{ 'rq_tab_' + tab | translatePipe }} @if (tab === 'waiting' && counts_().waiting > 0) {
+      <span class="c-chip__count">{{ counts_().waiting }}</span>
+      }
+    </button>
+    }
+  </div>
+
+  @if (!isLoading_()) { @if (shown_().length === 0) {
+  <app-empty-state [messageKey]="'rq_empty_' + tab_()" icon="clipboard-check" />
+  } @else {
+  <div class="rq-list">
+    @for (r of shown_(); track r._id) {
+    <app-request-card
+      [request]="r"
+      [dayLoad]="dayOf(r)"
+      [questionLabels]="labels_()[r.kind] ?? {}"
+      [busy]="busyId_() === r._id"
+      (approve)="onApprove(r, $event)"
+      (ask)="askFor_.set(r)"
+      (decline)="declineFor_.set(r)"
+    />
+    }
+  </div>
+  } } @if (askFor_(); as r) {
+  <app-ask-dialog
+    [phone]="r.guestPhone"
+    (saved)="onAsk($event)"
+    (closed)="closeDialogs()"
+    (dirtyChange)="setDialogDirty($event)"
+  />
+  } @if (declineFor_()) {
+  <app-decline-dialog (declined)="onDecline($event)" (closed)="closeDialogs()" (dirtyChange)="setDialogDirty($event)" />
+  } @if (newOpen_()) {
+  <app-new-request-dialog
+    (created)="onCreated()"
+    (failed)="onCreateFailed()"
+    (closed)="closeDialogs()"
+    (dirtyChange)="setDialogDirty($event)"
+  />
+  }
+</section>
