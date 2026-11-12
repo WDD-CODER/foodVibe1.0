@@ -249,6 +249,7 @@ export const routes: Routes = [
     canActivate: [authGuard, platformAdminGuard],
   },
   { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
+  { path: 'report', loadComponent: () => import('./pages/report/report.page').then(m => m.ReportPage), canActivate: [authGuard] },
   // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.
   ...devCatalogRoutes(environment.localDev),
   { path: '', redirectTo: homeRedirect, pathMatch: 'full' },

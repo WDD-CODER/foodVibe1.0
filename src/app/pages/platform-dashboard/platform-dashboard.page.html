@@ -50,6 +50,7 @@
           </th>
           }
           <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_report" | translatePipe }}</th>
         </tr>
       </thead>
       <tbody>
@@ -76,6 +77,15 @@
           <td>{{ row.events.finished }}</td>
           <td>{{ rate(row.closeRate) }}</td>
           <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
+          <td>
+            <a
+              class="report-link"
+              data-testid="report-link"
+              routerLink="/report"
+              [queryParams]="{ businessId: row._id }"
+              >{{ "platform_col_report" | translatePipe }}</a
+            >
+          </td>
           <td>
             <input
               type="checkbox"

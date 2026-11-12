@@ -33,4 +33,19 @@ describe('BusinessStatsService', () => {
       .flush({ error: 'x' }, { status: 500, statusText: 'err' })
     await expectAsync(result).toBeRejected()
   })
+
+  it('asks for the report with months, and businessId only when given', async () => {
+    const result = service.getReport(12, 'bX')
+    const req = http.expectOne((r) => r.url.endsWith('/api/v1/stats/report'))
+    expect(req.request.params.get('months')).toBe('12')
+    expect(req.request.params.get('businessId')).toBe('bX')
+    req.flush({ months: 12 })
+    expect(await result).toEqual(jasmine.objectContaining({ months: 12 }))
+
+    const own = service.getReport(3)
+    const req2 = http.expectOne((r) => r.url.endsWith('/api/v1/stats/report'))
+    expect(req2.request.params.has('businessId')).toBeFalse()
+    req2.flush({ months: 3 })
+    await own
+  })
 })

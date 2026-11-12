@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core'
 import { DatePipe } from '@angular/common'
-import { Router } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { BusinessStatsService } from '@services/business-stats.service'
@@ -34,7 +34,7 @@ const EMPTY = '—'
 @Component({
   selector: 'app-business-performance',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe],
+  imports: [DatePipe, LucideAngularModule, RouterLink, TranslatePipe],
   templateUrl: './business-performance.component.html',
   styleUrl: './business-performance.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

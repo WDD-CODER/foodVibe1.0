@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import type { BusinessStats, StatsPeriod } from '@models/business-stats.model'
+import type { BusinessReport, ReportMonths } from '@models/business-report.model'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 
@@ -14,5 +15,12 @@ export class BusinessStatsService {
     return firstValueFrom(
       this.http.get<BusinessStats>(`${environment.apiUrl}${API.stats('business')}`, { params: { period } })
     )
+  }
+
+  /** Plan 568: the business report. `businessId` is for the platform admin only. */
+  getReport(months: ReportMonths, businessId?: string): Promise<BusinessReport> {
+    const params: Record<string, string> = { months: String(months) }
+    if (businessId) params['businessId'] = businessId
+    return firstValueFrom(this.http.get<BusinessReport>(`${environment.apiUrl}${API.stats('report')}`, { params }))
   }
 }

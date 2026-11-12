@@ -6,6 +6,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | --- | --- |
 | `welcome/` | `/welcome` — the signed-out front door: the mark, the promise, sign-up and sign-in; `/` leads here for a first-time visitor (home-redirect.ts) |
 | `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
+| `report/` | `/report` — the business report: measured start vs latest, monthly trend, findings, one-page A4 print (plan 568); the platform admin opens it with `?businessId=` |
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
 | `dev-catalog/` | `/dev/catalog` — dev-only page that renders every shared UI family (route absent in production builds) |
