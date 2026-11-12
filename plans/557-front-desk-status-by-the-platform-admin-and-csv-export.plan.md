@@ -215,3 +215,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `e2e/ui/557-1.spec.ts` written; not run here (needs the running app and QA login); the gate reruns it.
 - Not done as written: the row's assistant level (see below); `src/app/pages/frontdesk/breadcrumbs.md` (breadcrumbs-check flags a file outside the seams; the rows went into `src/app/pages/breadcrumbs.md` instead).
 - `server/routes/admin.js` list rows are unchanged: `server/test/front-desk-setup.test.js:126` and `server/test/admin-businesses.test.js` pin the exact row shape and are outside the scope, so the table does not show the assistant level; the dialog's level select starts on "ללא שינוי".
+
+### Builder evidence (round 2, fresh builder)
+- Round 1 failed only the scope check: `src/app/core/breadcrumbs.md` and `test-results/.last-run.json` were outside the scope. Re-applied the round-0 implementation (5900cfc) from the base f69a1d4 without those two files; `utils/` is already named in core's breadcrumbs, so the csv.util line is not needed (breadcrumbs-check -> exit 0). The Playwright artifact `test-results/.last-run.json` is not committed.
+- scope-check --diff=origin/orch/batch-5 -> exit 0, `SCOPE: ok`; kit-manifest-check -> ok, 0 unclassified.
+- `pnpm run build`, `pnpm run lint`, `pnpm --dir server run lint`, `lint:icons`, `lint:no-native-select` -> exit 0.
+- `pnpm run test:server` -> exit 0, 102 files, 1328 passed; `pnpm run test:ci` -> exit 0, 2161 SUCCESS.
+- override-check, plan-ledger-check, breadcrumbs-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+- `e2e/ui/557-1.spec.ts`: not run here; per the Human's answer to ask 557-1, the gate's rerun is the evidence.
