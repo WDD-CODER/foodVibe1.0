@@ -112,6 +112,7 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `GET` | `/api/v1/data/:type/:id` | optional | Get one — same auth split as above |
 | `GET` | `/api/v1/data/:type/search` | optional | Lean prefix-match typeahead, `SEARCHABLE_ENTITY_TYPES` only |
 | `GET` | `/api/v1/data/:type/count` | optional | Lightweight count, `filter=lowStock\|unapproved` |
+| `GET` | `/api/v1/stats/report` | required | Plan 568: the business report (`months=3\|6\|12`, default 6): measured monthly series, first-30-days vs latest-30-days, rule-based findings. Owner only (staff 403); `businessId` only for the platform admin (others 403, unknown 404); no client names or phones |
 | `POST` | `/api/v1/data/:type` | required | Create. Server generates `_id` unless the body already supplies one (Plan 321 Phase 1 — a client-supplied id is still honored, e.g. `appendExisting`/trash-restore) |
 | `PUT` | `/api/v1/data/:type/:id` | required | Replace one — mirrors `StorageService.put()` |
 | `PUT` | `/api/v1/data/:type/:id/push-to-master` | required | Platform admin only (`requirePlatformAdmin`, `isPlatformAdmin` in the token) — as are delete-from-master, purge-ingredient-everywhere and shared-term writes |

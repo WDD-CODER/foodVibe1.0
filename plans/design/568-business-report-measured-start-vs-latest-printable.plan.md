@@ -188,14 +188,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Pin the report numbers with a fixture before writing the code — 8 events over 3 months, expected series, windows, findings, the 2-event case, no-baseline case, access cases — server/test/business-report.test.js
-- [ ] A2: Compute the report on the server from measured events only — metric list and thresholds, monthly series, start and latest windows, baseline mapping, rule findings — server/services/business-report.js, server/constants/report.js
-- [ ] A3: Serve the report to the owner and to the platform admin only — GET /stats/report with months, businessId and the 400/403/404 answers — server/routes/stats.js
-- [ ] A4: Let the app fetch the report — model type, getReport on the stats service, API path — src/app/core/models/business-report.model.ts, src/app/core/services/business-stats.service.ts, src/app/core/services/http-storage.adapter.ts
-- [ ] A5: Build the report page with the since-we-started strip, estimates column, trend and findings — lazy route, period radios, not-enough and too-early states, empty state, dictionary keys — src/app/pages/report/**, src/app/app.routes.ts, public/assets/data/dictionary.json
-- [ ] A6: Make the report print on one A4 page — component print layout and one appended global print block — src/app/pages/report/report.page.scss, src/styles.scss
-- [ ] A7: Link the report from the dashboard card and from each business on the platform page — business-performance link, platform row link — src/app/pages/dashboard/components/business-performance/**, src/app/pages/platform-dashboard/platform-dashboard.page.html
-- [ ] A8: Test the page and the two entry points, update the docs, run every check — report.page.spec.ts, two e2e cards, standards-backend row, breadcrumbs; test:server, test:ci, build, lint, lint:icons, log-query — e2e/ui/568-1.spec.ts, e2e/ui/568-2.spec.ts, docs/agent/standards-backend.md, src/app/pages/breadcrumbs.md
+- [x] A1: Pin the report numbers with a fixture before writing the code — 8 events over 3 months, expected series, windows, findings, the 2-event case, no-baseline case, access cases — server/test/business-report.test.js
+- [x] A2: Compute the report on the server from measured events only — metric list and thresholds, monthly series, start and latest windows, baseline mapping, rule findings — server/services/business-report.js, server/constants/report.js
+- [x] A3: Serve the report to the owner and to the platform admin only — GET /stats/report with months, businessId and the 400/403/404 answers — server/routes/stats.js
+- [x] A4: Let the app fetch the report — model type, getReport on the stats service, API path — src/app/core/models/business-report.model.ts, src/app/core/services/business-stats.service.ts, src/app/core/services/http-storage.adapter.ts
+- [x] A5: Build the report page with the since-we-started strip, estimates column, trend and findings — lazy route, period radios, not-enough and too-early states, empty state, dictionary keys — src/app/pages/report/**, src/app/app.routes.ts, public/assets/data/dictionary.json
+- [x] A6: Make the report print on one A4 page — component print layout and one appended global print block — src/app/pages/report/report.page.scss, src/styles.scss
+- [x] A7: Link the report from the dashboard card and from each business on the platform page — business-performance link, platform row link — src/app/pages/dashboard/components/business-performance/**, src/app/pages/platform-dashboard/platform-dashboard.page.html
+- [x] A8: Test the page and the two entry points, update the docs, run every check — report.page.spec.ts, two e2e cards, standards-backend row, breadcrumbs; test:server, test:ci, build, lint, lint:icons, log-query — e2e/ui/568-1.spec.ts, e2e/ui/568-2.spec.ts, docs/agent/standards-backend.md, src/app/pages/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: plan 567 (kitchen baseline fields and field-list constants). `business-stats.js` may need to export its revenue / accuracy expressions so the report reuses them — exporting is allowed; behaviour of `shapeStats` must not change (`server/test/business-stats.test.js` stays green).
@@ -219,3 +219,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Map row 15c (renumbered +2: old 566 → 568). Decisions made while drafting (Planner): counts are never hidden by the 3-event rule — only rates and averages are (principle 3 applies to numbers built from events); `comparable` needs 60 days since the first event so the two 30-day windows do not overlap; `/platform` had no business drill-down, so the report is opened from a per-row link.
+- Evidence: `pnpm run build` -> exit 0 (initial total 561.73 kB; report is a lazy route); `pnpm run lint` -> 0 errors; `pnpm run lint:icons` -> exit 0; `pnpm run test:ci` -> TOTAL 1991 SUCCESS (incl. report.page.spec.ts); `pnpm run test:server` -> exit 0 (business-report.test.js 10 tests, business-stats.test.js unchanged and green); override-check, plan-ledger-check, breadcrumbs-check, kit-manifest-check -> exit 0; log-query -> SKIP (no database configured).
+- e2e/ui/568-1 and 568-2 written but not run here (need the QA server and sign-in); the gate reruns them.
+- The revenue rule is re-written in JS in `business-report.js` (`closedRevenue`), not imported: `business-stats.js` is outside the scope and holds it as a Mongo expression. Same rule: actual -> planned -> pricing. No `http-storage.adapter.ts` change was needed (`API.stats` already exists).

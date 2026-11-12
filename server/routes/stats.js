@@ -2,13 +2,16 @@
 /** Plan 447 (spec 07.2): the dashboard's numbers, computed on the server and scoped to the caller's business. */
 const { Router } = require('express')
 const mongoose = require('mongoose')
-const { verifyToken } = require('../middleware/auth')
+const { verifyToken, isPlatformAdmin } = require('../middleware/auth')
 const { scopeFilter } = require('../utils/business-scope')
 const { can } = require('../utils/permissions')
 const { jerusalemDate } = require('../middleware/usage')
 const { getBusiness } = require('../services/business')
 const { withEventVisibility } = require('../utils/event-visibility')
 const { PERIODS, UPCOMING_DAYS, periodBounds, eventsPipeline, usagePipeline, shapeStats } = require('../services/business-stats')
+
+const { buildReport } = require('../services/business-report')
+const { REPORT_MONTHS, REPORT_DEFAULT_MONTHS } = require('../constants/report')
 
 const router = Router()
 const DAY_MS = 86400000
@@ -38,6 +41,24 @@ router.get('/business', verifyToken, async (req, res) => {
     res.json(shapeStats(facet ?? {}, usage, business, isOwner, period, bounds))
   } catch (err) {
     req.log.error({ err, event: 'stats.business.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 568: GET /api/v1/stats/report?months=3|6|12[&businessId=] — owner of the business, or the platform admin with businessId.
+router.get('/report', verifyToken, async (req, res) => {
+  try {
+    const admin = isPlatformAdmin(req)
+    const wanted = req.query.businessId
+    if (wanted !== undefined && !admin) return res.status(403).json({ error: 'Owner only' })
+    if (wanted === undefined && !can(req.user, 'editMoney', { type: 'menuEvents' }).ok) return res.status(403).json({ error: 'Owner only' })
+    const months = req.query.months === undefined ? REPORT_DEFAULT_MONTHS : Number(req.query.months)
+    if (!REPORT_MONTHS.includes(months)) return res.status(400).json({ error: 'Invalid months' })
+    const business = await getBusiness(wanted === undefined ? req.user.businessId : String(wanted))
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    res.json(await buildReport(mongoose.connection.db, business, months))
+  } catch (err) {
+    req.log.error({ err, event: 'stats.report.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

@@ -7,6 +7,11 @@
   <header class="perf__head">
     <h2 class="perf__title">{{ 'performance_title' | translatePipe }}</h2>
     @if (cards().length) {
+      <a class="perf__report-link" data-testid="report-link" routerLink="/report">{{
+        'report_open_full' | translatePipe
+      }}</a>
+    }
+    @if (cards().length) {
       <div class="c-chip-group perf__periods" role="radiogroup" [attr.aria-label]="'performance_title' | translatePipe">
         @for (option of periods; track option.value) {
           <label class="c-chip c-chip--toggle" [attr.data-testid]="'period-' + option.value">

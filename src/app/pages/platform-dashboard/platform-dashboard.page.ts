@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { DatePipe } from '@angular/common'
+import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
@@ -57,6 +58,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
   standalone: true,
   imports: [
     DatePipe,
+    RouterLink,
     LucideAngularModule,
     TranslatePipe,
     PageHeaderComponent,
