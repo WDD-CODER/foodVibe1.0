@@ -1,6 +1,6 @@
 # Plan 588 — A removed logistics question leaves the card after the visit, and sits behind a small "removed (N)" link
 
-Status: draft
+Status: done
 Depends-on: 581
 Snapshot: 84a63416b39f6ee635f9921904af63d4db131a45
 

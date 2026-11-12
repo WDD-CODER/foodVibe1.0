@@ -1,6 +1,6 @@
 # Plan 586 — The clients list on a phone works like the other list pages: name fixed, other columns in the column carousel
 
-Status: draft
+Status: done
 Depends-on: 547
 Snapshot: 84a63416b39f6ee635f9921904af63d4db131a45
 

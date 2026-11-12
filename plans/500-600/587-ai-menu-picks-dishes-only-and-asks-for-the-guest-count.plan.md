@@ -1,6 +1,6 @@
 # Plan 587 — The AI menu picks dishes only (no portions or prices), and asks for the guest count instead of guessing one
 
-Status: draft
+Status: done
 Depends-on: 580
 Snapshot: 84a63416b39f6ee635f9921904af63d4db131a45
 
