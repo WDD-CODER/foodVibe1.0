@@ -1,6 +1,6 @@
 # Plan 590 — Date tests pass on any PC: specs that type into a date field fix the pointer type instead of reading the machine's
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 8e7b189e653c617d7f2d21e01bac9b69c5e568f5
 
