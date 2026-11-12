@@ -1867,6 +1867,18 @@
     "ai_fail_timeout": "ה-AI לא ענה בזמן",
     "ai_fail_network": "תקלת רשת",
     "ai_fail_quota": "מכסה יומית",
-    "ai_fail_other": "אחר"
+    "ai_fail_other": "אחר",
+    "metadata_logistics_desc_v2": "השאלות שהשף עובר עליהן בשיחה הראשונה ובפגישת הספקים. אפשר להוסיף, לערוך ולהסיר; שאלה שהוסרה לא תופיע באירועים חדשים.",
+    "metadata_logistics_updated": "השאלה עודכנה",
+    "metadata_logistics_unsaved_confirm": "בטופס יש שאלה שלא נשמרה. לשמור אותה קודם?",
+    "metadata_logistics_discard": "לא לשמור",
+    "metadata_logistics_scope_mine": "רק לעסק שלי",
+    "metadata_logistics_scope_everyone": "לכל העסקים",
+    "metadata_logistics_remove_scope_confirm": "להסיר את השאלה לכל העסקים או רק לעסק שלך? אירועים שכבר קיימים ישמרו אותה.",
+    "metadata_logistics_hide_confirm": "להסיר את השאלה המשותפת מהרשימה של העסק שלך? אירועים שכבר קיימים ישמרו אותה.",
+    "metadata_logistics_hidden": "הוסרה מהעסק שלך",
+    "metadata_logistics_restore": "החזר",
+    "metadata_logistics_env_required": "בחרו לפחות סביבה אחת",
+    "add_new_logistics_section": "הוסף סעיף חדש"
   }
 }

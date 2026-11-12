@@ -3,7 +3,7 @@
     <lucide-icon name="list-checks" class="icon-primary"></lucide-icon>
     <h2>{{ 'metadata_logistics_title' | translatePipe }}</h2>
   </div>
-  <p class="card-desc">{{ 'metadata_logistics_desc' | translatePipe }}</p>
+  <p class="card-desc">{{ 'metadata_logistics_desc_v2' | translatePipe }}</p>
 
   <div class="c-chip-group logistics-tabs" role="tablist">
     @for (p of phases; track p) {
@@ -27,36 +27,61 @@
         @if (group.rows.length > 0) {
           <ul class="logistics-items">
             @for (row of group.rows; track row.term._id) {
-              <li class="logistics-item" [attr.data-shared]="row.shared">
-                @if (row.shared) {
-                  <span class="c-chip c-chip--tag" [attr.title]="'taxonomy_shared_admin_only' | translatePipe">
-                    {{ row.term.key | translatePipe }}
+              <li class="logistics-item" [class.is-hidden]="row.hidden" [attr.data-shared]="row.shared">
+                <span
+                  class="c-chip c-chip--tag"
+                  [attr.title]="row.shared ? ('taxonomy_shared_admin_only' | translatePipe) : null"
+                >
+                  {{ row.term.key | translatePipe }}
+                  @if (row.shared) {
                     <lucide-icon
                       name="lock"
                       [size]="14"
                       [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
                     ></lucide-icon>
-                  </span>
-                } @else {
-                  <span class="c-chip c-chip--removable">
-                    {{ row.term.key | translatePipe }}
-                    <button
-                      type="button"
-                      class="c-chip__remove"
-                      [attr.aria-label]="'delete' | translatePipe"
-                      [attr.title]="'delete' | translatePipe"
-                      (click)="onRemove(row.term)"
-                    >
-                      <lucide-icon name="x" [size]="12"></lucide-icon>
-                    </button>
-                  </span>
-                }
+                  }
+                </span>
                 <span class="logistics-item-meta">
                   {{ row.typeKey | translatePipe }}
                   @for (env of row.environmentKeys; track env) {
                     · {{ env | translatePipe }}
                   }
+                  @if (row.hidden) {
+                    · {{ 'metadata_logistics_hidden' | translatePipe }}
+                  }
                 </span>
+                @if (isLoggedIn()) {
+                  <span class="logistics-item-actions">
+                    @if (row.canEdit) {
+                      <button
+                        type="button"
+                        class="c-icon-btn"
+                        [attr.aria-label]="'edit' | translatePipe"
+                        [attr.title]="'edit' | translatePipe"
+                        (click)="onEdit(row.term)"
+                      >
+                        <lucide-icon name="pencil" [size]="16"></lucide-icon>
+                      </button>
+                    }
+                    @if (row.canRemove) {
+                      <button
+                        type="button"
+                        class="c-icon-btn danger"
+                        [attr.aria-label]="'delete' | translatePipe"
+                        [attr.title]="'delete' | translatePipe"
+                        (click)="onRemove(row.term)"
+                      >
+                        <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                      </button>
+                    }
+                    @if (row.hidden) {
+                      <button type="button" class="c-icon-btn" (click)="onRestore(row.term)">
+                        <lucide-icon name="undo-2" [size]="16"></lucide-icon>
+                        <span>{{ 'metadata_logistics_restore' | translatePipe }}</span>
+                      </button>
+                    }
+                  </span>
+                }
               </li>
             }
           </ul>
@@ -68,7 +93,7 @@
   </div>
 
   @if (isLoggedIn()) {
-    <div class="logistics-add">
+    <div class="logistics-add" #addForm>
       <app-form-field
         class="logistics-add-text"
         label="metadata_logistics_question"
@@ -87,7 +112,7 @@
           [placeholder]="'metadata_logistics_placeholder' | translatePipe"
           [ngModel]="draft().text"
           (ngModelChange)="setText($event)"
-          (keyup.enter)="onAdd()"
+          (keyup.enter)="onSubmit()"
         />
       </app-form-field>
 
@@ -103,9 +128,12 @@
         <app-form-field label="metadata_logistics_section">
           <app-custom-select
             class="logistics-add-section"
-            [options]="sectionOptions"
+            [options]="sectionOptions()"
+            [addNewValue]="addSectionValue"
+            addNewLabelKey="add_new_logistics_section"
             [ngModel]="draft().section"
             (ngModelChange)="setSection($event)"
+            (addNewChosen)="onAddSection($event)"
           />
         </app-form-field>
         <app-form-field label="metadata_logistics_type">
@@ -120,7 +148,7 @@
 
       <div class="logistics-add-envs">
         <span class="logistics-add-label">{{ 'metadata_logistics_environments' | translatePipe }}</span>
-        <div class="c-chip-group">
+        <div class="c-chip-group c-chip-group--tight">
           @for (env of environments; track env) {
             <label class="c-chip c-chip--toggle" [attr.data-env]="env">
               <input
@@ -135,17 +163,38 @@
       </div>
 
       @if (isAdmin()) {
-        <div class="c-chip-group logistics-add-shared">
+        <div class="c-chip-group c-chip-group--tight logistics-add-scope" role="radiogroup">
           <label class="c-chip c-chip--toggle">
-            <input type="checkbox" [checked]="draft().shared" (change)="setShared($any($event.target).checked)" />
-            <span>{{ 'metadata_logistics_shared' | translatePipe }}</span>
+            <input
+              type="radio"
+              name="logistics-scope"
+              [checked]="draft().scope === 'mine'"
+              [disabled]="!!editing()"
+              (change)="setScope('mine')"
+            />
+            <span>{{ 'metadata_logistics_scope_mine' | translatePipe }}</span>
+          </label>
+          <label class="c-chip c-chip--toggle">
+            <input
+              type="radio"
+              name="logistics-scope"
+              [checked]="draft().scope === 'everyone'"
+              [disabled]="!!editing()"
+              (change)="setScope('everyone')"
+            />
+            <span>{{ 'metadata_logistics_scope_everyone' | translatePipe }}</span>
           </label>
         </div>
       }
 
-      <button type="button" class="c-btn-primary logistics-add-submit" [disabled]="saving()" (click)="onAdd()">
-        {{ 'metadata_add' | translatePipe }}
-      </button>
+      <div class="logistics-add-actions">
+        @if (editing()) {
+          <button type="button" class="c-btn-ghost" (click)="cancelEdit()">{{ 'cancel' | translatePipe }}</button>
+        }
+        <button type="button" class="c-btn-primary logistics-add-submit" [disabled]="saving()" (click)="onSubmit()">
+          {{ (editing() ? 'save' : 'metadata_add') | translatePipe }}
+        </button>
+      </div>
     </div>
   } @else {
     <button type="button" class="c-btn-primary logistics-sign-in" (click)="requireSignIn()">
