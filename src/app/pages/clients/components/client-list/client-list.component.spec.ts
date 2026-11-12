@@ -164,4 +164,9 @@ describe('ClientListComponent (plan 547)', () => {
     expect(el().querySelector('app-empty-state')).toBeNull()
     expect(el().textContent).toContain('clients_no_results')
   })
+
+  it('a client name links to the profile (plan 551)', () => {
+    setup([client('1', 'דנה')])
+    expect(el().querySelector('a.client-name')?.getAttribute('href')).toBe('/clients/1')
+  })
 })

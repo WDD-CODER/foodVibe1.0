@@ -13,8 +13,8 @@
       <app-client-picker
         inputId="inquiry-client"
         [selected]="selectedClient_()"
-        (picked)="selectedClient_.set($event)"
-        (cleared)="selectedClient_.set(null)"
+        (picked)="pickedClient_.set($event)"
+        (cleared)="pickedClient_.set(null)"
         (addingChange)="adding_.set($event)"
       />
       @if (!adding_() && isTouched_() && !clientValid_()) {

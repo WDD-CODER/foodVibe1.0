@@ -18,7 +18,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `menu-library/` | `/menu-library` — menu list and filters |
 | `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views; the event-logistics-panel component = collapsed phone-intake / site-visit checklist under the notes log (plan 522; plan 579: questions by event date, hide on one event, one "נדרש" toggle + "עלינו" / "באחריות הלקוח") |
 | `metadata-manager/` | Categories, allergens, units, preparations, event-logistics questions (`metadata-manager/components/logistics-item-manager/`, plans 523, 581: edit, remove/restore, own sections) (`metadata-manager/metadata-manager.page.component.ts`) |
-| `clients/` | Front Desk: the client list (plan 547), profile from plan 551 |
+| `clients/` | Front Desk: the client list (plan 547), profile (`/clients/:id`) from plan 551 |
 | `trash/` | `/trash` — soft-deleted items and restore |
 | `platform-dashboard/` | `/platform` — platform-admin-only table of every business (activity, events, internal flag) + the logistics-items list (plan 532: each business's own logistics items grouped, promote to shared) |
 | `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |

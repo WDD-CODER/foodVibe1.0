@@ -68,9 +68,11 @@
       </div>
     }
     @for (item of filteredClients_(); track item._id) {
-      <div class="client-grid-row c-list-row" role="row">
+      <div class="client-grid-row c-list-row" role="row" (click)="openClient(item)">
         <div class="col-name c-list-body-cell" role="cell">
-          <span class="client-name">{{ item.name }}</span>
+          <a class="client-name" [routerLink]="['/clients', item._id]" (click)="$event.stopPropagation()">{{
+            item.name
+          }}</a>
           <span class="phone-inline" dir="ltr">{{ item.phone }}</span>
         </div>
         <div class="col-phone c-list-body-cell" role="cell" dir="ltr">{{ item.phone }}</div>

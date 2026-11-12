@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { Component, input, output, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { provideRouter } from '@angular/router'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { EventStageBarComponent } from './event-stage-bar.component'
@@ -80,6 +81,7 @@ describe('EventStageBarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [EventStageBarComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: MenuEventDataService, useValue: eventData },
@@ -241,6 +243,17 @@ describe('EventStageBarComponent', () => {
       await setup({ ...base, clientId: 'c1', clientName: 'ישן', clientPhone: '000' })
       expect(chips()).toEqual(['דנה'])
       expect(changeButton()!.textContent).toContain('T:client_change')
+    })
+
+    it('the client chip links to the client profile (plan 551)', async () => {
+      await setup({ ...base, clientId: 'c1' })
+      expect(el.querySelector('a.client-chip')?.getAttribute('href')).toBe('/clients/c1')
+    })
+
+    it('a legacy event without a client id keeps a plain chip (plan 551)', async () => {
+      await setup({ ...base, clientName: 'שרה' })
+      expect(el.querySelector('a.client-chip')).toBeNull()
+      expect(el.querySelector('span.client-chip')?.textContent?.trim()).toBe('שרה')
     })
 
     it('falls back to the snapshot name for an unlinked event', async () => {
