@@ -1,6 +1,6 @@
 # Plan 552 — Requests queue and bookings agenda: where the business approves what customers ask for
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 550, 547
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
