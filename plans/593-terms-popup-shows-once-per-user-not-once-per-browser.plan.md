@@ -85,8 +85,8 @@ Confirm `/refresh` answers `{ token }` only and the client builds the user from 
 - none.
 
 ## Atomic Sub-tasks
-- [ ] A1: Send the full signed-in user back when a session is restored — server/routes/auth.js, server/test/auth-terms.test.js
-- [ ] A2: Use that user in the app so an accepted terms version is remembered in every new browser — src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
+- [x] A1: Send the full signed-in user back when a session is restored — server/routes/auth.js, server/test/auth-terms.test.js
+- [x] A2: Use that user in the app so an accepted terms version is remembered in every new browser — src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
 
 ## What happens when
 - The terms `version` changes → the stored version differs → the popup shows once, as designed (plan 584).
@@ -105,3 +105,5 @@ Confirm `/refresh` answers `{ token }` only and the client builds the user from 
 
 ## Execution Notes
 - Human 2026-11-12 (quoted in the Problem Statement).
+- pnpm run test:server -> 1 fail (test/seed-demo-business.test.js, usageDays dup key `demo_owner:2026-10-25`, unrelated seed data, fails on its own); auth-terms.test.js passes (new refresh cases).
+- pnpm run build -> exit 0; pnpm run lint -> 0 errors; pnpm run test:ci -> 2029 SUCCESS.

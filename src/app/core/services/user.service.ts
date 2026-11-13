@@ -169,8 +169,12 @@ export class UserService {
   // -------------------------------------------------------------------------
 
   /** Public — auth interceptor calls this on 401 to silently refresh the access token. */
-  callBackendRefresh(): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(`${this.authBase}${API.auth('refresh')}`, {}, { withCredentials: true })
+  callBackendRefresh(): Observable<{ token: string; user?: User }> {
+    return this.http.post<{ token: string; user?: User }>(
+      `${this.authBase}${API.auth('refresh')}`,
+      {},
+      { withCredentials: true }
+    )
   }
 
   // Login and signup set the fv_refresh cookie. Cross-origin (local/slot: app and API on
@@ -236,14 +240,19 @@ export class UserService {
    * On success: stores the new access token and (if user is not yet in session)
    * updates the user signal from the existing session storage.
    */
-  refreshToken(): Observable<{ token: string }> {
+  refreshToken(): Observable<{ token: string; user?: User }> {
     return this.callBackendRefresh().pipe(
-      tap(({ token }) => {
+      tap(({ token, user }) => {
         this.storeToken(token)
         // Restore user signal from session if not already set (page reload case).
         const current = this._user_() ?? this._loadUserFromSession()
         const claims = this._tokenClaims(token)
-        if (claims && current?._id !== claims.userId) {
+        if (user && (!claims || claims.userId === user._id)) {
+          // The server answers the full public user (terms version included): use it as login does.
+          const changedUser = !!current && current._id !== user._id
+          this._saveUserLocal(user)
+          if (changedUser) void this._reloadDataServices()
+        } else if (claims && current?._id !== claims.userId) {
           // The refresh cookie belongs to someone else (another tab or slot signed in since):
           // the token decides who this session is, so the header never shows one user while
           // saves go out as another.
