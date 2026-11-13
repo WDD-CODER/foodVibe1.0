@@ -1,8 +1,8 @@
 # Orchestrator run batch-5
 
-Run branch: `orch/batch-5` (from `origin/main` at ca7dcb1) · started 2026-11-12T18:57:43.557Z · finished 2026-11-13T01:08:01.937Z
-Result: 6 merged, 1 parked, skipped or left out, 7 in the run (counted from git and status.json).
-`main` untouched: yes (3 plan/todo file(s) changed on main) — origin/main is 01ec339.
+Run branch: `orch/batch-5` (from `origin/main` at ca7dcb1) · started 2026-11-12T18:57:43.557Z · finished 2026-11-13T06:45:33.240Z
+Result: 7 merged, 0 parked, skipped or left out, 7 in the run (counted from git and status.json).
+`main` untouched: NO — origin/main is c636c02.
 
 Final gate: ok (attempt 1)
 
@@ -15,7 +15,7 @@ Final gate: ok (attempt 1)
 | 555  | merged | 0 |  | 75724aa |  |
 | 556  | merged | 0 |  | a1cfb8c |  |
 | 557 The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings | merged | 2 | build → judgment | 3851343 |  |
-| 559 Front desk numbers for the owner and the platform admin | parked | 2 | build → judgment |  | replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc — ask 559-2 not answered in 180 min |
+| 559 Front desk numbers for the owner and the platform admin | merged | 1 | build | 9b97dec |  |
 | 580  | merged | 0 |  | f69a1d4 |  |
 
 ## App errors since the run started
@@ -52,6 +52,9 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - D17 · 559 · none · seen: server/test/seed-demo-business.test.js:119 seeds from now: Date.now(), and server/scripts/seed-demo-business.js:95 then inserts a duplicate usageDays _id (demo_owner:2026-10-25) whenever the last 30 days include the 2026-10-25 clock change. It fails on any branch until about 2026-11-24.
 - D18 · 559 · none · behaviour: the report's front desk block reuses the existing rq_channel_* channel labels instead of adding frontdesk_channel_* twins (the plan says to reuse) — reverse: add the three frontdesk_channel_* keys and use them in report.page.ts
 - D19 · 559 · none · behaviour: the platform 'ייצוא קבלה CSV' button downloads the file through the signed-in session (the same as plan 566's downloadAiUsageCsv) instead of opening the raw URL, which would have no auth header — reverse: use window.open on the CSV URL in PlatformAdminService.downloadFrontDeskCsv
+- D20 · 559 · none · behaviour: the report's requests row shows the owner's phoneInquiriesPerDay estimate multiplied by the report's range days, and the median row shows avgResponseMinutes as it is; the other estimates (messages, host hours, no-shows per week, missed inquiries) are not shown in the report — reverse: drop the multiplication or add rows for them
+- D21 · 559 · none · behaviour: the platform CSV button downloads through an authenticated blob fetch, as plan 566 does, instead of opening the URL, because the route needs the session header — reverse: switch to an anchor on the URL if the route accepts a cookie
+- D22 · 559 · none · behaviour: the dashboard card and the report block are silently hidden when the front desk numbers fail to load (a warning is logged) — reverse: show an error message
 
 ## Run notes
 
@@ -91,13 +94,16 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 559: parked: nothing to save (nothing uncommitted)
 - 559: ask 559-2 (technical, the Human or the advisor answers): pnpm run test:server fails only in seed-demo-business.test.js (a DST duplicate _id that depends on today's date and is outside this plan). Should 559 merge as is, or may the builder fix that test?
 - 559: ask 559-2 not answered in 180 min — plan 559 parked; the question was: pnpm run test:server fails only in seed-demo-business.test.js (a DST duplicate _id that depends on today's date and is outside this plan). Should 559 merge as is, or may the builder fix that test?
+- 559: the folder foodVibe1.0-orch-batch-5-559 was installed (root, scripts, server)
+- 559: builder left undone (round 0): e2e/ui/559-1.spec.ts was not run. The servers on 4200/3000 are not this worktree's build, so the test has no valid target.
 
 ## Models per agent
 
 - 557 builder: opus
 - 557 reviewer: sonnet
 - 559 builder: sonnet
-- 559 judgment builder: opus
+- 559 builder fix: sonnet
+- 559 reviewer: sonnet
 
 ## What only the Human can do
 
@@ -109,8 +115,8 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 
 2. 557 The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings: On `/platform` Dandan moves a test business to "פיילוט" with a reason, then to "מושהה": the row shows each status, the owner sees the suspended banner, and `/book/<slug>` says the page is not available.
 3. 557 The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings: Dandan opens the three CSV files in Excel: Hebrew reads correctly, one row per record, and the columns are the ones listed in this plan.
+4. 559 Front desk numbers for the owner and the platform admin: Dandan checks the platform table and the CSV for the pilot business against what he saw on `/requests` that week.
 
-- Decide on 559: replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc — ask 559-2 not answered in 180 min
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -120,4 +126,4 @@ gh pr create --base main --head orch/batch-5 --title "Orchestrator run batch-5" 
 
 Context added by learning: 3.5k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0.17 → 0 → 0.57 · parked 0 → 0 → 1
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0.43 · parked 0 → 0 → 0

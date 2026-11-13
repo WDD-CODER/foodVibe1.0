@@ -442,19 +442,23 @@
       "nnn": "559",
       "title": "Front desk numbers for the owner and the platform admin",
       "branch": "feat/559-front-desk-numbers-for",
-      "state": "parked",
-      "round": 2,
-      "tier": "judgment",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
       "models": {
         "builder": {
           "model": "sonnet",
           "tier": "build",
-          "at": "2026-11-12T21:27:28.973Z"
+          "at": "2026-11-13T06:12:00.905Z"
         },
-        "judgment builder": {
-          "model": "opus",
-          "tier": "judgment",
-          "at": "2026-11-12T21:29:49.959Z"
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-13T06:29:08.993Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-13T06:40:23.406Z"
         }
       },
       "humanItems": [
@@ -545,6 +549,61 @@
           "at": "2026-11-13T01:04:02.678Z",
           "state": "parked",
           "round": 2
+        },
+        {
+          "at": "2026-11-13T06:12:00.636Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:12:00.907Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:29:08.431Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:29:08.653Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:29:08.821Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:29:08.995Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:34:43.056Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:40:17.023Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:40:23.407Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:40:40.067Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:41:29.382Z",
+          "state": "merged",
+          "round": 1
         }
       ],
       "earlier": [
@@ -612,57 +671,118 @@
             "reason": "ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PASS) are not set in this worktree.",
             "branch": "park/batch-5-559"
           }
-        }
-      ],
-      "escalations": [
-        {
-          "step": "resumed after: asking 559-1: ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PA",
-          "check": "(not given)"
         },
         {
-          "step": "round 2",
-          "check": "builder left uncommitted files: playwright-report/, test-results/"
+          "nnn": "559",
+          "title": "Front desk numbers for the owner and the platform admin",
+          "branch": "feat/559-front-desk-numbers-for",
+          "state": "parked",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T21:27:28.973Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-12T21:29:49.959Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 559-1: ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PA",
+              "check": "(not given)"
+            },
+            {
+              "step": "round 2",
+              "check": "builder left uncommitted files: playwright-report/, test-results/"
+            }
+          ],
+          "replan": "no — the builder gave no planChange",
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 5.4,
+          "roundCauses": [
+            "round 2: builder left uncommitted files: playwright-report/, test-results/"
+          ],
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 111.6,
+              "tokens": {
+                "input": 97596,
+                "output": 2227
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 1809.5,
+              "tokens": {
+                "input": 1159695,
+                "output": 10819
+              },
+              "exit": 0
+            }
+          ],
+          "resetToBase": "38513433192514076012e7229d08aadd739db57a",
+          "resetFrom": "e45a38a5b14c7408cde1b5b9ac5fe1757352696a",
+          "reason": "replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc — ask 559-2 not answered in 180 min",
+          "park": {
+            "at": "2026-11-12T22:03:29.748Z",
+            "reason": "replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc"
+          },
+          "parkBranch": "park/batch-5-559"
         }
       ],
-      "replan": "no — the builder gave no planChange",
       "tiers": [
-        "build",
-        "judgment"
+        "build"
       ],
-      "freeDiskGb": 5.4,
-      "roundCauses": [
-        "round 2: builder left uncommitted files: playwright-report/, test-results/"
-      ],
+      "freeDiskGb": 8.9,
+      "sha": "9b97dec7b568c38e34826d47d71baacf4a792a38",
       "calls": [
         {
           "stage": "builder",
           "model": "sonnet",
-          "seconds": 111.6,
+          "seconds": 1025,
           "tokens": {
-            "input": 97596,
-            "output": 2227
+            "input": 5467920,
+            "output": 53032
           },
           "exit": 0
         },
         {
-          "stage": "judgment builder",
-          "model": "opus",
-          "seconds": 1809.5,
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 331.7,
           "tokens": {
-            "input": 1159695,
-            "output": 10819
+            "input": 455526,
+            "output": 5512
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.4,
+          "tokens": {
+            "input": 115459,
+            "output": 921
           },
           "exit": 0
         }
       ],
-      "resetToBase": "38513433192514076012e7229d08aadd739db57a",
-      "resetFrom": "e45a38a5b14c7408cde1b5b9ac5fe1757352696a",
-      "reason": "replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc — ask 559-2 not answered in 180 min",
-      "park": {
-        "at": "2026-11-12T22:03:29.748Z",
-        "reason": "replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc"
-      },
-      "parkBranch": "park/batch-5-559"
+      "roundCauses": [
+        "round 1: Done-when item left undone: [ui] After one manual request is created for the QA business, the dashboard shows the card titled \"השבוע בקבלה\" with \"1\" requests (`e2e/ui/559-1.spec.ts`)."
+      ],
+      "checkedHead": "aee66a63fe0b3d9173360935064709865e6a5142"
     },
     "580": {
       "nnn": "580",
@@ -852,12 +972,22 @@
       "at": "2026-11-13T01:04:02.826Z",
       "plan": "559",
       "text": "ask 559-2 not answered in 180 min — plan 559 parked; the question was: pnpm run test:server fails only in seed-demo-business.test.js (a DST duplicate _id that depends on today's date and is outside this plan). Should 559 merge as is, or may the builder fix that test?"
+    },
+    {
+      "at": "2026-11-13T06:12:00.380Z",
+      "plan": "559",
+      "text": "the folder foodVibe1.0-orch-batch-5-559 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-13T06:29:06.107Z",
+      "plan": "559",
+      "text": "builder left undone (round 0): e2e/ui/559-1.spec.ts was not run. The servers on 4200/3000 are not this worktree's build, so the test has no valid target."
     }
   ],
-  "attempts": 1,
+  "attempts": 2,
   "phase": "finished",
-  "freeDiskGb": 5.4,
-  "updatedAt": "2026-11-13T01:08:01.939Z",
+  "freeDiskGb": 8.9,
+  "updatedAt": "2026-11-13T06:45:33.242Z",
   "decisions": [
     {
       "id": "D1",
@@ -1105,13 +1235,52 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the report's requests row shows the owner's phoneInquiriesPerDay estimate multiplied by the report's range days, and the median row shows avgResponseMinutes as it is; the other estimates (messages, host hours, no-shows per week, missed inquiries) are not shown in the report — reverse: drop the multiplication or add rows for them",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the platform CSV button downloads through an authenticated blob fetch, as plan 566 does, instead of opening the URL, because the route needs the session header — reverse: switch to an anchor on the URL if the route accepts a cookie",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the dashboard card and the report block are silently hidden when the front desk numbers fail to load (a warning is logged) — reverse: show an error message",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-13T01:08:01.937Z",
+  "finishedAt": "2026-11-13T06:45:33.240Z",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-13T01:08:01.938Z",
+    "at": "2026-11-13T06:45:33.241Z",
     "attempt": 1,
     "blamed": []
   }
