@@ -1,6 +1,6 @@
 # Plan 551 — Client profile with one timeline of requests, bookings and events, and merging duplicates
 
-Status: draft
+Status: done
 Depends-on: 550, 547
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

@@ -1,6 +1,6 @@
 # Plan 554 — Knowledge base: what the business knows about itself, with a fast import
 
-Status: draft
+Status: done
 Depends-on: 548, 566, 547, 580
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

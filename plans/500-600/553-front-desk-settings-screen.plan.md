@@ -1,6 +1,6 @@
 # Plan 553 — Front desk settings: one screen where the owner sets up how customers reach the business
 
-Status: draft
+Status: done
 Depends-on: 548, 547
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
