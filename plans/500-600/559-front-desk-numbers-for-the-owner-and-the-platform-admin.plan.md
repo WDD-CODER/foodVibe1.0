@@ -1,6 +1,6 @@
 # Plan 559 — Front desk numbers for the owner and the platform admin
 
-Status: draft
+Status: done
 Depends-on: 550, 556, 568
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 

@@ -1,6 +1,6 @@
 # Plan 555 — Public request page: customers send a request from one link, without an account
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 543, 550, 553, 558
 Prerequisite: plan 558 (privacy erase by phone + retention) is merged first — the public page collects customer data, so erase and retention must already exist. 558 is in run-546 (Planner reorder 2026-11-11).

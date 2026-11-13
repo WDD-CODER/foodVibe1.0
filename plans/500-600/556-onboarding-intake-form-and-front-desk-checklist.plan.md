@@ -1,6 +1,6 @@
 # Plan 556 — Onboarding intake form and a front desk checklist for each business type
 
-Status: draft
+Status: done
 Depends-on: 550, 553, 554, 567
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
