@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (3 runs): plans 6 · merged 4 · parked 2 · fix rounds 6 · escalations 2 · gate fails 1 · ✗ 2 · checker misses 0 — per run: plans 2 · parked 0.67 · fix rounds 2 · ✗ per plan 0.33
+Earlier (4 runs): plans 8 · merged 5 · parked 3 · fix rounds 7 · escalations 2 · gate fails 1 · ✗ 6 · checker misses 0 — per run: plans 2 · parked 0.75 · fix rounds 1.75 · ✗ per plan 0.75
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-03 | run-513-516c | 513,516 | 1 | 1 | other | 1 | 0 | 0 | ok | 4 | 0 | 2 |
 | 2026-11-08 | run-517 | 374,510,517,533,535 | 2 | 3 | other | 6 | 3 | 0 | failed | 0 | 0 | 0 |
 | 2026-11-08 | run-374b | 374,510,535 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-08 | run-536 | 536,537,538,539 | 4 | 0 | - | 1 | 0 | 1 | failed | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (3 runs): plans 6 · merged 4 · parked 2 · fix rounds 6 · escalations
 | 2026-11-12 | run-590 | 590 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | batch-3 | 546,547,551,552,553,554,580 | 7 | 0 | - | 6 | 2 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | batch-2-fix | 547,580,581,586,587,588 | 6 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-12 | batch-4 | 553,554,555,556,580 | 5 | 0 | - | 0 | 1 | 0 | ok | - | - | - |
+| 2026-11-12 | batch-4 | 553,554,555,556,580 | 5 | 0 | - | 0 | 1 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-13 | batch-5 | 553,554,555,556,557,559,580 | 6 | 1 | other | 4 | 2 | 0 | ok | - | - | - |
