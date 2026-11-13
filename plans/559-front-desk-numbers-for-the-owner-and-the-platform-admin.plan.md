@@ -203,7 +203,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Evidence: pnpm run build -> exit 0; pnpm run lint -> 0 errors; pnpm --dir server run lint -> 0 errors; lint:icons -> 0 violations; test:ci -> 2173 SUCCESS; test:server -> 104 files, 1346 passed (incl. frontdesk-stats 11, admin-frontdesk-stats 3); breadcrumbs-check clean; log-query -> SKIP no database.
-- e2e/ui/559-1.spec.ts written but NOT run: the servers on 4200/3000 are not this worktree's build.
+- e2e/ui/559-1.spec.ts RAN against this worktree build (server :3101, ng serve :4211 proxied to it, QA login) -> exit 0, 1 passed; screenshot screens/559-1.png.
 - behaviour: the report's requests row shows the owner's phoneInquiriesPerDay estimate multiplied by the range days (same unit as the measured total); noShowsPerWeek and the other estimates are not shown in the report — reverse: drop the multiplication or add rows.
 - Reused existing keys: rq_channel_* for channel labels, report_owner_estimate for the estimate label (no twins added). CSV on the platform page downloads with the session (blob), as plan 566 does, not by opening a URL.
 - Map row 17 (renumbered +2: old 557 → 559). Decisions made while drafting (Planner): after-hours share counts only guest channels (a manual request is typed by a member at any hour); the median comes from `decisionLog.secondsToDecision` (one definition with plan 550); the owner's weekly card replaces the brief's "/frontdesk home" because C-NAV has no home chip; the platform CSV follows plan 566's `format=csv` pattern instead of a client-side CSV helper.
