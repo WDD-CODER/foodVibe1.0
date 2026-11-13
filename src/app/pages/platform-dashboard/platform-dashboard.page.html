@@ -50,6 +50,9 @@
           </th>
           }
           <th scope="col">{{ "platform_frontdesk_col" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_fd_requests" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_fd_median" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_fd_no_show" | translatePipe }}</th>
           <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
           <th scope="col">{{ "platform_col_report" | translatePipe }}</th>
         </tr>
@@ -87,6 +90,11 @@
             </button>
             } @else { — }
           </td>
+          <td data-testid="fd-requests" class="c-num">{{ fdNumber(fdStats_().get(row._id)?.requests) }}</td>
+          <td data-testid="fd-median" class="c-num">
+            {{ fdNumber(fdStats_().get(row._id)?.medianMinutesToDecision) }}
+          </td>
+          <td data-testid="fd-no-show" class="c-num">{{ fdNumber(fdStats_().get(row._id)?.noShowRatePct) }}</td>
           <td>
             <a
               class="report-link"
@@ -110,6 +118,10 @@
       </tbody>
     </table>
   </div>
+  <button type="button" class="c-btn-ghost--sm" data-testid="fd-export-csv" (click)="exportFrontDeskCsv()">
+    <lucide-icon name="download" [size]="14"></lucide-icon>
+    {{ "platform_fd_export_csv" | translatePipe }}
+  </button>
 
   }
 

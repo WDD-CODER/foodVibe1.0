@@ -114,7 +114,29 @@
     </table>
   </section>
 
-  @if (findings().length) {
+  @if (frontDeskLines().length) {
+  <section
+    class="report__frontdesk c-glass-panel"
+    data-testid="report-frontdesk"
+    aria-labelledby="report-frontdesk-title"
+  >
+    <h2 id="report-frontdesk-title" class="report__h2">{{ 'report_frontdesk_title' | translatePipe }}</h2>
+    <dl class="report__fd">
+      @for (line of frontDeskLines(); track line.key) {
+      <div class="report__fd-row" [attr.data-testid]="'fd-' + line.key">
+        <dt>{{ line.labelKey | translatePipe }}</dt>
+        <dd dir="ltr">{{ line.text }}</dd>
+        @if (line.estimate !== null) {
+        <dd class="report__fd-estimate" data-testid="fd-estimate">
+          <span>{{ 'report_owner_estimate' | translatePipe }}</span>
+          <span dir="ltr">{{ line.estimate }}</span>
+        </dd>
+        }
+      </div>
+      }
+    </dl>
+  </section>
+  } @if (findings().length) {
   <section class="report__findings" data-testid="report-findings" aria-labelledby="report-findings-title">
     <h2 id="report-findings-title" class="report__h2">{{ 'report_findings_title' | translatePipe }}</h2>
     @for (f of findings(); track f.key) {

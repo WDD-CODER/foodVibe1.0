@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import type { FrontDeskStats } from '@models/frontdesk-stats.model'
 import { BusinessStatsService } from '@services/business-stats.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -17,6 +18,17 @@ import type {
   ReportValue
 } from '@models/business-report.model'
 import { formatDecimal1, formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
+
+const DAY_MS = 86400000
+const todayIL = (): string => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem' }).format(new Date())
+
+/** One line of the front desk block: the measured text and, when the owner filled it, the estimate beside it. */
+interface FrontDeskLine {
+  key: string
+  labelKey: string
+  text: string
+  estimate: string | null
+}
 
 type Kind = 'count' | 'money' | 'pct'
 
@@ -87,6 +99,7 @@ export class ReportPage {
   readonly report = this.report_.asReadonly()
   readonly forbidden = this.forbidden_.asReadonly()
   readonly loading = this.loading_.asReadonly()
+  private readonly frontDesk_ = signal<FrontDeskStats | null>(null)
   private requestId = 0
 
   // 5. COMPUTED
@@ -126,6 +139,42 @@ export class ReportPage {
       parts.push(`${this.t('report_est_hours_quotes')}: ${formatDecimal1(e.hoursPerWeekQuotes)}`)
     if (e.wastePct !== undefined) parts.push(`${this.t('report_est_waste')}: ${formatPct1(e.wastePct)}`)
     return parts.join(' · ')
+  })
+  /** Plan 559: the front desk block; absent when the range has no requests. */
+  protected readonly frontDeskLines = computed<FrontDeskLine[]>(() => {
+    const fd = this.frontDesk_()
+    if (!fd || fd.requests.total === 0) return []
+    const none = this.t('report_not_enough_data')
+    const pct = (v: number | null): string => (v === null ? none : formatPct1(v))
+    const days = Math.max(1, Math.round((fd.to - fd.from) / DAY_MS))
+    const perRange = fd.baseline?.['phoneInquiriesPerDay']?.estimate
+    const median = fd.baseline?.['avgResponseMinutes']?.estimate
+    const channels = (['manual', 'public_form', 'whatsapp'] as const)
+      .filter((c) => fd.requests.byChannel[c] > 0)
+      .map((c) => `${this.t('rq_channel_' + c)} ${fd.requests.byChannel[c]}`)
+      .join(' · ')
+    return [
+      {
+        key: 'requests',
+        labelKey: 'frontdesk_stat_requests',
+        text: channels ? `${fd.requests.total} (${channels})` : String(fd.requests.total),
+        estimate: perRange === undefined ? null : formatDecimal1(perRange * days)
+      },
+      { key: 'afterHours', labelKey: 'frontdesk_stat_after_hours_pct', text: pct(fd.afterHoursPct), estimate: null },
+      {
+        key: 'median',
+        labelKey: 'frontdesk_stat_median_decision',
+        text: fd.medianMinutesToDecision === null ? none : formatDecimal1(fd.medianMinutesToDecision),
+        estimate: median === undefined ? null : formatDecimal1(median)
+      },
+      { key: 'noShow', labelKey: 'frontdesk_stat_no_show_pct', text: pct(fd.bookings.noShowRatePct), estimate: null },
+      {
+        key: 'events',
+        labelKey: 'frontdesk_stat_events_from_requests',
+        text: String(fd.eventsFromRequests.count),
+        estimate: null
+      }
+    ]
   })
   protected readonly trend = computed<TrendRow[]>(() => {
     const r = this.report()
@@ -177,6 +226,7 @@ export class ReportPage {
     try {
       const report = await this.stats.getReport(months, businessId)
       if (id === this.requestId) this.report_.set(report)
+      if (id === this.requestId) void this.loadFrontDesk(report, businessId, id)
     } catch (err) {
       if (id !== this.requestId) return
       this.report_.set(null)
@@ -184,6 +234,19 @@ export class ReportPage {
       else this.logging.error({ event: 'report.load.failed', message: 'Could not load the business report' })
     } finally {
       if (id === this.requestId) this.loading_.set(false)
+    }
+  }
+
+  /** The front desk numbers from the first month of the report's trend until today; a failure only hides the block. */
+  private async loadFrontDesk(report: BusinessReport, businessId: string | undefined, id: number): Promise<void> {
+    this.frontDesk_.set(null)
+    const firstMonth = report.series.inquiries?.[0]?.month
+    if (!firstMonth) return
+    try {
+      const fd = await this.stats.getFrontDesk({ from: `${firstMonth}-01`, to: todayIL() }, businessId)
+      if (id === this.requestId) this.frontDesk_.set(fd)
+    } catch (err) {
+      this.logging.warn('Front desk numbers for the report could not be loaded', { err: String(err) })
     }
   }
 

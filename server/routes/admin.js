@@ -12,6 +12,8 @@ const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
 
+const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
+
 const router = Router()
 
 function col(type) {
@@ -143,6 +145,42 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
     res.json({ rows })
   } catch (err) {
     req.log.error({ err, event: 'admin.businesses_list.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+const FD_CSV_HEADER = ['businessId', 'name', 'requests', 'afterHoursPct', 'approved', 'declined', 'medianMinutesToDecision', 'noShowRatePct', 'eventsFromRequests']
+
+/** Plan 559: the front desk numbers per business (default last 30 days); `format=csv` downloads them. Names and numbers only. */
+router.get('/frontdesk-stats', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const range = parseRange(req.query, 30)
+    if (!range) return res.status(400).json({ error: 'Invalid range' })
+    const businesses = await col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, baseline: 1 } }).toArray()
+    const rows = []
+    for (const b of businesses) {
+      const s = await frontDeskStats(mongoose.connection.db, b._id, range, b)
+      rows.push({
+        businessId: b._id,
+        name: b.name,
+        requests: s.requests.total,
+        afterHoursPct: s.afterHoursPct,
+        approved: s.outcomes.approved,
+        declined: s.outcomes.declined,
+        medianMinutesToDecision: s.medianMinutesToDecision,
+        noShowRatePct: s.bookings.noShowRatePct,
+        eventsFromRequests: s.eventsFromRequests.count,
+      })
+    }
+    if (req.query.format === 'csv') {
+      const lines = [FD_CSV_HEADER.join(','), ...rows.map(r => FD_CSV_HEADER.map(k => csvCell(r[k])).join(','))]
+      res.set('Content-Type', 'text/csv; charset=utf-8')
+      res.set('Content-Disposition', `attachment; filename="frontdesk-${range.from}-${range.to}.csv"`)
+      return res.send(lines.join('\n') + '\n')
+    }
+    res.json({ from: range.from, to: range.to, rows })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.frontdesk_stats.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
