@@ -1,0 +1,253 @@
+<section class="rk-card c-glass-card" [attr.data-testid]="'kind-card-' + kind()">
+  <header class="rk-head">
+    <h3 class="rk-title">{{ 'fd_kind_' + kind() | translatePipe }}</h3>
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="checkbox"
+        [checked]="config().enabled"
+        [disabled]="disabled()"
+        [attr.data-testid]="'kind-enabled-' + kind()"
+        (change)="setEnabled_($any($event.target).checked)"
+      />
+      <span>{{ 'fd_kind_enabled' | translatePipe }}</span>
+    </label>
+  </header>
+
+  @if (!config().enabled) {
+    <p class="rk-summary" data-testid="kind-summary">{{ summary_() }}</p>
+  } @else {
+    <fieldset class="rk-body" [disabled]="disabled()">
+      <ol class="rk-questions">
+        @for (q of config().questions; track q.key; let i = $index) {
+          <li class="rk-question" data-testid="question-row">
+            <div class="rk-question-main">
+              <app-form-field
+                label="fd_q_label"
+                [forId]="'q-' + kind() + '-' + q.key"
+                [error]="showErrors() && !q.label.trim() ? 'field_required' : null"
+              >
+                <input
+                  class="c-input"
+                  type="text"
+                  maxlength="120"
+                  [id]="'q-' + kind() + '-' + q.key"
+                  [value]="labelText_(q)"
+                  (input)="setLabel_(i, $event)"
+                />
+              </app-form-field>
+              <app-form-field label="fd_q_type">
+                <app-custom-select
+                  [options]="typeOptions"
+                  [ngModel]="q.type"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="setType_(i, $event)"
+                />
+              </app-form-field>
+            </div>
+
+            @if (q.type === 'choice') {
+              <div class="rk-options">
+                <div class="rk-chips">
+                  @for (o of q.options ?? []; track $index; let oi = $index) {
+                    <span class="c-chip c-chip--removable">
+                      {{ optionText_(o) }}
+                      <button
+                        type="button"
+                        class="c-chip__remove"
+                        [attr.aria-label]="'remove' | translatePipe"
+                        (click)="removeOption_(i, oi)"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  }
+                </div>
+                <input
+                  class="c-input"
+                  type="text"
+                  maxlength="80"
+                  [attr.aria-label]="'fd_q_options' | translatePipe"
+                  [placeholder]="'fd_q_options' | translatePipe"
+                  [value]="optionDraft_(q.key)"
+                  (input)="setOptionDraft_(q.key, $any($event.target).value)"
+                  (keydown.enter)="$event.preventDefault(); addOption_(i)"
+                  (keydown.escape)="setOptionDraft_(q.key, '')"
+                />
+                @if (showErrors() && isBadChoice_(q)) {
+                  <span class="c-field-error" role="alert">{{ 'fd_q_options_min' | translatePipe }}</span>
+                }
+              </div>
+            }
+
+            <div class="rk-question-actions">
+              <label class="c-chip c-chip--toggle">
+                <input type="checkbox" [checked]="q.required" (change)="setRequired_(i, $any($event.target).checked)" />
+                <span>{{ 'fd_q_required' | translatePipe }}</span>
+              </label>
+              <button
+                type="button"
+                class="c-btn-ghost"
+                [disabled]="i === 0"
+                [attr.aria-label]="'fd_move_up' | translatePipe"
+                (click)="move_(i, -1)"
+              >
+                <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+              </button>
+              <button
+                type="button"
+                class="c-btn-ghost"
+                [disabled]="i === config().questions.length - 1"
+                [attr.aria-label]="'fd_move_down' | translatePipe"
+                (click)="move_(i, 1)"
+              >
+                <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+              </button>
+              <button
+                type="button"
+                class="c-btn-ghost"
+                data-testid="remove-question"
+                [attr.aria-label]="'remove' | translatePipe"
+                (click)="remove_(i)"
+              >
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+              </button>
+            </div>
+          </li>
+        }
+      </ol>
+
+      <div class="rk-add">
+        <button
+          type="button"
+          class="c-btn-ghost"
+          data-testid="add-question"
+          [disabled]="atMax_()"
+          (click)="addQuestion_()"
+        >
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          <span class="btn-label">{{ 'fd_add_question' | translatePipe }}</span>
+        </button>
+        @if (atMax_()) {
+          <span class="rk-hint">{{ 'fd_questions_max' | translatePipe }}</span>
+        }
+      </div>
+
+      <div class="rk-rules">
+        <app-form-field
+          label="fd_rule_min_party"
+          [error]="showErrors() && partyRangeInvalid_() ? 'fd_rule_party_range_invalid' : null"
+        >
+          <span appNumberBox class="rk-number">
+            <input
+              class="c-input"
+              type="number"
+              min="0"
+              step="1"
+              [value]="config().rules.minPartySize ?? ''"
+              (input)="setRule_('minPartySize', $event)"
+            />
+          </span>
+        </app-form-field>
+        <app-form-field label="fd_rule_max_party">
+          <span appNumberBox class="rk-number">
+            <input
+              class="c-input"
+              type="number"
+              min="0"
+              step="1"
+              [value]="config().rules.maxPartySize ?? ''"
+              (input)="setRule_('maxPartySize', $event)"
+            />
+          </span>
+        </app-form-field>
+        <app-form-field label="fd_rule_min_lead_hours">
+          <span appNumberBox class="rk-number">
+            <input
+              class="c-input"
+              type="number"
+              min="0"
+              [value]="config().rules.minLeadHours ?? ''"
+              (input)="setRule_('minLeadHours', $event)"
+            />
+          </span>
+        </app-form-field>
+        <app-form-field label="fd_rule_max_lead_days">
+          <span appNumberBox class="rk-number">
+            <input
+              class="c-input"
+              type="number"
+              min="0"
+              [value]="config().rules.maxLeadDays ?? ''"
+              (input)="setRule_('maxLeadDays', $event)"
+            />
+          </span>
+        </app-form-field>
+        <app-form-field label="fd_rule_min_budget">
+          <span appNumberBox class="rk-number">
+            <input
+              class="c-input"
+              type="number"
+              min="0"
+              [value]="config().rules.minBudgetPerGuest ?? ''"
+              (input)="setRule_('minBudgetPerGuest', $event)"
+            />
+          </span>
+        </app-form-field>
+        @if (hasDuration_()) {
+          <app-form-field label="fd_rule_duration">
+            <span appNumberBox class="rk-number">
+              <input
+                class="c-input"
+                type="number"
+                min="15"
+                max="1440"
+                step="1"
+                [value]="config().defaultDurationMinutes ?? ''"
+                (input)="setDuration_($event)"
+              />
+            </span>
+          </app-form-field>
+        }
+        <app-form-field label="fd_rule_expire_hours">
+          <span appNumberBox class="rk-number">
+            <input
+              class="c-input"
+              type="number"
+              min="1"
+              max="720"
+              step="1"
+              [value]="config().expireAfterHours"
+              (input)="setExpire_($event)"
+            />
+          </span>
+        </app-form-field>
+        <app-form-field label="fd_rule_areas" layout="full">
+          <div class="rk-chips">
+            @for (a of config().rules.areas ?? []; track $index; let ai = $index) {
+              <span class="c-chip c-chip--removable">
+                {{ a }}
+                <button
+                  type="button"
+                  class="c-chip__remove"
+                  [attr.aria-label]="'remove' | translatePipe"
+                  (click)="removeArea_(ai)"
+                >
+                  ×
+                </button>
+              </span>
+            }
+          </div>
+          <input
+            class="c-input"
+            type="text"
+            maxlength="80"
+            [value]="areaDraft_()"
+            (input)="areaDraft_.set($any($event.target).value)"
+            (keydown.enter)="$event.preventDefault(); addArea_()"
+            (keydown.escape)="areaDraft_.set('')"
+          />
+        </app-form-field>
+      </div>
+    </fieldset>
+  }
+</section>

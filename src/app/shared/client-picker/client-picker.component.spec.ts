@@ -138,4 +138,19 @@ describe('ClientPickerComponent', () => {
     fixture.detectChanges()
     expect(el.querySelector('app-client-form')).toBeNull()
   })
+
+  it('leaves the excluded client out of the list (plan 551)', () => {
+    fixture.componentRef.setInput('exclude', ['c1'])
+    fixture.detectChanges()
+    combobox().query.set('דנ')
+    fixture.detectChanges()
+    expect(combobox().options()).toEqual([])
+  })
+
+  it('shows no add row and no owner hint when allowAdd is false (plan 551)', () => {
+    fixture.componentRef.setInput('allowAdd', false)
+    fixture.detectChanges()
+    expect(combobox().addLabelKey()).toBeNull()
+    expect(combobox().emptyKey()).toBeNull()
+  })
 })

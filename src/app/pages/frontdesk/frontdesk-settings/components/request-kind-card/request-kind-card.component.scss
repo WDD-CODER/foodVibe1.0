@@ -1,0 +1,83 @@
+:host {
+  display: block;
+}
+
+.rk-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.rk-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.rk-title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.rk-summary,
+.rk-hint {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.rk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rk-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rk-question {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid rgb(0 0 0 / 12%);
+  border-radius: 0.75rem;
+}
+
+.rk-question-main,
+.rk-rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+}
+
+.rk-question-actions,
+.rk-add,
+.rk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rk-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rk-number {
+  display: block;
+}

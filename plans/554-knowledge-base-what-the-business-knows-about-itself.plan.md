@@ -87,6 +87,7 @@ e2e/ui/554-1.spec.ts
 docs/agent/standards-backend.md
 docs/brain/component-families.md
 server/breadcrumbs.md
+server/test/ai-usage.test.js
 ```
 
 ## Read Scope
@@ -184,15 +185,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the knowledge item as a new business-owned record only the owner may change — schema, registry, collection entry, owner-only type, cross-business body — shared/schemas/entities/knowledge-item.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/utils/permissions.js, server/test/cross-business.test.js
-- [ ] A2: Build the one fact source the assistant will read, in a fixed order and size — profile facts first, approved public items by topic, 6,000-character cap at a whole line — server/services/knowledge.js, server/test/knowledge.test.js
-- [ ] A3: Let the owner approve many drafts in one request — the approve route, mounted; tests for scope, staff and limits — server/routes/knowledge.js, server/app.js, server/test/knowledge.test.js
-- [ ] A4: Turn a pasted text or a web page into draft facts with one metered AI call — English prompt, text-or-link checks, 60-item cap, schema check per item — server/services/knowledge-import-prompt.js, server/routes/ai.js, server/test/knowledge-import.test.js
-- [ ] A5: Give the screen a data service that loads, imports and approves — model and service with spec — src/app/core/models/knowledge-item.model.ts, src/app/core/services/knowledge-item-data.service.ts, src/app/core/services/knowledge-item-data.service.spec.ts
-- [ ] A6: Build the knowledge screen grouped by topic with add, edit, import and bulk approve — page, dialogs, route, chip, dictionary keys, spec — src/app/pages/frontdesk/knowledge/**, src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/core/components/tab-chips/tab-chips.component.spec.ts, public/assets/data/dictionary.json
-- [ ] A7: Prove an owner can add a fact on the real screen — one e2e test that saves a screenshot — e2e/ui/554-1.spec.ts
-- [ ] A8: Record the new collection, routes and screen in the docs and maps — docs/agent/standards-backend.md, server/breadcrumbs.md, src/app/pages/frontdesk/breadcrumbs.md, docs/brain/component-families.md
-- [ ] A9: Run the full checks and hand Dandan the import check — test:server, test:ci, lints, reuse registry, build, log-query; then the [human] card
+- [x] A1: Add the knowledge item as a new business-owned record only the owner may change — schema, registry, collection entry, owner-only type, cross-business body — shared/schemas/entities/knowledge-item.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/utils/permissions.js, server/test/cross-business.test.js
+- [x] A2: Build the one fact source the assistant will read, in a fixed order and size — profile facts first, approved public items by topic, 6,000-character cap at a whole line — server/services/knowledge.js, server/test/knowledge.test.js
+- [x] A3: Let the owner approve many drafts in one request — the approve route, mounted; tests for scope, staff and limits — server/routes/knowledge.js, server/app.js, server/test/knowledge.test.js
+- [x] A4: Turn a pasted text or a web page into draft facts with one metered AI call — English prompt, text-or-link checks, 60-item cap, schema check per item — server/services/knowledge-import-prompt.js, server/routes/ai.js, server/test/knowledge-import.test.js
+- [x] A5: Give the screen a data service that loads, imports and approves — model and service with spec — src/app/core/models/knowledge-item.model.ts, src/app/core/services/knowledge-item-data.service.ts, src/app/core/services/knowledge-item-data.service.spec.ts
+- [x] A6: Build the knowledge screen grouped by topic with add, edit, import and bulk approve — page, dialogs, route, chip, dictionary keys, spec — src/app/pages/frontdesk/knowledge/**, src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/core/components/tab-chips/tab-chips.component.spec.ts, public/assets/data/dictionary.json
+- [x] A7: Prove an owner can add a fact on the real screen — one e2e test that saves a screenshot — e2e/ui/554-1.spec.ts
+- [x] A8: Record the new collection, routes and screen in the docs and maps — docs/agent/standards-backend.md, server/breadcrumbs.md, src/app/pages/frontdesk/breadcrumbs.md, docs/brain/component-families.md
+- [x] A9: Run the full checks and hand Dandan the import check — test:server, test:ci, lints, reuse registry, build, log-query; then the [human] card
 
 ## Technical Considerations
 - Dependencies: plan 548 (`frontDeskProfiles` fields), plan 566 (`usage` on `callGemini`, `knowledge_import` key), plan 547 (`frontdesk` tab group), plan 580 (`usageOf(req)` in `server/routes/ai.js`).
@@ -219,3 +220,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Plan number: map row 12, renumbered +2 on 2026-11-10 (old 552 → 554).
 - Depends-on adds 547 to the map's 548, 566: the `/frontdesk/knowledge` chip hangs from the `frontdesk` tab group that 547 creates (same reason the map gives for 553).
 - Decided while drafting: import stores the drafts on the server in the same request (one `insertMany`) instead of returning them for the browser to save one by one (INV-3); `softDelete: true` for `knowledgeItems`; a fact the owner types is saved approved (only AI drafts wait).
+- Round 2 (judgment builder, fresh from base 06104d3): re-applied the code from the discarded attempt 0e3d7d4 after checking it file by file against the plan. The only stop last time was the missing QA login for the e2e run, so the code did not need to change.
+- `src/app/pages/frontdesk/breadcrumbs.md` not created: `breadcrumbs-check` reports it as STRAY (no seam there). The `knowledge/` row is in the `frontdesk/` row of `src/app/pages/breadcrumbs.md`.
+- Human 2026-11-12 (ASK 554-2): approved server/test/ai-usage.test.js. Both `13` became `14` (callGemini sites). knowledge-import.test.js now awaits `_waitForUsageWritesForTests()` before it reads aiUsage.
+- Evidence: `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm --dir server run lint` → exit 0 (0 errors); `lint:icons`, `lint:no-native-select` → exit 0; `reuse-lint --check-registry` → REUSE: registry ok; kit-manifest-check → ok, 0 unclassified; override-check, breadcrumbs-check (clean), scope-check (SCOPE: ok) → exit 0; `pnpm run test:server` → exit 0, 96 files, 1227 passed; `pnpm run test:ci` → exit 0, TOTAL 2098 SUCCESS.
+- `e2e/ui/554-1.spec.ts` written, not run here: there is no `.env` with the QA login in the worktree or the main folder, and the Playwright config serves on 4200, the main folder's port. This is an environment limit, not a plan change. The [ui] card goes to the Human.
+- Resume after ASK 554-3 (Human: retry; [ui] specs are written-not-run, the Planner runs them on the served batch branch). Rechecked 2026-11-12: build, lint, server lint, lint:icons, lint:no-native-select, reuse-lint registry, override-check, plan-ledger-check, breadcrumbs-check, kit-manifest-check, scope-check → all exit 0; `pnpm run test:server` → exit 0, 1227 passed; `pnpm run test:ci` → first run 2 FAILED (an unrelated recipe-save spec, `crud.recipes.save_error`), rerun once → exit 0, TOTAL 2098 SUCCESS; `npx tsc --noEmit --strict … e2e/ui/554-1.spec.ts` (node types) → exit 0; `npx playwright test --list e2e/ui/554-1.spec.ts` → 1 test listed; log-query → exit 0 (SKIP: no database configured). `e2e/ui/554-1.spec.ts` uses `signInQa` and deletes its row in `finally`: written, not run.

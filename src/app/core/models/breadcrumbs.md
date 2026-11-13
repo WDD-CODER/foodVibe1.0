@@ -18,6 +18,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `logistics.model.ts` | Event/dish logistics | EventLogistics, DishLogistics, BaselineEntry, ServiceOverride, etc. |
 | `menu-event.model.ts` | Menu builder event model (plan 579: logistics answer section is a string, payer ours, hiddenKeys on the site logistics) | MenuEvent, MenuSection, MenuTypeDefinition, ALL_DISH_FIELDS |
 | `client.model.ts` | Client entity (who an event is for), mirror of the client schema | Client, ClientType, CLIENT_TYPES |
+| `knowledge-item.model.ts` | Knowledge item (a fact the business knows about itself), mirror of the schema (plan 554) | KnowledgeItem, KNOWLEDGE_TOPICS |
 | `front-desk-profile.model.ts` | Front desk profile type and constants, mirror of the profile schema | FrontDeskProfile, BUSINESS_TYPES, FRONT_DESK_STATUSES |
 | `ai-usage.model.ts` | AI usage ledger report shapes (platform admin) | AiUsageRow, AiUsageReport, AiUsageParams, AiUsageGroupBy |
 | `user.model.ts` | User/session | User |

@@ -5,6 +5,7 @@ import {
   computed,
   ElementRef,
   inject,
+  input,
   output,
   signal,
   viewChild
@@ -65,6 +66,10 @@ export class NewInquiryDialogComponent {
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
 
+  // 2. INPUTS
+  /** Plan 551: opens with this client already picked (the client profile). */
+  readonly initialClient = input<Client | null>(null)
+
   // 3. OUTPUTS
   readonly saved = output<MenuEvent>()
   readonly cancelled = output<void>()
@@ -72,7 +77,12 @@ export class NewInquiryDialogComponent {
   // 4. SIGNALS & CONSTANTS
   protected readonly nameMax = NAME_MAX
   protected readonly noteMax = NOTE_MAX
-  protected readonly selectedClient_ = signal<Client | null>(null)
+  /** What the user picked or cleared; `undefined` until they do, so `initialClient` shows first. */
+  protected readonly pickedClient_ = signal<Client | null | undefined>(undefined)
+  protected readonly selectedClient_ = computed<Client | null>(() => {
+    const picked = this.pickedClient_()
+    return picked === undefined ? this.initialClient() : picked
+  })
   /** True while the picker shows its add-client view: the title changes and the inquiry fields hide. */
   protected readonly adding_ = signal(false)
   protected readonly eventName_ = signal('')

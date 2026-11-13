@@ -55,6 +55,10 @@ export class ClientPickerComponent {
   readonly variant = input<'box' | 'plain'>('box')
   /** A click outside the search box closes its list and emits `outsideClick` (a page-owned popover). */
   readonly closeOnOutsideClick = input(false)
+  /** Plan 551: false hides the add row (a merge target is always an existing client). */
+  readonly allowAdd = input(true)
+  /** Plan 551: client ids left out of the list (the client being merged). */
+  readonly exclude = input<readonly string[]>([])
 
   // 3. OUTPUTS
   readonly picked = output<Client>()
@@ -73,10 +77,12 @@ export class ClientPickerComponent {
   protected readonly initialPhone_ = signal('')
 
   // 5. COMPUTED
-  protected readonly canCreate_ = computed(() => this.permission.isOwner_())
+  protected readonly canCreate_ = computed(() => this.allowAdd() && this.permission.isOwner_())
+  /** Staff are told to ask the owner only where an add row would otherwise have been possible. */
+  protected readonly emptyKey_ = computed(() => (this.canCreate_() || !this.allowAdd() ? null : 'client_ask_owner'))
   /** Clients matching the typed text; the combobox gets them already filtered (its own filter is off). */
   protected readonly options_ = computed(() =>
-    this.clientData.allClients_().filter((c) => matchesClientQuery(c, this.query_()))
+    this.clientData.allClients_().filter((c) => !this.exclude().includes(c._id) && matchesClientQuery(c, this.query_()))
   )
 
   // 6. METHODS

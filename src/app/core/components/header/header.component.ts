@@ -5,6 +5,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
+import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import { TranslationService } from '@services/translation.service'
 import { authGuard } from '../../guards/auth.guard'
 
 /** The top-level pages every signed-in or guest user can open (desktop pills and drawer). */
@@ -33,6 +35,7 @@ export class HeaderComponent {
   private readonly businessService = inject(BusinessService)
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
+  private readonly translation = inject(TranslationService)
 
   isMobileMenuOpen = signal(false)
   isMobileAvatarOpen = signal(false)
@@ -41,6 +44,11 @@ export class HeaderComponent {
   protected readonly user_ = this.userService.user_
   protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
   protected readonly isOwner_ = this.userService.isOwner_
+  /** Plan 552: requests waiting for a decision, shown on the front desk entry. */
+  protected readonly waitingCount_ = inject(FrontDeskBadgeService).waitingCount_
+  protected readonly waitingLabel_ = computed(() =>
+    this.translation.translate('rq_waiting_count_label').replace('{count}', String(this.waitingCount_()))
+  )
   protected readonly navLinks_ = computed(() => [
     ...NAV_LINKS,
     ...(this.isOwner_() ? [SETTINGS_LINK] : []),

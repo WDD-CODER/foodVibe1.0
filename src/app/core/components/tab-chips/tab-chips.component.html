@@ -13,6 +13,11 @@
         >
           <lucide-icon [name]="chip.icon" [size]="15"></lucide-icon>
           {{ chip.labelKey | translatePipe }}
+          @if (chip.badge && waitingCount_() > 0) {
+            <span class="c-chip__count" data-testid="waiting-count" [attr.aria-label]="countLabel_()">{{
+              waitingCount_()
+            }}</span>
+          }
         </a>
       }
     </app-scroll-rail>

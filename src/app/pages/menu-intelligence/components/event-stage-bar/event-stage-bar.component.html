@@ -53,7 +53,11 @@
     <div class="stage-links">
       <div class="client-row">
         @if (client_()?.name ?? event.clientName; as name) {
-          <span class="c-chip--tag client-chip">{{ name }}</span>
+          @if (event.clientId) {
+            <a class="c-chip--tag client-chip" [routerLink]="['/clients', event.clientId]">{{ name }}</a>
+          } @else {
+            <span class="c-chip--tag client-chip">{{ name }}</span>
+          }
         } @else {
           <span class="client-row-empty">{{ 'client' | translatePipe }}</span>
         }

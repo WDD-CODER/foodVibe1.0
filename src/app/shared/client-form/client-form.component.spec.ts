@@ -135,4 +135,31 @@ describe('ClientFormComponent', () => {
     el.querySelector<HTMLButtonElement>('.c-btn-ghost')!.click()
     expect(cancels).toBe(1)
   })
+
+  it('edit mode pre-fills the client and saves through updateClient (plan 551)', async () => {
+    const existing = {
+      _id: 'c7',
+      name: 'דנה',
+      phone: '0521234567',
+      phoneNormalized: '0521234567',
+      email: 'a@b.co',
+      notes: 'old'
+    } as Client
+    clientData.updateClient = jasmine
+      .createSpy('updateClient')
+      .and.resolveTo({ ...existing, name: 'דנה לוי', email: '' })
+    fixture.componentRef.setInput('client', existing)
+    fixture.detectChanges()
+    await fixture.whenStable()
+    expect(el.querySelector<HTMLInputElement>('#client-form-name')!.value).toBe('דנה')
+    expect(el.querySelector<HTMLInputElement>('#client-form-email')!.value).toBe('a@b.co')
+    type('#client-form-name', 'דנה לוי')
+    type('#client-form-email', '')
+    await save()
+    expect(clientData.addClient).not.toHaveBeenCalled()
+    expect(clientData.updateClient).toHaveBeenCalledWith(
+      jasmine.objectContaining({ _id: 'c7', name: 'דנה לוי', email: '', notes: 'old' })
+    )
+    expect(savedClients.length).toBe(1)
+  })
 })

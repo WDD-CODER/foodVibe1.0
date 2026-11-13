@@ -118,7 +118,7 @@ const PROFILE_EXISTS = { error: 'PROFILE_EXISTS' };
 const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
 /** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES]);
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems']);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
 const readProjection = (req, type) => {
@@ -447,6 +447,11 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
       let restored = 0;
       const skipped = [];
       for (const doc of trashed) {
+        // Plan 551: a merged client never comes back (the merge is not undone by restore).
+        if (doc.mergedInto) {
+          skipped.push({ _id: doc._id, name: doc.name });
+          continue;
+        }
         if (await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, doc.phoneKey, doc._id)) {
           skipped.push({ _id: doc._id, name: doc.name });
           continue;
@@ -491,6 +496,8 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
     }
     // Plan 545: a client comes back only while no live client has its phone; the restore re-takes the live key.
     const isClient = req.params.type === CLIENTS;
+    // Plan 551: a merged client is not restorable.
+    if (isClient && inTrash.mergedInto) return res.status(409).json({ error: 'CLIENT_MERGED', messageKey: 'client_merged_restore', mergedInto: inTrash.mergedInto });
     if (isClient && await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, inTrash.phoneKey, inTrash._id)) {
       return res.status(409).json(PHONE_TAKEN);
     }

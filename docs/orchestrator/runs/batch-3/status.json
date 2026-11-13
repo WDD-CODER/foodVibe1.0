@@ -1,0 +1,1885 @@
+{
+  "run": "batch-3",
+  "branch": "orch/batch-3",
+  "base": "main",
+  "startedAt": "2026-11-12T08:21:13.009Z",
+  "mainShaAtStart": "6cc22231f4ad991fdeaf592b660ec347cf65f42e",
+  "plans": {
+    "546": {
+      "nnn": "546",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "c6b5a6107a1eaefca395876d1e4e916b95ce138b"
+    },
+    "547": {
+      "nnn": "547",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "b73e8b2636834c81dd4e1fe4c8397ff4045775b9"
+    },
+    "551": {
+      "nnn": "551",
+      "title": "Client profile with one timeline of requests, bookings and events, and merging duplicates",
+      "branch": "feat/551-client-profile-timeline-and",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-12T08:56:17.646Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T09:10:38.437Z"
+        }
+      },
+      "humanItems": [
+        "Dandan merges two test clients on the profile and judges the confirm text and the result screen clear."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T08:23:55.017Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:23:55.309Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:44:00.610Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:44:00.923Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T08:44:01.098Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T08:44:01.252Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T08:44:38.793Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T08:44:45.176Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:44:45.302Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:52:47.389Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:53:09.329Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:53:09.521Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:53:53.240Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:56:17.473Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T08:56:17.647Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T09:05:12.302Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T09:10:33.265Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T09:10:38.439Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T09:10:53.794Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T09:11:58.028Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "551",
+          "title": "Client profile with one timeline of requests, bookings and events, and merging duplicates",
+          "branch": "feat/551-client-profile-timeline-and",
+          "state": "asking",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T08:23:55.307Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T08:44:01.251Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-12T08:44:45.300Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 15.5,
+          "sha": "978049d8eb2aca7a2dbda64003a67cbe9a5d360d",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1202.9,
+              "tokens": {
+                "input": 9038845,
+                "output": 71524
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 37.3,
+              "tokens": {
+                "input": 127459,
+                "output": 2028
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 479.9,
+              "tokens": {
+                "input": 475323,
+                "output": 7366
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: Done-when item left undone: [ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>` shows the event's name in the timeline (`e2e/ui/551-1.spec.ts`).",
+            "round 2: builder blocked: npx playwright test e2e/ui/551-1.spec.ts -> exit 1: 'QA credentials not set (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS)'. There is no .env in the worktree or the main checkout, and localhost:3000/api/health does not answer.",
+            "round 3: Done-when item left undone: [ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>` shows the event's name in the timeline (`e2e/ui/551-1.spec.ts`)."
+          ],
+          "escalations": [
+            {
+              "step": "round 2",
+              "check": "builder blocked: npx playwright test e2e/ui/551-1.spec.ts -> exit 1: 'QA credentials not set (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS)'. There is no .env in the worktree or the main check"
+            }
+          ],
+          "replan": "no — The plan holds as written. The only gap is the environment: it needs a QA login and a running API at localhost:3000.",
+          "resetToBase": "91421d366214016976fc685e0453429c1bf6a8ef",
+          "resetFrom": "c6f04ea225acba96758e5a4ff60ba449542d2972",
+          "reason": "asking 551-1: Done-when item left undone: [ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>` shows the event's name in the timeline (`e2e/ui/551-1.spec.ts`). (fix rounds used: 2 of 2) — needs the Human",
+          "park": {
+            "at": "2026-11-12T08:53:46.452Z",
+            "reason": "Done-when item left undone: [ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>` shows the event's name in the timeline (`e2e/ui/551-1.spec.ts`). (fix rounds used: 2 of 2) — needs the Human"
+          },
+          "parkBranch": "park/batch-3-551"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 14.8,
+      "sha": "76452ac4aadcaedcabd6a3d76e6b46e4ae9fb3ba",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 531.8,
+          "tokens": {
+            "input": 439550,
+            "output": 6345
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 14.3,
+          "tokens": {
+            "input": 122904,
+            "output": 888
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "3966183bca73f01e7aa5b71b08a0ba5fc26c1d72"
+    },
+    "552": {
+      "nnn": "552",
+      "title": "Requests queue and bookings agenda: where the business approves what customers ask for",
+      "branch": "feat/552-requests-queue-and-bookings",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T09:44:35.801Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T09:51:06.229Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads one card of each kind (event, tasting, table, consultation) on a phone and says he could decide each one without opening anything else."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T08:53:53.736Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:14:10.608Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:14:10.770Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:32:07.828Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:34:48.926Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:34:50.829Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:34:51.001Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:34:51.166Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:36:06.916Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:37:00.901Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:44:35.512Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:44:35.803Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:47:37.742Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:50:54.549Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:51:06.231Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:51:59.247Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T09:55:02.091Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "552",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 551-1",
+          "freeDiskGb": 15.5
+        },
+        {
+          "nnn": "552",
+          "title": "Requests queue and bookings agenda: where the business approves what customers ask for",
+          "branch": "feat/552-requests-queue-and-bookings",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T09:14:10.769Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T09:34:51.163Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.4,
+          "sha": "6b294487331120ffd9e4be4bb182a3eb3c7e713f",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1074.8,
+              "tokens": {
+                "input": 7807303,
+                "output": 86437
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 75.5,
+              "tokens": {
+                "input": 95731,
+                "output": 1740
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: scope: src/app/core/components/tab-chips/tab-chips.component.spec.ts"
+          ],
+          "reason": "asking 552-1: ESCALATE scope: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is a test beside the scoped tab-chips.component.ts, and reverting it fails 12 of 12 tests. The gate scope check is run against the run branch, so I cannot extend the scope myself.",
+          "park": {
+            "at": "2026-11-12T09:36:53.558Z",
+            "reason": "ESCALATE scope: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is a test beside the scoped tab-chips.component.ts, and reverting it fails 12 of 12 tests. The gate scope check is run against the run branch, so I cannot extend the scope myself."
+          },
+          "parkBranch": "park/batch-3-552"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 552-1: ESCALATE scope: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is a test beside the scoped tab-chips.comp",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.6,
+      "sha": "fd833e3d2103c821d529faea97617b5847411a45",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 179.6,
+          "tokens": {
+            "input": 77654,
+            "output": 1802
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 49.3,
+          "tokens": {
+            "input": 698834,
+            "output": 2741
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "3074ccb9b058ae4eba678c38e0d28bb5d8a8009f"
+    },
+    "553": {
+      "nnn": "553",
+      "title": "Front desk settings: one screen where the owner sets up how customers reach the business",
+      "branch": "feat/553-front-desk-settings-screen",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T11:14:59.174Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T11:32:51.287Z"
+        }
+      },
+      "humanItems": [
+        "Dandan fills one catering profile with a real owner's details on a phone and a laptop and says the screen is quick enough for the onboarding sitting and reads well in Hebrew."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T08:53:53.882Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:37:03.867Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:00:29.913Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:00:30.341Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:45:31.709Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:53:31.106Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:53:38.456Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:53:39.002Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T10:53:39.695Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T10:54:20.972Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T10:57:08.225Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:14:58.408Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:14:59.184Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:28:16.443Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:32:42.325Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:32:51.289Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:33:29.000Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T11:34:39.338Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "553",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 552-1",
+          "freeDiskGb": 15.4
+        },
+        {
+          "nnn": "553",
+          "title": "Front desk settings: one screen where the owner sets up how customers reach the business",
+          "branch": "feat/553-front-desk-settings-screen",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T10:00:30.338Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T10:53:39.692Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 13.6,
+          "sha": "dfe9232ba0bf170b556ab1726ea8e27c610207e8",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2695.9,
+              "tokens": {
+                "input": 5993435,
+                "output": 63530
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 40,
+              "tokens": {
+                "input": 55698,
+                "output": 1217
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: scope: src/app/core/components/tab-chips/tab-chips.component.spec.ts"
+          ],
+          "reason": "asking 553-1: replan needed: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is outside the plan's scope on orch/batch-3. The new settings chip changes the chip list this spec asserts, so test:ci fails without the edit.",
+          "park": {
+            "at": "2026-11-12T10:56:55.021Z",
+            "reason": "replan needed: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is outside the plan's scope on orch/batch-3. The new settings chip changes the chip list this spec asserts, so test:ci fails without the edit."
+          },
+          "parkBranch": "park/batch-3-553"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 553-1: replan needed: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is outside the plan's scope on orch/batch-3",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.7,
+      "sha": "b9f9f49aaae4a33d8bdc7e2f9cf3e8393e76fec8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 793.7,
+          "tokens": {
+            "input": 190798,
+            "output": 2690
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 35.5,
+          "tokens": {
+            "input": 311146,
+            "output": 2233
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "b2075f087aeed52e41c7832b5e92268def53dc53"
+    },
+    "554": {
+      "nnn": "554",
+      "title": "Knowledge base: what the business knows about itself, with a fast import",
+      "branch": "feat/554-knowledge-base-what-the",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-12T13:44:24.017Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T14:13:04.447Z"
+        }
+      },
+      "humanItems": [
+        "Dandan imports the pilot catering business's website on `/frontdesk/knowledge` and judges the drafts: right topics, answers taken from the site, nothing invented, no weekly hours / address / phone duplicated."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T08:53:54.034Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T09:37:04.356Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T10:57:09.877Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:38:01.432Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:38:01.954Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:43:47.685Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:45:34.097Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T11:50:06.289Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:50:17.085Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T12:50:17.296Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:12:50.098Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:14:49.339Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:19:18.530Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:19:18.887Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:25:27.773Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:25:28.553Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:25:28.980Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T13:25:29.347Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T13:26:25.292Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T13:26:36.738Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:26:36.991Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:39:36.849Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:39:37.320Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:39:37.974Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:41:20.522Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:44:22.281Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T13:44:24.019Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T14:06:04.521Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T14:12:56.576Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T14:13:04.450Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T14:13:25.786Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T14:14:29.329Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "554",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 553-1",
+          "freeDiskGb": 13.6
+        },
+        {
+          "nnn": "554",
+          "title": "Knowledge base: what the business knows about itself, with a fast import",
+          "branch": "feat/554-knowledge-base-what-the",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T11:38:01.951Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.4,
+          "reason": "replan needed: ESCALATE: scope — the generic POST on knowledgeItems answers 400 (server/routes/generic.js:595 adds _masterId/_userModified; NO_LINEAGE at generic.js:121 must include 'knowledgeItems'). Failing check: vitest run test/cross-business.test.js, exit 1. Needs approved: server/routes/generic.js, and serve — ask 554-1 answered, but the scope could not be extended: git p",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 345.1,
+              "tokens": {
+                "input": 1347646,
+                "output": 27370
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-12T11:45:20.383Z",
+            "reason": "replan needed: ESCALATE: scope — the generic POST on knowledgeItems answers 400 (server/routes/generic.js:595 adds _masterId/_userModified; NO_LINEAGE at generic.js:121 must include 'knowledgeItems'). Failing check: vitest run test/cross-business.test.js, exit 1. Needs approved: server/routes/generic.js, and serve"
+          },
+          "parkBranch": "park/batch-3-554"
+        },
+        {
+          "nnn": "554",
+          "title": "Knowledge base: what the business knows about itself, with a fast import",
+          "branch": "feat/554-knowledge-base-what-the",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T12:50:17.294Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 10.7,
+          "reason": "asking 554-2: ESCALATE scope: ESCALATE: scope server/test/ai-usage.test.js — `pnpm run test:server` exits 1; test/ai-usage.test.js:230-231 expects 13 `callGemini` call sites in routes/ai.js and finds 14 (the new knowledge-import call). Change both `13` to `14`.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1352.1,
+              "tokens": {
+                "input": 4915706,
+                "output": 57417
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-12T13:14:31.226Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/test/ai-usage.test.js — `pnpm run test:server` exits 1; test/ai-usage.test.js:230-231 expects 13 `callGemini` call sites in routes/ai.js and finds 14 (the new knowledge-import call). Change both `13` to `14`."
+          },
+          "parkBranch": "park/batch-3-554"
+        },
+        {
+          "nnn": "554",
+          "title": "Knowledge base: what the business knows about itself, with a fast import",
+          "branch": "feat/554-knowledge-base-what-the",
+          "state": "asking",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T13:19:18.884Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T13:25:29.344Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-12T13:26:36.988Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 554-2: ESCALATE scope: ESCALATE: scope server/test/ai-usage.test.js — `pnpm run test:server` exits 1; test/ai-usage.test.js:230-231 expects 13 ",
+              "check": "(not given)"
+            },
+            {
+              "step": "round 2",
+              "check": "builder blocked: npx playwright test e2e/ui/554-1.spec.ts -> exit 1: QA credentials are not set (no .env in the worktree or the main checkout)."
+            }
+          ],
+          "replan": "no — The plan holds; only the QA login is missing in the environment.",
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 10.8,
+          "sha": "e38deb032a60d25454eb3fd4dd144202e5d73063",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 365.6,
+              "tokens": {
+                "input": 191608,
+                "output": 2581
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 55.2,
+              "tokens": {
+                "input": 102626,
+                "output": 1721
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 773.8,
+              "tokens": {
+                "input": 871047,
+                "output": 10308
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: Done-when item left undone: [ui] Signed in as the QA owner, on `/frontdesk/knowledge`, pressing \"הוספת פריט\", choosing the topic \"מדיניות\", typing the question \"האם יש חניה?\" and the answer \"יש חניה חינם מאחורי המבנה\" and saving",
+            "round 2: builder blocked: npx playwright test e2e/ui/554-1.spec.ts -> exit 1: QA credentials are not set (no .env in the worktree or the main checkout).",
+            "round 3: Done-when item left undone: [ui] Signed in as the QA owner, on `/frontdesk/knowledge`, pressing \"הוספת פריט\", choosing the topic \"מדיניות\", typing the question \"האם יש חניה?\" and the answer \"יש חניה חינם מאחורי המבנה\" and saving"
+          ],
+          "resetToBase": "06104d3b3be71c76625fe6160bf244cbaf4a3786",
+          "resetFrom": "0e3d7d420a719eda1e2ea2ef27cc5e88835111e6",
+          "reason": "asking 554-3: Done-when item left undone: [ui] Signed in as the QA owner, on `/frontdesk/knowledge`, pressing \"הוספת פריט\", choosing the topic \"מדיניות\", typing the question \"האם יש חניה?\" and the answer \"יש חניה חינם מאחורי המבנה\" and saving (fix rounds used: 2 of 2) — needs the Human",
+          "park": {
+            "at": "2026-11-12T13:41:07.432Z",
+            "reason": "Done-when item left undone: [ui] Signed in as the QA owner, on `/frontdesk/knowledge`, pressing \"הוספת פריט\", choosing the topic \"מדיניות\", typing the question \"האם יש חניה?\" and the answer \"יש חניה חינם מאחורי המבנה\" and saving (fix rounds used: 2 of 2) — needs the Human"
+          },
+          "parkBranch": "park/batch-3-554"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 11.8,
+      "sha": "74a366e13eb3d633ef6126159b8840c8dde43448",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 1297,
+          "tokens": {
+            "input": 416022,
+            "output": 6877
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 19.5,
+          "tokens": {
+            "input": 201926,
+            "output": 1063
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "1623607c2c1515a2c91e3ecf2b08811ba6188fe8"
+    },
+    "580": {
+      "nnn": "580",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "91421d366214016976fc685e0453429c1bf6a8ef"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T08:23:54.718Z",
+      "plan": "551",
+      "text": "the folder foodVibe1.0-orch-batch-3-551 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T08:43:58.345Z",
+      "plan": "551",
+      "text": "builder left undone (round 0): e2e/ui/551-1.spec.ts and 551-2.spec.ts were written but not run in this worktree (no dev servers or QA login); the screenshots are written when they run"
+    },
+    {
+      "at": "2026-11-12T08:44:38.657Z",
+      "plan": "551",
+      "text": "builder left undone (round 1): [ui] 551-1: run e2e/ui/551-1.spec.ts and save screens/551-1.png (blocked: no QA login, no API server); [ui] 551-2: run e2e/ui/551-2.spec.ts and save screens/551-2.png (blocked: no QA login, no API server)"
+    },
+    {
+      "at": "2026-11-12T08:44:45.055Z",
+      "plan": "551",
+      "text": "escalated to a fresh judgment-tier builder (round 2): builder blocked: npx playwright test e2e/ui/551-1.spec.ts -> exit 1: 'QA credentials not set (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS)'. There is no .env in the worktree or the main checkout, and localhost:3000/api/health does not answer."
+    },
+    {
+      "at": "2026-11-12T08:52:45.307Z",
+      "plan": "551",
+      "text": "builder left undone (round 2): The [ui] tests e2e/ui/551-1.spec.ts and 551-2.spec.ts were not run to a pass, and no screenshots exist. They need a QA login in .env and the API on localhost:3000, which this environment lacks."
+    },
+    {
+      "at": "2026-11-12T08:53:09.199Z",
+      "plan": "551",
+      "text": "[ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>` s: the main folder's backend was started"
+    },
+    {
+      "at": "2026-11-12T08:53:53.103Z",
+      "plan": "551",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T08:53:53.382Z",
+      "plan": "551",
+      "text": "ask 551-1 (technical, the Human or the advisor answers): Plan 551 used its fix rounds (2 of 2) and still fails: Done-when item left undone: [ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>` shows the event's name in the timeline (`e2e/ui/551-1. Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-12T08:54:54.284Z",
+      "plan": "551",
+      "text": "ask 551-1 answered by the human: retry: the [ui] items need the running app, which this worktree does not have; that is expected and is not a failure. Write e2e/ui/551-1.spec.ts and 551-2.spec.ts so they compile and follow the plan's [ui] lines (signInQa, createQaEvent, cleanup in finally), make every [auto] check pass, and report the two [ui] specs as written-not-run, not as undone. The Planner r"
+    },
+    {
+      "at": "2026-11-12T08:56:11.677Z",
+      "plan": "551",
+      "text": "resumed from park/batch-3-551: round 2, tier judgment, after: asking 551-1: Done-when item left undone: [ui] Create a QA event for a new QA client through the API, open `/clients`, click that client's row → `/clients/<id>`"
+    },
+    {
+      "at": "2026-11-12T08:56:11.811Z",
+      "plan": "551",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-12T08:56:17.325Z",
+      "plan": "551",
+      "text": "the folder foodVibe1.0-orch-batch-3-551 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T09:11:02.743Z",
+      "plan": "551",
+      "text": "the folder foodVibe1.0-orch-merge-batch-3 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T09:14:10.446Z",
+      "plan": "552",
+      "text": "the folder foodVibe1.0-orch-batch-3-552 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T09:32:05.692Z",
+      "plan": "552",
+      "text": "builder left undone (round 0): e2e/ui/552-1..5 were not run by me: no server serves this branch. The gate reruns them."
+    },
+    {
+      "at": "2026-11-12T09:36:06.745Z",
+      "plan": "552",
+      "text": "builder left undone (round 1): scope-1: the tab-chips spec stays in the diff until the Human approves its path in the scope"
+    },
+    {
+      "at": "2026-11-12T09:37:00.785Z",
+      "plan": "552",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T09:37:01.726Z",
+      "plan": "552",
+      "text": "ask 552-1 (scope, the Human or the advisor answers): Add src/app/core/components/tab-chips/tab-chips.component.spec.ts to plan 552's Read-Write Scope?"
+    },
+    {
+      "at": "2026-11-12T09:42:34.794Z",
+      "plan": "552",
+      "text": "ask 552-1 answered by the human: approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts"
+    },
+    {
+      "at": "2026-11-12T09:44:26.441Z",
+      "plan": "552",
+      "text": "resumed from park/batch-3-552: round 1, tier build, after: asking 552-1: ESCALATE scope: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is a test beside the scoped tab-chips.component.ts,"
+    },
+    {
+      "at": "2026-11-12T09:44:35.118Z",
+      "plan": "552",
+      "text": "the folder foodVibe1.0-orch-batch-3-552 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T10:00:29.575Z",
+      "plan": "553",
+      "text": "the folder foodVibe1.0-orch-batch-3-553 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T10:45:26.680Z",
+      "plan": "553",
+      "text": "builder left undone (round 0): e2e/ui/553-1..3 were not run: the dev server on :4200 is not this worktree's build. The gate reruns them.; src/app/pages/frontdesk/breadcrumbs.md was dropped (see decisions)."
+    },
+    {
+      "at": "2026-11-12T10:54:20.165Z",
+      "plan": "553",
+      "text": "builder left undone (round 1): Fix scope-1: the spec is out of scope as the run branch holds the plan, and reverting it would break test:ci"
+    },
+    {
+      "at": "2026-11-12T10:57:07.885Z",
+      "plan": "553",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T10:57:08.633Z",
+      "plan": "553",
+      "text": "ask 553-1 (scope, the Human or the advisor answers): Approve src/app/core/components/tab-chips/tab-chips.component.spec.ts as in scope for plan 553? The new settings chip changes the chip list that spec asserts."
+    },
+    {
+      "at": "2026-11-12T11:10:43.272Z",
+      "plan": "553",
+      "text": "ask 553-1 answered by the human: approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts"
+    },
+    {
+      "at": "2026-11-12T11:14:10.521Z",
+      "plan": "553",
+      "text": "resumed from park/batch-3-553: round 1, tier build, after: asking 553-1: replan needed: ESCALATE: scope src/app/core/components/tab-chips/tab-chips.component.spec.ts is outside the plan's scope on orch/batch-3. The new"
+    },
+    {
+      "at": "2026-11-12T11:14:57.704Z",
+      "plan": "553",
+      "text": "the folder foodVibe1.0-orch-batch-3-553 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T11:38:01.058Z",
+      "plan": "554",
+      "text": "the folder foodVibe1.0-orch-batch-3-554 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T11:43:47.329Z",
+      "plan": "554",
+      "text": "builder left undone (round 0): A1: the schema, registry, collection entry, OWNER_ONLY_TYPES entry and cross-business body are written. The knowledgeItems cross-business body fails with 400 on generic POST until generic.js has knowledgeItems in NO_LINEAGE.; A5: client model and data service with spec; A6: knowledge page, route, ta"
+    },
+    {
+      "at": "2026-11-12T11:45:33.599Z",
+      "plan": "554",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T11:45:34.577Z",
+      "plan": "554",
+      "text": "ask 554-1 (scope, the Human or the advisor answers): May this plan edit server/routes/generic.js (one line: add 'knowledgeItems' to NO_LINEAGE) so the generic POST works for knowledgeItems?"
+    },
+    {
+      "at": "2026-11-12T11:49:36.644Z",
+      "plan": "554",
+      "text": "ask 554-1 answered by the human: approved: server/routes/generic.js, server/test/invariants.test.js"
+    },
+    {
+      "at": "2026-11-12T11:50:06.843Z",
+      "plan": "554",
+      "text": "ask 554-1 answered, but the scope could not be extended: git push: hint: See the 'Note about fast-forwards' in 'git push --help' for details. — plan 554 parked; the question was: May this plan edit server/routes/generic.js (one line: add 'knowledgeItems' to NO_LINEAGE) so the generic POST works for knowledgeItems?"
+    },
+    {
+      "at": "2026-11-12T12:50:16.861Z",
+      "plan": "554",
+      "text": "the folder foodVibe1.0-orch-batch-3-554 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T13:12:49.730Z",
+      "plan": "554",
+      "text": "builder left undone (round 0): A9: test:server fails only on server/test/ai-usage.test.js (13 -> 14 call sites), outside the plan's scope; e2e/ui/554-1.spec.ts not run: it needs the QA login and running servers; log-query not checked: it printed 'SKIP: no database configured'; [human] import check left for Dandan"
+    },
+    {
+      "at": "2026-11-12T13:14:48.844Z",
+      "plan": "554",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T13:14:49.783Z",
+      "plan": "554",
+      "text": "ask 554-2 (scope, the Human or the advisor answers): Add server/test/ai-usage.test.js to the plan 554 scope so both `13` can become `14` (the new knowledge-import callGemini site)?"
+    },
+    {
+      "at": "2026-11-12T13:15:53.334Z",
+      "plan": "554",
+      "text": "ask 554-2 answered by the human: approved: server/test/ai-usage.test.js"
+    },
+    {
+      "at": "2026-11-12T13:16:16.363Z",
+      "plan": "554",
+      "text": "scope of plan 554 extended on orch/batch-3 by the answer to 554-2: server/test/ai-usage.test.js"
+    },
+    {
+      "at": "2026-11-12T13:19:00.405Z",
+      "plan": "554",
+      "text": "resumed from park/batch-3-554: round 0, tier build, after: asking 554-2: ESCALATE scope: ESCALATE: scope server/test/ai-usage.test.js — `pnpm run test:server` exits 1; test/ai-usage.test.js:230-231 expects 13 `callGemin"
+    },
+    {
+      "at": "2026-11-12T13:19:18.155Z",
+      "plan": "554",
+      "text": "the folder foodVibe1.0-orch-batch-3-554 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T13:25:24.746Z",
+      "plan": "554",
+      "text": "builder left undone (round 0): [human] knowledge import check card (Human only); e2e/ui/554-1.spec.ts not run here (needs the QA login and running servers)"
+    },
+    {
+      "at": "2026-11-12T13:26:24.968Z",
+      "plan": "554",
+      "text": "builder left undone (round 1): [ui] item 554-1: the e2e test has not run, so screens/554-1.png is not saved; it needs ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PASS in .env or the environment"
+    },
+    {
+      "at": "2026-11-12T13:26:36.508Z",
+      "plan": "554",
+      "text": "escalated to a fresh judgment-tier builder (round 2): builder blocked: npx playwright test e2e/ui/554-1.spec.ts -> exit 1: QA credentials are not set (no .env in the worktree or the main checkout)."
+    },
+    {
+      "at": "2026-11-12T13:39:31.075Z",
+      "plan": "554",
+      "text": "builder left undone (round 2): e2e/ui/554-1.spec.ts not run here: no QA login (.env) in this environment; the Human runs the [ui] card; src/app/pages/frontdesk/breadcrumbs.md not created: breadcrumbs-check calls it STRAY; the row is in src/app/pages/breadcrumbs.md instead (Execution Notes)"
+    },
+    {
+      "at": "2026-11-12T13:41:20.210Z",
+      "plan": "554",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T13:41:20.961Z",
+      "plan": "554",
+      "text": "ask 554-3 (technical, the Human or the advisor answers): Plan 554 used its fix rounds (2 of 2) and still fails: Done-when item left undone: [ui] Signed in as the QA owner, on `/frontdesk/knowledge`, pressing \"הוספת פריט\", choosing the topic \"מדיניות\", typing the question \"האם יש חניה?\" and the answer \"יש חניה ח. Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-12T13:41:52.280Z",
+      "plan": "554",
+      "text": "ask 554-3 answered by the human: retry: the [ui] items need the running app, which this worktree does not have; that is expected and is not a failure. Write the e2e/ui/554-*.spec.ts files so they compile and follow the plan's [ui] lines (signInQa, cleanup in finally), make every [auto] check pass, and report the [ui] specs as written-not-run, not as undone. The Planner runs them against the served"
+    },
+    {
+      "at": "2026-11-12T13:43:51.031Z",
+      "plan": "554",
+      "text": "resumed from park/batch-3-554: round 2, tier judgment, after: asking 554-3: Done-when item left undone: [ui] Signed in as the QA owner, on `/frontdesk/knowledge`, pressing \"הוספת פריט\", choosing the topic \"מדיניות\", typing"
+    },
+    {
+      "at": "2026-11-12T13:43:51.257Z",
+      "plan": "554",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-12T13:44:21.736Z",
+      "plan": "554",
+      "text": "the folder foodVibe1.0-orch-batch-3-554 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 11.8,
+  "updatedAt": "2026-11-12T14:19:44.483Z",
+  "stops": [
+    {
+      "at": "2026-11-12T11:58:56.573Z",
+      "reason": "final gate failed: pnpm run test:ci — \u001b[33m12 11 2026 13:58:31.925:WARN [launcher]: \u001b[39mChromeHeadless was not killed in 2000 ms, sending SIGKILL. / ✔ Browser application bundle generation complete. /  ELIFECYCLE  Command failed with exit code 1.",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: a click anywhere on a client list row opens the profile, and the name is also a real link (the plan only said rows become links) — reverse: remove (click)=\"openClient(item)\" from the row in client-list.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: the timeline shows request and booking statuses and kinds through new dictionary keys client_tl_kind_* and client_tl_status_*, plus client_tag_add for the tags editor, because the dictionary had no words for them — reverse: delete those keys and the chips that use them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: editing a client sends cleared optional fields (company, e-mail, source, notes) as empty strings so they clear; adding still leaves empty ones out — reverse: change buildBody in client-form.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: a client sent to Trash by a merge shows the toast through the 409 body's messageKey, so src/app/pages/trash/** was not changed — reverse: drop messageKey from the CLIENT_MERGED response in generic.js and handle the code in the Trash page",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: the profile falls back to the digits of `phone` when `phoneNormalized` is missing (staff do not receive it) so call and WhatsApp work for staff — reverse: use phoneNormalized only in client-profile.util.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: a merged client is only offered a pointer to its target when it is still in the loaded list; the generic list hides deleted clients, so a merged client normally shows client_not_found — reverse: add a server read of merged clients",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "551",
+      "type": "seen",
+      "text": "seen: src/app/core/services/http-storage.adapter.ts:9 — API has no `clients` entry; ClientDataService builds /api/v1/clients locally because that file is outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "551",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons.ts — Phone, MessageCircle, GitMerge and Ban are missing from the test icon pick; the profile spec imports them itself",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: the plan listed no words for timeline kinds and statuses, so I added dictionary keys client_tag_add, client_tl_kind_* and client_tl_status_* — reverse: remove those keys and show the raw values",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "551",
+      "type": "behaviour",
+      "text": "behaviour: ClientDataService builds its URL as /api/v1/clients locally instead of adding API.clients, because that would mean editing http-storage.adapter.ts, which is outside this plan's scope — reverse: add API.clients in http-storage.adapter.ts and use it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "552",
+      "type": "behaviour",
+      "text": "behaviour: the \"חסר מידע\" (ask) button is hidden once a request is already needs_info, because the server answers BAD_STATUS for needs_info to needs_info — reverse: show it on every open status and let the server refuse a repeat",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "552",
+      "type": "behaviour",
+      "text": "behaviour: a failed phone-request save shows the toast and error line rq_create_failed instead of mapping a 400 to serverFieldErrors, because createManual returns only an error code — reverse: have createManual return the server's issues and feed them to serverFieldErrors",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "552",
+      "type": "behaviour",
+      "text": "behaviour: the profile's event_type question is typed as free text and stored in wanted.eventTypeKey; the card shows it through translate, which falls back to the typed text — reverse: replace it with a select over the event-type terms",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "552",
+      "type": "behaviour",
+      "text": "behaviour: the waiting tab shows its count (P1) and counts test requests too, while the badge excludes them — reverse: filter test requests out of counts_ in requests.page.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "552",
+      "type": "seen",
+      "text": "seen: src/app/core/services/request-data.service.ts:34 clearOnReload empties the requests store on every reload, so the badge count drops to 0 for a moment on each focus refresh; the page hides the list while reloading",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "552",
+      "type": "seen",
+      "text": "seen: the plan names /frontdesk/settings for the no-profile link, but no such route exists in src/app/app.routes.ts yet — the link is built as the plan says and goes nowhere until the settings plan merges",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "552",
+      "type": "seen",
+      "text": "seen: the header drawer block in src/app/core/components/header/header.component.html places the count span between the label and the icon on the desktop pill — looks fine in RTL but I did not view it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "552",
+      "type": "behaviour",
+      "text": "behaviour: Ask sends setStatus(id,'needs_info', note) because plan 550 shipped no dedicated ask route — reverse: switch to a dedicated ask method if the server adds one",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: a profile whose assistant tone was just edited sends assistant.level as loaded rather than omitting it, because the server's schema defaults a missing level to 0 and would reset an admin-set level — reverse: omit `level` in toBody() in frontdesk-settings.page.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: a choice question needs 2 options except template questions whose key is in WANTED_QUESTION_KEYS (the catering event_type ships with no options), so a fresh catering profile can be saved — reverse: drop the WANTED_QUESTION_KEYS exception in choiceNeedsOptions()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: save is shown with permission.can('editFrontDesk') instead of app-edit-gate, because the gate asks `create`, which staff may do — reverse: wrap the save button in app-edit-gate",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: the dictionary text of fd_slug_taken was changed to the plan's wording (only the server messageKey used it); fd_kind_consultation stays 'ייעוץ' because plan 552 uses it — reverse: restore the old fd_slug_taken text",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: src/app/pages/frontdesk/breadcrumbs.md was not kept because scripts/breadcrumbs-check.mjs flags it as STRAY; the frontdesk/ row in src/app/pages/breadcrumbs.md documents the folder — reverse: change SEAMS in the check and recreate the file",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: scope extended to src/app/core/components/tab-chips/tab-chips.component.spec.ts (the new chip changes its chip list and needs the Settings icon); under run-plans this may still fail the scope gate — reverse: revert the spec edit and add the path to the run branch's plan scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: the load-error state uses one direct StorageService.query when there is no profile, because FrontDeskProfileDataService.ensureLoaded swallows errors — reverse: drop the probe in load()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "553",
+      "type": "seen",
+      "text": "seen: src/app/core/services/base-entity-data.service.ts:60 — ensureLoaded swallows load errors, so a page cannot tell 'no data' from 'load failed'",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "553",
+      "type": "seen",
+      "text": "seen: build budget warning 'bundle initial exceeded maximum budget by 868 bytes' (angular.json budgets) — possibly pre-existing, the Settings icon registration adds a little",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D28",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: the save sends assistant.level as loaded rather than omitting it, because the server defaults a missing level to 0 and would reset an admin-set level — reverse: omit it from the payload",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D29",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: save is shown with permission.can('editFrontDesk') instead of app-edit-gate, because the gate asks 'create', which staff may do — reverse: wrap the button in app-edit-gate",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D30",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: a choice question needs 2 options except template questions whose key is in WANTED_QUESTION_KEYS (the catering event_type ships with no options) — reverse: require 2 options for every choice question",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D31",
+      "plan": "553",
+      "type": "behaviour",
+      "text": "behaviour: src/app/pages/frontdesk/breadcrumbs.md was not created because breadcrumbs-check flags it as STRAY; the frontdesk/ row in src/app/pages/breadcrumbs.md documents the folder — reverse: add the file and allow it in breadcrumbs-check",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D32",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: a non-JSON Gemini reply to the import answers 502, like /parse-price-list, and an empty or missing items list stores nothing and answers 201 with an empty list — reverse: change the branch in the knowledge-import handler in server/routes/ai.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D33",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: the import URL fetch is copied into the new route instead of refactored out of /generate-from-url, so the existing route is untouched — reverse: extract a shared fetch helper",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D34",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: a manually added item is saved approved/manual; editing keeps the item's status and source — reverse: change `saveForm` in knowledge.page.ts",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D35",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: the page uses `app-list-shell` with the topic groups as full-width rows and a native checkbox for row select — reverse: swap in `app-list-row-checkbox`",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D36",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: the import skips items beyond the 60th without counting them in `dropped` — reverse: count them in routes/ai.js",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D37",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: the /frontdesk/knowledge resolver is inline in app.routes.ts (no new resolver file, which the scope does not list) — reverse: move it to core/resolvers/",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: added the dictionary keys knowledge_no_results and knowledge_error beyond the plan's list — reverse: drop them and the two usages",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: did not create src/app/pages/frontdesk/breadcrumbs.md; breadcrumbs-check calls it STRAY, so the knowledge/ row sits in the existing frontdesk/ row of src/app/pages/breadcrumbs.md — reverse: restore the file and fix the check's seam list",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D40",
+      "plan": "554",
+      "type": "behaviour",
+      "text": "behaviour: the import counts only schema-invalid AI items in `dropped`; valid items past the 60th are skipped and not counted — reverse: add `dropped += 1` before `continue` on the 60-item cap in server/routes/ai.js /knowledge-import",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T14:19:44.481Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T14:19:44.483Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

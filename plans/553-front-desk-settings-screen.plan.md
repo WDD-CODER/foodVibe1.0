@@ -162,14 +162,14 @@ as merged; a missing one is a `conflict`.
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the front desk settings page, its route and its tab chip — lazy route with both guards, the settings chip, the Settings icon, page skeleton with load / error / staff states — src/app/pages/frontdesk/frontdesk-settings/**, src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/app.config.ts
-- [ ] A2: Let the owner choose the business type once and create the profile from its template — type picker, name, slug check, create, slug-taken error — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.*
-- [ ] A3: Build the business-and-link and opening-hours cards — details fields, copy-link button and toast, hours editor, closed dates — src/app/pages/frontdesk/frontdesk-settings/**
-- [ ] A4: Build one card per request kind with its questions and rules — enable toggle, question rows with move and remove, 12-question limit, rules fields and range check — src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/**
-- [ ] A5: Build the assistant and status cards — read-only level and status, tone, greeting, handoff text, active hours — src/app/pages/frontdesk/frontdesk-settings/**
-- [ ] A6: Save, discard and leave safely — one save without server-owned fields, field errors from the server, discard with confirm, leave guard — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.*
-- [ ] A7: Add every Hebrew string and the folder maps — dictionary keys listed above, breadcrumbs files — public/assets/data/dictionary.json, src/app/pages/frontdesk/breadcrumbs.md, src/app/pages/breadcrumbs.md
-- [ ] A8: Write the unit specs and the three screen checks, then run the full checks — page and kind-card specs, e2e/ui/553-1..3, test:ci, build, lint, lint:icons, reuse-lint --check-registry, log-query — e2e/ui/553-1.spec.ts, e2e/ui/553-2.spec.ts, e2e/ui/553-3.spec.ts
+- [x] A1: Add the front desk settings page, its route and its tab chip — lazy route with both guards, the settings chip, the Settings icon, page skeleton with load / error / staff states — src/app/pages/frontdesk/frontdesk-settings/**, src/app/app.routes.ts, src/app/core/components/tab-chips/tab-chips.component.ts, src/app/app.config.ts
+- [x] A2: Let the owner choose the business type once and create the profile from its template — type picker, name, slug check, create, slug-taken error — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.*
+- [x] A3: Build the business-and-link and opening-hours cards — details fields, copy-link button and toast, hours editor, closed dates — src/app/pages/frontdesk/frontdesk-settings/**
+- [x] A4: Build one card per request kind with its questions and rules — enable toggle, question rows with move and remove, 12-question limit, rules fields and range check — src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/**
+- [x] A5: Build the assistant and status cards — read-only level and status, tone, greeting, handoff text, active hours — src/app/pages/frontdesk/frontdesk-settings/**
+- [x] A6: Save, discard and leave safely — one save without server-owned fields, field errors from the server, discard with confirm, leave guard — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.*
+- [x] A7: Add every Hebrew string and the folder maps — dictionary keys listed above, breadcrumbs files — public/assets/data/dictionary.json, src/app/pages/frontdesk/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [x] A8: Write the unit specs and the three screen checks, then run the full checks — page and kind-card specs, e2e/ui/553-1..3, test:ci, build, lint, lint:icons, reuse-lint --check-registry, log-query — e2e/ui/553-1.spec.ts, e2e/ui/553-2.spec.ts, e2e/ui/553-3.spec.ts
 
 ## Technical Considerations
 - Dependencies: `FrontDeskProfileDataService`, `templateFor`, `editFrontDesk` (plan 548); the `frontdesk` tab group (plan 547).
@@ -195,4 +195,12 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Human 2026-11-12 (batch-3 ASK 553-1): approved: src/app/core/components/tab-chips/tab-chips.component.spec.ts. Planner wrote the two bare spec names as full paths (they matched nothing in the run's test-file gate).
 - Map row 11, renumbered +2 on 2026-11-10 (old 551 → 553).
+- scope extended: src/app/core/components/tab-chips/tab-chips.component.spec.ts — the new `settings` chip changes its chip list and needs the Settings icon in the spec's icon pick.
+- Decision: `src/app/pages/frontdesk/breadcrumbs.md` was not kept: `scripts/breadcrumbs-check.mjs` flags it as STRAY (leaf folders carry no breadcrumbs file); the `frontdesk/` row in `src/app/pages/breadcrumbs.md` documents the folder.
+- Decision: the save sends `assistant.level` as loaded (not omitted): the server's schema defaults a missing level to 0 and would reset an admin-set level.
+- Decision: a choice question needs 2 options except template questions whose key is in `WANTED_QUESTION_KEYS` (the catering `event_type` ships with no options).
+- Decision: `fd_slug_taken` text changed to the plan's wording (only the server's messageKey used it); `fd_kind_consultation` kept as "ייעוץ" (used by plan 552).
+- Decision: save is shown with `permission.can('editFrontDesk')` instead of `app-edit-gate` (the gate asks `create`, which staff may do).
+- Evidence: `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors); `pnpm run lint:icons` -> exit 0; `pnpm run lint:no-native-select` -> exit 0; `ng test --include frontdesk + tab-chips specs` -> see run below; breadcrumbs-check clean; reuse-lint --check-registry ok; kit-manifest-check ok.
+- e2e/ui/553-1..3 written and listed by Playwright; not run here (the dev server on :4200 is not this worktree's build).
 - Decision (Planner): staff see the screen read-only instead of a hidden chip, so `tab-chips.component.ts` stays an append-only change.

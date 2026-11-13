@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.strip-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  block-size: 3.5rem;
+}
+
+.strip-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.125rem;
+  min-inline-size: 1.5rem;
+  block-size: 100%;
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+}
+
+.strip-bar {
+  inline-size: 100%;
+  min-block-size: 0.125rem;
+  background: var(--border-chrome);
+  border-radius: var(--radius-xs);
+}
+
+.strip-col--requested {
+  color: var(--color-text);
+  font-weight: var(--fw-semibold);
+
+  .strip-bar {
+    background: var(--color-primary, currentcolor);
+  }
+}
+
+.strip-summary,
+.strip-failed {
+  margin-block: 0.25rem 0;
+  font-size: var(--fs-xs);
+  color: var(--color-text-muted);
+}

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, WritableSignal } from '@angular/core'
 import { DatePipe } from '@angular/common'
+import { Router, RouterLink } from '@angular/router'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClientDataService } from '@services/client-data.service'
@@ -35,6 +36,7 @@ const RESERVED_TAGS: readonly string[] = RESERVED_CLIENT_TAGS
   imports: [
     DatePipe,
     FormsModule,
+    RouterLink,
     LucideAngularModule,
     TranslatePipe,
     ...COLUMN_CAROUSEL,
@@ -53,6 +55,7 @@ export class ClientListComponent {
   private readonly permission = inject(PermissionService)
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly router = inject(Router)
 
   protected readonly isOwner_ = this.permission.isOwner_
   protected readonly kinds = CLIENT_KINDS
@@ -174,6 +177,11 @@ export class ClientListComponent {
     if (tag === 'vip') return 'amber'
     if (tag === 'allergy' || tag === 'repeat_no_show') return 'red'
     return null
+  }
+
+  /** Plan 551: a click anywhere on the row opens the profile. */
+  protected openClient(client: Client): void {
+    void this.router.navigate(['/clients', client._id])
   }
 
   protected openAdd(): void {

@@ -1,0 +1,126 @@
+<section class="bk-page" dir="rtl">
+  <app-page-header titleKey="fd_chip_bookings" />
+
+  <div class="bk-bar">
+    <div class="bk-nav">
+      <button
+        type="button"
+        class="c-btn-ghost c-btn-ghost--sm"
+        data-testid="bk-prev"
+        [attr.aria-label]="'bk_prev' | translatePipe"
+        (click)="step(-1)"
+      >
+        <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
+      </button>
+      <strong class="bk-date" data-testid="bk-date">{{ dmy(date_()) }}</strong>
+      <button
+        type="button"
+        class="c-btn-ghost c-btn-ghost--sm"
+        data-testid="bk-next"
+        [attr.aria-label]="'bk_next' | translatePipe"
+        (click)="step(1)"
+      >
+        <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost c-btn-ghost--sm"
+        data-testid="bk-today"
+        [disabled]="isToday_()"
+        (click)="go({ date: today() })"
+      >
+        {{ 'bk_today' | translatePipe }}
+      </button>
+    </div>
+    <div class="bk-views" role="tablist">
+      @for (v of views; track v) {
+      <button
+        type="button"
+        role="tab"
+        class="c-chip c-chip--tab"
+        [class.active]="view_() === v"
+        [attr.aria-selected]="view_() === v"
+        (click)="go({ view: v })"
+      >
+        {{ 'bk_view_' + v | translatePipe }}
+      </button>
+      }
+    </div>
+  </div>
+
+  @if (!isLoading_()) { @if (isEmpty_() && view_() === 'day') {
+  <app-empty-state messageKey="bk_empty_day" icon="clipboard-check" />
+  } @else { @for (section of sections_(); track section.date) {
+  <section class="bk-day" [attr.data-date]="section.date">
+    @if (view_() === 'week') {
+    <h2 class="bk-day-title">{{ dayName(section.date) }} · {{ dmy(section.date) }}</h2>
+    } @if (section.groups.length === 0 && view_() === 'week') {
+    <p class="bk-none">{{ 'bk_empty_day' | translatePipe }}</p>
+    } @for (group of section.groups; track group.time) {
+    <div class="bk-group">
+      <span class="bk-time" dir="ltr">{{ group.time }}</span>
+      <div class="bk-rows">
+        @for (b of group.bookings; track b._id) {
+        <article class="bk-row c-glass-card" data-testid="booking-row" [attr.data-status]="b.status">
+          <div class="bk-main">
+            <a class="bk-name" [routerLink]="['/clients', b.clientId]">{{ b.guestName }}</a>
+            <span class="bk-meta">{{ b.partySize }} · {{ 'fd_kind_' + b.kind | translatePipe }}</span>
+            <span class="c-chip--tag c-chip--sm" data-testid="booking-status"
+              >{{ 'bk_status_' + b.status | translatePipe }}</span
+            >
+          </div>
+          <div class="bk-actions">
+            @if (b.status === 'confirmed') {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="bk-seated"
+              [disabled]="busyId_() === b._id"
+              (click)="setStatus(b, 'seated')"
+            >
+              <lucide-icon name="user-check" [size]="15"></lucide-icon>
+              {{ 'bk_seated' | translatePipe }}
+            </button>
+            } @if (b.status === 'seated') {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="bk-finished"
+              [disabled]="busyId_() === b._id"
+              (click)="setStatus(b, 'finished')"
+            >
+              <lucide-icon name="circle-check" [size]="15"></lucide-icon>
+              {{ 'bk_finished' | translatePipe }}
+            </button>
+            } @if (canNoShow(b)) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="bk-no-show"
+              [disabled]="busyId_() === b._id"
+              (click)="setStatus(b, 'no_show')"
+            >
+              <lucide-icon name="circle-slash" [size]="15"></lucide-icon>
+              {{ 'bk_no_show' | translatePipe }}
+            </button>
+            } @if (canCancel(b)) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="bk-cancel"
+              [disabled]="busyId_() === b._id"
+              (click)="setStatus(b, 'cancelled')"
+            >
+              <lucide-icon name="circle-x" [size]="15"></lucide-icon>
+              {{ 'bk_cancel' | translatePipe }}
+            </button>
+            }
+          </div>
+        </article>
+        }
+      </div>
+    </div>
+    }
+  </section>
+  } } }
+</section>
