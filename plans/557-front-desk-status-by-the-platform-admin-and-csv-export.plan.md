@@ -174,13 +174,13 @@ public "not available" answer (555), `BusinessRow.frontDesk` (556), `RequestData
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the profile and business keep the admin's changes and reasons — adminHistory, frontDeskPlan, the admin body schema, level and history kept on owner writes — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/business.schema.ts, shared/schemas/front-desk-admin.schema.ts, shared/schemas/index.ts, server/routes/generic.js
-- [ ] A2: Give the platform admin one route to set status, assistant level and plan with a reason — server/routes/admin.js
-- [ ] A3: Test the route, the owner-write guard and that a suspended page is closed but its data still readable — server/test/front-desk-status.test.js
-- [ ] A4: Let the platform admin change a business's front desk from the platform page — row status and level, the dialog and its service call — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/platform-dashboard/components/front-desk-admin-dialog/**, src/app/core/services/platform-admin.service.ts
-- [ ] A5: Tell members when their front desk is suspended — the shared banner on the dashboard and the settings page — src/app/shared/front-desk-status-banner/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts, src/app/pages/frontdesk/frontdesk-settings/**
-- [ ] A6: Let the owner download clients, requests and bookings as files Excel opens in Hebrew — CSV helper and the export card — src/app/core/utils/csv.util.ts, src/app/core/utils/csv.util.spec.ts, src/app/pages/frontdesk/frontdesk-settings/**
-- [ ] A7: Add the words, icon, registry and docs rows, the download check, and run every check — public/assets/data/dictionary.json, src/app/app.config.ts, docs/brain/component-families.md, docs/agent/standards-backend.md, src/app/pages/frontdesk/breadcrumbs.md, e2e/ui/557-1.spec.ts
+- [x] A1: Let the profile and business keep the admin's changes and reasons — adminHistory, frontDeskPlan, the admin body schema, level and history kept on owner writes — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/business.schema.ts, shared/schemas/front-desk-admin.schema.ts, shared/schemas/index.ts, server/routes/generic.js
+- [x] A2: Give the platform admin one route to set status, assistant level and plan with a reason — server/routes/admin.js
+- [x] A3: Test the route, the owner-write guard and that a suspended page is closed but its data still readable — server/test/front-desk-status.test.js
+- [x] A4: Let the platform admin change a business's front desk from the platform page — row status and level, the dialog and its service call — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/platform-dashboard/components/front-desk-admin-dialog/**, src/app/core/services/platform-admin.service.ts
+- [x] A5: Tell members when their front desk is suspended — the shared banner on the dashboard and the settings page — src/app/shared/front-desk-status-banner/**, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html, src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts, src/app/pages/frontdesk/frontdesk-settings/**
+- [x] A6: Let the owner download clients, requests and bookings as files Excel opens in Hebrew — CSV helper and the export card — src/app/core/utils/csv.util.ts, src/app/core/utils/csv.util.spec.ts, src/app/pages/frontdesk/frontdesk-settings/**
+- [x] A7: Add the words, icon, registry and docs rows, the download check, and run every check — public/assets/data/dictionary.json, src/app/app.config.ts, docs/brain/component-families.md, docs/agent/standards-backend.md, src/app/pages/frontdesk/breadcrumbs.md, e2e/ui/557-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: 548 profile schema and strip/keep step, 549 data services, 553 settings page and keys, 555 public "not available", 556 admin row `frontDesk`.
@@ -206,3 +206,33 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Plan 555's bridge script `server/scripts/set-front-desk-status.js` stays (e2e setup and local use); the admin route is the in-app way and the only one that keeps a reason.
 - Assistant level is set here because brief D7 gives it to the platform admin and plan 553 shows it read-only pointing to this plan.
 - Platform admin and INV-1: the write is a platform-admin route into one named business, the pattern of `PUT /admin/businesses/:id/internal` (plan 448); members can never write these fields.
+
+### Builder evidence (round 0)
+- `pnpm run build` -> exit 0; `pnpm run lint` / `lint:icons` / `lint:no-native-select` -> exit 0 (0 errors).
+- `pnpm run test:server` -> exit 0, 102 files, 1328 tests (incl. `front-desk-status.test.js`).
+- `pnpm run test:ci` -> exit 0, 2161 SUCCESS (incl. csv.util, data-export-card, front-desk-status-banner, front-desk-admin-dialog specs).
+- breadcrumbs-check, override-check, plan-ledger-check, kit-manifest-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+- `e2e/ui/557-1.spec.ts` written; not run here (needs the running app and QA login); the gate reruns it.
+- Not done as written: the row's assistant level (see below); `src/app/pages/frontdesk/breadcrumbs.md` (breadcrumbs-check flags a file outside the seams; the rows went into `src/app/pages/breadcrumbs.md` instead).
+- `server/routes/admin.js` list rows are unchanged: `server/test/front-desk-setup.test.js:126` and `server/test/admin-businesses.test.js` pin the exact row shape and are outside the scope, so the table does not show the assistant level; the dialog's level select starts on "ללא שינוי".
+
+### Builder evidence (round 2, fresh builder)
+- Round 1 failed only the scope check: `src/app/core/breadcrumbs.md` and `test-results/.last-run.json` were outside the scope. Re-applied the round-0 implementation (5900cfc) from the base f69a1d4 without those two files; `utils/` is already named in core's breadcrumbs, so the csv.util line is not needed (breadcrumbs-check -> exit 0). The Playwright artifact `test-results/.last-run.json` is not committed.
+- scope-check --diff=origin/orch/batch-5 -> exit 0, `SCOPE: ok`; kit-manifest-check -> ok, 0 unclassified.
+- `pnpm run build`, `pnpm run lint`, `pnpm --dir server run lint`, `lint:icons`, `lint:no-native-select` -> exit 0.
+- `pnpm run test:server` -> exit 0, 102 files, 1328 passed; `pnpm run test:ci` -> exit 0, 2161 SUCCESS.
+- override-check, plan-ledger-check, breadcrumbs-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+- `e2e/ui/557-1.spec.ts`: not run here; per the Human's answer to ask 557-1, the gate's rerun is the evidence.
+
+### Builder evidence (resume after ask 557-2)
+- Per the Human's answer to ask 557-2: `e2e/ui/557-1.spec.ts` is written, not run (needs the running app and the QA login); `npx playwright test e2e/ui/557-1.spec.ts --list` -> exit 0, 1 test listed (compiles). It signs in with `signInQa` and clears profiles in `finally`. The Planner runs it against the served batch branch.
+- `pnpm run build`, `pnpm run lint` (0 errors), `pnpm --dir server run lint`, `lint:icons`, `lint:no-native-select` -> exit 0.
+- `pnpm run test:ci` -> exit 0, 2161 SUCCESS; `pnpm run test:server` -> exit 0, 102 files, 1328 passed.
+- kit-manifest-check -> ok, 0 unclassified; scope-check --diff=origin/orch/batch-5 -> `SCOPE: ok`; override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+
+### Builder evidence (resume after ask 557-3)
+- Reviewer finding fixed (platform row shows the assistant level): `server/routes/admin.js` list rows add `frontDesk.assistantLevel` only when the stored level is above 0, so the pinned row shape in `server/test/front-desk-setup.test.js:126` (level 0 template) still holds; `platform-dashboard.page.html` shows `fd_assistant_level_<level ?? 0>` next to the status (`data-testid="fd-level"`). `BusinessRow.frontDesk.assistantLevel?` added.
+- Tests: `platform-dashboard.page.spec.ts` new case asserts `fd_assistant_level_1` / `fd_assistant_level_0` per row; `server/test/front-desk-status.test.js` new case asserts the list row is level-free at 0 and carries `assistantLevel: 1` after the admin raises it.
+- `pnpm run test:server` -> exit 0, 1329 passed; `pnpm run test:ci` -> exit 0, 2162 SUCCESS; `pnpm run build`, `pnpm run lint` (0 errors), server lint, `lint:icons`, `lint:no-native-select` -> exit 0.
+- kit-manifest-check -> ok, 0 unclassified; scope-check --diff=origin/orch/batch-5 -> `SCOPE: ok`; override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check -> exit 0; log-query -> exit 0 (no database configured, skipped).
+- `e2e/ui/557-1.spec.ts`: written, not run (no running app or QA login in this worktree), per the Human's answer to ask 557-3.

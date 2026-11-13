@@ -26,7 +26,7 @@ const usage = (userId, businessId, daysAgo) => {
 }
 const event = (id, businessId, extra = {}) => ({ _id: id, businessId, userId: 'x', name: 'secret ' + id, stage: 'inquiry', eventDate: '2026-01-01', ...extra })
 
-const EXPECTED_KEYS = ['_id', 'name', 'ownerName', 'staffCount', 'createdAt', 'internal', 'lastActivityAt', 'activeDays7', 'events', 'closeRate', 'lastEventDate'].sort()
+const EXPECTED_KEYS = ['_id', 'name', 'ownerName', 'staffCount', 'createdAt', 'internal', 'lastActivityAt', 'activeDays7', 'events', 'closeRate', 'lastEventDate', 'frontDesk'].sort()
 
 let bAUsageLast
 

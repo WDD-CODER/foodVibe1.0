@@ -92,19 +92,19 @@ const ROWS = [
     verdict: 'unfit',
     reasons: ['fd_reason_out_of_area'],
   }],
-  ['catering event: 25 guests for a min of 30 is unfit', cateringEvent, { date: '2026-08-01', partySize: 25, eventTypeKey: 'wedding' }, {}, { now: NOW }, {
+  ['catering event: 25 guests for a min of 30 is unfit', cateringEvent, { date: '2026-08-01', partySize: 25, eventTypeKey: 'wedding', location: 'תל אביב' }, {}, { now: NOW }, {
     verdict: 'unfit',
     reasons: ['fd_reason_party_too_small|min=30'],
   }],
-  ['catering event: 28 guests for a min of 30 is borderline', cateringEvent, { date: '2026-08-01', partySize: 28, eventTypeKey: 'wedding' }, {}, { now: NOW }, {
+  ['catering event: 28 guests for a min of 30 is borderline', cateringEvent, { date: '2026-08-01', partySize: 28, eventTypeKey: 'wedding', location: 'תל אביב' }, {}, { now: NOW }, {
     verdict: 'borderline',
     reasons: ['fd_reason_party_too_small|min=30'],
   }],
-  ['catering event: no event type', cateringEvent, { date: '2026-08-01', partySize: 50 }, {}, { now: NOW }, {
+  ['catering event: no event type', cateringEvent, { date: '2026-08-01', partySize: 50, location: 'תל אביב' }, {}, { now: NOW }, {
     verdict: 'borderline',
     reasons: ['fd_reason_missing_answer|q=event_type'],
   }],
-  ['catering event: two weeks notice is needed (336 hours)', cateringEvent, { date: '2026-06-10', partySize: 50, eventTypeKey: 'wedding' }, {}, { now: NOW }, {
+  ['catering event: two weeks notice is needed (336 hours)', cateringEvent, { date: '2026-06-10', partySize: 50, eventTypeKey: 'wedding', location: 'תל אביב' }, {}, { now: NOW }, {
     verdict: 'unfit',
     reasons: ['fd_reason_too_soon|hours=336'],
   }],

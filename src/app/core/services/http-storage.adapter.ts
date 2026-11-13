@@ -17,6 +17,7 @@ export const API = {
   events: `${API_ROOT}/events`,
   requests: `${API_ROOT}/requests`,
   bookings: `${API_ROOT}/bookings`,
+  public: (path: string) => `${API_ROOT}/public/${path}`,
   log: `${API_ROOT}/log`,
   health: `${API_ROOT}/health`
 } as const

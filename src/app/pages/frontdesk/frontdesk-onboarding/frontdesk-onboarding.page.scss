@@ -1,0 +1,137 @@
+:host {
+  display: block;
+}
+
+.ob-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-inline-size: 48rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+.ob-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ob-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.ob-title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.ob-sub {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.ob-hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.ob-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+}
+
+.ob-faq-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.5rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--border-subtle, rgb(0 0 0 / 8%));
+  break-inside: avoid;
+}
+
+.ob-add-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ob-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ob-dates li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.ob-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ob-link {
+  align-self: flex-start;
+  font-size: 0.9rem;
+}
+
+.ob-baseline--closed {
+  display: none;
+}
+
+.ob-baseline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ob-baseline-toggle {
+  align-self: flex-start;
+}
+
+.ob-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media print {
+  .ob-page {
+    max-inline-size: none;
+    padding: 0;
+  }
+
+  .ob-card {
+    padding: 0.5rem 0;
+    break-inside: avoid;
+    border: 0;
+    box-shadow: none;
+    background: none;
+  }
+
+  /* Collapsed groups print open. */
+  .ob-baseline--closed {
+    display: flex !important;
+  }
+
+  .ob-no-print {
+    display: none !important;
+  }
+
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}

@@ -1,0 +1,36 @@
+@if (visible_()) {
+  <section
+    class="fd-card c-glass-panel"
+    data-testid="frontdesk-setup-card"
+    dir="rtl"
+    [attr.aria-label]="'frontdesk_setup_title' | translatePipe"
+  >
+    <header class="fd-card__head">
+      <span class="fd-card__icon"><lucide-icon name="clipboard-check" [size]="16" /></span>
+      <h2 class="fd-card__title">{{ 'frontdesk_setup_title' | translatePipe }}</h2>
+      @if (hasProfile_()) {
+        <span class="fd-card__progress" data-testid="frontdesk-setup-progress">{{ progress_() }}</span>
+      }
+    </header>
+    @if (!hasProfile_()) {
+      <p class="fd-card__none">{{ 'frontdesk_setup_none' | translatePipe }}</p>
+      <a class="c-btn-primary fd-card__start" routerLink="/frontdesk/onboarding" data-testid="frontdesk-setup-start">
+        {{ 'frontdesk_setup_start' | translatePipe }}
+      </a>
+    } @else {
+      <ul class="fd-card__rows">
+        @for (row of rows_(); track row.key) {
+          <li class="fd-row" [class.fd-row--done]="row.done" [attr.data-testid]="'frontdesk-row-' + row.key">
+            @if (row.done) {
+              <lucide-icon class="fd-row__mark" name="circle-check" [size]="18" />
+              <span>{{ row.labelKey | translatePipe }}</span>
+            } @else {
+              <lucide-icon class="fd-row__mark fd-row__mark--open" name="circle" [size]="18" />
+              <a class="fd-row__link" [routerLink]="row.path">{{ row.labelKey | translatePipe }}</a>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}

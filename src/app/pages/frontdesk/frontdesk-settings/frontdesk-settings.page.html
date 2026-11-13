@@ -1,5 +1,6 @@
 <section class="fs-page" dir="rtl">
   <app-page-header titleKey="fd_chip_settings"></app-page-header>
+  <app-front-desk-status-banner />
 
   @if (isLoading_()) {
   <p class="fs-loading" aria-busy="true">{{ 'fd_loading' | translatePipe }}</p>
@@ -274,6 +275,8 @@
       <p class="fs-note">{{ 'fd_status_admin' | translatePipe }}</p>
     </section>
   </fieldset>
+
+  <app-data-export-card />
 
   @if (canEdit_()) {
   <div class="fs-savebar">

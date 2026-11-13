@@ -9,18 +9,17 @@ const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
 const { checkStoredDoc } = require('../middleware/validate')
 const { dataWriteLimiter } = require('../middleware/write-limit')
-const { scopeFilter, stampNew } = require('../utils/business-scope')
+const { scopeFilter } = require('../utils/business-scope')
 const { assertCan } = require('../utils/permissions')
 const { actorOf } = require('../utils/actor')
 const { newId } = require('../utils/id')
 const { newPublicToken } = require('../utils/public-token')
-const { upsertClientByPhone, LIVE_UNMERGED } = require('../utils/client-upsert')
+const { createRequest, runQualify } = require('../utils/request-create')
 const { LIVE } = require('../jobs/purge-deleted')
 const { expireDue } = require('../utils/request-expiry')
 const { buildNewEventDoc } = require('../utils/event-create')
 const { newNote } = require('../utils/event-stage')
 const { jerusalemEpoch } = require('../generated/schemas/front-desk/local-time')
-const { qualify } = require('../generated/schemas/front-desk/qualify')
 const {
   REQUEST_STATUSES, DECLINE_REASONS, manualRequestInputSchema, wantedSchema, requestAnswersSchema,
 } = require('../generated/schemas/entities/request.schema')
@@ -40,7 +39,6 @@ const NOTE_MAX = 2000
 const DEFAULT_DURATION_MINUTES = 60
 const NEEDS_PARTY = ['table', 'tasting']
 const NEW_KIND = { event: 'event_client', tasting: 'event_client', consultation: 'event_client', table: 'diner' }
-const NO_KIND_CONFIG = { enabled: false, questions: [], rules: {}, expireAfterHours: 24 }
 
 router.use(dataWriteLimiter)
 
@@ -84,16 +82,6 @@ async function writeConditional(req, res, read, set, push) {
 }
 
 const loadProfile = businessId => db().collection('frontDeskProfiles').findOne({ businessId, ...LIVE })
-
-/** Rules check of one request: `{ status, qualification }`. A missing required answer means `needs_info`. */
-function runQualify(profile, kind, wanted, answers, now) {
-  const answerMap = Object.fromEntries((answers ?? []).map(a => [a.questionKey, a.value]))
-  const result = qualify(profile.requestKinds?.[kind] ?? NO_KIND_CONFIG, wanted, answerMap, {
-    now, hours: profile.hours, closedDates: profile.closedDates, kind,
-  })
-  const missing = result.reasons.some(r => r.startsWith('fd_reason_missing_answer'))
-  return { status: missing ? 'needs_info' : 'qualified', qualification: { ...result, by: 'rules' } }
-}
 
 /**
  * Plan 550: one decision-log row. Ids, enums and numbers only: never the guest's name, phone or any free text.
@@ -186,6 +174,25 @@ function bookingOutcome(request, wanted, profile, ctx) {
   }
 }
 
+/** Plan 556 (R-19): a test request touches no client: `clientId` is the placeholder `__test__`, no counter moves. */
+const TEST_CLIENT_ID = '__test__'
+
+async function createTestRequest(businessId, profile, input, actor) {
+  const now = Date.now()
+  const { status, qualification } = runQualify(profile, input.kind, input.wanted, input.answers, now)
+  const doc = {
+    _id: newId(), schemaVersion: 2, userId: actor.userId, businessId, createdBy: actor.userId, createdAt: now, updatedAt: now,
+    kind: input.kind, status, channel: 'manual', clientId: TEST_CLIENT_ID, guestName: input.guestName, guestPhone: input.guestPhone,
+    wanted: input.wanted, answers: input.answers, qualification,
+    statusHistory: [{ status, at: now, by: actor.userId, byName: actor.name, via: 'member' }],
+    publicToken: newPublicToken(), test: true,
+  }
+  const check = checkStoredDoc(TYPE, doc)
+  if (!check.ok) throw Object.assign(new Error('INVALID_DOC'), { code: 'INVALID_DOC', issues: check.issues })
+  await db().collection(TYPE).insertOne(doc)
+  return doc
+}
+
 // POST /api/v1/requests/:id/approve  { wanted?, note? }  - one call: claim, create the event or booking, update the client, log
 router.post('/:id/approve', verifyToken, async (req, res) => {
   try {
@@ -202,6 +209,18 @@ router.post('/:id/approve', verifyToken, async (req, res) => {
     if (!current) return
     if (!assertCan(req, res, 'manageRequests', { type: TYPE, doc: current })) return
     if (!OPEN.includes(current.status)) return res.status(409).json({ error: 'ALREADY_DECIDED' })
+
+    if (current.test === true) {
+      // Plan 556 (R-19): a test request is only marked approved; no event, booking, client change or decision row.
+      const actor = actorOf(req)
+      const entry = { status: 'approved', at: now, by: actor.userId, byName: actor.name, via: 'member', ...(note && { note }) }
+      const after = { ...current, status: 'approved', updatedAt: now, statusHistory: [...current.statusHistory, entry] }
+      if (!validMerged(res, after)) return
+      const result = await writeConditional(req, res, current, { status: 'approved', updatedAt: now }, entry)
+      if (!result) return
+      req.log.info({ event: 'requests.approved', kind: current.kind, test: true })
+      return res.json({ ok: true, request: result, test: true })
+    }
 
     const wanted = { ...current.wanted, ...overrides.data }
     const editedFields = Object.keys(overrides.data).filter(k => JSON.stringify(overrides.data[k]) !== JSON.stringify(current.wanted?.[k]))
@@ -288,7 +307,7 @@ router.post('/:id/decline', verifyToken, async (req, res) => {
       { returnDocument: 'after' },
     )
     if (!result) return res.status(409).json({ error: 'ALREADY_DECIDED' })
-    await writeDecision(req, current, 'decline', [], now)
+    if (current.test !== true) await writeDecision(req, current, 'decline', [], now)
     req.log.info({ event: 'requests.declined', kind: current.kind, reason })
     res.json(result)
   } catch (err) {
@@ -309,56 +328,22 @@ router.post('/', verifyToken, async (req, res) => {
     if (!assertCan(req, res, 'manageRequests', { type: TYPE })) return
     const input = parsed.data
     const { businessId } = scopeFilter(req)
-    const actor = actorOf(req)
     const profile = await loadProfile(businessId)
     if (!profile) return res.status(409).json({ error: 'NO_PROFILE' })
 
-    let client
-    if (input.clientId) {
-      client = await db().collection('clients').findOne({ _id: input.clientId, businessId, ...LIVE, ...LIVE_UNMERGED })
-      if (!client) return res.status(404).json({ error: 'CLIENT_NOT_FOUND' })
-    } else {
-      try {
-        client = (await upsertClientByPhone(db(), businessId, {
-          name: input.guestName, phone: input.guestPhone, source: 'manual', actor,
-        })).client
-      } catch (err) {
-        if (err?.code === 'BAD_CLIENT') return res.status(400).json({ error: 'BAD_REQUEST_INPUT', issues: err.issues ?? [] })
-        throw err
-      }
+    let created
+    try {
+      created = input.test === true
+        ? { request: await createTestRequest(businessId, profile, input, actorOf(req)) }
+        : await createRequest(db(), businessId, profile, input, { channel: 'manual', actor: actorOf(req), via: 'member' })
+    } catch (err) {
+      if (err?.code === 'CLIENT_NOT_FOUND') return res.status(404).json({ error: 'CLIENT_NOT_FOUND' })
+      if (err?.code === 'BAD_CLIENT') return res.status(400).json({ error: 'BAD_REQUEST_INPUT', issues: err.issues ?? [] })
+      if (err?.code === 'INVALID_DOC') return res.status(400).json({ error: 'Validation failed', issues: err.issues })
+      throw err
     }
-
-    const now = Date.now()
-    const { status, qualification } = runQualify(profile, input.kind, input.wanted, input.answers, now)
-    const doc = stampNew(req, {
-      _id: newId(),
-      schemaVersion: 2,
-      userId: actor.userId,
-      updatedAt: now,
-      kind: input.kind,
-      status,
-      channel: 'manual',
-      clientId: client._id,
-      guestName: client.name,
-      guestPhone: client.phone,
-      wanted: input.wanted,
-      answers: input.answers,
-      qualification,
-      statusHistory: [{ status, at: now, by: actor.userId, byName: actor.name, via: 'member' }],
-      publicToken: newPublicToken(),
-    })
-    if (!validMerged(res, doc)) return
-    await db().collection(TYPE).insertOne(doc)
-
-    const clients = db().collection('clients')
-    await clients.updateOne(
-      { _id: client._id, businessId },
-      { $inc: { 'counters.requests': 1 }, $set: { lastContactAt: now, updatedAt: now } },
-    )
-    await clients.updateOne(
-      { _id: client._id, businessId, $or: [{ kinds: { $exists: false } }, { kinds: { $size: 0 } }] },
-      { $set: { kinds: ['lead'] } },
-    )
+    const doc = created.request
+    const { status } = doc
     req.log.info({ event: 'requests.created', kind: doc.kind, status, channel: doc.channel })
     res.status(201).json(doc)
   } catch (err) {
@@ -383,7 +368,7 @@ router.put('/:id/status', verifyToken, async (req, res) => {
     if (!validMerged(res, { ...current, status, updatedAt: now, statusHistory: [...current.statusHistory, entry] })) return
     const result = await writeConditional(req, res, current, { status, updatedAt: now }, entry)
     if (!result) return
-    if (status === 'needs_info') await writeDecision(req, current, 'ask', [], now)
+    if (status === 'needs_info' && current.test !== true) await writeDecision(req, current, 'ask', [], now)
     req.log.info({ event: 'requests.status.changed', from: current.status, to: status })
     res.json(result)
   } catch (err) {

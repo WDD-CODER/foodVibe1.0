@@ -1,0 +1,6 @@
+@if (isSuspended_()) {
+  <p class="fd-banner" role="status" data-testid="fd-suspended-banner">
+    <lucide-icon name="circle-pause" [size]="16"></lucide-icon>
+    <span>{{ 'fd_suspended_banner' | translatePipe }}</span>
+  </p>
+}
