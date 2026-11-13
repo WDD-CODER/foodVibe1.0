@@ -61,6 +61,7 @@ describe('PlatformDashboardPage', () => {
     rows,
     totals: { calls: 0, failedCalls: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0, estCostUsd: 0 }
   })
+  const downloadFrontDeskCsv = jasmine.createSpy('downloadFrontDeskCsv').and.resolveTo()
   let getAiUsage: jasmine.Spy<(params?: AiUsageParams) => Promise<AiUsageReport>>
 
   async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
@@ -83,6 +84,25 @@ describe('PlatformDashboardPage', () => {
             rows_: rows_.asReadonly(),
             load: () => Promise.resolve(),
             getAiUsage,
+            getFrontDeskStats: () =>
+              Promise.resolve({
+                from: '2026-10-14',
+                to: '2026-11-12',
+                rows: [
+                  {
+                    businessId: 'a',
+                    name: 'a',
+                    requests: 7,
+                    afterHoursPct: null,
+                    approved: 3,
+                    declined: 1,
+                    medianMinutesToDecision: 12.5,
+                    noShowRatePct: null,
+                    eventsFromRequests: 0
+                  }
+                ]
+              }),
+            downloadFrontDeskCsv: downloadFrontDeskCsv,
             downloadAiUsageCsv: jasmine.createSpy('downloadAiUsageCsv').and.resolveTo(),
             setInternal: jasmine.createSpy('setInternal').and.resolveTo()
           }
@@ -201,6 +221,26 @@ describe('PlatformDashboardPage', () => {
     const open = spyOn(dialog, 'open').and.resolveTo(false)
     ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="fd-edit"]') as HTMLButtonElement).click()
     expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
+  })
+
+  describe('front desk columns (plan 559)', () => {
+    const cell = (id: string): string =>
+      ((fixture.nativeElement as HTMLElement).querySelector(`tbody [data-testid="${id}"]`)?.textContent ?? '').trim()
+
+    it('adds requests, median minutes and no-show % matched by business id, with a dash when there is none', async () => {
+      await setup([row('a')])
+      expect(cell('fd-requests')).toBe('7')
+      expect(cell('fd-median')).toBe('12.5')
+      expect(cell('fd-no-show')).toBe('—')
+    })
+
+    it('the export button downloads the CSV', async () => {
+      await setup([row('a')])
+      ;(
+        (fixture.nativeElement as HTMLElement).querySelector('[data-testid="fd-export-csv"]') as HTMLButtonElement
+      ).click()
+      expect(downloadFrontDeskCsv).toHaveBeenCalled()
+    })
   })
 
   describe('AI usage table (plan 566)', () => {

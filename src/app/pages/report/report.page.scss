@@ -212,3 +212,37 @@
     padding: 0.5mm 1mm;
   }
 }
+
+/* Plan 559: the front desk block — label, measured number, and the owner's estimate in the lighter style. */
+.report__fd {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.report__fd-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+
+  dt {
+    min-inline-size: 12rem;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+  }
+}
+
+.report__fd-estimate {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--color-text-muted-light);
+  font-size: 0.75rem;
+  font-weight: normal;
+}

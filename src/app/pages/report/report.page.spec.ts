@@ -7,6 +7,7 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { BusinessStatsService } from '@services/business-stats.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
+import type { FrontDeskStats } from '@models/frontdesk-stats.model'
 import type { BusinessReport, ReportMetricKey, ReportValue } from '@models/business-report.model'
 import { ReportPage } from './report.page'
 
@@ -65,12 +66,37 @@ function report(over: Partial<BusinessReport> = {}): BusinessReport {
   }
 }
 
+const frontDesk = (over: Partial<FrontDeskStats> = {}, total = 6): FrontDeskStats => ({
+  from: 0,
+  to: 10 * 86400000,
+  requests: {
+    total,
+    perDay: total / 10,
+    byChannel: { manual: 1, public_form: total - 1, whatsapp: 0 },
+    byKind: { table: total, event: 0, tasting: 0, consultation: 0 }
+  },
+  afterHoursPct: 40,
+  outcomes: { approved: 3, declined: 1, expired: 0, cancelled: 0, waiting: 2 },
+  declinesByReason: { full: 1, out_of_area: 0, below_minimum: 0, date_taken: 0, other: 0 },
+  medianMinutesToDecision: 15,
+  bookings: { total: 1, noShowRatePct: null, enough: false },
+  eventsFromRequests: { count: 2, revenue: 0 },
+  baseline: null,
+  ...over
+})
+
 describe('ReportPage', () => {
   let fixture: ComponentFixture<ReportPage>
   let getReport: jasmine.Spy
+  let getFrontDesk: jasmine.Spy
   let query$: BehaviorSubject<ReturnType<typeof convertToParamMap>>
 
-  async function setup(result: BusinessReport | HttpErrorResponse, query: Record<string, string> = {}): Promise<void> {
+  async function setup(
+    result: BusinessReport | HttpErrorResponse,
+    query: Record<string, string> = {},
+    fd: FrontDeskStats = frontDesk()
+  ): Promise<void> {
+    getFrontDesk = jasmine.createSpy('getFrontDesk').and.resolveTo(fd)
     getReport = jasmine
       .createSpy('getReport')
       .and.callFake(() => (result instanceof HttpErrorResponse ? Promise.reject(result) : Promise.resolve(result)))
@@ -79,7 +105,7 @@ describe('ReportPage', () => {
       imports: [ReportPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp, TrendingDown })],
       providers: [
         provideRouter([]),
-        { provide: BusinessStatsService, useValue: { getReport } },
+        { provide: BusinessStatsService, useValue: { getReport, getFrontDesk } },
         {
           provide: LoggingService,
           useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error', 'warn'])
@@ -133,6 +159,29 @@ describe('ReportPage', () => {
     await setup(report())
     expect(text('trend-inquiries')).toContain('—')
     expect(text('finding-below_profit_target')).toContain('2 אירועים נסגרו מתחת ליעד הרווח')
+  })
+
+  it('shows the front desk block from the report range start to today', async () => {
+    await setup(report(), { businessId: 'bX' })
+    expect(getFrontDesk).toHaveBeenCalledOnceWith({ from: '2026-09-01', to: jasmine.any(String) }, 'bX')
+    expect(text('fd-requests')).toContain('6')
+    expect(text('fd-afterHours')).toContain('40.0%')
+    expect(text('fd-median')).toContain('15')
+    expect(text('fd-noShow')).toContain('אין מספיק נתונים')
+    expect(text('fd-events')).toContain('2')
+    expect(byId('fd-estimate')).toBeNull()
+  })
+
+  it('shows the owner estimate beside the measured front desk number', async () => {
+    await setup(report(), {}, frontDesk({ baseline: { avgResponseMinutes: { estimate: 60, measured: 15 } } }))
+    const est = byId('fd-median')!.querySelector('[data-testid="fd-estimate"]')!
+    expect(est.textContent).toContain('הערכת בעל העסק')
+    expect(est.textContent).toContain('60')
+  })
+
+  it('hides the front desk block when the range has no requests', async () => {
+    await setup(report(), {}, frontDesk({}, 0))
+    expect(byId('report-frontdesk')).toBeNull()
   })
 
   it('shows the owner-only message on a 403', async () => {

@@ -2311,6 +2311,21 @@
     "fd_csv_no": "לא",
     "fd_csv_outcome_event": "אירוע",
     "fd_csv_outcome_booking": "הזמנה",
-    "platform_frontdesk_col": "לקוחות והזמנות"
+    "platform_frontdesk_col": "לקוחות והזמנות",
+    "frontdesk_week_title": "השבוע בקבלה",
+    "frontdesk_week_requests": "השבוע התקבלו {{m}} בקשות",
+    "frontdesk_week_after_hours": "({{k}} מחוץ לשעות הפתיחה)",
+    "frontdesk_week_decided": "אישרת {{x}} בחציון של {{y}} דקות.",
+    "frontdesk_week_all_requests": "לכל הבקשות",
+    "report_frontdesk_title": "קבלה ופניות",
+    "frontdesk_stat_requests": "בקשות",
+    "frontdesk_stat_after_hours_pct": "מחוץ לשעות הפתיחה (%)",
+    "frontdesk_stat_median_decision": "זמן החלטה חציוני (דקות)",
+    "frontdesk_stat_no_show_pct": "לא הגיעו (%)",
+    "frontdesk_stat_events_from_requests": "אירועים שנולדו מבקשות",
+    "platform_col_fd_requests": "בקשות (30 יום)",
+    "platform_col_fd_median": "זמן החלטה (דק׳)",
+    "platform_col_fd_no_show": "לא הגיעו (%)",
+    "platform_fd_export_csv": "ייצוא קבלה CSV"
   }
 }

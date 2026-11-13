@@ -48,4 +48,20 @@ describe('BusinessStatsService', () => {
     req2.flush({ months: 3 })
     await own
   })
+
+  it('asks for the front desk numbers with the range, and businessId only when given', async () => {
+    const result = service.getFrontDesk({ from: '2026-11-01', to: '2026-11-07' }, 'bX')
+    const req = http.expectOne((r) => r.url.endsWith('/api/v1/stats/frontdesk'))
+    expect(req.request.params.get('from')).toBe('2026-11-01')
+    expect(req.request.params.get('to')).toBe('2026-11-07')
+    expect(req.request.params.get('businessId')).toBe('bX')
+    req.flush({ requests: { total: 1 } })
+    expect(await result).toEqual(jasmine.objectContaining({ requests: jasmine.anything() }))
+
+    const own = service.getFrontDesk()
+    const req2 = http.expectOne((r) => r.url.endsWith('/api/v1/stats/frontdesk'))
+    expect(req2.request.params.keys().length).toBe(0)
+    req2.flush({})
+    await own
+  })
 })
