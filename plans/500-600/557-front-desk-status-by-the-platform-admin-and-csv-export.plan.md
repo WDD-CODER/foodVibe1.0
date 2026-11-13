@@ -1,6 +1,6 @@
 # Plan 557 — The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings
 
-Status: draft
+Status: done
 Depends-on: 555, 556
 Snapshot: 05741afd08ec936d1aec6f8d9a53631141905f93
 
