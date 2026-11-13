@@ -249,6 +249,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A1: Send the full signed-in user back when a session is restored — server/routes/auth.js, server/test/auth-terms.test.js
 - [ ] A2: Use that user in the app so an accepted terms version is remembered in every new browser — src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
 
+### Plan 595 — Website imports refuse redirects to internal addresses (`plans/595-website-imports-refuse-redirects-to-internal-addresses.plan.md`)
 - [ ] A1: Check every redirect of a website import against the safety rules, at most 5 hops — safeFetch helper used by both URL routes — server/routes/ai.js
 - [ ] A2: Refuse the internal addresses the safety check still lets through — 0.0.0.0/8, 100.64/10, IPv4-mapped IPv6, bracketed hosts — server/routes/ai.js
 - [ ] A3: Prove a redirect to an internal address is refused and never fetched — server/test/knowledge-import.test.js, server/test/generate-from-url.test.js
