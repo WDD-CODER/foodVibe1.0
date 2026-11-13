@@ -248,3 +248,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Plan 593 — The terms popup shows once per user (and again only after a terms change), not once per new browser (`plans/593-terms-popup-shows-once-per-user-not-once-per-browser.plan.md`)
 - [ ] A1: Send the full signed-in user back when a session is restored — server/routes/auth.js, server/test/auth-terms.test.js
 - [ ] A2: Use that user in the app so an accepted terms version is remembered in every new browser — src/app/core/services/user.service.ts, src/app/core/services/user.service.spec.ts
+
+- [ ] A1: Check every redirect of a website import against the safety rules, at most 5 hops — safeFetch helper used by both URL routes — server/routes/ai.js
+- [ ] A2: Refuse the internal addresses the safety check still lets through — 0.0.0.0/8, 100.64/10, IPv4-mapped IPv6, bracketed hosts — server/routes/ai.js
+- [ ] A3: Prove a redirect to an internal address is refused and never fetched — server/test/knowledge-import.test.js, server/test/generate-from-url.test.js
