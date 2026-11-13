@@ -361,7 +361,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
       })
       .catch(syncErr => req.log.error({ err: syncErr, event: 'auth.refresh.sync_failed' }));
 
-    return res.json({ token });
+    return res.json({ token, user: toPublicUser(user) });
   } catch (err) {
     req.log.error({ err, event: 'auth.refresh.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });

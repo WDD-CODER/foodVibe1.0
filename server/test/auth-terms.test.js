@@ -95,6 +95,30 @@ describe('POST /accept-terms (plan 584)', () => {
   })
 })
 
+describe('POST /refresh answers the public user (plan 593)', () => {
+  const jwt = require('jsonwebtoken')
+  const refresh = id => {
+    const cookie = jwt.sign({ userId: id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '1h' })
+    return request(app).post('/api/v1/auth/refresh').set('Cookie', [`fv_refresh_${process.env.PORT || 3000}=${cookie}`])
+  }
+
+  it('after accept-terms the refresh user carries the current version', async () => {
+    await testDb().collection('users').insertOne({ _id: 'u1', name: 'old', email: 'o@x.com', businessId: 'b_u1', businessRole: 'owner' })
+    await request(app).post('/api/v1/auth/accept-terms').set('Authorization', `Bearer ${signTestToken({ userId: 'u1', name: 'old' })}`).send({ termsVersion: currentTermsVersion() })
+    const res = await refresh('u1')
+    expect(res.status).toBe(200)
+    expect(res.body.token).toBeTruthy()
+    expect(res.body.user.termsAcceptedVersion).toBe(currentTermsVersion())
+  })
+
+  it('a user who never accepted gets null', async () => {
+    await testDb().collection('users').insertOne({ _id: 'u2', name: 'new', email: 'n@x.com', businessId: 'b_u2', businessRole: 'owner' })
+    const res = await refresh('u2')
+    expect(res.status).toBe(200)
+    expect(res.body.user.termsAcceptedVersion).toBeNull()
+  })
+})
+
 describe('terms file version guard (plan 584)', () => {
   it('sectionsHash equals the SHA-256 of JSON.stringify(sections): a text change needs a new version + sectionsHash', () => {
     const terms = JSON.parse(fs.readFileSync(TERMS_FILE, 'utf8'))
