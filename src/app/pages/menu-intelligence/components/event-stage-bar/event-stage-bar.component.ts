@@ -27,6 +27,7 @@ import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
 import { formatMoney } from 'src/app/core/engine/rounding'
+import { RouterLink } from '@angular/router'
 import { ClientDataService } from '@services/client-data.service'
 import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { TranslationService } from '@services/translation.service'
@@ -55,6 +56,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     SelectOnFocusDirective,
     DatePipe,
     LucideAngularModule,
+    RouterLink,
     TranslatePipe,
     ScrollRailComponent,
     DateFieldComponent,

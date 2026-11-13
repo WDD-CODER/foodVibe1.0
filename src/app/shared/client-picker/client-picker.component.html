@@ -24,7 +24,7 @@
     [keyOf]="keyOf"
     [minChars]="2"
     [closeOnOutsideClick]="closeOnOutsideClick()"
-    [emptyKey]="canCreate_() ? null : 'client_ask_owner'"
+    [emptyKey]="emptyKey_()"
     [addLabelKey]="canCreate_() ? 'client_new' : null"
     (picked)="onPicked($event)"
     (addChosen)="onAddChosen($event)"

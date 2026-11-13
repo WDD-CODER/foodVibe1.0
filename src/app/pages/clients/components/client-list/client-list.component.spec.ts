@@ -165,6 +165,11 @@ describe('ClientListComponent (plan 547)', () => {
     expect(el().textContent).toContain('clients_no_results')
   })
 
+  it('a client name links to the profile (plan 551)', () => {
+    setup([client('1', 'דנה')])
+    expect(el().querySelector('a.client-name')?.getAttribute('href')).toBe('/clients/1')
+  })
+
   it('puts the non-name columns in the column carousel header (owner: six slides)', () => {
     setup([client('1', 'א')])
     const header = el().querySelector('app-column-carousel-header')

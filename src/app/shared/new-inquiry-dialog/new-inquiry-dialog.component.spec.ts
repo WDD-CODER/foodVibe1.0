@@ -377,4 +377,15 @@ describe('NewInquiryDialogComponent', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     expect(cancels).toBe(1)
   })
+
+  it('opens with the initial client already picked and saves the event for it (plan 551)', async () => {
+    fixture.componentRef.setInput('initialClient', { _id: 'c9', name: 'רונית', phone: '050-9999999' })
+    fixture.detectChanges()
+    expect(el.querySelector('.client-picker-picked')?.textContent).toContain('רונית')
+    saveButton().click()
+    await fixture.whenStable()
+    expect(eventData.addMenuEvent).toHaveBeenCalledWith(
+      jasmine.objectContaining({ clientId: 'c9', clientName: 'רונית' })
+    )
+  })
 })

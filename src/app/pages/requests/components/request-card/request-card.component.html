@@ -1,0 +1,166 @@
+<article class="rq-card c-glass-card" [attr.data-testid]="'request-card'" [attr.data-status]="request().status">
+  <header class="rq-head">
+    <div class="rq-who">
+      <strong class="rq-name">{{ request().guestName }}</strong>
+      <span class="rq-phone" dir="ltr">{{ request().guestPhone }}</span>
+    </div>
+    <div class="rq-tags">
+      <span class="c-chip--tag c-chip--sm">{{ 'fd_kind_' + request().kind | translatePipe }}</span>
+      <span class="c-chip--tag c-chip--sm">{{ 'rq_channel_' + request().channel | translatePipe }}</span>
+      @if (request().test) {
+        <span class="c-chip--tag c-chip--sm">{{ 'rq_test_tag' | translatePipe }}</span>
+      }
+    </div>
+  </header>
+
+  <div class="rq-contact">
+    <a class="c-btn-ghost c-btn-ghost--sm" [href]="telHref_()" [attr.aria-label]="'rq_call' | translatePipe">
+      <lucide-icon name="phone" [size]="16"></lucide-icon>
+      {{ 'rq_call' | translatePipe }}
+    </a>
+    @if (waHref_(); as href) {
+      <a
+        class="c-btn-ghost c-btn-ghost--sm"
+        [href]="href"
+        target="_blank"
+        rel="noopener noreferrer"
+        [attr.aria-label]="'rq_whatsapp' | translatePipe"
+      >
+        <lucide-icon name="message-circle" [size]="16"></lucide-icon>
+        {{ 'rq_whatsapp' | translatePipe }}
+      </a>
+    }
+    <span class="rq-received">{{ receivedAt_() | date: 'dd/MM HH:mm' }}</span>
+  </div>
+
+  @if (wantedParts_().length) {
+    <p class="rq-wanted" data-testid="request-wanted">{{ wantedParts_().join(' · ') }}</p>
+  }
+
+  @if (verdict_(); as verdict) {
+    <div class="rq-verdict">
+      <span [class]="'c-chip--tag c-chip--' + verdict.tone" data-testid="request-verdict">{{
+        verdict.labelKey | translatePipe
+      }}</span>
+      @if (verdict.reasons.length) {
+        <ul class="rq-reasons">
+          @for (reason of verdict.reasons; track $index) {
+            <li>{{ reason }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  @if (request().answers.length) {
+    <dl class="rq-answers">
+      @for (answer of request().answers; track answer.questionKey) {
+        <div class="rq-answer">
+          <dt>{{ answer.label }}</dt>
+          <dd>{{ answer.value }}</dd>
+        </div>
+      }
+    </dl>
+  }
+
+  @if (request().status === 'needs_info') {
+    <p class="rq-needs-info">
+      <lucide-icon name="help-circle" [size]="16"></lucide-icon>
+      <strong>{{ 'rq_status_needs_info' | translatePipe }}</strong>
+      @if (askNote_()) {
+        <span>{{ askNote_() }}</span>
+      }
+    </p>
+  }
+
+  @if (showDayStrip_()) {
+    <app-day-load-strip [load]="dayLoad()" [time]="request().wanted.time ?? ''" />
+  }
+
+  @if (request().status === 'declined') {
+    <p class="rq-decline" data-testid="request-decline-line">{{ declineLine_() }}</p>
+  }
+
+  @if (request().status === 'approved' && request().outcome; as outcome) {
+    <p class="rq-outcome">
+      @if (outcome.type === 'menuEvent') {
+        <a
+          class="c-btn-ghost c-btn-ghost--sm"
+          data-testid="open-event"
+          [routerLink]="['/menu-intelligence', outcome.id]"
+          >{{ 'rq_open_event' | translatePipe }}</a
+        >
+      } @else {
+        <a
+          class="c-btn-ghost c-btn-ghost--sm"
+          data-testid="open-booking"
+          routerLink="/bookings"
+          [queryParams]="{ date: bookingDate_() }"
+          >{{ 'rq_open_booking' | translatePipe }}</a
+        >
+      }
+    </p>
+  }
+
+  @if (isOpen_()) {
+    @if (editing_()) {
+      <div class="rq-edit" (keydown.escape)="cancelEdit()">
+        <app-form-field label="date_filter" forId="edit-date">
+          <app-date-field inputId="edit-date" [value]="editDate_()" (valueChange)="editDate_.set($event)" />
+        </app-form-field>
+        <app-form-field label="fd_q_time" forId="edit-time">
+          <app-time-field inputId="edit-time" [value]="editTime_()" (valueChange)="editTime_.set($event)" />
+        </app-form-field>
+        <app-form-field label="fd_q_party_size">
+          <app-counter [value]="editParty_()" [min]="1" (valueChange)="editParty_.set($event)" />
+        </app-form-field>
+        <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="cancelEdit()">
+          {{ 'cancel' | translatePipe }}
+        </button>
+      </div>
+    } @else {
+      <button type="button" class="c-btn-ghost c-btn-ghost--sm rq-edit-btn" [disabled]="busy()" (click)="startEdit()">
+        <lucide-icon name="pencil" [size]="16"></lucide-icon>
+        {{ 'rq_edit_before_approve' | translatePipe }}
+      </button>
+    }
+
+    <div class="rq-actions">
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="request-approve"
+        [disabled]="busy()"
+        [attr.aria-busy]="busy()"
+        (click)="onApprove()"
+      >
+        <lucide-icon name="check" [size]="16"></lucide-icon>
+        {{ 'rq_approve' | translatePipe }}
+      </button>
+      @if (request().status !== 'needs_info') {
+        <button
+          type="button"
+          class="c-btn-ghost"
+          data-testid="request-ask"
+          [disabled]="busy()"
+          [attr.aria-busy]="busy()"
+          (click)="ask.emit()"
+        >
+          <lucide-icon name="help-circle" [size]="16"></lucide-icon>
+          {{ 'rq_ask' | translatePipe }}
+        </button>
+      }
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="request-decline"
+        [disabled]="busy()"
+        [attr.aria-busy]="busy()"
+        (click)="decline.emit()"
+      >
+        <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+        {{ 'rq_decline' | translatePipe }}
+      </button>
+    </div>
+  }
+</article>

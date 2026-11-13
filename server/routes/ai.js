@@ -1561,6 +1561,131 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /knowledge-import (plan 554, C-KB)
+// Accepts exactly one of { text } or { url }. One metered Gemini call turns the source into up to 60 draft knowledge
+// items, stored in the same request as `draft` / `ai_import` / `public`. Owner only, checked BEFORE the limiter.
+// Logs carry counts only, never the source text or the items.
+// Response 201: { items, dropped }
+// ---------------------------------------------------------------------------
+
+const { knowledgeImportItemSchema } = require('../generated/schemas/entities');
+const { KNOWLEDGE_IMPORT_PROMPT, KNOWLEDGE_IMPORT_GENERATION_CONFIG } = require('../services/knowledge-import-prompt');
+const { stampNew } = require('../utils/business-scope');
+const { newId } = require('../utils/id');
+const { checkStoredDoc } = require('../middleware/validate');
+
+const KNOWLEDGE_IMPORT_MAX_ITEMS = 60;
+
+/** Fetches `url` and reduces it to text like /generate-from-url; answers 502 / 422 itself and returns null then. */
+async function fetchImportText(req, res, url) {
+  let pageText;
+  try {
+    const pageRes = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!pageRes.ok) {
+      const urlStatus = pageRes.status;
+      let urlError;
+      if (urlStatus === 404) urlError = 'URL not found (404)';
+      else if (urlStatus === 403 || urlStatus === 401) urlError = `URL access denied (${urlStatus}) — bot protection`;
+      else if (urlStatus >= 500) urlError = `URL server error (${urlStatus})`;
+      else urlError = `Failed to fetch URL: ${urlStatus}`;
+      res.status(502).json({ error: urlError, urlStatus });
+      return null;
+    }
+    pageText = extractTextFromHtml(await pageRes.text());
+  } catch (err) {
+    req.log.warn({ err, event: 'ai.knowledge_import.fetch_failed' });
+    res.status(502).json({ error: 'Could not fetch the provided URL' });
+    return null;
+  }
+  if (!pageText.trim()) {
+    res.status(422).json({ error: 'No usable text found at the provided URL' });
+    return null;
+  }
+  return pageText.slice(0, MAX_IMPORT_TEXT);
+}
+
+router.post('/knowledge-import', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'create', { type: 'knowledgeItems' })) next();
+}, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { text, url } = req.body ?? {};
+  const hasText = typeof text === 'string' && text.trim() !== '';
+  const hasUrl = typeof url === 'string' && url.trim() !== '';
+  if (hasText === hasUrl) return badRequest(res, 'TEXT_OR_URL');
+
+  let source;
+  if (hasText) {
+    if (text.length > MAX_IMPORT_TEXT) return badRequest(res, 'TEXT_TOO_LONG', { max: MAX_IMPORT_TEXT });
+    source = text.trim();
+  } else {
+    if (!/^https?:\/\//i.test(url.trim())) return badRequest(res, 'url must start with http:// or https://');
+    if (!(await isSafeUrl(url.trim()))) return badRequest(res, 'url resolves to a disallowed address');
+    source = await fetchImportText(req, res, url.trim());
+    if (source === null) return;
+  }
+
+  try {
+    const call = await callGemini({
+      body: {
+        system_instruction: { parts: [{ text: KNOWLEDGE_IMPORT_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: source }] }],
+        generationConfig: KNOWLEDGE_IMPORT_GENERATION_CONFIG,
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.knowledge_import',
+      usage: { ...usageOf(req), feature: 'knowledge_import' },
+    });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
+
+    const raw = responseText(call.data);
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error) {
+      req.log.error({ event: 'ai.knowledge_import.parse_failed', rawLength: raw.length });
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+    const candidates = Array.isArray(parsed.value?.items) ? parsed.value.items : [];
+
+    const now = Date.now();
+    const items = [];
+    let dropped = 0;
+    for (const candidate of candidates) {
+      const checked = knowledgeImportItemSchema.safeParse(candidate);
+      if (!checked.success) { dropped += 1; continue; }
+      if (items.length >= KNOWLEDGE_IMPORT_MAX_ITEMS) continue;
+      const doc = stampNew(req, {
+        _id: newId(),
+        schemaVersion: 2,
+        ...checked.data,
+        status: 'draft',
+        source: 'ai_import',
+        visibility: 'public',
+        updatedAt: now,
+      });
+      if (!checkStoredDoc('knowledgeItems', doc).ok) { dropped += 1; continue; }
+      items.push(doc);
+    }
+    if (items.length) await mongoose.connection.db.collection('knowledgeItems').insertMany(items);
+    req.log.info({ event: 'ai.knowledge_import.stored', stored: items.length, dropped });
+    return res.status(201).json({ items, dropped });
+  } catch (err) {
+    req.log.error({ err, event: 'ai.knowledge_import.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /shots
 // Accepts { prompt, draft, status: 'approved'|'rejected', source: 'text'|'image'|'url' }.
 // Saves the shot to GEMINI_SHOTS and returns soft quality warnings.

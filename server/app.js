@@ -17,6 +17,8 @@ const businessRouter = require('./routes/business');
 const statsRouter = require('./routes/stats');
 const eventsRouter = require('./routes/events');
 const requestsRouter = require('./routes/requests');
+const clientsRouter = require('./routes/clients');
+const knowledgeRouter = require('./routes/knowledge');
 const bookingsRouter = require('./routes/bookings');
 const productImportRouter = require('./routes/product-import');
 const logRouter = require('./routes/log');
@@ -200,6 +202,8 @@ app.use(cookieParser());
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/data', genericRouter);
 app.use('/api/v1/events', eventsRouter);
+app.use('/api/v1/clients', clientsRouter);
+app.use('/api/v1/knowledge', knowledgeRouter);
 app.use('/api/v1/requests', requestsRouter);
 app.use('/api/v1/bookings', bookingsRouter);
 app.use('/api/v1/ai', aiRouter)

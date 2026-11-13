@@ -61,9 +61,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable (plan 546)
 - Use: `src/app/shared/client-picker/` · `app-client-picker` (built on `app-search-combobox`: search by name/phone, the picked client
   as a name inside the field with an X, and for an owner the add-client view); the add fields live in
-  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`).
+  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`, or through `updateClient()` in edit mode when it gets a `client` input, plan 551).
+  `NewInquiryDialogComponent` takes `initialClient` to open with a client picked (plan 551).
 - When: any screen that links a record to a client (new-inquiry dialog, event stage bar, the client section).
-- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`; outputs `picked`, `cleared`,
+- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`, `allowAdd` (false: no add row, a merge target), `exclude` (client ids left out); outputs `picked`, `cleared`,
   `addingChange`, `escaped`, `outsideClick`; method `back()` (leave the add view, true when it did).
 - Known copies: none.
 
@@ -123,7 +124,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
   `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
 - When: any screen that lists entities.
-- Users today (5): client list, equipment, inventory products, recipe book, suppliers.
+- Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
@@ -269,6 +270,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — save/delete methods return Promises (plan 454)
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
+- `FrontDeskBadgeService` (`front-desk-badge.service.ts`): app-wide count signal for the front desk badge (plan 552).
 - Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
@@ -296,6 +298,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
 
 ### http — talking to the server
 

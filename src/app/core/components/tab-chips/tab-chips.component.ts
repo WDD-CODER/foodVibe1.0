@@ -5,6 +5,8 @@ import { filter } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
 import { PermissionService } from '@services/permission.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { TranslationService } from '@services/translation.service'
+import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 
@@ -18,6 +20,8 @@ interface TabChip {
   queryParams?: Record<string, string>
   /** The "back to dashboard overview" chip (plan 367) — never shown as active, styled as `.c-chip--home`. */
   home?: boolean
+  /** Shows the waiting-requests count (plan 552). */
+  badge?: boolean
 }
 
 type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk'
@@ -34,7 +38,10 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/cook', 'recipes'],
   ['/menu-library', 'menus'],
   ['/menu-intelligence', 'menus'],
-  ['/clients', 'frontdesk']
+  ['/requests', 'frontdesk'],
+  ['/bookings', 'frontdesk'],
+  ['/clients', 'frontdesk'],
+  ['/frontdesk', 'frontdesk']
 ]
 
 const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
@@ -62,7 +69,13 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library' },
     { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'clipboard-list', path: '/menu-intelligence' }
   ],
-  frontdesk: [{ id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' }]
+  frontdesk: [
+    { id: 'requests', labelKey: 'fd_chip_requests', icon: 'clipboard-check', path: '/requests', badge: true },
+    { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings' },
+    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' },
+    { id: 'knowledge', labelKey: 'knowledge_chip', icon: 'book-open', path: '/frontdesk/knowledge' },
+    { id: 'settings', labelKey: 'fd_chip_settings', icon: 'settings', path: '/frontdesk/settings' }
+  ]
 }
 
 /** Replaces the current dashboard sub-page's chip, in the same position (plan 367). */
@@ -113,6 +126,11 @@ export class TabChipsComponent {
   private readonly destroyRef = inject(DestroyRef)
   private readonly permission = inject(PermissionService)
   private readonly kitchenState = inject(KitchenStateService)
+  private readonly translation = inject(TranslationService)
+  protected readonly waitingCount_ = inject(FrontDeskBadgeService).waitingCount_
+  protected readonly countLabel_ = computed(() =>
+    this.translation.translate('rq_waiting_count_label').replace('{count}', String(this.waitingCount_()))
+  )
 
   private readonly currentUrl_ = signal(this.router.url)
 
