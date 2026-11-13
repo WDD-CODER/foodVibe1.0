@@ -9,6 +9,7 @@
 ## Execution order (Planner review 2026-11-11, `node scripts/plan-order.mjs` at d4e904bb)
 
 Orchestrator chain (Human 2026-11-11; each run branch starts from the previous one; the Human validates and merges them in this order):
+- CHAIN DONE 2026-11-13: batches 1–3 + fixes on main (PRs #553 #555 #557 #559 #561 #563 #564); batch-4, batch-5, run-589, run-593 wait on hand checks (section "Chain finished")
 - batch-1 · run-546: **546, 558, 567, 575, 579** — built, all 5 merged into `orch/run-546` (429e7314); hand checks ①–⑦ done 2026-11-12 (H1 below), ⑧ pilot terms reworked; waits on the Human's merge · base of batch-2
 - batch-2 · running since 2026-11-12 (547 retried after `approved:` for its header spec)
 - batch-2 · `orch/batch-2`: **580, 581, 547, 568** (dependency markers for 546/567/579 added on the branch) (542 left out: only its Planner-only A8 is open)
@@ -53,6 +54,17 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] R1: Fix e2e/ui/584-1.spec.ts — on a local/slot app the dev guest auto-login moves /welcome to /dashboard before the sign-up click; sign out first or open the auth modal another way
 - [ ] R2: Fix e2e/ui/584-2.spec.ts — waits only 5 s for app-header while the QA login shows "רגע, מכינים הכל..."; wait for the loading screen to end
 - [ ] R3: After run-546 merges, add the note line to docs/frontdesk/pilot-terms-draft.md (the app shows public/assets/legal/terms.he.json; change both and bump version) — run-584 D1
+
+### Chain finished 2026-11-13 — merges and hand checks left (report: Planner scratch chain-report-2026-11-13.md)
+- [ ] M1: Merge orch/run-589 (589 + 591 + 592) after card A1 — shared recipe link needs sign-in, then opens the recipe
+- [ ] M2: Merge orch/run-593 (593) after card B1 — no terms popup in a new browser after accepting
+- [ ] M3: Merge orch/batch-4 (555, 556) after cards C1 (public request page /book/demo-catering) and C2 (onboarding form prints, 3 business types)
+- [ ] M4: Merge orch/batch-5 (557, 559; contains batch-4) after cards D1 (/platform status moves + assistant level), D2 (front desk numbers match /requests), D3 (three CSV exports in Excel)
+- [ ] M5: Batch-3 card ③ never answered — front desk settings quick and clear in Hebrew (on main)
+- [ ] M6: Batch-3 card ④ knowledge import "ok for now" — try more real caterer sites
+- [ ] M7: e2e/cook-view.spec.ts relies on the automatic guest — sign in with signInQa (fails once 589 is on main)
+- [ ] M8: Dead code: menu-ai-flow.service.ts:37 still copies serving_portions / sell_price (batch-2-fix D2)
+- [ ] M9: After 589 and batch-4/5 meet on main, run node scripts/route-guard-check.mjs (new routes need authGuard)
 
 ### Hand checks — Human 2026-11-12 (runs 584 and batch-2)
 - [x] V1: run-584 cards ①–⑥ (terms popup, sign-up blocked, phone reading, existing account, no repeat, guest) — Human 2026-11-12: ok; follow-ups → plan 585 (desktop scroll, cancel signs out)
