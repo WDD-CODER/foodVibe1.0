@@ -1,6 +1,6 @@
 # Plan 594 — The demo seed makes 21 different usage days even when the window crosses a clock change
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: bd321e0d75d2402122072a3bc81fd72caccddae8
 
