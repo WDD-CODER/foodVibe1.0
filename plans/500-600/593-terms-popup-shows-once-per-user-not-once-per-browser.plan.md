@@ -1,6 +1,6 @@
 # Plan 593 — The terms popup shows once per user (and again only after a terms change), not once per new browser
 
-Status: draft
+Status: done
 Depends-on: 584
 Snapshot: ca7dcb1d813c7dbfd6a07b82e2196b7ec802cf77
 
