@@ -126,6 +126,15 @@ describe('ProductFormComponent', () => {
     fixture.detectChanges()
   })
 
+  describe('plan 604: label icons', () => {
+    it('renders the category label icon at 16px', () => {
+      const svg = (fixture.nativeElement as HTMLElement).querySelector(
+        '.form-section--mandatory .product-field > label lucide-icon svg'
+      )
+      expect(svg?.getAttribute('width')).toBe('16')
+    })
+  })
+
   describe('Form Logic: Waste & Yield Sync', () => {
     it('should update yield_factor when waste_percent changes', () => {
       mockConversionService.handleWasteChange.and.returnValue({ yieldFactor: 0.8 })
