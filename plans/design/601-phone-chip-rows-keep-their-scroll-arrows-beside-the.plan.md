@@ -136,10 +136,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 601-A1: Mark a scroll rail as overflowing so its stylesheet can keep room for the arrows — is-overflowing host class from canPrev_/canNext_ — src/app/shared/scroll-rail/scroll-rail.component.ts
-- [ ] 601-A2: Keep an arrow's width free on each side of an overflowing rail so no chip sits under an arrow — --sr-arrow-size, --sr-arrow-room, :host(.is-overflowing) padding-inline — src/app/shared/scroll-rail/scroll-rail.component.scss
-- [ ] 601-A3: Cover the overflowing class and the arrow-beside-not-over geometry in the rail's unit test — two new cases — src/app/shared/scroll-rail/scroll-rail.component.spec.ts
-- [ ] 601-A4: Prove at 375px on dashboard and bookings that arrows sit beside the chips and the last chip is readable — e2e/ui/601-1.spec.ts, e2e/ui/601-2.spec.ts
+- [x] 601-A1: Mark a scroll rail as overflowing so its stylesheet can keep room for the arrows — is-overflowing host class from canPrev_/canNext_ — src/app/shared/scroll-rail/scroll-rail.component.ts
+- [x] 601-A2: Keep an arrow's width free on each side of an overflowing rail so no chip sits under an arrow — --sr-arrow-size, --sr-arrow-room, :host(.is-overflowing) padding-inline — src/app/shared/scroll-rail/scroll-rail.component.scss
+- [x] 601-A3: Cover the overflowing class and the arrow-beside-not-over geometry in the rail's unit test — two new cases — src/app/shared/scroll-rail/scroll-rail.component.spec.ts
+- [x] 601-A4: Prove at 375px on dashboard and bookings that arrows sit beside the chips and the last chip is readable — e2e/ui/601-1.spec.ts, e2e/ui/601-2.spec.ts
 
 ## Technical Considerations
 
@@ -169,3 +169,5 @@ touching any milestone.
 none
 
 ## Execution Notes
+- pnpm run build → exit 0; pnpm run lint → exit 0; pnpm run test:ci → exit 0 (2176 SUCCESS)
+- [ui] 601-1, 601-2: written, not run
