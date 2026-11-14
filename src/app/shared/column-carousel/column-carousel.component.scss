@@ -75,6 +75,19 @@ $cc-break: 768px;
     animation: cc-slide-in 150ms ease;
   }
 
+  :host(.column-carousel--header) ::ng-deep .column-slide.column-slide--active {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+    text-wrap: balance;
+    line-height: 1.2;
+  }
+
   .cc-arrow {
     position: relative;
     display: grid;
@@ -109,7 +122,8 @@ $cc-break: 768px;
 
   // ── Header ────────────────────────────────────────────────────────────────
   :host(.column-carousel--header) {
-    padding-inline: 0.25rem;
+    row-gap: 0.25rem;
+    padding-inline: 1.25rem;
   }
 
   .cc-header {
@@ -159,7 +173,7 @@ $cc-break: 768px;
     inset-block-start: 50%;
     transform: translateY(-50%);
 
-    inline-size: 1.75rem;
+    inline-size: 1.25rem;
     block-size: 1.75rem;
 
     border-radius: var(--radius-full);
