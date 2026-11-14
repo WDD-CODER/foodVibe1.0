@@ -85,9 +85,9 @@ Confirm the three `logout()` callers above and that `UserService` exposes the si
 - none.
 
 ## Atomic Sub-tasks
-- [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
-- [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
-- [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
+- [x] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
+- [x] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
+- [x] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
 
 ## What happens when
 - A session expires on `/menu-library` → the interceptor signs out → `/welcome`.
@@ -107,3 +107,5 @@ Confirm the three `logout()` callers above and that `UserService` exposes the si
 
 ## Execution Notes
 - Human 2026-11-12, plan 589 card ⑤ (quoted in the Problem Statement).
+- pnpm run lint -> exit 0 (0 errors); pnpm run build -> exit 0; pnpm run test:ci -> exit 0, 1986 of 1986 SUCCESS
+- e2e/ui/591-1.spec.ts written (clicks button.auth-username-btn); not run here (needs QA login from .env, gate reruns it).
