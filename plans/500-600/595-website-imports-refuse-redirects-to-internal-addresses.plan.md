@@ -1,6 +1,6 @@
 # Plan 595 — Website imports refuse redirects to internal addresses
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 23295e4e4aed808c1e403f1c7a9f839bcf3be9f6
 
@@ -90,9 +90,9 @@ server route fetches a user-given URL (`grep -rn "fetch(" server/routes`).
 - none — the client already shows the 400 / 502 errors these routes answer today.
 
 ## Atomic Sub-tasks
-- [ ] A1: Check every redirect of a website import against the safety rules, at most 5 hops — safeFetch helper used by both URL routes — server/routes/ai.js
-- [ ] A2: Refuse the internal addresses the safety check still lets through — 0.0.0.0/8, 100.64/10, IPv4-mapped IPv6, bracketed hosts — server/routes/ai.js
-- [ ] A3: Prove a redirect to an internal address is refused and never fetched — server/test/knowledge-import.test.js, server/test/generate-from-url.test.js
+- [x] A1: Check every redirect of a website import against the safety rules, at most 5 hops — safeFetch helper used by both URL routes — server/routes/ai.js
+- [x] A2: Refuse the internal addresses the safety check still lets through — 0.0.0.0/8, 100.64/10, IPv4-mapped IPv6, bracketed hosts — server/routes/ai.js
+- [x] A3: Prove a redirect to an internal address is refused and never fetched — server/test/knowledge-import.test.js, server/test/generate-from-url.test.js
 
 ## What happens when
 - A redirect has no `Location` header → treated as the final answer (not ok → 502, as today).
@@ -121,3 +121,4 @@ server route fetches a user-given URL (`grep -rn "fetch(" server/routes`).
 - Overlap: plan 582 (draft) also writes `server/routes/ai.js`; do not run the two in parallel.
 - `scripts/next-plan-number.mjs` crashed (`RangeError: Maximum call stack size exceeded` at line 54, `Math.max(...used)`);
   number 595 taken by hand from local, origin/main and branch plan files (highest 594). Kit item.
+- Evidence: `pnpm run test:server` -> exit 0, 106 files, 1359 tests pass; `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors).

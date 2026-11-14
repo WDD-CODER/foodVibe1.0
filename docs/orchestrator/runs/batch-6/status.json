@@ -1,0 +1,359 @@
+{
+  "run": "batch-6",
+  "branch": "orch/batch-6",
+  "base": "main",
+  "startedAt": "2026-11-14T10:41:48.461Z",
+  "mainShaAtStart": "afc44e92a6feab13662761f19e5456c724d13fc3",
+  "plans": {
+    "582": {
+      "nnn": "582",
+      "title": "Recipe AI examples stay inside their business",
+      "branch": "feat/582-recipe-ai-examples-stay",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T10:43:17.805Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T10:53:58.094Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-14T10:43:17.632Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:43:17.807Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:47:51.932Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:53:52.466Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:53:58.095Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:54:08.797Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:55:12.206Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.4,
+      "sha": "eb76044a4c9a66512bcd35f59de09d18efed396a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 272.2,
+          "tokens": {
+            "input": 463467,
+            "output": 8442
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.7,
+          "tokens": {
+            "input": 59066,
+            "output": 296
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "f0229d542ee0b0da2cec10ce228f9bb3cbaac1c6"
+    },
+    "595": {
+      "nnn": "595",
+      "title": "Website imports refuse redirects to internal addresses",
+      "branch": "feat/595-website-imports-refuse-redirects",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T10:57:15.210Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T11:07:20.071Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-14T10:57:15.067Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T10:57:15.211Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:01:56.418Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:07:14.441Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:07:20.073Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:07:27.970Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:08:01.513Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.7,
+      "sha": "bcb02db4434e6e053ea9f36cc71964d55f70576f",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 279.3,
+          "tokens": {
+            "input": 312780,
+            "output": 6398
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6.9,
+          "tokens": {
+            "input": 26893,
+            "output": 538
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "79f6e035adefce9a116e807793986de2db43eabd"
+    },
+    "596": {
+      "nnn": "596",
+      "title": "Platform CSV downloads show Hebrew correctly in Excel",
+      "branch": "feat/596-platform-csv-downloads-show",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T11:09:57.786Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T11:22:42.277Z"
+        }
+      },
+      "humanItems": [
+        "On `/platform`, download \"ייצוא קבלה CSV\" and open it in Excel by double-clicking it: the business names read in"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T11:09:57.632Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:09:57.787Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:17:15.314Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:22:36.449Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:22:42.279Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:22:47.739Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T11:23:23.337Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.4,
+      "sha": "421b99837684e96365685ffaccf4b564f2937d5d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 435.4,
+          "tokens": {
+            "input": 422157,
+            "output": 8870
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 4.5,
+          "tokens": {
+            "input": 24528,
+            "output": 230
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "958ec29daad842711a9d8467492fc989a19aa380"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-14T10:43:17.463Z",
+      "plan": "582",
+      "text": "the folder foodVibe1.0-orch-batch-6-582 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T10:54:21.742Z",
+      "plan": "582",
+      "text": "the folder foodVibe1.0-orch-merge-batch-6 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T10:57:14.919Z",
+      "plan": "595",
+      "text": "the folder foodVibe1.0-orch-batch-6-595 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T11:09:57.393Z",
+      "plan": "596",
+      "text": "the folder foodVibe1.0-orch-batch-6-596 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T11:17:13.278Z",
+      "plan": "596",
+      "text": "builder left undone (round 0): [human] Excel check of the downloaded CSV on /platform: not done by the builder"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 4.4,
+  "updatedAt": "2026-11-14T11:26:51.174Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "582",
+      "type": "behaviour",
+      "text": "behaviour: old GEMINI_SHOTS documents without businessId are left in place and never read or pruned (as the plan says) — reverse: run a cleanup or migration that deletes or stamps them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "582",
+      "type": "behaviour",
+      "text": "behaviour: POST /shots now stores userId as req.user.userId instead of req.user._id (the plan's P0 requires it) — reverse: pass req.user._id again in saveShot",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "595",
+      "type": "behaviour",
+      "text": "behaviour: a 3xx answer with no Location header is returned as the final answer, so it ends as 502 as before — reverse: change safeFetch to throw instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "595",
+      "type": "behaviour",
+      "text": "behaviour: tests use public IP literals (93.184.216.34) so no dns.lookup stub is needed — reverse: switch to hostnames and stub dns.promises.lookup",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-14T11:26:51.172Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-14T11:26:51.174Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

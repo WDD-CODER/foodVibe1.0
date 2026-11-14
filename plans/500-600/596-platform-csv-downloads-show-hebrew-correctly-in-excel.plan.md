@@ -1,6 +1,6 @@
 # Plan 596 — Platform CSV downloads show Hebrew correctly in Excel
 
-Status: draft
+Status: done
 Depends-on: 559
 Snapshot: dfe7571d555d5809cb8421204bf4ed3a32b1c2f3
 
@@ -73,8 +73,8 @@ Confirm both `format=csv` branches in `server/routes/admin.js` send `lines.join(
 - none.
 
 ## Atomic Sub-tasks
-- [ ] A1: Make both platform CSV downloads open in Excel with readable Hebrew — BOM and CRLF in one send helper — server/routes/admin.js
-- [ ] A2: Check the downloads start with the marker Excel needs — server/test/admin-frontdesk-stats.test.js, server/test/ai-usage.test.js
+- [x] A1: Make both platform CSV downloads open in Excel with readable Hebrew — BOM and CRLF in one send helper — server/routes/admin.js
+- [x] A2: Check the downloads start with the marker Excel needs — server/test/admin-frontdesk-stats.test.js, server/test/ai-usage.test.js
 
 ## What happens when
 - A script reads the CSV with a strict parser → most parsers drop a leading BOM; the owner exports already ship one.
@@ -93,3 +93,5 @@ Confirm both `format=csv` branches in `server/routes/admin.js` send `lines.join(
 
 ## Execution Notes
 - Human 2026-11-13: D2 numbers ok, names broken in Excel; merge of batch-5 approved, fix follows as this plan.
+- Step 0: both branches sent `lines.join('\n')` without BOM — confirmed, fixed with `sendCsv`.
+- `pnpm run test:server` -> exit 0, 106 files, 1359 tests pass; `pnpm run lint` -> 0 errors; `pnpm run build` -> exit 0.
