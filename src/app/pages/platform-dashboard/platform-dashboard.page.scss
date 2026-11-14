@@ -89,6 +89,20 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     overflow-x: auto;
   }
 
+  .platform-grid-scroll {
+    overflow-x: auto;
+  }
+
+  .platform-grid {
+    --platform-grid: minmax(12rem, 2fr) minmax(8rem, 1.2fr) repeat(4, minmax(5.5rem, 1fr))
+      repeat(5, minmax(4.5rem, 0.8fr)) minmax(6rem, 1fr) minmax(12rem, 1.6fr) repeat(3, minmax(5rem, 0.8fr))
+      minmax(4rem, 0.6fr) minmax(5.5rem, auto);
+
+    @media (max-width: $break-mobile) {
+      --platform-grid: minmax(7rem, 1fr) minmax(0, 1.4fr) 2.75rem;
+    }
+  }
+
   .platform-table {
     inline-size: 100%;
     border-collapse: collapse;
@@ -121,22 +135,6 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 
     tbody tr {
       border-block-start: 1px solid var(--border-row);
-    }
-
-    .sticky-col {
-      position: sticky;
-      inset-inline-start: 0;
-
-      background: var(--bg-card-solid);
-      font-weight: var(--fw-medium, 500);
-    }
-
-    .is-idle-7 {
-      background: var(--bg-warning-soft);
-    }
-
-    .is-idle-14 {
-      background: var(--bg-danger-subtle);
     }
   }
 
@@ -209,4 +207,41 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     color: var(--color-text-secondary);
     font-size: var(--fs-sm);
   }
+}
+
+/* Outside the layer: the .c-list-* engines in styles.scss are unlayered and would win. */
+.platform-grid .c-list-row {
+  grid-template-columns: var(--platform-grid);
+}
+
+.platform-grid .col-name {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+
+  justify-content: flex-start;
+  overflow-wrap: anywhere;
+  background: var(--bg-card-solid);
+}
+
+.platform-grid .c-grid-header-cell.col-name {
+  z-index: 2;
+}
+
+.platform-row.is-idle-7 > .c-list-body-cell,
+.platform-row.is-idle-7 .column-carousel--cell .c-list-body-cell {
+  background: var(--bg-warning-soft);
+}
+
+.platform-row.is-idle-14 > .c-list-body-cell,
+.platform-row.is-idle-14 .column-carousel--cell .c-list-body-cell {
+  background: var(--bg-danger-subtle);
+}
+
+.platform-row.is-idle-7 > .col-name {
+  background: linear-gradient(var(--bg-warning-soft), var(--bg-warning-soft)), var(--bg-card-solid);
+}
+
+.platform-row.is-idle-14 > .col-name {
+  background: linear-gradient(var(--bg-danger-subtle), var(--bg-danger-subtle)), var(--bg-card-solid);
 }
