@@ -134,3 +134,4 @@ touching any milestone.
 - node --test scripts/test/styleqa-sign-in.test.mjs -> exit 0, pass 3, fail 0
 - pnpm run test:scripts -> exit 0; pnpm run build -> exit 0
 - node scripts/styleqa/run.mjs --list -> line `client-detail — פרטי לקוח`; --layers=static -> `map check ok`
+- scope extended: docs/workflow-kit/manifest.json — approved (606-1); classified the new test; kit-manifest-check -> ok
