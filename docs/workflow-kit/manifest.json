@@ -4152,6 +4152,16 @@
       "notes": "Plan 387 ADR: the 2026-10-05 incident and the four-layer gate. FoodVibe history; the rule itself ships in core (AGENTS.md template, save-plan, scope-check)."
     },
     {
+      "path": "scripts/test/styleqa-sign-in.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/qa/lib/styleqa-sign-in.mjs"
+      ],
+      "notes": "Unit tests for the Style QA sign-in wrapper (bearer header on API requests only)."
+    },
+    {
       "path": "scripts/test/plan-close.test.mjs",
       "tier": "project",
       "action": "stay",
