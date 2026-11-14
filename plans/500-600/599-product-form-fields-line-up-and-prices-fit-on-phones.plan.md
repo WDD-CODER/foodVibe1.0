@@ -1,6 +1,6 @@
 # Plan 599 — Product form fields line up on desktop and inventory prices fit on phones
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: afc44e92a6feab13662761f19e5456c724d13fc3
