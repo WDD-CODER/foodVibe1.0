@@ -1,6 +1,6 @@
 # Plan 589 — A signed-out visitor sees only the welcome page; no automatic guest sign-in on the PC and in the slots
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: a996c7e9100845775dea14d844fd25e4be47e79f
 
