@@ -1,0 +1,47 @@
+<section class="ai-shots c-glass-panel" data-testid="platform-ai-shots">
+  <h2 class="ai-shots__title">{{ 'platform_ai_shots_title' | translatePipe }}</h2>
+
+  @if (!isLoading_()) {
+    <h3 class="ai-shots__heading">{{ 'platform_ai_shots_shared' | translatePipe }}</h3>
+    @if (!shared_().length) {
+      <app-empty-state messageKey="platform_ai_shots_empty" />
+    } @else {
+      <ul class="ai-shots__list" data-testid="ai-shots-shared">
+        @for (row of shared_(); track row._id) {
+          <li class="ai-shot">
+            <div class="ai-shot__body">
+              <strong class="ai-shot__name">{{ row.nameHebrew }}</strong>
+              <span class="ai-shot__prompt">{{ row.prompt }}</span>
+              <span class="ai-shot__meta">{{ keptLabel(row) }} · {{ row.createdAt | date: 'dd/MM/yy' }}</span>
+            </div>
+            <button type="button" class="c-btn-secondary" (click)="remove(row)">
+              {{ 'platform_ai_shots_remove' | translatePipe }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <h3 class="ai-shots__heading">{{ 'platform_ai_shots_candidates' | translatePipe }}</h3>
+    @if (!candidates_().length) {
+      <app-empty-state messageKey="platform_ai_shots_empty" />
+    } @else {
+      <ul class="ai-shots__list" data-testid="ai-shots-candidates">
+        @for (row of candidates_(); track row._id) {
+          <li class="ai-shot">
+            <div class="ai-shot__body">
+              <strong class="ai-shot__name">{{ row.nameHebrew }}</strong>
+              <span class="ai-shot__prompt">{{ row.prompt }}</span>
+              <span class="ai-shot__meta">
+                {{ keptLabel(row) }} · {{ row.createdAt | date: 'dd/MM/yy' }} · {{ row.businessName }}
+              </span>
+            </div>
+            <button type="button" class="c-btn-primary" (click)="promote(row)">
+              {{ 'platform_ai_shots_promote' | translatePipe }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

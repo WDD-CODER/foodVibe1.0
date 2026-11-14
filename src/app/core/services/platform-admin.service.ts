@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import type { FrontDeskAdminStats } from '../models/frontdesk-stats.model'
+import type { AiShotRow, AiShotsReport } from '../models/ai-shot.model'
 import type { AiUsageParams, AiUsageReport } from '../models/ai-usage.model'
 
 /** One line of the platform admin's table (plan 448): counts and dates only, never a business's content. */
@@ -76,6 +77,21 @@ export class PlatformAdminService {
       this.http.get<{ rows: AdminTermRow[] }>(`${environment.apiUrl}${API.admin('taxonomy')}`, { params: { kind } })
     )
     this._termRows_.set(res.rows)
+  }
+
+  /** Plan 600: recipe AI examples of businesses that opted in (candidates) and the shared pool. */
+  async getAiShots(): Promise<AiShotsReport> {
+    return firstValueFrom(this.http.get<AiShotsReport>(`${environment.apiUrl}${API.admin('ai-shots')}`))
+  }
+
+  /** Plan 600: copies one candidate into the shared pool. */
+  async promoteAiShot(id: string): Promise<AiShotRow> {
+    return firstValueFrom(this.http.post<AiShotRow>(`${environment.apiUrl}${API.admin(`ai-shots/${id}/promote`)}`, {}))
+  }
+
+  /** Plan 600: removes one shared copy (the owner's own example stays). */
+  async removeSharedAiShot(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete(`${environment.apiUrl}${API.admin(`ai-shots/shared/${id}`)}`))
   }
 
   /** Plan 566: AI call totals for the platform admin, grouped by business, feature, model or day. */

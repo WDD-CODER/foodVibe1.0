@@ -5,6 +5,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { RecipeFormService } from './recipe-form.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
+import { GeminiShotsService } from '@services/gemini-shots.service'
 import { AiRecipeModalService } from '../../../shared/ai-recipe-modal/ai-recipe-modal.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import type { Equipment } from '@models/equipment.model'
@@ -27,6 +28,10 @@ export class RecipeAiFlowService {
   private readonly recipeFormService_ = inject(RecipeFormService)
   private readonly aiRecipeDraft_ = inject(AiRecipeDraftService)
   private readonly aiModal_ = inject(AiRecipeModalService)
+  private readonly geminiShots_ = inject(GeminiShotsService)
+
+  /** Plan 600: key of the pending example the pending draft came with; held until the first save confirms it. */
+  private pendingShotKey_: string | null = null
 
   private refs_: RecipeAiFormRefs | null = null
 
@@ -56,8 +61,24 @@ export class RecipeAiFlowService {
   applyPendingDraft(): boolean {
     const draft = this.aiRecipeDraft_.consume()
     if (!draft) return false
+    this.pendingShotKey_ = this.aiRecipeDraft_.consumeShotKey()
     this.prefillFromDraft(draft)
     return true
+  }
+
+  /**
+   * Plan 600: the recipe was saved — confirms the pending AI example with the form as saved.
+   * Fire-and-forget, once per applied draft; does nothing without a key.
+   */
+  confirmAiShot(recipeId: string): void {
+    const key = this.pendingShotKey_
+    if (!key) return
+    this.pendingShotKey_ = null
+    this.geminiShots_.confirmShot(key, this.buildDraftSnapshot(), recipeId).subscribe({
+      error: () => {
+        /* non-blocking */
+      }
+    })
   }
 
   /** Opens the AI edit modal with the current form state as context. */

@@ -190,10 +190,10 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   /** Few-shot curation applies to AI-written drafts only; pasted recipes are the chef's own text (INV-6 plan 439). */
-  private saveShot_(draft: AiRecipeDraft, status: 'approved' | 'rejected'): void {
+  private saveShot_(draft: AiRecipeDraft, status: 'pending' | 'rejected', shotKey?: string): void {
     const mode = this.inputMode_()
     if (mode === 'paste') return
-    this.shots.saveShot(this.prompt_(), draft, status, mode).subscribe({
+    this.shots.saveShot(this.prompt_(), draft, status, mode, shotKey).subscribe({
       error: () => {
         /* non-blocking */
       }
@@ -300,20 +300,24 @@ export class AiRecipeModalComponent implements OnInit {
     this.pendingApprovedDraft_.set(draft)
     // Shot curation is fire-and-forget — reaching the recipe builder must never
     // depend on (or wait for) whether the background shot save succeeds.
-    this.saveShot_(draft, 'approved')
+    // Plan 600: saved as 'pending'; it becomes an approved example only once the recipe is saved.
+    // Pasted recipes are never saved as examples, so they carry no key.
+    const shotKey = this.inputMode_() === 'paste' ? undefined : crypto.randomUUID()
+    this.pendingShotKey_ = shotKey
+    this.saveShot_(draft, 'pending', shotKey)
     const warnings = this.shots.computeWarnings(draft)
     if (warnings.length) {
       this.shotWarnings_.set(warnings)
       this.isAwaitingWarningConfirm_.set(true)
     } else {
-      this.navigateToBuilder_(draft)
+      this.navigateToBuilder_(draft, shotKey)
     }
   }
 
   onConfirmWarnings(): void {
     const draft = this.pendingApprovedDraft_()
     if (!draft) return
-    this.navigateToBuilder_(draft)
+    this.navigateToBuilder_(draft, this.pendingShotKey_)
   }
 
   onBackFromWarnings(): void {
@@ -322,8 +326,11 @@ export class AiRecipeModalComponent implements OnInit {
     this.pendingApprovedDraft_.set(null)
   }
 
-  private navigateToBuilder_(draft: AiRecipeDraft): void {
-    this.aiDraft.set(draft)
+  /** Plan 600: the key of the pending example saved for the draft awaiting the warning confirmation. */
+  private pendingShotKey_: string | undefined
+
+  private navigateToBuilder_(draft: AiRecipeDraft, shotKey?: string): void {
+    this.aiDraft.set(draft, shotKey)
     void this.router.navigate(['/recipe-builder'])
     this.resetLocalState_()
     this.modalService.close()

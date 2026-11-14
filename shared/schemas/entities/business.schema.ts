@@ -74,6 +74,10 @@ export type StaffVisibleStagesInput = z.infer<typeof staffVisibleStagesInputSche
 export const logisticsHiddenInputSchema = z.strictObject({ keys: z.array(z.string().min(1).max(LOGISTICS_LABEL_MAX)).max(300) })
 export type LogisticsHiddenInput = z.infer<typeof logisticsHiddenInputSchema>
 
+/** Plan 600: body of `PUT /api/v1/business/share-ai-examples` (owner only). */
+export const shareAiExamplesInputSchema = z.strictObject({ share: z.boolean() })
+export type ShareAiExamplesInput = z.infer<typeof shareAiExamplesInputSchema>
+
 /** Plan 424: one document per business (the tenant). Lives in the `businesses` collection, not the generic data pipe. */
 export const businessSchema = z.strictObject({
   _id: z.string().min(1),
@@ -90,6 +94,8 @@ export const businessSchema = z.strictObject({
   staffVisibleStages: staffVisibleStagesField.optional(),
   /** Plan 579: shared logistics questions this business hid, with the time it hid them. */
   hiddenLogisticsKeys: z.array(z.strictObject({ key: z.string().min(1).max(LOGISTICS_LABEL_MAX), at: z.number() })).max(300).optional(),
+  /** Plan 600: the owner lets the platform admin copy its saved AI recipe examples, anonymously, into the shared pool. Absent = off. */
+  shareAiExamples: z.boolean().optional(),
   /** Server-written by the platform admin (plan 557); reserved so later features can check it. */
   frontDeskPlan: z.enum(['pilot', 'basic', 'pro']).optional()
 })
