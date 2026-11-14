@@ -96,8 +96,8 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 610-A1: Skip the sign-in, sign-up and refresh limits when the server runs in development — skip option on the three limiters — server/routes/auth.js
-- [ ] 610-A2: Prove the limits are off in development and still on in production — server/test/auth-limit-dev.test.js
+- [x] 610-A1: Skip the sign-in, sign-up and refresh limits when the server runs in development — skip option on the three limiters — server/routes/auth.js
+- [x] 610-A2: Prove the limits are off in development and still on in production — server/test/auth-limit-dev.test.js
 
 ## Technical Considerations
 
@@ -116,3 +116,6 @@ none
 ## Execution Notes
 
 - decision: Human 2026-11-14 "plan: login limit off locally" — keep the limits on the live site.
+- evidence: cd server && npx vitest run test/auth-limit-dev.test.js -> exit 0, 2 passed
+- evidence: pnpm run test:server -> exit 0, 1361 passed; pnpm run build -> exit 0; pnpm run lint -> 0 errors
+- evidence: log-query -> SKIP: no database configured
