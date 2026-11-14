@@ -75,6 +75,11 @@
       color: var(--color-text-muted);
       font-size: 0.875rem;
     }
+
+    @media (max-width: 620px) {
+      justify-content: flex-start;
+      min-inline-size: 0;
+    }
   }
 
   // ── Quick toggle chips in sidebar — tint only the icon; a selected chip's
