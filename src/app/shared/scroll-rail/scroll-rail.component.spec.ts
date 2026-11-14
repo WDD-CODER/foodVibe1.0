@@ -86,6 +86,25 @@ describe('ScrollRailComponent', () => {
     expect(arrow('next').classList).toContain('is-hidden')
   })
 
+  const host = (): HTMLElement => fixture.debugElement.query(By.directive(ScrollRailComponent)).nativeElement
+
+  it('does not mark the host overflowing when the content fits', () => {
+    refresh()
+    expect(host().classList).not.toContain('is-overflowing')
+  })
+
+  it('marks an overflowing host and keeps the next arrow beside the scroller, not over it', () => {
+    fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
+    fixture.detectChanges()
+    refresh()
+    fixture.detectChanges()
+    expect(host().classList).toContain('is-overflowing')
+    const a = arrow('next').getBoundingClientRect()
+    const s = scroller().getBoundingClientRect()
+    const intersects = a.left < s.right && a.right > s.left && a.top < s.bottom && a.bottom > s.top
+    expect(intersects).toBeFalse()
+  })
+
   describe('centerChild (plan 468)', () => {
     beforeEach(() => {
       fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
