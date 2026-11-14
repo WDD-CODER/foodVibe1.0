@@ -199,4 +199,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - scope extended: server/test/ai-shots.test.js — its helper saved 'approved' shots, which POST /shots now refuses; it now saves pending + confirms.
 - scope extended: src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts — specs beside scoped page files (stub for the new section; the metadata tab list is unchanged).
 - scope extended: moved containsInjectionPattern / scanRecipeDraftForInjection from routes/ai.js into services/ai-recipe-helpers.js so admin.js uses the same screen (both in scope).
-- kit-manifest-check (kit copy from main folder) reports `unclassified: scripts/qa/lib/styleqa-sign-in.mjs` — not touched by this plan.
+- scope extended: docs/workflow-kit/manifest.json — classified `scripts/qa/lib/styleqa-sign-in.mjs` (project/stay); kit-manifest-check now ok (ask 600-1 approved).
