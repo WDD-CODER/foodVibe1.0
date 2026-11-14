@@ -94,10 +94,10 @@ Plan 580 edits `server/routes/ai.js` before this plan: check by symbol that `get
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Stamp and prune recipe examples per business — `saveShot(req, …)` with `businessId`, per-business count and pruning, `POST /shots` passes `req` — server/routes/ai.js
-- [ ] A2: Read only the caller's own approved examples — `getApprovedShots(req, limit)` with `scopeFilter(req)`; both callers pass `req`; comment block updated — server/routes/ai.js
-- [ ] A3: Test the scope, the prune and the stamp — the four `[auto]` cases above — server/test/ai-shots.test.js
-- [ ] A4: Run test:server, the server lint and log-query, and paste the output lines under Execution Notes
+- [x] A1: Stamp and prune recipe examples per business — `saveShot(req, …)` with `businessId`, per-business count and pruning, `POST /shots` passes `req` — server/routes/ai.js
+- [x] A2: Read only the caller's own approved examples — `getApprovedShots(req, limit)` with `scopeFilter(req)`; both callers pass `req`; comment block updated — server/routes/ai.js
+- [x] A3: Test the scope, the prune and the stamp — the four `[auto]` cases above — server/test/ai-shots.test.js
+- [x] A4: Run test:server, the server lint and log-query, and paste the output lines under Execution Notes
 
 ## Technical Considerations
 - Dependencies: plan 580 (same file; its menu-shot fix is the model for this one).
@@ -125,3 +125,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Planner draft 2026-11-11 from todo item B6; checked against `origin/main` at d4e904bb.
 - Seen while drafting: `POST /shots` passes `req.user._id` as `userId`, while the other routes use `req.user.userId`. P0 switches to `req.user.userId`; the test checks the stamped `businessId` only.
+- Evidence: pnpm run test:server -> exit 0 (ai-shots.test.js 4 passed); pnpm --dir server run lint -> exit 0 (0 errors); log-query -> SKIP: no database configured.

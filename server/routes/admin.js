@@ -174,9 +174,7 @@ router.get('/frontdesk-stats', verifyToken, requirePlatformAdmin, async (req, re
     }
     if (req.query.format === 'csv') {
       const lines = [FD_CSV_HEADER.join(','), ...rows.map(r => FD_CSV_HEADER.map(k => csvCell(r[k])).join(','))]
-      res.set('Content-Type', 'text/csv; charset=utf-8')
-      res.set('Content-Disposition', `attachment; filename="frontdesk-${range.from}-${range.to}.csv"`)
-      return res.send(lines.join('\n') + '\n')
+      return sendCsv(res, `frontdesk-${range.from}-${range.to}.csv`, lines)
     }
     res.json({ from: range.from, to: range.to, rows })
   } catch (err) {
@@ -286,6 +284,13 @@ const AI_GROUP_BY = ['business', 'feature', 'model', 'day']
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/
 const AI_CSV_COLUMNS = ['key', 'label', 'calls', 'failedCalls', 'inputTokens', 'outputTokens', 'totalTokens', 'estCostUsd']
 
+/** Plan 596: send a CSV Excel reads as UTF-8 (BOM first, CRLF rows, final CRLF), like src/app/core/utils/csv.util.ts. */
+function sendCsv(res, filename, lines) {
+  res.set('Content-Type', 'text/csv; charset=utf-8')
+  res.set('Content-Disposition', `attachment; filename="${filename}"`)
+  return res.send('\uFEFF' + lines.join('\r\n') + '\r\n')
+}
+
 function csvCell(value) {
   const text = value == null ? '' : String(value)
   return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
@@ -315,9 +320,7 @@ router.get('/ai-usage', verifyToken, requirePlatformAdmin, async (req, res) => {
     if (q.format === 'csv') {
       const lines = [AI_CSV_COLUMNS.join(',')]
       for (const r of rows) lines.push(AI_CSV_COLUMNS.map(c => csvCell(r[c])).join(','))
-      res.set('Content-Type', 'text/csv; charset=utf-8')
-      res.set('Content-Disposition', `attachment; filename="ai-usage-${from}-${to}.csv"`)
-      return res.send(lines.join('\n') + '\n')
+      return sendCsv(res, `ai-usage-${from}-${to}.csv`, lines)
     }
     res.json({ from, to, groupBy, pricesAsOf: PRICES_AS_OF, rows, totals })
   } catch (err) {
