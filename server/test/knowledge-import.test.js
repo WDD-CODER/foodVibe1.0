@@ -88,6 +88,41 @@ describe('knowledge import', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  describe('redirects and internal addresses (plan 595)', () => {
+    const redirect = location => ({ ok: false, status: 302, headers: { get: h => (h.toLowerCase() === 'location' ? location : null) } })
+    const page = { ok: true, status: 200, text: async () => '<html><body>about our restaurant</body></html>' }
+
+    it('a redirect to 127.0.0.1 -> 400 and the internal address is never fetched', async () => {
+      fetchMock.mockResolvedValueOnce(redirect('http://127.0.0.1/'))
+      const res = await post({ url: 'http://93.184.216.34/start' })
+      expect(res.status).toBe(400)
+      expect(res.body.error).toBe('url resolves to a disallowed address')
+      expect(fetchMock.mock.calls.map(c => String(c[0]))).toEqual(['http://93.184.216.34/start'])
+    })
+
+    it('a redirect to another public page is followed and imported', async () => {
+      fetchMock.mockResolvedValueOnce(redirect('http://93.184.216.35/about'))
+      fetchMock.mockResolvedValueOnce(page)
+      fetchMock.mockResolvedValueOnce(reply([good(1)]))
+      const res = await post({ url: 'http://93.184.216.34/start' })
+      expect(res.status).toBe(201)
+      expect(String(fetchMock.mock.calls[1][0])).toBe('http://93.184.216.35/about')
+    })
+
+    it('more than 5 redirects -> 502', async () => {
+      fetchMock.mockResolvedValue(redirect('http://93.184.216.35/again'))
+      const res = await post({ url: 'http://93.184.216.34/start' })
+      expect(res.status).toBe(502)
+      expect(res.body.error).toBe('Could not fetch the provided URL')
+    })
+
+    it.each(['http://0.0.0.0/', 'http://100.64.0.1/', 'http://[::ffff:127.0.0.1]/'])('%s -> 400', async url => {
+      const res = await post({ url })
+      expect(res.status).toBe(400)
+      expect(fetchMock).not.toHaveBeenCalled()
+    })
+  })
+
   it('staff -> 403 and nothing is called', async () => {
     const res = await post({ text: 'x' }, staffToken())
     expect(res.status).toBe(403)
