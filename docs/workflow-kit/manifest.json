@@ -5140,6 +5140,14 @@
       "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
     },
     {
+      "path": "scripts/qa/lib/styleqa-sign-in.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe Style QA: signs in for the style QA run."
+    },
+    {
       "path": "scripts/qa/lib/qa-login.mjs",
       "tier": "project",
       "action": "stay",
