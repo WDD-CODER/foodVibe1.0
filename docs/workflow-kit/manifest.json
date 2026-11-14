@@ -5148,6 +5148,14 @@
       "notes": "FoodVibe code-QA: logs in with the QA account from .env."
     },
     {
+      "path": "scripts/qa/lib/styleqa-sign-in.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe Style QA: signs in for the style pages."
+    },
+    {
       "path": "scripts/qa/qa-code-merge.ps1",
       "tier": "project",
       "action": "stay",
