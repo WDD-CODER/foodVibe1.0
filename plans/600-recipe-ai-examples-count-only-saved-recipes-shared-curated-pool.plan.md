@@ -151,18 +151,18 @@ Check by symbol: `saveShot`, `getApprovedShots`, `selectShots`, `FEW_SHOT_COUNT`
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
-- [ ] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
-- [ ] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
-- [ ] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
-- [ ] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
-- [ ] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
-- [ ] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
-- [ ] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
-- [ ] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
-- [ ] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
-- [ ] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
-- [ ] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
+- [x] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [x] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
+- [x] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
+- [x] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
+- [x] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
+- [x] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
+- [x] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
+- [x] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
+- [x] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
+- [x] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
+- [x] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
+- [x] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
 - [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
 
 ## Technical Considerations
@@ -195,3 +195,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Planner draft 2026-11-14 from the Human's batch-6 D1 question; checked against `origin/main` at a1de3cdb.
 - 28 unscoped `GEMINI_SHOTS` documents counted on the local `foodvibe` DB on 2026-11-14 (none has `businessId` or `userId`). Atlas not counted.
+- Builder run-600 (2026-11-14): A1-A12 done; A13 partly: build 0, lint 0 errors, test:ci 2183 SUCCESS, test:server 1379 passed, lint:icons ok, breadcrumbs-check clean, override/ledger ok. The two `[ui]` specs are written, not run.
+- scope extended: server/test/ai-shots.test.js — its helper saved 'approved' shots, which POST /shots now refuses; it now saves pending + confirms.
+- scope extended: src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts — specs beside scoped page files (stub for the new section; the metadata tab list is unchanged).
+- scope extended: moved containsInjectionPattern / scanRecipeDraftForInjection from routes/ai.js into services/ai-recipe-helpers.js so admin.js uses the same screen (both in scope).
+- scope extended: docs/workflow-kit/manifest.json — classified `scripts/qa/lib/styleqa-sign-in.mjs` (project/stay); kit-manifest-check now ok (ask 600-1 approved).

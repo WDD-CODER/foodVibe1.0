@@ -12,6 +12,8 @@ const {
   IMPLAUSIBLE_PORTION_WEIGHT_WARNING,
   buildFewShotBlock,
   selectShots,
+  keptRatio,
+  pickShots,
 } = require('../services/ai-recipe-helpers');
 
 function draft(overrides = {}) {
@@ -223,5 +225,36 @@ describe('selectShots', () => {
 
   it('ignores stop words and single letters', () => {
     expect(selectShots(shots, 'עם ל', 2)).toEqual([]);
+  });
+});
+
+describe('keptRatio', () => {
+  const ai = { ingredients: [{ name: 'ביצים' }, { name: 'שמן' }] };
+  it('is 1 when all names are kept', () => {
+    expect(keptRatio(ai, { ingredients: [{ name: 'שמן' }, { name: 'ביצים' }, { name: 'מלח' }] })).toBe(1);
+  });
+  it('is 0.5 when half are kept', () => {
+    expect(keptRatio(ai, { ingredients: [{ name: 'שמן' }] })).toBe(0.5);
+  });
+  it('is 0 for an empty AI draft', () => {
+    expect(keptRatio({ ingredients: [] }, { ingredients: [{ name: 'שמן' }] })).toBe(0);
+    expect(keptRatio({}, {})).toBe(0);
+  });
+  it('compares trimmed, case- and space-insensitive', () => {
+    expect(keptRatio({ ingredients: [{ name: ' Olive  Oil ' }] }, { ingredients: [{ name: 'olive oil' }] })).toBe(1);
+  });
+});
+
+describe('pickShots', () => {
+  const own = n => Array.from({ length: n }, (_, i) => ({ prompt: `חביתה own${i}`, draft: { nameHebrew: 'חביתה' } }));
+  const shared = [{ prompt: 'חביתה shared1', draft: { nameHebrew: 'חביתה' } }, { prompt: 'חביתה shared2', draft: { nameHebrew: 'חביתה' } }];
+  it('two own matches → only own', () => {
+    expect(pickShots(own(2), shared, 'חביתה', 2).map(s => s.prompt)).toEqual(['חביתה own0', 'חביתה own1']);
+  });
+  it('one own match → one own + one shared', () => {
+    expect(pickShots(own(1), shared, 'חביתה', 2).map(s => s.prompt)).toEqual(['חביתה own0', 'חביתה shared1']);
+  });
+  it('no own → two shared', () => {
+    expect(pickShots([], shared, 'חביתה', 2).map(s => s.prompt)).toEqual(['חביתה shared1', 'חביתה shared2']);
   });
 });

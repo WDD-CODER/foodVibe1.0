@@ -5,7 +5,7 @@ const { createRateLimiter, userOrIpKey } = require('../middleware/rate-limit');
 const { badRequest, requireFields } = require('../middleware/validate');
 const dns = require('node:dns').promises;
 const { assertCan } = require('../utils/permissions');
-const { scopeFilter, readScope } = require('../utils/business-scope');
+const { scopeFilter, readScope, MASTER_BUSINESS_ID } = require('../utils/business-scope');
 const { LIVE } = require('../jobs/purge-deleted');
 const { MAX_IMPORT_TEXT, normalizePriceListRows, normalizeReceiptRows } = require('../utils/price-list-import');
 
@@ -163,7 +163,10 @@ const {
   computeSoftWarnings,
   escapeForPrompt,
   buildFewShotBlock,
-  selectShots,
+  keptRatio,
+  pickShots,
+  containsInjectionPattern,
+  scanRecipeDraftForInjection,
   RECIPE_GENERATION_CONFIG,
   SYSTEM_PROMPT,
 } = require('../services/ai-recipe-helpers');
@@ -178,6 +181,12 @@ const URL_SHOT_MATCH_CHARS = 300;
 // GEMINI_SHOTS — few-shot pool stored in MongoDB, one pool per business (INV-1).
 // Collection: GEMINI_SHOTS
 // Document: { businessId, prompt, draft, status, source, warnings, userId, createdAt }
+// Plan 600 lifecycle: the AI window saves a 'pending' shot (with a client shotKey) when the cook
+// continues into the recipe builder; POST /shots/confirm turns it 'approved' once the recipe is
+// saved (aiDraft = the original, draft = as saved, keptRatio, recipeId). Only 'approved' shots are
+// read into prompts. Shared pool: when the owner opted in (business.shareAiExamples) the platform
+// admin may copy an approved shot into a '__master__' shot (admin.js); every business's prompt
+// takes its own examples first and fills the rest from that pool. Copies carry no business name.
 // ---------------------------------------------------------------------------
 
 const SHOTS_COLLECTION = 'GEMINI_SHOTS';
@@ -193,30 +202,6 @@ function shotsCol() {
 // same pattern-based check standards-security.md prescribes for scanning
 // untrusted content, applied here to protect *other users'* Gemini calls
 // rather than the agent itself.
-const INJECTION_PATTERNS = [
-  /ignore (all |any )?(previous|prior|above) instructions/i,
-  /disregard (your|the|all) (rules|instructions)/i,
-  /you are now/i,
-  /repeat after me/i,
-  /system prompt/i,
-  /התעלם מ(כל )?ה?הוראות/,
-  /התעלם מההנחיות/,
-  /אתה עכשיו/,
-];
-
-function containsInjectionPattern(text) {
-  return typeof text === 'string' && INJECTION_PATTERNS.some(re => re.test(text));
-}
-
-function scanRecipeDraftForInjection(draft) {
-  if (!draft || typeof draft !== 'object') return false;
-  const fields = [draft.nameHebrew];
-  if (Array.isArray(draft.steps)) fields.push(...draft.steps);
-  if (Array.isArray(draft.ingredients)) fields.push(...draft.ingredients.map(ing => ing?.name));
-  if (Array.isArray(draft.equipment)) fields.push(...draft.equipment.map(eq => eq?.name));
-  return fields.some(containsInjectionPattern);
-}
-
 const SHOTS_CAP = 50;
 
 /**
@@ -225,11 +210,11 @@ const SHOTS_CAP = 50;
  * of that business (mirrors GEMINI_MENU_SHOTS) — nothing else bounds growth.
  * Returns the computed warnings array.
  */
-async function saveShot(req, { prompt, draft, status, source }) {
+async function saveShot(req, { prompt, draft, status, source, shotKey }) {
   try {
     const scope = scopeFilter(req);
     const warnings = computeSoftWarnings(draft);
-    await shotsCol().insertOne({ ...scope, prompt, draft, status, source, warnings, userId: req.user.userId, createdAt: new Date() });
+    await shotsCol().insertOne({ ...scope, prompt, draft, status, source, ...(shotKey && { shotKey }), warnings, userId: req.user.userId, createdAt: new Date() });
 
     const count = await shotsCol().countDocuments(scope);
     if (count > SHOTS_CAP) {
@@ -258,6 +243,20 @@ async function getApprovedShots(req, limit = SHOTS_CAP) {
       .find({ status: 'approved', ...scopeFilter(req) })
       .sort({ createdAt: -1 })
       .limit(limit)
+      .toArray();
+  } catch {
+    return [];
+  }
+}
+
+/** Plan 600: the shared pool — master approved shots, newest first. Never throws. */
+const SHARED_SHOTS_CAP = 200;
+async function getSharedShots() {
+  try {
+    return await shotsCol()
+      .find({ businessId: MASTER_BUSINESS_ID, status: 'approved' })
+      .sort({ createdAt: -1 })
+      .limit(SHARED_SHOTS_CAP)
       .toArray();
   } catch {
     return [];
@@ -377,7 +376,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
   const { prompt } = req.body;
   if (!requireFields(res, req.body, { prompt: 'text' })) return;
 
-  const shots = selectShots(await getApprovedShots(req), prompt, FEW_SHOT_COUNT);
+  const shots = pickShots(await getApprovedShots(req), await getSharedShots(), prompt, FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{
       text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
@@ -1588,7 +1587,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     return res.status(422).json({ error: 'No usable text found at the provided URL' });
   }
 
-  const shots = selectShots(await getApprovedShots(req), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
+  const shots = pickShots(await getApprovedShots(req), await getSharedShots(), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
     generationConfig: RECIPE_GENERATION_CONFIG,
@@ -1735,39 +1734,72 @@ router.post('/knowledge-import', verifyToken, (req, res, next) => {
 
 // ---------------------------------------------------------------------------
 // POST /shots
-// Accepts { prompt, draft, status: 'approved'|'rejected', source: 'text'|'image'|'url' }.
+// Accepts { prompt, draft, status: 'pending'|'rejected', source: 'text'|'image'|'url', shotKey? }.
+// 'pending' needs a shotKey and is confirmed later by POST /shots/confirm (plan 600).
 // Saves the shot to GEMINI_SHOTS and returns soft quality warnings.
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
 router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
-  const { prompt, draft, status, source } = req.body;
+  const { prompt, draft, status, source, shotKey } = req.body;
 
   if (!requireFields(res, req.body, { prompt: 'text', draft: 'object' })) return;
-  if (status !== 'approved' && status !== 'rejected') {
-    return badRequest(res, 'status must be "approved" or "rejected"');
+  if (status !== 'pending' && status !== 'rejected') {
+    return badRequest(res, 'status must be "pending" or "rejected"');
   }
   if (!['text', 'image', 'url'].includes(source)) {
     return badRequest(res, 'source must be "text", "image", or "url"');
   }
+  if (status === 'pending' && (typeof shotKey !== 'string' || shotKey.length < 8 || shotKey.length > 64)) {
+    return badRequest(res, 'shotKey must be a string of 8-64 characters');
+  }
 
-  // Hard structural validation — only block approved shots with broken structure
-  if (status === 'approved') {
+  // Hard structural validation — only block pending shots with broken structure
+  if (status === 'pending') {
     const errors = validateRecipeDraft(draft);
     if (errors.length > 0) {
       return res.status(400).json({ saved: false, errors });
     }
-    // Approved shots are injected verbatim (prompt + draft) into every user's
-    // future /generate call — screen for instruction-like content before
-    // anything from any logged-in user enters that shared pool.
+    // Once confirmed, shots are injected verbatim (prompt + draft) into future /generate
+    // calls — screen for instruction-like content before anything enters the pool.
     if (containsInjectionPattern(prompt) || scanRecipeDraftForInjection(draft)) {
       req.log.warn({ event: 'ai.shots.injection_rejected' });
       return res.status(400).json({ saved: false, errors: ['content rejected — instruction-like text is not allowed in an approved shot'] });
     }
   }
 
-  const warnings = await saveShot(req, { prompt: prompt.trim(), draft, status, source });
+  const warnings = await saveShot(req, { prompt: prompt.trim(), draft, status, source, ...(status === 'pending' && { shotKey }) });
   return res.json({ saved: true, warnings });
+});
+
+// ---------------------------------------------------------------------------
+// POST /shots/confirm (plan 600)
+// Accepts { shotKey, draft, recipeId }: the recipe was saved, so the caller's pending
+// shot becomes 'approved' with the draft as saved. Calls no AI (no aiLimiter).
+// ---------------------------------------------------------------------------
+
+router.post('/shots/confirm', verifyToken, async (req, res) => {
+  const { shotKey, draft, recipeId } = req.body;
+  if (!requireFields(res, req.body, { shotKey: 'text', draft: 'object', recipeId: 'text' })) return;
+  if (validateRecipeDraft(draft).length > 0) return badRequest(res, 'invalid draft');
+  if (scanRecipeDraftForInjection(draft)) {
+    req.log.warn({ event: 'ai.shots.injection_rejected' });
+    return badRequest(res, 'content rejected — instruction-like text is not allowed in an approved shot');
+  }
+  try {
+    const filter = { ...scopeFilter(req), shotKey, status: 'pending' };
+    const stored = await shotsCol().findOne(filter);
+    if (!stored) return res.status(404).json({ error: 'Shot not found' });
+    const ratio = keptRatio(stored.draft, draft);
+    await shotsCol().updateOne({ _id: stored._id }, { $set: {
+      status: 'approved', aiDraft: stored.draft, draft, keptRatio: ratio, recipeId, confirmedAt: new Date(),
+    } });
+    req.log.info({ event: 'ai.shots.confirmed', keptRatio: ratio });
+    return res.json({ confirmed: true, keptRatio: ratio });
+  } catch (err) {
+    req.log.error({ err, event: 'ai.shots.confirm_failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // ---------------------------------------------------------------------------

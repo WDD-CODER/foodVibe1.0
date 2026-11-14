@@ -79,7 +79,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `business-stats.service.ts` | The dashboard numbers for the signed-in business, computed by the server (plan 447) | BusinessStatsService |
 | `business-stats.service.ts` (getReport) | Plan 568: `getReport(months, businessId?)` reads the business report | BusinessStatsService |
 | `plan-snapshot.service.ts` | Builds an event's planning snapshot from today's prices and the supplier orders (plan 446) | PlanSnapshotService, LivePlan |
-| `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448) | PlatformAdminService, BusinessRow |
+| `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448); plan 600: `getAiShots`, `promoteAiShot`, `removeSharedAiShot` | PlatformAdminService, BusinessRow |
 | `product-import.service.ts` | Supplier price-list import: cleaned rows from the server, then apply (plan 432) | ProductImportService, ImportRow, ApplyRow, ApplyResult |
 | `unlinked-ingredient-link.service.ts` | Turns a free-text ingredient into a product-linked one in the stored recipes and dishes (plan 466) | UnlinkedIngredientLinkService, LinkUnlinkedRequest |
 | `user-admin.service.ts` | User admin management | UserAdminService |

@@ -228,6 +228,56 @@ function selectShots(shots, prompt, n = 2) {
     .map(s => s.shot);
 }
 
+// Plan 600: moved from routes/ai.js so admin.js screens a promoted shot the same way.
+// Shots are injected verbatim into other users' prompts, so free text is screened for instruction-like content.
+const INJECTION_PATTERNS = [
+  /ignore (all |any )?(previous|prior|above) instructions/i,
+  /disregard (your|the|all) (rules|instructions)/i,
+  /you are now/i,
+  /repeat after me/i,
+  /system prompt/i,
+  /התעלם מ(כל )?ה?הוראות/,
+  /התעלם מההנחיות/,
+  /אתה עכשיו/,
+];
+
+function containsInjectionPattern(text) {
+  return typeof text === 'string' && INJECTION_PATTERNS.some(re => re.test(text));
+}
+
+function scanRecipeDraftForInjection(draft) {
+  if (!draft || typeof draft !== 'object') return false;
+  const fields = [draft.nameHebrew];
+  if (Array.isArray(draft.steps)) fields.push(...draft.steps);
+  if (Array.isArray(draft.ingredients)) fields.push(...draft.ingredients.map(ing => ing?.name));
+  if (Array.isArray(draft.equipment)) fields.push(...draft.equipment.map(eq => eq?.name));
+  return fields.some(containsInjectionPattern);
+}
+
+/** Normalises an ingredient name for comparison: trimmed, lower-cased, inner spaces collapsed. */
+function normIngredientName(name) {
+  return String(name ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Plan 600: the share (0-1, 2 decimals) of the AI draft's ingredient names still present in the
+ * saved draft. 0 when the AI draft has no ingredients.
+ */
+function keptRatio(aiDraft, savedDraft) {
+  const ai = Array.isArray(aiDraft?.ingredients) ? aiDraft.ingredients : [];
+  if (ai.length === 0) return 0;
+  const saved = new Set((Array.isArray(savedDraft?.ingredients) ? savedDraft.ingredients : []).map(i => normIngredientName(i?.name)));
+  const kept = ai.filter(i => saved.has(normIngredientName(i?.name))).length;
+  return Math.round((kept / ai.length) * 100) / 100;
+}
+
+/** Plan 600: the business's own matching shots first; shared (curated) shots fill the remaining slots. */
+function pickShots(own, shared, prompt, n = 2) {
+  const picked = selectShots(own, prompt, n);
+  if (picked.length >= n) return picked;
+  return [...picked, ...selectShots(shared, prompt, n - picked.length)];
+}
+
 /** Lower than the default so portion counts and amounts are steadier between runs (plan 370). */
 const RECIPE_GENERATION_CONFIG = { temperature: 0.4 };
 
@@ -300,4 +350,8 @@ module.exports = {
   escapeForPrompt,
   buildFewShotBlock,
   selectShots,
+  keptRatio,
+  pickShots,
+  containsInjectionPattern,
+  scanRecipeDraftForInjection,
 };

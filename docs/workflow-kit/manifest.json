@@ -4570,6 +4570,14 @@
       "notes": "Tests for the log-query plan-start and no-database fallbacks. Plan 517."
     },
     {
+      "path": "scripts/qa/lib/styleqa-sign-in.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe Style QA sign-in helper; project script, not part of the kit."
+    },
+    {
       "path": "scripts/qa/evidence-server.mjs",
       "tier": "project",
       "action": "stay",
