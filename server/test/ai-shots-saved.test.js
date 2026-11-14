@@ -59,18 +59,29 @@ describe('pending → confirmed recipe shots', () => {
 
     const res = await confirm(tokenA(), { shotKey: KEY, draft: recipe('SAVED-DISH-NAME', ['מים']), recipeId: 'rec1' });
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ confirmed: true, keptRatio: 0.5 });
+    // Plan 612: type 1 + yield 1 + names 0.5 + amounts 0.5 → 0.75
+    expect(res.body).toEqual({ confirmed: true, keptRatio: 0.75 });
 
     await generate(tokenA());
     const sent = geminiBodies()[1];
     expect(sent).toContain('SAVED-DISH-NAME');
 
     const doc = await testDb().collection('GEMINI_SHOTS').findOne({ shotKey: KEY });
-    expect(doc).toMatchObject({ status: 'approved', recipeId: 'rec1', keptRatio: 0.5 });
+    expect(doc).toMatchObject({ status: 'approved', recipeId: 'rec1', keptRatio: 0.75 });
     expect(doc.aiDraft.nameHebrew).toBe('AI-DRAFT-NAME');
     expect(doc.draft.nameHebrew).toBe('SAVED-DISH-NAME');
     expect(doc.keptRatio).toBeGreaterThanOrEqual(0);
     expect(doc.keptRatio).toBeLessThanOrEqual(1);
+  });
+
+  it('a confirm with a changed recipe_type stores a score below 1 (plan 612)', async () => {
+    await postShot(tokenA(), { status: 'pending', shotKey: KEY });
+    const saved = { ...recipe('SAVED'), recipe_type: 'preparation', yield_amount: 1000, yield_unit: 'gram' };
+    const res = await confirm(tokenA(), { shotKey: KEY, draft: saved, recipeId: 'rec2' });
+    expect(res.status).toBe(200);
+    const doc = await testDb().collection('GEMINI_SHOTS').findOne({ shotKey: KEY });
+    expect(doc.keptRatio).toBeLessThan(1);
+    expect(doc.keptRatio).toBe(0.5);
   });
 
   it('status approved is refused; pending needs a shotKey', async () => {

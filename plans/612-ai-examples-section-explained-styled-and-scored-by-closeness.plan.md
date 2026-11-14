@@ -106,10 +106,10 @@ Check by symbol on `orch/run-600`: `keptRatio`, `normIngredientName` in `ai-reci
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Score how close the AI draft was to the saved recipe, not only the names kept — draftCloseness replaces keptRatio, tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
-- [ ] A2: Store and show the new score, also for examples saved before this fix — confirm, admin list and promote — server/routes/ai.js, server/routes/admin.js, server/test/ai-shots-shared.test.js, server/test/ai-shots-saved.test.js
-- [ ] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
-- [ ] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
+- [x] A1: Score how close the AI draft was to the saved recipe, not only the names kept — draftCloseness replaces keptRatio, tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [x] A2: Store and show the new score, also for examples saved before this fix — confirm, admin list and promote — server/routes/ai.js, server/routes/admin.js, server/test/ai-shots-shared.test.js, server/test/ai-shots-saved.test.js
+- [x] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
+- [x] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
 - [ ] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card
 
 ## Technical Considerations
@@ -136,3 +136,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner draft 2026-11-14 from the Human's card ③ notes on run-600.
+- Builder 2026-11-14 (resume after ask 612-1): cherry-picked 1dcaef01 and 6b4122be onto orch/run-600 as the Human answered (todo: only the plan 612 block added; plan 613 file kept as the run branch had it); run branch fast-forwarded to c2a3e1f5 and pushed.
+- Decision: the P0 text says the amounts part is a share "among the AI ingredients whose name was kept", but the Done-when expects 0.75 for "half the names kept with their amounts", which only holds when the amounts part is a share of all AI ingredients. Followed the Done-when (amounts = AI ingredients kept with the same unit and an amount within 10%, over all AI ingredients). Reverse: divide `sameAmount.length` by `kept.length` in `draftCloseness` and change that test to 0.88.
+- Rows stay `ul > li` with an `article.c-glass-card` inside, so e2e/ui/600-2.spec.ts (selects `li`) keeps working.
+- pnpm run build -> 0; pnpm run lint -> 0 (warnings only); pnpm --dir server run lint -> 0; pnpm run test:ci -> 0 (2200 SUCCESS); pnpm run test:server -> 0 (109 files, 1385 tests).
+- e2e/ui/612-1.spec.ts written, not run (no app or QA login in the worktree).

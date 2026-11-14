@@ -14,7 +14,7 @@ const { PRICES_AS_OF } = require('../constants/ai-prices')
 
 const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 
-const { containsInjectionPattern, scanRecipeDraftForInjection } = require('../services/ai-recipe-helpers')
+const { containsInjectionPattern, scanRecipeDraftForInjection, draftCloseness } = require('../services/ai-recipe-helpers')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
 
 const router = Router()
@@ -341,13 +341,22 @@ function shotsCol() {
   return col('GEMINI_SHOTS')
 }
 
+// Plan 612: recomputed from aiDraft and draft when both are stored, so shots saved before the
+// closeness score show it too; otherwise the stored number (or null).
+function shotScore(doc) {
+  if (doc.aiDraft && typeof doc.aiDraft === 'object' && doc.draft && typeof doc.draft === 'object') {
+    return draftCloseness(doc.aiDraft, doc.draft)
+  }
+  return typeof doc.keptRatio === 'number' ? doc.keptRatio : null
+}
+
 function aiShotRow(doc, businessName) {
   return {
     _id: String(doc._id),
     nameHebrew: doc.draft?.nameHebrew ?? '',
     prompt: String(doc.prompt ?? '').slice(0, 200),
     ingredientCount: Array.isArray(doc.draft?.ingredients) ? doc.draft.ingredients.length : 0,
-    keptRatio: typeof doc.keptRatio === 'number' ? doc.keptRatio : null,
+    keptRatio: shotScore(doc),
     source: doc.source,
     createdAt: doc.createdAt,
     ...(businessName !== undefined && { businessName })
@@ -394,7 +403,7 @@ router.post('/ai-shots/:id/promote', verifyToken, requirePlatformAdmin, async (r
       prompt: shot.prompt,
       draft: shot.draft,
       source: shot.source,
-      keptRatio: typeof shot.keptRatio === 'number' ? shot.keptRatio : null,
+      keptRatio: shotScore(shot),
       status: 'approved',
       promotedFrom: { businessId: shot.businessId, shotId: id },
       promotedBy: req.user.userId,

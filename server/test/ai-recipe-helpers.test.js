@@ -12,7 +12,7 @@ const {
   IMPLAUSIBLE_PORTION_WEIGHT_WARNING,
   buildFewShotBlock,
   selectShots,
-  keptRatio,
+  draftCloseness,
   pickShots,
 } = require('../services/ai-recipe-helpers');
 
@@ -228,20 +228,54 @@ describe('selectShots', () => {
   });
 });
 
-describe('keptRatio', () => {
-  const ai = { ingredients: [{ name: 'ביצים' }, { name: 'שמן' }] };
-  it('is 1 when all names are kept', () => {
-    expect(keptRatio(ai, { ingredients: [{ name: 'שמן' }, { name: 'ביצים' }, { name: 'מלח' }] })).toBe(1);
+describe('draftCloseness', () => {
+  const base = (overrides = {}) => ({
+    recipe_type: 'dish',
+    yield_amount: 10,
+    yield_unit: 'portion',
+    ingredients: [
+      { name: 'ביצים', amount: 4, unit: 'unit' },
+      { name: 'שמן', amount: 50, unit: 'gram' },
+    ],
+    ...overrides,
   });
-  it('is 0.5 when half are kept', () => {
-    expect(keptRatio(ai, { ingredients: [{ name: 'שמן' }] })).toBe(0.5);
+
+  it('is 1 for identical drafts', () => {
+    expect(draftCloseness(base(), base())).toBe(1);
   });
-  it('is 0 for an empty AI draft', () => {
-    expect(keptRatio({ ingredients: [] }, { ingredients: [{ name: 'שמן' }] })).toBe(0);
-    expect(keptRatio({}, {})).toBe(0);
+  it('is 0.5 when a 1000 gram preparation became a dish of 10 portions, ingredients unchanged', () => {
+    const ai = base({ recipe_type: 'preparation', yield_amount: 1000, yield_unit: 'gram' });
+    expect(draftCloseness(ai, base())).toBe(0.5);
   });
-  it('compares trimmed, case- and space-insensitive', () => {
-    expect(keptRatio({ ingredients: [{ name: ' Olive  Oil ' }] }, { ingredients: [{ name: 'olive oil' }] })).toBe(1);
+  it('is 0.75 when type and yield match and half the names are kept with their amounts', () => {
+    const saved = base({ ingredients: [{ name: 'ביצים', amount: 4, unit: 'unit' }, { name: 'קמח', amount: 100, unit: 'gram' }] });
+    expect(draftCloseness(base(), saved)).toBe(0.75);
+  });
+  it('gives the amounts part 0.5 when one of two kept amounts changed by more than 10%', () => {
+    const saved = base({ ingredients: [{ name: 'ביצים', amount: 4, unit: 'unit' }, { name: 'שמן', amount: 80, unit: 'gram' }] });
+    // type 1 + yield 1 + names 1 + amounts 0.5 → 0.875 → 0.88
+    expect(draftCloseness(base(), saved)).toBe(0.88);
+  });
+  it('treats an amount within 10% as the same, and a changed unit as different', () => {
+    const within = base({ ingredients: [{ name: 'ביצים', amount: 4, unit: 'unit' }, { name: 'שמן', amount: 55, unit: 'gram' }] });
+    expect(draftCloseness(base(), within)).toBe(1);
+    const unit = base({ ingredients: [{ name: 'ביצים', amount: 4, unit: 'unit' }, { name: 'שמן', amount: 50, unit: 'ml' }] });
+    expect(draftCloseness(base(), unit)).toBe(0.88);
+  });
+  it('scores names and amounts 0 for an AI draft with no ingredients', () => {
+    expect(draftCloseness(base({ ingredients: [] }), base())).toBe(0.5);
+    expect(draftCloseness({}, {})).toBe(0);
+  });
+  it('compares names trimmed, case- and space-insensitive', () => {
+    const ai = base({ ingredients: [{ name: ' Olive  Oil ', amount: 1, unit: 'gram' }] });
+    const saved = base({ ingredients: [{ name: 'olive oil', amount: 1, unit: 'gram' }] });
+    expect(draftCloseness(ai, saved)).toBe(1);
+  });
+  it('rounds to 2 decimals', () => {
+    const ai = base({ ingredients: [{ name: 'א', amount: 1, unit: 'gram' }, { name: 'ב', amount: 1, unit: 'gram' }, { name: 'ג', amount: 1, unit: 'gram' }] });
+    const saved = base({ ingredients: [{ name: 'א', amount: 1, unit: 'gram' }] });
+    // (1 + 1 + 1/3 + 1/3) / 4 = 0.6666… → 0.67
+    expect(draftCloseness(ai, saved)).toBe(0.67);
   });
 });
 

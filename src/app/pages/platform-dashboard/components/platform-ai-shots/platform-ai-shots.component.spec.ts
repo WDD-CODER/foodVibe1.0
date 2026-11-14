@@ -17,6 +17,8 @@ const row = (id: string, extra: Partial<AiShotRow> = {}): AiShotRow => ({
   ...extra
 })
 
+const DICT: Record<string, string> = { platform_ai_shots_accuracy: 'דיוק ה-AI: {n}' }
+
 describe('PlatformAiShotsComponent (plan 600)', () => {
   let fixture: ComponentFixture<PlatformAiShotsComponent>
   let getAiShots: jasmine.Spy
@@ -38,7 +40,7 @@ describe('PlatformAiShotsComponent (plan 600)', () => {
         { provide: PlatformAdminService, useValue: { getAiShots, promoteAiShot, removeSharedAiShot } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error']) },
-        { provide: TranslationService, useValue: { translate: (key: string) => key } }
+        { provide: TranslationService, useValue: { translate: (key: string) => DICT[key] ?? key } }
       ]
     })
     fixture = TestBed.createComponent(PlatformAiShotsComponent)
@@ -56,9 +58,9 @@ describe('PlatformAiShotsComponent (plan 600)', () => {
     const candidates = fixture.nativeElement.querySelector('[data-testid="ai-shots-candidates"]') as HTMLElement
     expect(text()).toContain('platform_ai_shots_shared')
     expect(text()).toContain('platform_ai_shots_candidates')
-    expect(shared.textContent).toContain('—')
+    expect(shared.textContent).toContain('דיוק ה-AI: —')
     expect(shared.textContent).not.toContain('Biz One')
-    expect(candidates.textContent).toContain('50%')
+    expect(candidates.textContent).toContain('דיוק ה-AI: 50%')
     expect(candidates.textContent).toContain('Biz One')
   })
 
@@ -81,5 +83,32 @@ describe('PlatformAiShotsComponent (plan 600)', () => {
     await fixture.whenStable()
     expect(removeSharedAiShot).toHaveBeenCalledWith('s1')
     expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('platform_ai_shots_error')
+  })
+
+  it('explains the section, labels each row «דיוק ה-AI: n%» and styles the buttons (plan 612)', async () => {
+    await setup({
+      shared: [row('s1', { keptRatio: 0.88 })],
+      candidates: [
+        row('c1', { keptRatio: 0.5, businessName: 'Biz One' }),
+        row('c2', { keptRatio: 1, businessName: 'Biz Two' })
+      ]
+    })
+    const desc = fixture.nativeElement.querySelector('[data-testid="ai-shots-desc"]') as HTMLElement
+    expect(desc.textContent?.trim()).toBe('platform_ai_shots_desc')
+    expect(text()).toContain('platform_ai_shots_shared_hint')
+    expect(text()).toContain('platform_ai_shots_candidates_hint')
+    const rows = Array.from(fixture.nativeElement.querySelectorAll('article.c-glass-card.ai-shot')) as HTMLElement[]
+    expect(rows.length).toBe(3)
+    expect(rows.map((r) => r.querySelector('.ai-shot__meta')!.textContent!.trim().split(' · ')[0])).toEqual([
+      'דיוק ה-AI: 88%',
+      'דיוק ה-AI: 50%',
+      'דיוק ה-AI: 100%'
+    ])
+    const remove = buttons().find((b) => b.textContent?.includes('platform_ai_shots_remove'))!
+    expect(remove.classList).toContain('c-btn-ghost')
+    expect(buttons().find((b) => b.textContent?.includes('platform_ai_shots_promote'))!.classList).toContain(
+      'c-btn-primary'
+    )
+    expect(fixture.nativeElement.querySelector('.c-btn-secondary')).toBeNull()
   })
 })
