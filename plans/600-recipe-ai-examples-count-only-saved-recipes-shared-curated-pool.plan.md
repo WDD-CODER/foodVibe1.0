@@ -73,6 +73,8 @@ docs/agent/standards-backend.md
 docs/brain/component-families.md
 e2e/ui/600-1.spec.ts
 e2e/ui/600-2.spec.ts
+server/test/ai-shots.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
