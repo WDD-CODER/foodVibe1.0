@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule } from 'lucide-angular'
+import { LucideAngularModule, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
@@ -76,7 +76,7 @@ describe('PlatformDashboardPage', () => {
         )
       )
     TestBed.configureTestingModule({
-      imports: [PlatformDashboardPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp })],
       providers: [
         {
           provide: PlatformAdminService,
@@ -128,11 +128,11 @@ describe('PlatformDashboardPage', () => {
   }
 
   const names = (): string[] =>
-    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody th')).map(
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="biz-name"]')).map(
       (el) => (el.textContent ?? '').trim().split(/\s+/)[0]
     )
   const header = (index: number): HTMLButtonElement =>
-    (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('thead .sort-btn')[index]
+    (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.platform-grid .sort-btn')[index]
 
   it('sorts by last activity, newest first, never-active last', async () => {
     await setup([
@@ -160,8 +160,13 @@ describe('PlatformDashboardPage', () => {
       row('d15', { lastActivityAt: Date.now() - 15 * DAY }),
       row('none', { lastActivityAt: null })
     ])
-    const trs = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr'))
-    const cls = (name: string): string => trs.find((tr) => tr.textContent?.includes(name))!.className
+    const trs = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="biz-row"]'))
+    const cls = (name: string): string =>
+      trs
+        .find((tr) => tr.textContent?.includes(name))!
+        .className.split(' ')
+        .filter((c) => c.startsWith('is-idle'))
+        .join(' ')
     expect(cls('fresh')).toBe('')
     expect(cls('d8')).toBe('is-idle-7')
     expect(cls('d15')).toBe('is-idle-14')
@@ -187,8 +192,8 @@ describe('PlatformDashboardPage', () => {
       row('a', { closeRate: 0.5714, lastActivityAt: Date.now() }),
       row('b', { lastActivityAt: Date.now() - DAY })
     ])
-    const cells = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr')).map((tr) =>
-      tr.querySelectorAll('td')[9].textContent?.trim()
+    const cells = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="close-rate"]')).map(
+      (el) => el.textContent?.trim()
     )
     expect(cells).toEqual(['57%', '—'])
   })
@@ -201,7 +206,7 @@ describe('PlatformDashboardPage', () => {
     const cells = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('[data-testid="frontdesk-cell"]')
     ).map((td) => (td.textContent ?? '').replace(/\s+/g, ' ').trim())
-    expect(cells).toEqual(['3/8 · fd_status_pilot · fd_assistant_level_0platform_fd_edit', '—'])
+    expect(cells).toEqual(['3/8 · fd_status_pilot · fd_assistant_level_0', '—'])
   })
 
   it('shows the assistant level next to the status on each front desk row (plan 557)', async () => {
@@ -223,9 +228,33 @@ describe('PlatformDashboardPage', () => {
     expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
   })
 
+  describe('pinned name column (plan 611)', () => {
+    it('keeps the name cells and header above anything that scrolls under them', async () => {
+      await setup([row('a'), row('b')])
+      const host = fixture.nativeElement as HTMLElement
+      const z = (el: Element): number => Number(getComputedStyle(el).zIndex)
+      const head = host.querySelector('.platform-grid .c-grid-header-cell.col-name')!
+      const bodies = Array.from(host.querySelectorAll('[data-testid="biz-name"]'))
+      expect(getComputedStyle(head).position).toBe('sticky')
+      for (const cell of bodies) {
+        expect(getComputedStyle(cell).position).toBe('sticky')
+        expect(z(cell)).toBeGreaterThanOrEqual(1)
+        expect(z(head)).toBeGreaterThan(z(cell))
+      }
+    })
+
+    it('puts the front desk edit button in the row actions menu, not in the front desk cell', async () => {
+      await setup([row('a', { frontDesk: { status: 'pilot', done: 3, total: 8 } })])
+      const host = fixture.nativeElement as HTMLElement
+      const edit = host.querySelector('[data-testid="fd-edit"]')!
+      expect(edit.closest('app-row-actions-menu')).not.toBeNull()
+      expect(edit.closest('[data-testid="frontdesk-cell"]')).toBeNull()
+    })
+  })
+
   describe('front desk columns (plan 559)', () => {
     const cell = (id: string): string =>
-      ((fixture.nativeElement as HTMLElement).querySelector(`tbody [data-testid="${id}"]`)?.textContent ?? '').trim()
+      ((fixture.nativeElement as HTMLElement).querySelector(`[data-testid="${id}"]`)?.textContent ?? '').trim()
 
     it('adds requests, median minutes and no-show % matched by business id, with a dash when there is none', async () => {
       await setup([row('a')])
