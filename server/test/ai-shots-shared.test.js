@@ -6,6 +6,7 @@ const request = require('supertest');
 process.env.GEMINI_API_KEY = 'test-key';
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app');
 const { resetForTests } = require('../services/gemini-client');
+const { draftCloseness } = require('../services/ai-recipe-helpers');
 
 let app;
 let fetchMock;
@@ -93,6 +94,22 @@ describe('shared recipe AI examples', () => {
     expect(body.shared.map(r => r.nameHebrew)).toEqual(['soup one']);
     expect(body.shared[0].businessName).toBeUndefined();
     expect((await request(app).get('/api/v1/admin/ai-shots').set(auth(owner('ownerShareA', 'bizShareA')))).status).toBe(403);
+  });
+
+  it('GET recomputes the closeness score from aiDraft and draft; promote copies it (plan 612)', async () => {
+    const aiDraft = { ...recipe('fixed soup'), recipe_type: 'preparation', yield_amount: 1000, yield_unit: 'gram' };
+    const id = await approvedShot('bizShareA', 'fixed soup', { aiDraft, keptRatio: 1 });
+    await approvedShot('bizShareA', 'old soup', { keptRatio: 0.6 });
+    await approvedShot('bizShareA', 'bare soup', { keptRatio: undefined });
+    const expected = draftCloseness(aiDraft, recipe('fixed soup'));
+    expect(expected).toBe(0.5);
+    const body = (await list()).body;
+    const byName = Object.fromEntries(body.candidates.map(r => [r.nameHebrew, r.keptRatio]));
+    expect(byName).toEqual({ 'fixed soup': expected, 'old soup': 0.6, 'bare soup': null });
+    const promoted = await promote(id);
+    expect(promoted.status).toBe(200);
+    expect(promoted.body.keptRatio).toBe(expected);
+    expect((await testDb().collection('GEMINI_SHOTS').findOne({ businessId: '__master__' })).keptRatio).toBe(expected);
   });
 
   it('DELETE removes the shared copy only', async () => {

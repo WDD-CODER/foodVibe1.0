@@ -39,9 +39,10 @@ export class PlatformAiShotsComponent implements OnInit {
     this.isLoading_.set(false)
   }
 
-  /** The kept share as a whole percent; «—» when the example has none. */
-  protected keptLabel(row: AiShotRow): string {
-    return row.keptRatio === null ? '—' : formatPctInt(row.keptRatio * 100)
+  /** Plan 612: «דיוק ה-AI: n%» — how close the AI draft was to the saved recipe; «—» when the example has no score. */
+  protected accuracyLabel(row: AiShotRow): string {
+    const n = row.keptRatio === null ? '—' : formatPctInt(row.keptRatio * 100)
+    return this.translation.translate('platform_ai_shots_accuracy').replace('{n}', n)
   }
 
   protected async promote(row: AiShotRow): Promise<void> {

@@ -259,16 +259,43 @@ function normIngredientName(name) {
   return String(name ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+/** True when two amounts are numbers that differ by at most 10% of the larger one. */
+function amountsClose(a, b) {
+  if (typeof a !== 'number' || typeof b !== 'number' || !Number.isFinite(a) || !Number.isFinite(b)) return false;
+  return Math.abs(a - b) <= 0.1 * Math.max(Math.abs(a), Math.abs(b));
+}
+
 /**
- * Plan 600: the share (0-1, 2 decimals) of the AI draft's ingredient names still present in the
- * saved draft. 0 when the AI draft has no ingredients.
+ * Plan 612: how close the AI draft was to the recipe the cook saved (0-1, 2 decimals) — the mean of
+ * four parts, each 0 or a share:
+ *  1. type — the same recipe_type;
+ *  2. yield — the same yield_unit and yield_amount within 10%;
+ *  3. names — the share of the AI's ingredient names still in the saved draft;
+ *  4. amounts — the share of the AI's ingredients kept with the same unit and an amount within 10%.
+ * An AI draft with no ingredients scores 0 on names and amounts.
  */
-function keptRatio(aiDraft, savedDraft) {
+function draftCloseness(aiDraft, savedDraft) {
+  const type = aiDraft?.recipe_type !== undefined && aiDraft?.recipe_type === savedDraft?.recipe_type ? 1 : 0;
+  const yieldPart = aiDraft?.yield_unit !== undefined && aiDraft?.yield_unit === savedDraft?.yield_unit
+    && amountsClose(aiDraft?.yield_amount, savedDraft?.yield_amount) ? 1 : 0;
   const ai = Array.isArray(aiDraft?.ingredients) ? aiDraft.ingredients : [];
-  if (ai.length === 0) return 0;
-  const saved = new Set((Array.isArray(savedDraft?.ingredients) ? savedDraft.ingredients : []).map(i => normIngredientName(i?.name)));
-  const kept = ai.filter(i => saved.has(normIngredientName(i?.name))).length;
-  return Math.round((kept / ai.length) * 100) / 100;
+  const savedByName = new Map();
+  for (const ing of Array.isArray(savedDraft?.ingredients) ? savedDraft.ingredients : []) {
+    const key = normIngredientName(ing?.name);
+    if (!savedByName.has(key)) savedByName.set(key, ing);
+  }
+  let names = 0;
+  let amounts = 0;
+  if (ai.length > 0) {
+    const kept = ai.filter(ing => savedByName.has(normIngredientName(ing?.name)));
+    const sameAmount = kept.filter(ing => {
+      const saved = savedByName.get(normIngredientName(ing?.name));
+      return ing?.unit === saved?.unit && amountsClose(ing?.amount, saved?.amount);
+    });
+    names = kept.length / ai.length;
+    amounts = sameAmount.length / ai.length;
+  }
+  return Math.round(((type + yieldPart + names + amounts) / 4) * 100) / 100;
 }
 
 /** Plan 600: the business's own matching shots first; shared (curated) shots fill the remaining slots. */
@@ -350,7 +377,7 @@ module.exports = {
   escapeForPrompt,
   buildFewShotBlock,
   selectShots,
-  keptRatio,
+  draftCloseness,
   pickShots,
   containsInjectionPattern,
   scanRecipeDraftForInjection,

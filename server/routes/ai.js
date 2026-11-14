@@ -163,7 +163,7 @@ const {
   computeSoftWarnings,
   escapeForPrompt,
   buildFewShotBlock,
-  keptRatio,
+  draftCloseness,
   pickShots,
   containsInjectionPattern,
   scanRecipeDraftForInjection,
@@ -1790,7 +1790,7 @@ router.post('/shots/confirm', verifyToken, async (req, res) => {
     const filter = { ...scopeFilter(req), shotKey, status: 'pending' };
     const stored = await shotsCol().findOne(filter);
     if (!stored) return res.status(404).json({ error: 'Shot not found' });
-    const ratio = keptRatio(stored.draft, draft);
+    const ratio = draftCloseness(stored.draft, draft);
     await shotsCol().updateOne({ _id: stored._id }, { $set: {
       status: 'approved', aiDraft: stored.draft, draft, keptRatio: ratio, recipeId, confirmedAt: new Date(),
     } });
