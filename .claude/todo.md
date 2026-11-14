@@ -176,23 +176,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
 
-### Plan 589 — A signed-out visitor sees only the welcome page; no automatic guest sign-in on the PC and in the slots (`plans/589-signed-out-visitors-see-only-the-welcome-page.plan.md`)
-- [ ] A1: Stop signing a guest in by itself on the PC and in the slots — src/environments/environment.local.ts, src/environments/environment.ts
-- [ ] A2: Send a signed-out visitor to the welcome page from every page but the shared recipe link — src/app/core/guards/auth.guard.ts, src/app/app.routes.ts
-- [ ] A3: After signing in on the welcome page, return to the page the visitor wanted — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/home-redirect.ts
-- [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
-- [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
-
-### Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page (`plans/591-signing-out-goes-to-the-welcome-page.plan.md`)
-- [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
-- [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
-- [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
-
-### Plan 592 — Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions (`plans/592-shared-recipe-links-also-need-signing-in.plan.md`)
-- [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
-- [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
-- [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
-
 ### Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
 
 - [ ] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
@@ -251,6 +234,31 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
 - [ ] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
 
+### Plan 607 — The phone bottom bar shows no waiting-count badge (`plans/design/607-the-phone-bottom-bar-shows-no-waitingcount-badge.plan.md`)
+- [ ] 607-A1: Take the waiting-count badge out of the phone bottom bar — delete the badge block, tidy the aria-label — src/app/core/components/header/header.component.html
+- [ ] 607-A2: Drop the badge styles the bottom bar no longer uses — src/app/core/components/header/header.component.scss
+- [ ] 607-A3: Update the header spec and prove on a phone screen that the badge is gone — src/app/core/components/header/header.component.spec.ts, e2e/ui/607-1.spec.ts
+
+### Plan 608 — The recipe ingredient amount stays fully visible on phones (`plans/design/608-the-recipe-ingredient-amount-stays-fully-visible-on-phones.plan.md`)
+- [ ] 608-A1: Give the phone amount box a floor so the typed number is always visible — quantity column minmax, input min size, button min size — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
+- [ ] 608-A2: Prove at 320px and 375px that the amount and the − / + buttons keep their size — e2e/ui/608-1.spec.ts
+
+### Plan 609 — The list filter panel is only as tall as its content (`plans/design/609-the-list-filter-panel-is-only-as-tall-as.plan.md`)
+- [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
+
+### Plan 610 — Sign-in limits stay on the live site but stop blocking local development (`plans/610-signin-limits-stay-on-the-live-site-but-stop.plan.md`)
+- [ ] 610-A1: Skip the sign-in, sign-up and refresh limits when the server runs in development — skip option on the three limiters — server/routes/auth.js
+- [ ] 610-A2: Prove the limits are off in development and still on in production — server/test/auth-limit-dev.test.js
+
+### Plan 611 — Platform business table becomes the app's standard grid with the phone column carousel (`plans/design/611-platform-business-table-becomes-the-apps-standard-grid-with.plan.md`)
+- [ ] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [ ] 611-A2: Keep the pinned name column above anything that scrolls under it, with opaque idle tints — z-index 1/2 and solid backgrounds outside the page layer — src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [ ] 611-A3: Show one swipeable column at a time on phones, like the other lists — COLUMN_CAROUSEL header + cells, carouselColumns field — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
+- [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
+
 ### Plan 612 — The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was
 
 - [ ] A1: Score how close the AI draft was to the saved recipe, not only the names kept — draftCloseness replaces keptRatio, tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
@@ -258,3 +266,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
 - [ ] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
 - [ ] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card
+
+### Plan 613 — The top menu scrolls sideways on tablet widths instead of breaking onto a second line
+
+- [ ] A1: Keep the top menu on one line between 621 and 1023 px and let the pills scroll sideways — media block, flex and overflow rules — src/app/core/components/header/header.component.scss
+- [ ] A2: Write the screen check at 800 and 1000 px wide — e2e/ui/613-1.spec.ts
+- [ ] A3: Run the checks and hand over — build, test:ci, lint, spec 613-1 against the slot app; then the [human] card
