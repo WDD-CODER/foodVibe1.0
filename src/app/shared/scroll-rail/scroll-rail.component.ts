@@ -43,7 +43,7 @@ export function normalizedScrollStart(scrollLeft: number, rtl: boolean): number 
   templateUrl: './scroll-rail.component.html',
   styleUrl: './scroll-rail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'scroll-rail' }
+  host: { class: 'scroll-rail', '[class.is-overflowing]': 'overflowing()' }
 })
 export class ScrollRailComponent {
   readonly snap = input<ScrollRailSnap>('proximity')
@@ -64,6 +64,8 @@ export class ScrollRailComponent {
   protected readonly showNext = computed(
     () => this.arrows() === 'always' || (this.arrows() === 'auto' && this.canNext_())
   )
+
+  protected readonly overflowing = computed(() => this.canPrev_() || this.canNext_())
 
   /** Fade widths for the physical left/right edges (the mask is written in physical terms). */
   protected readonly fadeLeft = computed(() => `${(this.isRtl_() ? this.canNext_() : this.canPrev_()) ? FADE_PX : 0}px`)
