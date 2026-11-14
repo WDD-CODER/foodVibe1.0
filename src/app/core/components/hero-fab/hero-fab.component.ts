@@ -8,6 +8,8 @@ import { UserService } from '@services/user.service'
 import type { HeroFabAction } from '@services/hero-fab.service'
 import { HeroFabService } from '@services/hero-fab.service'
 
+const ENTITY_FORM_ROUTE = /^\/(inventory|inventory\/equipment|suppliers|venues)\/(add|edit\/[^/]+)$/
+
 @Component({
   selector: 'app-hero-fab',
   standalone: true,
@@ -26,6 +28,7 @@ export class HeroFabComponent {
   readonly isOnMenuIntelligence_ = signal(false)
   readonly isOnRecipeBuilder_ = signal(false)
   readonly isOnWelcome_ = signal(false)
+  protected readonly isOnEntityForm_ = signal(false)
 
   /** Actions to show: page-specific only; empty when no page has registered actions. */
   protected readonly effectiveActions_ = computed(() => {
@@ -43,6 +46,7 @@ export class HeroFabComponent {
       this.isOnMenuIntelligence_.set(url.includes('menu-intelligence'))
       this.isOnRecipeBuilder_.set(url.includes('recipe-builder'))
       this.isOnWelcome_.set(url.startsWith('/welcome'))
+      this.isOnEntityForm_.set(ENTITY_FORM_ROUTE.test(url.split(/[?#]/)[0]))
     }
     setRoute()
     this.router.events

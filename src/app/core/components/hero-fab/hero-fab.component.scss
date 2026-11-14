@@ -172,3 +172,10 @@
     height: 3.5rem;
   }
 }
+
+// Add/edit forms: the create shortcut adds nothing and covers the action row on phones
+@media (max-width: 620px) {
+  .hero-fab-container.hide-on-phone {
+    display: none;
+  }
+}
