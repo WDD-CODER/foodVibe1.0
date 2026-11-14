@@ -133,9 +133,9 @@ const FEW_SHOT_COUNT = 2;
 const URL_SHOT_MATCH_CHARS = 300;
 
 // ---------------------------------------------------------------------------
-// GEMINI_SHOTS — shared few-shot pool stored in MongoDB.
+// GEMINI_SHOTS — few-shot pool stored in MongoDB, one pool per business (INV-1).
 // Collection: GEMINI_SHOTS
-// Document: { prompt, draft, status, source, warnings, createdAt }
+// Document: { businessId, prompt, draft, status, source, warnings, userId, createdAt }
 // ---------------------------------------------------------------------------
 
 const SHOTS_COLLECTION = 'GEMINI_SHOTS';
@@ -179,19 +179,20 @@ const SHOTS_CAP = 50;
 
 /**
  * Saves a shot to the GEMINI_SHOTS collection. Non-blocking — never throws.
- * Prunes to the most recent SHOTS_CAP shots (mirrors GEMINI_MENU_SHOTS) —
- * now that any logged-in user can write here, nothing else bounds growth.
+ * Stamps the caller's businessId and prunes to the most recent SHOTS_CAP shots
+ * of that business (mirrors GEMINI_MENU_SHOTS) — nothing else bounds growth.
  * Returns the computed warnings array.
  */
-async function saveShot(prompt, draft, status, source, userId) {
+async function saveShot(req, { prompt, draft, status, source }) {
   try {
+    const scope = scopeFilter(req);
     const warnings = computeSoftWarnings(draft);
-    await shotsCol().insertOne({ prompt, draft, status, source, warnings, userId, createdAt: new Date() });
+    await shotsCol().insertOne({ ...scope, prompt, draft, status, source, warnings, userId: req.user.userId, createdAt: new Date() });
 
-    const count = await shotsCol().countDocuments();
+    const count = await shotsCol().countDocuments(scope);
     if (count > SHOTS_CAP) {
       const oldest = await shotsCol()
-        .find({})
+        .find(scope)
         .sort({ createdAt: 1 })
         .limit(count - SHOTS_CAP)
         .toArray();
@@ -209,10 +210,10 @@ async function saveShot(prompt, draft, status, source, userId) {
  * Returns up to `limit` most-recent approved shots — the candidate pool selectShots()
  * picks the relevant few-shot examples from (plan 370).
  */
-async function getApprovedShots(limit = SHOTS_CAP) {
+async function getApprovedShots(req, limit = SHOTS_CAP) {
   try {
     return await shotsCol()
-      .find({ status: 'approved' })
+      .find({ status: 'approved', ...scopeFilter(req) })
       .sort({ createdAt: -1 })
       .limit(limit)
       .toArray();
@@ -334,7 +335,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
   const { prompt } = req.body;
   if (!requireFields(res, req.body, { prompt: 'text' })) return;
 
-  const shots = selectShots(await getApprovedShots(), prompt, FEW_SHOT_COUNT);
+  const shots = selectShots(await getApprovedShots(req), prompt, FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{
       text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
@@ -1544,7 +1545,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     return res.status(422).json({ error: 'No usable text found at the provided URL' });
   }
 
-  const shots = selectShots(await getApprovedShots(), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
+  const shots = selectShots(await getApprovedShots(req), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
     generationConfig: RECIPE_GENERATION_CONFIG,
@@ -1718,7 +1719,7 @@ router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
     }
   }
 
-  const warnings = await saveShot(prompt.trim(), draft, status, source, req.user._id);
+  const warnings = await saveShot(req, { prompt: prompt.trim(), draft, status, source });
   return res.json({ saved: true, warnings });
 });
 
