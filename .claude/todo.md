@@ -258,3 +258,17 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
 - [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
 - [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
+
+### Plan 612 — The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was
+
+- [ ] A1: Score how close the AI draft was to the saved recipe, not only the names kept — draftCloseness replaces keptRatio, tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [ ] A2: Store and show the new score, also for examples saved before this fix — confirm, admin list and promote — server/routes/ai.js, server/routes/admin.js, server/test/ai-shots-shared.test.js, server/test/ai-shots-saved.test.js
+- [ ] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
+- [ ] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
+- [ ] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card
+
+### Plan 613 — The top menu scrolls sideways on tablet widths instead of breaking onto a second line
+
+- [ ] A1: Keep the top menu on one line between 621 and 1023 px and let the pills scroll sideways — media block, flex and overflow rules — src/app/core/components/header/header.component.scss
+- [ ] A2: Write the screen check at 800 and 1000 px wide — e2e/ui/613-1.spec.ts
+- [ ] A3: Run the checks and hand over — build, test:ci, lint, spec 613-1 against the slot app; then the [human] card
