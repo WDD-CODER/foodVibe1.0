@@ -71,6 +71,16 @@ describe('UserService (business model)', () => {
     )
   })
 
+  it('a refresh with no stored user and a response user sets user_() from it, terms version included', () => {
+    service.refreshToken().subscribe()
+    http.expectOne(REFRESH_URL).flush({
+      token: fakeToken({ userId: 'u7', name: 'seven', isPlatformAdmin: false }),
+      user: { _id: 'u7', name: 'seven', email: 's@x', termsAcceptedVersion: '2026-11-v2' }
+    })
+    expect(service.user_()?._id).toBe('u7')
+    expect(service.user_()?.termsAcceptedVersion).toBe('2026-11-v2')
+  })
+
   it('login 403 NO_BUSINESS -> Error NO_BUSINESS', () => {
     let message = ''
     service.login({ name: 'x', password: 'pw' }).subscribe({ error: (e: Error) => (message = e.message) })

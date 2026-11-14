@@ -2783,3 +2783,24 @@ input[type='number']::-webkit-outer-spin-button {
     min-block-size: 2.25rem;
   }
 }
+
+/* Plan 568: the business report prints on one A4 page. */
+@media print {
+  app-report-page,
+  app-report-page * {
+    visibility: visible;
+  }
+  app-report-page {
+    position: static;
+    background: #fff;
+  }
+}
+
+/* Plan 556: the onboarding intake form prints on its own (the rule above hides everything else). */
+@media print {
+  app-root,
+  app-front-desk-onboarding,
+  app-front-desk-onboarding * {
+    visibility: visible;
+  }
+}

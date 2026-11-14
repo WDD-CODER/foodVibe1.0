@@ -49,6 +49,11 @@
     @for (link of navLinks_(); track link.path) {
       <a class="nav-pill" [routerLink]="link.path" routerLinkActive="active" (click)="closeMobileMenu()">
         {{ link.key | translatePipe }}
+        @if (link.path === '/clients' && waitingCount_() > 0) {
+          <span class="c-chip__count" data-testid="header-waiting-count" [attr.aria-label]="waitingLabel_()">{{
+            waitingCount_()
+          }}</span>
+        }
         <lucide-icon [name]="link.icon" size="16"></lucide-icon>
       </a>
     }
@@ -80,6 +85,11 @@
         <a [routerLink]="link.path" routerLinkActive="active" (click)="closeMobileMenu()">
           <lucide-icon [name]="link.icon" size="16"></lucide-icon>
           {{ link.key | translatePipe }}
+          @if (link.path === '/clients' && waitingCount_() > 0) {
+            <span class="c-chip__count" data-testid="header-waiting-count" [attr.aria-label]="waitingLabel_()">{{
+              waitingCount_()
+            }}</span>
+          }
         </a>
       </li>
     }
@@ -167,5 +177,12 @@
   <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
     <lucide-icon name="library" [size]="22"></lucide-icon>
     <span>{{ 'menu_library' | translatePipe }}</span>
+  </a>
+  <a routerLink="/clients" routerLinkActive="active" (click)="closeMobileMenu()">
+    <lucide-icon name="users" [size]="22"></lucide-icon>
+    <span>{{ 'frontdesk_section' | translatePipe }}</span>
+    @if (waitingCount_() > 0) {
+      <span class="c-chip__count" [attr.aria-label]="waitingLabel_()">{{ waitingCount_() }}</span>
+    }
   </a>
 </nav>

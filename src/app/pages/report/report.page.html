@@ -1,0 +1,150 @@
+<section class="report" data-testid="report-page" dir="rtl">
+  <header class="report__head">
+    <div>
+      <h1 class="report__title">{{ 'report_title' | translatePipe }}</h1>
+      @if (report(); as r) {
+      <p class="report__business" data-testid="report-business">{{ r.businessName }}</p>
+      }
+    </div>
+    <div class="report__controls">
+      <div class="c-chip-group" role="radiogroup" [attr.aria-label]="'report_trend_title' | translatePipe">
+        @for (option of monthOptions; track option.value) {
+        <label class="c-chip c-chip--toggle" [attr.data-testid]="'months-' + option.value">
+          <input
+            type="radio"
+            name="report-months"
+            [value]="option.value"
+            [checked]="months() === option.value"
+            (change)="selectMonths(option.value)"
+          />
+          <span>{{ option.labelKey | translatePipe }}</span>
+        </label>
+        }
+      </div>
+      <button type="button" class="c-btn-ghost--sm" data-testid="report-print" (click)="print()">
+        <lucide-icon name="printer" [size]="14" aria-hidden="true" />
+        {{ 'report_print' | translatePipe }}
+      </button>
+    </div>
+  </header>
+
+  @if (forbidden()) {
+  <p class="report__notice c-glass-panel" data-testid="report-forbidden">{{ 'report_owner_only' | translatePipe }}</p>
+  } @else if (isEmpty()) {
+  <app-empty-state messageKey="report_empty" icon="trending-up" />
+  } @else if (report()) { @let r = report()!;
+  <section class="report__since c-glass-panel" data-testid="report-since" aria-labelledby="report-since-title">
+    <h2 id="report-since-title" class="report__h2">{{ 'report_since_start' | translatePipe }}</h2>
+    <p class="report__periods">
+      <span>{{ 'report_first_period' | translatePipe }}</span>
+      @if (r.comparable) {
+      <span>→ {{ 'report_latest_period' | translatePipe }}</span>
+      }
+    </p>
+    @if (!r.comparable) {
+    <p class="report__muted" data-testid="report-too-early">{{ 'report_too_early' | translatePipe }}</p>
+    }
+    <div class="report__tiles">
+      @for (tile of tiles(); track tile.key) {
+      <article class="tile" [attr.data-testid]="'tile-' + tile.key">
+        <h3 class="tile__label">{{ tile.labelKey | translatePipe }}</h3>
+        <p class="tile__values">
+          <span class="tile__start" dir="ltr" [attr.data-testid]="'start-' + tile.key">
+            @if (tile.startEnough) { {{ tile.start }} } @else {
+            <span class="tile__nodata">{{ 'report_not_enough_data' | translatePipe }}</span>
+            }
+          </span>
+          @if (tile.latest !== null) {
+          <span class="tile__latest" dir="ltr" [attr.data-testid]="'latest-' + tile.key">
+            @if (tile.latestEnough) { {{ tile.latest }} } @else {
+            <span class="tile__nodata">{{ 'report_not_enough_data' | translatePipe }}</span>
+            }
+          </span>
+          }
+        </p>
+        @if (tile.change) {
+        <p class="tile__change" dir="ltr">
+          <lucide-icon [name]="tile.change.icon" [size]="12" aria-hidden="true" />
+          {{ tile.change.text }}
+        </p>
+        } @if (hasEstimates() && tile.estimate !== null) {
+        <p class="tile__estimate" data-testid="report-estimate">
+          <span class="tile__estimate-label"
+            >{{ 'report_before_foodvibe' | translatePipe }} · {{ 'report_owner_estimate' | translatePipe }}</span
+          >
+          <span dir="ltr">{{ tile.estimate }}</span>
+        </p>
+        }
+      </article>
+      }
+    </div>
+    @if (estimatesOnlyLine()) {
+    <p class="report__muted" data-testid="report-estimates-only">{{ estimatesOnlyLine() }}</p>
+    }
+  </section>
+
+  <section class="report__trend c-glass-panel" data-testid="report-trend" aria-labelledby="report-trend-title">
+    <h2 id="report-trend-title" class="report__h2">{{ 'report_trend_title' | translatePipe }}</h2>
+    <table class="trend">
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          @for (cell of trend()[0].cells; track cell.month) {
+          <th scope="col" dir="ltr">{{ cell.month }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of trend(); track row.key) {
+        <tr [attr.data-testid]="'trend-' + row.key">
+          <th scope="row">{{ row.labelKey | translatePipe }}</th>
+          @for (cell of row.cells; track cell.month) {
+          <td>
+            @if (cell.enough) {
+            <span class="trend__bar" aria-hidden="true"><span [style.inline-size.%]="cell.share"></span></span>
+            <span class="trend__num" dir="ltr">{{ cell.text }}</span>
+            } @else {
+            <span class="trend__num">—</span>
+            }
+          </td>
+          }
+        </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  @if (frontDeskLines().length) {
+  <section
+    class="report__frontdesk c-glass-panel"
+    data-testid="report-frontdesk"
+    aria-labelledby="report-frontdesk-title"
+  >
+    <h2 id="report-frontdesk-title" class="report__h2">{{ 'report_frontdesk_title' | translatePipe }}</h2>
+    <dl class="report__fd">
+      @for (line of frontDeskLines(); track line.key) {
+      <div class="report__fd-row" [attr.data-testid]="'fd-' + line.key">
+        <dt>{{ line.labelKey | translatePipe }}</dt>
+        <dd dir="ltr">{{ line.text }}</dd>
+        @if (line.estimate !== null) {
+        <dd class="report__fd-estimate" data-testid="fd-estimate">
+          <span>{{ 'report_owner_estimate' | translatePipe }}</span>
+          <span dir="ltr">{{ line.estimate }}</span>
+        </dd>
+        }
+      </div>
+      }
+    </dl>
+  </section>
+  } @if (findings().length) {
+  <section class="report__findings" data-testid="report-findings" aria-labelledby="report-findings-title">
+    <h2 id="report-findings-title" class="report__h2">{{ 'report_findings_title' | translatePipe }}</h2>
+    @for (f of findings(); track f.key) {
+    <article class="c-glass-panel finding" [attr.data-testid]="'finding-' + f.key">
+      <p>{{ f.text }}</p>
+      <p class="report__muted">{{ 'report_evidence' | translatePipe }}: <span dir="ltr">{{ f.evidenceCount }}</span></p>
+    </article>
+    }
+  </section>
+  } }
+</section>

@@ -5950,6 +5950,134 @@
       "params": [],
       "refs": [],
       "notes": "Plan 529: local-only read-only Mongo MCP launcher"
+    },
+    {
+      "path": ".claude/agents/styleqa-reviewer.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/skills/styleqa/SKILL.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/styleqa-rubric.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/styleqa.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa-routes.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/config.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/findings.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/merge.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/pages.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/probe.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/queue.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/redact.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/report.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/run.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/static-checks.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/styleqa/sweep.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
     }
   ]
 }

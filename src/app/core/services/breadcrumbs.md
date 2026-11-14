@@ -27,6 +27,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
 | `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
+| `knowledge-item-data.service.ts` | Knowledge items CRUD plus `importDrafts` (AI import) and `approve` (bulk), on BaseEntityDataService (plan 554) | KnowledgeItemDataService |
 | `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
@@ -38,7 +39,8 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `key-resolution.service.ts` | Canonical key resolution helpers | KeyResolutionService |
 | `keyboard-inset.service.ts` | Detects the on-screen keyboard (visualViewport) and exposes the inset as `--kb-inset` / `kb-open` | KeyboardInsetService, KEYBOARD_OPEN_THRESHOLD_PX |
 | `user-msg.service.ts` | Global user messages | UserMsgService |
-| `logging.service.ts` | App-wide logging | LoggingService, LogEvent |
+| `logging.service.ts` | App-wide logging; masks a guest token in the URLs it sends (plan 555) | LoggingService, LogEvent, maskTokenUrl |
+| `layout-mode.service.ts` | Signal bare_ is true on a route marked bare in its route data (public pages), so the shell hides header, tabs and quick-add (plan 555) | LayoutModeService |
 | `modal-controller.ts` | Signal-only open/close/result controller every popup service composes + the shell stack for Escape | ModalController, pushModalShell, popModalShell, isTopModalShell |
 | `add-item-modal.service.ts` | Add-item modal orchestration | AddItemModalService, AddItemConfig |
 | `add-supplier-flow.service.ts` | Add-supplier from product form | AddSupplierFlowService |
@@ -76,6 +78,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `logistics-item-registry.service.ts` | Event-logistics checklist items (taxonomy kind `logisticsItem`) by phase and environment (plan 521); plan 579: the date rule `forEvent`, removed / folded terms, the business hide list, own sections | LogisticsItemRegistryService |
 | `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
 | `business-stats.service.ts` | The dashboard numbers for the signed-in business, computed by the server (plan 447) | BusinessStatsService |
+| `business-stats.service.ts` (getReport) | Plan 568: `getReport(months, businessId?)` reads the business report | BusinessStatsService |
 | `plan-snapshot.service.ts` | Builds an event's planning snapshot from today's prices and the supplier orders (plan 446) | PlanSnapshotService, LivePlan |
 | `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448) | PlatformAdminService, BusinessRow |
 | `product-import.service.ts` | Supplier price-list import: cleaned rows from the server, then apply (plan 432) | ProductImportService, ImportRow, ApplyRow, ApplyResult |
@@ -85,6 +88,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
 | `terms.service.ts` | Loads the terms file, posts the acceptance (plan 584) | TermsService |
 | `booking-data.service.ts` | Booking status moves through the server routes (plan 549) | BookingDataService |
+| `front-desk-badge.service.ts` | Waiting-requests count for the header and tab chips; reloads on focus (plan 552) | FrontDeskBadgeService |
 
 ## Architecture Context
 

@@ -1,0 +1,248 @@
+:host {
+  display: block;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-semibold);
+  }
+
+  &__business {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  &__h2 {
+    margin: 0 0 var(--space-2);
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+  }
+
+  &__periods {
+    display: flex;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  &__muted {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-muted-light);
+    font-size: var(--fs-sm);
+  }
+
+  &__since,
+  &__trend,
+  &__notice {
+    padding: var(--space-4);
+  }
+
+  &__tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-3);
+  }
+
+  &__findings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
+  border-radius: var(--radius-md);
+
+  &__label {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium, 500);
+  }
+
+  &__values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+  }
+
+  &__latest {
+    color: var(--color-primary);
+  }
+
+  &__nodata {
+    color: var(--color-text-muted-light);
+    font-size: var(--fs-sm);
+    font-weight: normal;
+  }
+
+  &__change {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin: 0;
+    font-size: var(--fs-sm);
+  }
+
+  /* The owner's estimate: always lighter and smaller than a measured number. */
+  &__estimate {
+    display: flex;
+    flex-direction: column;
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-muted-light);
+    font-size: 0.75rem;
+    font-weight: normal;
+  }
+}
+
+.trend {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+
+  th,
+  td {
+    padding: var(--space-1) var(--space-2);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  &__bar {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: 2rem;
+    block-size: 0.4rem;
+    background: rgba(15, 118, 110, 0.1);
+    border-radius: 999px;
+    overflow: hidden;
+
+    > span {
+      display: block;
+      block-size: 100%;
+      background: var(--color-primary);
+    }
+  }
+
+  &__num {
+    color: var(--color-text-main);
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  .report {
+    gap: 2mm;
+    padding: 0;
+    font-size: 9pt;
+
+    &__controls,
+    &__findings .c-glass-panel:nth-of-type(n + 4) {
+      display: none !important;
+    }
+
+    &__since,
+    &__trend,
+    &__notice {
+      padding: 2mm;
+      box-shadow: none;
+      break-inside: avoid;
+    }
+
+    &__tiles {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5mm;
+    }
+
+    &__title {
+      font-size: 14pt;
+    }
+
+    &__h2 {
+      font-size: 11pt;
+      margin-block-end: 1mm;
+    }
+  }
+
+  .tile {
+    padding: 1.5mm;
+    break-inside: avoid;
+
+    &__values {
+      font-size: 11pt;
+    }
+  }
+
+  .trend th,
+  .trend td {
+    padding: 0.5mm 1mm;
+  }
+}
+
+/* Plan 559: the front desk block — label, measured number, and the owner's estimate in the lighter style. */
+.report__fd {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.report__fd-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+
+  dt {
+    min-inline-size: 12rem;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+  }
+}
+
+.report__fd-estimate {
+  display: flex;
+  gap: var(--space-2);
+  color: var(--color-text-muted-light);
+  font-size: 0.75rem;
+  font-weight: normal;
+}

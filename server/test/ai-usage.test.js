@@ -95,7 +95,7 @@ describe('the ledger row', () => {
     const [row] = await rows();
     const allowed = new Set([
       '_id', 'businessId', 'userId', 'feature', 'model', 'ok', 'errorCode', 'inputTokens', 'outputTokens',
-      'totalTokens', 'audioSeconds', 'imageCount', 'latencyMs', 'estCostUsd', 'at', 'day',
+      'totalTokens', 'audioSeconds', 'outcome', 'rejectCode', 'imageCount', 'latencyMs', 'estCostUsd', 'at', 'day',
     ]);
     expect(Object.keys(row).filter(k => !allowed.has(k))).toEqual([]);
     expect(JSON.stringify(row)).not.toContain('secret prompt');
@@ -227,8 +227,8 @@ describe('static checks', () => {
     const src = fs.readFileSync(path.join(__dirname, '../routes/ai.js'), 'utf8');
     const sites = src.match(/await callGemini\(\{\r?\n|await callGeminiForRecipeWithRetry\(requestBody, \{/g) ?? [];
     const features = [...src.matchAll(/usage: \{ [^}]*feature: '(\w+)' \}/g)].map(m => m[1]);
-    expect(sites).toHaveLength(13);
-    expect(features).toHaveLength(13);
+    expect(sites).toHaveLength(14);
+    expect(features).toHaveLength(14);
     for (const f of features) expect(isAiFeature(f), f).toBe(true);
   });
 });
@@ -252,6 +252,35 @@ describe('POST /generate retry', () => {
     const all = await rows();
     expect(all).toHaveLength(2);
     expect(all.every(r => r.feature === 'recipe_generate' && r.businessId === 'bizGen' && r.userId === 'genUser1')).toBe(true);
+    expect(all.map(r => r.outcome).sort()).toEqual(['accepted', 'rejected']);
+    expect(all.find(r => r.outcome === 'rejected').rejectCode).toBe('retried');
+  });
+});
+
+describe('plan 580 - outcome on the row', () => {
+  const menuToken = () => signTestToken({ userId: 'outUser1', name: 'o', businessId: 'bizOut', businessRole: 'owner' });
+  const menuPost = () => request(app).post('/api/v1/ai/generate-menu').set('Authorization', `Bearer ${menuToken()}`).send({ rawText: 'x' });
+
+  it('a successful call has outcome accepted', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_WITH_USAGE));
+    await call(fakeLog());
+    expect((await rows())[0].outcome).toBe('accepted');
+  });
+
+  it('a refused menu draft marks the row rejected with its code', async () => {
+    const answer = JSON.stringify({ name: 'a', servingType: 'buffet', guestCount: 5, sections: [] });
+    fetchMock.mockResolvedValue(jsonResponse(200, { candidates: [{ content: { parts: [{ text: answer }] } }] }));
+    const res = await menuPost();
+    expect(res.status).toBe(502);
+    const all = await rows();
+    expect(all).toHaveLength(1);
+    expect(all[0]).toMatchObject({ ok: true, outcome: 'rejected', rejectCode: 'no_recipes' });
+  });
+
+  it('a call that failed at Gemini gets no outcome', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(500, { error: { message: 'boom' } }));
+    await call(fakeLog());
+    expect((await rows())[0].outcome).toBeUndefined();
   });
 });
 
@@ -284,6 +313,20 @@ describe('GET /api/v1/admin/ai-usage', () => {
     expect(byKey.bizA).toMatchObject({ label: 'Alpha', calls: 2, failedCalls: 1, totalTokens: 150, estCostUsd: 0.1 });
     expect(byKey.bizB).toMatchObject({ label: 'Beta', calls: 1, totalTokens: 300, estCostUsd: 0.2 });
     expect(res.body.totals).toMatchObject({ calls: 3, failedCalls: 1, inputTokens: 300, outputTokens: 150, totalTokens: 450, estCostUsd: 0.3 });
+  });
+
+  it('counts rejected answers as failed and splits failures by reason', async () => {
+    const base = { ok: true, model: 'gemini-3.1-flash-lite', latencyMs: 10, at: 1, inputTokens: 0, outputTokens: 0, totalTokens: 0, estCostUsd: 0, day: '2026-11-05', businessId: 'bizC', feature: 'menu_generate' };
+    await testDb().collection('aiUsage').insertMany([
+      { ...base, outcome: 'rejected', rejectCode: 'no_sections' },
+      { ...base, outcome: 'rejected', rejectCode: 'no_sections' },
+      { ...base, ok: false, errorCode: 'timeout' },
+      { ...base },
+    ]);
+    const res = await get('?from=2026-11-05&to=2026-11-05&groupBy=business');
+    const row = res.body.rows.find(r => r.key === 'bizC');
+    expect(row).toMatchObject({ calls: 4, failedCalls: 3, failures: { no_sections: 2, timeout: 1 } });
+    expect(res.body.totals.failures).toBeUndefined();
   });
 
   it('groups by feature, model and day; drills into one business', async () => {

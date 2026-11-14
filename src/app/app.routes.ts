@@ -1,3 +1,4 @@
+import { inject } from '@angular/core'
 import { Routes } from '@angular/router'
 import { welcomeGuard } from './core/guards/welcome.guard'
 import { homeRedirect } from './pages/welcome/home-redirect'
@@ -19,6 +20,7 @@ import { platformAdminGuard } from './core/guards/platform-admin.guard'
 import { environment } from '../environments/environment'
 import { devCatalogRoutes } from './pages/dev-catalog/dev-catalog.routes'
 import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
+import { KnowledgeItemDataService } from './core/services/knowledge-item-data.service'
 
 export const routes: Routes = [
   // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
@@ -151,6 +153,48 @@ export const routes: Routes = [
     resolve: { kitchenDataLoaded: kitchenDataEnsureLoadedResolver },
   },
   {
+    path: 'clients',
+    loadComponent: () => import('./pages/clients/components/client-list/client-list.component').then(m => m.ClientListComponent),
+    canActivate: [authGuard],
+    resolve: { clientsLoaded: clientsEnsureLoadedResolver },
+  },
+  {
+    path: 'clients/:id',
+    loadComponent: () => import('./pages/clients/components/client-profile/client-profile.component').then(m => m.ClientProfileComponent),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+    resolve: { clientsLoaded: clientsEnsureLoadedResolver, menuEventsLoaded: menuEventsEnsureLoadedResolver },
+  },
+  {
+    path: 'requests',
+    loadComponent: () => import('./pages/requests/requests.page').then(m => m.RequestsPage),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'frontdesk/settings',
+    loadComponent: () => import('./pages/frontdesk/frontdesk-settings/frontdesk-settings.page').then(m => m.FrontdeskSettingsPage),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'frontdesk/onboarding',
+    loadComponent: () => import('./pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding.page').then(m => m.FrontDeskOnboardingComponent),
+    canActivate: [authGuard],
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
+    path: 'frontdesk/knowledge',
+    loadComponent: () => import('./pages/frontdesk/knowledge/knowledge.page').then(m => m.KnowledgePage),
+    canActivate: [authGuard],
+    resolve: { knowledgeLoaded: () => inject(KnowledgeItemDataService).ensureLoaded().then(() => true) },
+  },
+  {
+    path: 'bookings',
+    loadComponent: () => import('./pages/bookings/bookings.page').then(m => m.BookingsPage),
+    canActivate: [authGuard],
+  },
+  {
     path: 'menu-library',
     canActivate: [authGuard],
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
@@ -251,8 +295,21 @@ export const routes: Routes = [
     canActivate: [authGuard, platformAdminGuard],
   },
   { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
+  { path: 'report', loadComponent: () => import('./pages/report/report.page').then(m => m.ReportPage), canActivate: [authGuard] },
   // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.
   ...devCatalogRoutes(environment.localDev),
+  // Plan 555: the public request pages. `bare` hides the app header, tabs and quick-add button; no guard, no resolver.
+  {
+    path: 'book/:slug',
+    loadComponent: () => import('./pages/public-request/public-request.page').then(m => m.PublicRequestPage),
+    data: { bare: true },
+  },
+  {
+    path: 'book/:slug/r/:token',
+    loadComponent: () =>
+      import('./pages/public-request/public-request-status/public-request-status.page').then(m => m.PublicRequestStatusPage),
+    data: { bare: true },
+  },
   { path: '', redirectTo: homeRedirect, pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ]

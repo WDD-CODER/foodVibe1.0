@@ -1,0 +1,201 @@
+<app-modal-shell
+  size="md"
+  titleKey="rq_new"
+  [sheet]="true"
+  [dismissible]="!isSaving_()"
+  [hasChanges]="dirty_()"
+  (dismissed)="onClose()"
+>
+  @if (noProfile_()) {
+    <div class="c-modal-body" data-testid="no-profile">
+      @if (isOwner_()) {
+        <app-empty-state messageKey="rq_no_profile" icon="clipboard-check" />
+        <a class="c-btn-primary" routerLink="/frontdesk/settings" (click)="onClose()">{{
+          'rq_no_profile_link' | translatePipe
+        }}</a>
+      } @else {
+        <app-empty-state messageKey="fd_no_profile_staff" icon="clipboard-check" />
+      }
+    </div>
+  } @else {
+    <div class="c-modal-body nr-body">
+      <div class="c-input-stack">
+        <label for="nr-kind">{{ 'rq_kind' | translatePipe }}</label>
+        <app-custom-select
+          triggerId="nr-kind"
+          placeholder="rq_kind"
+          [options]="kindOptions_()"
+          [ngModel]="kind_()"
+          (ngModelChange)="kind_.set($event); touch()"
+        />
+        @if (touched_() && !kind_()) {
+          <span class="c-field-error" role="alert">{{ 'rq_kind_required' | translatePipe }}</span>
+        }
+      </div>
+
+      @if (isOwner_()) {
+        <div class="c-input-stack">
+          @if (!picking_()) {
+            <label for="nr-client">{{ 'client' | translatePipe }}</label>
+          }
+          <app-client-picker
+            inputId="nr-client"
+            [selected]="client_()"
+            (picked)="client_.set($event); touch()"
+            (cleared)="client_.set(null)"
+            (addingChange)="picking_.set($event)"
+          />
+          @if (touched_() && !client_() && !picking_()) {
+            <span class="c-field-error" role="alert">{{ 'client_required' | translatePipe }}</span>
+          }
+        </div>
+      } @else {
+        <div class="nr-row">
+          <div class="c-input-stack">
+            <label for="nr-name">{{ 'name' | translatePipe }}</label>
+            <input
+              id="nr-name"
+              class="c-input"
+              type="text"
+              autocomplete="off"
+              [maxLength]="nameMax"
+              [ngModel]="name_()"
+              (ngModelChange)="name_.set($event); touch()"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="nr-phone">{{ 'phone' | translatePipe }}</label>
+            <input
+              id="nr-phone"
+              class="c-input"
+              type="tel"
+              dir="ltr"
+              autocomplete="off"
+              [ngModel]="phone_()"
+              (ngModelChange)="phone_.set($event); touch()"
+            />
+          </div>
+        </div>
+        @if (touched_() && !clientValid_()) {
+          <span class="c-field-error" role="alert">{{ 'rq_guest_required' | translatePipe }}</span>
+        }
+      }
+
+      @if (kind_()) {
+        <div class="nr-row">
+          <app-form-field
+            label="date_filter"
+            forId="nr-date"
+            [error]="missing('date', date_()) ? 'rq_field_required' : null"
+          >
+            <app-date-field inputId="nr-date" [value]="date_()" (valueChange)="date_.set($event); touch()" />
+          </app-form-field>
+          @if (timeBound_()) {
+            <app-form-field
+              label="fd_q_time"
+              forId="nr-time"
+              [error]="missing('time', time_()) ? 'rq_field_required' : null"
+            >
+              <app-time-field inputId="nr-time" [value]="time_()" (valueChange)="time_.set($event); touch()" />
+            </app-form-field>
+          }
+          @if (hasParty_()) {
+            <div class="c-input-stack">
+              <label for="nr-party">{{ 'fd_q_party_size' | translatePipe }}</label>
+              <input
+                id="nr-party"
+                class="c-input"
+                type="number"
+                min="1"
+                inputmode="numeric"
+                [ngModel]="party_()"
+                (ngModelChange)="party_.set($event); touch()"
+              />
+              @if (missing('party_size', party_())) {
+                <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
+              }
+            </div>
+          }
+        </div>
+
+        @if (isEvent_()) {
+          <div class="nr-row">
+            <div class="c-input-stack">
+              <label for="nr-budget">{{ 'fd_q_budget_per_guest' | translatePipe }}</label>
+              <input
+                id="nr-budget"
+                class="c-input"
+                type="number"
+                min="0"
+                inputmode="numeric"
+                [ngModel]="budget_()"
+                (ngModelChange)="budget_.set($event); touch()"
+              />
+            </div>
+            <div class="c-input-stack">
+              <label for="nr-location">{{ 'fd_q_location' | translatePipe }}</label>
+              <input
+                id="nr-location"
+                class="c-input"
+                type="text"
+                maxlength="200"
+                [ngModel]="location_()"
+                (ngModelChange)="location_.set($event); touch()"
+              />
+              @if (missing('location', location_().trim())) {
+                <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        @for (q of extraQuestions_(); track q.key) {
+          <div class="c-input-stack">
+            <label [attr.for]="'nr-q-' + q.key"
+              >{{ q.label }}
+              @if (q.required) {
+                <span aria-hidden="true"> *</span>
+              }
+            </label>
+            @if (q.type === 'choice') {
+              <app-custom-select
+                [triggerId]="'nr-q-' + q.key"
+                [options]="q.options"
+                [ngModel]="answers_()[q.key] ?? ''"
+                (ngModelChange)="setAnswer(q.key, $event)"
+              />
+            } @else {
+              <input
+                class="c-input"
+                maxlength="500"
+                [id]="'nr-q-' + q.key"
+                [type]="q.type === 'number' ? 'number' : 'text'"
+                [ngModel]="answers_()[q.key] ?? ''"
+                (ngModelChange)="setAnswer(q.key, '' + $event)"
+              />
+            }
+            @if (touched_() && q.required && !(answers_()[q.key] ?? '').trim()) {
+              <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
+            }
+          </div>
+        }
+      }
+
+      @if (saveFailed_()) {
+        <span class="c-field-error" role="alert">{{ 'rq_create_failed' | translatePipe }}</span>
+      }
+    </div>
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="new-request-save"
+        [disabled]="isSaving_()"
+        (click)="onSave()"
+      >
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  }
+</app-modal-shell>

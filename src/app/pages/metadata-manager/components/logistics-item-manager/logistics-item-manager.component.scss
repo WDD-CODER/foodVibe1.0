@@ -83,6 +83,41 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     min-inline-size: 0;
   }
 
+  .logistics-item.is-hidden {
+    opacity: 0.55;
+  }
+
+  .logistics-removed {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .logistics-removed-toggle {
+    align-self: flex-start;
+  }
+
+  .logistics-item-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+
+    margin-inline-start: auto;
+  }
+
+  .logistics-add-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    @media (min-width: $above-mobile) {
+      flex-direction: row;
+      align-self: flex-end;
+    }
+  }
+
   .logistics-item-meta {
     font-size: var(--fs-xs);
     color: var(--color-text-muted);
@@ -120,7 +155,6 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     color: var(--color-text-main);
   }
 
-  .logistics-add-submit,
   .logistics-sign-in {
     align-self: stretch;
 

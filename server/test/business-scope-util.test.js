@@ -49,3 +49,15 @@ describe('scopeFilter / readScope', () => {
     expect(() => readScope(reqOf({ userId: 'u1' }), 'taxonomyTerms')).toThrow('NO_BUSINESS_IN_TOKEN')
   })
 })
+
+describe('guestScope (plan 555)', () => {
+  const { guestScope } = require('../utils/business-scope')
+  it('returns the business filter', () => {
+    expect(guestScope('b1')).toEqual({ businessId: 'b1' })
+  })
+  it('throws on an empty id, a non-string and the master', () => {
+    expect(() => guestScope('')).toThrow()
+    expect(() => guestScope(undefined)).toThrow()
+    expect(() => guestScope(MASTER_BUSINESS_ID)).toThrow()
+  })
+})

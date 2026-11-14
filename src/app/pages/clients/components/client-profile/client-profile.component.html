@@ -1,0 +1,269 @@
+@if (client_(); as client) {
+  @if (isMerged_()) {
+    <div class="profile-state">
+      <app-empty-state messageKey="client_not_found" icon="users" />
+      <div class="profile-state__links">
+        <a class="c-btn-ghost" [routerLink]="['/clients', client.mergedInto]">{{
+          'client_go_to_merged' | translatePipe
+        }}</a>
+        <a class="c-btn-ghost" routerLink="/clients">{{ 'clients' | translatePipe }}</a>
+      </div>
+    </div>
+  } @else {
+    <app-page-header titleKey="client_profile" backLink="/clients">
+      <ng-container header-actions>
+        @if (canCreateEvent_()) {
+          <button
+            type="button"
+            class="c-btn-primary"
+            data-testid="client-new-inquiry"
+            (click)="isInquiryOpen_.set(true)"
+          >
+            <lucide-icon name="plus" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'new_inquiry' | translatePipe }}</span>
+          </button>
+        }
+      </ng-container>
+    </app-page-header>
+
+    <section class="profile-head c-glass-card">
+      <h2 class="profile-name" data-testid="client-name">{{ client.name }}</h2>
+      <div class="profile-phone" dir="ltr">{{ client.phone }}</div>
+      <div class="profile-chips">
+        @for (kind of client.kinds ?? []; track kind) {
+          <span class="c-chip--tag c-chip--sm">{{ 'client_kind_' + kind | translatePipe }}</span>
+        }
+        @for (tag of client.tags ?? []; track tag) {
+          <span
+            class="c-chip--tag c-chip--sm"
+            [class.c-chip--amber]="tagTone(tag) === 'amber'"
+            [class.c-chip--red]="tagTone(tag) === 'red'"
+            >{{ tagLabel(tag) }}</span
+          >
+        }
+        @if (client.doNotContact; as dnc) {
+          <span class="c-chip--tag c-chip--sm c-chip--red" data-testid="client-dnc">{{
+            'client_do_not_contact' | translatePipe
+          }}</span>
+          @if (isOwner_()) {
+            <span class="profile-dnc-note">{{ dnc.reason }} · {{ dnc.at | date: 'd.M.yy' }}</span>
+          }
+        }
+      </div>
+
+      <div class="profile-actions">
+        <a class="c-btn-ghost" data-testid="client-call" [href]="telHref_()">
+          <lucide-icon name="phone" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'client_call' | translatePipe }}</span>
+        </a>
+        <a
+          class="c-btn-ghost"
+          data-testid="client-whatsapp"
+          [href]="waHref_()"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <lucide-icon name="message-circle" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'client_whatsapp' | translatePipe }}</span>
+        </a>
+        @if (!client.doNotContact) {
+          <button type="button" class="c-btn-ghost" data-testid="client-dnc-set" (click)="openReason()">
+            <lucide-icon name="ban" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'client_do_not_contact' | translatePipe }}</span>
+          </button>
+        } @else if (isOwner_()) {
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="client-dnc-clear"
+            [disabled]="isBusy_()"
+            (click)="clearDoNotContact()"
+          >
+            <lucide-icon name="ban" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'client_do_not_contact_clear' | translatePipe }}</span>
+          </button>
+        }
+        @if (isOwner_()) {
+          <button type="button" class="c-btn-ghost" data-testid="client-merge" (click)="isMergeOpen_.set(true)">
+            <lucide-icon name="git-merge" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'client_merge' | translatePipe }}</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    @if (isOwner_()) {
+      <section class="profile-details c-glass-card" data-testid="client-details">
+        <button
+          type="button"
+          class="c-chip c-chip--tap profile-details__toggle"
+          [attr.aria-expanded]="isDetailsOpen_()"
+          (click)="isDetailsOpen_.set(!isDetailsOpen_())"
+        >
+          {{ 'client_details' | translatePipe }}
+        </button>
+        <div class="profile-details__body" [class.profile-details__body--open]="isDetailsOpen_()">
+          <dl class="profile-details__list">
+            <dt>{{ 'client_type' | translatePipe }}</dt>
+            <dd>{{ 'client_type_' + (client.clientType ?? 'private') | translatePipe }}</dd>
+            @if (client.companyName) {
+              <dt>{{ 'client_company_name' | translatePipe }}</dt>
+              <dd>{{ client.companyName }}</dd>
+            }
+            @if (client.email) {
+              <dt>{{ 'client_email' | translatePipe }}</dt>
+              <dd dir="ltr">{{ client.email }}</dd>
+            }
+            @if (client.source) {
+              <dt>{{ 'client_source' | translatePipe }}</dt>
+              <dd>{{ client.source }}</dd>
+            }
+            @if (client.notes) {
+              <dt>{{ 'client_notes' | translatePipe }}</dt>
+              <dd class="profile-details__notes">{{ client.notes }}</dd>
+            }
+            @if (client.firstSeenAt) {
+              <dt>{{ 'client_first_seen' | translatePipe }}</dt>
+              <dd>{{ client.firstSeenAt | date: 'd.M.yy' }}</dd>
+            }
+            <dt>{{ 'client_tags' | translatePipe }}</dt>
+            <dd>
+              <app-custom-multi-select
+                triggerId="client-tags"
+                [options]="tagOptions_()"
+                [ngModel]="client.tags ?? []"
+                [addNewValue]="addTagValue"
+                [allowTypedAdd]="true"
+                [searchable]="true"
+                placeholder="client_tags"
+                (valueChange)="onTagsChange($event)"
+                (addNewChosen)="onTagAdded($event)"
+              />
+            </dd>
+          </dl>
+          <button type="button" class="c-btn-ghost" data-testid="client-edit" (click)="isEditOpen_.set(true)">
+            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'client_edit' | translatePipe }}</span>
+          </button>
+        </div>
+      </section>
+    }
+
+    <section class="profile-timeline" data-testid="client-timeline">
+      <h3 class="profile-timeline__title">{{ 'client_timeline' | translatePipe }}</h3>
+      @if (timeline_().length === 0) {
+        <app-empty-state messageKey="client_timeline_empty" icon="clock" />
+      } @else {
+        <ul class="timeline-list">
+          @for (item of timeline_(); track item.kind + item.id) {
+            <li class="timeline-row" [attr.data-kind]="item.kind">
+              @switch (item.kind) {
+                @case ('request') {
+                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_request' | translatePipe }}</span>
+                  <span class="timeline-row__main">{{ 'client_tl_kind_' + item.request.kind | translatePipe }}</span>
+                  <span class="c-chip--tag c-chip--sm">{{
+                    'client_tl_status_' + item.request.status | translatePipe
+                  }}</span>
+                  @if (item.request.wanted.date) {
+                    <span class="timeline-row__meta" dir="ltr">{{ item.request.wanted.date }}</span>
+                  }
+                }
+                @case ('booking') {
+                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_booking' | translatePipe }}</span>
+                  <span class="timeline-row__main">{{ 'client_tl_kind_' + item.booking.kind | translatePipe }}</span>
+                  <span class="c-chip--tag c-chip--sm">{{
+                    'client_tl_status_' + item.booking.status | translatePipe
+                  }}</span>
+                  <span class="timeline-row__meta" dir="ltr"
+                    >{{ item.booking.date }} {{ item.booking.time }} · {{ item.booking.partySize }}</span
+                  >
+                }
+                @case ('event') {
+                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_event' | translatePipe }}</span>
+                  <a class="timeline-row__main" [routerLink]="['/menu-intelligence', item.event._id]">{{
+                    item.event.name
+                  }}</a>
+                  @if (item.event.stage) {
+                    <span class="c-chip--tag c-chip--sm">{{ stageLabelKey(item.event.stage) | translatePipe }}</span>
+                  }
+                  @if (item.event.eventDate) {
+                    <span class="timeline-row__meta" dir="ltr">{{ item.event.eventDate }}</span>
+                  }
+                }
+                @case ('note') {
+                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_note' | translatePipe }}</span>
+                  <span class="timeline-row__main timeline-row__note">{{ item.text }}</span>
+                  <a class="timeline-row__meta" [routerLink]="['/menu-intelligence', item.event._id]"
+                    >{{ item.byName }} · {{ item.event.name }}</a
+                  >
+                }
+              }
+              <span class="timeline-row__date">{{ item.at | date: 'd.M.yy' }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+} @else {
+  <div class="profile-state">
+    <app-empty-state messageKey="client_not_found" icon="users" />
+    <div class="profile-state__links">
+      <a class="c-btn-ghost" routerLink="/clients">{{ 'clients' | translatePipe }}</a>
+    </div>
+  </div>
+}
+
+@if (isEditOpen_()) {
+  <app-modal-shell size="md" titleKey="client_edit" [sheet]="true" (dismissed)="isEditOpen_.set(false)">
+    <app-client-form [client]="client_()" (saved)="onEdited()" (cancelled)="isEditOpen_.set(false)" />
+  </app-modal-shell>
+}
+
+@if (isInquiryOpen_()) {
+  <app-new-inquiry-dialog
+    [initialClient]="client_()"
+    (saved)="onInquirySaved()"
+    (cancelled)="isInquiryOpen_.set(false)"
+  />
+}
+
+@if (isMergeOpen_()) {
+  <app-modal-shell size="md" titleKey="client_merge_pick" [sheet]="true" (dismissed)="isMergeOpen_.set(false)">
+    <div class="c-modal-body">
+      <app-client-picker
+        inputId="client-merge-pick"
+        [allowAdd]="false"
+        [exclude]="excludeIds_()"
+        (picked)="onMergePicked($event)"
+      />
+    </div>
+  </app-modal-shell>
+}
+
+@if (isReasonOpen_()) {
+  <app-modal-shell size="sm" titleKey="client_do_not_contact" [sheet]="true" (dismissed)="isReasonOpen_.set(false)">
+    <div class="c-modal-body">
+      <div class="c-input-stack">
+        <label for="client-dnc-reason">{{ 'client_do_not_contact_reason' | translatePipe }}</label>
+        <input
+          id="client-dnc-reason"
+          type="text"
+          autocomplete="off"
+          [maxLength]="reasonMax"
+          [ngModel]="reason_()"
+          (ngModelChange)="reason_.set($event)"
+          (keydown.enter)="onReasonSave()"
+        />
+      </div>
+    </div>
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="isReasonOpen_.set(false)">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button type="button" class="c-btn-primary" [disabled]="!reason_().trim() || isBusy_()" (click)="onReasonSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </app-modal-shell>
+}

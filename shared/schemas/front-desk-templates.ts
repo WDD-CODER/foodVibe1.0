@@ -65,10 +65,12 @@ function kindsFor(type: BusinessType): Kinds {
           enabled: true,
           questions: [
             dateQ(),
+            timeQ(false),
             q('party_size', 'fd_q_guests', 'number', true),
             q('location', 'fd_q_location', 'text', true),
             q('kitchen_on_site', 'fd_q_kitchen_on_site', 'choice', false, ['fd_opt_yes', 'fd_opt_no']),
             q('dietary', 'fd_q_dietary', 'text'),
+            q('kashrut', 'fd_q_kashrut', 'text'),
             q('budget_per_guest', 'fd_q_budget_per_guest', 'number')
           ],
           rules: { minPartySize: 2, maxPartySize: 40, minLeadHours: 72, maxLeadDays: 365 },
@@ -81,10 +83,13 @@ function kindsFor(type: BusinessType): Kinds {
           enabled: true,
           questions: [
             dateQ(),
+            timeQ(false),
             q('party_size', 'fd_q_guests', 'number', true),
             q('event_type', 'fd_q_event_type', 'choice', true, []),
-            q('location', 'fd_q_venue', 'text'),
+            q('location', 'fd_q_venue', 'text', true),
             q('serving_style', 'fd_q_serving_style', 'choice', false, ['fd_opt_buffet', 'fd_opt_plated', 'fd_opt_cocktail']),
+            q('dietary', 'fd_q_dietary', 'text'),
+            q('kashrut', 'fd_q_kashrut', 'text'),
             q('budget_per_guest', 'fd_q_budget_per_guest', 'number')
           ],
           rules: { minPartySize: 30, minLeadHours: 336, maxLeadDays: 540 },

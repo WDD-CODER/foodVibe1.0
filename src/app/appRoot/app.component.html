@@ -1,5 +1,7 @@
-<app-header />
-<app-tab-chips />
+@if (!layout.bare_()) {
+  <app-header />
+  <app-tab-chips />
+}
 <div class="app-content">
   @if (isRouteLoading() || isDataReloading_() || loading_.isLoading_()) {
     <app-loader size="large" label="loader_please_wait" [overlay]="true" />
@@ -52,7 +54,9 @@
   <app-restore-choice-modal />
 }
 <app-terms-gate />
-<app-hero-fab />
+@if (!layout.bare_()) {
+  <app-hero-fab />
+}
 @defer (when authModal.isOpen(); prefetch on idle) {
   <app-auth-modal />
 }

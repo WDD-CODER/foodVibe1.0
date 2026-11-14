@@ -11,13 +11,8 @@ import { GeminiService } from '@services/gemini.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
-import {
-  getGeminiUsage,
-  geminiModelAvailability,
-  geminiUsageStatus,
-  geminiBudgetUsedPercent
-} from '../../core/utils/gemini-usage.util'
-import { matchRecipeName } from '../../core/utils/recipe-match.util'
+import { getGeminiUsage, geminiUsageStatus, geminiBudgetUsedPercent } from '../../core/utils/gemini-usage.util'
+import { matchMenuDish } from '../../core/utils/recipe-match.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
@@ -71,19 +66,10 @@ export class AiMenuModalComponent implements OnInit {
     const offer = this.gemini_.modelSwitch()
     return offer ? this.translation_.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
   })
-  /** "נותרו X" — calls left today across the model chain (shared by all users). */
-  protected readonly budgetLeftLabel_ = computed(() =>
-    this.translation_.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))
+  /** "נותרו N שימושים היום" - calls left today across the model chain (shared by all users). */
+  protected readonly usesLeftLabel_ = computed(() =>
+    this.translation_.translate('ai_uses_left_today').replace('{n}', String(this.geminiUsage_().remaining))
   )
-  /** "N מתוך M מודלים זמינים" once any model is out of its daily quota; empty otherwise. */
-  protected readonly modelsAvailableLabel_ = computed(() => {
-    const { available, total } = geminiModelAvailability(this.geminiUsage_())
-    if (total === 0 || available === total) return ''
-    return this.translation_
-      .translate('ai_models_available')
-      .replace('{available}', String(available))
-      .replace('{total}', String(total))
-  })
 
   private static readonly SERVING_TYPE_LABELS: Record<string, string> = {
     plated_course: 'ai_serving_plated_course',
@@ -180,15 +166,13 @@ export class AiMenuModalComponent implements OnInit {
     const recipes = this.kitchenState_.recipes_()
     const sections: MatchedSection[] = draft.sections.map((section, _si) => {
       const items: MatchedDish[] = section.items.map((dish) => {
-        const { bestMatch, candidates, status } = matchRecipeName(dish.nameHebrew, recipes)
+        const { bestMatch, candidates, status } = matchMenuDish(dish, recipes)
         return {
           nameHebrew: dish.nameHebrew,
           status,
           recipeId: status === 'matched' ? (bestMatch?.recipeId ?? null) : null,
           candidates,
-          predictedTakeRate: dish.predictedTakeRate,
-          servingPortions: dish.serving_portions,
-          sellPrice: dish.sell_price
+          predictedTakeRate: dish.predictedTakeRate
         }
       })
       return { category: section.category, items }
@@ -282,14 +266,32 @@ export class AiMenuModalComponent implements OnInit {
     this.status_.set('idle')
   }
 
+  /** Plan 580: server reason code (`code` on the error body) -> dictionary key. */
+  private static readonly ERROR_KEYS: Readonly<Record<string, string>> = {
+    no_sections: 'ai_menu_error_no_dishes',
+    no_recipes: 'ai_menu_error_no_recipes',
+    no_guest_count: 'ai_menu_error_no_guest_count',
+    invalid_draft: 'ai_menu_error_unreadable',
+    unreadable: 'ai_menu_error_unreadable',
+    empty_response: 'ai_menu_error_unreadable',
+    invalid_patch: 'ai_menu_error_unreadable',
+    timeout: 'ai_menu_error_timeout',
+    not_configured: 'ai_menu_error_not_configured',
+    ai_error: 'ai_menu_error_busy',
+    daily_limit_reached: 'ai_daily_limit_reached_all',
+    model_exhausted: 'ai_model_exhausted_prompt'
+  }
+
   private resolveErrorKey_(err: unknown): string {
     if (this.gemini_.offerModelSwitch(err)) return 'ai_model_exhausted_prompt'
     if (err instanceof HttpErrorResponse) {
-      const msg: string = err.error?.error ?? ''
-      const status = err.status
-      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
-      if (status === 504 || msg.includes('timed out')) return 'ai_menu_error'
-      if (status === 503 && msg.includes('not configured')) return 'ai_menu_error'
+      const code: unknown = err.error?.code
+      if (typeof code === 'string' && AiMenuModalComponent.ERROR_KEYS[code])
+        return AiMenuModalComponent.ERROR_KEYS[code]
+      if (err.error?.error === 'daily_limit_reached') return 'ai_daily_limit_reached_all'
+      if (err.status === 429) return 'ai_limit_reached'
+      if (err.status === 504) return 'ai_menu_error_timeout'
+      if (err.status === 503) return 'ai_menu_error_not_configured'
     }
     return 'ai_menu_error'
   }

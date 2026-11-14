@@ -118,7 +118,7 @@ const PROFILE_EXISTS = { error: 'PROFILE_EXISTS' };
 const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
 /** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES]);
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems']);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
 const readProjection = (req, type) => {
@@ -447,6 +447,11 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
       let restored = 0;
       const skipped = [];
       for (const doc of trashed) {
+        // Plan 551: a merged client never comes back (the merge is not undone by restore).
+        if (doc.mergedInto) {
+          skipped.push({ _id: doc._id, name: doc.name });
+          continue;
+        }
         if (await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, doc.phoneKey, doc._id)) {
           skipped.push({ _id: doc._id, name: doc.name });
           continue;
@@ -491,6 +496,8 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
     }
     // Plan 545: a client comes back only while no live client has its phone; the restore re-takes the live key.
     const isClient = req.params.type === CLIENTS;
+    // Plan 551: a merged client is not restorable.
+    if (isClient && inTrash.mergedInto) return res.status(409).json({ error: 'CLIENT_MERGED', messageKey: 'client_merged_restore', mergedInto: inTrash.mergedInto });
     if (isClient && await findLiveClientByPhoneKey(col(CLIENTS), scopeFilter(req).businessId, inTrash.phoneKey, inTrash._id)) {
       return res.status(409).json(PHONE_TAKEN);
     }
@@ -559,6 +566,10 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
     // Plan 548: a client never sets a profile's status or WhatsApp routing; every profile starts as a draft.
     if (entityType === PROFILES) safeEntity = withoutServerProfileFields(safeEntity);
+    // Plan 557: only the platform admin raises the assistant level; a new profile starts at 0.
+    if (entityType === PROFILES && safeEntity.assistant && typeof safeEntity.assistant === 'object') {
+      safeEntity = { ...safeEntity, assistant: { ...safeEntity.assistant, level: 0 } };
+    }
     if (shared && !isPlatformAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -746,6 +757,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       }
       // Plan 446: a frozen planning snapshot survives a client save unchanged.
       if (req.params.type === EVENTS) updatable = withSavedSnapshot(updatable, current);
+      // Plan 557: the stored assistant level survives a client PUT (adminHistory is already dropped above).
+      if (req.params.type === PROFILES && updatable.assistant && typeof updatable.assistant === 'object') {
+        updatable = { ...updatable, assistant: { ...updatable.assistant, level: current.assistant?.level ?? 0 } };
+      }
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
       let merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];

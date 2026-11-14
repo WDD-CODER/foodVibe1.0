@@ -292,9 +292,10 @@ function buildDemoData({ now, ownerId, businessId, ownerName = 'demo_chef' }) {
   });
 
   const usageDays = [];
+  const todayMs = Date.parse(`${jerusalemDate(now)}T00:00:00Z`); // calendar days: step back on the date, not on the clock
   for (let d = 0; d < 30; d++) {
     if (d % 3 === 2 && d < 27) continue;
-    const date = jerusalemDate(now - d * DAY);
+    const date = new Date(todayMs - d * DAY).toISOString().slice(0, 10);
     usageDays.push({ _id: `${ownerId}:${date}`, userId: ownerId, businessId, date, firstAt: now - d * DAY - 3600000, lastAt: now - d * DAY, writeCount: 3 + (d % 5) });
   }
 

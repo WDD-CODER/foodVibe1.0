@@ -34,6 +34,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `list-selection/` | Row selection + `ListSelectionState` | ListRowCheckboxComponent, ListSelectionState |
 | `list-shell/` | Reusable list shell: `layout="table"` (default, pinned header grid) or `layout="cards"` (projects `[shell-cards]`, `cardMin`); list search/sort/clear handlers live in `core/utils/list-controls.util.ts` | ListShellComponent |
 | `loader/` | Loading indicator | LoaderComponent |
+| `front-desk-status-banner/` | One-line amber notice when the front desk is suspended (plan 557) | FrontDeskStatusBannerComponent |
 | `modal-shell/` | The one popup shell: engines + dialog role, Escape (top-most only), focus trap | ModalShellComponent |
 | `nutrition-badge/` | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
 | `partial-cost-badge/` | "חלקי" badge + missing-prices popover (owner can price in place) | PartialCostBadgeComponent |
@@ -41,7 +42,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `supplier-picker/` | Truck button + popover: pick which priced supplier a line is bought from (owner only) | SupplierPickerComponent |
 | `search-combobox/` | Search box with a results list, keyboard (rule K) and one add option (family search-combobox) | SearchComboboxComponent, SearchPick, SearchAddPick |
 | `client-picker/` | Find, show or add one client (family client-picker), on the search box | ClientPickerComponent |
-| `client-form/` | The add-client fields (name, phone, more details) used by the picker | ClientFormComponent |
+| `client-form/` | The add-client fields (name, phone, more details) used by the picker; edit mode with a `client` input | ClientFormComponent |
 | `new-inquiry-dialog/` | "פנייה חדשה" dialog (moved from the menu library, plan 546); uses the client picker | NewInquiryDialogComponent |
 | `add-option-row/` | Icon + label of a dropdown's single add option | AddOptionRowComponent |
 | `quick-add-product-modal/` | Quick add product | QuickAddProductModalComponent |

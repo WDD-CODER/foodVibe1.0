@@ -8,6 +8,7 @@ import { HeaderComponent } from '../core/components/header/header.component'
 import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { LayoutModeService } from '@services/layout-mode.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConversionService } from '@services/conversion.service'
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component'
@@ -96,5 +97,26 @@ describe('AppComponent', () => {
       fixture.detectChanges()
     }
     expect(host.querySelector('app-confirm-modal')).toBeTruthy()
+  })
+
+  it('hides the header, tab chips and hero button on a bare route (plan 555)', () => {
+    TestBed.overrideProvider(LayoutModeService, { useValue: { bare_: signal(true) } })
+    const fixture = TestBed.createComponent(AppComponent)
+    fixture.detectChanges()
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('app-header')).toBeNull()
+    expect(host.querySelector('app-tab-chips')).toBeNull()
+    expect(host.querySelector('app-hero-fab')).toBeNull()
+    expect(host.querySelector('router-outlet')).toBeTruthy()
+  })
+
+  it('shows the header, tab chips and hero button on a normal route (plan 555)', () => {
+    TestBed.overrideProvider(LayoutModeService, { useValue: { bare_: signal(false) } })
+    const fixture = TestBed.createComponent(AppComponent)
+    fixture.detectChanges()
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('app-header')).toBeTruthy()
+    expect(host.querySelector('app-tab-chips')).toBeTruthy()
+    expect(host.querySelector('app-hero-fab')).toBeTruthy()
   })
 })

@@ -2,13 +2,14 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule, Wrench } from 'lucide-angular'
+import { CalendarDays, ClipboardCheck, LucideAngularModule, Settings, Wrench } from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserService } from '@services/user.service'
+import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import type { Recipe } from '@models/recipe.model'
 import type { User } from '@models/user.model'
 
@@ -33,7 +34,10 @@ describe('TabChipsComponent', () => {
     mockTranslation.translate.and.callFake((k: string) => k)
 
     await TestBed.configureTestingModule({
-      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench })],
+      imports: [
+        TabChipsComponent,
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings })
+      ],
       providers: [
         provideRouter([
           { path: 'dashboard', component: BlankStubComponent },
@@ -42,9 +46,12 @@ describe('TabChipsComponent', () => {
           { path: 'trash', component: BlankStubComponent },
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
-          { path: 'settings', component: BlankStubComponent }
+          { path: 'settings', component: BlankStubComponent },
+          { path: 'clients', component: BlankStubComponent },
+          { path: 'frontdesk/knowledge', component: BlankStubComponent }
         ]),
-        { provide: TranslationService, useValue: mockTranslation }
+        { provide: TranslationService, useValue: mockTranslation },
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
       ]
     }).compileComponents()
 
@@ -115,6 +122,27 @@ describe('TabChipsComponent', () => {
     expect(chipIds()[1]).toBe('/dashboard?tab=metadata')
   })
 
+  it('maps /clients to the frontdesk group with the clients chip active (plan 547)', async () => {
+    await router.navigateByUrl('/clients')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients', '/frontdesk/knowledge', '/frontdesk/settings'])
+    await fixture.whenStable()
+    fixture.detectChanges()
+    const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
+    expect(active).not.toBeNull()
+    expect(active.injector.get(RouterLink).href).toBe('/clients')
+  })
+
+  it('maps /frontdesk/knowledge to the frontdesk group with the knowledge chip active (plan 554)', async () => {
+    await router.navigateByUrl('/frontdesk/knowledge')
+    fixture.detectChanges()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
+    expect(active).not.toBeNull()
+    expect(active.injector.get(RouterLink).href).toBe('/frontdesk/knowledge')
+  })
+
   it('should render nothing on a route with no mapped chip group', async () => {
     await router.navigateByUrl('/settings')
     fixture.detectChanges()
@@ -149,13 +177,14 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
   beforeEach(async () => {
     user_.set(null)
     await TestBed.configureTestingModule({
-      imports: [TabChipsComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings })],
       providers: [
         provideRouter([
           { path: 'cook/:id', component: BlankStubComponent },
           { path: 'recipe-builder/:id', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
         {
           provide: KitchenStateService,
           useValue: { recipesById_: computed(() => new Map(recipes.map((r) => [r._id, r]))) }

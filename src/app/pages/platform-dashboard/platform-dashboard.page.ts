@@ -1,15 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { DatePipe } from '@angular/common'
+import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import type { FrontDeskAdminRow } from 'src/app/core/models/frontdesk-stats.model'
 import type { AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { FrontDeskAdminDialogComponent } from './components/front-desk-admin-dialog/front-desk-admin-dialog.component'
+import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { formatPctInt } from 'src/app/core/engine/rounding'
 
@@ -57,12 +61,14 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
   standalone: true,
   imports: [
     DatePipe,
+    RouterLink,
     LucideAngularModule,
     TranslatePipe,
     PageHeaderComponent,
     LoaderComponent,
     EmptyStateComponent,
-    PlatformLogisticsItemsComponent
+    PlatformLogisticsItemsComponent,
+    FrontDeskAdminDialogComponent
   ],
   templateUrl: './platform-dashboard.page.html',
   styleUrl: './platform-dashboard.page.scss',
@@ -74,6 +80,7 @@ export class PlatformDashboardPage implements OnInit {
   private readonly logging = inject(LoggingService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
+  protected readonly fdDialog = inject(FrontDeskAdminDialogService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly sortKey_ = signal<SortKey>('lastActivityAt')
@@ -83,6 +90,8 @@ export class PlatformDashboardPage implements OnInit {
   protected readonly aiUsage_ = signal<AiUsageReport | null>(null)
   protected readonly aiDrill_ = signal<{ businessId: string; rows: AiUsageRow[] } | null>(null)
   protected readonly aiLoading_ = signal(true)
+  /** Plan 559: the front desk numbers (last 30 days) per business id; a row with none shows a dash. */
+  protected readonly fdStats_ = signal<Map<string, FrontDeskAdminRow>>(new Map())
   protected readonly columns: Column[] = [
     { key: 'name', labelKey: 'platform_col_business' },
     { key: 'ownerName', labelKey: 'platform_col_owner' },
@@ -137,6 +146,7 @@ export class PlatformDashboardPage implements OnInit {
   // 6. METHODS
   async ngOnInit(): Promise<void> {
     void this.loadAiUsage()
+    void this.loadFrontDeskStats()
     try {
       await this.platformAdmin.load()
     } catch (err) {
@@ -148,6 +158,37 @@ export class PlatformDashboardPage implements OnInit {
       this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     } finally {
       this.isLoading_.set(false)
+    }
+  }
+
+  private async loadFrontDeskStats(): Promise<void> {
+    try {
+      const stats = await this.platformAdmin.getFrontDeskStats()
+      this.fdStats_.set(new Map(stats.rows.map((r) => [r.businessId, r])))
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.frontdesk_stats_failed',
+        message: 'Loading the front desk numbers failed',
+        context: { err: String(err) }
+      })
+    }
+  }
+
+  /** A front desk number for the table: the value, or a dash when there is none. */
+  protected fdNumber(value: number | null | undefined): string {
+    return typeof value === 'number' ? String(Math.round(value * 10) / 10) : '—'
+  }
+
+  protected async exportFrontDeskCsv(): Promise<void> {
+    try {
+      await this.platformAdmin.downloadFrontDeskCsv()
+    } catch (err) {
+      this.logging.error({
+        event: 'platform.frontdesk_csv_failed',
+        message: 'Downloading the front desk CSV failed',
+        context: { err: String(err) }
+      })
+      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     }
   }
 
@@ -198,6 +239,21 @@ export class PlatformDashboardPage implements OnInit {
     }
   }
 
+  /** Plan 580: hover text of a failed-calls cell: the reasons, most frequent first. */
+  protected failureTitle(row: AiUsageRow): string | null {
+    const entries = Object.entries(row.failures ?? {})
+    if (entries.length === 0) return null
+    return entries
+      .sort((a, b) => b[1] - a[1])
+      .map(([reason, count]) => {
+        const key = 'ai_fail_' + reason
+        const text = this.translation.translate(key)
+        const label = text && text !== key ? text : this.translation.translate('ai_fail_other') + ' (' + reason + ')'
+        return label + ': ' + count
+      })
+      .join(' · ')
+  }
+
   protected cost(value: number): string {
     return value.toFixed(4)
   }
@@ -239,5 +295,16 @@ export class PlatformDashboardPage implements OnInit {
       })
       this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     }
+  }
+
+  /** Plan 557: opens the front desk dialog for one row; the table reloads in the service after a save. */
+  protected async editFrontDesk(row: BusinessRow): Promise<void> {
+    const fd = row.frontDesk
+    if (!fd) return
+    await this.fdDialog.open({
+      businessId: row._id,
+      name: row.name,
+      status: fd.status
+    })
   }
 }

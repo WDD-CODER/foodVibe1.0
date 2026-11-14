@@ -9,6 +9,8 @@ export interface AiUsageRow {
   outputTokens: number
   totalTokens: number
   estCostUsd: number
+  /** plan 580: failed calls per reason (rejectCode or Gemini errorCode) */
+  failures?: Record<string, number>
 }
 
 export type AiUsageGroupBy = 'business' | 'feature' | 'model' | 'day'
@@ -20,7 +22,7 @@ export interface AiUsageReport {
   /** Date of the price table the estimate uses. */
   pricesAsOf: string
   rows: AiUsageRow[]
-  totals: Omit<AiUsageRow, 'key' | 'label'>
+  totals: Omit<AiUsageRow, 'key' | 'label' | 'failures'>
 }
 
 export interface AiUsageParams {

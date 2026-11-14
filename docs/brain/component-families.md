@@ -61,9 +61,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable (plan 546)
 - Use: `src/app/shared/client-picker/` · `app-client-picker` (built on `app-search-combobox`: search by name/phone, the picked client
   as a name inside the field with an X, and for an owner the add-client view); the add fields live in
-  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`).
+  `src/app/shared/client-form/` · `app-client-form` (name, phone, "עוד פרטים"; saves through `ClientDataService.addClient()`, or through `updateClient()` in edit mode when it gets a `client` input, plan 551).
+  `NewInquiryDialogComponent` takes `initialClient` to open with a client picked (plan 551).
 - When: any screen that links a record to a client (new-inquiry dialog, event stage bar, the client section).
-- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`; outputs `picked`, `cleared`,
+- Inputs / variants: `selected`, `inputId`, `variant: 'box' | 'plain'`, `closeOnOutsideClick`, `allowAdd` (false: no add row, a merge target), `exclude` (client ids left out); outputs `picked`, `cleared`,
   `addingChange`, `escaped`, `outsideClick`; method `back()` (leave the add view, true when it did).
 - Known copies: none.
 
@@ -112,7 +113,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users (13 services): in `src/app/core/services/` the add-equipment, add-item, auth, confirm, global-specific,
   quick-add-product, quick-edit-product, restore-choice and translation-key `*-modal.service.ts`; in `src/app/shared/`
   the ai-menu, ai-product, ai-recipe and label-creation `*-modal/*.service.ts`.
-- Also used by `PlatformLogisticsItemsComponent` (`ConfirmModalService`, plan 532).
+- Also used by `PlatformLogisticsItemsComponent` (`ConfirmModalService`, plan 532) and `logistics-item-manager` (`open` / `openTernary` choices: remove, hide, unsaved question, plan 581).
 - Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
 
 ### list-page — a list screen (header, search, filters, rows, selection)
@@ -123,7 +124,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
   `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
 - When: any screen that lists entities.
-- Users today (4): equipment, inventory products, recipe book, suppliers.
+- Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
@@ -202,7 +203,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
 - Users (plan 522): `event-logistics-panel` — toggle header (`--tap`), phase tabs (`--tab`), status/payer radios (`--toggle`).
 - Tight group (plan 579): `.c-chip-group.c-chip-group--tight` — no block padding, `--space-1` gap, small chips; user: `event-logistics-panel` (one "נדרש" toggle + the two provider radios); plan 581 uses it too.
-- Users (plan 523): `logistics-item-manager` — phase tabs (`--tab`), shared item (`--tag` + lock), own item (`--removable`), environment and shared choices (`--toggle`).
+- Users (plans 523, 581): `logistics-item-manager` — phase tabs (`--tab`), every question row a `--tag` (shared + lock), environment chips and the admin's scope radios (`--toggle` in `--tight` groups).
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
   header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
@@ -216,6 +217,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`logging.error`). Pattern: `logging.error(...)` + `userMsg.onSet*Msg(translate(key))`.
 - When: any wait, success or error the user must see.
 - Also used by `PlatformLogisticsItemsComponent` (`UserMsgService`, plan 532).
+- `app-front-desk-status-banner` (`src/app/shared/front-desk-status-banner/`): the persistent amber notice for a suspended front desk, on the dashboard and `/frontdesk/settings` (plan 557).
 - Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
 - Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 
@@ -269,6 +271,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — save/delete methods return Promises (plan 454)
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
+- `FrontDeskBadgeService` (`front-desk-badge.service.ts`): app-wide count signal for the front desk badge (plan 552).
+- `LayoutModeService` (`layout-mode.service.ts`): root signal `bare_` from the deepest route's `data.bare`; the shell hides header, tabs and quick-add on the public pages (plan 555).
 - Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
@@ -296,12 +300,15 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
+- `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
 
 ### http — talking to the server
 
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `PublicRequestService` (`pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.

@@ -1,0 +1,306 @@
+{
+  "$comment": "Style QA page map (project-owned; the kit writes it once). node scripts/styleqa/run.mjs reads it: --pages takes a slug or an alias, --list prints the pages. A page: { slug (lower-case, dashes), aliases (words in any language, matched exactly), title, routes (paths starting with /), idType (optional: the kind of id a route needs), auth (true, false or a ui.logins role), oneRow (optional true/false), states: [{ name, steps: [{ action: click | hover | fill | press | waitFor | scrollTo, target: <selector>, value (fill and press) }] }] }. Every page also has the state default. excluded: [{ route, why }] lists routes left out on purpose. The settings are the styleqa.* keys of kit.config.json; the /styleqa command docs explain the whole flow.",
+  "pages": [
+    {
+      "slug": "dashboard",
+      "aliases": [
+        "לוח-בקרה",
+        "home"
+      ],
+      "title": "לוח בקרה",
+      "routes": [
+        "/dashboard"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "inventory",
+      "aliases": [
+        "products",
+        "מוצרים"
+      ],
+      "title": "רשימת מוצרים",
+      "routes": [
+        "/inventory/list"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "product-form",
+      "aliases": [
+        "product"
+      ],
+      "title": "טופס מוצר",
+      "routes": [
+        "/inventory/add",
+        "/inventory/edit/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/products?limit=1"
+    },
+    {
+      "slug": "product-import",
+      "aliases": [
+        "import"
+      ],
+      "title": "ייבוא מוצרים",
+      "routes": [
+        "/inventory/import"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "equipment",
+      "aliases": [
+        "ציוד"
+      ],
+      "title": "ציוד",
+      "routes": [
+        "/inventory/equipment"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "equipment-form",
+      "aliases": [],
+      "title": "טופס ציוד",
+      "routes": [
+        "/inventory/equipment/add",
+        "/inventory/equipment/edit/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/equipment?limit=1"
+    },
+    {
+      "slug": "recipe-book",
+      "aliases": [
+        "recipes",
+        "מתכונים"
+      ],
+      "title": "ספר מתכונים",
+      "routes": [
+        "/recipe-book"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "recipe-builder",
+      "aliases": [
+        "builder"
+      ],
+      "title": "בונה מתכונים",
+      "routes": [
+        "/recipe-builder",
+        "/recipe-builder/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/recipes?limit=1"
+    },
+    {
+      "slug": "menu-library",
+      "aliases": [
+        "menus",
+        "תפריטים"
+      ],
+      "title": "תפריטי אירוע",
+      "routes": [
+        "/menu-library"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "menu-intelligence",
+      "aliases": [
+        "menu-builder"
+      ],
+      "title": "בונה תפריט",
+      "routes": [
+        "/menu-intelligence",
+        "/menu-intelligence/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/menuEvents?limit=1"
+    },
+    {
+      "slug": "cook",
+      "aliases": [
+        "cook-view",
+        "בישול"
+      ],
+      "title": "מסך בישול",
+      "routes": [
+        "/cook",
+        "/cook/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/recipes?limit=1"
+    },
+    {
+      "slug": "suppliers",
+      "aliases": [
+        "ספקים"
+      ],
+      "title": "ספקים",
+      "routes": [
+        "/suppliers/list"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "supplier-form",
+      "aliases": [],
+      "title": "טופס ספק",
+      "routes": [
+        "/suppliers/add",
+        "/suppliers/edit/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/suppliers?limit=1"
+    },
+    {
+      "slug": "venues",
+      "aliases": [
+        "מיקומים"
+      ],
+      "title": "מיקומי אירוע",
+      "routes": [
+        "/venues/list"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "venue-view",
+      "aliases": [],
+      "title": "פרטי מיקום",
+      "routes": [
+        "/venues/view/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/venues?limit=1"
+    },
+    {
+      "slug": "venue-form",
+      "aliases": [],
+      "title": "טופס מיקום",
+      "routes": [
+        "/venues/add",
+        "/venues/edit/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/venues?limit=1"
+    },
+    {
+      "slug": "clients",
+      "aliases": [
+        "לקוחות"
+      ],
+      "title": "לקוחות",
+      "routes": [
+        "/clients"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "requests",
+      "aliases": [
+        "פניות"
+      ],
+      "title": "פניות",
+      "routes": [
+        "/requests"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "bookings",
+      "aliases": [
+        "הזמנות"
+      ],
+      "title": "הזמנות",
+      "routes": [
+        "/bookings"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "frontdesk",
+      "aliases": [
+        "front-desk"
+      ],
+      "title": "דלפק קדמי",
+      "routes": [
+        "/frontdesk/settings",
+        "/frontdesk/onboarding",
+        "/frontdesk/knowledge"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "trash",
+      "aliases": [
+        "אשפה"
+      ],
+      "title": "אשפה",
+      "routes": [
+        "/trash"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "settings",
+      "aliases": [
+        "הגדרות"
+      ],
+      "title": "הגדרות",
+      "routes": [
+        "/settings"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "platform",
+      "aliases": [
+        "admin"
+      ],
+      "title": "ניהול פלטפורמה",
+      "routes": [
+        "/platform"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "welcome",
+      "aliases": [
+        "landing"
+      ],
+      "title": "ברוכים הבאים",
+      "routes": [
+        "/welcome"
+      ],
+      "auth": false
+    },
+    {
+      "slug": "report",
+      "aliases": [],
+      "title": "דיווח",
+      "routes": [
+        "/report"
+      ],
+      "auth": true
+    }
+  ],
+  "excluded": [
+    {
+      "route": "/clients/:id",
+      "why": "the clients API needs a signed-in request; the engine fetches the id without one"
+    },
+    {
+      "route": "/book/:slug",
+      "why": "public booking page needs a business slug, not a record id"
+    },
+    {
+      "route": "/book/:slug/r/:token",
+      "why": "needs a booking slug and a one-time request token"
+    }
+  ]
+}

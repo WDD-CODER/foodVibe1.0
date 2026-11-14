@@ -1,0 +1,148 @@
+{
+  "run": "run-593",
+  "branch": "orch/run-593",
+  "base": "main",
+  "startedAt": "2026-11-12T21:23:15.334Z",
+  "mainShaAtStart": "bd321e0d75d2402122072a3bc81fd72caccddae8",
+  "plans": {
+    "593": {
+      "nnn": "593",
+      "title": "The terms popup shows once per user (and again only after a terms change), not once per new browser",
+      "branch": "feat/593-terms-popup-shows-once",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T21:26:32.782Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T22:09:58.061Z"
+        }
+      },
+      "humanItems": [
+        "Sign in as an account that already accepted, close the browser, open a new browser window on the app: no"
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T21:26:32.203Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:26:32.786Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:57:52.090Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:09:48.907Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:09:58.063Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:10:08.437Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T22:11:54.328Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.3,
+      "sha": "2640653cece4de4892513cded657a929ed6246d8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1874.5,
+          "tokens": {
+            "input": 348657,
+            "output": 5713
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.7,
+          "tokens": {
+            "input": 25214,
+            "output": 345
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "16a486d61730d2f2c0e073749d8ae16a161043ec"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T21:26:31.623Z",
+      "plan": "593",
+      "text": "the folder foodVibe1.0-orch-run-593-593 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T22:10:23.048Z",
+      "plan": "593",
+      "text": "the folder foodVibe1.0-orch-merge-run-593 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 6.3,
+  "updatedAt": "2026-11-12T22:18:15.665Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "593",
+      "type": "behaviour",
+      "text": "behaviour: when the refresh response has a user but the token claims name a different user, I trust the response user and reload data services only if a different user was already in the session (the simplest option) — reverse: drop the changedUser reload branch",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "593",
+      "type": "seen",
+      "text": "seen: server/test/seed-demo-business.test.js — 'inserts the business once…' fails with E11000 duplicate key in usageDays (demo_owner:2026-10-25) on its own; steps: cd server && npx vitest run test/seed-demo-business.test.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T22:18:15.662Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T22:18:15.664Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

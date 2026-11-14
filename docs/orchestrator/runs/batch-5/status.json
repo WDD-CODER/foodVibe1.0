@@ -1,0 +1,1287 @@
+{
+  "run": "batch-5",
+  "branch": "orch/batch-5",
+  "base": "main",
+  "startedAt": "2026-11-12T18:57:43.557Z",
+  "mainShaAtStart": "ca7dcb1d813c7dbfd6a07b82e2196b7ec802cf77",
+  "plans": {
+    "553": {
+      "nnn": "553",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "adc4671d79343f22304b56ed3c5f5d5b009eabc3"
+    },
+    "554": {
+      "nnn": "554",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "b7fdd8ba62e5218c473504a29c96e14f808e8302"
+    },
+    "555": {
+      "nnn": "555",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "75724aa1ffdb806720cf40f00da2ee1a05e61e06"
+    },
+    "556": {
+      "nnn": "556",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "a1cfb8cf7d792ba82305e5338746555f25190251"
+    },
+    "557": {
+      "nnn": "557",
+      "title": "The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings",
+      "branch": "feat/557-front-desk-status-by",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-12T20:24:26.177Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T20:44:04.441Z"
+        }
+      },
+      "humanItems": [
+        "On `/platform` Dandan moves a test business to \"פיילוט\" with a reason, then to \"מושהה\": the row shows each status, the owner sees the suspended banner, and `/book/<slug>` says the page is not available.",
+        "Dandan opens the three CSV files in Excel: Hebrew reads correctly, one row per record, and the columns are the ones listed in this plan."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T18:59:58.324Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T18:59:58.564Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T19:27:45.774Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T19:27:46.030Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T19:27:46.257Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:27:46.445Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:28:23.249Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:30:13.351Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:49:03.134Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:49:03.307Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:49:23.902Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:55:48.673Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T19:55:54.449Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T19:55:54.609Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:03:43.294Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:03:43.502Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:03:43.714Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:04:35.953Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:06:54.730Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:06:54.913Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:14:54.401Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:20:14.999Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:20:21.441Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:20:39.258Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:20:39.491Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:21:33.219Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:24:25.966Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:24:26.180Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:38:32.531Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:43:58.079Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:44:04.443Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:44:19.419Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T20:45:27.572Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "557",
+          "title": "The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings",
+          "branch": "feat/557-front-desk-status-by",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T18:59:58.562Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T19:27:46.444Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 5.9,
+          "sha": "5900cfcc2dfd221fc6aaaf3023a0af1eb7b11fd7",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1663.9,
+              "tokens": {
+                "input": 7250899,
+                "output": 59072
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 36.4,
+              "tokens": {
+                "input": 70746,
+                "output": 1394
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: Done-when item left undone: [ui] Owner opens `/frontdesk/settings`, clicks \"ייצוא לקוחות (CSV)\" and a file named `clients-<YYYY-MM-DD>.csv` downloads (`e2e/ui/557-1.spec.ts`)."
+          ],
+          "reason": "asking 557-1: ESCALATE environment: npx playwright test e2e/ui/557-1.spec.ts exits 1 because the QA login (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS) is not set in this worktree's environment.",
+          "parkBranch": "park/batch-5-557",
+          "park": {
+            "at": "2026-11-12T19:30:07.991Z",
+            "reason": "ESCALATE environment: npx playwright test e2e/ui/557-1.spec.ts exits 1 because the QA login (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS) is not set in this worktree's environment.",
+            "branch": "park/batch-5-557"
+          }
+        },
+        {
+          "nnn": "557",
+          "title": "The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings",
+          "branch": "feat/557-front-desk-status-by",
+          "state": "asking",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T19:49:03.306Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-12T19:55:54.607Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 557-1: ESCALATE environment: npx playwright test e2e/ui/557-1.spec.ts exits 1 because the QA login (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER ",
+              "check": "(not given)"
+            },
+            {
+              "step": "round 2",
+              "check": "scope-check (kit copy) --diff=origin/orch/batch-5 --plan=plans/557-front-desk-status-by-the-platform-admin-and-csv-export.plan.md"
+            }
+          ],
+          "replan": "no — the builder gave no planChange",
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 5.7,
+          "sha": "375203cc82338b6d741b97192d8e1a7e06bddda4",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 18.3,
+              "tokens": {
+                "input": 53809,
+                "output": 863
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 464.5,
+              "tokens": {
+                "input": 473119,
+                "output": 6929
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 2: gate: scope-check (kit copy) --diff=origin/orch/batch-5 --plan=plans/557-front-desk-status-by-the-platform-admin-and-csv-export.plan.md",
+            "round 3: Done-when item left undone: [ui] Owner opens `/frontdesk/settings`, clicks \"ייצוא לקוחות (CSV)\" and a file named `clients-<YYYY-MM-DD>.csv` downloads (`e2e/ui/557-1.spec.ts`)."
+          ],
+          "resetToBase": "f69a1d40cd5127b59d9bdec8a0163872196bce9f",
+          "resetFrom": "7bd52c27f086a57f7cbd7a33e3d98995a05b0838",
+          "reason": "asking 557-2: Done-when item left undone: [ui] Owner opens `/frontdesk/settings`, clicks \"ייצוא לקוחות (CSV)\" and a file named `clients-<YYYY-MM-DD>.csv` downloads (`e2e/ui/557-1.spec.ts`). (fix rounds used: 2 of 2) — needs the Human",
+          "park": {
+            "at": "2026-11-12T20:04:27.630Z",
+            "reason": "Done-when item left undone: [ui] Owner opens `/frontdesk/settings`, clicks \"ייצוא לקוחות (CSV)\" and a file named `clients-<YYYY-MM-DD>.csv` downloads (`e2e/ui/557-1.spec.ts`). (fix rounds used: 2 of 2) — needs the Human"
+          },
+          "parkBranch": "park/batch-5-557"
+        },
+        {
+          "nnn": "557",
+          "title": "The platform admin moves a front desk between draft, pilot, active and suspended; the owner exports clients, requests and bookings",
+          "branch": "feat/557-front-desk-status-by",
+          "state": "asking",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-12T20:06:54.911Z"
+            },
+            "reviewer": {
+              "model": "sonnet",
+              "at": "2026-11-12T20:20:21.439Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 5.7,
+          "sha": "094b041171705a5c6741065294207bc18cecfe4e",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "opus",
+              "seconds": 476.9,
+              "tokens": {
+                "input": 270148,
+                "output": 5403
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 16.4,
+              "tokens": {
+                "input": 125296,
+                "output": 1102
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 3: review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.html:82 P0: platform row does not show the assistant level"
+          ],
+          "reason": "asking 557-3: review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.html:82 P0: platform row does not show the assistant level (fix rounds used: 2 of 2) — needs the Human",
+          "park": {
+            "at": "2026-11-12T20:21:25.079Z",
+            "reason": "review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.html:82 P0: platform row does not show the assistant level (fix rounds used: 2 of 2) — needs the Human"
+          },
+          "parkBranch": "park/batch-5-557"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 5,
+      "sha": "38513433192514076012e7229d08aadd739db57a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 844.1,
+          "tokens": {
+            "input": 690531,
+            "output": 9909
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.4,
+          "tokens": {
+            "input": 124502,
+            "output": 612
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "8cf26c4ee3535252706a6a1f8eb620df7d030e81"
+    },
+    "559": {
+      "nnn": "559",
+      "title": "Front desk numbers for the owner and the platform admin",
+      "branch": "feat/559-front-desk-numbers-for",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-13T06:12:00.905Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-13T06:29:08.993Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-13T06:40:23.406Z"
+        }
+      },
+      "humanItems": [
+        "Dandan checks the platform table and the CSV for the pilot business against what he saw on `/requests` that week."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T19:30:14.018Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T20:47:38.186Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T20:47:38.367Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:08:20.593Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:08:20.899Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T21:08:21.243Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:08:21.463Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:09:17.289Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:10:54.036Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:27:28.100Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:27:28.979Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:29:23.458Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-12T21:29:48.979Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T21:29:49.962Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T22:00:00.423Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-12T22:03:56.576Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-13T01:04:02.678Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-13T06:12:00.636Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:12:00.907Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:29:08.431Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:29:08.653Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-13T06:29:08.821Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:29:08.995Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:34:43.056Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:40:17.023Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:40:23.407Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:40:40.067Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-13T06:41:29.382Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "559",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 557-1",
+          "freeDiskGb": 5.9
+        },
+        {
+          "nnn": "559",
+          "title": "Front desk numbers for the owner and the platform admin",
+          "branch": "feat/559-front-desk-numbers-for",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T20:47:38.365Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T21:08:21.460Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 6.4,
+          "sha": "6b12dbca441132f0ff9f4ebb97d15d4d6f578cc5",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1238,
+              "tokens": {
+                "input": 5685502,
+                "output": 64629
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 54.3,
+              "tokens": {
+                "input": 145048,
+                "output": 1849
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: Done-when item left undone: [ui] After one manual request is created for the QA business, the dashboard shows the card titled \"השבוע בקבלה\" with \"1\" requests (`e2e/ui/559-1.spec.ts`)."
+          ],
+          "reason": "asking 559-1: ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PASS) are not set in this worktree.",
+          "parkBranch": "park/batch-5-559",
+          "park": {
+            "at": "2026-11-12T21:10:47.642Z",
+            "reason": "ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PASS) are not set in this worktree.",
+            "branch": "park/batch-5-559"
+          }
+        },
+        {
+          "nnn": "559",
+          "title": "Front desk numbers for the owner and the platform admin",
+          "branch": "feat/559-front-desk-numbers-for",
+          "state": "parked",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-12T21:27:28.973Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-12T21:29:49.959Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 559-1: ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PA",
+              "check": "(not given)"
+            },
+            {
+              "step": "round 2",
+              "check": "builder left uncommitted files: playwright-report/, test-results/"
+            }
+          ],
+          "replan": "no — the builder gave no planChange",
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 5.4,
+          "roundCauses": [
+            "round 2: builder left uncommitted files: playwright-report/, test-results/"
+          ],
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 111.6,
+              "tokens": {
+                "input": 97596,
+                "output": 2227
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 1809.5,
+              "tokens": {
+                "input": 1159695,
+                "output": 10819
+              },
+              "exit": 0
+            }
+          ],
+          "resetToBase": "38513433192514076012e7229d08aadd739db57a",
+          "resetFrom": "e45a38a5b14c7408cde1b5b9ac5fe1757352696a",
+          "reason": "replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc — ask 559-2 not answered in 180 min",
+          "park": {
+            "at": "2026-11-12T22:03:29.748Z",
+            "reason": "replan needed: pnpm run test:server -> exit 1: server/test/seed-demo-business.test.js fails with E11000 duplicate usageDays _id demo_owner:2026-10-25. The test counts back from Date.now() across the 2026-10-25 clock change. That file and server/scripts/seed-demo-business.js are outside this plan's scope and untouc"
+          },
+          "parkBranch": "park/batch-5-559"
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.9,
+      "sha": "9b97dec7b568c38e34826d47d71baacf4a792a38",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1025,
+          "tokens": {
+            "input": 5467920,
+            "output": 53032
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 331.7,
+          "tokens": {
+            "input": 455526,
+            "output": 5512
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.4,
+          "tokens": {
+            "input": 115459,
+            "output": 921
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [ui] After one manual request is created for the QA business, the dashboard shows the card titled \"השבוע בקבלה\" with \"1\" requests (`e2e/ui/559-1.spec.ts`)."
+      ],
+      "checkedHead": "aee66a63fe0b3d9173360935064709865e6a5142"
+    },
+    "580": {
+      "nnn": "580",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "f69a1d40cd5127b59d9bdec8a0163872196bce9f"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T18:59:58.112Z",
+      "plan": "557",
+      "text": "the folder foodVibe1.0-orch-batch-5-557 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T19:27:42.686Z",
+      "plan": "557",
+      "text": "builder left undone (round 0): The platform row does not show the assistant level (see decisions).; e2e/ui/557-1.spec.ts is written but not run here; it needs the running app and the QA login. The gate reruns it.; src/app/pages/frontdesk/breadcrumbs.md is not created, because breadcrumbs-check flags a breadcrumbs file outside the"
+    },
+    {
+      "at": "2026-11-12T19:28:22.989Z",
+      "plan": "557",
+      "text": "builder left undone (round 1): [ui] Owner opens /frontdesk/settings, clicks the CSV export button and a clients-<date>.csv file downloads: the test e2e/ui/557-1.spec.ts is written but needs the QA login to run"
+    },
+    {
+      "at": "2026-11-12T19:30:13.163Z",
+      "plan": "557",
+      "text": "parked: saved on park/batch-5-557 (7bd52c2) and pushed"
+    },
+    {
+      "at": "2026-11-12T19:30:13.544Z",
+      "plan": "557",
+      "text": "ask 557-1 (environment, the Human or the advisor answers): Can the QA login be made available to the worktree so 557-1 can run, or should the gate's own rerun of 557-1 count as the evidence?"
+    },
+    {
+      "at": "2026-11-12T19:47:44.631Z",
+      "plan": "557",
+      "text": "ask 557-1 answered by the human: Accept the gate's rerun of e2e/ui/557-1.spec.ts as the evidence for this item"
+    },
+    {
+      "at": "2026-11-12T19:48:55.645Z",
+      "plan": "557",
+      "text": "resumed from park/batch-5-557: round 1, tier build, after: asking 557-1: ESCALATE environment: npx playwright test e2e/ui/557-1.spec.ts exits 1 because the QA login (ORCH_QA_USER / ORCH_QA_PASSWORD or QA_USER / QA_PASS)"
+    },
+    {
+      "at": "2026-11-12T19:49:02.860Z",
+      "plan": "557",
+      "text": "the folder foodVibe1.0-orch-batch-5-557 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T19:55:54.291Z",
+      "plan": "557",
+      "text": "escalated to a fresh judgment-tier builder (round 2): gate: scope-check (kit copy) --diff=origin/orch/batch-5 --plan=plans/557-front-desk-status-by-the-platform-admin-and-csv-export.plan.md"
+    },
+    {
+      "at": "2026-11-12T20:03:39.499Z",
+      "plan": "557",
+      "text": "builder left undone (round 2): The platform table does not show the assistant level on each row: server/test/front-desk-setup.test.js:126 and admin-businesses.test.js lock the row shape and are outside the scope. The dialog's level select starts on 'no change'.; src/app/pages/frontdesk/breadcrumbs.md was not created: breadcrumbs-"
+    },
+    {
+      "at": "2026-11-12T20:04:35.774Z",
+      "plan": "557",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T20:04:36.139Z",
+      "plan": "557",
+      "text": "ask 557-2 (technical, the Human or the advisor answers): Plan 557 used its fix rounds (2 of 2) and still fails: Done-when item left undone: [ui] Owner opens `/frontdesk/settings`, clicks \"ייצוא לקוחות (CSV)\" and a file named `clients-<YYYY-MM-DD>.csv` downloads (`e2e/ui/557-1.spec.ts`).. Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-12T20:05:36.756Z",
+      "plan": "557",
+      "text": "ask 557-2 answered by the human: retry: the [ui] items need the running app and a QA login, which this worktree does not have; that is expected and is not a failure. Write e2e/ui/557-*.spec.ts so they compile and follow the plan's [ui] lines (signInQa, cleanup in finally), make every [auto] check pass, and report the [ui] specs as written-not-run, not as undone. The Planner runs them against the s"
+    },
+    {
+      "at": "2026-11-12T20:06:48.051Z",
+      "plan": "557",
+      "text": "resumed from park/batch-5-557: round 2, tier judgment, after: asking 557-2: Done-when item left undone: [ui] Owner opens `/frontdesk/settings`, clicks \"ייצוא לקוחות (CSV)\" and a file named `clients-<YYYY-MM-DD>.csv` downlo"
+    },
+    {
+      "at": "2026-11-12T20:06:48.216Z",
+      "plan": "557",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-12T20:06:54.546Z",
+      "plan": "557",
+      "text": "the folder foodVibe1.0-orch-batch-5-557 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T20:14:51.933Z",
+      "plan": "557",
+      "text": "builder left undone (round 2): src/app/pages/frontdesk/breadcrumbs.md was not edited: breadcrumbs-check flags that file, so the export card row went into src/app/pages/breadcrumbs.md (decided in round 0, logged in Execution Notes); The platform row does not show the assistant level: server/test/front-desk-setup.test.js:126 and ad"
+    },
+    {
+      "at": "2026-11-12T20:21:33.035Z",
+      "plan": "557",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T20:21:33.399Z",
+      "plan": "557",
+      "text": "ask 557-3 (technical, the Human or the advisor answers): Plan 557 used its fix rounds (2 of 2) and still fails: review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.html:82 P0: platform row does not show the assistant level. Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-12T20:23:04.110Z",
+      "plan": "557",
+      "text": "ask 557-3 answered by the human: retry: fix the reviewer's finding — on /platform, each business row (src/app/pages/platform-dashboard/platform-dashboard.page.html around line 82) must show the front desk assistant level next to the status, with the existing fd_assistant_level_* keys, as the plan's P0 asks. Add or extend the platform-dashboard spec to assert it. The [ui] specs stay written-not-run"
+    },
+    {
+      "at": "2026-11-12T20:24:18.771Z",
+      "plan": "557",
+      "text": "resumed from park/batch-5-557: round 2, tier judgment, after: asking 557-3: review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.html:82 P0: platform row does not show the assistant level (fix rounds"
+    },
+    {
+      "at": "2026-11-12T20:24:18.941Z",
+      "plan": "557",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-12T20:24:25.673Z",
+      "plan": "557",
+      "text": "the folder foodVibe1.0-orch-batch-5-557 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T20:44:30.043Z",
+      "plan": "557",
+      "text": "the folder foodVibe1.0-orch-merge-batch-5 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T20:47:37.977Z",
+      "plan": "559",
+      "text": "the folder foodVibe1.0-orch-batch-5-559 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T21:08:16.595Z",
+      "plan": "559",
+      "text": "builder left undone (round 0): e2e/ui/559-1.spec.ts not run here (needs the QA login and running servers); its screenshot screens/559-1.png does not exist yet; log-query returned SKIP because no database is configured, so the no-error-entries check is not proven; [human] item left unticked: Dandan compares the platform table and"
+    },
+    {
+      "at": "2026-11-12T21:09:16.239Z",
+      "plan": "559",
+      "text": "builder left undone (round 1): [ui] dashboard card 'השבוע בקבלה' with 1 request: e2e/ui/559-1.spec.ts not run, screens/559-1.png missing. It needs QA login credentials in .env or in the environment."
+    },
+    {
+      "at": "2026-11-12T21:10:53.849Z",
+      "plan": "559",
+      "text": "parked: saved on park/batch-5-559 (72fdbd9) and pushed"
+    },
+    {
+      "at": "2026-11-12T21:10:54.210Z",
+      "plan": "559",
+      "text": "ask 559-1 (environment, the Human or the advisor answers): Provide the QA login (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PASS) to this worktree's environment so the builder can run e2e/ui/559-1.spec.ts and save screens/559-1.png, or leave the [ui] card to the Human's UI check?"
+    },
+    {
+      "at": "2026-11-12T21:24:26.260Z",
+      "plan": "559",
+      "text": "ask 559-1 answered by the human: leave the [ui] card to the Human's UI check: no QA login goes into the worktree. Write e2e/ui/559-1.spec.ts so it compiles and follows the plan's [ui] line, make every [auto] check pass, and report the [ui] spec as written-not-run, not as undone. The Planner runs it against the served batch branch afterwards."
+    },
+    {
+      "at": "2026-11-12T21:27:04.920Z",
+      "plan": "559",
+      "text": "resumed from park/batch-5-559: round 1, tier build, after: asking 559-1: ESCALATE environment: npx playwright test e2e/ui/559-1.spec.ts -> exit 1: QA credentials (ORCH_QA_USER/ORCH_QA_PASSWORD or QA_USER/QA_PASS) are no"
+    },
+    {
+      "at": "2026-11-12T21:27:27.633Z",
+      "plan": "559",
+      "text": "the folder foodVibe1.0-orch-batch-5-559 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T21:29:48.089Z",
+      "plan": "559",
+      "text": "escalated to a fresh judgment-tier builder (round 2): builder left uncommitted files: playwright-report/, test-results/"
+    },
+    {
+      "at": "2026-11-12T22:03:55.250Z",
+      "plan": "559",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-12T22:03:57.175Z",
+      "plan": "559",
+      "text": "ask 559-2 (technical, the Human or the advisor answers): pnpm run test:server fails only in seed-demo-business.test.js (a DST duplicate _id that depends on today's date and is outside this plan). Should 559 merge as is, or may the builder fix that test?"
+    },
+    {
+      "at": "2026-11-13T01:04:02.826Z",
+      "plan": "559",
+      "text": "ask 559-2 not answered in 180 min — plan 559 parked; the question was: pnpm run test:server fails only in seed-demo-business.test.js (a DST duplicate _id that depends on today's date and is outside this plan). Should 559 merge as is, or may the builder fix that test?"
+    },
+    {
+      "at": "2026-11-13T06:12:00.380Z",
+      "plan": "559",
+      "text": "the folder foodVibe1.0-orch-batch-5-559 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-13T06:29:06.107Z",
+      "plan": "559",
+      "text": "builder left undone (round 0): e2e/ui/559-1.spec.ts was not run. The servers on 4200/3000 are not this worktree's build, so the test has no valid target."
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 8.9,
+  "updatedAt": "2026-11-13T06:45:33.242Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: the platform table row does not show the assistant level, and the dialog's level select starts on 'ללא שינוי' (send a level only when chosen). Showing it means adding a key to GET /admin/businesses rows, and server/test/front-desk-setup.test.js:126 and server/test/admin-businesses.test.js pin the exact row shape; both files are outside this plan's scope. Reverse: add",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: a plan select option 'ללא שינוי' (key platform_fd_plan_keep) was added so the plan stays optional. Reverse: delete the option and its dictionary key.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: the new dictionary key platform_fd_plan_keep is in addition to the keys the plan named.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: the requests CSV status column reuses the client_tl_status_* labels, and the booking source column writes the raw key because the dictionary has no label for it. Reverse: add fd_csv_* label keys and map to them.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: the admin dialog marks the reason field on any 400 from the route; 400s on the other fields cannot happen from the UI. Reverse: map each issue path to its own field.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: the dialog's assistant-level select starts on 'no change' because the admin row does not carry the level — reverse: add assistantLevel to the admin list rows (needs server/test/front-desk-setup.test.js and admin-businesses.test.js in scope) and preselect it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "557",
+      "type": "removes",
+      "text": "removes: the platform admin cannot see a business's current assistant level on its /platform row; the dialog's level select starts on 'no change'. Reverse: add assistantLevel to the GET /admin/businesses row and update front-desk-setup.test.js and admin-businesses.test.js (both outside this plan's scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "557",
+      "type": "behaviour",
+      "text": "behaviour: the server adds frontDesk.assistantLevel to the list row only when the level is above 0, and the page shows a missing level as level 0. This keeps the exact row shape that server/test/front-desk-setup.test.js:126 checks; that test is outside the scope — reverse: always send assistantLevel and update that test (needs scope approval)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: reused the existing rq_channel_* labels for the report's channel breakdown instead of adding frontdesk_channel_* keys, as the plan's UI notes say to — reverse: add the frontdesk_channel_* keys and point the report at them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the platform CSV button fetches the file with the session and saves it as a blob, the same way as plan 566's AI-usage CSV, instead of opening a URL — reverse: change PlatformAdminService.downloadFrontDeskCsv to open the URL",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the card's after-hours count k is rounded from afterHoursPct × the non-manual request count, since the server returns only the percentage — reverse: add an afterHoursCount field to the server response",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: on the report, the owner's estimates sit beside requests (phoneInquiriesPerDay), median decision (avgResponseMinutes) and no-shows (noShowsPerWeek) as plain numbers, even though no-show is a rate and the estimate is a weekly count — reverse: drop the noShowsPerWeek estimate from the report tiles",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: 559-1 cancels its request afterwards (the router has no delete), and a cancelled request still counts in the numbers — reverse: remove the afterAll cleanup, or add a delete route",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "559",
+      "type": "seen",
+      "text": "seen: server/test/seed-demo-business.test.js:119 — 'inserts the business once…' fails with a duplicate usageDays key demo_owner:2026-10-25; probably 24-hour steps repeating a date across the Oct 25 DST change in scripts/seed-demo-business.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: reused the existing rq_channel_* dictionary labels instead of adding frontdesk_channel_* twins — reverse: add the three frontdesk_channel_* keys and point the card to them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "559",
+      "type": "seen",
+      "text": "seen: server/test/seed-demo-business.test.js fails with a duplicate usageDays _id demo_owner:2026-10-25 (a DST day), and this plan does not touch the seed script",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "559",
+      "type": "seen",
+      "text": "seen: server/test/seed-demo-business.test.js:119 seeds from now: Date.now(), and server/scripts/seed-demo-business.js:95 then inserts a duplicate usageDays _id (demo_owner:2026-10-25) whenever the last 30 days include the 2026-10-25 clock change. It fails on any branch until about 2026-11-24.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the report's front desk block reuses the existing rq_channel_* channel labels instead of adding frontdesk_channel_* twins (the plan says to reuse) — reverse: add the three frontdesk_channel_* keys and use them in report.page.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the platform 'ייצוא קבלה CSV' button downloads the file through the signed-in session (the same as plan 566's downloadAiUsageCsv) instead of opening the raw URL, which would have no auth header — reverse: use window.open on the CSV URL in PlatformAdminService.downloadFrontDeskCsv",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the report's requests row shows the owner's phoneInquiriesPerDay estimate multiplied by the report's range days, and the median row shows avgResponseMinutes as it is; the other estimates (messages, host hours, no-shows per week, missed inquiries) are not shown in the report — reverse: drop the multiplication or add rows for them",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the platform CSV button downloads through an authenticated blob fetch, as plan 566 does, instead of opening the URL, because the route needs the session header — reverse: switch to an anchor on the URL if the route accepts a cookie",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "559",
+      "type": "behaviour",
+      "text": "behaviour: the dashboard card and the report block are silently hidden when the front desk numbers fail to load (a warning is logged) — reverse: show an error message",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-13T06:45:33.240Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-13T06:45:33.241Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

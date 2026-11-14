@@ -156,6 +156,13 @@ function shapeStats(facet, usage, business, isOwner, period, bounds) {
   return out
 }
 
+const isNum = v => typeof v === 'number' && Number.isFinite(v)
+/** Plan 559: the revenue rule of `eventsPipeline` (actual, then planned, then pricing) for one closed event, in JS. */
+function closedRevenueOf(e) {
+  if (isNum(e?.closing?.finishedAt)) return e.closing.actualRevenue ?? e.planSnapshot?.plannedRevenue ?? 0
+  return e?.pricing?.revenue ?? 0
+}
+
 module.exports = {
-  PERIODS, FUNNEL_STAGES, UPCOMING_DAYS, periodBounds, eventsPipeline, usagePipeline, shapeStats,
+  closedRevenueOf, PERIODS, FUNNEL_STAGES, UPCOMING_DAYS, periodBounds, eventsPipeline, usagePipeline, shapeStats,
 }

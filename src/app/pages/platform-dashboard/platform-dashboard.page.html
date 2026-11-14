@@ -49,7 +49,12 @@
             </button>
           </th>
           }
+          <th scope="col">{{ "platform_frontdesk_col" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_fd_requests" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_fd_median" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_fd_no_show" | translatePipe }}</th>
           <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
+          <th scope="col">{{ "platform_col_report" | translatePipe }}</th>
         </tr>
       </thead>
       <tbody>
@@ -76,6 +81,29 @@
           <td>{{ row.events.finished }}</td>
           <td>{{ rate(row.closeRate) }}</td>
           <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
+          <td data-testid="frontdesk-cell">
+            @if (row.frontDesk; as fd) { {{ fd.done }}/{{ fd.total }} · {{ "fd_status_" + fd.status | translatePipe }} ·
+            <span data-testid="fd-level">{{ "fd_assistant_level_" + (fd.assistantLevel ?? 0) | translatePipe }}</span>
+            <button type="button" class="c-btn-ghost" data-testid="fd-edit" (click)="editFrontDesk(row)">
+              <lucide-icon name="pencil" [size]="14"></lucide-icon>
+              <span class="btn-label">{{ "platform_fd_edit" | translatePipe }}</span>
+            </button>
+            } @else { — }
+          </td>
+          <td data-testid="fd-requests" class="c-num">{{ fdNumber(fdStats_().get(row._id)?.requests) }}</td>
+          <td data-testid="fd-median" class="c-num">
+            {{ fdNumber(fdStats_().get(row._id)?.medianMinutesToDecision) }}
+          </td>
+          <td data-testid="fd-no-show" class="c-num">{{ fdNumber(fdStats_().get(row._id)?.noShowRatePct) }}</td>
+          <td>
+            <a
+              class="report-link"
+              data-testid="report-link"
+              routerLink="/report"
+              [queryParams]="{ businessId: row._id }"
+              >{{ "platform_col_report" | translatePipe }}</a
+            >
+          </td>
           <td>
             <input
               type="checkbox"
@@ -90,6 +118,10 @@
       </tbody>
     </table>
   </div>
+  <button type="button" class="c-btn-ghost--sm" data-testid="fd-export-csv" (click)="exportFrontDeskCsv()">
+    <lucide-icon name="download" [size]="14"></lucide-icon>
+    {{ "platform_fd_export_csv" | translatePipe }}
+  </button>
 
   }
 
@@ -122,7 +154,7 @@
           >
             <th scope="row">{{ row.label ?? row.key }}</th>
             <td class="num">{{ row.calls }}</td>
-            <td class="num">{{ row.failedCalls }}</td>
+            <td class="num" [attr.title]="failureTitle(row)">{{ row.failedCalls }}</td>
             <td class="num">{{ row.totalTokens }}</td>
             <td class="num">{{ cost(row.estCostUsd) }}</td>
           </tr>
@@ -130,7 +162,7 @@
           <tr class="ai-drill-row">
             <th scope="row">{{ "ai_feature_" + feature.key | translatePipe }}</th>
             <td class="num">{{ feature.calls }}</td>
-            <td class="num">{{ feature.failedCalls }}</td>
+            <td class="num" [attr.title]="failureTitle(feature)">{{ feature.failedCalls }}</td>
             <td class="num">{{ feature.totalTokens }}</td>
             <td class="num">{{ cost(feature.estCostUsd) }}</td>
           </tr>
@@ -147,4 +179,8 @@
   </section>
 
   <app-platform-logistics-items />
+
+  @if (fdDialog.isOpen_()) {
+  <app-front-desk-admin-dialog />
+  }
 </section>

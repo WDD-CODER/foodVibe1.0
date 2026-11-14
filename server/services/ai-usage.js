@@ -11,6 +11,7 @@ const { jerusalemDate } = require('../middleware/usage');
 const COLLECTION = 'aiUsage';
 const pending = new Set();
 const warnedNoPrice = new Set();
+const pendingById = new Map();
 
 function round6(n) {
   return Math.round(n * 1e6) / 1e6;
@@ -47,6 +48,7 @@ function buildRow({ usage, model, ok, errorCode, data, body, latencyMs, log }) {
   const totalTokens = meta.totalTokenCount ?? inputTokens + outputTokens;
   const at = Date.now();
   const row = {
+    _id: new mongoose.Types.ObjectId(),
     businessId: usage.businessId ?? '__platform__',
     feature: usage.feature,
     model,
@@ -59,6 +61,7 @@ function buildRow({ usage, model, ok, errorCode, data, body, latencyMs, log }) {
     at,
     day: jerusalemDate(at),
   };
+  if (ok) row.outcome = 'accepted';
   if (usage.userId) row.userId = usage.userId;
   if (errorCode) row.errorCode = errorCode;
   const images = countImages(body);
@@ -70,8 +73,12 @@ function buildRow({ usage, model, ok, errorCode, data, body, latencyMs, log }) {
 function recordAiUsage(args) {
   const { usage, model, log } = args;
   let promise;
+  let rowId;
   try {
-    promise = mongoose.connection.db.collection(COLLECTION).insertOne(buildRow(args));
+    const row = buildRow(args);
+    rowId = row._id;
+    if (Array.isArray(usage?.ids)) usage.ids.push(row._id);
+    promise = mongoose.connection.db.collection(COLLECTION).insertOne(row);
   } catch (err) {
     promise = Promise.reject(err);
   }
@@ -83,9 +90,55 @@ function recordAiUsage(args) {
         // logging must not throw
       }
     })
-    .finally(() => pending.delete(tracked));
+    .finally(() => {
+      pending.delete(tracked);
+      if (rowId) pendingById.delete(String(rowId));
+    });
+  pending.add(tracked);
+  if (rowId) pendingById.set(String(rowId), tracked);
+  return tracked;
+}
+
+/** Plan 580: marks rows whose Gemini answer the route refused (ok stays true). Fire-and-forget. */
+function markAiUsageRejected({ ids, code, log }) {
+  if (!Array.isArray(ids) || ids.length === 0) return Promise.resolve();
+  const tracked = (async () => {
+    try {
+      await Promise.all(ids.map(id => pendingById.get(String(id))).filter(Boolean));
+      await mongoose.connection.db.collection(COLLECTION).updateMany(
+        { _id: { $in: ids }, ok: true },
+        { $set: { outcome: 'rejected', rejectCode: code } },
+      );
+    } catch {
+      try {
+        log?.warn?.({ event: 'ai.usage.outcome_failed', code });
+      } catch {
+        // logging must not throw
+      }
+    }
+  })().finally(() => pending.delete(tracked));
   pending.add(tracked);
   return tracked;
+}
+
+/** Express middleware: ties the usage rows a request wrote to the route's final answer. */
+function trackAiOutcome(req, res, next) {
+  req.aiUsageIds = [];
+  const origJson = res.json.bind(res);
+  res.json = (body) => {
+    if (body && typeof body.code === 'string') res.locals.aiRejectCode = body.code;
+    return origJson(body);
+  };
+  res.on('finish', () => {
+    const ids = req.aiUsageIds;
+    if (!ids || ids.length === 0) return;
+    if (res.statusCode >= 400) {
+      markAiUsageRejected({ ids, code: res.locals.aiRejectCode ?? 'http_' + res.statusCode, log: req.log });
+    } else if (ids.length > 1) {
+      markAiUsageRejected({ ids: ids.slice(0, -1), code: 'retried', log: req.log });
+    }
+  });
+  next();
 }
 
 async function _waitForUsageWritesForTests() {
@@ -102,7 +155,8 @@ async function aggregateAiUsage(db, { from, to, groupBy, businessId }) {
     { $group: {
       _id: field,
       calls: { $sum: 1 },
-      failedCalls: { $sum: { $cond: [{ $eq: ['$ok', false] }, 1, 0] } },
+      failedCalls: { $sum: { $cond: [{ $or: [{ $eq: ['$ok', false] }, { $eq: ['$outcome', 'rejected'] }] }, 1, 0] } },
+      failReasons: { $push: { $cond: [{ $or: [{ $eq: ['$ok', false] }, { $eq: ['$outcome', 'rejected'] }] }, { $ifNull: ['$rejectCode', { $ifNull: ['$errorCode', 'unknown'] }] }, '$$REMOVE'] } },
       inputTokens: { $sum: '$inputTokens' },
       outputTokens: { $sum: '$outputTokens' },
       totalTokens: { $sum: '$totalTokens' },
@@ -123,6 +177,10 @@ async function aggregateAiUsage(db, { from, to, groupBy, businessId }) {
     if (groupBy === 'business') row.label = names.get(g._id) ?? g._id;
     row.calls = g.calls;
     row.failedCalls = g.failedCalls;
+    if (Array.isArray(g.failReasons) && g.failReasons.length) {
+      row.failures = {};
+      for (const r of g.failReasons) row.failures[r] = (row.failures[r] ?? 0) + 1;
+    }
     row.inputTokens = g.inputTokens;
     row.outputTokens = g.outputTokens;
     row.totalTokens = g.totalTokens;
@@ -134,4 +192,4 @@ async function aggregateAiUsage(db, { from, to, groupBy, businessId }) {
   return { rows, totals };
 }
 
-module.exports = { estimateCostUsd, recordAiUsage, aggregateAiUsage, _waitForUsageWritesForTests };
+module.exports = { estimateCostUsd, recordAiUsage, markAiUsageRejected, trackAiOutcome, aggregateAiUsage, _waitForUsageWritesForTests };

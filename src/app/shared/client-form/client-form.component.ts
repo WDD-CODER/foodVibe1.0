@@ -44,6 +44,8 @@ export class ClientFormComponent {
   // 2. INPUTS
   readonly initialName = input('')
   readonly initialPhone = input('')
+  /** Plan 551: with a client the form edits it (pre-filled, saved through updateClient) instead of adding one. */
+  readonly client = input<Client | null>(null)
 
   // 3. OUTPUTS
   readonly saved = output<Client>()
@@ -53,19 +55,28 @@ export class ClientFormComponent {
   protected readonly nameMax = NAME_MAX
   protected readonly clientTypeOptions = CLIENT_TYPES.map((value) => ({ value, label: 'client_type_' + value }))
   protected readonly nameEdit_ = signal<string | null>(null)
+  protected readonly typeEdit_ = signal<ClientType | null>(null)
+  protected readonly companyEdit_ = signal<string | null>(null)
+  protected readonly emailEdit_ = signal<string | null>(null)
+  protected readonly sourceEdit_ = signal<string | null>(null)
+  protected readonly notesEdit_ = signal<string | null>(null)
   protected readonly phoneEdit_ = signal<string | null>(null)
-  protected readonly clientType_ = signal<ClientType>('private')
-  protected readonly companyName_ = signal('')
-  protected readonly email_ = signal('')
-  protected readonly source_ = signal('')
-  protected readonly notes_ = signal('')
   protected readonly isSaving_ = signal(false)
-  protected readonly isMoreOpen_ = signal(false)
+  protected readonly moreEdit_ = signal<boolean | null>(null)
   protected readonly isTouched_ = signal(false)
 
   // 5. COMPUTED
-  protected readonly name_ = computed(() => this.nameEdit_() ?? this.initialName())
-  protected readonly phone_ = computed(() => this.phoneEdit_() ?? this.initialPhone())
+  /** The more-details block is open from the start when editing a client. */
+  protected readonly isMoreOpen_ = computed(() => this.moreEdit_() ?? this.client() !== null)
+  protected readonly name_ = computed(() => this.nameEdit_() ?? this.client()?.name ?? this.initialName())
+  protected readonly phone_ = computed(() => this.phoneEdit_() ?? this.client()?.phone ?? this.initialPhone())
+  protected readonly clientType_ = computed<ClientType>(
+    () => this.typeEdit_() ?? this.client()?.clientType ?? 'private'
+  )
+  protected readonly companyName_ = computed(() => this.companyEdit_() ?? this.client()?.companyName ?? '')
+  protected readonly email_ = computed(() => this.emailEdit_() ?? this.client()?.email ?? '')
+  protected readonly source_ = computed(() => this.sourceEdit_() ?? this.client()?.source ?? '')
+  protected readonly notes_ = computed(() => this.notesEdit_() ?? this.client()?.notes ?? '')
   protected readonly nameValid_ = computed(
     () => this.name_().trim().length > 0 && this.name_().trim().length <= NAME_MAX
   )
@@ -92,8 +103,11 @@ export class ClientFormComponent {
     if (!this.nameValid_() || !this.phoneValid_() || this.isSaving_()) return
     this.isSaving_.set(true)
     try {
-      const client = await this.clientData.addClient(this.buildBody())
-      this.saved.emit(client)
+      const editing = this.client()
+      const saved = editing
+        ? await this.clientData.updateClient({ ...editing, ...this.buildBody() })
+        : await this.clientData.addClient(this.buildBody())
+      this.saved.emit(saved)
     } catch (err) {
       // A 403 already got the "no permission" toast from the interceptor.
       if ((err as { status?: number }).status !== 403)
@@ -112,10 +126,11 @@ export class ClientFormComponent {
       name: this.name_().trim(),
       phone: this.phone_().trim(),
       clientType: this.clientType_(),
-      ...(companyName && { companyName }),
-      ...(email && { email }),
-      ...(source && { source }),
-      ...(notes && { notes })
+      // Editing: a cleared field is sent as an empty string so it is cleared; adding leaves an empty one out.
+      ...(this.client() || companyName ? { companyName } : {}),
+      ...(this.client() || email ? { email } : {}),
+      ...(this.client() || source ? { source } : {}),
+      ...(this.client() || notes ? { notes } : {})
     }
   }
 
