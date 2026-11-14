@@ -1,0 +1,14 @@
+<section class="manager-card c-glass-panel" data-testid="ai-examples-share-card">
+  <div class="card-title">
+    <lucide-icon name="sparkles" class="icon-primary"></lucide-icon>
+    <h2>{{ 'metadata_ai_share_title' | translatePipe }}</h2>
+  </div>
+  <p class="card-desc">{{ 'metadata_ai_share_desc' | translatePipe }}</p>
+
+  <div class="c-chip-group">
+    <label class="c-chip c-chip--toggle" data-testid="ai-examples-share-toggle">
+      <input #box type="checkbox" [checked]="checked()" [disabled]="saving()" (change)="onToggle(box)" />
+      <span>{{ 'metadata_ai_share_chip' | translatePipe }}</span>
+    </label>
+  </div>
+</section>

@@ -51,9 +51,17 @@ const recipe = name => ({
   ingredients: [{ name: 'מים', amount: 100, unit: 'gram' }],
   steps: ['לבשל'],
 });
-const saveShotVia = (token, prompt) =>
-  request(app).post('/api/v1/ai/shots').set(auth(token))
-    .send({ prompt, draft: recipe('מרק'), status: 'approved', source: 'text' });
+// Plan 600: an approved shot is a pending one confirmed after the recipe is saved. Resolves to the pending POST's response.
+const saveShotVia = async (token, prompt) => {
+  const shotKey = `key-${prompt}`.padEnd(8, '_');
+  const res = await request(app).post('/api/v1/ai/shots').set(auth(token))
+    .send({ prompt, draft: recipe('מרק'), status: 'pending', source: 'text', shotKey });
+  if (res.status === 200) {
+    await request(app).post('/api/v1/ai/shots/confirm').set(auth(token))
+      .send({ shotKey, draft: recipe('מרק'), recipeId: 'r1' });
+  }
+  return res;
+};
 const generate = token =>
   request(app).post('/api/v1/ai/generate').set(auth(token)).send({ prompt: 'soup' });
 const generateFromUrl = token =>

@@ -14,9 +14,19 @@ export interface AiRecipeDraft {
 export class AiRecipeDraftService {
   private readonly draft_ = signal<AiRecipeDraft | null>(null)
   readonly draft = this.draft_.asReadonly()
+  /** Plan 600: the key of the pending example saved when the cook continued; confirmed once the recipe is saved. */
+  private readonly shotKey_ = signal<string | null>(null)
 
-  set(draft: AiRecipeDraft): void {
+  set(draft: AiRecipeDraft, shotKey?: string): void {
     this.draft_.set(draft)
+    this.shotKey_.set(shotKey ?? null)
+  }
+
+  /** Returns and clears the pending example key (null when the draft has none). */
+  consumeShotKey(): string | null {
+    const key = this.shotKey_()
+    this.shotKey_.set(null)
+    return key
   }
 
   consume(): AiRecipeDraft | null {

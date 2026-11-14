@@ -14,6 +14,9 @@ const { PRICES_AS_OF } = require('../constants/ai-prices')
 
 const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 
+const { containsInjectionPattern, scanRecipeDraftForInjection } = require('../services/ai-recipe-helpers')
+const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
+
 const router = Router()
 
 function col(type) {
@@ -325,6 +328,99 @@ router.get('/ai-usage', verifyToken, requirePlatformAdmin, async (req, res) => {
     res.json({ from, to, groupBy, pricesAsOf: PRICES_AS_OF, rows, totals })
   } catch (err) {
     req.log.error({ err, event: 'admin.ai_usage.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 600 — the shared pool of recipe AI examples the platform admin curates.
+const AI_SHOT_CANDIDATES_CAP = 100
+const AI_SHOT_SHARED_CAP = 200
+const OBJECT_ID_RE = /^[0-9a-f]{24}$/
+
+function shotsCol() {
+  return col('GEMINI_SHOTS')
+}
+
+function aiShotRow(doc, businessName) {
+  return {
+    _id: String(doc._id),
+    nameHebrew: doc.draft?.nameHebrew ?? '',
+    prompt: String(doc.prompt ?? '').slice(0, 200),
+    ingredientCount: Array.isArray(doc.draft?.ingredients) ? doc.draft.ingredients.length : 0,
+    keptRatio: typeof doc.keptRatio === 'number' ? doc.keptRatio : null,
+    source: doc.source,
+    createdAt: doc.createdAt,
+    ...(businessName !== undefined && { businessName })
+  }
+}
+
+router.get('/ai-shots', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const sharing = await col('businesses').find({ shareAiExamples: true }, { projection: { name: 1 } }).toArray()
+    const nameById = new Map(sharing.map(b => [String(b._id), b.name]))
+    const shared = await shotsCol().find({ businessId: MASTER_BUSINESS_ID }).sort({ createdAt: -1 }).limit(AI_SHOT_SHARED_CAP).toArray()
+    const promoted = new Set(shared.map(d => d.promotedFrom?.shotId).filter(Boolean))
+    const pool = nameById.size
+      ? await shotsCol().find({ status: 'approved', businessId: { $in: [...nameById.keys()] } }).sort({ createdAt: -1 }).toArray()
+      : []
+    const candidates = pool.filter(d => !promoted.has(String(d._id))).slice(0, AI_SHOT_CANDIDATES_CAP)
+    res.json({
+      candidates: candidates.map(d => aiShotRow(d, nameById.get(String(d.businessId)))),
+      shared: shared.map(d => aiShotRow(d))
+    })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.ai_shots_list.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.post('/ai-shots/:id/promote', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const id = req.params.id
+    if (!OBJECT_ID_RE.test(id)) return res.status(404).json({ error: 'Shot not found' })
+    const shot = await shotsCol().findOne({ _id: new mongoose.Types.ObjectId(id), status: 'approved', businessId: { $ne: MASTER_BUSINESS_ID } })
+    if (!shot) return res.status(404).json({ error: 'Shot not found' })
+    const business = await col('businesses').findOne({ _id: shot.businessId }, { projection: { shareAiExamples: 1 } })
+    if (business?.shareAiExamples !== true) return res.status(409).json({ error: 'Business does not share examples', code: 'not_shared' })
+    if (await shotsCol().findOne({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.shotId': id })) {
+      return res.status(409).json({ error: 'Already shared', code: 'already_shared' })
+    }
+    if (containsInjectionPattern(shot.prompt) || scanRecipeDraftForInjection(shot.draft)) {
+      req.log.warn({ event: 'admin.ai_shots.injection_rejected' })
+      return res.status(400).json({ error: 'content rejected — instruction-like text is not allowed' })
+    }
+    const copy = {
+      businessId: MASTER_BUSINESS_ID,
+      prompt: shot.prompt,
+      draft: shot.draft,
+      source: shot.source,
+      keptRatio: typeof shot.keptRatio === 'number' ? shot.keptRatio : null,
+      status: 'approved',
+      promotedFrom: { businessId: shot.businessId, shotId: id },
+      promotedBy: req.user.userId,
+      createdAt: new Date()
+    }
+    const { insertedId } = await shotsCol().insertOne(copy)
+    const stale = await shotsCol().find({ businessId: MASTER_BUSINESS_ID }).sort({ createdAt: -1 }).skip(AI_SHOT_SHARED_CAP).project({ _id: 1 }).toArray()
+    if (stale.length) await shotsCol().deleteMany({ _id: { $in: stale.map(d => d._id) } })
+    req.log.info({ event: 'admin.ai_shots.promoted' })
+    res.json(aiShotRow({ ...copy, _id: insertedId }))
+  } catch (err) {
+    req.log.error({ err, event: 'admin.ai_shots.promote_failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.delete('/ai-shots/shared/:id', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const id = req.params.id
+    if (!OBJECT_ID_RE.test(id)) return res.status(404).json({ error: 'Shot not found' })
+    const result = await shotsCol().deleteOne({ _id: new mongoose.Types.ObjectId(id), businessId: MASTER_BUSINESS_ID })
+    if (!result.deletedCount) return res.status(404).json({ error: 'Shot not found' })
+    req.log.info({ event: 'admin.ai_shots.removed' })
+    res.json({ removed: true })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.ai_shots.remove_failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
