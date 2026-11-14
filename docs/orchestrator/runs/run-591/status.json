@@ -1,0 +1,160 @@
+{
+  "run": "run-591",
+  "branch": "orch/run-591",
+  "base": "main",
+  "startedAt": "2026-11-12T13:01:16.704Z",
+  "mainShaAtStart": "971449dcb37956ceafd90933999b0389d342dc1f",
+  "plans": {
+    "589": {
+      "nnn": "589",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "29b8cee391ce91bad6614313a1ac498f94ed26e1"
+    },
+    "591": {
+      "nnn": "591",
+      "title": "Signing out (or a session ending) always moves the visitor to the welcome page",
+      "branch": "feat/591-signing-out-goes-to",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T13:03:39.391Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T13:24:44.831Z"
+        }
+      },
+      "humanItems": [
+        "Sign out from any page → the welcome page appears at once."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T13:03:39.111Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:03:39.394Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:16:59.269Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:24:37.767Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:24:44.833Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:25:07.916Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:26:42.237Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.6,
+      "sha": "8dc4398eae3489dd0219c1c28922ce5fba031ced",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 789.4,
+          "tokens": {
+            "input": 296532,
+            "output": 5893
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 21.3,
+          "tokens": {
+            "input": 76561,
+            "output": 495
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "e1b22007f3f1b70784b95154de321cc98c3083ec"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T13:03:38.842Z",
+      "plan": "591",
+      "text": "the folder foodVibe1.0-orch-run-591-591 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T13:16:49.341Z",
+      "plan": "591",
+      "text": "builder left undone (round 0): e2e/ui/591-1.spec.ts was not run: it needs the QA login from .env. The gate reruns it."
+    },
+    {
+      "at": "2026-11-12T13:25:22.366Z",
+      "plan": "591",
+      "text": "the folder foodVibe1.0-orch-merge-run-591 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 10.6,
+  "updatedAt": "2026-11-12T13:33:53.600Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "591",
+      "type": "behaviour",
+      "text": "behaviour: the redirect skips URLs that are /welcome or start with /cook/, and a page load with no user is ignored (the first read) — reverse: remove the URL check or the was-signed-in flag in signed-out-redirect.service.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "591",
+      "type": "behaviour",
+      "text": "behaviour: the e2e test clicks button.auth-username-btn, the header's sign-out control (the username button, aria-label log_out) — reverse: change the locator in e2e/ui/591-1.spec.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-12T13:33:53.597Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T13:33:53.599Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

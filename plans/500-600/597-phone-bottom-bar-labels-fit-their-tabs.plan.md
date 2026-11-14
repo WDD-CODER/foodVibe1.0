@@ -1,6 +1,6 @@
 # Plan 597 — Phone bottom bar labels fit their tabs without colliding or clipping
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: afc44e92a6feab13662761f19e5456c724d13fc3
@@ -108,10 +108,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 597-A1: Give the phone bottom bar its own short tab names so six labels fit at 375px — three nav_short_* keys, used only in .bottom-nav — public/assets/data/dictionary.json, src/app/core/components/header/header.component.html
-- [ ] 597-A2: Keep every bottom-bar label inside its tab and pin the waiting badge to the clients icon — .bottom-nav__label ellipsis, .bottom-nav__icon relative wrapper, absolute badge — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.scss
-- [ ] 597-A3: Keep the full clients section name for screen readers and cover it in the header spec — aria-label on the clients tab — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.spec.ts
-- [ ] 597-A4: Prove at 375px that labels never overlap or leave the screen and the badge sits on the icon — e2e/ui/597-1.spec.ts, e2e/ui/597-2.spec.ts
+- [x] 597-A1: Give the phone bottom bar its own short tab names so six labels fit at 375px — three nav_short_* keys, used only in .bottom-nav — public/assets/data/dictionary.json, src/app/core/components/header/header.component.html
+- [x] 597-A2: Keep every bottom-bar label inside its tab and pin the waiting badge to the clients icon — .bottom-nav__label ellipsis, .bottom-nav__icon relative wrapper, absolute badge — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.scss
+- [x] 597-A3: Keep the full clients section name for screen readers and cover it in the header spec — aria-label on the clients tab — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.spec.ts
+- [x] 597-A4: Prove at 375px that labels never overlap or leave the screen and the badge sits on the icon — e2e/ui/597-1.spec.ts, e2e/ui/597-2.spec.ts
 
 ## Technical Considerations
 
@@ -132,3 +132,6 @@ touching any milestone.
   Worker starts.
 
 ## Execution Notes
+- pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, 2175 SUCCESS
+- [ui] 597-1, 597-2 written, not run (no running app here)
+- The badge's own aria-label moved onto the clients tab's aria-label (full name + waiting count); badge is aria-hidden.

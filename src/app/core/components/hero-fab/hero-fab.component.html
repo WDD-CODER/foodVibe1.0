@@ -1,5 +1,5 @@
 @if (!isOnWelcome_()) {
-  <div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()">
+  <div class="hero-fab-container" [class.above-bar]="isOnMenuIntelligence_()" [class.hide-on-phone]="isOnEntityForm_()">
     <div class="fab-actions" [class.expanded]="isExpanded_()">
       @for (action of effectiveActions_(); track action.labelKey + action.icon) {
         <button

@@ -104,3 +104,4 @@ These rules apply to the Express server (`server/`) and are non-negotiable for p
 16. **No Stack Traces in Production**: Global error handler must check `NODE_ENV === 'production'` and return `{ error: 'Internal server error' }` only — never the stack.
 17. **PBKDF2 Pass-through**: Angular hashes passwords client-side (PBKDF2, saltHex:hashHex). Backend stores the incoming hash as-is at signup. Backend compares the incoming hash directly at login (`timingSafeEqual`). Backend must NEVER re-hash an already-hashed value.
 
+- Every route needs `authGuard` except `welcome` (a signed-out visitor goes to `/welcome`); checked by `node scripts/route-guard-check.mjs` (plan 589).

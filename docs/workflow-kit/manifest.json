@@ -4570,14 +4570,6 @@
       "notes": "Tests for the log-query plan-start and no-database fallbacks. Plan 517."
     },
     {
-      "path": "scripts/qa/lib/styleqa-sign-in.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [],
-      "notes": "FoodVibe Style QA sign-in helper; project script, not part of the kit."
-    },
-    {
       "path": "scripts/qa/evidence-server.mjs",
       "tier": "project",
       "action": "stay",
@@ -5148,6 +5140,14 @@
       "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
     },
     {
+      "path": "scripts/qa/lib/styleqa-sign-in.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe Style QA: signs in for the style QA run."
+    },
+    {
       "path": "scripts/qa/lib/qa-login.mjs",
       "tier": "project",
       "action": "stay",
@@ -5710,6 +5710,14 @@
       "params": [],
       "refs": [],
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/route-guard-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 589: fails when a top-level route in src/app/app.routes.ts lacks authGuard (except welcome, cook/:id, redirects)."
     },
     {
       "path": "scripts/scout/page-template.html",

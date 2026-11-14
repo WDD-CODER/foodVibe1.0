@@ -174,3 +174,43 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
     expect(host.querySelectorAll('a[href="/platform"]').length).toBe(2)
   })
 })
+
+describe('HeaderComponent phone bottom bar labels (plan 597)', () => {
+  let fixture: ComponentFixture<HeaderComponent>
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => false,
+            user_: signal(null),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            logout: () => of(null)
+          }
+        }
+      ]
+    }).compileComponents()
+    fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+  })
+
+  it('renders the short keys in the bottom bar and keeps the full name for the clients tab', () => {
+    const host: HTMLElement = fixture.nativeElement
+    const labels = Array.from(host.querySelectorAll('.bottom-nav .bottom-nav__label')).map((e) => e.textContent?.trim())
+    const short = ['nav_short_recipe_book', 'nav_short_menu_library', 'nav_short_frontdesk']
+    const fullKeys = ['recipe_book', 'menu_library', 'frontdesk_section']
+    const dict = (k: string) =>
+      (fixture.componentInstance as unknown as { translation: { translate(k: string): string } }).translation.translate(
+        k
+      )
+    for (const k of short) expect(labels).toContain(dict(k))
+    for (const k of fullKeys) expect(labels).not.toContain(dict(k))
+    const clients = host.querySelector('.bottom-nav a[href="/clients"]')
+    expect(clients?.getAttribute('aria-label')).toBe(dict('frontdesk_section'))
+  })
+})

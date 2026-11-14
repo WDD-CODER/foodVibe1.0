@@ -1,6 +1,6 @@
 # Plan 598 — The floating create button stays off the form action buttons on phones
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: afc44e92a6feab13662761f19e5456c724d13fc3
@@ -104,10 +104,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 598-A1: Teach the floating button to recognise add and edit form pages — isOnEntityForm_ signal from the router URL — src/app/core/components/hero-fab/hero-fab.component.ts
-- [ ] 598-A2: Hide the floating button on add and edit forms at phone width only — hide-on-phone class and a 620px media rule — src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.scss
-- [ ] 598-A3: Cover which routes count as a form page in the floating button's spec — src/app/core/components/hero-fab/hero-fab.component.spec.ts
-- [ ] 598-A4: Prove on a phone-sized screen that the form buttons are clear and the list still has the button — e2e/ui/598-1.spec.ts, e2e/ui/598-2.spec.ts
+- [x] 598-A1: Teach the floating button to recognise add and edit form pages — isOnEntityForm_ signal from the router URL — src/app/core/components/hero-fab/hero-fab.component.ts
+- [x] 598-A2: Hide the floating button on add and edit forms at phone width only — hide-on-phone class and a 620px media rule — src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.scss
+- [x] 598-A3: Cover which routes count as a form page in the floating button's spec — src/app/core/components/hero-fab/hero-fab.component.spec.ts
+- [x] 598-A4: Prove on a phone-sized screen that the form buttons are clear and the list still has the button — e2e/ui/598-1.spec.ts, e2e/ui/598-2.spec.ts
 
 ## Technical Considerations
 
@@ -124,3 +124,5 @@ touching any milestone.
 - none
 
 ## Execution Notes
+- pnpm run build, lint, test:ci -> exit 0 (2184 SUCCESS)
+- [ui] items: e2e/ui/598-1.spec.ts, 598-2.spec.ts written, not run

@@ -120,11 +120,11 @@ automatic guest); list them in Execution Notes, do not edit them.
 - The welcome page is unchanged.
 
 ## Atomic Sub-tasks
-- [ ] A1: Stop signing a guest in by itself on the PC and in the slots — src/environments/environment.local.ts, src/environments/environment.ts
-- [ ] A2: Send a signed-out visitor to the welcome page from every page but the shared recipe link — src/app/core/guards/auth.guard.ts, src/app/app.routes.ts
-- [ ] A3: After signing in on the welcome page, return to the page the visitor wanted — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/home-redirect.ts
-- [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
-- [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
+- [x] A1: Stop signing a guest in by itself on the PC and in the slots — src/environments/environment.local.ts, src/environments/environment.ts
+- [x] A2: Send a signed-out visitor to the welcome page from every page but the shared recipe link — src/app/core/guards/auth.guard.ts, src/app/app.routes.ts
+- [x] A3: After signing in on the welcome page, return to the page the visitor wanted — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/home-redirect.ts
+- [x] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
+- [x] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
 
 ## What happens when
 - `returnUrl=//evil.example` → ignored, goes to `/dashboard`.
@@ -149,3 +149,7 @@ automatic guest); list them in Execution Notes, do not edit them.
 ## Execution Notes
 - Human 2026-11-12: Q1 = a, Q2 = keep.
 - Planner: shares `src/app/app.routes.ts` with open plans 553, 554 (batch-3) and later batches; they add new routes, this plan adds guards to existing ones — separate lines, merged in order by the Human. New routes from those plans must carry `authGuard` (route-guard-check catches a miss after they meet on main).
+- Step 0 routes (before): authGuard missing on venues, inventory, recipe-book, menu-library, cook, suppliers, dashboard (now added); already guarded: recipe-builder, recipe-builder/:id, menu-intelligence(/:id), trash, settings, platform; welcome has welcomeGuard; cook/:id unguarded by design; redirects: equipment*, command-center, '', '**'. `dev/catalog` comes from a spread (devCatalogRoutes), local/test/slot builds only; not covered by the check.
+- Step 0 e2e specs relying on the automatic guest (no signInQa): e2e/cook-view.spec.ts and other non-`e2e/ui` specs (not edited).
+- Evidence: pnpm run build → 0; pnpm run lint → 0 errors; pnpm run test:ci → 1980 SUCCESS; node scripts/route-guard-check.mjs → ROUTE_GUARDS: ok (old routes file → exit 1 listing 7 routes). e2e 589-1/589-2 written, not run here (need servers + QA login).
+- scope extended: docs/workflow-kit/manifest.json — manifest entry for the new script (kit-manifest-check)
