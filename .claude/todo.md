@@ -16,7 +16,7 @@ Orchestrator chain (Human 2026-11-11; each run branch starts from the previous o
 - batch-3 · `orch/batch-3`: **553, 554, 551, 552**
 - batch-4 · `orch/batch-4`: **556, 555**
 - batch-5 · `orch/batch-5`: **557, 559**
-- batch-6 · `orch/batch-6`: **582, 595, 596** — started 2026-11-14 (580 closed first: it was on main via #569 but still open, so the dry run pulled it in)
+- batch-6 · `orch/batch-6`: **582, 595, 596** — merged #573 2026-11-14 (580 closed first: it was on main via #569 but still open, so the dry run pulled it in)
 - Not in the chain: **542** A8 (Planner, by hand) · **582** recipe AI examples per business (after 580) · parked **373**, **471**
 
 plan-order.mjs waves: 1: 373, 471, 542, 546, 558, 567, 575, 579, 580 · 2: 547, 568, 581, 582 · 3: 551, 552, 553, 554 · 4: 555, 556 · 5: 557, 559
@@ -146,12 +146,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Write the four screen checks and update 523-3 — 581-1…4 per the `[ui]` lines with `signInQa`, API setup and cleanup in `finally` (own terms "בדיקה 581" and section "סעיף 581" deleted through `DELETE /api/v1/data/taxonomyTerms/:id`), screenshots `screens/581-<n>.png`; 523-3: click the row's trash button (aria "מחיקה") instead of `.c-chip__remove`, and its cleanup also deletes a removed (`removedAt`) "בדיקה E2E"; run each with `pnpm exec playwright test <spec>` with `E2E_APP_URL` / `E2E_API_URL` set to the slot's ports — e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts, e2e/ui/581-3.spec.ts, e2e/ui/581-4.spec.ts, e2e/ui/523-3.spec.ts
 - [x] A8: Record the changes in the maps and run every `[auto]` check — paste the outputs under Execution Notes — docs/brain/component-families.md, src/app/pages/breadcrumbs.md
 
-### Plan 582 — Recipe AI examples stay inside their business (`plans/582-recipe-ai-examples-stay-inside-their-business.plan.md`)
-- [ ] A1: Stamp and prune recipe examples per business — `saveShot(req, …)` with `businessId`, per-business count and pruning, `POST /shots` passes `req` — server/routes/ai.js
-- [ ] A2: Read only the caller's own approved examples — `getApprovedShots(req, limit)` with `scopeFilter(req)`; both callers pass `req`; comment block updated — server/routes/ai.js
-- [ ] A3: Test the scope, the prune and the stamp — the four `[auto]` cases above — server/test/ai-shots.test.js
-- [ ] A4: Run test:server, the server lint and log-query, and paste the output lines under Execution Notes
-
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions. Plan 471 (exports) is parked too (needs a Human walk-through session).
@@ -199,15 +193,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
 - [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
 
-### Plan 595 — Website imports refuse redirects to internal addresses (`plans/595-website-imports-refuse-redirects-to-internal-addresses.plan.md`)
-- [ ] A1: Check every redirect of a website import against the safety rules, at most 5 hops — safeFetch helper used by both URL routes — server/routes/ai.js
-- [ ] A2: Refuse the internal addresses the safety check still lets through — 0.0.0.0/8, 100.64/10, IPv4-mapped IPv6, bracketed hosts — server/routes/ai.js
-- [ ] A3: Prove a redirect to an internal address is refused and never fetched — server/test/knowledge-import.test.js, server/test/generate-from-url.test.js
-
-### Plan 596 — Platform CSV downloads show Hebrew correctly in Excel (`plans/596-platform-csv-downloads-show-hebrew-correctly-in-excel.plan.md`)
-- [ ] A1: Make both platform CSV downloads open in Excel with readable Hebrew — BOM and CRLF in one send helper — server/routes/admin.js
-- [ ] A2: Check the downloads start with the marker Excel needs — server/test/admin-frontdesk-stats.test.js, server/test/ai-usage.test.js
-
 ### Plan 597 — Phone bottom bar labels fit their tabs without colliding or clipping (`plans/design/597-phone-bottom-bar-labels-fit-their-tabs.plan.md`)
 - [ ] 597-A1: Give the phone bottom bar its own short tab names so six labels fit at 375px — three nav_short_* keys, used only in .bottom-nav — public/assets/data/dictionary.json, src/app/core/components/header/header.component.html
 - [ ] 597-A2: Keep every bottom-bar label inside its tab and pin the waiting badge to the clients icon — .bottom-nav__label ellipsis, .bottom-nav__icon relative wrapper, absolute badge — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.scss
@@ -225,3 +210,61 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 599-A2: Give the inventory price column enough room on phones that every price shows in full — mobileGridTemplate price floor — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
 - [ ] 599-A3: Keep a long price inside its own cell instead of spilling under the category — .col-price-readonly phone alignment — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.scss
 - [ ] 599-A4: Prove the desktop form rows line up and the phone prices are whole — e2e/ui/599-1.spec.ts, e2e/ui/599-2.spec.ts
+
+### Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
+
+- [ ] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [ ] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
+- [ ] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
+- [ ] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
+- [ ] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
+- [ ] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
+- [ ] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
+- [ ] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
+- [ ] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
+- [ ] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
+- [ ] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
+- [ ] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
+- [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
+- [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
+
+### Plan 601 — Phone chip rows keep their scroll arrows beside the chips, never on top of them (`plans/design/601-phone-chip-rows-keep-their-scroll-arrows-beside-the.plan.md`)
+- [ ] 601-A1: Mark a scroll rail as overflowing so its stylesheet can keep room for the arrows — is-overflowing host class from canPrev_/canNext_ — src/app/shared/scroll-rail/scroll-rail.component.ts
+- [ ] 601-A2: Keep an arrow's width free on each side of an overflowing rail so no chip sits under an arrow — --sr-arrow-size, --sr-arrow-room, :host(.is-overflowing) padding-inline — src/app/shared/scroll-rail/scroll-rail.component.scss
+- [ ] 601-A3: Cover the overflowing class and the arrow-beside-not-over geometry in the rail's unit test — two new cases — src/app/shared/scroll-rail/scroll-rail.component.spec.ts
+- [ ] 601-A4: Prove at 375px on dashboard and bookings that arrows sit beside the chips and the last chip is readable — e2e/ui/601-1.spec.ts, e2e/ui/601-2.spec.ts
+
+### Plan 602 — Five pages sit in a centred column sized to their content instead of leaving empty space (`plans/design/602-five-pages-sit-in-a-centred-column-sized-to.plan.md`)
+- [ ] 602-A1: Centre the equipment form with a page gutter instead of pinning it to the right edge — :host padding, margin-inline auto, max-inline-size — src/app/pages/equipment/components/equipment-form/equipment-form.component.scss
+- [ ] 602-A2: Put the requests page in a centred column so two request cards fill the row — .rq-page max-inline-size 60rem + margin-inline auto — src/app/pages/requests/requests.page.scss
+- [ ] 602-A3: Widen the menu library card so it uses the desktop width and its filters fit one row — .menu-library-container max-inline-size 75rem — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+- [ ] 602-A4: Narrow the settings page to the team column so the title lines up with the content — .settings-shell max-inline-size 36rem — src/app/pages/settings/settings.page.scss
+- [ ] 602-A5: Make the venues card panel only as tall as its cards, capped at one screen — .table-area--cards align-self start + max-block-size at desktop, phone and ≤620px — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 602-A6: Prove each page is centred, aligned and free of the empty panel at its width — e2e/ui/602-1.spec.ts, e2e/ui/602-2.spec.ts, e2e/ui/602-3.spec.ts, e2e/ui/602-4.spec.ts, e2e/ui/602-5.spec.ts, e2e/ui/602-6.spec.ts
+
+### Plan 603 — On phones, pages leave room for the round button and list headers stop squeezing (`plans/design/603-on-phones-pages-leave-room-for-the-round-button.plan.md`)
+- [ ] 603-A1: Add phone tokens for the bottom bar and the round-button lane above it — --bottom-bar-h, --fab-lane in a ≤620px :root block — src/styles.scss
+- [ ] 603-A2: Reserve the bar plus the button lane under every page and drop per-page copies — .app-content padding; delete Plan 278 rules — src/app/appRoot/app.component.scss, src/app/pages/dashboard/dashboard.page.scss, src/app/pages/inventory/inventory.page.scss
+- [ ] 603-A3: End the phone list card above the round button so no row sits under it — .table-area block-size at ≤620px — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 603-A4: Remove the empty gap a closed filter panel leaves above the list card — hide .scroll-arrow--panel when collapsed, .list-header margin — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 603-A5: Keep carousel column names between the arrows and clear of the dots — header padding, row-gap, narrower arrows, 2-line clamp — src/app/shared/column-carousel/column-carousel.component.scss
+- [ ] 603-A6: Prove on a 375px phone that nothing sits under the button and headers read cleanly — e2e/ui/603-1.spec.ts … e2e/ui/603-5.spec.ts
+
+### Plan 604 — Product form label icons and option tiles even up, recipe ingredient rows breathe, form hints wrap cleanly (`plans/design/604-product-form-label-icons-and-option-tiles-even-up.plan.md`)
+- [ ] 604-A1: Shrink the product form's category and field label icons to match the other small icons — [size]="16" on the tags icon and the five expanded-label icons — src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
+- [ ] 604-A2: Make the five product option tiles even, icons centred, none alone on its row — header min-block-size 4rem + align-items center; 5 cols above 768px, 2 cols with odd last tile spanning below — src/app/pages/inventory/components/product-form/product-form.component.scss
+- [ ] 604-A3: Space the phone ingredient card evenly and line the cost up under the trash button — container-query grid columns, column-gap, stepper 2rem, cost flex-end — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
+- [ ] 604-A4: Balance the line breaks of form hints so no single word sits alone — text-wrap: balance on .form-field__hint — src/app/shared/form-field/form-field.component.scss, src/app/shared/form-field/form-field.component.spec.ts
+- [ ] 604-A5: Prove the icon size, tile evenness, ingredient spacing and hint wrap in the running app — e2e/ui/604-1.spec.ts, e2e/ui/604-2.spec.ts, e2e/ui/604-3.spec.ts, e2e/ui/604-4.spec.ts
+
+### Plan 605 — Menu library filters sit on one even grid, request cards get tidy buttons and a labelled hour chart (`plans/design/605-menu-library-filters-sit-on-one-even-grid-request.plan.md`)
+- [ ] 605-A1: Let the shared date field take the outlined look the dropdowns have — .c-input--outline modifier + variant input — src/styles.scss, src/app/shared/date-field/date-field.component.ts, src/app/shared/date-field/date-field.component.html, src/app/shared/date-field/date-field.component.spec.ts
+- [ ] 605-A2: Put the event-menus filters on one even grid with the outlined date and a one-line sort button — grid columns, nowrap sort button, variant="outline" — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+- [ ] 605-A3: Lay out a request card's buttons tidily on phones: approve full width, the other two paired — 2-col grid under 768px — src/app/pages/requests/components/request-card/request-card.component.scss
+- [ ] 605-A4: Give the request hour chart a title and real hour labels so it no longer reads as a fraction — rq_day_load_title, "HH:00", bars aligned right — public/assets/data/dictionary.json, src/app/pages/requests/components/day-load-strip/day-load-strip.component.html, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.spec.ts
+- [ ] 605-A5: Prove the filter grid, date outline, sort button, action layout and chart title in the running app — e2e/ui/605-1.spec.ts, e2e/ui/605-2.spec.ts, e2e/ui/605-3.spec.ts, e2e/ui/605-4.spec.ts
+
+### Plan 606 — Style QA opens real records of the signed-in business on detail pages (`plans/606-style-qa-opens-real-records-of-the-signedin-business.plan.md`)
+- [ ] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
+- [ ] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
+- [ ] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json

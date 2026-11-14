@@ -24,7 +24,10 @@ const aiLimiter = createRateLimiter({
 
 const PRIVATE_IP_RANGES = [
   /^127\./,
+  /^0\./,
+  /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,
   /^::1$/,
+  /^::$/,
   /^10\./,
   /^172\.(1[6-9]|2\d|3[01])\./,
   /^192\.168\./,
@@ -34,18 +37,57 @@ const PRIVATE_IP_RANGES = [
   /^fd/i,
 ];
 
+/** Plan 595: `::ffff:a.b.c.d` / `::ffff:hhhh:hhhh` (IPv4 written in IPv6 form) -> the dotted IPv4, else null. */
+function mappedIpv4(host) {
+  const dotted = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/i.exec(host);
+  if (dotted) return dotted[1];
+  const hex = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i.exec(host);
+  if (!hex) return null;
+  const hi = parseInt(hex[1], 16);
+  const lo = parseInt(hex[2], 16);
+  return `${hi >> 8}.${hi & 255}.${lo >> 8}.${lo & 255}`;
+}
+
+function isPrivateAddress(raw) {
+  const host = String(raw).replace(/^\[|\]$/g, '');
+  const v4 = mappedIpv4(host);
+  const addr = v4 ?? host;
+  return PRIVATE_IP_RANGES.some(re => re.test(addr));
+}
+
 async function isSafeUrl(rawUrl) {
   let parsed;
   try { parsed = new URL(rawUrl); } catch { return false; }
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
-  const hostname = parsed.hostname;
-  if (PRIVATE_IP_RANGES.some(re => re.test(hostname))) return false;
+  const hostname = parsed.hostname.replace(/^\[|\]$/g, '');
+  if (isPrivateAddress(hostname)) return false;
   let addresses;
   try {
     const results = await dns.lookup(hostname, { all: true });
     addresses = results.map(r => r.address);
   } catch { return false; }
-  return !addresses.some(addr => PRIVATE_IP_RANGES.some(re => re.test(addr)));
+  return !addresses.some(isPrivateAddress);
+}
+
+const MAX_REDIRECTS = 5;
+
+/** Plan 595: fetch that follows redirects itself, checking every hop with isSafeUrl (at most 5 hops). */
+async function safeFetch(url, options) {
+  let current = url;
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const res = await fetch(current, { ...options, redirect: 'manual' });
+    if (res.status < 300 || res.status > 399) return res;
+    const location = res.headers?.get?.('location');
+    if (!location) return res;
+    const next = new URL(location, current).toString();
+    if (!(await isSafeUrl(next))) {
+      const err = new Error('url resolves to a disallowed address');
+      err.code = 'URL_DISALLOWED';
+      throw err;
+    }
+    current = next;
+  }
+  throw new Error('Too many redirects');
 }
 
 const {
@@ -133,9 +175,9 @@ const FEW_SHOT_COUNT = 2;
 const URL_SHOT_MATCH_CHARS = 300;
 
 // ---------------------------------------------------------------------------
-// GEMINI_SHOTS — shared few-shot pool stored in MongoDB.
+// GEMINI_SHOTS — few-shot pool stored in MongoDB, one pool per business (INV-1).
 // Collection: GEMINI_SHOTS
-// Document: { prompt, draft, status, source, warnings, createdAt }
+// Document: { businessId, prompt, draft, status, source, warnings, userId, createdAt }
 // ---------------------------------------------------------------------------
 
 const SHOTS_COLLECTION = 'GEMINI_SHOTS';
@@ -179,19 +221,20 @@ const SHOTS_CAP = 50;
 
 /**
  * Saves a shot to the GEMINI_SHOTS collection. Non-blocking — never throws.
- * Prunes to the most recent SHOTS_CAP shots (mirrors GEMINI_MENU_SHOTS) —
- * now that any logged-in user can write here, nothing else bounds growth.
+ * Stamps the caller's businessId and prunes to the most recent SHOTS_CAP shots
+ * of that business (mirrors GEMINI_MENU_SHOTS) — nothing else bounds growth.
  * Returns the computed warnings array.
  */
-async function saveShot(prompt, draft, status, source, userId) {
+async function saveShot(req, { prompt, draft, status, source }) {
   try {
+    const scope = scopeFilter(req);
     const warnings = computeSoftWarnings(draft);
-    await shotsCol().insertOne({ prompt, draft, status, source, warnings, userId, createdAt: new Date() });
+    await shotsCol().insertOne({ ...scope, prompt, draft, status, source, warnings, userId: req.user.userId, createdAt: new Date() });
 
-    const count = await shotsCol().countDocuments();
+    const count = await shotsCol().countDocuments(scope);
     if (count > SHOTS_CAP) {
       const oldest = await shotsCol()
-        .find({})
+        .find(scope)
         .sort({ createdAt: 1 })
         .limit(count - SHOTS_CAP)
         .toArray();
@@ -209,10 +252,10 @@ async function saveShot(prompt, draft, status, source, userId) {
  * Returns up to `limit` most-recent approved shots — the candidate pool selectShots()
  * picks the relevant few-shot examples from (plan 370).
  */
-async function getApprovedShots(limit = SHOTS_CAP) {
+async function getApprovedShots(req, limit = SHOTS_CAP) {
   try {
     return await shotsCol()
-      .find({ status: 'approved' })
+      .find({ status: 'approved', ...scopeFilter(req) })
       .sort({ createdAt: -1 })
       .limit(limit)
       .toArray();
@@ -334,7 +377,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
   const { prompt } = req.body;
   if (!requireFields(res, req.body, { prompt: 'text' })) return;
 
-  const shots = selectShots(await getApprovedShots(), prompt, FEW_SHOT_COUNT);
+  const shots = selectShots(await getApprovedShots(req), prompt, FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{
       text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
@@ -1516,7 +1559,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
 
   let pageText;
   try {
-    const pageRes = await fetch(url.trim(), {
+    const pageRes = await safeFetch(url.trim(), {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -1536,6 +1579,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     const html = await pageRes.text();
     pageText = extractTextFromHtml(html);
   } catch (err) {
+    if (err.code === 'URL_DISALLOWED') return badRequest(res, 'url resolves to a disallowed address');
     req.log.warn({ err, event: 'ai.generate_from_url.fetch_failed' });
     return res.status(502).json({ error: 'Could not fetch the provided URL' });
   }
@@ -1544,7 +1588,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     return res.status(422).json({ error: 'No usable text found at the provided URL' });
   }
 
-  const shots = selectShots(await getApprovedShots(), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
+  const shots = selectShots(await getApprovedShots(req), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
     generationConfig: RECIPE_GENERATION_CONFIG,
@@ -1580,7 +1624,7 @@ const KNOWLEDGE_IMPORT_MAX_ITEMS = 60;
 async function fetchImportText(req, res, url) {
   let pageText;
   try {
-    const pageRes = await fetch(url, {
+    const pageRes = await safeFetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -1600,6 +1644,10 @@ async function fetchImportText(req, res, url) {
     }
     pageText = extractTextFromHtml(await pageRes.text());
   } catch (err) {
+    if (err.code === 'URL_DISALLOWED') {
+      badRequest(res, 'url resolves to a disallowed address');
+      return null;
+    }
     req.log.warn({ err, event: 'ai.knowledge_import.fetch_failed' });
     res.status(502).json({ error: 'Could not fetch the provided URL' });
     return null;
@@ -1718,7 +1766,7 @@ router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
     }
   }
 
-  const warnings = await saveShot(prompt.trim(), draft, status, source, req.user._id);
+  const warnings = await saveShot(req, { prompt: prompt.trim(), draft, status, source });
   return res.json({ saved: true, warnings });
 });
 
