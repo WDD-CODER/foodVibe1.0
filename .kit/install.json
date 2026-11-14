@@ -1233,7 +1233,7 @@
       "source": "packs/angular/scripts/styleqa-routes.mjs"
     },
     "scripts/styleqa/config.mjs": {
-      "sha256": "52ec9ee566fc557779cc8e8fc6af0074d45dddbab138494ce58bcb02329cd0e7",
+      "sha256": "f698ae1a190de1ebc16cd8d05a05b02e203819e2138ab85973be0f14b33c7c3a",
       "kind": "managed",
       "source": "core/scripts/styleqa/config.mjs"
     },
