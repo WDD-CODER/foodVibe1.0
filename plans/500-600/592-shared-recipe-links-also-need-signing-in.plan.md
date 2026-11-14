@@ -1,6 +1,6 @@
 # Plan 592 — Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions
 
-Status: draft
+Status: done
 Depends-on: 591
 Snapshot: 6bc27e0639dfbd1e24f49c7f1e0c63a025bf88c7
 

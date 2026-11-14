@@ -176,23 +176,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
 
-### Plan 589 — A signed-out visitor sees only the welcome page; no automatic guest sign-in on the PC and in the slots (`plans/589-signed-out-visitors-see-only-the-welcome-page.plan.md`)
-- [ ] A1: Stop signing a guest in by itself on the PC and in the slots — src/environments/environment.local.ts, src/environments/environment.ts
-- [ ] A2: Send a signed-out visitor to the welcome page from every page but the shared recipe link — src/app/core/guards/auth.guard.ts, src/app/app.routes.ts
-- [ ] A3: After signing in on the welcome page, return to the page the visitor wanted — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/home-redirect.ts
-- [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
-- [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
-
-### Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page (`plans/591-signing-out-goes-to-the-welcome-page.plan.md`)
-- [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
-- [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
-- [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
-
-### Plan 592 — Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions (`plans/592-shared-recipe-links-also-need-signing-in.plan.md`)
-- [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
-- [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
-- [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
-
 ### Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
 
 - [ ] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
