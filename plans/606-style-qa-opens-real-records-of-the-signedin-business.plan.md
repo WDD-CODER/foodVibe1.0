@@ -107,9 +107,9 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
-- [ ] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
-- [ ] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
+- [x] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
+- [x] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
+- [x] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
 
 ## Technical Considerations
 
@@ -130,3 +130,6 @@ touching any milestone.
 - none
 
 ## Execution Notes
+- node --test scripts/test/styleqa-sign-in.test.mjs -> exit 0, pass 3, fail 0
+- pnpm run test:scripts -> exit 0; pnpm run build -> exit 0
+- node scripts/styleqa/run.mjs --list -> line `client-detail — פרטי לקוח`; --layers=static -> `map check ok`
