@@ -372,7 +372,8 @@ describe('GET /api/v1/admin/ai-usage', () => {
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/^text\/csv; charset=utf-8/);
     expect(res.headers['content-disposition']).toContain('ai-usage-2026-11-01-2026-11-30.csv');
-    const lines = res.text.trim().split('\n');
+    expect(res.text.charCodeAt(0)).toBe(0xFEFF);
+    const lines = res.text.slice(1).trim().split('\r\n');
     expect(lines[0]).toBe('key,label,calls,failedCalls,inputTokens,outputTokens,totalTokens,estCostUsd');
     expect(lines).toHaveLength(3);
   });
