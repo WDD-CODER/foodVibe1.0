@@ -31,4 +31,26 @@ describe('HeroFabComponent', () => {
     const fixture = create('/dashboard')
     expect(fixture.nativeElement.querySelector('.hero-fab-container')).not.toBeNull()
   })
+
+  const hidesOnPhone = (url: string): boolean =>
+    create(url).nativeElement.querySelector('.hero-fab-container').classList.contains('hide-on-phone')
+
+  for (const url of [
+    '/inventory/add',
+    '/inventory/edit/abc',
+    '/inventory/equipment/add',
+    '/suppliers/edit/abc',
+    '/venues/add',
+    '/inventory/add?x=1'
+  ]) {
+    it('marks ' + url + ' as an entity form', () => {
+      expect(hidesOnPhone(url)).toBeTrue()
+    })
+  }
+
+  for (const url of ['/inventory/list', '/venues/view/abc', '/recipe-builder']) {
+    it('does not mark ' + url + ' as an entity form', () => {
+      expect(hidesOnPhone(url)).toBeFalse()
+    })
+  }
 })
