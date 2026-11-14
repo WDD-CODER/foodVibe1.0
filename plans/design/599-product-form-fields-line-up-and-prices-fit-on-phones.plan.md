@@ -113,10 +113,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 599-A1: Lay out the product form's required fields in two even columns on desktop with no empty cell — mandatory grid out of the phone block, price-lock hidden when empty at all widths — src/app/pages/inventory/components/product-form/product-form.component.scss
-- [ ] 599-A2: Give the inventory price column enough room on phones that every price shows in full — mobileGridTemplate price floor — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
-- [ ] 599-A3: Keep a long price inside its own cell instead of spilling under the category — .col-price-readonly phone alignment — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.scss
-- [ ] 599-A4: Prove the desktop form rows line up and the phone prices are whole — e2e/ui/599-1.spec.ts, e2e/ui/599-2.spec.ts
+- [x] 599-A1: Lay out the product form's required fields in two even columns on desktop with no empty cell — mandatory grid out of the phone block, price-lock hidden when empty at all widths — src/app/pages/inventory/components/product-form/product-form.component.scss
+- [x] 599-A2: Give the inventory price column enough room on phones that every price shows in full — mobileGridTemplate price floor — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
+- [x] 599-A3: Keep a long price inside its own cell instead of spilling under the category — .col-price-readonly phone alignment — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.scss
+- [x] 599-A4: Prove the desktop form rows line up and the phone prices are whole — e2e/ui/599-1.spec.ts, e2e/ui/599-2.spec.ts
 
 ## Technical Considerations
 
@@ -134,3 +134,5 @@ touching any milestone.
 - none
 
 ## Execution Notes
+- pnpm run build → exit 0; pnpm run lint → exit 0; pnpm run test:ci → exit 0 (2184 SUCCESS)
+- [ui] 599-1, 599-2: written, not run. Price floor minmax(4.75rem, auto) not checked at 320px (no running app).
