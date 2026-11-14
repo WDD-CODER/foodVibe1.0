@@ -177,11 +177,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 605-A1: Let the shared date field take the outlined look the dropdowns have — .c-input--outline modifier + variant input — src/styles.scss, src/app/shared/date-field/date-field.component.ts, src/app/shared/date-field/date-field.component.html, src/app/shared/date-field/date-field.component.spec.ts
-- [ ] 605-A2: Put the event-menus filters on one even grid with the outlined date and a one-line sort button — grid columns, nowrap sort button, variant="outline" — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
-- [ ] 605-A3: Lay out a request card's buttons tidily on phones: approve full width, the other two paired — 2-col grid under 768px — src/app/pages/requests/components/request-card/request-card.component.scss
-- [ ] 605-A4: Give the request hour chart a title and real hour labels so it no longer reads as a fraction — rq_day_load_title, "HH:00", bars aligned right — public/assets/data/dictionary.json, src/app/pages/requests/components/day-load-strip/day-load-strip.component.html, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.spec.ts
-- [ ] 605-A5: Prove the filter grid, date outline, sort button, action layout and chart title in the running app — e2e/ui/605-1.spec.ts, e2e/ui/605-2.spec.ts, e2e/ui/605-3.spec.ts, e2e/ui/605-4.spec.ts
+- [x] 605-A1: Let the shared date field take the outlined look the dropdowns have — .c-input--outline modifier + variant input — src/styles.scss, src/app/shared/date-field/date-field.component.ts, src/app/shared/date-field/date-field.component.html, src/app/shared/date-field/date-field.component.spec.ts
+- [x] 605-A2: Put the event-menus filters on one even grid with the outlined date and a one-line sort button — grid columns, nowrap sort button, variant="outline" — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+- [x] 605-A3: Lay out a request card's buttons tidily on phones: approve full width, the other two paired — 2-col grid under 768px — src/app/pages/requests/components/request-card/request-card.component.scss
+- [x] 605-A4: Give the request hour chart a title and real hour labels so it no longer reads as a fraction — rq_day_load_title, "HH:00", bars aligned right — public/assets/data/dictionary.json, src/app/pages/requests/components/day-load-strip/day-load-strip.component.html, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.spec.ts
+- [x] 605-A5: Prove the filter grid, date outline, sort button, action layout and chart title in the running app — e2e/ui/605-1.spec.ts, e2e/ui/605-2.spec.ts, e2e/ui/605-3.spec.ts, e2e/ui/605-4.spec.ts
 
 ## Technical Considerations
 
@@ -211,3 +211,7 @@ touching any milestone.
 none
 
 ## Execution Notes
+- pnpm run build -> exit 0
+- pnpm run lint -> exit 0 (0 errors, 67 pre-existing warnings)
+- pnpm run test:ci -> exit 0, 2178 SUCCESS (incl. new date-field variant and day-load-strip specs)
+- [ui] 605-1..605-4: written, not run (no running app / QA login)

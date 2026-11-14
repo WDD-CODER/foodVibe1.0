@@ -40,6 +40,8 @@ export class DateFieldComponent {
   /** Translation key of the aria-label for the text input (use when there is no visible label). */
   readonly ariaLabelKey = input<string | null>(null)
   readonly disabled = input<boolean>(false)
+  /** `outline` gives the text input the bordered look of the dropdowns (filter rows); `filled` is the default grey box. */
+  readonly variant = input<'filled' | 'outline'>('filled')
   /** Fires when the user finishes: leaves the field with an empty or real date, or picks a day. Not on every key. */
   readonly committed = output<string>()
 
