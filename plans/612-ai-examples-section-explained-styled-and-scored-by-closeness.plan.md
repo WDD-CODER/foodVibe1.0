@@ -60,6 +60,7 @@ append the path to the scope block above and retry.
 ## Architecture Impact
 - INV-1: preserves — no change to who reads or writes shots; only the score and the screen change.
 - INV-6: preserves — no Gemini call changes.
+- INV-2: preserves — `server/services/ai-recipe-helpers.js` gains a pure function; no scoped query changes (shared shots still read by `MASTER_BUSINESS_ID`).
 
 ## Reuse Check
 - `draftCloseness` — family: helpers — rung: 4 — why: replaces `keptRatio` beside it in `server/services/ai-recipe-helpers.js`; reuses `normIngredientName`.
