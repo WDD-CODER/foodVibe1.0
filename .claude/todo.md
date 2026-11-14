@@ -16,7 +16,7 @@ Orchestrator chain (Human 2026-11-11; each run branch starts from the previous o
 - batch-3 · `orch/batch-3`: **553, 554, 551, 552**
 - batch-4 · `orch/batch-4`: **556, 555**
 - batch-5 · `orch/batch-5`: **557, 559**
-- batch-6 · `orch/batch-6`: **582, 595, 596** — started 2026-11-14 (580 closed first: it was on main via #569 but still open, so the dry run pulled it in)
+- batch-6 · `orch/batch-6`: **582, 595, 596** — merged #573 2026-11-14 (580 closed first: it was on main via #569 but still open, so the dry run pulled it in)
 - Not in the chain: **542** A8 (Planner, by hand) · **582** recipe AI examples per business (after 580) · parked **373**, **471**
 
 plan-order.mjs waves: 1: 373, 471, 542, 546, 558, 567, 575, 579, 580 · 2: 547, 568, 581, 582 · 3: 551, 552, 553, 554 · 4: 555, 556 · 5: 557, 559
@@ -210,3 +210,20 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 599-A2: Give the inventory price column enough room on phones that every price shows in full — mobileGridTemplate price floor — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
 - [ ] 599-A3: Keep a long price inside its own cell instead of spilling under the category — .col-price-readonly phone alignment — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.scss
 - [ ] 599-A4: Prove the desktop form rows line up and the phone prices are whole — e2e/ui/599-1.spec.ts, e2e/ui/599-2.spec.ts
+
+### Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
+
+- [ ] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [ ] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
+- [ ] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
+- [ ] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
+- [ ] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
+- [ ] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
+- [ ] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
+- [ ] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
+- [ ] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
+- [ ] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
+- [ ] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
+- [ ] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
+- [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
+- [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
