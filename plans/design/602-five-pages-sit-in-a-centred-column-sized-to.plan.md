@@ -84,6 +84,7 @@ e2e/ui/602-3.spec.ts
 e2e/ui/602-4.spec.ts
 e2e/ui/602-5.spec.ts
 e2e/ui/602-6.spec.ts
+src/app/pages/settings/settings.page.spec.ts
 ```
 
 ## Read Scope
