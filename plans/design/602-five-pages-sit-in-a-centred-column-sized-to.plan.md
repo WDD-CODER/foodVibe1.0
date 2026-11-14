@@ -164,12 +164,12 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 602-A1: Centre the equipment form with a page gutter instead of pinning it to the right edge — :host padding, margin-inline auto, max-inline-size — src/app/pages/equipment/components/equipment-form/equipment-form.component.scss
-- [ ] 602-A2: Put the requests page in a centred column so two request cards fill the row — .rq-page max-inline-size 60rem + margin-inline auto — src/app/pages/requests/requests.page.scss
-- [ ] 602-A3: Widen the menu library card so it uses the desktop width and its filters fit one row — .menu-library-container max-inline-size 75rem — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
-- [ ] 602-A4: Narrow the settings page to the team column so the title lines up with the content — .settings-shell max-inline-size 36rem — src/app/pages/settings/settings.page.scss
-- [ ] 602-A5: Make the venues card panel only as tall as its cards, capped at one screen — .table-area--cards align-self start + max-block-size at desktop, phone and ≤620px — src/app/shared/list-shell/list-shell.component.scss
-- [ ] 602-A6: Prove each page is centred, aligned and free of the empty panel at its width — e2e/ui/602-1.spec.ts, e2e/ui/602-2.spec.ts, e2e/ui/602-3.spec.ts, e2e/ui/602-4.spec.ts, e2e/ui/602-5.spec.ts, e2e/ui/602-6.spec.ts
+- [x] 602-A1: Centre the equipment form with a page gutter instead of pinning it to the right edge — :host padding, margin-inline auto, max-inline-size — src/app/pages/equipment/components/equipment-form/equipment-form.component.scss
+- [x] 602-A2: Put the requests page in a centred column so two request cards fill the row — .rq-page max-inline-size 60rem + margin-inline auto — src/app/pages/requests/requests.page.scss
+- [x] 602-A3: Widen the menu library card so it uses the desktop width and its filters fit one row — .menu-library-container max-inline-size 75rem — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+- [x] 602-A4: Narrow the settings page to the team column so the title lines up with the content — .settings-shell max-inline-size 36rem — src/app/pages/settings/settings.page.scss
+- [x] 602-A5: Make the venues card panel only as tall as its cards, capped at one screen — .table-area--cards align-self start + max-block-size at desktop, phone and ≤620px — src/app/shared/list-shell/list-shell.component.scss
+- [x] 602-A6: Prove each page is centred, aligned and free of the empty panel at its width — e2e/ui/602-1.spec.ts, e2e/ui/602-2.spec.ts, e2e/ui/602-3.spec.ts, e2e/ui/602-4.spec.ts, e2e/ui/602-5.spec.ts, e2e/ui/602-6.spec.ts
 
 ## Technical Considerations
 
@@ -200,3 +200,5 @@ none
 ## Execution Notes
 
 - decision (Planner, 2026-11-14, Human asked for unattended runs): widths requests 60rem (two cards per row), menu library 75rem, settings 36rem; the Human can change them at validation.
+- scope: settings.page.spec.ts plan-469 rail test now compares to .settings-shell width (ask 602-1 approved).
+- evidence: pnpm run build, lint, test:ci -> exit 0, 2176 SUCCESS. [ui] specs written, not run.
