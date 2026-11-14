@@ -207,3 +207,21 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Plan 596 — Platform CSV downloads show Hebrew correctly in Excel (`plans/596-platform-csv-downloads-show-hebrew-correctly-in-excel.plan.md`)
 - [ ] A1: Make both platform CSV downloads open in Excel with readable Hebrew — BOM and CRLF in one send helper — server/routes/admin.js
 - [ ] A2: Check the downloads start with the marker Excel needs — server/test/admin-frontdesk-stats.test.js, server/test/ai-usage.test.js
+
+### Plan 597 — Phone bottom bar labels fit their tabs without colliding or clipping (`plans/design/597-phone-bottom-bar-labels-fit-their-tabs.plan.md`)
+- [ ] 597-A1: Give the phone bottom bar its own short tab names so six labels fit at 375px — three nav_short_* keys, used only in .bottom-nav — public/assets/data/dictionary.json, src/app/core/components/header/header.component.html
+- [ ] 597-A2: Keep every bottom-bar label inside its tab and pin the waiting badge to the clients icon — .bottom-nav__label ellipsis, .bottom-nav__icon relative wrapper, absolute badge — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.scss
+- [ ] 597-A3: Keep the full clients section name for screen readers and cover it in the header spec — aria-label on the clients tab — src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.spec.ts
+- [ ] 597-A4: Prove at 375px that labels never overlap or leave the screen and the badge sits on the icon — e2e/ui/597-1.spec.ts, e2e/ui/597-2.spec.ts
+
+### Plan 598 — The floating create button stays off the form action buttons on phones (`plans/design/598-floating-button-stays-off-form-action-buttons-on-phones.plan.md`)
+- [ ] 598-A1: Teach the floating button to recognise add and edit form pages — isOnEntityForm_ signal from the router URL — src/app/core/components/hero-fab/hero-fab.component.ts
+- [ ] 598-A2: Hide the floating button on add and edit forms at phone width only — hide-on-phone class and a 620px media rule — src/app/core/components/hero-fab/hero-fab.component.html, src/app/core/components/hero-fab/hero-fab.component.scss
+- [ ] 598-A3: Cover which routes count as a form page in the floating button's spec — src/app/core/components/hero-fab/hero-fab.component.spec.ts
+- [ ] 598-A4: Prove on a phone-sized screen that the form buttons are clear and the list still has the button — e2e/ui/598-1.spec.ts, e2e/ui/598-2.spec.ts
+
+### Plan 599 — Product form fields line up on desktop and inventory prices fit on phones (`plans/design/599-product-form-fields-line-up-and-prices-fit-on-phones.plan.md`)
+- [ ] 599-A1: Lay out the product form's required fields in two even columns on desktop with no empty cell — mandatory grid out of the phone block, price-lock hidden when empty at all widths — src/app/pages/inventory/components/product-form/product-form.component.scss
+- [ ] 599-A2: Give the inventory price column enough room on phones that every price shows in full — mobileGridTemplate price floor — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
+- [ ] 599-A3: Keep a long price inside its own cell instead of spilling under the category — .col-price-readonly phone alignment — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.scss
+- [ ] 599-A4: Prove the desktop form rows line up and the phone prices are whole — e2e/ui/599-1.spec.ts, e2e/ui/599-2.spec.ts
