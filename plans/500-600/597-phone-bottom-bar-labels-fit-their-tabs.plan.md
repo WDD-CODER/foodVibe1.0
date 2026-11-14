@@ -1,6 +1,6 @@
 # Plan 597 — Phone bottom bar labels fit their tabs without colliding or clipping
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: afc44e92a6feab13662761f19e5456c724d13fc3

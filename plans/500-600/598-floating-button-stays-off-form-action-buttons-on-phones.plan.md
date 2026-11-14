@@ -1,6 +1,6 @@
 # Plan 598 — The floating create button stays off the form action buttons on phones
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: afc44e92a6feab13662761f19e5456c724d13fc3
