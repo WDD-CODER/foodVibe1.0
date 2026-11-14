@@ -1,0 +1,427 @@
+{
+  "run": "run-597",
+  "branch": "orch/run-597",
+  "base": "main",
+  "startedAt": "2026-11-14T13:33:14.851Z",
+  "mainShaAtStart": "c012c2ceb7824ae5fb67f465f3707b9858575c2c",
+  "plans": {
+    "597": {
+      "nnn": "597",
+      "title": "Phone bottom bar labels fit their tabs without colliding or clipping",
+      "branch": "feat/597-phone-bottom-bar-labels",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T13:34:32.422Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T13:41:07.935Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T13:43:42.259Z"
+        }
+      },
+      "humanItems": [
+        "Nothing else moved: tablet and desktop navigation (the top header) is unchanged.",
+        "On a phone (or a 375px window) the bottom bar reads cleanly on dashboard, inventory and clients: six short"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T13:34:32.283Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:34:32.424Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:39:03.095Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:41:07.620Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:41:07.772Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T13:41:07.936Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T13:41:35.935Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T13:43:36.876Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T13:43:42.260Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T13:43:55.583Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T13:44:49.266Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7.1,
+      "sha": "f4a225149be3150e8c5ebb6a0e5f4ec4ec3f4fc1",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 268.5,
+          "tokens": {
+            "input": 236487,
+            "output": 7787
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 26.1,
+          "tokens": {
+            "input": 85462,
+            "output": 1567
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.4,
+          "tokens": {
+            "input": 53315,
+            "output": 694
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-manifest-check.mjs\" --root ."
+      ],
+      "checkedHead": "17a2c1ba0333da2235ef0fd4617c1e8b328a4fac"
+    },
+    "598": {
+      "nnn": "598",
+      "title": "The floating create button stays off the form action buttons on phones",
+      "branch": "feat/598-floating-button-stays-off",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T13:46:43.547Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T13:55:18.730Z"
+        }
+      },
+      "humanItems": [
+        "Nothing else moved: the floating button is unchanged on every other page, and on add/edit forms at tablet and desktop widths.",
+        "On a phone, open \"add product\", then \"add supplier\": no round button over the bottom buttons; back on the"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T13:46:43.391Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:46:43.549Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:52:42.659Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:55:13.245Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:55:18.731Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:55:24.507Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:56:08.759Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 7,
+      "sha": "25eb45f7173be71a47f055317211193a65932c1c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 356.9,
+          "tokens": {
+            "input": 156998,
+            "output": 4055
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 4.8,
+          "tokens": {
+            "input": 23594,
+            "output": 267
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "be57d5b1e4125c7b324259643ae24951d2353f86"
+    },
+    "599": {
+      "nnn": "599",
+      "title": "Product form fields line up on desktop and inventory prices fit on phones",
+      "branch": "feat/599-product-form-fields-line",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T13:58:23.207Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T14:07:34.714Z"
+        }
+      },
+      "humanItems": [
+        "Nothing else moved: the phone layout of the product form (already two columns) and the desktop inventory list are unchanged.",
+        "Open \"add product\" on a desktop window and the inventory list on a phone-sized window: the form looks tidy in"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T13:58:23.046Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T13:58:23.209Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:03:00.605Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:07:24.592Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:07:34.717Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:07:47.603Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:09:11.278Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.4,
+      "sha": "77d958318184d7d678fe5652aafa98072fb34be2",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 274.3,
+          "tokens": {
+            "input": 179522,
+            "output": 5171
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.8,
+          "tokens": {
+            "input": 24083,
+            "output": 530
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "63136ca1a8ea02fcf1e594f406a64a5ddbf6812f"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-14T13:34:32.146Z",
+      "plan": "597",
+      "text": "the folder foodVibe1.0-orch-run-597-597 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T13:39:01.040Z",
+      "plan": "597",
+      "text": "builder left undone (round 0): [ui] 597-1: written, not run; [ui] 597-2: written, not run; kit-manifest-check, scope-check, ci-scope-check and log-query: not run in the builder; the gate runs them; [human] items (top header unchanged, bar reads cleanly on a phone): not ticked"
+    },
+    {
+      "at": "2026-11-14T13:44:03.597Z",
+      "plan": "597",
+      "text": "the folder foodVibe1.0-orch-merge-run-597 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T13:46:43.140Z",
+      "plan": "598",
+      "text": "the folder foodVibe1.0-orch-run-597-598 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T13:52:40.572Z",
+      "plan": "598",
+      "text": "builder left undone (round 0): [ui] 598-1: written, not run; [ui] 598-2: written, not run; [human] checks on a phone and at tablet and desktop widths: not done"
+    },
+    {
+      "at": "2026-11-14T13:58:22.904Z",
+      "plan": "599",
+      "text": "the folder foodVibe1.0-orch-run-597-599 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T14:02:57.691Z",
+      "plan": "599",
+      "text": "builder left undone (round 0): [ui] 599-1: written, not run; [ui] 599-2: written, not run; The 4.75rem price floor was not checked against the longest price at 375px or 320px, because there is no running app in this worktree. A later run should check it and adjust the floor if needed.; [human] items: not ticked"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 6.4,
+  "updatedAt": "2026-11-14T14:16:24.761Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "597",
+      "type": "behaviour",
+      "text": "behaviour: the badge's own aria-label moved to the clients tab's aria-label (full section name, then the waiting count) and the badge is now aria-hidden, so screen readers read it once — reverse: put aria-label back on the .c-chip__count span and drop the tab's aria-label",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "597",
+      "type": "seen",
+      "text": "seen: scripts/qa/lib/styleqa-sign-in.mjs was added by an earlier merge (commit 59acaddf) without a manifest entry — the gate only now reports it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "598",
+      "type": "behaviour",
+      "text": "behaviour: made isOnEntityForm_ protected, not private as the plan says, because the Angular template cannot read a private member — reverse: none needed, it is only a visibility change",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "598",
+      "type": "behaviour",
+      "text": "behaviour: I added a spec case for '/inventory/add?x=1' to confirm the query string is ignored — reverse: delete that case",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "599",
+      "type": "behaviour",
+      "text": "behaviour: used a max-width 620px media query inside .col-price-readonly for the phone alignment, matching the plan's ≤620px — reverse: remove that nested @media block",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-14T14:16:24.760Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-14T14:16:24.761Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
