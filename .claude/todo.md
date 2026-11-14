@@ -250,3 +250,11 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Plan 610 — Sign-in limits stay on the live site but stop blocking local development (`plans/610-signin-limits-stay-on-the-live-site-but-stop.plan.md`)
 - [ ] 610-A1: Skip the sign-in, sign-up and refresh limits when the server runs in development — skip option on the three limiters — server/routes/auth.js
 - [ ] 610-A2: Prove the limits are off in development and still on in production — server/test/auth-limit-dev.test.js
+
+### Plan 611 — Platform business table becomes the app's standard grid with the phone column carousel (`plans/design/611-platform-business-table-becomes-the-apps-standard-grid-with.plan.md`)
+- [ ] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [ ] 611-A2: Keep the pinned name column above anything that scrolls under it, with opaque idle tints — z-index 1/2 and solid backgrounds outside the page layer — src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [ ] 611-A3: Show one swipeable column at a time on phones, like the other lists — COLUMN_CAROUSEL header + cells, carouselColumns field — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
+- [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
