@@ -227,3 +227,44 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
 - [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
 - [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
+
+### Plan 601 — Phone chip rows keep their scroll arrows beside the chips, never on top of them (`plans/design/601-phone-chip-rows-keep-their-scroll-arrows-beside-the.plan.md`)
+- [ ] 601-A1: Mark a scroll rail as overflowing so its stylesheet can keep room for the arrows — is-overflowing host class from canPrev_/canNext_ — src/app/shared/scroll-rail/scroll-rail.component.ts
+- [ ] 601-A2: Keep an arrow's width free on each side of an overflowing rail so no chip sits under an arrow — --sr-arrow-size, --sr-arrow-room, :host(.is-overflowing) padding-inline — src/app/shared/scroll-rail/scroll-rail.component.scss
+- [ ] 601-A3: Cover the overflowing class and the arrow-beside-not-over geometry in the rail's unit test — two new cases — src/app/shared/scroll-rail/scroll-rail.component.spec.ts
+- [ ] 601-A4: Prove at 375px on dashboard and bookings that arrows sit beside the chips and the last chip is readable — e2e/ui/601-1.spec.ts, e2e/ui/601-2.spec.ts
+
+### Plan 602 — Five pages sit in a centred column sized to their content instead of leaving empty space (`plans/design/602-five-pages-sit-in-a-centred-column-sized-to.plan.md`)
+- [ ] 602-A1: Centre the equipment form with a page gutter instead of pinning it to the right edge — :host padding, margin-inline auto, max-inline-size — src/app/pages/equipment/components/equipment-form/equipment-form.component.scss
+- [ ] 602-A2: Put the requests page in a centred column so two request cards fill the row — .rq-page max-inline-size 60rem + margin-inline auto — src/app/pages/requests/requests.page.scss
+- [ ] 602-A3: Widen the menu library card so it uses the desktop width and its filters fit one row — .menu-library-container max-inline-size 75rem — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+- [ ] 602-A4: Narrow the settings page to the team column so the title lines up with the content — .settings-shell max-inline-size 36rem — src/app/pages/settings/settings.page.scss
+- [ ] 602-A5: Make the venues card panel only as tall as its cards, capped at one screen — .table-area--cards align-self start + max-block-size at desktop, phone and ≤620px — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 602-A6: Prove each page is centred, aligned and free of the empty panel at its width — e2e/ui/602-1.spec.ts, e2e/ui/602-2.spec.ts, e2e/ui/602-3.spec.ts, e2e/ui/602-4.spec.ts, e2e/ui/602-5.spec.ts, e2e/ui/602-6.spec.ts
+
+### Plan 603 — On phones, pages leave room for the round button and list headers stop squeezing (`plans/design/603-on-phones-pages-leave-room-for-the-round-button.plan.md`)
+- [ ] 603-A1: Add phone tokens for the bottom bar and the round-button lane above it — --bottom-bar-h, --fab-lane in a ≤620px :root block — src/styles.scss
+- [ ] 603-A2: Reserve the bar plus the button lane under every page and drop per-page copies — .app-content padding; delete Plan 278 rules — src/app/appRoot/app.component.scss, src/app/pages/dashboard/dashboard.page.scss, src/app/pages/inventory/inventory.page.scss
+- [ ] 603-A3: End the phone list card above the round button so no row sits under it — .table-area block-size at ≤620px — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 603-A4: Remove the empty gap a closed filter panel leaves above the list card — hide .scroll-arrow--panel when collapsed, .list-header margin — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 603-A5: Keep carousel column names between the arrows and clear of the dots — header padding, row-gap, narrower arrows, 2-line clamp — src/app/shared/column-carousel/column-carousel.component.scss
+- [ ] 603-A6: Prove on a 375px phone that nothing sits under the button and headers read cleanly — e2e/ui/603-1.spec.ts … e2e/ui/603-5.spec.ts
+
+### Plan 604 — Product form label icons and option tiles even up, recipe ingredient rows breathe, form hints wrap cleanly (`plans/design/604-product-form-label-icons-and-option-tiles-even-up.plan.md`)
+- [ ] 604-A1: Shrink the product form's category and field label icons to match the other small icons — [size]="16" on the tags icon and the five expanded-label icons — src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
+- [ ] 604-A2: Make the five product option tiles even, icons centred, none alone on its row — header min-block-size 4rem + align-items center; 5 cols above 768px, 2 cols with odd last tile spanning below — src/app/pages/inventory/components/product-form/product-form.component.scss
+- [ ] 604-A3: Space the phone ingredient card evenly and line the cost up under the trash button — container-query grid columns, column-gap, stepper 2rem, cost flex-end — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
+- [ ] 604-A4: Balance the line breaks of form hints so no single word sits alone — text-wrap: balance on .form-field__hint — src/app/shared/form-field/form-field.component.scss, src/app/shared/form-field/form-field.component.spec.ts
+- [ ] 604-A5: Prove the icon size, tile evenness, ingredient spacing and hint wrap in the running app — e2e/ui/604-1.spec.ts, e2e/ui/604-2.spec.ts, e2e/ui/604-3.spec.ts, e2e/ui/604-4.spec.ts
+
+### Plan 605 — Menu library filters sit on one even grid, request cards get tidy buttons and a labelled hour chart (`plans/design/605-menu-library-filters-sit-on-one-even-grid-request.plan.md`)
+- [ ] 605-A1: Let the shared date field take the outlined look the dropdowns have — .c-input--outline modifier + variant input — src/styles.scss, src/app/shared/date-field/date-field.component.ts, src/app/shared/date-field/date-field.component.html, src/app/shared/date-field/date-field.component.spec.ts
+- [ ] 605-A2: Put the event-menus filters on one even grid with the outlined date and a one-line sort button — grid columns, nowrap sort button, variant="outline" — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+- [ ] 605-A3: Lay out a request card's buttons tidily on phones: approve full width, the other two paired — 2-col grid under 768px — src/app/pages/requests/components/request-card/request-card.component.scss
+- [ ] 605-A4: Give the request hour chart a title and real hour labels so it no longer reads as a fraction — rq_day_load_title, "HH:00", bars aligned right — public/assets/data/dictionary.json, src/app/pages/requests/components/day-load-strip/day-load-strip.component.html, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.spec.ts
+- [ ] 605-A5: Prove the filter grid, date outline, sort button, action layout and chart title in the running app — e2e/ui/605-1.spec.ts, e2e/ui/605-2.spec.ts, e2e/ui/605-3.spec.ts, e2e/ui/605-4.spec.ts
+
+### Plan 606 — Style QA opens real records of the signed-in business on detail pages (`plans/606-style-qa-opens-real-records-of-the-signedin-business.plan.md`)
+- [ ] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
+- [ ] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
+- [ ] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
