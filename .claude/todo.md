@@ -16,6 +16,7 @@ Orchestrator chain (Human 2026-11-11; each run branch starts from the previous o
 - batch-3 · `orch/batch-3`: **553, 554, 551, 552**
 - batch-4 · `orch/batch-4`: **556, 555**
 - batch-5 · `orch/batch-5`: **557, 559**
+- batch-6 · `orch/batch-6`: **582, 595, 596** — started 2026-11-14 (580 closed first: it was on main via #569 but still open, so the dry run pulled it in)
 - Not in the chain: **542** A8 (Planner, by hand) · **582** recipe AI examples per business (after 580) · parked **373**, **471**
 
 plan-order.mjs waves: 1: 373, 471, 542, 546, 558, 567, 575, 579, 580 · 2: 547, 568, 581, 582 · 3: 551, 552, 553, 554 · 4: 555, 556 · 5: 557, 559
