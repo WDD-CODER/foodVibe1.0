@@ -225,6 +225,283 @@
         }
       ],
       "checkedHead": "d6d3947b78144c2c155eaf27e9912b6b6aa2b2b1"
+    },
+    "612": {
+      "nnn": "612",
+      "title": "The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was",
+      "branch": "feat/612-ai-examples-section-explained",
+      "state": "merged",
+      "round": 1,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-14T20:29:57.780Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T20:45:37.074Z"
+        }
+      },
+      "humanItems": [
+        "The section looks like the logistics section above it (cards, spacing, buttons) and reads clearly."
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T20:09:00.227Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:09:00.372Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:09:19.661Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:09:21.814Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:09:21.995Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:10:06.236Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:10:43.696Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:29:57.640Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:29:57.781Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:40:52.047Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:45:31.682Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:45:37.075Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:45:45.566Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T20:46:19.736Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "612",
+          "title": "The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was",
+          "branch": "feat/612-ai-examples-section-explained",
+          "state": "asking",
+          "round": 1,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-14T20:09:00.371Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-14T20:09:21.993Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 2.3,
+          "roundCauses": [
+            "round 1: builder blocked: plans/612-ai-examples-section-explained-styled-and-scored-by-closeness.plan.md is not on orch/run-600 (scope-check: plan not found). It exists only in the main checkout and in commits 1dcaef01 and 6b4122be."
+          ],
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 19,
+              "tokens": {
+                "input": 64095,
+                "output": 1240
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 43.9,
+              "tokens": {
+                "input": 118679,
+                "output": 3123
+              },
+              "exit": 0
+            }
+          ],
+          "escalations": [
+            {
+              "step": "round 1",
+              "check": "builder blocked: plans/612-ai-examples-section-explained-styled-and-scored-by-closeness.plan.md is not on orch/run-600 (scope-check: plan not found). It exists only in the main checkout and in commits"
+            }
+          ],
+          "replan": "no — The plan is fine. It was committed outside the run branch and needs to be merged into orch/run-600 before the build.",
+          "resetToBase": "b6c38360ff9059f1d71ee8aff423452086cd39ef",
+          "resetFrom": "b6c38360ff9059f1d71ee8aff423452086cd39ef",
+          "reason": "asking 612-1: ESCALATE environment: node scripts/scope-check.mjs --diff=origin/orch/run-600 --plan=plans/612-ai-examples-section-explained-styled-and-scored-by-closeness.plan.md -> exit 1, 'SCOPE_CHECK: plan not found'. The plan is only on main (commits 1dcaef01 and 6b4122be), and orch/run-600 at b6c38360 does not include them.",
+          "park": {
+            "at": "2026-11-14T20:10:39.291Z",
+            "reason": "ESCALATE environment: node scripts/scope-check.mjs --diff=origin/orch/run-600 --plan=plans/612-ai-examples-section-explained-styled-and-scored-by-closeness.plan.md -> exit 1, 'SCOPE_CHECK: plan not found'. The plan is only on main (commits 1dcaef01 and 6b4122be), and orch/run-600 at b6c38360 does not include them."
+          },
+          "parkBranch": "park/run-600-612"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 3.7,
+      "sha": "fd9f3bfa6cfc9fac9761eebc5fb1982534175afd",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 652.1,
+          "tokens": {
+            "input": 1751350,
+            "output": 24921
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.5,
+          "tokens": {
+            "input": 40327,
+            "output": 581
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "bcb1389a5cf82870b6730d32f313ce623dbf92af"
+    },
+    "613": {
+      "nnn": "613",
+      "title": "The top menu scrolls sideways on tablet widths instead of breaking onto a second line",
+      "branch": "feat/613-top-menu-scrolls-sideways",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T20:12:03.913Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T20:18:49.540Z"
+        }
+      },
+      "humanItems": [
+        "At 700, 850 and 1000 px wide the header stays one line, the pills slide sideways by touch or trackpad, and the user chip and the logo stay visible."
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T20:12:03.765Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:12:03.914Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:16:32.244Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:18:44.155Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:18:49.541Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:19:02.600Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T20:19:38.998Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 1.2,
+      "sha": "2655ecf65136fc25d9cb3514dbf6c20f9220ce61",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 266.2,
+          "tokens": {
+            "input": 206205,
+            "output": 5767
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.1,
+          "tokens": {
+            "input": 75190,
+            "output": 583
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "1956f81c4d4e8e166eeceb4ece9f1b8542229d19"
     }
   },
   "notes": [
@@ -292,12 +569,77 @@
       "at": "2026-11-14T17:00:40.087Z",
       "plan": "600",
       "text": "the folder foodVibe1.0-orch-merge-run-600 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T20:09:00.086Z",
+      "plan": "612",
+      "text": "the folder foodVibe1.0-orch-run-600-612 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T20:09:19.538Z",
+      "plan": "612",
+      "text": "builder left undone (round 0): All sub-tasks: the plan file is missing from the branch, so its scope and Done-when items could not be read."
+    },
+    {
+      "at": "2026-11-14T20:09:21.671Z",
+      "plan": "612",
+      "text": "escalated to a fresh judgment-tier builder (round 1): builder blocked: plans/612-ai-examples-section-explained-styled-and-scored-by-closeness.plan.md is not on orch/run-600 (scope-check: plan not found). It exists only in the main checkout and in commits 1dcaef01 and 6b4122be."
+    },
+    {
+      "at": "2026-11-14T20:10:06.066Z",
+      "plan": "612",
+      "text": "builder left undone (round 1): All of plan 612's sub-tasks: not started. The plan is not on orch/run-600, and the gate checks scope against the run branch's copy of the plan, so changes made here would fail the gate."
+    },
+    {
+      "at": "2026-11-14T20:10:43.568Z",
+      "plan": "612",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-14T20:10:43.827Z",
+      "plan": "612",
+      "text": "ask 612-1 (environment, the Human or the advisor answers): Plan 612 only exists on main (commits 1dcaef01 and 6b4122be), not on orch/run-600, so it can't be built. How should the plan get onto the run branch?"
+    },
+    {
+      "at": "2026-11-14T20:12:03.618Z",
+      "plan": "613",
+      "text": "the folder foodVibe1.0-orch-run-600-613 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T20:16:30.209Z",
+      "plan": "613",
+      "text": "builder left undone (round 0): [ui] 613-1: written, not run; [human] header stays one line at 700, 850 and 1000 px, with pills sliding sideways: not checked; kit-manifest-check, scope-check, lint:icons, lint:no-native-select, breadcrumbs-check and ci-scope-check from CHECKS were not run by me"
+    },
+    {
+      "at": "2026-11-14T20:28:48.933Z",
+      "plan": "612",
+      "text": "ask 612-1 answered by the human: Cherry-pick 1dcaef01 and 6b4122be onto orch/run-600 (adds the plan files for 612 and 613 plus the todo lines), then cut the plan branch again from the new run branch head"
+    },
+    {
+      "at": "2026-11-14T20:29:51.735Z",
+      "plan": "612",
+      "text": "resumed from park/run-600-612: round 1, tier judgment, after: asking 612-1: ESCALATE environment: node scripts/scope-check.mjs --diff=origin/orch/run-600 --plan=plans/612-ai-examples-section-explained-styled-and-scored-by-"
+    },
+    {
+      "at": "2026-11-14T20:29:51.873Z",
+      "plan": "612",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-14T20:29:57.503Z",
+      "plan": "612",
+      "text": "the folder foodVibe1.0-orch-run-600-612 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T20:40:50.043Z",
+      "plan": "612",
+      "text": "builder left undone (round 1): A5: the [human] card and the run's [ui] step are still to do (A5 is not ticked); 612-1 (the AI examples section explains itself and scores a changed recipe below 100%): written, not run"
     }
   ],
-  "attempts": 1,
+  "attempts": 2,
   "phase": "finished",
-  "freeDiskGb": 3.3,
-  "updatedAt": "2026-11-14T17:05:34.396Z",
+  "freeDiskGb": 3.7,
+  "updatedAt": "2026-11-14T20:49:22.155Z",
   "decisions": [
     {
       "id": "D1",
@@ -389,13 +731,78 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "613",
+      "type": "behaviour",
+      "text": "behaviour: the plan file was missing from the run branch, so I copied it from the main checkout into plans/ and committed it — reverse: drop that file from the commit",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "613",
+      "type": "behaviour",
+      "text": "behaviour: I split the logo-name hiding into its own 621–767px media block so the 768–1023px range keeps the name — reverse: merge it into the main block",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "612",
+      "type": "behaviour",
+      "text": "behaviour: the plan contradicts itself on the amounts part. The P0 text counts amounts only among the kept ingredients, but the Done-when expects 0.75 for 'half the names kept with their amounts', which needs amounts counted over all the AI's ingredients. I followed the Done-when, so the amounts part is (kept ingredients with the same unit and an amount within 10%) / (all AI in",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "612",
+      "type": "behaviour",
+      "text": "behaviour: each row is an article.c-glass-card inside the existing ul > li, so e2e/ui/600-2.spec.ts, which selects rows by li, keeps working — reverse: drop the li wrappers and update the 600-2 selectors",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "612",
+      "type": "behaviour",
+      "text": "behaviour: the 612-1 e2e leaves its confirmed shot on the QA business and cleans up by turning sharing off, as 600-2 does — reverse: add a shot delete to its finally block",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-14T17:05:34.394Z",
+  "finishedAt": "2026-11-14T20:49:22.153Z",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-14T17:05:34.396Z",
+    "at": "2026-11-14T20:49:22.155Z",
     "attempt": 1,
     "blamed": []
   }

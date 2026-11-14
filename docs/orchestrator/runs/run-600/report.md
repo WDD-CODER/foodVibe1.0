@@ -1,8 +1,8 @@
 # Orchestrator run run-600
 
-Run branch: `orch/run-600` (from `origin/main` at d8b1f68) · started 2026-11-14T14:45:29.899Z · finished 2026-11-14T17:05:34.394Z
-Result: 1 merged, 0 parked, skipped or left out, 1 in the run (counted from git and status.json).
-`main` untouched: NO — origin/main is 7c16fc4.
+Run branch: `orch/run-600` (from `origin/main` at d8b1f68) · started 2026-11-14T14:45:29.899Z · finished 2026-11-14T20:49:22.153Z
+Result: 3 merged, 0 parked, skipped or left out, 3 in the run (counted from git and status.json).
+`main` untouched: NO — origin/main is 6b4122b.
 
 Final gate: ok (attempt 1)
 
@@ -11,6 +11,8 @@ Final gate: ok (attempt 1)
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 600 Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates | merged | 1 | build | c34fc43 |  |
+| 612 The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was | merged | 1 | build → judgment | fd9f3bf |  |
+| 613 The top menu scrolls sideways on tablet widths instead of breaking onto a second line | merged | 0 | build | 2655ecf |  |
 
 ## App errors since the run started
 
@@ -18,7 +20,11 @@ Command (from the main folder): `node scripts/log-query.mjs --since=2026-11-14T1
 Exit code: 0
 
 ```text
-no entries
+2026-11-14T17:13:20.532Z error client http.error - 908fbd69-b716-4d16-88ee-81f1b17e8d38 HTTP 429 {"method":"POST","url":"http://localhost:3001/api/v1/auth/login","status":429}
+2026-11-14T17:11:54.506Z error client http.error - 01aa41af-97b1-4de6-a6a1-3066f70b3e62 HTTP 429 {"method":"POST","url":"http://localhost:3001/api/v1/auth/login","status":429}
+2026-11-14T17:11:36.912Z error client http.error - b4b78f70-632b-40ff-b933-7a2e0de6b55d HTTP 429 {"method":"POST","url":"http://localhost:3001/api/v1/auth/login","status":429}
+2026-11-14T17:11:17.759Z error client http.error - d593da14-8302-42eb-a11b-4c687b0b1340 HTTP 429 {"method":"POST","url":"http://localhost:3001/api/v1/auth/login","status":429}
+2026-11-14T17:11:11.902Z error client http.error - fc9a0e4a-bb4f-4f10-8378-33708c3836b2 HTTP 429 {"method":"POST","url":"http://localhost:3001/api/v1/auth/login","status":429}
 ```
 
 ## Decisions
@@ -34,6 +40,11 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - D5 · 600 · none · seen: scripts/qa/lib/styleqa-sign-in.mjs — unclassified in the kit manifest (kit-manifest-check exits 1); it was added in 59acaddf, not by this plan
 - D6 · 600 · none · seen: scripts/qa/lib/styleqa-sign-in.mjs:1 — it arrived with commit 59acaddf on the run branch and is missing from docs/workflow-kit/manifest.json. It will fail kit-manifest-check on any plan until classified.
 - D7 · 600 · none · seen: scripts/qa/lib/styleqa-sign-in.mjs was unclassified, added by commit 59acaddf outside this plan. I classified it project/stay in the manifest under the approved scope. Reverse: remove that manifest entry.
+- D8 · 613 · none · behaviour: the plan file was missing from the run branch, so I copied it from the main checkout into plans/ and committed it — reverse: drop that file from the commit
+- D9 · 613 · none · behaviour: I split the logo-name hiding into its own 621–767px media block so the 768–1023px range keeps the name — reverse: merge it into the main block
+- D10 · 612 · none · behaviour: the plan contradicts itself on the amounts part. The P0 text counts amounts only among the kept ingredients, but the Done-when expects 0.75 for 'half the names kept with their amounts', which needs amounts counted over all the AI's ingredients. I followed the Done-when, so the amounts part is (kept ingredients with the same unit and an amount within 10%) / (all AI in
+- D11 · 612 · none · behaviour: each row is an article.c-glass-card inside the existing ul > li, so e2e/ui/600-2.spec.ts, which selects rows by li, keeps working — reverse: drop the li wrappers and update the 600-2 selectors
+- D12 · 612 · none · behaviour: the 612-1 e2e leaves its confirmed shot on the QA business and cleans up by turning sharing off, as 600-2 does — reverse: add a shot delete to its finally block
 
 ## Run notes
 
@@ -50,11 +61,28 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 600: the folder foodVibe1.0-orch-run-600-600 was installed (root, scripts, server)
 - 600: builder left undone (round 1): [ui] 600-1: written, not run; [ui] 600-2: written, not run
 - 600: the folder foodVibe1.0-orch-merge-run-600 was installed (root, scripts, server)
+- 612: the folder foodVibe1.0-orch-run-600-612 was installed (root, scripts, server)
+- 612: builder left undone (round 0): All sub-tasks: the plan file is missing from the branch, so its scope and Done-when items could not be read.
+- 612: escalated to a fresh judgment-tier builder (round 1): builder blocked: plans/612-ai-examples-section-explained-styled-and-scored-by-closeness.plan.md is not on orch/run-600 (scope-check: plan not found). It exists only in the main checkout and in commits 1dcaef01 and 6b4122be.
+- 612: builder left undone (round 1): All of plan 612's sub-tasks: not started. The plan is not on orch/run-600, and the gate checks scope against the run branch's copy of the plan, so changes made here would fail the gate.
+- 612: parked: nothing to save (nothing uncommitted)
+- 612: ask 612-1 (environment, the Human or the advisor answers): Plan 612 only exists on main (commits 1dcaef01 and 6b4122be), not on orch/run-600, so it can't be built. How should the plan get onto the run branch?
+- 613: the folder foodVibe1.0-orch-run-600-613 was installed (root, scripts, server)
+- 613: builder left undone (round 0): [ui] 613-1: written, not run; [human] header stays one line at 700, 850 and 1000 px, with pills sliding sideways: not checked; kit-manifest-check, scope-check, lint:icons, lint:no-native-select, breadcrumbs-check and ci-scope-check from CHECKS were not run by me
+- 612: ask 612-1 answered by the human: Cherry-pick 1dcaef01 and 6b4122be onto orch/run-600 (adds the plan files for 612 and 613 plus the todo lines), then cut the plan branch again from the new run branch head
+- 612: resumed from park/run-600-612: round 1, tier judgment, after: asking 612-1: ESCALATE environment: node scripts/scope-check.mjs --diff=origin/orch/run-600 --plan=plans/612-ai-examples-section-explained-styled-and-scored-by-
+- 612: starts on the judgment tier: resumed on the tier the stopped attempt ran on
+- 612: the folder foodVibe1.0-orch-run-600-612 was installed (root, scripts, server)
+- 612: builder left undone (round 1): A5: the [human] card and the run's [ui] step are still to do (A5 is not ticked); 612-1 (the AI examples section explains itself and scores a changed recipe below 100%): written, not run
 
 ## Models per agent
 
 - 600 builder: sonnet
 - 600 reviewer: sonnet
+- 612 builder: opus
+- 612 reviewer: sonnet
+- 613 builder: sonnet
+- 613 reviewer: sonnet
 
 ## What only the Human can do
 
@@ -62,6 +90,8 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 
 1. 600 Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates: Make a recipe with AI from text, change one ingredient in the builder and save it; then, as the platform admin with that business opted in, the recipe appears under "מועמדים" on `/platform` with a kept % below 100.
 2. 600 Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates: After merge, from the main folder: `node server/migrations/0012-drop-unscoped-ai-shots.js --target=atlas --confirm-host=<member host>` (dry run) shows the count; the same with `--write=yes` deletes them; `--verify=yes` exits 0.
+3. 612 The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was: The section looks like the logistics section above it (cards, spacing, buttons) and reads clearly.
+4. 613 The top menu scrolls sideways on tablet widths instead of breaking onto a second line: At 700, 850 and 1000 px wide the header stays one line, the pills slide sideways by touch or trackpad, and the user chip and the logo stay visible.
 
 - Review and merge the run branch (PowerShell, one line each):
 
@@ -72,4 +102,4 @@ gh pr create --base main --head orch/run-600 --title "Orchestrator run run-600" 
 
 Context added by learning: 3.5k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 1 · parked 0 → 0 → 0
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0.33 → 0 → 0.67 · parked 0 → 0 → 0
