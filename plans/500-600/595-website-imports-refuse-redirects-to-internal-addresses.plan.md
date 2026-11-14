@@ -1,6 +1,6 @@
 # Plan 595 — Website imports refuse redirects to internal addresses
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 23295e4e4aed808c1e403f1c7a9f839bcf3be9f6
 

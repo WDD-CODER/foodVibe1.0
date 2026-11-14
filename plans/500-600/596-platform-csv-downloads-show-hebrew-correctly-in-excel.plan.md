@@ -1,6 +1,6 @@
 # Plan 596 — Platform CSV downloads show Hebrew correctly in Excel
 
-Status: draft
+Status: done
 Depends-on: 559
 Snapshot: dfe7571d555d5809cb8421204bf4ed3a32b1c2f3
 
