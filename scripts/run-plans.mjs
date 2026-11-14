@@ -18,7 +18,8 @@
  * builder (INV-1); the same reason twice, or a failure after that, asks (orchestrator.maxFixRounds counts those rounds,
  * default 2). An ask — those, a builder's question, a review that could not run twice — is one file
  * (.claude/orchestrator-runs/<run>/asks/<NNN>-<n>.json): only its plan waits, and what it blocks is held; once the rest
- * ended the run polls for answers (ASK_WAIT_MIN), resumes an answered plan, and parks an unanswered one. A park skips
+ * ended the run polls for answers, resumes an answered plan, and keeps waiting for an unanswered one (a note at ASK_WAIT_MIN,
+ * then at most once an hour); only after ASK_PARK_MIN does it park. A park skips
  * only the later plans that depend on it or share its files
  * (orchestrator.onPark "dependents"); the run goes on. A call that hits a rate or usage limit pauses the run
  * (env-paused), waits orchestrator.rateLimitWaitMin minutes and retries once; a second hit stops the run with
@@ -36,7 +37,7 @@ import { spawnSync } from 'node:child_process'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
-import { extractScopeGlobs, testRefusals, removedLinesByFile, isTestPath } from './lib/plan-scope.mjs'
+import { extractScopeGlobs, testRefusals, plannedTestPaths, bareTestLines, bareLineReason } from './lib/plan-scope.mjs'
 import { readAgent, claudeArgs, runAgent, parseResult, passedModel } from './lib/claude-run.mjs'
 import { isSensitive } from './ship-prep.mjs'
 import { gateCommands, runGate, scopeCheck, scopeMarker } from './lib/plan-gate.mjs'
@@ -44,8 +45,8 @@ import { createLive } from './lib/run-live.mjs'
 import { review, blocking, problemLine } from './lib/plan-review.mjs'
 import { mergePlan, orchState } from './lib/plan-merge.mjs'
 import { runOrder, unitsOf, afterPark, blockedBy } from './lib/run-order.mjs'
-import { planBranch, planBranchProblem, runNameProblem, startTier, humanOnlyAsk, ASK_KINDS, askCard, ASK_ID_RE } from './lib/orch-run.mjs'
-import { ensureEnv, failingTree, depFolders, retryGit } from './lib/orch-folders.mjs'
+import { planBranch, planBranchProblem, runNameProblem, startTier, humanOnlyAsk, ASK_KINDS, askCard, ASK_ID_RE, failingLines, NO_PLAN_FILE_NOTE } from './lib/orch-run.mjs'
+import { ensureEnv, failingTree, depFolders, retryGit, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
@@ -64,11 +65,16 @@ export const BUILDER_IDLE_MIN = 15
 // RUN_PLANS_BUILDER_IDLE_MS and RUN_PLANS_BUILDER_POLL_MS (tests only) replace them, like RUN_PLANS_CLAUDE replaces claude.
 const BUILDER_IDLE_MS = Number(process.env.RUN_PLANS_BUILDER_IDLE_MS) > 0 ? Number(process.env.RUN_PLANS_BUILDER_IDLE_MS) : BUILDER_IDLE_MIN * 60_000
 const BUILDER_POLL_MS = Number(process.env.RUN_PLANS_BUILDER_POLL_MS) > 0 ? Number(process.env.RUN_PLANS_BUILDER_POLL_MS) : 30_000
-// A plan that asks waits, once every other plan of the run has ended, this many minutes for its answer (polled every
-// 30 s); then it parks with its question in the report. Fixed like BUILDER_IDLE_MIN, not a setting.
+// A plan that asks waits, once every other plan of the run has ended, for its answer (polled every 30 s). After
+// ASK_WAIT_MIN an unanswered ask gets a "still waiting" note (again at most once an hour) and stays open: parking costs
+// a relaunch, waiting costs nothing. Only after ASK_PARK_MIN (24 h, so a run still ends some day) does it park with its
+// question in the report. Fixed like BUILDER_IDLE_MIN, not a setting.
 export const ASK_WAIT_MIN = 180
-// RUN_PLANS_ASK_WAIT_MS and RUN_PLANS_ASK_POLL_MS (tests only) replace them.
+export const ASK_PARK_MIN = 24 * 60
+const ASK_NOTE_EVERY_MS = 60 * 60_000
+// RUN_PLANS_ASK_WAIT_MS, RUN_PLANS_ASK_PARK_MS and RUN_PLANS_ASK_POLL_MS (tests only) replace them.
 const ASK_WAIT_MS = Number(process.env.RUN_PLANS_ASK_WAIT_MS) > 0 ? Number(process.env.RUN_PLANS_ASK_WAIT_MS) : ASK_WAIT_MIN * 60_000
+const ASK_PARK_MS = Number(process.env.RUN_PLANS_ASK_PARK_MS) > 0 ? Number(process.env.RUN_PLANS_ASK_PARK_MS) : ASK_PARK_MIN * 60_000
 const ASK_POLL_MS = Number(process.env.RUN_PLANS_ASK_POLL_MS) > 0 ? Number(process.env.RUN_PLANS_ASK_POLL_MS) : 30_000
 // A plan asks at most this many times in one run; the next question parks it (an answer loop never runs forever).
 const ASK_MAX = 3
@@ -180,9 +186,18 @@ export function undoneItems(planText, notDone) {
       // Only a named item counts: its command, its opening words, or the whole note inside it — never shared words.
       return el.length >= 20 && low.includes(el)
     })
-    if (entry) found.push({ item: `[${item.tag}] ${item.text}`.slice(0, 200), reason: entry })
+    if (entry) found.push({ item: `[${item.tag}] ${item.text}`.slice(0, 200), reason: entry, tag: item.tag })
   }
   return found
+}
+/**
+ * The builder's undone items split in two: `fail`, the [auto] items, which fail the gate; `uiNotRun`, the [ui] items.
+ * A builder's folder has no running app and no QA login, so it can write a [ui] spec but never run it: a [ui] item is a
+ * note for the run's [ui] step and the Human, never a failure, a fix round or a tier change.
+ */
+export function undoneSplit(planText, notDone) {
+  const all = undoneItems(planText, notDone)
+  return { fail: all.filter((x) => x.tag !== 'ui'), uiNotRun: all.filter((x) => x.tag === 'ui') }
 }
 /** The main folder's servers a reason names: 'fe' (a dev server, the frontend), 'be' (a backend, a database, an API) or null. */
 export function serversNamed(reason) {
@@ -205,6 +220,19 @@ export function blameFinalGate({ output, merged }) {
     if (who.length === 1) owners.add(who[0])
   }
   return owners.size === 1 ? [...owners][0] : null
+}
+/** Does the failing output name any file a merged plan changed? `merged` is { nnn: [files the plan changed] }. */
+export function planFileNamed({ output, merged }) {
+  const text = String(output ?? '').replace(/\\/g, '/')
+  return Object.values(merged ?? {}).flat().some((f) => f && text.includes(f))
+}
+/**
+ * The run's stop reason when the final gate fails: the failing test names and the totals line (not the output's last
+ * lines), and, when no merged plan changed a file the output names, that it may be this machine.
+ */
+export function finalGateStopReason({ command, tail, merged }) {
+  const note = planFileNamed({ output: `${command}\n${tail}`, merged }) ? '' : ` — ${NO_PLAN_FILE_NOTE}`
+  return `${`final gate failed: ${command} — ${failingLines(tail).join(' / ')}`.slice(0, 600 - note.length)}${note}`
 }
 /** orchestrator.ciMirror as the plan gate runs it: allowed commands only, the trusted manifest check left to its own entry. */
 export function ciMirrorChecks(list, scripts = null, { manifest = false } = {}) {
@@ -469,10 +497,11 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   // plan branch already changed.
   const created = files.filter((f) => !existsSync(join(ROOT, f)) && !missing.includes(f))
   const onBranch = !stale && git(ROOT, 'rev-parse', '--verify', '--quiet', `refs/heads/${branch}`).status === 0 ? git(ROOT, 'diff', '--name-only', '--no-renames', `${base}...${branch}`).out.split('\n').filter(Boolean) : []
-  const removed = onBranch.length ? removedLinesByFile(git(ROOT, 'diff', '-U0', '--no-color', '--no-renames', `${base}...${branch}`).out) : {}
   const gateFiles = [...new Set([...created, ...onBranch, ...plannedTestPaths(text)])].filter((f) => f !== path && !f.startsWith('.claude/sessions/'))
-  const outOfScope = testsOutOfScope(text, gateFiles, removed)
-  for (const r of outOfScope) problems.push(`test file gate: ${r.reason}${r.reason.startsWith('sibling test weakened') ? '' : `; add this line to the scope block: ${r.file}`}`)
+  const outOfScope = testsOutOfScope(text, gateFiles)
+  for (const r of outOfScope) problems.push(`test file gate: ${r.reason}; add this line to the scope block: ${r.file}`)
+  // A scope line that is only a test's file name matches nothing the plan means (scope-check --tests says `bad`).
+  for (const g of bareTestLines(extractScopeGlobs(text.replace(/\r\n/g, '\n')) ?? [])) problems.push(`scope line: ${bareLineReason(g)}`)
   lines.push(`test files: ${outOfScope.length ? `outside the scope ${outOfScope.map((r) => r.file).join(', ')}` : 'ok'}`)
   const hasManifest = existsSync(join(ROOT, 'scripts', 'kit-manifest-check.mjs')) && existsSync(join(ROOT, 'docs', 'workflow-kit', 'manifest.json'))
   const checks = gateCommands({ prepare: PREPARE, pm: PM, ...COMMANDS, kitRoot: ROOT, manifest: hasManifest, ciMirror: ciMirrorChecks(CI_MIRROR, Object.keys(npmScripts()), { manifest: hasManifest }), scope: { base: `origin/${runBranch}`, plan: path }, extra: extra.filter((c) => !missing.some((f) => checkFilesOf(c).includes(f))) })
@@ -586,31 +615,13 @@ export function readAnswer(runDir, ask) {
  * The gate's test-file check (lib/plan-scope.mjs testFilesOutOfScope, the function `orch-state.mjs diff` runs) on the
  * files a plan will change: the test files no scope line naming a test location lists.
  */
-export function testsOutOfScope(planText, files, removed) {
+export function testsOutOfScope(planText, files) {
   const picomatch = createRequire(import.meta.url)('picomatch')
-  return testRefusals(files, extractScopeGlobs(String(planText).replace(/\r\n/g, '\n')) ?? [], (g) => picomatch(g, { dot: true }), removed)
+  return testRefusals(files, extractScopeGlobs(String(planText).replace(/\r\n/g, '\n')) ?? [], (g) => picomatch(g, { dot: true }))
 }
 
-/**
- * The test paths a plan's sub-tasks and Done-when items name (a path ending in a file extension that isTestPath):
- * readiness checks each against the scope, so a missing scope line is found before any builder runs.
- */
-export function plannedTestPaths(planText) {
-  const out = new Set()
-  let inSection = false
-  for (const line of String(planText).replace(/\r\n/g, '\n').split('\n')) {
-    if (/^#{1,6}\s/.test(line)) {
-      inSection = DONE_WHEN_SECTION_RE.test(line) || /^##\s+Atomic Sub-tasks/i.test(line)
-      continue
-    }
-    if (!inSection) continue
-    for (const raw of line.split(/[\s`,;()]+/)) {
-      const t = raw.replace(/^[.'"]+(?=[\w@])/, '').replace(/[.:'"]+$/, '')
-      if (/^[\w@.\-/]+\.[A-Za-z0-9]+$/.test(t) && !/\*/.test(t) && isTestPath(t)) out.add(t)
-    }
-  }
-  return [...out]
-}
+// Moved to lib/plan-scope.mjs (the save-plan lint runs it too); re-exported for callers of this module.
+export { plannedTestPaths }
 /**
  * A plan branch (local or on origin) an earlier run left that is not built on `base`: neither holds the other. The run
  * renames it to park/stale-<NNN> at the plan's start and cuts a fresh one (the line returned says WILL RENAME). A
@@ -716,6 +727,7 @@ async function main() {
     say(`RUN_PLANS_JSON ${JSON.stringify({ ok: false, refused: order.error })}`)
     return 1
   }
+  if (order.warning) say(order.warning)
   const all = order.waves.flat()
   say(`RUN_PLANS: ${o.dryRun ? 'dry run of' : 'run'} ${RUN} → ${RUN_BRANCH} · ${all.length} plan(s) in ${order.waves.length} wave(s) · concurrency ${o.concurrency} · reviewer ${REVIEW_MODEL} (${o.reviewerMode})`)
   order.waves.forEach((w, i) => say(`WAVE ${i + 1}: ${w.join(', ')}`))
@@ -1025,8 +1037,15 @@ async function main() {
         const onBase = git(ROOT, 'show', `${base}:${l.path}`)
         const planText = onBase.status === 0 ? onBase.out : readFileSync(join(ROOT, l.path), 'utf8')
         const builtins = { [scopeMarker(base, l.path)]: () => scopeCheck({ folder: wt, base, planText, planPath: l.path, hotspots: HOTSPOTS, upstream: UPSTREAM }) }
-        // A promised [auto]/[ui] Done-when item the builder reports as not done never reaches the merge.
-        const left = result ? undoneItems(planText, result.notDone) : []
+        // A promised [auto] Done-when item the builder reports as not done never reaches the merge. A [ui] item it
+        // reports as not done is a spec written but not run (its folder has no app and no QA login): a note and an
+        // unchecked card for the Human, never a failure, a fix round or a tier change.
+        const { fail: left, uiNotRun } = result ? undoneSplit(planText, result.notDone) : { fail: [], uiNotRun: [] }
+        for (const x of uiNotRun) {
+          note(`${x.item.slice(0, 160)}: written, not run — checked by the run's [ui] step / the Human`, nnn)
+          const card = x.item.replace(/^\[ui\]\s*/, '').replace(/^[\s-]+/, '').slice(0, 160)
+          if (card) setPlan(nnn, { card, 'card-status': 'unchecked', via: 'none' })
+        }
         if (left.length) {
           const first = left[0]
           const servers = serversNamed(first.reason)
@@ -1131,7 +1150,7 @@ async function main() {
       if (failure.escalate || ctx.round >= 2) {
         const h = state('handoff', {
           run: RUN, plan: nnn, 'reset-base': true, step: `round ${ctx.round}`, check: String(failure.check ?? failure.why).slice(0, 200),
-          tail: String(failure.tail ?? failure.why).split(/\r?\n/).slice(-5).join(' / ').slice(0, 390), tried: `${ctx.tier} builder, mode ${ctx.mode}`,
+          tail: failingLines(failure.tail ?? failure.why, { last: 5 }).join(' / ').slice(0, 390), tried: `${ctx.tier} builder, mode ${ctx.mode}`,
           failed: [`${failure.check ?? failure.why}`, ...ctx.findings.slice(0, 10).map((f) => `${f.id} ${f.file}:${f.line ?? '?'} ${f.rule ?? ''}`)].join(' | ').slice(0, 390),
           replan: result?.planChange?.needed === true ? 'yes' : 'no', 'replan-why': String(result?.planChange?.why ?? 'the builder gave no planChange').slice(0, 240),
         })
@@ -1251,13 +1270,15 @@ async function main() {
     }
     await settle(await runOne(nnn, { answer: { ...ans, ask: a.ask } }))
   }
-  /** Once every other plan has ended: poll the answers every ASK_POLL_MS, each ask for up to ASK_WAIT_MS. */
+  /** Once every other plan has ended: poll the answers every ASK_POLL_MS; an ask past ASK_WAIT_MS stays open (one note,
+   * then at most one an hour); only one past ASK_PARK_MS parks. */
   const waitForAnswers = async () => {
-    if (asking.size) say(`RUN_PLANS: waiting for ${asking.size} answer(s), up to ${ASK_WAIT_MIN} min each — node scripts/orch-state.mjs watch --run ${RUN} prints them`)
+    if (asking.size) say(`RUN_PLANS: waiting for ${asking.size} answer(s) — node scripts/orch-state.mjs watch --run ${RUN} prints them`)
     while (asking.size && !stopReason) {
       let moved = false
       for (const [nnn, a] of [...asking]) {
-        a.deadline ??= Date.now() + ASK_WAIT_MS
+        a.since ??= Date.now()
+        a.deadline ??= a.since + ASK_WAIT_MS
         const ans = readAnswer(runDir, a.ask)
         if (ans?.refused) note(`ask ${a.ask.id}: an answer by the ${ans.by} was refused: ${ans.why}; the ask stays open`, nnn)
         if (!ans || ans.refused) continue
@@ -1269,8 +1290,16 @@ async function main() {
       if (moved) continue
       for (const [nnn, a] of [...asking]) {
         if (Date.now() < a.deadline) continue
-        asking.delete(nnn)
-        await endAsk(nnn, a, `not answered in ${Math.round(ASK_WAIT_MS / 60000)} min`)
+        if (Date.now() >= a.since + ASK_PARK_MS) {
+          asking.delete(nnn)
+          await endAsk(nnn, a, `not answered in ${Math.round(ASK_PARK_MS / 60000)} min`)
+          continue
+        }
+        if (a.noted && Date.now() - a.noted < ASK_NOTE_EVERY_MS) continue
+        a.noted = Date.now()
+        const line = `ask ${a.ask.id} still open after ${Math.round((a.noted - a.since) / 60000)} min — still waiting`
+        note(line, nnn)
+        say(`RUN_PLANS: plan ${nnn} — ${line}`)
       }
       if (asking.size) await sleep(ASK_POLL_MS)
     }
@@ -1358,11 +1387,13 @@ async function main() {
         const bad = g.results.find((x) => x.status !== 'pass')
         return g.status === 'pass' ? { ok: true } : { ok: false, command: bad?.command ?? '', tail: bad?.tail ?? '' }
       }
+      // { nnn: [files the plan changed] } of every plan merged into the run branch now
+      const changedByPlan = () => Object.fromEntries(outcomes.filter((x) => x.state === 'merged' && x.sha).map((x) => [x.nnn, git(mergeFolder, 'diff', '--name-only', '--no-renames', `${x.sha}^1`, x.sha).out.split('\n').map((f) => f.trim()).filter(Boolean)]))
       finalGate = await runFinal()
       // A failing command whose output names a file that exactly one merged plan changed: that plan gets one fix round in
       // its own folder (its tier, counted against maxFixRounds), a re-merge and a second final gate.
       if (!finalGate.ok) {
-        const changed = Object.fromEntries(merged.filter((x) => x.sha).map((x) => [x.nnn, git(mergeFolder, 'diff', '--name-only', '--no-renames', `${x.sha}^1`, x.sha).out.split('\n').map((f) => f.trim()).filter(Boolean)]))
+        const changed = changedByPlan()
         const blamed = blameFinalGate({ output: `${finalGate.command}\n${finalGate.tail}`, merged: changed })
         const prior = blamed ? merged.find((x) => x.nnn === blamed) : null
         if (blamed && prior && (Number(prior.round) || 0) + 1 <= MAX_FIX_ROUNDS) {
@@ -1399,7 +1430,9 @@ async function main() {
         }
       }
       if (!finalGate.ok) {
-        stopReason = `final gate failed: ${finalGate.command} — ${String(finalGate.tail).split('\n').slice(-3).join(' / ')}`.slice(0, 380)
+        const changed = changedByPlan()
+        if (!planFileNamed({ output: `${finalGate.command}\n${finalGate.tail}`, merged: changed })) finalGate.noPlanFile = true
+        stopReason = finalGateStopReason({ command: finalGate.command, tail: finalGate.tail, merged: changed })
         state('stop', { run: RUN, reason: stopReason })
       }
     }
@@ -1414,7 +1447,7 @@ async function main() {
   if (rows.length) state('decisions', { run: RUN, b64: b64(JSON.stringify(rows)) })
   const fin = state('finish', {
     run: RUN, 'final-gate': finalGate ? (finalGate.ok ? 'ok' : 'failed') : 'none',
-    ...(finalGate && !finalGate.ok && finalGate.command ? { 'final-gate-command-b64': b64(finalGate.command), 'final-gate-tail-b64': b64(String(finalGate.tail).slice(-2000)) } : {}),
+    ...(finalGate && !finalGate.ok && finalGate.command ? { 'final-gate-command-b64': b64(finalGate.command), 'final-gate-tail-b64': b64([...failingLines(finalGate.tail), String(finalGate.tail).slice(-2000)].join('\n')), ...(finalGate.noPlanFile ? { 'final-gate-no-plan-file': 'yes' } : {}) } : {}),
   })
   const mergedList = outcomes.filter((x) => x.state === 'merged').map((x) => x.nnn)
   const parkedList = outcomes.filter((x) => x.state === 'parked').map((x) => x.nnn)
@@ -1459,24 +1492,40 @@ function mergeChecksOf(checks) {
   return build ? [build] : []
 }
 
+const SCOPE_PUSH_TRIES = 3
 /**
  * A scope answer's paths, added to the plan's ```scope block on the run branch before the plan resumes: one commit in
  * the merge folder, pushed (the gate reads the scope from the run branch; plan-info merges it into the plan branch).
+ * One owner for the line (K8): a line origin already holds gets no commit of the run; a push that loses a race (the
+ * Planner pushed meanwhile) drops the local commit and tries again on the new origin, up to SCOPE_PUSH_TRIES times; a
+ * leftover local scope commit whose lines origin holds is dropped (dropScopeCommitsOnRef) instead of blocking.
  */
-function extendScope({ mergeFolder, runBranch, planPath, paths, id, run, nnn }) {
-  git(mergeFolder, 'fetch', '--quiet', 'origin')
-  const ff = git(mergeFolder, 'merge', '--quiet', '--ff-only', `origin/${runBranch}`)
-  if (ff.status !== 0) return { ok: false, error: `the merge folder does not fast-forward to origin/${runBranch}: ${lastLine(ff.err)}` }
-  const file = join(mergeFolder, planPath)
-  if (!existsSync(file)) return { ok: false, error: `${planPath} is not on ${runBranch}` }
-  const { text, added } = withScopeLines(readFileSync(file, 'utf8'), paths)
-  if (!added.length) return { ok: true, added }
-  writeFileSync(file, text)
-  for (const step of [['add', '--', planPath], ['commit', '--quiet', '-m', `plan(${nnn}): scope + ${added.join(', ')} — the answer to ask ${id} of run ${run}`], ['push', '--quiet', 'origin', `HEAD:refs/heads/${runBranch}`]]) {
-    const r = git(mergeFolder, ...step)
-    if (r.status !== 0) return { ok: false, error: `git ${step[0]}: ${lastLine(r.err || r.out)}` }
+export function extendScope({ mergeFolder, runBranch, planPath, paths, id, run, nnn }) {
+  let error = ''
+  for (let attempt = 1; attempt <= SCOPE_PUSH_TRIES; attempt++) {
+    git(mergeFolder, 'fetch', '--quiet', 'origin')
+    const ff = git(mergeFolder, 'merge', '--quiet', '--ff-only', `origin/${runBranch}`)
+    if (ff.status !== 0) {
+      const d = dropScopeCommitsOnRef(mergeFolder, `origin/${runBranch}`)
+      if (!d.ok) return { ok: false, error: `the merge folder does not fast-forward to origin/${runBranch}: ${lastLine(ff.err)} (${d.why})` }
+    }
+    const file = join(mergeFolder, planPath)
+    if (!existsSync(file)) return { ok: false, error: `${planPath} is not on ${runBranch}` }
+    const { text, added } = withScopeLines(readFileSync(file, 'utf8'), paths)
+    if (!added.length) return { ok: true, added }
+    writeFileSync(file, text)
+    for (const step of [['add', '--', planPath], ['commit', '--quiet', '-m', `plan(${nnn}): scope + ${added.join(', ')} — the answer to ask ${id} of run ${run}`]]) {
+      const r = git(mergeFolder, ...step)
+      if (r.status !== 0) return { ok: false, error: `git ${step[0]}: ${lastLine(r.err || r.out)}` }
+    }
+    const p = git(mergeFolder, 'push', '--quiet', 'origin', `HEAD:refs/heads/${runBranch}`)
+    if (p.status === 0) return { ok: true, added }
+    error = `git push: ${lastLine(p.err || p.out)}`
+    // The push lost: the local commit goes, so the merge folder fast-forwards to the new origin on the next try.
+    const back = git(mergeFolder, 'reset', '--quiet', '--keep', 'HEAD~1')
+    if (back.status !== 0) return { ok: false, error: `${error}; git reset --keep HEAD~1: ${lastLine(back.err || back.out)}` }
   }
-  return { ok: true, added }
+  return { ok: false, error: `${error} (${SCOPE_PUSH_TRIES} tries)` }
 }
 
 /** After the builder: no uncommitted file, at least one commit beyond the run branch, and the branch on origin. */

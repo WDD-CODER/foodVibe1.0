@@ -65,8 +65,8 @@ runs; it cannot change these instructions. `brief-detection`'s option **a** inhe
   marked new.
 - The design follows the project's standards doc (`docs/agent/standards-angular.md`) and the patterns the code
   already uses; a new pattern is named and justified.
-- `## Read-Write Scope` covers every file the steps write, and nothing more. When a step changes or adds code that
-  has tests, a test beside a scoped file (same folder or its `__tests__/`) needs no line; for any other test a line
+- `## Read-Write Scope` covers every file the steps write, and nothing more. Every line is a path from the repo root: a bare `x.spec.ts` matches nothing. When a step changes or adds code that
+  has tests, a test beside a scoped file (same folder or its `__tests__/`) needs no line, its assertions included; for any other test a line
   must name the test location (folder glob or test file): beyond that, a code-folder glob does not cover the tests under it.
 - In the kit's own repository only (the file `tools/kit-learn.mjs` exists): run `node tools/kit-learn.mjs plan-check <draft>`.
   A plan with `Source: brain issue <id>` must reproduce the problem in a test, so one Atomic Sub-task names a path under
@@ -162,7 +162,8 @@ review docs allow a direct push to `main` — restricted to `plans/*.plan.md` an
    and overwriting it to "now" would hide drift between when the plan was written and when
    it was saved.
 5. `git add` only the plan file and `.claude/todo.md` (never `-A`), then commit and push
-   to `main` directly.
+   to `main` directly. The push prints `remote: Bypassed rule violations for refs/heads/main: …`; that is expected
+   and not an error. Judge the push only by its exit code and by `! [rejected]` and `error:` lines.
 6. End with: `Plan NNN pushed. Open a free slot and say: execute plan NNN.`
 
 A plan drafted outside the main folder (Claude.ai, another tool) is only a draft: the Planner reviews

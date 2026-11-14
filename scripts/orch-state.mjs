@@ -43,7 +43,7 @@
  *   node scripts/orch-state.mjs decisions  --run <name> --b64 <base64 of a JSON list of decision objects>   every decision in one call, all-or-nothing
  *   node scripts/orch-state.mjs brain-commit --run <name>                   commit docs/brain in the merge folder, push the run branch
  *   node scripts/orch-state.mjs stop       --run <name> --reason "<why the run stopped>"   (gives every held slot back)
- *   node scripts/orch-state.mjs watch      --run <name> [--stale-min <n>]   one line: RUNNING, FINISHED, STOPPED: <why>
+ *   node scripts/orch-state.mjs watch      --run <name> [--stale-min <n>]   one line: STARTING, RUNNING, FINISHED, STOPPED: <why>
  *                                          or STUCK: plan <NNN> · <state> · no progress for <n> min · last: <note>
  *                                          (exit 1); reads status.json only — no git, no agent, no lock;
  *                                          then one card per open ask (question, options, the answer command)
@@ -70,15 +70,15 @@ import { resolve, dirname, join, relative } from 'path'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 import { findOpenPlan } from './lib/plan-paths.mjs'
-import { extractScopeGlobs, testFilesOutOfScope, removedLinesByFile } from './lib/plan-scope.mjs'
+import { extractScopeGlobs, testFilesOutOfScope } from './lib/plan-scope.mjs'
 import { scopeTestsLint } from './lib/scope-tests-lint.mjs'
 import { planNumber, planTitle, mergeSubjectRe } from './lib/plan-deps.mjs'
 import { uiItems } from './lib/done-when.mjs'
 import { listSlots } from './lib/slot.mjs'
-import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit, isWorktree, removeFolder } from './lib/orch-folders.mjs'
+import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit, isWorktree, removeFolder, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 import { removeMergedBuilder } from './worktree-clean.mjs'
 import { agreementStats, addLesson, lessonParts, ruleLines, LESSON_ROLES } from './decision-log.mjs'
-import { planWithoutNotes, triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, planLines, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES, askCard, ASK_ID_RE } from './lib/orch-run.mjs'
+import { failingLines, planWithoutNotes, triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, planLines, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES, askCard, ASK_ID_RE } from './lib/orch-run.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const MAIN = 'main'
@@ -116,7 +116,7 @@ const SENSITIVE_CODE_RE = /auth|permission|password|jwt|session[_-]?id|tokens?\b
 // folder is always this script's own project) or a second positional word stops the command.
 const FLAGS = new Set(['run', 'started', 'plans', 'plan', 'state', 'round', 'tier', 'sha', 'checked-head','role', 'model', 'effort', 'roles', 'reason', 'card', 'card-status', 'page', 'shots', 'via', 'step', 'check', 'tail', 'tried', 'text', 'min', 'stale-min', 'files', 'cmd', 'id', 'verdict', 'kind', 'confidence', 'rec', 'why', 'forced', 'dup-of', 'command', 'where',
   // facts recorded for the lessons (docs/agent/orchestrator.md "State rules"), and `finish` options
-  'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'final-gate-command', 'final-gate-command-b64', 'final-gate-tail-b64', 'final-gate-plans', 'result',
+  'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'final-gate-command', 'final-gate-command-b64', 'final-gate-tail-b64', 'final-gate-plans', 'final-gate-no-plan-file', 'result',
   // the hand-off's replan verdict and the builder's receipt
   'replan', 'replan-why', 'not-done', 'failed',
   // run notes riding on set, and the one-call decisions list
@@ -285,6 +285,18 @@ function runName() {
 const runBranch = (run) => `${PREFIX}${run}`
 const runsDir = () => join(root, '.claude', 'orchestrator-runs')
 const statusPath = (run) => join(runsDir(), run, 'status.json')
+/** True when run-supervisor.mjs wrote supervisor.json for this run, is still supervising, and its pid is alive. */
+function supervisorStarting(run) {
+  try {
+    const s = JSON.parse(readFileSync(join(runsDir(), run, 'supervisor.json'), 'utf8'))
+    if (s.phase !== 'supervising' || !Number.isInteger(s.pid)) return false
+    process.kill(s.pid, 0)
+    return true
+  } catch (e) {
+    // EPERM: the process exists but belongs to someone else — alive. Anything else (no file, no process): not starting.
+    return e?.code === 'EPERM'
+  }
+}
 const mergeFolder = (run) => join(parent, `${repoName}-orch-merge-${run}`)
 const builderFolder = (run, nnn) => join(parent, `${repoName}-orch-${run}-${nnn}`)
 // The builder marker `worktree` writes (lib/db-write.mjs), removed when the folder is given back. A slot released some
@@ -416,7 +428,7 @@ const cutText = (s, n) => String(s ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ')
 /** The first path of `files` that the text names (a failing test or a lint line names the file it failed in). */
 const firstNamed = (files, text) => (files ?? []).find((f) => String(text ?? '').includes(f)) ?? null
 const fgWord = (status) => (status.finalGate ? (status.finalGate.ok ? 'ok' : 'failed') : 'none')
-function applyFinalGate(status, result, { command = '', plans = '', tail = '' } = {}) {
+function applyFinalGate(status, result, { command = '', plans = '', tail = '', noPlanFile = false } = {}) {
   const ok = result === 'ok'
   const cmd = ok ? null : cutText(command, 200) || null
   const blamed = ok ? [] : [...new Set(String(plans).split(',').map((x) => x.trim()).filter((x) => /^\d+$/.test(x)))].sort()
@@ -425,9 +437,13 @@ function applyFinalGate(status, result, { command = '', plans = '', tail = '' } 
   const prev = status.finalGate
   // no output given (a repeat, or the Human's call): the stored file of the same command stands
   const file = ok ? null : tail ? firstNamed(pool, tail) : (prev?.command ?? null) === cmd ? prev?.file ?? null : null
+  // the failing test names and totals (the report shows them), and whether no plan changed a file the output names
+  const same = (prev?.command ?? null) === cmd
+  const failing = ok ? [] : tail ? failingLines(tail).map((l) => cutText(l, 200)) : same ? prev?.failing ?? [] : []
+  const local = ok ? false : tail ? noPlanFile === true : same && prev?.noPlanFile === true
   let changed = false
-  if (!(prev && prev.ok === ok && (prev.command ?? null) === cmd && (prev.file ?? null) === file && JSON.stringify(prev.blamed ?? []) === JSON.stringify(blamed))) {
-    status.finalGate = { ok, command: cmd, at: nowIso(), attempt: (Number(prev?.attempt) || 0) + 1, blamed, ...(file ? { file } : {}) }
+  if (!(prev && prev.ok === ok && (prev.command ?? null) === cmd && (prev.file ?? null) === file && JSON.stringify(prev.blamed ?? []) === JSON.stringify(blamed) && JSON.stringify(prev.failing ?? []) === JSON.stringify(failing) && (prev.noPlanFile === true) === local)) {
+    status.finalGate = { ok, command: cmd, at: nowIso(), attempt: (Number(prev?.attempt) || 0) + 1, blamed, ...(file ? { file } : {}), ...(failing.length ? { failing } : {}), ...(local ? { noPlanFile: true } : {}) }
     changed = true
   }
   if (ok) {
@@ -461,6 +477,7 @@ const fgArgs = () => ({
   plans: args['final-gate-plans'],
   // the failing output (cut by the workflow); only used to find which path of the branch diff it names, never stored
   tail: args['final-gate-tail-b64'] !== undefined ? Buffer.from(String(args['final-gate-tail-b64']), 'base64').toString('utf8') : '',
+  noPlanFile: args['final-gate-no-plan-file'] === 'yes',
 })
 
 function diskGb() {
@@ -729,7 +746,12 @@ const commands = {
       if (dirty) fail(`the merge folder ${mf} has uncommitted files: ${dirty.split('\n').map((l) => l.slice(3)).join(', ')}`)
       if (refExists(`origin/${branch}`)) {
         const ff = git(mf, 'merge', '--quiet', '--ff-only', `origin/${branch}`)
-        if (ff.status !== 0) fail(`the merge folder cannot fast-forward to origin/${branch}: ${ff.err}`)
+        if (ff.status !== 0) {
+          // Its only own commits are scope-answer lines origin already holds (K8): they add nothing, so it moves to origin.
+          const d = dropScopeCommitsOnRef(mf, `origin/${branch}`)
+          if (!d.ok) fail(`the merge folder cannot fast-forward to origin/${branch}: ${ff.err} (${d.why})`)
+          lines.push(`merge folder moved to origin/${branch}: its scope commit(s) ${d.dropped.map((s) => s.slice(0, 8)).join(', ')} are already there`)
+        }
       }
     }
     if (!refExists(`origin/${branch}`)) {
@@ -798,7 +820,8 @@ const commands = {
       const text = rel ? readIf(join(root, rel)) : null
       if (!text) continue
       const lint = scopeTestsLint(text)
-      if (lint.status === 'warn') testLocations[nnn] = lint.codeGlobs
+      // The code-without-a-test-line warning only; a refused or bare test line is the dry run's readiness problem.
+      if (lint.status === 'warn' && !lint.refused.length) testLocations[nnn] = lint.codeGlobs
     }
     emit({ ok: true, waves: j.waves, waveLocks: j.waveLocks, edges: (j.edges ?? []).filter((e) => !e.met), plans: j.plans, skipped: j.skipped, done: Object.keys(j.done ?? {}), testLocations },
       [...j.waves.map((w, i) => `WAVE ${i + 1}: ${w.join(', ')}`), ...Object.entries(testLocations).map(([n, g]) => `plan ${n}: changes code (${g.join(', ')}) and no scope line names a test location`)])
@@ -1282,7 +1305,7 @@ const commands = {
     const onBase = git(root, 'show', `origin/${runBranch(run)}:${rel}`)
     const planText = onBase.status === 0 ? onBase.out : (existsSync(join(root, rel)) ? readFileSync(join(root, rel), 'utf8') : '')
     const scopeGlobs = extractScopeGlobs(planText) ?? []
-    const testsOutOfScope = testFilesOutOfScope(files.filter((f) => f !== rel && !f.startsWith('.claude/sessions/')), scopeGlobs, (g) => picomatch(g, { dot: true }), removedLinesByFile(zeroDiff.out))
+    const testsOutOfScope = testFilesOutOfScope(files.filter((f) => f !== rel && !f.startsWith('.claude/sessions/')), scopeGlobs, (g) => picomatch(g, { dot: true }))
     // --no-notes: the checkers' copy of the plan (the same run-branch text, without ## Execution Notes), written next to
     // the status file just before the checkers read it.
     const reviewPath = args['no-notes'] !== undefined && planText ? writeReviewCopy(run, nnn, planText) : null
@@ -1625,7 +1648,15 @@ const commands = {
   watch() {
     const run = runName()
     const p = statusPath(run)
-    if (!existsSync(p)) fail(`no run "${run}" — start it with: node scripts/orch-state.mjs init --run ${run}`)
+    if (!existsSync(p)) {
+      // Started under the supervisor and not yet at init (run-plans.mjs runs its preflight and plan lint first): the
+      // supervisor is alive and still supervising, so the run is starting, not missing.
+      if (supervisorStarting(run)) {
+        emit({ ok: true, stuck: false, line: 'STARTING', phase: 'starting', updatedAt: null, asks: [] }, ['STARTING'])
+        return
+      }
+      fail(`no run "${run}" — start it with: node scripts/orch-state.mjs init --run ${run}`)
+    }
     let status
     try {
       status = JSON.parse(readFileSync(p, 'utf8'))
