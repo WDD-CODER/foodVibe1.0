@@ -48,6 +48,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 scripts/qa/lib/styleqa-sign-in.mjs
 scripts/test/styleqa-sign-in.test.mjs
 docs/qa/styleqa-pages.json
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope

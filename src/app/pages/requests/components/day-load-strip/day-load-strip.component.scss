@@ -2,9 +2,18 @@
   display: block;
 }
 
+.strip-title {
+  display: block;
+  margin-block-end: var(--space-1);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+}
+
 .strip-bars {
   display: flex;
   align-items: flex-end;
+  justify-content: flex-end;
   gap: 0.25rem;
   block-size: 3.5rem;
 }
@@ -15,7 +24,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.125rem;
-  min-inline-size: 1.5rem;
+  min-inline-size: 2.25rem;
   block-size: 100%;
   font-size: var(--fs-xs);
   color: var(--color-text-muted);

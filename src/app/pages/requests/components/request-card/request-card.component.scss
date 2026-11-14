@@ -1,3 +1,5 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+
 :host {
   display: block;
 }
@@ -114,4 +116,22 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-block-start: 0.25rem;
+
+  @media (max-width: $break-mobile) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    > :first-child {
+      grid-column: 1 / -1;
+    }
+
+    // With only approve + decline, decline is full width too.
+    > :last-child:nth-child(2) {
+      grid-column: 1 / -1;
+    }
+
+    > button {
+      justify-content: center;
+    }
+  }
 }

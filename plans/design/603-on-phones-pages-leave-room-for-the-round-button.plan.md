@@ -213,12 +213,12 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 603-A1: Add phone tokens for the bottom bar and the round-button lane above it — --bottom-bar-h, --fab-lane in a ≤620px :root block — src/styles.scss
-- [ ] 603-A2: Reserve the bar plus the button lane under every page and drop per-page copies — .app-content padding; delete Plan 278 rules — src/app/appRoot/app.component.scss, src/app/pages/dashboard/dashboard.page.scss, src/app/pages/inventory/inventory.page.scss
-- [ ] 603-A3: End the phone list card above the round button so no row sits under it — .table-area block-size at ≤620px — src/app/shared/list-shell/list-shell.component.scss
-- [ ] 603-A4: Remove the empty gap a closed filter panel leaves above the list card — hide .scroll-arrow--panel when collapsed, .list-header margin — src/app/shared/list-shell/list-shell.component.scss
-- [ ] 603-A5: Keep carousel column names between the arrows and clear of the dots — header padding, row-gap, narrower arrows, 2-line clamp — src/app/shared/column-carousel/column-carousel.component.scss
-- [ ] 603-A6: Prove on a 375px phone that nothing sits under the button and headers read cleanly — e2e/ui/603-1.spec.ts … e2e/ui/603-5.spec.ts
+- [x] 603-A1: Add phone tokens for the bottom bar and the round-button lane above it — --bottom-bar-h, --fab-lane in a ≤620px :root block — src/styles.scss
+- [x] 603-A2: Reserve the bar plus the button lane under every page and drop per-page copies — .app-content padding; delete Plan 278 rules — src/app/appRoot/app.component.scss, src/app/pages/dashboard/dashboard.page.scss, src/app/pages/inventory/inventory.page.scss
+- [x] 603-A3: End the phone list card above the round button so no row sits under it — .table-area block-size at ≤620px — src/app/shared/list-shell/list-shell.component.scss
+- [x] 603-A4: Remove the empty gap a closed filter panel leaves above the list card — hide .scroll-arrow--panel when collapsed, .list-header margin — src/app/shared/list-shell/list-shell.component.scss
+- [x] 603-A5: Keep carousel column names between the arrows and clear of the dots — header padding, row-gap, narrower arrows, 2-line clamp — src/app/shared/column-carousel/column-carousel.component.scss
+- [x] 603-A6: Prove on a 375px phone that nothing sits under the button and headers read cleanly — e2e/ui/603-1.spec.ts … e2e/ui/603-5.spec.ts
 
 ## Technical Considerations
 
@@ -245,3 +245,6 @@ touching any milestone.
 none
 
 ## Execution Notes
+- pnpm run build → exit 0; pnpm run lint → exit 0; pnpm run test:ci → exit 0 (2176 of 2176 SUCCESS)
+- behaviour: also moved the `.table-area--cards` phone `max-block-size` to the same tokens (it repeated the old bar-only height) — reverse: restore the old calc there
+- [ui] items 603-1..603-5: written, not run
