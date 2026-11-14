@@ -200,3 +200,5 @@ none
 ## Execution Notes
 
 - decision (Planner, 2026-11-14, Human asked for unattended runs): widths requests 60rem (two cards per row), menu library 75rem, settings 36rem; the Human can change them at validation.
+- scope: settings.page.spec.ts plan-469 rail test now compares to .settings-shell width (ask 602-1 approved).
+- evidence: pnpm run build, lint, test:ci -> exit 0, 2176 SUCCESS. [ui] specs written, not run.
