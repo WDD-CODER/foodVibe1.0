@@ -146,12 +146,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Write the four screen checks and update 523-3 — 581-1…4 per the `[ui]` lines with `signInQa`, API setup and cleanup in `finally` (own terms "בדיקה 581" and section "סעיף 581" deleted through `DELETE /api/v1/data/taxonomyTerms/:id`), screenshots `screens/581-<n>.png`; 523-3: click the row's trash button (aria "מחיקה") instead of `.c-chip__remove`, and its cleanup also deletes a removed (`removedAt`) "בדיקה E2E"; run each with `pnpm exec playwright test <spec>` with `E2E_APP_URL` / `E2E_API_URL` set to the slot's ports — e2e/ui/581-1.spec.ts, e2e/ui/581-2.spec.ts, e2e/ui/581-3.spec.ts, e2e/ui/581-4.spec.ts, e2e/ui/523-3.spec.ts
 - [x] A8: Record the changes in the maps and run every `[auto]` check — paste the outputs under Execution Notes — docs/brain/component-families.md, src/app/pages/breadcrumbs.md
 
-### Plan 582 — Recipe AI examples stay inside their business (`plans/582-recipe-ai-examples-stay-inside-their-business.plan.md`)
-- [ ] A1: Stamp and prune recipe examples per business — `saveShot(req, …)` with `businessId`, per-business count and pruning, `POST /shots` passes `req` — server/routes/ai.js
-- [ ] A2: Read only the caller's own approved examples — `getApprovedShots(req, limit)` with `scopeFilter(req)`; both callers pass `req`; comment block updated — server/routes/ai.js
-- [ ] A3: Test the scope, the prune and the stamp — the four `[auto]` cases above — server/test/ai-shots.test.js
-- [ ] A4: Run test:server, the server lint and log-query, and paste the output lines under Execution Notes
-
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions. Plan 471 (exports) is parked too (needs a Human walk-through session).
@@ -198,15 +192,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
 - [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
 - [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
-
-### Plan 595 — Website imports refuse redirects to internal addresses (`plans/595-website-imports-refuse-redirects-to-internal-addresses.plan.md`)
-- [ ] A1: Check every redirect of a website import against the safety rules, at most 5 hops — safeFetch helper used by both URL routes — server/routes/ai.js
-- [ ] A2: Refuse the internal addresses the safety check still lets through — 0.0.0.0/8, 100.64/10, IPv4-mapped IPv6, bracketed hosts — server/routes/ai.js
-- [ ] A3: Prove a redirect to an internal address is refused and never fetched — server/test/knowledge-import.test.js, server/test/generate-from-url.test.js
-
-### Plan 596 — Platform CSV downloads show Hebrew correctly in Excel (`plans/596-platform-csv-downloads-show-hebrew-correctly-in-excel.plan.md`)
-- [ ] A1: Make both platform CSV downloads open in Excel with readable Hebrew — BOM and CRLF in one send helper — server/routes/admin.js
-- [ ] A2: Check the downloads start with the marker Excel needs — server/test/admin-frontdesk-stats.test.js, server/test/ai-usage.test.js
 
 ### Plan 597 — Phone bottom bar labels fit their tabs without colliding or clipping (`plans/design/597-phone-bottom-bar-labels-fit-their-tabs.plan.md`)
 - [ ] 597-A1: Give the phone bottom bar its own short tab names so six labels fit at 375px — three nav_short_* keys, used only in .bottom-nav — public/assets/data/dictionary.json, src/app/core/components/header/header.component.html

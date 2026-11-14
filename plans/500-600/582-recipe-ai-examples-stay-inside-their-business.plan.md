@@ -1,6 +1,6 @@
 # Plan 582 — Recipe AI examples stay inside their business
 
-Status: draft
+Status: done
 Depends-on: 580
 Snapshot: d4e904bb
 
