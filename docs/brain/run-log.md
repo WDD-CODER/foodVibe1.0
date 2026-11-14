@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (9 runs): plans 24 · merged 15 · parked 9 · fix rounds 18 · escalations 6 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 2.67 · parked 1 · fix rounds 2 · ✗ per plan 0.42
+Earlier (10 runs): plans 25 · merged 16 · parked 9 · fix rounds 18 · escalations 6 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 2.5 · parked 0.9 · fix rounds 1.8 · ✗ per plan 0.4
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-09 | run-540 | 540 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-09 | run-518 | 372,533 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-09 | run-518b | 518,528,530,533,534 | 5 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-09 | run-519 | 519,520,521,529,531 | 5 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (9 runs): plans 24 · merged 15 · parked 9 · fix rounds 18 · escalati
 | 2026-11-12 | run-594 | 594 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-13 | batch-5 | 553,554,555,556,557,559,580 | 7 | 0 | - | 3 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-593 | 593 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
+| 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-14 | run-600 | 600 | 1 | 0 | - | 1 | 1 | 0 | ok | - | - | - |

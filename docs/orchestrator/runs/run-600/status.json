@@ -1,0 +1,402 @@
+{
+  "run": "run-600",
+  "branch": "orch/run-600",
+  "base": "main",
+  "startedAt": "2026-11-14T14:45:29.899Z",
+  "mainShaAtStart": "d8b1f68494302471c8afa1da89e5ea6d3af5e8ef",
+  "plans": {
+    "600": {
+      "nnn": "600",
+      "title": "Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates",
+      "branch": "feat/600-recipe-ai-examples-count",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T16:51:18.319Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T17:00:06.015Z"
+        }
+      },
+      "humanItems": [
+        "Make a recipe with AI from text, change one ingredient in the builder and save it; then, as the platform admin with that business opted in, the recipe appears under \"מועמדים\" on `/platform` with a kept % below 100.",
+        "After merge, from the main folder: `node server/migrations/0012-drop-unscoped-ai-shots.js --target=atlas --confirm-host=<member host>` (dry run) shows the count; the same with `--write=yes` deletes them; `--verify=yes` exits 0."
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T14:47:39.973Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:47:40.244Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:12:41.533Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:12:42.078Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:12:42.558Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:20:33.950Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:20:34.243Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:20:34.484Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:21:07.554Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:22:15.285Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:51:18.050Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:51:18.322Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:52:02.206Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:59:55.661Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T17:00:06.018Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T17:00:25.161Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T17:01:42.881Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "600",
+          "title": "Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates",
+          "branch": "feat/600-recipe-ai-examples-count",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-14T14:47:40.241Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-14T15:20:34.482Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 7.1,
+          "sha": "8bddf29321013eeac50fe00b3abb40b876ec082a",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1497.8,
+              "tokens": {
+                "input": 4762654,
+                "output": 57651
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 32.5,
+              "tokens": {
+                "input": 102583,
+                "output": 2429
+              },
+              "exit": 0
+            }
+          ],
+          "uiCards": [
+            {
+              "card": "`e2e/ui/600-1.spec.ts`: as the owner (`signInQa`), on `/metadata-manager` the card \"שיתוף דוגמאות AI\" shows the chip \"לשתף דוגמאות\"; ticking it and reloading ke",
+              "status": "unchecked",
+              "via": "none",
+              "page": "",
+              "screenshots": [],
+              "round": 0
+            },
+            {
+              "card": "`e2e/ui/600-2.spec.ts`: as the platform admin, on `/platform` the section \"דוגמאות AI למתכונים\" shows the headings \"מאגר משותף\" and \"מועמדים\"; a seeded candidat",
+              "status": "unchecked",
+              "via": "none",
+              "page": "",
+              "screenshots": [],
+              "round": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-manifest-check.mjs\" --root ., scope-check (kit copy) --diff=origin/orch/run-600 --plan=plans/600-recipe-ai-examples-count-only-saved-recipes-shared-curated-pool.plan.md"
+          ],
+          "reason": "asking 600-1: ESCALATE scope: ESCALATE: scope server/test/ai-shots.test.js, docs/workflow-kit/manifest.json — both are needed to clear gate-1 and gate-2, and I cannot extend the scope myself under run-plans.",
+          "park": {
+            "at": "2026-11-14T15:22:05.567Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/test/ai-shots.test.js, docs/workflow-kit/manifest.json — both are needed to clear gate-1 and gate-2, and I cannot extend the scope myself under run-plans."
+          },
+          "parkBranch": "park/run-600-600"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 600-1: ESCALATE scope: ESCALATE: scope server/test/ai-shots.test.js, docs/workflow-kit/manifest.json — both are needed to clear gate-1 and gate",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3.3,
+      "sha": "c34fc43c09fd2a42865aad09a392925d0810ac6b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 39.7,
+          "tokens": {
+            "input": 130492,
+            "output": 2467
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 17.2,
+          "tokens": {
+            "input": 125828,
+            "output": 749
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "d6d3947b78144c2c155eaf27e9912b6b6aa2b2b1"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-14T14:47:39.726Z",
+      "plan": "600",
+      "text": "the folder foodVibe1.0-orch-run-600-600 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T15:12:38.234Z",
+      "plan": "600",
+      "text": "builder left undone (round 0): e2e/ui/600-1.spec.ts: written, not run; e2e/ui/600-2.spec.ts: written, not run; A13: the [ui] specs against the slot app and the [human] cards are left to the run and the Human; The scope-check (kit copy) step was not run separately"
+    },
+    {
+      "at": "2026-11-14T15:12:41.830Z",
+      "plan": "600",
+      "text": "[ui] `e2e/ui/600-1.spec.ts`: as the owner (`signInQa`), on `/metadata-manager` the card \"שיתוף דוגמאות AI\" shows the chip \"לשתף דוגמאות\"; ticking it and reloadi: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-14T15:12:42.269Z",
+      "plan": "600",
+      "text": "[ui] `e2e/ui/600-2.spec.ts`: as the platform admin, on `/platform` the section \"דוגמאות AI למתכונים\" shows the headings \"מאגר משותף\" and \"מועמדים\"; a seeded can: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-14T15:21:07.205Z",
+      "plan": "600",
+      "text": "builder left undone (round 1): gate-2: add server/test/ai-shots.test.js to the plan's scope block and note it in Execution Notes; gate-1: add a project/stay entry for scripts/qa/lib/styleqa-sign-in.mjs to docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-14T15:22:15.094Z",
+      "plan": "600",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-14T15:22:15.488Z",
+      "plan": "600",
+      "text": "ask 600-1 (scope, the Human or the advisor answers): May this plan's scope include server/test/ai-shots.test.js and docs/workflow-kit/manifest.json so the two gate findings can be fixed?"
+    },
+    {
+      "at": "2026-11-14T16:49:17.824Z",
+      "plan": "600",
+      "text": "ask 600-1 answered by the human: approved: server/test/ai-shots.test.js, docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-14T16:49:31.569Z",
+      "plan": "600",
+      "text": "scope of plan 600 extended on orch/run-600 by the answer to 600-1: server/test/ai-shots.test.js, docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-14T16:51:09.736Z",
+      "plan": "600",
+      "text": "resumed from park/run-600-600: round 1, tier build, after: asking 600-1: ESCALATE scope: ESCALATE: scope server/test/ai-shots.test.js, docs/workflow-kit/manifest.json — both are needed to clear gate-1 and gate-2, and I"
+    },
+    {
+      "at": "2026-11-14T16:51:17.835Z",
+      "plan": "600",
+      "text": "the folder foodVibe1.0-orch-run-600-600 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T16:51:58.320Z",
+      "plan": "600",
+      "text": "builder left undone (round 1): [ui] 600-1: written, not run; [ui] 600-2: written, not run"
+    },
+    {
+      "at": "2026-11-14T17:00:40.087Z",
+      "plan": "600",
+      "text": "the folder foodVibe1.0-orch-merge-run-600 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 3.3,
+  "updatedAt": "2026-11-14T17:05:34.396Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "600",
+      "type": "behaviour",
+      "text": "behaviour: a pasted recipe carries no shot key, because pasted recipes are never saved as examples; the plan said always generate a key — reverse: drop the paste check in onDraftApproved",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "600",
+      "type": "behaviour",
+      "text": "behaviour: the new owner card has no jump-nav tab in /metadata-manager, because the existing specs fix the tab count at 14 and the plan did not ask for a tab — reverse: add an entry to _allJumpSections, extend the owner filter and the spec's id list",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "600",
+      "type": "behaviour",
+      "text": "behaviour: if the confirm call never happens (the recipe is never saved), the pending shot stays pending until the per-business cap prunes it, as the plan states — reverse: none needed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "600",
+      "type": "behaviour",
+      "text": "behaviour: moved containsInjectionPattern and scanRecipeDraftForInjection from routes/ai.js to services/ai-recipe-helpers.js so the promote route uses the same screen — reverse: move them back and export from ai.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "600",
+      "type": "seen",
+      "text": "seen: scripts/qa/lib/styleqa-sign-in.mjs — unclassified in the kit manifest (kit-manifest-check exits 1); it was added in 59acaddf, not by this plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "600",
+      "type": "seen",
+      "text": "seen: scripts/qa/lib/styleqa-sign-in.mjs:1 — it arrived with commit 59acaddf on the run branch and is missing from docs/workflow-kit/manifest.json. It will fail kit-manifest-check on any plan until classified.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "600",
+      "type": "seen",
+      "text": "seen: scripts/qa/lib/styleqa-sign-in.mjs was unclassified, added by commit 59acaddf outside this plan. I classified it project/stay in the manifest under the approved scope. Reverse: remove that manifest entry.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-14T17:05:34.394Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-14T17:05:34.396Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
