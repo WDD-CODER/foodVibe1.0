@@ -2327,6 +2327,9 @@
     "platform_col_fd_requests": "בקשות (30 יום)",
     "platform_col_fd_median": "זמן החלטה (דק׳)",
     "platform_col_fd_no_show": "לא הגיעו (%)",
-    "platform_fd_export_csv": "ייצוא קבלה CSV"
+    "platform_fd_export_csv": "ייצוא קבלה CSV",
+    "nav_short_recipe_book": "מתכונים",
+    "nav_short_menu_library": "תפריטים",
+    "nav_short_frontdesk": "לקוחות"
   }
 }

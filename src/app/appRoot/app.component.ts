@@ -49,6 +49,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { AppUpdateService } from '@services/app-update.service'
 import { UpdateBannerComponent } from '../core/components/update-banner/update-banner.component'
 import { KeyboardInsetService } from '@services/keyboard-inset.service'
+import { SignedOutRedirectService } from '../core/services/signed-out-redirect.service'
 import { LayoutModeService } from '@services/layout-mode.service'
 
 @Component({
@@ -87,6 +88,7 @@ export class AppComponent {
   private readonly userService = inject(UserService)
   private readonly serverHeartbeat_ = inject(ServerHeartbeatService)
   private readonly keyboardInset_ = inject(KeyboardInsetService)
+  private readonly signedOutRedirect_ = inject(SignedOutRedirectService)
   protected readonly loading_ = inject(LoadingService)
   protected readonly layout = inject(LayoutModeService)
 

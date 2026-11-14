@@ -1,0 +1,134 @@
+{
+  "run": "run-592",
+  "branch": "orch/run-592",
+  "base": "main",
+  "startedAt": "2026-11-12T13:47:37.953Z",
+  "mainShaAtStart": "226a482c26af48bd5c6464f34cb5a8d8d5fc0b92",
+  "plans": {
+    "589": {
+      "nnn": "589",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "8785846f0bbdbedc366ab4f398ea3c473a434beb"
+    },
+    "591": {
+      "nnn": "591",
+      "round": 0,
+      "models": {},
+      "state": "merged",
+      "sha": "3e579c9ed0004ac0af7e83d6dd1ab4683a0c1ab0"
+    },
+    "592": {
+      "nnn": "592",
+      "title": "Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions",
+      "branch": "feat/592-shared-recipe-links-also",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-12T13:50:58.092Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-12T14:07:18.693Z"
+        }
+      },
+      "humanItems": [
+        "Signed out, a shared recipe link shows the welcome page; after signing in, the recipe opens."
+      ],
+      "history": [
+        {
+          "at": "2026-11-12T13:50:56.908Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T13:50:58.095Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T14:04:05.392Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T14:07:10.437Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T14:07:18.696Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T14:07:26.452Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-12T14:09:01.540Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 11.1,
+      "sha": "ad2203035f9670215327d5a7ee898e92266f07a9",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 783,
+          "tokens": {
+            "input": 212751,
+            "output": 4239
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6,
+          "tokens": {
+            "input": 23163,
+            "output": 231
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "d99e6045700f17ed8f180c31f94c60cd06292880"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-12T13:50:56.254Z",
+      "plan": "592",
+      "text": "the folder foodVibe1.0-orch-run-592-592 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-12T14:07:40.392Z",
+      "plan": "592",
+      "text": "the folder foodVibe1.0-orch-merge-run-592 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 11.1,
+  "updatedAt": "2026-11-12T14:16:25.232Z",
+  "finishedAt": "2026-11-12T14:16:25.229Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-12T14:16:25.231Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

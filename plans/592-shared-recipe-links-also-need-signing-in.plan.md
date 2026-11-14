@@ -86,9 +86,9 @@ Confirm the five places above still read as quoted.
 - none.
 
 ## Atomic Sub-tasks
-- [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
-- [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
-- [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
+- [x] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
+- [x] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
+- [x] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
 
 ## What happens when
 - A signed-in user opens a shared recipe link → the recipe, as today.
@@ -107,3 +107,4 @@ Confirm the five places above still read as quoted.
 
 ## Execution Notes
 - Human 2026-11-12, plan 589/591 card ④ (quoted above): replaces Q2 = keep.
+- build, lint, test:ci (1986 SUCCESS) → exit 0; `node scripts/route-guard-check.mjs` → ROUTE_GUARDS: ok. log-query hung in my shell (left to the gate). e2e 589-2 rewritten, not run (needs QA servers).

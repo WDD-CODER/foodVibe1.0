@@ -132,7 +132,7 @@
             <span class="avatar-initials">{{ userInitial() }}</span>
           }
         </span>
-        <span>{{ 'profile' | translatePipe }}</span>
+        <span class="bottom-nav__label">{{ 'profile' | translatePipe }}</span>
       </button>
       @if (isMobileAvatarOpen()) {
         <div class="profile-menu" role="menu">
@@ -158,31 +158,42 @@
     } @else {
       <button type="button" class="bottom-nav__item" (click)="openAuth('sign-in')">
         <lucide-icon name="circle-user-round" [size]="22"></lucide-icon>
-        <span>{{ 'sign_in' | translatePipe }}</span>
+        <span class="bottom-nav__label">{{ 'sign_in' | translatePipe }}</span>
       </button>
     }
   </div>
   <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
     <lucide-icon name="layout-dashboard" [size]="22"></lucide-icon>
-    <span>{{ 'dashboard' | translatePipe }}</span>
+    <span class="bottom-nav__label">{{ 'dashboard' | translatePipe }}</span>
   </a>
   <a routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">
     <lucide-icon name="package" [size]="22"></lucide-icon>
-    <span>{{ 'inventory' | translatePipe }}</span>
+    <span class="bottom-nav__label">{{ 'inventory' | translatePipe }}</span>
   </a>
   <a routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">
     <lucide-icon name="book-open" [size]="22"></lucide-icon>
-    <span>{{ 'recipe_book' | translatePipe }}</span>
+    <span class="bottom-nav__label">{{ 'nav_short_recipe_book' | translatePipe }}</span>
   </a>
   <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
     <lucide-icon name="library" [size]="22"></lucide-icon>
-    <span>{{ 'menu_library' | translatePipe }}</span>
+    <span class="bottom-nav__label">{{ 'nav_short_menu_library' | translatePipe }}</span>
   </a>
-  <a routerLink="/clients" routerLinkActive="active" (click)="closeMobileMenu()">
-    <lucide-icon name="users" [size]="22"></lucide-icon>
-    <span>{{ 'frontdesk_section' | translatePipe }}</span>
-    @if (waitingCount_() > 0) {
-      <span class="c-chip__count" [attr.aria-label]="waitingLabel_()">{{ waitingCount_() }}</span>
-    }
+  <a
+    routerLink="/clients"
+    routerLinkActive="active"
+    (click)="closeMobileMenu()"
+    [attr.aria-label]="
+      waitingCount_() > 0
+        ? ('frontdesk_section' | translatePipe) + ' — ' + waitingLabel_()
+        : ('frontdesk_section' | translatePipe)
+    "
+  >
+    <span class="bottom-nav__icon">
+      <lucide-icon name="users" [size]="22"></lucide-icon>
+      @if (waitingCount_() > 0) {
+        <span class="c-chip__count" aria-hidden="true">{{ waitingCount_() }}</span>
+      }
+    </span>
+    <span class="bottom-nav__label">{{ 'nav_short_frontdesk' | translatePipe }}</span>
   </a>
 </nav>
