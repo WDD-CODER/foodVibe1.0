@@ -1,6 +1,6 @@
 # Plan 580 — AI menu: say why it failed, build it from the recipe book, count rejected calls as failed
 
-Status: draft
+Status: done
 Depends-on: 566
 Snapshot: 8d4f043ffd5ded749cf5c78836d241b87ada6f86
 
@@ -187,7 +187,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A10: Show on `/platform` how the failed calls divide by reason — `failures` on `AiUsageRow`, `failureTitle`, `title` on both failed cells, the `ai_fail_*` keys, spec cases — src/app/core/models/ai-usage.model.ts, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, public/assets/data/dictionary.json
 - [x] A11: Add the three screen checks — each spec signs in with `signInQa`, stubs one route with `page.route(…, r => r.fulfill({ status, contentType: 'application/json', body }))` (no Gemini call), opens `/menu-library`, clicks the button with aria-label "פעולות מהירות", then "צור עם AI"; 580-1 and 580-2 fill the textarea with "אירוע ל-50 אורחים" and click "צור תפריט"; each asserts its quoted text and saves `screens/580-N.png` — e2e/ui/580-1.spec.ts (`**/ai/generate-menu` → 502 `{ error: 'Gemini returned invalid menu draft', code: 'no_sections' }`), e2e/ui/580-2.spec.ts (`**/ai/generate-menu` → 429 `{ error: 'Too many AI requests, please try again later' }`), e2e/ui/580-3.spec.ts (`**/ai/usage` → 200 `{ budget: 20, used: 13, remaining: 7, count: 13, models: [] }`, routed before `page.goto`)
 - [x] A12: Record the new fields in the docs and the maps — docs/agent/standards-backend.md, docs/frontdesk/frontdesk-map.md, server/breadcrumbs.md; run `node scripts/breadcrumbs-check.mjs` and touch the other four maps only if it names them
-- [ ] A13: Run the checks and hand over the two hand checks — test:server, test:ci, both lints, lint:icons, build, breadcrumbs-check, log-query, specs 580-1…3 against the slot app; then the [human] cards
+- [x] A13: Run the checks and hand over the two hand checks — test:server, test:ci, both lints, lint:icons, build, breadcrumbs-check, log-query, specs 580-1…3 against the slot app; then the [human] cards
 
 ## Technical Considerations
 - Dependencies: plan 566's ledger and `/platform` table; plan 554 runs after this plan and writes its `knowledge_import` call with `usageOf(req)`; `callGemini`'s return contract is unchanged; `validateMenuDraft` keeps serving `/save-menu-shot`; `GET /api/v1/ai/usage` unchanged.
@@ -224,3 +224,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Old shots: the 3 `GEMINI_MENU_SHOTS` docs on Atlas have no `businessId`, so after this plan they are used by no one until a business saves new shots; no migration.
 - Evidence (builder): pnpm run build -> 0; pnpm run lint -> 0; pnpm --dir server run lint -> 0; lint:icons -> 0; pnpm run test:ci -> 1995 SUCCESS; pnpm run test:server -> 92 files, 1181 passed; breadcrumbs-check -> clean; log-query -> SKIP (no database configured).
 - A13: the three [ui] specs (e2e/ui/580-1..3) are written but not run here (no slot app); the gate/browser step runs them. The two [human] cards are left for the Human.
+- 2026-11-14 Planner: closed — built in batch-4/batch-5, on main via #569 after the Human's batch-5 cards; reopened by batch-6's dry run as an unmet dependency of 582.
