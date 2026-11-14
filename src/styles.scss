@@ -1654,6 +1654,12 @@ textarea.c-input {
   animation: focusPulse 0.4s ease-out;
 }
 
+/* Matches the custom-select trigger outline (date field in filter rows) */
+.c-input.c-input--outline:not(:focus) {
+  background: var(--bg-glass);
+  border-color: var(--border-default);
+}
+
 /* ---- Engine: Filter Panel Utilities ---- */
 .c-filter-section {
   margin-block-end: 1rem;

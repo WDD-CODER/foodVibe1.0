@@ -1943,6 +1943,7 @@
     "rq_verdict_unfit": "לא מתאים",
     "rq_status_needs_info": "חסר מידע",
     "rq_day_load": "באותו יום: {covers} סועדים ב-{count} הזמנות",
+    "rq_day_load_title": "סועדים לפי שעה",
     "rq_day_load_failed": "לא הצלחנו לטעון את עומס היום",
     "rq_approve": "אישור",
     "rq_edit_before_approve": "עריכה לפני אישור",
