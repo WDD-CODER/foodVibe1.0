@@ -183,11 +183,3 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Plan 609 — The list filter panel is only as tall as its content (`plans/design/609-the-list-filter-panel-is-only-as-tall-as.plan.md`)
 - [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
 - [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
-
-### Plan 611 — Platform business table becomes the app's standard grid with the phone column carousel (`plans/design/611-platform-business-table-becomes-the-apps-standard-grid-with.plan.md`)
-- [ ] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
-- [ ] 611-A2: Keep the pinned name column above anything that scrolls under it, with opaque idle tints — z-index 1/2 and solid backgrounds outside the page layer — src/app/pages/platform-dashboard/platform-dashboard.page.scss
-- [ ] 611-A3: Show one swipeable column at a time on phones, like the other lists — COLUMN_CAROUSEL header + cells, carouselColumns field — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
-- [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
-- [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
-- [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
