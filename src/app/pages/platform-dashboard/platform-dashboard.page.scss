@@ -210,7 +210,10 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 }
 
 /* Outside the layer: the .c-list-* engines in styles.scss are unlayered and would win. */
-.platform-grid .c-list-row {
+/* `.c-list-row` is `display: contents` (styles.scss), so the grid lives on the table itself:
+   every row's cells land in the same tracks, as in app-list-shell. */
+.platform-grid {
+  display: grid;
   grid-template-columns: var(--platform-grid);
 }
 
