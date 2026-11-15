@@ -1,0 +1,872 @@
+{
+  "run": "run-601",
+  "branch": "orch/run-601",
+  "base": "main",
+  "startedAt": "2026-11-14T14:49:45.209Z",
+  "mainShaAtStart": "69a30d6320dca4fb3ec001bb3744432cc1b1a94a",
+  "plans": {
+    "601": {
+      "nnn": "601",
+      "title": "Phone chip rows keep their scroll arrows beside the chips, never on top of them",
+      "branch": "feat/601-phone-chip-rows-keep",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T15:25:55.207Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T15:33:20.399Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T15:36:05.890Z"
+        }
+      },
+      "humanItems": [
+        "On a phone (or a 375px window) the top chip row on dashboard, bookings and venues reads cleanly: the arrow",
+        "Nothing else moved: on desktop the chip rows look the same as before (centered, no arrows), and on a phone the"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T15:25:55.065Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:25:55.209Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:30:56.506Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:33:20.139Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:33:20.272Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:33:20.400Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:33:46.987Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:36:00.899Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:36:05.892Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:36:15.609Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:37:15.102Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.5,
+      "sha": "71bf3d1959a55b3918a80b7f9952526f394618b3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 299.2,
+          "tokens": {
+            "input": 125145,
+            "output": 4112
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 24.5,
+          "tokens": {
+            "input": 68661,
+            "output": 1439
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.8,
+          "tokens": {
+            "input": 26516,
+            "output": 807
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-manifest-check.mjs\" --root ."
+      ],
+      "checkedHead": "d7e7e0ae215a3fdfdd2793c6b21719225deb9005"
+    },
+    "602": {
+      "nnn": "602",
+      "title": "Five pages sit in a centred column sized to their content instead of leaving empty space",
+      "branch": "feat/602-five-pages-sit-in",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T16:01:50.863Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T16:08:12.892Z"
+        }
+      },
+      "humanItems": [
+        "Nothing else moved: the inventory, recipe book, suppliers, clients and equipment lists (the table-layout",
+        "At desktop width and on a phone, the equipment form, requests, menu library, settings (all three tabs) and"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T14:51:55.464Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T14:51:55.878Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:22:53.016Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:24:10.156Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:01:50.590Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:01:50.865Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:05:59.194Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:08:07.432Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:08:12.894Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:08:21.431Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:08:56.312Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "602",
+          "title": "Five pages sit in a centred column sized to their content instead of leaving empty space",
+          "branch": "feat/602-five-pages-sit-in",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-14T14:51:55.875Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 7.1,
+          "reason": "asking 602-1: replan needed: ESCALATE: scope src/app/pages/settings/settings.page.spec.ts — the existing test 'owner: the tab row fills the page width' (line 65) fails now that .settings-shell is 36rem. The fix is to compare the rail width with .settings-shell instead of the host. Needs `approved: src/app/pages/settings/setting",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1856.3,
+              "tokens": {
+                "input": 39695,
+                "output": 1858
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-14T15:24:00.880Z",
+            "reason": "replan needed: ESCALATE: scope src/app/pages/settings/settings.page.spec.ts — the existing test 'owner: the tab row fills the page width' (line 65) fails now that .settings-shell is 36rem. The fix is to compare the rail width with .settings-shell instead of the host. Needs `approved: src/app/pages/settings/setting"
+          },
+          "parkBranch": "park/run-601-602"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 602-1: replan needed: ESCALATE: scope src/app/pages/settings/settings.page.spec.ts — the existing test 'owner: the tab row fills the page width",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.5,
+      "sha": "f6dbea0b6b0e1d5a9fba2729ab40396396dcb58c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 246.2,
+          "tokens": {
+            "input": 135984,
+            "output": 2370
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.6,
+          "tokens": {
+            "input": 29600,
+            "output": 564
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "be65a201e1bfe52956013cf3cfd570fc450c07d1"
+    },
+    "603": {
+      "nnn": "603",
+      "title": "On phones, pages leave room for the round button and list headers stop squeezing",
+      "branch": "feat/603-on-phones-pages-leave",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T16:11:00.186Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T16:18:06.263Z"
+        }
+      },
+      "humanItems": [
+        "Nothing else moved: tablet and desktop (≥621px) spacing, the list card height on tablet, and the round",
+        "On a phone (or a 375px window), scroll to the end of inventory, suppliers, dashboard and the recipe builder:"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T15:45:30.278Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:11:00.037Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:11:00.188Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:15:54.381Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:18:00.592Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:18:06.264Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:18:12.993Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:18:46.695Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "603",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 602-1",
+          "freeDiskGb": 7.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.4,
+      "sha": "011a8e8253790ae90412e500ba38b52db11c01d3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 292.1,
+          "tokens": {
+            "input": 530362,
+            "output": 15626
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.8,
+          "tokens": {
+            "input": 30374,
+            "output": 371
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "a80859bd5fdd4b3e8fdd9cd042a279e12afebc76"
+    },
+    "605": {
+      "nnn": "605",
+      "title": "Menu library filters sit on one even grid, request cards get tidy buttons and a labelled hour chart",
+      "branch": "feat/605-menu-library-filters-sit",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T16:20:46.755Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T16:27:34.558Z"
+        }
+      },
+      "humanItems": [
+        "On a phone (or a 375px window) and on a desktop window, the event-menus filters look like one tidy row, with",
+        "Nothing else moved: other date fields (event page, deposit dialog, frontdesk settings) keep their grey filled"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T15:45:30.402Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:20:46.541Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:20:46.757Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:25:19.390Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:27:28.885Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:27:34.562Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:27:42.581Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T16:28:18.217Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "605",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 602-1",
+          "freeDiskGb": 7.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.1,
+      "sha": "0a704d6e226a608446d691ef41e4c707358b430f",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 270.6,
+          "tokens": {
+            "input": 274675,
+            "output": 8744
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6.9,
+          "tokens": {
+            "input": 33070,
+            "output": 531
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "9f5f049c91a5acd82466f5da36b9853e2eedcbc7"
+    },
+    "606": {
+      "nnn": "606",
+      "title": "Style QA opens real records of the signed-in business on detail pages",
+      "branch": "feat/606-style-qa-opens-real",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T16:30:27.304Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T16:46:49.406Z"
+        }
+      },
+      "humanItems": [
+        "Run `/styleqa venue-view`: the venue page screenshot at 375px shows the venue's details, with no \"מיקום האירוע לא נמצא\" notice."
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T15:39:17.730Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:39:17.907Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:41:09.512Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:44:22.446Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:44:22.579Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:44:22.718Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:44:45.187Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T15:45:29.741Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:30:27.173Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:30:27.305Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:42:50.790Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:46:43.459Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:46:49.408Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:46:55.753Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-14T16:47:36.425Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "606",
+          "title": "Style QA opens real records of the signed-in business on detail pages",
+          "branch": "feat/606-style-qa-opens-real",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-14T15:39:17.906Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-14T15:44:22.717Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 7.2,
+          "sha": "c820faaa986042bdb90d5ff558d1a128df7e0ba4",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 109.5,
+              "tokens": {
+                "input": 195465,
+                "output": 4601
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 22.2,
+              "tokens": {
+                "input": 104324,
+                "output": 1894
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-manifest-check.mjs\" --root ."
+          ],
+          "reason": "asking 606-1: ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'unclassified: scripts/test/styleqa-sign-in.test.mjs' and the manifest file is not in the plan's Read-Write Scope.",
+          "park": {
+            "at": "2026-11-14T15:45:22.803Z",
+            "reason": "ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'unclassified: scripts/test/styleqa-sign-in.test.mjs' and the manifest file is not in the plan's Read-Write Scope."
+          },
+          "parkBranch": "park/run-601-606"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 606-1: ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'unclassified: scripts/test/styleqa-sign",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 4.2,
+      "sha": "864e25c27271bde6895a2054d7ca7591f3180dde",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 741.2,
+          "tokens": {
+            "input": 25974,
+            "output": 910
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.1,
+          "tokens": {
+            "input": 24528,
+            "output": 227
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "7bbbb3f776caec936ed4d8164c51705183ef1d54"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-14T14:51:55.144Z",
+      "plan": "602",
+      "text": "the folder foodVibe1.0-orch-run-601-602 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T15:22:52.607Z",
+      "plan": "602",
+      "text": "builder left undone (round 0): src/app/pages/settings/settings.page.spec.ts line 65 needs its assertion compared against the .settings-shell width instead of the whole host width. Not applied, so test:ci still fails.; The [ui] items 602-1 to 602-6 are written, not run.; The post-commit checks after test:ci were not run: kit-manif"
+    },
+    {
+      "at": "2026-11-14T15:24:09.803Z",
+      "plan": "602",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-14T15:24:10.388Z",
+      "plan": "602",
+      "text": "ask 602-1 (scope, the Human or the advisor answers): Allow editing src/app/pages/settings/settings.page.spec.ts so the plan-469 rail-width test compares against the .settings-shell width instead of the 1280px host?"
+    },
+    {
+      "at": "2026-11-14T15:25:54.907Z",
+      "plan": "601",
+      "text": "the folder foodVibe1.0-orch-run-601-601 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T15:30:54.541Z",
+      "plan": "601",
+      "text": "builder left undone (round 0): [ui] 601-1: written, not run; [ui] 601-2: written, not run; [human] the phone and desktop visual checks are left to the Human; kit-manifest-check, scope-check and the other CHECKS entries were not run by me, only build, lint, test:ci and log-query"
+    },
+    {
+      "at": "2026-11-14T15:36:23.611Z",
+      "plan": "601",
+      "text": "the folder foodVibe1.0-orch-merge-run-601 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T15:39:17.554Z",
+      "plan": "606",
+      "text": "the folder foodVibe1.0-orch-run-601-606 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T15:41:07.474Z",
+      "plan": "606",
+      "text": "builder left undone (round 0): [human] Done-when item: run /styleqa venue-view and check the 375px venue screenshot (left to the Human)"
+    },
+    {
+      "at": "2026-11-14T15:44:45.023Z",
+      "plan": "606",
+      "text": "builder left undone (round 1): Add the manifest entry for scripts/test/styleqa-sign-in.test.mjs (tier project, action stay, refs scripts/qa/lib/styleqa-sign-in.mjs) to docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-14T15:45:29.622Z",
+      "plan": "606",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-14T15:45:29.946Z",
+      "plan": "606",
+      "text": "ask 606-1 (scope, the Human or the advisor answers): May the builder add docs/workflow-kit/manifest.json to plan 606's scope so the new test file can be classified?"
+    },
+    {
+      "at": "2026-11-14T15:59:31.310Z",
+      "plan": "602",
+      "text": "ask 602-1 answered by the human: approved: src/app/pages/settings/settings.page.spec.ts"
+    },
+    {
+      "at": "2026-11-14T15:59:42.932Z",
+      "plan": "602",
+      "text": "scope of plan 602 extended on orch/run-601 by the answer to 602-1: src/app/pages/settings/settings.page.spec.ts"
+    },
+    {
+      "at": "2026-11-14T16:01:42.778Z",
+      "plan": "602",
+      "text": "resumed from park/run-601-602: round 0, tier build, after: asking 602-1: replan needed: ESCALATE: scope src/app/pages/settings/settings.page.spec.ts — the existing test 'owner: the tab row fills the page width' (line 65"
+    },
+    {
+      "at": "2026-11-14T16:01:50.271Z",
+      "plan": "602",
+      "text": "the folder foodVibe1.0-orch-run-601-602 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T16:05:57.247Z",
+      "plan": "602",
+      "text": "builder left undone (round 0): [ui] items 602-1 to 602-6: written, not run; [human] items not ticked, as they are the Human's to check"
+    },
+    {
+      "at": "2026-11-14T16:10:59.891Z",
+      "plan": "603",
+      "text": "the folder foodVibe1.0-orch-run-601-603 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T16:15:52.363Z",
+      "plan": "603",
+      "text": "builder left undone (round 0): 603-1: written, not run; 603-2: written, not run; 603-3: written, not run; 603-4: written, not run; 603-5: written, not run"
+    },
+    {
+      "at": "2026-11-14T16:20:46.408Z",
+      "plan": "605",
+      "text": "the folder foodVibe1.0-orch-run-601-605 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T16:25:17.463Z",
+      "plan": "605",
+      "text": "builder left undone (round 0): [ui] 605-1: written, not run; [ui] 605-2: written, not run; [ui] 605-3: written, not run; [ui] 605-4: written, not run; Not run by me: the gate commands from CHECKS other than build, lint and test:ci (kit-manifest-check, scope-check, override-check, lint:icons, lint:no-native-select, plan-ledger-che"
+    },
+    {
+      "at": "2026-11-14T16:28:55.361Z",
+      "plan": "606",
+      "text": "ask 606-1 answered by the human: approved: docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-14T16:29:03.603Z",
+      "plan": "606",
+      "text": "scope of plan 606 extended on orch/run-601 by the answer to 606-1: docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-14T16:30:21.533Z",
+      "plan": "606",
+      "text": "resumed from park/run-601-606: round 1, tier build, after: asking 606-1: ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'unclassified: scripts/test/styleqa-sign-in.test.m"
+    },
+    {
+      "at": "2026-11-14T16:30:27.052Z",
+      "plan": "606",
+      "text": "the folder foodVibe1.0-orch-run-601-606 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T16:42:48.625Z",
+      "plan": "606",
+      "text": "builder left undone (round 1): [human] Run /styleqa venue-view and check the 375px screenshot shows the venue's details with no 'מיקום האירוע לא נמצא' notice: not run, left for the Human"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 4.2,
+  "updatedAt": "2026-11-14T16:53:20.415Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "602",
+      "type": "behaviour",
+      "text": "behaviour: the e2e specs for 602-5 and 602-6 only assert the 48px gap when the last card ends more than 48px above the viewport bottom (all cards fit on one screen), and skip with a message when there is no card — reverse: drop the fit condition in e2e/ui/602-5.spec.ts and 602-6.spec.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "602",
+      "type": "seen",
+      "text": "seen: scripts/test/fixtures/code-qa/app/src/app/app.routes.ts:12 — tsc reports TS2339 'MissingPage' does not exist. This looks like an intentional test fixture.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "603",
+      "type": "behaviour",
+      "text": "behaviour: also moved the .table-area--cards phone max-block-size to the same two tokens, since it repeated the old bar-only height — reverse: restore the old calc there",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-14T16:53:20.412Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-14T16:53:20.414Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

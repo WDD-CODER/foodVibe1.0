@@ -17,7 +17,22 @@ async function login(api) {
   }
 }
 
+/**
+ * Wraps request.get so a call to the API origin carries the bearer token; other origins stay untouched.
+ * Not setExtraHTTPHeaders: that would also hit page requests (cross-origin fonts would need a preflight).
+ */
+export function withApiAuth(request, apiOrigin, token) {
+  const original = request.get.bind(request)
+  request.get = (url, opts = {}) => {
+    if (!String(url).startsWith(apiOrigin)) return original(url, opts)
+    return original(url, { ...opts, headers: { ...(opts.headers || {}), authorization: `Bearer ${token}` } })
+  }
+  return request
+}
+
 export async function signIn(context, { appOrigin, apiOrigin }) {
   pending ??= login(apiOrigin)
-  await seedQaContext(context, await pending, appOrigin)
+  const session = await pending
+  await seedQaContext(context, session, appOrigin)
+  withApiAuth(context.request, apiOrigin, session.token)
 }
