@@ -1,6 +1,6 @@
 # Plan 609 — The list filter panel is only as tall as its content
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 602, 603
 Snapshot: 7c16fc4d620acf269f6d85dafccf9ac1d1e18777
