@@ -29,21 +29,29 @@ const REFRESH_COOKIE = process.env.NODE_ENV === 'development'
 // Rate limiters
 // ---------------------------------------------------------------------------
 
+// Development only: the live site runs NODE_ENV=production and keeps these per-IP limits. Local
+// servers share one IP (the Human, Playwright, QA), so they skip them. The account lockout
+// (5 wrong passwords -> 15 minutes) still applies in development.
+const skipInDevelopment = () => process.env.NODE_ENV === 'development';
+
 const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
+  skip: skipInDevelopment,
   message: 'Too many login attempts, please try again later',
 });
 
 const signupLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
+  skip: skipInDevelopment,
   message: 'Too many signup attempts, please try again later',
 });
 
 const refreshLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 30,
+  skip: skipInDevelopment,
   message: 'Too many refresh attempts, please try again later',
 });
 

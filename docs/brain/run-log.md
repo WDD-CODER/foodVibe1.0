@@ -2,6 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
+Earlier (12 runs): plans 27 · merged 20 · parked 6 · fix rounds 13 · escalations 5 · gate fails 1 · ✗ 6 · checker misses 0 — per run: plans 2.25 · parked 0.5 · fix rounds 1.08 · ✗ per plan 0.22
+
+| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 Earlier (10 runs): plans 25 · merged 16 · parked 9 · fix rounds 18 · escalations 6 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 2.5 · parked 0.9 · fix rounds 1.8 · ✗ per plan 0.4
 Earlier (2 runs): plans 4 · merged 4 · parked 0 · fix rounds 3 · escalations 1 · gate fails 1 · ✗ 2 · checker misses 0 — per run: plans 2 · parked 0 · fix rounds 1.5 · ✗ per plan 0.5
 
@@ -46,6 +50,7 @@ Earlier (14 runs): plans 35 · merged 28 · parked 6 · fix rounds 15 · escalat
 | 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
 | 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-14 | run-607 | 607,610 | 2 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
 | 2026-11-14 | run-604 | 604 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-600 | 600,612,613 | 3 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-15 | run-608 | 608 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |

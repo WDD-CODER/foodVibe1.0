@@ -85,9 +85,9 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 607-A1: Take the waiting-count badge out of the phone bottom bar — delete the badge block, tidy the aria-label — src/app/core/components/header/header.component.html
-- [ ] 607-A2: Drop the badge styles the bottom bar no longer uses — src/app/core/components/header/header.component.scss
-- [ ] 607-A3: Update the header spec and prove on a phone screen that the badge is gone — src/app/core/components/header/header.component.spec.ts, e2e/ui/607-1.spec.ts
+- [x] 607-A1: Take the waiting-count badge out of the phone bottom bar — delete the badge block, tidy the aria-label — src/app/core/components/header/header.component.html
+- [x] 607-A2: Drop the badge styles the bottom bar no longer uses — src/app/core/components/header/header.component.scss
+- [x] 607-A3: Update the header spec and prove on a phone screen that the badge is gone — src/app/core/components/header/header.component.spec.ts, e2e/ui/607-1.spec.ts
 
 ## Technical Considerations
 
@@ -105,3 +105,6 @@ none
 ## Execution Notes
 
 - decision: Human 2026-11-14 — "remove it in mobile from the nav".
+- pnpm run build -> exit 0; pnpm run lint -> exit 0
+- pnpm run test:ci -> first run 2 unrelated ExportService timeouts, rerun exit 0, 2191 SUCCESS
+- [ui] 607-1: written, not run (e2e/ui/607-1.spec.ts)
