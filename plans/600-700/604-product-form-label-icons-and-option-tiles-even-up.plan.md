@@ -1,6 +1,6 @@
 # Plan 604 — Product form label icons and option tiles even up, recipe ingredient rows breathe, form hints wrap cleanly
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 599
 Snapshot: d8b1f68494302471c8afa1da89e5ea6d3af5e8ef
