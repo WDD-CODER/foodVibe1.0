@@ -1662,8 +1662,13 @@ textarea.c-input {
 
 /* ---- Engine: Filter Panel Utilities ---- */
 .c-filter-section {
-  margin-block-end: 1rem;
   padding-block-end: 0.75rem;
+
+  /* Space only between sections (the Human, 2026-11-15): no margin after the last one,
+     so the filter panel ends at its content. */
+  & + & {
+    padding-block-start: 0.75rem;
+  }
 
   border-block-end: 1px solid var(--border-default);
 

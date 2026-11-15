@@ -41,6 +41,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 src/app/shared/list-shell/list-shell.component.scss
 e2e/ui/609-1.spec.ts
 e2e/ui/609-2.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -84,8 +85,8 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
-- [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
+- [x] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
+- [x] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
 
 ## Technical Considerations
 
@@ -102,3 +103,5 @@ none
 ## Execution Notes
 
 - decision: Human 2026-11-14 — "the filter takes the height it needs for its content and padding, and that's it, on all screens".
+- evidence: no other fixed block-size on .filter-panel (only phone max-block-size 40dvh, kept). [ui] specs written, not run.
+- evidence: removed duplicate styleqa-sign-in.mjs entry from manifest (answer 609-1 approved) → kit-manifest-check exit 0.
