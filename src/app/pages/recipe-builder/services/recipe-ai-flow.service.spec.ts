@@ -6,6 +6,8 @@ import { signal } from '@angular/core'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { AiRecipeDraftService } from '@services/ai-recipe-draft.service'
+import { GeminiShotsService } from '@services/gemini-shots.service'
+import { of } from 'rxjs'
 import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
 import { RecipeAiFlowService } from './recipe-ai-flow.service'
@@ -15,6 +17,7 @@ describe('RecipeAiFlowService.applyPendingDraft', () => {
   let service: RecipeAiFlowService
   let draftService: AiRecipeDraftService
   let recipeForm: FormGroup
+  let confirmShot: jasmine.Spy
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -22,6 +25,14 @@ describe('RecipeAiFlowService.applyPendingDraft', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         RecipeAiFlowService,
+        {
+          provide: GeminiShotsService,
+          useValue: {
+            confirmShot: (confirmShot = jasmine
+              .createSpy('confirmShot')
+              .and.returnValue(of({ confirmed: true, keptRatio: 1 })))
+          }
+        },
         {
           provide: KitchenStateService,
           useValue: {
@@ -82,5 +93,35 @@ describe('RecipeAiFlowService.applyPendingDraft', () => {
     expect(rows()[0].get('referenceId')?.value).toBeNull()
     expect(rows()[0].get('nameHebrew')?.value).toBe('עגבניות (קופסה)')
     expect(rows()[0].get('unit')?.value).toBe('unit')
+  })
+
+  describe('confirmAiShot', () => {
+    const draft = {
+      nameHebrew: 'רוטב',
+      recipe_type: 'preparation' as const,
+      yield_amount: 1,
+      yield_unit: 'kg',
+      ingredients: [{ name: 'עגבניות', amount: 2, unit: 'kg' }],
+      steps: []
+    }
+
+    it('confirms once with the key, the form snapshot and the recipe id', () => {
+      draftService.set(draft, 'shot-key-0001')
+      service.applyPendingDraft()
+      service.confirmAiShot('r1')
+      service.confirmAiShot('r1')
+      expect(confirmShot).toHaveBeenCalledTimes(1)
+      const [key, snapshot, id] = confirmShot.calls.mostRecent().args
+      expect(key).toBe('shot-key-0001')
+      expect(snapshot.nameHebrew).toBe('רוטב')
+      expect(id).toBe('r1')
+    })
+
+    it('never confirms without a key', () => {
+      draftService.set(draft)
+      service.applyPendingDraft()
+      service.confirmAiShot('r1')
+      expect(confirmShot).not.toHaveBeenCalled()
+    })
   })
 })

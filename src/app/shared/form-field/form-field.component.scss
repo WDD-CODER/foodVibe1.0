@@ -17,6 +17,7 @@
 
     color: var(--color-text-muted);
     font-size: var(--fs-xs);
+    text-wrap: balance;
   }
 
   :host(.form-field--full) {

@@ -1,6 +1,6 @@
 # Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page
 
-Status: draft
+Status: done
 Depends-on: 589
 Snapshot: 0f40a867dd90e11fa68c1588e3e13651e33f9e11
 
