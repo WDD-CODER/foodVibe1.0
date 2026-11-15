@@ -1,6 +1,6 @@
 # Plan 608 — The recipe ingredient amount stays fully visible on phones
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 604
 Snapshot: 7c16fc4d620acf269f6d85dafccf9ac1d1e18777

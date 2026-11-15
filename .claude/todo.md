@@ -219,10 +219,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 607-A2: Drop the badge styles the bottom bar no longer uses — src/app/core/components/header/header.component.scss
 - [ ] 607-A3: Update the header spec and prove on a phone screen that the badge is gone — src/app/core/components/header/header.component.spec.ts, e2e/ui/607-1.spec.ts
 
-### Plan 608 — The recipe ingredient amount stays fully visible on phones (`plans/design/608-the-recipe-ingredient-amount-stays-fully-visible-on-phones.plan.md`)
-- [ ] 608-A1: Give the phone amount box a floor so the typed number is always visible — quantity column minmax, input min size, button min size — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
-- [ ] 608-A2: Prove at 320px and 375px that the amount and the − / + buttons keep their size — e2e/ui/608-1.spec.ts
-
 ### Plan 609 — The list filter panel is only as tall as its content (`plans/design/609-the-list-filter-panel-is-only-as-tall-as.plan.md`)
 - [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
 - [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
