@@ -1,6 +1,6 @@
 # Plan 606 — Style QA opens real records of the signed-in business on detail pages
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: d8b1f68494302471c8afa1da89e5ea6d3af5e8ef
 ## Problem Statement
@@ -48,6 +48,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 scripts/qa/lib/styleqa-sign-in.mjs
 scripts/test/styleqa-sign-in.test.mjs
 docs/qa/styleqa-pages.json
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -107,9 +108,9 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
-- [ ] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
-- [ ] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
+- [x] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
+- [x] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
+- [x] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
 
 ## Technical Considerations
 
@@ -130,3 +131,7 @@ touching any milestone.
 - none
 
 ## Execution Notes
+- node --test scripts/test/styleqa-sign-in.test.mjs -> exit 0, pass 3, fail 0
+- pnpm run test:scripts -> exit 0; pnpm run build -> exit 0
+- node scripts/styleqa/run.mjs --list -> line `client-detail — פרטי לקוח`; --layers=static -> `map check ok`
+- scope extended: docs/workflow-kit/manifest.json — approved (606-1); classified the new test; kit-manifest-check -> ok

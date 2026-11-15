@@ -11,6 +11,7 @@ import { DateFieldComponent } from './date-field.component'
     [(value)]="iso_"
     [(invalid)]="bad_"
     [disabled]="disabled_()"
+    [variant]="variant_()"
     (committed)="commits_.push($event)"
   />`
 })
@@ -18,6 +19,7 @@ class HostComponent {
   readonly iso_ = signal('')
   readonly bad_ = signal(false)
   readonly disabled_ = signal(false)
+  readonly variant_ = signal<'filled' | 'outline'>('filled')
   readonly commits_: string[] = []
 }
 
@@ -50,6 +52,13 @@ describe('DateFieldComponent', () => {
 
   beforeEach(async () => {
     await create(false)
+  })
+
+  it('adds the outline class only when the variant is outline', () => {
+    expect(text().classList.contains('c-input--outline')).toBeFalse()
+    host.variant_.set('outline')
+    fixture.detectChanges()
+    expect(text().classList.contains('c-input--outline')).toBeTrue()
   })
 
   it('keeps the hidden picker 1px high inside a .c-input-stack wrapper', () => {

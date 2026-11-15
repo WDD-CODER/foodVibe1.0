@@ -2,10 +2,13 @@
 
 :host {
   display: block;
+  padding-block: var(--space-6);
+  padding-inline: var(--space-4);
 }
 
 .equipment-form-container {
-  max-width: 35rem;
+  max-inline-size: 35rem;
+  margin-inline: auto;
   padding: 1.5rem;
   background: var(--bg-glass-strong);
   border: 1px solid var(--border-glass);
