@@ -271,7 +271,7 @@
 
     padding: 0.5rem 1rem 1rem;
 
-    min-height: 12.5rem;
+    min-block-size: fit-content;
 
     transition:
       opacity 0.25s var(--ease-spring),
