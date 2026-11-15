@@ -171,11 +171,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 604-A1: Shrink the product form's category and field label icons to match the other small icons — [size]="16" on the tags icon and the five expanded-label icons — src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
-- [ ] 604-A2: Make the five product option tiles even, icons centred, none alone on its row — header min-block-size 4rem + align-items center; 5 cols above 768px, 2 cols with odd last tile spanning below — src/app/pages/inventory/components/product-form/product-form.component.scss
-- [ ] 604-A3: Space the phone ingredient card evenly and line the cost up under the trash button — container-query grid columns, column-gap, stepper 2rem, cost flex-end — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
-- [ ] 604-A4: Balance the line breaks of form hints so no single word sits alone — text-wrap: balance on .form-field__hint — src/app/shared/form-field/form-field.component.scss, src/app/shared/form-field/form-field.component.spec.ts
-- [ ] 604-A5: Prove the icon size, tile evenness, ingredient spacing and hint wrap in the running app — e2e/ui/604-1.spec.ts, e2e/ui/604-2.spec.ts, e2e/ui/604-3.spec.ts, e2e/ui/604-4.spec.ts
+- [x] 604-A1: Shrink the product form's category and field label icons to match the other small icons — [size]="16" on the tags icon and the five expanded-label icons — src/app/pages/inventory/components/product-form/product-form.component.html, src/app/pages/inventory/components/product-form/product-form.component.spec.ts
+- [x] 604-A2: Make the five product option tiles even, icons centred, none alone on its row — header min-block-size 4rem + align-items center; 5 cols above 768px, 2 cols with odd last tile spanning below — src/app/pages/inventory/components/product-form/product-form.component.scss
+- [x] 604-A3: Space the phone ingredient card evenly and line the cost up under the trash button — container-query grid columns, column-gap, stepper 2rem, cost flex-end — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
+- [x] 604-A4: Balance the line breaks of form hints so no single word sits alone — text-wrap: balance on .form-field__hint — src/app/shared/form-field/form-field.component.scss, src/app/shared/form-field/form-field.component.spec.ts
+- [x] 604-A5: Prove the icon size, tile evenness, ingredient spacing and hint wrap in the running app — e2e/ui/604-1.spec.ts, e2e/ui/604-2.spec.ts, e2e/ui/604-3.spec.ts, e2e/ui/604-4.spec.ts
 
 ## Technical Considerations
 
@@ -202,3 +202,5 @@ touching any milestone.
 none
 
 ## Execution Notes
+- pnpm run build -> 0; pnpm run lint -> 0 (0 errors); pnpm run test:ci -> 0, 2191 SUCCESS; log-query -> 0 (no database configured, skipped)
+- [ui] 604-1..604-4: written, not run

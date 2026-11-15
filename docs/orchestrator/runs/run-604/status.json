@@ -1,0 +1,126 @@
+{
+  "run": "run-604",
+  "branch": "orch/run-604",
+  "base": "main",
+  "startedAt": "2026-11-14T15:00:05.027Z",
+  "mainShaAtStart": "7c16fc4d620acf269f6d85dafccf9ac1d1e18777",
+  "plans": {
+    "604": {
+      "nnn": "604",
+      "title": "Product form label icons and option tiles even up, recipe ingredient rows breathe, form hints wrap cleanly",
+      "branch": "feat/604-product-form-label-icons",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T15:02:58.819Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T15:15:42.675Z"
+        }
+      },
+      "humanItems": [
+        "On a phone (or a 375px window), the product form's category label looks like the other labels, and the",
+        "Nothing else moved: the product form's name, price, unit and purchase-unit rows look the same, the recipe"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T15:02:58.550Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:02:58.822Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:11:55.663Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:15:34.130Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:15:42.676Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:15:53.677Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T15:18:38.260Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 5.8,
+      "sha": "3402e2d79530fa6b829ff28bfa9c4c19adeed569",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 533.2,
+          "tokens": {
+            "input": 185403,
+            "output": 6566
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.3,
+          "tokens": {
+            "input": 30785,
+            "output": 684
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "e4fa86f764ad2b9cc481f45abc5c14925117766a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-14T15:02:58.263Z",
+      "plan": "604",
+      "text": "the folder foodVibe1.0-orch-run-604-604 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T15:11:52.274Z",
+      "plan": "604",
+      "text": "builder left undone (round 0): 604-1: written, not run; 604-2: written, not run; 604-3: written, not run; 604-4: written, not run"
+    },
+    {
+      "at": "2026-11-14T15:16:07.679Z",
+      "plan": "604",
+      "text": "the folder foodVibe1.0-orch-merge-run-604 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 5.8,
+  "updatedAt": "2026-11-14T15:25:03.682Z",
+  "finishedAt": "2026-11-14T15:25:03.679Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-14T15:25:03.681Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
