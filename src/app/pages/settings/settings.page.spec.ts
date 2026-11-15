@@ -62,7 +62,8 @@ describe('SettingsPage', () => {
       const rail = tabs.querySelector('app-scroll-rail') as HTMLElement
       expect(getComputedStyle(tabs).justifyContent).toBe('center')
       expect(getComputedStyle(rail).flexGrow).toBe('1')
-      expect(rail.getBoundingClientRect().width).toBeGreaterThan(host.getBoundingClientRect().width / 2)
+      const shell = host.querySelector('.settings-shell') as HTMLElement
+      expect(rail.getBoundingClientRect().width).toBeGreaterThan(shell.getBoundingClientRect().width / 2)
     } finally {
       host.remove()
     }

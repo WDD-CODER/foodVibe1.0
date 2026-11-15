@@ -5,6 +5,17 @@
   align-items: center;
 
   min-inline-size: 0;
+
+  --sr-arrow-size: 1.75rem;
+  --sr-arrow-room: max(
+    0px,
+    calc(var(--sr-arrow-size) + var(--rail-arrow-gap, 0.25rem) - var(--rail-arrow-offset, 0px))
+  );
+}
+
+// Overflowing rail: keep one arrow's width free on both sides so no chip sits under an arrow.
+:host(.is-overflowing) {
+  padding-inline: var(--sr-arrow-room);
 }
 
 .sr-scroller {
@@ -65,8 +76,8 @@
   display: grid;
   place-content: center;
 
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
+  inline-size: var(--sr-arrow-size);
+  block-size: var(--sr-arrow-size);
   padding: 0;
 
   color: var(--color-text-main);

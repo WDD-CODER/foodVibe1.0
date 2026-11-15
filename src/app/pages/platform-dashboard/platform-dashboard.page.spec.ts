@@ -9,11 +9,15 @@ import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
+import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformDashboardPage } from './platform-dashboard.page'
 
 @Component({ selector: 'app-platform-logistics-items', standalone: true, template: '' })
 class StubLogisticsItemsComponent {}
+
+@Component({ selector: 'app-platform-ai-shots', standalone: true, template: '' })
+class StubAiShotsComponent {}
 
 const DAY = 86_400_000
 const FAIL_TEXTS: Record<string, string> = {
@@ -118,8 +122,8 @@ describe('PlatformDashboardPage', () => {
     })
     // The logistics list (plan 532) has its own spec; here it is an empty stub.
     TestBed.overrideComponent(PlatformDashboardPage, {
-      remove: { imports: [PlatformLogisticsItemsComponent] },
-      add: { imports: [StubLogisticsItemsComponent] }
+      remove: { imports: [PlatformLogisticsItemsComponent, PlatformAiShotsComponent] },
+      add: { imports: [StubLogisticsItemsComponent, StubAiShotsComponent] }
     })
     fixture = TestBed.createComponent(PlatformDashboardPage)
     fixture.detectChanges()

@@ -6,6 +6,7 @@ const { newId } = require('../utils/id')
 const User = require('../models/user.model')
 const { businessSchema, EVENT_STAGES } = require('../generated/schemas/entities')
 const { getMasterVersion } = require('./master-version')
+const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
 
 const col = () => mongoose.connection.db.collection('businesses')
 
@@ -77,6 +78,18 @@ async function setStaffVisibleStages(id, stages) {
   return { matchedCount: result.matchedCount, staffVisibleStages }
 }
 
+/** Plan 600: sets the owner's consent to share AI examples; turning it off also deletes this business's shared copies. */
+async function setShareAiExamples(id, share) {
+  const result = await col().updateOne({ _id: String(id) }, { $set: { shareAiExamples: share } })
+  let removed = 0
+  if (result.matchedCount && !share) {
+    const del = await mongoose.connection.db.collection('GEMINI_SHOTS')
+      .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': String(id) })
+    removed = del.deletedCount
+  }
+  return { matchedCount: result.matchedCount, shareAiExamples: share, removed }
+}
+
 /** Plan 579: replaces the business's hidden logistics keys; a key already listed keeps its `at`, a new one gets now. */
 async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
   const business = await col().findOne({ _id: String(id) }, { projection: { hiddenLogisticsKeys: 1 } })
@@ -87,4 +100,4 @@ async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
   return { matchedCount: result.matchedCount, hiddenLogisticsKeys }
 }
 
-module.exports = { setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+module.exports = { setShareAiExamples, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

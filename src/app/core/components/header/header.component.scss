@@ -339,6 +339,41 @@
   pointer-events: none;
 }
 
+// ─── NARROW TABLET (621px – 1023px) — one row; pills scroll sideways ───────
+@media (min-width: 621px) and (max-width: 1023px) {
+  .header-nav {
+    height: 3.875rem;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  .nav-pills {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+    scrollbar-width: thin;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-pill {
+    flex: 0 0 auto;
+  }
+
+  .auth-section,
+  .brand-section {
+    flex: 0 0 auto;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 767px) {
+  .brand-mark__name {
+    display: none;
+  }
+}
+
 // ─── TABLET (768px – 1023px) — inline nav pills with tighter padding ───────
 @media (min-width: 768px) and (max-width: 1023px) {
   .header-nav {
@@ -475,17 +510,6 @@
       max-inline-size: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .bottom-nav__icon {
-      position: relative;
-      display: inline-flex;
-
-      .c-chip__count {
-        position: absolute;
-        inset-block-start: -0.375rem;
-        inset-inline-end: -0.625rem;
-      }
     }
 
     .bottom-nav__profile {

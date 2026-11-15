@@ -65,7 +65,12 @@
       <div class="filter-item date-range-wrap">
         <span class="date-range-label">{{ 'menu_date_from' | translatePipe }}</span>
         <div class="date-input-wrap">
-          <app-date-field inputId="menu-library-date-from" ariaLabelKey="menu_date_from" [(value)]="dateFrom_" />
+          <app-date-field
+            inputId="menu-library-date-from"
+            ariaLabelKey="menu_date_from"
+            variant="outline"
+            [(value)]="dateFrom_"
+          />
         </div>
       </div>
 

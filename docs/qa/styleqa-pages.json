@@ -201,6 +201,16 @@
       "auth": true
     },
     {
+      "slug": "client-detail",
+      "aliases": [],
+      "title": "פרטי לקוח",
+      "routes": [
+        "/clients/:id"
+      ],
+      "auth": true,
+      "idType": "/api/v1/data/clients?limit=1"
+    },
+    {
       "slug": "requests",
       "aliases": [
         "פניות"
@@ -290,10 +300,6 @@
     }
   ],
   "excluded": [
-    {
-      "route": "/clients/:id",
-      "why": "the clients API needs a signed-in request; the engine fetches the id without one"
-    },
     {
       "route": "/book/:slug",
       "why": "public booking page needs a business slug, not a record id"

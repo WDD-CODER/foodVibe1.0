@@ -182,18 +182,9 @@
     routerLink="/clients"
     routerLinkActive="active"
     (click)="closeMobileMenu()"
-    [attr.aria-label]="
-      waitingCount_() > 0
-        ? ('frontdesk_section' | translatePipe) + ' — ' + waitingLabel_()
-        : ('frontdesk_section' | translatePipe)
-    "
+    [attr.aria-label]="'frontdesk_section' | translatePipe"
   >
-    <span class="bottom-nav__icon">
-      <lucide-icon name="users" [size]="22"></lucide-icon>
-      @if (waitingCount_() > 0) {
-        <span class="c-chip__count" aria-hidden="true">{{ waitingCount_() }}</span>
-      }
-    </span>
+    <lucide-icon name="users" [size]="22"></lucide-icon>
     <span class="bottom-nav__label">{{ 'nav_short_frontdesk' | translatePipe }}</span>
   </a>
 </nav>

@@ -1,3 +1,4 @@
+import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
@@ -175,7 +176,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
   })
 })
 
-describe('HeaderComponent phone bottom bar labels (plan 597)', () => {
+describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
   let fixture: ComponentFixture<HeaderComponent>
 
   beforeEach(async () => {
@@ -212,5 +213,34 @@ describe('HeaderComponent phone bottom bar labels (plan 597)', () => {
     for (const k of fullKeys) expect(labels).not.toContain(dict(k))
     const clients = host.querySelector('.bottom-nav a[href="/clients"]')
     expect(clients?.getAttribute('aria-label')).toBe(dict('frontdesk_section'))
+  })
+})
+
+describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
+  it('renders no count in the bottom bar and still renders it in the top nav', async () => {
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        provideRouter([]),
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(3) } },
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => false,
+            user_: signal(null),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            logout: () => of(null)
+          }
+        }
+      ]
+    }).compileComponents()
+    const fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelectorAll('.bottom-nav .c-chip__count').length).toBe(0)
+    expect(host.querySelector('[data-testid="header-waiting-count"]')?.textContent?.trim()).toBe('3')
+    const label = host.querySelector('.bottom-nav a[href="/clients"]')?.getAttribute('aria-label')
+    expect(label).not.toContain('3')
   })
 })

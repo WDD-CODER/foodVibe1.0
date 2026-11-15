@@ -78,14 +78,29 @@ export class GeminiShotsService {
   saveShot(
     prompt: string,
     draft: AiRecipeDraft,
-    status: 'approved' | 'rejected',
-    source: 'text' | 'image' | 'url'
+    status: 'pending' | 'rejected',
+    source: 'text' | 'image' | 'url',
+    shotKey?: string
   ): Observable<{ saved: boolean; warnings: string[] }> {
     return this.http_.post<{ saved: boolean; warnings: string[] }>(`${this.authBase_}${API.ai('shots')}`, {
       prompt,
       draft,
       status,
-      source
+      source,
+      ...(shotKey && { shotKey })
+    })
+  }
+
+  /** Plan 600: the recipe was saved — the pending example becomes an approved one with the draft as saved. */
+  confirmShot(
+    shotKey: string,
+    draft: AiRecipeDraft,
+    recipeId: string
+  ): Observable<{ confirmed: boolean; keptRatio: number }> {
+    return this.http_.post<{ confirmed: boolean; keptRatio: number }>(`${this.authBase_}${API.ai('shots/confirm')}`, {
+      shotKey,
+      draft,
+      recipeId
     })
   }
 }

@@ -12,7 +12,7 @@
 .menu-library-container {
   display: block;
 
-  max-inline-size: 56.25rem;
+  max-inline-size: 75rem;
 
   background: var(--bg-glass-strong);
 
@@ -32,18 +32,22 @@
   margin-block-end: 1.25rem;
 }
 
+$break-mobile: 768px; // mirrors src/styles.scss
+
 // Borderless — blends into the page background, matching the design's filter
 // row (no card chrome here; the event cards below carry the glass treatment).
 .filters-bar {
-  display: flex;
-  flex-wrap: wrap;
-  place-content: center;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.5fr);
+  align-items: end;
+  gap: var(--space-4);
   margin-block-end: 1.5rem;
-  padding: 0.5rem 1rem;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
 }
 
 .filter-item {
+  min-inline-size: 0;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -72,6 +76,10 @@
   }
 }
 
+.filter-item app-custom-select {
+  inline-size: 100%;
+}
+
 .date-range-wrap {
   .date-range-label {
     display: block;
@@ -93,9 +101,16 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+
+    app-custom-select {
+      flex: 1 1 auto;
+      min-inline-size: 0;
+    }
   }
 
   .sort-order-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -301,7 +316,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-mobile) {
   :host {
     padding-inline: var(--space-3);
     padding-block: var(--space-3);
@@ -313,16 +328,8 @@
   }
 
   .filters-bar {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
-
-    .filter-item {
-      width: 100%;
-    }
-
-    .date-range-wrap {
-      width: 100%;
-    }
   }
 
   .event-card {
@@ -340,7 +347,6 @@
 }
 
 // The FAB carries "פנייה חדשה" on phones; the header button would not fit next to the title.
-$break-mobile: 768px; // mirrors src/styles.scss
 @media (max-width: $break-mobile) {
   .header-inquiry-btn {
     display: none;
