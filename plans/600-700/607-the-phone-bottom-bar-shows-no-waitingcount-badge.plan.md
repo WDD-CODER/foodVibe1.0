@@ -1,6 +1,6 @@
 # Plan 607 — The phone bottom bar shows no waiting-count badge
 
-Status: draft
+Status: done
 Track: design
 Depends-on: 597
 Snapshot: 7c16fc4d620acf269f6d85dafccf9ac1d1e18777

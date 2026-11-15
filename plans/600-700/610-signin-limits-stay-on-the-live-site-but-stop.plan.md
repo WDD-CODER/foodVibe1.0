@@ -1,6 +1,6 @@
 # Plan 610 — Sign-in limits stay on the live site but stop blocking local development
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 7c16fc4d620acf269f6d85dafccf9ac1d1e18777
 ## Problem Statement

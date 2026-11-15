@@ -180,18 +180,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 
 - [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
 
-### Plan 607 — The phone bottom bar shows no waiting-count badge (`plans/design/607-the-phone-bottom-bar-shows-no-waitingcount-badge.plan.md`)
-- [ ] 607-A1: Take the waiting-count badge out of the phone bottom bar — delete the badge block, tidy the aria-label — src/app/core/components/header/header.component.html
-- [ ] 607-A2: Drop the badge styles the bottom bar no longer uses — src/app/core/components/header/header.component.scss
-- [ ] 607-A3: Update the header spec and prove on a phone screen that the badge is gone — src/app/core/components/header/header.component.spec.ts, e2e/ui/607-1.spec.ts
-
 ### Plan 609 — The list filter panel is only as tall as its content (`plans/design/609-the-list-filter-panel-is-only-as-tall-as.plan.md`)
 - [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
 - [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
-
-### Plan 610 — Sign-in limits stay on the live site but stop blocking local development (`plans/610-signin-limits-stay-on-the-live-site-but-stop.plan.md`)
-- [ ] 610-A1: Skip the sign-in, sign-up and refresh limits when the server runs in development — skip option on the three limiters — server/routes/auth.js
-- [ ] 610-A2: Prove the limits are off in development and still on in production — server/test/auth-limit-dev.test.js
 
 ### Plan 611 — Platform business table becomes the app's standard grid with the phone column carousel (`plans/design/611-platform-business-table-becomes-the-apps-standard-grid-with.plan.md`)
 - [ ] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
