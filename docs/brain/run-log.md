@@ -6,6 +6,9 @@ Earlier (12 runs): plans 27 · merged 20 · parked 6 · fix rounds 13 · escalat
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 Earlier (10 runs): plans 25 · merged 16 · parked 9 · fix rounds 18 · escalations 6 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 2.5 · parked 0.9 · fix rounds 1.8 · ✗ per plan 0.4
 Earlier (2 runs): plans 4 · merged 4 · parked 0 · fix rounds 3 · escalations 1 · gate fails 1 · ✗ 2 · checker misses 0 — per run: plans 2 · parked 0 · fix rounds 1.5 · ✗ per plan 0.5
 
@@ -44,6 +47,9 @@ Earlier (14 runs): plans 35 · merged 28 · parked 6 · fix rounds 15 · escalat
 | 2026-11-12 | run-594 | 594 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-13 | batch-5 | 553,554,555,556,557,559,580 | 7 | 0 | - | 3 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-593 | 593 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
+| 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-14 | run-611 | 611 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
 | 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-601 | 601,602,603,605,606 | 5 | 0 | - | 2 | 2 | 1 | ok | - | - | - |
 | 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | - | - | - |

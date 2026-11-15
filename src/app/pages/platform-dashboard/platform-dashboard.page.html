@@ -37,74 +37,112 @@
     </div>
   </div>
 
-  <div class="table-scroll c-glass-panel">
-    <table class="platform-table">
-      <thead>
-        <tr>
-          @for (col of columns; track col.key) {
-          <th scope="col" [attr.aria-sort]="ariaSort(col.key)" [class.sticky-col]="col.key === 'name'">
+  <div class="platform-grid-scroll c-glass-panel">
+    <div
+      class="platform-grid"
+      role="table"
+      appColumnCarouselGroup
+      [attr.aria-label]="'platform_dashboard' | translatePipe"
+    >
+      <div class="c-list-row" role="row">
+        <div
+          class="col-name c-grid-header-cell c-sortable-header"
+          role="columnheader"
+          [attr.aria-sort]="ariaSort('name')"
+        >
+          <button type="button" class="sort-btn" (click)="sortBy('name')">
+            {{ "platform_col_business" | translatePipe }}
+            <lucide-icon name="arrow-up-down" [size]="12"></lucide-icon>
+          </button>
+        </div>
+        <app-column-carousel-header>
+          @for (col of carouselColumns; track col.key) {
+          <div
+            class="c-grid-header-cell c-sortable-header"
+            appColumnSlide
+            [label]="col.labelKey"
+            role="columnheader"
+            [attr.aria-sort]="ariaSort(col.key)"
+          >
             <button type="button" class="sort-btn" (click)="sortBy(col.key)">
               {{ col.labelKey | translatePipe }}
               <lucide-icon name="arrow-up-down" [size]="12"></lucide-icon>
             </button>
-          </th>
+          </div>
           }
-          <th scope="col">{{ "platform_frontdesk_col" | translatePipe }}</th>
-          <th scope="col">{{ "platform_col_fd_requests" | translatePipe }}</th>
-          <th scope="col">{{ "platform_col_fd_median" | translatePipe }}</th>
-          <th scope="col">{{ "platform_col_fd_no_show" | translatePipe }}</th>
-          <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
-          <th scope="col">{{ "platform_col_report" | translatePipe }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of sortedRows_(); track row._id) {
-        <tr [class]="idleClass(row)">
-          <th scope="row" class="sticky-col">
-            {{ row.name }} @if (idleClass(row) === "is-idle-14") {
-            <span class="idle-label">{{ "platform_idle_14" | translatePipe }}</span>
-            } @else if (idleClass(row) === "is-idle-7") {
-            <span class="idle-label">{{ "platform_idle_7" | translatePipe }}</span>
-            }
-          </th>
-          <td>{{ row.ownerName ?? "—" }}</td>
-          <td>{{ row.staffCount }}</td>
-          <td>{{ row.createdAt ? (row.createdAt | date: "dd/MM/yyyy") : "—" }}</td>
-          <td>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_frontdesk_col" role="columnheader">
+            {{ "platform_frontdesk_col" | translatePipe }}
+          </div>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_col_fd_requests" role="columnheader">
+            {{ "platform_col_fd_requests" | translatePipe }}
+          </div>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_col_fd_median" role="columnheader">
+            {{ "platform_col_fd_median" | translatePipe }}
+          </div>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_col_fd_no_show" role="columnheader">
+            {{ "platform_col_fd_no_show" | translatePipe }}
+          </div>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_col_internal" role="columnheader">
+            {{ "platform_col_internal" | translatePipe }}
+          </div>
+        </app-column-carousel-header>
+        <div class="col-actions c-col-actions c-grid-header-cell" role="columnheader">
+          {{ "actions" | translatePipe }}
+        </div>
+      </div>
+      @for (row of sortedRows_(); track row._id) {
+      <div
+        class="platform-row c-list-row"
+        role="row"
+        data-testid="biz-row"
+        [class.is-idle-7]="idleClass(row) === 'is-idle-7'"
+        [class.is-idle-14]="idleClass(row) === 'is-idle-14'"
+      >
+        <div class="col-name c-list-body-cell" role="rowheader" data-testid="biz-name">
+          {{ row.name }} @if (idleClass(row) === "is-idle-14") {
+          <span class="idle-label">{{ "platform_idle_14" | translatePipe }}</span>
+          } @else if (idleClass(row) === "is-idle-7") {
+          <span class="idle-label">{{ "platform_idle_7" | translatePipe }}</span>
+          }
+        </div>
+        <app-column-carousel-cell>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_owner">{{ row.ownerName ?? "—" }}</div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_staff">{{ row.staffCount }}</div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_joined">
+            {{ row.createdAt ? (row.createdAt | date: "dd/MM/yyyy") : "—" }}
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_last_activity">
             @if (row.lastActivityAt) { {{ row.lastActivityAt | date: "dd/MM/yyyy" }} } @else { {{ "never" |
             translatePipe }} }
-          </td>
-          <td>{{ row.activeDays7 }}</td>
-          <td>{{ row.events.total }}</td>
-          <td>{{ row.events.active }}</td>
-          <td>{{ row.events.closed }}</td>
-          <td>{{ row.events.finished }}</td>
-          <td>{{ rate(row.closeRate) }}</td>
-          <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
-          <td data-testid="frontdesk-cell">
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_active_days_7">{{ row.activeDays7 }}</div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_events_total">{{ row.events.total }}</div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_events_active">{{ row.events.active }}</div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_events_closed">{{ row.events.closed }}</div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_events_finished">
+            {{ row.events.finished }}
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_close_rate" data-testid="close-rate">
+            {{ rate(row.closeRate) }}
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_last_event">
+            {{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_frontdesk_col" data-testid="frontdesk-cell">
             @if (row.frontDesk; as fd) { {{ fd.done }}/{{ fd.total }} · {{ "fd_status_" + fd.status | translatePipe }} ·
             <span data-testid="fd-level">{{ "fd_assistant_level_" + (fd.assistantLevel ?? 0) | translatePipe }}</span>
-            <button type="button" class="c-btn-ghost" data-testid="fd-edit" (click)="editFrontDesk(row)">
-              <lucide-icon name="pencil" [size]="14"></lucide-icon>
-              <span class="btn-label">{{ "platform_fd_edit" | translatePipe }}</span>
-            </button>
             } @else { — }
-          </td>
-          <td data-testid="fd-requests" class="c-num">{{ fdNumber(fdStats_().get(row._id)?.requests) }}</td>
-          <td data-testid="fd-median" class="c-num">
+          </div>
+          <div class="c-list-body-cell c-num" appColumnSlide label="platform_col_fd_requests" data-testid="fd-requests">
+            {{ fdNumber(fdStats_().get(row._id)?.requests) }}
+          </div>
+          <div class="c-list-body-cell c-num" appColumnSlide label="platform_col_fd_median" data-testid="fd-median">
             {{ fdNumber(fdStats_().get(row._id)?.medianMinutesToDecision) }}
-          </td>
-          <td data-testid="fd-no-show" class="c-num">{{ fdNumber(fdStats_().get(row._id)?.noShowRatePct) }}</td>
-          <td>
-            <a
-              class="report-link"
-              data-testid="report-link"
-              routerLink="/report"
-              [queryParams]="{ businessId: row._id }"
-              >{{ "platform_col_report" | translatePipe }}</a
-            >
-          </td>
-          <td>
+          </div>
+          <div class="c-list-body-cell c-num" appColumnSlide label="platform_col_fd_no_show" data-testid="fd-no-show">
+            {{ fdNumber(fdStats_().get(row._id)?.noShowRatePct) }}
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_internal">
             <input
               type="checkbox"
               class="internal-toggle"
@@ -112,11 +150,33 @@
               [attr.aria-label]="'platform_col_internal' | translatePipe"
               (change)="toggleInternal(row, $event)"
             />
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+          </div>
+        </app-column-carousel-cell>
+        <app-row-actions-menu class="col-actions c-col-actions c-list-body-cell" role="cell">
+          <a
+            class="c-icon-btn"
+            data-testid="report-link"
+            routerLink="/report"
+            [queryParams]="{ businessId: row._id }"
+            [attr.aria-label]="'platform_col_report' | translatePipe"
+          >
+            <lucide-icon name="trending-up" [size]="16"></lucide-icon>
+          </a>
+          @if (row.frontDesk) {
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="fd-edit"
+            (click)="editFrontDesk(row)"
+            [attr.aria-label]="'platform_fd_edit' | translatePipe"
+          >
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          </button>
+          }
+        </app-row-actions-menu>
+      </div>
+      }
+    </div>
   </div>
   <button type="button" class="c-btn-ghost--sm" data-testid="fd-export-csv" (click)="exportFrontDeskCsv()">
     <lucide-icon name="download" [size]="14"></lucide-icon>

@@ -1,0 +1,154 @@
+{
+  "run": "run-611",
+  "branch": "orch/run-611",
+  "base": "main",
+  "startedAt": "2026-11-14T17:46:30.302Z",
+  "mainShaAtStart": "9d301459d2e43644ca2b5d8b43cf380d3032d72c",
+  "plans": {
+    "611": {
+      "nnn": "611",
+      "title": "Platform business table becomes the app's standard grid with the phone column carousel",
+      "branch": "feat/611-platform-business-table-becomes",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-14T17:48:47.354Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-14T18:02:46.214Z"
+        }
+      },
+      "humanItems": [
+        "Signed in as the platform admin, `/platform` at 1366px and on a phone (or a 375px window): the business table",
+        "Nothing else moved: the totals tiles above the table, the CSV export button, the AI usage table (and its"
+      ],
+      "history": [
+        {
+          "at": "2026-11-14T17:48:47.165Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T17:48:47.356Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T17:59:28.079Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T18:02:36.617Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T18:02:46.216Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T18:03:01.181Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-14T18:04:52.950Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3,
+      "sha": "4870c9b369819ebdcf2f349961b08f6680d2184c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 637.8,
+          "tokens": {
+            "input": 966244,
+            "output": 17567
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.1,
+          "tokens": {
+            "input": 37228,
+            "output": 1388
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "fac158b10c157469700ad344a192127a5b698158"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-14T17:48:46.990Z",
+      "plan": "611",
+      "text": "the folder foodVibe1.0-orch-run-611-611 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-14T17:59:25.383Z",
+      "plan": "611",
+      "text": "builder left undone (round 0): [ui] 611-1: written, not run; [ui] 611-2: written, not run; The [human] items are not ticked"
+    },
+    {
+      "at": "2026-11-14T18:03:20.504Z",
+      "plan": "611",
+      "text": "the folder foodVibe1.0-orch-merge-run-611 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 3,
+  "updatedAt": "2026-11-14T18:11:27.678Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "611",
+      "type": "behaviour",
+      "text": "behaviour: the two [ui] e2e specs skip with a message when the QA user is not a platform admin or there are no business rows (the plan's own instruction) — reverse: remove the test.skip lines",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "611",
+      "type": "behaviour",
+      "text": "behaviour: the spec adds TrendingUp to its Lucide icon pick, because the report-link icon is registered in app.config.ts but not in TEST_LUCIDE_ICONS, which is outside scope — reverse: drop the import in the spec and move the icon into the shared test pick",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-14T18:11:27.675Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-14T18:11:27.677Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

@@ -16,6 +16,8 @@ import { FrontDeskAdminDialogComponent } from './components/front-desk-admin-dia
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { formatPctInt } from 'src/app/core/engine/rounding'
 
 export type SortKey =
@@ -70,7 +72,9 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     EmptyStateComponent,
     PlatformLogisticsItemsComponent,
     PlatformAiShotsComponent,
-    FrontDeskAdminDialogComponent
+    FrontDeskAdminDialogComponent,
+    ...COLUMN_CAROUSEL,
+    RowActionsMenuComponent
   ],
   templateUrl: './platform-dashboard.page.html',
   styleUrl: './platform-dashboard.page.scss',
@@ -108,6 +112,8 @@ export class PlatformDashboardPage implements OnInit {
     { key: 'closeRate', labelKey: 'platform_col_close_rate' },
     { key: 'lastEventDate', labelKey: 'platform_col_last_event' }
   ]
+  /** The sortable columns after the pinned name column; the phone carousel shows one at a time. */
+  protected readonly carouselColumns: Column[] = this.columns.slice(1)
 
   // 5. COMPUTED
   protected readonly rows_ = this.platformAdmin.rows_

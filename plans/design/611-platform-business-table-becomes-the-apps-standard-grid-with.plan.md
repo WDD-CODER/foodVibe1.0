@@ -188,12 +188,12 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
-- [ ] 611-A2: Keep the pinned name column above anything that scrolls under it, with opaque idle tints — z-index 1/2 and solid backgrounds outside the page layer — src/app/pages/platform-dashboard/platform-dashboard.page.scss
-- [ ] 611-A3: Show one swipeable column at a time on phones, like the other lists — COLUMN_CAROUSEL header + cells, carouselColumns field — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
-- [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
-- [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
-- [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
+- [x] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [x] 611-A2: Keep the pinned name column above anything that scrolls under it, with opaque idle tints — z-index 1/2 and solid backgrounds outside the page layer — src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [x] 611-A3: Show one swipeable column at a time on phones, like the other lists — COLUMN_CAROUSEL header + cells, carouselColumns field — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [x] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [x] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
+- [x] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
 
 ## Technical Considerations
 
@@ -233,3 +233,6 @@ none
   inline icon buttons on desktop), matching the other lists; the internal checkbox stays a column (a carousel slide on
   phones) because it is data, not an action.
 - decision (Planner default): the AI usage table stays a `<table>`; only the business table changes.
+- evidence: pnpm run build → 0; pnpm run lint → 0; pnpm run test:ci → 0 (2192 SUCCESS; one unrelated DataExportCard flake on the first run, passed on rerun); lint:icons, lint:no-native-select, override-check, breadcrumbs-check, plan-ledger-check, log-query (error) → 0.
+- decision: behaviour: the `[ui]` e2e specs skip when the QA user is not a platform admin (plan's own instruction) — reverse: remove the skip.
+- note: the spec adds `TrendingUp` to its icon pick (the report-link icon is registered in app.config.ts, not in TEST_LUCIDE_ICONS, which is out of scope).
