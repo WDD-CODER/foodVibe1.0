@@ -1,6 +1,6 @@
 # Plan 606 — Style QA opens real records of the signed-in business on detail pages
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: d8b1f68494302471c8afa1da89e5ea6d3af5e8ef
 ## Problem Statement

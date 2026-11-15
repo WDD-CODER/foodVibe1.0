@@ -1,6 +1,6 @@
 # Plan 605 — Menu library filters sit on one even grid, request cards get tidy buttons and a labelled hour chart
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: d8b1f68494302471c8afa1da89e5ea6d3af5e8ef

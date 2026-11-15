@@ -1,6 +1,6 @@
 # Plan 601 — Phone chip rows keep their scroll arrows beside the chips, never on top of them
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: d8b1f68494302471c8afa1da89e5ea6d3af5e8ef
