@@ -27,10 +27,9 @@ Where each server's `NODE_ENV` comes from:
 unchanged everywhere.
 
 Done when:
-- [auto] `pnpm run test:server` → exit 0
+- [auto] `pnpm run test:server` → exit 0 (includes the new server/test/auth-limit-dev.test.js: 15 sign-ins with NODE_ENV=development, none 429; with NODE_ENV=production, the 11th is 429)
 - [auto] `pnpm run build` → exit 0
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries
-- [auto] `cd server && npx vitest run test/auth-limit-dev.test.js` → exit 0 (15 sign-ins with NODE_ENV=development: none returns 429; 15 sign-ins with NODE_ENV=production: the 11th returns 429)
 - [human] On a local test server, sign in and out more than 10 times in a row: it never says "Too many login attempts".
 
 ## Execution Mode

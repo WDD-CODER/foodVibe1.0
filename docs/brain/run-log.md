@@ -8,6 +8,10 @@ Earlier (12 runs): plans 27 · merged 20 · parked 6 · fix rounds 13 · escalat
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-11-10 | run-522 | 522,523,532 | 3 | 0 | - | 2 | 1 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-11 | pass-theme | 571,572,573,574,576 | 5 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+Earlier (14 runs): plans 35 · merged 28 · parked 6 · fix rounds 15 · escalations 6 · gate fails 2 · ✗ 6 · checker misses 0 — per run: plans 2.5 · parked 0.43 · fix rounds 1.07 · ✗ per plan 0.17
+
+| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-11-10 | fd-1a-data | 543,544,545,548,549,550,566,569,570 | 9 | 0 | - | 3 | 4 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-11 | run-546 | 546,558,567,575,579 | 5 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | batch-2 | 546,547,567,568,579,580,581 | 7 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
@@ -26,3 +30,6 @@ Earlier (12 runs): plans 27 · merged 20 · parked 6 · fix rounds 13 · escalat
 | 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-607 | 607,610 | 2 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
+| 2026-11-14 | run-604 | 604 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-14 | run-600 | 600,612,613 | 3 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-15 | run-608 | 608 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |

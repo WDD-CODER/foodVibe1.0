@@ -42,7 +42,7 @@
 
       <div class="product-field" [class.c-input--invalid]="validationErrors_()['categories']">
         <label class="label-row collapsible-field__label-with-icon">
-          <lucide-icon name="tags" class="icon-xs icon-muted"></lucide-icon>
+          <lucide-icon [size]="16" name="tags" class="icon-xs icon-muted"></lucide-icon>
           {{ 'category' | translatePipe }}
         </label>
         <app-chip-search-dropdown
@@ -231,7 +231,7 @@
           (appClickOutside)="onSupplierBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
+            <lucide-icon [size]="16" name="truck" class="icon-xs icon-muted"></lucide-icon>
             {{ 'supplier' | translatePipe }}
           </label>
           <app-chip-search-dropdown
@@ -269,7 +269,7 @@
           (appClickOutside)="onAllergensBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
+            <lucide-icon [size]="16" name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
             {{ 'allergens' | translatePipe }}
           </label>
           <app-chip-search-dropdown
@@ -307,7 +307,7 @@
           (appClickOutside)="onWasteYieldBlur($event)"
         >
           <div class="collapsible-field__label-with-icon">
-            <lucide-icon name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
+            <lucide-icon [size]="16" name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
             <span class="label-text">{{ 'waste_yield_logic' | translatePipe }}</span>
           </div>
           <div class="two-col-grid">
@@ -373,7 +373,7 @@
           (appClickOutside)="onMinStockBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
+            <lucide-icon [size]="16" name="package" class="icon-xs icon-muted"></lucide-icon>
             {{ 'min_stock_level' | translatePipe }}
           </label>
           <input type="number" formControlName="minStockLevel" min="0" placeholder="0" class="c-input" />
@@ -400,7 +400,7 @@
           (appClickOutside)="onExpiryDaysBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
+            <lucide-icon [size]="16" name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
             {{ 'expiry_days_default' | translatePipe }}
           </label>
           <input type="number" formControlName="expiryDaysDefault" min="0" placeholder="0" class="c-input" />

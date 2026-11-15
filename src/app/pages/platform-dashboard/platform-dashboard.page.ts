@@ -14,6 +14,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { FrontDeskAdminDialogComponent } from './components/front-desk-admin-dialog/front-desk-admin-dialog.component'
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
+import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { formatPctInt } from 'src/app/core/engine/rounding'
 
@@ -68,6 +69,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     LoaderComponent,
     EmptyStateComponent,
     PlatformLogisticsItemsComponent,
+    PlatformAiShotsComponent,
     FrontDeskAdminDialogComponent
   ],
   templateUrl: './platform-dashboard.page.html',

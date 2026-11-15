@@ -696,6 +696,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     try {
       const saved = await this.state_.saveRecipe(recipe)
+      if (saved?._id) this.aiFlow_.confirmAiShot(saved._id)
       if (scope === 'everyone' && saved) this.masterPush_.pushToMaster(saved)
       this.saving.setSaving(false)
       this.isSubmitted = true
@@ -923,6 +924,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     let saved: Recipe
     try {
       saved = await this.state_.saveRecipe(recipe)
+      this.aiFlow_.confirmAiShot(saved._id)
     } catch (err) {
       this.saving.setSaving(false)
       this.recipeHeaderRef_()?.markServerErrors(err)
