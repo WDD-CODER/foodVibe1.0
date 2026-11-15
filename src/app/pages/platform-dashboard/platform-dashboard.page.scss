@@ -229,6 +229,7 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 
 .platform-grid .c-grid-header-cell.col-name {
   z-index: 2;
+  background: var(--bg-muted); /* same as every other header title (.c-grid-header-cell) */
 }
 
 .platform-row.is-idle-7 > .c-list-body-cell,
