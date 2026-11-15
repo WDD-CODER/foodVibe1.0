@@ -87,9 +87,9 @@ Check that `.header-nav`, `.nav-pills`, `.nav-pill`, `.auth-section`, `.brand-se
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Keep the top menu on one line between 621 and 1023 px and let the pills scroll sideways — media block, flex and overflow rules — src/app/core/components/header/header.component.scss
-- [ ] A2: Write the screen check at 800 and 1000 px wide — e2e/ui/613-1.spec.ts
-- [ ] A3: Run the checks and hand over — build, test:ci, lint, spec 613-1 against the slot app; then the [human] card
+- [x] A1: Keep the top menu on one line between 621 and 1023 px and let the pills scroll sideways — media block, flex and overflow rules — src/app/core/components/header/header.component.scss
+- [x] A2: Write the screen check at 800 and 1000 px wide — e2e/ui/613-1.spec.ts
+- [x] A3: Run the checks and hand over — build, test:ci, lint, spec 613-1 against the slot app; then the [human] card
 
 ## Technical Considerations
 - Dependencies: none. Runs in run-600 with plan 612 so both reach main in PR #580.
@@ -110,3 +110,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner draft 2026-11-14 from the Human's note during the run-600 checks; the break itself was not reproduced by the Planner.
+- Builder 2026-11-14: plan file was missing on the run branch; copied from the main checkout.
+- pnpm run build -> 0; pnpm run lint -> 0; pnpm run test:ci -> 0 (2199 SUCCESS).
+- 613-1 spec written, not run (no app/QA login in the worktree).
