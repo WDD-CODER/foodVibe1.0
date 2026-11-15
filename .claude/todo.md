@@ -176,37 +176,20 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
 
-### Plan 589 — A signed-out visitor sees only the welcome page; no automatic guest sign-in on the PC and in the slots (`plans/589-signed-out-visitors-see-only-the-welcome-page.plan.md`)
-- [ ] A1: Stop signing a guest in by itself on the PC and in the slots — src/environments/environment.local.ts, src/environments/environment.ts
-- [ ] A2: Send a signed-out visitor to the welcome page from every page but the shared recipe link — src/app/core/guards/auth.guard.ts, src/app/app.routes.ts
-- [ ] A3: After signing in on the welcome page, return to the page the visitor wanted — src/app/pages/welcome/welcome.page.ts, src/app/pages/welcome/home-redirect.ts
-- [ ] A4: Add a check that every route keeps its guard, and the security note — scripts/route-guard-check.mjs, docs/agent/standards-security.md
-- [ ] A5: Prove it in unit tests and two screen checks — src/app/core/guards/auth.guard.spec.ts, src/app/core/guards/welcome.guard.spec.ts, e2e/ui/589-1.spec.ts, e2e/ui/589-2.spec.ts
-
-### Plan 591 — Signing out (or a session ending) always moves the visitor to the welcome page (`plans/591-signing-out-goes-to-the-welcome-page.plan.md`)
-- [ ] A1: Move a signed-out visitor to the welcome page from wherever they are — src/app/core/services/signed-out-redirect.service.ts, src/app/appRoot/app.component.ts
-- [ ] A2: Let the terms popup rely on it instead of its own jump — src/app/core/components/terms-gate/terms-gate.component.ts, src/app/core/components/terms-gate/terms-gate.component.spec.ts
-- [ ] A3: Prove it in a unit test and a sign-out screen check — src/app/core/services/signed-out-redirect.service.spec.ts, e2e/ui/591-1.spec.ts, src/app/core/services/breadcrumbs.md
-
-### Plan 592 — Shared recipe links also need signing in: a signed-out visitor sees only the welcome page, no exceptions (`plans/592-shared-recipe-links-also-need-signing-in.plan.md`)
-- [ ] A1: Put shared recipe links behind sign-in like every other page — src/app/app.routes.ts, scripts/route-guard-check.mjs
-- [ ] A2: Send a signed-out visitor on a recipe link to the welcome page too — src/app/core/services/signed-out-redirect.service.ts, src/app/core/services/signed-out-redirect.service.spec.ts
-- [ ] A3: Update the screen check and the security rule — e2e/ui/589-2.spec.ts, docs/agent/standards-security.md
-
 ### Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
 
-- [ ] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
-- [ ] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
-- [ ] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
-- [ ] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
-- [ ] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
-- [ ] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
-- [ ] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
-- [ ] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
-- [ ] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
-- [ ] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
-- [ ] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
-- [ ] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
+- [x] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [x] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
+- [x] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
+- [x] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
+- [x] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
+- [x] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
+- [x] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
+- [x] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
+- [x] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
+- [x] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
+- [x] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
+- [x] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
 - [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
 - [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
 
@@ -250,3 +233,36 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 606-A1: Make Style QA look up record ids as the signed-in user, not as a guest — withApiAuth wrapper on context.request.get — scripts/qa/lib/styleqa-sign-in.mjs
 - [ ] 606-A2: Prove that only API requests get the sign-in header — node:test with a fake request — scripts/test/styleqa-sign-in.test.mjs
 - [ ] 606-A3: Measure the client detail page now that its id can be found — page map entry, drop the exclusion — docs/qa/styleqa-pages.json
+
+### Plan 607 — The phone bottom bar shows no waiting-count badge (`plans/design/607-the-phone-bottom-bar-shows-no-waitingcount-badge.plan.md`)
+- [ ] 607-A1: Take the waiting-count badge out of the phone bottom bar — delete the badge block, tidy the aria-label — src/app/core/components/header/header.component.html
+- [ ] 607-A2: Drop the badge styles the bottom bar no longer uses — src/app/core/components/header/header.component.scss
+- [ ] 607-A3: Update the header spec and prove on a phone screen that the badge is gone — src/app/core/components/header/header.component.spec.ts, e2e/ui/607-1.spec.ts
+
+### Plan 608 — The recipe ingredient amount stays fully visible on phones (`plans/design/608-the-recipe-ingredient-amount-stays-fully-visible-on-phones.plan.md`)
+- [ ] 608-A1: Give the phone amount box a floor so the typed number is always visible — quantity column minmax, input min size, button min size — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
+- [ ] 608-A2: Prove at 320px and 375px that the amount and the − / + buttons keep their size — e2e/ui/608-1.spec.ts
+
+### Plan 609 — The list filter panel is only as tall as its content (`plans/design/609-the-list-filter-panel-is-only-as-tall-as.plan.md`)
+- [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
+- [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
+
+### Plan 610 — Sign-in limits stay on the live site but stop blocking local development (`plans/610-signin-limits-stay-on-the-live-site-but-stop.plan.md`)
+- [ ] 610-A1: Skip the sign-in, sign-up and refresh limits when the server runs in development — skip option on the three limiters — server/routes/auth.js
+- [ ] 610-A2: Prove the limits are off in development and still on in production — server/test/auth-limit-dev.test.js
+
+### Plan 611 — Platform business table becomes the app's standard grid with the phone column carousel (`plans/design/611-platform-business-table-becomes-the-apps-standard-grid-with.plan.md`)
+- [ ] 611-A1: Rebuild the business table as the shared list grid with a pinned name column — div grid with the .c-list engines, --platform-grid tracks, sticky .col-name — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [ ] 611-A2: Keep the pinned name column above anything that scrolls under it, with opaque idle tints — z-index 1/2 and solid backgrounds outside the page layer — src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [ ] 611-A3: Show one swipeable column at a time on phones, like the other lists — COLUMN_CAROUSEL header + cells, carouselColumns field — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
+- [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
+- [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
+
+### Plan 612 — The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was
+
+- [x] A1: Score how close the AI draft was to the saved recipe, not only the names kept — draftCloseness replaces keptRatio, tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
+- [x] A2: Store and show the new score, also for examples saved before this fix — confirm, admin list and promote — server/routes/ai.js, server/routes/admin.js, server/test/ai-shots-shared.test.js, server/test/ai-shots-saved.test.js
+- [x] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
+- [x] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
+- [ ] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card

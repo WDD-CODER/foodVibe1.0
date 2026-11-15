@@ -20,6 +20,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `client.model.ts` | Client entity (who an event is for), mirror of the client schema | Client, ClientType, CLIENT_TYPES |
 | `knowledge-item.model.ts` | Knowledge item (a fact the business knows about itself), mirror of the schema (plan 554) | KnowledgeItem, KNOWLEDGE_TOPICS |
 | `front-desk-profile.model.ts` | Front desk profile type and constants, mirror of the profile schema | FrontDeskProfile, BUSINESS_TYPES, FRONT_DESK_STATUSES |
+| `ai-shot.model.ts` | Recipe AI example rows of the platform admin's shared pool (plan 600) | AiShotRow, AiShotsReport |
 | `ai-usage.model.ts` | AI usage ledger report shapes (platform admin) | AiUsageRow, AiUsageReport, AiUsageParams, AiUsageGroupBy |
 | `user.model.ts` | User/session | User |
 | `msg.model.ts` | User message / toast | Msg |

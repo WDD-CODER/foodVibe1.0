@@ -30,6 +30,7 @@ import { SectionCategoryManagerComponent } from './components/section-category-m
 import { StationManagerComponent } from './components/station-manager/station-manager.component'
 import { LogisticsItemManagerComponent } from './components/logistics-item-manager/logistics-item-manager.component'
 import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
+import { AiExamplesShareComponent } from './components/ai-examples-share/ai-examples-share.component'
 import { StaffStagesManagerComponent } from './components/staff-stages-manager/staff-stages-manager.component'
 import { PermissionService } from '@services/permission.service'
 import { UserManagementComponent } from './components/user-management/user-management.component'
@@ -65,6 +66,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     LogisticsItemManagerComponent,
     CoefficientManagerComponent,
     StaffStagesManagerComponent,
+    AiExamplesShareComponent,
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
