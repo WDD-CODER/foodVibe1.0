@@ -176,21 +176,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
 
-### Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
+### Follow-ups — Planner 2026-11-15
 
-- [x] A1: Add `keptRatio` and `pickShots` with their tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
-- [x] A2: Save a pending example on continue and confirm it on save (server) — `POST /shots` statuses and `shotKey`, `POST /shots/confirm`, the comment block — server/routes/ai.js
-- [x] A3: Read the shared pool after the business's own examples in both generate routes — `getSharedShots`, `pickShots` — server/routes/ai.js
-- [x] A4: Let the owner opt in and out — schema field and input schema, `build:schemas`, `setShareAiExamples`, `PUT /business/share-ai-examples` — shared/schemas/entities/business.schema.ts, server/services/business.js, server/routes/business.js
-- [x] A5: Let the platform admin list, promote and remove shared examples — server/routes/admin.js
-- [x] A6: Test the saved signal and the shared pool — server/test/ai-shots-saved.test.js, server/test/ai-shots-shared.test.js
-- [x] A7: Write migration 0012 and its test — server/migrations/0012-drop-unscoped-ai-shots.js, server/test/migration-0012.test.js
-- [x] A8: Send pending + key from the AI window and confirm after the recipe is saved — src/app/core/services/ai-recipe-draft.service.ts, src/app/core/services/gemini-shots.service.ts, src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts (+ spec), src/app/pages/recipe-builder/recipe-builder.page.ts
-- [x] A9: Add the owner's sharing card — src/app/core/services/business.service.ts, src/app/pages/metadata-manager/components/ai-examples-share/**, src/app/pages/metadata-manager/metadata-manager.page.component.html (+ .ts imports), public/assets/data/dictionary.json
-- [x] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
-- [x] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
-- [x] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
-- [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
 - [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
 
 ### Plan 601 — Phone chip rows keep their scroll arrows beside the chips, never on top of them (`plans/design/601-phone-chip-rows-keep-their-scroll-arrows-beside-the.plan.md`)
@@ -251,11 +238,3 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] 611-A4: Move the report link and front desk edit into the row actions menu — app-row-actions-menu with c-icon-btn buttons — src/app/pages/platform-dashboard/platform-dashboard.page.html, src/app/pages/platform-dashboard/platform-dashboard.page.ts
 - [ ] 611-A5: Bring the page tests onto the new grid and cover the pinned column's layering — new selectors, sticky/z-index and actions-menu cases — src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
 - [ ] 611-A6: Prove on screen that the name column stays on top and the phone carousel works — e2e/ui/611-1.spec.ts, e2e/ui/611-2.spec.ts
-
-### Plan 612 — The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was
-
-- [x] A1: Score how close the AI draft was to the saved recipe, not only the names kept — draftCloseness replaces keptRatio, tests — server/services/ai-recipe-helpers.js, server/test/ai-recipe-helpers.test.js
-- [x] A2: Store and show the new score, also for examples saved before this fix — confirm, admin list and promote — server/routes/ai.js, server/routes/admin.js, server/test/ai-shots-shared.test.js, server/test/ai-shots-saved.test.js
-- [x] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
-- [x] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
-- [ ] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card

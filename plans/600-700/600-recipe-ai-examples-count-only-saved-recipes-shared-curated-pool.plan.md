@@ -1,6 +1,6 @@
 # Plan 600 — Recipe AI examples count only saved recipes, plus a shared pool the platform admin curates
 
-Status: draft
+Status: done
 Depends-on: 582
 Snapshot: a1de3cdb
 
@@ -163,7 +163,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A10: Add the admin's examples section — src/app/core/models/ai-shot.model.ts, src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, src/app/pages/platform-dashboard/platform-dashboard.page.ts, src/app/pages/platform-dashboard/platform-dashboard.page.html, public/assets/data/dictionary.json
 - [x] A11: Write the two screen checks — e2e/ui/600-1.spec.ts, e2e/ui/600-2.spec.ts (`signInQa`, API setup and cleanup in `finally`, screenshots `screens/600-<n>.png`)
 - [x] A12: Update the docs and maps — docs/agent/standards-backend.md, docs/brain/component-families.md, breadcrumbs maps; run `node scripts/breadcrumbs-check.mjs`
-- [ ] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
+- [x] A13: Run the checks and hand over — build, test:ci, test:server, both lints, lint:icons, breadcrumbs-check, log-query, specs 600-1/600-2 against the slot app; then the [human] cards
 
 ## Technical Considerations
 - Dependencies: plan 582 (per-business shots, merged #573).
@@ -200,3 +200,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - scope extended: src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts — specs beside scoped page files (stub for the new section; the metadata tab list is unchanged).
 - scope extended: moved containsInjectionPattern / scanRecipeDraftForInjection from routes/ai.js into services/ai-recipe-helpers.js so admin.js uses the same screen (both in scope).
 - scope extended: docs/workflow-kit/manifest.json — classified `scripts/qa/lib/styleqa-sign-in.mjs` (project/stay); kit-manifest-check now ok (ask 600-1 approved).
+- 2026-11-15 Human: hand checks done, merged #580. Atlas cleanup (migration 0012) dropped by the Human as not relevant: plan 582 already stops reads of the old examples.

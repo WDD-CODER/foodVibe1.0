@@ -1,6 +1,6 @@
 # Plan 612 — The AI examples section on /platform explains itself, looks like the page, and scores how close the AI was
 
-Status: draft
+Status: done
 Depends-on: 600
 Snapshot: 9d301459
 
@@ -110,7 +110,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A2: Store and show the new score, also for examples saved before this fix — confirm, admin list and promote — server/routes/ai.js, server/routes/admin.js, server/test/ai-shots-shared.test.js, server/test/ai-shots-saved.test.js
 - [x] A3: Explain the section and restyle its rows like the logistics section — text, accuracy label, c-glass-card rows, c-btn-ghost — src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
 - [x] A4: Write the screen check and update the docs — e2e/ui/612-1.spec.ts, docs/agent/standards-backend.md
-- [ ] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card
+- [x] A5: Run the checks and hand over — build, test:ci, test:server, both lints, log-query, spec 612-1 against the slot app; then the [human] card
 
 ## Technical Considerations
 - Dependencies: plan 600 (on `orch/run-600`, not on main yet). Run with `--run run-600` so the builder starts from that branch.
@@ -141,3 +141,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Rows stay `ul > li` with an `article.c-glass-card` inside, so e2e/ui/600-2.spec.ts (selects `li`) keeps working.
 - pnpm run build -> 0; pnpm run lint -> 0 (warnings only); pnpm --dir server run lint -> 0; pnpm run test:ci -> 0 (2200 SUCCESS); pnpm run test:server -> 0 (109 files, 1385 tests).
 - e2e/ui/612-1.spec.ts written, not run (no app or QA login in the worktree).
+- 2026-11-15 Human: cards ①–③ done, merged #580.
