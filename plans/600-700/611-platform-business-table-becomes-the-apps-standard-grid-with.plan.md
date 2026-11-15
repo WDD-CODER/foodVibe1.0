@@ -1,6 +1,6 @@
 # Plan 611 — Platform business table becomes the app's standard grid with the phone column carousel
 
-Status: draft
+Status: done
 Track: design
 Depends-on: none
 Snapshot: c1eb0cd89b768f944cc3374bb91666125b8c59d8
