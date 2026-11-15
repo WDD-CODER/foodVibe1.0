@@ -104,3 +104,4 @@ none
 
 - decision: Human 2026-11-14 — "the filter takes the height it needs for its content and padding, and that's it, on all screens".
 - evidence: no other fixed block-size on .filter-panel (only phone max-block-size 40dvh, kept). [ui] specs written, not run.
+- evidence: removed duplicate styleqa-sign-in.mjs entry from manifest (answer 609-1 approved) → kit-manifest-check exit 0.
