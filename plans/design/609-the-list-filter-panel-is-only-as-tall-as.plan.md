@@ -41,6 +41,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 src/app/shared/list-shell/list-shell.component.scss
 e2e/ui/609-1.spec.ts
 e2e/ui/609-2.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
