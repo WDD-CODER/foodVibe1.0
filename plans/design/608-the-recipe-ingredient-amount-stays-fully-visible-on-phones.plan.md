@@ -89,8 +89,8 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] 608-A1: Give the phone amount box a floor so the typed number is always visible — quantity column minmax, input min size, button min size — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
-- [ ] 608-A2: Prove at 320px and 375px that the amount and the − / + buttons keep their size — e2e/ui/608-1.spec.ts
+- [x] 608-A1: Give the phone amount box a floor so the typed number is always visible — quantity column minmax, input min size, button min size — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.scss
+- [x] 608-A2: Prove at 320px and 375px that the amount and the − / + buttons keep their size — e2e/ui/608-1.spec.ts
 
 ## Technical Considerations
 
@@ -106,3 +106,7 @@ touching any milestone.
 none
 
 ## Execution Notes
+
+- drift (604 commit) checked: the scss block matched the plan's description; proceeded.
+- pnpm run build -> exit 0; pnpm run lint -> exit 0; pnpm run test:ci -> exit 0 (2201 SUCCESS)
+- [ui] 608-1: written, not run (e2e/ui/608-1.spec.ts)
