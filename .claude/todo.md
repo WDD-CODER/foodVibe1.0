@@ -179,7 +179,3 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Follow-ups — Planner 2026-11-15
 
 - [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
-
-### Plan 609 — The list filter panel is only as tall as its content (`plans/design/609-the-list-filter-panel-is-only-as-tall-as.plan.md`)
-- [ ] 609-A1: Let the filter panel shrink to its filters instead of a fixed 200px floor — panel-content min-block-size fit-content, no other fixed height — src/app/shared/list-shell/list-shell.component.scss
-- [ ] 609-A2: Prove on desktop and phone that the panel hugs its content — e2e/ui/609-1.spec.ts, e2e/ui/609-2.spec.ts
