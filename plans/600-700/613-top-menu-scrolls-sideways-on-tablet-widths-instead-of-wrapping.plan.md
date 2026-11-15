@@ -1,6 +1,6 @@
 # Plan 613 — The top menu scrolls sideways on tablet widths instead of breaking onto a second line
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 9d301459
 
