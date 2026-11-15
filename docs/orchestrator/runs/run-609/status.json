@@ -1,0 +1,309 @@
+{
+  "run": "run-609",
+  "branch": "orch/run-609",
+  "base": "main",
+  "startedAt": "2026-11-15T10:29:16.648Z",
+  "mainShaAtStart": "68a7b4ff68ed97408079f90c6c114f98d13e3c7e",
+  "plans": {
+    "609": {
+      "nnn": "609",
+      "title": "The list filter panel is only as tall as its content",
+      "branch": "feat/609-the-list-filter-panel",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-15T15:08:22.865Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-15T15:16:33.316Z"
+        }
+      },
+      "humanItems": [
+        "Open the filters on the inventory, suppliers and venues lists, on a wide and a narrow window: the panel hugs its filters, with no empty band.",
+        "Nothing else moved: the panel still opens and closes with its animation, and long filter lists still scroll."
+      ],
+      "history": [
+        {
+          "at": "2026-11-15T10:31:05.559Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-15T10:31:05.718Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-15T10:38:01.238Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-15T10:41:45.597Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-15T10:41:45.755Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T10:41:45.913Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T10:42:11.510Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T10:43:06.941Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:08:22.675Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:08:22.867Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:13:42.567Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:16:27.810Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:16:33.318Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:16:40.066Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-15T15:17:45.075Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "609",
+          "title": "The list filter panel is only as tall as its content",
+          "branch": "feat/609-the-list-filter-panel",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-15T10:31:05.716Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-15T10:41:45.911Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 4.8,
+          "sha": "ad5049b550386bbfc7deb3ef3148e4701ddfd72b",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 412.1,
+              "tokens": {
+                "input": 24597,
+                "output": 999
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 24.9,
+              "tokens": {
+                "input": 86224,
+                "output": 1619
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-manifest-check.mjs\" --root ."
+          ],
+          "reason": "asking 609-1: ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'duplicate: scripts/qa/lib/styleqa-sign-in.mjs (2 entries)' and the manifest is not in the plan's Read-Write Scope.",
+          "park": {
+            "at": "2026-11-15T10:42:59.159Z",
+            "reason": "ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'duplicate: scripts/qa/lib/styleqa-sign-in.mjs (2 entries)' and the manifest is not in the plan's Read-Write Scope."
+          },
+          "parkBranch": "park/run-609-609"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 609-1: ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'duplicate: scripts/qa/lib/styleqa-sign-",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3.6,
+      "sha": "f36d98dc961dd6a54934f0b735c6f2fc40b18367",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 317,
+          "tokens": {
+            "input": 134473,
+            "output": 2004
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 5.6,
+          "tokens": {
+            "input": 21842,
+            "output": 336
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "a8611f86eba5a44d76ec4409c9f7580ce525452d"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-15T10:31:05.375Z",
+      "plan": "609",
+      "text": "the folder foodVibe1.0-orch-run-609-609 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-15T10:37:58.020Z",
+      "plan": "609",
+      "text": "builder left undone (round 0): [ui] 609-1 (suppliers list at 1366x768): written, not run; [ui] 609-2 (inventory list at 375x812): written, not run; [human] items not ticked; Gate checks other than build, lint and test:ci were not run by me (override-check, lint:icons, lint:no-native-select, breadcrumbs-check, ci-scope-check, scop"
+    },
+    {
+      "at": "2026-11-15T10:42:11.051Z",
+      "plan": "609",
+      "text": "builder left undone (round 1): gate-1: remove the duplicate styleqa-sign-in.mjs entry (the second one, around line 5169) from docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-15T10:43:06.779Z",
+      "plan": "609",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-15T10:43:07.102Z",
+      "plan": "609",
+      "text": "ask 609-1 (scope, the Human or the advisor answers): May I remove the duplicate styleqa-sign-in.mjs entry from docs/workflow-kit/manifest.json, which is outside this plan's scope?"
+    },
+    {
+      "at": "2026-11-15T13:43:10.541Z",
+      "plan": "609",
+      "text": "ask 609-1 still open after 180 min — still waiting"
+    },
+    {
+      "at": "2026-11-15T14:43:11.654Z",
+      "plan": "609",
+      "text": "ask 609-1 still open after 240 min — still waiting"
+    },
+    {
+      "at": "2026-11-15T15:06:42.157Z",
+      "plan": "609",
+      "text": "ask 609-1 answered by the human: approved: docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-15T15:06:54.392Z",
+      "plan": "609",
+      "text": "scope of plan 609 extended on orch/run-609 by the answer to 609-1: docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-15T15:08:13.720Z",
+      "plan": "609",
+      "text": "resumed from park/run-609-609: round 1, tier build, after: asking 609-1: ESCALATE scope: ESCALATE: scope docs/workflow-kit/manifest.json — kit-manifest-check fails with 'duplicate: scripts/qa/lib/styleqa-sign-in.mjs (2"
+    },
+    {
+      "at": "2026-11-15T15:08:22.493Z",
+      "plan": "609",
+      "text": "the folder foodVibe1.0-orch-run-609-609 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-15T15:13:39.981Z",
+      "plan": "609",
+      "text": "builder left undone (round 1): [ui] 609-1: written, not run; [ui] 609-2: written, not run; [human] checks: not ticked"
+    },
+    {
+      "at": "2026-11-15T15:16:49.488Z",
+      "plan": "609",
+      "text": "the folder foodVibe1.0-orch-merge-run-609 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 3.6,
+  "updatedAt": "2026-11-15T15:21:44.665Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "609",
+      "type": "behaviour",
+      "text": "behaviour: in the e2e specs the filter panel is opened by clicking a button whose name matches /filter|סינון|מסננים/ when `.panel-content` is not visible. The plan did not name the toggle, and I did not run the specs — reverse: fix the selector in e2e/ui/609-*.spec.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "609",
+      "type": "seen",
+      "text": "seen: docs/workflow-kit/manifest.json:5169 — duplicate entry for scripts/qa/lib/styleqa-sign-in.mjs, already on the run branch (two earlier merges each added one)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-15T15:21:44.664Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-15T15:21:44.665Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
