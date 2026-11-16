@@ -30,6 +30,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | Building or changing a dropdown / search picker | `patterns/dropdown-add-option.md` — one add option + shared `KeyedPickerSearch`; the add-option rule lives in `docs/agent/standards-domain.md` |
 | Inspecting the local database from a session (MCP) | `scripts/mcp-mongo-local.mjs` — read-only, local-only, never Atlas or production; why in [[0028-read-only-local-mongodb-mcp]] |
 | Front Desk program (bookings, requests, assistant) | `docs/frontdesk/frontdesk-map.md` — the Front Desk program map: plans, frozen contracts and their extensions |
+| Modules program (modules per business, site-visit and invoice AI flows, consultant access, stock count) | `docs/modules/modules-map.md` — the plan map and frozen contracts; decisions in `docs/modules/modules-program-brief.md` Part 0.5 |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |
 
