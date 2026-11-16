@@ -366,3 +366,19 @@ only the Bash tool's command text triggers it.
 **What to do instead:**
 1. After setting a user variable, open a new terminal window (not a tab, not the editor's terminal).
 2. Install an MCP server as a dependency and start it with `node`, never `npx -y` at start (plan 542).
+
+### A validation dev server on port 6000 (or any browser-blocked port) answers curl but never the browser
+
+**What hurt:** Plan 614's validation backend ran on `http://localhost:6000`. `curl` returned 200, but the page showed "no connection" and the console said `net::ERR_UNSAFE_PORT` on every API call. Chrome refuses a fixed list of ports (6000, 6665–6669, 4045, 5060, 10080 and others) before any request leaves the browser.
+
+**Why the obvious fix is wrong:** Restarting the server or re-checking it with `curl` proves nothing, because the server was never the problem.
+
+**What to do instead:** Pick a validation port outside Chrome's blocked list (4600/4601 worked) and test it from a real browser page, not only with `curl`. A `ERR_UNSAFE_PORT` in the console means change the port.
+
+### The slot backend runs in watch mode and is down about 7 seconds on every server-file change while the human validates
+
+**What hurt:** The slot backend ran `node --watch index.js`. Every edit under `server/`, a regenerated schema or a test run restarted it (10 restarts in one session, about 6.5 s of boot each). A click during a restart showed a server error although the backend was fine seconds later.
+
+**Why the obvious fix is wrong:** "It is sleeping, wait a second" is true but hides the cause, and the frontend does not retry. Servers started from a tool shell can also vanish when that shell call ends.
+
+**What to do instead:** Before showing validation cards, start the backend without watch mode (`node index.js`, detached from the shell) and confirm both URLs answer. After any later `server/` change, restart it by hand and say so.
