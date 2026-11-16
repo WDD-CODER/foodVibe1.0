@@ -179,3 +179,15 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 ### Follow-ups — Planner 2026-11-15
 
 - [ ] F600-1: Follow-up plan — AI menu examples (GEMINI_MENU_SHOTS) get the same saved-signal and shared pool (Human 2026-11-14: separate plan)
+
+### Plan 614 — AI menu links named dishes to the recipe book or keeps them as unlinked dishes to build (`plans/614-ai-menu-links-named-dishes-or-keeps-them-unlinked-to-build.plan.md`)
+- [ ] A1: The AI menu reply also names which recipe-book dishes match each dish the user typed
+- [ ] A2: One rule decides which dish options the chef sees and which one is preselected
+- [ ] A3: The AI menu window lets the chef pick a matching dish or keep a new unlinked one
+- [ ] A4: Menus can store a dish that has no recipe yet
+- [ ] A5: Both places that apply an AI menu keep the new dishes instead of dropping them
+- [ ] A6: The menu page loads, saves and keeps unlinked dishes
+- [ ] A7: Costs, prep sheets and exports ignore an unlinked dish instead of calling it deleted
+- [ ] A8: An unlinked dish on the menu is clearly marked and opens its builder on click
+- [ ] A9: The dish builder starts with the menu's dish name and goes back to the menu after saving
+- [ ] A10: Add the Hebrew texts and the one browser check
