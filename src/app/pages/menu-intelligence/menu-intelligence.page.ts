@@ -19,7 +19,14 @@ import { LucideAngularModule } from 'lucide-angular'
 import { filter, startWith } from 'rxjs'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TranslationService } from '@services/translation.service'
-import { blankMenuItemIndex, missingMenuFieldsMessage, pruneBlankMenuItems } from './menu-form.util'
+import {
+  blankMenuItemIndex,
+  missingMenuFieldsMessage,
+  dateMenuName,
+  pruneBlankMenuItems,
+  uniqueMenuName,
+  recipeIdValidators
+} from './menu-form.util'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
@@ -76,6 +83,7 @@ import { refusalShownToUser } from 'src/app/core/utils/server-refusal.util'
 type MenuItemForm = {
   recipeId: string
   recipeType: 'dish' | 'preparation'
+  unlinkedName?: string
   coefficient_override?: number | null
   sell_price?: number
   food_cost_money?: number
@@ -475,6 +483,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         this.fb.group({
           recipeId: ['', Validators.required],
           recipeType: ['dish'],
+          unlinkedName: [''],
           coefficient_override: [null as number | null],
           sell_price: [0],
           food_cost_money: [0],
@@ -765,10 +774,48 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     })
   }
 
+  /** Plan 614: saves the menu, then opens the dish builder for an unlinked dish; saving there returns to this menu. */
+  protected async buildUnlinkedDish(sectionIndex: number, itemIndex: number): Promise<void> {
+    const section = this.sectionsArray.at(sectionIndex)
+    const name = (
+      (section.get('items') as FormArray).at(itemIndex)?.get('unlinkedName')?.value as string | undefined
+    )?.trim()
+    const sectionId = section.get('_id')?.value as string | undefined
+    const sectionName = ((section.get('name')?.value as string | undefined) ?? '').trim()
+    if (!name || !sectionId) return
+    pruneBlankMenuItems(this.sectionsArray)
+    if (this.form_.invalid) {
+      this.form_.markAllAsTouched()
+      this.userMsg.onSetErrorMsg(missingMenuFieldsMessage(this.form_, this.translation))
+      return
+    }
+    let opened = false
+    await this.saving.withSaving(async () => {
+      try {
+        await this.persist_()
+      } catch (err) {
+        if (!refusalShownToUser(err)) this.userMsg.onSetErrorMsg(this.translation.translate('error_saving_menu'))
+        return
+      }
+      opened = true
+    })
+    if (!opened) return
+    void this.router.navigate(['/recipe-builder'], {
+      queryParams: { type: 'dish', name, fromMenu: this.editingId_(), section: sectionId, category: sectionName }
+    })
+  }
+
   /** Names an unnamed menu, creates or updates it, and marks the form saved (shared by save and saveAndWait). */
   private async persist_(): Promise<void> {
-    if (!this.form_.value.name?.trim()) this.form_.patchValue({ name: this.generateDateName() })
     const id = this.editingId_()
+    // Plan 614: no name -> the date; a name another menu already has -> numbered (the form shows the final name)
+    const others = this.menuEventData
+      .allMenuEvents_()
+      .filter((e) => e._id !== id)
+      .map((e) => e.name)
+    const typed = this.form_.value.name?.trim() ?? ''
+    const name = typed ? uniqueMenuName(typed, others) : dateMenuName(others)
+    if (name !== this.form_.value.name) this.form_.patchValue({ name })
     // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
     const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
     const now = Date.now()
@@ -779,19 +826,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.editingId_.set(created._id)
     }
     this.unsaved_.markSaved()
-  }
-
-  private generateDateName(): string {
-    const today = new Date()
-    const base = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`
-    const existing = this.menuEventData
-      .allMenuEvents_()
-      .map((e) => e.name)
-      .filter((n) => n === base || n.startsWith(`${base} (`))
-    if (!existing.includes(base)) return base
-    let i = 1
-    while (existing.includes(`${base} (${i})`)) i++
-    return `${base} (${i})`
   }
 
   protected toggleExportSheet(): void {
@@ -833,8 +867,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       section.items.forEach((item) => {
         items.push(
           this.fb.group({
-            recipeId: [item.recipeId, Validators.required],
+            recipeId: [item.recipeId, recipeIdValidators(item.unlinkedName)],
             recipeType: [item.recipeType],
+            unlinkedName: [item.unlinkedName ?? ''],
             coefficient_override: [item.coefficientOverride ?? null],
             sell_price: [item.sellPrice ?? 0],
             food_cost_money: [item.foodCostOverride ?? 0],
@@ -901,10 +936,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       name: section.name ?? '',
       sortOrder: sectionIndex + 1,
       items: (section.items || []).flatMap((item: MenuItemForm, itemIndex: number) => {
-        if (!item.recipeId) return []
+        if (!item.recipeId && !item.unlinkedName) return []
         return {
           recipeId: item.recipeId,
           recipeType: item.recipeType,
+          ...(!item.recipeId && item.unlinkedName ? { unlinkedName: item.unlinkedName } : {}),
           derivedPortions: 0,
           sellPrice: item.sell_price ?? undefined,
           foodCostOverride: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,

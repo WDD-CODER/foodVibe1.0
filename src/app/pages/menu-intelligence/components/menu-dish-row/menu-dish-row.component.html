@@ -47,6 +47,26 @@
       <button type="button" class="dish-remove no-print" (click)="remove.emit()">
         <lucide-icon name="trash-2" [size]="14"></lucide-icon>
       </button>
+    } @else if (itemGroup().get('unlinkedName')?.value) {
+      <!-- Plan 614: a dish not built yet — click opens the dish builder -->
+      <div class="dish-name-meta-wrap">
+        <div class="dish-name-meta">
+          <button
+            type="button"
+            class="dish-name dish-name-btn"
+            [id]="'dish-name-' + sectionIndex() + '-' + itemIndex()"
+            [attr.aria-label]="'menu_dish_unlinked_build' | translatePipe"
+            [title]="'menu_dish_unlinked_build' | translatePipe"
+            (click)="buildUnlinked.emit(); $event.stopPropagation()"
+          >
+            {{ itemGroup().get('unlinkedName')?.value }}
+          </button>
+        </div>
+      </div>
+      <span class="c-chip c-chip--amber no-print">{{ 'menu_dish_unlinked' | translatePipe }}</span>
+      <button type="button" class="dish-remove no-print" (click)="remove.emit()">
+        <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+      </button>
     } @else {
       <div class="dish-search-wrap" (appClickOutside)="clearSearch.emit()">
         <app-search-combobox

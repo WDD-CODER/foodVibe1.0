@@ -1,12 +1,23 @@
-import type { AbstractControl, FormArray, FormGroup } from '@angular/forms'
+import { Validators } from '@angular/forms'
+import type { AbstractControl, FormArray, FormGroup, ValidatorFn } from '@angular/forms'
 import type { TranslationService } from '@services/translation.service'
+
+/** Plan 614: an item is blank when it has neither a recipe nor an unlinked dish name. */
+function isBlankItem(item: AbstractControl): boolean {
+  return !item.get('recipeId')?.value && !item.get('unlinkedName')?.value
+}
+
+/** Plan 614: recipeId is required, except on an unlinked dish (a name and no recipe yet). */
+export function recipeIdValidators(unlinkedName: string | null | undefined): ValidatorFn[] {
+  return unlinkedName ? [] : [Validators.required]
+}
 
 /** Rows with no dish/recipe picked are placeholders, not menu items: drop them before validating/saving. */
 export function pruneBlankMenuItems(sections: FormArray): void {
   for (const section of sections.controls) {
     const items = section.get('items') as FormArray
     for (let i = items.length - 1; i >= 0; i--) {
-      if (!items.at(i).get('recipeId')?.value) items.removeAt(i)
+      if (isBlankItem(items.at(i))) items.removeAt(i)
     }
   }
 }
@@ -17,9 +28,27 @@ export function pruneBlankMenuItems(sections: FormArray): void {
  */
 export function blankMenuItemIndex(items: FormArray, skipIndex = -1): number {
   for (let i = 0; i < items.length; i++) {
-    if (i !== skipIndex && !items.at(i).get('recipeId')?.value) return i
+    if (i !== skipIndex && isBlankItem(items.at(i))) return i
   }
   return -1
+}
+
+/**
+ * Plan 614: no two menus share a name. A name already taken by another menu gets " (2)", then " (3)"...
+ * Compared trimmed; an empty name is the caller's job (see dateMenuName).
+ */
+export function uniqueMenuName(name: string, otherNames: string[]): string {
+  const base = name.trim()
+  const taken = new Set(otherNames.map((n) => n.trim()))
+  if (!taken.has(base)) return base
+  let n = 2
+  while (taken.has(`${base} (${n})`)) n++
+  return `${base} (${n})`
+}
+
+/** Plan 614: the name of a menu without one — today's date, numbered when another menu already has it. */
+export function dateMenuName(existingNames: string[], today: Date = new Date()): string {
+  return uniqueMenuName(`${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`, existingNames)
 }
 
 /** Hebrew message naming exactly which required fields are missing. */

@@ -385,8 +385,9 @@ function allExhausted(candidates) {
 
 /**
  * Every real HTTP call writes one ledger row (plan 566); `usage: { businessId, userId?, feature }`
- * is required (a call without it throws under vitest). Sends `body` to ONE model — never more than one Gemini call per request (plan 395, Human
- * 2026-10-09: switching models is the user's decision, not the server's). The model is
+ * is required (a call without it throws under vitest). Sends `body` to ONE model — never a second model per request (plan 395, Human
+ * 2026-10-09: switching models is the user's decision, not the server's). Plan 614: the same model is tried
+ * again, up to 4 calls in all, when a failure goes away by itself (network drop, 429 not daily, 5xx). The model is
  * `model` when the user picked one (it must be an enabled chain model), else the first in
  * the chain. If that model is out of its daily quota — known already, or learned from this
  * call's 429 — the result is 'model_exhausted' naming the next usable model, and the user
@@ -422,7 +423,32 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };
   }
 
-  // One ledger row per real HTTP call (plan 566); fire-and-forget, never changes the result.
+  // Plan 614: a failure that goes away by itself (Google overloaded or unavailable, a dropped connection) is
+  // tried again, up to MAX_ATTEMPTS calls in all. Every attempt is a real call and is counted and logged on its own.
+  let result;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    result = await callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
+    if (!isTransient(result) || attempt === MAX_ATTEMPTS) break;
+    log.warn({ event: `${eventPrefix}.retry`, model, attempt, kind: result.kind, status: result.status });
+    await sleep(retryDelayMs(attempt));
+  }
+  return result;
+}
+
+const MAX_ATTEMPTS = 4;
+const TRANSIENT_STATUSES = new Set([429, 500, 502, 503, 504]);
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+/** 0.5 s, 1 s, 2 s between attempts; no wait under the test runner. */
+const retryDelayMs = attempt => (process.env.VITEST ? 0 : 500 * 2 ** (attempt - 1));
+
+/** True for a failure worth another try: a network drop, or Google answering 429 (not the daily quota) or 5xx. */
+function isTransient(result) {
+  if (result.kind === 'network') return true;
+  return result.kind === 'gemini_error' && TRANSIENT_STATUSES.has(result.status);
+}
+
+/** One real HTTP call: one usage count and one ledger row (plan 566), whatever the outcome. */
+async function callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now }) {
   const startedAt = Date.now();
   const record = (ok, errorCode, data) => {
     if (!meter) return;

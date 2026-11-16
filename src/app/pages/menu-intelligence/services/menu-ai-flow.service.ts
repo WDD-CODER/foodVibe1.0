@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core'
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms'
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import type { AiMenuDraft, AiMenuPatch, MatchedDish, MatchedMenu, MatchedSection } from '@models/ai-menu-draft.model'
 import { matchRecipeName } from '../../../core/utils/recipe-match.util'
+import { resolveAiMenuDish } from '../../../core/utils/menu-unlinked.util'
+import { recipeIdValidators } from '../menu-form.util'
 
 export interface MenuAiFormRefs {
   menuForm: FormGroup
@@ -51,7 +53,7 @@ export class MenuAiFlowService {
     }
   }
 
-  applyMatchedMenu(matched: MatchedMenu, resolutions: Map<string, string | 'skip'>): void {
+  applyMatchedMenu(matched: MatchedMenu, resolutions: Map<string, string>): void {
     if (!this.refs_) return
     const form = this.refs_.menuForm
     const sectionsArray = this.sectionsArray_
@@ -74,24 +76,14 @@ export class MenuAiFlowService {
       const itemsArray = this.fb_.array<FormGroup>([])
 
       section.items.forEach((dish) => {
-        const dishKey = `${sectionIndex}:${dish.nameHebrew}`
-        const resolution = resolutions.get(dishKey)
-
-        // Skip if explicitly skipped
-        if (resolution === 'skip') return
-
-        // Determine recipeId
-        let recipeId: string | null = null
-        if (resolution && resolution !== 'skip') {
-          recipeId = resolution
-        } else if (dish.status === 'matched') {
-          recipeId = dish.recipeId
-        }
-        // unmatched/ambiguous without resolution → create placeholder row with empty recipeId
+        // Plan 614: a picked id links, 'new' (or no match) keeps the typed name as an unlinked dish, 'skip' drops it
+        const resolved = resolveAiMenuDish(dish, resolutions.get(`${sectionIndex}:${dish.nameHebrew}`))
+        if (!resolved) return
 
         const itemGroup = this.fb_.group({
-          recipeId: [recipeId ?? '', Validators.required],
+          recipeId: [resolved.recipeId, recipeIdValidators(resolved.unlinkedName)],
           recipeType: ['dish'],
+          unlinkedName: [resolved.unlinkedName ?? ''],
           coefficient_override: [null as number | null],
           sell_price: [dish.sellPrice ?? 0],
           food_cost_money: [0],

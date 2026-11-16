@@ -80,11 +80,19 @@ describe('POST /generate-menu reason codes', () => {
     expect(res.body).toMatchObject({ error: 'Gemini returned invalid menu draft', code: 'no_sections' });
   });
 
-  it('no_guest_count', async () => {
+  it('no guest count is not a refusal: the draft comes back with guestCount null (plan 614)', async () => {
     fetchMock.mockResolvedValue(modelAnswer(draft({ guestCount: undefined, sections: [{ category: 'א', items: [{ nameHebrew: 'חומוס' }] }] })));
     const res = await post({ rawText: 'בופה עם חומוס' });
+    expect(res.status).toBe(200);
+    expect(res.body.menu.sections[0].items[0].nameHebrew).toBe('חומוס');
+    expect(res.body.menu.guestCount ?? null).toBeNull();
+  });
+
+  it('a guest count that is not a positive number is still refused', async () => {
+    fetchMock.mockResolvedValue(modelAnswer(draft({ guestCount: -5, sections: [{ category: 'א', items: [{ nameHebrew: 'חומוס' }] }] })));
+    const res = await post({ rawText: 'בופה עם חומוס' });
     expect(res.status).toBe(502);
-    expect(res.body).toMatchObject({ error: 'Gemini returned invalid menu draft', code: 'no_guest_count' });
+    expect(res.body).toMatchObject({ code: 'invalid_draft' });
   });
 
   it('unreadable and empty_response', async () => {
@@ -132,12 +140,12 @@ describe('POST /generate-menu dish numbers and guest count (plan 587)', () => {
     expect(res.body.menu.sections[0].items[0]).toEqual({ nameHebrew: 'חומוס', predictedTakeRate: 0.5 });
   });
 
-  it('guestCount null -> no_guest_count and the call is counted as failed', async () => {
+  it('guestCount null -> the menu comes back with null and no failed call (plan 614)', async () => {
     fetchMock.mockResolvedValue(modelAnswer(draft({ guestCount: null, sections })));
     const res = await post({ rawText: 'בופה עם חומוס' });
-    expect(res.status).toBe(502);
-    expect(res.body).toMatchObject({ code: 'no_guest_count' });
-    expect(logs.byEvent('ai.generate_menu.validation_failed')[0].code).toBe('no_guest_count');
+    expect(res.status).toBe(200);
+    expect(res.body.menu.guestCount).toBeNull();
+    expect(logs.byEvent('ai.generate_menu.validation_failed')).toHaveLength(0);
   });
 
   it('the prompt asks for no portions or prices and for null without a guest number', async () => {
@@ -201,6 +209,92 @@ describe('POST /generate-menu recipe book', () => {
     expect(ids.has('bulk305')).toBe(true);
     expect(ids.has('bulk6')).toBe(true);
     expect(ids.has('bulk5')).toBe(false);
+  });
+});
+
+describe('POST /generate-menu dish matches (plan 614)', () => {
+  // Own user: the AI limiter allows 20 calls per user per window.
+  const tokenM = () => signTestToken({ userId: 'menuUserMatch', role: 'user', businessId: 'bizMenuA' });
+  const postM = body => post(body, tokenM());
+  const named = matches => draft({ sections: [{ category: 'ראשונות', items: [{ nameHebrew: "קרפצ'יו דג", matches }] }] });
+  const seed = () => testDb().collection('dishes').insertMany(
+    ['m1', 'm2', 'm3', 'm4'].map(id => dish(id, 'bizMenuA', { nameHebrew: `קרפצ'יו ${id}` })));
+
+  it('drops a match whose dish id is not in the recipe book', async () => {
+    await seed();
+    fetchMock.mockResolvedValue(modelAnswer(named([{ dishId: 'm1', confidence: 0.8 }, { dishId: 'stranger', confidence: 0.9 }])));
+    const res = await postM({ rawText: "קרפצ'יו דג לראשונות ל-50" });
+    expect(res.status).toBe(200);
+    expect(res.body.menu.sections[0].items[0].matches).toEqual([{ dishId: 'm1', confidence: 0.8 }]);
+  });
+
+  it('cuts more than 3 matches to the best 3', async () => {
+    await seed();
+    fetchMock.mockResolvedValue(modelAnswer(named([
+      { dishId: 'm1', confidence: 0.5 }, { dishId: 'm2', confidence: 0.9 },
+      { dishId: 'm3', confidence: 0.7 }, { dishId: 'm4', confidence: 0.8 },
+    ])));
+    const res = await postM({ rawText: "קרפצ'יו דג ל-50" });
+    expect(res.body.menu.sections[0].items[0].matches.map(m => m.dishId)).toEqual(['m2', 'm4', 'm3']);
+  });
+
+  it('clamps a confidence outside 0–1 and drops duplicates', async () => {
+    await seed();
+    fetchMock.mockResolvedValue(modelAnswer(named([
+      { dishId: 'm1', confidence: 1.7 }, { dishId: 'm2', confidence: -0.3 }, { dishId: 'm1', confidence: 0.4 },
+    ])));
+    const res = await postM({ rawText: "קרפצ'יו דג ל-50" });
+    expect(res.body.menu.sections[0].items[0].matches).toEqual([{ dishId: 'm1', confidence: 1 }, { dishId: 'm2', confidence: 0 }]);
+  });
+
+  it('keeps the named dish nameHebrew as the user wrote it and removes empty matches', async () => {
+    await seed();
+    fetchMock.mockResolvedValue(modelAnswer(named([{ dishId: 'nope', confidence: 0.9 }])));
+    const res = await postM({ rawText: "קרפצ'יו דג ל-50" });
+    expect(res.body.menu.sections[0].items[0]).toEqual({ nameHebrew: "קרפצ'יו דג" });
+  });
+
+  it('the prompt asks for matches on named dishes', async () => {
+    await seed();
+    fetchMock.mockResolvedValue(modelAnswer(named(undefined)));
+    await postM({ rawText: "קרפצ'יו דג ל-50" });
+    expect(sentText()).toContain('matches');
+  });
+});
+
+describe('POST /generate-menu retries a failure that goes away by itself (plan 614)', () => {
+  const tokenR = () => signTestToken({ userId: 'menuUserRetry', role: 'user', businessId: 'bizMenuA' });
+  const postR = body => post(body, tokenR());
+  const good = () => modelAnswer(draft({ sections: [{ category: 'א', items: [{ nameHebrew: 'חומוס' }] }] }));
+  const overloaded = () => jsonResponse(503, { error: { code: 503, message: 'overloaded' } });
+
+  it('succeeds on the 3rd try and every try is one logged call', async () => {
+    fetchMock.mockResolvedValueOnce(overloaded()).mockResolvedValueOnce(overloaded()).mockResolvedValueOnce(good());
+    const res = await postR({ rawText: 'חומוס' });
+    expect(res.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(logs.byEvent('ai.generate_menu.gemini_call')).toHaveLength(3);
+    expect(logs.byEvent('ai.generate_menu.retry')).toHaveLength(2);
+  });
+
+  it('gives up after 4 tries', async () => {
+    fetchMock.mockResolvedValue(overloaded());
+    const res = await postR({ rawText: 'חומוס' });
+    expect(res.status).toBeGreaterThanOrEqual(500);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it('retries a dropped connection', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('socket hang up')).mockResolvedValueOnce(good());
+    const res = await postR({ rawText: 'חומוס' });
+    expect(res.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a bad request', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(400, { error: { code: 400, message: 'bad' } }));
+    await postR({ rawText: 'חומוס' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 

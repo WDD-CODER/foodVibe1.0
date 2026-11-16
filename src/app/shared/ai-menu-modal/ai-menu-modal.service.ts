@@ -14,7 +14,7 @@ export class AiMenuModalService {
   private readonly controller_ = new ModalController<void>(undefined)
   private readonly mode_ = signal<AiMenuModalMode>('create')
   private currentMenu_: AiMenuDraft | null = null
-  private onResult_: ((result: MatchedMenu, resolutions: Map<string, string | 'skip'>) => void) | null = null
+  private onResult_: ((result: MatchedMenu, resolutions: Map<string, string>) => void) | null = null
   private onPatch_: ((patch: AiMenuPatch) => void) | null = null
 
   readonly isOpen = this.controller_.isOpen_
@@ -23,7 +23,7 @@ export class AiMenuModalService {
   open(
     mode: AiMenuModalMode,
     currentMenu?: AiMenuDraft,
-    onResult?: (result: MatchedMenu, resolutions: Map<string, string | 'skip'>) => void,
+    onResult?: (result: MatchedMenu, resolutions: Map<string, string>) => void,
     onPatch?: (patch: AiMenuPatch) => void
   ): void {
     if (!this.userService_.isLoggedIn()) {
@@ -41,7 +41,7 @@ export class AiMenuModalService {
     return this.currentMenu_
   }
 
-  deliverResult(result: MatchedMenu, resolutions: Map<string, string | 'skip'>): void {
+  deliverResult(result: MatchedMenu, resolutions: Map<string, string>): void {
     this.onResult_?.(result, resolutions)
     this.close()
   }

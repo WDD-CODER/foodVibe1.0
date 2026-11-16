@@ -87,6 +87,8 @@ export interface MenuItemSelection {
   portionsPerDiner?: number
   /** Plan 440: replaces the event's default coefficient for this item (> 0, at most 2 decimals) */
   coefficientOverride?: number
+  /** Plan 614: the name of a dish not built yet; set only while recipeId is '' */
+  unlinkedName?: string
 }
 
 export interface MenuSection {

@@ -2345,6 +2345,12 @@
     "platform_fd_export_csv": "ייצוא קבלה CSV",
     "nav_short_recipe_book": "מתכונים",
     "nav_short_menu_library": "תפריטים",
-    "nav_short_frontdesk": "לקוחות"
+    "nav_short_frontdesk": "לקוחות",
+    "ai_menu_new_unlinked_dish": "הוסף כמנה חדשה (לא מקושרת)",
+    "ai_menu_choose_dish": "בחר מנה מספר המתכונים או הוסף מנה חדשה",
+    "menu_dish_unlinked": "לא מקושר",
+    "menu_dish_unlinked_build": "לחץ כדי לבנות את המנה",
+    "menu_link_dish_failed": "המנה נשמרה, אך לא חוברה לתפריט",
+    "ai_menu_no_guest_count_warning": "לא צוין מספר אורחים, התפריט ייווצר ל-1 אורח. אפשר לשנות אותו אחר כך."
   }
 }

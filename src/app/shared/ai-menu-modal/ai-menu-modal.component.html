@@ -159,8 +159,24 @@
         <div class="ai-menu-preview-panel">
           <div class="ai-menu-preview-meta">
             <span class="ai-menu-meta-name">{{ matched_()!.name }}</span>
-            <span class="ai-menu-meta-guests">{{ matched_()!.guestCount }}</span>
+            <label class="ai-menu-meta-guests">
+              <span>{{ 'menu_guests' | translatePipe }}</span>
+              <input
+                type="number"
+                min="1"
+                step="1"
+                class="ai-menu-guests-input"
+                [value]="guestInput_() ?? matched_()!.guestCount"
+                (input)="onGuestInput($any($event.target).value)"
+              />
+            </label>
           </div>
+          @if (matched_()!.guestCountMissing && !guestInput_()) {
+            <p class="ai-menu-guest-warning" role="status">
+              <lucide-icon name="help-circle" [size]="16"></lucide-icon>
+              {{ 'ai_menu_no_guest_count_warning' | translatePipe }}
+            </p>
+          }
 
           <div class="ai-menu-sections">
             @for (section of matched_()!.sections; track section.category; let si = $index) {
@@ -168,8 +184,10 @@
                 <h3 class="ai-menu-section-title">{{ section.category }}</h3>
                 <ul class="ai-menu-dish-list">
                   @for (dish of section.items; track dish.nameHebrew; let di = $index) {
-                    <li class="ai-menu-dish-row" [attr.data-status]="dish.status">
-                      @if (dish.status === 'matched') {
+                    @let key = si + ':' + dish.nameHebrew;
+                    @let picking = dish.status !== 'matched' || isEditing_(key);
+                    <li class="ai-menu-dish-row" [attr.data-status]="picking ? 'ambiguous' : dish.status">
+                      @if (!picking) {
                         <!-- Matched: show the database recipe name, not the AI input -->
                         <lucide-icon
                           name="check-circle"
@@ -179,59 +197,55 @@
                         <span class="ai-menu-dish-name">{{
                           dish.candidates[0] ? dish.candidates[0].name : dish.nameHebrew
                         }}</span>
-                        <button
-                          type="button"
-                          class="c-icon-btn ai-menu-change-btn"
-                          (click)="onResolve(si + ':' + dish.nameHebrew, '')"
-                        >
+                        <button type="button" class="c-icon-btn ai-menu-change-btn" (click)="onEditChoice(key)">
                           <lucide-icon name="pencil" [size]="14"></lucide-icon>
                         </button>
-                      } @else if (dish.status === 'ambiguous') {
-                        <!-- Ambiguous: radio of top candidates -->
+                      } @else {
+                        <!-- Pick a recipe-book dish, keep it as a new unlinked dish, or skip -->
                         <lucide-icon
-                          name="help-circle"
+                          [name]="dish.status === 'unmatched' ? 'circle-x' : 'help-circle'"
                           [size]="16"
-                          class="ai-menu-dish-icon ai-menu-dish-icon--ambiguous"
+                          class="ai-menu-dish-icon"
+                          [class.ai-menu-dish-icon--ambiguous]="dish.status !== 'unmatched'"
+                          [class.ai-menu-dish-icon--unmatched]="dish.status === 'unmatched'"
                         ></lucide-icon>
                         <span class="ai-menu-dish-name">{{ dish.nameHebrew }}</span>
                         <div class="ai-menu-candidates">
-                          <p class="ai-menu-candidates-label">{{ 'ai_menu_ambiguous' | translatePipe }}</p>
+                          <p class="ai-menu-candidates-label">{{ 'ai_menu_choose_dish' | translatePipe }}</p>
                           @for (candidate of dish.candidates; track candidate.recipeId) {
                             <label class="ai-menu-candidate-option">
                               <input
                                 type="radio"
                                 [name]="'dish-' + si + '-' + di"
                                 [value]="candidate.recipeId"
-                                (change)="onResolve(si + ':' + dish.nameHebrew, candidate.recipeId)"
+                                [checked]="choiceOf_(key, dish) === candidate.recipeId"
+                                (change)="onResolve(key, candidate.recipeId)"
                               />
-                              <span>{{ candidate.name }}</span>
+                              <span class="ai-menu-candidate-name">{{ candidate.name }}</span>
                               <span class="ai-menu-candidate-score">{{ pctInt(candidate.confidence * 100) }}</span>
                             </label>
                           }
+                          <label class="ai-menu-candidate-option">
+                            <input
+                              type="radio"
+                              [name]="'dish-' + si + '-' + di"
+                              value="new"
+                              [checked]="choiceOf_(key, dish) === 'new'"
+                              (change)="onResolve(key, 'new')"
+                            />
+                            <span class="ai-menu-candidate-name">{{
+                              'ai_menu_new_unlinked_dish' | translatePipe
+                            }}</span>
+                          </label>
                           <button
                             type="button"
                             class="c-btn-ghost ai-menu-skip-btn"
-                            (click)="onResolve(si + ':' + dish.nameHebrew, 'skip')"
+                            [class.is-active]="choiceOf_(key, dish) === 'skip'"
+                            (click)="onResolve(key, 'skip')"
                           >
                             {{ 'ai_menu_skip_dish' | translatePipe }}
                           </button>
                         </div>
-                      } @else {
-                        <!-- Unmatched -->
-                        <lucide-icon
-                          name="circle-x"
-                          [size]="16"
-                          class="ai-menu-dish-icon ai-menu-dish-icon--unmatched"
-                        ></lucide-icon>
-                        <span class="ai-menu-dish-name ai-menu-dish-name--placeholder">{{ dish.nameHebrew }}</span>
-                        <span class="ai-menu-unmatched-note">{{ 'ai_menu_unmatched' | translatePipe }}</span>
-                        <button
-                          type="button"
-                          class="c-btn-ghost ai-menu-skip-btn"
-                          (click)="onResolve(si + ':' + dish.nameHebrew, 'skip')"
-                        >
-                          {{ 'ai_menu_skip_dish' | translatePipe }}
-                        </button>
                       }
                     </li>
                   }

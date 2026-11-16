@@ -81,7 +81,9 @@ export const menuEventSchema = z.strictObject({
       /** @deprecated replaced by portionsPerDiner (plan 440); read only as a fallback */
       servingPortions: z.number().optional(),
       portionsPerDiner: z.number().min(0).optional(),
-      coefficientOverride: coefficientSchema.optional()
+      coefficientOverride: coefficientSchema.optional(),
+      /** Plan 614: the name of a dish not built yet (recipeId is ''). */
+      unlinkedName: z.string().trim().min(1).max(120).optional()
     }))
   })),
   /** Plan 445 (money field, plan 427): the price per guest quoted to the client. Empty = computed from dish sell prices. */

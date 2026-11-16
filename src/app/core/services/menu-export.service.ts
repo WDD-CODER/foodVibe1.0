@@ -72,7 +72,7 @@ export class MenuExportService {
       let rowNum = 2
       ;(section.items ?? []).forEach((item: MenuItemSelection) => {
         const recipe = recipeMap.get(item.recipeId)
-        const name = recipe?.nameHebrew ?? item.recipeId
+        const name = recipe?.nameHebrew ?? item.unlinkedName ?? item.recipeId
         ws.addRow([
           name,
           roundExportNumber(item.derivedPortions ?? 0),
@@ -154,7 +154,7 @@ export class MenuExportService {
       let rowNum = 2
       ;(section.items ?? []).forEach((item: MenuItemSelection) => {
         const recipe = recipeMap.get(item.recipeId)
-        const name = recipe?.nameHebrew ?? item.recipeId
+        const name = recipe?.nameHebrew ?? item.unlinkedName ?? item.recipeId
         ws.addRow([
           name,
           roundExportNumber(item.derivedPortions ?? 0),
@@ -194,7 +194,7 @@ export class MenuExportService {
     sections.forEach((section: MenuSection) => {
       const sectionRows: (string | number)[][] = (section.items ?? []).map((item: MenuItemSelection) => {
         const recipe = recipeMap.get(item.recipeId)
-        const name = recipe?.nameHebrew ?? item.recipeId
+        const name = recipe?.nameHebrew ?? item.unlinkedName ?? item.recipeId
         return [
           name,
           roundExportNumber(item.derivedPortions ?? 0),
@@ -245,7 +245,7 @@ export class MenuExportService {
     const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     for (const section of sections) {
       const sectionRows: (string | number)[][] = (section.items ?? []).map((item: MenuItemSelection, index) => {
-        const name = recipeMap.get(item.recipeId)?.nameHebrew ?? item.recipeId
+        const name = recipeMap.get(item.recipeId)?.nameHebrew ?? item.unlinkedName ?? item.recipeId
         const portions = item.derivedPortions ?? 0
         const totalCost = costByItem.get(`${section._id}|${index}`) ?? 0
         const costPerPortion = portions >= 1 ? totalCost / portions : totalCost

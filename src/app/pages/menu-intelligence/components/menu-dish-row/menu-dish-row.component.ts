@@ -99,6 +99,8 @@ export class MenuDishRowComponent {
 
   // ── Outputs ───────────────────────────────────────────────────────────────
   readonly remove = output<void>()
+  /** Plan 614: click on an unlinked dish — the page saves the menu and opens the dish builder. */
+  readonly buildUnlinked = output<void>()
   readonly selectRecipe = output<{ recipe: Recipe }>()
   readonly startEditName = output<void>()
   readonly searchQueryChange = output<string>()
