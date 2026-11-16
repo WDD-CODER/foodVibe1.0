@@ -126,6 +126,21 @@ describe('computeEventPlan', () => {
     expect(plan.dishCosts.find((d) => d.recipeId === ID.pasta)?.partial).toBeTrue()
   })
 
+  it('an unlinked menu item adds no cost and no deleted entry (plan 614)', () => {
+    const base = computeEventPlan(buildFixtureInput())
+    const input = buildFixtureInput()
+    input.event.sections[0].items.push({
+      recipeId: '',
+      recipeType: 'dish',
+      derivedPortions: 0,
+      unlinkedName: 'קרפצ׳יו'
+    })
+    const plan = computeEventPlan(input)
+    expect(plan.missing.some((m) => m.kind === 'deleted')).toBeFalse()
+    expect(plan.dishCosts.length).toBe(base.dishCosts.length)
+    expect(plan.rawLines.length).toBe(base.rawLines.length)
+  })
+
   it('keeps a free-text row apart from the linked product of the same name', () => {
     const input = buildFixtureInput()
     const pasta = input.recipes.find((r) => r._id === ID.pasta)

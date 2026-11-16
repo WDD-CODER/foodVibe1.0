@@ -190,7 +190,7 @@
             <div class="dish-list" formArrayName="items">
               @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
               <app-menu-dish-row
-                [class.no-print]="!item.get('recipeId')?.value"
+                [class.no-print]="!item.get('recipeId')?.value && !item.get('unlinkedName')?.value"
                 [itemGroup]="item"
                 [sectionIndex]="sectionIndex"
                 [itemIndex]="itemIndex"
@@ -201,6 +201,7 @@
                 [editingDishField]="editingDishField_()"
                 [portionInfo]="menuPortions_.at(sectionIndex, itemIndex)"
                 (remove)="removeItem(sectionIndex, itemIndex)"
+                (buildUnlinked)="buildUnlinkedDish(sectionIndex, itemIndex)"
                 (selectRecipe)="selectRecipe(sectionIndex, itemIndex, $event.recipe)"
                 (startEditName)="startEditDishName(sectionIndex, itemIndex)"
                 (searchQueryChange)="onDishSearchQueryChange(sectionIndex, itemIndex, $event)"

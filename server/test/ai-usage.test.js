@@ -125,11 +125,11 @@ describe('the ledger row', () => {
 });
 
 describe('failures write one row with ok:false', () => {
-  it('http 500', async () => {
+  it('http 500: every one of the 4 tries writes its own row (plan 614)', async () => {
     fetchMock.mockResolvedValue(jsonResponse(500, { error: { message: 'boom' } }));
     expect((await call(fakeLog())).kind).toBe('gemini_error');
     const all = await rows();
-    expect(all).toHaveLength(1);
+    expect(all).toHaveLength(4);
     expect(all[0]).toMatchObject({ ok: false, errorCode: 'http_500', inputTokens: 0 });
   });
 
@@ -141,11 +141,11 @@ describe('failures write one row with ok:false', () => {
     expect(all[0]).toMatchObject({ ok: false, errorCode: 'timeout' });
   });
 
-  it('network error', async () => {
+  it('network error: every one of the 4 tries writes its own row (plan 614)', async () => {
     fetchMock.mockRejectedValue(new Error('down'));
     expect((await call(fakeLog())).kind).toBe('network');
     const all = await rows();
-    expect(all).toHaveLength(1);
+    expect(all).toHaveLength(4);
     expect(all[0]).toMatchObject({ ok: false, errorCode: 'network' });
   });
 

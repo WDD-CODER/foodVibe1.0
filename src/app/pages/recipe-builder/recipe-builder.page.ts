@@ -26,6 +26,10 @@ import {
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
+import { MenuIntelligenceService } from '@services/menu-intelligence.service'
+import { courseKeyForSection, linkUnlinkedMenuItem } from '../../core/utils/menu-unlinked.util'
+import type { MenuEvent } from '@models/menu-event.model'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
@@ -103,6 +107,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected readonly logisticsPicker = inject(RecipeLogisticsPickerService)
   protected readonly recipeExport = inject(RecipeBuilderExportService)
   private readonly userService_ = inject(UserService)
+  private readonly menuEventData_ = inject(MenuEventDataService)
+  private readonly menuIntelligence_ = inject(MenuIntelligenceService)
   private readonly isAdmin_ = this.userService_.isAdmin_
 
   // CHILD REFS
@@ -456,13 +462,19 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (!gotDraft) {
           const type = this.route_.snapshot.queryParams['type'] as string | undefined
           if (type === 'dish') {
+            // Plan 614: a dish opened from the menu starts with the menu's dish name
+            const startName = String(this.route_.snapshot.queryParams['name'] ?? '')
+              .trim()
+              .slice(0, 120)
             this.recipeForm_.patchValue(
               {
                 recipe_type: 'dish',
-                serving_portions: 1
+                serving_portions: 1,
+                ...(startName ? { nameHebrew: startName } : {})
               },
               { emitEvent: false }
             )
+            this.applyMenuCourse_()
             this.yieldConversionsArray.clear()
             this.yieldConversionsArray.push(this.fb.group({ amount: [1], unit: ['dish'] }))
             this.workflowArray.clear()
@@ -937,8 +949,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     if (pushToMasterAfterSave) this.masterPush_.pushToMaster(saved)
     if (navigateOnSuccess) {
       this.isSubmitted = true
+      const fromMenu = this.fromMenu_()
+      if (fromMenu) await this.linkSavedToMenu_(fromMenu, saved)
       this.resetToNewForm_()
-      this.router_.navigate(['/recipe-book'])
+      this.router_.navigate(this.backRoute_())
     } else {
       // If a type-change caused a new _id to be assigned, update recipeId_ so the
       // duplicate-name validator does not flag the same recipe as a conflict.
@@ -977,7 +991,46 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   navigateBackFromHistory(): void {
-    this.router_.navigate(['/recipe-book'])
+    this.router_.navigate(this.backRoute_())
+  }
+
+  /** Plan 614: a dish opened from a menu section starts on the matching course (dish type), when one fits. */
+  private applyMenuCourse_(): void {
+    const section = String(this.route_.snapshot.queryParams['category'] ?? '')
+    if (!section || !this.fromMenu_()) return
+    const courses = this.metadataRegistry_
+      .courses_()
+      .map((c) => ({ key: c.key, label: this.translation_.translate(c.key) }))
+    const course = courseKeyForSection(section, courses)
+    if (course) this.recipeForm_.patchValue({ course }, { emitEvent: false })
+  }
+
+  /** Plan 614: the menu this dish builder was opened from (an unlinked dish), or null. */
+  private fromMenu_(): { menuId: string; sectionId: string } | null {
+    const q = this.route_.snapshot.queryParams
+    const menuId = q['fromMenu'] as string | undefined
+    const sectionId = q['section'] as string | undefined
+    return menuId && sectionId ? { menuId, sectionId } : null
+  }
+
+  /** Plan 614: back goes to the menu when the builder was opened from one, else to the recipe book. */
+  private backRoute_(): string[] {
+    const menuId = this.route_.snapshot.queryParams['fromMenu'] as string | undefined
+    return menuId ? ['/menu-intelligence', menuId] : ['/recipe-book']
+  }
+
+  /** Plan 614: links the saved dish to the unlinked menu item it came from; a failure only shows a message. */
+  private async linkSavedToMenu_(from: { menuId: string; sectionId: string }, saved: Recipe): Promise<void> {
+    const name = String(this.route_.snapshot.queryParams['name'] ?? '').trim()
+    try {
+      const event = await this.menuEventData_.getMenuEventById(from.menuId)
+      const type = saved.recipeType === 'dish' ? 'dish' : 'preparation'
+      const linked = linkUnlinkedMenuItem(event, from.sectionId, name, saved._id, type)
+      if (!linked) return
+      await this.menuEventData_.updateMenuEvent(this.menuIntelligence_.hydrateDerivedPortions(linked) as MenuEvent)
+    } catch {
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('menu_link_dish_failed'))
+    }
   }
 
   /** Quantity for export (form snapshot): dish = serving_portions, recipe = yield amount; min 1. */

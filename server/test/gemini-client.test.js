@@ -167,18 +167,18 @@ describe('daily quota — one call, the user decides the switch', () => {
 });
 
 describe('other failures return on the model tried', () => {
-  it('per-minute 429 returns on the model tried', async () => {
+  it('per-minute 429 is tried 4 times (plan 614), then returns on the model tried', async () => {
     fetchMock.mockResolvedValue(jsonResponse(429, MINUTE_429));
     const result = await call(fakeLog());
     expect(result).toEqual({ kind: 'gemini_error', model: DEFAULT_MODELS[0], status: 429, message: 'Rate limit' });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
-  it('5xx returns on the model tried', async () => {
+  it('5xx is tried 4 times (plan 614), then returns on the model tried', async () => {
     fetchMock.mockResolvedValue(jsonResponse(503, { error: { message: 'overloaded' } }));
     const result = await call(fakeLog());
     expect(result).toEqual({ kind: 'gemini_error', model: DEFAULT_MODELS[0], status: 503, message: 'overloaded' });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it('timeout returns on the model tried', async () => {

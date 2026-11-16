@@ -5,7 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { GeminiService } from '@services/gemini.service'
-import { KitchenStateService } from '@services/kitchen-state.service'
+import { DishDataService } from '@services/dish-data.service'
 import { getGeminiUsage } from '@utils/gemini-usage.util'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { AiMenuModalComponent } from './ai-menu-modal.component'
@@ -13,24 +13,28 @@ import { AiMenuModalService } from './ai-menu-modal.service'
 
 type Internals = { buildMatchedMenu_: (d: AiMenuDraft) => MatchedMenu }
 
+function makeComponent(): AiMenuModalComponent {
+  const gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['fetchUsage'])
+  gemini.fetchUsage.and.callFake(() => Promise.resolve(getGeminiUsage()))
+  TestBed.configureTestingModule({
+    imports: [AiMenuModalComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+    providers: [
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      { provide: GeminiService, useValue: gemini },
+      { provide: DishDataService, useValue: { allDishes_: signal([]) } },
+      {
+        provide: AiMenuModalService,
+        useValue: { isOpen: signal(true), mode: signal('create'), getEditContext: () => null, close: () => {} }
+      }
+    ]
+  })
+  return TestBed.createComponent(AiMenuModalComponent).componentInstance
+}
+
 describe('AiMenuModalComponent dish numbers (plan 587)', () => {
   it('does not copy serving_portions or sell_price into the menu line', async () => {
-    const gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['fetchUsage'])
-    gemini.fetchUsage.and.callFake(() => Promise.resolve(getGeminiUsage()))
-    TestBed.configureTestingModule({
-      imports: [AiMenuModalComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        { provide: GeminiService, useValue: gemini },
-        { provide: KitchenStateService, useValue: { recipes_: signal([]) } },
-        {
-          provide: AiMenuModalService,
-          useValue: { isOpen: signal(true), mode: signal('create'), getEditContext: () => null, close: () => {} }
-        }
-      ]
-    })
-    const component = TestBed.createComponent(AiMenuModalComponent).componentInstance
+    const component = makeComponent()
     const draft: AiMenuDraft = {
       name: 'אירוע',
       eventType: 'חתונה',
@@ -43,5 +47,20 @@ describe('AiMenuModalComponent dish numbers (plan 587)', () => {
     const line = matched.sections[0].items[0]
     expect(line.servingPortions).toBeUndefined()
     expect(line.sellPrice).toBeUndefined()
+  })
+
+  it('no guest count: the menu is made for 1 guest and flagged for the warning (plan 614)', () => {
+    const component = makeComponent()
+    const draft = {
+      name: 'אירוע',
+      eventType: '',
+      eventDate: null,
+      servingType: 'buffet',
+      guestCount: null as unknown as number,
+      sections: [{ category: 'ראשונות', items: [{ nameHebrew: 'חומוס' }] }]
+    } as AiMenuDraft
+    const matched = (component as unknown as Internals).buildMatchedMenu_(draft)
+    expect(matched.guestCount).toBe(1)
+    expect(matched.guestCountMissing).toBeTrue()
   })
 })

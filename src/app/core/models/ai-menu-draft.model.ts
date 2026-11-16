@@ -2,6 +2,8 @@ export interface AiMenuDishDraft {
   nameHebrew: string
   /** plan 580: id of a dish from the business's recipe book, set only when the AI picked from it */
   dishId?: string
+  /** plan 614: recipe-book dishes the AI thinks are the same dish (server-checked ids, confidence 0–1) */
+  matches?: { dishId: string; confidence: number }[]
   /** @deprecated plan 441: the AI may still send it; nothing reads it */
   predictedTakeRate?: number | null
   /** @deprecated plan 587: the server removes it; nothing reads it */
@@ -31,6 +33,8 @@ export interface MatchedDish {
   status: 'matched' | 'ambiguous' | 'unmatched'
   recipeId: string | null
   candidates: Array<{ recipeId: string; name: string; confidence: number }>
+  /** plan 614: the choice preselected in the AI menu window — a recipeId or 'new' (keep as an unlinked dish) */
+  defaultChoice?: string
   predictedTakeRate?: number | null
   servingPortions?: number | null
   sellPrice?: number | null
@@ -47,5 +51,7 @@ export interface MatchedMenu {
   eventDate: string | null
   servingType: string
   guestCount: number
+  /** plan 614: the user wrote no guest count, so guestCount is 1 and the window warns */
+  guestCountMissing?: boolean
   sections: MatchedSection[]
 }

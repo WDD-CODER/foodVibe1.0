@@ -8,11 +8,12 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from '../loader/loader.component'
 import { AiMenuModalService } from './ai-menu-modal.service'
 import { GeminiService } from '@services/gemini.service'
-import { KitchenStateService } from '@services/kitchen-state.service'
+import { DishDataService } from '@services/dish-data.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { getGeminiUsage, geminiUsageStatus, geminiBudgetUsedPercent } from '../../core/utils/gemini-usage.util'
 import { matchMenuDish } from '../../core/utils/recipe-match.util'
+import { aiMenuNameOrEmpty } from '../../core/utils/menu-unlinked.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
@@ -39,7 +40,7 @@ export class AiMenuModalComponent implements OnInit {
 
   protected readonly modalService = inject(AiMenuModalService)
   private readonly gemini_ = inject(GeminiService)
-  private readonly kitchenState_ = inject(KitchenStateService)
+  private readonly dishData_ = inject(DishDataService)
   private readonly userMsg_ = inject(UserMsgService)
   private readonly translation_ = inject(TranslationService)
 
@@ -47,7 +48,11 @@ export class AiMenuModalComponent implements OnInit {
   protected readonly prompt_ = signal('')
   protected readonly draft_ = signal<AiMenuDraft | null>(null)
   protected readonly matched_ = signal<MatchedMenu | null>(null)
-  protected readonly userResolutions_ = signal<Map<string, string | 'skip'>>(new Map())
+  protected readonly userResolutions_ = signal<Map<string, string>>(new Map())
+  /** Plan 614: guests typed in this window; empty = keep what the text said (or 1) */
+  protected readonly guestInput_ = signal<number | null>(null)
+  /** Matched rows whose pencil was clicked: they show the same choice list as the others */
+  private readonly editing_ = signal<ReadonlySet<string>>(new Set())
 
   // Edit mode
   protected readonly instruction = signal('')
@@ -152,6 +157,7 @@ export class AiMenuModalComponent implements OnInit {
       this.draft_.set(draft)
       const matched = this.buildMatchedMenu_(draft)
       this.matched_.set(matched)
+      this.userResolutions_.set(this.defaultResolutions_(matched))
       this.status_.set('done')
     } catch (err) {
       this.errorKey_.set(this.resolveErrorKey_(err))
@@ -163,38 +169,73 @@ export class AiMenuModalComponent implements OnInit {
   }
 
   private buildMatchedMenu_(draft: AiMenuDraft): MatchedMenu {
-    const recipes = this.kitchenState_.recipes_()
+    const recipes = this.dishData_.allDishes_()
+    // Plan 614: no guest number is a warning, not an error — the menu is made for 1 guest and the chef changes it later
+    const guestCountGiven = Number(draft.guestCount) > 0
     const sections: MatchedSection[] = draft.sections.map((section, _si) => {
       const items: MatchedDish[] = section.items.map((dish) => {
-        const { bestMatch, candidates, status } = matchMenuDish(dish, recipes)
+        const { bestMatch, candidates, status, defaultChoice } = matchMenuDish(dish, recipes)
         return {
           nameHebrew: dish.nameHebrew,
           status,
           recipeId: status === 'matched' ? (bestMatch?.recipeId ?? null) : null,
           candidates,
+          defaultChoice,
           predictedTakeRate: dish.predictedTakeRate
         }
       })
       return { category: section.category, items }
     })
     return {
-      name: draft.name,
+      name: aiMenuNameOrEmpty(draft.name),
       eventType: draft.eventType,
       eventDate: draft.eventDate,
       servingType: draft.servingType,
-      guestCount: draft.guestCount,
+      guestCount: guestCountGiven ? draft.guestCount : 1,
+      ...(guestCountGiven ? {} : { guestCountMissing: true }),
       sections
     }
   }
 
+  /** Each dish that needs a choice starts on its default: the top option, or a new unlinked dish. */
+  private defaultResolutions_(matched: MatchedMenu): Map<string, string> {
+    const out = new Map<string, string>()
+    matched.sections.forEach((section, si) => {
+      for (const dish of section.items) {
+        if (dish.status !== 'matched' && dish.defaultChoice) out.set(si + ':' + dish.nameHebrew, dish.defaultChoice)
+      }
+    })
+    return out
+  }
+
+  protected isEditing_(key: string): boolean {
+    return this.editing_().has(key)
+  }
+
+  protected onEditChoice(key: string): void {
+    this.editing_.set(new Set(this.editing_()).add(key))
+  }
+
+  /** The current choice of a dish: what the chef picked, else its default. */
+  protected choiceOf_(key: string, dish: MatchedDish): string {
+    return this.userResolutions_().get(key) ?? dish.defaultChoice ?? 'new'
+  }
+
+  protected onGuestInput(value: string): void {
+    const n = Math.floor(Number(value))
+    this.guestInput_.set(Number.isFinite(n) && n > 0 ? n : null)
+  }
+
   onGenerateAgain(): void {
+    this.guestInput_.set(null)
+    this.editing_.set(new Set())
     this.matched_.set(null)
     this.userResolutions_.set(new Map())
     this.status_.set('idle')
     this.errorKey_.set('ai_menu_error')
   }
 
-  onResolve(dishKey: string, value: string | 'skip'): void {
+  onResolve(dishKey: string, value: string): void {
     const current = new Map(this.userResolutions_())
     current.set(dishKey, value)
     this.userResolutions_.set(current)
@@ -204,7 +245,11 @@ export class AiMenuModalComponent implements OnInit {
     const matched = this.matched_()
     const draft = this.draft_()
     if (!matched) return
-    this.modalService.deliverResult(matched, this.userResolutions_())
+    const guests = this.guestInput_()
+    this.modalService.deliverResult(
+      guests ? { ...matched, guestCount: guests, guestCountMissing: false } : matched,
+      this.userResolutions_()
+    )
     if (draft) {
       this.gemini_.saveMenuShot(this.prompt_(), draft).catch(() => {
         /* non-blocking */
@@ -301,6 +346,8 @@ export class AiMenuModalComponent implements OnInit {
     this.draft_.set(null)
     this.matched_.set(null)
     this.userResolutions_.set(new Map())
+    this.guestInput_.set(null)
+    this.editing_.set(new Set())
     this.instruction.set('')
     this.patch_.set(null)
     this.isLoading_.set(false)

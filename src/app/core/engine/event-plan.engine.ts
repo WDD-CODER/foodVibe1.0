@@ -259,6 +259,8 @@ export function computeEventPlan(input: EventPlanInput): EventPlan {
   input.event.sections.forEach((section) => {
     section.items.forEach((item, index) => {
       const itemKey = `${section._id}|${index}`
+      // Plan 614: a dish not built yet has no cost and is not a missing recipe
+      if (!item.recipeId) return
       const recipe = recipesById.get(item.recipeId)
       if (!recipe) {
         addMissing({ kind: 'deleted', name: item.recipeId, recipeIds: [item.recipeId] })

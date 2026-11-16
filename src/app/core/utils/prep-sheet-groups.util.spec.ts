@@ -91,6 +91,18 @@ describe('buildPrepSheetGroups (04.1 fixture)', () => {
     expect(groups.map((g) => g.title)).toEqual(['חם', 'קר', 'גריל', 'כללי'])
   })
 
+  it('by dish: an unlinked menu item is skipped (plan 614)', () => {
+    const { input, plan } = withStations('קר')
+    input.event.sections[0].items.push({
+      recipeId: '',
+      recipeType: 'dish',
+      derivedPortions: 0,
+      unlinkedName: 'קרפצ׳יו'
+    })
+    const groups = buildPrepSheetGroups(plan, input.event, recipesById(input), 'by_dish', t)
+    expect(groups.map((g) => g.title)).toEqual(['סלט', 'פסטה'])
+  })
+
   it('by dish: סלט has the sauce row, פסטה is kept with the empty text', () => {
     const { input, plan } = withStations('קר')
     const groups = buildPrepSheetGroups(plan, input.event, recipesById(input), 'by_dish', t)

@@ -9,6 +9,8 @@ import { EventTypeSnapshotService } from '@services/event-type-snapshot.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import type { MatchedMenu } from '@models/ai-menu-draft.model'
+import { resolveAiMenuDish } from '../../core/utils/menu-unlinked.util'
+import { dateMenuName, uniqueMenuName } from '../menu-intelligence/menu-form.util'
 
 @Component({
   selector: 'app-menu-library-page',
@@ -55,24 +57,29 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
         _id: crypto.randomUUID(),
         name: section.category,
         sortOrder: si + 1,
-        items: section.items
-          .filter((dish) => resolutions.get(`${si}:${dish.nameHebrew}`) !== 'skip')
-          .map((dish) => {
-            const resolution = resolutions.get(`${si}:${dish.nameHebrew}`)
-            const recipeId = resolution && resolution !== 'skip' ? resolution : (dish.recipeId ?? '')
-            return {
-              recipeId: recipeId,
-              recipeType: 'dish' as const,
-              derivedPortions: 0,
-              sellPrice: dish.sellPrice ?? undefined,
-              portionsPerDiner: dish.servingPortions ?? 1
-            }
-          })
+        items: section.items.flatMap((dish) => {
+          // Plan 614: a picked id links, 'new' keeps the typed name as an unlinked dish, 'skip' drops it
+          const resolved = resolveAiMenuDish(dish, resolutions.get(`${si}:${dish.nameHebrew}`))
+          if (!resolved) return []
+          return {
+            recipeId: resolved.recipeId,
+            ...(resolved.unlinkedName ? { unlinkedName: resolved.unlinkedName } : {}),
+            recipeType: 'dish' as const,
+            derivedPortions: 0,
+            sellPrice: dish.sellPrice ?? undefined,
+            portionsPerDiner: dish.servingPortions ?? 1
+          }
+        })
       }))
       const eventTypeSnapshot = this.snapshots_.snapshotFor('eventType', matched.eventType)
       const servingTypeSnapshot = this.snapshots_.snapshotFor('menuType', matched.servingType)
       const draft = {
-        name: matched.name,
+        name: matched.name?.trim()
+          ? uniqueMenuName(
+              matched.name,
+              this.menuEventData.allMenuEvents_().map((e) => e.name)
+            )
+          : dateMenuName(this.menuEventData.allMenuEvents_().map((e) => e.name)),
         eventType: matched.eventType,
         eventDate: matched.eventDate ?? undefined,
         servingType: matched.servingType as ServingType,

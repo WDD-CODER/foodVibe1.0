@@ -48,7 +48,7 @@ function dishesInMenuOrder(event: MenuEvent, recipesById: Map<string, Recipe>): 
   const sections = [...(event.sections ?? [])].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
   for (const section of sections) {
     for (const item of section.items ?? []) {
-      if (seen.has(item.recipeId)) continue
+      if (!item.recipeId || seen.has(item.recipeId)) continue
       seen.add(item.recipeId)
       out.push({ id: item.recipeId, name: recipesById.get(item.recipeId)?.nameHebrew ?? item.recipeId })
     }
