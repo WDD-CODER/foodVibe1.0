@@ -1,5 +1,5 @@
 # Plan 614 — AI menu links named dishes to the recipe book or keeps them as unlinked dishes to build
-Status: draft
+Status: active
 Depends-on: none
 Snapshot: a8d09c051a08d36c9d24261da98c01066cfe448f
 
