@@ -14,6 +14,16 @@ export function isWorktree(root, folder) {
   const r = spawnSync('git', ['worktree', 'list', '--porcelain'], { cwd: root, encoding: 'utf8', windowsHide: true })
   return String(r.stdout ?? '').split('\n').some((l) => l.startsWith('worktree ') && samePath(l.slice(9).trim(), folder))
 }
+/** The folder that has `refs/heads/<branch>` checked out in one of `root`'s worktrees, or null. */
+export function branchHolder(root, branch) {
+  const r = spawnSync('git', ['worktree', 'list', '--porcelain'], { cwd: root, encoding: 'utf8', windowsHide: true })
+  let folder = null
+  for (const l of String(r.stdout ?? '').split('\n').map((x) => x.replace(/\r$/, ''))) {
+    if (l.startsWith('worktree ')) folder = l.slice(9).trim()
+    else if (l.trim() === `branch refs/heads/${branch}`) return folder
+  }
+  return null
+}
 /**
  * Removes a builder folder git no longer tracks, or a worktree `git worktree remove` left half-deleted (on Windows it
  * fails on node_modules with "Directory not empty"): a recursive delete with retries; when that fails, the folder is

@@ -13,7 +13,7 @@ Flags: `regular` forces REGULAR · `fast` makes one reply answer commit + push +
 `node scripts/ship-prep.mjs` (`--mode regular` for `regular`); announce its `Lane:` line. The script decides: a sensitive, build or CI path is always REGULAR.
 
 ## Phase 1 — Gate (hard stop, every lane)
-`node scripts/ship-prep.mjs --gate --lane <lane>` runs `npm run build`, lint, the tests (REGULAR only), `node scripts/plan-ledger-check.mjs` and `node scripts/override-check.mjs` by code, one `GATE:` line each. Exit 1 → stop, do not commit; fix from the printed tail, re-run `/ship`. `OVERRIDE_CHECK: FAIL` names the step an override lost: add it back from the kit's template. Ledger warnings are advisory.
+`node scripts/ship-prep.mjs --gate --lane <lane>` runs `npm run build`, lint, the tests (REGULAR only), the diff checks `node scripts/kit-checks.mjs` (every lane — they are scripts; a `KIT_CHECK:` or `KIT_DEBT:` line names the file and what to use instead), `node scripts/plan-ledger-check.mjs` and `node scripts/override-check.mjs` by code, one `GATE:` line each. Exit 1 → stop, do not commit; fix from the printed tail, re-run `/ship`. `OVERRIDE_CHECK: FAIL` names the step an override lost: add it back from the kit's template. Ledger warnings are advisory.
 
 ## Phase 2 — Review
 - **FAST / ULTRA-TRIVIAL:** `npx eslint --fix`, one read of the diff for obvious bugs, `Review: SKIPPED (fast-lane: {n} files/{m} lines, no sensitive paths)` + `[review-skipped: fast-lane]` in the body.

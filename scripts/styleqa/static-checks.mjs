@@ -126,10 +126,63 @@ export function parseStylesheet(text) {
 const PX_IN_MEDIA = /(?<![\w.-])\d+(?:\.\d+)?px\b/
 const COLOR = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})\b|\b(?:rgba?|hsla?)\(/
 const FONT_SIZE = /(?<![\w.$-])\d*\.?\d+(?:px|rem|em|pt)\b/
+const LENGTH = /(?<![\w.$-])(\d*\.?\d+)(?:px|rem|em)\b/g
+const BLUR = /\bblur\(\s*(\d*\.?\d+)(?:px|rem|em)\b/
 const bare = (name) => String(name).replace(/^(--|\$|@)/, '')
+/** The kinds of raw value, each with the styleqa.tokenPrefixes key that holds its token prefix. */
+export const LITERAL_KINDS = Object.freeze({ color: 'color', 'font-size': 'fontSize', radius: 'radius', shadow: 'shadow', blur: 'blur', spacing: 'spacing' })
+const nonZeroLength =(value) => [...String(value).matchAll(LENGTH)].find((m) => Number(m[1]) !== 0)
+
+/**
+ * The raw design values of one declaration: [{ kind, text }] (kind: color, font-size, radius, shadow, blur, spacing).
+ * A colour literal counts in any property; the other kinds read their own properties only. 0, a percentage, auto and a
+ * var() / token reference are never a literal; a length of 0 (0px) is not one either.
+ * Shared with the diff check scripts/lib/checks/style-raw-values.mjs, so both agree on what a raw value is.
+ */
+export function literalMatches(prop, value) {
+  const p = String(prop).toLowerCase()
+  const v = String(value)
+  const out = []
+  const color = COLOR.exec(v)
+  if (color) out.push({ kind: 'color', text: color[0].endsWith('(') ? `${color[0]}…)` : color[0] })
+  if (p === 'font-size') {
+    const m = FONT_SIZE.exec(v)
+    if (m) out.push({ kind: 'font-size', text: m[0] })
+  } else if (/^border(-(top|bottom|start|end)-(left|right|start|end))?-radius$/.test(p)) {
+    const m = nonZeroLength(v)
+    if (m) out.push({ kind: 'radius', text: m[0] })
+  } else if (p === 'box-shadow' || p === 'text-shadow') {
+    const m = nonZeroLength(v)
+    if (m) out.push({ kind: 'shadow', text: m[0] })
+  } else if (p === 'filter' || p === 'backdrop-filter') {
+    const m = BLUR.exec(v)
+    if (m && Number(m[1]) !== 0) out.push({ kind: 'blur', text: m[0] })
+  } else if (/^(margin|padding)(-[a-z-]+)?$/.test(p) || p === 'gap' || p === 'row-gap' || p === 'column-gap' || p === 'grid-gap') {
+    const m = nonZeroLength(v)
+    if (m) out.push({ kind: 'spacing', text: m[0] })
+  }
+  return out
+}
+
+/** { prop, value } of a one-line declaration (`  margin: 8px; // note`), else null (selector, comment, at-rule, brace). */
+export function declarationOf(line) {
+  const t = String(line).replace(/\/\*.*?\*\//g, '').replace(/(^|\s)\/\/.*$/, '').trim()
+  if (!t || t.includes('{') || t.includes('}') || (t.startsWith('@') && !/^@[\w-]+\s*:/.test(t))) return null
+  const m = /^((?:--|\$|@)?[a-zA-Z_][\w-]*)\s*:\s*(.+?)\s*;?$/.exec(t)
+  return m ? { prop: m[1], value: m[2].replace(/\s+/g, ' ') } : null
+}
+
+const tokenPrefixList = (settings) => Object.values(settings.tokenPrefixes ?? {}).filter(Boolean)
+
+/** The kinds of raw values on one stylesheet line (`color: #fff;` → ['color']); a line that is no declaration, or a token definition, has none. */
+export function literalKinds(line, settings = {}) {
+  const d = declarationOf(line)
+  if (!d || isTokenDefinition(d.prop, tokenPrefixList(settings))) return []
+  return [...new Set(literalMatches(d.prop, d.value).map((m) => m.kind))]
+}
 
 /** True when a declaration defines a token: its name has a variable sigil and starts with a configured prefix. */
-function isTokenDefinition(prop, prefixes) {
+export function isTokenDefinition(prop, prefixes) {
   if (!/^(--|\$|@)/.test(prop)) return false
   return prefixes.some((p) => p && bare(prop).startsWith(bare(p)))
 }
@@ -137,7 +190,7 @@ function isTokenDefinition(prop, prefixes) {
 /** The static findings of the configured stylesheets: { findings, notes, files }. */
 export function staticChecks({ root, settings }) {
   const prefixes = settings.tokenPrefixes ?? {}
-  const all = [prefixes.color, prefixes.fontSize, prefixes.radius].filter(Boolean)
+  const all = tokenPrefixList(settings)
   const s2 = Boolean(prefixes.color)
   const s3 = Boolean(prefixes.fontSize)
   const notes = []
@@ -167,13 +220,9 @@ export function staticChecks({ root, settings }) {
         continue
       }
       if (tokenFile || isTokenDefinition(item.prop, all)) continue
-      if (s2) {
-        const m = COLOR.exec(item.value)
-        if (m) add('S2', file, item, item.prop, `${item.prop} uses the colour literal ${m[0].endsWith('(') ? `${m[0]}…)` : m[0]} — use a colour token (${prefixes.color}…)`)
-      }
-      if (s3 && item.prop.toLowerCase() === 'font-size') {
-        const m = FONT_SIZE.exec(item.value)
-        if (m) add('S3', file, item, item.prop, `font-size uses the literal ${m[0]} — use a font-size token (${prefixes.fontSize}…)`)
+      for (const m of literalMatches(item.prop, item.value)) {
+        if (m.kind === 'color' && s2) add('S2', file, item, item.prop, `${item.prop} uses the colour literal ${m.text} — use a colour token (${prefixes.color}…)`)
+        else if (m.kind === 'font-size' && s3) add('S3', file, item, item.prop, `font-size uses the literal ${m.text} — use a font-size token (${prefixes.fontSize}…)`)
       }
     }
   }

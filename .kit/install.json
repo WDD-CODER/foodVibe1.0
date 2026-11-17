@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.3.0"
+    "version": "3.4.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.3.0",
-  "commit": "7ae9ebc9ebe69e2187b7bffad7ddb6b501e983c3",
+  "ref": "v3.4.0",
+  "commit": "d6d7200619dd25510369c1c7f198a3e1e3ff565d",
   "packs": [
     "angular",
     "node-express"
@@ -18,7 +18,7 @@
       "source": "core/.claude/agents/git-agent.md"
     },
     ".claude/agents/orch-builder.md": {
-      "sha256": "bd3f0ed8ed1ed3778cb7e251ff4dd06023c7dd663f5be9746315c8650d4dcf68",
+      "sha256": "6c7b81171bb52fc4f78fc953279a8698df2bad9bb12474e8bddd56d8ac747a8f",
       "kind": "managed",
       "source": "core/.claude/agents/orch-builder.md"
     },
@@ -33,7 +33,7 @@
       "source": "core/.claude/agents/orch-check-plan.md"
     },
     ".claude/agents/orch-check-rules.md": {
-      "sha256": "b4a9084a99e108ee50ae29c30713108a4de2f3a5891bc3e79ad16a0abaad2e05",
+      "sha256": "bae2076ce2088994ad9960529ad7f99a72878709e9aef2a68f79d7ce5903746b",
       "kind": "managed",
       "source": "core/.claude/agents/orch-check-rules.md"
     },
@@ -113,12 +113,12 @@
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "2baca81e3634a9caf6fcdd91ba3db7fee8d853c00e788cfb2e4bf0a2ec7dc3a8",
+      "sha256": "ac486ae00d3e3b06f3855dda9dd7b6a5160ce8e4af96fe5e0990bd019468d48a",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "6ededd1d7acb8c0541d20d41a89135e1c792e17bd0d2610301d8d908453e6c7a",
+      "sha256": "d88c95e8a8b5ab5ae33c46aab550551deec49a3b780692a7e63adfb823bf44e1",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
@@ -148,7 +148,7 @@
       "source": "core/.claude/commands/security.md"
     },
     ".claude/commands/ship.md": {
-      "sha256": "aa7f1b0d36a4116c41a6e3e65c7bc9c7fb54fe57e51f8f7e4b4c54014d138b5a",
+      "sha256": "a5180c5b06fbe74057152e6d49f1e29caf732b9718527f0169d3ad965dbf9407",
       "kind": "managed",
       "source": "core/.claude/commands/ship.md"
     },
@@ -163,7 +163,7 @@
       "source": "core/.claude/commands/sweep-stale-todos.md"
     },
     ".claude/commands/take-plan.md": {
-      "sha256": "af37212a73fd54badaccfb7ec4d4abac483cf15ed20406ad14c46a59ebda4655",
+      "sha256": "7bc1f789706e1ee0e5b9e10d66f280e0b62090a0ff21f5fe5385d2ec6186ff22",
       "kind": "managed",
       "source": "core/.claude/commands/take-plan.md"
     },
@@ -213,7 +213,7 @@
       "source": "core/.claude/skills/brief-detection/SKILL.md"
     },
     ".claude/skills/cssLayer/SKILL.md": {
-      "sha256": "4fb0177b896de7f770774bb305530c4dfd07d5296037e7e53958edf459075c99",
+      "sha256": "94c315eeb7611f7660e7867b8039193439dd63e820506541122baf7243a95db7",
       "kind": "managed",
       "source": "packs/angular/.claude/skills/cssLayer/SKILL.md"
     },
@@ -508,7 +508,7 @@
       "source": "templates/CLAUDE.md"
     },
     "README_WORKFLOW.md": {
-      "sha256": "51b81e47fabdcc688a813bf72e17c573f42434df598a0e30081de387872d8f46",
+      "sha256": "b6ae175488baed4a3b0f3765fc75f76201b9cdaa6ea62dcdfd69846ad9f8221b",
       "kind": "managed",
       "source": "core/README_WORKFLOW.md"
     },
@@ -516,6 +516,16 @@
       "sha256": "c1b44339ba576a90bc3c8f27861eac51c0f955c700eb1ff657806decc02aa54b",
       "kind": "seed",
       "source": "templates/docs/project/current-state.md"
+    },
+    "_shared/debt-baseline.json": {
+      "sha256": "5d00bc6f73b586e76af9475537226618dd5336daebe970e9269640b16fe54333",
+      "kind": "seed",
+      "source": "templates/docs/project/debt-baseline.json"
+    },
+    "_shared/product-defaults.md": {
+      "sha256": "a017acb0010d68064ce7e3c2d2afe4d80e59b3b9708267fe786943ab699b4440",
+      "kind": "seed",
+      "source": "templates/docs/project/product-defaults.md"
     },
     "_shared/tech-stack.md": {
       "sha256": "3767dc06ad8db888d66fe04ffccba704ef0e3ad5a984496e9fe323b9f1bda2e3",
@@ -538,12 +548,12 @@
       "source": "core/docs/agent/brain-capture.md"
     },
     "docs/agent/decision-review.md": {
-      "sha256": "9ac42d4974582e144a627f7595d3ae8d69ea35232d60d33683e670d1114f71a1",
+      "sha256": "7fdcc84562fb8f5a1e0e291cb227d69067a906848eca766777c8c92b3f20834b",
       "kind": "managed",
       "source": "core/docs/agent/decision-review.md"
     },
     "docs/agent/job-validation.md": {
-      "sha256": "25c663e24398708af36b65cb9b775c798fc8717917f8050f1ec0a9cc94d91d11",
+      "sha256": "e03c9cfa1ffc8e4922f48859ee698b2296bdf30dea066b326ca4f3bbc71c892f",
       "kind": "managed",
       "source": "core/docs/agent/job-validation.md"
     },
@@ -553,7 +563,7 @@
       "source": "core/docs/agent/kit-brain.md"
     },
     "docs/agent/kit-lessons/builder.md": {
-      "sha256": "0e8c2f6c79c01cee8c98025630d40e814beb861a4f5f9ba79be4eb2dc19e0c4e",
+      "sha256": "a501ec8892ded0d761ff69c9ae50f86d69c12958abc1cee4b4d6b68f0000c4bc",
       "kind": "managed",
       "source": "core/docs/agent/kit-lessons/builder.md"
     },
@@ -578,7 +588,7 @@
       "source": "core/docs/agent/kit-lessons/gate.md"
     },
     "docs/agent/kit-lessons/planner.md": {
-      "sha256": "d290762fe7ca8eb71494a4a57c0005bfdf61b3a39155ba68cfb9b1bc8ea88e95",
+      "sha256": "5dab7f1ca92e0c4c4235642ec4033931b22462280706be0bddca663fe16358fd",
       "kind": "managed",
       "source": "core/docs/agent/kit-lessons/planner.md"
     },
@@ -613,7 +623,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "d08ee9ff8dd6134dd8b92455d97aaa5cdd5f1d6be0d7e9ff4b0197f13c872a9a",
+      "sha256": "209ba7540ccc73e73cc6321f57bc5b604ad9d53248d851260eea92a9eeba62a4",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -637,13 +647,18 @@
       "kind": "managed",
       "source": "core/docs/agent/standards-git.md"
     },
+    "docs/agent/standards-reuse.md": {
+      "sha256": "06c301e8a2f1f73fcf540b8310223991e71071d7eda60c0c4ba021fb97e505db",
+      "kind": "managed",
+      "source": "core/docs/agent/standards-reuse.md"
+    },
     "docs/agent/styleqa-rubric.md": {
       "sha256": "148e47fb205b4fd72bb35e0aeb33b9700ccbe26b060fa4efbb35cab83561d7b8",
       "kind": "managed",
       "source": "core/docs/agent/styleqa-rubric.md"
     },
     "docs/agent/styleqa.md": {
-      "sha256": "e198ccf24bd1933c5cb7ffa83bfa42c48a64e07884a624bb433d292fd209e32f",
+      "sha256": "f87561183bcd6c496b5e34f849bc0541771551c851e3b2a0a31bbfe993a8418d",
       "kind": "managed",
       "source": "core/docs/agent/styleqa.md"
     },
@@ -817,6 +832,11 @@
       "kind": "seed",
       "source": "templates/docs/brain/invariants.md"
     },
+    "docs/brain/inventory.md": {
+      "sha256": "233e6b4e2a8a41846ebd9853cd559100a1223871c7c79916b7dd6252cb836daa",
+      "kind": "seed",
+      "source": "templates/docs/brain/inventory.md"
+    },
     "docs/brain/patterns/_TEMPLATE.md": {
       "sha256": "bad82f0a8a0bfb69ad3d06088c847fbd629a70730fbeb8ed3b7e9e410a712d15",
       "kind": "seed",
@@ -912,6 +932,11 @@
       "kind": "managed",
       "source": "packs/angular/scripts/breadcrumbs-check.mjs"
     },
+    "scripts/debt-baseline.mjs": {
+      "sha256": "ee1f0c4ba05fa4af1719981aa575aa8a546e2224cb759dc217bd6e6922ef90d3",
+      "kind": "managed",
+      "source": "core/scripts/debt-baseline.mjs"
+    },
     "scripts/decision-log.mjs": {
       "sha256": "f61c51b6bce9c76be68aba4425c464a1e7576e3f388cc5296b741b089b3d0a15",
       "kind": "managed",
@@ -932,15 +957,60 @@
       "kind": "managed",
       "source": "core/scripts/handoff-check.sh"
     },
+    "scripts/inventory.mjs": {
+      "sha256": "815c5da499c16eac39f19101c2e6d5023dd6d65da4b09c34d227ba6d733a159f",
+      "kind": "managed",
+      "source": "core/scripts/inventory.mjs"
+    },
+    "scripts/kit-checks.mjs": {
+      "sha256": "f22e31d6857311f5c2c44382c6ea244c9bde80090647582ed419a08dbce2a01c",
+      "kind": "managed",
+      "source": "core/scripts/kit-checks.mjs"
+    },
     "scripts/kit-feedback.mjs": {
       "sha256": "3bb816afc3c1d82a814dcaf55887741274f003b8a18a4e5abaf7950dad583cac",
       "kind": "managed",
       "source": "core/scripts/kit-feedback.mjs"
     },
     "scripts/lib/brain-doc.mjs": {
-      "sha256": "ab7fd60b123fb303da5fa41e0dcd51366805902da749940e4cf24777f787a7a5",
+      "sha256": "d4ff088976d0cfcec791497f3b0cca46a8acfd4e45f156fcb8fa5140f408fc8f",
       "kind": "managed",
       "source": "core/scripts/lib/brain-doc.mjs"
+    },
+    "scripts/lib/checks/README.md": {
+      "sha256": "4b058e7363edaf47dc2561fd4ab63f7ffd42f8555e5a4fd3d9a0d5dcc0aaea23",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/README.md"
+    },
+    "scripts/lib/checks/inventory-fresh.mjs": {
+      "sha256": "9eb3c8427d86c36fb387528a5b547af163ebec964a7279fa62958e6199c3e8f0",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/inventory-fresh.mjs"
+    },
+    "scripts/lib/checks/product-defaults.mjs": {
+      "sha256": "632b6316ebeeaa826d624f5b7be2404e66c24b97dd0aa83421bd94510570af25",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/product-defaults.mjs"
+    },
+    "scripts/lib/checks/reuse-copies.mjs": {
+      "sha256": "338531e496137eb8784f6c066a7f57553d63067a704f00b0c0235655d782e2af",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/reuse-copies.mjs"
+    },
+    "scripts/lib/checks/reuse-new-items.mjs": {
+      "sha256": "0008e91d3d8700d7333f00b2128d1116a4d6c9b4dce9311b2c8c04efa42f90f7",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/reuse-new-items.mjs"
+    },
+    "scripts/lib/checks/style-duplicates.mjs": {
+      "sha256": "a26b0d026b56d559d78084cfa3b6c071611eecb49c4e66522290497ea63956f3",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/style-duplicates.mjs"
+    },
+    "scripts/lib/checks/style-raw-values.mjs": {
+      "sha256": "8f987a8f3898a72c09aca1f028d23834fb3bd5436e49fd78b4b64a8be8f4dcd4",
+      "kind": "managed",
+      "source": "core/scripts/lib/checks/style-raw-values.mjs"
     },
     "scripts/lib/claude-run.mjs": {
       "sha256": "61edc193d733cf9ceccca5153301614a711ce3f6cf46143cf79bf919f46ad8c9",
@@ -952,6 +1022,21 @@
       "kind": "managed",
       "source": "core/scripts/lib/db-write.mjs"
     },
+    "scripts/lib/debt-baseline.mjs": {
+      "sha256": "c389cd1fddea00f29f75b528dc07d2f650a69ab4577c2b57e6c7d4eac188373a",
+      "kind": "managed",
+      "source": "core/scripts/lib/debt-baseline.mjs"
+    },
+    "scripts/lib/diff-items.mjs": {
+      "sha256": "4a27cdc47c531a509132264bd1c39e69ae85d72bd7f1e6f9cde803b89b13705f",
+      "kind": "managed",
+      "source": "core/scripts/lib/diff-items.mjs"
+    },
+    "scripts/lib/diff-rules.mjs": {
+      "sha256": "473490e36d26f75067f7340796a6cae5bb7c9759829ef5602f88377878c53170",
+      "kind": "managed",
+      "source": "core/scripts/lib/diff-rules.mjs"
+    },
     "scripts/lib/done-when.mjs": {
       "sha256": "8bedbcbbfa5db9edc9f3b13d73e66043f2cdc2b0c958fa80f8d14ec24f75a4d2",
       "kind": "managed",
@@ -961,6 +1046,11 @@
       "sha256": "773c2497736c1e70b4a2d5753e94a67d53dc19ce2aa97c79db51fe19c8290d56",
       "kind": "managed",
       "source": "core/scripts/lib/fe-command.mjs"
+    },
+    "scripts/lib/gate-select.mjs": {
+      "sha256": "0557a4a60c045cc409927d0a03dbf519fd95145da4659d6faf9f1167bcf0be2c",
+      "kind": "managed",
+      "source": "core/scripts/lib/gate-select.mjs"
     },
     "scripts/lib/guard.mjs": {
       "sha256": "d38666c473e01e8ea3dcfd7d31b11cda8f32087d7ae21ae1ac210aea9a764047",
@@ -973,7 +1063,7 @@
       "source": "core/scripts/lib/invariants.mjs"
     },
     "scripts/lib/orch-folders.mjs": {
-      "sha256": "1dd2bb08e12e9246b683c50c5af3ca312d3377b3d2525edcb5368b13e90bbf65",
+      "sha256": "6a5fec9d01cacf1d6745838f4e307cdfb3415f46cf222c58771d099fd62d5f9d",
       "kind": "managed",
       "source": "core/scripts/lib/orch-folders.mjs"
     },
@@ -993,7 +1083,7 @@
       "source": "core/scripts/lib/plan-deps.mjs"
     },
     "scripts/lib/plan-gate.mjs": {
-      "sha256": "5e2960991354ad6989daf89409263412b95714e27609f3422d2718e531920e5a",
+      "sha256": "a160837de7f15f52cfe32464b707da54c0c9db29a8743c447eb3b5c64906a45a",
       "kind": "managed",
       "source": "core/scripts/lib/plan-gate.mjs"
     },
@@ -1027,10 +1117,35 @@
       "kind": "managed",
       "source": "core/scripts/lib/plan-scope.mjs"
     },
+    "scripts/lib/plan-sections.mjs": {
+      "sha256": "b301abf42b81049c2a6e853fd1dd7c80956d9f056a0f70974be7043c864dbc51",
+      "kind": "managed",
+      "source": "core/scripts/lib/plan-sections.mjs"
+    },
+    "scripts/lib/proc.mjs": {
+      "sha256": "9bdd7b785d86e2f1836e234d209f740d0f61f9114a4016bd013111bd8e8898a7",
+      "kind": "managed",
+      "source": "core/scripts/lib/proc.mjs"
+    },
+    "scripts/lib/product-defaults.mjs": {
+      "sha256": "c7d696886dbe135e1aebe9a0390190bb672e206ba4c894d16321e904682561a8",
+      "kind": "managed",
+      "source": "core/scripts/lib/product-defaults.mjs"
+    },
     "scripts/lib/redact.mjs": {
       "sha256": "ebbde39de060ebf84644a5e0d6a95f27525d6b84774b37f22ecff6778b4dbc4b",
       "kind": "managed",
       "source": "core/scripts/lib/redact.mjs"
+    },
+    "scripts/lib/registry.mjs": {
+      "sha256": "774a99e32b0bb3ba43c835eae094192f2aaaa1f2b34638c16d62e3d6fdce21fa",
+      "kind": "managed",
+      "source": "core/scripts/lib/registry.mjs"
+    },
+    "scripts/lib/reuse-check.mjs": {
+      "sha256": "a3585f2daae659438cc403fe5791aba553a778609a694548614f15ca908df1ef",
+      "kind": "managed",
+      "source": "core/scripts/lib/reuse-check.mjs"
     },
     "scripts/lib/run-live.mjs": {
       "sha256": "e006774cd7731cddf2661b221a2acf9f4d67ac1380667053c3a7fd51ecacf700",
@@ -1048,7 +1163,7 @@
       "source": "core/scripts/lib/scope-tests-lint.mjs"
     },
     "scripts/lib/slot-procs.mjs": {
-      "sha256": "7a4c88b0518f2b32edd1c524c9637de03f7c7cf2063ffcc5ec27573e59607a61",
+      "sha256": "6e1be1977eef1825496ecc0aca6c93855e269685c9cc0ee6c1b8a1dd63be0963",
       "kind": "managed",
       "source": "core/scripts/lib/slot-procs.mjs"
     },
@@ -1056,6 +1171,11 @@
       "sha256": "3bff3989e9e96c9355932146c67706af00431a48e8363b42ffa5da3b860d1f1c",
       "kind": "managed",
       "source": "core/scripts/lib/slot.mjs"
+    },
+    "scripts/lib/style-blocks.mjs": {
+      "sha256": "a0ca17a29f4d79003b99e60cb7ccbd3794b71064f513ac70490e5e92733a4227",
+      "kind": "managed",
+      "source": "core/scripts/lib/style-blocks.mjs"
     },
     "scripts/lib/todo-parse.mjs": {
       "sha256": "352b9a5f93e13dbea0991ecd1a5b839ef51b691dbe9c2f169ea5908f54aea509",
@@ -1078,7 +1198,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "f1fc5981676fb8d33489610b41a98144439a818023c0b3f54c6869cdc2f6d38c",
+      "sha256": "426c19727b2dda9c54957087b7574c18deb59b57c8901c4131866a27cd8124a5",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
@@ -1142,6 +1262,11 @@
       "kind": "managed",
       "source": "core/scripts/pre-compact-reminder.sh"
     },
+    "scripts/product-defaults.mjs": {
+      "sha256": "7cdaad9a73bd41577174a49a423c19b25bf65f11659685070ea9f51f47d032d4",
+      "kind": "managed",
+      "source": "core/scripts/product-defaults.mjs"
+    },
     "scripts/prune-merged-worktrees.sh": {
       "sha256": "5ce8bf835c7ba4c753902a8a2023aed29bc1414d69591b1d2446fc46725c85df",
       "kind": "managed",
@@ -1152,8 +1277,18 @@
       "kind": "managed",
       "source": "core/scripts/prune-old-sessions.sh"
     },
+    "scripts/reuse-lint.mjs": {
+      "sha256": "c798e11101f26d989ce8ee36a115074bcad0a4886f60203b79901268f254de6b",
+      "kind": "managed",
+      "source": "core/scripts/reuse-lint.mjs"
+    },
+    "scripts/reuse-scan.mjs": {
+      "sha256": "daf6eb1abe186c7994c55c7cb0767fbdf33182de14d587a95654682b88724f7d",
+      "kind": "managed",
+      "source": "core/scripts/reuse-scan.mjs"
+    },
     "scripts/run-plans.mjs": {
-      "sha256": "424ba3061769eb7a071b69b817b6a61d6bf7e3a390e2dd7566da3cfc79ba13b3",
+      "sha256": "bb87b6180ecccf1aaeda1a050bbbcd47a6ab5fddc59db4e73ce10285132ea32d",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
@@ -1168,7 +1303,7 @@
       "source": "core/scripts/run-supervisor.mjs"
     },
     "scripts/scope-check.mjs": {
-      "sha256": "2e9017c632eca1f2d0f3d193bf2e8e48931810ada5f66f7423d83f98ee5268e3",
+      "sha256": "dae8da4096c59d425a4a99c8d23ca5a4fa1bb9cd58495e4413c2594ecd1ed046",
       "kind": "managed",
       "source": "core/scripts/scope-check.mjs"
     },
@@ -1213,7 +1348,7 @@
       "source": "core/scripts/session-startup.sh"
     },
     "scripts/ship-prep.mjs": {
-      "sha256": "1bb3b3fdf7b51cc7d16f6ac9ce25f58fc72748b29af3fd47d995ccb96f00a965",
+      "sha256": "f3c429a91b7bee829a8277f7fcc867fa8b0bedf473101fdadcef54b1d38ef602",
       "kind": "managed",
       "source": "core/scripts/ship-prep.mjs"
     },
@@ -1233,7 +1368,7 @@
       "source": "packs/angular/scripts/styleqa-routes.mjs"
     },
     "scripts/styleqa/config.mjs": {
-      "sha256": "f698ae1a190de1ebc16cd8d05a05b02e203819e2138ab85973be0f14b33c7c3a",
+      "sha256": "88b36ff20e854aabf8562e3e881de197bca739e59dec39973d7ef2b8186bd2bc",
       "kind": "managed",
       "source": "core/scripts/styleqa/config.mjs"
     },
@@ -1278,7 +1413,7 @@
       "source": "core/scripts/styleqa/run.mjs"
     },
     "scripts/styleqa/static-checks.mjs": {
-      "sha256": "c7fac22c13d98c39e2ebe620b8349cf855fde2ed75accbb915a4875bfde9057f",
+      "sha256": "dbdf8b85aa23a3bd86976b035962817dd28d4c817cee8beb84ef8b942c85d933",
       "kind": "managed",
       "source": "core/scripts/styleqa/static-checks.mjs"
     },
@@ -1318,6 +1453,8 @@
       "Install workflow script dependencies",
       "Kit override check",
       "Workflow script tests",
+      "Install workflow script dependencies for the diff checks",
+      "Kit diff checks",
       "Secret scan (gitleaks)",
       "Require quality gates"
     ],

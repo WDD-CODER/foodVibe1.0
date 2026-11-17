@@ -121,6 +121,13 @@ runs no command.
   commit; the wrap-up lists new rules, case paths and the enforce candidates. `/ship` has no triage, so the rows carry `triageVerdict: none`: they never count toward the triage
   agreement (`stats`, the kit's `triage-prior`), but their `seen:` items become follow-ups like the orchestrator's. The
   grades, the follow-ups and the tagged plan file are committed with the ship.
+  **Repeat → default (same `review.learn` = `on` gate, no model call of its own).** While grading, when a `behaviour:`
+  decision or a validation note matches an earlier graded one of the same decision kind (`decision-grades.jsonl`) and the same
+  trigger word (`editable-form`, `write-endpoint`, `list`, `destructive-action` or `screen`), print one line under the tree:
+  `make this a default? <the rule, one sentence> (trigger: <word>)`. `default yes` on the Y reply runs
+  `node scripts/product-defaults.mjs propose --id <id> --rule "<rule>" --trigger <word>`, which appends a `proposed` entry to
+  `docs/project/product-defaults.md`; the contract file joins the ship's commit. Nothing is turned on: only the Human sets
+  `status: on`. No reply, or `no default`, adds nothing.
 
 - **One line per decision.** `orch-state.mjs decision` merges a differently worded repeat in code: the same type, in the same plan
   (a `seen:` defect in any plan), and either the same `file:line` named or 60 % of the words alike with no different

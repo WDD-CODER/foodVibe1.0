@@ -75,7 +75,7 @@ import { scopeTestsLint } from './lib/scope-tests-lint.mjs'
 import { planNumber, planTitle, mergeSubjectRe } from './lib/plan-deps.mjs'
 import { uiItems } from './lib/done-when.mjs'
 import { listSlots } from './lib/slot.mjs'
-import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit, isWorktree, removeFolder, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
+import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit, isWorktree, branchHolder, samePath, removeFolder, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 import { removeMergedBuilder } from './worktree-clean.mjs'
 import { agreementStats, addLesson, lessonParts, ruleLines, LESSON_ROLES } from './decision-log.mjs'
 import { failingLines, planWithoutNotes, triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, planLines, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES, askCard, ASK_ID_RE } from './lib/orch-run.mjs'
@@ -966,6 +966,28 @@ const commands = {
       git(root, 'worktree', 'prune')
       lines.push(gone.ok ? `removed ${own}: left by an earlier run, no longer a git worktree` : `renamed ${own} to ${gone.aside}: left by an earlier run, no longer a git worktree (${gone.error})`)
       if (!gone.ok && !gone.aside) fail(`${own} is left by an earlier run, is no longer a git worktree, and could not be removed or renamed: ${gone.error}`, { envFailure: true })
+    }
+    // A branch an earlier run's folder still has checked out: that folder is removed when it is a kit-made builder
+    // folder, clean and pushed; any other folder (a person's, a slot) is never touched and the plan parks naming it.
+    const holder = branchHolder(root, branch)
+    if (holder && !samePath(holder, wt)) {
+      const name = holder.replace(/\\/g, '/').split('/').pop()
+      const kitMade = name.startsWith(`${repoName}-orch-`) && !name.startsWith(`${repoName}-orch-merge-`) && !/-wt-\d+$/.test(name)
+      const clean = kitMade && git(holder, 'status', '--porcelain').out.split('\n').filter((l) => l && !/^\?\? \.worktree-/.test(l)).length === 0
+      const pushed = clean && git(holder, 'branch', '-r', '--contains', 'HEAD').out.split('\n').some((l) => /^\s*origin\//.test(l) && !l.includes('->'))
+      const stuck = `plan branch ${branch} is checked out in ${holder} — run git switch --detach in that folder, or close the session using it`
+      if (!pushed) fail(stuck)
+      if (git(root, 'worktree', 'remove', holder).status !== 0) removeFolder(holder)
+      git(root, 'worktree', 'prune')
+      if (branchHolder(root, branch)) fail(stuck)
+      lines.push(`freed ${branch} from ${holder} (an earlier run's builder folder)`)
+    }
+    // The run's own folder left on no branch by an earlier attempt: put back on the plan branch (nothing uncommitted), or park.
+    if (!slot && existsSync(own) && isWorktree(root, own) && !git(own, 'branch', '--show-current').out) {
+      if (git(own, 'status', '--porcelain', '--untracked-files=no').out) fail(`${own} is on no branch and has uncommitted files — commit or discard them there, then relaunch`)
+      const sw = refExists(`refs/heads/${branch}`) ? git(own, 'switch', '--quiet', branch) : git(own, 'switch', '--quiet', '--no-track', '-c', branch, base)
+      if (sw.status !== 0) fail(`git switch ${branch} in ${own}: ${sw.err.split('\n').pop()}`)
+      lines.push(`switched ${own} to ${branch} (it was on no branch)`)
     }
     if (!slot && !existsSync(own)) {
       const free = idleSlot(slots)

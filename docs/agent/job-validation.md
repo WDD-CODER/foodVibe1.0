@@ -9,7 +9,7 @@
 
 A job is **done** when every Done-when item is validated. `[auto]` items are validated by agent evidence (Tier 1). `[ui]` items are validated by a script that drives the real UI and saves a screenshot (Tier 1b). `[human]` or untagged items are validated only by the Human. Agents never promote an item to `[auto]` or `[ui]`; only the plan author tags it. Tag syntax: `.claude/skills/save-plan/SKILL.md` Plan Rules. Rationale: agent-verifiable checks (`[auto]`, `[ui]`) close without a human round-trip while subjective checks still need the Human.
 
-Plans with no tags behave exactly as before: everything is `[human]`.
+Plans with no tags behave exactly as before: everything is `[human]`. A product default's card (`check: card`) comes from the contract's wording through the plan's `[human]` Done-when item; the Human never writes or requests it.
 
 | Tag | Checked by | Evidence | Use for |
 | --- | --- | --- | --- |
@@ -214,7 +214,7 @@ Do **not** ask “verify / I’ll check?” at task start — the checklist is u
 
 ## Tier 1 — auto-verified
 
-Runs automatically, without a `verify` reply, for `[auto]` Done-when items only. An item is `[auto]` when its expected output is exact: an exact string, an exit code, a byte-identical diff, `npm run build` or a test suite passing, or deterministic CLI output.
+Runs automatically, without a `verify` reply, for `[auto]` Done-when items only. An item is `[auto]` when its expected output is exact: an exact string, an exit code, a byte-identical diff, `npm run build` or a test suite passing, or deterministic CLI output. While working, run only the build, lint and the plan's own tests; run each `[auto]` command once, when the work is finished — a failing one again only after its fix, never just to watch a slow suite again.
 
 - Evidence is raw: the exact command, then its actual output, exit code, or diff hash. No paraphrase.
 - An item that fails verification, or cannot be verified, falls back to `[human]` with a ⚠ and a reason.

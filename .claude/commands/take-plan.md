@@ -66,7 +66,7 @@ Triggers: "execute plan NNN", "take plan NNN" (only meaningful inside a wt-N slo
 
 5. **Close-out — the last step of every executed plan, before `/ship`.** When the plan's sub-tasks are
    done (`docs/agent/job-validation.md` → "HOW TO VALIDATE checklist — the hand-off at the end of the work"):
-   - Run every `[auto]` Done-when check and print `VERIFIED BY AGENT` (raw command + output).
+   - Run every `[auto]` Done-when check once, when the work is finished (while working: build, lint, the plan's own tests), and print `VERIFIED BY AGENT` (raw command + output).
    - All `[auto]` → no cards, no servers; go on to `/ship`.
    - Any `[human]` item → start the servers (`node scripts/slot-serve.mjs`) and open every page URL the cards
      will name; fix a failed start before going on. Then show the HOW TO VALIDATE cards (plain terminal text, grouped by place; every value to

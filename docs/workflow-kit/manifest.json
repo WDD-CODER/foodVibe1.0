@@ -5478,22 +5478,6 @@
       "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
     },
     {
-      "path": "scripts/test/reuse-check.test.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [],
-      "notes": "FoodVibe script test (node --test) for the reuse tools."
-    },
-    {
-      "path": "scripts/test/reuse-lint.test.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [],
-      "notes": "FoodVibe script test (node --test) for the reuse tools."
-    },
-    {
       "path": ".github/workflows/rules.yml",
       "tier": "project",
       "action": "stay",
@@ -6096,6 +6080,198 @@
       "params": [],
       "refs": [],
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.3.0). Classified project/stay here so the kit-owned list stays as is; move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "_shared/debt-baseline.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "_shared/product-defaults.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "docs/brain/inventory.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/debt-baseline.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/inventory.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/kit-checks.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/README.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/inventory-fresh.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/product-defaults.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/reuse-copies.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/reuse-new-items.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/style-duplicates.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/checks/style-raw-values.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/debt-baseline.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/diff-items.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/diff-rules.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/gate-select.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/plan-sections.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/proc.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/product-defaults.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/registry.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/lib/style-blocks.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/product-defaults.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
+    },
+    {
+      "path": "scripts/reuse-scan.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, kit 3.4.0). Classified project/stay here so the kit-owned list stays as is."
     }
   ]
 }

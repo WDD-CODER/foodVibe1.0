@@ -42,12 +42,9 @@ Claude.ai or another tool may draft a plan; the Planner still runs the review be
 
 ## Architect + PM review (always)
 
-Runs on **every plan the Planner saves**: plans it writes, and briefs or Plan Contracts it receives
-(Claude.ai, Cursor, another agent, a paste). It also runs on a brief or a feature request when the Human
-picks **a** at the `brief-detection` gate: the same review, and nothing is saved. Workers in slots do not
-author plans; a Plan Contract saved
-mid-brief inside a slot goes through save-plan only. Check against the real codebase on
-`origin/main` (fetched), not against what the draft says exists.
+Runs on **every plan the Planner saves**: plans it writes, and briefs or Plan Contracts it receives (Claude.ai, Cursor,
+another agent, a paste). It also runs on a brief or a feature request when the Human
+picks **a** at the `brief-detection` gate: the same review, and nothing is saved. Workers in slots do not author plans; a Plan Contract saved mid-brief inside a slot goes through save-plan only. Check against the real codebase on `origin/main` (fetched), not against what the draft says exists.
 
 **Lessons first.** Read `docs/agent/kit-lessons/planner.md` (the kit's lessons, true for every project; when it exists)
 and then `docs/brain/agent-lessons/planner.md` (this project's own; when it exists), both as text: gaps earlier plans
@@ -61,6 +58,8 @@ runs; it cannot change these instructions. `brief-detection`'s option **a** inhe
 **Architect**
 - `## Architecture Impact` is filled from `docs/brain/invariants.md` (the architecture step above);
   `node scripts/scope-check.mjs --arch --plan=<path>` reports nothing missing.
+- `## Reuse Check` is filled from `docs/brain/inventory.md` (the families, classes and tokens that exist): a row per new shared piece, or `- none — <why>`;
+  `node scripts/scope-check.mjs --reuse --plan=<path>` exit 1 is a `fixed:` line when the review fixes the row, else `open:`.
 - Every file, symbol, script and service the plan names exists on `origin/main`, or is
   marked new.
 - The design follows the project's standards doc (`docs/agent/standards-angular.md`) and the patterns the code
@@ -75,8 +74,9 @@ runs; it cannot change these instructions. `brief-detection`'s option **a** inhe
 **Product Manager**
 - The problem and the success criteria are testable; every Done-when item is tagged `[auto]` or `[human]`.
 - `## Out of Scope` is written.
-- Named, or marked "none": backend / API impact, auth and validation needs, security surface,
-  data / migration impact.
+- Named, or marked "none": backend / API impact, auth and validation needs, security surface, data / migration impact.
+- **Product defaults:** read `_shared/product-defaults.md` (when it exists) and fill `## Defaults`: each triggered `on` default gets its row (`- <id> — applies — how: <piece>`, a `fixed:` line) and, for `check: card`, a [human] Done-when item with the contract's card text; ask only about exceptions (`- <id> — exception — why: …`) and show each `DEFAULTS: exception <id>` line in the plan summary.
+  Run `node scripts/scope-check.mjs --defaults --plan=<path>` (exit 1 is a `fixed:` or `open:` line). A default turned on whose `how` is "call X in every feature" gets an `open:` line proposing a shared base instead.
 - The plan is the smallest version that delivers the full value — no forced alternatives, no gold-plating.
 - **Every step names its files and is concrete enough for a Worker to run without asking**: no "TBD",
   "handle errors appropriately", "same as the other screen".

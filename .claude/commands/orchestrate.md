@@ -1,5 +1,5 @@
 ---
-description: Run saved plans unattended into one run branch with scripts/run-plans.mjs — starts it under the supervisor right after a dry run that says WOULD START yes, reads the result from status.json; the Human merges the run branch.
+description: Run saved plans unattended into one run branch with scripts/run-plans.mjs — starts it under the supervisor right after a dry run that says WOULD START yes, reads the result from status.json; on the Human's `merge it` it opens the PR, gets CI green and merges the run branch.
 ---
 
 # /orchestrate — run saved plans with run-plans.mjs (FoodVibe)
@@ -48,7 +48,7 @@ unless the Human asked to be asked.
 
 Read `.claude/orchestrator-runs/<run>/status.json` and print: merged, parked (each with its reason), skipped (each with
 its reason), `stopReason` when set, the report (`.claude/orchestrator-runs/<run>.md`) and `calls.csv` beside the status
-file; every stop is in `status.json` `stops[]`. The Human merges `orch/<run>`; never merge it, never touch `main`.
+file; every stop is in `status.json` `stops[]`. **The merge is the Human's yes, the work is yours.** Never hand the Human commands to type: end with one line, `merge it` ⏎. Only on that reply (or merges pre-approved): `gh pr create --base main --head orch/<run> --body-file .claude/orchestrator-runs/<run>.md`, wait for its checks, fix a failing one per `docs/agent/pr-check-fix-loop.md` (2 rounds, on the run branch), then `gh pr merge <n> --merge` (Claude Code asks once more). Never merge without that yes, never push to `main`.
 
 ## 5. The cards — without being asked
 

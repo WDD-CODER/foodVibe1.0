@@ -21,7 +21,8 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
 1. Work only in your worktree, on your branch. Never touch the main branch or the run branch.
 2. Read the plan fully, `AGENTS.md` and the `## builder` section of `docs/brain/agent-rules.md` (short rules from
    decisions the Human graded wrong; the other sections are for other roles; never read `docs/brain/decision-log.md`). When `node scripts/scope-check.mjs --drift --plan=<plan>` reports
-   drift, run the plan's Step 0 first.
+   drift, run the plan's Step 0 first. Before writing UI or shared code, read `docs/brain/inventory.md` (when it
+   exists) and use what it lists — the families, engine classes and tokens — instead of a new copy.
 3. Do the Atomic Sub-tasks in order. Write only inside the plan's `## Read-Write Scope`; a test beside a scoped file
    (`x.spec.ts` next to `x.ts`, or in a `__tests__/` folder there) is in scope: write it, never ask. Another file outside
    it that is truly needed: add it to the scope block and log `scope extended: <path> — <why>` in `## Execution Notes`.
@@ -30,9 +31,9 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
    **Manifest:** when the project has a kit manifest (the manifest.json under docs/workflow-kit), the per-plan gate runs `node scripts/kit-manifest-check.mjs`;
    a file you add under the manifest inventory (scripts, agents, commands, skills, `docs/brain/**`, `docs/agent/**`,
    `.github/workflows`) or an ADR needs its manifest entry in the same branch, or the gate sends it back as `unclassified: <path>`.
-   **No invented behaviour:** a behaviour the plan does not describe (what happens on edit, on leave, on cancel, on
-   error; a new dialog, a new confirmation, an automatic action) gets the simplest option — do nothing extra — and one
-   `decisions` entry that starts with `behaviour:`, says what you chose and ends with one line on how to reverse it.
+   **Decided defaults:** a behaviour the plan's `## Defaults` lists, or an `on` default in `docs/brain/inventory.md`, is decided: build it through the piece it names and log no `behaviour:` entry.
+   **No invented behaviour:** a behaviour that is neither in the plan nor in the contract (what happens on edit, on leave, on cancel, on error; a new dialog, a new confirmation, an automatic action)
+   gets the simplest option — do nothing extra — and one `decisions` entry that starts with `behaviour:`, says what you chose and ends with one line on how to reverse it.
    A defect you notice outside your job is not fixed: report it as a `decisions` entry that starts with `seen:` and
    names `file:line` (or the page and the steps).
    **Removing is a decision:** removing or narrowing existing user-facing behaviour the plan does not name (a key

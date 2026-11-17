@@ -236,15 +236,18 @@ export function laneFor({ mode = 'auto', files, totalLines, sensitiveMatches = f
 const GATE_PM = "pnpm" === 'pnpm' ? 'pnpm' : 'npm'
 const GATE_SCRIPTS = { build: "build", lint: "lint", test: "test:ci", testCi: "" }
 const LEDGER_CMD = 'node scripts/plan-ledger-check.mjs'
+// The diff checks and the debt ratchet: scripts, no tokens — every lane runs them.
+const KIT_CHECKS_CMD = 'node scripts/kit-checks.mjs --base origin/main'
 const GATE_TAIL = 20
 
 /**
  * The gate's commands for a lane: build, lint, the test script (commands.testCi wins over commands.test) on REGULAR
- * only, then the plan ledger and the override check. An unset script is left out. Exported for the tests.
+ * only, then the diff checks (every lane), the plan ledger and the override check. An unset script is left out.
+ * Exported for the tests.
  */
-export function shipGateCommands({ lane, pm = GATE_PM, build = GATE_SCRIPTS.build, lint = GATE_SCRIPTS.lint, test = GATE_SCRIPTS.test, testCi = GATE_SCRIPTS.testCi }) {
+export function shipGateCommands({ lane, pm = GATE_PM, build = GATE_SCRIPTS.build, lint = GATE_SCRIPTS.lint, test = GATE_SCRIPTS.test, testCi = GATE_SCRIPTS.testCi, kitChecks = KIT_CHECKS_CMD }) {
   const run = (s) => (typeof s === 'string' && s !== '' ? `${pm} run ${s}` : null)
-  return [run(build), run(lint), lane === 'REGULAR' ? run(testCi || test) : null, LEDGER_CMD, 'node scripts/override-check.mjs'].filter(Boolean)
+  return [run(build), run(lint), lane === 'REGULAR' ? run(testCi || test) : null, kitChecks, LEDGER_CMD, 'node scripts/override-check.mjs'].filter(Boolean)
 }
 
 /** One gate command by spawnSync: `node …` with this node, `npm|pnpm run <script>` (through the shell on Windows). */

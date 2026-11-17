@@ -26,7 +26,7 @@ import { dirname, join, relative, resolve, sep } from 'path'
 import { fileURLToPath } from 'url'
 import { inflateRawSync } from 'zlib'
 import { REGISTRY_PATH } from './design-feature-inventory.mjs'
-import { parseRegistry } from './lib/reuse-check.mjs'
+import { parseRegistry } from './lib/registry.mjs'
 
 export const FAMILIES_PATH = 'docs/brain/component-families.md'
 

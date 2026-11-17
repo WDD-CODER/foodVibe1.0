@@ -10,7 +10,7 @@
    prints what it holds; an app route in neither list fails the map check.
 2. **Sign-in module** — for pages with `auth`, `styleqa.signIn` names a module that exports
    `signIn(context, { appOrigin, apiOrigin })`. Without it, auth pages are measured signed out (the report says so).
-3. **Settings** — the `styleqa.*` keys of `kit.config.json`: `appOrigin`, `apiOrigin`, `signIn`, `uiFontToken`, `tokenPrefixes`,
+3. **Settings** — the `styleqa.*` keys of `kit.config.json`: `appOrigin`, `apiOrigin`, `signIn`, `uiFontToken`, `tokenPrefixes` (`color`, `fontSize`, `radius`, `shadow`, `blur`, `spacing`; default empty. Style QA reads colour and font-size; `scripts/kit-checks.mjs` reads all six on changed lines),
    `tokenFiles`, `breakpointPattern`, `stylesheets`, `loaderText`, `blockedSteps`, `outDir` (default: a `styleqa` folder under `.claude`), `widths`
    (default list such as `375x812`, `1366x768`). Run `node tools/sync.mjs --apply` after a change.
 4. **Theme facts** — `docs/qa/styleqa-theme.md`: a few lines on the project's look (colours, radii, fonts, what a control should

@@ -192,6 +192,12 @@ function head(ctx, kind, key) {
   return { _id: idOf(ctx.project, ctx.run, kind, key), schema: SCHEMA, project: ctx.project, run: ctx.run, machine: ctx.machine, kitVersion: ctx.kitVersion, kitCommit: ctx.kitCommit }
 }
 
+/** `final gate: failed on <command>` when the run's status names the failing command, else `final gate: <word>`. */
+function finalGateText(status, ctx) {
+  const command = String(status.finalGate?.command ?? '').trim()
+  return command && status.finalGate?.ok === false ? `final gate: ${ctx.finalGate} on ${command}` : `final gate: ${ctx.finalGate}`
+}
+
 /** The events of a run: parks, timeouts, env-fails, flakes, runner retries, model fallbacks, dropped main checks, stuck, final-gate fail. */
 export function eventDocs(status, ctx) {
   const out = []
@@ -218,7 +224,7 @@ export function eventDocs(status, ctx) {
     const kind = noteKind(n.text)
     if (kind) push(kind, n.plan ?? null, n.text, n.at ?? null)
   }
-  if (/fail/i.test(String(ctx.finalGate ?? ''))) push('final-gate-fail', null, `final gate: ${ctx.finalGate}`, status.finishedAt ?? null)
+  if (/fail/i.test(String(ctx.finalGate ?? ''))) push('final-gate-fail', null, finalGateText(status, ctx), status.finishedAt ?? null)
   return out
 }
 
