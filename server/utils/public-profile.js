@@ -4,14 +4,18 @@
  * Never exposed: businessId, whatsapp, assistant, status, minBudgetPerGuest, areas, any _id.
  */
 const { LIVE } = require('../jobs/purge-deleted')
+const { businessModules } = require('../middleware/require-module')
 
 const PUBLIC_STATUSES = ['pilot', 'active']
 const PUBLIC_RULES = ['minPartySize', 'maxPartySize', 'minLeadHours', 'maxLeadDays']
 
-/** The live profile whose slug matches (lower-case), or null. */
+/** The live profile whose slug matches (lower-case), or null. Plan 616: also null when its business has no `frontdesk` module (a stranger sees the same 404 as for no business). */
 async function loadPublicProfile(db, slug) {
   if (typeof slug !== 'string' || !slug) return null
-  return db.collection('frontDeskProfiles').findOne({ slug: slug.toLowerCase(), ...LIVE })
+  const profile = await db.collection('frontDeskProfiles').findOne({ slug: slug.toLowerCase(), ...LIVE })
+  if (!profile) return null
+  const modules = await businessModules(profile.businessId)
+  return modules.includes('frontdesk') ? profile : null
 }
 
 const isPublic = profile => PUBLIC_STATUSES.includes(profile?.status)

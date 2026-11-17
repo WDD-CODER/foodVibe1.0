@@ -3,6 +3,7 @@
 const { Router } = require('express')
 const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { getBusiness, setShareAiExamples, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { checkStoredDoc } = require('../middleware/validate')
@@ -37,7 +38,8 @@ router.get('/', verifyToken, async (req, res) => {
   try {
     const business = await getBusiness(req.user.businessId)
     if (!business) return res.status(404).json({ error: 'Business not found' })
-    res.json({ ...business, settings: { ...BUSINESS_SETTINGS_DEFAULTS, ...(business.settings ?? {}) } })
+    const { platformHistory: _platformHistory, ...visible } = business // the platform admin's own notes stay off the member's copy
+    res.json({ ...visible, settings: { ...BUSINESS_SETTINGS_DEFAULTS, ...(business.settings ?? {}) } })
   } catch (err) {
     req.log.error({ err, event: 'business.get.failed' })
     res.status(500).json({ error: 'Server error' })
@@ -53,10 +55,16 @@ router.put('/settings', verifyToken, async (req, res) => {
       req.log.info({ event: 'business.settings.failed', reason: 'validation' })
       return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
     }
-    const result = await setBusinessSettings(req.user.businessId, parsed.data)
+    // A body without priceRiseAlertPct keeps the stored one (the three-number form must not wipe it).
+    let settings = parsed.data
+    if (settings.priceRiseAlertPct === undefined) {
+      const stored = (await getBusiness(req.user.businessId))?.settings?.priceRiseAlertPct
+      if (stored !== undefined) settings = { ...settings, priceRiseAlertPct: stored }
+    }
+    const result = await setBusinessSettings(req.user.businessId, settings)
     if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
     req.log.info({ event: 'business.settings.saved' })
-    res.json({ settings: parsed.data })
+    res.json({ settings })
   } catch (err) {
     req.log.error({ err, event: 'business.settings.failed' })
     res.status(500).json({ error: 'Server error' })
@@ -185,7 +193,7 @@ function mergeIntakeKinds(stored, template, incoming) {
 const hasBaselineValue = baseline => !!baseline && Object.values(baseline).some(v => v !== undefined)
 
 // POST /api/v1/business/front-desk-intake — the owner's whole onboarding form in one save (plan 556): profile, draft knowledge items, optional baseline.
-router.post('/front-desk-intake', verifyToken, async (req, res) => {
+router.post('/front-desk-intake', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     if (!assertCan(req, res, 'editFrontDesk', { type: 'frontDeskProfiles' })) return
     const parsed = frontDeskIntakeSchema.safeParse(req.body)

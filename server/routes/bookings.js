@@ -6,6 +6,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { checkStoredDoc } = require('../middleware/validate')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
@@ -36,7 +37,7 @@ function fail(req, res, name, err) {
 const COVERING = ['confirmed', 'seated', 'finished']
 
 // GET /api/v1/bookings/day?date=YYYY-MM-DD -> { bookings, coversByHour }  (Wave 1 manual stand-in for availability)
-router.get('/day', verifyToken, async (req, res) => {
+router.get('/day', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const { date } = req.query
     if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return res.status(400).json({ error: 'BAD_DATE' })
@@ -58,7 +59,7 @@ router.get('/day', verifyToken, async (req, res) => {
 })
 
 // PUT /api/v1/bookings/:id/status  { status, note? }
-router.put('/:id/status', verifyToken, async (req, res) => {
+router.put('/:id/status', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const { status, note } = req.body ?? {}
     if (!BOOKING_STATUSES.includes(status) || (note !== undefined && (typeof note !== 'string' || note.length > 500))) {
