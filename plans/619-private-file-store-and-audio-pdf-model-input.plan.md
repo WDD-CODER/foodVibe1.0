@@ -188,6 +188,7 @@ server/.env.example
 docs/security-go-live.md
 docs/agent/standards-backend.md
 server/breadcrumbs.md
+docs/brain/component-families.md
 ```
 
 ## Read Scope
