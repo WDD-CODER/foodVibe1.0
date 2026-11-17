@@ -126,6 +126,8 @@ e2e/ui/612-1.spec.ts
 e2e/ui/618-1.spec.ts
 docs/agent/standards-backend.md
 server/breadcrumbs.md
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope
