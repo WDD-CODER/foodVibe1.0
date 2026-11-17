@@ -56,6 +56,9 @@ app.use(helmet({
       // the browser blocks the request itself before it ever leaves (connect-src violation),
       // independent of whatever CORS headers Cloudinary's response carries.
       connectSrc:     ["'self'", "https://api.cloudinary.com"],
+      // A recording is replayed from a blob: before it is sent, and a stored recording is played from the
+      // file store's link (plans 623, 628).
+      mediaSrc:       ["'self'", "blob:", "https://api.cloudinary.com", "https://res.cloudinary.com"],
       objectSrc:      ["'none'"],
       frameSrc:       ["'none'"],
       upgradeInsecureRequests: [],

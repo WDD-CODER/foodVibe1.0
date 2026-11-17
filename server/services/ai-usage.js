@@ -41,6 +41,19 @@ function countImages(body) {
   return n;
 }
 
+/** Plan 619: audio and PDF parts (files other than pictures). */
+function countFiles(body) {
+  let n = 0;
+  const contents = Array.isArray(body?.contents) ? body.contents : [];
+  for (const c of contents) {
+    for (const p of Array.isArray(c?.parts) ? c.parts : []) {
+      const mime = p?.inlineData?.mimeType;
+      if (typeof mime === 'string' && (mime.startsWith('audio/') || mime === 'application/pdf')) n += 1;
+    }
+  }
+  return n;
+}
+
 function buildRow({ usage, model, ok, errorCode, data, body, latencyMs, log }) {
   const meta = data?.usageMetadata ?? {};
   const inputTokens = meta.promptTokenCount ?? 0;
@@ -66,6 +79,10 @@ function buildRow({ usage, model, ok, errorCode, data, body, latencyMs, log }) {
   if (errorCode) row.errorCode = errorCode;
   const images = countImages(body);
   if (images > 0) row.imageCount = images;
+  const files = countFiles(body);
+  if (files > 0) row.fileCount = files;
+  const seconds = usage.audioSeconds;
+  if (typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0 && seconds <= 34200) row.audioSeconds = Math.round(seconds);
   return row;
 }
 
