@@ -1,5 +1,5 @@
 'use strict';
-/** Plan 600 — the shared pool: opt-in, admin promote/remove, and use in another business's prompt. */
+/** Plan 600 — the shared pool: admin promote/remove, and use in another business's prompt. Plan 618: shared unless private. */
 
 const request = require('supertest');
 
@@ -28,8 +28,8 @@ beforeEach(async () => {
   await testDb().collection('GEMINI_SHOTS').deleteMany({});
   await testDb().collection('businesses').deleteMany({});
   await testDb().collection('businesses').insertMany([
-    biz('bizShareA', 'Sharing Kitchen', { shareAiExamples: true }),
-    biz('bizPrivateC', 'Private Kitchen'),
+    biz('bizShareA', 'Sharing Kitchen'),
+    biz('bizPrivateC', 'Private Kitchen', { aiPrivate: true }),
     biz('bizNewB', 'New Kitchen'),
   ]);
   fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: JSON.stringify(recipe('soup')) }] } }] }) }));
@@ -80,7 +80,7 @@ describe('shared recipe AI examples', () => {
     expect((await promote('0'.repeat(24))).status).toBe(404);
   });
 
-  it('GET lists candidates only from opted-in businesses; promoted ones move to shared', async () => {
+  it('GET lists candidates only from businesses that are not private; promoted ones move to shared', async () => {
     const ok = await approvedShot('bizShareA', 'soup one');
     await approvedShot('bizPrivateC', 'soup two');
     await approvedShot('bizShareA', 'pending soup', { status: 'pending' });
@@ -123,18 +123,38 @@ describe('shared recipe AI examples', () => {
     expect(again.status).toBe(404);
   });
 
-  it('PUT share-ai-examples: off by the owner removes the copies; staff get 403', async () => {
+  it('promote: 200 for a business that never touched a switch (plan 618)', async () => {
+    const id = await approvedShot('bizNewB', 'new soup');
+    const res = await promote(id);
+    expect(res.status).toBe(200);
+    expect(await testDb().collection('GEMINI_SHOTS').countDocuments({ businessId: '__master__', 'promotedFrom.businessId': 'bizNewB' })).toBe(1);
+  });
+
+  it('the retired PUT share-ai-examples answers 404 for owner and staff and deletes nothing (plan 618)', async () => {
     const ok = await approvedShot('bizShareA', 'soup one');
     await promote(ok);
     const staffRes = await request(app).put('/api/v1/business/share-ai-examples').set(auth(staff())).send({ share: false });
-    expect(staffRes.status).toBe(403);
+    expect(staffRes.status).toBe(404);
+    const ownerRes = await request(app).put('/api/v1/business/share-ai-examples').set(auth(owner('ownerShareA', 'bizShareA'))).send({ share: false });
+    expect(ownerRes.status).toBe(404);
     expect(await testDb().collection('GEMINI_SHOTS').countDocuments({ businessId: '__master__' })).toBe(1);
-    const bad = await request(app).put('/api/v1/business/share-ai-examples').set(auth(owner('ownerShareA', 'bizShareA'))).send({ share: 'x' });
-    expect(bad.status).toBe(400);
-    const res = await request(app).put('/api/v1/business/share-ai-examples').set(auth(owner('ownerShareA', 'bizShareA'))).send({ share: false });
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ shareAiExamples: false });
-    expect(await testDb().collection('GEMINI_SHOTS').countDocuments({ businessId: '__master__' })).toBe(0);
-    expect((await testDb().collection('businesses').findOne({ _id: 'bizShareA' })).shareAiExamples).toBe(false);
+    expect(await testDb().collection('GEMINI_SHOTS').countDocuments({ businessId: 'bizShareA' })).toBe(1);
+  });
+
+  it('the platform route: aiPrivate true removes only that business promoted copies; false restores and deletes nothing (plan 618)', async () => {
+    const a = await approvedShot('bizShareA', 'soup a');
+    const b = await approvedShot('bizNewB', 'soup b');
+    expect((await promote(a)).status).toBe(200);
+    expect((await promote(b)).status).toBe(200);
+    const platform = body => request(app).put('/api/v1/admin/businesses/bizShareA/platform').set(auth(adminToken())).send(body);
+    const shots = filter => testDb().collection('GEMINI_SHOTS').countDocuments(filter);
+    expect((await platform({ aiPrivate: true, reason: 'test reason' })).status).toBe(200);
+    expect(await shots({ businessId: '__master__', 'promotedFrom.businessId': 'bizShareA' })).toBe(0);
+    expect(await shots({ businessId: '__master__', 'promotedFrom.businessId': 'bizNewB' })).toBe(1);
+    expect(await shots({ businessId: 'bizShareA' })).toBe(1);
+    expect((await platform({ aiPrivate: false, reason: 'test reason' })).status).toBe(200);
+    expect(await shots({ businessId: '__master__' })).toBe(1);
+    expect(await shots({ businessId: 'bizShareA' })).toBe(1);
+    expect((await testDb().collection('businesses').findOne({ _id: 'bizShareA' })).aiPrivate).toBe(false);
   });
 });

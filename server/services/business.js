@@ -78,16 +78,21 @@ async function setStaffVisibleStages(id, stages) {
   return { matchedCount: result.matchedCount, staffVisibleStages }
 }
 
-/** Plan 600: sets the owner's consent to share AI examples; turning it off also deletes this business's shared copies. */
-async function setShareAiExamples(id, share) {
-  const result = await col().updateOne({ _id: String(id) }, { $set: { shareAiExamples: share } })
+/**
+ * Plan 618 (C-LEARN): the platform admin marks a business private (or shared again). Turning private on deletes the
+ * business's promoted copies in the shared examples pool; turning it off restores nothing.
+ */
+async function setAiPrivate(id, value) {
+  const aiPrivate = value === true
+  const result = await col().updateOne({ _id: String(id) }, { $set: { aiPrivate } })
   let removed = 0
-  if (result.matchedCount && !share) {
+  if (result.matchedCount && aiPrivate) {
     const del = await mongoose.connection.db.collection('GEMINI_SHOTS')
       .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': String(id) })
     removed = del.deletedCount
+    // plan 627 calls forgetBusiness(db, id) here when value is true
   }
-  return { matchedCount: result.matchedCount, shareAiExamples: share, removed }
+  return { matchedCount: result.matchedCount, aiPrivate, removed }
 }
 
 /** Plan 579: replaces the business's hidden logistics keys; a key already listed keeps its `at`, a new one gets now. */
@@ -100,4 +105,4 @@ async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
   return { matchedCount: result.matchedCount, hiddenLogisticsKeys }
 }
 
-module.exports = { setShareAiExamples, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+module.exports = { setAiPrivate,setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

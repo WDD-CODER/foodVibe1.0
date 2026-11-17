@@ -18,8 +18,7 @@ test('600-2: the platform admin moves a candidate into the shared pool and back 
   const shotKey = `e2e600-${Date.now()}`
   let sharedId: string | null = null
   try {
-    // Setup: the QA business opts in and has one saved (confirmed) example.
-    await request.put(`${API}/api/v1/business/share-ai-examples`, { headers, data: { share: true } })
+    // Setup: the QA business is not private, so its confirmed example is a candidate.
     await request.post(`${API}/api/v1/ai/shots`, {
       headers,
       data: { prompt: 'E2E 600 מרק', draft, status: 'pending', source: 'text', shotKey }
@@ -44,6 +43,5 @@ test('600-2: the platform admin moves a candidate into the shared pool and back 
       sharedId = body.shared.find((r) => r.nameHebrew === draft.nameHebrew)?._id ?? null
     }
     if (sharedId) await request.delete(`${API}/api/v1/admin/ai-shots/shared/${sharedId}`, { headers })
-    await request.put(`${API}/api/v1/business/share-ai-examples`, { headers, data: { share: false } })
   }
 })

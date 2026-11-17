@@ -195,8 +195,8 @@ const URL_SHOT_MATCH_CHARS = 300;
 // Plan 600 lifecycle: the AI window saves a 'pending' shot (with a client shotKey) when the cook
 // continues into the recipe builder; POST /shots/confirm turns it 'approved' once the recipe is
 // saved (aiDraft = the original, draft = as saved, keptRatio, recipeId). Only 'approved' shots are
-// read into prompts. Shared pool: when the owner opted in (business.shareAiExamples) the platform
-// admin may copy an approved shot into a '__master__' shot (admin.js); every business's prompt
+// read into prompts. Shared pool (plan 618): the platform admin may copy an approved shot of any
+// business that is not private (business.aiPrivate, mayLearnFrom) into a '__master__' shot (admin.js); every business's prompt
 // takes its own examples first and fills the rest from that pool. Copies carry no business name.
 // ---------------------------------------------------------------------------
 

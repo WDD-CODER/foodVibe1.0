@@ -63,6 +63,20 @@ describe('PUT /admin/businesses/:id/platform', () => {
     expect(doc.platformHistory[1].changed).toEqual(['aiMonthlyTokenCap', 'aiPrivate'])
   })
 
+  it('aiPrivate true stores the flag, appends one history row and removes the promoted copy (plan 618)', async () => {
+    const shots = testDb().collection('GEMINI_SHOTS')
+    await shots.deleteMany({})
+    await shots.insertOne({ businessId: '__master__', prompt: 'soup', draft: {}, status: 'approved', promotedFrom: { businessId: 'bA', shotId: 'x1' }, createdAt: new Date() })
+    const res = await put({ aiPrivate: true, reason: 'pays for privacy' })
+    expect(res.status).toBe(200)
+    expect(res.body.aiPrivate).toBe(true)
+    const doc = await stored()
+    expect(doc.aiPrivate).toBe(true)
+    expect(doc.platformHistory).toHaveLength(1)
+    expect(doc.platformHistory[0].changed).toEqual(['aiPrivate'])
+    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(0)
+  })
+
   it('keeps only the last 50 history rows', async () => {
     for (let i = 0; i < 51; i++) expect((await put({ aiPrivate: i % 2 === 0, reason: 'round ' + i })).status).toBe(200)
     const rows = (await stored()).platformHistory
