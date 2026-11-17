@@ -12,6 +12,7 @@ import {
   DestroyRef,
   ElementRef
 } from '@angular/core'
+import { aiCapErrorKey } from '@utils/ai-error.util'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common'
@@ -373,9 +374,10 @@ export class RecipeIngredientsTableComponent {
       const status = (failure as { status?: number }).status
       const text = (failure as { error?: { error?: string } }).error?.error ?? ''
       const key =
-        status === 429 || text.includes('daily_limit_reached')
+        aiCapErrorKey(failure) ??
+        (status === 429 || text.includes('daily_limit_reached')
           ? 'ai_daily_limit_reached_all'
-          : 'paste_ingredients_match_failed'
+          : 'paste_ingredients_match_failed')
       this.userMsg_.onSetWarningMsg(this.translation_.translate(key))
     }
     const array = this.ingredientsFormArray()

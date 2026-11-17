@@ -3,12 +3,18 @@
     <lucide-icon name="sparkles" class="icon-primary"></lucide-icon>
     <h2>{{ 'metadata_ai_share_title' | translatePipe }}</h2>
   </div>
-  <p class="card-desc">{{ 'metadata_ai_share_desc' | translatePipe }}</p>
+  <p class="card-desc">{{ 'metadata_ai_learn_desc' | translatePipe }}</p>
 
   <div class="c-chip-group">
-    <label class="c-chip c-chip--toggle" data-testid="ai-examples-share-toggle">
-      <input type="checkbox" [checked]="checked()" disabled />
-      <span>{{ 'metadata_ai_share_chip' | translatePipe }}</span>
-    </label>
+    <span
+      class="c-chip c-chip--tap is-locked"
+      tabindex="0"
+      data-testid="ai-examples-share-state"
+      [attr.title]="tooltip_()"
+      [attr.aria-label]="label_()"
+    >
+      <lucide-icon name="lock" [size]="14"></lucide-icon>
+      {{ stateKey_() | translatePipe }}
+    </span>
   </div>
 </section>

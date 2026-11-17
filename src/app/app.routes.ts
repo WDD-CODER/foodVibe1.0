@@ -15,6 +15,7 @@ import { kitchenDataEnsureLoadedResolver } from './core/resolvers/kitchen-data-e
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
+import { moduleGuard } from './core/guards/module.guard'
 import { recipeBuilderAccessGuard } from './core/guards/recipe-builder-access.guard'
 import { platformAdminGuard } from './core/guards/platform-admin.guard'
 import { environment } from '../environments/environment'
@@ -30,7 +31,7 @@ export const routes: Routes = [
   { path: 'equipment/edit/:id', redirectTo: 'inventory/equipment/edit/:id', pathMatch: 'full' },
   {
     path: 'venues',
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['events'])],
     loadComponent: () => import('./pages/venues/venues.page').then(m => m.VenuesPage),
     resolve: { venuesLoaded: venuesEnsureLoadedResolver },
     children: [
@@ -155,48 +156,48 @@ export const routes: Routes = [
   {
     path: 'clients',
     loadComponent: () => import('./pages/clients/components/client-list/client-list.component').then(m => m.ClientListComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['events', 'frontdesk'])],
     resolve: { clientsLoaded: clientsEnsureLoadedResolver },
   },
   {
     path: 'clients/:id',
     loadComponent: () => import('./pages/clients/components/client-profile/client-profile.component').then(m => m.ClientProfileComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['events', 'frontdesk'])],
     canDeactivate: [pendingChangesGuard],
     resolve: { clientsLoaded: clientsEnsureLoadedResolver, menuEventsLoaded: menuEventsEnsureLoadedResolver },
   },
   {
     path: 'requests',
     loadComponent: () => import('./pages/requests/requests.page').then(m => m.RequestsPage),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
     canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'frontdesk/settings',
     loadComponent: () => import('./pages/frontdesk/frontdesk-settings/frontdesk-settings.page').then(m => m.FrontdeskSettingsPage),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
     canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'frontdesk/onboarding',
     loadComponent: () => import('./pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding.page').then(m => m.FrontDeskOnboardingComponent),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
     canDeactivate: [pendingChangesGuard],
   },
   {
     path: 'frontdesk/knowledge',
     loadComponent: () => import('./pages/frontdesk/knowledge/knowledge.page').then(m => m.KnowledgePage),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
     resolve: { knowledgeLoaded: () => inject(KnowledgeItemDataService).ensureLoaded().then(() => true) },
   },
   {
     path: 'bookings',
     loadComponent: () => import('./pages/bookings/bookings.page').then(m => m.BookingsPage),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
   },
   {
     path: 'menu-library',
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['events'])],
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
     resolve: {
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
@@ -208,7 +209,7 @@ export const routes: Routes = [
   {
     path: 'menu-intelligence',
     loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['events'])],
     canDeactivate: [pendingChangesGuard],
     resolve: {
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
@@ -221,7 +222,7 @@ export const routes: Routes = [
   {
     path: 'menu-intelligence/:id',
     loadComponent: () => import('@pages/menu-intelligence/menu-intelligence.page').then(m => m.MenuIntelligencePage),
-    canActivate: [authGuard],
+    canActivate: [authGuard, moduleGuard(['events'])],
     canDeactivate: [pendingChangesGuard],
     resolve: {
       menuEventsLoaded: menuEventsEnsureLoadedResolver,

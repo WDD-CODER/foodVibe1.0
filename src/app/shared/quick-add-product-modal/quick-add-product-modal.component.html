@@ -33,18 +33,20 @@
                 autocapitalize="off"
                 spellcheck="false"
               />
-              <button
-                type="button"
-                class="c-icon-btn"
-                (click)="onAiFill()"
-                [disabled]="!name().trim() || isAiLoading_()"
-              >
-                @if (isAiLoading_()) {
-                  <app-loader size="small" [inline]="true" />
-                } @else {
-                  <lucide-icon name="sparkles" [size]="16"></lucide-icon>
-                }
-              </button>
+              @if (modules_.has('ai_create')) {
+                <button
+                  type="button"
+                  class="c-icon-btn"
+                  (click)="onAiFill()"
+                  [disabled]="!name().trim() || isAiLoading_()"
+                >
+                  @if (isAiLoading_()) {
+                    <app-loader size="small" [inline]="true" />
+                  } @else {
+                    <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+                  }
+                </button>
+              }
             </div>
             @if (nameError_()) {
               <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>

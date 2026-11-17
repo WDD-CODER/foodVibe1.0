@@ -9,6 +9,7 @@ import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ClientDataService } from './client-data.service'
+import { ModuleService } from './module.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import type { VersionEntityType } from './version-history.service'
@@ -69,6 +70,10 @@ export class TrashService {
   private readonly storage = inject(StorageService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
+  private readonly modules = inject(ModuleService)
+
+  /** Plan 620: the sections whose module the business has (venues and menuEvents need events, clients events or frontdesk). */
+  readonly sections_ = computed(() => TRASH_SECTIONS.filter(({ type }) => this.modules.hasType(type)))
 
   /** A list that already loaded must pick up a restored item; one that never loaded will fetch it anyway. */
   private readonly lists: Record<TrashType, { hasLoaded(): boolean; reloadFromStorage(): Promise<void> }> = {
@@ -89,7 +94,7 @@ export class TrashService {
 
   async loadTrash(): Promise<void> {
     const lists = await Promise.all(
-      TRASH_SECTIONS.map(async ({ type }) => {
+      this.sections_().map(async ({ type }) => {
         const docs = await this.storage.trash<TrashDoc>(type)
         return [
           type,

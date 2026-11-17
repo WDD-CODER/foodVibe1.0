@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core'
+import { ModuleService } from '@services/module.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ActivatedRoute, Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
@@ -103,6 +104,15 @@ describe('DashboardPage', () => {
     queryParamsSubject.next({ tab: 'venues' })
     fixture.detectChanges()
     expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-venues"]'))).not.toBeNull()
+  })
+
+  it('should show the overview for the venue tabs when events is off (plan 620)', () => {
+    spyOn(TestBed.inject(ModuleService), 'has').and.returnValue(false)
+    for (const tab of ['venues', 'add-venue']) {
+      queryParamsSubject.next({ tab })
+      fixture.detectChanges()
+      expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-' + tab + '"]'))).toBeNull()
+    }
   })
 
   it('should resolve "add-venue" query param to add-venue tab', () => {

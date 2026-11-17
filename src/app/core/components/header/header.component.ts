@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
+import { ModuleService } from '@services/module.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { TranslationService } from '@services/translation.service'
@@ -33,6 +34,7 @@ const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'act
 export class HeaderComponent {
   private readonly userService = inject(UserService)
   private readonly businessService = inject(BusinessService)
+  private readonly modules = inject(ModuleService)
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
   private readonly translation = inject(TranslationService)
@@ -49,8 +51,14 @@ export class HeaderComponent {
   protected readonly waitingLabel_ = computed(() =>
     this.translation.translate('rq_waiting_count_label').replace('{count}', String(this.waitingCount_()))
   )
+  /** Plan 620: the events link needs `events`, the clients link needs `events` or `frontdesk`. */
+  protected readonly showEvents_ = computed(() => this.modules.has('events'))
+  protected readonly showClients_ = computed(() => this.modules.has(['events', 'frontdesk']))
   protected readonly navLinks_ = computed(() => [
-    ...NAV_LINKS,
+    ...NAV_LINKS.filter(
+      (link) =>
+        (link.path !== '/menu-library' || this.showEvents_()) && (link.path !== '/clients' || this.showClients_())
+    ),
     ...(this.isOwner_() ? [SETTINGS_LINK] : []),
     ...(this.isPlatformAdmin_() ? [PLATFORM_LINK] : [])
   ])

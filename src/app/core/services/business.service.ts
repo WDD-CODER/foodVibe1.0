@@ -55,10 +55,22 @@ export class BusinessService {
   /** Only the id: a new user object with the same _id (profile update, token refresh) must not reload. */
   private readonly _userId_ = computed(() => this.userService.user_()?._id ?? null)
 
+  private readonly _loaded_ = signal(this._userId_() === null)
+  /** Plan 620: false when the signed-in user changes, true once the load answered (or failed), true when nobody is signed in. */
+  public readonly loaded_ = this._loaded_.asReadonly()
+
   constructor() {
     effect(() => {
       const userId = this._userId_()
-      untracked(() => (userId ? this._load(userId) : this._business_.set(null)))
+      untracked(() => {
+        if (userId) {
+          this._loaded_.set(false)
+          this._load(userId)
+        } else {
+          this._business_.set(null)
+          this._loaded_.set(true)
+        }
+      })
     })
   }
 
@@ -113,10 +125,16 @@ export class BusinessService {
   private _load(userId: string): void {
     this.http.get<Business>(`${environment.apiUrl}${API.business()}`).subscribe({
       next: (business) => {
-        if (this._userId_() === userId) this._business_.set(business)
+        if (this._userId_() === userId) {
+          this._business_.set(business)
+          this._loaded_.set(true)
+        }
       },
       error: (err: unknown) => {
-        if (this._userId_() === userId) this._business_.set(null)
+        if (this._userId_() === userId) {
+          this._business_.set(null)
+          this._loaded_.set(true)
+        }
         this.logging.warn('Business could not be loaded', { err: String(err) })
       }
     })

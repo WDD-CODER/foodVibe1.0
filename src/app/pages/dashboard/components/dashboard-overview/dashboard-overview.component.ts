@@ -8,6 +8,7 @@ import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType } from '@services/activity-log.service'
@@ -69,6 +70,7 @@ export class DashboardOverviewComponent {
   private readonly translation = inject(TranslationService)
   private readonly businessService = inject(BusinessService)
   private readonly permission = inject(PermissionService)
+  protected readonly modules = inject(ModuleService)
   private readonly relativeTimeFormat = new Intl.RelativeTimeFormat('he', { numeric: 'auto', style: 'short' })
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   /** Activity entry whose change chips are open (mobile only — desktop always shows them). */

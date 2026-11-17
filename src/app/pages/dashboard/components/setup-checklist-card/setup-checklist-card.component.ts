@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { BusinessService, type SetupStatus } from '@services/business.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { ModuleService } from '@services/module.service'
 import { LoggingService } from '@services/logging.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
@@ -39,6 +40,7 @@ export class SetupChecklistCardComponent {
   private readonly logging = inject(LoggingService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly translation = inject(TranslationService)
+  private readonly modules = inject(ModuleService)
 
   // 4. SIGNALS & CONSTANTS
   private readonly status_ = signal<SetupStatus | null>(null)
@@ -52,7 +54,7 @@ export class SetupChecklistCardComponent {
   // 5. COMPUTED
   protected readonly steps = computed<SetupStep[]>(() => {
     const status = this.status_()
-    return [
+    const all: SetupStep[] = [
       {
         key: 'products',
         labelKey: 'setup_step_products',
@@ -94,11 +96,17 @@ export class SetupChecklistCardComponent {
         queryParams: { tab: 'team' }
       }
     ]
+    // Plan 620: the events step belongs to the `events` module.
+    return this.modules.has('events') ? all : all.filter((step) => step.key !== 'event')
   })
   protected readonly doneRequired = computed(() => this.steps().filter((step) => !step.optional && step.done).length)
   /** Shown only to the owner, after the status arrived, until the four required steps are done or the owner hides it. */
   protected readonly visible = computed(
-    () => this.permission.isOwner_() && this.status_() !== null && !this.isHidden_() && this.doneRequired() < 4
+    () =>
+      this.permission.isOwner_() &&
+      this.status_() !== null &&
+      !this.isHidden_() &&
+      this.doneRequired() < this.steps().filter((step) => !step.optional).length
   )
 
   constructor() {

@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { Router, ActivatedRoute } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
+import { ModuleService } from '@services/module.service'
 
 import { DashboardOverviewComponent } from './components/dashboard-overview/dashboard-overview.component'
 import { DashboardHeaderComponent } from './components/dashboard-header/dashboard-header.component'
@@ -46,6 +47,7 @@ const TAB_QUERY_VALUES: Record<DashboardTab, string | null> = {
 export class DashboardPage implements PendingChangesComponent {
   private readonly router = inject(Router)
   private readonly route = inject(ActivatedRoute)
+  private readonly modules = inject(ModuleService)
 
   private readonly metadata = viewChild(MetadataManagerComponent)
 
@@ -56,6 +58,8 @@ export class DashboardPage implements PendingChangesComponent {
   protected readonly activeTab = computed<DashboardTab>(() => {
     const params = this.queryParams_() as Record<string, string>
     const t = params['tab']
+    // Plan 620: the venue tabs belong to `events`; without it the overview shows.
+    if ((t === 'venues' || t === 'add-venue') && !this.modules.has('events')) return 'overview'
     if (t === 'metadata' || t === 'venues' || t === 'add-venue' || t === 'trash') return t
     return 'overview'
   })

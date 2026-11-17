@@ -8,6 +8,7 @@ import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import type { Recipe } from '@models/recipe.model'
@@ -16,7 +17,13 @@ import type { User } from '@models/user.model'
 @Component({ selector: 'app-blank-stub', template: '', standalone: true })
 class BlankStubComponent {}
 
+/** Plan 620: a stub where every module is on unless a spec turns some off. */
+const modulesOff = new Set<string>()
+const moduleStub = { has: (keys: string | readonly string[]) => [keys].flat().some((k) => !modulesOff.has(k)) }
+
 describe('TabChipsComponent', () => {
+  beforeEach(() => modulesOff.clear())
+
   let fixture: ComponentFixture<TabChipsComponent>
   let component: TabChipsComponent
   let router: Router
@@ -51,7 +58,8 @@ describe('TabChipsComponent', () => {
           { path: 'frontdesk/knowledge', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation },
-        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
+        { provide: ModuleService, useValue: moduleStub }
       ]
     }).compileComponents()
 
@@ -143,6 +151,20 @@ describe('TabChipsComponent', () => {
     expect(active.injector.get(RouterLink).href).toBe('/frontdesk/knowledge')
   })
 
+  it('on /dashboard with events off the chips are metadata, suppliers, trash (plan 620)', async () => {
+    modulesOff.add('events')
+    await router.navigateByUrl('/dashboard')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual(['/dashboard?tab=metadata', '/suppliers', '/trash'])
+  })
+
+  it('on /clients with frontdesk off and events on no chip row is rendered (plan 620)', async () => {
+    modulesOff.add('frontdesk')
+    await router.navigateByUrl('/clients')
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('nav.c-tab-chips'))).toBeNull()
+  })
+
   it('should render nothing on a route with no mapped chip group', async () => {
     await router.navigateByUrl('/settings')
     fixture.detectChanges()
@@ -185,6 +207,7 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
         ]),
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
+        { provide: ModuleService, useValue: moduleStub },
         {
           provide: KitchenStateService,
           useValue: { recipesById_: computed(() => new Map(recipes.map((r) => [r._id, r]))) }

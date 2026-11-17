@@ -1,4 +1,5 @@
 import { signal } from '@angular/core'
+import { ModuleService } from '@services/module.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -23,6 +24,8 @@ const BUSINESS: Business = {
 const EMPTY: SetupStatus = { pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 }
 const KEY = 'fv_setup_card_hidden_b1'
 
+const modulesOff = new Set<string>()
+
 describe('SetupChecklistCardComponent', () => {
   let fixture: ComponentFixture<SetupChecklistCardComponent>
   let business_: ReturnType<typeof signal<Business | null>>
@@ -40,6 +43,7 @@ describe('SetupChecklistCardComponent', () => {
     TestBed.configureTestingModule({
       imports: [SetupChecklistCardComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        { provide: ModuleService, useValue: { has: (k: string) => !modulesOff.has(k), hasType: () => true } },
         { provide: BusinessService, useValue: { business_: business_.asReadonly(), loadSetupStatus } },
         { provide: PermissionService, useValue: { isOwner_: isOwner_.asReadonly() } },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['warn']) },
@@ -65,6 +69,7 @@ describe('SetupChecklistCardComponent', () => {
   const isDone = (key: string) => step(key).querySelector('[data-testid="setup-step-done"]') !== null
 
   beforeEach(() => {
+    modulesOff.clear()
     try {
       localStorage.removeItem(KEY)
     } catch {
@@ -79,6 +84,13 @@ describe('SetupChecklistCardComponent', () => {
     for (const key of ['products', 'supplier', 'recipe', 'event', 'staff']) expect(isDone(key)).toBeFalse()
     expect(el().querySelector('[data-testid="setup-progress"]')?.textContent).toContain('0')
     expect(navigate).not.toHaveBeenCalled()
+  })
+
+  it('leaves the events step out without the events module and counts three required steps (plan 620)', async () => {
+    modulesOff.add('events')
+    await setup()
+    expect(el().querySelectorAll('li').length).toBe(4)
+    expect(el().querySelector('[data-testid="setup-step-event"]')).toBeNull()
   })
 
   const progressText = () => step('products').querySelector('[data-testid="setup-step-progress"]')?.textContent?.trim()

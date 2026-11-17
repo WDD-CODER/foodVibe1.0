@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
+import { DEFAULT_MODULES, type ModuleKey } from '@schemas/modules-pure'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import type { FrontDeskAdminStats } from '../models/frontdesk-stats.model'
@@ -29,6 +30,19 @@ export interface BusinessRow {
     /** Plan 557: the assistant level; absent means 0 (the server sends it only when raised). */
     assistantLevel?: number
   } | null
+  /** Plan 620: the modules the business has (resolved by the server), its private mode, monthly AI cap and use. */
+  modules: ModuleKey[]
+  aiPrivate: boolean
+  aiMonthlyTokenCap: number | null
+  aiTokensThisMonth: number
+}
+
+/** Plan 620: body of the platform admin's modules / AI cap / private change; `reason` is required (3–200). */
+export interface PlatformUpdateBody {
+  modules?: ModuleKey[]
+  aiMonthlyTokenCap?: number | null
+  aiPrivate?: boolean
+  reason: string
 }
 
 /** Plan 557: body of the platform admin's front desk change; `reason` is required and kept on the profile. */
@@ -65,7 +79,15 @@ export class PlatformAdminService {
     const res = await firstValueFrom(
       this.http.get<{ rows: BusinessRow[] }>(`${environment.apiUrl}${API.admin('businesses')}`)
     )
-    this._rows_.set(res.rows)
+    this._rows_.set(
+      res.rows.map((row) => ({
+        ...row,
+        modules: row.modules ?? [...DEFAULT_MODULES],
+        aiPrivate: row.aiPrivate ?? false,
+        aiMonthlyTokenCap: row.aiMonthlyTokenCap ?? null,
+        aiTokensThisMonth: row.aiTokensThisMonth ?? 0
+      }))
+    )
   }
 
   private readonly _termRows_ = signal<AdminTermRow[]>([])
@@ -156,6 +178,12 @@ export class PlatformAdminService {
   /** Plan 557: sets one business's front desk status, assistant level and plan, then reloads the table. */
   async updateFrontDesk(id: string, body: FrontDeskAdminBody): Promise<void> {
     await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/front-desk`)}`, body))
+    await this.load()
+  }
+
+  /** Plan 620: sets one business's modules, monthly AI cap and private mode in one request, then reloads the table. */
+  async updatePlatform(id: string, body: PlatformUpdateBody): Promise<void> {
+    await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/platform`)}`, body))
     await this.load()
   }
 }
