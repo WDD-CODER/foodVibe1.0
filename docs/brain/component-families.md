@@ -351,3 +351,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
 - When: a new stored collection needs a shape.
 - Known copies: none.
+
+### ai-cap — monthly AI token cap per business
+
+- Status: stable — plan 617
+- Use: `server/services/ai-cap.js` — `capState`, `monthTokensByBusiness`, `clearCapCache`; checked before the model call
+  in `server/services/gemini-client.js`.
+- When: a server path calls the model and must refuse once the business has used its monthly cap.
+- Known copies: none.
