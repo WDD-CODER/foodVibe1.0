@@ -326,7 +326,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: converging — plan 458 (rule sweep) decides
 - Use: `server/middleware/auth.js` (token check), `server/utils/business-scope.js` (the only tenant-scoping path,
-  ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`.
+  ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`,
+  `server/middleware/require-module.js` (`requireModule`, `requireHomeModule`, `requireModuleForType`, `businessModules`, `clearModuleCache`: the module gate on a route).
 - When: a server route checks who is calling, scopes data to a business, checks a write permission or limits a rate.
 - Known copies: `jwt.verify` also in `server/routes/auth.js` and `server/routes/log.js`; `isAdmin` re-declared in
   `server/routes/generic.js`; rate limiters built per file in `server/routes/ai.js`, `server/routes/auth.js`,
