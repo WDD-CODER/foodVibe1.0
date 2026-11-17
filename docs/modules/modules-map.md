@@ -109,6 +109,12 @@ Confirm every grouping with `node scripts/plan-order.mjs` and the `/orchestrate`
   on Render. Until then every feature works and files are not kept (D16). 619 documents the three names in
   `render.yaml` and `docs/security-go-live.md`.
 - **G4:** the updated `docs/frontdesk/pilot-terms-draft.md` goes to Dandan's lawyer (sections 4.2, 7.1, 7.5, 7.6, 7.7).
+  Ask the lawyer one more thing: the terms must say that what the platform learned from a business (supplier name
+  memory without prices, promoted recipe examples, accuracy numbers) stays after the business leaves, unless it was
+  in private mode.
+- **G1 was given on 2026-11-17** (`approve arch change INV-1`, in the Planner session). Critical Questions answered
+  the same day: 624 a (scaling inputs return to the equipment form), 636 a (the old "low stock" number stays), 634 b
+  (a VAT switch per diagnosis).
 - Dandan merges each run branch. Every plan's `[human]` Done-when.
 
 ## Reality Check deltas
@@ -213,7 +219,7 @@ Numbers
     `invoices` and `stockCounts` are registered without soft delete (no plan deletes one); the `businessAccess`
     index is a full unique index; C-STOCK gains its index, the counts read, `draftIds` and `fileId`; a settings save
     keeps a stored `priceRiseAlertPct`; staff read only the name and status of a diagnosis; 619 makes deleting a
-    business remove its rows in the program's server-only collections. A draft records the model that answered;
+    business remove its own rows in the program's server-only collections and keep what the platform learned (C-LEARN). A draft records the model that answered;
     an invoice file nobody saved is deleted after 30 days; rows and printed lines of an invoice read are linked by name.
     625 therefore also depends on 619. C-ACCESS gains the `ACCESS_ENDED` answer, `homeModules` on the user object
     while acting, and the Trash filter line in `generic.js`; a client log line carries no business id.
@@ -332,6 +338,13 @@ Numbers
   `BusinessService.updateShareAiExamples`. `business.shareAiExamples` stays in the schema as optional so stored
   documents validate; nothing reads it.
 - `GET /api/v1/admin/ai-shots` candidates and `POST …/promote`: every business with `mayLearnFrom` true.
+- Deleting a business keeps what the platform learned from it (Dandan, 2026-11-17). Always deleted, as the
+  business's own records: `priceHistory`, its own `invoiceAliases`, its `storedFiles` and the provider files
+  (recordings, invoice files), its `businessAccess` rows. Kept when the business is not private at that moment: its
+  contributions to the shared supplier brain, its promoted recipe examples, and its `aiDrafts` rows reduced to
+  numbers (`feature`, `model`, `keptRatio`, `status`, `at`, `confirmedAt`, `businessId`; no input, draft, saved text
+  or user id). A private business leaves nothing. To erase everything of a business, the platform admin turns
+  private mode on, then deletes it (619).
 - The owner's card `ai-examples-share` shows one locked chip (shared / private) and a tooltip from a dictionary
   key saying private mode is arranged by contacting FoodVibe. It calls no route.
 
