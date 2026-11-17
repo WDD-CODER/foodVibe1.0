@@ -90,6 +90,8 @@
     "serverRoot": "server/",
     "slotEnvFile": "src/environments/environment.slot.ts",
     "sharedDocs": "_shared",
+    "debtBaseline": "_shared/debt-baseline.json",
+    "productDefaults": "_shared/product-defaults.md",
     "routesFile": "src/app/app.routes.ts",
     "planChecks": "docs/agent/plan-checks.md"
   },
@@ -114,6 +116,14 @@
     "domainSummary": "Ingredient Ledger, Triple-Unit conversion, Recursive Compounding, Waste Factor"
   },
   "overrides": [
+    {
+      "path": "docs/brain/component-families.md",
+      "reason": "the project's own family registry (plan 450); the kit ships only an empty seed"
+    },
+    {
+      "path": "scripts/lib/registry-families.mjs",
+      "reason": "the project's own reuse-lint rules (plan 450, 533); the kit ships only an empty seed"
+    },
     {
       "path": "docs/agent/standards-git.md",
       "reason": "plan 497 added the FoodVibe-only section on pull-request checks and branch clean-up"
@@ -185,10 +195,6 @@
     {
       "path": "docs/brain/patterns/llm-backend-proxy.md",
       "reason": "kit seed for the node-express pack; FoodVibe keeps its own docs/brain/patterns/gemini-backend-proxy.md"
-    },
-    {
-      "path": "scripts/scope-check.mjs",
-      "reason": "plan 450 reuse layer on top of kit v1.13.0 (--reuse gate in scope-check.mjs, rebased by plan 524); queued as a kit PR"
     },
     {
       "path": ".claude/references/prd-template.md",

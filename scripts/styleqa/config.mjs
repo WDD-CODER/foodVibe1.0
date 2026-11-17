@@ -16,7 +16,10 @@ export const SETTINGS = Object.freeze({
   apiOrigin: "",
   signIn: "scripts/qa/lib/styleqa-sign-in.mjs",
   uiFontToken: "--font-sans",
-  tokenPrefixes: { color: "--color-", fontSize: "--fs-", radius: "--radius-" },
+  tokenPrefixes: {
+    color: "--color-", fontSize: "--fs-", radius: "--radius-",
+    shadow: "", blur: "", spacing: "",
+  },
   tokenFiles: ["src/styles.scss"],
   breakpointPattern: "break-",
   stylesheets: ["src/**/*.scss"],

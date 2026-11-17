@@ -78,6 +78,44 @@ jobs:
       - name: Workflow script tests
         run: pnpm run --if-present test:scripts
 
+  # The diff checks and the debt ratchet (scripts/kit-checks.mjs, kit v3.4.0): what this change adds is compared with
+  # the project's rules and its debt baseline. Blocking. A PR compares its merge commit with the base side (HEAD^1).
+  kit-checks:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install workflow script dependencies for the diff checks
+        if: hashFiles('scripts/package-lock.json') != ''
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
+      - name: Kit diff checks
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            BASE="$(git rev-parse --verify 'HEAD^1')"
+          else
+            BASE="$PUSH_BEFORE"
+            if [[ -z "$BASE" || "$BASE" =~ ^0+$ ]] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+              BASE="$(git rev-parse -q --verify 'HEAD~1' || true)"
+            fi
+          fi
+          if [[ -z "$BASE" ]]; then
+            echo "No commit to compare with: nothing to check"
+            exit 0
+          fi
+          node scripts/kit-checks.mjs --base "$BASE"
+
   build:
     needs: changes
     if: needs.changes.outputs.run-gates == 'true'
@@ -157,7 +195,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   ci:
-    needs: [changes, lint, build, test, server-tests, gitleaks]
+    needs: [changes, lint, kit-checks, build, test, server-tests, gitleaks]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -188,6 +226,10 @@ jobs:
             fi
             if [[ "${{ needs.server-tests.result }}" != "success" ]]; then
               echo "server-tests failed: ${{ needs.server-tests.result }}"
+              exit 1
+            fi
+            if [[ "${{ needs.kit-checks.result }}" != "success" ]]; then
+              echo "kit-checks failed: ${{ needs.kit-checks.result }}"
               exit 1
             fi
             echo "All quality gates passed"

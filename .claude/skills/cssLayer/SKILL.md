@@ -21,7 +21,7 @@ The design system lives in `src/styles.scss`: the token block at the top (`/* De
 
 ## Workflow
 
-1. **Audit before writing.** Read the token block at the top of `src/styles.scss` and pick the tokens for this surface (surface: `--bg-glass`, `--bg-glass-strong`, `--blur-glass`; semantic: `--bg-warning-soft`, `--text-warning`; type: `--fs-*`, `--fw-*`; `--space-*`; `--radius-*`; `--shadow-*`; `--ease-smooth`/`--ease-spring`). Grep `src/styles.scss` for an existing `.c-*` engine and `src/app/shared/` for a composable pattern before authoring anything new.
+1. **Audit before writing.** Read the token block at the top of `src/styles.scss` and pick the tokens for this surface (surface: `--bg-glass`, `--bg-glass-strong`, `--blur-glass`; semantic: `--bg-warning-soft`, `--text-warning`; type: `--fs-*`, `--fw-*`; `--space-*`; `--radius-*`; `--shadow-*`; `--ease-smooth`/`--ease-spring`). Read `docs/brain/inventory.md` (the families, `.c-*` engine classes and tokens that exist) before authoring anything new; do not search the code for it.
 2. **Write each selector in five groups**, blank line between groups, in this order:
 
    ```scss
@@ -46,7 +46,7 @@ The design system lives in `src/styles.scss`: the token block at the top (`/* De
    }
    ```
 
-3. **Promote, don't repeat.** The same block in more than two components → define a `.c-*` engine in `src/styles.scss`, then replace the copies with the class in each template.
+3. **Promote, don't repeat.** The same block in more than two components → the duplicate detector reports it; define a `.c-*` engine in `src/styles.scss`, replace the copies with the class in each template, and name the family in the plan's `## Reuse Check` row.
 
 ## Verify before you finish (loop until both are empty)
 

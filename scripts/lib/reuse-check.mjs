@@ -1,152 +1,74 @@
 /**
- * Reuse layer (plan 450, ADR 0024): the component-family registry parser and the plan "## Reuse Check" gate.
- * Used by `node scripts/scope-check.mjs --reuse --plan=<p>` (BLOCK) and `scripts/reuse-lint.mjs`.
+ * The plan "## Reuse Check" gate: `node scripts/scope-check.mjs --reuse --plan=<p> [--diff=<base>] [--registry=<path>]`.
  *
- * Registry (docs/brain/component-families.md): one `### <family-id> — <title>` heading per family, bullet fields
- * below it, and one header line "Reuse enforced from plan: NNN". Every backticked repo path in the file is
- * expected to exist on disk (`reuse-lint --check-registry`).
- *
- * Plan section — one bullet (or table row) per new piece the plan creates:
+ * Plan section — one row per new piece the plan creates (bullets, or a table with the columns Piece, Family, Rung, Why):
  *   ## Reuse Check
  *   - <new piece> — family: <family-id | none> — rung: <1-4> — why: <one line; required for rung 4>
- *   - none — <why this plan creates no component, util, pipe, service or .c-* class>
+ *   - none — <why this plan creates no new shared piece>
  * Rungs: 1 use as is · 2 use with existing inputs · 3 extend the family · 4 new family (needs a why).
- * Table form: | New piece | Family | Rung | Why | (header row names the columns).
  *
- * A plan numbered below "Reuse enforced from plan:" without the section is grandfathered (skipped);
- * a plan that has the section is always checked.
+ * Output: REUSE: ok | missing | bad | skipped (…), one line per problem, exit 1 on missing or bad.
+ * A plan numbered below the registry's "Reuse enforced from plan:" without the section is grandfathered (skipped);
+ * a plan that has the section is always checked. With --diff, a plan without the section passes when the only .ts / .html
+ * line the branch adds is one import of a piece the registry lists (the one-import override).
  */
-import { readFileSync, existsSync } from 'fs'
-import { join, isAbsolute } from 'path'
+import { readFileSync, existsSync } from 'node:fs'
+import { join, isAbsolute } from 'node:path'
+import { sectionRows } from './plan-sections.mjs'
 import { planNumber } from './invariants.mjs'
+import { readRegistryFile, REGISTRY_PATH } from './registry.mjs'
+import { addedItems } from './diff-items.mjs'
 
-export const REGISTRY_PATH = 'docs/brain/component-families.md'
-
-const REPO_PATH_RE = /^(?:src|server|shared|scripts|docs|public|e2e)\/[^\s`]*$/
-
-/** Parse the registry: { enforcedFrom, families: [{ id, title, line }], paths: [{ path, line }] }. */
-export function parseRegistry(text) {
-  const enforced = text.match(/^(?:Reuse enforced|Enforced) from plan:\s*(\d+)/m)
-  const families = []
-  const paths = []
-  text.split(/\r?\n/).forEach((l, i) => {
-    const h = l.match(/^### ([a-z0-9][a-z0-9-]*)\s*[—-]\s*(.*)$/)
-    if (h) families.push({ id: h[1], title: h[2].trim(), line: i + 1 })
-    for (const m of l.matchAll(/`([^`]+)`/g)) {
-      if (REPO_PATH_RE.test(m[1])) paths.push({ path: m[1], line: i + 1 })
-    }
-  })
-  return { enforcedFrom: enforced ? Number(enforced[1]) : null, families, paths }
-}
-
-function sectionBody(planText, title) {
-  const m = planText.match(new RegExp(`^## ${title}[^\\n]*\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm'))
-  return m ? m[1] : null
-}
-
-// Bullet fields are split by —, ·, | or an ASCII " - " / " -- " (spaces around it, so ids like search-combobox survive).
-const SEP = '\\s+(?:—|·|\\||--?)\\s+'
-
-function field(text, name) {
-  const m = text.match(new RegExp(`\\b${name}\\s*:\\s*(.*?)(?=${SEP}|$)`, 'i'))
-  return m ? m[1].trim() : ''
-}
-
-function cells(line) {
-  return line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim())
-}
-
-/** Parse "## Reuse Check": { present, rows: [{ raw, none, piece, family, rung, why }] }. */
-export function parseReuseCheck(planText) {
-  const body = sectionBody(planText, 'Reuse Check')
-  if (body === null) return { present: false, rows: [] }
-  const rows = []
-  let header = null
-  for (const raw of body.split(/\r?\n/)) {
-    const line = raw.trim()
-    if (line.startsWith('|')) {
-      const c = cells(line)
-      if (c.every((x) => /^:?-{2,}:?$/.test(x))) continue
-      if (!header && c.some((x) => /^rung\b/i.test(x))) {
-        header = c.map((x) => x.toLowerCase())
-        continue
-      }
-      const col = (name) => {
-        const idx = header ? header.findIndex((h) => h.includes(name)) : -1
-        return idx >= 0 ? (c[idx] || '') : ''
-      }
-      const piece = header ? col('piece') || c[0] : c[0]
-      if (/^none\b/i.test(piece)) { rows.push({ raw: line, none: true, piece: 'none', family: '', rung: null, why: c.slice(1).join(' ') }); continue }
-      const rungText = header ? col('rung') : ''
-      rows.push({ raw: line, none: false, piece, family: header ? col('family') : '', rung: /^[1-4]$/.test(rungText) ? Number(rungText) : null, why: header ? col('why') || col('justification') : '' })
-      continue
-    }
-    const b = line.match(/^[-*]\s+(.*)$/)
-    if (!b) continue
-    const text = b[1]
-    if (/^none\b/i.test(text)) {
-      rows.push({ raw: line, none: true, piece: 'none', family: '', rung: null, why: text.replace(/^none\s*[—·:-]*\s*/i, '').trim() })
-      continue
-    }
-    const rungText = field(text, 'rung')
-    rows.push({
-      raw: line,
-      none: false,
-      piece: text.split(new RegExp(`${SEP}|\\bfamily\\s*:`, 'i'))[0].trim(),
-      family: field(text, 'family'),
-      rung: /^[1-4]$/.test(rungText) ? Number(rungText) : null,
-      why: ((text.match(/\b(?:why|justification)\s*:\s*(.*)$/i) || [])[1] || '').trim()
-    })
-  }
-  return { present: true, rows }
-}
-
+export const REUSE_COLUMNS = ['piece', 'family', 'rung', 'why']
 const PLACEHOLDER_RE = /^\[.*\]$|^<.*>$|^$/
 
-/** The --reuse --plan gate. Returns { ok, lines }. */
-export function checkPlanReuse({ planPath, planText, registry }) {
-  const section = parseReuseCheck(planText)
+/** True when the added lines are one import of a registry-listed piece (the only .ts / .html change). */
+export function oneImportOverride(items, registry) {
+  if (!registry) return false
+  const lines = items.lines.filter((l) => /\.(ts|html)$/.test(l.file) && l.text.trim() !== '')
+  if (lines.length !== 1) return false
+  const m = lines[0].text.match(/^\s*import\b[^'"]*['"]([^'"]+)['"]/)
+  if (!m) return false
+  const stem = m[1].replace(/\\/g, '/').split('/').filter(Boolean).pop().replace(/\.[a-z]+$/i, '')
+  if (!stem || stem === '.' || stem === '..') return false
+  return registry.paths.some((p) => p.path.split('/').some((seg) => seg.replace(/\.[a-z]+$/i, '') === stem))
+}
+
+/** The gate. Returns { ok, lines }. `oneImport` is the override verdict (computed by the caller from the diff). */
+export function checkPlanReuse({ planPath, planText, registry, oneImport = false }) {
+  const section = sectionRows(planText, 'Reuse Check', REUSE_COLUMNS)
   const num = planNumber(planPath)
   const enforcedFrom = registry ? registry.enforcedFrom : null
-  if (!section.present && num !== null && enforcedFrom !== null && num < enforcedFrom) {
-    return { ok: true, lines: ['REUSE: skipped (grandfathered)'] }
-  }
+  if (!section.present && num !== null && enforcedFrom !== null && num < enforcedFrom) return { ok: true, lines: ['REUSE: skipped (grandfathered)'] }
+  if (!section.present && oneImport) return { ok: true, lines: ['REUSE: ok (one import of an existing shared piece)'] }
   if (!section.present) {
     return { ok: false, lines: ['REUSE: missing section "## Reuse Check" (one line per new piece: "- <piece> — family: <id|none> — rung: <1-4> — why: <…>", or "- none — <why>")'] }
   }
-  if (!section.rows.length) return { ok: false, lines: ['REUSE: empty section "## Reuse Check" — list each new piece, or "- none — <why>"'] }
-
+  const problems = section.errors.map((e) => `REUSE: ${e}`)
+  if (!section.rows.length && !problems.length) return { ok: false, lines: ['REUSE: empty section "## Reuse Check" — list each new piece, or "- none — <why>"'] }
   const known = new Set((registry ? registry.families : []).map((f) => f.id))
-  const problems = []
   for (const r of section.rows) {
     if (r.none) {
-      if (PLACEHOLDER_RE.test(r.why)) problems.push(`REUSE: none-without-why — say why the plan creates no new piece: ${r.raw}`)
+      if (PLACEHOLDER_RE.test(r.why)) problems.push('REUSE: none-without-why — say why the plan creates no new piece')
       continue
     }
-    if (r.rung === null) { problems.push(`REUSE: unreadable row — needs "rung: 1-4": ${r.raw}`); continue }
-    if (PLACEHOLDER_RE.test(r.piece)) problems.push(`REUSE: unnamed piece: ${r.raw}`)
-    if (r.rung === 4) {
-      if (PLACEHOLDER_RE.test(r.why)) problems.push(`REUSE: rung-4 without justification — a new family needs "why: <one line>": ${r.raw}`)
+    if (!/^[1-4]$/.test(r.rung)) { problems.push(`REUSE: unreadable row — needs "rung: 1-4": ${r.piece}`); continue }
+    const rung = Number(r.rung)
+    if (PLACEHOLDER_RE.test(r.piece)) problems.push(`REUSE: unnamed piece (rung ${rung})`)
+    if (rung === 4) {
+      if (PLACEHOLDER_RE.test(r.why)) problems.push(`REUSE: rung-4 without justification — a new family needs "why: <one line>": ${r.piece}`)
       continue
     }
     const family = r.family.replace(/`/g, '').trim()
-    if (PLACEHOLDER_RE.test(family) || /^none$/i.test(family)) problems.push(`REUSE: rung ${r.rung} needs the registry family it reuses ("family: <id>"): ${r.raw}`)
-    else if (known.size && !known.has(family)) problems.push(`REUSE: unknown family "${family}" — not a ### heading in ${REGISTRY_PATH}: ${r.raw}`)
+    if (PLACEHOLDER_RE.test(family) || /^none$/i.test(family)) problems.push(`REUSE: rung ${rung} needs the registry family it reuses ("family: <id>"): ${r.piece}`)
+    else if (registry && !known.has(family)) problems.push(`REUSE: unknown family "${family}" — not a ### heading in ${REGISTRY_PATH}: ${r.piece}`)
   }
   if (problems.length) return { ok: false, lines: problems }
   const summary = section.rows.map((r) => (r.none ? 'none' : `${r.piece} (rung ${r.rung})`)).join(', ')
   return { ok: true, lines: [`REUSE: ok ${summary}`] }
 }
 
-/** Read the registry from disk, or null when it is missing. --registry=<path> overrides it (tests). */
-export function readRegistryFile(repoRoot, override) {
-  const path = String(override || REGISTRY_PATH).replace(/\\/g, '/')
-  const abs = isAbsolute(path) ? path : join(repoRoot, path)
-  if (!existsSync(abs)) return null
-  return parseRegistry(readFileSync(abs, 'utf8'))
-}
-
-/** CLI entry for `scope-check.mjs --reuse --plan=<p> [--registry=<path>]`. Prints, returns the exit code. */
+/** CLI entry for `scope-check.mjs --reuse --plan=<p> [--diff=<base>] [--registry=<path>]`. Prints, returns the exit code. */
 export function runReuseCheck({ args, repoRoot }) {
   if (!args.plan || args.plan === true) {
     console.error('SCOPE_CHECK: --reuse needs --plan=<path>')
@@ -163,7 +85,60 @@ export function runReuseCheck({ args, repoRoot }) {
     console.error(`SCOPE_CHECK: reuse registry not found: ${args.registry}`)
     return 1
   }
-  const { ok, lines } = checkPlanReuse({ planPath, planText: readFileSync(planAbs, 'utf8'), registry })
+  const planText = readFileSync(planAbs, 'utf8')
+  let oneImport = false
+  if (args.diff && args.diff !== true && !/^## Reuse Check/m.test(planText)) {
+    try {
+      oneImport = oneImportOverride(addedItems({ root: repoRoot, base: String(args.diff) }), registry)
+    } catch {
+      oneImport = false
+    }
+  }
+  const { ok, lines } = checkPlanReuse({ planPath, planText, registry, oneImport })
   for (const l of lines) (ok ? console.log : console.error)(l)
   return ok ? 0 : 1
+}
+
+// ---- What a diff adds is matched with the plan's rows, and the nearest existing piece is named ----
+
+/** The lower-case word tokens of a name (`BadgeTitle`, `badge-title`, `badge_title.component.ts` → badge, title, …). */
+export function nameTokens(name) {
+  return String(name)
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t.length > 1)
+}
+
+export const escapeRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, (c) => `\\${c}`)
+
+/** True when a `## Reuse Check` row's piece text names `word` (a file stem, a selector or a token) as a whole word. */
+export function pieceNames(piece, word) {
+  const w = String(word).replace(/^\./, '')
+  if (!w) return false
+  return new RegExp(`(^|[^\\w-])\\.?${escapeRe(w)}(?![\\w-])`, 'i').test(String(piece))
+}
+
+/** True when any row (not a `none` row) names `word`. */
+export function rowsName(rows, word) {
+  return rows.some((r) => !r.none && pieceNames(r.piece, word))
+}
+
+/**
+ * The candidate with the most name tokens in common with `name`: [{ label, tokens }] → label, or null when none
+ * shares a token. A tie keeps the earlier candidate (the caller lists registry families first).
+ */
+export function nearest(name, candidates) {
+  const mine = new Set(nameTokens(name))
+  let best = null
+  let bestN = 0
+  for (const c of candidates) {
+    let n = 0
+    for (const t of c.tokens) if (mine.has(t)) n++
+    if (n > bestN) {
+      best = c.label
+      bestN = n
+    }
+  }
+  return best
 }

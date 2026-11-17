@@ -41,6 +41,7 @@ import { extractScopeGlobs, testRefusals, plannedTestPaths, bareTestLines, bareL
 import { readAgent, claudeArgs, runAgent, parseResult, passedModel } from './lib/claude-run.mjs'
 import { isSensitive } from './ship-prep.mjs'
 import { gateCommands, runGate, scopeCheck, scopeMarker } from './lib/plan-gate.mjs'
+import { selectGate, entryOf, readCache, writeCache, cacheFileOf } from './lib/gate-select.mjs'
 import { createLive } from './lib/run-live.mjs'
 import { review, blocking, problemLine } from './lib/plan-review.mjs'
 import { mergePlan, orchState } from './lib/plan-merge.mjs'
@@ -56,6 +57,8 @@ const PM = "pnpm" === 'pnpm' ? 'pnpm' : 'npm'
 const COMMANDS = { build: "build", lint: "lint", test: "test:ci", testCi: "" }
 const PREPARE = [{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]
 const CI_MIRROR = ["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]
+// full (default) = the final gate runs everything again; ci = it runs only the suites the run changed and not yet passed, CI runs the full set
+const FINAL_GATE = "full" === 'ci' ? 'ci' : 'full'
 const SERVER_ROOT = 'server/'
 const MERGE_CHECKS_MODE = "build"
 const GATE_TIMEOUT_MIN = Number(45) || 15
@@ -236,7 +239,8 @@ export function finalGateStopReason({ command, tail, merged }) {
 }
 /** orchestrator.ciMirror as the plan gate runs it: allowed commands only, the trusted manifest check left to its own entry. */
 export function ciMirrorChecks(list, scripts = null, { manifest = false } = {}) {
-  return (Array.isArray(list) ? list : []).filter((c) => !checkProblem(c, scripts)).map((c) => String(c).trim()).filter((c) => !(manifest && /kit-manifest-check/.test(c)))
+  // An entry is a command string or { command, touches } (kept as an object so the gate can pick it by the diff).
+  return (Array.isArray(list) ? list : []).map(entryOf).filter((e) => e && !checkProblem(e.command, scripts) && !(manifest && /kit-manifest-check/.test(e.command))).map((e) => (e.touches ? e : e.command))
 }
 
 /** Every `Q:` of `## Critical Questions` with its number and answer ('' when none): [{ n, question, answer }]. */
@@ -504,8 +508,13 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   for (const g of bareTestLines(extractScopeGlobs(text.replace(/\r\n/g, '\n')) ?? [])) problems.push(`scope line: ${bareLineReason(g)}`)
   lines.push(`test files: ${outOfScope.length ? `outside the scope ${outOfScope.map((r) => r.file).join(', ')}` : 'ok'}`)
   const hasManifest = existsSync(join(ROOT, 'scripts', 'kit-manifest-check.mjs')) && existsSync(join(ROOT, 'docs', 'workflow-kit', 'manifest.json'))
-  const checks = gateCommands({ prepare: PREPARE, pm: PM, ...COMMANDS, kitRoot: ROOT, manifest: hasManifest, ciMirror: ciMirrorChecks(CI_MIRROR, Object.keys(npmScripts()), { manifest: hasManifest }), scope: { base: `origin/${runBranch}`, plan: path }, extra: extra.filter((c) => !missing.some((f) => checkFilesOf(c).includes(f))) })
-  return { nnn, path, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
+  const mirror = ciMirrorChecks(CI_MIRROR, Object.keys(npmScripts()), { manifest: hasManifest })
+  const own = extra.filter((c) => !missing.some((f) => checkFilesOf(c).includes(f)))
+  const gateOpts = { prepare: PREPARE, pm: PM, ...COMMANDS, kitRoot: ROOT, manifest: hasManifest, scope: { base: `origin/${runBranch}`, plan: path }, kitChecks: existsSync(join(ROOT, 'scripts', 'kit-checks.mjs')) }
+  const checks = gateCommands({ ...gateOpts, ciMirror: mirror, extra: own })
+  // `always` = what runs whatever the diff changed (the project checks and the plan's own [auto] commands); `mirror` = what the diff picks from.
+  const always = [...gateCommands({ ...gateOpts, extra: own })]
+  return { nnn, path, mirror, always, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
 }
 
 /**
@@ -1068,16 +1077,19 @@ async function main() {
           ensureIn(wt, { nnn, clean: true, out: r?.out })
         }
         const onStart = (s) => live.gate(nnn, s)
-        let g = await runGate({ folder: wt, commands: l.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry })
+        const sel = selectedChecks(l, wt, RUN, RUN_BRANCH)
+        for (const line of sel.lines) { say(`  ${line}`); note(line, nnn) }
+        let g = await runGate({ folder: wt, commands: sel.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry })
         if (g.status === 'env') {
           setPlan(nnn, { state: 'env-paused', round: ctx.round, reason: `gate env-fail: ${g.failed.join(', ')}` })
           const env = node('orch-preflight.mjs', ['--env-only', '--run', RUN, '--probe-dir', wt, ...g.failed.flatMap((c) => ['--probe', c])])
           if (env.status !== 0) return park(`environment: ${(orchJson(env.out)?.problems ?? [lastLine(env.out)]).join('; ')}`)
           note(`environment failure (gate env-fail: ${g.failed.join(', ')}); the environment check passed, the gate runs once more without a fix round`, nnn)
           ensureIn(wt, { nnn })
-          g = await runGate({ folder: wt, commands: l.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry })
+          g = await runGate({ folder: wt, commands: sel.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry })
           if (g.status === 'env') return park(`environment, again after one retry: gate env-fail: ${g.failed.join(', ')}`)
         }
+        writeCache(cacheFileOf(ROOT, RUN), { keys: sel.keys, passed: g.results.filter((x) => x.status === 'pass').map((x) => x.command), plan: nnn })
         for (const c of g.flaky) state('flake', { run: RUN, plan: nnn, command: c, round: ctx.round, via: 'rerun', where: 'gate', sha: g.head ?? undefined })
         receipt = g
         if (g.status === 'fail') {
@@ -1375,7 +1387,9 @@ async function main() {
     await waitForAnswers()
     // ---- the final gate on the run branch ----
     const merged = outcomes.filter((x) => x.state === 'merged')
-    const finalChecks = [...new Set([...gateCommands({ prepare: PREPARE, pm: PM, ...COMMANDS, manifest: init.kitManifest === true }), ...(Array.isArray(CI_MIRROR) ? CI_MIRROR : []).filter((c) => !checkProblem(c, init.npmScripts ?? null)).map((c) => String(c).trim())])]
+    const finalBase = gateCommands({ prepare: PREPARE, pm: PM, ...COMMANDS, manifest: init.kitManifest === true })
+    const finalMirror = (Array.isArray(CI_MIRROR) ? CI_MIRROR : []).map(entryOf).filter((e) => e && !checkProblem(e.command, init.npmScripts ?? null)).map((e) => (e.touches ? e : e.command))
+    const finalChecks = [...new Set([...finalBase, ...finalMirror.map((e) => entryOf(e).command)])]
     if ((merged.length || order.skipped.length) && finalChecks.length && !stopReason) {
       const runFinal = async () => {
         say(`RUN_PLANS: final gate on ${RUN_BRANCH} (${finalChecks.length} command(s))`)
@@ -1383,7 +1397,19 @@ async function main() {
         git(mergeFolder, 'merge', '--quiet', '--ff-only', `origin/${RUN_BRANCH}`)
         ensureIn(mergeFolder)
         live.step('final', 'final-gate')
-        const g = await runGate({ folder: mergeFolder, commands: finalChecks, timeoutMin: GATE_TIMEOUT_MIN, receipt: false, onStart: (s) => live.gate('final', s), onResult: (row) => csvRow('final', `final gate: ${row.command}`, '-', row.seconds, 0, 0, row.exit), beforeRetry: (command, r) => { ensureIn(mergeFolder, { clean: true, out: r?.out }) } })
+        let commands = finalChecks
+        let sel = null
+        if (FINAL_GATE === 'ci') {
+          // The full set runs in CI on the pull request; here only the suites the run changed and that have not passed on this tree.
+          const changed = git(mergeFolder, 'diff', '--name-only', '--no-renames', `origin/${MAIN}...HEAD`).out.split('\n').map((f) => f.trim()).filter(Boolean)
+          sel = selectGate({ commands: finalMirror, changed, ownCommands: finalBase, testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, RUN)), root: mergeFolder })
+          commands = [...new Set([...finalBase, ...sel.run])]
+          for (const line of sel.lines) say(`  ${line}`)
+          say('FINAL: ci — the full set runs in CI on the pull request')
+          note('FINAL: ci — the full set runs in CI on the pull request')
+        }
+        const g = await runGate({ folder: mergeFolder, commands, timeoutMin: GATE_TIMEOUT_MIN, receipt: false, onStart: (s) => live.gate('final', s), onResult: (row) => csvRow('final', `final gate: ${row.command}`, '-', row.seconds, 0, 0, row.exit), beforeRetry: (command, r) => { ensureIn(mergeFolder, { clean: true, out: r?.out }) } })
+        if (sel) writeCache(cacheFileOf(ROOT, RUN), { keys: sel.keys, passed: g.results.filter((x) => x.status === 'pass').map((x) => x.command), plan: 'final' })
         const bad = g.results.find((x) => x.status !== 'pass')
         return g.status === 'pass' ? { ok: true } : { ok: false, command: bad?.command ?? '', tail: bad?.tail ?? '' }
       }
@@ -1485,6 +1511,23 @@ export function builderSettings(runDir, { write = true } = {}) {
   return file
 }
 
+/** The body of the project's test script (what `npm run test` runs), or ''. */
+function testScriptBody() {
+  return String(npmScripts()[COMMANDS.testCi || COMMANDS.test] ?? '')
+}
+/**
+ * A plan's gate list for the diff in `folder`: the project checks and the plan's own commands always, the ciMirror suites
+ * its diff touches (a suite that npm run test already runs, or that passed on the same files earlier in this run, is
+ * left out). Every decision is a `GATE:` line.
+ */
+function selectedChecks(l, folder, run, runBranch) {
+  const mirror = Array.isArray(l.mirror) ? l.mirror : []
+  if (!mirror.length) return { checks: l.checks, lines: [], keys: {} }
+  const changed = git(folder, 'diff', '--name-only', '--no-renames', `origin/${runBranch}...HEAD`).out.split('\n').map((f) => f.trim()).filter(Boolean)
+  const sel = selectGate({ commands: mirror, changed, ownCommands: l.always ?? [], testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, run)), root: folder })
+  const drop = new Set(sel.skipped)
+  return { checks: l.checks.filter((c) => !drop.has(c)), lines: sel.lines, keys: sel.keys }
+}
 /** The merge step's checks (orchestrator.mergeChecks): "build" = the build plus the scope check, "full" = the plan's gate. */
 function mergeChecksOf(checks) {
   if (MERGE_CHECKS_MODE === 'full') return checks.filter((c) => !/kit-manifest-check|^scope-check \(kit copy\)/.test(c))

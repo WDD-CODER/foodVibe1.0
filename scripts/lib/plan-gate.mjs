@@ -73,9 +73,11 @@ export function words(cmd) {
 /**
  * The gate's command list, deduplicated, in order. `prepare` = orchestrator.prepare entries; `build`/`lint`/`test` =
  * npm script names (testCi wins over test); `manifest` adds the kit manifest check; `scope` = { plan, base } adds the
- * plan's scope check against the run branch; `extra` = the plan's own [auto] commands (already allowed).
+ * plan's scope check against the run branch; `kitChecks` (with `scope`) adds the diff checks
+ * (scripts/kit-checks.mjs, the main folder's copy when kitRoot is set) after it; `extra` = the plan's own [auto]
+ * commands (already allowed).
  */
-export function gateCommands({ prepare = [], pm = 'npm', build = '', lint = '', test = '', testCi = '', manifest = false, kitRoot = null, scope = null, ciMirror = [], extra = [] } = {}) {
+export function gateCommands({ prepare = [], pm = 'npm', build = '', lint = '', test = '', testCi = '', manifest = false, kitRoot = null, scope = null, kitChecks = false, ciMirror = [], extra = [] } = {}) {
   const run = (s) => (typeof s === 'string' && s !== '' ? `${pm} run ${s}` : null)
   const prep = (Array.isArray(prepare) ? prepare : [])
     .filter((p) => p && typeof p.missing === 'string' && typeof p.script === 'string')
@@ -87,8 +89,10 @@ export function gateCommands({ prepare = [], pm = 'npm', build = '', lint = '', 
     // edits its own copy cannot pass them. The manifest check reads the folder it runs in.
     manifest ? (kitRoot ? `node "${String(kitRoot).replace(/\\/g, '/')}/scripts/kit-manifest-check.mjs" --root .` : 'node scripts/kit-manifest-check.mjs') : null,
     scope ? scopeMarker(scope.base, scope.plan) : null,
+    // The diff checks and the debt ratchet (scripts/lib/checks/): from the main folder's copy, like the policy checks.
+    scope && kitChecks ? `node ${kitRoot ? `"${String(kitRoot).replace(/\\/g, '/')}/scripts/kit-checks.mjs"` : 'scripts/kit-checks.mjs'} --base ${scope.base} --plan ${scope.plan}` : null,
     // What the run's final gate also runs (orchestrator.ciMirror): a plan's gate fails on it before the merge, not after.
-    ...(Array.isArray(ciMirror) ? ciMirror : []),
+    ...(Array.isArray(ciMirror) ? ciMirror : []).map((e) => (e && typeof e === 'object' ? e.command : e)),
     ...extra,
   ].filter(Boolean).map((c) => String(c).trim())
   return [...new Set(list)]

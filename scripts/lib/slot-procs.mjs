@@ -19,7 +19,7 @@
  * Node built-ins only; Windows (netstat/taskkill/PowerShell) and POSIX (lsof/ps/kill).
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, readdirSync, readlinkSync, openSync, renameSync, statSync } from 'fs'
-import { execFileSync, execSync, spawn } from 'child_process'
+import { proc, launcherArgs } from './proc.mjs'
 import { createHash } from 'crypto'
 import { resolve, dirname, join, basename } from 'path'
 import { fileURLToPath } from 'url'
@@ -28,7 +28,14 @@ import { frontendCommand } from './fe-command.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 export const repoRoot = resolve(__dirname, '..', '..')
-const isWin = process.platform === 'win32'
+let isWin = process.platform === 'win32'
+// Every child process goes through proc.mjs (windowsHide always). `P` and the platform are replaced by the tests only.
+let P = proc
+/** Tests only: a fake proc set and/or platform (e.g. 'win32'); call with no argument to restore the real ones. */
+export function __setForTest({ proc: fake = proc, platform = process.platform } = {}) {
+  P = fake
+  isWin = platform === 'win32'
+}
 // .claude/.slot-pids: a slot's recorded chains; .claude/.main-serve-pids: the chains `slot-serve.mjs --main` started.
 export const SLOT_PIDS = '.slot-pids'
 export const MAIN_PIDS = '.main-serve-pids'
@@ -91,7 +98,7 @@ export function frontendArgs(port) {
 
 const run = (cmd, args) => {
   try {
-    return execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 })
+    return P.execFileSync(cmd, args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024 })
   } catch {
     return ''
   }
@@ -243,7 +250,7 @@ export function devChains(folder, table = processTable(), lst = listeners()) {
 /** Kill a process and its children. Returns true when the kill command ran. */
 export function killTree(pid) {
   try {
-    if (isWin) execFileSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' })
+    if (isWin) P.execFileSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' })
     else {
       try { process.kill(-Number(pid), 'SIGTERM') } catch { process.kill(Number(pid), 'SIGTERM') }
     }
@@ -470,10 +477,21 @@ export function tail(file, n = 20) {
 // slot logs stayed empty. Run npm's own CLI under node directly instead; npm.cmd + shell is the fallback.
 const NPM_CLI = join(dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js')
 
+/**
+ * Windows: start `cmd args` the hidden-console way. A detached process has no console, so windowsHide would hide
+ * only its first child and every later one (cmd.exe, cross-env, node --watch) would open a window of its own. The
+ * launcher (lib/proc.mjs --launch) is the detached, console-less process that outlives slot-serve; it starts the
+ * server NOT detached with windowsHide, so the whole chain shares one hidden console. The launcher is the chain's
+ * root (its pid is the one recorded), and `taskkill /T` from it stops the whole chain.
+ */
+function spawnHidden(cmd, args, opts, shell = false) {
+  return P.spawn(process.execPath, launcherArgs(cmd, args, shell), { ...opts, detached: true })
+}
+
 export function spawnNpm(args, opts) {
-  const base = { ...opts, detached: true, windowsHide: true }
-  if (isWin && existsSync(NPM_CLI)) return spawn(process.execPath, [NPM_CLI, ...args], base)
-  return spawn(isWin ? 'npm.cmd' : 'npm', args, { ...base, shell: isWin })
+  if (isWin && existsSync(NPM_CLI)) return spawnHidden(process.execPath, [NPM_CLI, ...args], opts)
+  if (isWin) return spawnHidden('npm.cmd', args, opts, true)
+  return P.spawn('npm', args, { ...opts, detached: true })
 }
 
 /**
@@ -482,7 +500,8 @@ export function spawnNpm(args, opts) {
  */
 export function spawnPm(args, opts, pm = PROJECT_PM) {
   if (pm !== 'pnpm') return spawnNpm(args, opts)
-  return spawn(isWin ? 'pnpm.cmd' : 'pnpm', args, { ...opts, detached: true, windowsHide: true, shell: isWin })
+  if (isWin) return spawnHidden('pnpm.cmd', args, opts, true)
+  return P.spawn('pnpm', args, { ...opts, detached: true })
 }
 
 /** The project's package manager command name (npm or pnpm), for messages. */
@@ -632,8 +651,8 @@ export function npmInstallIfChanged(dir, hashFileName, root = repoRoot) {
   const pm = packageManagerOf(dir)
   try {
     // Windows: npm.cmd needs a shell, and a shell must get one command string, not an args array (DEP0190).
-    if (isWin) execSync(`${pm} install`, { cwd: dir, stdio: 'ignore' })
-    else execFileSync(pm, ['install'], { cwd: dir, stdio: 'ignore' })
+    if (isWin) P.execSync(`${pm} install`, { cwd: dir, stdio: 'ignore' })
+    else P.execFileSync(pm, ['install'], { cwd: dir, stdio: 'ignore' })
   } catch (e) {
     throw new Error(`${String(e.message).split('\n')[0]} - run \`${pm} install\` in ${dir} by hand`)
   }

@@ -1,86 +1,25 @@
 /**
- * Reuse lint (plan 450, ADR 0024) — warns when a diff adds a new copy of a registered component family.
- * Never blocks: always exit 0 for --diff / --patch. A --diff base git cannot resolve exits 1 ("REUSE: bad base"). Rules are data in scripts/lib/registry-families.mjs.
+ * Reuse lint: copies of a registered component family, as a ratchet.
  *
- * Usage:
- *   node scripts/reuse-lint.mjs --diff=<base>          added lines since the merge base with <base> (+ untracked files)
- *   node scripts/reuse-lint.mjs --patch=<file.diff>    added lines of a saved unified diff (tests, fixtures)
- *   node scripts/reuse-lint.mjs --check-registry       exit 1 when a path in docs/brain/component-families.md is gone,
- *                                                      or a rule names a family the registry has no heading for
- *   [--registry=<path>]                                 another registry file (tests)
+ *   node scripts/reuse-lint.mjs --diff=<base>       the added lines that look like a copy of a family; exit 1 when a
+ *                                                   `reuse-copy.<family>` count rose above paths.debtBaseline
+ *   node scripts/reuse-lint.mjs --check-registry    exit 1 when a path in the registry is gone, or a rule names a family
+ *                                                   the registry has no heading for   [--registry=<path>]
  *
- * Output: one "REUSE: warn <rule> <family> <file>:<line> — <hint>" per hit, or "REUSE: ok".
+ * Rules are data in the project's scripts/lib/registry-families.mjs (the seed explains the shape). An old copy never blocks
+ * (it is in the baseline); a new one does. Output: "REUSE: copy <rule> <family> <file>:<line> — <hint>", then
+ * "REUSE: ok" or "REUSE: fail (...)".
  */
-import { readFileSync, existsSync } from 'fs'
-import { execFileSync } from 'child_process'
-import { resolve, dirname, join, isAbsolute } from 'path'
-import { fileURLToPath, pathToFileURL } from 'url'
-import picomatch from 'picomatch'
-import { parseAddedLines } from './lib/invariants.mjs'
-import { readRegistryFile, REGISTRY_PATH } from './lib/reuse-check.mjs'
-import { REUSE_RULES } from './lib/registry-families.mjs'
+import { existsSync } from 'node:fs'
+import { resolve, dirname, join, isAbsolute } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { addedItems } from './lib/diff-items.mjs'
+import { normalizeCounts, readBaseline, compare } from './lib/debt-baseline.mjs'
+import { readRegistryFile, REGISTRY_PATH } from './lib/registry.mjs'
+import { loadRules, lintAddedLines, countCopies, checkRegistry, projectFiles } from './lib/checks/reuse-copies.mjs'
+import { CHECKS_CONFIG, isEntry } from './kit-checks.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-
-function git(args) {
-  try {
-    return execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).replace(/\r?\n+$/, '')
-  } catch {
-    return ''
-  }
-}
-
-/** Warnings for added lines ([{ file, line, text }]) against the rules. */
-export function lintAddedLines(added, rules = REUSE_RULES) {
-  const compiled = rules.map((r) => ({
-    ...r,
-    inFiles: picomatch(r.files, { dot: true }),
-    excluded: r.exclude ? picomatch(r.exclude, { dot: true }) : () => false
-  }))
-  const out = []
-  for (const { file, line, text } of added) {
-    for (const r of compiled) {
-      if (!r.inFiles(file) || r.excluded(file)) continue
-      if (r.skip && r.skip.test(text)) continue
-      if (r.pattern.test(text)) out.push(`REUSE: warn ${r.id} ${r.family} ${file}:${line} — ${r.hint}`)
-    }
-  }
-  return out
-}
-
-/** Registry problems: missing paths (globs need one tracked match) and rule families with no heading. */
-export function checkRegistry({ registry, rules = REUSE_RULES, exists, trackedFiles }) {
-  const problems = []
-  const ids = new Set(registry.families.map((f) => f.id))
-  const seen = new Set()
-  for (const { path, line } of registry.paths) {
-    if (seen.has(path)) continue
-    seen.add(path)
-    if (path.includes('*')) {
-      const match = picomatch(path, { dot: true })
-      if (!trackedFiles().some((f) => match(f))) problems.push(`REUSE: registry missing-path ${path} (line ${line}) — no tracked file matches`)
-    } else if (!exists(path.replace(/\/$/, ''))) {
-      problems.push(`REUSE: registry missing-path ${path} (line ${line})`)
-    }
-  }
-  for (const r of rules) {
-    if (!ids.has(r.family)) problems.push(`REUSE: registry unknown-family ${r.family} (rule ${r.id}) — add a "### ${r.family} — …" heading`)
-  }
-  return problems
-}
-
-function addedSince(base) {
-  const mergeBase = git(['merge-base', base, 'HEAD']) || base
-  const added = parseAddedLines(git(['diff', '-U0', '--no-color', mergeBase]))
-  const untracked = git(['ls-files', '--others', '--exclude-standard']).split('\n').filter(Boolean)
-  for (const f of untracked) {
-    const abs = join(repoRoot, f)
-    let text
-    try { text = readFileSync(abs, 'utf8') } catch { continue }
-    text.split(/\r?\n/).forEach((t, i) => added.push({ file: f.replace(/\\/g, '/'), line: i + 1, text: t }))
-  }
-  return added
-}
 
 function parseArgs(argv) {
   const out = {}
@@ -93,51 +32,54 @@ function parseArgs(argv) {
   return out
 }
 
-function main() {
-  const args = parseArgs(process.argv.slice(2))
-  if (args['check-registry']) {
-    const registry = readRegistryFile(repoRoot, args.registry)
-    if (!registry) {
-      console.error(`REUSE: registry not found: ${args.registry || REGISTRY_PATH}`)
-      process.exit(1)
+export async function main(argv = process.argv.slice(2), root = repoRoot, print = (l) => console.log(l)) {
+  const args = parseArgs(argv)
+  try {
+    if (args['check-registry']) {
+      const registry = readRegistryFile(root, args.registry)
+      if (!registry) {
+        print(`REUSE: registry not found: ${args.registry || REGISTRY_PATH}`)
+        return 1
+      }
+      const { rules } = await loadRules(root)
+      let files = null
+      const problems = checkRegistry({
+        registry,
+        rules,
+        exists: (p) => existsSync(isAbsolute(p) ? p : join(root, p)),
+        files: () => (files ??= projectFiles(root)),
+      })
+      for (const p of problems) print(p)
+      if (!problems.length) print(`REUSE: registry ok (${registry.families.length} families, ${new Set(registry.paths.map((p) => p.path)).size} paths)`)
+      return problems.length ? 1 : 0
     }
-    let tracked = null
-    const problems = checkRegistry({
-      registry,
-      exists: (p) => existsSync(isAbsolute(p) ? p : join(repoRoot, p)),
-      trackedFiles: () => (tracked ??= git(['ls-files']).split('\n').filter(Boolean))
-    })
-    if (problems.length) {
-      for (const p of problems) console.error(p)
-      process.exit(1)
+    if (args.diff && args.diff !== true) {
+      const { found, rules } = await loadRules(root)
+      if (!found) {
+        print('REUSE: ok (no scripts/lib/registry-families.mjs — no rules)')
+        return 0
+      }
+      let items
+      try {
+        items = addedItems({ root, base: String(args.diff) })
+      } catch (e) {
+        print(`REUSE: bad base ${args.diff} — ${e.message}`)
+        return 1
+      }
+      for (const w of lintAddedLines(items.lines, rules)) print(`REUSE: copy ${w.rule} ${w.family} ${w.file}:${w.line} — ${w.hint}`)
+      const current = normalizeCounts(countCopies(root, rules))
+      const baseline = readBaseline(root, CHECKS_CONFIG.debtBaseline)
+      const raised = compare(current, baseline).raised.filter((r) => r.kind.startsWith('reuse-copy.'))
+      for (const r of raised) print(`REUSE: debt ${r.kind} ${r.old} → ${r.now} — new in ${r.files.join(', ') || '(no single file)'}; use the family's shared piece`)
+      print(raised.length ? `REUSE: fail (${raised.length} families gained a copy)` : 'REUSE: ok')
+      return raised.length ? 1 : 0
     }
-    console.log(`REUSE: registry ok (${registry.families.length} families, ${new Set(registry.paths.map((p) => p.path)).size} paths)`)
-    process.exit(0)
+  } catch (e) {
+    print(`REUSE: error — ${e.message}`)
+    return 1
   }
-  let added
-  if (args.patch && args.patch !== true) {
-    const p = isAbsolute(args.patch) ? args.patch : join(repoRoot, args.patch)
-    if (!existsSync(p)) {
-      console.error(`REUSE: patch not found: ${args.patch}`)
-      process.exit(1)
-    }
-    added = parseAddedLines(readFileSync(p, 'utf8'))
-  } else if (args.diff && args.diff !== true) {
-    // A base git cannot resolve (typo, ref missing here) is a usage error, never a clean diff.
-    try {
-      execFileSync('git', ['rev-parse', '--verify', '--quiet', `${args.diff}^{commit}`], { cwd: repoRoot, stdio: 'ignore' })
-    } catch {
-      console.error(`REUSE: bad base ${args.diff}`)
-      process.exit(1)
-    }
-    added = addedSince(args.diff)
-  } else {
-    console.error('usage: --diff=<base> | --patch=<file.diff> | --check-registry [--registry=<path>]')
-    process.exit(1)
-  }
-  const warnings = lintAddedLines(added)
-  console.log(warnings.length ? warnings.join('\n') : 'REUSE: ok')
-  process.exit(0)
+  print('usage: --diff=<base> | --check-registry [--registry=<path>]')
+  return 1
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) main()
+if (isEntry(import.meta.url)) process.exitCode = await main()

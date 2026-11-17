@@ -13,6 +13,9 @@
  *   node scripts/scope-check.mjs --deps --plan=<path>
  *   node scripts/scope-check.mjs --tags --plan=<path>
  *   node scripts/scope-check.mjs --tests --plan=<path>
+ *   node scripts/scope-check.mjs --reuse --plan=<path> [--diff=<base>]   (REUSE: ok | missing | bad | skipped; exit 1 on missing or bad)
+ *
+ *   node scripts/scope-check.mjs --defaults --plan=<path>                (DEFAULTS: ok | missing | bad | card missing | skipped; exit 1 on a problem)
  *
  * --diff also prints "SCOPE: test-out <path>" (exit 1) for a changed test file that no scope line naming a test
  * location lists (a broad folder glob such as tools/** does not list the tests under it).
@@ -53,12 +56,13 @@ import { resolve, dirname, join, relative, isAbsolute } from 'path'
 import { fileURLToPath } from 'url'
 import picomatch from 'picomatch'
 import { activePlanPath, branchPlanPath } from './lib/slot.mjs'
-import { extractScopeGlobs, testFilesOutOfScope } from './lib/plan-scope.mjs'
+import { extractScopeGlobs, testRefusals, isSiblingTest, bareLineReason } from './lib/plan-scope.mjs'
 import { listOpenPlans, OPEN_PLAN_DIRS } from './lib/plan-paths.mjs'
 import { parseDependsOn, parseProsePrerequisites } from './lib/plan-deps.mjs'
 import { doneWhenTagProblems } from './lib/done-when.mjs'
 import { scopeTestsLint } from './lib/scope-tests-lint.mjs'
 import { runReuseCheck } from './lib/reuse-check.mjs'
+import { runDefaultsCheck } from './lib/product-defaults.mjs'
 import { parseInvariants, checkPlanArch, diffArchWarnings, decisionWithoutAdr, parseAddedLines } from './lib/invariants.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -154,7 +158,9 @@ function buildMatcher(planPath) {
   ]
 
   const allowed = [...alwaysAllowed, ...scopeGlobs]
-  const isMatch = picomatch(allowed, { dot: true })
+  const inScope = picomatch(allowed, { dot: true })
+  // A test file next to a file the scope covers is in scope; the test-file gate still checks it.
+  const isMatch = (f) => inScope(f) || isSiblingTest(f, scopeGlobs, (g) => picomatch(g, { dot: true }))
   return { isMatch, planText, scopeGlobs }
 }
 
@@ -204,7 +210,7 @@ function cmdDiff(args) {
   // own scope block must not approve its own test edits. A plan not on the base falls back to the working copy.
   const onBase = git(['show', `${args.diff}:${planPath}`])
   const baseGlobs = (onBase && extractScopeGlobs(onBase)) || scopeGlobs
-  const testOut = testFilesOutOfScope(files.filter(f => !out.includes(f)), baseGlobs, (g) => picomatch(g, { dot: true }))
+  const testOut = testRefusals(files.filter(f => !out.includes(f)), baseGlobs, (g) => picomatch(g, { dot: true }))
 
   if (!out.length && !testOut.length) {
     console.log('SCOPE: ok')
@@ -214,7 +220,11 @@ function cmdDiff(args) {
     console.log('SCOPE: out')
     for (const f of out) console.log(`  ${f}${isUpstream(f) ? ' (upstream-owned: ownership.upstreamPaths)' : ''}`)
   }
-  for (const f of testOut) console.log(`SCOPE: test-out ${f}`)
+  // The reason goes to stderr: ship-prep reads every stdout line as a path.
+  for (const { file: f, reason } of testOut) {
+    console.log(`SCOPE: test-out ${f}`)
+    console.error(`SCOPE_CHECK: ${reason}`)
+  }
   process.exit(1)
 }
 
@@ -356,7 +366,15 @@ function cmdTests(args) {
   if (!args.plan || args.plan === true) fail('--tests requires --plan=<path>')
   const planPath = normalize(args.plan)
   const r = scopeTestsLint(readPlanFile(planPath))
-  if (r.status === 'warn') {
+  if (r.status === 'bad') {
+    // Exit 1: a bare line matches nothing the plan means, so save-plan fixes it before the save.
+    console.log('SCOPE_TESTS: bad')
+    for (const g of r.bare) console.log(`  ${bareLineReason(g)}`)
+    process.exit(1)
+  } else if (r.status === 'warn' && r.refused.length) {
+    console.log('SCOPE_TESTS: warn')
+    for (const x of r.refused) console.log(`  test file gate: ${x.reason}; add this line to the scope block: ${x.file}`)
+  } else if (r.status === 'warn') {
     console.log('SCOPE_TESTS: warn')
     console.log(`  ${planPath} changes code (scope: ${r.codeGlobs.join(', ')}) but no scope line names a test location - add one (a tests folder glob or a single test file); a code-folder glob does not cover the tests under it`)
   } else if (r.status === 'docs-only') console.log('SCOPE_TESTS: skipped (docs only)')
@@ -365,7 +383,17 @@ function cmdTests(args) {
 }
 
 const args = parseArgs(process.argv.slice(2))
+// A flag that takes a value but came without one (`--diff`, or `--plan <path>` with a space) stops here with one usage
+// line, before git or a plan read could turn the word `true` into a verdict.
+for (const flag of ['diff', 'plan', 'base']) {
+  if (args[flag] === true || args[flag] === '') {
+    console.error(`SCOPE_CHECK: --${flag} needs a value: --${flag}=<${flag === 'plan' ? 'path' : 'ref'}>`)
+    process.exit(2)
+  }
+}
+
 if (args.reuse) process.exit(runReuseCheck({ args, repoRoot }))
+if (args.defaults) process.exit(runDefaultsCheck({ args, repoRoot }))
 
 if (args.arch && args.diff) cmdArchDiff(args)
 else if (args.arch && args.plan) cmdArchPlan(args)
@@ -377,4 +405,4 @@ else if (args.file) cmdFile(args)
 else if (args.diff) cmdDiff(args)
 else if (args.overlap) cmdOverlap(args)
 else if (args.drift) cmdDrift(args)
-else fail('usage: --file=<p> | --diff=<base> | --overlap --plan=<p> | --drift [--plan=<p>] | --arch --plan=<p> | --arch --diff=<base> | --deps --plan=<p> | --tags --plan=<p> | --tests --plan=<p> | --reuse --plan=<p>')
+else fail('usage: --file=<p> | --diff=<base> | --overlap --plan=<p> | --drift [--plan=<p>] | --arch --plan=<p> | --arch --diff=<base> | --deps --plan=<p> | --tags --plan=<p> | --tests --plan=<p> | --reuse --plan=<p> | --defaults --plan=<p>')

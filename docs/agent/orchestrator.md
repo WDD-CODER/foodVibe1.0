@@ -3,7 +3,7 @@
 An opt-in second workflow beside the Planner/Worker flow. Nothing changes unless the Human starts a run. A run checks
 everything first and refuses to start while a plan has an open question, then runs without anyone: per plan a builder,
 a gate, a reviewer and a merge into one run branch `orch/<run>` — never into
-`main`. The Human gets one report and merges the run branch himself.
+`main`. The Human gets one report and approves the merge of the run branch (`merge it`); the session opens the PR, gets CI green and merges it.
 
 The loop is code (the kit's ADR 0017, "the orchestrator loop is a script"): `scripts/run-plans.mjs` runs it in a
 terminal, and only the builder and the reviewer are model calls. `/orchestrate` prints the line to run, starts it on
@@ -40,6 +40,7 @@ now are ignored by install and sync with a `NOTE orchestrator: <key> removed` li
 | `staleMin` | `10` | Minutes without a `status.json` update after which `orch-state.mjs watch` prints `STUCK` |
 | `mergeChecks` | `build` | What the merge step runs on the merged tree: `build` = the project build plus the plan's scope check, `full` = the plan's whole check list on every merge |
 | `ciMirror` | `["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]` | CI commands (`npm run <script>`, `pnpm run <script>`, `node scripts/…` or `node tools/…`, no write flag) the final gate runs after the project checks and the kit manifest check. Install and sync print a `NOTE ci-mirror:` line for each CI command the final gate does not run; they never write the list |
+| `finalGate` | `full` | `full` (default) = the final gate runs every `ciMirror` command again; `ci` = it runs the project checks and only the suites the run changed and that have not passed on the run branch's files; CI runs the full set on the pull request. Install and sync print `NOTE final-gate: ci — <command> is not run by any CI workflow` for a `ciMirror` command no workflow runs. See "What a gate runs" |
 | `prepare` | `[{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]` | Files the gate generates before the tests: `{ "missing": "<path>", "script": "<npm script>", "in": "<folder, default .>" }`, run as `node scripts/orch-state.mjs prepare …` first in every plan gate and the final gate, only when the path is absent |
 | `useSlots` | `false` | Whether a builder takes an idle `wt-N` slot before making its own folder. The scaffold says `false`: builders get folders of their own (one per plan in flight, at most `concurrency`), and the Human's slots stay free |
 | `reviewerMode` | `gate` | What a reviewer STOP does (default `gate`): `advisory` = a run note, the plan still merges; `gate` = one fix round with the findings, then the plan parks (and a review that could not run parks). `advisory` applies only to a plan whose `## Execution Mode` says `Reviewer: advisory` (any other plan is reviewed as `gate`), and never to a diff that touches a sensitive path (ship-prep's check, `security.sensitivePaths` included): that diff is always `gate`. `--reviewer-mode` overrides it for one run, within the same two rules |
@@ -88,7 +89,9 @@ two marked **model**.
      Impact `changes` or `deviation`s an invariant — INV-1; `preserves` stays on `models.build`). Its `decisions` and `notDone` are recorded; its `pass` is never read. The script checks the folder is
      committed and ahead of the run branch, and pushes it.
    - **gate**: `plan-gate.mjs` runs `prepare`, build, lint and test, the kit manifest check, the scope check (the
-     script's own copy, on the scope as the run branch holds it) and the plan's `[auto]` commands. An environment
+     script's own copy, on the scope as the run branch holds it), the diff checks and debt ratchet
+     (`scripts/kit-checks.mjs`, the main folder's copy; a failure is a fix round with its `KIT_CHECK:` lines, never a
+     card) and the plan's `[auto]` commands. An environment
      error reruns once (a pass on that rerun is recorded with `orch-state.mjs flake`), then the environment check
      probes the failed command's own precondition, then the gate runs once more without a fix round.
    - `orch-state.mjs diff --no-notes`: the changed files, the test-file gate (a changed test file no scope line names
@@ -166,6 +169,23 @@ two marked **model**.
 5. **Report.** The builders' `behaviour:` / `seen:` / `removes:` decisions go in one `decisions` call; `finish`
    writes the report. Exit 0 = every plan merged, 2 = some parked or skipped. `calls.csv` in the run's folder has one
    row per model call and gate command; its `model` is the value passed after `--model` on that call.
+
+## What a gate runs
+
+A plan's gate always runs: `prepare`, build, lint, the test script, the manifest, scope and kit checks, and the plan's own
+`[auto]` commands. A `ciMirror` command is a string (always runs) or `{ "command", "touches": [globs] }` and runs only when
+the plan's diff (against the run branch) matches a glob. A diff that touches `kit.config.json`, `.kit/config.json`,
+`package.json` or a lockfile selects every suite. Each decision is one `GATE:` line in the console log and the run notes:
+
+- `GATE: skip <command> — no change under <globs>`
+- `GATE: once <command> — runs inside npm run test` (the project's test script already runs it)
+- `GATE: cached <command> — passed on the same files in plan <NNN>` (same command, same content of every file its
+  `touches` match, earlier in this run: `.claude/orchestrator-runs/<run>/gate-cache.json`)
+
+Nothing is skipped without a line. With `finalGate: ci` the final gate on the run branch runs the project checks and the
+suites the run's diff selects that are not cached for the run branch's files, prints `FINAL: ci — the full set runs in CI
+on the pull request`, and a failure blames and fixes a plan as with `full`. CI runs the full set on Linux; the short
+final pass is the Windows run. Default: `full`, plain strings: today's behaviour. `/ship` is unchanged.
 
 ## Live view
 
@@ -300,7 +320,7 @@ is refused when the review folder holds a `.claude/settings.local.json`.
 
 ## Never
 
-- Merge into, push to or check out `main` from a run; the Human merges the run branch.
+- Merge into, push to or check out `main` from a run; the run branch reaches `main` only by a PR the session merges on the Human's `merge it`.
 - Use a command on the deny list (`docs/agent/agent-roles.md`); the merge folder is kept clean with `git merge --abort`.
 - Write the Human's uncommitted files, run unbounded background commands, or state a count it did not compute.
 
