@@ -18,7 +18,7 @@ const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
 const OWNER = { userId: 'own1', name: 'owner1', businessId: 'b1', businessRole: 'owner' }
 const OWNER_Y = { userId: 'own2', name: 'owner2', businessId: 'b2', businessRole: 'owner' }
 const STAFF = { userId: 'st1', name: 'staff1', businessId: 'b1', businessRole: 'staff' }
-const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 }
+const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5 }
 const VALID = { profitTargetPct: 30, safetyMarginPct: 12.5, overrunThresholdPct: 15 }
 const URL = '/api/v1/business'
 const put = (body, who = OWNER) => request(app).put(`${URL}/settings`).set(as(who)).send(body)
@@ -54,7 +54,7 @@ describe('PUT /api/v1/business/settings', () => {
     expect(res.status).toBe(200)
     expect(res.body).toEqual({ settings: VALID })
     const get = await request(app).get(URL).set(as(OWNER))
-    expect(get.body.settings).toEqual(VALID)
+    expect(get.body.settings).toEqual({ ...VALID, priceRiseAlertPct: 5 })
   })
 
   it.each([
