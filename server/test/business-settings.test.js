@@ -49,6 +49,24 @@ describe('GET /api/v1/business settings', () => {
 })
 
 describe('PUT /api/v1/business/settings', () => {
+  it('keeps a stored priceRiseAlertPct when the body has none, and replaces it when the body has one (plan 616)', async () => {
+    await testDb().collection('businesses').updateOne({ _id: 'b1' }, { $set: { settings: { ...VALID, priceRiseAlertPct: 8 } } })
+    const keep = await put({ ...VALID, profitTargetPct: 31 })
+    expect(keep.status).toBe(200)
+    expect((await stored('b1')).settings.priceRiseAlertPct).toBe(8)
+    const replace = await put({ ...VALID, priceRiseAlertPct: 12 })
+    expect(replace.status).toBe(200)
+    expect((await stored('b1')).settings.priceRiseAlertPct).toBe(12)
+  })
+
+  it('stores no priceRiseAlertPct for a three-number body when none was stored (plan 616)', async () => {
+    const res = await put(VALID)
+    expect(res.status).toBe(200)
+    expect((await stored('b1')).settings).toEqual(VALID)
+    const get = await request(app).get(URL).set(as(OWNER))
+    expect(get.body.settings.priceRiseAlertPct).toBe(5)
+  })
+
   it('owner saves valid numbers and the next GET returns them', async () => {
     const res = await put(VALID)
     expect(res.status).toBe(200)

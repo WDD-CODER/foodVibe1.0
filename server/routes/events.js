@@ -8,6 +8,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { checkStoredDoc } = require('../middleware/validate')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
@@ -53,7 +54,7 @@ function fail(req, res, name, err) {
 }
 
 // PUT /api/v1/events/:id/stage  { stage, reason?, reasonText?, planSnapshot? }
-router.put('/:id/stage', verifyToken, async (req, res) => {
+router.put('/:id/stage', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
@@ -86,7 +87,7 @@ router.put('/:id/stage', verifyToken, async (req, res) => {
 })
 
 // POST /api/v1/events/:id/notes  { text }
-router.post('/:id/notes', verifyToken, async (req, res) => {
+router.post('/:id/notes', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
@@ -126,7 +127,7 @@ async function loadOwnNote(req, res, action) {
 }
 
 // PUT /api/v1/events/:id/notes/:noteId  { text }  (author only)
-router.put('/:id/notes/:noteId', verifyToken, async (req, res) => {
+router.put('/:id/notes/:noteId', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const found = await loadOwnNote(req, res, 'addNote')
     if (!found) return
@@ -150,7 +151,7 @@ router.put('/:id/notes/:noteId', verifyToken, async (req, res) => {
 })
 
 // DELETE /api/v1/events/:id/notes/:noteId  (author only)
-router.delete('/:id/notes/:noteId', verifyToken, async (req, res) => {
+router.delete('/:id/notes/:noteId', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const found = await loadOwnNote(req, res, 'addNote')
     if (!found) return
@@ -188,7 +189,7 @@ async function writeConditional(req, res, event, update, logEvent, status = 200)
 // Plan 488: a caller without editMoney whose (older) copy also carries a tick gets an arrival-only merge — the stored
 // money and row set are kept, only new ticks and new photos of shared rows are added (nothing stored is cleared) —
 // instead of a 403 that drops the tick.
-router.put('/:id/closing', verifyToken, async (req, res) => {
+router.put('/:id/closing', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
@@ -216,7 +217,7 @@ router.put('/:id/closing', verifyToken, async (req, res) => {
 // POST /api/v1/events/:id/finish  { planSnapshot? }  (owner, from any live stage; plan 493)
 // An event with no frozen plan gets the client's snapshot stored and frozen here, so the closing has its supplier rows
 // and the dashboard keeps its planned revenue. A frozen snapshot is never replaced.
-router.post('/:id/finish', verifyToken, async (req, res) => {
+router.post('/:id/finish', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
@@ -239,7 +240,7 @@ router.post('/:id/finish', verifyToken, async (req, res) => {
 })
 
 // POST /api/v1/events/:id/reopen  (owner, only a finished event)
-router.post('/:id/reopen', verifyToken, async (req, res) => {
+router.post('/:id/reopen', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
@@ -267,7 +268,7 @@ router.post('/:id/reopen', verifyToken, async (req, res) => {
 })
 
 // POST /api/v1/events/:id/refresh-plan  { planSnapshot }  (owner): replaces the snapshot, `frozenAt` kept
-router.post('/:id/refresh-plan', verifyToken, async (req, res) => {
+router.post('/:id/refresh-plan', verifyToken, requireModule('events'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
@@ -292,7 +293,7 @@ const validAnswer = a => a && typeof a === 'object' && isStr(a.itemKey) && isStr
 
 // PUT /api/v1/events/:id/logistics  { answers?, hiddenKeys?, environmentType?, venueProfileId?, meetingAt?, meetingWith?, phaseDone? }
 // Owner only (editLogistics). Answers are merged by itemKey; a new or changed one is stamped with the actor and now.
-router.put('/:id/logistics', verifyToken, async (req, res) => {
+router.put('/:id/logistics', verifyToken, requireModule('event_logistics'), async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return

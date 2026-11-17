@@ -26,7 +26,7 @@ const usage = (userId, businessId, daysAgo) => {
 }
 const event = (id, businessId, extra = {}) => ({ _id: id, businessId, userId: 'x', name: 'secret ' + id, stage: 'inquiry', eventDate: '2026-01-01', ...extra })
 
-const EXPECTED_KEYS = ['_id', 'name', 'ownerName', 'staffCount', 'createdAt', 'internal', 'lastActivityAt', 'activeDays7', 'events', 'closeRate', 'lastEventDate', 'frontDesk'].sort()
+const EXPECTED_KEYS = ['_id', 'name', 'ownerName', 'staffCount', 'createdAt', 'internal', 'lastActivityAt', 'activeDays7', 'events', 'closeRate', 'lastEventDate', 'frontDesk', 'modules', 'aiPrivate', 'aiMonthlyTokenCap'].sort()
 
 let bAUsageLast
 
@@ -90,6 +90,9 @@ describe('GET /api/v1/admin/businesses', () => {
   it('returns exactly the allowed keys, no content', async () => {
     for (const row of Object.values(await rowsOf())) {
       expect(Object.keys(row).sort()).toEqual(EXPECTED_KEYS)
+      expect(row.modules).toEqual(['events', 'event_logistics', 'frontdesk', 'ai_create'])
+      expect(row.aiPrivate).toBe(false)
+      expect(row.aiMonthlyTokenCap).toBeNull()
       expect(Object.keys(row.events).sort()).toEqual(['active', 'closed', 'finished', 'total'])
     }
     const res = await request(app).get('/api/v1/admin/businesses').set(as(ADMIN))

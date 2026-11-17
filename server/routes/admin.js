@@ -8,6 +8,8 @@ const { jerusalemDate } = require('../middleware/usage')
 const { activeDaysByBusiness } = require('../utils/usage-stats')
 const { frontDeskSetup } = require('../services/front-desk-setup')
 const { actorOf } = require('../utils/actor')
+const { platformUpdateSchema, modulesOf, MODULE_KEYS } = require('../generated/schemas/modules')
+const { clearModuleCache } = require('../middleware/require-module')
 const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-admin.schema')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
@@ -88,7 +90,7 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
   try {
     const now = Date.now()
     const [businesses, members, usage, activeDays, events, profiles] = await Promise.all([
-      col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1 } }).toArray(),
+      col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1, modules: 1, aiPrivate: 1, aiMonthlyTokenCap: 1 } }).toArray(),
       col('users').aggregate([
         { $match: { businessId: { $type: 'string' } } },
         { $group: {
@@ -137,6 +139,9 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
         staffCount: m?.staffCount ?? 0,
         createdAt: b.createdAt ?? null,
         internal: b.internal === true,
+        modules: modulesOf(b),
+        aiPrivate: b.aiPrivate === true,
+        aiMonthlyTokenCap: b.aiMonthlyTokenCap ?? null,
         lastActivityAt: usageBy.get(b._id) ?? null,
         activeDays7: activeDays.get(b._id) ?? 0,
         events: { total: e?.total ?? 0, active: e?.active ?? 0, closed, finished: e?.finished ?? 0 },
@@ -237,6 +242,49 @@ router.put('/businesses/:id/front-desk', verifyToken, requirePlatformAdmin, asyn
     })
   } catch (err) {
     req.log.error({ err, event: 'admin.front_desk.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 616: the platform admin sets one business's modules, AI token cap and private flag, and the reason is kept.
+router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const parsed = platformUpdateSchema.safeParse(req.body ?? {})
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message }))
+    })
+  }
+  const { modules, aiMonthlyTokenCap, aiPrivate, reason } = parsed.data
+  try {
+    const actor = actorOf(req)
+    const $set = {}
+    const $unset = {}
+    const changed = []
+    if (modules !== undefined) { $set.modules = MODULE_KEYS.filter(k => modules.includes(k)); changed.push('modules') }
+    if (aiMonthlyTokenCap !== undefined) {
+      if (aiMonthlyTokenCap === null) $unset.aiMonthlyTokenCap = ''
+      else $set.aiMonthlyTokenCap = aiMonthlyTokenCap
+      changed.push('aiMonthlyTokenCap')
+    }
+    // Plan 618 replaces this plain write with setAiPrivate (C-LEARN); plan 617 adds the cap-cache clear and aiTokensThisMonth here.
+    if (aiPrivate !== undefined) { $set.aiPrivate = aiPrivate; changed.push('aiPrivate') }
+    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed }
+    const update = { $push: { platformHistory: { $each: [row], $slice: -50 } } }
+    if (Object.keys($set).length) update.$set = $set
+    if (Object.keys($unset).length) update.$unset = $unset
+    const after = await col('businesses').findOneAndUpdate({ _id: req.params.id }, update, { returnDocument: 'after' })
+    if (!after) return res.status(404).json({ error: 'Business not found' })
+    clearModuleCache(req.params.id)
+    req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed })
+    res.json({
+      ok: true,
+      modules: modulesOf(after),
+      aiMonthlyTokenCap: after.aiMonthlyTokenCap ?? null,
+      aiPrivate: after.aiPrivate === true
+    })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.platform.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
