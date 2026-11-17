@@ -216,7 +216,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     const actions = [
       { labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) },
-      { labelKey: 'ai_product_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() }
+      {
+        labelKey: 'ai_product_create_new',
+        icon: 'sparkles',
+        module: 'ai_create' as const,
+        run: () => this.openAiCreateModal()
+      }
     ]
     // Plan 432: prices are money, so the price-list import is the owner's only.
     if (this.permission.can('editMoney', { type: 'products' })) {

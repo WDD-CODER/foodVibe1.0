@@ -1,0 +1,84 @@
+<app-modal-shell size="sm" titleKey="platform_biz_dialog_title" [dismissible]="!isSaving_()" (dismissed)="cancel()">
+  <div class="fda-body" data-testid="biz-dialog">
+    <p class="fda-name">{{ target()?.name }}</p>
+    <app-form-field label="platform_biz_modules">
+      <div class="c-chip-group">
+        @for (key of moduleKeys; track key) {
+          <label class="c-chip c-chip--toggle">
+            <input
+              type="checkbox"
+              [attr.data-testid]="'biz-module-' + key"
+              [checked]="isOn(key)"
+              [disabled]="isDisabled(key) || isSaving_()"
+              (change)="toggleModule(key, $any($event.target).checked)"
+            />
+            <span>{{ 'module_' + key | translatePipe }}</span>
+          </label>
+        }
+      </div>
+    </app-form-field>
+    <app-form-field
+      label="platform_ai_cap"
+      forId="biz-cap"
+      hint="platform_ai_cap_hint"
+      [error]="tried_() && capInvalid_() ? 'platform_ai_cap_invalid' : null"
+    >
+      <input
+        id="biz-cap"
+        class="c-input"
+        type="number"
+        min="0"
+        step="1"
+        inputmode="numeric"
+        dir="ltr"
+        [value]="cap_()"
+        (input)="cap_.set($any($event.target).value)"
+      />
+    </app-form-field>
+    <p class="fda-used">
+      {{ 'platform_ai_used_month' | translatePipe }} <span class="c-num">{{ target()?.aiTokensThisMonth ?? 0 }}</span>
+    </p>
+    <div class="c-chip-group">
+      <label class="c-chip c-chip--toggle">
+        <input
+          type="checkbox"
+          data-testid="biz-private"
+          [checked]="private_()"
+          [disabled]="isSaving_()"
+          (change)="private_.set($any($event.target).checked)"
+        />
+        <span>{{ 'platform_ai_private' | translatePipe }}</span>
+      </label>
+    </div>
+    <p class="fda-hint">{{ 'platform_ai_private_hint' | translatePipe }}</p>
+    <app-form-field
+      label="platform_fd_reason"
+      forId="biz-reason"
+      [error]="reasonError_() ?? (tried_() && reasonShort_() ? 'field_required' : null)"
+    >
+      <textarea
+        id="biz-reason"
+        class="c-input"
+        rows="2"
+        [attr.maxlength]="reasonMax"
+        [value]="reason_()"
+        (input)="reason_.set($any($event.target).value); reasonError_.set(null)"
+      ></textarea>
+    </app-form-field>
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" data-testid="biz-cancel" [disabled]="isSaving_()" (click)="cancel()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="biz-save"
+      [disabled]="isSaving_() || !hasChange_()"
+      [attr.aria-busy]="isSaving_()"
+      (click)="save()"
+    >
+      {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>

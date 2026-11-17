@@ -1,6 +1,6 @@
 <section class="ai-shots c-glass-panel" data-testid="platform-ai-shots">
   <h2 class="ai-shots__title">{{ 'platform_ai_shots_title' | translatePipe }}</h2>
-  <p class="ai-shots__desc" data-testid="ai-shots-desc">{{ 'platform_ai_shots_desc' | translatePipe }}</p>
+  <p class="ai-shots__desc" data-testid="ai-shots-desc">{{ 'platform_ai_shots_desc_all' | translatePipe }}</p>
 
   @if (!isLoading_()) {
     <div class="ai-shots__group">
@@ -30,7 +30,7 @@
 
     <div class="ai-shots__group">
       <h3 class="ai-shots__heading">{{ 'platform_ai_shots_candidates' | translatePipe }}</h3>
-      <p class="ai-shots__hint">{{ 'platform_ai_shots_candidates_hint' | translatePipe }}</p>
+      <p class="ai-shots__hint">{{ 'platform_ai_shots_candidates_hint_all' | translatePipe }}</p>
     </div>
     @if (!candidates_().length) {
       <app-empty-state messageKey="platform_ai_shots_empty" />

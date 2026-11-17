@@ -449,6 +449,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       [
         {
           labelKey: 'add_recipe_ai',
+          module: 'ai_create',
           icon: 'sparkles',
           run: () => {
             void this.aiRecipeModal.open()

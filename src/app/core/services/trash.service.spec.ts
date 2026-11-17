@@ -10,6 +10,7 @@ import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ClientDataService } from './client-data.service'
+import { ModuleService } from './module.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 
@@ -22,8 +23,16 @@ describe('TrashService (plan 407)', () => {
   const recipes = list(true)
   const dishes = list(false)
   const clients = list(true)
+  const modulesOff = new Set<string>()
+  const moduleStub = {
+    hasType: (type: string) =>
+      ({ venues: ['events'], menuEvents: ['events'], clients: ['events', 'frontdesk'] })[type as 'venues']?.some(
+        (k) => !modulesOff.has(k)
+      ) ?? true
+  }
 
   beforeEach(() => {
+    modulesOff.clear()
     storage = jasmine.createSpyObj<StorageService>('StorageService', [
       'trash',
       'restore',
@@ -53,6 +62,7 @@ describe('TrashService (plan 407)', () => {
     TestBed.configureTestingModule({
       providers: [
         TrashService,
+        { provide: ModuleService, useValue: moduleStub },
         { provide: StorageService, useValue: storage },
         { provide: RecipeDataService, useValue: recipes },
         { provide: DishDataService, useValue: dishes },
@@ -75,6 +85,19 @@ describe('TrashService (plan 407)', () => {
     expect(service.items().recipes).toEqual([{ _id: 'r1', name: 'מרק', deletedAt: 1 }])
     expect(service.items().menuEvents).toEqual([{ _id: 'e1', name: 'חתונה', deletedAt: 2 }])
     expect(service.hasAnyTrash()).toBeTrue()
+  })
+
+  it('with events off the sections hold no venues and no menuEvents and no request is sent for them (plan 620)', async () => {
+    modulesOff.add('events')
+    service = TestBed.inject(TrashService)
+    const types = service.sections_().map((s) => s.type)
+    expect(types).not.toContain('venues')
+    expect(types).not.toContain('menuEvents')
+    expect(types).toContain('clients')
+    await service.loadTrash()
+    const asked = storage.trash.calls.allArgs().map((a) => a[0])
+    expect(asked).not.toContain('venues')
+    expect(asked).not.toContain('menuEvents')
   })
 
   it('restore refreshes a list that already loaded, and leaves an unloaded one alone', async () => {

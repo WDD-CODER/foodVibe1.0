@@ -6,6 +6,8 @@ import { LucideAngularModule } from 'lucide-angular'
 import { PermissionService } from '@services/permission.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
+import { ModuleService } from '@services/module.service'
+import type { ModuleKey } from '@schemas/modules'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
@@ -22,6 +24,8 @@ interface TabChip {
   home?: boolean
   /** Shows the waiting-requests count (plan 552). */
   badge?: boolean
+  /** Plan 620: shown only when the business has any one of these modules. */
+  modules?: readonly ModuleKey[]
 }
 
 type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk'
@@ -46,7 +50,7 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
 
 const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
   dashboard: [
-    { id: 'venues', labelKey: 'venues', icon: 'map-pin', path: '/venues' },
+    { id: 'venues', labelKey: 'venues', icon: 'map-pin', path: '/venues', modules: ['events'] },
     {
       id: 'metadata',
       labelKey: 'metadata_manager',
@@ -66,15 +70,40 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'cook-view', labelKey: 'cook_view', icon: 'flame', path: '/cook' }
   ],
   menus: [
-    { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library' },
-    { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'clipboard-list', path: '/menu-intelligence' }
+    { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library', modules: ['events'] },
+    {
+      id: 'menu-intelligence',
+      labelKey: 'menu_intelligence',
+      icon: 'clipboard-list',
+      path: '/menu-intelligence',
+      modules: ['events']
+    }
   ],
   frontdesk: [
-    { id: 'requests', labelKey: 'fd_chip_requests', icon: 'clipboard-check', path: '/requests', badge: true },
-    { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings' },
-    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' },
-    { id: 'knowledge', labelKey: 'knowledge_chip', icon: 'book-open', path: '/frontdesk/knowledge' },
-    { id: 'settings', labelKey: 'fd_chip_settings', icon: 'settings', path: '/frontdesk/settings' }
+    {
+      id: 'requests',
+      labelKey: 'fd_chip_requests',
+      icon: 'clipboard-check',
+      path: '/requests',
+      badge: true,
+      modules: ['frontdesk']
+    },
+    { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings', modules: ['frontdesk'] },
+    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients', modules: ['events', 'frontdesk'] },
+    {
+      id: 'knowledge',
+      labelKey: 'knowledge_chip',
+      icon: 'book-open',
+      path: '/frontdesk/knowledge',
+      modules: ['frontdesk']
+    },
+    {
+      id: 'settings',
+      labelKey: 'fd_chip_settings',
+      icon: 'settings',
+      path: '/frontdesk/settings',
+      modules: ['frontdesk']
+    }
   ]
 }
 
@@ -125,6 +154,7 @@ export class TabChipsComponent {
   private readonly router = inject(Router)
   private readonly destroyRef = inject(DestroyRef)
   private readonly permission = inject(PermissionService)
+  private readonly modules = inject(ModuleService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly translation = inject(TranslationService)
   protected readonly waitingCount_ = inject(FrontDeskBadgeService).waitingCount_
@@ -134,7 +164,13 @@ export class TabChipsComponent {
 
   private readonly currentUrl_ = signal(this.router.url)
 
+  /** Plan 620: the chips of modules the business lacks are dropped; a row of fewer than two chips is not shown. */
   protected readonly chips_ = computed<readonly TabChip[]>(() => {
+    const chips = this.groupChips_().filter((chip) => !chip.modules || this.modules.has(chip.modules))
+    return chips.length < 2 ? [] : chips
+  })
+
+  private readonly groupChips_ = computed<readonly TabChip[]>(() => {
     const path = this.currentUrl_().split('?')[0]
     const group = GROUP_BY_PATH_PREFIX.find(([prefix]) => path.startsWith(prefix))?.[1]
     if (!group) return []

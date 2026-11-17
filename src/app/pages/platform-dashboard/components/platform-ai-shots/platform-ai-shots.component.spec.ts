@@ -94,9 +94,9 @@ describe('PlatformAiShotsComponent (plan 600)', () => {
       ]
     })
     const desc = fixture.nativeElement.querySelector('[data-testid="ai-shots-desc"]') as HTMLElement
-    expect(desc.textContent?.trim()).toBe('platform_ai_shots_desc')
+    expect(desc.textContent?.trim()).toBe('platform_ai_shots_desc_all')
     expect(text()).toContain('platform_ai_shots_shared_hint')
-    expect(text()).toContain('platform_ai_shots_candidates_hint')
+    expect(text()).toContain('platform_ai_shots_candidates_hint_all')
     const rows = Array.from(fixture.nativeElement.querySelectorAll('article.c-glass-card.ai-shot')) as HTMLElement[]
     expect(rows.length).toBe(3)
     expect(rows.map((r) => r.querySelector('.ai-shot__meta')!.textContent!.trim().split(' · ')[0])).toEqual([

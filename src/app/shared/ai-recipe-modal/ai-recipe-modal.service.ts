@@ -1,4 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core'
+import { ModuleService } from '@services/module.service'
 import type { AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import { UserService } from '@services/user.service'
@@ -13,6 +14,7 @@ export type AiModalInputMode = 'text' | 'image' | 'url' | 'paste'
 export class AiRecipeModalService {
   private readonly userService = inject(UserService)
   private readonly authModal = inject(AuthModalService)
+  private readonly modules_ = inject(ModuleService)
 
   private readonly controller_ = new ModalController<void>(undefined)
   private readonly mode_ = signal<AiModalMode>('create')
@@ -34,6 +36,8 @@ export class AiRecipeModalService {
       this.authModal.open('sign-in')
       return
     }
+    // Plan 620: the window belongs to the `ai_create` module; the server refuses its calls anyway.
+    if (!this.modules_.has('ai_create')) return
     this.mode_.set(mode)
     this.currentRecipe_ = currentRecipe ?? null
     this.onPatch_ = onPatch ?? null

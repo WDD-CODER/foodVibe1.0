@@ -7,6 +7,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
 import type { HeroFabAction } from '@services/hero-fab.service'
 import { HeroFabService } from '@services/hero-fab.service'
+import { ModuleService } from '@services/module.service'
 
 const ENTITY_FORM_ROUTE = /^\/(inventory|inventory\/equipment|suppliers|venues)\/(add|edit\/[^/]+)$/
 
@@ -22,6 +23,7 @@ export class HeroFabComponent {
   private router = inject(Router)
   private destroyRef = inject(DestroyRef)
   private heroFab_ = inject(HeroFabService)
+  private readonly modules = inject(ModuleService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
 
   readonly isExpanded_ = signal(false)
@@ -34,7 +36,7 @@ export class HeroFabComponent {
   protected readonly effectiveActions_ = computed(() => {
     const state = this.heroFab_.pageActions()
     if (!state) return []
-    return state.actions
+    return state.actions.filter((action) => !action.module || this.modules.has(action.module))
   })
 
   /** Always rotate — chef-hat action is always present in the template. */

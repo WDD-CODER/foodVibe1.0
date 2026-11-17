@@ -221,6 +221,7 @@ export class ProductImportComponent {
   }
 
   private errorKeyFor_(fromPhoto: boolean, status: number, code: string, reason: string): string {
+    if (code === 'ai_monthly_cap_reached') return 'ai_monthly_cap_reached'
     if (status === 429 || code.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
     if (!fromPhoto) return 'import_ai_failed'
     if (reason === 'IMAGE_TOO_LARGE' || code === 'IMAGE_TOO_LARGE') return 'import_photo_too_big'
