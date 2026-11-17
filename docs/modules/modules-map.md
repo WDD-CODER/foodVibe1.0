@@ -40,7 +40,7 @@ Size: S / M / L (one Worker session each; an L may be split at drafting). Tier: 
 
 | Map# | NNN | Spec | Title | Size · tier | Depends on |
 |---|---|---|---|---|---|
-| M10 | 625 | MP-05 | Invoice records and price history written by `apply` in one request (C-INVOICE) | M · build | 618 |
+| M10 | 625 | MP-05 | Invoice records and price history written by `apply` in one request (C-INVOICE) | M · build | 618, 619 |
 | M11 | 626 | MP-06 | Invoice read: header, PDF, stored file, supplier suggested by tax id (C-INVREAD) | M · build | 619, 625 |
 | M12 | 627 | MP-07 | Name memory: own aliases, shared supplier brain, `resolve` before the model (C-ALIAS) | M · build | 626 |
 | M13 | 628 | MP-08 | Invoice screen: photo or PDF, header strip, memory first, price change in percent; invoices list | M · build (design-light) | 627 |
@@ -84,7 +84,7 @@ Confirm every grouping with `node scripts/plan-order.mjs` and the `/orchestrate`
 - 616, 617, 618 all edit `server/routes/admin.js`; 617 and 619 both edit `server/services/gemini-client.js` — sequential
   inside `mod-0` (already the row order).
 - 625, 626, 627 all edit `server/routes/product-import.js` — sequential inside `mod-invoices-srv`.
-- 631 edits `server/middleware/auth.js`, `server/routes/auth.js`, `server/utils/permissions.js`,
+- 631 edits `server/routes/generic.js` (one line, the Trash filter), `server/middleware/auth.js`, `server/routes/auth.js`, `server/utils/permissions.js`,
   `server/middleware/usage.js`, `server/test/invariants.test.js`, `docs/brain/invariants.md` — alone in its run; no
   other live run may touch those files.
 - 624 and 616 both edit `server/routes/events.js` (616 merges in round 1, so only a re-run can collide).
@@ -130,7 +130,7 @@ Business document and platform screen
 - `businessSchema` strict, no `modules`: ok — `hiddenLogisticsKeys` is `[{ key, at }]`, not a list of strings (delta 1).
 - `GET /api/v1/business` returns the whole document, `BusinessService.business_`: ok.
 - Platform screen (12 sortable columns, `front-desk-admin-dialog`): ok — the page file is
-  `src/app/pages/platform-dashboard/platform.page.ts`.
+  `src/app/pages/platform-dashboard/platform-dashboard.page.ts`.
 - Navigation: changed: the header is as written; `tab-chips` has five groups, not four — `dashboard` (venues, metadata,
   suppliers, trash), `inventory` (products, equipment), `recipes` (recipe-builder, cook-view), `menus` (menu-library,
   menu-intelligence), `frontdesk` (requests, bookings, clients, knowledge, settings) (delta 2).
@@ -190,7 +190,8 @@ Numbers
 2. **`venues` is a chip of the `dashboard` group**, not of `menus`. C-MODULES browser cell corrected.
 3. **No screen sets an equipment scaling rule.** The labels that exist ("לכל אורחים", "כמות מינימלית", "כמות מקסימלית")
    agree with the reading "one per `perGuests` guests, between min and max". 624 adds the three inputs to the equipment
-   form with the keys that already exist; scope gains `src/app/pages/inventory/components/equipment-form/**`.
+   form with the keys that already exist; scope gains `src/app/pages/equipment/components/equipment-form/**` and the
+   equipment list. Plan 338 removed these inputs on Dandan's decision ("meaningless" then, because nothing used them).
    Critical Question 1 of the program asks Dandan to confirm.
 4. **Unit conversion is browser-only**: `toBase` in `src/app/core/engine/units.ts` (63 lines), with rates in
    gram-equivalent from the `unit` taxonomy terms (`gramRate`) and `SYSTEM_UNITS`. 635 moves the pure rule to
@@ -205,6 +206,23 @@ Numbers
    C-ACCESS says what they do with an acting token.
 9. **A feature key is enforced only in tests.** 617 keeps that; the cap check runs only for a call that has a
    `usage.businessId`.
+11. **Found while drafting (2026-11-17):** routers under `server/routes/ai/` could not reach the shared AI helpers
+    (C-REGISTRY now exports four of them); the two C-ALIAS unique indexes could collide (both are partial now);
+    C-INVREAD and C-DIAG disagreed on the limiter (the invoice read has only its own); the brief's MP-05 seed "a staff
+    token gets 403 on the invoice read" is replaced by the Contract: staff get the three header fields.
+    `invoices` and `stockCounts` are registered without soft delete (no plan deletes one); the `businessAccess`
+    index is a full unique index; C-STOCK gains its index, the counts read, `draftIds` and `fileId`; a settings save
+    keeps a stored `priceRiseAlertPct`; staff read only the name and status of a diagnosis; 619 makes deleting a
+    business remove its rows in the program's server-only collections. A draft records the model that answered;
+    an invoice file nobody saved is deleted after 30 days; rows and printed lines of an invoice read are linked by name.
+    625 therefore also depends on 619. C-ACCESS gains the `ACCESS_ENDED` answer, `homeModules` on the user object
+    while acting, and the Trash filter line in `generic.js`; a client log line carries no business id.
+    C-FILES gains `format`, the request-builder file, the download endpoint for the expiring link and the
+    `media-src` line; C-VOICE maps `audio/mp4` to the model's `audio/m4a`; C-LOGX names the master test by
+    `createdBy`; the loading tick uses the existing `markArrival` action. 620 is size L and stays one plan.
+    Known and left for later: the cost estimate of an audio call uses the text token price
+    (`server/constants/ai-prices.js` has no audio price yet). The brief's "whole existing suite green,
+    untouched" for 615 means: green, with only the assertions that list registry content updated.
 10. **Kit v3.4.0 (lesson K1):** a plan that edits a file under `.claude/` cannot be built unattended. No plan of this
     program does.
 
@@ -215,7 +233,8 @@ Numbers
 - `shared/schemas/modules.ts` (C-MODULES names).
 - `businessSchema` gains, all optional: `modules`, `platformHistory`, `aiMonthlyTokenCap`, `aiPrivate`.
   `businessSettingsSchema` gains optional `priceRiseAlertPct` (`> 0`, `≤ 100`); reads fill the default 5 the way
-  `BUSINESS_SETTINGS_DEFAULTS` fills the others; a `PUT /business/settings` body without it stays valid.
+  `BUSINESS_SETTINGS_DEFAULTS` fills the others; a `PUT /business/settings` body without it stays valid and keeps
+  the stored number (the route replaces the whole settings object today; 616 makes it keep this one field).
 - `supplierSchema` gains `taxId?` (`^\d{9}$`). `menuEvents.siteLogistics` gains `loaded?` (C-LOAD), added to what
   the events router owns.
 - New schema files under `shared/schemas/entities/`, exported from `index.ts` and `SCHEMA_BY_COLLECTION`:
@@ -226,14 +245,15 @@ Numbers
 
   | name | userData | cloneable | backup | searchable | softDelete | routerWrites |
   |---|---|---|---|---|---|---|
-  | `invoices` | true | false | true | false | true | true |
+  | `invoices` | true | false | true | false | false | true |
   | `diagnoses` | true | false | true | false | false | true |
-  | `stockCounts` | true | false | true | false | true | true |
+  | `stockCounts` | true | false | true | false | false | true |
   | `priceHistory`, `invoiceAliases`, `supplierProfiles`, `aiDrafts`, `storedFiles`, `businessAccess` | false | false | false | false | false | — |
 
 - `server/utils/permissions.js`: `OWNER_ONLY_TYPES` gains `invoices`, `diagnoses`. `shared/schemas/money-fields.ts`:
   `invoices` → `lines[].unitPrice`, `lines[].lineTotal`, `lines[].price`. `shared/schemas/staff-fields.ts`:
-  `invoices` → `['supplierName', 'invoiceDate', 'invoiceNumber']`.
+  `invoices` → `['supplierName', 'invoiceDate', 'invoiceNumber']`, `diagnoses` → `['name', 'status']` (staff never
+  read a diagnosis's selling prices).
 - `server/db.js` indexes: the ones named in the Contracts below.
 - `server/constants/ai-features.js` gains `logistics_extract`, `invoice_read`, `menu_prices_parse`, `stock_extract`
   (`voice_transcribe` is already there).
@@ -243,6 +263,10 @@ Numbers
   in `server/app.js` — `/api/v1/files` → `routes/files.js`, `/api/v1/access` → `routes/access.js`,
   `/api/v1/stock` → `routes/stock.js`, `/api/v1/diag` → `routes/diag.js`, `/api/v1/admin/learning` →
   `routes/admin-learning.js`.
+- `server/routes/ai.js` also exports `respondFromGeminiFailure`, `usageOf`, `requestedModel` and `aiLimiter`, so a
+  router under `server/routes/ai/` uses the same failure answers, usage stamp, model choice and limiter. `ai.js`
+  requires each sub-router before its own `module.exports`, so a sub-router reads them with `require('../ai')`
+  inside the handler, never at the top of the file.
 - `docs/brain/invariants.md`: INV-6 `Touches` gains `server/routes/ai/**` (the rule holds: every model call still
   enters through `server/routes/ai.js`); INV-1 `Touches` gains the five new routers. `preserves`.
 
@@ -301,7 +325,7 @@ Numbers
   platform admin. A private business keeps its own per-business memory and its own drafts.
 - `setAiPrivate(id, value)` in `server/services/business.js` replaces `setShareAiExamples`: turning private on
   deletes the business's promoted `GEMINI_SHOTS` copies (`promotedFrom.businessId`) and calls
-  `forgetBusiness` (C-ALIAS, a no-op until 627).
+  `forgetBusiness` (C-ALIAS; 618 leaves a one-line placeholder and 627 adds the real call).
 - Removed: `PUT /api/v1/business/share-ai-examples`, `shareAiExamplesInputSchema`,
   `BusinessService.updateShareAiExamples`. `business.shareAiExamples` stays in the schema as optional so stored
   documents validate; nothing reads it.
@@ -312,9 +336,10 @@ Numbers
 **C-AIDRAFT (618; used by 622, 625, 626, 633, 637)**
 - Collection `aiDrafts` (server-only): `{ _id, businessId, userId, feature, subject?: { type: 'menuEvent' |
   'invoice' | 'diagnosis' | 'stockCount', id?: string }, input: { text?: string (≤ 20,000), fileId?: string },
-  aiDraft, saved?, keptRatio?: number (0–1), status: 'pending' | 'confirmed', at, confirmedAt? }`.
+  aiDraft, model?: string, saved?, keptRatio?: number (0–1), status: 'pending' | 'confirmed', at, confirmedAt? }`
+  (`model` = the model that answered, so accuracy can be read per model).
   Index `{ businessId, feature, at }`. At most the newest 500 per business and feature are kept.
-- `server/services/ai-drafts.js`: `saveAiDraft(req, { feature, subject?, input, aiDraft }) → draftId` (never
+- `server/services/ai-drafts.js`: `saveAiDraft(req, { feature, subject?, input, aiDraft, model? }) → draftId` (never
   throws; on failure returns `null` and the feature still answers); `confirmAiDraft(req, draftId, saved, ratio)`
   — `ratio` is a pure function `(aiDraft, saved) → 0..1` owned by the feature (lines saved unchanged / lines
   suggested). A draft of another business answers 404.
@@ -323,21 +348,28 @@ Numbers
 **C-FILES (619; used by 621, 626, 628)**
 - `server/services/file-store.js`: `isFileStoreConfigured()` (all of `CLOUDINARY_CLOUD_NAME`,
   `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` set); `putPrivateFile(req, { kind: 'invoice' | 'voice', mimeType,
-  buffer }) → fileId | null` — `null` when not configured or when the upload fails (one warn log with kind and
+  buffer, deleteAfterDays? }) → fileId | null` — `null` when not configured or when the upload fails (one warn log with kind and
   size, never the content; never throws); `signedFileUrl(file, ttlSeconds)`; `deleteStoredFile(file)`;
   `setFileStoreForTests(fake)`.
 - Upload is signed by the server and delivered as an authenticated (non-public) asset; no new npm dependency
-  (`node:crypto` + `fetch`). Check the provider's current upload and signed-delivery documentation before writing
-  the plan; do not write the request shape from memory.
+  (`node:crypto` + `fetch`). The request shapes are in 619, taken from the provider's documentation as read on
+  2026-11-17 and built by pure functions in `server/services/cloudinary-requests.js`: a signed delivery URL does not
+  expire there, so the 300-second link is the provider's API download endpoint with `expires_at`.
+- `server/app.js` gains `media-src` in the content security policy (619), so a recording can be replayed from a
+  `blob:` and from a stored file.
 - Collection `storedFiles` (server-only): `{ _id, businessId, kind, mimeType, bytes, provider: 'cloudinary',
-  providerId, resourceType, createdBy, createdAt, deleteAfter?: number }`. Index `{ businessId, kind, createdAt }`.
+  providerId, resourceType, format?: string (≤ 12, from the provider's upload answer), createdBy, createdAt,
+  deleteAfter?: number }`. Index `{ businessId, kind, createdAt }`.
 - `GET /api/v1/files/:id` → `{ url }` (expires in 300 s) for a member of the file's business; 404 otherwise.
   An invoice file: owner (and consultant) only — it shows prices.
 - Limits: base64 ≤ 1,800,000 characters (the JSON body limit is 2 MB). Mime allowlists — invoice:
   `image/jpeg`, `image/png`, `image/webp`, `application/pdf`; voice: `audio/webm`, `audio/mp4`, `audio/ogg`,
   `audio/mpeg`, `audio/wav`.
 - Retention: a voice file gets `deleteAfter = createdAt + 730 days`; `server/jobs/retention.js` deletes the
-  provider asset and the document (lazy, same throttle). An invoice file lives as long as its invoice.
+  provider asset and the document of every stored file whose `deleteAfter` has passed (lazy, same throttle). An
+  invoice file is stored at read time with `deleteAfterDays: 30`; when `apply` writes the invoice it calls
+  `keepStoredFile(db, businessId, fileId)` (`file-store.js`), which clears `deleteAfter` — so a read nobody saved is
+  cleaned up, and a kept invoice's file lives as long as its invoice.
 - Model input: `callGemini` gains `needsMedia?: 'image' | 'audio' | 'pdf'` (`needsVision: true` keeps meaning
   `'image'`); a model that cannot take the medium is skipped in the chain; ledger rows gain `audioSeconds?` and
   `fileCount?`.
@@ -349,13 +381,15 @@ Numbers
   `feature: 'voice_transcribe'`; `needsMedia: 'audio'`. The prompt asks for the words as spoken, in the spoken
   language, with no summary and no answer to anything said. Silence → 200 with `transcript: ''`.
 - The browser stops a recording at 180 seconds.
+- `audio/mp4` (what a phone browser records) is accepted and sent to the model labelled `audio/m4a`, the name the
+  model's audio documentation lists for the same container.
 
 **C-LOGX (622; used by 623)**
 - `shared/schemas/logistics/visible-items.ts` → `visibleLogisticsItems({ terms, hiddenLogisticsKeys, eventCreatedAt,
   phase, environment, eventHiddenKeys? }) → LogisticsItemTerm[]` — the questions this event shows. Pure. It is the rule
   `LogisticsItemRegistryService.forEvent` has today (plan 579), moved: `terms` = master ∪ the business's own
   `logisticsItem` terms; group by `key`; a term with `foldedAt` gives no row but still counts for the start date; the
-  row is the live term, else the newest removed one; a key counts from the earliest of its terms (a master term = 0,
+  row is the live term, else the newest removed one; a key counts from the earliest of its terms (a term whose `createdBy` is `'__master__'` = 0,
   else `createdAt`) until the earliest `removedAt` or the business's hide date (`hiddenLogisticsKeys[].at`); it shows
   when `start ≤ eventCreatedAt < end` (no `eventCreatedAt` = now); `phase` must equal the term's; a term with
   `environments` shows only when the event has no environment or has one of them (`event.logistics.environmentType`).
@@ -390,14 +424,16 @@ Numbers
   quantity, else 1; `key` = `itemKey`.
 - Ticks: `menuEvents.siteLogistics.loaded?: [{ key, at, by, byName }]` (≤ 600), server-owned, written by
   `PUT /api/v1/events/:id/loading` body `{ key, loaded: boolean }` — any member of the business,
-  `requireModule('event_logistics')`, not on a finished event.
+  `requireModule('event_logistics')`, not on a finished event. There is no permission action of its own: the route
+  uses the existing `markArrival` action, so `permissions.js` is not edited.
 
 **C-INVOICE (625; used by 626–629, 633)**
 - `invoices`: `{ ...baseDocShape, supplierId?, supplierName, supplierTaxId? (^\d{9}$), invoiceNumber? (≤ 40),
   invoiceDate? ('YYYY-MM-DD'), vatIncluded?, source: 'photo' | 'pdf' | 'text', fileId?, draftId?, supplierKey?,
   lines: [{ printedName (≤ 200), quantity?, unit?, unitPrice?, lineTotal?, price: number | null, needsReview,
   productId?, result: 'created' | 'updated' | 'same_price' | 'no_price' | 'invalid' | 'duplicate' }] (≤ 200) }`.
-  Read through the generic API (owner; staff see only the three header fields); written only by `apply`.
+  Read through the generic API (owner; staff get 200 with only the three header fields — the generic API trims, it
+  does not refuse); written only by `apply`.
 - `priceHistory` (server-only): `{ _id, businessId, productId, supplierId ('' = none), price, prevPrice?,
   changePct?, at, by, source: 'invoice' | 'import', invoiceId? }`. `changePct = (price − prevPrice) / prevPrice ×
   100`, two decimals, computed by code. Indexes `{ businessId, productId, at }`, `{ businessId, at }`.
@@ -409,18 +445,21 @@ Numbers
   today, plus the history rows (`source: 'import'`). The route has no transaction today and gets none: the writes run
   in this order — products, `priceHistory`, `invoices`, the draft confirm. A failure after the product write is
   logged (`product_import.apply.trail_failed`, ids and counts only) and the response is still 200 with the product
-  result and `invoiceId: null`: the prices the person approved are never rolled back by a failed trail.
+  result and `invoiceId: null`: the prices the person approved are never rolled back by a failed trail. `invoiceId`
+  is the real id whenever the history rows and the invoice were both written, also when only the draft confirm failed.
 - `GET /api/v1/product-import/price-rises?days=60` (owner) → `[{ productId, supplierId, from, to, changePct, at }]`
   — the latest rise per product and supplier at or above the business's `priceRiseAlertPct`.
 
 **C-INVREAD (626; used by 628, 634)**
 - `POST /api/v1/ai/invoices/read` body `{ fileBase64, mimeType, knownCategories? }` — owner or consultant
-  (`editMoney` on `products`), checked before `aiLimiter`; `feature: 'invoice_read'`;
+  (`editMoney` on `products`), checked before the route's own limiter (60 / 15 minutes per user; not `aiLimiter`); `feature: 'invoice_read'`;
   `needsMedia: 'image' | 'pdf'` → `{ header: { supplierName?, supplierTaxId?, supplierPhone?, invoiceNumber?,
   invoiceDate?, vatIncluded? }, supplier: { supplierId?, matchedBy?: 'taxId' | 'phone' | 'name', supplierKey },
   rows: ImportRow[], printed: [{ name, quantity, unit, unitPrice, lineTotal }], truncated, draftId, fileId }`.
 - Rows go through the existing `normalizeReceiptRows` (`RECEIPT_MISMATCH_TOLERANCE` 5%, `needsReview`): one
-  implementation of the line check, never a block. Header values are copied as printed; a tax id that is not 9
+  implementation of the line check, never a block. It drops nameless lines and merges duplicates, so `rows` and
+  `printed` are not aligned by index: a row is linked to its printed line by normalised name, and the last printed
+  line with that name wins. Header values are copied as printed; a tax id that is not 9
   digits is dropped.
 - `server/utils/supplier-key.js` → `supplierKey({ taxId, phone, name })` = `tax:<9 digits>` |
   `phone:<last 9 digits>` | `name:<normalizeProductName(name)>`.
@@ -428,10 +467,12 @@ Numbers
 
 **C-ALIAS (627; used by 628, 630)**
 - `invoiceAliases` (server-only). Own alias: `{ _id, businessId, supplierKey, nameKey, printedName, productId,
-  unit?, packQty?, hits, lastAt }`, unique `{ businessId, supplierKey, nameKey }` — the person's latest link wins.
+  unit?, packQty?, hits, lastAt }`, unique `{ businessId, supplierKey, nameKey }` over rows that have a `productId`
+  (a partial index) — the person's latest link wins. `packQty` is not filled in this program (no read gives it).
   Shared alias: `{ _id, businessId: '__master__', supplierKey, nameKey, printedName, masterProductId, hits,
   contributors: string[] (≤ 200, never returned), lastAt }`, unique `{ supplierKey, nameKey, masterProductId }`
-  among master rows. `nameKey = normalizeProductName(printedName)`.
+  over rows that have a `masterProductId` (a partial index; the two unique indexes never meet on one row).
+  `nameKey = normalizeProductName(printedName)`.
 - `supplierProfiles` (server-only, shared): `{ _id: supplierKey, names: string[] (≤ 10), vatIncludedYes,
   vatIncludedNo, invoices, contributors: string[] (≤ 200, never returned), lastAt }`.
 - Neither shared shape has a price, a quantity or a date of purchase (a schema test asserts the key list).
@@ -447,8 +488,9 @@ Numbers
 
 **C-ACCESS (631; used by 632, 633)**
 - `businessAccess` (server-only): `{ _id, userId, businessId, role: 'consultant', grantedBy, grantedByName,
-  grantedAt, revokedAt?, revokedBy? }`; unique partial index `{ userId, businessId }` over rows with no
-  `revokedAt`. `users` gain `activeBusinessId?`.
+  grantedAt, revokedAt?, revokedBy? }`; unique index `{ userId, businessId, revokedAt }` (a partial index cannot
+  say "no `revokedAt`"; two live grants of one user in one business collide, removed ones differ by their time).
+  `users` gain `activeBusinessId?`.
 - Token payload: `{ userId, name, businessId, businessRole, isPlatformAdmin, homeBusinessId, acting? }` —
   `businessId` is the **active** business, so every existing reader keeps working; `businessRole` is `owner`,
   `staff` or `consultant`; `acting` is `'consultant'` or `'platform'` and absent at home.
@@ -459,7 +501,13 @@ Numbers
 - `POST /api/v1/auth/switch-business` body `{ businessId: string | null }` → `{ token, user }`, or 403
   `NO_ACCESS`. `GET /api/v1/access/businesses` → `[{ businessId, name, role }]` for the signed-in user.
 - While `acting` is set, `verifyToken` re-resolves on every request (one indexed read); a session whose grant was
-  removed gets 401 on its very next request and the refresh lands at home.
+  removed gets 401 `{ error: 'ACCESS_ENDED' }` on its very next request (so the browser can tell it from an expired
+  token) and the refresh lands at home.
+- While acting, the user object the server answers on login, refresh and switch also carries `homeModules` (the
+  resolved modules of the home business): `GET /api/v1/business` answers the client's business then, and the browser
+  needs the home modules for the diagnosis entry (C-MODULES). The token payload does not change.
+- `trashOwnerFilter` in `server/routes/generic.js` tests the role name `owner` directly; 631 changes that one test
+  so a consultant's "restore all" and "empty Trash" answer like the owner's.
 - `permissions.js`: `consultant` may do everything the owner may, except `manageTeam` and `editSettings`
   (`CONSULTANT_DENIED`). Map every `server/routes/business.js` route to one of the two sides in the plan. The
   platform write (modules, cap, private, front desk status) stays platform admin only.
@@ -470,8 +518,8 @@ Numbers
 - Stamps keep the real person: `createdBy` and `actorOf(req)` are unchanged. `aiUsage` rows keep the active
   `businessId`. `recordUsage` (`server/middleware/usage.js`) skips a request whose token has `acting`.
 - `verifyAccessToken` (used by `server/middleware/write-limit.js` and `server/routes/log.js`) does not re-check a
-  grant: the write limit is keyed by the real `userId`, and a log line sent by an acting session carries the active
-  `businessId` and the real `userId`. Neither reads or writes business data, so a removed grant loses nothing there.
+  grant: the write limit is keyed by the real `userId`, and a log line sent by an acting session carries the real
+  `userId`. Neither reads or writes business data, so a removed grant loses nothing there.
 - INV-1 rule gains one sentence (a user reads and writes a business only as its member, as a consultant with a
   live grant, or as the platform admin acting in it; the business is always taken from the token the server
   signed). ADR `docs/brain/decisions/0032-one-user-more-than-one-business.md` (amends ADR 0023's "one business
@@ -484,7 +532,7 @@ Numbers
   dishId? }] (≤ 300), invoiceIds: string[] (≤ 100), homeBusinessId, status: 'open' | 'done' }`; read through the
   generic API (owner, consultant), written only by the router.
 - `/api/v1/diag` (`requireHomeModule('consultant_diag')`; owner, consultant or acting platform admin):
-  `POST /`, `PUT /:id/menu`, `PUT /:id/invoices`, `PUT /:id/status`, `GET /:id/data` → `{ diagnosis,
+  `POST /`, `PUT /:id/menu` body `{ menu, draftId? }` (it confirms the AI draft), `PUT /:id/invoices`, `PUT /:id/status`, `GET /:id/data` → `{ diagnosis,
   volatility: [{ productId, supplierId, min, max, movePct, points }] }` from `priceHistory` inside the period;
   `movePct = (max − min) / min × 100`, two decimals, by code.
 - `POST /api/v1/ai/diag/menu` body `{ text (1–20,000) }` → `{ items: [{ name, sellPrice }], draftId }`;
@@ -500,10 +548,13 @@ Numbers
 
 **C-STOCK (635; used by 636, 637)**
 - `stockCounts`: `{ ...baseDocShape, countedAt, status: 'draft' | 'final', source: 'manual' | 'voice' | 'text',
-  draftId?, note? (≤ 500), lines: [{ productId, quantity (≥ 0), unit, baseQuantity (≥ 0) }] (≤ 2,000), finalAt?,
-  finalBy? }`. Written only by the router; `baseQuantity` is computed by the server.
+  draftIds?: string[] (≤ 20), note? (≤ 500), lines: [{ productId, quantity (≥ 0), unit, baseQuantity (≥ 0) }] (≤ 2,000), finalAt?,
+  finalBy? }`. Written only by the router; `baseQuantity` is computed by the server. Index
+  `{ businessId, status, countedAt: -1 }`. A count is never deleted in this program: a draft is continued or made final.
 - `/api/v1/stock`: `POST /counts`, `PUT /counts/:id` (draft only; its creator or the owner),
-  `POST /counts/:id/finalize` (its creator or the owner), `GET /on-hand` → `[{ productId, baseQuantity,
+  `POST /counts/:id/finalize` (its creator or the owner; it also confirms every pending draft in `draftIds`
+  through `confirmAiDraft`, and a failure there never fails the finalise), `GET /counts?status=draft|final&limit=`
+  (any member; newest first; 20 by default, 100 at most), `GET /on-hand` → `[{ productId, baseQuantity,
   countedAt }]` — per product, the value in the newest final count that lists it.
 - Conversion to the base unit uses the product's `baseUnit`, its `purchaseOptions` and the unit rates. Step 0: the
   rule is `toBase(amount, unit, product, units)` in `src/app/core/engine/units.ts`, browser-only. 635 moves it
@@ -511,7 +562,7 @@ Numbers
   `units.ts` re-exports it, so the browser has no second rule. On the server the rates are the `gramRate` of the
   `unit` taxonomy terms (master ∪ the business's own) over the system units. A unit that cannot be converted for a
   product answers 400 `UNIT_NOT_CONVERTIBLE` with the line index.
-- `POST /api/v1/ai/stock/extract` body `{ text (1–20,000) }` — any member; `feature: 'stock_extract'` →
+- `POST /api/v1/ai/stock/extract` body `{ text (1–20,000), fileId? }` — any member; `feature: 'stock_extract'` →
   `{ draftId, lines: [{ productId, quantity, unit }], unmatched: [{ spoken, quantity?, unit? }] }`. The server
   sends the numbered names of the business's live products (≤ 800; more → 413 `TOO_MANY_PRODUCTS`), the model
   answers positions; an out-of-range position goes to `unmatched`.
