@@ -345,6 +345,8 @@ function respondFromGeminiFailure(res, result) {
       });
     case 'all_exhausted':
       return res.status(429).json({ error: 'daily_limit_reached', code: 'daily_limit_reached', resetAt: result.resetAt });
+    case 'business_cap':
+      return res.status(429).json({ error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' });
     case 'model_removed':
       return badRequest(res, 'model_removed', { model: result.model });
     case 'gemini_error':

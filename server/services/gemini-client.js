@@ -18,6 +18,7 @@
 const mongoose = require('mongoose');
 const { isAiFeature } = require('../constants/ai-features');
 const { recordAiUsage } = require('./ai-usage');
+const { capState } = require('./ai-cap');
 
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -394,6 +395,7 @@ function allExhausted(candidates) {
  * decides whether to send again on it. A requested model no longer in the catalog is refused
  * without a call (plan 412). Never throws. Returns:
  *   { kind: 'ok', model, data }
+ *   { kind: 'business_cap', model, cap, used }  (plan 617: monthly cap reached; no call made)
  *   { kind: 'model_removed', model }
  *   { kind: 'model_exhausted', model, nextModel, resetAt }
  *   { kind: 'all_exhausted', resetAt }          (ISO string or null)
@@ -418,6 +420,20 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
   if (!firstUsable(candidates, now)) return allExhausted(candidates);
 
   const model = candidates.includes(requested) ? requested : candidates[0];
+  // Plan 617: a business over its monthly token cap gets no request (C-AICAP). A ledger problem never blocks AI.
+  const capId = usage?.businessId;
+  if (typeof capId === 'string' && capId && capId !== '__platform__' && capId !== '__master__' && mongoose.connection.readyState === 1) {
+    try {
+      const state = await capState(mongoose.connection.db, capId, Date.now());
+      if (state.over) {
+        if (meter) recordAiUsage({ usage, model, ok: false, errorCode: 'business_cap', latencyMs: 0, log });
+        log.info({ event: 'ai.cap.refused', feature: usage.feature });
+        return { kind: 'business_cap', model, cap: state.cap, used: state.used };
+      }
+    } catch {
+      log.warn({ event: 'ai.cap.check_failed', businessId: capId });
+    }
+  }
   const knownReset = exhaustedResetAt(model, now);
   if (knownReset) {
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };

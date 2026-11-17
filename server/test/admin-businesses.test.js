@@ -26,7 +26,7 @@ const usage = (userId, businessId, daysAgo) => {
 }
 const event = (id, businessId, extra = {}) => ({ _id: id, businessId, userId: 'x', name: 'secret ' + id, stage: 'inquiry', eventDate: '2026-01-01', ...extra })
 
-const EXPECTED_KEYS = ['_id', 'name', 'ownerName', 'staffCount', 'createdAt', 'internal', 'lastActivityAt', 'activeDays7', 'events', 'closeRate', 'lastEventDate', 'frontDesk', 'modules', 'aiPrivate', 'aiMonthlyTokenCap'].sort()
+const EXPECTED_KEYS = ['_id', 'name', 'ownerName', 'staffCount', 'createdAt', 'internal', 'lastActivityAt', 'activeDays7', 'events', 'closeRate', 'lastEventDate', 'frontDesk', 'modules', 'aiPrivate', 'aiMonthlyTokenCap', 'aiTokensThisMonth'].sort()
 
 let bAUsageLast
 
@@ -85,6 +85,21 @@ describe('GET /api/v1/admin/businesses', () => {
     const b = (await rowsOf()).bB
     expect(b).toMatchObject({ ownerName: 'Owner B', staffCount: 0, internal: false, lastActivityAt: null, activeDays7: 0, closeRate: null, lastEventDate: null })
     expect(b.events).toEqual({ total: 0, active: 0, closed: 0, finished: 0 })
+  })
+
+  it('gives this Israel month tokens of AI per business, 0 without rows', async () => {
+    const db = testDb()
+    await db.collection('aiUsage').deleteMany({})
+    const day = jerusalemDate(Date.now())
+    await db.collection('aiUsage').insertMany([
+      { businessId: 'bA', day, totalTokens: 30, feature: 'parse_text', ok: true, at: 1 },
+      { businessId: 'bA', day, totalTokens: 12, feature: 'parse_text', ok: true, at: 1 },
+      { businessId: 'bA', day: '2020-01-05', totalTokens: 999, feature: 'parse_text', ok: true, at: 1 },
+    ])
+    const rows = await rowsOf()
+    expect(rows.bA.aiTokensThisMonth).toBe(42)
+    expect(rows.bB.aiTokensThisMonth).toBe(0)
+    await db.collection('aiUsage').deleteMany({})
   })
 
   it('returns exactly the allowed keys, no content', async () => {

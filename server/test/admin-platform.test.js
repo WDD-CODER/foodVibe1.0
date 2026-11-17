@@ -7,6 +7,8 @@ const request = require('supertest')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
 const { clearModuleCache } = require('../middleware/require-module')
 const { createBusinessFor } = require('../services/business')
+const { clearCapCache } = require('../services/ai-cap')
+const { jerusalemDate } = require('../middleware/usage')
 
 let app
 
@@ -95,6 +97,33 @@ describe('PUT /admin/businesses/:id/platform', () => {
     expect(line).toContain('businessId: req.params.id')
     expect(line).toContain('changed')
     expect(line).not.toContain('reason')
+  })
+})
+
+describe('the cap takes effect at once', () => {
+  it('a new cap refuses the next AI call and null lets it through', async () => {
+    const db = testDb()
+    clearCapCache()
+    process.env.GEMINI_API_KEY = 'test-key'
+    await db.collection('aiUsage').deleteMany({})
+    await db.collection('aiUsage').insertOne({ businessId: 'bA', day: jerusalemDate(Date.now()), totalTokens: 50, feature: 'parse_text', ok: true, at: 1 })
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: '{"ingredients":[]}' }] } }] }) })
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      const ai = () => request(app).post('/api/v1/ai/parse-text').set(as(OWNER)).send({ rawText: '2 eggs' })
+      expect((await ai()).status).not.toBe(429) // no cap yet; the state is cached
+      expect((await put({ aiMonthlyTokenCap: 1, reason: 'cap it' })).status).toBe(200)
+      const refused = await ai()
+      expect(refused.status).toBe(429)
+      expect(refused.body.error).toBe('ai_monthly_cap_reached')
+      const calls = fetchMock.mock.calls.length
+      expect((await put({ aiMonthlyTokenCap: null, reason: 'uncap' })).status).toBe(200)
+      await ai()
+      expect(fetchMock.mock.calls.length).toBe(calls + 1)
+    } finally {
+      vi.unstubAllGlobals()
+      await db.collection('aiUsage').deleteMany({})
+    }
   })
 })
 

@@ -10,6 +10,7 @@ const { frontDeskSetup } = require('../services/front-desk-setup')
 const { actorOf } = require('../utils/actor')
 const { platformUpdateSchema, modulesOf, MODULE_KEYS } = require('../generated/schemas/modules')
 const { clearModuleCache } = require('../middleware/require-module')
+const { monthTokensByBusiness, clearCapCache } = require('../services/ai-cap')
 const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-admin.schema')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
@@ -89,7 +90,7 @@ const DAY_MS = 86400000
 router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const now = Date.now()
-    const [businesses, members, usage, activeDays, events, profiles] = await Promise.all([
+    const [businesses, members, usage, activeDays, events, profiles, tokens] = await Promise.all([
       col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1, modules: 1, aiPrivate: 1, aiMonthlyTokenCap: 1 } }).toArray(),
       col('users').aggregate([
         { $match: { businessId: { $type: 'string' } } },
@@ -114,6 +115,7 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
         } },
       ]).toArray(),
       col('frontDeskProfiles').find({ ...LIVE }).toArray(),
+      monthTokensByBusiness(mongoose.connection.db, now),
     ])
     const profileBy = new Map(profiles.map(p => [p.businessId, p]))
     const frontDeskBy = new Map()
@@ -142,6 +144,7 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
         modules: modulesOf(b),
         aiPrivate: b.aiPrivate === true,
         aiMonthlyTokenCap: b.aiMonthlyTokenCap ?? null,
+        aiTokensThisMonth: tokens.get(b._id) ?? 0,
         lastActivityAt: usageBy.get(b._id) ?? null,
         activeDays7: activeDays.get(b._id) ?? 0,
         events: { total: e?.total ?? 0, active: e?.active ?? 0, closed, finished: e?.finished ?? 0 },
@@ -276,6 +279,7 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
     const after = await col('businesses').findOneAndUpdate({ _id: req.params.id }, update, { returnDocument: 'after' })
     if (!after) return res.status(404).json({ error: 'Business not found' })
     clearModuleCache(req.params.id)
+    if (aiMonthlyTokenCap !== undefined) clearCapCache(req.params.id)
     req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed })
     res.json({
       ok: true,

@@ -239,12 +239,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Work out from the ledger how much AI a business used this month and whether it is over its ceiling — monthRangeOf, capState with the 60-second cache, monthTokensByBusiness, clearCapCache; month boundary, other business, no cap, cap zero and cache cases — server/services/ai-cap.js, server/test/ai-cap.test.js
-- [ ] A2: Stop a capped business before any request leaves for the model and record the refusal — the block after the model is picked; business_cap result, one zero-token ledger row, no fetch; platform calls unread, feature check unchanged, failed read lets the call through — server/services/gemini-client.js, server/test/ai-cap.test.js
-- [ ] A3: Answer a refused AI action with one clear code every AI route shares — business_cap case in respondFromGeminiFailure; parse-text and generate route cases — server/routes/ai.js, server/test/ai-cap.test.js
-- [ ] A4: Give the platform table this month's tokens and make a new ceiling count at once — aiTokensThisMonth in GET businesses, clearCapCache after the platform write; update both admin tests — server/routes/admin.js, server/test/admin-businesses.test.js, server/test/admin-platform.test.js
-- [ ] A5: Write the cap into the backend docs and the server map — docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A6: Run every check and record the results — test:server, server lint, build, log-query; paste the exit lines into Execution Notes — this plan file
+- [x] A1: Work out from the ledger how much AI a business used this month and whether it is over its ceiling — monthRangeOf, capState with the 60-second cache, monthTokensByBusiness, clearCapCache; month boundary, other business, no cap, cap zero and cache cases — server/services/ai-cap.js, server/test/ai-cap.test.js
+- [x] A2: Stop a capped business before any request leaves for the model and record the refusal — the block after the model is picked; business_cap result, one zero-token ledger row, no fetch; platform calls unread, feature check unchanged, failed read lets the call through — server/services/gemini-client.js, server/test/ai-cap.test.js
+- [x] A3: Answer a refused AI action with one clear code every AI route shares — business_cap case in respondFromGeminiFailure; parse-text and generate route cases — server/routes/ai.js, server/test/ai-cap.test.js
+- [x] A4: Give the platform table this month's tokens and make a new ceiling count at once — aiTokensThisMonth in GET businesses, clearCapCache after the platform write; update both admin tests — server/routes/admin.js, server/test/admin-businesses.test.js, server/test/admin-platform.test.js
+- [x] A5: Write the cap into the backend docs and the server map — docs/agent/standards-backend.md, server/breadcrumbs.md
+- [x] A6: Run every check and record the results — test:server, server lint, build, log-query; paste the exit lines into Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: plan 615 (`business.aiMonthlyTokenCap`), plan 616 (the platform write and the row fields). `recordAiUsage`, `jerusalemDate`, the `ai_usage_business_day` index. A business call adds at most one `businesses` read and one indexed aggregation per 60 seconds.
@@ -273,3 +273,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the cap row is written only when the call is metered (a valid feature) — why: the ledger takes only known feature keys; the cap is still enforced for a call with a business and no valid feature (map delta 9).
 - decided: `aiTokensThisMonth` is added here, not in 616 — why: it is read from the ledger by the same month rule as the cap (C-AICAP); 616 adds `modules`, `aiPrivate`, `aiMonthlyTokenCap`.
 - decided: this plan has no dictionary key and no [human] item — why: it is server-only; the message is shown by plan 620 in the same run.
+- evidence: `pnpm run test:server` → exit 0, 115 files / 1543 tests pass (incl. new ai-cap.test.js); `pnpm --dir server run lint` → exit 0 (0 errors); `pnpm run build` → exit 0; `node scripts/breadcrumbs-check.mjs` → clean; `log-query` → SKIP: no database configured.
