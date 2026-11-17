@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { provideHttpClient } from '@angular/common/http'
@@ -293,6 +294,20 @@ describe('RecipeIngredientsTableComponent', () => {
       await flush()
       expect(warn).toHaveBeenCalledOnceWith('he:paste_ingredients_match_failed')
       expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+    })
+
+    it('shows the monthly cap message when the AI step is refused by the cap (plan 620)', async () => {
+      matchProductNames.and.rejectWith(
+        new HttpErrorResponse({
+          status: 429,
+          error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' }
+        })
+      )
+      const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')
+      spyOn(TestBed.inject(TranslationService), 'translate').and.callFake((k?: string) => `he:${k}`)
+      component.onPasteIngredients('1 צרור שום')
+      await flush()
+      expect(warn).toHaveBeenCalledOnceWith('he:ai_monthly_cap_reached')
     })
 
     it('shows no message when the AI step fails for a paste of only text lines', async () => {

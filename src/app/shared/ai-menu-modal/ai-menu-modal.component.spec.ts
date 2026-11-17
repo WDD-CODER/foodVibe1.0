@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
@@ -62,5 +63,13 @@ describe('AiMenuModalComponent dish numbers (plan 587)', () => {
     const matched = (component as unknown as Internals).buildMatchedMenu_(draft)
     expect(matched.guestCount).toBe(1)
     expect(matched.guestCountMissing).toBeTrue()
+  })
+
+  it('shows the monthly cap message for the cap refusal (plan 620)', () => {
+    const component = makeComponent()
+    const key = (component as unknown as { resolveErrorKey_(e: unknown): string }).resolveErrorKey_(
+      new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' } })
+    )
+    expect(key).toBe('ai_monthly_cap_reached')
   })
 })

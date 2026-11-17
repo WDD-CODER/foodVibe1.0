@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
@@ -79,5 +80,12 @@ describe('AiProductModalComponent base unit (plan 497)', () => {
     fixture.detectChanges()
     expect((component as unknown as Internals).draft_()?.baseUnit).toBe('kg')
     expect(root().querySelector('.custom-select-label')?.textContent?.trim()).toBe('kg')
+  })
+
+  it('shows the monthly cap message for the cap refusal (plan 620)', () => {
+    const key = (component as unknown as { resolveErrorKey_(e: unknown): string }).resolveErrorKey_(
+      new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' } })
+    )
+    expect(key).toBe('ai_monthly_cap_reached')
   })
 })

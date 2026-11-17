@@ -21,13 +21,13 @@ describe('AiProductModalService (plan 620)', () => {
   })
 
   it('opens with ai_create', () => {
-    service.open()
+    service.open('create')
     expect(service.isOpen()).toBeTrue()
   })
 
   it('returns without opening when ai_create is off', () => {
     hasAi = false
-    service.open()
+    service.open('create')
     expect(service.isOpen()).toBeFalse()
   })
 })

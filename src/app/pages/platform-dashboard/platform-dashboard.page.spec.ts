@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, TrendingUp } from 'lucide-angular'
+import { LucideAngularModule, Settings, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
@@ -10,6 +10,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
+import { PlatformBusinessDialogService } from './components/platform-business-dialog/platform-business-dialog.service'
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformDashboardPage } from './platform-dashboard.page'
 
@@ -39,6 +40,10 @@ function row(id: string, extra: Partial<BusinessRow> = {}, events: Partial<Busin
     closeRate: null,
     lastEventDate: null,
     frontDesk: null,
+    modules: ['events', 'event_logistics', 'frontdesk', 'ai_create'],
+    aiPrivate: false,
+    aiMonthlyTokenCap: null,
+    aiTokensThisMonth: 0,
     ...extra
   }
 }
@@ -80,7 +85,7 @@ describe('PlatformDashboardPage', () => {
         )
       )
     TestBed.configureTestingModule({
-      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp })],
+      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp, Settings })],
       providers: [
         {
           provide: PlatformAdminService,
@@ -320,6 +325,54 @@ describe('PlatformDashboardPage', () => {
       const host = fixture.nativeElement as HTMLElement
       expect(host.querySelector('.ai-table')).toBeNull()
       expect(host.querySelector('.ai-usage app-empty-state')?.textContent).toContain('platform_ai_empty')
+    })
+  })
+
+  describe('modules and AI columns (plan 620)', () => {
+    const cell = (testid: string): string =>
+      ((fixture.nativeElement as HTMLElement).querySelector(`[data-testid="${testid}"]`)?.textContent ?? '')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    it('shows the module names joined with a dot, in order', async () => {
+      await setup([row('a', { modules: ['events', 'ai_create'] })])
+      expect(cell('biz-modules')).toBe('module_events · module_ai_create')
+    })
+
+    it('shows a dash when no module is on', async () => {
+      await setup([row('a', { modules: [] })])
+      expect(cell('biz-modules')).toBe('—')
+    })
+
+    it('shows tokens / cap with thousands separators', async () => {
+      await setup([row('a', { aiTokensThisMonth: 12345, aiMonthlyTokenCap: 1000000 })])
+      expect(cell('biz-ai-month')).toBe('12,345 / 1,000,000')
+    })
+
+    it('shows the no-cap text and no private tag by default', async () => {
+      await setup([row('a')])
+      expect(cell('biz-ai-month')).toBe('0 / platform_ai_no_cap')
+      expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-private-tag"]')).toBeNull()
+    })
+
+    it('shows the private tag for a private business', async () => {
+      await setup([row('a', { aiPrivate: true })])
+      expect(cell('biz-private-tag')).toBe('platform_ai_private_tag')
+    })
+
+    it('opens the modules dialog on the row state when the settings button is clicked', async () => {
+      await setup([row('a', { modules: ['frontdesk'], aiPrivate: true, aiMonthlyTokenCap: 5, aiTokensThisMonth: 3 })])
+      const dialog = TestBed.inject(PlatformBusinessDialogService)
+      const open = spyOn(dialog, 'open').and.resolveTo(false)
+      ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      expect(open).toHaveBeenCalledOnceWith({
+        businessId: 'a',
+        name: 'a',
+        modules: ['frontdesk'],
+        aiPrivate: true,
+        aiMonthlyTokenCap: 5,
+        aiTokensThisMonth: 3
+      })
     })
   })
 })

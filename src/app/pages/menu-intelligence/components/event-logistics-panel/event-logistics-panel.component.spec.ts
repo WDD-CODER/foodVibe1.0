@@ -10,6 +10,7 @@ import { EventPipelineService } from '@services/event-pipeline.service'
 import { LogisticsItemRegistryService, type LogisticsItemTerm } from '@services/logistics-item-registry.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
+import { ModuleService } from '@services/module.service'
 import type { MenuEvent } from '@models/menu-event.model'
 import type { EnvironmentType } from '@models/venue.model'
 
@@ -305,5 +306,12 @@ describe('EventLogisticsPanelComponent', () => {
     fixture.detectChanges()
     expect(rows()[0].querySelector<HTMLInputElement>('.logistics-status input')!.checked).toBe(true)
     expect(radios(0)[1].checked).toBe(true)
+  })
+
+  it('renders nothing without the event_logistics module (plan 620)', () => {
+    spyOn(TestBed.inject(ModuleService), 'has').and.returnValue(false)
+    create()
+    expect(el.querySelector('.logistics')).toBeNull()
+    expect(el.querySelector('.logistics-toggle')).toBeNull()
   })
 })

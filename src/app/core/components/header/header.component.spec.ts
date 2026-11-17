@@ -132,7 +132,8 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
             logout: () => of(null)
           }
         },
-        { provide: BusinessService, useValue: { business_: business } }
+        { provide: BusinessService, useValue: { business_: business } },
+        { provide: ModuleService, useValue: { has: () => true } }
       ]
     }).compileComponents()
     fixture = TestBed.createComponent(HeaderComponent)
