@@ -220,6 +220,8 @@ Numbers
     C-FILES gains `format`, the request-builder file, the download endpoint for the expiring link and the
     `media-src` line; C-VOICE maps `audio/mp4` to the model's `audio/m4a`; C-LOGX names the master test by
     `createdBy`; the loading tick uses the existing `markArrival` action. 620 is size L and stays one plan.
+    Dandan's answer of 2026-11-17 to the VAT question: C-DIAG gains `pricesIncludeVat`, `vatPct`, `netPrice`
+    and `suggestedPrice`.
     Known and left for later: the cost estimate of an audio call uses the text token price
     (`server/constants/ai-prices.js` has no audio price yet). The brief's "whole existing suite green,
     untouched" for 615 means: green, with only the assertions that list registry content updated.
@@ -529,19 +531,26 @@ Numbers
 
 **C-DIAG (633; used by 634)**
 - `diagnoses`: `{ ...baseDocShape, name, periodDays (default 60, 30–365), menu: [{ name (≤ 200), sellPrice (≥ 0),
-  dishId? }] (≤ 300), invoiceIds: string[] (≤ 100), homeBusinessId, status: 'open' | 'done' }`; read through the
+  dishId? }] (≤ 300), pricesIncludeVat: boolean (default true), vatPct: number (0–100, default 18),
+  invoiceIds: string[] (≤ 100), homeBusinessId, status: 'open' | 'done' }`; read through the
   generic API (owner, consultant), written only by the router.
 - `/api/v1/diag` (`requireHomeModule('consultant_diag')`; owner, consultant or acting platform admin):
-  `POST /`, `PUT /:id/menu` body `{ menu, draftId? }` (it confirms the AI draft), `PUT /:id/invoices`, `PUT /:id/status`, `GET /:id/data` → `{ diagnosis,
+  `POST /` (accepts `pricesIncludeVat?`, `vatPct?`), `PUT /:id/menu` body `{ menu, draftId?, pricesIncludeVat?,
+  vatPct? }` (it confirms the AI draft), `PUT /:id/invoices`, `PUT /:id/status`, `GET /:id/data` → `{ diagnosis,
   volatility: [{ productId, supplierId, min, max, movePct, points }] }` from `priceHistory` inside the period;
   `movePct = (max − min) / min × 100`, two decimals, by code.
 - `POST /api/v1/ai/diag/menu` body `{ text (1–20,000) }` → `{ items: [{ name, sellPrice }], draftId }`;
   `feature: 'menu_prices_parse'`; prices copied as printed; an item without a printed price is returned with
   `sellPrice: null` and the person types it.
-- `shared/schemas/diag/margin-report.ts` → `buildMarginReport({ menu, costByDishId, volatility, settings }) →
-  { dishes: [{ name, sellPrice, cost?, marginPct?, underTarget }], findings: [{ key, value, evidenceCount }] }`.
-  Pure. `marginPct = (sellPrice − cost) / sellPrice × 100`; `underTarget` when below
-  `settings.profitTargetPct`. The browser supplies `costByDishId` from `RecipeCostService` (the server has no
+- `shared/schemas/diag/margin-report.ts` → `buildMarginReport({ menu, costByDishId, volatility, settings,
+  pricesIncludeVat, vatPct }) → { dishes: [{ name, sellPrice, netPrice, cost?, marginPct?, underTarget,
+  suggestedPrice? }], findings: [{ key, value, evidenceCount }] }`. Pure, all by code, two decimals.
+  `netPrice = pricesIncludeVat ? sellPrice / (1 + vatPct / 100) : sellPrice`;
+  `marginPct = (netPrice − cost) / netPrice × 100`; `underTarget` when below `settings.profitTargetPct`;
+  `suggestedPrice` = the price to charge to reach the target = `cost / (1 − profitTargetPct / 100)`, times
+  `(1 + vatPct / 100)` when prices include VAT; absent without a cost or when the target is 100 or more. Costs are
+  taken as stored: no VAT is removed from a cost in this program (Dandan, 2026-11-17: a menu sold to the public
+  includes VAT, and the report must take it off and say what to charge). The browser supplies `costByDishId` from `RecipeCostService` (the server has no
   cost engine).
 - A batch of invoice files is a queue in the browser: one `POST /ai/invoices/read`, one preview, one `apply` at a
   time. `/api/v1/ai/invoices/read` gets its own limiter for this (60 / 15 minutes per user) in 626.
