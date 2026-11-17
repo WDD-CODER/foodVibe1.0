@@ -367,3 +367,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - evidence: `pnpm run lint` -> exit 0 (0 errors, 67 warnings); `pnpm --dir server run lint` -> exit 0 (0 errors).
 - evidence: `node scripts/log-query.mjs --since=plan-start --level=error` -> exit 0, "SKIP: no database configured".
 - [ui] `e2e/ui/618-1.spec.ts` written, not run (no running app in the worktree).
+- builder (resume after ask 618-1, approved): added the `ai-learning` and `ai-draft` family headings to `docs/brain/component-families.md` (naming mayLearnFrom, setAiPrivate in server/services/business.js, saveAiDraft/confirmAiDraft) and regenerated `docs/brain/inventory.md`.
+- evidence: `node scripts/inventory.mjs --check` -> exit 0, INVENTORY: ok; `kit-checks.mjs --base origin/orch/mod-0` -> exit 0, KIT_CHECKS: ok (6 checks); `kit-manifest-check.mjs` -> exit 0; `scope-check.mjs --diff=origin/orch/mod-0` -> SCOPE: ok; override, lint:icons, lint:no-native-select, plan-ledger, breadcrumbs, ci-scope, log-query -> all exit 0.
