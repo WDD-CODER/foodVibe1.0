@@ -203,6 +203,7 @@ shared/schemas/modules-pure.ts
 shared/schemas/modules.ts
 docs/brain/component-families.md
 src/app/pages/trash/trash.page.ts
+package.json
 ```
 
 ## Read Scope
@@ -501,7 +502,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A7: Give the platform admin one dialog for a business's modules, AI cap and private mode with a required reason — BusinessRow fields, PlatformUpdateBody, updatePlatform; the dialog component, template, service and spec (the five Done-when cases plus cancel closes without a request and a 500 keeps the dialog open with a toast); the module and dialog keys — src/app/core/services/platform-admin.service.ts, src/app/pages/platform-dashboard/components/platform-business-dialog/**, public/assets/data/dictionary.json
 - [x] A8: Show each business's modules and its AI use against the cap in the platform table — the two cells and header cells, the two grid tracks, the private tag, the settings action button that opens the dialog, the dialog mounted under @if (isOpen_()); page spec cases (modules text, tokens / cap, no cap, private tag, button opens the dialog on the row); the two new AI examples texts and their spec assertions — src/app/pages/platform-dashboard/platform-dashboard.page.ts, .html, .scss, .spec.ts, src/app/pages/platform-dashboard/components/platform-ai-shots/**, public/assets/data/dictionary.json
 - [x] A9: Turn the owner's sharing card into a locked chip that shows shared or private — the locked span with the lock icon, title and aria-label, the new description key; spec rewritten to three cases (shared text by default, private text when aiPrivate is true, title equals the tooltip key and there is no input); e2e 618-1 keeps passing (no enabled input) — src/app/pages/metadata-manager/components/ai-examples-share/**, public/assets/data/dictionary.json
-- [ ] A10: Write the four browser checks and run every gate — 620-1 and 620-2 set the QA business's modules through PUT /api/v1/admin/businesses/<id>/platform (id from GET /api/v1/business, reason "e2e 620"), reload, assert, and restore the four defaults in finally; 620-1 also fails if any response during the page load has status 403; 620-3 opens the dialog and cancels; 620-4 reads the chip text; each saves screens/620-n.png; then pnpm run test:ci, build, lint, lint:icons, lint:reuse, breadcrumbs-check, log-query, with the result lines in Execution Notes and the three [human] cards handed over — e2e/ui/620-1.spec.ts, e2e/ui/620-2.spec.ts, e2e/ui/620-3.spec.ts, e2e/ui/620-4.spec.ts
+- [x] A10: Write the four browser checks and run every gate — 620-1 and 620-2 set the QA business's modules through PUT /api/v1/admin/businesses/<id>/platform (id from GET /api/v1/business, reason "e2e 620"), reload, assert, and restore the four defaults in finally; 620-1 also fails if any response during the page load has status 403; 620-3 opens the dialog and cancels; 620-4 reads the chip text; each saves screens/620-n.png; then pnpm run test:ci, build, lint, lint:icons, lint:reuse, breadcrumbs-check, log-query, with the result lines in Execution Notes and the three [human] cards handed over — e2e/ui/620-1.spec.ts, e2e/ui/620-2.spec.ts, e2e/ui/620-3.spec.ts, e2e/ui/620-4.spec.ts
 
 ## Technical Considerations
 - Dependencies: `BusinessService`, `HttpStorageAdapter` (every generic read passes through the new check),
@@ -562,3 +563,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - `node scripts/reuse-lint.mjs --diff=origin/orch/mod-0` -> REUSE: ok. `--check-registry` -> exit 1 with 4 missing paths that the base registry has too (lines 23, 164, 197, 312 on origin/orch/mod-0), none from this plan.
 - NOT MET: the Done-when `pnpm run lint:reuse` exits 0 — the bare script (`node scripts/reuse-lint.mjs`, no argument) always prints its usage and exits 1, on the base too. Returned as ESCALATE (A10 left open).
 - The four `[ui]` specs (e2e/ui/620-1..4.spec.ts) are written, not run (no app, no QA login in this folder).
+
+### Builder run (mod-0, round 2, resume after answer 620-2)
+- scope extended: package.json — approved by the Human (answer 620-2): `lint:reuse` is now `node scripts/reuse-lint.mjs --diff=origin/main`; a passed `--check-registry` still wins (checked first), a later `--diff=` overrides.
+- `pnpm run lint:reuse` -> exit 0, REUSE: ok. `pnpm run build` -> exit 0. `pnpm run lint` -> exit 0 (0 errors, 67 old warnings). `pnpm run test:ci` -> exit 0, TOTAL: 2301 SUCCESS. `lint:icons`, `lint:no-native-select` -> exit 0. scope-check -> SCOPE: ok. kit-checks -> KIT_CHECKS: ok (6 checks). kit-manifest-check -> ok. override-check, plan-ledger-check, breadcrumbs-check (clean), ci-scope-check -> exit 0. log-query -> SKIP: no database configured (no entries).
+- A10 done; the four `[ui]` specs are written, not run, and the three `[human]` cards go to the Human.
