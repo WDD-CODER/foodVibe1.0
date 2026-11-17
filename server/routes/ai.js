@@ -105,6 +105,16 @@ const { trackAiOutcome } = require('../services/ai-usage');
 const router = Router();
 router.use(trackAiOutcome);
 
+// Plan 615 (C-REGISTRY): empty sub-routers filled by plans 621, 622, 626, 633, 637. They sit after trackAiOutcome so the
+// outcome tracker covers them. This file requires each one before it sets its own module.exports, so a sub-router must
+// read respondFromGeminiFailure, usageOf, requestedModel and aiLimiter with require('../ai') inside a handler (or a lazy
+// getter), never at the top of its module.
+router.use('/voice', require('./ai/voice'));
+router.use('/logistics', require('./ai/logistics'));
+router.use('/invoices', require('./ai/invoices'));
+router.use('/diag', require('./ai/diag'));
+router.use('/stock', require('./ai/stock'));
+
 /** Plan 580: usage context for callGemini; `ids` lets the outcome tracker mark refused answers. */
 function usageOf(req) {
   return { businessId: req.user.businessId, userId: req.user.userId, ids: req.aiUsageIds };
@@ -1874,3 +1884,8 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
 module.exports = router;
 module.exports.appendKnownMetadata = appendKnownMetadata;
 module.exports.PRICE_LIST_SYSTEM_PROMPT = PRICE_LIST_SYSTEM_PROMPT;
+// Plan 615: shared with the sub-routers under ./ai/ (read lazily, see the comment above the mounts).
+module.exports.respondFromGeminiFailure = respondFromGeminiFailure;
+module.exports.usageOf = usageOf;
+module.exports.requestedModel = requestedModel;
+module.exports.aiLimiter = aiLimiter;

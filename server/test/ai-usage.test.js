@@ -217,8 +217,8 @@ describe('static checks', () => {
     for (const m of DEFAULT_MODELS) expect(AI_PRICES[m], m).toBeTruthy();
   });
 
-  it('AI_FEATURES has 19 keys', () => {
-    expect(AI_FEATURES).toHaveLength(19);
+  it('AI_FEATURES has 23 keys', () => {
+    expect(AI_FEATURES).toHaveLength(23);
     expect(isAiFeature('recipe_generate')).toBe(true);
     expect(isAiFeature('nope')).toBe(false);
   });

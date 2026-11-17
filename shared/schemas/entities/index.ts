@@ -12,7 +12,25 @@ import { requestSchema } from './request.schema'
 import { supplierSchema } from './supplier.schema'
 import { taxonomyTermSchema } from './taxonomy-term.schema'
 import { venueSchema } from './venue.schema'
+import { invoiceSchema } from './invoice.schema'
+import { priceHistorySchema } from './price-history.schema'
+import { invoiceAliasSchema } from './invoice-alias.schema'
+import { supplierProfileSchema } from './supplier-profile.schema'
+import { aiDraftSchema } from './ai-draft.schema'
+import { storedFileSchema } from './stored-file.schema'
+import { businessAccessSchema } from './business-access.schema'
+import { diagnosisSchema } from './diagnosis.schema'
+import { stockCountSchema } from './stock-count.schema'
 
+export * from './invoice.schema'
+export * from './price-history.schema'
+export * from './invoice-alias.schema'
+export * from './supplier-profile.schema'
+export * from './ai-draft.schema'
+export * from './stored-file.schema'
+export * from './business-access.schema'
+export * from './diagnosis.schema'
+export * from './stock-count.schema'
 export * from './booking.schema'
 export * from './business.schema'
 export * from './client.schema'
@@ -41,7 +59,16 @@ export const SCHEMA_BY_COLLECTION = {
   knowledgeItems: knowledgeItemSchema,
   requests: requestSchema,
   bookings: bookingSchema,
-  decisionLog: decisionLogSchema
+  decisionLog: decisionLogSchema,
+  invoices: invoiceSchema,
+  priceHistory: priceHistorySchema,
+  invoiceAliases: invoiceAliasSchema,
+  supplierProfiles: supplierProfileSchema,
+  aiDrafts: aiDraftSchema,
+  storedFiles: storedFileSchema,
+  businessAccess: businessAccessSchema,
+  diagnoses: diagnosisSchema,
+  stockCounts: stockCountSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION

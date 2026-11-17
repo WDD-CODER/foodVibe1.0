@@ -18,6 +18,17 @@
 | `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests` |
 | `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
+| `routes/files.js` | Mounted at `/api/v1/files` (plan 615, C-FILES): empty until plan 619 |
+| `routes/access.js` | Mounted at `/api/v1/access` (plan 615, C-ACCESS): empty until plan 631 |
+| `routes/stock.js` | Mounted at `/api/v1/stock` (plan 615, C-STOCK): empty until plan 635 |
+| `routes/diag.js` | Mounted at `/api/v1/diag` (plan 615, C-DIAG): empty until plan 633 |
+| `routes/admin-learning.js` | Mounted at `/api/v1/admin/learning`, before `/api/v1/admin` (plan 615, C-FILES, C-LEARN): empty until plans 619 and 630 |
+| `routes/ai/voice.js` | Mounted at `/api/v1/ai/voice` inside `routes/ai.js` (plan 615): empty until plan 621 |
+| `routes/ai/logistics.js` | Mounted at `/api/v1/ai/logistics` (plan 615, C-LOAD): empty until plan 622 |
+| `routes/ai/invoices.js` | Mounted at `/api/v1/ai/invoices` (plan 615, C-INVREAD): empty until plan 626 |
+| `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
+| `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
+| `shared/schemas/modules.ts` | `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`, `platformUpdateSchema` (plan 615, C-MODULES); shared by the server gate and the browser |
 | `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token; plan 555: profile view, send, read by token, cancel by token |
 | `utils/public-profile.js` | `loadPublicProfile`, `isPublic`, `publicView` (plan 555): the one place that decides which profile fields a stranger sees |
 | `utils/request-create.js` | `createRequest`, `runQualify` (plan 555): the one request-creation path of the manual route and the public route |

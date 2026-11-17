@@ -1,20 +1,24 @@
 import { z } from 'zod'
 import { nameField } from '../base.schema'
+import { modulesFieldSchema, platformHistoryRowSchema } from '../modules'
 import { EVENT_STAGES } from './event-stage'
 import { LOGISTICS_LABEL_MAX } from './event-logistics'
 
 /** Plan 429: the three numbers that belong to the business. Defaults apply on read when a business has none stored. */
-export const BUSINESS_SETTINGS_DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 } as const
+export const BUSINESS_SETTINGS_DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5 } as const
 
 export const businessSettingsSchema = z.strictObject({
   /** Spec 03.2: a target of 100% or more is an error. */
   profitTargetPct: z.number().min(0).lt(100),
   safetyMarginPct: z.number().min(0).lt(100),
   /** 0 would flag every supplier. */
-  overrunThresholdPct: z.number().gt(0).max(100)
+  overrunThresholdPct: z.number().gt(0).max(100),
+  /** Plan 615: a price rise at or above this percent is flagged. Absent on older documents; reads fill 5. */
+  priceRiseAlertPct: z.number().gt(0).max(100).optional()
 })
 
-export type BusinessSettings = z.infer<typeof businessSettingsSchema>
+/** The three numbers the settings tab edits. `priceRiseAlertPct` (plan 615) has no input yet (plan 629 adds it and widens this type). */
+export type BusinessSettings = Omit<z.infer<typeof businessSettingsSchema>, 'priceRiseAlertPct'>
 
 /** Plan 472: the owner renames the business. Trimmed, 1–200 characters. */
 export const businessNameInputSchema = z.strictObject({ name: nameField.trim().min(1) })
@@ -97,7 +101,14 @@ export const businessSchema = z.strictObject({
   /** Plan 600: the owner lets the platform admin copy its saved AI recipe examples, anonymously, into the shared pool. Absent = off. */
   shareAiExamples: z.boolean().optional(),
   /** Server-written by the platform admin (plan 557); reserved so later features can check it. */
-  frontDeskPlan: z.enum(['pilot', 'basic', 'pro']).optional()
+  frontDeskPlan: z.enum(['pilot', 'basic', 'pro']).optional(),
+  /** Plan 615 (C-MODULES): modules switched on; absent = the defaults. Written only by the platform admin. */
+  modules: modulesFieldSchema.optional(),
+  platformHistory: z.array(platformHistoryRowSchema).max(50).optional(),
+  /** Plan 615 (C-AICAP): integer >= 0; absent = no cap. */
+  aiMonthlyTokenCap: z.number().int().min(0).optional(),
+  /** Plan 615 (C-LEARN): platform admin only; absent = shared. */
+  aiPrivate: z.boolean().optional()
 })
 
 export type Business = z.infer<typeof businessSchema>

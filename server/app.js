@@ -21,6 +21,11 @@ const clientsRouter = require('./routes/clients');
 const knowledgeRouter = require('./routes/knowledge');
 const bookingsRouter = require('./routes/bookings');
 const productImportRouter = require('./routes/product-import');
+const filesRouter = require('./routes/files');
+const accessRouter = require('./routes/access');
+const stockRouter = require('./routes/stock');
+const diagRouter = require('./routes/diag');
+const adminLearningRouter = require('./routes/admin-learning');
 const logRouter = require('./routes/log');
 const { redactUrl } = require('./utils/redact-url')
 const publicRouter = require('./routes/public');
@@ -208,10 +213,17 @@ app.use('/api/v1/knowledge', knowledgeRouter);
 app.use('/api/v1/requests', requestsRouter);
 app.use('/api/v1/bookings', bookingsRouter);
 app.use('/api/v1/ai', aiRouter)
+// Plan 615: more specific than /api/v1/admin, so it is matched first.
+app.use('/api/v1/admin/learning', adminLearningRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/business', businessRouter);
 app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/product-import', productImportRouter);
+// Plan 615 (C-REGISTRY): empty routers, filled by plans 619, 631, 635, 633.
+app.use('/api/v1/files', filesRouter);
+app.use('/api/v1/access', accessRouter);
+app.use('/api/v1/stock', stockRouter);
+app.use('/api/v1/diag', diagRouter);
 // Plan 543 (ADR 0030): the public door for non-members — never behind verifyToken, so no usage is recorded.
 app.use('/api/v1/public', publicRouter);
 

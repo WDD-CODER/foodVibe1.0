@@ -18,4 +18,6 @@ export const MONEY_FIELDS: Record<string, readonly string[]> = {
   recipes: ['ingredients[].supplierId'],
   dishes: ['ingredients[].supplierId'],
   businesses: ['settings', 'baseline'],
+  // Plan 615 (C-REGISTRY): an invoice's prices.
+  invoices: ['lines[].unitPrice', 'lines[].lineTotal', 'lines[].price'],
 }

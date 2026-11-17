@@ -11,6 +11,8 @@ export const supplierSchema = z.strictObject({
   minOrderMov: z.number(),
   leadTimeDays: z.number(),
   supplierLogoUrl: z.string().optional(),
+  /** Plan 615 (C-INVOICE): nine-digit company number. */
+  taxId: z.string().regex(/^\d{9}$/).optional(),
   /** @deprecated legacy-import provenance */
   legacyImport: z.boolean().optional(),
   /** @deprecated legacy-import provenance */
