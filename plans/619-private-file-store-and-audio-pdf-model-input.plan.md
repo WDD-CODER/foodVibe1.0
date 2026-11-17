@@ -502,3 +502,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: kept 615's STORED_FILE_KINDS and added FILE_KINDS as an alias of it — why: the plan names FILE_KINDS, 615 exported the other name.
 - decided: the download link is signed with the documented API rule; the page gives no other formula (the open item below) — a real call is the [human] G3 check.
 - open for the Worker: the documentation pages give the download link's parameters and two example links but not its signing formula; the plan signs them with the documented API rule (what the provider's SDKs do). If the provider's page says otherwise at build time, follow the page and write the difference here.
+- scope extended: docs/brain/component-families.md — approved by the Human (ask 619-1); four family headings (file-store, cloudinary-requests, business-delete, model-media) added; inventory.md regenerated. kit-checks → ok (6 checks).
