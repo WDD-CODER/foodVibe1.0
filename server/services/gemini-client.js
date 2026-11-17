@@ -137,6 +137,28 @@ function isVisionModel(model) {
   return VISION_MODEL_PATTERN.test(model);
 }
 
+/**
+ * Plan 619: the media each default model takes as input. Source: the model pages under
+ * https://aistudio.google.com/docs/models/ read on 2026-11-17 (inputs listed: text, image, video, audio, PDF;
+ * gemini-2.5-flash lists no PDF and is deprecated), https://aistudio.google.com/docs/audio and
+ * https://aistudio.google.com/docs/document-processing.
+ */
+const ALL_MEDIA = ['image', 'audio', 'pdf'];
+const MODEL_MEDIA = Object.freeze({
+  'gemini-3.1-flash-lite': ALL_MEDIA,
+  'gemini-3.5-flash-lite': ALL_MEDIA,
+  'gemini-2.5-flash-lite': ALL_MEDIA,
+  'gemini-2.5-flash': ['image', 'audio'],
+  'gemini-3.6-flash': ALL_MEDIA,
+  'gemini-3.8-flash': ALL_MEDIA,
+  'gemini-3-flash-preview': ALL_MEDIA,
+});
+
+/** True when the model takes the medium ('image' | 'audio' | 'pdf'); an unlisted model is judged by the vision pattern. */
+function modelTakes(model, medium) {
+  return MODEL_MEDIA[model]?.includes(medium) ?? (medium === 'image' && isVisionModel(model));
+}
+
 function modelUrl(model) {
   return `${GEMINI_BASE_URL}/${model}:generateContent`;
 }
@@ -402,12 +424,18 @@ function allExhausted(candidates) {
  *   { kind: 'gemini_error', model, status, message }
  *   { kind: 'timeout' | 'network', model }
  */
-async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, model: requested, usage }) {
+async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage }) {
   let meter = true;
   if (!usage || !isAiFeature(usage.feature)) {
     if (process.env.VITEST) throw new Error('callGemini: usage.feature required');
     log.error({ event: 'ai.usage.missing', eventPrefix });
     meter = false;
+  }
+  let medium = needsVision ? 'image' : null;
+  if (needsMedia !== undefined) {
+    if (ALL_MEDIA.includes(needsMedia)) medium = needsMedia;
+    else if (process.env.VITEST) throw new Error('callGemini: unknown needsMedia');
+    else log.error({ event: 'ai.media.unknown', eventPrefix });
   }
   await ensureLoaded();
   if (typeof requested === 'string' && !isCatalogModel(requested)) {
@@ -415,9 +443,12 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     return { kind: 'model_removed', model: requested };
   }
   const apiKey = process.env.GEMINI_API_KEY;
-  const candidates = modelChain().filter(m => !needsVision || isVisionModel(m));
+  const candidates = modelChain().filter(m => !medium || modelTakes(m, medium));
   const now = new Date();
-  if (!firstUsable(candidates, now)) return allExhausted(candidates);
+  if (!firstUsable(candidates, now)) {
+    if (medium && candidates.length === 0) log.warn({ event: 'ai.media.no_model', medium });
+    return allExhausted(candidates);
+  }
 
   const model = candidates.includes(requested) ? requested : candidates[0];
   // Plan 617: a business over its monthly token cap gets no request (C-AICAP). A ledger problem never blocks AI.
@@ -550,6 +581,8 @@ module.exports = {
   isCatalogModel,
   isDailyQuota,
   isVisionModel,
+  MODEL_MEDIA,
+  modelTakes,
   modelCatalog,
   modelChain,
   modelUrl,

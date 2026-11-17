@@ -95,7 +95,7 @@ describe('the ledger row', () => {
     const [row] = await rows();
     const allowed = new Set([
       '_id', 'businessId', 'userId', 'feature', 'model', 'ok', 'errorCode', 'inputTokens', 'outputTokens',
-      'totalTokens', 'audioSeconds', 'outcome', 'rejectCode', 'imageCount', 'latencyMs', 'estCostUsd', 'at', 'day',
+      'totalTokens', 'audioSeconds', 'fileCount', 'outcome', 'rejectCode', 'imageCount', 'latencyMs', 'estCostUsd', 'at', 'day',
     ]);
     expect(Object.keys(row).filter(k => !allowed.has(k))).toEqual([]);
     expect(JSON.stringify(row)).not.toContain('secret prompt');
@@ -121,6 +121,32 @@ describe('the ledger row', () => {
     expect(estimateCostUsd('gemini-unknown-x', 1000, 1000, log)).toBe(0);
     expect(log.warn).toHaveBeenCalledTimes(1);
     expect(log.warn.mock.calls[0][0].event).toBe('ai.usage.no_price');
+  });
+});
+
+describe('audio and file counts (plan 619)', () => {
+  const part = mimeType => ({ inlineData: { mimeType, data: 'AAAA' } });
+  it('an audio part with usage.audioSeconds writes audioSeconds and fileCount', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_WITH_USAGE));
+    await call(fakeLog(), { body: { contents: [{ parts: [part('audio/webm')] }] }, usage: { businessId: 'bizA', feature: 'parse_text', audioSeconds: 42 } });
+    const [row] = await rows();
+    expect(row.audioSeconds).toBe(42);
+    expect(row.fileCount).toBe(1);
+    expect(row.imageCount).toBeUndefined();
+  });
+  it('a pdf part and an image part write fileCount 1 and imageCount 1', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_WITH_USAGE));
+    await call(fakeLog(), { body: { contents: [{ parts: [part('application/pdf'), part('image/png')] }] } });
+    const [row] = await rows();
+    expect(row.fileCount).toBe(1);
+    expect(row.imageCount).toBe(1);
+  });
+  it('a text-only call writes neither field', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_WITH_USAGE));
+    await call(fakeLog(), { body: { contents: [{ parts: [{ text: 'hi' }] }] } });
+    const [row] = await rows();
+    expect('fileCount' in row).toBe(false);
+    expect('audioSeconds' in row).toBe(false);
   });
 });
 

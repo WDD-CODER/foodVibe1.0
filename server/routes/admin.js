@@ -20,7 +20,7 @@ const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 const { containsInjectionPattern, scanRecipeDraftForInjection, draftCloseness } = require('../services/ai-recipe-helpers')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
 const { mayLearnFrom } = require('../utils/ai-learning')
-const { setAiPrivate } = require('../services/business')
+const { setAiPrivate, deleteBusinessServerData } = require('../services/business')
 
 const router = Router()
 
@@ -68,6 +68,12 @@ router.delete('/users/:userId', verifyToken, requirePlatformAdmin, async (req, r
     let usersDeleted = 1
     if (wholeBusiness) {
       const { businessId } = target
+      try {
+        const business = await col('businesses').findOne({ _id: businessId })
+        if (business) await deleteBusinessServerData(mongoose.connection.db, business, req.log)
+      } catch (err) {
+        req.log.error({ err, event: 'admin.users_delete.extras_failed', businessId })
+      }
       await Promise.all(ALL_USER_ENTITY_TYPES.map(t => col(t).deleteMany({ businessId })))
       usersDeleted = (await User.deleteMany({ businessId })).deletedCount
       await col('businesses').deleteOne({ _id: businessId })

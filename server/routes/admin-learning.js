@@ -1,5 +1,14 @@
 'use strict';
-// Plan 615 (C-REGISTRY): empty router, filled by plans 619 and 630. It has no route of its own.
+// Plan 615 (C-REGISTRY): router filled by plans 619 and 630.
 const { Router } = require('express');
+const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
+const { isFileStoreConfigured } = require('../services/file-store');
 
-module.exports = Router();
+const router = Router();
+
+// Plan 619: is the private file store switched on (the three keys are set)?
+router.get('/status', verifyToken, requirePlatformAdmin, (_req, res) => {
+  res.json({ fileStore: isFileStoreConfigured() });
+});
+
+module.exports = router;

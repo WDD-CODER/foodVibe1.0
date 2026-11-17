@@ -377,3 +377,33 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   and feature.
 - When: an AI flow must store what the model suggested next to what the person saved, with a closeness score.
 - Known copies: none.
+
+### file-store — private files (audio, PDF, pictures)
+
+- Status: stable — plan 619
+- Use: `server/services/file-store.js` — `isFileStoreConfigured`, `putPrivateFile`, `keepStoredFile`, `signedFileUrl`,
+  `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`.
+- When: a server path stores, reads, links or deletes a private uploaded file.
+- Known copies: none.
+
+### cloudinary-requests — signed requests to the file provider
+
+- Status: stable — plan 619
+- Use: `server/services/cloudinary-requests.js` — `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest`; used
+  only through `file-store`.
+- When: building a signed upload, expiring download link or delete request.
+- Known copies: none.
+
+### business-delete — `deleteBusinessServerData` removes a business's server data
+
+- Status: stable — plan 619
+- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files).
+- When: a business is deleted and everything it owns on the server must go.
+- Known copies: none.
+
+### model-media — `needsMedia` in `callGemini` for audio and PDF input
+
+- Status: stable — plan 619
+- Use: needsMedia in callGemini (server/services/gemini-client.js) picks a media-capable model in the chain.
+- When: a model call carries audio or a PDF.
+- Known copies: none.
