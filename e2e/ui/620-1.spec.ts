@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test'
 import { signInQa } from '../helpers/qa-session'
 
-const API = (process.env['E2E_API_URL'] ?? 'http://localhost:3000').replace(//$/, '')
+const API = (process.env['E2E_API_URL'] ?? 'http://localhost:3000').replace(/\/$/, '')
 const DEFAULTS = ['events', 'event_logistics', 'frontdesk', 'ai_create']
 
 async function setModules(request: APIRequestContext, token: string, modules: string[]): Promise<void> {

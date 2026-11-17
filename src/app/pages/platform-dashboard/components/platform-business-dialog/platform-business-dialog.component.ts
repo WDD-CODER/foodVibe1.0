@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { MODULE_KEYS, type ModuleKey } from '@schemas/modules'
+import { MODULE_KEYS, type ModuleKey } from '@schemas/modules-pure'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'

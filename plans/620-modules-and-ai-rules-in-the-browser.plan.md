@@ -199,6 +199,10 @@ e2e/ui/620-1.spec.ts
 e2e/ui/620-2.spec.ts
 e2e/ui/620-3.spec.ts
 e2e/ui/620-4.spec.ts
+shared/schemas/modules-pure.ts
+shared/schemas/modules.ts
+docs/brain/component-families.md
+src/app/pages/trash/trash.page.ts
 ```
 
 ## Read Scope
@@ -224,7 +228,7 @@ append the path to the scope block above and retry.
 - `moduleGuard(keys)` — family: none — rung: 4 — why: a route guard factory; the existing guards test sign-in or the platform admin, none takes a module. It follows `platform-admin.guard.ts`.
 - `aiCapErrorKey` in `src/app/core/utils/ai-error.util.ts` — family: helpers — rung: 3 — why: one pure function used by the five places that turn an AI refusal into a message, in `core/utils` with a spec as the family asks.
 - `PlatformBusinessDialogComponent` — family: modal-shell — rung: 1 — why: `app-modal-shell size="sm"` with `.c-modal-actions`, the same frame as `front-desk-admin-dialog` beside it.
-- `platform-business-dialog` (the folder with the component and the service above) — family: modal-shell — rung: 1 — why: the declared dialog pieces live in `src/app/pages/platform-dashboard/components/platform-business-dialog/`, beside `front-desk-admin-dialog`.
+- `platform-business-dialog` (the folder holding the component and the service of this dialog) — family: modal-shell — rung: 1 — why: the dialog pieces live in `src/app/pages/platform-dashboard/components/platform-business-dialog/`, beside `front-desk-admin-dialog`; not a business-delete piece.
 - `PlatformBusinessDialogService` — family: modal-controller — rung: 1 — why: `new ModalController<boolean>(false)` exactly as `FrontDeskAdminDialogService`.
 - Module chips and the private chip in the dialog — family: chip — rung: 1 — why: `label.c-chip.c-chip--toggle` with a checkbox inside `.c-chip-group`.
 - Cap number field and reason textarea in the dialog — family: form-field — rung: 1 — why: `app-form-field` with a projected `input.c-input[type=number]` / `textarea.c-input`, with `hint` and `error`.
@@ -549,16 +553,12 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the dialog asks no question on cancel, Escape or backdrop — why: the front desk dialog beside it does not, and the brief forbids confirmation dialogs nobody asked for.
 - decided: the cap message is added in the five places that already translate a 429 — why: they would otherwise show "daily limit, try tomorrow", which is false for a monthly cap.
 
-### Builder run (mod-0, round 0) — evidence
-- `pnpm run test:ci` -> exit 0, Executed 2301 of 2301 SUCCESS (before the last one-line template edit of the dialog's cap field; rerun below).
-- `pnpm run lint` -> exit 0 (0 errors, 67 old warnings). `pnpm run lint:icons` -> exit 0. `pnpm run lint:no-native-select` -> exit 0. `node scripts/breadcrumbs-check.mjs` -> exit 0. `node scripts/override-check.mjs` -> ok. `node scripts/plan-ledger-check.mjs` -> ok. `node scripts/log-query.mjs --since=plan-start --level=error` -> no entries (no database configured). `node scripts/reuse-lint.mjs --diff=origin/orch/mod-0` -> REUSE: ok. scope-check -> ok.
-- BLOCKED `pnpm run build` -> exit 1: "bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 45.76 kB with a total of 1.05 MB". Base (origin/orch/mod-0) builds at 588.93 kB. Cause: the browser imports runtime values (`MODULE_OF_TYPE`, `modulesOf`, `DEFAULT_MODULES`, `MODULE_KEYS`) from `@schemas/modules`, whose file also builds zod schemas (`import { z } from 'zod'`, `modulesFieldSchema`, `platformUpdateSchema`), so zod (~460 kB) lands in the initial chunk. Checked: a zod-free copy of the same constants (`shared/schemas/modules-pure.ts`, temporary, removed) imported by the four browser files builds at 590.71 kB, exit 0. Fix needs files outside the scope: a new `shared/schemas/modules-pure.ts` (the constants and `modulesOf` / `hasModule`, no zod) and `shared/schemas/modules.ts` re-exporting it (server and entities keep importing `modules.ts`), then the four browser imports point at `@schemas/modules-pure`.
-- BLOCKED kit-checks: five `reuse-registry-missing-piece` findings; `docs/brain/component-families.md` (outside the scope) needs rows naming `ModuleService`, `moduleGuard`, `aiCapErrorKey` (under helpers), `PlatformAdminService.updatePlatform` (under http) and the `module` field of `HeroFabAction`.
-- scope extended: none (both needs above returned as ESCALATE).
-- The four `[ui]` e2e specs (e2e/ui/620-1..4.spec.ts) are written, not run (no app, no QA login in this folder).
-- Not done (A10): the build gate and the kit-checks gate above.
-
-### Decisions logged by the builder
-- decided: `TrashService` gained `sections_` (types whose module is off are left out of the load and the bulk calls); `src/app/pages/trash/trash.page.ts` is outside the scope and still lists every section from `TRASH_SECTIONS`, so the Trash screen shows an empty section for an off type (no request is sent). Fix: one line in `trash.page.ts` (`sections = inject(TrashService).sections_`) once that file is in scope.
-- decided: the two new platform table cells sit after the "internal" cell and the two new grid tracks sit before the actions track (the plan text says "before the last two"; the cell order decides).
-- decided: `setup-checklist-card` "hide when done" now compares with the number of required steps shown (3 without events). Its text `setup_progress` still says "מתוך 4" (existing key).
+### Builder run (mod-0, round 2, fresh judgment builder) — evidence
+- Restarted from base 76088b05 with the approved scope (answer 620-1). Re-used the reviewed files of the discarded attempt 335fcc4, except `src/app/pages/trash/trash.page.html` (outside the scope): `trash.page.ts` now reads `TrashService.sections_()` through a `sections` getter, so the template is unchanged.
+- Fixed: the dialog's cap input now sits on the `appNumberBox` line (the `number-box` debt stays at 68); `e2e/ui/620-1.spec.ts` and `620-2.spec.ts` had lost the backslashes of `/\/$/` and `/\/dashboard/` (a syntax error); `npx playwright test --list` -> 5 tests in 5 files.
+- Reuse Check: the `platform-business-dialog` folder declared (kit-checks `reuse-undeclared`).
+- `pnpm run build` -> exit 0 (initial 590.71 kB, warning budget 570 kB; base 588.93 kB). `pnpm run lint` -> exit 0 (0 errors, 67 old warnings). `pnpm run test:ci` -> exit 0, 2301 of 2301 SUCCESS.
+- `pnpm run lint:icons` -> exit 0. `pnpm run lint:no-native-select` -> exit 0. `node scripts/breadcrumbs-check.mjs` -> BREADCRUMBS: clean. `node scripts/override-check.mjs` -> ok. `node scripts/plan-ledger-check.mjs` -> OK. `node scripts/log-query.mjs --since=plan-start --level=error` -> SKIP: no database configured (no entries). scope-check --diff=origin/orch/mod-0 -> SCOPE: ok. kit-checks -> KIT_CHECKS: ok (6 checks). kit-manifest-check -> ok, 0 unclassified.
+- `node scripts/reuse-lint.mjs --diff=origin/orch/mod-0` -> REUSE: ok. `--check-registry` -> exit 1 with 4 missing paths that the base registry has too (lines 23, 164, 197, 312 on origin/orch/mod-0), none from this plan.
+- NOT MET: the Done-when `pnpm run lint:reuse` exits 0 — the bare script (`node scripts/reuse-lint.mjs`, no argument) always prints its usage and exits 1, on the base too. Returned as ESCALATE (A10 left open).
+- The four `[ui]` specs (e2e/ui/620-1..4.spec.ts) are written, not run (no app, no QA login in this folder).

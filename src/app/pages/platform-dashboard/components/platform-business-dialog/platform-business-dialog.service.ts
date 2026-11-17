@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core'
-import type { ModuleKey } from '@schemas/modules'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { ModalController } from '@services/modal-controller'
 
 /** What the dialog opens on: one business's row. */

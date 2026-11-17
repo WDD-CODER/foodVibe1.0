@@ -23,19 +23,8 @@
       hint="platform_ai_cap_hint"
       [error]="tried_() && capInvalid_() ? 'platform_ai_cap_invalid' : null"
     >
-      <div appNumberBox>
-        <input
-          id="biz-cap"
-          class="c-input"
-          type="number"
-          min="0"
-          step="1"
-          inputmode="numeric"
-          dir="ltr"
-          [value]="cap_()"
-          (input)="cap_.set($any($event.target).value)"
-        />
-      </div>
+      <!-- prettier-ignore -->
+      <div appNumberBox><input type="number" id="biz-cap" class="c-input" min="0" step="1" inputmode="numeric" dir="ltr" [value]="cap_()" (input)="cap_.set($any($event.target).value)" /></div>
     </app-form-field>
     <p class="fda-used">
       {{ 'platform_ai_used_month' | translatePipe }} <span class="c-num">{{ target()?.aiTokensThisMonth ?? 0 }}</span>

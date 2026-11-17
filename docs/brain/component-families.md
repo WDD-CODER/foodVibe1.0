@@ -303,6 +303,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
+- `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key for a monthly-cap 429, or null (plan 620).
 
 ### http — talking to the server
 
@@ -310,6 +311,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PublicRequestService` (`pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
+- `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): the platform admin's write of modules, cap and private mode (plan 620).
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
@@ -336,10 +338,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### modules-registry — which program modules a business has
 
 - Status: stable — plan 615
-- Use: `shared/schemas/modules.ts` — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
-  `platformUpdateSchema`.
+- Use: `shared/schemas/modules-pure.ts` (no zod; the browser imports it) — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`;
+  `shared/schemas/modules.ts` re-exports it and adds `platformUpdateSchema` (server).
+- Browser: `ModuleService` (`src/app/core/services/module.service.ts`) answers `has(key)`; `moduleGuard(keys)` (`src/app/core/guards/module.guard.ts`) gates a route; `HeroFabAction.module` (`src/app/core/services/hero-fab.service.ts`) hides an action whose module is off (plan 620).
 - When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
   same rule.
+- Known copies: none.
+
+### module-gate — hide or block a screen whose module is off (browser)
+
+- Status: stable — plan 620
+- Use: `ModuleService` (`src/app/core/services/module.service.ts`, `has(key)`, `hasType(type)`, `ready()`); `moduleGuard(keys)` (`src/app/core/guards/module.guard.ts`, a `CanActivateFn` factory placed after `authGuard`); the `module` field of `HeroFabAction` (`src/app/core/services/hero-fab.service.ts`).
+- When: a link, chip, card, route, FAB action or request depends on a module. Never read `business.modules` directly in a component.
 - Known copies: none.
 
 ### entity-schemas — one stored shape per file
@@ -376,4 +386,34 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `null` on failure) and `confirmAiDraft(req, draftId, saved, ratio)`; collection `aiDrafts`, newest 500 per business
   and feature.
 - When: an AI flow must store what the model suggested next to what the person saved, with a closeness score.
+- Known copies: none.
+
+### file-store — private files (audio, PDF, pictures)
+
+- Status: stable — plan 619
+- Use: `server/services/file-store.js` — `isFileStoreConfigured`, `putPrivateFile`, `keepStoredFile`, `signedFileUrl`,
+  `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`.
+- When: a server path stores, reads, links or deletes a private uploaded file.
+- Known copies: none.
+
+### cloudinary-requests — signed requests to the file provider
+
+- Status: stable — plan 619
+- Use: `server/services/cloudinary-requests.js` — `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest`; used
+  only through `file-store`.
+- When: building a signed upload, expiring download link or delete request.
+- Known copies: none.
+
+### business-delete — `deleteBusinessServerData` removes a business's server data
+
+- Status: stable — plan 619
+- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files).
+- When: a business is deleted and everything it owns on the server must go.
+- Known copies: none.
+
+### model-media — `needsMedia` in `callGemini` for audio and PDF input
+
+- Status: stable — plan 619
+- Use: needsMedia in callGemini (server/services/gemini-client.js) picks a media-capable model in the chain.
+- When: a model call carries audio or a PDF.
 - Known copies: none.

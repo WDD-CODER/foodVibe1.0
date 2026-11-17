@@ -1,5 +1,5 @@
 import { computed, effect, inject, Injectable, Injector, untracked } from '@angular/core'
-import { DEFAULT_MODULES, MODULE_OF_TYPE, modulesOf, type ModuleKey } from '@schemas/modules'
+import { DEFAULT_MODULES, MODULE_OF_TYPE, modulesOf, type ModuleKey } from '@schemas/modules-pure'
 import { BusinessService } from './business.service'
 
 /** Plan 620: which modules the signed-in business has. The server is the gate; the browser only hides. */

@@ -12,6 +12,8 @@ const {
   getModelStatus,
   isDailyQuota,
   isVisionModel,
+  MODEL_MEDIA,
+  modelTakes,
   modelCatalog,
   modelChain,
   nextResetAt,
@@ -207,6 +209,50 @@ describe('vision', () => {
     const result = await call(fakeLog(), { needsVision: true });
     expect(result.model).toBe(DEFAULT_MODELS[0]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('needsMedia (plan 619)', () => {
+  const chain = () => setChainSettingsForTests([{ name: 'gemini-2.5-flash', enabled: true }, { name: 'gemini-3.1-flash-lite', enabled: true }]);
+
+  it('a pdf call skips gemini-2.5-flash', async () => {
+    chain();
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+    const result = await call(fakeLog(), { needsMedia: 'pdf' });
+    expect(result.model).toBe('gemini-3.1-flash-lite');
+    expect(modelOf(fetchMock.mock.calls[0])).toBe('gemini-3.1-flash-lite');
+  });
+
+  it('an audio call goes to gemini-2.5-flash', async () => {
+    chain();
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+    const result = await call(fakeLog(), { needsMedia: 'audio' });
+    expect(result.model).toBe('gemini-2.5-flash');
+  });
+
+  it('needsVision: true behaves as needsMedia image', async () => {
+    chain();
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+    expect((await call(fakeLog(), { needsVision: true })).model).toBe('gemini-2.5-flash');
+    expect(modelTakes('gemini-2.5-flash', 'image')).toBe(true);
+  });
+
+  it('every default model has a media entry', () => {
+    for (const m of DEFAULT_MODELS) expect(MODEL_MEDIA[m], m).toBeInstanceOf(Array);
+    expect(Object.isFrozen(MODEL_MEDIA)).toBe(true);
+  });
+
+  it('an unknown needsMedia value throws under vitest', async () => {
+    await expect(call(fakeLog(), { needsMedia: 'video' })).rejects.toThrow('unknown needsMedia');
+  });
+
+  it('no model takes the medium: all_exhausted and one warn', async () => {
+    setChainSettingsForTests([{ name: 'gemini-2.5-flash', enabled: true }]);
+    const log = fakeLog();
+    const result = await call(log, { needsMedia: 'pdf' });
+    expect(result.kind).toBe('all_exhausted');
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(log.warn).toHaveBeenCalledWith({ event: 'ai.media.no_model', medium: 'pdf' });
   });
 });
 

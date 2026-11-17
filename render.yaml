@@ -44,5 +44,12 @@ services:
         sync: false
       - key: WHATSAPP_VERIFY_TOKEN
         sync: false
+      # Private file store (plan 619). Optional: without all three, invoices and voice notes still work and the file is not kept. Set in the Render dashboard by hand - never commit a value.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
       - key: ALLOWED_ORIGIN
         value: https://foodvibe1-0-1-frankfurt.onrender.com,https://wdd-coder.github.io,http://localhost:4200

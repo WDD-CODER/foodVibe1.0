@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
-import { DEFAULT_MODULES, type ModuleKey } from '@schemas/modules'
+import { DEFAULT_MODULES, type ModuleKey } from '@schemas/modules-pure'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import type { FrontDeskAdminStats } from '../models/frontdesk-stats.model'

@@ -1,7 +1,7 @@
 import { Injectable, Injector, inject } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
-import { MODULE_OF_TYPE } from '@schemas/modules'
+import { MODULE_OF_TYPE } from '@schemas/modules-pure'
 import { environment } from '../../../environments/environment'
 import { ModuleService } from './module.service'
 

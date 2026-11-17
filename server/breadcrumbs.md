@@ -18,11 +18,9 @@
 | `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests` |
 | `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
-| `routes/files.js` | Mounted at `/api/v1/files` (plan 615, C-FILES): empty until plan 619 |
 | `routes/access.js` | Mounted at `/api/v1/access` (plan 615, C-ACCESS): empty until plan 631 |
 | `routes/stock.js` | Mounted at `/api/v1/stock` (plan 615, C-STOCK): empty until plan 635 |
 | `routes/diag.js` | Mounted at `/api/v1/diag` (plan 615, C-DIAG): empty until plan 633 |
-| `routes/admin-learning.js` | Mounted at `/api/v1/admin/learning`, before `/api/v1/admin` (plan 615, C-FILES, C-LEARN): empty until plans 619 and 630 |
 | `routes/ai/voice.js` | Mounted at `/api/v1/ai/voice` inside `routes/ai.js` (plan 615): empty until plan 621 |
 | `routes/ai/logistics.js` | Mounted at `/api/v1/ai/logistics` (plan 615, C-LOAD): empty until plan 622 |
 | `routes/ai/invoices.js` | Mounted at `/api/v1/ai/invoices` (plan 615, C-INVREAD): empty until plan 626 |
@@ -35,6 +33,10 @@
 | `utils/redact-url.js` | `redactUrl` (plan 555): masks a guest's token in a logged URL; used by the pino-http `req` serializer |
 | `scripts/set-front-desk-status.js` | `--slug --status [--target]` (plan 555): sets one profile's status until plan 557's admin switch; prints `FRONT_DESK_STATUS: <slug> <old> → <new>` |
 | `services/ai-usage.js` | The AI ledger (plan 566): `recordAiUsage` (one `aiUsage` row per Gemini call, fire-and-forget), `estimateCostUsd`, `aggregateAiUsage`, `trackAiOutcome`, `markAiUsageRejected` (plan 580: marks refused answers) |
+| `services/file-store.js` | The private file store (plan 619, C-FILES): `putPrivateFile`, `keepStoredFile`, `signedFileUrl`, `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`; only writer of `storedFiles` |
+| `services/cloudinary-requests.js` | Pure request builders for the file store (plan 619): `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest` |
+| `routes/files.js` | `GET /api/v1/files/:id` → `{ url }`, 300-second link (plan 619) |
+| `routes/admin-learning.js` | `GET /api/v1/admin/learning/status` → `{ fileStore }` (plan 619; plan 630 adds more) |
 | `services/ai-cap.js` | The monthly AI cap per business (plan 617, C-AICAP): `capState` (cap vs this Israel month's ledger tokens, 60 s cache), `monthTokensByBusiness`, `clearCapCache`; read by `callGemini` and the platform table |
 | `services/ai-drafts.js` | The draft trail (plan 618, C-AIDRAFT): `saveAiDraft` (stores what the model suggested, never throws, keeps the newest 500 per business and feature) and `confirmAiDraft` (what was saved and the closeness score); the only writer of `aiDrafts`, returns only ids |
 | `utils/ai-learning.js` | `mayLearnFrom(business)` (plan 618, C-LEARN): the one consent test before the platform copies or lists a business's AI material — true unless `aiPrivate` |
@@ -43,7 +45,7 @@
 | `services/business-report.js` | The business report (plan 568): `buildReport` — monthly series, first vs latest 30 days, baseline mapping, rule findings; read-only |
 | `services/frontdesk-stats.js` | Front desk numbers of one business (plan 559): `frontDeskStats`, `parseRange`, `isOutsideHours`; read-only, test requests never count |
 | `constants/report.js` | `REPORT_METRICS`, `REPORT_MIN_EVENTS`, finding thresholds (plan 568) |
-| `jobs/retention.js` | `purgeRetained(db, businessId, now)` — lazy 24-month delete of final requests and bookings, 12 months of messages; throttled to once a day per business; run from the generic GET (plan 558) |
+| `jobs/retention.js` | `purgeRetained(db, businessId, now)` — lazy 24-month delete of final requests and bookings, stored files (voice recordings, abandoned invoice reads) past their `deleteAfter`, 12 months of messages; throttled to once a day per business; run from the generic GET (plan 558) |
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |

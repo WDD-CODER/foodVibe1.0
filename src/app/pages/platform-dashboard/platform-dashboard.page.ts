@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { DatePipe, DecimalPipe } from '@angular/common'
-import { MODULE_KEYS } from '@schemas/modules'
+import { MODULE_KEYS } from '@schemas/modules-pure'
 import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'

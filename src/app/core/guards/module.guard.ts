@@ -1,6 +1,6 @@
 import { inject } from '@angular/core'
 import { CanActivateFn, Router } from '@angular/router'
-import type { ModuleKey } from '@schemas/modules'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 

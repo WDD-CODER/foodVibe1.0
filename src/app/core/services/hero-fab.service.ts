@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core'
-import type { ModuleKey } from '@schemas/modules'
+import type { ModuleKey } from '@schemas/modules-pure'
 
 export interface HeroFabAction {
   labelKey: string
