@@ -310,6 +310,13 @@ line or file this plan names was removed, renamed or rewritten).
     `BusinessService.updateShareAiExamples`. `business.shareAiExamples` stays in the schema as optional so stored
     documents validate; nothing reads it.
   - `GET /api/v1/admin/ai-shots` candidates and `POST …/promote`: every business with `mayLearnFrom` true.
+  - Deleting a business keeps what the platform learned from it (Dandan, 2026-11-17). Always deleted, as the
+    business's own records: `priceHistory`, its own `invoiceAliases`, its `storedFiles` and the provider files
+    (recordings, invoice files), its `businessAccess` rows. Kept when the business is not private at that moment: its
+    contributions to the shared supplier brain, its promoted recipe examples, and its `aiDrafts` rows reduced to
+    numbers (`feature`, `model`, `keptRatio`, `status`, `at`, `confirmedAt`, `businessId`; no input, draft, saved text
+    or user id). A private business leaves nothing. To erase everything of a business, the platform admin turns
+    private mode on, then deletes it (619).
   - The owner's card `ai-examples-share` shows one locked chip (shared / private) and a tooltip from a dictionary
     key saying private mode is arranged by contacting FoodVibe. It calls no route.
 - [ ] Contract copied verbatim from `docs/modules/modules-map.md` (frozen 2026-11-17):

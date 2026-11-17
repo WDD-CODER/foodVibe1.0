@@ -54,6 +54,8 @@ Verified on `origin/main` (e916e48e, 2026-11-17):
   business's documents in `ALL_USER_ENTITY_TYPES` (line 66), its users and the `businesses` document. A deleted staff
   user removes only the user. No server-only collection is touched, so the program's new server-only rows
   (`priceHistory`, `invoiceAliases`, `aiDrafts`, `storedFiles`, `businessAccess`) and the stored files would stay.
+  The Human's rule (2026-11-17): a delete removes the business's private records but not what the platform learned
+  from a business that is not private; a private business's delete removes everything.
 - `docs/security-go-live.md` (95 lines) has a "Data retention" table (line 55) and no section on stored files.
   `server/.env.example` is tracked.
 - New files of this plan: `server/services/file-store.js`, `server/services/cloudinary-requests.js`,
@@ -135,12 +137,17 @@ breaks; and `callGemini` sends an audio or PDF request only to a model that take
 - [auto] `pnpm run test:server` passes, including `server/test/ai-usage.test.js`: a call whose body has one `audio/webm` part and
   `usage.audioSeconds: 42` writes `audioSeconds: 42` and `fileCount: 1`; a body with one `application/pdf` part and
   one `image/png` part writes `fileCount: 1` and `imageCount: 1`; a text-only call writes neither field.
-- [auto] `pnpm run test:server` passes, including `server/test/admin-business-delete.test.js`: deleting the owner of business A
-  (platform admin token, in-memory store) leaves no document of A in `priceHistory`, `invoiceAliases`, `aiDrafts`,
-  `storedFiles` and `businessAccess`, removes A's two files from the store, and leaves business B's rows, B's file
-  and the `invoiceAliases` rows of `'__master__'` untouched; with `failNextDestroy` set the answer is still 200, the
-  `storedFiles` rows are gone and one warn log holds the business id and a count only; deleting a staff user removes
-  none of these rows.
+- [auto] `pnpm run test:server` passes, including `server/test/admin-business-delete.test.js`, on the in-memory store with a
+  platform admin token. Deleting the owner of business A, which is not private: no document of A is left in
+  `priceHistory`, `invoiceAliases`, `storedFiles` and `businessAccess`, and A's two files are gone from the store;
+  the `'__master__'` rows of `invoiceAliases` and `supplierProfiles` that list A as a contributor are unchanged; A's
+  promoted copy in `GEMINI_SHOTS` (`businessId: '__master__'`) is still there; each of A's `aiDrafts` rows is still
+  there and its keys are a subset of exactly `_id, businessId, feature, model, keptRatio, status, at, confirmedAt`
+  (no `input`, `aiDraft`, `saved`, `userId`, `subject`). Deleting the owner of business P, which has
+  `aiPrivate: true`: nothing of P is left in those collections, in `aiDrafts`, or as a promoted copy. Business B's
+  rows and file are untouched in both cases. With `failNextDestroy` set the answer is still 200, the `storedFiles`
+  rows are gone and one warn log holds the business id and a count only. Deleting a staff user changes none of
+  these rows.
 - [auto] `pnpm run test:server` passes (the whole server suite).
 - [auto] `pnpm --dir server run lint` exits 0.
 - [auto] `pnpm run build` passes.
@@ -197,7 +204,7 @@ append the path to the scope block above and retry.
 ## Architecture Impact
 
 - INV-1: preserves — `GET /api/v1/files/:id` finds a file only inside the business of the signed token (another business's id answers 404) and an invoice file needs `assertCan(…, 'editMoney')`; the status route is platform admin only.
-- INV-2: preserves — every `storedFiles` row carries the caller's `businessId` from the token and is never cloned or shared; the retention sweep in `server/jobs/retention.js` deletes only the files of the business it was called for.
+- INV-2: preserves — a business delete removes only rows of that business; what stays for a non-private business is either already shared `'__master__'` material or draft rows with no content, read only by the platform admin. Every `storedFiles` row carries the caller's `businessId` from the token and is never cloned or shared; the retention sweep in `server/jobs/retention.js` deletes only the files of the business it was called for.
 - INV-4: preserves — the stored document's shape stays in `shared/schemas/entities/stored-file.schema.ts` and every insert is checked against it before it is written.
 - INV-6: preserves — `callGemini` stays the one caller of the model and is still reached only from `server/routes/ai.js` and its sub-routers; this plan adds a filter on the model chain, not a call.
 
@@ -206,6 +213,7 @@ append the path to the scope block above and retry.
 - `server/services/file-store.js` (`isFileStoreConfigured`, `putPrivateFile`, `keepStoredFile`, `signedFileUrl`, `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`) — family: none — rung: 4 — why: the server has no file code; the browser's `CloudinaryService` uploads public images with an unsigned preset and cannot hold a secret.
 - `server/services/cloudinary-requests.js` (`signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest`) — family: none — rung: 4 — why: pure request builders kept apart from the service so they are tested against the provider's published examples without a network or a key.
 - `GET /api/v1/files/:id` and `GET /api/v1/admin/learning/status` — family: server-auth — rung: 1 — why: `verifyToken`, the business filter, `assertCan` and `requirePlatformAdmin` as they are.
+- `deleteBusinessServerData` in `server/services/business.js` — family: none — rung: 4 — why: the delete route walks only the user-data collections; one function beside `setAiPrivate` holds the rule for the server-only ones and uses `mayLearnFrom` and `deleteStoredFile` as they are.
 - `needsMedia` in `callGemini` — family: none — rung: 4 — why: extends the existing `needsVision` filter in the same function; not a second model caller.
 
 ## Step 0 — Reality Check
@@ -220,6 +228,7 @@ line or file this plan names was removed, renamed or rewritten).
 - As a chef, I want the voice note I recorded on site to be kept with its transcript, so that I can listen again when the checklist is unclear.
 - As a chef, I want scanning and recording to work on a day the file storage is not set up or is down, so that I never lose the result because a file could not be kept.
 - As the platform admin, I want to see whether file storage is switched on, so that I know when the keys are missing.
+- As the platform admin, I want deleting a business to remove its files and prices but keep what the AI learned from it, and to remove that too when the business is private, so that an erasure request is two steps and an ordinary delete does not make the AI worse for everyone.
 
 ## Functional Requirements
 
@@ -334,17 +343,30 @@ line or file this plan names was removed, renamed or rewritten).
   the number deleted as `files` beside the three existing counts (`retention.purged` logs it too). The 24-hour
   throttle is unchanged. The sweep is by `deleteAfter` alone, whatever the kind: the provider asset is deleted first
   and the document only after it; a file with no `deleteAfter` (a kept invoice) is never matched.
-- [ ] Deleting a whole business also clears the program's server-only rows. `server/services/business.js` gains
-  `deleteBusinessServerData(db, businessId, log)`: for every `storedFiles` document of the business it calls
-  `deleteStoredFile` (a `false` answer is counted, never thrown); then `deleteMany({ businessId })` on `storedFiles`,
-  `priceHistory`, `invoiceAliases` (the business's own rows only — rows of `'__master__'` are never matched),
-  `aiDrafts` and `businessAccess`; when any provider delete failed it logs one
-  `log.warn({ event: 'business.delete.files_left', businessId, count })`; it ends with the comment line
-  `// plan 627 calls forgetBusiness(db, businessId) here` (the same placeholder plan 618 leaves in `setAiPrivate`).
-  It returns the counts. `server/routes/admin.js` `DELETE /users/:userId` calls it inside the `wholeBusiness`
-  branch only, before the `businesses` document is deleted; a throw from it is caught and logged
-  (`admin.users_delete.extras_failed`, business id only) and the delete goes on. A deleted staff user changes
-  nothing here: a business is removed only together with its owner, as the route already works.
+- [ ] Deleting a whole business removes its private records and keeps what the platform learned from it, unless the
+  business is private (the Human's rule of 2026-11-17, C-LEARN). `server/services/business.js` gains
+  `deleteBusinessServerData(db, business, log)`, which takes the `businesses` document read before the delete:
+  - Always, whatever the business is: for every `storedFiles` document of the business it calls `deleteStoredFile`
+    (a `false` answer is counted, never thrown), then `deleteMany({ businessId })` on `storedFiles`, `priceHistory`,
+    `invoiceAliases` (the business's own rows only — rows of `'__master__'` are never matched) and `businessAccess`.
+    When any provider delete failed it logs one `log.warn({ event: 'business.delete.files_left', businessId, count })`.
+  - When `mayLearnFrom(business)` is true (not private at delete time): the shared supplier brain is left as it is
+    (`forgetBusiness` is not called — the shared rows hold no price, quantity or identity); the business's promoted
+    recipe examples in the `'__master__'` pool of `GEMINI_SHOTS` stay; its `aiDrafts` rows stay, reduced to numbers:
+    `updateMany({ businessId }, { $unset: { input: '', aiDraft: '', saved: '', userId: '', subject: '' } })`, so
+    `feature`, `model`, `keptRatio`, `status`, `at`, `confirmedAt` and `businessId` remain and no content of the
+    business does. (`subject` goes too: it holds an id of a record that no longer exists.)
+  - When the business is private at delete time: everything goes — `GEMINI_SHOTS` documents
+    `{ businessId: '__master__', 'promotedFrom.businessId': id }` are deleted (as `setAiPrivate` does), its `aiDrafts`
+    rows are deleted, and the function ends at the comment line `// plan 627 calls forgetBusiness(db, businessId)
+    here (private business only)` — the same placeholder plan 618 leaves in `setAiPrivate`.
+  - It returns the counts and never logs content. `server/routes/admin.js` `DELETE /users/:userId` reads the
+    business document and calls the function inside the `wholeBusiness` branch only, before the `businesses`
+    document is deleted; a throw from it is caught and logged (`admin.users_delete.extras_failed`, business id only)
+    and the delete goes on. A deleted staff user changes nothing here: a business is removed only together with its
+    owner, as the route already works.
+  - "Erase everything" needs no new screen: the platform admin turns private mode on for the business (plan 620's
+    dialog) and then deletes it.
 - [ ] `server/services/gemini-client.js`:
   - `MODEL_MEDIA` (exported, frozen): `['image', 'audio', 'pdf']` for `gemini-3.1-flash-lite`,
     `gemini-3.5-flash-lite`, `gemini-2.5-flash-lite`, `gemini-3.6-flash`, `gemini-3.8-flash`, `gemini-3-flash-preview`;
@@ -374,7 +396,11 @@ line or file this plan names was removed, renamed or rewritten).
   names and that the browser never gets them; the gate G3 steps in order (create the three values in the provider's
   console, set them on Render, allow "PDF and ZIP files delivery" under the provider's Security settings, check
   `/platform` shows the store on); a link lives 300 seconds; who may open what (any member a voice note, the owner an
-  invoice); what is logged (kind and size only). The "Data retention" table gains a row: voice recordings, 24 months
+  invoice); what is logged (kind and size only). A sub-section "Deleting a business and an erasure request": what a
+  delete always removes (files, price history, own name memory, access grants, with the user-data collections), what
+  stays for a business that is not private (its part in the shared supplier memory, promoted recipe examples, draft
+  rows without any content), and the two steps of a full erasure — 1. turn private mode on for the business on
+  `/platform`, 2. delete the business — after which nothing learned from it remains. The "Data retention" table gains a row: voice recordings, 24 months
   from the recording, the same sweep (also run when a file link is asked for); the file of an invoice read that was
   never saved, 30 days; the file of a saved invoice, as long as the invoice.
 - [ ] `docs/agent/standards-backend.md` §5: rows for `GET /api/v1/files/:id` and `GET /api/v1/admin/learning/status`;
@@ -405,7 +431,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A5: Delete voice recordings after twenty-four months — RETENTION.voiceFilesDays, the storedFiles sweep (50 per run) through deleteStoredFile, the files count; update the two toEqual assertions of the existing test and add the five file cases — server/jobs/retention.js, server/test/retention.test.js
 - [ ] A6: Send an audio or PDF request only to a model that can read it — MODEL_MEDIA, modelTakes, needsMedia in callGemini with needsVision kept as image; tests: pdf skips gemini-2.5-flash, audio does not, every DEFAULT_MODELS entry has media, unknown value throws under vitest, the existing vision tests unchanged — server/services/gemini-client.js, server/test/gemini-client.test.js
 - [ ] A7: Count audio seconds and attached files in the AI usage ledger — fileCount and audioSeconds in buildRow; three new cases; the stored-field-list test still passes for a text call — server/services/ai-usage.js, server/test/ai-usage.test.js
-- [ ] A8: Leave nothing of a business behind when the platform admin deletes it — deleteBusinessServerData (stored files through deleteStoredFile, then the five collections, the warn for files left, the placeholder comment); called from the whole-business branch of the delete route; the new test on the in-memory store — server/services/business.js, server/routes/admin.js, server/test/admin-business-delete.test.js
+- [ ] A8: Leave nothing of a business behind when the platform admin deletes it — deleteBusinessServerData: always the stored files through deleteStoredFile, price history, own aliases and access grants; a business that is not private keeps its shared contributions and promoted examples and its drafts stripped to numbers; a private business loses promoted copies and drafts too and reaches the forgetBusiness placeholder; called with the business document from the whole-business branch of the delete route; tests on the in-memory store for a non-private delete (exact remaining draft keys), a private delete, a failed provider delete and a staff delete — server/services/business.js, server/routes/admin.js, server/test/admin-business-delete.test.js
 - [ ] A9: Document the three keys and the go-live steps without writing any value — render.yaml entries, .env.example names, the new section and retention row in the security doc, the backend standards rows, the server map rows — render.yaml, server/.env.example, docs/security-go-live.md, docs/agent/standards-backend.md, server/breadcrumbs.md
 - [ ] A10: Run every check and write the evidence into the plan — pnpm run test:server, pnpm --dir server run lint, pnpm run build, node scripts/log-query.mjs --since=plan-start --level=error; exact result lines into Execution Notes; the [human] card is handed over for gate G3
 
@@ -425,7 +451,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   `editMoney` (owner; consultant after plan 631); the id is used only as a query value. `GET /admin/learning/status` —
   platform admin. `readUploadedFile` checks kind, mime type, length and the base64 alphabet before anything is
   decoded.
-- Security surface: three new server secrets, read only from the environment inside `file-store.js`; they never
+- Security surface: a business delete keeps no content of a non-private business (drafts are stripped to numbers; shared rows hold no price, quantity or identity) and nothing at all of a private one. Three new server secrets, read only from the environment inside `file-store.js`; they never
   reach a log, an error, a test, a response or the browser (tests pass the documentation's sample values to the pure
   builders and use the in-memory store elsewhere). The upload is `type: authenticated`, so no public link exists;
   the only link the app hands out expires after 300 seconds and is given only to a member of the business. The file
@@ -462,6 +488,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: Contract extension — `server/services/cloudinary-requests.js` holds the pure request builders beside `file-store.js` — why: they are tested against the provider's published signature examples with sample values, so no secret and no network is needed.
 - decided: `readUploadedFile` and `createMemoryFileStore` live in `file-store.js` — why: 621 and 626 need the same limits and the same fake; one implementation of each.
 - decided: `GET /api/v1/files/:id` answers 403 to staff for an invoice file (through `assertCan`) and 503 `FILE_STORE_OFF` when the keys are missing — why: 403 is what every other owner-only read answers; a missing store is a server state, not a missing file.
+- decided: the stripped draft rows also lose `subject` — why: it holds the id of an event, invoice or count that the delete removed; the Human's list of fields that stay does not name it.
+- decided: `deleteBusinessServerData` takes the business document, not only its id — why: it must ask `mayLearnFrom(business)` before the document is deleted.
+- note: a stripped `aiDrafts` row no longer has the fields plan 615's schema may require (`input`, `aiDraft`, `userId`); nothing validates a stored draft on read, and plan 630, which reads drafts for the platform admin, must read `feature`, `model`, `keptRatio`, `status`, `at` only.
 - decided: a failed provider delete during a business delete still removes the `storedFiles` rows — why: the business is gone, so the row could never be retried from inside it; the warn line with the business id and a count is the trace.
 - decided: the retention sweep also runs when a file link is asked for — why: its only caller today is the read of requests and bookings, which a business without the front desk never makes.
 - decided: `server/app.js` gains the `media-src` policy line here — why: without it the browser refuses to play a `blob:` recording or a stored one, and after wave 0 no plan may edit this file.

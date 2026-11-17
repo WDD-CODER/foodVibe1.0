@@ -244,7 +244,7 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 - Printing or exporting the sheet.
 
 ## Critical Questions
-- Q: The dashboard's existing "low stock" number counts every product that has a minimum, without comparing to stock. a) leave it as it is in this program; the new below-minimum list lives on the count screen (recommended) / b) make the existing number use the new on-hand figure once a final count exists A: open
+- Q: The dashboard's existing "low stock" number counts every product that has a minimum, without comparing to stock. a) leave it as it is in this program; the new below-minimum list lives on the count screen (recommended) / b) make the existing number use the new on-hand figure once a final count exists A: a — the Human, 2026-11-17: the existing number stays as it is; the below-minimum list lives on the count screen.
 
 ## Execution Notes
 - decided: the screen is `/inventory/count`, one route with two views (sheet, below minimum) — why: one chip, one lazy chunk, and the list is the result of the sheet.

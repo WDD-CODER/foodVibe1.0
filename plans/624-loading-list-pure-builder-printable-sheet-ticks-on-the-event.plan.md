@@ -332,7 +332,7 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 - A row for the route in `docs/agent/standards-backend.md` §5 (one docs change after the program's server rounds).
 
 ## Critical Questions
-- Q: The loading list needs a scaling rule per equipment item and no screen sets one today (plan 338 removed the inputs as "meaningless"). a) add "one per N guests, min, max" to the equipment form in this plan (recommended) / b) loading list shows owned equipment without scaling A: open
+- Q: The loading list needs a scaling rule per equipment item and no screen sets one today (plan 338 removed the inputs as "meaningless"). a) add "one per N guests, min, max" to the equipment form in this plan (recommended) / b) loading list shows owned equipment without scaling A: a — the Human, 2026-11-17: the scaling inputs return to the equipment form in this plan.
 
 ## Execution Notes
 - decided: the plan is written for answer a) of the Critical Question — why: without a rule the equipment half of the list cannot say a quantity or a shortage, which is the point of MP-04.

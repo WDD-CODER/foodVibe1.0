@@ -339,7 +339,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Prove the panel, the card and the settings field in the running app, then run every check — 629-1 creates its supplier, product and recipe through the API, answers the parse route with page.route, saves for real and removes what it created; 629-2 answers the price-rises route with page.route; 629-3 reads the la
 
 ### Plan 630 — Platform screen: how accurate each AI scan flow is per model, how big the shared supplier brain is, and whether files are kept (`plans/630-platform-screen-scan-accuracy-supplier-brain-file-store-status.plan.md`)
-- [ ] A1: Group draft rows into flows, models and weeks in one pure function so the rule can be tested with a fixed clock — weekStart and buildLearningStats with the average and rounding rules; the fixtures of the first Done-when item
+- [ ] A1: Group draft rows by flow, model and week in one pure function that tests can pin a date on — weekStart and buildLearningStats with the average and rounding rules; the fixtures of the first Done-when item
 - [ ] A2: Give the platform admin one read of scan accuracy and brain size that never includes a private business — GET /stats (days check, mayLearnFrom filter, 20,000 cap, three brain counts, counts-only answer), route tests with the fixtures of the second Done-when item, breadcrumbs row
 - [ ] A3: Let the browser's admin service fetch the learning numbers and the file-store status — the three types, getLearningStats and getLearningStatus, two spec cases with HttpTestingController
 - [ ] A4: Build the learning section so the numbers can be read on the platform screen — the component (table, by-week reveal, brain block, private note, file-store note, empty and error states), its styles and spec, every dictionary key of the UI notes
@@ -411,3 +411,15 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Build the report that marks dishes under the target and prints on one page — per-portion costs from the cost service, the shared report function, the two tables, findings, print rules; spec
 - [ ] A8: Put the diagnosis entry where a consultant will find it — the link in the acting banner by the home modules, the chip and path prefix in the inventory group, the two new icons; specs updated
 - [ ] A9: Add the words, the pages map row and the screen check, then run everything — the 50 dictionary keys, the breadcrumbs row, the ui spec with its fixtures, every Done-when command, the human cards
+
+### Plan 631 — One user, more than one business: access grants, the active business and the consultant role (`plans/631-one-user-more-than-one-business-access-grants-consultant-role.plan.md`)
+- [ ] A1: Write the rule change down first so the code is built against the approved words — create the ADR from section (a) of the gate text, apply the four field edits of section (b) to INV-1; keep each field on one line
+- [ ] A2: Teach the permission checker the consultant role and its two refusals — CONSULTANT_DENIED set and the branch after the owner line, exported; the Trash filter line so a consultant's Trash request gets an answer; consultant cases in the permission tests
+- [ ] A3: Add the one service that decides which business a session is in — liveGrant, resolveSession (no read at home), canEnter, stillActing with its test counter, grant helpers; the active-business field on the user model; read the wave 0 index and schema first
+- [ ] A4: Sign every access token through that decision and let a user switch business — async signAccess returning token and session, the public user object with home and acting fields, the four existing callers, the guest reset, accept-terms, the new switch route; token-field test updated
+- [ ] A5: Stop an acting session on the first request after its grant is removed — async attachUser, the ACCESS_ENDED answer, the 503 on a failed check, no read for a home token, acting ids on the request log; usage is not recorded for an acting request
+- [ ] A6: Add the grant routes and the list of businesses a user may enter — the three grant routes and the businesses list with their error codes, limiter and id-only logs
+- [ ] A7: Keep the baseline out of a consultant's reach inside the onboarding save — the one condition on the baseline line; every row of the business-route table gets a test
+- [ ] A8: Prove the whole flow with tests, including the ownership invariant — the switch, refresh, grant and list cases; the acting, usage, write-limit and log cases; the new INV-1 tests
+- [ ] A9: Record the new service, collection and routes where the next developer looks — a row for the access service in the server map, the businessAccess collection and the five routes in the backend standards, the service on the server-auth family line
+- [ ] A10: Run every check and hand Dandan the one reading check — the Done-when commands in order; then the human card for the ADR and INV-1 text
