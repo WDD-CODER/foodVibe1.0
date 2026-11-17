@@ -331,3 +331,22 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: `jwt.verify` also in `server/routes/auth.js` and `server/routes/log.js`; `isAdmin` re-declared in
   `server/routes/generic.js`; rate limiters built per file in `server/routes/ai.js`, `server/routes/auth.js`,
   `server/routes/business.js`, `server/routes/log.js`, `server/routes/product-import.js`.
+
+### modules-registry — which program modules a business has
+
+- Status: stable — plan 615
+- Use: `shared/schemas/modules.ts` — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
+  `platformUpdateSchema`.
+- When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
+  same rule.
+- Known copies: none.
+
+### entity-schemas — one stored shape per file
+
+- Status: stable — plan 615
+- Use: the nine new entity schema files under `shared/schemas/entities/` (`invoice.schema.ts`, `price-history.schema.ts`,
+  `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
+  `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+- When: a new stored collection needs a shape.
+- Known copies: none.
