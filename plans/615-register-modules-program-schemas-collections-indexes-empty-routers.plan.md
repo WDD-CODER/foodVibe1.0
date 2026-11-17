@@ -305,7 +305,7 @@ line or file this plan names was removed, renamed or rewritten).
     platform admin. A private business keeps its own per-business memory and its own drafts.
   - `setAiPrivate(id, value)` in `server/services/business.js` replaces `setShareAiExamples`: turning private on
     deletes the business's promoted `GEMINI_SHOTS` copies (`promotedFrom.businessId`) and calls
-    `forgetBusiness` (C-ALIAS, a no-op until 627).
+    `forgetBusiness` (C-ALIAS; 618 leaves a one-line placeholder and 627 adds the real call).
   - Removed: `PUT /api/v1/business/share-ai-examples`, `shareAiExamplesInputSchema`,
     `BusinessService.updateShareAiExamples`. `business.shareAiExamples` stays in the schema as optional so stored
     documents validate; nothing reads it.
@@ -332,10 +332,14 @@ line or file this plan names was removed, renamed or rewritten).
     size, never the content; never throws); `signedFileUrl(file, ttlSeconds)`; `deleteStoredFile(file)`;
     `setFileStoreForTests(fake)`.
   - Upload is signed by the server and delivered as an authenticated (non-public) asset; no new npm dependency
-    (`node:crypto` + `fetch`). Check the provider's current upload and signed-delivery documentation before writing
-    the plan; do not write the request shape from memory.
+    (`node:crypto` + `fetch`). The request shapes are in 619, taken from the provider's documentation as read on
+    2026-11-17 and built by pure functions in `server/services/cloudinary-requests.js`: a signed delivery URL does not
+    expire there, so the 300-second link is the provider's API download endpoint with `expires_at`.
+  - `server/app.js` gains `media-src` in the content security policy (619), so a recording can be replayed from a
+    `blob:` and from a stored file.
   - Collection `storedFiles` (server-only): `{ _id, businessId, kind, mimeType, bytes, provider: 'cloudinary',
-    providerId, resourceType, createdBy, createdAt, deleteAfter?: number }`. Index `{ businessId, kind, createdAt }`.
+    providerId, resourceType, format?: string (≤ 12, from the provider's upload answer), createdBy, createdAt,
+    deleteAfter?: number }`. Index `{ businessId, kind, createdAt }`.
   - `GET /api/v1/files/:id` → `{ url }` (expires in 300 s) for a member of the file's business; 404 otherwise.
     An invoice file: owner (and consultant) only — it shows prices.
   - Limits: base64 ≤ 1,800,000 characters (the JSON body limit is 2 MB). Mime allowlists — invoice:
@@ -365,7 +369,8 @@ line or file this plan names was removed, renamed or rewritten).
     quantity, else 1; `key` = `itemKey`.
   - Ticks: `menuEvents.siteLogistics.loaded?: [{ key, at, by, byName }]` (≤ 600), server-owned, written by
     `PUT /api/v1/events/:id/loading` body `{ key, loaded: boolean }` — any member of the business,
-    `requireModule('event_logistics')`, not on a finished event.
+    `requireModule('event_logistics')`, not on a finished event. There is no permission action of its own: the route
+    uses the existing `markArrival` action, so `permissions.js` is not edited.
 - [ ] Contract copied verbatim from `docs/modules/modules-map.md` (frozen 2026-11-17):
   **C-INVOICE (625; used by 626–629, 633)**
   - `invoices`: `{ ...baseDocShape, supplierId?, supplierName, supplierTaxId? (^\d{9}$), invoiceNumber? (≤ 40),
@@ -469,19 +474,26 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] Contract copied verbatim from `docs/modules/modules-map.md` (frozen 2026-11-17):
   **C-DIAG (633; used by 634)**
   - `diagnoses`: `{ ...baseDocShape, name, periodDays (default 60, 30–365), menu: [{ name (≤ 200), sellPrice (≥ 0),
-    dishId? }] (≤ 300), invoiceIds: string[] (≤ 100), homeBusinessId, status: 'open' | 'done' }`; read through the
+    dishId? }] (≤ 300), pricesIncludeVat: boolean (default true), vatPct: number (0–100, default 18),
+    invoiceIds: string[] (≤ 100), homeBusinessId, status: 'open' | 'done' }`; read through the
     generic API (owner, consultant), written only by the router.
   - `/api/v1/diag` (`requireHomeModule('consultant_diag')`; owner, consultant or acting platform admin):
-    `POST /`, `PUT /:id/menu` body `{ menu, draftId? }` (it confirms the AI draft), `PUT /:id/invoices`, `PUT /:id/status`, `GET /:id/data` → `{ diagnosis,
+    `POST /` (accepts `pricesIncludeVat?`, `vatPct?`), `PUT /:id/menu` body `{ menu, draftId?, pricesIncludeVat?,
+    vatPct? }` (it confirms the AI draft), `PUT /:id/invoices`, `PUT /:id/status`, `GET /:id/data` → `{ diagnosis,
     volatility: [{ productId, supplierId, min, max, movePct, points }] }` from `priceHistory` inside the period;
     `movePct = (max − min) / min × 100`, two decimals, by code.
   - `POST /api/v1/ai/diag/menu` body `{ text (1–20,000) }` → `{ items: [{ name, sellPrice }], draftId }`;
     `feature: 'menu_prices_parse'`; prices copied as printed; an item without a printed price is returned with
     `sellPrice: null` and the person types it.
-  - `shared/schemas/diag/margin-report.ts` → `buildMarginReport({ menu, costByDishId, volatility, settings }) →
-    { dishes: [{ name, sellPrice, cost?, marginPct?, underTarget }], findings: [{ key, value, evidenceCount }] }`.
-    Pure. `marginPct = (sellPrice − cost) / sellPrice × 100`; `underTarget` when below
-    `settings.profitTargetPct`. The browser supplies `costByDishId` from `RecipeCostService` (the server has no
+  - `shared/schemas/diag/margin-report.ts` → `buildMarginReport({ menu, costByDishId, volatility, settings,
+    pricesIncludeVat, vatPct }) → { dishes: [{ name, sellPrice, netPrice, cost?, marginPct?, underTarget,
+    suggestedPrice? }], findings: [{ key, value, evidenceCount }] }`. Pure, all by code, two decimals.
+    `netPrice = pricesIncludeVat ? sellPrice / (1 + vatPct / 100) : sellPrice`;
+    `marginPct = (netPrice − cost) / netPrice × 100`; `underTarget` when below `settings.profitTargetPct`;
+    `suggestedPrice` = the price to charge to reach the target = `cost / (1 − profitTargetPct / 100)`, times
+    `(1 + vatPct / 100)` when prices include VAT; absent without a cost or when the target is 100 or more. Costs are
+    taken as stored: no VAT is removed from a cost in this program (Dandan, 2026-11-17: a menu sold to the public
+    includes VAT, and the report must take it off and say what to charge). The browser supplies `costByDishId` from `RecipeCostService` (the server has no
     cost engine).
   - A batch of invoice files is a queue in the browser: one `POST /ai/invoices/read`, one preview, one `apply` at a
     time. `/api/v1/ai/invoices/read` gets its own limiter for this (60 / 15 minutes per user) in 626.
@@ -566,7 +578,8 @@ line or file this plan names was removed, renamed or rewritten).
     z.literal('consultant')`, `grantedBy`, `grantedByName` max 80, `grantedAt`, `revokedAt?`, `revokedBy?`). Map key
     `businessAccess`.
   - `diagnosis.schema.ts` → `DIAGNOSIS_STATUSES` (`open`, `done`), `diagnosisSchema` (`...baseDocShape`, `name` 1–200,
-    `periodDays` integer 30–365, `menu`: array max 300 of `{ name 1–200, sellPrice ≥ 0, dishId? }`, `invoiceIds`:
+    `periodDays` integer 30–365, `menu`: array max 300 of `{ name 1–200, sellPrice ≥ 0, dishId? }`, `pricesIncludeVat`: boolean default true,
+    `vatPct`: number 0–100 default 18, `invoiceIds`:
     array of string max 100, `homeBusinessId`, `status`). Map key `diagnoses`.
   - `stock-count.schema.ts` → `STOCK_COUNT_STATUSES` (`draft`, `final`), `STOCK_COUNT_SOURCES` (`manual`, `voice`,
     `text`), `stockCountSchema` (`...baseDocShape`, `countedAt`, `status`, `source`, `draftIds?`: array of string max 20, `note?` max 500,
