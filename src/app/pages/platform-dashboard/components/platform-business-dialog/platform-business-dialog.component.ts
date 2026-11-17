@@ -4,6 +4,7 @@ import { MODULE_KEYS, type ModuleKey } from '@schemas/modules'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 import { PlatformAdminService, type PlatformUpdateBody } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -17,7 +18,7 @@ const REASON_MAX = 200
 @Component({
   selector: 'app-platform-business-dialog',
   standalone: true,
-  imports: [TranslatePipe, ModalShellComponent, FormFieldComponent],
+  imports: [TranslatePipe, ModalShellComponent, FormFieldComponent, NumberBoxDirective],
   templateUrl: './platform-business-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
