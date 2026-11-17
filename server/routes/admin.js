@@ -19,6 +19,8 @@ const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 
 const { containsInjectionPattern, scanRecipeDraftForInjection, draftCloseness } = require('../services/ai-recipe-helpers')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
+const { mayLearnFrom } = require('../utils/ai-learning')
+const { setAiPrivate } = require('../services/business')
 
 const router = Router()
 
@@ -270,8 +272,14 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
       else $set.aiMonthlyTokenCap = aiMonthlyTokenCap
       changed.push('aiMonthlyTokenCap')
     }
-    // Plan 618 replaces this plain write with setAiPrivate (C-LEARN); plan 617 adds the cap-cache clear and aiTokensThisMonth here.
-    if (aiPrivate !== undefined) { $set.aiPrivate = aiPrivate; changed.push('aiPrivate') }
+    // Plan 618 (C-LEARN): aiPrivate is written only through setAiPrivate, which also removes the business's shared copies.
+    let removed
+    if (aiPrivate !== undefined) {
+      const priv = await setAiPrivate(req.params.id, aiPrivate)
+      if (!priv.matchedCount) return res.status(404).json({ error: 'Business not found' })
+      removed = priv.removed
+      changed.push('aiPrivate')
+    }
     const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed }
     const update = { $push: { platformHistory: { $each: [row], $slice: -50 } } }
     if (Object.keys($set).length) update.$set = $set
@@ -280,7 +288,7 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
     if (!after) return res.status(404).json({ error: 'Business not found' })
     clearModuleCache(req.params.id)
     if (aiMonthlyTokenCap !== undefined) clearCapCache(req.params.id)
-    req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed })
+    req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed, ...(removed !== undefined && { removed }) })
     res.json({
       ok: true,
       modules: modulesOf(after),
@@ -417,7 +425,9 @@ function aiShotRow(doc, businessName) {
 
 router.get('/ai-shots', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
-    const sharing = await col('businesses').find({ shareAiExamples: true }, { projection: { name: 1 } }).toArray()
+    // Plan 618 (C-LEARN): every business that is not private offers its approved examples.
+    const businesses = await col('businesses').find({ _id: { $ne: MASTER_BUSINESS_ID } }, { projection: { name: 1, aiPrivate: 1 } }).toArray()
+    const sharing = businesses.filter(mayLearnFrom)
     const nameById = new Map(sharing.map(b => [String(b._id), b.name]))
     const shared = await shotsCol().find({ businessId: MASTER_BUSINESS_ID }).sort({ createdAt: -1 }).limit(AI_SHOT_SHARED_CAP).toArray()
     const promoted = new Set(shared.map(d => d.promotedFrom?.shotId).filter(Boolean))
@@ -441,8 +451,8 @@ router.post('/ai-shots/:id/promote', verifyToken, requirePlatformAdmin, async (r
     if (!OBJECT_ID_RE.test(id)) return res.status(404).json({ error: 'Shot not found' })
     const shot = await shotsCol().findOne({ _id: new mongoose.Types.ObjectId(id), status: 'approved', businessId: { $ne: MASTER_BUSINESS_ID } })
     if (!shot) return res.status(404).json({ error: 'Shot not found' })
-    const business = await col('businesses').findOne({ _id: shot.businessId }, { projection: { shareAiExamples: 1 } })
-    if (business?.shareAiExamples !== true) return res.status(409).json({ error: 'Business does not share examples', code: 'not_shared' })
+    const business = await col('businesses').findOne({ _id: shot.businessId }, { projection: { aiPrivate: 1 } })
+    if (!business || !mayLearnFrom(business)) return res.status(409).json({ error: 'Business is private', code: 'not_shared' })
     if (await shotsCol().findOne({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.shotId': id })) {
       return res.status(409).json({ error: 'Already shared', code: 'already_shared' })
     }

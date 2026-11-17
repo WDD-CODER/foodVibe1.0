@@ -359,3 +359,21 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   in `server/services/gemini-client.js`.
 - When: a server path calls the model and must refuse once the business has used its monthly cap.
 - Known copies: none.
+
+### ai-learning — whether the platform may learn from a business
+
+- Status: stable — plan 618
+- Use: `server/utils/ai-learning.js` — `mayLearnFrom(business)` (`aiPrivate !== true`); the private mark is written
+  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` deletes the promoted
+  `GEMINI_SHOTS` copies).
+- When: code copies something into a `'__master__'` pool or lists a business's AI material for the platform admin.
+- Known copies: none.
+
+### ai-draft — the AI draft trail (suggested vs saved)
+
+- Status: stable — plan 618
+- Use: `server/services/ai-drafts.js` — `saveAiDraft(req, { feature, subject, input, aiDraft, model })` (never throws,
+  `null` on failure) and `confirmAiDraft(req, draftId, saved, ratio)`; collection `aiDrafts`, newest 500 per business
+  and feature.
+- When: an AI flow must store what the model suggested next to what the person saved, with a closeness score.
+- Known copies: none.

@@ -18,30 +18,25 @@ test('612-1: the AI examples section explains itself and scores a changed recipe
   const session = await signInQa(context)
   const headers = { authorization: `Bearer ${session.token}` }
   const shotKey = `e2e612-${Date.now()}`
-  try {
-    // Setup: the QA business opts in and has one confirmed example whose recipe_type changed.
-    await request.put(`${API}/api/v1/business/share-ai-examples`, { headers, data: { share: true } })
-    await request.post(`${API}/api/v1/ai/shots`, {
-      headers,
-      data: { prompt: 'E2E 612 מרק', draft: aiDraft, status: 'pending', source: 'text', shotKey }
-    })
-    await request.post(`${API}/api/v1/ai/shots/confirm`, {
-      headers,
-      data: { shotKey, draft: savedDraft, recipeId: 'e2e-612' }
-    })
+  // Setup: the QA business is not private, so its confirmed example is a candidate.
+  await request.post(`${API}/api/v1/ai/shots`, {
+    headers,
+    data: { prompt: 'E2E 612 מרק', draft: aiDraft, status: 'pending', source: 'text', shotKey }
+  })
+  await request.post(`${API}/api/v1/ai/shots/confirm`, {
+    headers,
+    data: { shotKey, draft: savedDraft, recipeId: 'e2e-612' }
+  })
 
-    await page.goto('/platform')
-    const section = page.locator('app-platform-ai-shots')
-    await expect(section).toContainText('דוגמאות AI למתכונים')
-    await expect(section.getByTestId('ai-shots-desc')).toContainText('כאן מופיעות דוגמאות')
+  await page.goto('/platform')
+  const section = page.locator('app-platform-ai-shots')
+  await expect(section).toContainText('דוגמאות AI למתכונים')
+  await expect(section.getByTestId('ai-shots-desc')).toContainText('כאן מופיעות דוגמאות')
 
-    const candidate = section.locator('[data-testid="ai-shots-candidates"] li', { hasText: 'E2E 612 מרק' })
-    const meta = candidate.locator('.ai-shot__meta')
-    await expect(meta).toContainText('דיוק ה-AI:')
-    const pct = Number(/דיוק ה-AI:\s*(\d+)%/.exec((await meta.textContent()) ?? '')?.[1])
-    expect(pct).toBeLessThan(100)
-    await page.screenshot({ path: 'screens/612-1.png' })
-  } finally {
-    await request.put(`${API}/api/v1/business/share-ai-examples`, { headers, data: { share: false } })
-  }
+  const candidate = section.locator('[data-testid="ai-shots-candidates"] li', { hasText: 'E2E 612 מרק' })
+  const meta = candidate.locator('.ai-shot__meta')
+  await expect(meta).toContainText('דיוק ה-AI:')
+  const pct = Number(/דיוק ה-AI:\s*(\d+)%/.exec((await meta.textContent()) ?? '')?.[1])
+  expect(pct).toBeLessThan(100)
+  await page.screenshot({ path: 'screens/612-1.png' })
 })
