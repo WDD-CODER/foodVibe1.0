@@ -16,6 +16,12 @@
  * Write order (no transaction): products, priceHistory (one row per created or changed price), invoices, the AI draft
  * confirm. A failure after the product write is logged (`product_import.apply.trail_failed`, ids and counts only) and
  * the answer is still 200: a failed trail NEVER rolls back or hides the prices the owner approved.
+ *
+ * Plan 627: after the supplier step a 'memory' trail step teaches the invoice-name memory (own aliases always, shared
+ * aliases + supplier profile only for a business that may teach; see services/invoice-memory.js). Same failure rule.
+ * POST /api/v1/product-import/resolve  { supplierKey, names: string[] (<= 200) } -> { matches: [{ i, productId, source: 'own' | 'shared' }] }
+ *   Owner or consultant (editMoney on products). Answers printed names from memory: no model call, no write, no limiter.
+ * No printed name, product name or supplier key value is logged.
  */
 const { Router } = require('express')
 const { createRateLimiter } = require('../middleware/rate-limit')
@@ -32,6 +38,9 @@ const { changePct, buildInvoiceLines, invoiceKeptRatio } = require('../utils/inv
 const { confirmAiDraft } = require('../services/ai-drafts')
 const { keepStoredFile } = require('../services/file-store')
 const { invoiceApplyInputSchema } = require('../generated/schemas/entities/invoice.schema')
+const { invoiceResolveRequestSchema } = require('../generated/schemas/entities/invoice-alias.schema')
+const { learnFromApply, resolveNames } = require('../services/invoice-memory')
+const { getBusiness } = require('../services/business')
 
 const router = Router()
 
@@ -191,6 +200,8 @@ router.post('/apply', verifyToken, (req, res, next) => {
 
     let invoiceOk = false
     let supplierTaxSet = false
+    let aliasesOwn = 0
+    let aliasesShared = 0
     if (invoice) {
       const savedLines = buildInvoiceLines(invoice.lines, outcomes)
       if (historyOk) {
@@ -239,6 +250,19 @@ router.post('/apply', verifyToken, (req, res, next) => {
           trailFailed('supplier', err)
         }
       }
+      if (invoice.supplierKey) {
+        try {
+          const business = await getBusiness(req.user.businessId)
+          const lines = savedLines.filter(line => line.productId).map(line => ({ printedName: line.printedName, productId: line.productId, unit: line.unit }))
+          const learned = await learnFromApply(mongoose.connection.db, business ?? { _id: req.user.businessId }, {
+            supplierKey: invoice.supplierKey, supplierName: invoice.supplierName, vatIncluded: invoice.vatIncluded, lines,
+          })
+          aliasesOwn = learned.own
+          aliasesShared = learned.shared
+        } catch (err) {
+          trailFailed('memory', err)
+        }
+      }
       if (invoice.draftId) {
         try {
           await confirmAiDraft(req, invoice.draftId, savedLines, invoiceKeptRatio)
@@ -250,13 +274,31 @@ router.post('/apply', verifyToken, (req, res, next) => {
 
     req.log.info({
       event: 'product_import.applied', created: created.length, updated: updates.length, skipped: skippedRows.length,
-      historyRows: historyQueue.length - historySkipped, historySkipped, invoice: invoice !== null, supplierTaxSet,
+      historyRows: historyQueue.length - historySkipped, historySkipped, invoice: invoice !== null, supplierTaxSet, aliasesOwn, aliasesShared,
     })
     const answer = { created: created.length, updated: updates.length, skipped: skippedRows.length, skippedRows }
     if (invoice) answer.invoiceId = historyOk && invoiceOk ? invoiceId : null
     res.json(answer)
   } catch (err) {
     req.log.error({ err, event: 'product_import.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.post('/resolve', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'editMoney', { type: 'products' })) next()
+}, async (req, res) => {
+  try {
+    const parsed = invoiceResolveRequestSchema.safeParse(req.body)
+    if (!parsed.success) return res.status(400).json({ error: 'INVALID_REQUEST' })
+    const matches = await resolveNames(mongoose.connection.db, req.user.businessId, parsed.data)
+    req.log.info({
+      event: 'product_import.resolved', names: parsed.data.names.length,
+      own: matches.filter(m => m.source === 'own').length, shared: matches.filter(m => m.source === 'shared').length,
+    })
+    res.json({ matches })
+  } catch (err) {
+    req.log.error({ err, event: 'product_import.resolve_failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
