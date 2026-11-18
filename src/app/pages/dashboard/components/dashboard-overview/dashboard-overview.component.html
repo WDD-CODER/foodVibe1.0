@@ -5,12 +5,16 @@
     <app-front-desk-status-banner />
     @if (needsOpeningDetails_()) {
       <app-opening-details-banner />
-    } @else {
+    } @else if (modules.has('events')) {
       <app-business-performance />
     }
-    <app-frontdesk-week-card />
+    @if (modules.has('frontdesk')) {
+      <app-frontdesk-week-card />
+    }
     <app-setup-checklist-card />
-    <app-front-desk-checklist-card />
+    @if (modules.has('frontdesk')) {
+      <app-front-desk-checklist-card />
+    }
     <section class="kpi-grid">
       <!-- Total Products -->
       <article class="kpi-card" data-testid="kpi-total-products">

@@ -257,7 +257,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.menuAiFlow_.init({ menuForm: this.form_ })
     this.heroFab.setPageActions(
       [
-        { labelKey: 'ai_menu_open', icon: 'sparkles', run: () => this.openAiMenuModal() },
+        { labelKey: 'ai_menu_open', icon: 'sparkles', run: () => this.openAiMenuModal(), module: 'ai_create' },
         { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.toggleExportSheet() },
         { labelKey: 'supplier_orders', icon: 'truck', run: () => this.openSupplierOrders() }
       ],

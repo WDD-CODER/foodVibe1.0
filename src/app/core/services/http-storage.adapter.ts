@@ -1,7 +1,9 @@
 import { Injectable, Injector, inject } from '@angular/core'
 import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
+import { MODULE_OF_TYPE } from '@schemas/modules-pure'
 import { environment } from '../../../environments/environment'
+import type { ModuleService } from './module.service'
 
 /** Plan 456 — every backend path in one place. Paths only: each caller keeps its own base
  *  (`environment.apiUrl` or `environment.authApiUrl`) in front, exactly as before. */
@@ -91,6 +93,19 @@ export class HttpStorageAdapter {
     return this.injector_.get(HttpClient)
   }
 
+  /**
+   * Plan 620: true when the type belongs to a module this business does not have — the caller returns an empty result
+   * and sends no request (the server would answer 403 MODULE_OFF). Types with no module are not delayed.
+   * ModuleService is read at call time through the injector (no constructor injection, no cycle).
+   */
+  private async moduleOff_(entityType: string): Promise<boolean> {
+    if (!(entityType in MODULE_OF_TYPE)) return false
+    const { ModuleService: ModuleServiceToken } = await import('./module.service')
+    const modules: ModuleService = this.injector_.get(ModuleServiceToken)
+    await modules.ready()
+    return !modules.hasType(entityType)
+  }
+
   // ---------------------------------------------------------------------------
   // Token helper
   // ---------------------------------------------------------------------------
@@ -106,6 +121,7 @@ export class HttpStorageAdapter {
 
   /** Returns all entities of a given type. */
   async query<T>(entityType: string): Promise<T[]> {
+    if (await this.moduleOff_(entityType)) return []
     const docs = await firstValueFrom(
       this.http.get<T[]>(`${this.base}${API.data(entityType)}`, { headers: this.headers(), withCredentials: true })
     )
@@ -117,6 +133,7 @@ export class HttpStorageAdapter {
    * (e.g. VERSION_HISTORY scoped to one recipe/dish/product).
    */
   async queryFiltered<T>(entityType: string, filterEntityType: string, filterEntityId: string): Promise<T[]> {
+    if (await this.moduleOff_(entityType)) return []
     const params = new URLSearchParams({
       filterEntityType,
       filterEntityId
@@ -135,6 +152,7 @@ export class HttpStorageAdapter {
    * is a small response regardless of collection size.
    */
   async search<T>(entityType: string, q: string, limit = 25): Promise<T[]> {
+    if (await this.moduleOff_(entityType)) return []
     const params = new URLSearchParams({ q, limit: String(limit) })
     return firstValueFrom(
       this.http.get<T[]>(`${this.base}${API.data(entityType)}/search?${params.toString()}`, {
@@ -149,6 +167,7 @@ export class HttpStorageAdapter {
    * the full collection loaded. Mirrors the server's `filter=lowStock|unapproved`.
    */
   async count(entityType: string, filter?: string): Promise<number> {
+    if (await this.moduleOff_(entityType)) return 0
     const params = filter ? `?${new URLSearchParams({ filter }).toString()}` : ''
     const { count } = await firstValueFrom(
       this.http.get<{ count: number }>(`${this.base}${API.data(entityType)}/count${params}`, {
@@ -299,6 +318,7 @@ export class HttpStorageAdapter {
 
   /** The caller's deleted items of one type, newest first (plan 407). */
   async trash<T>(entityType: string): Promise<(T & { deletedAt: number })[]> {
+    if (await this.moduleOff_(entityType)) return []
     const docs = await firstValueFrom(
       this.http.get<(T & { deletedAt: number })[]>(`${this.base}${API.data(entityType)}/trash`, {
         headers: this.headers(),
@@ -325,6 +345,7 @@ export class HttpStorageAdapter {
 
   /** Brings every item of one type back from Trash. */
   async restoreAll(entityType: string): Promise<void> {
+    if (await this.moduleOff_(entityType)) return
     await firstValueFrom(
       this.http.put<unknown>(
         `${this.base}${API.data(entityType)}/trash/restore-all`,
@@ -339,6 +360,7 @@ export class HttpStorageAdapter {
 
   /** Removes every item of one type in Trash for good. */
   async emptyTrash(entityType: string): Promise<void> {
+    if (await this.moduleOff_(entityType)) return
     await firstValueFrom(
       this.http.delete<unknown>(`${this.base}${API.data(entityType)}/trash`, {
         headers: this.headers(),

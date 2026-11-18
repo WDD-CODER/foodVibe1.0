@@ -1,15 +1,17 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, TrendingUp } from 'lucide-angular'
+import { LucideAngularModule, Settings, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
+import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
+import { PlatformBusinessDialogService } from './components/platform-business-dialog/platform-business-dialog.service'
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformDashboardPage } from './platform-dashboard.page'
 
@@ -39,6 +41,10 @@ function row(id: string, extra: Partial<BusinessRow> = {}, events: Partial<Busin
     closeRate: null,
     lastEventDate: null,
     frontDesk: null,
+    modules: ['events', 'event_logistics', 'frontdesk', 'ai_create'],
+    aiPrivate: false,
+    aiMonthlyTokenCap: null,
+    aiTokensThisMonth: 0,
     ...extra
   }
 }
@@ -67,6 +73,8 @@ describe('PlatformDashboardPage', () => {
   })
   const downloadFrontDeskCsv = jasmine.createSpy('downloadFrontDeskCsv').and.resolveTo()
   let getAiUsage: jasmine.Spy<(params?: AiUsageParams) => Promise<AiUsageReport>>
+  /** The signed-in session works in business 'a'. */
+  const reloadBusiness = jasmine.createSpy('reload')
 
   async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
     rows_ = signal(rows)
@@ -80,7 +88,7 @@ describe('PlatformDashboardPage', () => {
         )
       )
     TestBed.configureTestingModule({
-      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp })],
+      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, TrendingUp })],
       providers: [
         {
           provide: PlatformAdminService,
@@ -110,6 +118,10 @@ describe('PlatformDashboardPage', () => {
             downloadAiUsageCsv: jasmine.createSpy('downloadAiUsageCsv').and.resolveTo(),
             setInternal: jasmine.createSpy('setInternal').and.resolveTo()
           }
+        },
+        {
+          provide: BusinessService,
+          useValue: { business_: signal({ _id: 'a' }).asReadonly(), reload: reloadBusiness }
         },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error']) },
         {
@@ -230,6 +242,81 @@ describe('PlatformDashboardPage', () => {
     const open = spyOn(dialog, 'open').and.resolveTo(false)
     ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="fd-edit"]') as HTMLButtonElement).click()
     expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
+  })
+
+  describe('modules and AI columns (plan 620)', () => {
+    const text = (id: string): string =>
+      ((fixture.nativeElement as HTMLElement).querySelector(`[data-testid="${id}"]`)?.textContent ?? '').trim()
+
+    it('shows the module names joined with a dot, and a dash when none is on', async () => {
+      await setup([row('a', { modules: ['events', 'frontdesk'] })])
+      expect(text('biz-modules')).toBe('module_events · module_frontdesk')
+    })
+
+    it('shows a dash when no module is on', async () => {
+      await setup([row('b', { modules: [] })])
+      expect(text('biz-modules')).toBe('—')
+    })
+
+    it('shows tokens over the cap with thousands separators', async () => {
+      await setup([row('a', { aiTokensThisMonth: 12345, aiMonthlyTokenCap: 100000 })])
+      expect(text('biz-ai-month')).toContain('12,345 / 100,000')
+    })
+
+    it('shows "no cap" when there is none', async () => {
+      await setup([row('b', { aiTokensThisMonth: 0 })])
+      expect(text('biz-ai-month')).toContain('0 / platform_ai_no_cap')
+    })
+
+    it('shows the private tag only for a private business', async () => {
+      await setup([row('a', { aiPrivate: true })])
+      expect(text('biz-private-tag')).toBe('platform_ai_private_tag')
+    })
+
+    it('shows no private tag for a shared business', async () => {
+      await setup([row('b')])
+      expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-private-tag"]')).toBeNull()
+    })
+
+    it('opens the dialog on the row when the settings button is pressed', async () => {
+      await setup([row('a', { modules: ['events'], aiPrivate: true, aiMonthlyTokenCap: 5, aiTokensThisMonth: 2 })])
+      const open = spyOn(TestBed.inject(PlatformBusinessDialogService), 'open').and.resolveTo(false)
+      ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      expect(open).toHaveBeenCalledOnceWith({
+        businessId: 'a',
+        name: 'a',
+        modules: ['events'],
+        aiPrivate: true,
+        aiMonthlyTokenCap: 5,
+        aiTokensThisMonth: 2
+      })
+    })
+
+    it('reads the business again after a save on the business this session works in, so no refresh is needed', async () => {
+      await setup([row('a')])
+      reloadBusiness.calls.reset()
+      spyOn(TestBed.inject(PlatformBusinessDialogService), 'open').and.resolveTo(true)
+      ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      await fixture.whenStable()
+      expect(reloadBusiness).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not read the business again after a cancel, or after a save on another business', async () => {
+      await setup([row('a')])
+      reloadBusiness.calls.reset()
+      const open = spyOn(TestBed.inject(PlatformBusinessDialogService), 'open').and.resolveTo(false)
+      const press = () =>
+        ((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      press()
+      await fixture.whenStable()
+      expect(reloadBusiness).not.toHaveBeenCalled()
+      rows_.set([row('b')])
+      fixture.detectChanges()
+      open.and.resolveTo(true)
+      press()
+      await fixture.whenStable()
+      expect(reloadBusiness).not.toHaveBeenCalled()
+    })
   })
 
   describe('pinned name column (plan 611)', () => {

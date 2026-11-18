@@ -1,3 +1,4 @@
+import { aiCapErrorKey } from '@utils/ai-error.util'
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
@@ -272,6 +273,8 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   private resolveErrorKey_(err: unknown): string {
+    const capKey = aiCapErrorKey(err)
+    if (capKey) return capKey
     if (this.gemini.offerModelSwitch(err)) return 'ai_model_exhausted_prompt'
     if (err instanceof HttpErrorResponse) {
       const msg: string = err.error?.error ?? ''

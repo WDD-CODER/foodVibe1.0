@@ -52,13 +52,25 @@ export class BusinessService {
   private readonly _business_ = signal<Business | null>(null)
   public readonly business_ = this._business_.asReadonly()
 
+  private readonly _loaded_ = signal(false)
+  /** Plan 620: `false` while a signed-in user's business is loading; `true` once `_load` answered or failed, and when nobody is signed in. */
+  public readonly loaded_ = this._loaded_.asReadonly()
+
   /** Only the id: a new user object with the same _id (profile update, token refresh) must not reload. */
   private readonly _userId_ = computed(() => this.userService.user_()?._id ?? null)
 
   constructor() {
     effect(() => {
       const userId = this._userId_()
-      untracked(() => (userId ? this._load(userId) : this._business_.set(null)))
+      untracked(() => {
+        if (!userId) {
+          this._business_.set(null)
+          this._loaded_.set(true)
+          return
+        }
+        this._loaded_.set(false)
+        this._load(userId)
+      })
     })
   }
 
@@ -110,13 +122,28 @@ export class BusinessService {
     this._business_.update((business) => (business ? { ...business, ...res } : business))
   }
 
+  /**
+   * Reads the business again from the server, so a change made elsewhere (the platform admin's modules, AI cap or
+   * private mode) shows at once, with no page refresh. `loaded_` stays as it is: nothing flickers while it reads.
+   */
+  reload(): void {
+    const userId = this._userId_()
+    if (userId) this._load(userId)
+  }
+
   private _load(userId: string): void {
     this.http.get<Business>(`${environment.apiUrl}${API.business()}`).subscribe({
       next: (business) => {
-        if (this._userId_() === userId) this._business_.set(business)
+        if (this._userId_() === userId) {
+          this._business_.set(business)
+          this._loaded_.set(true)
+        }
       },
       error: (err: unknown) => {
-        if (this._userId_() === userId) this._business_.set(null)
+        if (this._userId_() === userId) {
+          this._business_.set(null)
+          this._loaded_.set(true)
+        }
         this.logging.warn('Business could not be loaded', { err: String(err) })
       }
     })

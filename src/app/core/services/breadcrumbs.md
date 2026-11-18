@@ -32,6 +32,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
 | `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |
+| `module.service.ts` | Which modules the business has (`has`, `hasType`, `ready`); the browser only hides, the server gates (plan 620) | ModuleService |
 | `permission.service.ts` | Client mirror of the server permission checker; UI hides/locks by the same rules | PermissionService, PermissionAction |
 | `activity-log.service.ts` | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |
 | `version-history.service.ts` | Version history | VersionHistoryService, VersionEntry |

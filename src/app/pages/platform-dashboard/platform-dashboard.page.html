@@ -85,6 +85,12 @@
           <div class="c-grid-header-cell" appColumnSlide label="platform_col_internal" role="columnheader">
             {{ "platform_col_internal" | translatePipe }}
           </div>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_col_modules" role="columnheader">
+            {{ "platform_col_modules" | translatePipe }}
+          </div>
+          <div class="c-grid-header-cell" appColumnSlide label="platform_col_ai_month" role="columnheader">
+            {{ "platform_col_ai_month" | translatePipe }}
+          </div>
         </app-column-carousel-header>
         <div class="col-actions c-col-actions c-grid-header-cell" role="columnheader">
           {{ "actions" | translatePipe }}
@@ -151,6 +157,17 @@
               (change)="toggleInternal(row, $event)"
             />
           </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_modules" data-testid="biz-modules">
+            {{ modulesText(row) }}
+          </div>
+          <div class="c-list-body-cell" appColumnSlide label="platform_col_ai_month" data-testid="biz-ai-month">
+            <span class="c-num">{{ aiMonthText(row) }}</span>
+            @if (row.aiPrivate) {
+            <span class="c-chip c-chip--tag c-chip--sm" data-testid="biz-private-tag"
+              >{{ "platform_ai_private_tag" | translatePipe }}</span
+            >
+            }
+          </div>
         </app-column-carousel-cell>
         <app-row-actions-menu class="col-actions c-col-actions c-list-body-cell" role="cell">
           <a
@@ -162,6 +179,15 @@
           >
             <lucide-icon name="trending-up" [size]="16"></lucide-icon>
           </a>
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="biz-edit"
+            (click)="editPlatform(row)"
+            [attr.aria-label]="'platform_biz_edit' | translatePipe"
+          >
+            <lucide-icon name="settings" [size]="16"></lucide-icon>
+          </button>
           @if (row.frontDesk) {
           <button
             type="button"
@@ -244,5 +270,7 @@
 
   @if (fdDialog.isOpen_()) {
   <app-front-desk-admin-dialog />
+  } @if (bizDialog.isOpen_()) {
+  <app-platform-business-dialog />
   }
 </section>

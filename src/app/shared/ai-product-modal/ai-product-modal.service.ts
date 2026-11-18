@@ -1,4 +1,5 @@
 import { inject, Injectable, signal } from '@angular/core'
+import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 import { ModalController } from '@services/modal-controller'
 import { AuthModalService } from '@services/auth-modal.service'
@@ -10,6 +11,7 @@ export type AiProductModalMode = 'create' | 'edit'
 export class AiProductModalService {
   private readonly userService_ = inject(UserService)
   private readonly authModal_ = inject(AuthModalService)
+  private readonly modules_ = inject(ModuleService)
 
   private readonly controller_ = new ModalController<void>(undefined)
   private readonly mode_ = signal<AiProductModalMode>('create')
@@ -30,6 +32,8 @@ export class AiProductModalService {
       this.authModal_.open('sign-in')
       return
     }
+    // Plan 620: the entry points are hidden without the module; a stray call opens nothing.
+    if (!this.modules_.has('ai_create')) return
     this.mode_.set(mode)
     this.currentProduct_ = currentProduct ?? null
     this.onResult_ = onResult ?? null

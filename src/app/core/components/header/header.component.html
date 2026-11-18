@@ -174,17 +174,21 @@
     <lucide-icon name="book-open" [size]="22"></lucide-icon>
     <span class="bottom-nav__label">{{ 'nav_short_recipe_book' | translatePipe }}</span>
   </a>
-  <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
-    <lucide-icon name="library" [size]="22"></lucide-icon>
-    <span class="bottom-nav__label">{{ 'nav_short_menu_library' | translatePipe }}</span>
-  </a>
-  <a
-    routerLink="/clients"
-    routerLinkActive="active"
-    (click)="closeMobileMenu()"
-    [attr.aria-label]="'frontdesk_section' | translatePipe"
-  >
-    <lucide-icon name="users" [size]="22"></lucide-icon>
-    <span class="bottom-nav__label">{{ 'nav_short_frontdesk' | translatePipe }}</span>
-  </a>
+  @if (showEvents_()) {
+    <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
+      <lucide-icon name="library" [size]="22"></lucide-icon>
+      <span class="bottom-nav__label">{{ 'nav_short_menu_library' | translatePipe }}</span>
+    </a>
+  }
+  @if (showClients_()) {
+    <a
+      routerLink="/clients"
+      routerLinkActive="active"
+      (click)="closeMobileMenu()"
+      [attr.aria-label]="'frontdesk_section' | translatePipe"
+    >
+      <lucide-icon name="users" [size]="22"></lucide-icon>
+      <span class="bottom-nav__label">{{ 'nav_short_frontdesk' | translatePipe }}</span>
+    </a>
+  }
 </nav>

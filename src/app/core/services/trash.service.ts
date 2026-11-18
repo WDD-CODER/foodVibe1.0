@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
+import { ModuleService } from './module.service'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
@@ -68,6 +69,7 @@ const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
 export class TrashService {
   private readonly storage = inject(StorageService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly modules = inject(ModuleService)
   private readonly translation = inject(TranslationService)
 
   /** A list that already loaded must pick up a restored item; one that never loaded will fetch it anyway. */
@@ -85,11 +87,14 @@ export class TrashService {
   private readonly items_ = signal<Record<TrashType, TrashItem[]>>(emptyTrash())
   readonly items = this.items_.asReadonly()
 
+  /** Plan 620: the sections of the types whose module is on (`venues`, `menuEvents`, `clients` are gated). */
+  readonly sections_ = computed(() => TRASH_SECTIONS.filter(({ type }) => this.modules.hasType(type)))
+
   readonly hasAnyTrash = computed(() => Object.values(this.items_()).some((list) => list.length > 0))
 
   async loadTrash(): Promise<void> {
     const lists = await Promise.all(
-      TRASH_SECTIONS.map(async ({ type }) => {
+      this.sections_().map(async ({ type }) => {
         const docs = await this.storage.trash<TrashDoc>(type)
         return [
           type,

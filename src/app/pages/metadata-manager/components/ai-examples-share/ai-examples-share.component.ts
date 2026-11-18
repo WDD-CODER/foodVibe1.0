@@ -6,7 +6,7 @@ import { BusinessService } from '@services/business.service'
 /**
  * Plan 600 — the owner's «שיתוף דוגמאות AI» card. Plan 618: every business shares unless the platform admin marked
  * it private, so the chip is read-only — ticked unless `aiPrivate` is true — and the card calls no route.
- * Plan 620 turns it into the locked chip with its tooltip.
+ * Plan 620: the chip is one locked span (shared / private) with the "contact FoodVibe" tooltip; nothing to edit.
  */
 @Component({
   selector: 'app-ai-examples-share',
@@ -21,5 +21,8 @@ export class AiExamplesShareComponent {
   private readonly businessService = inject(BusinessService)
 
   // 5. COMPUTED
-  protected readonly checked = computed(() => this.businessService.business_()?.aiPrivate !== true)
+  /** Plan 620: shared unless the platform admin marked the business private (shared while the business loads). */
+  protected readonly stateKey_ = computed(() =>
+    this.businessService.business_()?.aiPrivate === true ? 'metadata_ai_state_private' : 'metadata_ai_state_shared'
+  )
 }

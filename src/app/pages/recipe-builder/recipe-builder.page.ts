@@ -524,7 +524,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     const actions: HeroFabAction[] = [
-      { labelKey: 'ai_recipe_edit', icon: 'sparkles', run: () => this.onAiEditClick() },
+      { labelKey: 'ai_recipe_edit', icon: 'sparkles', run: () => this.onAiEditClick(), module: 'ai_create' },
       { labelKey: 'export', icon: 'printer', run: () => this.recipeExport.openToolbar() }
     ]
     if (this.recipeId_()) {

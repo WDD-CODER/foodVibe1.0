@@ -10,11 +10,22 @@ import { TranslationService } from '@services/translation.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserService } from '@services/user.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import type { ModuleKey } from '@schemas/modules-pure'
+import { ModuleService } from '@services/module.service'
 import type { Recipe } from '@models/recipe.model'
 import type { User } from '@models/user.model'
 
 @Component({ selector: 'app-blank-stub', template: '', standalone: true })
 class BlankStubComponent {}
+
+/** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
+const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
+const modulesOn = signal<ModuleKey[]>(ALL_MODULES)
+const moduleStub = {
+  provide: ModuleService,
+  useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
+}
+beforeEach(() => modulesOn.set(ALL_MODULES))
 
 describe('TabChipsComponent', () => {
   let fixture: ComponentFixture<TabChipsComponent>
@@ -39,6 +50,7 @@ describe('TabChipsComponent', () => {
         LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings })
       ],
       providers: [
+        moduleStub,
         provideRouter([
           { path: 'dashboard', component: BlankStubComponent },
           { path: 'venues', component: BlankStubComponent },
@@ -149,6 +161,20 @@ describe('TabChipsComponent', () => {
     expect(fixture.debugElement.query(By.css('nav.c-tab-chips'))).toBeNull()
   })
 
+  it('hides the venues chip on /dashboard without events (plan 620)', async () => {
+    modulesOn.set(['frontdesk', 'ai_create'])
+    await router.navigateByUrl('/dashboard')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual(['/dashboard?tab=metadata', '/suppliers', '/trash'])
+  })
+
+  it('renders no chip row on /clients with frontdesk off and events on (plan 620)', async () => {
+    modulesOn.set(['events'])
+    await router.navigateByUrl('/clients')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual([])
+  })
+
   it('should scroll the pressed chip into view on click', async () => {
     await router.navigateByUrl('/dashboard')
     fixture.detectChanges()
@@ -179,6 +205,7 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
     await TestBed.configureTestingModule({
       imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings })],
       providers: [
+        moduleStub,
         provideRouter([
           { path: 'cook/:id', component: BlankStubComponent },
           { path: 'recipe-builder/:id', component: BlankStubComponent }
