@@ -19,7 +19,20 @@ import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
 import type { ImportRow } from './product-import.service'
 import type { ProductNameMatchRequest, ProductNameMatchResponse } from '@schemas/ai-product-match.schema'
+import {
+  VOICE_AUDIO_MAX_BASE64,
+  type VoiceTranscribeRequest,
+  type VoiceTranscribeResponse
+} from '@schemas/ai-voice.schema'
+import type {
+  LogisticsConfirmRequest,
+  LogisticsExtractRequest,
+  LogisticsExtractResponse
+} from '@schemas/logistics/extract.schema'
 import { RECEIPT_IMAGE_MAX_BASE64, RECEIPT_IMAGE_MIME_TYPES } from '@schemas/ai-receipt-photo.schema'
+
+export type VoicePurpose = VoiceTranscribeRequest['purpose']
+export type LogisticsConfirmLine = LogisticsConfirmRequest['saved'][number]
 
 /** One model in the admin's AI model chain (plan 395): today's status plus on/off. */
 export interface GeminiChainModel extends GeminiModelStatus {
@@ -184,6 +197,57 @@ export class GeminiService {
     )
     incrementGeminiUsage()
     return data.matches
+  }
+
+  /** Plan 623: one voice recording → text. Rejects with `AUDIO_TOO_LARGE` (no request) when the base64 is over the limit. */
+  async transcribeVoice(
+    recording: { blob: Blob; mimeType: string; durationSec: number },
+    purpose: VoicePurpose
+  ): Promise<VoiceTranscribeResponse> {
+    const audioBase64 = await this.blobToBase64_(recording.blob)
+    if (audioBase64.length > VOICE_AUDIO_MAX_BASE64) throw new Error('AUDIO_TOO_LARGE')
+    const data = await firstValueFrom(
+      this.http_.post<VoiceTranscribeResponse>(`${this.authBase_}${API.ai('voice/transcribe')}`, {
+        audioBase64,
+        mimeType: recording.mimeType,
+        purpose,
+        durationSec: recording.durationSec,
+        ...this.modelParam_()
+      })
+    )
+    incrementGeminiUsage()
+    return data
+  }
+
+  /** Plan 623: site-visit notes → a checklist draft (never written to the event by this call). */
+  async extractLogistics(
+    body: Pick<LogisticsExtractRequest, 'eventId' | 'phase' | 'text' | 'fileId'>
+  ): Promise<LogisticsExtractResponse> {
+    const data = await firstValueFrom(
+      this.http_.post<LogisticsExtractResponse>(`${this.authBase_}${API.ai('logistics/extract')}`, {
+        ...body,
+        ...this.modelParam_()
+      })
+    )
+    incrementGeminiUsage()
+    return data
+  }
+
+  /** Plan 623: tells the server which draft lines the owner kept. */
+  async confirmLogisticsDraft(draftId: string, saved: LogisticsConfirmLine[]): Promise<void> {
+    await firstValueFrom(
+      this.http_.post<unknown>(`${this.authBase_}${API.ai(`logistics/extract/${draftId}/confirm`)}`, { saved })
+    )
+  }
+
+  private async blobToBase64_(blob: Blob): Promise<string> {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+    return dataUrl.split(',')[1] ?? ''
   }
 
   async generateFromImage(file: File): Promise<AiRecipeDraft> {

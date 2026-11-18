@@ -165,3 +165,77 @@ describe('GeminiService.parseReceiptPhoto', () => {
     http.expectNone(RECEIPT_URL)
   })
 })
+
+describe('GeminiService voice and logistics notes (plan 623)', () => {
+  const BASE = `${environment.authApiUrl}/api/v1/ai`
+  let service: GeminiService
+  let http: HttpTestingController
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: MetadataRegistryService, useValue: { allCategories_: () => [], allAllergens_: () => [] } },
+        { provide: TranslationService, useValue: { translate: (key: string) => key } }
+      ]
+    })
+    service = TestBed.inject(GeminiService)
+    http = TestBed.inject(HttpTestingController)
+    localStorage.clear()
+  })
+
+  afterEach(() => http.verify())
+
+  async function waitFor(url: string) {
+    for (let i = 0; i < 50; i++) {
+      const pending = http.match(url)
+      if (pending.length) return pending[0]
+      await new Promise((r) => setTimeout(r, 10))
+    }
+    throw new Error(`no request to ${url}`)
+  }
+
+  it('transcribeVoice posts base64, mime, purpose and duration', async () => {
+    const result = service.transcribeVoice(
+      { blob: new Blob(['hello'], { type: 'audio/webm' }), mimeType: 'audio/webm', durationSec: 7 },
+      'logistics'
+    )
+    const req = await waitFor(`${BASE}/voice/transcribe`)
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({
+      audioBase64: btoa('hello'),
+      mimeType: 'audio/webm',
+      purpose: 'logistics',
+      durationSec: 7
+    })
+    req.flush({ transcript: 'שלום', fileId: 'f1' })
+    expect(await result).toEqual({ transcript: 'שלום', fileId: 'f1' })
+  })
+
+  it('transcribeVoice throws AUDIO_TOO_LARGE and sends nothing when the base64 is over the limit', async () => {
+    const big = new Blob([new Uint8Array(1_400_000)], { type: 'audio/webm' })
+    await expectAsync(
+      service.transcribeVoice({ blob: big, mimeType: 'audio/webm', durationSec: 10 }, 'stock')
+    ).toBeRejectedWithError('AUDIO_TOO_LARGE')
+    http.expectNone(`${BASE}/voice/transcribe`)
+  })
+
+  it('extractLogistics posts the body and returns the draft', async () => {
+    const draft = { draftId: 'd1', answers: [], conflicts: [], adhoc: [], unanswered: [] }
+    const result = service.extractLogistics({ eventId: 'e1', phase: 'site_visit', text: 'note' })
+    const req = http.expectOne(`${BASE}/logistics/extract`)
+    expect(req.request.body).toEqual({ eventId: 'e1', phase: 'site_visit', text: 'note' })
+    req.flush(draft)
+    expect(await result).toEqual(draft)
+  })
+
+  it('confirmLogisticsDraft posts the kept lines to the draft url', async () => {
+    const saved = [{ itemKey: 'k', status: 'needed' as const }]
+    const result = service.confirmLogisticsDraft('d1', saved)
+    const req = http.expectOne(`${BASE}/logistics/extract/d1/confirm`)
+    expect(req.request.body).toEqual({ saved })
+    req.flush({})
+    await result
+  })
+})

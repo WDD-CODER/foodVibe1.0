@@ -1,0 +1,75 @@
+<div class="voice-note">
+  <textarea
+    class="c-input voice-note-text"
+    dir="auto"
+    rows="3"
+    [attr.maxlength]="maxChars"
+    [value]="text()"
+    [disabled]="disabled()"
+    [attr.placeholder]="placeholderKey() ? (placeholderKey() | translatePipe) : null"
+    [attr.aria-label]="placeholderKey() ? (placeholderKey() | translatePipe) : null"
+    (input)="onType($any($event.target).value)"
+  ></textarea>
+
+  @if (!canRecord_) {
+    <p class="voice-note-muted voice-note-unsupported">{{ 'voice_note_unsupported' | translatePipe }}</p>
+  } @else {
+    @switch (state_()) {
+      @case ('idle') {
+        <div class="voice-note-controls">
+          <button type="button" class="c-btn-ghost" [disabled]="disabled()" (click)="start()">
+            <lucide-icon name="mic" [size]="16"></lucide-icon>
+            <span>{{ 'voice_note_record' | translatePipe }}</span>
+          </button>
+          <span class="voice-note-muted">{{ 'voice_note_limit' | translatePipe }}</span>
+        </div>
+        <p class="voice-note-muted">{{ 'voice_note_privacy' | translatePipe }}</p>
+      }
+      @case ('recording') {
+        <div class="voice-note-controls">
+          <span class="voice-note-clock" dir="ltr">{{ clock() }} / 3:00</span>
+          <button type="button" class="c-btn-primary" (click)="stop()">
+            <lucide-icon name="square" [size]="16"></lucide-icon>
+            <span>{{ 'voice_note_stop' | translatePipe }}</span>
+          </button>
+        </div>
+      }
+      @case ('recorded') {
+        <div class="voice-note-controls">
+          @if (objectUrl_(); as url) {
+            <audio class="voice-note-audio" controls [src]="url"></audio>
+          }
+          <button type="button" class="c-btn-primary" [disabled]="disabled()" (click)="transcribe()">
+            {{ 'voice_note_transcribe' | translatePipe }}
+          </button>
+          <button
+            type="button"
+            class="c-icon-btn"
+            [disabled]="disabled()"
+            [attr.aria-label]="'voice_note_discard' | translatePipe"
+            [attr.title]="'voice_note_discard' | translatePipe"
+            (click)="discard()"
+          >
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      }
+      @case ('transcribing') {
+        <div class="voice-note-controls">
+          <app-loader size="small" [inline]="true"></app-loader>
+          <span class="voice-note-muted">{{ 'voice_note_transcribing' | translatePipe }}</span>
+        </div>
+      }
+    }
+  }
+
+  <button
+    type="button"
+    class="c-btn-primary voice-note-send"
+    [disabled]="!canSend()"
+    [attr.aria-busy]="busy()"
+    (click)="emit()"
+  >
+    {{ (busy() && busyLabelKey() ? busyLabelKey() : sendLabelKey()) | translatePipe }}
+  </button>
+</div>

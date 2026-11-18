@@ -1,0 +1,45 @@
+@layer components.voice-note {
+  :host {
+    display: block;
+    inline-size: 100%;
+  }
+
+  .voice-note {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .voice-note-text {
+    inline-size: 100%;
+    resize: none;
+  }
+
+  .voice-note-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .voice-note-muted {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .voice-note-clock {
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .voice-note-audio {
+    max-inline-size: 100%;
+  }
+
+  .voice-note-send {
+    align-self: flex-start;
+  }
+}

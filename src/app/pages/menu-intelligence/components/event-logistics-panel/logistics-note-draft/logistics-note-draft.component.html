@@ -1,0 +1,193 @@
+<div class="note-draft" dir="rtl">
+  @if (step_() === 'input') {
+    <p class="note-draft-hint">{{ 'logistics_notes_hint' | translatePipe }}</p>
+    <app-voice-note
+      purpose="logistics"
+      [(text)]="text_"
+      placeholderKey="logistics_notes_placeholder"
+      sendLabelKey="logistics_notes_extract"
+      busyLabelKey="logistics_notes_extracting"
+      [busy]="isExtracting_()"
+      (send)="extract($event)"
+    />
+  } @else {
+    @if (answerLines_().length) {
+      <section class="note-draft-group" [attr.aria-label]="'logistics_draft_answers' | translatePipe">
+        <h4 class="note-draft-title">{{ 'logistics_draft_answers' | translatePipe }}</h4>
+        @for (line of answerLines_(); track line.id) {
+          <div class="note-draft-row" [class.is-dropped]="!line.keep">
+            <div class="note-draft-head">
+              <label class="c-chip c-chip--toggle">
+                <input
+                  type="checkbox"
+                  [checked]="line.keep"
+                  (change)="patchLine(line.id, { keep: $any($event.target).checked })"
+                />
+                <span>{{ 'logistics_draft_keep' | translatePipe }}</span>
+              </label>
+              <div class="note-draft-text">
+                <span class="note-draft-label">{{ line.label }}</span>
+                @if (line.hint) {
+                  <small class="note-draft-small">{{ line.hint }}</small>
+                }
+              </div>
+            </div>
+            <ng-container *ngTemplateOutlet="controls; context: { $implicit: line }"></ng-container>
+          </div>
+        }
+      </section>
+    }
+
+    @if (conflicts_().length) {
+      <section class="note-draft-group" [attr.aria-label]="'logistics_draft_conflicts' | translatePipe">
+        <h4 class="note-draft-title">{{ 'logistics_draft_conflicts' | translatePipe }}</h4>
+        @for (c of conflicts_(); track c.id) {
+          <div class="note-draft-row" [class.is-dropped]="!c.replace">
+            <span class="note-draft-label">{{ c.conflict.itemKey }}</span>
+            <p class="note-draft-line">
+              <strong>{{ 'logistics_draft_current' | translatePipe }}:</strong>
+              {{ describe(c.conflict.current.status, c.conflict.current.quantity, c.conflict.current.text) }}
+            </p>
+            <p class="note-draft-line">
+              <strong>{{ 'logistics_draft_suggested' | translatePipe }}:</strong>
+              {{ describe(c.conflict.suggested.status, c.conflict.suggested.quantity, c.conflict.suggested.text) }}
+            </p>
+            <label class="c-chip c-chip--toggle">
+              <input type="checkbox" [checked]="c.replace" (change)="setReplace(c.id, $any($event.target).checked)" />
+              <span>{{ 'logistics_draft_replace' | translatePipe }}</span>
+            </label>
+          </div>
+        }
+      </section>
+    }
+
+    @if (adhocLines_().length) {
+      <section class="note-draft-group" [attr.aria-label]="'logistics_draft_adhoc' | translatePipe">
+        <h4 class="note-draft-title">{{ 'logistics_draft_adhoc' | translatePipe }}</h4>
+        @for (line of adhocLines_(); track line.id) {
+          <div class="note-draft-row" [class.is-dropped]="!line.keep">
+            <div class="note-draft-head">
+              <label class="c-chip c-chip--toggle">
+                <input
+                  type="checkbox"
+                  [checked]="line.keep"
+                  [disabled]="!line.label.trim()"
+                  (change)="patchLine(line.id, { keep: $any($event.target).checked })"
+                />
+                <span>{{ 'logistics_draft_keep' | translatePipe }}</span>
+              </label>
+              <input
+                type="text"
+                class="c-input note-draft-adhoc-label"
+                [attr.maxlength]="labelMax"
+                [value]="line.label"
+                [disabled]="!line.keep"
+                (input)="setLabel(line, $any($event.target).value)"
+              />
+            </div>
+            <app-custom-select
+              [options]="sectionOptions_()"
+              [ngModel]="line.section"
+              [disabled]="!line.keep"
+              (ngModelChange)="patchLine(line.id, { section: $event })"
+            />
+            <ng-container *ngTemplateOutlet="controls; context: { $implicit: line }"></ng-container>
+          </div>
+        }
+      </section>
+    }
+
+    @if (isEmpty_()) {
+      <app-empty-state messageKey="logistics_draft_nothing" />
+    }
+
+    @if (unanswered_().length) {
+      <section class="note-draft-group" [attr.aria-label]="'logistics_draft_unanswered' | translatePipe">
+        <h4 class="note-draft-title">
+          {{ 'logistics_draft_unanswered' | translatePipe }}
+          <span class="c-chip__count">{{ unanswered_().length }}</span>
+        </h4>
+        <ul class="note-draft-open">
+          @for (q of unanswered_(); track q) {
+            <li>{{ q }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    <div class="note-draft-actions">
+      <button
+        type="button"
+        class="c-btn-primary"
+        [disabled]="keptCount_() === 0 || isSaving_()"
+        [attr.aria-busy]="isSaving_()"
+        (click)="save()"
+      >
+        {{ (isSaving_() ? 'saving' : 'logistics_draft_save') | translatePipe }}
+      </button>
+      <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+    </div>
+  }
+</div>
+
+<ng-template #controls let-line>
+  <div class="c-chip-group c-chip-group--tight">
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="checkbox"
+        [checked]="line.needed"
+        [disabled]="!line.keep"
+        (change)="patchLine(line.id, { needed: $any($event.target).checked })"
+      />
+      <span>{{ 'logistics_status_needed' | translatePipe }}</span>
+    </label>
+  </div>
+  @if (line.needed) {
+    <div
+      class="c-chip-group c-chip-group--tight"
+      role="radiogroup"
+      [attr.aria-label]="'logistics_payer' | translatePipe"
+    >
+      <label class="c-chip c-chip--toggle">
+        <input
+          type="radio"
+          [name]="'draft-payer-' + line.id"
+          [checked]="line.provider === 'ours'"
+          [disabled]="!line.keep"
+          (change)="patchLine(line.id, { provider: 'ours' })"
+        />
+        <span>{{ 'logistics_payer_ours' | translatePipe }}</span>
+      </label>
+      <label class="c-chip c-chip--toggle">
+        <input
+          type="radio"
+          [name]="'draft-payer-' + line.id"
+          [checked]="line.provider === 'client'"
+          [disabled]="!line.keep"
+          (change)="patchLine(line.id, { provider: 'client' })"
+        />
+        <span>{{ 'logistics_payer_client_care' | translatePipe }}</span>
+      </label>
+    </div>
+    <div class="note-draft-detail">
+      @if (line.answerType === 'quantity') {
+        <app-counter
+          [value]="line.quantity"
+          [min]="0"
+          [max]="100000"
+          [disabled]="!line.keep"
+          (valueChange)="patchLine(line.id, { quantity: $event })"
+        />
+      }
+      <input
+        type="text"
+        class="c-input note-draft-note"
+        [attr.maxlength]="textMax"
+        [value]="line.text"
+        [disabled]="!line.keep"
+        [attr.aria-label]="'logistics_note' | translatePipe"
+        (input)="patchLine(line.id, { text: $any($event.target).value })"
+      />
+    </div>
+  }
+</ng-template>

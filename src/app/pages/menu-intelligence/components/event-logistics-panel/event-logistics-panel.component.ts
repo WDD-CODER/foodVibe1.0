@@ -6,6 +6,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { LogisticsNoteDraftComponent } from './logistics-note-draft/logistics-note-draft.component'
 import { ModuleService } from '@services/module.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService, type LogisticsPatch } from '@services/event-pipeline.service'
@@ -67,7 +68,8 @@ const ENVIRONMENTS: EnvironmentType[] = ['professional_kitchen', 'outdoor_field'
     TranslatePipe,
     CustomSelectComponent,
     CounterComponent,
-    DateFieldComponent
+    DateFieldComponent,
+    LogisticsNoteDraftComponent
   ],
   templateUrl: './event-logistics-panel.component.html',
   styleUrl: './event-logistics-panel.component.scss',
@@ -100,6 +102,7 @@ export class EventLogisticsPanelComponent {
   protected readonly pending_ = signal<Map<string, DraftAnswer>>(new Map())
   protected readonly envDraft_ = signal<EnvironmentType | null>(null)
   protected readonly showHidden_ = signal(false)
+  protected readonly notesOpen_ = signal(false)
   protected readonly noteOpen_ = signal<ReadonlySet<string>>(new Set())
   protected readonly addDraft_ = signal<Partial<Record<string, string>>>({})
   private timer: ReturnType<typeof setTimeout> | null = null

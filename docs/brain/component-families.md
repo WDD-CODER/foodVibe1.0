@@ -253,6 +253,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
+### voice-note — record or type a spoken note
+
+- Status: stable (plan 623)
+- Use: `src/app/shared/voice-note/` · `app-voice-note`.
+- When: a screen takes a spoken or typed note and needs it as text.
+- Inputs `purpose`, `placeholderKey`, `sendLabelKey`, `busyLabelKey`, `busy`, `disabled`, `[(text)]`; output `send` = `{ text, source: 'voice' | 'text', fileId: string | null }` (`'voice'` when the text is the transcript of a recording, with the id the transcribe route returned; `'text'` when pasted or typed). Stops at 180 seconds; typed fallback when the browser cannot record.
+- Known copies: none; first user `logistics-note-draft`.
+
 ## Logic families
 
 ### entity-data-service — load and save one entity type
@@ -285,6 +293,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
 - Plan 579: kind `logisticsSection` (a business's own sections); `logisticsItem` gains `removedAt` (removed from that date, older events keep it) and `foldedAt` (server-written when promoted: the business's own copy is kept, not deleted, so it still dates the question). `LogisticsItemRegistryService` adds `allItems_`, `hiddenAt_`, `defaultItems_`, `sections_`, `sectionLabel()` and `forEvent()` (the date rule); `items_` is the live list.
 - Plan 622: `visibleLogisticsItems` in `shared/schemas/logistics/visible-items.ts` is the one date and environment rule for which logistics questions an event sees; the server's notes-to-checklist draft and the browser both call it.
+- Plan 623: `forEvent()` calls `visibleLogisticsItems` in `shared/schemas/logistics/visible-items.ts`, the one rule the server uses too.
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
