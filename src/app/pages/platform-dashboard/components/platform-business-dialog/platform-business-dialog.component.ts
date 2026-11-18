@@ -72,51 +72,6 @@ export function describePlatformChange(change: PlatformChange, translate: (key: 
     LucideAngularModule
   ],
   templateUrl: './platform-business-dialog.component.html',
-  // One rule per line, no trailing semicolon: the pre-commit no-semi hook strips line-end semicolons.
-  styles: [
-    `
-      @layer components.platform-business-dialog {
-        .pbd-top {
-          display: flex
-          align-items: center
-          justify-content: space-between
-          gap: var(--space-2)
-        }
-        .pbd-history {
-          display: grid
-          gap: var(--space-2)
-          padding: var(--space-2)
-          border: 1px solid var(--color-border)
-          border-radius: var(--radius-sm)
-        }
-        .pbd-history__head {
-          display: flex
-          align-items: center
-          justify-content: space-between
-        }
-        .pbd-history__body {
-          max-block-size: 40vh
-          overflow-y: auto
-        }
-        .pbd-history__list {
-          display: grid
-          gap: var(--space-2)
-          margin: 0
-          padding: 0
-          list-style: none
-        }
-        .pbd-history__row {
-          display: grid
-          gap: var(--space-1)
-          padding-block-end: var(--space-2)
-          border-block-end: 1px solid var(--color-border)
-        }
-        .pbd-history__meta {
-          color: var(--color-text-muted)
-        }
-      }
-    `
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PlatformBusinessDialogComponent {

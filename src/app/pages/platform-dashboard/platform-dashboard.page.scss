@@ -249,3 +249,53 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 .platform-row.is-idle-14 > .col-name {
   background: linear-gradient(var(--bg-danger-subtle), var(--bg-danger-subtle)), var(--bg-card-solid);
 }
+
+// Plan 638: the history panel of the business dialog (the dialog has no stylesheet of its own and renders inside this page).
+@layer components.platform-business-dialog {
+  :host ::ng-deep {
+    .pbd-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .pbd-history {
+      display: grid;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+    }
+
+    .pbd-history__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pbd-history__body {
+      max-block-size: 40vh;
+      overflow-y: auto;
+    }
+
+    .pbd-history__list {
+      display: grid;
+      gap: var(--space-2);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pbd-history__row {
+      display: grid;
+      gap: var(--space-1);
+      padding-block-end: var(--space-2);
+      border-block-end: 1px solid var(--color-border);
+    }
+
+    .pbd-history__meta {
+      color: var(--color-text-muted);
+    }
+  }
+}

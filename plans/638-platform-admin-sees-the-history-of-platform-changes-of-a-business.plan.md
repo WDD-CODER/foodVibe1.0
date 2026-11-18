@@ -298,6 +298,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   hold no values and nothing can rebuild them.
 - decided: a field sent with the value it already has is left out of `changes` but stays in `changed` — why: the
   dialog sends only what changed, but a direct API call may not; the list should show real changes.
-- scope note: the dialog has no stylesheet and the page's encapsulated scss cannot reach it, so the few list rules are inline `styles` in the dialog component (layer `components.platform-business-dialog`); `platform-dashboard.page.scss` is untouched.
+- scope note: the dialog has no stylesheet and renders inside the platform page, so the few list rules sit in `platform-dashboard.page.scss` under `:host ::ng-deep` (layer `components.platform-business-dialog`); inline component styles were tried and the pre-commit no-semi hook strips their semicolons.
 - evidence: `pnpm run build` -> exit 0; `pnpm run test:ci` -> 2505 SUCCESS; `server vitest run` -> 1827 passed; `pnpm run lint` / `server lint` -> 0 errors; `lint:icons` -> ok; `lint:reuse` -> ok; kit-manifest-check ok; breadcrumbs-check clean.
 - A7: `e2e/ui/638-1.spec.ts` written, not run (no running app).
