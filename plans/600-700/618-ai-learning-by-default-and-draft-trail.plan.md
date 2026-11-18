@@ -1,6 +1,6 @@
 # Plan 618 — Every business teaches the AI by default, and every AI draft keeps its trail
 
-Status: draft
+Status: done
 Depends-on: 617
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
