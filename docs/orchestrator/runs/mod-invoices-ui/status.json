@@ -1,0 +1,741 @@
+{
+  "run": "mod-invoices-ui",
+  "branch": "orch/mod-invoices-ui",
+  "base": "main",
+  "startedAt": "2026-11-18T17:29:41.175Z",
+  "mainShaAtStart": "4aa70d5c89fe0d1c571d787758147fa402c4af67",
+  "plans": {
+    "628": {
+      "nnn": "628",
+      "title": "Invoice screen: scan a photo or a PDF, confirm the header, match from memory first, see the price change in percent, and an invoices list",
+      "branch": "feat/628-invoice-screen-photo-or",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T18:04:02.802Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T18:10:29.876Z"
+        }
+      },
+      "humanItems": [
+        "Dandan scans a real invoice on his phone: the header strip is right or easy to fix, the percent next to each price reads well in Hebrew RTL, and the save lands in the invoices list.",
+        "Dandan scans the same invoice a second time: the preview is matched before he touches it (brief MP-07), and the file opens from the invoices list (only once the file-store keys are set, gate G3; before that the row says «הקובץ לא נשמר»)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T17:31:04.485Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T17:31:04.619Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T17:54:36.521Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T17:54:36.928Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T17:54:37.291Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T17:54:37.499Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T17:54:37.741Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T17:54:38.106Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T17:57:29.459Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T17:57:29.965Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T17:57:30.337Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T17:57:30.581Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T17:57:31.049Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:00:02.663Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:04:02.578Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:04:02.804Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:06:28.407Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:10:23.151Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:10:29.879Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:10:48.700Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:11:58.893Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "628",
+          "title": "Invoice screen: scan a photo or a PDF, confirm the header, match from memory first, see the price change in percent, and an invoices list",
+          "branch": "feat/628-invoice-screen-photo-or",
+          "state": "asking",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-18T17:31:04.618Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-18T17:54:38.104Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 18.7,
+          "sha": "f4ea73867a8a5b2fa17979fda17aa9235ec3ed33",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1409.2,
+              "tokens": {
+                "input": 11687105,
+                "output": 76672
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 168.4,
+              "tokens": {
+                "input": 92498,
+                "output": 1544
+              },
+              "exit": 0
+            }
+          ],
+          "uiCards": [
+            {
+              "card": "On `/inventory/import`, choosing an image in the upload input (the read route answered by a prepared fixture whose `supplier.supplierId` is a supplier the spec ",
+              "status": "unchecked",
+              "via": "none",
+              "page": "",
+              "screenshots": [],
+              "round": 1
+            },
+            {
+              "card": "On `/inventory/invoices` (the generic read of `invoices` answered by a prepared fixture with one invoice of «ספק בדיקה 628», number «INV-628») the page shows th",
+              "status": "unchecked",
+              "via": "none",
+              "page": "",
+              "screenshots": [],
+              "round": 1
+            }
+          ],
+          "roundCauses": [
+            "round 1: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/inventory/components/product-import/product-import.component.spec.ts`: (a) a PDF chosen in the upload input calls",
+            "round 2: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/inventory/components/product-import/product-import.component.spec.ts`: (a) a PDF chosen in the upload input calls"
+          ],
+          "reason": "asking 628-1: same reason twice: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/inventory/components/product-import/product-import.component.spec.ts`: (a) a PDF chosen in the upload input calls",
+          "park": {
+            "at": "2026-11-18T17:59:54.434Z",
+            "reason": "same reason twice: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/inventory/components/product-import/product-import.component.spec.ts`: (a) a PDF chosen in the upload input calls"
+          },
+          "parkBranch": "park/mod-invoices-ui-628"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 628-1: same reason twice: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/in",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.6,
+      "sha": "e054a94778b115460655ccff4bc241758ac5e8af",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 140.8,
+          "tokens": {
+            "input": 145463,
+            "output": 3269
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.8,
+          "tokens": {
+            "input": 215071,
+            "output": 1444
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "b2358afb6ec14d4f3a05cae627b45e41eb0073fe"
+    },
+    "629": {
+      "nnn": "629",
+      "title": "Price-rise alert: the business's own threshold, what a rise does to recipes and dishes, and a dashboard card of recent rises",
+      "branch": "feat/629-price-rise-alert-impact",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T18:43:34.088Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T19:05:22.975Z"
+        }
+      },
+      "humanItems": [
+        "Dandan saves a real invoice with a price that rose: the mark, the panel and (after a reload) the dashboard card read clearly on his phone, and the numbers in the panel match the recipe's cost in the recipe book."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T18:00:03.591Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:43:33.946Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:43:34.090Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:59:31.918Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:05:17.219Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:05:22.977Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:05:35.897Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:06:14.411Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "629",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 628-1",
+          "freeDiskGb": 18.7
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.3,
+      "sha": "7a2fdc13f19174744f32837228d84d7d0d02c7bc",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 955.7,
+          "tokens": {
+            "input": 5135063,
+            "output": 52046
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.9,
+          "tokens": {
+            "input": 201454,
+            "output": 922
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "175240a64c28e7d8d241921c9042961c056cbe49"
+    },
+    "630": {
+      "nnn": "630",
+      "title": "Platform screen: how accurate each AI scan flow is per model, how big the shared supplier brain is, and whether files are kept",
+      "branch": "feat/630-platform-screen-scan-accuracy",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T18:14:12.054Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T18:32:21.602Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T18:40:52.034Z"
+        }
+      },
+      "humanItems": [
+        "After scanning three invoices in a test business, Dandan opens `/platform`: the invoice-read row counts them, the accuracy reads as he expects from how much he corrected, and the brain numbers moved."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T18:00:03.296Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:14:11.897Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:14:12.056Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:26:32.946Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:32:21.270Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T18:32:21.440Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:32:21.603Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:35:01.312Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:40:46.713Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:40:52.035Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:41:01.698Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T18:41:41.418Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "630",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 628-1",
+          "freeDiskGb": 18.7
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.6,
+      "sha": "8b543a34a6597bfbecc3e57670b6f32a88f94b78",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 738.8,
+          "tokens": {
+            "input": 1592298,
+            "output": 38556
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 157.6,
+          "tokens": {
+            "input": 569075,
+            "output": 9446
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.6,
+          "tokens": {
+            "input": 58518,
+            "output": 763
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-invoices-ui --plan plans/630-platform-screen-scan-accuracy-supplier-brain-file-store-status.plan.md"
+      ],
+      "checkedHead": "ab6e5fe5a9685df7c895d66c9fd79e7a22686b55"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T17:31:04.345Z",
+      "plan": "628",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-ui-628 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T17:54:33.983Z",
+      "plan": "628",
+      "text": "builder left undone (round 0): [ui] 628-1: written, not run (e2e/ui/628-1.spec.ts); [ui] 628-2: written, not run (e2e/ui/628-2.spec.ts); [human] both items left for Dandan (real invoice scan; second scan matched from memory and file opens from the list)"
+    },
+    {
+      "at": "2026-11-18T17:54:36.758Z",
+      "plan": "628",
+      "text": "[ui] On `/inventory/import`, choosing an image in the upload input (the read route answered by a prepared fixture whose `supplier.supplierId` is a supplier the : written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T17:54:37.105Z",
+      "plan": "628",
+      "text": "[ui] On `/inventory/invoices` (the generic read of `invoices` answered by a prepared fixture with one invoice of «ספק בדיקה 628», number «INV-628») the page sho: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T17:57:26.698Z",
+      "plan": "628",
+      "text": "builder left undone (round 1): [human] Dandan scans a real invoice on his phone (header strip, percent in Hebrew RTL, save lands in the list): needs his phone and real file-store keys; [human] second scan of the same invoice matched from memory, file opens from the list: same reason; [ui] 628-1 and 628-2: written, not run (e2e/ui"
+    },
+    {
+      "at": "2026-11-18T17:57:29.788Z",
+      "plan": "628",
+      "text": "[ui] On `/inventory/import`, choosing an image in the upload input (the read route answered by a prepared fixture whose `supplier.supplierId` is a supplier the : written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T17:57:30.149Z",
+      "plan": "628",
+      "text": "[ui] On `/inventory/invoices` (the generic read of `invoices` answered by a prepared fixture with one invoice of «ספק בדיקה 628», number «INV-628») the page sho: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T18:00:02.509Z",
+      "plan": "628",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-18T18:00:02.842Z",
+      "plan": "628",
+      "text": "ask 628-1 (technical, the Human or the advisor answers): Plan 628 failed twice for the same reason (Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/inventory/components/product-import/product-import.component.spec.ts`: (a) a PDF chos). Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-18T18:00:03.809Z",
+      "text": "plan 628 asks 628-1 — 629 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-18T18:02:04.400Z",
+      "plan": "628",
+      "text": "ask 628-1 answered by the human: retry: the reviewer is right that two of the ten named cases are not in product-import.component.spec.ts. Add (h) a test where a preview row is deleted before saving after a file read, and assert the saved invoice has no line for it (the other lines keep their row index). In (i) assert the message key invoice_supplier_required is shown (by key or its translated tex"
+    },
+    {
+      "at": "2026-11-18T18:03:51.698Z",
+      "plan": "628",
+      "text": "resumed from park/mod-invoices-ui-628: round 1, tier build, after: asking 628-1: same reason twice: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the cases this plan adds to `src/app/pages/inventory/co"
+    },
+    {
+      "at": "2026-11-18T18:04:02.327Z",
+      "plan": "628",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-ui-628 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T18:10:59.981Z",
+      "plan": "628",
+      "text": "the folder foodVibe1.0-orch-merge-mod-invoices-ui was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T18:14:11.731Z",
+      "plan": "630",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-ui-630 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T18:26:30.970Z",
+      "plan": "630",
+      "text": "builder left undone (round 0): [ui] 630-1: written, not run"
+    },
+    {
+      "at": "2026-11-18T18:43:33.818Z",
+      "plan": "629",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-ui-629 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T18:59:29.873Z",
+      "plan": "629",
+      "text": "builder left undone (round 0): [ui] 629-1: written, not run; [ui] 629-2: written, not run; [ui] 629-3: written, not run; log-query: SKIP, no database configured in this folder"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 16.3,
+  "updatedAt": "2026-11-18T19:10:13.400Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "628",
+      "type": "behaviour",
+      "text": "behaviour: a date the read returns that is not yyyy-mm-dd leaves the strip's date empty, and the invoice number is cut to 40 characters (the simplest option) — reverse: show the raw printed date text and drop the 40-character cut in setInvoiceFrom_",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "628",
+      "type": "behaviour",
+      "text": "behaviour: the percent shows only on rows with status update (not on same-price rows) — reverse: drop the status check on changePct in view_",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "628",
+      "type": "behaviour",
+      "text": "behaviour: the invoices list uses the table layout of app-list-shell, so the shell's filter-toggle button shows although there are no filters — reverse: switch the list to layout=cards or hide the toggle in the shell",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "628",
+      "type": "behaviour",
+      "text": "behaviour: a blocked pop-up or a failed file link closes the tab, logs the status and shows invoice_file_open_failed — reverse: drop the error toast in InvoicesListComponent.openFile",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "628",
+      "type": "behaviour",
+      "text": "behaviour: case (h) asserts the invoice line row index as the position among the rows sent, [0,1], matching what the existing save test already expects. The answer's wording 'keep their row index' could be read differently — reverse: change the expected row values in that test.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "630",
+      "type": "behaviour",
+      "text": "behaviour: the four ai_feature_* flow labels already existed in dictionary.json, so none were added (the plan said to add them only when absent) — reverse: none needed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "630",
+      "type": "behaviour",
+      "text": "behaviour: /stats lets `days` through only as digits only (`7` to `365`), so `7.5` or `1e2` get 400 BAD_DAYS (the simplest reading of 'an integer') — reverse: relax the regex in admin-learning.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "630",
+      "type": "behaviour",
+      "text": "behaviour: made tiny style tweaks (font-weight, line-height, padding, min-inline-size, letter-spacing, muted heading colour) to the learning section's SCSS so it no longer duplicates other components' blocks — reverse: restore the earlier SCSS from commit before ab6e5fe5 and accept the debt",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "630",
+      "type": "behaviour",
+      "text": "behaviour: declared the learning classes in the Reuse Check under the empty-state family at rung 1 (page-local layout, as .ai-shots is) — reverse: change those rows in the plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "629",
+      "type": "behaviour",
+      "text": "behaviour: the settings tab declares a local SettingsNumbers type (BusinessSettings plus priceRiseAlertPct) because shared/schemas/entities/business.schema.ts is outside the scope and its BusinessSettings type still omits the field — reverse: widen BusinessSettings in the schema file and drop the local type",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "629",
+      "type": "seen",
+      "text": "seen: shared/schemas/entities/business.schema.ts:20 — the comment says plan 629 widens BusinessSettings, but the file is not in plan 629's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-18T19:10:13.398Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T19:10:13.400Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
