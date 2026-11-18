@@ -362,6 +362,15 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A2: Store the old and new value with every platform save, only for what really changed — read the business first, platformChangesOf, the row with changes; the three new write cases
 - [ ] A3: Give the platform admin a way to read a business's history from the server — the GET route, newest first, with its five access and empty cases
 - [ ] A4: Fetch the history in the browser through the admin service — getPlatformHistory and its spec case
-- [ ] A5: Show the history in the business dialog with its loading, empty and failed states — signals, loadHistory_, describePlatformChange, the section and its styles, the History icon, the twelve dictionary keys, the six spec cases
+- [ ] A5: Show the history in the business dialog only when asked for: a small button with a tooltip opens a scrollable panel with a close button, with loading, empty and failed states — signals, openHistory, closeHistory, loadHistory_, describePlatformChange, the button, the panel and its styles, the History icon, the thirteen dictionary keys, the nine spec cases
 - [ ] A6: Record the new route and the two new pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row
-- [ ] A7: Prove it in the running app and run every check — the one screen check with a fixture row, then the Done-when commands in order
+- [ ] A7: Prove it in the running app and run every check — the one screen check (closed, opened, closed again) with a fixture row, then the Done-when commands in order
+
+### Plan 639 — Private mode only stops learning; erasing what was learned is a separate, explicit action (`plans/639-private-mode-stops-learning-and-erasing-is-an-explicit-action.plan.md`)
+- [ ] A1: Make private mode stop learning without erasing, and make deleting a business keep what was learned — setAiPrivate writes the flag only, deleteBusinessServerData loses its private branch, the three old tests rewritten
+- [ ] A2: Give the platform admin one explicit way to erase what was learned from a business, with a reason in the history — eraseLearnedData, the POST route, its seven cases
+- [ ] A3: Let the browser call the erase — the service method and its spec case
+- [ ] A4: Put the erase in the business dialog behind a reason and a confirm, and say the new rule under the private switch — the button, the reason field, the confirm, the done and failed lines, the history label, the dictionary value and six new keys, the spec cases
+- [ ] A5: Write the new rule where the program and the lawyer read it — C-LEARN and G4 in the map, the private and leaving lines of the pilot terms
+- [ ] A6: Record the new route and pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row
+- [ ] A7: Prove it in the running app and run every check — the one screen check with a fixture, then the Done-when commands in order
