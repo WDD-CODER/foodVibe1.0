@@ -75,3 +75,26 @@ describe('PlatformAdminService.getPlatformHistory (plan 638)', () => {
     http.verify()
   })
 })
+
+describe('PlatformAdminService.eraseLearnedData (plan 639)', () => {
+  it('POSTs the reason to the erase route and returns the unwrapped counts', async () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] })
+    const service = TestBed.inject(PlatformAdminService)
+    const http = TestBed.inject(HttpTestingController)
+    const counts = {
+      promoted: 1,
+      drafts: 2,
+      aliasesPulled: 3,
+      aliasesDeleted: 0,
+      profilesPulled: 1,
+      profilesDeleted: 0
+    }
+    const done = service.eraseLearnedData('b1', 'the business asked')
+    const req = http.expectOne((r) => r.url.endsWith('/admin/businesses/b1/erase-learned'))
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({ reason: 'the business asked' })
+    req.flush({ ok: true, counts })
+    expect(await done).toEqual(counts)
+    http.verify()
+  })
+})

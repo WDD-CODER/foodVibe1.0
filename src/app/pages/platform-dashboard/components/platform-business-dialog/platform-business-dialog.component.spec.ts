@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { History, LucideAngularModule, X } from 'lucide-angular'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 import { PlatformAdminService } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -11,6 +12,8 @@ import { PlatformBusinessDialogService } from './platform-business-dialog.servic
 describe('PlatformBusinessDialogComponent (plan 620)', () => {
   let update: jasmine.Spy
   let history: jasmine.Spy
+  let erase: jasmine.Spy
+  let confirmOpen: jasmine.Spy
   let success: string[]
   let errors: string[]
   let service: PlatformBusinessDialogService
@@ -24,10 +27,23 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
     errors = []
     update = jasmine.createSpy('updatePlatform').and.resolveTo()
     history = jasmine.createSpy('getPlatformHistory').and.resolveTo([])
+    erase = jasmine.createSpy('eraseLearnedData').and.resolveTo({
+      promoted: 1,
+      drafts: 2,
+      aliasesPulled: 0,
+      aliasesDeleted: 0,
+      profilesPulled: 0,
+      profilesDeleted: 0
+    })
+    confirmOpen = jasmine.createSpy('open').and.resolveTo(true)
     TestBed.configureTestingModule({
       imports: [PlatformBusinessDialogComponent, LucideAngularModule.pick({ History, X })],
       providers: [
-        { provide: PlatformAdminService, useValue: { updatePlatform: update, getPlatformHistory: history } },
+        {
+          provide: PlatformAdminService,
+          useValue: { updatePlatform: update, getPlatformHistory: history, eraseLearnedData: erase }
+        },
+        { provide: ConfirmModalService, useValue: { open: confirmOpen } },
         { provide: TranslationService, useValue: { translate: (k: string | undefined) => k ?? '' } },
         {
           provide: UserMsgService,
@@ -216,7 +232,89 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
       expect(describePlatformChange({ field: 'aiPrivate', from: 'true', to: 'false' }, t)).toBe(
         'platform_history_private_off'
       )
+      expect(describePlatformChange({ field: 'learnedData', from: '', to: 'erased' }, t)).toBe(
+        'platform_history_learned_erased'
+      )
       expect(describePlatformChange({ field: 'zzz', from: '', to: '' }, t)).toBe('zzz')
+    })
+  })
+
+  describe('erase learned data (plan 639)', () => {
+    const q = (id: string): HTMLElement | null => el.querySelector(`[data-testid="${id}"]`)
+    const flush = async (): Promise<void> => {
+      await new Promise((r) => setTimeout(r))
+      fixture.detectChanges()
+    }
+    const typeReason = (text: string): void => {
+      const box = q('biz-erase-reason') as HTMLTextAreaElement
+      box.value = text
+      box.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+    const openBox = (): void => {
+      ;(q('biz-erase-learned') as HTMLButtonElement).click()
+      fixture.detectChanges()
+    }
+
+    it('the erase button opens the reason field; confirm stays disabled while the reason is empty', () => {
+      setup()
+      expect(q('biz-erase-box')).toBeNull()
+      openBox()
+      expect(q('biz-erase-box')).not.toBeNull()
+      expect((q('biz-erase-confirm') as HTMLButtonElement).disabled).toBeTrue()
+      typeReason('   ')
+      expect((q('biz-erase-confirm') as HTMLButtonElement).disabled).toBeTrue()
+      typeReason('asked')
+      expect((q('biz-erase-confirm') as HTMLButtonElement).disabled).toBeFalse()
+    })
+
+    it('confirm opens the popup naming the business; cancel sends nothing', async () => {
+      setup()
+      confirmOpen.and.resolveTo(false)
+      openBox()
+      typeReason('asked')
+      ;(q('biz-erase-confirm') as HTMLButtonElement).click()
+      await flush()
+      expect(confirmOpen).toHaveBeenCalledTimes(1)
+      expect(confirmOpen.calls.argsFor(0)[0]).toBe('platform_erase_confirm'.replace('{name}', 'עסק'))
+      expect(erase).not.toHaveBeenCalled()
+    })
+
+    it('confirm with a reason calls the service once and shows the counts text', async () => {
+      setup()
+      openBox()
+      typeReason('  asked  ')
+      ;(q('biz-erase-confirm') as HTMLButtonElement).click()
+      await flush()
+      expect(erase).toHaveBeenCalledOnceWith('b1', 'asked')
+      expect(q('biz-erase-done')?.textContent).toContain('platform_erase_done')
+      expect(q('biz-erase-failed')).toBeNull()
+    })
+
+    it('a failed call shows the error text and the dialog stays usable', async () => {
+      setup()
+      erase.and.rejectWith(new Error('x'))
+      openBox()
+      typeReason('asked')
+      ;(q('biz-erase-confirm') as HTMLButtonElement).click()
+      await flush()
+      expect(q('biz-erase-failed')?.textContent).toContain('platform_erase_failed')
+      api().private_.set(true)
+      api().reason_.set('still works')
+      await api().save()
+      expect(update).toHaveBeenCalled()
+    })
+
+    it('requests the history again after a successful erase when the panel is open', async () => {
+      setup()
+      ;(q('biz-history-open') as HTMLButtonElement).click()
+      await flush()
+      expect(history).toHaveBeenCalledTimes(1)
+      openBox()
+      typeReason('asked')
+      ;(q('biz-erase-confirm') as HTMLButtonElement).click()
+      await flush()
+      expect(history).toHaveBeenCalledTimes(2)
     })
   })
 })
