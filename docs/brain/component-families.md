@@ -438,3 +438,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `shared/schemas/ai-invoice-read.schema.ts`.
 - When: the invoice read route (`POST /api/v1/ai/invoices/read`) turns a photo or PDF into a header, a supplier suggestion and rows.
 - Known copies: none.
+
+### invoice-memory — `learnFromApply`, `resolveNames`, `forgetBusiness`, `invoiceResolveRequestSchema`
+
+- Status: stable — plan 627
+- Use: `server/services/invoice-memory.js` — `learnFromApply`, `resolveNames`, `forgetBusiness` (a business's own
+  remembered invoice names and the shared supplier brain); the resolve request shape is
+  `invoiceResolveRequestSchema` in `shared/schemas/entities/invoice-alias.schema.ts`.
+- When: an invoice apply remembers printed names, a read looks them up, or a business is deleted and its memory must go.
+- Known copies: none.
