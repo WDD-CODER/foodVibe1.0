@@ -339,7 +339,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable (MVP)
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
-  `src/app/core/engine/units.ts`; portions: `src/app/core/engine/portions.ts`.
+  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`.
 - When: anything that computes quantities, costs or prices for an event.
 - Known copies: none.
 
@@ -525,4 +525,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 632
 - Use: `src/app/core/components/acting-banner/` (`app-acting-banner`, rendered by the app shell right after the header on every non-bare screen) — the persistent bar that names the business a consultant or the platform admin is acting in, with one button back to their own (`UserService.switchBusiness(null)`); hidden at home and in print.
 - When: a persistent notice with an action must stay on every screen; a toast disappears and `app-front-desk-status-banner` has no action.
+- Known copies: none.
+
+### unit-rates — `unitRatesFrom`, `loadUnitRates`, `toBase` (shared unit rule)
+
+- Status: stable — plan 635
+- Use: `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, `SYSTEM_UNITS`, the unit constants and `unitRatesFrom(terms)`; the browser reaches it through `@schemas/units/to-base` (`units.ts` and the other app files re-export it), the server through `server/generated/schemas/units/to-base`. `server/utils/unit-rates.js` — `loadUnitRates(req)` reads the master and the business's own `unit` terms and returns the rates the server converts with.
+- When: server code converts an amount into a product's base unit (a stock count); never write a second conversion.
 - Known copies: none.
