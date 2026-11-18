@@ -2,41 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (26 runs): plans 78 · merged 64 · parked 12 · fix rounds 32 · escalations 16 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 3 · parked 0.46 · fix rounds 1.23 · ✗ per plan 0.13
+Earlier (42 runs): plans 132 · merged 111 · parked 18 · fix rounds 51 · escalations 27 · gate fails 3 · ✗ 14 · checker misses 0 — per run: plans 3.14 · parked 0.43 · fix rounds 1.21 · ✗ per plan 0.11
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-
-| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-Earlier (10 runs): plans 25 · merged 16 · parked 9 · fix rounds 18 · escalations 6 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 2.5 · parked 0.9 · fix rounds 1.8 · ✗ per plan 0.4
-Earlier (2 runs): plans 4 · merged 4 · parked 0 · fix rounds 3 · escalations 1 · gate fails 1 · ✗ 2 · checker misses 0 — per run: plans 2 · parked 0 · fix rounds 1.5 · ✗ per plan 0.5
-
-| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-03 | run-513-516 | 513,516 | 0 | 2 | other | 3 | 1 | 0 | - | 0 | 0 | 0 |
-| 2026-11-03 | run-513-516c | 513,516 | 1 | 1 | other | 1 | 0 | 0 | ok | 4 | 0 | 2 |
-| 2026-11-08 | run-517 | 374,510,517,533,535 | 2 | 3 | other | 6 | 3 | 0 | failed | 0 | 0 | 0 |
-Earlier (7 runs): plans 17 · merged 8 · parked 9 · fix rounds 17 · escalations 6 · gate fails 1 · ✗ 10 · checker misses 0 — per run: plans 2.43 · parked 1.29 · fix rounds 2.43 · ✗ per plan 0.59
-Earlier (9 runs): plans 24 · merged 15 · parked 9 · fix rounds 18 · escalations 6 · gate fails 2 · ✗ 10 · checker misses 0 — per run: plans 2.67 · parked 1 · fix rounds 2 · ✗ per plan 0.42
-
-| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-09 | run-518 | 372,533 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-09 | run-518b | 518,528,530,533,534 | 5 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-09 | run-519 | 519,520,521,529,531 | 5 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-10 | run-542 | 542 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-10 | run-522 | 522,523,532 | 3 | 0 | - | 2 | 1 | 1 | ok | 0 | 0 | 0 |
-| 2026-11-11 | pass-theme | 571,572,573,574,576 | 5 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-Earlier (14 runs): plans 35 · merged 28 · parked 6 · fix rounds 15 · escalations 6 · gate fails 2 · ✗ 6 · checker misses 0 — per run: plans 2.5 · parked 0.43 · fix rounds 1.07 · ✗ per plan 0.17
-
-| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-10 | fd-1a-data | 543,544,545,548,549,550,566,569,570 | 9 | 0 | - | 3 | 4 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-11 | run-546 | 546,558,567,575,579 | 5 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-12 | batch-2 | 546,547,567,568,579,580,581 | 7 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-12 | run-584 | 584 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-12 | run-585 | 584,585 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-590 | 590 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-589 | 589 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-12 | run-591 | 589,591 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -49,12 +18,11 @@ Earlier (14 runs): plans 35 · merged 28 · parked 6 · fix rounds 15 · escalat
 | 2026-11-12 | run-593 | 593 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-14 | run-611 | 611 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
-| 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-14 | run-611 | 611 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-601 | 601,602,603,605,606 | 5 | 0 | - | 2 | 2 | 1 | ok | 0 | 0 | 0 |
-| 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-607 | 607,610 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-604 | 604 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-600 | 600,612,613 | 3 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-15 | run-608 | 608 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-15 | run-609 | 609 | 1 | 0 | - | 1 | 1 | 0 | ok | - | - | - |
+| 2026-11-15 | run-609 | 609 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-18 | mod-0 | 615,616,617,618,619,620 | 5 | 1 | fix-rounds | 7 | 1 | 4 | ok | - | - | - |
