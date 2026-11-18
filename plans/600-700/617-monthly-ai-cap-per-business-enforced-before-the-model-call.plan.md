@@ -1,6 +1,6 @@
 # Plan 617 — Monthly AI cap per business, read from the usage ledger and enforced before the model call
 
-Status: draft
+Status: done
 Depends-on: 616
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

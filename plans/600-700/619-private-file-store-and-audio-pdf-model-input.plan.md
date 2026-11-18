@@ -1,6 +1,6 @@
 # Plan 619 — Keep invoice files and voice recordings privately, and let the AI read audio and PDF
 
-Status: draft
+Status: done
 Depends-on: 618
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

@@ -1,6 +1,6 @@
 # Plan 616 — Modules on the server: one gate on every covered route, and the platform admin's switch with a reason
 
-Status: draft
+Status: done
 Depends-on: 615
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
