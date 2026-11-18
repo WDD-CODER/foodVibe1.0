@@ -16,6 +16,7 @@ export const API = {
   business: (path?: string) => (path ? `${API_ROOT}/business/${path}` : `${API_ROOT}/business`),
   stats: (path: string) => `${API_ROOT}/stats/${path}`,
   productImport: (path: string) => `${API_ROOT}/product-import/${path}`,
+  files: (id: string) => `${API_ROOT}/files/${id}`,
   events: `${API_ROOT}/events`,
   requests: `${API_ROOT}/requests`,
   bookings: `${API_ROOT}/bookings`,

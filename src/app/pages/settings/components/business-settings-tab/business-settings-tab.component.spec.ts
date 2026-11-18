@@ -16,7 +16,7 @@ const BUSINESS: Business = {
   createdAt: 1,
   internal: false,
   lastSyncedMasterVersion: 0,
-  settings: { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 }
+  settings: { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 7 }
 }
 
 describe('BusinessSettingsTabComponent', () => {
@@ -58,6 +58,7 @@ describe('BusinessSettingsTabComponent', () => {
     expect(input('profitTargetPct').value).toBe('25')
     expect(input('safetyMarginPct').value).toBe('10')
     expect(input('overrunThresholdPct').value).toBe('10')
+    expect(input('priceRiseAlertPct').value).toBe('7')
     expect(saveBtn().disabled).toBeTrue()
   })
 
@@ -65,6 +66,7 @@ describe('BusinessSettingsTabComponent', () => {
     business_.set({ ...BUSINESS, settings: undefined })
     fixture.detectChanges()
     expect(input('profitTargetPct').value).toBe('25')
+    expect(input('priceRiseAlertPct').value).toBe('5')
   })
 
   it('100 in the target shows the field error and disables save', () => {
@@ -83,11 +85,24 @@ describe('BusinessSettingsTabComponent', () => {
     expect(saveBtn().disabled).toBeTrue()
   })
 
-  it('a valid change enables save, sends all three numbers and toasts', async () => {
+  it('0 in the price-rise alert is refused with the overrun range message', () => {
+    type('priceRiseAlertPct', '0')
+    expect(el().querySelector('[data-testid="business-error-priceRiseAlertPct"]')?.textContent).toContain(
+      'pct_range_overrun'
+    )
+    expect(saveBtn().disabled).toBeTrue()
+  })
+
+  it('a valid change enables save, sends all four numbers and toasts', async () => {
     type('profitTargetPct', '30')
     expect(saveBtn().disabled).toBeFalse()
     await fixture.componentInstance.save()
-    expect(updateSettings).toHaveBeenCalledWith({ profitTargetPct: 30, safetyMarginPct: 10, overrunThresholdPct: 10 })
+    expect(updateSettings).toHaveBeenCalledWith({
+      profitTargetPct: 30,
+      safetyMarginPct: 10,
+      overrunThresholdPct: 10,
+      priceRiseAlertPct: 7
+    })
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('settings_saved')
     fixture.detectChanges()
     expect(saveBtn().disabled).toBeTrue()

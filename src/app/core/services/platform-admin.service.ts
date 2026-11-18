@@ -37,6 +37,32 @@ export interface BusinessRow {
   aiTokensThisMonth: number
 }
 
+/** Plan 630: one week of one AI flow and model. */
+export interface LearningWeekRow {
+  week: string
+  drafts: number
+  confirmed: number
+  avgKeptRatio: number | null
+}
+
+/** Plan 630: one AI flow and model; `model` is null while drafts carry none. */
+export interface LearningFlowRow extends Omit<LearningWeekRow, 'week'> {
+  feature: string
+  model: string | null
+  weeks: LearningWeekRow[]
+}
+
+/** Plan 630: counts and averages only, never an id, a name or a document. */
+export interface LearningStats {
+  days: number
+  from: string
+  to: string
+  flows: LearningFlowRow[]
+  brain: { suppliers: number; names: number; businesses: number }
+  privateBusinesses: number
+  truncated: boolean
+}
+
 /** Plan 620: body of the platform admin's modules, AI cap and private-mode change; `reason` is required. */
 export interface PlatformUpdateBody {
   modules?: ModuleKey[]
@@ -102,6 +128,20 @@ export class PlatformAdminService {
       this.http.get<{ rows: AdminTermRow[] }>(`${environment.apiUrl}${API.admin('taxonomy')}`, { params: { kind } })
     )
     this._termRows_.set(res.rows)
+  }
+
+  /** Plan 630: AI draft accuracy per flow and model by week, and the size of the shared supplier brain. */
+  async getLearningStats(days = 90): Promise<LearningStats> {
+    return firstValueFrom(
+      this.http.get<LearningStats>(`${environment.apiUrl}${API.admin('learning/stats')}`, {
+        params: { days: String(days) }
+      })
+    )
+  }
+
+  /** Plan 630: is the private file store configured? */
+  async getLearningStatus(): Promise<{ fileStore: boolean }> {
+    return firstValueFrom(this.http.get<{ fileStore: boolean }>(`${environment.apiUrl}${API.admin('learning/status')}`))
   }
 
   /** Plan 600: recipe AI examples of businesses that opted in (candidates) and the shared pool. */

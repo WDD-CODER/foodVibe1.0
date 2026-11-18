@@ -17,43 +17,39 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { LoggingService } from '@services/logging.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { PermissionService } from '@services/permission.service'
-import { ApplyRow, ImportRow, ProductImportService } from '@services/product-import.service'
+import { ApplyRow, ImportRow, InvoiceReadResult, ProductImportService } from '@services/product-import.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { formatMoney } from 'src/app/core/engine/rounding'
+import { formatMoney, roundMoney } from 'src/app/core/engine/rounding'
+import { BusinessService } from '@services/business.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { BUSINESS_SETTINGS_DEFAULTS } from '@schemas/entities'
 import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
+import { isPriceRiseAlert, priceChangePct, recipesUsingProducts } from '@utils/price-change.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { InvoiceHeaderStripComponent } from './invoice-header-strip/invoice-header-strip.component'
+import { PriceImpactPanelComponent, PriceImpactRow } from './price-impact-panel/price-impact-panel.component'
+import {
+  buildApplyInvoice,
+  changeText,
+  importErrorKey,
+  ImportSummary,
+  InvoiceState,
+  PreviewRow,
+  ImportRowStatus,
+  invoiceStateFrom,
+  isIsoDate,
+  positiveNumber
+} from './invoice-import.util'
+
+export type { ImportRowStatus }
 
 /** The base units a product may have (same list as the server). */
 const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
-
-/** `matching`: the AI step has not settled this row yet, so neither `new` nor an existing status is claimed. */
-export type ImportRowStatus = 'new' | 'update' | 'same' | 'matching'
-
-/** One editable line of the preview. `id` keeps the row stable while its siblings are deleted. */
-interface PreviewRow {
-  id: number
-  name: string
-  baseUnit: string
-  price: number | null
-  purchaseUnit: string
-  purchaseQty: number | null
-  category: string
-  needsReview: boolean
-  duplicate: boolean
-  /** The product the AI step linked this row to; dropped as soon as the name is edited. */
-  matchedId: string | null
-}
-
-interface ImportSummary {
-  created: number
-  updated: number
-  skipped: number
-}
 
 @Component({
   selector: 'app-product-import',
@@ -68,7 +64,9 @@ interface ImportSummary {
     CustomSelectComponent,
     EmptyStateComponent,
     PageHeaderComponent,
-    TextareaAutoGrowDirective
+    TextareaAutoGrowDirective,
+    InvoiceHeaderStripComponent,
+    PriceImpactPanelComponent
   ],
   templateUrl: './product-import.component.html',
   styleUrl: './product-import.component.scss',
@@ -87,6 +85,8 @@ export class ProductImportComponent {
   private readonly logging_ = inject(LoggingService)
   private readonly matcher_ = inject(ProductNameMatcherService)
   private readonly unitRegistry_ = inject(UnitRegistryService)
+  private readonly business_ = inject(BusinessService)
+  private readonly recipeCost_ = inject(RecipeCostService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly text_ = signal('')
@@ -95,7 +95,7 @@ export class ProductImportComponent {
   protected readonly isParsed_ = signal(false)
   protected readonly isTruncated_ = signal(false)
   protected readonly isParsing_ = signal(false)
-  /** True when the rows in the preview were read from a receipt photo (shows the "check every line" note). */
+  /** True when the rows in the preview were read from a photo or a PDF (shows the "check every line" note). */
   protected readonly isFromPhoto_ = signal(false)
   protected readonly isSaving_ = signal(false)
   /** True while the AI name-matching step runs after a parse. */
@@ -108,6 +108,12 @@ export class ProductImportComponent {
   protected readonly deleted_ = signal(0)
   protected readonly errorKey_ = signal<string | null>(null)
   protected readonly summary_ = signal<ImportSummary | null>(null)
+  /** Plan 629: the recipes and dishes a save made dearer (null = no price went up, no panel). Cleared with summary_. */
+  protected readonly impact_ = signal<PriceImpactRow[] | null>(null)
+  protected readonly changeText = changeText
+  protected readonly invoice_ = signal<InvoiceState | null>(null)
+  protected readonly invoiceDate_ = signal('')
+  protected readonly invoiceNumber_ = signal('')
   private nextRowId_ = 1
 
   constructor() {
@@ -140,6 +146,8 @@ export class ProductImportComponent {
     const products = this.kitchenState_.products_()
     const knownUnits = this.knownPurchaseUnits_()
     const pendingIds = this.pendingIds_()
+    const threshold =
+      this.business_.business_()?.settings?.priceRiseAlertPct ?? BUSINESS_SETTINGS_DEFAULTS.priceRiseAlertPct
     return this.rows_().map((row) => {
       const match = this.matchOf_(row, products)
       let status: ImportRowStatus = !match && pendingIds.has(row.id) ? 'matching' : 'new'
@@ -150,12 +158,30 @@ export class ProductImportComponent {
       }
       const unitText = row.purchaseUnit.trim()
       const hasUnknownPurchaseUnit = !match && status !== 'matching' && unitText !== '' && !knownUnits.has(unitText)
-      return { row, status, match, oldPrice, hasUnknownPurchaseUnit }
+      const changePct = status === 'update' ? priceChangePct(oldPrice, row.price) : null
+      const isRiseAlert = isPriceRiseAlert(changePct, threshold)
+      return { row, status, match, oldPrice, changePct, isRiseAlert, hasUnknownPurchaseUnit }
     })
   })
 
+  /** The strip shows while the preview came from a file and has rows. */
+  protected readonly showStrip_ = computed(() => this.invoice_() !== null && this.rows_().length > 0)
+
+  /** The name saved on the invoice: the chosen supplier's own name, else the printed one. */
+  private readonly invoiceSupplierName_ = computed(() => {
+    const chosen = this.kitchenState_.suppliers_().find((s) => s._id === this.supplierId_())
+    return chosen?.nameHebrew ?? this.invoice_()?.header.supplierName?.trim() ?? ''
+  })
+
+  protected readonly isSupplierMissing_ = computed(() => this.showStrip_() && this.invoiceSupplierName_() === '')
+
   protected readonly canSave_ = computed(
-    () => this.rows_().length > 0 && !this.isSaving_() && !this.isParsing_() && !this.isMatching_()
+    () =>
+      this.rows_().length > 0 &&
+      !this.isSaving_() &&
+      !this.isParsing_() &&
+      !this.isMatching_() &&
+      !this.isSupplierMissing_()
   )
 
   // 6. METHODS
@@ -170,49 +196,56 @@ export class ProductImportComponent {
     if (!text || this.isParsing_()) return
     await this.readAndFill_(
       () => firstValueFrom(this.gemini_.parsePriceList(text, this.metadataRegistry_.allCategories_())),
-      false
+      null
     )
   }
 
-  /** Plan 465: reads a photo of a receipt (camera or file) with one AI call; the text box is left untouched. */
-  protected async onPhotoChosen(event: Event): Promise<void> {
+  /** Plan 628: reads a photo or a PDF of an invoice (camera or file) with one AI call; the text box is left untouched. */
+  protected async onFileChosen(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement
     const file = input.files?.[0] ?? null
-    input.value = '' // the same photo can be chosen again
+    input.value = '' // the same file can be chosen again
     if (!file || this.isParsing_() || this.isSaving_()) return
-    await this.readAndFill_(() => this.gemini_.parseReceiptPhoto(file, this.metadataRegistry_.allCategories_()), true)
+    await this.readAndFill_(() => this.gemini_.readInvoice(file, this.metadataRegistry_.allCategories_()), file)
   }
 
   /**
-   * The one read-and-fill path for pasted text and for a photo: runs the AI call, counts the usage, fills the
-   * preview, matches against the inventory, and maps a failure to a message. Existing rows are kept on failure.
+   * The one read-and-fill path for pasted text and for a file: runs the AI call, counts the usage, fills the
+   * preview, asks memory (file only), matches against the inventory, and maps a failure to a message.
+   * Existing rows are kept on failure.
    */
   private async readAndFill_(
     call: () => Promise<{ rows: ImportRow[]; truncated: boolean }>,
-    fromPhoto: boolean
+    file: File | null
   ): Promise<void> {
     this.isParsing_.set(true)
     this.errorKey_.set(null)
     this.summary_.set(null)
+    this.impact_.set(null)
     this.hasMatchFailed_.set(false)
     try {
       const result = await call()
       incrementGeminiUsage()
       this.rows_.set(result.rows.map((row) => this.toPreviewRow_(row)))
       this.isTruncated_.set(result.truncated)
-      this.isFromPhoto_.set(fromPhoto)
+      this.isFromPhoto_.set(file !== null)
       this.deleted_.set(0)
       this.isParsed_.set(true)
+      if (file) this.setInvoiceFrom_(result as InvoiceReadResult, file)
+      else this.clearInvoice_()
       if (result.rows.length === 0) this.errorKey_.set('import_nothing_found')
-      else await this.matchWithAi_()
+      else {
+        if (file) await this.resolveFromMemory_()
+        await this.matchWithAi_()
+      }
     } catch (err) {
       const status = err instanceof HttpErrorResponse ? err.status : 0
       const code = err instanceof HttpErrorResponse ? String(err.error?.error ?? '') : ''
       const reason = err instanceof Error ? err.message : ''
-      this.errorKey_.set(this.errorKeyFor_(fromPhoto, status, code, reason))
+      this.errorKey_.set(importErrorKey(file !== null, status, code, reason))
       this.logging_.error({
-        event: fromPhoto ? 'productImport.photo_failed' : 'productImport.parse_failed',
-        message: fromPhoto ? 'Receipt photo read failed' : 'Price list parse failed',
+        event: file ? 'productImport.file_failed' : 'productImport.parse_failed',
+        message: file ? 'Invoice file read failed' : 'Price list parse failed',
         context: { status }
       })
     } finally {
@@ -220,13 +253,41 @@ export class ProductImportComponent {
     }
   }
 
-  private errorKeyFor_(fromPhoto: boolean, status: number, code: string, reason: string): string {
-    if (code === 'ai_monthly_cap_reached') return 'ai_monthly_cap_reached'
-    if (status === 429 || code.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
-    if (!fromPhoto) return 'import_ai_failed'
-    if (reason === 'IMAGE_TOO_LARGE' || code === 'IMAGE_TOO_LARGE') return 'import_photo_too_big'
-    if (reason === 'IMAGE_TYPE_UNSUPPORTED') return 'import_photo_unsupported'
-    return 'import_photo_failed'
+  private clearInvoice_(): void {
+    this.invoice_.set(null)
+    this.invoiceDate_.set('')
+    this.invoiceNumber_.set('')
+  }
+
+  /** Keeps what the read said about the invoice and preselects the supplier it recognised. */
+  private setInvoiceFrom_(read: InvoiceReadResult, file: File): void {
+    const known = this.kitchenState_.suppliers_().some((s) => s._id === read.supplier.supplierId)
+    const state = invoiceStateFrom(read, file, known)
+    this.supplierId_.set(state.suggestedSupplierId)
+    this.invoice_.set(state)
+    this.invoiceDate_.set(isIsoDate(read.header?.invoiceDate) ? read.header.invoiceDate! : '')
+    this.invoiceNumber_.set((read.header?.invoiceNumber ?? '').slice(0, 40))
+  }
+
+  /** Plan 627: rows the business already linked arrive linked, so the model is asked only about the rest. */
+  private async resolveFromMemory_(): Promise<void> {
+    const invoice = this.invoice_()
+    if (!invoice) return
+    try {
+      const names = this.rows_()
+        .slice(0, 200)
+        .map((row) => row.name)
+      const matches = await this.importService_.resolve(invoice.supplierKey, names)
+      const ids = new Set(this.kitchenState_.products_().map((p) => p._id))
+      const linked = new Map(matches.filter((m) => ids.has(m.productId)).map((m) => [m.i, m.productId]))
+      this.rows_.update((rows) => rows.map((row, i) => (linked.has(i) ? { ...row, matchedId: linked.get(i)! } : row)))
+    } catch (err) {
+      this.logging_.error({
+        event: 'productImport.resolve_failed',
+        message: 'Memory match failed',
+        context: { status: err instanceof HttpErrorResponse ? err.status : 0 }
+      })
+    }
   }
 
   /** Saves every kept row in one request. */
@@ -244,7 +305,25 @@ export class ProductImportComponent {
         purchaseQty: status === 'new' ? row.purchaseQty : null
       }))
       const supplierId = this.supplierId_() || null
-      const result = await this.importService_.apply(supplierId, rows)
+      const state = this.invoice_()
+      const invoice = state
+        ? buildApplyInvoice(
+            state,
+            this.invoiceSupplierName_(),
+            this.invoiceNumber_(),
+            this.invoiceDate_(),
+            this.view_().map(({ row }) => row)
+          )
+        : undefined
+      // Plan 629: the cost of every affected recipe at the OLD prices (apply reloads the products).
+      const risen = new Set<string>()
+      for (const { status, match, changePct } of this.view_()) {
+        if (status === 'update' && match && changePct !== null && changePct > 0) risen.add(match._id)
+      }
+      const affected = risen.size ? recipesUsingProducts(this.kitchenState_.recipes_(), risen) : []
+      const before = new Map(affected.map((recipe) => [recipe._id, this.recipeCost_.computeRecipeCost(recipe)]))
+      const result = await this.importService_.apply(supplierId, rows, invoice)
+      if (risen.size) this.impact_.set(this.impactRows_(affected, before))
       const summary = {
         created: result.created,
         updated: result.updated,
@@ -256,6 +335,10 @@ export class ProductImportComponent {
       this.isParsed_.set(false)
       this.isFromPhoto_.set(false)
       this.text_.set('')
+      this.clearInvoice_()
+      if (invoice && result.invoiceId === null) {
+        this.userMsg_.onSetErrorMsg(this.translation_.translate('invoice_trail_failed'))
+      }
     } catch (err) {
       this.logging_.error({
         event: 'productImport.apply_failed',
@@ -266,6 +349,28 @@ export class ProductImportComponent {
     } finally {
       this.isSaving_.set(false)
     }
+  }
+
+  /** The recipes whose cost changed once the new prices are loaded, biggest rise first. */
+  private impactRows_(
+    affected: ReturnType<typeof recipesUsingProducts>,
+    before: Map<string, number>
+  ): PriceImpactRow[] {
+    const rows: PriceImpactRow[] = []
+    for (const recipe of affected) {
+      const was = before.get(recipe._id) ?? 0
+      const now = this.recipeCost_.computeRecipeCost(recipe)
+      if (roundMoney(now) === roundMoney(was)) continue
+      rows.push({
+        id: recipe._id,
+        name: recipe.nameHebrew,
+        isDish: recipe.recipeType === 'dish',
+        before: was,
+        after: now,
+        changePct: priceChangePct(was, now)
+      })
+    }
+    return rows.sort((a, b) => b.after - b.before - (a.after - a.before))
   }
 
   protected removeRow(id: number): void {
@@ -302,27 +407,11 @@ export class ProductImportComponent {
   }
 
   protected setPrice(id: number, value: string | number | null): void {
-    const price =
-      typeof value === 'number'
-        ? value
-        : Number(
-            String(value ?? '')
-              .trim()
-              .replace(',', '.')
-          )
-    this.updateRow(id, { price: Number.isFinite(price) && price > 0 ? price : null })
+    this.updateRow(id, { price: positiveNumber(value) })
   }
 
   protected setPurchaseQty(id: number, value: string | number | null): void {
-    const qty =
-      typeof value === 'number'
-        ? value
-        : Number(
-            String(value ?? '')
-              .trim()
-              .replace(',', '.')
-          )
-    this.updateRow(id, { purchaseQty: Number.isFinite(qty) && qty > 0 ? qty : null })
+    this.updateRow(id, { purchaseQty: positiveNumber(value) })
   }
 
   protected summaryText_(summary: ImportSummary): string {
@@ -343,6 +432,7 @@ export class ProductImportComponent {
     return {
       id: this.nextRowId_++,
       name: row.name,
+      printedName: row.name,
       baseUnit: row.baseUnit,
       price: row.price,
       purchaseUnit: row.purchaseUnit ?? '',

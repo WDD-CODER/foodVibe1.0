@@ -1,0 +1,34 @@
+@if (visible()) {
+  <section
+    class="pr-card c-glass-panel"
+    data-testid="price-rises-card"
+    dir="rtl"
+    [attr.aria-label]="'price_rises_card_title' | translatePipe"
+  >
+    <header class="pr-card__head">
+      <span class="pr-card__icon"><lucide-icon name="trending-up" [size]="16" /></span>
+      <h2 class="pr-card__title">{{ 'price_rises_card_title' | translatePipe }}</h2>
+      <a class="pr-card__link" routerLink="/inventory/invoices">{{ 'price_rises_card_all' | translatePipe }}</a>
+    </header>
+    <ul class="pr-card__list">
+      @for (row of rows(); track row.key) {
+        <li class="pr-card__row" data-testid="price-rise-row">
+          <span class="pr-card__who">
+            <span class="pr-card__name">{{ row.name }}</span>
+            <span class="pr-card__supplier">{{ row.supplier }}</span>
+          </span>
+          <span class="pr-card__nums">
+            <span class="c-num" dir="ltr">{{ formatMoney(row.from) }}</span>
+            <span aria-hidden="true">←</span>
+            <span class="c-num" dir="ltr">{{ formatMoney(row.to) }}</span>
+            <span class="c-num pr-card__pct" dir="ltr">{{ row.pct }}</span>
+            <span class="c-num pr-card__date" dir="ltr">{{ row.date }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+    @if (moreText()) {
+      <p class="pr-card__more" data-testid="price-rises-more">{{ moreText() }}</p>
+    }
+  </section>
+}
