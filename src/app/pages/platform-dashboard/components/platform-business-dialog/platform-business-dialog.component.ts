@@ -72,6 +72,7 @@ export function describePlatformChange(change: PlatformChange, translate: (key: 
     LucideAngularModule
   ],
   templateUrl: './platform-business-dialog.component.html',
+  // One rule per line, no trailing semicolon: the pre-commit no-semi hook strips line-end semicolons.
   styles: [
     `
       @layer components.platform-business-dialog {
