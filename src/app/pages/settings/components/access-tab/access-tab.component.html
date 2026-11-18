@@ -1,0 +1,29 @@
+<section class="access-tab" dir="rtl">
+  <p class="access-hint">{{ 'access_list_hint' | translatePipe }}</p>
+
+  @if (isLoading_()) {
+    <app-loader />
+  } @else if (grants_().length === 0) {
+    <app-empty-state messageKey="access_list_empty" icon="user-check" />
+  } @else {
+    <ul class="access-list c-glass-panel" data-testid="access-list">
+      @for (grant of grants_(); track grant._id) {
+        <li class="access-row" data-testid="access-row">
+          <span class="access-row__name">{{ grant.name }}</span>
+          <span class="access-row__since">
+            {{ 'access_granted_on' | translatePipe }} {{ grant.grantedAt | date: 'dd/MM/yyyy' }}
+          </span>
+          <button
+            type="button"
+            class="c-icon-btn danger"
+            data-testid="access-remove"
+            [attr.aria-label]="'access_remove' | translatePipe"
+            (click)="remove(grant)"
+          >
+            <lucide-icon name="trash-2" [size]="16" />
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>

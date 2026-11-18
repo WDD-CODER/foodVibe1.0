@@ -188,6 +188,26 @@
           >
             <lucide-icon name="settings" [size]="16"></lucide-icon>
           </button>
+          @if (canEnter(row)) {
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="enter-business"
+            (click)="enterBusiness(row)"
+            [attr.aria-label]="'platform_enter_business' | translatePipe"
+          >
+            <lucide-icon name="eye" [size]="16"></lucide-icon>
+          </button>
+          }
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="grant-access"
+            (click)="giveAccess(row)"
+            [attr.aria-label]="'platform_grant_access' | translatePipe"
+          >
+            <lucide-icon name="user-plus" [size]="16"></lucide-icon>
+          </button>
           @if (row.frontDesk) {
           <button
             type="button"
@@ -274,5 +294,7 @@
   <app-front-desk-admin-dialog />
   } @if (bizDialog.isOpen_()) {
   <app-platform-business-dialog />
+  } @if (grantDialog.isOpen_()) {
+  <app-grant-access-dialog />
   }
 </section>

@@ -25,6 +25,23 @@ const DATA_API_PATH = API.data('')
 // destroyed mid-refresh) cannot abort the refresh the queued requests are waiting on.
 let refreshInFlight$: Observable<string> | null = null
 
+// Plan 632: one refresh at a time after a lost access, however many requests got the 401.
+let accessEndedRefreshing = false
+
+/** Asks the server where this session belongs now; the refresh reloads the application when the business moved. */
+function refreshIntoCurrentBusiness(userService: UserService) {
+  if (accessEndedRefreshing) return
+  accessEndedRefreshing = true
+  userService.refreshToken().subscribe({
+    error: () => {
+      accessEndedRefreshing = false
+    },
+    complete: () => {
+      accessEndedRefreshing = false
+    }
+  })
+}
+
 function signOut(userService: UserService, authModal: AuthModalService, router: Router) {
   userService.logout().subscribe()
   authModal.open('sign-in')
@@ -71,6 +88,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           return throwError(() => err)
         }
 
+        // Plan 632: the access to the business this session acted in was removed. Never replay: the
+        // refresh puts the session in its own business and the application reloads there.
+        if (err.error?.error === 'ACCESS_ENDED') {
+          refreshIntoCurrentBusiness(userService)
+          return throwError(() => err)
+        }
+
         // Silent token refresh: call /auth/refresh (10s timeout), retry original request once.
         // The request that starts the refresh gets the refresh error; queued ones get their own 401.
         const startsRefresh = !refreshInFlight$
@@ -96,7 +120,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
         return refreshInFlight$.pipe(
           catchError((refreshErr) => throwError(() => (startsRefresh ? refreshErr : err))),
-          switchMap((token) => next(req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })))
+          switchMap((newToken) => {
+            // A request is replayed only into the business it was made for.
+            if (token && userService.tokenBusinessId(token) !== userService.tokenBusinessId(newToken)) {
+              refreshIntoCurrentBusiness(userService)
+              return throwError(() => err)
+            }
+            return next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }))
+          })
         )
       }
 

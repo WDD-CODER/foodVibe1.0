@@ -1,0 +1,56 @@
+@layer components.access-tab {
+  :host {
+    display: block;
+    inline-size: min(100%, 36rem);
+    margin-inline: auto;
+  }
+
+  .access-tab {
+    display: grid;
+    row-gap: var(--space-4);
+  }
+
+  .access-hint {
+    margin-block: 0;
+    line-height: 1.5;
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+  }
+
+  .access-list {
+    margin-block: 0;
+    padding-inline-start: 0;
+    overflow: hidden;
+    list-style-type: none;
+  }
+
+  .access-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+
+    padding: var(--space-3) var(--space-4);
+    border-block-end: 1px solid var(--border-default);
+
+    &:last-child {
+      border-block-end: 0;
+    }
+  }
+
+  .access-row__name {
+    flex: 1 1 8rem;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+
+    font-weight: 600;
+    color: var(--color-text-main);
+  }
+
+  .access-row__since {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+  }
+}

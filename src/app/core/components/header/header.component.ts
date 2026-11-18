@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  signal,
+  untracked
+} from '@angular/core'
+import { FormsModule } from '@angular/forms'
 import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -8,6 +18,9 @@ import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { TranslationService } from '@services/translation.service'
+import { AccessService } from '@services/access.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { CustomSelectComponent } from '../../../shared/custom-select/custom-select.component'
 import { authGuard } from '../../guards/auth.guard'
 
 /** The top-level pages every signed-in or guest user can open (desktop pills and drawer). */
@@ -26,7 +39,7 @@ const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'act
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe, FormsModule, CustomSelectComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -38,6 +51,8 @@ export class HeaderComponent {
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
   private readonly translation = inject(TranslationService)
+  private readonly access = inject(AccessService)
+  private readonly userMsg = inject(UserMsgService)
 
   isMobileMenuOpen = signal(false)
   isMobileAvatarOpen = signal(false)
@@ -70,6 +85,50 @@ export class HeaderComponent {
     const name = this.user_()?.name
     return name ? name.charAt(0).toUpperCase() : ''
   })
+
+  /** Plan 632: the switcher shows only when the user has another business to enter (or is inside one). */
+  protected readonly canSwitch_ = this.access.canSwitch_
+  protected readonly activeBusinessId_ = computed(() => this.user_()?.businessId ?? '')
+  /** What the switcher shows; set to the picked value while a switch runs and back on failure. */
+  protected readonly selectedBusinessId_ = linkedSignal(() => this.activeBusinessId_())
+  protected readonly businessOptions_ = computed(() => {
+    const homeId = this.userService.homeBusinessId_()
+    const active = this.activeBusinessId_()
+    const rows = this.access.businesses_().map((b) => ({
+      value: b.businessId,
+      label: b.businessId === homeId ? `${b.name} · ${this.translation.translate('my_business')}` : b.name
+    }))
+    const activeName = this.business_()?.name
+    if (active && !rows.some((r) => r.value === active) && activeName) rows.push({ value: active, label: activeName })
+    return rows
+  })
+  /** The phone profile menu lists every business but the active one. */
+  protected readonly otherBusinesses_ = computed(() =>
+    this.businessOptions_().filter((b) => b.value !== this.activeBusinessId_())
+  )
+
+  constructor() {
+    const userId_ = computed(() => this.user_()?._id ?? null)
+    effect(() => {
+      if (userId_()) untracked(() => void this.access.loadBusinesses())
+    })
+    if (this.userService.consumeAccessEndedNotice()) {
+      this.userMsg.onSetSuccessMsg(this.translation.translate('access_ended'))
+    }
+  }
+
+  /** Switches into the picked business (the home id goes as null); a failure keeps the user where he was. */
+  protected async switchTo(businessId: string): Promise<void> {
+    this.isMobileAvatarOpen.set(false)
+    if (businessId === this.activeBusinessId_()) return
+    this.selectedBusinessId_.set(businessId)
+    const target = businessId === this.userService.homeBusinessId_() ? null : businessId
+    const ok = await this.userService.switchBusiness(target)
+    if (!ok) {
+      this.selectedBusinessId_.set(this.activeBusinessId_())
+      this.userMsg.onSetErrorMsg(this.translation.translate('switch_failed'))
+    }
+  }
 
   openMobileMenu(): void {
     this.isMobileMenuOpen.set(true)

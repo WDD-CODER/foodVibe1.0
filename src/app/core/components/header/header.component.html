@@ -23,8 +23,24 @@
           >
             {{ user_()!.name }}
           </button>
-          @if (business_(); as business) {
-            <span class="business-name">{{ business.name }}</span>
+          @if (canSwitch_()) {
+            <app-custom-select
+              class="business-switcher"
+              data-testid="business-switcher"
+              [attr.aria-label]="'switch_business' | translatePipe"
+              [ngModel]="selectedBusinessId_()"
+              (ngModelChange)="switchTo($event)"
+              [options]="businessOptions_()"
+              [translateLabels]="false"
+              placeholder="switch_business"
+              variant="chip"
+              triggerId="business-switcher"
+            >
+            </app-custom-select>
+          } @else {
+            @if (business_(); as business) {
+              <span class="business-name">{{ business.name }}</span>
+            }
           }
         </div>
       </div>
@@ -137,6 +153,14 @@
       @if (isMobileAvatarOpen()) {
         <div class="profile-menu" role="menu">
           <span class="profile-menu__name">{{ user_()!.name }}</span>
+          @if (canSwitch_()) {
+            @for (b of otherBusinesses_(); track b.value) {
+              <button type="button" class="profile-menu__item" role="menuitem" (click)="switchTo(b.value)">
+                <lucide-icon name="arrow-left-right" size="16"></lucide-icon>
+                {{ b.label }}
+              </button>
+            }
+          }
           @if (isOwner_()) {
             <a class="profile-menu__item" role="menuitem" routerLink="/settings" (click)="toggleMobileAvatar()">
               <lucide-icon name="sliders-vertical" size="16"></lucide-icon>

@@ -105,7 +105,7 @@ export class SetupChecklistCardComponent {
   /** Shown only to the owner, after the status arrived, until the required steps are done or the owner hides it. */
   protected readonly visible = computed(
     () =>
-      this.permission.isOwner_() &&
+      this.permission.can('editSettings') &&
       this.status_() !== null &&
       !this.isHidden_() &&
       this.doneRequired() < this.requiredTotal()
@@ -114,7 +114,7 @@ export class SetupChecklistCardComponent {
   constructor() {
     effect(() => {
       const business = this.businessService.business_()
-      if (!this.permission.isOwner_() || !business) return
+      if (!this.permission.can('editSettings') || !business) return
       untracked(() => {
         // Sign-in happens in a modal on top of the dashboard, so the business may arrive after the card exists.
         // Missing opening details never send the owner anywhere (plan 469): the dashboard shows a banner instead.
@@ -133,7 +133,7 @@ export class SetupChecklistCardComponent {
         const previous = this.lastProductCount
         this.lastProductCount = count
         if (previous === null || previous === count) return
-        if (!this.isStatusRequested_() || this.isHidden_() || !this.permission.isOwner_()) return
+        if (!this.isStatusRequested_() || this.isHidden_() || !this.permission.can('editSettings')) return
         void this.loadStatus()
       })
     })
