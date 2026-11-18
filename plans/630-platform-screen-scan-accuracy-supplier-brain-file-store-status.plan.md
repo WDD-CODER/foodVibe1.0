@@ -108,10 +108,12 @@ append the path to the scope block above and retry.
 
 - `GET /stats` handler in `server/routes/admin-learning.js` — family: server-auth — rung: 1 — why: `verifyToken` + `requirePlatformAdmin` as every platform route uses them.
 - `buildLearningStats`, `weekStart` in `server/utils/learning-stats.js` — family: none — rung: 4 — why: pure server-side grouping of draft rows into flows and weeks; no server helper groups by week, and keeping it pure lets the week rule be tested with a fixed clock.
-- `PlatformAdminService.getLearningStats`, `getLearningStatus` — family: http — rung: 3 — why: two more methods on the existing admin service, same `API.admin(...)` pattern.
+- `PlatformAdminService.getLearningStats` — family: http — rung: 3 — why: a new method on the existing admin service, same `API.admin(...)` pattern.
+- `PlatformAdminService.getLearningStatus` — family: http — rung: 3 — why: a second new method on the same service, same pattern.
 - `app-platform-learning` section — family: empty-state — rung: 1 — why: a page-local section like `platform-ai-shots` (`c-glass-panel`, its own table styles) that uses `app-empty-state` as is.
 - "By week" control on a flow row — family: chip — rung: 1 — why: a `button` with `c-chip c-chip--tap` and `aria-expanded`, the engine's own reveal control.
 - File-store and private-business notes — family: feedback — rung: 1 — why: plain text lines with a registered icon; a failed load uses `LoggingService` + `UserMsgService`.
+- `platform-learning`, `.platform-learning`, `.learning`, `.learning__title`, `.learning__desc`, `.learning__hint`, `.learning__warn`, `.learning__scroll`, `.learning__table`, `.learning__week`, `.learning__heading`, `.learning__numbers`, `.learning__brain` — family: empty-state — rung: 1 — why: page-local layout of the one section, as `.ai-shots*` is for `platform-ai-shots`; the empty state itself is the shared `app-empty-state`.
 - Accuracy text — family: helpers — rung: 1 — why: `formatPctInt` from `src/app/core/engine/rounding.ts`, as `platform-ai-shots` does.
 
 ## Step 0 — Reality Check

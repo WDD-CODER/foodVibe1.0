@@ -9,11 +9,14 @@
     gap: var(--space-3);
 
     padding: var(--space-3);
+
+    min-inline-size: 0;
   }
 
   .learning__title {
     margin: 0;
     font-size: var(--fs-lg);
+    font-weight: 600;
   }
 
   .learning__desc,
@@ -21,6 +24,7 @@
     margin: 0;
 
     font-size: var(--fs-sm);
+    line-height: 1.5;
     color: var(--text-muted);
   }
 
@@ -40,16 +44,19 @@
 
   .learning__scroll {
     overflow-x: auto;
+    max-inline-size: 100%;
   }
 
   .learning__table {
     inline-size: 100%;
     font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
     border-collapse: collapse;
 
     th,
     td {
-      padding: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      vertical-align: middle;
       text-align: start;
       white-space: nowrap;
     }
@@ -62,12 +69,14 @@
   .learning__heading {
     margin: 0;
     font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--text-muted);
   }
 
   .learning__numbers {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-4);
+    gap: var(--space-5);
 
     margin: var(--space-2) 0 0;
 
@@ -75,17 +84,22 @@
       display: flex;
       flex-direction: column;
       gap: var(--space-1);
+
+      min-inline-size: 6rem;
     }
 
     dt {
       font-size: var(--fs-sm);
+      font-weight: 500;
+      letter-spacing: 0.01em;
       color: var(--text-muted);
     }
 
     dd {
       margin: 0;
       font-size: var(--fs-lg);
-      font-weight: 600;
+      font-weight: 700;
+      line-height: 1.2;
     }
   }
 }
