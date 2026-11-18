@@ -448,3 +448,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: an invoice apply remembers printed names, a read looks them up, or a business is deleted and its memory must go.
 - Known copies: none.
 - Request shape: invoiceResolveRequestSchema in shared/schemas/entities/invoice-alias.schema.ts (the resolve read).
+
+### ai-voice — `voiceTranscribeRequestSchema`, `VOICE_MIME_TYPES`, `VOICE_AUDIO_MAX_BASE64`, `VOICE_MAX_SECONDS`
+
+- Status: stable — plan 621
+- Use: `shared/schemas/ai-voice.schema.ts` — request and reply shapes, the mime list and the size and length limits of one
+  voice-note transcription; served by `server/routes/ai/voice.js` (the recording is kept through `file-store`).
+- When: a screen or route sends a voice note to be turned into a transcript.
+- Known copies: none.
