@@ -421,3 +421,30 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: needsMedia in callGemini (server/services/gemini-client.js) picks a media-capable model in the chain.
 - When: a model call carries audio or a PDF.
 - Known copies: none.
+
+### invoice-trail — `invoiceApplyInputSchema`, `SUPPLIER_KEY_PATTERN`, `changePct`, `invoiceKeptRatio`, `buildInvoiceLines`
+
+- Status: stable — plan 625
+- Use: `server/utils/invoice-trail.js` — `changePct`, `invoiceKeptRatio`, `buildInvoiceLines`; the request shape is
+  `invoiceApplyInputSchema` and `SUPPLIER_KEY_PATTERN` in `shared/schemas/entities/invoice.schema.ts`.
+- When: the invoice apply route stores the invoice record, the price history rows and the draft closeness score.
+- Known copies: none.
+
+### invoice-read — `supplierKey`, `cleanInvoiceHeader`, `parsePrintedDate`, `cleanPrintedLines`, `suggestSupplier`, `INVOICE_READ_SYSTEM_PROMPT`, `invoiceReadRequestSchema`
+
+- Status: stable — plan 626
+- Use: `server/utils/supplier-key.js` — `supplierKey` (the one key naming a supplier across businesses);
+  `server/utils/invoice-read.js` — the prompt and the pure cleaning of a model read; request and model-answer shapes in
+  `shared/schemas/ai-invoice-read.schema.ts`.
+- When: the invoice read route (`POST /api/v1/ai/invoices/read`) turns a photo or PDF into a header, a supplier suggestion and rows.
+- Known copies: none.
+
+### invoice-memory — `learnFromApply`, `resolveNames`, `forgetBusiness`, `invoiceResolveRequestSchema`
+
+- Status: stable — plan 627
+- Use: `server/services/invoice-memory.js` — `learnFromApply`, `resolveNames`, `forgetBusiness` (a business's own
+  remembered invoice names and the shared supplier brain); the resolve request shape is
+  `invoiceResolveRequestSchema` in `shared/schemas/entities/invoice-alias.schema.ts`.
+- When: an invoice apply remembers printed names, a read looks them up, or a business is deleted and its memory must go.
+- Known copies: none.
+- Request shape: invoiceResolveRequestSchema in shared/schemas/entities/invoice-alias.schema.ts (the resolve read).
