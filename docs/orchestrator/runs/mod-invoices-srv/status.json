@@ -1,0 +1,467 @@
+{
+  "run": "mod-invoices-srv",
+  "branch": "orch/mod-invoices-srv",
+  "base": "main",
+  "startedAt": "2026-11-18T08:57:22.121Z",
+  "mainShaAtStart": "65e510e0e0b530e69e34ba74a905558768f24a89",
+  "plans": {
+    "625": {
+      "nnn": "625",
+      "title": "Keep every approved invoice and every price change when prices are applied",
+      "branch": "feat/625-invoice-records-and-price",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T08:59:55.069Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T09:19:56.602Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T09:28:32.599Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-18T08:59:54.731Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T08:59:55.073Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:10:40.626Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:19:56.173Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:19:56.400Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T09:19:56.604Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T09:21:39.847Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T09:28:24.707Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T09:28:32.601Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T09:28:43.494Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T09:29:44.288Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.9,
+      "sha": "81cd2b9f1f9e41c035f9381224ecb8c816bec933",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 641.5,
+          "tokens": {
+            "input": 1075701,
+            "output": 28985
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 100.4,
+          "tokens": {
+            "input": 264092,
+            "output": 4168
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.7,
+          "tokens": {
+            "input": 50268,
+            "output": 846
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-invoices-srv --plan plans/625-invoice-records-and-price-history-on-apply.plan.md"
+      ],
+      "checkedHead": "7bb84eed205a5c3fe7f1266dbf331a8db4bb7fb1"
+    },
+    "626": {
+      "nnn": "626",
+      "title": "Read a supplier invoice with its header, from a photo or a PDF, and keep the file",
+      "branch": "feat/626-read-supplier-invoice-header",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T09:31:55.351Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T09:52:37.007Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-18T09:31:55.190Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:31:55.353Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:42:57.330Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:52:28.934Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:52:37.010Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:52:51.112Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:53:45.594Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.9,
+      "sha": "23169d49c4b7f5bf832162bc8ef3e038e3608e7f",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 658.3,
+          "tokens": {
+            "input": 1763498,
+            "output": 28337
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.8,
+          "tokens": {
+            "input": 56322,
+            "output": 891
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "9b6f8db64215ea600463e6a010a6b8dc5e34d92d"
+    },
+    "627": {
+      "nnn": "627",
+      "title": "Remember which product each printed invoice name means, for the business and for everyone",
+      "branch": "feat/627-remember-invoice-names-own",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T09:55:58.043Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T10:14:15.643Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T10:20:30.082Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-18T09:55:57.834Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T09:55:58.045Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T10:08:25.659Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T10:14:15.348Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T10:14:15.494Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T10:14:15.644Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T10:15:18.100Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T10:20:24.295Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T10:20:30.083Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T10:20:45.558Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T10:21:23.310Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.6,
+      "sha": "e502177d26bf14980c91f50cf513cd275c0dfa8e",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 745.5,
+          "tokens": {
+            "input": 73885,
+            "output": 991
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 60.4,
+          "tokens": {
+            "input": 274664,
+            "output": 4289
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 14.5,
+          "tokens": {
+            "input": 47625,
+            "output": 1562
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-invoices-srv --plan plans/627-remember-invoice-names-own-memory-and-shared-supplier-brain.plan.md"
+      ],
+      "checkedHead": "fb34621392210e621bee04385359b907c7111607"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T08:59:54.493Z",
+      "plan": "625",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-srv-625 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T09:28:52.153Z",
+      "plan": "625",
+      "text": "the folder foodVibe1.0-orch-merge-mod-invoices-srv was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T09:31:54.972Z",
+      "plan": "626",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-srv-626 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T09:55:57.664Z",
+      "plan": "627",
+      "text": "the folder foodVibe1.0-orch-mod-invoices-srv-627 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 17.6,
+  "updatedAt": "2026-11-18T10:24:58.255Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "625",
+      "type": "behaviour",
+      "text": "behaviour: invalid and duplicate rows also get an outcome, so their stored invoice line carries their own positive price or null — reverse: drop the price from those outcomes in product-import.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "625",
+      "type": "behaviour",
+      "text": "behaviour: confirmAiDraft's own 2-decimal rounding applies to keptRatio; invoiceKeptRatio itself rounds to 4 decimals — reverse: change the rounding in server/services/ai-drafts.js (out of scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "625",
+      "type": "behaviour",
+      "text": "behaviour: docs/brain/component-families.md and docs/brain/inventory.md are outside the plan's scope block but I edited them, because the finding needs a registry row. I did not add them to the scope block. scope-check does not list them as out. The paths it lists are .claude/todo.md, plans/638-…, and files under Claude outputs/, none of which this fix touched — reverse: drop t",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "625",
+      "type": "behaviour",
+      "text": "behaviour: the second Reuse Check row now names only `invoiceApplyInputSchema`, because the check takes the whole row text as one piece name and could not match the longer text — reverse: restore the original row text",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "626",
+      "type": "behaviour",
+      "text": "behaviour: the apply's supplier taxId step runs only when the invoice record was written (invoiceOk) — reverse: drop `invoiceOk &&` in server/routes/product-import.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "627",
+      "type": "behaviour",
+      "text": "behaviour: also filled the second forgetBusiness placeholder in deleteBusinessServerData (private business), which plans 618/619 left naming 627 — reverse: delete that one require line in server/services/business.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "627",
+      "type": "seen",
+      "text": "seen: scripts/reuse-lint.mjs --check-registry reports old missing-path entries in docs/brain/component-families.md (lines 197, 314, 354). They are not from this plan.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-18T10:24:58.253Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T10:24:58.255Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
