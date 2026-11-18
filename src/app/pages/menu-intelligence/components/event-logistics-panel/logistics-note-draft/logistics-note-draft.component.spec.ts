@@ -190,7 +190,7 @@ describe('LogisticsNoteDraftComponent', () => {
     await open(baseDraft({ answers: [], conflicts: [], adhoc: [] }))
     expect(el.querySelector('app-empty-state')).not.toBeNull()
     expect(el.querySelector('.note-draft-open')).not.toBeNull()
-    expect(el.querySelector<HTMLButtonElement>('.note-draft-actions .c-btn-primary')!.disabled).toBeTrue()
+    expect(el.querySelector<HTMLButtonElement>('.note-draft .c-chip-group .c-btn-primary')!.disabled).toBeTrue()
   })
 
   it('shows the 429 toast and keeps the text when extraction fails', async () => {
