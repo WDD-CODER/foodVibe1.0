@@ -235,3 +235,34 @@ describe('who can read and write invoices', () => {
     expect(await col('invoices').countDocuments()).toBe(1)
   })
 })
+
+describe('plan 626: the supplier tax id from the first approved invoice', () => {
+  const withTax = () => header([printed('lettuce', 0)], { supplierTaxId: '514236987' })
+
+  it('sets taxId on a supplier that had none', async () => {
+    const res = await apply({ supplierId: 'sup1', rows: [line('lettuce2', 4)], invoice: withTax() })
+    expect(res.status).toBe(200)
+    expect((await col('suppliers').findOne({ _id: 'sup1' })).taxId).toBe('514236987')
+    expect(logs.byEvent('product_import.applied').at(-1)).toMatchObject({ supplierTaxSet: true })
+  })
+
+  it('leaves a supplier that already has a different tax id unchanged', async () => {
+    await col('suppliers').updateOne({ _id: 'sup1' }, { $set: { taxId: '123456789' } })
+    const res = await apply({ supplierId: 'sup1', rows: [line('lettuce2', 4)], invoice: withTax() })
+    expect(res.status).toBe(200)
+    expect((await col('suppliers').findOne({ _id: 'sup1' })).taxId).toBe('123456789')
+  })
+
+  it('a failing supplier update still answers 200 with a real invoiceId', async () => {
+    const original = mongoose.mongo.Collection.prototype.updateOne
+    vi.spyOn(mongoose.mongo.Collection.prototype, 'updateOne').mockImplementation(function (...args) {
+      if (this.collectionName === 'suppliers') throw new Error('boom')
+      return original.apply(this, args)
+    })
+    const res = await apply({ supplierId: 'sup1', rows: [line('lettuce2', 4)], invoice: withTax() })
+    expect(res.status).toBe(200)
+    expect(typeof res.body.invoiceId).toBe('string')
+    expect(logs.byEvent('product_import.apply.trail_failed').some(r => r.stage === 'supplier')).toBe(true)
+    expect((await col('suppliers').findOne({ _id: 'sup1' })).taxId).toBeUndefined()
+  })
+})
