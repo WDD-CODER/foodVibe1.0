@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { SUPPLIER_KEY_PATTERN } from './invoice.schema'
 
 /** Plan 615 (C-ALIAS): printed invoice names linked to products. Server-only collection. No price, quantity or date of purchase. */
 export const ownInvoiceAliasSchema = z.strictObject({
@@ -28,3 +29,9 @@ export const sharedInvoiceAliasSchema = z.strictObject({
 
 export const invoiceAliasSchema = z.union([ownInvoiceAliasSchema, sharedInvoiceAliasSchema])
 export type InvoiceAlias = z.infer<typeof invoiceAliasSchema>
+
+/** Plan 627: body of POST /api/v1/product-import/resolve — printed names answered from memory, no model call. */
+export const invoiceResolveRequestSchema = z.strictObject({
+  supplierKey: z.string().regex(SUPPLIER_KEY_PATTERN),
+  names: z.array(z.string().max(200)).min(1).max(200)
+})

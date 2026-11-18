@@ -92,7 +92,7 @@ async function setAiPrivate(id, value) {
     const del = await mongoose.connection.db.collection('GEMINI_SHOTS')
       .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': String(id) })
     removed = del.deletedCount
-    // plan 627 calls forgetBusiness(db, id) here when value is true
+    await require('./invoice-memory').forgetBusiness(mongoose.connection.db, String(id))
   }
   return { matchedCount: result.matchedCount, aiPrivate, removed }
 }
@@ -123,7 +123,7 @@ async function deleteBusinessServerData(db, business, log) {
     counts.promoted = (await db.collection('GEMINI_SHOTS')
       .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': businessId })).deletedCount
     counts.drafts = (await db.collection('aiDrafts').deleteMany({ businessId })).deletedCount
-    // plan 627 calls forgetBusiness(db, businessId) here (private business only)
+    await require('./invoice-memory').forgetBusiness(db, businessId)
   }
   return counts
 }
