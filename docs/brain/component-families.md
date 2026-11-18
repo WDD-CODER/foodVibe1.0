@@ -340,12 +340,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 615
 - Use: `shared/schemas/modules-pure.ts` (the helpers, no zod; the browser imports this) and `shared/schemas/modules.ts`
   (re-exports them and adds the zod schemas) — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
-  `platformUpdateSchema`. Browser (plan 620): `ModuleService` (`src/app/core/services/module.service.ts`) — `has`,
-  `hasType`, `ready`; `moduleGuard(keys)` (`src/app/core/guards/module.guard.ts`) sends a screen of a missing module to
-  `/dashboard`; `HeroFabAction.module` hides a floating-button action; `HttpStorageAdapter` returns an empty result
-  without a request for a type whose module is off. The browser imports the helpers from `@schemas/modules-pure`.
+  `platformUpdateSchema`.
 - When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
   same rule.
+- Known copies: none.
+
+### module-gate — the browser hides and skips what a business's modules turn off
+
+- Status: stable — plan 620
+- Use: `ModuleService` (`src/app/core/services/module.service.ts`) — `has`, `hasType`, `ready`; `moduleGuard(keys)`
+  (`src/app/core/guards/module.guard.ts`) sends a screen of a missing module to `/dashboard`; the module field on
+  `HeroFabAction` (`module?: ModuleKey`) hides an action in the floating button; `HttpStorageAdapter` returns an empty
+  result without a request for a type whose module is off. Import the helpers from `@schemas/modules-pure` (no zod in
+  the first bundle).
+- When: a link, chip, screen, button or request belongs to a module. The server is the gate; the browser only hides.
 - Known copies: none.
 
 ### entity-schemas — one stored shape per file
