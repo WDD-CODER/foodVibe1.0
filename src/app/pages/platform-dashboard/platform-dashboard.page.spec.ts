@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, Settings, TrendingUp } from 'lucide-angular'
+import { LucideAngularModule, Settings, TrendingUp, UserPlus } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
@@ -9,6 +9,8 @@ import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { UserService } from '@services/user.service'
+import { GrantAccessDialogService } from './components/grant-access-dialog/grant-access-dialog.service'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
 import { PlatformLearningComponent } from './components/platform-learning/platform-learning.component'
@@ -78,6 +80,8 @@ describe('PlatformDashboardPage', () => {
   let getAiUsage: jasmine.Spy<(params?: AiUsageParams) => Promise<AiUsageReport>>
   /** The signed-in session works in business 'a'. */
   const reloadBusiness = jasmine.createSpy('reload')
+  const switchBusiness = jasmine.createSpy('switchBusiness')
+  const grantDialogStub = { isOpen_: signal(false), open: jasmine.createSpy('open').and.resolveTo(false) }
 
   async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
     rows_ = signal(rows)
@@ -91,7 +95,10 @@ describe('PlatformDashboardPage', () => {
         )
       )
     TestBed.configureTestingModule({
-      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, TrendingUp })],
+      imports: [
+        PlatformDashboardPage,
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, TrendingUp, UserPlus })
+      ],
       providers: [
         {
           provide: PlatformAdminService,
@@ -132,6 +139,8 @@ describe('PlatformDashboardPage', () => {
           useValue: jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg'])
         },
         { provide: TranslationService, useValue: { translate: (key: string) => FAIL_TEXTS[key] ?? key } },
+        { provide: UserService, useValue: { homeBusinessId_: signal('home'), switchBusiness } },
+        { provide: GrantAccessDialogService, useValue: grantDialogStub },
         provideRouter([])
       ]
     })
@@ -245,6 +254,38 @@ describe('PlatformDashboardPage', () => {
     const open = spyOn(dialog, 'open').and.resolveTo(false)
     ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="fd-edit"]') as HTMLButtonElement).click()
     expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
+  })
+
+  describe('enter a business and give access (plan 632)', () => {
+    const q = (id: string): NodeListOf<HTMLButtonElement> =>
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(`[data-testid="${id}"]`)
+
+    beforeEach(() => {
+      switchBusiness.calls.reset()
+      grantDialogStub.open.calls.reset()
+    })
+
+    it('the enter button switches into the row business and is hidden on the admin home business', async () => {
+      switchBusiness.and.resolveTo(true)
+      await setup([row('a'), row('home')])
+      expect(q('enter-business').length).toBe(1)
+      q('enter-business')[0].click()
+      expect(switchBusiness).toHaveBeenCalledOnceWith('a')
+    })
+
+    it('a failed enter shows the failure toast', async () => {
+      switchBusiness.and.resolveTo(false)
+      await setup([row('a')])
+      q('enter-business')[0].click()
+      await fixture.whenStable()
+      expect(TestBed.inject(UserMsgService).onSetErrorMsg).toHaveBeenCalledWith('switch_failed')
+    })
+
+    it('the grant button opens the grant dialog for the row business', async () => {
+      await setup([row('a')])
+      q('grant-access')[0].click()
+      expect(grantDialogStub.open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a' })
+    })
   })
 
   describe('modules and AI columns (plan 620)', () => {

@@ -14,6 +14,9 @@ import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { GrantAccessDialogComponent } from './components/grant-access-dialog/grant-access-dialog.component'
+import { GrantAccessDialogService } from './components/grant-access-dialog/grant-access-dialog.service'
+import { UserService } from '@services/user.service'
 import { FrontDeskAdminDialogComponent } from './components/front-desk-admin-dialog/front-desk-admin-dialog.component'
 import { PlatformBusinessDialogComponent } from './components/platform-business-dialog/platform-business-dialog.component'
 import { PlatformBusinessDialogService } from './components/platform-business-dialog/platform-business-dialog.service'
@@ -79,6 +82,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     PlatformAiShotsComponent,
     PlatformLearningComponent,
     FrontDeskAdminDialogComponent,
+    GrantAccessDialogComponent,
     PlatformBusinessDialogComponent,
     ...COLUMN_CAROUSEL,
     RowActionsMenuComponent
@@ -95,6 +99,8 @@ export class PlatformDashboardPage implements OnInit {
   private readonly translation = inject(TranslationService)
   protected readonly fdDialog = inject(FrontDeskAdminDialogService)
   protected readonly bizDialog = inject(PlatformBusinessDialogService)
+  protected readonly grantDialog = inject(GrantAccessDialogService)
+  private readonly userService = inject(UserService)
   private readonly businessService = inject(BusinessService)
 
   // 4. SIGNALS & CONSTANTS
@@ -323,6 +329,21 @@ export class PlatformDashboardPage implements OnInit {
       name: row.name,
       status: fd.status
     })
+  }
+
+  /** Plan 632: the platform admin enters one business (not his own home business, which he is in already). */
+  protected canEnter(row: BusinessRow): boolean {
+    return row._id !== this.userService.homeBusinessId_()
+  }
+
+  protected async enterBusiness(row: BusinessRow): Promise<void> {
+    const ok = await this.userService.switchBusiness(row._id)
+    if (!ok) this.userMsg.onSetErrorMsg(this.translation.translate('switch_failed'))
+  }
+
+  /** Plan 632: opens the one-field dialog that gives a consultant access to this business. */
+  protected async giveAccess(row: BusinessRow): Promise<void> {
+    await this.grantDialog.open({ businessId: row._id, name: row.name })
   }
 
   /** Plan 620: the short module names of one row, in MODULE_KEYS order; a dash when none is on. */

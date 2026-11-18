@@ -2,16 +2,18 @@ import { computed, inject, Injector, Injectable, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Router } from '@angular/router'
 import { User } from '../models/user.model'
-import { catchError, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs'
+import { catchError, firstValueFrom, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs'
 import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
 import { hashPassword } from '../utils/auth-crypto'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
+import { APP_RELOAD } from '../utils/app-reload.util'
 import { clearReturningVisitor, markReturningVisitor } from '../utils/returning-visitor.util'
 
 const SESSION_USER_KEY = 'loggedInUser'
 const TOKEN_KEY = 'fv_token'
+const ACCESS_ENDED_KEY = 'fv_access_ended'
 
 /** 13 minutes — access token expires at 15m; refresh early to avoid 401s mid-session. */
 const REFRESH_INTERVAL_MS = 13 * 60 * 1000
@@ -26,6 +28,7 @@ export class UserService {
   private userMsgService = inject(UserMsgService)
   private logging = inject(LoggingService)
   private injector = inject(Injector)
+  private appReload = inject(APP_RELOAD)
 
   private get http(): HttpClient {
     return this.injector.get(HttpClient)
@@ -37,7 +40,17 @@ export class UserService {
   public user_ = this._user_.asReadonly()
   public readonly isPlatformAdmin_ = computed(() => this._user_()?.isPlatformAdmin === true)
   public readonly businessRole_ = computed(() => this._user_()?.businessRole ?? null)
+  /** The owner of the active business (true for the platform admin acting inside one). */
   public readonly isOwner_ = computed(() => this._user_()?.businessRole === 'owner')
+  /** The user's own business: `homeBusinessId`, else the active one. */
+  public readonly homeBusinessId_ = computed(() => {
+    const u = this._user_()
+    return u?.homeBusinessId ?? u?.businessId ?? null
+  })
+  /** Set while the user works in a business that is not his own. */
+  public readonly acting_ = computed<'consultant' | 'platform' | null>(() => this._user_()?.acting ?? null)
+  /** The home business's modules while acting; empty at home. */
+  public readonly homeModules_ = computed<string[]>(() => this._user_()?.homeModules ?? [])
   /** @deprecated use isPlatformAdmin_ */
   public readonly isAdmin_ = this.isPlatformAdmin_
 
@@ -250,8 +263,14 @@ export class UserService {
         if (user && (!claims || claims.userId === user._id)) {
           // The server answers the full public user (terms version included): use it as login does.
           const changedUser = !!current && current._id !== user._id
+          const movedBusiness = !!current && current._id === user._id && current.businessId !== user.businessId
           this._saveUserLocal(user)
-          if (changedUser) void this._reloadDataServices()
+          if (movedBusiness) {
+            // The session now belongs to another business (a switch in another tab, or an access that
+            // ended): reload the whole application so nothing of the previous business stays on screen.
+            if (current?.acting && !user.acting) this._setAccessEndedNotice()
+            this.appReload('/dashboard')
+          } else if (changedUser) void this._reloadDataServices()
         } else if (claims && current?._id !== claims.userId) {
           // The refresh cookie belongs to someone else (another tab or slot signed in since):
           // the token decides who this session is, so the header never shows one user while
@@ -262,6 +281,8 @@ export class UserService {
             email: '',
             businessId: claims.businessId,
             businessRole: claims.businessRole,
+            homeBusinessId: claims.homeBusinessId,
+            acting: claims.acting,
             isPlatformAdmin: claims.isPlatformAdmin
           })
           if (current) void this._reloadDataServices()
@@ -277,7 +298,9 @@ export class UserService {
     userId: string
     name: string
     businessId?: string
-    businessRole?: 'owner' | 'staff'
+    businessRole?: 'owner' | 'staff' | 'consultant'
+    homeBusinessId?: string
+    acting?: 'consultant' | 'platform'
     isPlatformAdmin: boolean
   } | null {
     try {
@@ -287,7 +310,9 @@ export class UserService {
         userId?: string
         name?: string
         businessId?: string
-        businessRole?: 'owner' | 'staff'
+        businessRole?: 'owner' | 'staff' | 'consultant'
+        homeBusinessId?: string
+        acting?: 'consultant' | 'platform'
         isPlatformAdmin?: boolean
       }
       return claims.userId
@@ -296,11 +321,63 @@ export class UserService {
             name: claims.name ?? '',
             businessId: claims.businessId,
             businessRole: claims.businessRole,
+            homeBusinessId: claims.homeBusinessId,
+            acting: claims.acting,
             isPlatformAdmin: claims.isPlatformAdmin === true
           }
         : null
     } catch {
       return null
+    }
+  }
+
+  /** The business id inside an access token's payload, or null when it can't be read. */
+  tokenBusinessId(token: string): string | null {
+    return this._tokenClaims(token)?.businessId ?? null
+  }
+
+  /**
+   * Switches the session into another business (`null` = back to the user's own). The open page is left
+   * first so an unsaved-changes question can stop it. On success the server's token replaces the stored
+   * one and the whole application reloads: no signal of the previous business can survive.
+   * Returns false when the switch did not happen.
+   */
+  async switchBusiness(businessId: string | null): Promise<boolean> {
+    const left = await this.injector.get(Router).navigate(['/dashboard'])
+    if (!left) return false
+    try {
+      const { token, user } = await firstValueFrom(
+        this.http.post<{ token: string; user: User }>(
+          `${this.authBase}${API.auth('switch-business')}`,
+          { businessId },
+          { withCredentials: true }
+        )
+      )
+      this.storeToken(token)
+      this._saveUserLocal(user)
+      this.appReload('/dashboard')
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  /** True once after a session lost its access to a business; reading clears it. */
+  consumeAccessEndedNotice(): boolean {
+    try {
+      const had = sessionStorage.getItem(ACCESS_ENDED_KEY) === '1'
+      if (had) sessionStorage.removeItem(ACCESS_ENDED_KEY)
+      return had
+    } catch {
+      return false
+    }
+  }
+
+  private _setAccessEndedNotice(): void {
+    try {
+      sessionStorage.setItem(ACCESS_ENDED_KEY, '1')
+    } catch {
+      /* private mode: the notice is lost, the reload still happens */
     }
   }
 

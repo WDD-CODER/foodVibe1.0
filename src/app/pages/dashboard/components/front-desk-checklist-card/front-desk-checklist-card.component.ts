@@ -42,14 +42,14 @@ export class FrontDeskChecklistCardComponent {
   /** Shown to the owner once the status arrived; hidden when every item is done. */
   protected readonly visible_ = computed(() => {
     const setup = this.setup_()
-    if (!this.permission.isOwner_() || !setup) return false
+    if (!this.permission.can('editSettings') || !setup) return false
     return setup.businessType === null || setup.done < setup.total
   })
 
   constructor() {
     effect(() => {
       const business = this.businessService.business_()
-      if (!this.permission.isOwner_() || !business) return
+      if (!this.permission.can('editSettings') || !business) return
       untracked(() => {
         if (this.isRequested_()) return
         this.isRequested_.set(true)

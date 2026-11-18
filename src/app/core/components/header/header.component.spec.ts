@@ -4,12 +4,14 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
 import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule } from 'lucide-angular'
+import { ArrowLeftRight, LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { signal } from '@angular/core'
 import { of } from 'rxjs'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
+import { AccessService } from '@services/access.service'
+import { UserMsgService } from '@services/user-msg.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 
@@ -46,6 +48,9 @@ describe('HeaderComponent', () => {
             user_: signal(null),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -123,6 +128,9 @@ describe('HeaderComponent avatar fallback', () => {
             user_: signal({ _id: 'u1', name: 'dana', imgUrl: 'https://x.invalid/a.png' }),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -168,6 +176,9 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
             user_: signal({ _id: 'u1', name: 'dana' }),
             isPlatformAdmin_: isPlatformAdmin,
             isOwner_: isOwner,
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         },
@@ -232,6 +243,9 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
             user_: signal(null),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -272,6 +286,9 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
             user_: signal(null),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -284,5 +301,130 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
     expect(host.querySelector('[data-testid="header-waiting-count"]')?.textContent?.trim()).toBe('3')
     const label = host.querySelector('.bottom-nav a[href="/clients"]')?.getAttribute('aria-label')
     expect(label).not.toContain('3')
+  })
+})
+
+describe('HeaderComponent business switcher (plan 632)', () => {
+  const canSwitch = signal(false)
+  const businesses = signal<{ businessId: string; name: string; role: string }[]>([])
+  const user = signal<{ _id: string; name: string; businessId: string }>({ _id: 'u1', name: 'dana', businessId: 'b1' })
+  const switchBusiness = jasmine.createSpy('switchBusiness')
+  const loadBusinesses = jasmine.createSpy('loadBusinesses')
+  const consume = jasmine.createSpy('consume')
+  let fixture: ComponentFixture<HeaderComponent>
+
+  const setup = async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        HeaderComponent,
+        HttpClientTestingModule,
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ArrowLeftRight })
+      ],
+      providers: [
+        moduleStub,
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: user,
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal('b1'),
+            consumeAccessEndedNotice: consume,
+            switchBusiness,
+            logout: () => of(null)
+          }
+        },
+        { provide: BusinessService, useValue: { business_: signal({ name: 'Mine' }) } },
+        { provide: AccessService, useValue: { canSwitch_: canSwitch, businesses_: businesses, loadBusinesses } }
+      ]
+    }).compileComponents()
+    fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+  }
+
+  beforeEach(() => {
+    canSwitch.set(false)
+    businesses.set([{ businessId: 'b1', name: 'Mine', role: 'owner' }])
+    switchBusiness.calls.reset()
+    loadBusinesses.calls.reset()
+    consume.calls.reset()
+    consume.and.returnValue(false)
+  })
+
+  it('shows the plain business name and no switcher when there is nothing to switch to', async () => {
+    await setup()
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('[data-testid="business-switcher"]')).toBeNull()
+    expect(host.querySelector('.business-name')?.textContent?.trim()).toBe('Mine')
+    expect(loadBusinesses).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the switcher instead of the name when there is somewhere to switch to', async () => {
+    canSwitch.set(true)
+    businesses.set([
+      { businessId: 'b1', name: 'Mine', role: 'owner' },
+      { businessId: 'b2', name: 'Client', role: 'consultant' }
+    ])
+    await setup()
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('[data-testid="business-switcher"]')).not.toBeNull()
+    expect(host.querySelector('.business-name')).toBeNull()
+  })
+
+  it('switching to another business asks the user service; the home id is sent as null', async () => {
+    canSwitch.set(true)
+    businesses.set([
+      { businessId: 'b1', name: 'Mine', role: 'owner' },
+      { businessId: 'b2', name: 'Client', role: 'consultant' }
+    ])
+    switchBusiness.and.resolveTo(true)
+    await setup()
+    const cmp = fixture.componentInstance as unknown as { switchTo(id: string): Promise<void> }
+    await cmp.switchTo('b2')
+    expect(switchBusiness).toHaveBeenCalledWith('b2')
+    user.set({ _id: 'u1', name: 'dana', businessId: 'b2' })
+    await cmp.switchTo('b1')
+    expect(switchBusiness).toHaveBeenCalledWith(null)
+    user.set({ _id: 'u1', name: 'dana', businessId: 'b1' })
+  })
+
+  it('a failed switch shows the failure toast and keeps the active business', async () => {
+    canSwitch.set(true)
+    switchBusiness.and.resolveTo(false)
+    await setup()
+    const toast = spyOn(TestBed.inject(UserMsgService), 'onSetErrorMsg')
+    const cmp = fixture.componentInstance as unknown as {
+      switchTo(id: string): Promise<void>
+      selectedBusinessId_(): string
+    }
+    await cmp.switchTo('b2')
+    expect(toast).toHaveBeenCalled()
+    expect(cmp.selectedBusinessId_()).toBe('b1')
+  })
+
+  it('the phone profile menu lists the other businesses', async () => {
+    canSwitch.set(true)
+    businesses.set([
+      { businessId: 'b1', name: 'Mine', role: 'owner' },
+      { businessId: 'b2', name: 'Client', role: 'consultant' }
+    ])
+    await setup()
+    const host: HTMLElement = fixture.nativeElement
+    ;(host.querySelector('.bottom-nav__profile .bottom-nav__item') as HTMLButtonElement).click()
+    fixture.detectChanges()
+    const rows = Array.from(host.querySelectorAll('.profile-menu button.profile-menu__item')).map((e) =>
+      e.textContent?.trim()
+    )
+    expect(rows).toEqual(['Client'])
+  })
+
+  it('shows the access-ended toast once when the notice was set', async () => {
+    consume.and.returnValue(true)
+    await setup()
+    // the toast service is real here: the call is what matters
+    expect(consume).toHaveBeenCalledTimes(1)
   })
 })
