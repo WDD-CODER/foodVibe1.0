@@ -18,7 +18,7 @@ const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
 const OWNER = { userId: 'own1', name: 'owner1', businessId: 'b1', businessRole: 'owner' }
 const OWNER_Y = { userId: 'own2', name: 'owner2', businessId: 'b2', businessRole: 'owner' }
 const STAFF = { userId: 'st1', name: 'staff1', businessId: 'b1', businessRole: 'staff' }
-const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 }
+const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5 }
 const VALID = { profitTargetPct: 30, safetyMarginPct: 12.5, overrunThresholdPct: 15 }
 const URL = '/api/v1/business'
 const put = (body, who = OWNER) => request(app).put(`${URL}/settings`).set(as(who)).send(body)
@@ -49,12 +49,30 @@ describe('GET /api/v1/business settings', () => {
 })
 
 describe('PUT /api/v1/business/settings', () => {
+  it('keeps a stored priceRiseAlertPct when the body has none, and replaces it when the body has one (plan 616)', async () => {
+    await testDb().collection('businesses').updateOne({ _id: 'b1' }, { $set: { settings: { ...VALID, priceRiseAlertPct: 8 } } })
+    const keep = await put({ ...VALID, profitTargetPct: 31 })
+    expect(keep.status).toBe(200)
+    expect((await stored('b1')).settings.priceRiseAlertPct).toBe(8)
+    const replace = await put({ ...VALID, priceRiseAlertPct: 12 })
+    expect(replace.status).toBe(200)
+    expect((await stored('b1')).settings.priceRiseAlertPct).toBe(12)
+  })
+
+  it('stores no priceRiseAlertPct for a three-number body when none was stored (plan 616)', async () => {
+    const res = await put(VALID)
+    expect(res.status).toBe(200)
+    expect((await stored('b1')).settings).toEqual(VALID)
+    const get = await request(app).get(URL).set(as(OWNER))
+    expect(get.body.settings.priceRiseAlertPct).toBe(5)
+  })
+
   it('owner saves valid numbers and the next GET returns them', async () => {
     const res = await put(VALID)
     expect(res.status).toBe(200)
     expect(res.body).toEqual({ settings: VALID })
     const get = await request(app).get(URL).set(as(OWNER))
-    expect(get.body.settings).toEqual(VALID)
+    expect(get.body.settings).toEqual({ ...VALID, priceRiseAlertPct: 5 })
   })
 
   it.each([

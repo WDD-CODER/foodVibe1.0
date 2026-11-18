@@ -7,6 +7,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { checkStoredDoc } = require('../middleware/validate')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
@@ -194,7 +195,7 @@ async function createTestRequest(businessId, profile, input, actor) {
 }
 
 // POST /api/v1/requests/:id/approve  { wanted?, note? }  - one call: claim, create the event or booking, update the client, log
-router.post('/:id/approve', verifyToken, async (req, res) => {
+router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const { note } = req.body ?? {}
     const overrides = wantedSchema.safeParse(req.body?.wanted ?? {})
@@ -285,7 +286,7 @@ router.post('/:id/approve', verifyToken, async (req, res) => {
 })
 
 // POST /api/v1/requests/:id/decline  { reason, text? }
-router.post('/:id/decline', verifyToken, async (req, res) => {
+router.post('/:id/decline', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const { reason, text } = req.body ?? {}
     if (!DECLINE_REASONS.includes(reason)) return res.status(400).json({ error: 'BAD_REASON' })
@@ -316,7 +317,7 @@ router.post('/:id/decline', verifyToken, async (req, res) => {
 })
 
 // POST /api/v1/requests  { kind, clientId? | guestName + guestPhone, wanted, answers? }  (a phone request, typed by a member)
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const parsed = manualRequestInputSchema.safeParse(req.body ?? {})
     if (!parsed.success) {
@@ -352,7 +353,7 @@ router.post('/', verifyToken, async (req, res) => {
 })
 
 // PUT /api/v1/requests/:id/status  { status, note? }
-router.put('/:id/status', verifyToken, async (req, res) => {
+router.put('/:id/status', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const { status, note } = req.body ?? {}
     if (!REQUEST_STATUSES.includes(status) || (note !== undefined && (typeof note !== 'string' || note.length > 500))) {
@@ -377,7 +378,7 @@ router.put('/:id/status', verifyToken, async (req, res) => {
 })
 
 // PUT /api/v1/requests/:id/wanted  { wanted, answers? }
-router.put('/:id/wanted', verifyToken, async (req, res) => {
+router.put('/:id/wanted', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
     const wanted = wantedSchema.safeParse(req.body?.wanted)
     const answers = req.body?.answers === undefined ? { success: true, data: undefined } : requestAnswersSchema.safeParse(req.body.answers)

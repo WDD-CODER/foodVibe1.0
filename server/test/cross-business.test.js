@@ -52,6 +52,10 @@ const BODY = {
   // requests / bookings are written only by their routers: the generic describe skips them, the router one below covers them.
   requests: () => ({}),
   bookings: () => ({}),
+  // invoices / diagnoses / stockCounts: written only by their routers (plan 615).
+  invoices: () => ({}),
+  diagnoses: () => ({}),
+  stockCounts: () => ({}),
   VERSION_HISTORY: () => ({ entityType: 'recipes', entityId: 'entity-X', note: 'x' }),
   activity_log: () => ({ action: 'x', at: 1 }),
   DICTIONARY_OVERRIDES: () => ({ items: { a: 'b' } }),

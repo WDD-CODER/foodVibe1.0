@@ -8,8 +8,7 @@ import type {
   BusinessSettings,
   EventStage,
   LogisticsHiddenInput,
-  StaffVisibleStagesInput,
-  ShareAiExamplesInput
+  StaffVisibleStagesInput
 } from '@schemas/entities'
 import type { BusinessType } from '@schemas/entities/front-desk-profile.schema'
 import type { FrontDeskIntake } from '@schemas/front-desk-intake.schema'
@@ -83,11 +82,6 @@ export class BusinessService {
     return this._put('staff-visible-stages', { stages })
   }
 
-  /** Owner only (plan 600): lets the platform admin copy this business's saved AI recipe examples into the shared pool; off deletes the copies. Throws on any refusal. */
-  updateShareAiExamples(share: boolean): Promise<void> {
-    return this._put('share-ai-examples', { share })
-  }
-
   /** Owner only (plan 579): the whole list of shared logistics questions this business hides; puts the stored list into `business_`. Throws on any refusal. */
   updateHiddenLogisticsKeys(keys: string[]): Promise<void> {
     return this._put('logistics-hidden', { keys })
@@ -107,14 +101,8 @@ export class BusinessService {
 
   /** PUTs one owner-only part of the business and puts the stored reply into `business_`. */
   private async _put(
-    path: 'name' | 'settings' | 'baseline' | 'staff-visible-stages' | 'logistics-hidden' | 'share-ai-examples',
-    body:
-      | BusinessNameInput
-      | BusinessSettings
-      | BaselineInput
-      | StaffVisibleStagesInput
-      | LogisticsHiddenInput
-      | ShareAiExamplesInput
+    path: 'name' | 'settings' | 'baseline' | 'staff-visible-stages' | 'logistics-hidden',
+    body: BusinessNameInput | BusinessSettings | BaselineInput | StaffVisibleStagesInput | LogisticsHiddenInput
   ): Promise<void> {
     const res = await firstValueFrom(
       this.http.put<Partial<Business>>(`${environment.apiUrl}${API.business(path)}`, body)

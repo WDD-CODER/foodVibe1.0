@@ -7,6 +7,8 @@ const User = require('../models/user.model')
 const { businessSchema, EVENT_STAGES } = require('../generated/schemas/entities')
 const { getMasterVersion } = require('./master-version')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
+const { mayLearnFrom } = require('../utils/ai-learning')
+const { deleteStoredFile } = require('./file-store')
 
 const col = () => mongoose.connection.db.collection('businesses')
 
@@ -78,16 +80,52 @@ async function setStaffVisibleStages(id, stages) {
   return { matchedCount: result.matchedCount, staffVisibleStages }
 }
 
-/** Plan 600: sets the owner's consent to share AI examples; turning it off also deletes this business's shared copies. */
-async function setShareAiExamples(id, share) {
-  const result = await col().updateOne({ _id: String(id) }, { $set: { shareAiExamples: share } })
+/**
+ * Plan 618 (C-LEARN): the platform admin marks a business private (or shared again). Turning private on deletes the
+ * business's promoted copies in the shared examples pool; turning it off restores nothing.
+ */
+async function setAiPrivate(id, value) {
+  const aiPrivate = value === true
+  const result = await col().updateOne({ _id: String(id) }, { $set: { aiPrivate } })
   let removed = 0
-  if (result.matchedCount && !share) {
+  if (result.matchedCount && aiPrivate) {
     const del = await mongoose.connection.db.collection('GEMINI_SHOTS')
       .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': String(id) })
     removed = del.deletedCount
+    // plan 627 calls forgetBusiness(db, id) here when value is true
   }
-  return { matchedCount: result.matchedCount, shareAiExamples: share, removed }
+  return { matchedCount: result.matchedCount, aiPrivate, removed }
+}
+
+/**
+ * Plan 619 (C-LEARN): removes the server-only records of a business that is being deleted. `business` is the
+ * `businesses` document read before the delete. Always: its stored files, price history, own name memory and access
+ * grants. Not private: the shared supplier brain and promoted examples stay, drafts are reduced to numbers.
+ * Private: promoted copies and drafts go too. Returns counts; never logs content.
+ */
+async function deleteBusinessServerData(db, business, log) {
+  const businessId = String(business._id)
+  const files = await db.collection('storedFiles').find({ businessId }).toArray()
+  let filesLeft = 0
+  for (const file of files) {
+    if (!(await deleteStoredFile(file))) filesLeft += 1
+  }
+  const counts = { files: files.length, filesLeft }
+  for (const name of ['storedFiles', 'priceHistory', 'invoiceAliases', 'businessAccess']) {
+    counts[name] = (await db.collection(name).deleteMany({ businessId })).deletedCount
+  }
+  if (filesLeft > 0) log?.warn?.({ event: 'business.delete.files_left', businessId, count: filesLeft })
+  if (mayLearnFrom(business)) {
+    const stripped = await db.collection('aiDrafts')
+      .updateMany({ businessId }, { $unset: { input: '', aiDraft: '', saved: '', userId: '', subject: '' } })
+    counts.draftsStripped = stripped.modifiedCount
+  } else {
+    counts.promoted = (await db.collection('GEMINI_SHOTS')
+      .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': businessId })).deletedCount
+    counts.drafts = (await db.collection('aiDrafts').deleteMany({ businessId })).deletedCount
+    // plan 627 calls forgetBusiness(db, businessId) here (private business only)
+  }
+  return counts
 }
 
 /** Plan 579: replaces the business's hidden logistics keys; a key already listed keeps its `at`, a new one gets now. */
@@ -100,4 +138,4 @@ async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
   return { matchedCount: result.matchedCount, hiddenLogisticsKeys }
 }
 
-module.exports = { setShareAiExamples, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+module.exports = { deleteBusinessServerData, setAiPrivate,setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

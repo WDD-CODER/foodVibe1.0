@@ -199,6 +199,11 @@ e2e/ui/620-1.spec.ts
 e2e/ui/620-2.spec.ts
 e2e/ui/620-3.spec.ts
 e2e/ui/620-4.spec.ts
+shared/schemas/modules-pure.ts
+shared/schemas/modules.ts
+docs/brain/component-families.md
+src/app/pages/trash/trash.page.ts
+package.json
 ```
 
 ## Read Scope

@@ -326,8 +326,84 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: converging — plan 458 (rule sweep) decides
 - Use: `server/middleware/auth.js` (token check), `server/utils/business-scope.js` (the only tenant-scoping path,
-  ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`.
+  ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`,
+  `server/middleware/require-module.js` (`requireModule`, `requireHomeModule`, `requireModuleForType`, `businessModules`, `clearModuleCache`: the module gate on a route).
 - When: a server route checks who is calling, scopes data to a business, checks a write permission or limits a rate.
 - Known copies: `jwt.verify` also in `server/routes/auth.js` and `server/routes/log.js`; `isAdmin` re-declared in
   `server/routes/generic.js`; rate limiters built per file in `server/routes/ai.js`, `server/routes/auth.js`,
   `server/routes/business.js`, `server/routes/log.js`, `server/routes/product-import.js`.
+
+### modules-registry — which program modules a business has
+
+- Status: stable — plan 615
+- Use: `shared/schemas/modules.ts` — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
+  `platformUpdateSchema`.
+- When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
+  same rule.
+- Known copies: none.
+
+### entity-schemas — one stored shape per file
+
+- Status: stable — plan 615
+- Use: the nine new entity schema files under `shared/schemas/entities/` (`invoice.schema.ts`, `price-history.schema.ts`,
+  `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
+  `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+- When: a new stored collection needs a shape.
+- Known copies: none.
+
+### ai-cap — monthly AI token cap per business
+
+- Status: stable — plan 617
+- Use: `server/services/ai-cap.js` — `capState`, `monthTokensByBusiness`, `clearCapCache`; checked before the model call
+  in `server/services/gemini-client.js`.
+- When: a server path calls the model and must refuse once the business has used its monthly cap.
+- Known copies: none.
+
+### ai-learning — whether the platform may learn from a business
+
+- Status: stable — plan 618
+- Use: `server/utils/ai-learning.js` — `mayLearnFrom(business)` (`aiPrivate !== true`); the private mark is written
+  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` deletes the promoted
+  `GEMINI_SHOTS` copies).
+- When: code copies something into a `'__master__'` pool or lists a business's AI material for the platform admin.
+- Known copies: none.
+
+### ai-draft — the AI draft trail (suggested vs saved)
+
+- Status: stable — plan 618
+- Use: `server/services/ai-drafts.js` — `saveAiDraft(req, { feature, subject, input, aiDraft, model })` (never throws,
+  `null` on failure) and `confirmAiDraft(req, draftId, saved, ratio)`; collection `aiDrafts`, newest 500 per business
+  and feature.
+- When: an AI flow must store what the model suggested next to what the person saved, with a closeness score.
+- Known copies: none.
+
+### file-store — private files (audio, PDF, pictures)
+
+- Status: stable — plan 619
+- Use: `server/services/file-store.js` — `isFileStoreConfigured`, `putPrivateFile`, `keepStoredFile`, `signedFileUrl`,
+  `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`.
+- When: a server path stores, reads, links or deletes a private uploaded file.
+- Known copies: none.
+
+### cloudinary-requests — signed requests to the file provider
+
+- Status: stable — plan 619
+- Use: `server/services/cloudinary-requests.js` — `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest`; used
+  only through `file-store`.
+- When: building a signed upload, expiring download link or delete request.
+- Known copies: none.
+
+### business-delete — `deleteBusinessServerData` removes a business's server data
+
+- Status: stable — plan 619
+- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files).
+- When: a business is deleted and everything it owns on the server must go.
+- Known copies: none.
+
+### model-media — `needsMedia` in `callGemini` for audio and PDF input
+
+- Status: stable — plan 619
+- Use: needsMedia in callGemini (server/services/gemini-client.js) picks a media-capable model in the chain.
+- When: a model call carries audio or a PDF.
+- Known copies: none.

@@ -8,6 +8,9 @@ const { jerusalemDate } = require('../middleware/usage')
 const { activeDaysByBusiness } = require('../utils/usage-stats')
 const { frontDeskSetup } = require('../services/front-desk-setup')
 const { actorOf } = require('../utils/actor')
+const { platformUpdateSchema, modulesOf, MODULE_KEYS } = require('../generated/schemas/modules')
+const { clearModuleCache } = require('../middleware/require-module')
+const { monthTokensByBusiness, clearCapCache } = require('../services/ai-cap')
 const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-admin.schema')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
@@ -16,6 +19,8 @@ const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 
 const { containsInjectionPattern, scanRecipeDraftForInjection, draftCloseness } = require('../services/ai-recipe-helpers')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
+const { mayLearnFrom } = require('../utils/ai-learning')
+const { setAiPrivate, deleteBusinessServerData } = require('../services/business')
 
 const router = Router()
 
@@ -63,6 +68,12 @@ router.delete('/users/:userId', verifyToken, requirePlatformAdmin, async (req, r
     let usersDeleted = 1
     if (wholeBusiness) {
       const { businessId } = target
+      try {
+        const business = await col('businesses').findOne({ _id: businessId })
+        if (business) await deleteBusinessServerData(mongoose.connection.db, business, req.log)
+      } catch (err) {
+        req.log.error({ err, event: 'admin.users_delete.extras_failed', businessId })
+      }
       await Promise.all(ALL_USER_ENTITY_TYPES.map(t => col(t).deleteMany({ businessId })))
       usersDeleted = (await User.deleteMany({ businessId })).deletedCount
       await col('businesses').deleteOne({ _id: businessId })
@@ -87,8 +98,8 @@ const DAY_MS = 86400000
 router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const now = Date.now()
-    const [businesses, members, usage, activeDays, events, profiles] = await Promise.all([
-      col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1 } }).toArray(),
+    const [businesses, members, usage, activeDays, events, profiles, tokens] = await Promise.all([
+      col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1, modules: 1, aiPrivate: 1, aiMonthlyTokenCap: 1 } }).toArray(),
       col('users').aggregate([
         { $match: { businessId: { $type: 'string' } } },
         { $group: {
@@ -112,6 +123,7 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
         } },
       ]).toArray(),
       col('frontDeskProfiles').find({ ...LIVE }).toArray(),
+      monthTokensByBusiness(mongoose.connection.db, now),
     ])
     const profileBy = new Map(profiles.map(p => [p.businessId, p]))
     const frontDeskBy = new Map()
@@ -137,6 +149,10 @@ router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) =>
         staffCount: m?.staffCount ?? 0,
         createdAt: b.createdAt ?? null,
         internal: b.internal === true,
+        modules: modulesOf(b),
+        aiPrivate: b.aiPrivate === true,
+        aiMonthlyTokenCap: b.aiMonthlyTokenCap ?? null,
+        aiTokensThisMonth: tokens.get(b._id) ?? 0,
         lastActivityAt: usageBy.get(b._id) ?? null,
         activeDays7: activeDays.get(b._id) ?? 0,
         events: { total: e?.total ?? 0, active: e?.active ?? 0, closed, finished: e?.finished ?? 0 },
@@ -237,6 +253,56 @@ router.put('/businesses/:id/front-desk', verifyToken, requirePlatformAdmin, asyn
     })
   } catch (err) {
     req.log.error({ err, event: 'admin.front_desk.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 616: the platform admin sets one business's modules, AI token cap and private flag, and the reason is kept.
+router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const parsed = platformUpdateSchema.safeParse(req.body ?? {})
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message }))
+    })
+  }
+  const { modules, aiMonthlyTokenCap, aiPrivate, reason } = parsed.data
+  try {
+    const actor = actorOf(req)
+    const $set = {}
+    const $unset = {}
+    const changed = []
+    if (modules !== undefined) { $set.modules = MODULE_KEYS.filter(k => modules.includes(k)); changed.push('modules') }
+    if (aiMonthlyTokenCap !== undefined) {
+      if (aiMonthlyTokenCap === null) $unset.aiMonthlyTokenCap = ''
+      else $set.aiMonthlyTokenCap = aiMonthlyTokenCap
+      changed.push('aiMonthlyTokenCap')
+    }
+    // Plan 618 (C-LEARN): aiPrivate is written only through setAiPrivate, which also removes the business's shared copies.
+    let removed
+    if (aiPrivate !== undefined) {
+      const priv = await setAiPrivate(req.params.id, aiPrivate)
+      if (!priv.matchedCount) return res.status(404).json({ error: 'Business not found' })
+      removed = priv.removed
+      changed.push('aiPrivate')
+    }
+    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed }
+    const update = { $push: { platformHistory: { $each: [row], $slice: -50 } } }
+    if (Object.keys($set).length) update.$set = $set
+    if (Object.keys($unset).length) update.$unset = $unset
+    const after = await col('businesses').findOneAndUpdate({ _id: req.params.id }, update, { returnDocument: 'after' })
+    if (!after) return res.status(404).json({ error: 'Business not found' })
+    clearModuleCache(req.params.id)
+    if (aiMonthlyTokenCap !== undefined) clearCapCache(req.params.id)
+    req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed, ...(removed !== undefined && { removed }) })
+    res.json({
+      ok: true,
+      modules: modulesOf(after),
+      aiMonthlyTokenCap: after.aiMonthlyTokenCap ?? null,
+      aiPrivate: after.aiPrivate === true
+    })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.platform.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
@@ -365,7 +431,9 @@ function aiShotRow(doc, businessName) {
 
 router.get('/ai-shots', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
-    const sharing = await col('businesses').find({ shareAiExamples: true }, { projection: { name: 1 } }).toArray()
+    // Plan 618 (C-LEARN): every business that is not private offers its approved examples.
+    const businesses = await col('businesses').find({ _id: { $ne: MASTER_BUSINESS_ID } }, { projection: { name: 1, aiPrivate: 1 } }).toArray()
+    const sharing = businesses.filter(mayLearnFrom)
     const nameById = new Map(sharing.map(b => [String(b._id), b.name]))
     const shared = await shotsCol().find({ businessId: MASTER_BUSINESS_ID }).sort({ createdAt: -1 }).limit(AI_SHOT_SHARED_CAP).toArray()
     const promoted = new Set(shared.map(d => d.promotedFrom?.shotId).filter(Boolean))
@@ -389,8 +457,8 @@ router.post('/ai-shots/:id/promote', verifyToken, requirePlatformAdmin, async (r
     if (!OBJECT_ID_RE.test(id)) return res.status(404).json({ error: 'Shot not found' })
     const shot = await shotsCol().findOne({ _id: new mongoose.Types.ObjectId(id), status: 'approved', businessId: { $ne: MASTER_BUSINESS_ID } })
     if (!shot) return res.status(404).json({ error: 'Shot not found' })
-    const business = await col('businesses').findOne({ _id: shot.businessId }, { projection: { shareAiExamples: 1 } })
-    if (business?.shareAiExamples !== true) return res.status(409).json({ error: 'Business does not share examples', code: 'not_shared' })
+    const business = await col('businesses').findOne({ _id: shot.businessId }, { projection: { aiPrivate: 1 } })
+    if (!business || !mayLearnFrom(business)) return res.status(409).json({ error: 'Business is private', code: 'not_shared' })
     if (await shotsCol().findOne({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.shotId': id })) {
       return res.status(409).json({ error: 'Already shared', code: 'already_shared' })
     }

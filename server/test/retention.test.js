@@ -4,6 +4,7 @@
 const request = require('supertest');
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app');
 const { purgeRetained, resetRetentionThrottle, RETENTION } = require('../jobs/retention');
+const { setFileStoreForTests, createMemoryFileStore } = require('../services/file-store');
 
 let app;
 beforeAll(async () => { app = await buildTestApp(); }, 60000);
@@ -25,7 +26,7 @@ beforeEach(async () => {
 
 describe('purgeRetained', () => {
   it('constants', () => {
-    expect(RETENTION).toEqual({ requestsDays: 730, bookingsDays: 730, messagesDays: 365 });
+    expect(RETENTION).toEqual({ requestsDays: 730, bookingsDays: 730, messagesDays: 365, voiceFilesDays: 730 });
   });
 
   it('deletes old final requests and old bookings; keeps 729-day ones, open requests and decisionLog', async () => {
@@ -43,7 +44,7 @@ describe('purgeRetained', () => {
     await db.collection('bookings').insertMany([booking('b_old', 'b1', 731), booking('b_729', 'b1', 729), booking('b_other', 'b2', 900)]);
     await db.collection('decisionLog').insertOne({ _id: 'd1', businessId: 'b1', at: NOW - 3000 * DAY });
     const counts = await purgeRetained(db, 'b1', NOW);
-    expect(counts).toEqual({ requests: 5, bookings: 1, messages: 0 });
+    expect(counts).toEqual({ requests: 5, bookings: 1, messages: 0, files: 0 });
     expect(await ids('requests')).toEqual(['r_729', 'r_old_new', 'r_other_biz']);
     expect(await ids('bookings')).toEqual(['b_729', 'b_other']);
     expect(await ids('decisionLog')).toEqual(['d1']);
@@ -83,5 +84,40 @@ describe('generic GET hook', () => {
     const res = await request(app).get('/api/v1/data/bookings').set(as(OWNER));
     expect(res.status).toBe(200);
     expect(await ids('bookings')).toEqual(['new', 'other']);
+  });
+});
+
+describe('stored files (plan 619)', () => {
+  let store;
+  const file = (id, businessId, kind, deleteAfter) => ({
+    _id: id, businessId, kind, mimeType: kind === 'voice' ? 'audio/webm' : 'image/png', bytes: 3, provider: 'cloudinary',
+    providerId: 'fv/' + id, resourceType: kind === 'voice' ? 'video' : 'image', createdBy: 'u', createdAt: NOW - 800 * DAY,
+    ...(deleteAfter === undefined ? {} : { deleteAfter }),
+  });
+  beforeEach(async () => {
+    store = createMemoryFileStore();
+    setFileStoreForTests(store);
+    await testDb().collection('storedFiles').deleteMany({});
+  });
+  afterEach(() => setFileStoreForTests(null));
+
+  it('deletes a voice file past deleteAfter; keeps one a day early, another business, and an invoice with none', async () => {
+    await testDb().collection('storedFiles').insertMany([
+      file('v_old', 'b1', 'voice', NOW - 1),
+      file('v_early', 'b1', 'voice', NOW + DAY),
+      file('v_other', 'b2', 'voice', NOW - DAY),
+      file('i_abandoned', 'b1', 'invoice', NOW - DAY),
+      file('i_kept', 'b1', 'invoice'),
+    ]);
+    const counts = await purgeRetained(testDb(), 'b1', NOW);
+    expect(counts.files).toBe(2);
+    expect(await ids('storedFiles')).toEqual(['i_kept', 'v_early', 'v_other']);
+  });
+
+  it('a file whose provider delete fails keeps its document', async () => {
+    await testDb().collection('storedFiles').insertOne(file('v_fail', 'b1', 'voice', NOW - 1));
+    store.failNextDestroy = true;
+    expect((await purgeRetained(testDb(), 'b1', NOW)).files).toBe(0);
+    expect(await ids('storedFiles')).toEqual(['v_fail']);
   });
 });

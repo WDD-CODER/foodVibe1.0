@@ -21,6 +21,11 @@ const AI_FEATURES = Object.freeze([
   'product_generate',
   'product_patch',
   'recipe_from_image',
+  // Modules program (plan 615, C-REGISTRY).
+  'logistics_extract',
+  'invoice_read',
+  'menu_prices_parse',
+  'stock_extract',
 ]);
 
 function isAiFeature(key) {

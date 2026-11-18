@@ -165,6 +165,8 @@ export const menuEventSchema = z.strictObject({
     })).max(LOGISTICS_ANSWERS_MAX),
     /** Plan 579: questions hidden on this event only (answers stay). */
     hiddenKeys: z.array(z.string().min(1).max(LOGISTICS_LABEL_MAX)).max(LOGISTICS_ANSWERS_MAX).optional(),
+    /** Plan 615 (C-LOAD): loading-sheet ticks. Server-owned (written by plan 624). */
+    loaded: z.array(z.strictObject({ key: z.string().min(1).max(200), at: z.number(), by: z.string(), byName: z.string() })).max(600).optional(),
     meetingAt: z.string().optional(),
     meetingWith: z.string().max(80).optional(),
     phaseDone: z.strictObject({

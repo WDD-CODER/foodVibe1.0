@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
 const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
+const { requireModule } = require('../middleware/require-module')
 const { createRateLimiter, userOrIpKey } = require('../middleware/rate-limit');
 const { badRequest, requireFields } = require('../middleware/validate');
 const dns = require('node:dns').promises;
@@ -105,6 +106,16 @@ const { trackAiOutcome } = require('../services/ai-usage');
 const router = Router();
 router.use(trackAiOutcome);
 
+// Plan 615 (C-REGISTRY): empty sub-routers filled by plans 621, 622, 626, 633, 637. They sit after trackAiOutcome so the
+// outcome tracker covers them. This file requires each one before it sets its own module.exports, so a sub-router must
+// read respondFromGeminiFailure, usageOf, requestedModel and aiLimiter with require('../ai') inside a handler (or a lazy
+// getter), never at the top of its module.
+router.use('/voice', require('./ai/voice'));
+router.use('/logistics', require('./ai/logistics'));
+router.use('/invoices', require('./ai/invoices'));
+router.use('/diag', require('./ai/diag'));
+router.use('/stock', require('./ai/stock'));
+
 /** Plan 580: usage context for callGemini; `ids` lets the outcome tracker mark refused answers. */
 function usageOf(req) {
   return { businessId: req.user.businessId, userId: req.user.userId, ids: req.aiUsageIds };
@@ -184,8 +195,8 @@ const URL_SHOT_MATCH_CHARS = 300;
 // Plan 600 lifecycle: the AI window saves a 'pending' shot (with a client shotKey) when the cook
 // continues into the recipe builder; POST /shots/confirm turns it 'approved' once the recipe is
 // saved (aiDraft = the original, draft = as saved, keptRatio, recipeId). Only 'approved' shots are
-// read into prompts. Shared pool: when the owner opted in (business.shareAiExamples) the platform
-// admin may copy an approved shot into a '__master__' shot (admin.js); every business's prompt
+// read into prompts. Shared pool (plan 618): the platform admin may copy an approved shot of any
+// business that is not private (business.aiPrivate, mayLearnFrom) into a '__master__' shot (admin.js); every business's prompt
 // takes its own examples first and fills the rest from that pool. Copies carry no business name.
 // ---------------------------------------------------------------------------
 
@@ -334,6 +345,8 @@ function respondFromGeminiFailure(res, result) {
       });
     case 'all_exhausted':
       return res.status(429).json({ error: 'daily_limit_reached', code: 'daily_limit_reached', resetAt: result.resetAt });
+    case 'business_cap':
+      return res.status(429).json({ error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' });
     case 'model_removed':
       return badRequest(res, 'model_removed', { model: result.model });
     case 'gemini_error':
@@ -367,7 +380,7 @@ function respondFromRecipeResult(res, result) {
 // Requires a valid JWT — prevents unauthenticated use of the API quota.
 // ---------------------------------------------------------------------------
 
-router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
+router.post('/generate', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -449,7 +462,7 @@ If type is "dish", return:
   }
 }`;
 
-router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
+router.post('/parse-text', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -818,7 +831,7 @@ Format:
   }
 }`;
 
-router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
+router.post('/patch-recipe', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1041,7 +1054,7 @@ function validateMenuDraft(menu) {
   return errors;
 }
 
-router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
+router.post('/generate-menu', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server', code: 'not_configured' });
@@ -1142,7 +1155,7 @@ Format:
   }
 }`;
 
-router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
+router.post('/patch-menu', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server', code: 'not_configured' });
@@ -1269,7 +1282,7 @@ function appendKnownMetadata(systemPrompt, { knownCategories, knownAllergens } =
   return `${systemPrompt}\n${lines.join('\n')}`;
 }
 
-router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
+router.post('/generate-product', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1359,7 +1372,7 @@ Format:
   }
 }`;
 
-router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
+router.post('/patch-product', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1416,7 +1429,7 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => {
+router.post('/generate-from-image', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1465,7 +1478,7 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
 const PRODUCT_FROM_IMAGE_INSTRUCTION = 'Identify the product from the photo (packaging, label, or the item itself) and return its product record.';
 const PRODUCT_IMAGE_HINT_MAX_LEN = 300;
 
-router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, res) => {
+router.post('/generate-product-from-image', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1565,7 +1578,7 @@ function extractTextFromHtml(html) {
   return stripped.slice(0, 8000);
 }
 
-router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
+router.post('/generate-from-url', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1683,7 +1696,7 @@ async function fetchImportText(req, res, url) {
   return pageText.slice(0, MAX_IMPORT_TEXT);
 }
 
-router.post('/knowledge-import', verifyToken, (req, res, next) => {
+router.post('/knowledge-import', verifyToken, requireModule('frontdesk'), (req, res, next) => {
   if (assertCan(req, res, 'create', { type: 'knowledgeItems' })) next();
 }, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -1765,7 +1778,7 @@ router.post('/knowledge-import', verifyToken, (req, res, next) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
+router.post('/shots', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const { prompt, draft, status, source, shotKey } = req.body;
 
   if (!requireFields(res, req.body, { prompt: 'text', draft: 'object' })) return;
@@ -1803,7 +1816,7 @@ router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
 // shot becomes 'approved' with the draft as saved. Calls no AI (no aiLimiter).
 // ---------------------------------------------------------------------------
 
-router.post('/shots/confirm', verifyToken, async (req, res) => {
+router.post('/shots/confirm', verifyToken, requireModule('ai_create'), async (req, res) => {
   const { shotKey, draft, recipeId } = req.body;
   if (!requireFields(res, req.body, { shotKey: 'text', draft: 'object', recipeId: 'text' })) return;
   if (validateRecipeDraft(draft).length > 0) return badRequest(res, 'invalid draft');
@@ -1835,7 +1848,7 @@ router.post('/shots/confirm', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
+router.post('/save-menu-shot', verifyToken, requireModule('ai_create'), aiLimiter, async (req, res) => {
   const { prompt, menu } = req.body;
   if (!requireFields(res, req.body, { prompt: 'text', menu: 'object' })) return;
   const validationErrors = validateMenuDraft(menu);
@@ -1874,3 +1887,8 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
 module.exports = router;
 module.exports.appendKnownMetadata = appendKnownMetadata;
 module.exports.PRICE_LIST_SYSTEM_PROMPT = PRICE_LIST_SYSTEM_PROMPT;
+// Plan 615: shared with the sub-routers under ./ai/ (read lazily, see the comment above the mounts).
+module.exports.respondFromGeminiFailure = respondFromGeminiFailure;
+module.exports.usageOf = usageOf;
+module.exports.requestedModel = requestedModel;
+module.exports.aiLimiter = aiLimiter;

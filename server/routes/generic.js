@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { verifyToken, optionalToken, requirePlatformAdmin, isPlatformAdmin } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
+const { requireModuleForType } = require('../middleware/require-module');
 const { bumpMasterVersion } = require('../services/master-version');
 const { newId: makeId } = require('../utils/id');
 const { hasSchema: hasV2Schema } = require('../utils/schema-check');
@@ -53,6 +54,8 @@ router.use('/:type', (req, res, next) => {
   }
   next();
 });
+
+router.use('/:type', requireModuleForType);
 
 // Plan 549: requests and bookings are read here, written only by their own routers (server/routes/requests.js, bookings.js).
 const ROUTER_WRITES = new Set(ROUTER_WRITE_TYPES);

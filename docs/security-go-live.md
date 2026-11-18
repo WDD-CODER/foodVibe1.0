@@ -61,8 +61,24 @@ Nothing to start. `LoggingService` sends every `warn` / `error` to **`POST /api/
 | `decisionLog` | kept (no personal fields) | — |
 | clients | until erased | `erase-client.js` |
 | Trash | purged after 30 days | `server/jobs/purge-deleted.js` |
+| Voice recordings (`storedFiles`, kind voice) | 24 months from the recording | same sweep (also run when a file link is asked for) |
+| File of an invoice read that was never saved | 30 days | same sweep |
+| File of a saved invoice | as long as the invoice | `keepStoredFile` clears its `deleteAfter` |
 
 The sweep runs on a read of `requests` or `bookings` for the caller's own business, at most once per business per 24 hours. An open request is never cleared.
+
+### Private files: invoices and voice notes (plan 619)
+- `storedFiles` holds ids and sizes only; the file itself lives in the file store (Cloudinary, uploaded as an authenticated, non-public asset), never in MongoDB.
+- Three server variables: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`. The browser never gets them. Without all three every feature works and the file is simply not kept.
+- Gate G3, in order: (1) create the three values in the provider's console; (2) set them on Render by hand; (3) allow "PDF and ZIP files delivery" under the provider's Security settings; (4) check `/platform` shows the store on (`GET /api/v1/admin/learning/status` → `{ fileStore: true }`).
+- A link to a file lives 300 seconds (`GET /api/v1/files/:id`).
+- Who may open what: any member of the business a voice note; the owner an invoice file (it shows prices).
+- What is logged: the kind and the size only — never the content, a file name or a provider id.
+
+#### Deleting a business and an erasure request
+- A delete always removes the business's files, price history, own name memory and access grants, together with the user-data collections.
+- For a business that is not private, its part in the shared supplier memory, its promoted recipe examples and its draft rows (reduced to numbers, no content) stay.
+- A full erasure is two steps: 1. turn private mode on for the business on `/platform`; 2. delete the business. Nothing learned from it remains.
 
 ### Erase a customer by phone
 Dry run first (counts only, nothing written):

@@ -58,6 +58,17 @@ const COLLECTIONS = [
   { name: 'DICTIONARY_OVERRIDES',     userData: true,  cloneable: false, backup: true,  searchable: false },
   // server-only AI ledger (plan 566, C-AIUSAGE)
   { name: 'aiUsage',                  userData: false, cloneable: false, backup: false, searchable: false, softDelete: false },
+  // Plan 615 (C-REGISTRY): the Modules program. The three readable types are read through the generic API; every write goes through their router.
+  { name: 'invoices',                 userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-INVOICE, filled by plan 625
+  { name: 'diagnoses',                userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-DIAG, filled by plan 633
+  { name: 'stockCounts',              userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-STOCK, filled by plan 635
+  // Server-only (no generic API).
+  { name: 'priceHistory',             userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-INVOICE, plan 625
+  { name: 'invoiceAliases',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ALIAS, plan 627
+  { name: 'supplierProfiles',         userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ALIAS, plan 627
+  { name: 'aiDrafts',                 userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-AIDRAFT, plan 618
+  { name: 'storedFiles',              userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-FILES, plan 619
+  { name: 'businessAccess',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ACCESS, plan 631
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

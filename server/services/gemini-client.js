@@ -18,6 +18,7 @@
 const mongoose = require('mongoose');
 const { isAiFeature } = require('../constants/ai-features');
 const { recordAiUsage } = require('./ai-usage');
+const { capState } = require('./ai-cap');
 
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -134,6 +135,28 @@ function modelChain() {
 
 function isVisionModel(model) {
   return VISION_MODEL_PATTERN.test(model);
+}
+
+/**
+ * Plan 619: the media each default model takes as input. Source: the model pages under
+ * https://aistudio.google.com/docs/models/ read on 2026-11-17 (inputs listed: text, image, video, audio, PDF;
+ * gemini-2.5-flash lists no PDF and is deprecated), https://aistudio.google.com/docs/audio and
+ * https://aistudio.google.com/docs/document-processing.
+ */
+const ALL_MEDIA = ['image', 'audio', 'pdf'];
+const MODEL_MEDIA = Object.freeze({
+  'gemini-3.1-flash-lite': ALL_MEDIA,
+  'gemini-3.5-flash-lite': ALL_MEDIA,
+  'gemini-2.5-flash-lite': ALL_MEDIA,
+  'gemini-2.5-flash': ['image', 'audio'],
+  'gemini-3.6-flash': ALL_MEDIA,
+  'gemini-3.8-flash': ALL_MEDIA,
+  'gemini-3-flash-preview': ALL_MEDIA,
+});
+
+/** True when the model takes the medium ('image' | 'audio' | 'pdf'); an unlisted model is judged by the vision pattern. */
+function modelTakes(model, medium) {
+  return MODEL_MEDIA[model]?.includes(medium) ?? (medium === 'image' && isVisionModel(model));
 }
 
 function modelUrl(model) {
@@ -394,18 +417,25 @@ function allExhausted(candidates) {
  * decides whether to send again on it. A requested model no longer in the catalog is refused
  * without a call (plan 412). Never throws. Returns:
  *   { kind: 'ok', model, data }
+ *   { kind: 'business_cap', model, cap, used }  (plan 617: monthly cap reached; no call made)
  *   { kind: 'model_removed', model }
  *   { kind: 'model_exhausted', model, nextModel, resetAt }
  *   { kind: 'all_exhausted', resetAt }          (ISO string or null)
  *   { kind: 'gemini_error', model, status, message }
  *   { kind: 'timeout' | 'network', model }
  */
-async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, model: requested, usage }) {
+async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage }) {
   let meter = true;
   if (!usage || !isAiFeature(usage.feature)) {
     if (process.env.VITEST) throw new Error('callGemini: usage.feature required');
     log.error({ event: 'ai.usage.missing', eventPrefix });
     meter = false;
+  }
+  let medium = needsVision ? 'image' : null;
+  if (needsMedia !== undefined) {
+    if (ALL_MEDIA.includes(needsMedia)) medium = needsMedia;
+    else if (process.env.VITEST) throw new Error('callGemini: unknown needsMedia');
+    else log.error({ event: 'ai.media.unknown', eventPrefix });
   }
   await ensureLoaded();
   if (typeof requested === 'string' && !isCatalogModel(requested)) {
@@ -413,11 +443,28 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     return { kind: 'model_removed', model: requested };
   }
   const apiKey = process.env.GEMINI_API_KEY;
-  const candidates = modelChain().filter(m => !needsVision || isVisionModel(m));
+  const candidates = modelChain().filter(m => !medium || modelTakes(m, medium));
   const now = new Date();
-  if (!firstUsable(candidates, now)) return allExhausted(candidates);
+  if (!firstUsable(candidates, now)) {
+    if (medium && candidates.length === 0) log.warn({ event: 'ai.media.no_model', medium });
+    return allExhausted(candidates);
+  }
 
   const model = candidates.includes(requested) ? requested : candidates[0];
+  // Plan 617: a business over its monthly token cap gets no request (C-AICAP). A ledger problem never blocks AI.
+  const capId = usage?.businessId;
+  if (typeof capId === 'string' && capId && capId !== '__platform__' && capId !== '__master__' && mongoose.connection.readyState === 1) {
+    try {
+      const state = await capState(mongoose.connection.db, capId, Date.now());
+      if (state.over) {
+        if (meter) recordAiUsage({ usage, model, ok: false, errorCode: 'business_cap', latencyMs: 0, log });
+        log.info({ event: 'ai.cap.refused', feature: usage.feature });
+        return { kind: 'business_cap', model, cap: state.cap, used: state.used };
+      }
+    } catch {
+      log.warn({ event: 'ai.cap.check_failed', businessId: capId });
+    }
+  }
   const knownReset = exhaustedResetAt(model, now);
   if (knownReset) {
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };
@@ -534,6 +581,8 @@ module.exports = {
   isCatalogModel,
   isDailyQuota,
   isVisionModel,
+  MODEL_MEDIA,
+  modelTakes,
   modelCatalog,
   modelChain,
   modelUrl,

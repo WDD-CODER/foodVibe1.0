@@ -149,6 +149,36 @@ async function connectDb() {
   await db.collection('decisionLog').createIndex({ businessId: 1, at: 1 }, { name: 'decisionlog_business_at' })
   logger.debug({ event: 'mongo.index.ensured', index: 'requests' })
 
+  // Plan 615 (C-REGISTRY): the Modules program. One block per collection; the Contract is named in each comment.
+  // C-AIDRAFT: newest drafts per business and feature.
+  await db.collection('aiDrafts').createIndex({ businessId: 1, feature: 1, at: 1 }, { name: 'ai_drafts_business_feature_at' })
+  // C-FILES
+  await db.collection('storedFiles').createIndex({ businessId: 1, kind: 1, createdAt: 1 }, { name: 'stored_files_business_kind' })
+  // C-INVOICE
+  await db.collection('priceHistory').createIndex({ businessId: 1, productId: 1, at: 1 }, { name: 'price_history_business_product_at' })
+  await db.collection('priceHistory').createIndex({ businessId: 1, at: 1 }, { name: 'price_history_business_at' })
+  // C-ALIAS: both unique and partial, so an own row and a shared row never collide (a partial filter cannot say "not equal").
+  await db.collection('invoiceAliases').createIndex(
+    { businessId: 1, supplierKey: 1, nameKey: 1 },
+    { unique: true, name: 'invoice_alias_own_unique', partialFilterExpression: { productId: { $exists: true } } }
+  )
+  await db.collection('invoiceAliases').createIndex(
+    { supplierKey: 1, nameKey: 1, masterProductId: 1 },
+    { unique: true, name: 'invoice_alias_shared_unique', partialFilterExpression: { masterProductId: { $exists: true } } }
+  )
+  // C-ACCESS: one live grant per user and business. A partial filter cannot say "revokedAt is absent", so a live row is
+  // indexed as null (two live rows collide) and a revoked row carries its own time.
+  await db.collection('businessAccess').createIndex(
+    { userId: 1, businessId: 1, revokedAt: 1 },
+    { unique: true, name: 'business_access_live_unique' }
+  )
+  // The three readable collections are not cloneable, so the generic businessId index loop does not cover them.
+  await db.collection('invoices').createIndex({ businessId: 1, createdAt: -1 }, { name: 'invoices_business_created' })
+  await db.collection('diagnoses').createIndex({ businessId: 1, createdAt: -1 }, { name: 'diagnoses_business_created' })
+  // C-STOCK: the on-hand read.
+  await db.collection('stockCounts').createIndex({ businessId: 1, status: 1, countedAt: -1 }, { name: 'stock_counts_business_status_counted' })
+  logger.debug({ event: 'mongo.index.ensured', index: 'modules' })
+
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
   await ensureLogIndexes(db)
   logger.debug({ event: 'mongo.index.ensured', index: 'app_logs' })

@@ -39,12 +39,12 @@ describe('server/constants/collections.js', () => {
     expect(BACKUP_ENTITY_TYPES).toEqual(COLLECTIONS.filter(c => c.backup).map(c => c.name));
   });
 
-  it('routerWrites is a boolean when present and ROUTER_WRITE_TYPES matches it (requests, bookings)', () => {
+  it('routerWrites is a boolean when present and ROUTER_WRITE_TYPES matches it (requests, bookings, invoices, diagnoses, stockCounts)', () => {
     for (const entry of COLLECTIONS) {
       if ('routerWrites' in entry) expect(typeof entry.routerWrites).toBe('boolean');
     }
     expect(ROUTER_WRITE_TYPES).toEqual(COLLECTIONS.filter(c => c.routerWrites).map(c => c.name));
-    expect(ROUTER_WRITE_TYPES).toEqual(['requests', 'bookings']);
+    expect(ROUTER_WRITE_TYPES).toEqual(['requests', 'bookings', 'invoices', 'diagnoses', 'stockCounts']);
   });
 
   it('suppliers precedes products in CLONEABLE_TYPES (supplierIdMap ordering)', () => {

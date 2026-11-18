@@ -3,6 +3,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken, isPlatformAdmin } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { scopeFilter } = require('../utils/business-scope')
 const { can } = require('../utils/permissions')
 const { jerusalemDate } = require('../middleware/usage')
@@ -66,7 +67,8 @@ router.get('/report', verifyToken, async (req, res) => {
 })
 
 // Plan 559: GET /api/v1/stats/frontdesk?from&to[&businessId=] — the front desk numbers; default the last 7 Israel days.
-router.get('/frontdesk', verifyToken, async (req, res) => {
+// The platform admin reading another business (?businessId=) is the platform's own read, like an /admin route.
+router.get('/frontdesk', verifyToken, (req, res, next) => (isPlatformAdmin(req) && req.query.businessId !== undefined ? next() : requireModule('frontdesk')(req, res, next)), async (req, res) => {
   try {
     const admin = isPlatformAdmin(req)
     const wanted = req.query.businessId

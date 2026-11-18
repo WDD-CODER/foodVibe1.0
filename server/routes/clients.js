@@ -8,6 +8,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
 const { assertCan, staffProjection } = require('../utils/permissions')
@@ -23,6 +24,7 @@ const NOT_FOUND = { error: 'Client not found' }
 const router = Router()
 
 router.use(verifyToken)
+router.use(requireModule(['events', 'frontdesk']))
 router.use(dataWriteLimiter)
 
 const db = () => mongoose.connection.db

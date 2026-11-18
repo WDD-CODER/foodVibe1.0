@@ -6,6 +6,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
+const { requireModule } = require('../middleware/require-module')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { badRequest } = require('../middleware/validate')
 const { scopeFilter } = require('../utils/business-scope')
@@ -15,7 +16,7 @@ const TYPE = 'knowledgeItems'
 const MAX_IDS = 200
 const router = Router()
 
-router.put('/approve', verifyToken, dataWriteLimiter, async (req, res) => {
+router.put('/approve', verifyToken, requireModule('frontdesk'), dataWriteLimiter, async (req, res) => {
   if (!assertCan(req, res, 'edit', { type: TYPE })) return
   const ids = req.body?.ids
   if (!Array.isArray(ids) || ids.length === 0 || !ids.every(id => typeof id === 'string' && id)) {
