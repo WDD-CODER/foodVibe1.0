@@ -1,6 +1,6 @@
 # Plan 627 — Remember which product each printed invoice name means, for the business and for everyone
 
-Status: draft
+Status: done
 Depends-on: 626
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
