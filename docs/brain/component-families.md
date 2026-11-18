@@ -284,6 +284,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
 - Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
 - Plan 579: kind `logisticsSection` (a business's own sections); `logisticsItem` gains `removedAt` (removed from that date, older events keep it) and `foldedAt` (server-written when promoted: the business's own copy is kept, not deleted, so it still dates the question). `LogisticsItemRegistryService` adds `allItems_`, `hiddenAt_`, `defaultItems_`, `sections_`, `sectionLabel()` and `forEvent()` (the date rule); `items_` is the live list.
+- Plan 622: `visibleLogisticsItems` in `shared/schemas/logistics/visible-items.ts` is the one date and environment rule for which logistics questions an event sees; the server's notes-to-checklist draft and the browser both call it.
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
@@ -449,3 +450,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: an invoice apply remembers printed names, a read looks them up, or a business is deleted and its memory must go.
 - Known copies: none.
 - Request shape: invoiceResolveRequestSchema in shared/schemas/entities/invoice-alias.schema.ts (the resolve read).
+
+### ai-voice — `voiceTranscribeRequestSchema`, `VOICE_MIME_TYPES`, `VOICE_AUDIO_MAX_BASE64`, `VOICE_MAX_SECONDS`
+
+- Status: stable — plan 621
+- Use: `shared/schemas/ai-voice.schema.ts` — request and reply shapes, the mime list and the size and length limits of one
+  voice-note transcription; served by `server/routes/ai/voice.js` (the recording is kept through `file-store`).
+- When: a screen or route sends a voice note to be turned into a transcript.
+- Known copies: none.
+
+### logistics-extract — `logisticsExtractRequestSchema`, `buildQuestionList`, `cleanLogisticsDraft`, `keptRatio`
+
+- Status: stable — plan 622
+- Use: `shared/schemas/logistics/extract.schema.ts` — request, model answer, draft and confirm shapes of the notes-to-checklist draft; `server/utils/logistics-extract.js` — `buildQuestionList` (the questions sent to the model), `cleanLogisticsDraft` (drops what the model got wrong), `keptRatio` (share of the draft kept).
+- When: a route turns an event's free-text notes into a draft logistics checklist.
+- Known copies: none.

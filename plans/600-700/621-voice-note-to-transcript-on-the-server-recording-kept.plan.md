@@ -1,6 +1,6 @@
 # Plan 621 — Voice note to transcript on the server, with the recording kept
 
-Status: draft
+Status: done
 Depends-on: 619
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
@@ -191,12 +191,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Confirm what wave 0 left for a voice route before any code is written — read the merged `server/routes/ai/voice.js` (empty router with the lazy-require comment), the four exports at the end of `server/routes/ai.js` (`respondFromGeminiFailure`, `usageOf`, `requestedModel`, `aiLimiter`), `server/services/file-store.js` (`putPrivateFile`, `setFileStoreForTests`, `createMemoryFileStore`) and `callGemini` (`needsMedia`, `usage.audioSeconds`, which model of the chain takes audio). A name that differs from this plan is followed as merged and noted in Execution Notes; a missing export is a STOP with `approved: server/routes/ai.js` offered — never a copied helper or a second limiter — server/routes/ai/voice.js
-- [ ] A2: Define the request and reply of a transcription once for server and browser — `VOICE_MIME_TYPES`, the size, length and transcript limits, `VOICE_PURPOSES`, the two Zod schemas and their types; run `pnpm run build:schemas` and check `server/generated/schemas/ai-voice.schema.js` appears — shared/schemas/ai-voice.schema.ts
-- [ ] A3: Write the transcription prompt and the model request so the recording is only ever data — `VOICE_TRANSCRIBE_PROMPT` word for word as in this plan, the `user` content with the `inlineData` part, `MODEL_MIME`, `generationConfig`; re-read the provider's audio page and note the accepted types in Execution Notes — server/routes/ai/voice.js
-- [ ] A4: Add the route that turns one recording into text and keeps the recording when storage exists — the ten handler steps in order, the two 400 codes, the 503, the failure mapping, the size-only log line — server/routes/ai/voice.js
-- [ ] A5: Prove the route with a fake model and a fake file store — every [auto] case of this plan: success with a stored file, store not configured, silence, the 20,000 cut, 401, staff allowed, the four bad bodies, the size limit, the prompt placement, the ledger row, a model failure, the log contents, the audio model in the chain — server/test/ai-voice-transcribe.test.js
-- [ ] A6: Run the full checks and write down what was verified — `pnpm run test:server`, `pnpm --dir server run lint`, `pnpm run build`, `node scripts/log-query.mjs --since=plan-start --level=error`; exact result lines into Execution Notes — server/test/ai-voice-transcribe.test.js
+- [x] A1: Confirm what wave 0 left for a voice route before any code is written — read the merged `server/routes/ai/voice.js` (empty router with the lazy-require comment), the four exports at the end of `server/routes/ai.js` (`respondFromGeminiFailure`, `usageOf`, `requestedModel`, `aiLimiter`), `server/services/file-store.js` (`putPrivateFile`, `setFileStoreForTests`, `createMemoryFileStore`) and `callGemini` (`needsMedia`, `usage.audioSeconds`, which model of the chain takes audio). A name that differs from this plan is followed as merged and noted in Execution Notes; a missing export is a STOP with `approved: server/routes/ai.js` offered — never a copied helper or a second limiter — server/routes/ai/voice.js
+- [x] A2: Define the request and reply of a transcription once for server and browser — `VOICE_MIME_TYPES`, the size, length and transcript limits, `VOICE_PURPOSES`, the two Zod schemas and their types; run `pnpm run build:schemas` and check `server/generated/schemas/ai-voice.schema.js` appears — shared/schemas/ai-voice.schema.ts
+- [x] A3: Write the transcription prompt and the model request so the recording is only ever data — `VOICE_TRANSCRIBE_PROMPT` word for word as in this plan, the `user` content with the `inlineData` part, `MODEL_MIME`, `generationConfig`; re-read the provider's audio page and note the accepted types in Execution Notes — server/routes/ai/voice.js
+- [x] A4: Add the route that turns one recording into text and keeps the recording when storage exists — the ten handler steps in order, the two 400 codes, the 503, the failure mapping, the size-only log line — server/routes/ai/voice.js
+- [x] A5: Prove the route with a fake model and a fake file store — every [auto] case of this plan: success with a stored file, store not configured, silence, the 20,000 cut, 401, staff allowed, the four bad bodies, the size limit, the prompt placement, the ledger row, a model failure, the log contents, the audio model in the chain — server/test/ai-voice-transcribe.test.js
+- [x] A6: Run the full checks and write down what was verified — `pnpm run test:server`, `pnpm --dir server run lint`, `pnpm run build`, `node scripts/log-query.mjs --since=plan-start --level=error`; exact result lines into Execution Notes — server/test/ai-voice-transcribe.test.js
 
 ## Technical Considerations
 - Dependencies: plan 619 (`putPrivateFile`, `setFileStoreForTests`, `callGemini({ needsMedia })`, the `storedFiles` collection, the retention job that deletes a voice file after 730 days); plan 615 (the empty router and its mount); the four helpers plan 615 exports from `server/routes/ai.js`, read lazily.
@@ -229,3 +229,9 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 - decided: `durationSec` may be up to 185 — why: the browser stops at 180 seconds and the recorder's last chunk can run slightly over.
 - decided: no `assertCan` on the route — why: C-VOICE says any signed-in member; there is no document to authorise against.
 - decided: the prompt adds `[?]` for an unclear word — why: without an explicit way out a model fills the gap with a guess, and the transcript feeds answers a person then approves.
+- A1: merged names match the plan (voice.js empty router, four exports at end of ai.js, file-store putPrivateFile/setFileStoreForTests, callGemini needsMedia + usage.audioSeconds; gemini-client lists audio for gemini-2.5-flash and the default chain has an audio model).
+- A3: provider audio page not re-fetched (no network browsing here); gemini-client.js:142 cites the 2026-11-17 reading: webm, ogg, mpeg, wav, m4a/aac listed, audio/mp4 not; audio/mp4 stays allowed and is sent as audio/m4a.
+- test:server -> exit 0, 126 files, 1692 tests passed (includes ai-voice-transcribe.test.js, 17 tests)
+- pnpm --dir server run lint -> exit 0 (0 errors, warnings only)
+- pnpm run build -> exit 0
+- node scripts/log-query.mjs --since=plan-start --level=error -> SKIP: no database configured
