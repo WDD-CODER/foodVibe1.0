@@ -84,6 +84,8 @@ src/app/pages/platform-dashboard/platform-dashboard.page.html
 src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
 public/assets/data/dictionary.json
 e2e/ui/630-1.spec.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope

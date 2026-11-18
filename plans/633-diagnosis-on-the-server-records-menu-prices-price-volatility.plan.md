@@ -86,6 +86,8 @@ server/test/ai-diag-menu.test.js
 server/test/diag-margin-report.test.js
 docs/agent/standards-backend.md
 server/breadcrumbs.md
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope

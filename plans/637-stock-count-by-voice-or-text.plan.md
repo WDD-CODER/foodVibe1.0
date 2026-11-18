@@ -97,6 +97,8 @@ src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.com
 public/assets/data/dictionary.json
 e2e/ui/637-1.spec.ts
 e2e/ui/637-2.spec.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope

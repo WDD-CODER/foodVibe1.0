@@ -96,6 +96,8 @@ e2e/ui/636-1.spec.ts
 e2e/ui/636-2.spec.ts
 e2e/ui/636-3.spec.ts
 e2e/ui/636-4.spec.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope
