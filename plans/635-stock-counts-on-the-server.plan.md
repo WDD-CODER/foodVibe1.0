@@ -281,3 +281,4 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 - behaviour: finalize confirms draftIds through confirmAiDraft with a simple kept-ratio (share of saved products the draft listed); failures are logged only — reverse: drop the loop in finalize.
 - behaviour: GET /on-hand and /counts use the create check, which gives a token with no role the owner path in tests; no 403 test for that — reverse: n/a.
 - seen: src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.spec.ts:105 and :114 — flaky (Expected 0 to be 2), differs per run.
+- evidence (fix round 1): pnpm run test:ci -> exit 0 twice, TOTAL 2498 SUCCESS; the earlier DataExportCardComponent failure was flaky and did not reproduce; no code changed.
