@@ -313,6 +313,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
+- `scalingRuleFrom(values, hadRule)` / `scalingRuleErrors(values)` in `src/app/core/utils/scaling-rule.util.ts`: the equipment loading rule (one per N guests, min, max) built and checked from form values; the full equipment form and the list's quick-edit popup both call it (plan 640).
 - `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key `ai_monthly_cap_reached` for the server's monthly-cap refusal, else null; every place that maps an AI 429 asks it first (plan 620).
 
 ### http — talking to the server
