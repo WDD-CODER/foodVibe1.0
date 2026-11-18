@@ -12,6 +12,8 @@ const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
 const { currentTermsVersion } = require('../utils/terms-version');
 const { verifyToken } = require('../middleware/auth');
 const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
+const { resolveSession, canEnter } = require('../services/access');
+const { modulesOf } = require('../generated/schemas/modules');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -74,33 +76,47 @@ function isDbUnavailableError(err) {
 }
 
 /**
- * The one place an access token is signed. Plan 426: the payload is exactly the C-USER contract
- * (`userId, name, businessId, businessRole, isPlatformAdmin`) — no `role`. Platform-admin power comes
- * from the `isPlatformAdmin` flag only.
+ * The one place an access token is signed. Plan 426: no `role`; platform-admin power comes from the
+ * `isPlatformAdmin` flag only. Plan 631 (C-ACCESS, ADR 0032): `businessId` is the ACTIVE business that
+ * `resolveSession` decided, `homeBusinessId` the user's own, and `acting` is set only away from home.
+ * Returns `{ token, session }`.
  */
-function signAccess(user) {
+async function signAccess(user) {
+  const session = await resolveSession(user);
   const payload = {
     userId: String(user._id),
     name: user.name,
-    businessId: user.businessId ?? null,
-    businessRole: user.businessRole ?? null,
+    businessId: session.businessId,
+    businessRole: session.businessRole,
     isPlatformAdmin: user.isPlatformAdmin === true,
+    homeBusinessId: user.businessId ?? null,
+    ...(session.acting && { acting: session.acting }),
   };
-  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+  return { token: jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY }), session };
 }
 
-/** The user object login/signup/guest hand to the client. */
-function toPublicUser(user) {
-  return {
+/**
+ * The user object login/signup/guest/refresh/switch hand to the client. Business fields come from the session.
+ * Plan 631: while acting it also carries `homeModules` (the home business's modules; the browser only sees the
+ * client's business then).
+ */
+async function toPublicUser(user, session) {
+  const out = {
     _id: user._id,
     name: user.name,
     email: user.email,
     imgUrl: user.imgUrl || '',
-    businessId: user.businessId ?? null,
-    businessRole: user.businessRole ?? null,
+    businessId: session.businessId ?? null,
+    businessRole: session.businessRole ?? null,
+    homeBusinessId: user.businessId ?? null,
     isPlatformAdmin: user.isPlatformAdmin === true,
     termsAcceptedVersion: user.termsAcceptedVersion ?? null,
   };
+  if (session.acting) {
+    out.acting = session.acting;
+    out.homeModules = modulesOf(await getBusiness(user.businessId));
+  }
+  return out;
 }
 
 /** Why this user may not hold a session, or null: no business yet, or removed from it. */
@@ -210,7 +226,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const business = await createBusinessFor(user, { name: trimmedBusinessName || undefined, masterVersion });
     await cloneMasterDataToBusiness(business._id, { createdBy: String(_id) });
 
-    const token = signAccess(user);
+    const { token, session } = await signAccess(user);
     const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -220,7 +236,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    const publicUser = toPublicUser(user);
+    const publicUser = await toPublicUser(user, session);
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
     req.log.error({ err, event: 'auth.signup.failed' });
@@ -291,7 +307,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     const blocked = blockedReason(user);
     if (blocked) return res.status(403).json({ error: blocked });
 
-    const token = signAccess(user);
+    const { token, session } = await signAccess(user);
     const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -305,7 +321,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       await syncBusinessOf(user);
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.login.sync_failed' }); }
 
-    const publicUser = toPublicUser(user);
+    const publicUser = await toPublicUser(user, session);
     return res.json({ token, user: publicUser });
   } catch (err) {
     req.log.error({ err, event: 'auth.login.failed' });
@@ -341,7 +357,8 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
       return res.status(401).json({ error: blocked });
     }
 
-    const token = signAccess(user);
+    // Plan 631: re-resolved on every refresh, so a removed grant lands the session at home.
+    const { token, session } = await signAccess(user);
 
     const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
     res.cookie(REFRESH_COOKIE, newRefreshToken, {
@@ -369,7 +386,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
       })
       .catch(syncErr => req.log.error({ err: syncErr, event: 'auth.refresh.sync_failed' }));
 
-    return res.json({ token, user: toPublicUser(user) });
+    return res.json({ token, user: await toPublicUser(user, session) });
   } catch (err) {
     req.log.error({ err, event: 'auth.refresh.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
@@ -391,9 +408,52 @@ router.post('/accept-terms', refreshLimiter, verifyToken, async (req, res) => {
       { new: true }
     ).lean();
     if (!updated) return res.status(401).json({ error: 'USER_NOT_FOUND' });
-    return res.json({ user: toPublicUser(updated) });
+    const session = { businessId: req.user.businessId, businessRole: req.user.businessRole, acting: req.user.acting };
+    return res.json({ user: await toPublicUser(updated, session) });
   } catch (err) {
     req.log.error({ err, event: 'auth.accept_terms.failed' });
+    if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /switch-business
+// Plan 631 (C-ACCESS): body { businessId: string | null } → { token, user }. null or the home id → home;
+// anything else needs a live grant or the platform admin flag, else 403 NO_ACCESS and nothing is written.
+// The refresh cookie is not touched: it carries only the userId, and /refresh re-resolves the active business.
+// ---------------------------------------------------------------------------
+
+router.post('/switch-business', refreshLimiter, verifyToken, async (req, res) => {
+  try {
+    const target = req.body?.businessId;
+    const valid = target === null || (typeof target === 'string' && target.length >= 1 && target.length <= 64);
+    if (!valid) return res.status(400).json({ error: 'INVALID_BODY' });
+
+    const user = await User.findById(req.user.userId).lean();
+    if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
+    const blocked = blockedReason(user);
+    if (blocked) return res.status(403).json({ error: blocked });
+
+    let to = 'home';
+    let activeBusinessId = null;
+    if (target !== null && target !== user.businessId) {
+      const how = await canEnter(user, target);
+      if (!how) {
+        req.log.info({ event: 'auth.switch_business.denied', businessId: target });
+        return res.status(403).json({ error: 'NO_ACCESS' });
+      }
+      to = how;
+      activeBusinessId = target;
+    }
+    await User.updateOne({ _id: user._id }, { $set: { activeBusinessId } });
+    user.activeBusinessId = activeBusinessId;
+
+    const { token, session } = await signAccess(user);
+    req.log.info({ event: 'auth.switch_business', to, businessId: session.businessId });
+    return res.json({ token, user: await toPublicUser(user, session) });
+  } catch (err) {
+    req.log.error({ err, event: 'auth.switch_business.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -430,13 +490,13 @@ router.post('/guest', async (req, res) => {
   try {
     const guestDoc = await User.findOneAndUpdate(
       { _id: 'dev-guest' },
-      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', isPlatformAdmin: true, passwordHash: null },
+      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', isPlatformAdmin: true, passwordHash: null, activeBusinessId: null },
       { upsert: true, new: true }
     );
     const guest = guestDoc.toObject();
     await ensureBusinessForUser(guest);
 
-    const token = signAccess(guest);
+    const { token, session } = await signAccess(guest);
     const refreshToken = jwt.sign({ userId: 'dev-guest' }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -452,7 +512,7 @@ router.post('/guest', async (req, res) => {
 
     return res.json({
       token,
-      user: toPublicUser(guest),
+      user: await toPublicUser(guest, session),
     });
   } catch (err) {
     req.log.error({ err, event: 'auth.guest.failed' });

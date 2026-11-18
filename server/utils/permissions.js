@@ -1,6 +1,8 @@
 'use strict'
 /**
- * Plan 427 (contract C-PERM): the one place that decides what an owner or a staff member may do.
+ * Plan 427 (contract C-PERM): the one place that decides what an owner, a staff member or a consultant may do.
+ * Plan 631 (C-ACCESS, ADR 0032): a consultant acting in a client business may do what the owner may, except
+ * manage the team and change the business settings (`CONSULTANT_DENIED`).
  * Generic write routes call `assertCan` before every write; later plans (428, 429, 442, 445, 446) call it
  * for their own actions instead of inventing role checks. Deny by default.
  */
@@ -16,6 +18,8 @@ const ACTIONS = [
   'manageRequests',
 ]
 const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy', 'editLogistics', 'editFrontDesk'])
+/** Plan 631: the two actions a consultant is refused in the business he advises. */
+const CONSULTANT_DENIED = new Set(['manageTeam', 'editSettings'])
 const EVENTS = 'menuEvents'
 /** Plan 512: types only an owner may create, edit or delete (staff read them through `staffProjection`). */
 const OWNER_ONLY_TYPES = new Set(['clients', 'frontDeskProfiles', 'knowledgeItems', 'invoices', 'diagnoses'])
@@ -31,7 +35,9 @@ const deny = reason => ({ ok: false, reason })
 const OK = Object.freeze({ ok: true })
 
 /**
- * @param {{ userId?: string, businessId?: string, businessRole?: string, isPlatformAdmin?: boolean }} user
+ * Owner: everything in his business. Consultant (plan 631): the owner's rights minus `CONSULTANT_DENIED`.
+ * Staff: the narrower rules below. The document checks (`MASTER_ONLY`, `OTHER_BUSINESS`) run first for every role.
+ * @param {{ userId?: string, businessId?: string, businessRole?: 'owner' | 'staff' | 'consultant', isPlatformAdmin?: boolean }} user
  * @param {string} action one of ACTIONS
  * @param {{ type?: string, doc?: object, patch?: object }} [ctx]
  * @returns {{ ok: true } | { ok: false, reason: string }}
@@ -44,6 +50,7 @@ function can(user, action, ctx = {}) {
     if (!user?.businessId || doc.businessId !== user.businessId) return deny('OTHER_BUSINESS')
   }
   if (user?.businessRole === 'owner') return OK
+  if (user?.businessRole === 'consultant') return CONSULTANT_DENIED.has(action) ? deny('CONSULTANT_DENIED') : OK
   if (user?.businessRole !== 'staff') return deny('NO_ROLE')
 
   if (OWNER_ONLY_ACTIONS.has(action)) return deny('OWNER_ONLY')
@@ -164,4 +171,4 @@ function moneyFieldsChanged(type, before, after) {
   return (MONEY_FIELDS[type] || []).some(path => moneySignature(before, path) !== moneySignature(after, path))
 }
 
-module.exports = { can, assertCan, staffProjection, OWNER_ONLY_TYPES, stripMoneyFields, moneyFieldsChanged, valuesAt, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES, ACTIONS }
+module.exports = { can, assertCan, staffProjection, OWNER_ONLY_TYPES, stripMoneyFields, moneyFieldsChanged, valuesAt, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES, ACTIONS, CONSULTANT_DENIED }

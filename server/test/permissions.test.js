@@ -58,6 +58,32 @@ describe('can', () => {
   })
 })
 
+describe('plan 631: consultant', () => {
+  const CONSULTANT = { userId: 'c1', businessId: 'b1', businessRole: 'consultant', homeBusinessId: 'b9', acting: 'consultant' }
+  const { ACTIONS: ALL, CONSULTANT_DENIED } = require('../utils/permissions')
+
+  it('may do 11 actions on a doc of the business he acts in, including someone else\'s and money', () => {
+    const allowed = ALL.filter(a => a !== 'manageTeam' && a !== 'editSettings')
+    expect(allowed).toHaveLength(11)
+    for (const a of allowed) {
+      expect(can(CONSULTANT, a, { type: 'menuEvents', doc: own })).toEqual({ ok: true })
+      expect(can(CONSULTANT, a, { type: 'clients' })).toEqual({ ok: true })
+    }
+  })
+  it('is refused manageTeam and editSettings with CONSULTANT_DENIED, with or without a doc', () => {
+    expect([...CONSULTANT_DENIED].sort()).toEqual(['editSettings', 'manageTeam'])
+    for (const a of ['manageTeam', 'editSettings']) {
+      expect(can(CONSULTANT, a, {})).toEqual({ ok: false, reason: 'CONSULTANT_DENIED' })
+      expect(can(CONSULTANT, a, { type: 'businesses', doc: own })).toEqual({ ok: false, reason: 'CONSULTANT_DENIED' })
+    }
+  })
+  it('is refused a document of another business and a master document', () => {
+    expect(can(CONSULTANT, 'edit', { doc: { businessId: 'b9' } })).toEqual({ ok: false, reason: 'OTHER_BUSINESS' })
+    expect(can(CONSULTANT, 'edit', { doc: { businessId: 'b2' } })).toEqual({ ok: false, reason: 'OTHER_BUSINESS' })
+    expect(can(CONSULTANT, 'edit', { doc: { businessId: '__master__' } })).toEqual({ ok: false, reason: 'MASTER_ONLY' })
+  })
+})
+
 describe('plan 549: manageRequests', () => {
   it('any member of the business may, with or without a doc; another business and no role may not', () => {
     for (const u of [OWNER, STAFF]) {

@@ -384,15 +384,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the rule change down first so the code is built against the approved words — create the ADR from section (a) of the gate text, apply the four field edits of section (b) to INV-1; keep each field on one line — docs/brain/decisions/0032-one-user-more-than-one-business.md, docs/brain/invariants.md
-- [ ] A2: Teach the permission checker the consultant role and its two refusals — CONSULTANT_DENIED set and the branch after the owner line, exported; the Trash filter line so a consultant's Trash request gets an answer; consultant cases in the permission tests — server/utils/permissions.js, server/routes/generic.js, server/test/permissions.test.js
-- [ ] A3: Add the one service that decides which business a session is in — liveGrant, resolveSession (no read at home), canEnter, stillActing with its test counter, grant helpers; the active-business field on the user model; read the wave 0 index and schema first — server/services/access.js, server/models/user.model.js
-- [ ] A4: Sign every access token through that decision and let a user switch business — async signAccess returning token and session, the public user object with home and acting fields, the four existing callers, the guest reset, accept-terms, the new switch route; token-field test updated — server/routes/auth.js, server/test/auth-business.test.js
-- [ ] A5: Stop an acting session on the first request after its grant is removed — async attachUser, the ACCESS_ENDED answer, the 503 on a failed check, no read for a home token, acting ids on the request log; usage is not recorded for an acting request — server/middleware/auth.js, server/middleware/usage.js
-- [ ] A6: Add the grant routes and the list of businesses a user may enter — the three grant routes and the businesses list with their error codes, limiter and id-only logs — server/routes/access.js
-- [ ] A7: Keep the baseline out of a consultant's reach inside the onboarding save — the one condition on the baseline line; every row of the business-route table gets a test — server/routes/business.js, server/test/access-acting.test.js
-- [ ] A8: Prove the whole flow with tests, including the ownership invariant — the switch, refresh, grant and list cases; the acting, usage, write-limit and log cases; the new INV-1 tests — server/test/access.test.js, server/test/access-acting.test.js, server/test/invariants.test.js
-- [ ] A9: Record the new service, collection and routes where the next developer looks — a row for the access service in the server map, the businessAccess collection and the five routes in the backend standards, the service on the server-auth family line — server/breadcrumbs.md, docs/agent/standards-backend.md, docs/brain/component-families.md
+- [x] A1: Write the rule change down first so the code is built against the approved words — create the ADR from section (a) of the gate text, apply the four field edits of section (b) to INV-1; keep each field on one line — docs/brain/decisions/0032-one-user-more-than-one-business.md, docs/brain/invariants.md
+- [x] A2: Teach the permission checker the consultant role and its two refusals — CONSULTANT_DENIED set and the branch after the owner line, exported; the Trash filter line so a consultant's Trash request gets an answer; consultant cases in the permission tests — server/utils/permissions.js, server/routes/generic.js, server/test/permissions.test.js
+- [x] A3: Add the one service that decides which business a session is in — liveGrant, resolveSession (no read at home), canEnter, stillActing with its test counter, grant helpers; the active-business field on the user model; read the wave 0 index and schema first — server/services/access.js, server/models/user.model.js
+- [x] A4: Sign every access token through that decision and let a user switch business — async signAccess returning token and session, the public user object with home and acting fields, the four existing callers, the guest reset, accept-terms, the new switch route; token-field test updated — server/routes/auth.js, server/test/auth-business.test.js
+- [x] A5: Stop an acting session on the first request after its grant is removed — async attachUser, the ACCESS_ENDED answer, the 503 on a failed check, no read for a home token, acting ids on the request log; usage is not recorded for an acting request — server/middleware/auth.js, server/middleware/usage.js
+- [x] A6: Add the grant routes and the list of businesses a user may enter — the three grant routes and the businesses list with their error codes, limiter and id-only logs — server/routes/access.js
+- [x] A7: Keep the baseline out of a consultant's reach inside the onboarding save — the one condition on the baseline line; every row of the business-route table gets a test — server/routes/business.js, server/test/access-acting.test.js
+- [x] A8: Prove the whole flow with tests, including the ownership invariant — the switch, refresh, grant and list cases; the acting, usage, write-limit and log cases; the new INV-1 tests — server/test/access.test.js, server/test/access-acting.test.js, server/test/invariants.test.js
+- [x] A9: Record the new service, collection and routes where the next developer looks — a row for the access service in the server map, the businessAccess collection and the five routes in the backend standards, the service on the server-auth family line — server/breadcrumbs.md, docs/agent/standards-backend.md, docs/brain/component-families.md
 - [ ] A10: Run every check and hand Dandan the one reading check — the Done-when commands in order; then the human card for the ADR and INV-1 text — no file
 
 ## Technical Considerations
@@ -428,3 +428,16 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the public user object carries `homeModules` while acting (beyond C-ACCESS; the token payload is untouched) — why: C-MODULES puts the diagnosis entry in the acting banner by the HOME business's modules, and while acting the browser only ever sees the client's business.
 - decided: one changed line in `server/routes/generic.js` (a wave 0 registry file) — why: `trashOwnerFilter` tests `role === 'owner'` and sends no answer for any other role that passes `can()`; without the change a consultant's "restore all" and "empty Trash" hang.
 - decided: `GET /api/v1/access/grants` answers `_id` beside `name` and `grantedAt` — why: the owner's list removes a grant by id.
+- round 2 (fresh judgment builder, from base ed839532): rerun of the failing check first — `pnpm run test:ci` on the base → exit 0, TOTAL: 2304 SUCCESS (the earlier 1 FAILED did not reproduce; this plan changes no browser file).
+- decided: the grant tests give each test its own platform-admin id — why: the grant limiter (30 per 15 minutes, keyed by user, as the plan says) is shared by every test in the file otherwise.
+- decided: `resolveSession` also treats an active `__master__` as "does not exist" (home, cleared) — why: the same rule `canEnter` uses; no session may sit in the master catalog.
+- registry fix: `docs/brain/component-families.md` (in scope) had five registry paths that `reuse-lint --check-registry` could not resolve (lines 23, 164, 197, 314, 355); rewritten to the real file paths so the Done-when check passes.
+- manifest: `docs/workflow-kit/manifest.json` gains the ADR 0032 entry (a generated kit file, always allowed by scope-check).
+- evidence:
+  - `pnpm run test:server` → exit 0, Test Files 127 passed, Tests 1723 passed (access.test.js 18, access-acting.test.js 22, invariants.test.js 41, permissions.test.js 24)
+  - `pnpm --dir server run lint` → exit 0 (0 errors)
+  - `node scripts/breadcrumbs-check.mjs` → BREADCRUMBS: clean
+  - `node scripts/reuse-lint.mjs --check-registry` → exit 0, registry ok (39 families, 139 paths)
+  - `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, SKIP: no database configured
+  - `pnpm run build` → exit 0; `pnpm run lint` → exit 0; `pnpm run test:ci` → exit 0, TOTAL: 2304 SUCCESS
+  - kit-manifest-check → KIT_MANIFEST: ok — 433 classified, 0 unclassified

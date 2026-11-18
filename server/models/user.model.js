@@ -16,6 +16,9 @@ const userSchema = new Schema(
     // Plan 424: the business (tenant) the user belongs to and their part in it.
     businessId: { type: String, default: null },
     businessRole: { type: String, enum: ['owner', 'staff'], default: null },
+    // Plan 631 (C-ACCESS): the business this user's session is in; null = home. `consultant` is a session role
+    // (server/services/access.js), never stored in `businessRole`.
+    activeBusinessId: { type: String, default: null },
     isPlatformAdmin: { type: Boolean, default: false },
     removedAt: { type: Number, default: null },
     // Plan 492: the username a removed staff member had; `name` then holds a tombstone (releasedUsername).

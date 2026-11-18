@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { recordUsage } = require('./usage');
+const { stillActing } = require('../services/access');
 
 /** The Bearer token of the request's Authorization header, or '' when there is none. */
 function bearerToken(req) {
@@ -35,17 +36,60 @@ function isPlatformAdmin(req) {
   return req.user?.isPlatformAdmin === true;
 }
 
+/** An error that ends an acting session (plan 631): the grant was removed or the admin flag taken away. */
+function accessEnded() {
+  const err = new Error('ACCESS_ENDED');
+  err.code = 'ACCESS_ENDED';
+  return err;
+}
+
+/** A database failure while re-checking an acting token (plan 631): denied with 503, never passed on. */
+function actingCheckFailed(cause) {
+  const err = new Error('DB_UNAVAILABLE');
+  err.code = 'DB_UNAVAILABLE';
+  err.cause = cause;
+  return err;
+}
+
 /**
  * Verifies the access token onto req.user and binds `userId` onto `req.log` — the pino-http
  * request logger, Plan 383 — so every handler log line after auth carries it. userId only.
+ * Plan 631 (ADR 0032): a token with `acting` is re-checked here on every request (one indexed read);
+ * a home token takes no read.
  */
-function attachUser(req, res, token) {
+async function attachUser(req, res, token) {
   const payload = decodeAccessToken(token);
   // Plan 425: a token without a business can't be scoped to any data. The client refreshes and retries.
   if (payload?.userId && !payload.businessId) throw new Error('NO_BUSINESS_IN_TOKEN');
+  if (payload?.acting) {
+    let live;
+    try {
+      live = await stillActing(payload);
+    } catch (err) {
+      throw actingCheckFailed(err);
+    }
+    if (!live) throw accessEnded();
+  }
   req.user = payload;
-  if (req.log && req.user?.userId) req.log = req.log.child({ userId: req.user.userId });
+  if (req.log && req.user?.userId) {
+    req.log = req.log.child(req.user.acting
+      ? { userId: req.user.userId, acting: req.user.acting, actingIn: req.user.businessId }
+      : { userId: req.user.userId });
+  }
   recordUsage(req, res); // Plan 430: non-blocking, runs after the response is sent
+}
+
+/** Plan 631: the answer for a failed attachUser. */
+function rejectToken(req, res, err) {
+  if (err?.code === 'ACCESS_ENDED') {
+    req.log?.info({ event: 'auth.access_ended' });
+    return res.status(401).json({ error: 'ACCESS_ENDED' });
+  }
+  if (err?.code === 'DB_UNAVAILABLE') {
+    req.log?.error({ err: err.cause, event: 'auth.acting_check.failed' });
+    return res.status(503).json({ error: 'DB_UNAVAILABLE' });
+  }
+  return res.status(401).json({ error: 'Invalid or expired token' });
 }
 
 /**
@@ -57,7 +101,7 @@ function attachUser(req, res, token) {
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
-function verifyToken(req, res, next) {
+async function verifyToken(req, res, next) {
   const token = bearerToken(req);
 
   if (!token) {
@@ -65,11 +109,11 @@ function verifyToken(req, res, next) {
   }
 
   try {
-    attachUser(req, res, token);
-    next();
-  } catch {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    await attachUser(req, res, token);
+  } catch (err) {
+    return rejectToken(req, res, err);
   }
+  next();
 }
 
 /**
@@ -82,7 +126,7 @@ function verifyToken(req, res, next) {
  *
  * This distinction prevents silently degrading an expired session to anonymous reads.
  */
-function optionalToken(req, res, next) {
+async function optionalToken(req, res, next) {
   const token = bearerToken(req);
 
   if (!token) {
@@ -91,11 +135,11 @@ function optionalToken(req, res, next) {
   }
 
   try {
-    attachUser(req, res, token);
-    next();
-  } catch {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    await attachUser(req, res, token);
+  } catch (err) {
+    return rejectToken(req, res, err);
   }
+  next();
 }
 
 /** Platform-admin gate (plan 425): only the `isPlatformAdmin` flag counts; the legacy `role` is never read. */

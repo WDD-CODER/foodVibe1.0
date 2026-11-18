@@ -20,7 +20,7 @@ How this file is checked:
   section) whose `## Reuse Check` is missing or incomplete.
 
 Each family: `Status` (`stable` = use it as is; `converging` = a refactor plan is removing the copies) · `Use` (base
-path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on `origin/mvp-review`
+path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on the origin mvp-review branch
 `1953dcb5`, 2026-10-21; the audit numbers were from `8ffda3d2`) and the plan that removes them.
 
 Optional field `Design changes`, written by `/design-port` Step 6 when a family's look changed:
@@ -161,7 +161,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
   clear button: `src/app/shared/input-clear/` (`app-input-clear`).
 - When: any form input with a label.
-- Server refusals (plan 540): `serverFieldErrors(err, map)` from `@utils/server-refusal.util` fills `validationErrors_`; templates read the key from the map.
+- Server refusals (plan 540): `serverFieldErrors(err, map)` from `src/app/core/utils/server-refusal.util.ts` (import `@utils` alias) fills `validationErrors_`; templates read the key from the map.
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
@@ -194,7 +194,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### chip — chips, badges, pills
 
 - Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
-- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal`, `.amber`, `.red` or `--teal|--amber|--red`) plus variants
   `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
   `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
   `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
@@ -311,7 +311,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
-- `PublicRequestService` (`pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
+- `PublicRequestService` (`src/app/pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
@@ -329,7 +329,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: converging — plan 458 (rule sweep) decides
 - Use: `server/middleware/auth.js` (token check), `server/utils/business-scope.js` (the only tenant-scoping path,
   ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`,
-  `server/middleware/require-module.js` (`requireModule`, `requireHomeModule`, `requireModuleForType`, `businessModules`, `clearModuleCache`: the module gate on a route).
+  `server/middleware/require-module.js` (`requireModule`, `requireHomeModule`, `requireModuleForType`, `businessModules`, `clearModuleCache`: the module gate on a route),
+  `server/services/access.js` (`resolveSession`, `canEnter`, `stillActing`, `liveGrant`: which business a session is in, plan 631).
 - When: a server route checks who is calling, scopes data to a business, checks a write permission or limits a rate.
 - Known copies: `jwt.verify` also in `server/routes/auth.js` and `server/routes/log.js`; `isAdmin` re-declared in
   `server/routes/generic.js`; rate limiters built per file in `server/routes/ai.js`, `server/routes/auth.js`,
@@ -351,7 +352,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `ModuleService` (`src/app/core/services/module.service.ts`) — `has`, `hasType`, `ready`; `moduleGuard(keys)`
   (`src/app/core/guards/module.guard.ts`) sends a screen of a missing module to `/dashboard`; the module field on
   `HeroFabAction` (`module?: ModuleKey`) hides an action in the floating button; `HttpStorageAdapter` returns an empty
-  result without a request for a type whose module is off. Import the helpers from `@schemas/modules-pure` (no zod in
+  result without a request for a type whose module is off. Import the helpers from `shared/schemas/modules-pure.ts` (no zod in
   the first bundle).
 - When: a link, chip, screen, button or request belongs to a module. The server is the gate; the browser only hides.
 - Known copies: none.
