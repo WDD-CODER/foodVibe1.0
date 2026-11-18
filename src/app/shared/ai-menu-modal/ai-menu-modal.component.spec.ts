@@ -64,8 +64,10 @@ describe('AiMenuModalComponent dish numbers (plan 587)', () => {
     expect(matched.guestCount).toBe(1)
     expect(matched.guestCountMissing).toBeTrue()
   })
+})
 
-  it('shows the monthly cap message for the cap refusal (plan 620)', () => {
+describe('AiMenuModalComponent monthly cap (plan 620)', () => {
+  it('shows the monthly cap message for the cap refusal', () => {
     const component = makeComponent()
     const key = (component as unknown as { resolveErrorKey_(e: unknown): string }).resolveErrorKey_(
       new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' } })

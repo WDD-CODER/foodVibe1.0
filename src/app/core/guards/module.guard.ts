@@ -4,7 +4,7 @@ import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 
-/** Plan 620: a screen of a module the business does not have goes back to the dashboard. The server stays the gate. */
+/** Plan 620: a screen of a module the business does not have goes back to the dashboard. The server is the real gate. */
 export const moduleGuard =
   (keys: readonly ModuleKey[]): CanActivateFn =>
   async () => {

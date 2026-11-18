@@ -1,4 +1,5 @@
-// Zod-free half of the modules contract: the browser imports this one so zod stays out of the initial bundle.
+/** Plan 620: the module helpers without zod, so the browser's first bundle does not pull the validation library. */
+
 /** Plan 615 (C-MODULES): the five modules a business may have switched on. */
 export const MODULE_KEYS = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag'] as const
 export type ModuleKey = (typeof MODULE_KEYS)[number]

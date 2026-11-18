@@ -3,13 +3,13 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { Router, ActivatedRoute } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
-import { ModuleService } from '@services/module.service'
 
 import { DashboardOverviewComponent } from './components/dashboard-overview/dashboard-overview.component'
 import { DashboardHeaderComponent } from './components/dashboard-header/dashboard-header.component'
 import { MetadataManagerComponent } from '../metadata-manager/metadata-manager.page.component'
 import { VenueListComponent } from '../venues/components/venue-list/venue-list.component'
 import { VenueFormComponent } from '../venues/components/venue-form/venue-form.component'
+import { ModuleService } from '@services/module.service'
 import { TrashPage } from '../trash/trash.page'
 import type { PendingChangesComponent } from '../../core/guards/pending-changes.guard'
 
@@ -58,9 +58,8 @@ export class DashboardPage implements PendingChangesComponent {
   protected readonly activeTab = computed<DashboardTab>(() => {
     const params = this.queryParams_() as Record<string, string>
     const t = params['tab']
-    // Plan 620: the venue tabs belong to `events`; without it the overview shows.
-    if ((t === 'venues' || t === 'add-venue') && !this.modules.has('events')) return 'overview'
-    if (t === 'metadata' || t === 'venues' || t === 'add-venue' || t === 'trash') return t
+    if ((t === 'venues' || t === 'add-venue') && this.modules.has('events')) return t
+    if (t === 'metadata' || t === 'trash') return t
     return 'overview'
   })
 

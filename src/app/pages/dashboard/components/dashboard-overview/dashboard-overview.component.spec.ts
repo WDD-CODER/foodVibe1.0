@@ -1,5 +1,7 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { signal as modSignal } from '@angular/core'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
+import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal, WritableSignal } from '@angular/core'
 import { Router } from '@angular/router'
 import { By } from '@angular/platform-browser'
@@ -21,11 +23,15 @@ import type { Business } from '@schemas/entities'
 import { Product } from '@models/product.model'
 import { Recipe } from '@models/recipe.model'
 
-const modulesOff = new Set<string>()
+/** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
+const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
+const modulesOn = modSignal<ModuleKey[]>(ALL_MODULES)
+const moduleStub = {
+  provide: ModuleService,
+  useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
+}
 
 describe('DashboardOverviewComponent', () => {
-  beforeEach(() => modulesOff.clear())
-
   let fixture: ComponentFixture<DashboardOverviewComponent>
   let component: DashboardOverviewComponent
   let mockRouter: jasmine.SpyObj<Router>
@@ -94,9 +100,9 @@ describe('DashboardOverviewComponent', () => {
     await TestBed.configureTestingModule({
       imports: [DashboardOverviewComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
-        { provide: ModuleService, useValue: { has: (k: string) => !modulesOff.has(k), hasType: () => true } },
         provideHttpClient(),
         provideHttpClientTesting(),
+        moduleStub,
         { provide: KitchenStateService, useValue: mockKitchenState },
         { provide: RecipeDataService, useValue: mockRecipeData },
         { provide: DishDataService, useValue: mockDishData },
@@ -342,33 +348,37 @@ describe('DashboardOverviewComponent', () => {
     expect(btn.nativeElement.getAttribute('title')).toBeNull()
   })
 
-  // --- Opening details banner (plan 469) ---
+  // --- Modules (plan 620) ---
 
-  describe('modules (plan 620)', () => {
+  describe('modules', () => {
     const has = (selector: string) => fixture.debugElement.query(By.css(selector)) !== null
 
-    it('shows the performance area, the week card and the front desk checklist with everything on', () => {
+    beforeEach(() => modulesOn.set(ALL_MODULES))
+
+    it('shows the performance, week and front desk checklist cards with every module on', () => {
       fixture.detectChanges()
       expect(has('app-business-performance')).toBeTrue()
       expect(has('app-frontdesk-week-card')).toBeTrue()
       expect(has('app-front-desk-checklist-card')).toBeTrue()
     })
 
-    it('hides the performance area without events', () => {
-      modulesOff.add('events')
+    it('hides the performance card without events', () => {
+      modulesOn.set(['frontdesk', 'ai_create'])
       fixture.detectChanges()
       expect(has('app-business-performance')).toBeFalse()
       expect(has('app-frontdesk-week-card')).toBeTrue()
     })
 
     it('hides the week card and the front desk checklist without frontdesk', () => {
-      modulesOff.add('frontdesk')
+      modulesOn.set(['events', 'ai_create'])
       fixture.detectChanges()
       expect(has('app-frontdesk-week-card')).toBeFalse()
       expect(has('app-front-desk-checklist-card')).toBeFalse()
       expect(has('app-business-performance')).toBeTrue()
     })
   })
+
+  // --- Opening details banner (plan 469) ---
 
   describe('opening details banner', () => {
     const BUSINESS = {

@@ -32,7 +32,7 @@ export class AiMenuModalService {
       this.authModal_.open('sign-in')
       return
     }
-    // Plan 620: the window belongs to the `ai_create` module; the server refuses its calls anyway.
+    // Plan 620: the entry points are hidden without the module; a stray call opens nothing.
     if (!this.modules_.has('ai_create')) return
     this.mode_.set(mode)
     this.currentMenu_ = currentMenu ?? null

@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
+import { ModuleService } from './module.service'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
@@ -9,7 +10,6 @@ import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ClientDataService } from './client-data.service'
-import { ModuleService } from './module.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import type { VersionEntityType } from './version-history.service'
@@ -69,11 +69,8 @@ const emptyTrash = (): Record<TrashType, TrashItem[]> => ({
 export class TrashService {
   private readonly storage = inject(StorageService)
   private readonly userMsg = inject(UserMsgService)
-  private readonly translation = inject(TranslationService)
   private readonly modules = inject(ModuleService)
-
-  /** Plan 620: the sections whose module the business has (venues and menuEvents need events, clients events or frontdesk). */
-  readonly sections_ = computed(() => TRASH_SECTIONS.filter(({ type }) => this.modules.hasType(type)))
+  private readonly translation = inject(TranslationService)
 
   /** A list that already loaded must pick up a restored item; one that never loaded will fetch it anyway. */
   private readonly lists: Record<TrashType, { hasLoaded(): boolean; reloadFromStorage(): Promise<void> }> = {
@@ -89,6 +86,9 @@ export class TrashService {
 
   private readonly items_ = signal<Record<TrashType, TrashItem[]>>(emptyTrash())
   readonly items = this.items_.asReadonly()
+
+  /** Plan 620: the sections of the types whose module is on (`venues`, `menuEvents`, `clients` are gated). */
+  readonly sections_ = computed(() => TRASH_SECTIONS.filter(({ type }) => this.modules.hasType(type)))
 
   readonly hasAnyTrash = computed(() => Object.values(this.items_()).some((list) => list.length > 0))
 

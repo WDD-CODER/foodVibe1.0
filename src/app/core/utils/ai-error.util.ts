@@ -1,7 +1,10 @@
-/** Plan 620: the dictionary key for a refusal because the business reached its monthly AI cap; null for any other error. */
+/** The dictionary key shown when the business reached its monthly AI cap (plan 617 answers 429 `ai_monthly_cap_reached`). */
+export const AI_MONTHLY_CAP_KEY = 'ai_monthly_cap_reached'
+
+/** `ai_monthly_cap_reached` when the error is the server's monthly-cap refusal, else null (any other error, a 429 included). */
 export function aiCapErrorKey(err: unknown): string | null {
-  if (!err || typeof err !== 'object') return null
+  if (typeof err !== 'object' || err === null) return null
   const body = (err as { error?: unknown }).error
-  if (!body || typeof body !== 'object') return null
-  return (body as { error?: unknown }).error === 'ai_monthly_cap_reached' ? 'ai_monthly_cap_reached' : null
+  if (typeof body !== 'object' || body === null) return null
+  return (body as { error?: unknown }).error === AI_MONTHLY_CAP_KEY ? AI_MONTHLY_CAP_KEY : null
 }

@@ -54,7 +54,7 @@ export class SetupChecklistCardComponent {
   // 5. COMPUTED
   protected readonly steps = computed<SetupStep[]>(() => {
     const status = this.status_()
-    const all: SetupStep[] = [
+    const steps: SetupStep[] = [
       {
         key: 'products',
         labelKey: 'setup_step_products',
@@ -96,17 +96,18 @@ export class SetupChecklistCardComponent {
         queryParams: { tab: 'team' }
       }
     ]
-    // Plan 620: the events step belongs to the `events` module.
-    return this.modules.has('events') ? all : all.filter((step) => step.key !== 'event')
+    // Plan 620: the events step leads into a screen a business without the events module does not have.
+    return this.modules.has('events') ? steps : steps.filter((step) => step.key !== 'event')
   })
   protected readonly doneRequired = computed(() => this.steps().filter((step) => !step.optional && step.done).length)
+  private readonly requiredTotal_ = computed(() => this.steps().filter((step) => !step.optional).length)
   /** Shown only to the owner, after the status arrived, until the four required steps are done or the owner hides it. */
   protected readonly visible = computed(
     () =>
       this.permission.isOwner_() &&
       this.status_() !== null &&
       !this.isHidden_() &&
-      this.doneRequired() < this.steps().filter((step) => !step.optional).length
+      this.doneRequired() < this.requiredTotal_()
   )
 
   constructor() {

@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { MODULE_OF_TYPE } from '@schemas/modules-pure'
 import { environment } from '../../../environments/environment'
-import { ModuleService } from './module.service'
+import type { ModuleService } from './module.service'
 
 /** Plan 456 — every backend path in one place. Paths only: each caller keeps its own base
  *  (`environment.apiUrl` or `environment.authApiUrl`) in front, exactly as before. */
@@ -93,6 +93,19 @@ export class HttpStorageAdapter {
     return this.injector_.get(HttpClient)
   }
 
+  /**
+   * Plan 620: true when the type belongs to a module this business does not have — the caller returns an empty result
+   * and sends no request (the server would answer 403 MODULE_OFF). Types with no module are not delayed.
+   * ModuleService is read at call time through the injector (no constructor injection, no cycle).
+   */
+  private async moduleOff_(entityType: string): Promise<boolean> {
+    if (!(entityType in MODULE_OF_TYPE)) return false
+    const { ModuleService: ModuleServiceToken } = await import('./module.service')
+    const modules: ModuleService = this.injector_.get(ModuleServiceToken)
+    await modules.ready()
+    return !modules.hasType(entityType)
+  }
+
   // ---------------------------------------------------------------------------
   // Token helper
   // ---------------------------------------------------------------------------
@@ -100,18 +113,6 @@ export class HttpStorageAdapter {
   private headers(): HttpHeaders {
     const token = sessionStorage.getItem(TOKEN_KEY)
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders()
-  }
-
-  /**
-   * Plan 620: true when the type belongs to a module this business does not have, so the caller
-   * returns an empty result and sends no request the server would refuse with MODULE_OFF.
-   * Types with no module are not delayed.
-   */
-  private async moduleOff_(entityType: string): Promise<boolean> {
-    if (!(entityType in MODULE_OF_TYPE)) return false
-    const modules = this.injector_.get(ModuleService)
-    await modules.ready()
-    return !modules.hasType(entityType)
   }
 
   // ---------------------------------------------------------------------------

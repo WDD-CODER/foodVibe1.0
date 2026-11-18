@@ -40,9 +40,7 @@ describe('BusinessService', () => {
     http.expectNone(URL)
   })
 
-  it('loaded_ is true when signed out, false while loading, true after the answer', () => {
-    TestBed.flushEffects()
-    expect(service.loaded_()).toBeTrue()
+  it('loaded_ is false while loading, then true after the answer', () => {
     user.set({ _id: 'u1', name: 'u', email: 'u@x' })
     TestBed.flushEffects()
     expect(service.loaded_()).toBeFalse()
@@ -50,11 +48,16 @@ describe('BusinessService', () => {
     expect(service.loaded_()).toBeTrue()
   })
 
-  it('loaded_ is true after a failed load', () => {
+  it('loaded_ is true after an error', () => {
     user.set({ _id: 'u1', name: 'u', email: 'u@x' })
     TestBed.flushEffects()
-    expect(service.loaded_()).toBeFalse()
-    http.expectOne(URL).flush({ error: 'x' }, { status: 500, statusText: 'Err' })
+    http.expectOne(URL).flush('boom', { status: 500, statusText: 'err' })
+    expect(service.loaded_()).toBeTrue()
+    expect(service.business_()).toBeNull()
+  })
+
+  it('loaded_ is true when nobody is signed in', () => {
+    TestBed.flushEffects()
     expect(service.loaded_()).toBeTrue()
   })
 

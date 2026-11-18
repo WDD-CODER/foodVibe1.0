@@ -15,12 +15,12 @@ import { kitchenDataEnsureLoadedResolver } from './core/resolvers/kitchen-data-e
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
-import { moduleGuard } from './core/guards/module.guard'
 import { recipeBuilderAccessGuard } from './core/guards/recipe-builder-access.guard'
 import { platformAdminGuard } from './core/guards/platform-admin.guard'
 import { environment } from '../environments/environment'
 import { devCatalogRoutes } from './pages/dev-catalog/dev-catalog.routes'
 import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
+import { moduleGuard } from './core/guards/module.guard'
 import { KnowledgeItemDataService } from './core/services/knowledge-item-data.service'
 
 export const routes: Routes = [

@@ -70,6 +70,7 @@ export class DashboardOverviewComponent {
   private readonly translation = inject(TranslationService)
   private readonly businessService = inject(BusinessService)
   private readonly permission = inject(PermissionService)
+  /** Plan 620: the events and front desk cards belong to modules the business may not have. */
   protected readonly modules = inject(ModuleService)
   private readonly relativeTimeFormat = new Intl.RelativeTimeFormat('he', { numeric: 'auto', style: 'short' })
   protected readonly isLoggedIn = inject(UserService).isLoggedIn

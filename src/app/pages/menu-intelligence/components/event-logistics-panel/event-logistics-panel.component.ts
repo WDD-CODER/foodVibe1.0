@@ -6,11 +6,11 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { ModuleService } from '@services/module.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService, type LogisticsPatch } from '@services/event-pipeline.service'
 import { LogisticsItemRegistryService } from '@services/logistics-item-registry.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
-import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -75,8 +75,9 @@ const ENVIRONMENTS: EnvironmentType[] = ['professional_kitchen', 'outdoor_field'
 })
 export class EventLogisticsPanelComponent {
   // 1. INJECTED
-  protected readonly modules = inject(ModuleService)
   private readonly eventData = inject(MenuEventDataService)
+  /** Plan 620: the whole panel is hidden for a business without the event_logistics module. */
+  protected readonly modules = inject(ModuleService)
   private readonly pipeline = inject(EventPipelineService)
   protected readonly registry = inject(LogisticsItemRegistryService)
   private readonly permission = inject(PermissionService)

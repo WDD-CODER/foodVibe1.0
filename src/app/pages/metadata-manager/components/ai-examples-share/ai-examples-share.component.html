@@ -10,11 +10,11 @@
       class="c-chip c-chip--tap is-locked"
       tabindex="0"
       data-testid="ai-examples-share-state"
-      [attr.title]="tooltip_()"
-      [attr.aria-label]="label_()"
+      [attr.title]="'metadata_ai_private_tooltip' | translatePipe"
+      [attr.aria-label]="(stateKey_() | translatePipe) + ' — ' + ('metadata_ai_private_tooltip' | translatePipe)"
     >
       <lucide-icon name="lock" [size]="14"></lucide-icon>
-      {{ stateKey_() | translatePipe }}
+      <span>{{ stateKey_() | translatePipe }}</span>
     </span>
   </div>
 </section>

@@ -23,7 +23,7 @@ export class HeroFabComponent {
   private router = inject(Router)
   private destroyRef = inject(DestroyRef)
   private heroFab_ = inject(HeroFabService)
-  private readonly modules = inject(ModuleService)
+  private modules_ = inject(ModuleService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
 
   readonly isExpanded_ = signal(false)
@@ -36,7 +36,7 @@ export class HeroFabComponent {
   protected readonly effectiveActions_ = computed(() => {
     const state = this.heroFab_.pageActions()
     if (!state) return []
-    return state.actions.filter((action) => !action.module || this.modules.has(action.module))
+    return state.actions.filter((action) => !action.module || this.modules_.has(action.module))
   })
 
   /** Always rotate — chef-hat action is always present in the template. */

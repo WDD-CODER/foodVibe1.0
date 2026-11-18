@@ -127,6 +127,13 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     expect(internals().errorKey_()).toBe('ai_recipe_error')
   })
 
+  it('shows the monthly cap message for the cap refusal (plan 620)', () => {
+    const key = (component as unknown as { resolveErrorKey_(e: unknown): string }).resolveErrorKey_(
+      new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' } })
+    )
+    expect(key).toBe('ai_monthly_cap_reached')
+  })
+
   it('does not save a pasted recipe as a few-shot example when approved', async () => {
     gemini.parseText.and.returnValue(of(parsed))
     spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true)
@@ -184,12 +191,5 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
       fixture.detectChanges()
       expect(hint()).toBeNull()
     })
-  })
-
-  it('shows the monthly cap message for the cap refusal (plan 620)', () => {
-    const key = (component as unknown as { resolveErrorKey_(e: unknown): string }).resolveErrorKey_(
-      new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' } })
-    )
-    expect(key).toBe('ai_monthly_cap_reached')
   })
 })

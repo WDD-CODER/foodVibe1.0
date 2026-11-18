@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
+import { FormsModule } from '@angular/forms'
 import { MODULE_KEYS, type ModuleKey } from '@schemas/modules-pure'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
@@ -14,11 +15,11 @@ import { PlatformBusinessDialogService } from './platform-business-dialog.servic
 const REASON_MIN = 3
 const REASON_MAX = 200
 
-/** Plan 620: the platform admin sets one business's modules, monthly AI cap and private mode, with a reason. */
+/** Plan 620: the platform admin sets one business's modules, monthly AI token cap and private mode, with a reason. */
 @Component({
   selector: 'app-platform-business-dialog',
   standalone: true,
-  imports: [TranslatePipe, ModalShellComponent, FormFieldComponent, NumberBoxDirective],
+  imports: [FormsModule, TranslatePipe, ModalShellComponent, FormFieldComponent, NumberBoxDirective],
   templateUrl: './platform-business-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -35,22 +36,22 @@ export class PlatformBusinessDialogComponent {
 
   protected readonly modules_ = signal<ModuleKey[]>([...(this.dialog.current_()?.modules ?? [])])
   protected readonly cap_ = signal<string>(String(this.dialog.current_()?.aiMonthlyTokenCap ?? ''))
-  protected readonly private_ = signal(this.dialog.current_()?.aiPrivate ?? false)
+  protected readonly private_ = signal<boolean>(this.dialog.current_()?.aiPrivate ?? false)
   protected readonly reason_ = signal('')
   protected readonly isSaving_ = signal(false)
   protected readonly reasonError_ = signal<string | null>(null)
   protected readonly tried_ = signal(false)
 
-  /** The cap as typed: `null` when emptied, a whole number ≥ 0, or `'invalid'`. */
-  private readonly capValue_ = computed<number | null | 'invalid'>(() => {
+  /** The cap as typed: `null` when emptied, `NaN` when it is not a whole number of 0 or more. */
+  private readonly capValue_ = computed<number | null>(() => {
     const text = this.cap_().trim()
     if (text === '') return null
-    return /^\d+$/.test(text) ? Number(text) : 'invalid'
+    return /^\d+$/.test(text) ? Number(text) : Number.NaN
   })
-  protected readonly capInvalid_ = computed(() => this.capValue_() === 'invalid')
-  protected readonly reasonShort_ = computed(() => this.reason_().trim().length < REASON_MIN)
+  protected readonly capInvalid_ = computed(() => Number.isNaN(this.capValue_()))
+  protected readonly reasonMissing_ = computed(() => this.reason_().trim().length < REASON_MIN)
 
-  /** Only what differs from the row. */
+  /** Only what differs from the row is sent. */
   private readonly body_ = computed<Omit<PlatformUpdateBody, 'reason'>>(() => {
     const t = this.dialog.current_()
     const body: Omit<PlatformUpdateBody, 'reason'> = {}
@@ -59,29 +60,32 @@ export class PlatformBusinessDialogComponent {
     const before = MODULE_KEYS.filter((key) => t.modules.includes(key))
     if (chosen.join() !== before.join()) body.modules = chosen
     const cap = this.capValue_()
-    if (cap !== 'invalid' && cap !== t.aiMonthlyTokenCap) body.aiMonthlyTokenCap = cap
+    if (cap === null ? t.aiMonthlyTokenCap !== null : !Number.isNaN(cap) && cap !== t.aiMonthlyTokenCap) {
+      body.aiMonthlyTokenCap = cap
+    }
     if (this.private_() !== t.aiPrivate) body.aiPrivate = this.private_()
     return body
   })
-  protected readonly hasChange_ = computed(() => Object.keys(this.body_()).length > 0)
+  protected readonly hasChange_ = computed(() => Object.keys(this.body_()).length > 0 || this.capInvalid_())
 
   protected isOn(key: ModuleKey): boolean {
     return this.modules_().includes(key)
   }
 
-  /** Logistics lives on an event: it stays off and disabled while `events` is off. */
+  /** Logistics lives on an event: it is disabled while `events` is off. */
   protected isDisabled(key: ModuleKey): boolean {
     return key === 'event_logistics' && !this.isOn('events')
   }
 
-  protected toggleModule(key: ModuleKey, checked: boolean): void {
+  protected toggleModule(key: ModuleKey, on: boolean): void {
     this.modules_.update((list) => {
-      const next = checked ? [...list, key] : list.filter((k) => k !== key)
-      return key === 'events' && !checked ? next.filter((k) => k !== 'event_logistics') : next
+      const next = on ? [...list, key] : list.filter((k) => k !== key)
+      return key === 'events' && !on ? next.filter((k) => k !== 'event_logistics') : next
     })
   }
 
   protected cancel(): void {
+    if (this.isSaving_()) return
     this.dialog.close(false)
   }
 
@@ -89,7 +93,7 @@ export class PlatformBusinessDialogComponent {
     const t = this.dialog.current_()
     if (!t || this.isSaving_()) return
     this.tried_.set(true)
-    if (this.reasonShort_() || this.capInvalid_() || !this.hasChange_()) return
+    if (this.reasonMissing_() || this.capInvalid_() || !this.hasChange_()) return
     this.isSaving_.set(true)
     this.reasonError_.set(null)
     try {

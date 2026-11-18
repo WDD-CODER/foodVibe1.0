@@ -85,7 +85,7 @@ describe('PlatformDashboardPage', () => {
         )
       )
     TestBed.configureTestingModule({
-      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp, Settings })],
+      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, TrendingUp })],
       providers: [
         {
           provide: PlatformAdminService,
@@ -237,6 +237,55 @@ describe('PlatformDashboardPage', () => {
     expect(open).toHaveBeenCalledOnceWith({ businessId: 'a', name: 'a', status: 'pilot' })
   })
 
+  describe('modules and AI columns (plan 620)', () => {
+    const text = (id: string): string =>
+      ((fixture.nativeElement as HTMLElement).querySelector(`[data-testid="${id}"]`)?.textContent ?? '').trim()
+
+    it('shows the module names joined with a dot, and a dash when none is on', async () => {
+      await setup([row('a', { modules: ['events', 'frontdesk'] })])
+      expect(text('biz-modules')).toBe('module_events · module_frontdesk')
+    })
+
+    it('shows a dash when no module is on', async () => {
+      await setup([row('b', { modules: [] })])
+      expect(text('biz-modules')).toBe('—')
+    })
+
+    it('shows tokens over the cap with thousands separators', async () => {
+      await setup([row('a', { aiTokensThisMonth: 12345, aiMonthlyTokenCap: 100000 })])
+      expect(text('biz-ai-month')).toContain('12,345 / 100,000')
+    })
+
+    it('shows "no cap" when there is none', async () => {
+      await setup([row('b', { aiTokensThisMonth: 0 })])
+      expect(text('biz-ai-month')).toContain('0 / platform_ai_no_cap')
+    })
+
+    it('shows the private tag only for a private business', async () => {
+      await setup([row('a', { aiPrivate: true })])
+      expect(text('biz-private-tag')).toBe('platform_ai_private_tag')
+    })
+
+    it('shows no private tag for a shared business', async () => {
+      await setup([row('b')])
+      expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-private-tag"]')).toBeNull()
+    })
+
+    it('opens the dialog on the row when the settings button is pressed', async () => {
+      await setup([row('a', { modules: ['events'], aiPrivate: true, aiMonthlyTokenCap: 5, aiTokensThisMonth: 2 })])
+      const open = spyOn(TestBed.inject(PlatformBusinessDialogService), 'open').and.resolveTo(false)
+      ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      expect(open).toHaveBeenCalledOnceWith({
+        businessId: 'a',
+        name: 'a',
+        modules: ['events'],
+        aiPrivate: true,
+        aiMonthlyTokenCap: 5,
+        aiTokensThisMonth: 2
+      })
+    })
+  })
+
   describe('pinned name column (plan 611)', () => {
     it('keeps the name cells and header above anything that scrolls under them', async () => {
       await setup([row('a'), row('b')])
@@ -325,54 +374,6 @@ describe('PlatformDashboardPage', () => {
       const host = fixture.nativeElement as HTMLElement
       expect(host.querySelector('.ai-table')).toBeNull()
       expect(host.querySelector('.ai-usage app-empty-state')?.textContent).toContain('platform_ai_empty')
-    })
-  })
-
-  describe('modules and AI columns (plan 620)', () => {
-    const cell = (testid: string): string =>
-      ((fixture.nativeElement as HTMLElement).querySelector(`[data-testid="${testid}"]`)?.textContent ?? '')
-        .replace(/\s+/g, ' ')
-        .trim()
-
-    it('shows the module names joined with a dot, in order', async () => {
-      await setup([row('a', { modules: ['events', 'ai_create'] })])
-      expect(cell('biz-modules')).toBe('module_events · module_ai_create')
-    })
-
-    it('shows a dash when no module is on', async () => {
-      await setup([row('a', { modules: [] })])
-      expect(cell('biz-modules')).toBe('—')
-    })
-
-    it('shows tokens / cap with thousands separators', async () => {
-      await setup([row('a', { aiTokensThisMonth: 12345, aiMonthlyTokenCap: 1000000 })])
-      expect(cell('biz-ai-month')).toBe('12,345 / 1,000,000')
-    })
-
-    it('shows the no-cap text and no private tag by default', async () => {
-      await setup([row('a')])
-      expect(cell('biz-ai-month')).toBe('0 / platform_ai_no_cap')
-      expect((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-private-tag"]')).toBeNull()
-    })
-
-    it('shows the private tag for a private business', async () => {
-      await setup([row('a', { aiPrivate: true })])
-      expect(cell('biz-private-tag')).toBe('platform_ai_private_tag')
-    })
-
-    it('opens the modules dialog on the row state when the settings button is clicked', async () => {
-      await setup([row('a', { modules: ['frontdesk'], aiPrivate: true, aiMonthlyTokenCap: 5, aiTokensThisMonth: 3 })])
-      const dialog = TestBed.inject(PlatformBusinessDialogService)
-      const open = spyOn(dialog, 'open').and.resolveTo(false)
-      ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
-      expect(open).toHaveBeenCalledOnceWith({
-        businessId: 'a',
-        name: 'a',
-        modules: ['frontdesk'],
-        aiPrivate: true,
-        aiMonthlyTokenCap: 5,
-        aiTokensThisMonth: 3
-      })
     })
   })
 })

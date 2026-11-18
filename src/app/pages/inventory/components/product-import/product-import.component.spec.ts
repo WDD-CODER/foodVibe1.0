@@ -177,7 +177,7 @@ describe('ProductImportComponent', () => {
     expect(byId('import-preview')).toBeNull()
   })
 
-  it('on the monthly cap refusal the cap message is shown (plan 620)', async () => {
+  it('on the monthly cap refusal the monthly cap message is shown (plan 620)', async () => {
     await setup(
       throwError(
         () =>

@@ -1,5 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core'
+import { signal as modSignal } from '@angular/core'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
+import { Component, Input, Output, EventEmitter } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ActivatedRoute, Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
@@ -34,6 +36,14 @@ class VenueFormStub {
 @Component({ selector: 'app-trash-page', template: '', standalone: true })
 class TrashPageStub {}
 
+/** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
+const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
+const modulesOn = modSignal<ModuleKey[]>(ALL_MODULES)
+const moduleStub = {
+  provide: ModuleService,
+  useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
+}
+
 describe('DashboardPage', () => {
   let fixture: ComponentFixture<DashboardPage>
   let component: DashboardPage
@@ -41,6 +51,7 @@ describe('DashboardPage', () => {
   let queryParamsSubject: BehaviorSubject<Record<string, string>>
 
   beforeEach(async () => {
+    modulesOn.set(ALL_MODULES)
     router = jasmine.createSpyObj('Router', ['navigate'])
     router.navigate.and.returnValue(Promise.resolve(true))
     queryParamsSubject = new BehaviorSubject<Record<string, string>>({})
@@ -50,6 +61,7 @@ describe('DashboardPage', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        moduleStub,
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
@@ -106,13 +118,15 @@ describe('DashboardPage', () => {
     expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-venues"]'))).not.toBeNull()
   })
 
-  it('should show the overview for the venue tabs when events is off (plan 620)', () => {
-    spyOn(TestBed.inject(ModuleService), 'has').and.returnValue(false)
-    for (const tab of ['venues', 'add-venue']) {
-      queryParamsSubject.next({ tab })
-      fixture.detectChanges()
-      expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-' + tab + '"]'))).toBeNull()
-    }
+  it('answers overview for the venues tabs without events (plan 620)', () => {
+    modulesOn.set(['frontdesk', 'ai_create'])
+    queryParamsSubject.next({ tab: 'venues' })
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-venues"]'))).toBeNull()
+    expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-overview"]'))).not.toBeNull()
+    queryParamsSubject.next({ tab: 'add-venue' })
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('[data-testid="dashboard-tab-add-venue"]'))).toBeNull()
   })
 
   it('should resolve "add-venue" query param to add-venue tab', () => {

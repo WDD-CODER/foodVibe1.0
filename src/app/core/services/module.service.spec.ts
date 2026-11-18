@@ -10,7 +10,7 @@ describe('ModuleService', () => {
   let service: ModuleService
 
   beforeEach(() => {
-    business.set({ _id: 'b1', name: 'x' } as Business)
+    business.set(null)
     loaded.set(true)
     TestBed.configureTestingModule({
       providers: [{ provide: BusinessService, useValue: { business_: business, loaded_: loaded } }]
@@ -19,6 +19,7 @@ describe('ModuleService', () => {
   })
 
   it('a business without modules has the four defaults and not consultant_diag', () => {
+    business.set({ _id: 'b1', name: 'x' } as Business)
     expect(service.has('events')).toBeTrue()
     expect(service.has('event_logistics')).toBeTrue()
     expect(service.has('frontdesk')).toBeTrue()
@@ -26,16 +27,17 @@ describe('ModuleService', () => {
     expect(service.has('consultant_diag')).toBeFalse()
   })
 
-  it("modules: ['frontdesk'] has only frontdesk", () => {
+  it('modules: [frontdesk] has only frontdesk', () => {
     business.set({ _id: 'b1', name: 'x', modules: ['frontdesk'] } as Business)
-    expect(service.modules_()).toEqual(['frontdesk'])
+    expect(service.has('frontdesk')).toBeTrue()
     expect(service.has('events')).toBeFalse()
+    expect(service.has('ai_create')).toBeFalse()
   })
 
-  it('has() with a list is true when either is on', () => {
+  it('has(list) is true when either is on', () => {
     business.set({ _id: 'b1', name: 'x', modules: ['frontdesk'] } as Business)
     expect(service.has(['events', 'frontdesk'])).toBeTrue()
-    expect(service.has(['events', 'ai_create'])).toBeFalse()
+    expect(service.has(['events', 'event_logistics'])).toBeFalse()
   })
 
   it('hasType follows MODULE_OF_TYPE and leaves other types open', () => {
@@ -45,26 +47,21 @@ describe('ModuleService', () => {
     expect(service.hasType('products')).toBeTrue()
   })
 
-  it('before the business loaded it answers from the defaults', () => {
+  it('answers from the defaults before the business has loaded', () => {
     loaded.set(false)
-    business.set(null)
     expect(service.has('events')).toBeTrue()
   })
 
-  it('ready() resolves at once when loaded (also signed out or after a failed load)', async () => {
-    business.set(null)
+  it('ready() resolves at once when loaded, after the load, and when signed out', async () => {
     await service.ready()
-  })
-
-  it('ready() waits for the load to finish', async () => {
     loaded.set(false)
     let done = false
-    const p = service.ready().then(() => (done = true))
-    TestBed.flushEffects()
+    const pending = service.ready().then(() => (done = true))
+    await Promise.resolve()
     expect(done).toBeFalse()
     loaded.set(true)
     TestBed.flushEffects()
-    await p
+    await pending
     expect(done).toBeTrue()
   })
 })

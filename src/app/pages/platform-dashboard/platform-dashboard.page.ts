@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
-import { DatePipe, DecimalPipe } from '@angular/common'
 import { MODULE_KEYS } from '@schemas/modules-pure'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
+import { DatePipe } from '@angular/common'
 import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -67,7 +67,6 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
   standalone: true,
   imports: [
     DatePipe,
-    DecimalPipe,
     RouterLink,
     LucideAngularModule,
     TranslatePipe,
@@ -311,26 +310,6 @@ export class PlatformDashboardPage implements OnInit {
     }
   }
 
-  /** Plan 620: the short names of the modules a business has, in MODULE_KEYS order. */
-  protected modulesText(row: BusinessRow): string {
-    const names = MODULE_KEYS.filter((key) => row.modules.includes(key)).map((key) =>
-      this.translation.translate('module_' + key)
-    )
-    return names.length ? names.join(' · ') : '—'
-  }
-
-  /** Plan 620: opens the modules / AI cap / private dialog; the table reloads in the service after a save. */
-  protected async editBusiness(row: BusinessRow): Promise<void> {
-    await this.bizDialog.open({
-      businessId: row._id,
-      name: row.name,
-      modules: row.modules,
-      aiPrivate: row.aiPrivate,
-      aiMonthlyTokenCap: row.aiMonthlyTokenCap,
-      aiTokensThisMonth: row.aiTokensThisMonth
-    })
-  }
-
   /** Plan 557: opens the front desk dialog for one row; the table reloads in the service after a save. */
   protected async editFrontDesk(row: BusinessRow): Promise<void> {
     const fd = row.frontDesk
@@ -339,6 +318,40 @@ export class PlatformDashboardPage implements OnInit {
       businessId: row._id,
       name: row.name,
       status: fd.status
+    })
+  }
+
+  /** Plan 620: the short module names of one row, in MODULE_KEYS order; a dash when none is on. */
+  protected modulesText(row: BusinessRow): string {
+    const names = MODULE_KEYS.filter((key) => row.modules.includes(key)).map((key) =>
+      this.translation.translate('module_' + key)
+    )
+    return names.length ? names.join(' · ') : '—'
+  }
+
+  /** Plan 620: this month's tokens over the cap, or "no cap". */
+  protected aiMonthText(row: BusinessRow): string {
+    const cap =
+      row.aiMonthlyTokenCap === null
+        ? this.translation.translate('platform_ai_no_cap')
+        : this.tokens(row.aiMonthlyTokenCap)
+    return `${this.tokens(row.aiTokensThisMonth)} / ${cap}`
+  }
+
+  /** Plan 620: a number with thousands separators. */
+  protected tokens(n: number): string {
+    return n.toLocaleString('en-US')
+  }
+
+  /** Plan 620: opens the modules, AI cap and private-mode dialog for one row; the table reloads in the service after a save. */
+  protected async editPlatform(row: BusinessRow): Promise<void> {
+    await this.bizDialog.open({
+      businessId: row._id,
+      name: row.name,
+      modules: row.modules,
+      aiPrivate: row.aiPrivate,
+      aiMonthlyTokenCap: row.aiMonthlyTokenCap,
+      aiTokensThisMonth: row.aiTokensThisMonth
     })
   }
 }

@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core'
 import { aiCapErrorKey } from '@utils/ai-error.util'
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
 import { HttpErrorResponse } from '@angular/common/http'

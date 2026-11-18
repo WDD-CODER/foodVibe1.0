@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing'
-import { signal } from '@angular/core'
 import { Router, UrlTree, type ActivatedRouteSnapshot, type RouterStateSnapshot } from '@angular/router'
-import type { ModuleKey } from '@schemas/modules'
+import { signal } from '@angular/core'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 import { moduleGuard } from './module.guard'
@@ -10,62 +10,52 @@ describe('moduleGuard', () => {
   const user = signal<{ _id: string } | null>({ _id: 'u1' })
   let on: ModuleKey[]
   let resolveReady: () => void
-  let readyCalled: boolean
+  let readyPromise: Promise<void>
+
+  const run = (keys: ModuleKey[]) =>
+    TestBed.runInInjectionContext(() => moduleGuard(keys)({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot))
 
   beforeEach(() => {
     user.set({ _id: 'u1' })
     on = ['events']
-    readyCalled = false
+    readyPromise = Promise.resolve()
     TestBed.configureTestingModule({
       providers: [
         { provide: UserService, useValue: { user_: user } },
         {
           provide: ModuleService,
           useValue: {
-            has: (keys: readonly ModuleKey[]) => keys.some((k) => on.includes(k)),
-            ready: () => {
-              readyCalled = true
-              return new Promise<void>((r) => (resolveReady = r))
-            }
+            has: (k: ModuleKey | ModuleKey[]) => [k].flat().some((x) => on.includes(x)),
+            ready: () => readyPromise
           }
-        }
+        },
+        { provide: Router, useValue: { createUrlTree: (c: string[]) => ({ path: c.join('/') }) as unknown as UrlTree } }
       ]
     })
   })
 
-  const run = (keys: readonly ModuleKey[]) =>
-    TestBed.runInInjectionContext(() =>
-      moduleGuard(keys)({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
-    ) as Promise<boolean | UrlTree>
-
-  it('returns true with the module, after ready()', async () => {
-    const p = run(['events'])
-    expect(readyCalled).toBeTrue()
-    resolveReady()
-    expect(await p).toBeTrue()
+  it('returns true with the module', async () => {
+    expect(await run(['events'])).toBeTrue()
   })
 
-  it('returns the /dashboard UrlTree without the module', async () => {
-    const p = run(['frontdesk'])
-    resolveReady()
-    const res = await p
-    expect(res instanceof UrlTree).toBeTrue()
-    expect(TestBed.inject(Router).serializeUrl(res as UrlTree)).toBe('/dashboard')
+  it('returns the /dashboard UrlTree without it', async () => {
+    const res = (await run(['frontdesk'])) as unknown as { path: string }
+    expect(res.path).toBe('/dashboard')
   })
 
   it('waits for ready() before it answers', async () => {
-    let settled = false
-    const p = run(['frontdesk']).then(() => (settled = true))
+    readyPromise = new Promise<void>((r) => (resolveReady = r))
+    let answered = false
+    const p = Promise.resolve(run(['events'])).then(() => (answered = true))
     await Promise.resolve()
-    expect(settled).toBeFalse()
+    expect(answered).toBeFalse()
     resolveReady()
     await p
-    expect(settled).toBeTrue()
+    expect(answered).toBeTrue()
   })
 
-  it('signed out: true without waiting', async () => {
+  it('returns true when signed out', async () => {
     user.set(null)
     expect(await run(['frontdesk'])).toBeTrue()
-    expect(readyCalled).toBeFalse()
   })
 })

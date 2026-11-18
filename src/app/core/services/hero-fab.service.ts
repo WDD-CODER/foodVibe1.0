@@ -5,7 +5,7 @@ export interface HeroFabAction {
   labelKey: string
   icon: string
   run: () => void
-  /** Plan 620: the action is left out while the business lacks this module. */
+  /** Plan 620: the action is left out when the business does not have this module. */
   module?: ModuleKey
 }
 

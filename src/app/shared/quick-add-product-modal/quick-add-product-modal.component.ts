@@ -1,3 +1,4 @@
+import { ModuleService } from '@services/module.service'
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,7 +16,6 @@ import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service'
-import { ModuleService } from '@services/module.service'
 import { ProductDataService } from '@services/product-data.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -52,7 +52,7 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
 })
 export class QuickAddProductModalComponent {
   private readonly modalService = inject(QuickAddProductModalService)
-  protected readonly modules_ = inject(ModuleService)
+  protected readonly modules = inject(ModuleService)
   private readonly productData = inject(ProductDataService)
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly metadataRegistry = inject(MetadataRegistryService)

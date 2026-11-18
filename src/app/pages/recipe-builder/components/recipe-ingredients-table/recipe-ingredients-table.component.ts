@@ -1,3 +1,4 @@
+import { aiCapErrorKey } from '@utils/ai-error.util'
 import {
   ChangeDetectionStrategy,
   Component,
@@ -12,7 +13,6 @@ import {
   DestroyRef,
   ElementRef
 } from '@angular/core'
-import { aiCapErrorKey } from '@utils/ai-error.util'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
 import { CommonModule } from '@angular/common'

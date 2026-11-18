@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { BusinessService } from '@services/business.service'
-import { TranslationService } from '@services/translation.service'
 
 /**
- * Plan 600 — the owner's «שיתוף דוגמאות AI» card. Plans 618 and 620: every business shares unless the platform admin
- * marked it private, so the card shows one locked chip (shared / private) and calls no route.
+ * Plan 600 — the owner's «שיתוף דוגמאות AI» card. Plan 618: every business shares unless the platform admin marked
+ * it private, so the chip is read-only — ticked unless `aiPrivate` is true — and the card calls no route.
+ * Plan 620: the chip is one locked span (shared / private) with the "contact FoodVibe" tooltip; nothing to edit.
  */
 @Component({
   selector: 'app-ai-examples-share',
@@ -19,12 +19,10 @@ import { TranslationService } from '@services/translation.service'
 export class AiExamplesShareComponent {
   // 1. INJECTED
   private readonly businessService = inject(BusinessService)
-  private readonly translation = inject(TranslationService)
 
   // 5. COMPUTED
+  /** Plan 620: shared unless the platform admin marked the business private (shared while the business loads). */
   protected readonly stateKey_ = computed(() =>
     this.businessService.business_()?.aiPrivate === true ? 'metadata_ai_state_private' : 'metadata_ai_state_shared'
   )
-  protected readonly tooltip_ = computed(() => this.translation.translate('metadata_ai_private_tooltip'))
-  protected readonly label_ = computed(() => `${this.translation.translate(this.stateKey_())} — ${this.tooltip_()}`)
 }

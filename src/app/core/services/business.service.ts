@@ -52,24 +52,24 @@ export class BusinessService {
   private readonly _business_ = signal<Business | null>(null)
   public readonly business_ = this._business_.asReadonly()
 
+  private readonly _loaded_ = signal(false)
+  /** Plan 620: `false` while a signed-in user's business is loading; `true` once `_load` answered or failed, and when nobody is signed in. */
+  public readonly loaded_ = this._loaded_.asReadonly()
+
   /** Only the id: a new user object with the same _id (profile update, token refresh) must not reload. */
   private readonly _userId_ = computed(() => this.userService.user_()?._id ?? null)
-
-  private readonly _loaded_ = signal(this._userId_() === null)
-  /** Plan 620: false when the signed-in user changes, true once the load answered (or failed), true when nobody is signed in. */
-  public readonly loaded_ = this._loaded_.asReadonly()
 
   constructor() {
     effect(() => {
       const userId = this._userId_()
       untracked(() => {
-        if (userId) {
-          this._loaded_.set(false)
-          this._load(userId)
-        } else {
+        if (!userId) {
           this._business_.set(null)
           this._loaded_.set(true)
+          return
         }
+        this._loaded_.set(false)
+        this._load(userId)
       })
     })
   }

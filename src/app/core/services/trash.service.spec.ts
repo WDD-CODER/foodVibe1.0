@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { TrashService, TRASH_SECTIONS } from './trash.service'
+import { signal } from '@angular/core'
+import { ModuleService } from './module.service'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
@@ -10,7 +12,6 @@ import { VenueDataService } from './venue-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
 import { SupplierDataService } from './supplier-data.service'
 import { ClientDataService } from './client-data.service'
-import { ModuleService } from './module.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 
@@ -23,16 +24,10 @@ describe('TrashService (plan 407)', () => {
   const recipes = list(true)
   const dishes = list(false)
   const clients = list(true)
-  const modulesOff = new Set<string>()
-  const moduleStub = {
-    hasType: (type: string) =>
-      ({ venues: ['events'], menuEvents: ['events'], clients: ['events', 'frontdesk'] })[type as 'venues']?.some(
-        (k) => !modulesOff.has(k)
-      ) ?? true
-  }
+  const eventsOn = signal(true)
 
   beforeEach(() => {
-    modulesOff.clear()
+    eventsOn.set(true)
     storage = jasmine.createSpyObj<StorageService>('StorageService', [
       'trash',
       'restore',
@@ -62,7 +57,10 @@ describe('TrashService (plan 407)', () => {
     TestBed.configureTestingModule({
       providers: [
         TrashService,
-        { provide: ModuleService, useValue: moduleStub },
+        {
+          provide: ModuleService,
+          useValue: { hasType: (type: string) => eventsOn() || !['venues', 'menuEvents', 'clients'].includes(type) }
+        },
         { provide: StorageService, useValue: storage },
         { provide: RecipeDataService, useValue: recipes },
         { provide: DishDataService, useValue: dishes },
@@ -87,17 +85,16 @@ describe('TrashService (plan 407)', () => {
     expect(service.hasAnyTrash()).toBeTrue()
   })
 
-  it('with events off the sections hold no venues and no menuEvents and no request is sent for them (plan 620)', async () => {
-    modulesOff.add('events')
-    service = TestBed.inject(TrashService)
+  it('with events off the sections hold no venues, menuEvents or clients and Trash asks no request for them (plan 620)', async () => {
+    eventsOn.set(false)
+    await service.loadTrash()
     const types = service.sections_().map((s) => s.type)
     expect(types).not.toContain('venues')
     expect(types).not.toContain('menuEvents')
-    expect(types).toContain('clients')
-    await service.loadTrash()
-    const asked = storage.trash.calls.allArgs().map((a) => a[0])
-    expect(asked).not.toContain('venues')
-    expect(asked).not.toContain('menuEvents')
+    expect(types).not.toContain('clients')
+    expect(storage.trash).toHaveBeenCalledTimes(types.length)
+    expect(storage.trash).not.toHaveBeenCalledWith('venues')
+    expect(storage.trash).not.toHaveBeenCalledWith('menuEvents')
   })
 
   it('restore refreshes a list that already loaded, and leaves an unloaded one alone', async () => {

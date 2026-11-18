@@ -34,7 +34,7 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
       [
         { labelKey: 'menu_new_event', icon: 'book-plus', run: () => void this.router.navigate(['/menu-intelligence']) },
         { labelKey: 'new_inquiry', icon: 'phone-incoming', run: () => void this.openInquiryForm() },
-        { labelKey: 'ai_menu_create_new', icon: 'sparkles', module: 'ai_create', run: () => this.openAiCreateModal() }
+        { labelKey: 'ai_menu_create_new', icon: 'sparkles', run: () => this.openAiCreateModal(), module: 'ai_create' }
       ],
       'replace'
     )

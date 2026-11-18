@@ -10,7 +10,17 @@ import { signal } from '@angular/core'
 import { of } from 'rxjs'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
+import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
+
+/** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
+const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
+const modulesOn = signal<ModuleKey[]>(ALL_MODULES)
+const moduleStub = {
+  provide: ModuleService,
+  useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
+}
+beforeEach(() => modulesOn.set(ALL_MODULES))
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent
@@ -20,6 +30,7 @@ describe('HeaderComponent', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        moduleStub,
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
           { path: 'dashboard', redirectTo: '' },
@@ -68,6 +79,32 @@ describe('HeaderComponent', () => {
     const navLinks = fixture.nativeElement.querySelectorAll('li a')
     expect(navLinks.length).toBe(5)
   })
+
+  describe('modules (plan 620)', () => {
+    const hrefs = () => Array.from<Element>(fixture.nativeElement.querySelectorAll('a[href="/menu-library"]'))
+    const clients = () => Array.from<Element>(fixture.nativeElement.querySelectorAll('a[href="/clients"]'))
+
+    it('hides /menu-library in the pills, the drawer and the bottom bar without events', () => {
+      expect(hrefs().length).toBeGreaterThan(0)
+      modulesOn.set(['frontdesk', 'ai_create'])
+      fixture.detectChanges()
+      expect(hrefs().length).toBe(0)
+      expect(clients().length).toBeGreaterThan(0)
+    })
+
+    it('hides /clients when both events and frontdesk are off', () => {
+      modulesOn.set(['ai_create'])
+      fixture.detectChanges()
+      expect(clients().length).toBe(0)
+      expect(hrefs().length).toBe(0)
+    })
+
+    it('keeps /clients when only events is on', () => {
+      modulesOn.set(['events'])
+      fixture.detectChanges()
+      expect(clients().length).toBeGreaterThan(0)
+    })
+  })
 })
 
 describe('HeaderComponent avatar fallback', () => {
@@ -77,6 +114,7 @@ describe('HeaderComponent avatar fallback', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        moduleStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -121,6 +159,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        moduleStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -132,8 +171,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
             logout: () => of(null)
           }
         },
-        { provide: BusinessService, useValue: { business_: business } },
-        { provide: ModuleService, useValue: { has: () => true } }
+        { provide: BusinessService, useValue: { business_: business } }
       ]
     }).compileComponents()
     fixture = TestBed.createComponent(HeaderComponent)
@@ -185,6 +223,7 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        moduleStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -223,6 +262,7 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        moduleStub,
         provideRouter([]),
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(3) } },
         {
@@ -244,51 +284,5 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
     expect(host.querySelector('[data-testid="header-waiting-count"]')?.textContent?.trim()).toBe('3')
     const label = host.querySelector('.bottom-nav a[href="/clients"]')?.getAttribute('aria-label')
     expect(label).not.toContain('3')
-  })
-})
-
-describe('HeaderComponent links follow the modules (plan 620)', () => {
-  const setup = async (on: string[]) => {
-    await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
-      providers: [
-        provideRouter([]),
-        {
-          provide: ModuleService,
-          useValue: { has: (keys: string | string[]) => [keys].flat().some((k) => on.includes(k)) }
-        },
-        {
-          provide: UserService,
-          useValue: {
-            isLoggedIn: () => false,
-            user_: signal(null),
-            isPlatformAdmin_: signal(false),
-            isOwner_: signal(false),
-            logout: () => of(null)
-          }
-        }
-      ]
-    }).compileComponents()
-    const fixture = TestBed.createComponent(HeaderComponent)
-    fixture.detectChanges()
-    return fixture.nativeElement as HTMLElement
-  }
-
-  it('with events off there is no menu-library link anywhere, clients stays through frontdesk', async () => {
-    const host = await setup(['frontdesk'])
-    expect(host.querySelectorAll('a[href="/menu-library"]').length).toBe(0)
-    expect(host.querySelectorAll('a[href="/clients"]').length).toBeGreaterThan(0)
-  })
-
-  it('with events and frontdesk off there is no clients link anywhere', async () => {
-    const host = await setup(['ai_create'])
-    expect(host.querySelectorAll('a[href="/menu-library"]').length).toBe(0)
-    expect(host.querySelectorAll('a[href="/clients"]').length).toBe(0)
-  })
-
-  it('with only events on both links stay', async () => {
-    const host = await setup(['events'])
-    expect(host.querySelectorAll('.bottom-nav a[href="/menu-library"]').length).toBe(1)
-    expect(host.querySelectorAll('.bottom-nav a[href="/clients"]').length).toBe(1)
   })
 })

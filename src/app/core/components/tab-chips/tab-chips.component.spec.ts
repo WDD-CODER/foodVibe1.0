@@ -8,22 +8,26 @@ import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
-import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import type { ModuleKey } from '@schemas/modules-pure'
+import { ModuleService } from '@services/module.service'
 import type { Recipe } from '@models/recipe.model'
 import type { User } from '@models/user.model'
 
 @Component({ selector: 'app-blank-stub', template: '', standalone: true })
 class BlankStubComponent {}
 
-/** Plan 620: a stub where every module is on unless a spec turns some off. */
-const modulesOff = new Set<string>()
-const moduleStub = { has: (keys: string | readonly string[]) => [keys].flat().some((k) => !modulesOff.has(k)) }
+/** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
+const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
+const modulesOn = signal<ModuleKey[]>(ALL_MODULES)
+const moduleStub = {
+  provide: ModuleService,
+  useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
+}
+beforeEach(() => modulesOn.set(ALL_MODULES))
 
 describe('TabChipsComponent', () => {
-  beforeEach(() => modulesOff.clear())
-
   let fixture: ComponentFixture<TabChipsComponent>
   let component: TabChipsComponent
   let router: Router
@@ -46,6 +50,7 @@ describe('TabChipsComponent', () => {
         LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings })
       ],
       providers: [
+        moduleStub,
         provideRouter([
           { path: 'dashboard', component: BlankStubComponent },
           { path: 'venues', component: BlankStubComponent },
@@ -58,8 +63,7 @@ describe('TabChipsComponent', () => {
           { path: 'frontdesk/knowledge', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation },
-        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
-        { provide: ModuleService, useValue: moduleStub }
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
       ]
     }).compileComponents()
 
@@ -151,24 +155,24 @@ describe('TabChipsComponent', () => {
     expect(active.injector.get(RouterLink).href).toBe('/frontdesk/knowledge')
   })
 
-  it('on /dashboard with events off the chips are metadata, suppliers, trash (plan 620)', async () => {
-    modulesOff.add('events')
+  it('should render nothing on a route with no mapped chip group', async () => {
+    await router.navigateByUrl('/settings')
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('nav.c-tab-chips'))).toBeNull()
+  })
+
+  it('hides the venues chip on /dashboard without events (plan 620)', async () => {
+    modulesOn.set(['frontdesk', 'ai_create'])
     await router.navigateByUrl('/dashboard')
     fixture.detectChanges()
     expect(chipIds()).toEqual(['/dashboard?tab=metadata', '/suppliers', '/trash'])
   })
 
-  it('on /clients with frontdesk off and events on no chip row is rendered (plan 620)', async () => {
-    modulesOff.add('frontdesk')
+  it('renders no chip row on /clients with frontdesk off and events on (plan 620)', async () => {
+    modulesOn.set(['events'])
     await router.navigateByUrl('/clients')
     fixture.detectChanges()
-    expect(fixture.debugElement.query(By.css('nav.c-tab-chips'))).toBeNull()
-  })
-
-  it('should render nothing on a route with no mapped chip group', async () => {
-    await router.navigateByUrl('/settings')
-    fixture.detectChanges()
-    expect(fixture.debugElement.query(By.css('nav.c-tab-chips'))).toBeNull()
+    expect(chipIds()).toEqual([])
   })
 
   it('should scroll the pressed chip into view on click', async () => {
@@ -201,13 +205,13 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
     await TestBed.configureTestingModule({
       imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings })],
       providers: [
+        moduleStub,
         provideRouter([
           { path: 'cook/:id', component: BlankStubComponent },
           { path: 'recipe-builder/:id', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
-        { provide: ModuleService, useValue: moduleStub },
         {
           provide: KitchenStateService,
           useValue: { recipesById_: computed(() => new Map(recipes.map((r) => [r._id, r]))) }

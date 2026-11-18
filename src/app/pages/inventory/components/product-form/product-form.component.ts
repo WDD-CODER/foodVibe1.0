@@ -326,8 +326,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         {
           labelKey: 'ai_product_title_edit',
           icon: 'sparkles',
-          module: 'ai_create',
-          run: () => this.openAiProductModal()
+          run: () => this.openAiProductModal(),
+          module: 'ai_create'
         }
       ],
       'replace'

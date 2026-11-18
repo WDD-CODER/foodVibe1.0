@@ -3,11 +3,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { filter } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
+import type { ModuleKey } from '@schemas/modules-pure'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
-import { ModuleService } from '@services/module.service'
-import type { ModuleKey } from '@schemas/modules-pure'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
@@ -164,17 +164,14 @@ export class TabChipsComponent {
 
   private readonly currentUrl_ = signal(this.router.url)
 
-  /** Plan 620: the chips of modules the business lacks are dropped; a row of fewer than two chips is not shown. */
   protected readonly chips_ = computed<readonly TabChip[]>(() => {
-    const chips = this.groupChips_().filter((chip) => !chip.modules || this.modules.has(chip.modules))
-    return chips.length < 2 ? [] : chips
-  })
-
-  private readonly groupChips_ = computed<readonly TabChip[]>(() => {
     const path = this.currentUrl_().split('?')[0]
     const group = GROUP_BY_PATH_PREFIX.find(([prefix]) => path.startsWith(prefix))?.[1]
     if (!group) return []
-    const chips = CHIPS_BY_GROUP[group]
+    const all = CHIPS_BY_GROUP[group]
+    const chips = all.filter((chip) => !chip.modules || this.modules.has(chip.modules))
+    // Plan 620: a group the modules cut down to fewer than two chips has nothing to switch to.
+    if (chips.length < all.length && chips.length < 2) return []
     if (group === 'dashboard') {
       const currentId = currentDashboardChipId(this.currentUrl_())
       return currentId ? chips.map((chip) => (chip.id === currentId ? DASHBOARD_HOME_CHIP : chip)) : chips

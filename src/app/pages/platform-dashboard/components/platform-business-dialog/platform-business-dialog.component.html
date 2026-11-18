@@ -24,9 +24,9 @@
       [error]="tried_() && capInvalid_() ? 'platform_ai_cap_invalid' : null"
     >
       <!-- prettier-ignore -->
-      <div appNumberBox><input type="number" id="biz-cap" class="c-input" min="0" step="1" inputmode="numeric" dir="ltr" [value]="cap_()" (input)="cap_.set($any($event.target).value)" /></div>
+      <div appNumberBox><input id="biz-cap" class="c-input" type="number" min="0" step="1" inputmode="numeric" dir="ltr" [value]="cap_()" (input)="cap_.set($any($event.target).value)" /></div>
     </app-form-field>
-    <p class="fda-used">
+    <p class="fda-name">
       {{ 'platform_ai_used_month' | translatePipe }} <span class="c-num">{{ target()?.aiTokensThisMonth ?? 0 }}</span>
     </p>
     <div class="c-chip-group">
@@ -41,11 +41,11 @@
         <span>{{ 'platform_ai_private' | translatePipe }}</span>
       </label>
     </div>
-    <p class="fda-hint">{{ 'platform_ai_private_hint' | translatePipe }}</p>
+    <p class="fda-name">{{ 'platform_ai_private_hint' | translatePipe }}</p>
     <app-form-field
       label="platform_fd_reason"
       forId="biz-reason"
-      [error]="reasonError_() ?? (tried_() && reasonShort_() ? 'field_required' : null)"
+      [error]="reasonError_() ?? (tried_() && reasonMissing_() ? 'field_required' : null)"
     >
       <textarea
         id="biz-reason"
