@@ -39,10 +39,13 @@ jobs:
         with:
           node-version: '22'
 
+      # A solo-flow repo has no ledger (.claude/todo.md): plan-close still runs and closes every finished plan.
       - name: Sync plan checkboxes into the ledger
         run: |
-          node scripts/todo-query.mjs sync --merged
-          node scripts/todo-archive.mjs
+          if [ -f .claude/todo.md ]; then
+            node scripts/todo-query.mjs sync --merged
+            node scripts/todo-archive.mjs
+          fi
           node scripts/plan-close.mjs
 
       - name: Open and merge a ledger PR when something changed
@@ -50,7 +53,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -z "$(git status --porcelain -- .claude/todo.md .claude/todo-archive plans)" ]; then
+          # A solo-flow repo has no ledger files: git add fails on a path that does not exist.
+          paths=(plans)
+          for p in .claude/todo.md .claude/todo-archive; do
+            if [ -e "$p" ]; then paths+=("$p"); fi
+          done
+          if [ -z "$(git status --porcelain -- "${paths[@]}")" ]; then
             echo 'Ledger already in sync.'
             exit 0
           fi
@@ -58,7 +66,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$branch"
-          git add -A .claude/todo.md .claude/todo-archive plans
+          git add -A -- "${paths[@]}"
           git commit -m "chore(todo): sync ledger and close finished plans (${GITHUB_SHA::8})"
           git push origin "$branch"
           # Default repos refuse PRs from GITHUB_TOKEN. Delete the branch so failed runs don't pile up

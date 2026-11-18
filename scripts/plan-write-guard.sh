@@ -16,18 +16,19 @@ if command -v timeout >/dev/null 2>&1; then
 elif command -v gtimeout >/dev/null 2>&1; then
   INPUT=$(gtimeout 1 cat 2>/dev/null || true)
 else
-  INPUT=$(python -c "
-import sys, select
-r, _, _ = select.select([sys.stdin], [], [], 0.3)
-print(sys.stdin.read() if r else '')
-" 2>/dev/null || true)
+  INPUT=$(node -e 'let s="";const t=setTimeout(()=>{process.stdout.write(s);process.exit(0)},300);process.stdin.on("data",d=>s+=d).on("end",()=>{clearTimeout(t);process.stdout.write(s)})' 2>/dev/null || true)
 fi
+
+# JSON-escape stdin with node: the kit needs node everywhere, python is not always there (a service account has none).
+json_str() {
+  node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.stringify(s)))' 2>/dev/null
+}
 
 json_allow() {
   local msg="$1"
   if [[ -n "$msg" ]]; then
     local escaped
-    escaped=$(printf '%s' "$msg" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null)
+    escaped=$(printf '%s' "$msg" | json_str)
     if [[ -z "$escaped" ]]; then
       escaped="\"plan write guard\""
     fi
@@ -41,7 +42,7 @@ json_allow() {
 json_deny() {
   local msg="$1"
   local escaped
-  escaped=$(printf '%s' "$msg" | python -c 'import json,sys; print(json.dumps(sys.stdin.read()))' 2>/dev/null)
+  escaped=$(printf '%s' "$msg" | json_str)
   if [[ -z "$escaped" ]]; then
     escaped="\"Denied: run save-plan / plan-name-similarity first.\""
   fi
@@ -54,26 +55,23 @@ if [[ -z "$INPUT" ]]; then
   json_allow ""
 fi
 
-FILE_PATH=$(PLAN_GUARD_INPUT="$INPUT" python - <<'PY'
-import json, os, re
-raw = os.environ.get("PLAN_GUARD_INPUT", "")
-path = ""
-try:
-    d = json.loads(raw)
-    ti = d.get("tool_input") or d.get("input") or d
-    if isinstance(ti, dict):
-        path = ti.get("file_path") or ti.get("path") or ti.get("filePath") or ""
-        edits = ti.get("edits")
-        if not path and isinstance(edits, list) and edits:
-            path = edits[0].get("file_path") or edits[0].get("path") or ""
-except Exception:
-    pass
-if not path:
-    m = re.search(r"plans[/\\][\w./\\-]+\.plan\.md", raw)
-    path = m.group(0) if m else ""
-print(path)
-PY
-)
+FILE_PATH=$(PLAN_GUARD_INPUT="$INPUT" node -e '
+const raw = process.env.PLAN_GUARD_INPUT || ""
+let path = ""
+try {
+  const d = JSON.parse(raw)
+  const ti = d.tool_input || d.input || d
+  if (ti && typeof ti === "object" && !Array.isArray(ti)) {
+    path = ti.file_path || ti.path || ti.filePath || ""
+    if (!path && Array.isArray(ti.edits) && ti.edits.length) path = ti.edits[0].file_path || ti.edits[0].path || ""
+  }
+} catch {}
+if (!path) {
+  const m = raw.match(/plans[\/\\][\w.\/\\-]+\.plan\.md/)
+  path = m ? m[0] : ""
+}
+process.stdout.write(String(path))
+')
 
 NORM=$(printf '%s' "$FILE_PATH" | tr '\\' '/')
 

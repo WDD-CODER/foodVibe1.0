@@ -5,6 +5,7 @@
  *   node scripts/lib/guard.mjs branch   no code writes on main
  *   node scripts/lib/guard.mjs plan     a Bash command's new plans/*.plan.md files (the Bash half of plan-write-guard.sh)
  *   node scripts/lib/guard.mjs write    the text an Edit/Write/MultiEdit writes, through every pre-commit guard's scanGuardText
+ *   node scripts/lib/guard.mjs merge    a Bash `gh pr merge`: the Human's chat yes + green checks (scripts/lib/merge-guard.mjs)
  *
  * Input: the hook's JSON on stdin ({ tool_name, tool_input, cwd }). Output: one JSON decision on stdout, in both
  * formats (Cursor reads "permission", Claude Code reads hookSpecificOutput). Exit code is always 0.
@@ -1446,6 +1447,12 @@ if (isMain && process.argv[2] === 'plan') {
     result = allow()
   }
   emit(result)
+  process.exit(0)
+}
+// `gh pr merge` needs the Human's own chat yes and green checks (scripts/lib/merge-guard.mjs).
+if (isMain && process.argv[2] === 'merge') {
+  const { runMergeGuard } = await import('./merge-guard.mjs')
+  await runMergeGuard()
   process.exit(0)
 }
 if (isMain) {

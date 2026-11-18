@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.4.0"
+    "version": "3.4.2"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.4.0",
-  "commit": "d6d7200619dd25510369c1c7f198a3e1e3ff565d",
+  "ref": "v3.4.2",
+  "commit": "d5ccfac597c6dbb2aa19fa85647e4356d4154b73",
   "packs": [
     "angular",
     "node-express"
@@ -113,7 +113,7 @@
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "ac486ae00d3e3b06f3855dda9dd7b6a5160ce8e4af96fe5e0990bd019468d48a",
+      "sha256": "9bb3095fa8dbc0a958793ae655d230c2631dd1cbeee807fc59ddeb4a586af182",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
@@ -438,7 +438,7 @@
       "source": "core/.github/workflows/security.yml"
     },
     ".github/workflows/todo-sync.yml": {
-      "sha256": "a721fc53432bba5f341be2767fa86d0d74c40b049201f4079d1467fb1190ee4f",
+      "sha256": "057cb10ff98c2be3805a1d3ead05040407c93dcc1805e612261a02d1c05056d0",
       "kind": "managed",
       "source": "core/.github/workflows/todo-sync.yml"
     },
@@ -623,7 +623,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "209ba7540ccc73e73cc6321f57bc5b604ad9d53248d851260eea92a9eeba62a4",
+      "sha256": "309ad5dd4451732ab3d99c0b1f22540f76264615d8457443a47b3e985518ac17",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -1053,7 +1053,7 @@
       "source": "core/scripts/lib/gate-select.mjs"
     },
     "scripts/lib/guard.mjs": {
-      "sha256": "d38666c473e01e8ea3dcfd7d31b11cda8f32087d7ae21ae1ac210aea9a764047",
+      "sha256": "8352c3e7ad88a691f3d54c506e8e83488294afeeee4a103eeac7db87d5b178e2",
       "kind": "managed",
       "source": "core/scripts/lib/guard.mjs"
     },
@@ -1061,6 +1061,11 @@
       "sha256": "501a17f33318427c96dd135f1a28198412395843679c7f56d84c967bfc24d597",
       "kind": "managed",
       "source": "core/scripts/lib/invariants.mjs"
+    },
+    "scripts/lib/merge-guard.mjs": {
+      "sha256": "789216b393576e20ef8e29d97e0efff5d54e49e265719ec18371ab9e63bc1b55",
+      "kind": "managed",
+      "source": "core/scripts/lib/merge-guard.mjs"
     },
     "scripts/lib/orch-folders.mjs": {
       "sha256": "6a5fec9d01cacf1d6745838f4e307cdfb3415f46cf222c58771d099fd62d5f9d",
@@ -1243,7 +1248,7 @@
       "source": "core/scripts/plan-park.mjs"
     },
     "scripts/plan-write-guard.sh": {
-      "sha256": "c5599a02d4210a7a3d1d14aa1bd834fd2a69b87c09c2a95770dabb1818828ff8",
+      "sha256": "bbe9a9b23eccefcc7e94fb27a1b7f05d9deb79f17aee6f6d24875f928532a850",
       "kind": "managed",
       "source": "core/scripts/plan-write-guard.sh"
     },
