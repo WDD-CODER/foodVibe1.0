@@ -1,5 +1,5 @@
 'use strict'
-/** Plan 619 (C-LEARN, C-FILES): deleting a whole business removes its private records and keeps what the platform learned, unless it is private. */
+/** Plan 619 (C-LEARN, C-FILES): deleting a whole business removes its private records and keeps what the platform learned, (what was learned stays unless eraseLearned is asked for). */
 
 const request = require('supertest')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
@@ -78,15 +78,52 @@ describe('deleting the owner of a business that is not private', () => {
 })
 
 describe('deleting the owner of a private business', () => {
-  it('leaves nothing of it, promoted copies and drafts included; another business is untouched', async () => {
+  it('keeps promoted copies and shared contributions, strips drafts to numbers, deletes its own records (plan 639)', async () => {
     const res = await request(app).delete('/api/v1/admin/users/ownerP').set(as(ADMIN))
     expect(res.status).toBe(200)
     const db = testDb()
-    for (const c of [...SERVER_ONLY, 'aiDrafts']) expect(await countIn(c, 'bP'), c).toBe(0)
-    expect(await db.collection('GEMINI_SHOTS').findOne({ _id: 'shot-bP' })).toBeNull()
+    for (const c of SERVER_ONLY) expect(await countIn(c, 'bP'), c).toBe(0)
+    expect(await db.collection('GEMINI_SHOTS').findOne({ _id: 'shot-bP' })).not.toBeNull()
+    expect((await db.collection('invoiceAliases').findOne({ _id: 'alias-master' })).contributors).toEqual(['bA', 'bP'])
+    expect(await db.collection('aiDrafts').findOne({ _id: 'd-bP' })).not.toHaveProperty('input')
     expect(await db.collection('GEMINI_SHOTS').findOne({ _id: 'shot-bB' })).not.toBeNull()
     expect(await countIn('storedFiles', 'bB')).toBe(2)
     expect(await countIn('aiDrafts', 'bB')).toBe(1)
+  })
+})
+
+describe('DELETE with eraseLearned (plan 639)', () => {
+  it('eraseLearned=true also removes promoted copies, shared contributions and every draft; another business untouched', async () => {
+    const res = await request(app).delete('/api/v1/admin/users/ownerA?eraseLearned=true').set(as(ADMIN))
+    expect(res.status).toBe(200)
+    const db = testDb()
+    for (const c of [...SERVER_ONLY, 'aiDrafts']) expect(await countIn(c, 'bA'), c).toBe(0)
+    expect(await db.collection('GEMINI_SHOTS').findOne({ _id: 'shot-bA' })).toBeNull()
+    expect((await db.collection('invoiceAliases').findOne({ _id: 'alias-master' })).contributors).toEqual(['bP'])
+    expect((await db.collection('supplierProfiles').findOne({ _id: 'sup1' })).contributors).toEqual(['bP'])
+    expect(await db.collection('GEMINI_SHOTS').findOne({ _id: 'shot-bB' })).not.toBeNull()
+    expect(await countIn('aiDrafts', 'bB')).toBe(1)
+  })
+
+  it.each(['false', '1', 'TRUE', ''])('eraseLearned=%s keeps what was learned', async value => {
+    const res = await request(app).delete(`/api/v1/admin/users/ownerA?eraseLearned=${value}`).set(as(ADMIN))
+    expect(res.status).toBe(200)
+    const db = testDb()
+    expect(await db.collection('GEMINI_SHOTS').findOne({ _id: 'shot-bA' })).not.toBeNull()
+    expect((await db.collection('invoiceAliases').findOne({ _id: 'alias-master' })).contributors).toEqual(['bA', 'bP'])
+    expect(await countIn('aiDrafts', 'bA')).toBe(1)
+  })
+
+  it('a staff delete ignores the parameter', async () => {
+    const res = await request(app).delete('/api/v1/admin/users/staffA?eraseLearned=true').set(as(ADMIN))
+    expect(res.status).toBe(200)
+    expect(await testDb().collection('GEMINI_SHOTS').findOne({ _id: 'shot-bA' })).not.toBeNull()
+    expect(await countIn('aiDrafts', 'bA')).toBe(1)
+  })
+
+  it('the log line carries eraseLearned and counts only', () => {
+    const src = require('fs').readFileSync(require('path').join(__dirname, '../routes/admin.js'), 'utf8')
+    expect(src).toContain("event: 'admin.users_delete', deletedBusiness: wholeBusiness, eraseLearned,")
   })
 })
 
