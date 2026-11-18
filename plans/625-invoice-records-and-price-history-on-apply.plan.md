@@ -100,8 +100,8 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 
-- `server/utils/invoice-trail.js` (`changePct`, `invoiceKeptRatio`, `buildInvoiceLines`) — family: none — rung: 4 — why: server-side pure helpers; no price-change or draft-closeness helper for invoices exists, and keeping them out of the route makes them testable without a database.
-- `invoiceApplyInputSchema`, `SUPPLIER_KEY_PATTERN` in `shared/schemas/entities/invoice.schema.ts` — family: none — rung: 4 — why: the request shape of C-INVOICE; it lives in the invoice schema file wave 0 created so the screen (628) and the server read one definition.
+- `server/utils/invoice-trail.js` (`changePct`, `invoiceKeptRatio`, `buildInvoiceLines`) — family: invoice-trail — rung: 4 — why: server-side pure helpers; no price-change or draft-closeness helper for invoices exists, and keeping them out of the route makes them testable without a database.
+- `invoiceApplyInputSchema` — family: invoice-trail — rung: 4 — why: the request shape of C-INVOICE; it lives in the invoice schema file wave 0 created so the screen (628) and the server read one definition.
 
 ## Step 0 — Reality Check
 
@@ -237,3 +237,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the invoice's stored file is kept by `keepStoredFile` right after the invoice insert — why: C-FILES gives a freshly read file 30 days; only a saved invoice lifts that, so a file whose invoice failed to save is still cleaned up.
 - evidence: `pnpm run test:server` → exit 0, 122 files / 1629 tests passed (incl. product-import-invoice, invoice-trail, the 23 unchanged product-import-route tests).
 - evidence: `pnpm --dir server run lint` → exit 0 (0 errors); `pnpm run lint` → 0 errors; `pnpm run build` → ok; `plan-ledger-check` OK; `log-query` → SKIP: no database configured.
+
+- Fix round 1: added family `invoice-trail` to docs/brain/component-families.md, regenerated docs/brain/inventory.md; Reuse Check rows now name the family. kit-checks → ok (6 checks).
