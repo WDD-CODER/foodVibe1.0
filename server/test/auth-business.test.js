@@ -57,6 +57,11 @@ describe('signup', () => {
     for (const f of FIELDS) expect(payload).toHaveProperty(f)
     expect(payload).toMatchObject({ name: 'chefone', businessRole: 'owner', isPlatformAdmin: false })
     expect(payload.businessId).toBe(res.body.user.businessId)
+    // Plan 631: at home the token names the home business twice and is not acting.
+    expect(payload.homeBusinessId).toBe(payload.businessId)
+    expect(payload).not.toHaveProperty('acting')
+    expect(res.body.user).toMatchObject({ homeBusinessId: payload.businessId })
+    expect(res.body.user).not.toHaveProperty('acting')
   })
 })
 
@@ -68,6 +73,8 @@ describe('login, refresh and guest', () => {
     const login = await request(app).post('/api/v1/auth/login').send({ name: 'chefone', password: 'pw' })
     expect(login.status).toBe(200)
     expect(decode(login.body.token)).toMatchObject({ businessId: su.body.user.businessId, businessRole: 'owner', isPlatformAdmin: false })
+    expect(decode(login.body.token).homeBusinessId).toBe(su.body.user.businessId)
+    expect(decode(login.body.token)).not.toHaveProperty('acting')
     const refresh = await agent.post('/api/v1/auth/refresh')
     expect(refresh.status).toBe(200)
     expect(decode(refresh.body.token)).toMatchObject({ businessId: su.body.user.businessId, businessRole: 'owner', isPlatformAdmin: false })

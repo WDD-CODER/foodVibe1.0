@@ -5,7 +5,7 @@ const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { requireModule } = require('../middleware/require-module')
 const { getBusiness, setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
-const { assertCan } = require('../utils/permissions')
+const { assertCan, can } = require('../utils/permissions')
 const { checkStoredDoc } = require('../middleware/validate')
 const { actorOf } = require('../utils/actor')
 const { frontDeskSetup } = require('../services/front-desk-setup')
@@ -242,8 +242,9 @@ router.post('/front-desk-intake', verifyToken, requireModule('frontdesk'), async
     for (const u of writes.update) await items.updateOne({ _id: u._id, businessId }, { $set: u.$set })
 
     // 3. Baseline only when the owner filled at least one number (D15); otherwise it stays as it is.
+    // Plan 631: only a caller who may editSettings writes it (a consultant gets 'skipped'; PUT /baseline is the door).
     let baselineResult = 'skipped'
-    if (hasBaselineValue(baseline)) {
+    if (hasBaselineValue(baseline) && can(req.user, 'editSettings', { type: 'businesses' }).ok) {
       const clean = Object.fromEntries(Object.entries(baseline).filter(([, v]) => v !== undefined))
       await setBusinessBaseline(businessId, { ...clean, filledAt: now })
       baselineResult = 'saved'
