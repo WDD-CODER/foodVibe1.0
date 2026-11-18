@@ -38,6 +38,7 @@
 | `services/cloudinary-requests.js` | Pure request builders for the file store (plan 619): `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest` |
 | `routes/files.js` | `GET /api/v1/files/:id` → `{ url }`, 300-second link (plan 619) |
 | `routes/admin-learning.js` | `GET /api/v1/admin/learning/status` → `{ fileStore }` (plan 619); `GET …/stats` → drafts per flow and model by week, brain counts, private count; counts only (plan 630) |
+| `routes/admin.js` (erase learned data) | `POST /api/v1/admin/businesses/:id/erase-learned` → `{ ok, counts }` via `eraseLearnedData` in `services/business.js` (plan 639); `DELETE /users/:userId?eraseLearned=true` does the same before deleting a business |
 | `routes/admin.js` (platform history) | `GET /api/v1/admin/businesses/:id/platform-history` → `{ rows }` newest first (plan 638); `PUT …/platform` stores `changes` (`platformChangesOf`) |
 | `utils/learning-stats.js` | `weekStart`, `buildLearningStats` (plan 630): pure grouping of AI drafts into flow x model x Sunday-week with the average closeness |
 | `services/ai-cap.js` | The monthly AI cap per business (plan 617, C-AICAP): `capState` (cap vs this Israel month's ledger tokens, 60 s cache), `monthTokensByBusiness`, `clearCapCache`; read by `callGemini` and the platform table |

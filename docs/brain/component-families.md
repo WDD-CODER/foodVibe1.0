@@ -325,6 +325,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
+- `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
@@ -408,8 +409,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 618
 - Use: `server/utils/ai-learning.js` — `mayLearnFrom(business)` (`aiPrivate !== true`); the private mark is written
-  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` deletes the promoted
-  `GEMINI_SHOTS` copies).
+  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` only writes the flag; plan 639).
 - When: code copies something into a `'__master__'` pool or lists a business's AI material for the platform admin.
 - Known copies: none.
 
@@ -445,10 +445,17 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: building a signed upload, expiring download link or delete request.
 - Known copies: none.
 
+### learning — erasing what the platform learned from one business (plan 639)
+
+- Status: stable
+- Use: `eraseLearnedData(db, businessId)` in `server/services/business.js` — deletes the promoted `GEMINI_SHOTS` copies, every `aiDrafts` row of the business and its share of the shared name memory (`forgetBusiness`); returns counts.
+- When: the platform admin explicitly erases what was learned (`POST /admin/businesses/:id/erase-learned`, `DELETE /admin/users/:userId?eraseLearned=true`); nothing else erases learned data.
+- Known copies: none.
+
 ### business-delete — `deleteBusinessServerData` removes a business's server data
 
 - Status: stable — plan 619
-- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files).
+- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files). Keeps what was learned for every business; `eraseLearnedData` erases it (plan 639).
 - When: a business is deleted and everything it owns on the server must go.
 - Known copies: none.
 
