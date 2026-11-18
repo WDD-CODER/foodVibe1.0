@@ -371,6 +371,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A2: Give the platform admin one explicit way to erase what was learned from a business, with a reason in the history — eraseLearnedData, the POST route, its seven cases
 - [ ] A3: Let the browser call the erase — the service method and its spec case
 - [ ] A4: Put the erase in the business dialog behind a reason and a confirm, and say the new rule under the private switch — the button, the reason field, the confirm, the done and failed lines, the history label, the dictionary value and six new keys, the spec cases
+- [ ] A4b: Ask, when a business is deleted, whether to erase what was learned from it too — the query parameter on the delete route and its cases, deleteUser's flag, the question between the two confirms, the four keys, the spec cases
 - [ ] A5: Write the new rule where the program and the lawyer read it — C-LEARN and G4 in the map, the private and leaving lines of the pilot terms
 - [ ] A6: Record the new route and pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row
-- [ ] A7: Prove it in the running app and run every check — the one screen check with a fixture, then the Done-when commands in order
+- [ ] A7: Prove it in the running app and run every check — the two screen checks with fixtures, then the Done-when commands in order

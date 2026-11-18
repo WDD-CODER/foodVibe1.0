@@ -8,8 +8,8 @@ Snapshot: dede1a11
 The map's C-LEARN (`docs/modules/modules-map.md`, 2026-11-17) says that turning private mode on erases what the platform
 already learned from a business, and that deleting a private business leaves nothing. Plans 618, 619 and 627 built it.
 On 2026-11-18 Dandan changed the rule: data already collected is kept and used. Private mode only stops learning from
-that moment on. Old learned data is erased only when the business explicitly asks for it, and then the platform admin
-erases it as a separate action, with a reason.
+that moment on. Old learned data is erased only when the business explicitly asks for it: the platform admin erases
+it from the business dialog with a reason, or answers "erase it too" to a question the delete of a business now asks.
 
 Verified on `origin/orch/mod-invoices-srv` (run `mod-invoices-srv`, PR #605, holds 625–627; this plan runs after it is
 merged):
@@ -28,15 +28,20 @@ merged):
   nothing", line 80), `server/test/invoice-memory.test.js` (`setAiPrivate('bA', true)`, line 153).
 - The dialog text `platform_ai_private_hint` (`public/assets/data/dictionary.json:2371`) says: "הפעלה מוחקת את מה שכבר
   שותף ממנו".
+- A whole business is deleted from `src/app/pages/metadata-manager/components/user-management/`
+  (`onDeleteUser`, around line 58): deleting an owner asks `ConfirmModalService.open` twice (the second with the
+  business name typed), then calls `UserAdminService.deleteUser(userId)` → `DELETE /api/v1/admin/users/:userId`
+  (`server/routes/admin.js` around line 56), which calls `deleteBusinessServerData`. `ConfirmModalService.openTernary`
+  answers `'cancel' | 'confirm' | 'save'` with a second action button (`saveButtonLabel`).
 - `mayLearnFrom(business)` (`server/utils/ai-learning.js`) is the only test any code uses before it learns; it stays as
   it is, so a private business still adds nothing new to the shared pools.
 - Plan 638 adds `changes: [{ field, from, to }]` to `platformHistoryRowSchema` and the history panel in
   `platform-business-dialog`; this plan writes one more kind of history row and adds one button to the same dialog.
 
 ## Goals & Success Criteria
-**Primary:** turning private mode on keeps everything already learned; deleting a business keeps what was learned from
-it, private or not; and the platform admin can erase what was learned from one business, with a required reason, from
-the business dialog.
+**Primary:** turning private mode on keeps everything already learned; deleting a business asks whether to erase what
+was learned from it too (keeping it is the default answer); and the platform admin can erase what was learned from one
+business, with a required reason, from the business dialog.
 
 - [auto] `pnpm run test:server` passes, including `server/test/admin-platform.test.js`: a save with `aiPrivate: true`
   stores the flag and keeps the promoted copy and the shared alias contributions of the business; `aiPrivate: false`
@@ -44,6 +49,9 @@ the business dialog.
 - [auto] The same command, `server/test/admin-business-delete.test.js`: deleting the owner of a private business keeps
   its promoted copies and its shared contributions and strips its drafts to numbers, exactly as for a business that is
   not private; `storedFiles`, `priceHistory`, own `invoiceAliases` and `businessAccess` are still deleted.
+  `DELETE /api/v1/admin/users/:ownerId?eraseLearned=true` also removes the promoted copies, the shared contributions
+  and every draft of that business (another business untouched); without the parameter, or with any other value,
+  they are kept; the log line `admin.users_delete` carries `eraseLearned: true|false` and counts only.
 - [auto] The same command, `server/test/admin-erase-learned.test.js` (new): `POST /api/v1/admin/businesses/:id/erase-learned`
   with `{ reason }` for the platform admin answers 200 `{ ok: true, counts }` and removes the promoted copies, the
   business from every shared `contributors` list (shared rows left with none are deleted), and every `aiDrafts` row of
@@ -57,14 +65,23 @@ the business dialog.
   the erase button opens the confirm popup; cancel sends nothing; confirm with an empty reason keeps the confirm
   button disabled; confirm with a reason calls the service once and shows the counts text; a failed call shows the
   error text and the dialog stays usable; when the history panel is open it is requested again after a successful erase.
+- [auto] The same command, including
+  `src/app/pages/metadata-manager/components/user-management/user-management.component.spec.ts`: deleting an owner asks
+  the learned-data question after the first confirm; "keep" → the final confirm, then `deleteUser(id, false)`;
+  "erase too" → the final confirm says the learned data is erased too, then `deleteUser(id, true)`; cancel at the
+  question or at the final confirm deletes nothing; deleting a staff user asks no learned-data question.
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm --dir server run lint` exits 0;
   `pnpm run lint:icons` exits 0; `pnpm run lint:reuse` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [ui] On `/platform`, the business dialog shows the button "מחיקת מה שנלמד מהעסק"; pressing it opens a confirm popup
   that names the business; cancel closes it (`e2e/ui/639-1.spec.ts`, the erase route answered from a fixture).
+- [ui] Deleting an owner from the users list shows, after the first confirm, the question "למחוק גם את מה שהמערכת למדה
+  מהעסק?" with the two answers; cancel closes it and nothing is deleted (`e2e/ui/639-2.spec.ts`, the delete route
+  answered from a fixture).
 - [human] Dandan opens the dialog of a test business, reads the new private-mode hint, turns private on with a reason
   and sees in the history that nothing was erased; then presses the erase button, types a reason, confirms, and reads
-  the counts and the new history row in clear Hebrew.
+  the counts and the new history row in clear Hebrew. Then deletes a second test business, answers "erase it too",
+  and sees the business gone.
 
 ## Execution Mode
 - Parallel: no — it edits `platform-business-dialog` (also 638, 630, 632), `public/assets/data/dictionary.json` and
@@ -90,6 +107,10 @@ server/test/invoice-memory.test.js
 shared/schemas/modules.ts
 src/app/core/services/platform-admin.service.ts
 src/app/core/services/platform-admin.service.spec.ts
+src/app/core/services/user-admin.service.ts
+src/app/core/services/user-admin.service.spec.ts
+src/app/pages/metadata-manager/components/user-management/user-management.component.ts
+src/app/pages/metadata-manager/components/user-management/user-management.component.spec.ts
 src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts
 src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.html
 src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.spec.ts
@@ -97,6 +118,7 @@ src/app/pages/platform-dashboard/platform-dashboard.page.scss
 public/assets/data/dictionary.json
 src/app/app.config.ts
 e2e/ui/639-1.spec.ts
+e2e/ui/639-2.spec.ts
 docs/modules/modules-map.md
 docs/frontdesk/pilot-terms-draft.md
 docs/brain/component-families.md
@@ -123,6 +145,8 @@ append the path to the scope block above and retry.
 - INV-2: preserves — the erase touches the `'__master__'` pools only through the platform admin, removes only rows
   whose `promotedFrom.businessId` or `contributors` name the one business, and never touches another business's own
   copy; the existing scoped deletes of `deleteBusinessServerData` stay as they are.
+- INV-3: preserves — the erase and the delete run on the server in one request; the browser only passes the
+  admin's answer (`eraseLearned`), and the `user-management` change adds a question, no cross-document write.
 - INV-4: preserves — the history row stays the one Zod shape in `shared/schemas/modules.ts`; `learnedData` is one more
   value of `changed` / `changes.field`, which are free strings there.
 
@@ -172,6 +196,17 @@ line or file this plan names was removed, renamed or rewritten).
     `changed: ['learnedData']` and `changes: [{ field: 'learnedData', from: '', to: 'erased' }]`; answers
     `{ ok: true, counts }`. Log `event: 'admin.learned_data.erased'` with the business id and the counts; never the
     reason. Failure: `admin.learned_data.erase_failed` with the error and the id, 500.
+- [ ] `DELETE /users/:userId` in `server/routes/admin.js`: reads the query `eraseLearned`; only the exact string
+  `'true'` counts. For a whole-business delete with it, `eraseLearnedData` runs before `deleteBusinessServerData`
+  (inside the same `try`, so a failure is logged as today and the delete still goes on); for a staff user the
+  parameter is ignored. The success log line gains `eraseLearned` (boolean) and the erase counts.
+- [ ] `src/app/core/services/user-admin.service.ts`: `deleteUser(userId, eraseLearned = false)` adds
+  `?eraseLearned=true` only when true; one spec case for each value.
+- [ ] `user-management.component.ts` `onDeleteUser`, for an owner only, between the first confirm and the typed
+  final confirm: `ConfirmModalService.openTernary(delete_business_learned_question, { variant: 'danger',
+  saveLabel: 'delete_business_learned_keep', saveButtonLabel: 'delete_business_learned_erase' })` —
+  `'confirm'` = keep, `'save'` = erase too, `'cancel'` = stop. When the answer is erase, the final confirm's message
+  adds `delete_business_learned_erase_note`. The chosen value is passed to `deleteUser`. Staff deletes are unchanged.
 - [ ] `src/app/core/services/platform-admin.service.ts`: `eraseLearnedData(businessId, reason): Promise<EraseCounts>`
   and one spec case (URL, body, unwrapped counts).
 - [ ] `platform-business-dialog`:
@@ -210,6 +245,12 @@ line or file this plan names was removed, renamed or rewritten).
   - `platform_erase_done` — "נמחקו {count} רשומות שנלמדו" ({count} learned records were erased)
   - `platform_erase_failed` — "המחיקה לא הצליחה, נסו שוב" (erasing failed, try again)
   - `platform_history_learned_erased` — "נמחק מה שנלמד מהעסק" (what was learned from the business was erased)
+  - `delete_business_learned_question` — "למחוק גם את מה שהמערכת למדה מהעסק? (שמות מוצרים בחשבוניות, דוגמאות מתכונים
+    ששותפו, נתוני דיוק). אם תשאירו, זה ממשיך לעזור לעסקים אחרים, בלי מחירים ובלי פרטים אישיים." (also erase what the
+    system learned from the business? kept, it keeps helping other businesses, with no prices or personal details)
+  - `delete_business_learned_keep` — "להשאיר" (keep)
+  - `delete_business_learned_erase` — "למחוק גם את זה" (erase it too)
+  - `delete_business_learned_erase_note` — "גם מה שנלמד מהעסק יימחק." (what was learned from the business is erased too)
 - Reused: `ConfirmModalService` and its yes / no keys.
 - Lucide: none new.
 
@@ -221,16 +262,18 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A2: Give the platform admin one explicit way to erase what was learned from a business, with a reason in the history — eraseLearnedData, the POST route, its seven cases — server/services/business.js, server/routes/admin.js, server/test/admin-erase-learned.test.js
 - [ ] A3: Let the browser call the erase — the service method and its spec case — src/app/core/services/platform-admin.service.ts, src/app/core/services/platform-admin.service.spec.ts
 - [ ] A4: Put the erase in the business dialog behind a reason and a confirm, and say the new rule under the private switch — the button, the reason field, the confirm, the done and failed lines, the history label, the dictionary value and six new keys, the spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts, .html, .spec.ts, src/app/pages/platform-dashboard/platform-dashboard.page.scss, public/assets/data/dictionary.json
+- [ ] A4b: Ask, when a business is deleted, whether to erase what was learned from it too — the query parameter on the delete route and its cases, deleteUser's flag, the question between the two confirms, the four keys, the spec cases — server/routes/admin.js, server/test/admin-business-delete.test.js, src/app/core/services/user-admin.service.ts, src/app/core/services/user-admin.service.spec.ts, src/app/pages/metadata-manager/components/user-management/user-management.component.ts, src/app/pages/metadata-manager/components/user-management/user-management.component.spec.ts, public/assets/data/dictionary.json
 - [ ] A5: Write the new rule where the program and the lawyer read it — C-LEARN and G4 in the map, the private and leaving lines of the pilot terms — docs/modules/modules-map.md, docs/frontdesk/pilot-terms-draft.md
 - [ ] A6: Record the new route and pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row — docs/brain/component-families.md, docs/brain/inventory.md, docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A7: Prove it in the running app and run every check — the one screen check with a fixture, then the Done-when commands in order — e2e/ui/639-1.spec.ts
+- [ ] A7: Prove it in the running app and run every check — the two screen checks with fixtures, then the Done-when commands in order — e2e/ui/639-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: 627 (`forgetBusiness`), 638 (history panel, `changes`, `describePlatformChange`), 619
   (`deleteBusinessServerData`), 618 (`setAiPrivate`).
-- New files: `server/test/admin-erase-learned.test.js`, `e2e/ui/639-1.spec.ts`.
+- New files: `server/test/admin-erase-learned.test.js`, `e2e/ui/639-1.spec.ts`, `e2e/ui/639-2.spec.ts`.
 - Model changes: none (`changed` and `changes.field` are free strings).
-- Backend / API: new `POST /api/v1/admin/businesses/:id/erase-learned`; `PUT …/platform` stops erasing.
+- Backend / API: new `POST /api/v1/admin/businesses/:id/erase-learned`; `PUT …/platform` stops erasing;
+  `DELETE /api/v1/admin/users/:userId` takes `?eraseLearned=true`.
 - Auth and validation: platform admin only; the id is a path parameter in an exact match; the reason is validated and
   stored, never logged.
 - Security and privacy: erasing is irreversible and is the answer to a deletion request, so it needs the reason and
@@ -253,8 +296,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided (Dandan, 2026-11-18): private mode stops learning from that moment and erases nothing; learned data is kept
   after a business is deleted; it is erased only on the business's explicit request — why: data already collected is
   useful to every business, and erasing it should be a deliberate act, not a side effect.
-- decided: the erase is its own action in the platform dialog, not a checkbox on the delete — why: a business may ask
-  to erase without leaving, and the delete screen (`user-management`) stays as it is; to erase and leave, the admin
-  erases first, then deletes.
+- decided (Dandan, 2026-11-18): deleting a business asks whether to erase what was learned too — why: a business that
+  leaves may ask for it, and the question makes the choice visible at the moment it matters.
+- decided: the question comes between the first confirm and the typed final confirm, and "keep" is the first answer
+  — why: keeping is the rule, and the typed confirm stays the last step for both answers.
+- decided: the erase is also its own action in the platform dialog — why: a business may ask to erase without leaving.
 - decided: PR #605 (run `mod-invoices-srv`) is merged as it is — why: the old rule is already on `main` from 618 and
   619, so one plan changes every place at once; until this plan is merged, no business is turned private.
