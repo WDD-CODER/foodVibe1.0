@@ -1,6 +1,6 @@
 # Plan 620 — Show each business only the modules it has, and give the platform admin one dialog for modules, AI cap and private mode
 
-Status: draft
+Status: done
 Depends-on: 616, 617, 618
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
