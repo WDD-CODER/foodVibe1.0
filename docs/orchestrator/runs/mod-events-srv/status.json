@@ -1,0 +1,339 @@
+{
+  "run": "mod-events-srv",
+  "branch": "orch/mod-events-srv",
+  "base": "main",
+  "startedAt": "2026-11-18T11:13:07.597Z",
+  "mainShaAtStart": "80c6a5b76fca044e952c84d18486843e6fa73d81",
+  "plans": {
+    "621": {
+      "nnn": "621",
+      "title": "Voice note to transcript on the server, with the recording kept",
+      "branch": "feat/621-voice-note-to-transcript",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T11:17:17.357Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T11:54:43.987Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T12:11:31.264Z"
+        }
+      },
+      "humanItems": [
+        "After plan 623 is merged: Dandan records a 20-second Hebrew note on his phone in the logistics panel and reads back the same words he said."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T11:17:16.961Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T11:17:17.360Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T11:39:12.901Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T11:54:43.243Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T11:54:43.670Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T11:54:43.989Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T11:58:42.105Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:11:17.127Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:11:31.267Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:11:44.879Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:13:59.118Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.7,
+      "sha": "39ed6c2e5dfd46748fbbb3aa79003b101f966acb",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1307.8,
+          "tokens": {
+            "input": 980117,
+            "output": 16005
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 234.5,
+          "tokens": {
+            "input": 153546,
+            "output": 2261
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.3,
+          "tokens": {
+            "input": 40918,
+            "output": 767
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci, node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-events-srv --plan plans/621-voice-note-to-transcript-on-the-server-recording-kept.plan.md"
+      ],
+      "checkedHead": "3c5d7e7ef03c70a673b83186136f1a9020b025e5"
+    },
+    "622": {
+      "nnn": "622",
+      "title": "Site-visit notes become a checklist draft on the server",
+      "branch": "feat/622-notes-to-checklist-draft",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T12:18:48.565Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T12:52:18.256Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T12:58:50.325Z"
+        }
+      },
+      "humanItems": [
+        "After plan 623 is merged: Dandan pastes a real site-visit note for one of his events and the suggested answers match what the note says, with nothing invented."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T12:18:48.395Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T12:18:48.566Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T12:42:56.125Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T12:52:17.881Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T12:52:18.084Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:52:18.258Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:53:03.107Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:58:44.362Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:58:50.327Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:59:03.822Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:59:39.282Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 20.7,
+      "sha": "75a1d40a15bc6ab090a50cc358472506a0238b69",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1444.9,
+          "tokens": {
+            "input": 103619,
+            "output": 1294
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 42,
+          "tokens": {
+            "input": 118470,
+            "output": 2251
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.4,
+          "tokens": {
+            "input": 65031,
+            "output": 1211
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-events-srv --plan plans/622-notes-to-checklist-draft-on-the-server.plan.md"
+      ],
+      "checkedHead": "b7e44c4f9c971d03c889392c804943daafb4a09a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T11:17:16.465Z",
+      "plan": "621",
+      "text": "the folder foodVibe1.0-orch-mod-events-srv-621 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T11:39:06.217Z",
+      "plan": "621",
+      "text": "builder left undone (round 0): [human] check after plan 623 merges: record a 20-second Hebrew note and read back the same words; I did not run the kit-manifest, scope, override, ledger and breadcrumbs checks from CHECKS on their own. The plan-ledger check printed OK during the commit hook."
+    },
+    {
+      "at": "2026-11-18T12:12:08.129Z",
+      "plan": "621",
+      "text": "the folder foodVibe1.0-orch-merge-mod-events-srv was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T12:18:48.244Z",
+      "plan": "622",
+      "text": "the folder foodVibe1.0-orch-mod-events-srv-622 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T12:42:53.641Z",
+      "plan": "622",
+      "text": "builder left undone (round 0): [human] Dandan pastes a real site-visit note after plan 623 is merged"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 20.7,
+  "updatedAt": "2026-11-18T13:03:22.942Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "621",
+      "type": "behaviour",
+      "text": "behaviour: I did not re-fetch the provider's audio page, because I have no browsing here. I relied on the 2026-11-17 reading cited in server/services/gemini-client.js:142: webm, ogg, mpeg and wav are listed and audio/mp4 is not. audio/mp4 stays allowed and is sent as audio/m4a — reverse: re-check the page and edit MODEL_MIME in voice.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "621",
+      "type": "seen",
+      "text": "seen: pnpm run test:ci failed once with 1 of 2304 Karma tests failing and passed on rerun with no code change. I did not find which test failed, so it may be flaky.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "622",
+      "type": "behaviour",
+      "text": "behaviour: a model answer with no `answers` array fails the schema and returns 502, as the contract's schema says. An empty or whitespace answer is the only case treated as an empty draft — reverse: make `answers` optional in logisticsModelAnswerSchema",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-18T13:03:22.940Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T13:03:22.941Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
