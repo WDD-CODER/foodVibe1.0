@@ -255,9 +255,11 @@ $break-desktop: 1200px; // mirrors src/styles.scss
   :host ::ng-deep {
     .pbd-top {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: var(--space-2);
+      min-inline-size: 0;
     }
 
     .pbd-history {
@@ -272,6 +274,7 @@ $break-desktop: 1200px; // mirrors src/styles.scss
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: var(--space-1);
     }
 
     .pbd-history__body {
@@ -280,9 +283,11 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     }
 
     .pbd-history__list {
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: var(--space-2);
       margin: 0;
+      min-inline-size: 0;
       padding: 0;
       list-style: none;
     }

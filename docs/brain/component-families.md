@@ -325,7 +325,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
-- `PlatformAdminService.getPlatformHistory` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
+- `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
 - Plan 632: `AccessService` (`src/app/core/services/access.service.ts`) reads and writes the consultant access routes through `API.access(...)`; `UserService.switchBusiness` posts `API.auth('switch-business')`.
@@ -336,6 +336,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
+
+### platform-history — the platform change history of a business (plan 638)
+
+- Status: stable
+- Use: `platformChangesOf(before, after)` in `server/routes/admin.js` compares the stored business with the values being saved and returns the `{ field, from, to }` rows written to `platformHistory`.
+- Use: `describePlatformChange(change, translate)` in `src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts` turns one row into the Hebrew line.
+- Use: the panel's layout classes `.pbd-top`, `.pbd-history`, `.pbd-history__head`, `.pbd-history__body`, `.pbd-history__list`, `.pbd-history__row`, `.pbd-history__meta` in `platform-dashboard.page.scss`.
+- When: any platform change line of the business history; never format `{ field, from, to }` elsewhere.
 
 ### event-plan — event costing and planning engine
 

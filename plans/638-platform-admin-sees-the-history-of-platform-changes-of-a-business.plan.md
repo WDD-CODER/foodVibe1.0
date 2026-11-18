@@ -132,11 +132,19 @@ append the path to the scope block above and retry.
 - empty text of the list — family: empty-state — rung: 1 — why: `app-empty-state` in its small form, as the platform
   tables use it.
 - loading line of the list — family: feedback — rung: 1 — why: `app-loader`, as the platform page uses it.
-- `describePlatformChange(change, translate)` in the dialog component — family: helpers — rung: 4 — why: turns one
+- `describePlatformChange(change, translate)` — family: helpers — rung: 4 — why: in the dialog component; turns one
   stored `{ field, from, to }` into the Hebrew line; nothing else formats these three fields, and it must be testable
   without the template.
-- `platformChangesOf(before, after)` in `server/routes/admin.js` — family: none — rung: 4 — why: a server-side pure
+- `platformChangesOf(before, after)` — family: none — rung: 4 — why: in `server/routes/admin.js`; a server-side pure
   function local to the one route that writes the row; it compares the stored business with the values being saved.
+
+- `.pbd-top` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__head` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__body` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__list` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__row` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__meta` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
 
 ## Step 0 — Reality Check
 
