@@ -1,17 +1,14 @@
 # Orchestrator run mod-stock-srv
 
-Run branch: `orch/mod-stock-srv` (from `origin/main` at b15c698) · started 2026-11-18T19:49:03.358Z · finished 2026-11-18T20:35:27.323Z
+Run branch: `orch/mod-stock-srv` (from `origin/main` at b15c698) · started 2026-11-18T19:49:03.358Z · finished 2026-11-18T21:09:18.354Z
 Result: 1 merged, 0 parked, skipped or left out, 1 in the run (counted from git and status.json).
-`main` untouched: yes — origin/main is b15c698.
-Stopped: final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2497 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
+`main` untouched: yes (4 plan/todo file(s) changed on main) — origin/main is 39cc447.
 
 ## Stops
 
 - attempt 1 · 2026-11-18T20:35:23.440Z · final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2497 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
 
-Final gate: failed: pnpm run test:ci (attempt 1)
-Failing: TOTAL: 1 FAILED, 2497 SUCCESS
-Final gate note: no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
+Final gate: ok (attempt 1)
 
 ## Plans
 

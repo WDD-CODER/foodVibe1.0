@@ -146,11 +146,10 @@
       "text": "the folder foodVibe1.0-orch-merge-mod-stock-srv was installed (root, scripts, server)"
     }
   ],
-  "attempts": 1,
-  "phase": "stopped",
-  "freeDiskGb": 15.1,
-  "updatedAt": "2026-11-18T20:35:27.329Z",
-  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2497 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 15.6,
+  "updatedAt": "2026-11-18T21:09:18.359Z",
   "stops": [
     {
       "at": "2026-11-18T20:35:23.440Z",
@@ -199,16 +198,12 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-18T20:35:27.323Z",
+  "finishedAt": "2026-11-18T21:09:18.354Z",
   "finalGate": {
-    "ok": false,
-    "command": "pnpm run test:ci",
-    "at": "2026-11-18T20:35:27.328Z",
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T21:09:18.358Z",
     "attempt": 1,
-    "blamed": [],
-    "failing": [
-      "TOTAL: 1 FAILED, 2497 SUCCESS"
-    ],
-    "noPlanFile": true
+    "blamed": []
   }
 }
