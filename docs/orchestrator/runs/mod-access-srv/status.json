@@ -1,0 +1,264 @@
+{
+  "run": "mod-access-srv",
+  "branch": "orch/mod-access-srv",
+  "base": "main",
+  "startedAt": "2026-11-18T11:13:07.596Z",
+  "mainShaAtStart": "80c6a5b76fca044e952c84d18486843e6fa73d81",
+  "plans": {
+    "631": {
+      "nnn": "631",
+      "title": "One user, more than one business: access grants, the active business and the consultant role",
+      "branch": "feat/631-one-user-more-than",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-18T11:17:18.287Z"
+        },
+        "builder fix": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-18T12:04:20.828Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-18T12:17:58.544Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T12:42:17.549Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads `docs/brain/decisions/0032-one-user-more-than-one-business.md` and the INV-1 section of `docs/brain/invariants.md` on the branch and confirms they say what he approved at gate G2."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T11:17:17.777Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T11:17:18.289Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T11:53:23.181Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T12:04:20.077Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T12:04:20.470Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:04:20.831Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:06:14.359Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:17:48.173Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T12:17:58.266Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T12:17:58.546Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T12:36:37.576Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T12:42:11.969Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T12:42:17.550Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T12:42:27.626Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T12:43:43.648Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "tiers": [
+        "judgment"
+      ],
+      "freeDiskGb": 15.9,
+      "sha": "738f043539a0530155997967b7afefa8d39253ec",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 2157.4,
+          "tokens": {
+            "input": 5960134,
+            "output": 56270
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "opus",
+          "seconds": 109,
+          "tokens": {
+            "input": 206041,
+            "output": 4675
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 1117,
+          "tokens": {
+            "input": 5091485,
+            "output": 50973
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9,
+          "tokens": {
+            "input": 131993,
+            "output": 599
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node scripts/reuse-lint.mjs --check-registry",
+        "round 2: gate: pnpm run test:ci"
+      ],
+      "escalations": [
+        {
+          "step": "round 2",
+          "check": "pnpm run test:ci"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "resetToBase": "ed8395320488ea1d686d0b92c033896cf1256ce2",
+      "resetFrom": "4a1c7957368ace82797800c8d5092edfb9c9aa7d",
+      "checkedHead": "52072e21b41dfcbe6076b131f66d9ab522460f3e"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T11:16:35.342Z",
+      "plan": "631",
+      "text": "starts on the judgment tier: INV-1 changes"
+    },
+    {
+      "at": "2026-11-18T11:17:17.233Z",
+      "plan": "631",
+      "text": "the folder foodVibe1.0-orch-mod-access-srv-631 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T11:53:16.191Z",
+      "plan": "631",
+      "text": "builder left undone (round 0): A10: every check ran and passed; the [human] item (Dandan reads ADR 0032 and the INV-1 section and confirms they match gate G2) is left for him"
+    },
+    {
+      "at": "2026-11-18T12:17:57.888Z",
+      "plan": "631",
+      "text": "escalated to a fresh judgment-tier builder (round 2): gate: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-18T12:36:35.671Z",
+      "plan": "631",
+      "text": "builder left undone (round 2): A10 [human]: Dandan reads docs/brain/decisions/0032-one-user-more-than-one-business.md and the INV-1 section of docs/brain/invariants.md on the branch (not ticked: [human] item)"
+    },
+    {
+      "at": "2026-11-18T12:42:36.137Z",
+      "plan": "631",
+      "text": "the folder foodVibe1.0-orch-merge-mod-access-srv was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.9,
+  "updatedAt": "2026-11-18T12:51:42.986Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "631",
+      "type": "behaviour",
+      "text": "behaviour: resolveSession treats an active '__master__' business like a missing one (lands at home and clears users.activeBusinessId), the same rule canEnter uses — reverse: drop the MASTER_BUSINESS_ID test in resolveSession in server/services/access.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "631",
+      "type": "behaviour",
+      "text": "behaviour: POST /switch-business logs a refused switch as info auth.switch_business.denied with the businessId only — reverse: remove that req.log.info line in server/routes/auth.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "631",
+      "type": "seen",
+      "text": "seen: node scripts/ci-scope-check.mjs --checkout-branch printed 'skipped (branch \"\" is not feat/NNN-*)' in this worktree (exit 0), so it did not check the branch here",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-18T12:51:42.982Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T12:51:42.985Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
