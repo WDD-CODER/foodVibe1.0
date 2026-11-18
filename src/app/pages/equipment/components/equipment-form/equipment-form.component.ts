@@ -15,7 +15,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
-import { Equipment, EquipmentCategory, ScalingRule } from '@models/equipment.model'
+import { Equipment, EquipmentCategory } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -24,6 +24,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.util'
+import { scalingRuleFrom, scalingRuleErrors } from 'src/app/core/utils/scaling-rule.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
@@ -145,37 +146,12 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
     this.scalingEnabled_.set((e.scalingRule?.perGuests ?? 0) > 0)
   }
 
-  private isBlank_(v: unknown): boolean {
-    return v === null || v === undefined || v === ''
-  }
-
-  /** The rule to store: on = the three numbers; off on an item that had one = `perGuests: 0` (a PUT keeps a field left out). */
-  private scalingRuleFor_(v: Record<string, unknown>, hadRule: boolean): ScalingRule | undefined {
-    if (v['scalingEnabled']) {
-      return {
-        perGuests: Number(v['perGuests']),
-        minQuantity: Number(v['minQuantity']),
-        ...(!this.isBlank_(v['maxQuantity']) && { maxQuantity: Number(v['maxQuantity']) })
-      }
-    }
-    return hadRule ? { perGuests: 0, minQuantity: 0 } : undefined
-  }
-
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}
     const val = this.equipmentForm_.getRawValue()
     if (!val.nameHebrew?.trim()) errors['nameHebrew'] = 'field_name_required'
     if (!val.category?.trim()) errors['category'] = 'field_category_required'
-    if (val.scalingEnabled) {
-      const per = Number(val.perGuests)
-      if (this.isBlank_(val.perGuests) || !Number.isInteger(per) || per < 1)
-        errors['perGuests'] = 'scaling_per_guests_required'
-      const min = Number(val.minQuantity)
-      if (this.isBlank_(val.minQuantity) || !Number.isFinite(min) || min < 0)
-        errors['minQuantity'] = 'scaling_min_required'
-      else if (!this.isBlank_(val.maxQuantity) && Number(val.maxQuantity) < min)
-        errors['maxQuantity'] = 'scaling_max_below_min'
-    }
+    Object.assign(errors, scalingRuleErrors(val))
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -212,7 +188,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
             notes: v.notes ?? undefined,
             updatedAt: now
           }
-          const rule = this.scalingRuleFor_(v, !!equipment.scalingRule)
+          const rule = scalingRuleFrom(v, !!equipment.scalingRule)
           if (rule) updated.scalingRule = rule
           await this.equipmentData.updateEquipment(updated)
         } else {
@@ -222,7 +198,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
             ownedQuantity: Number(v.ownedQuantity),
             isConsumable: !!v.isConsumable,
             notes: v.notes || undefined,
-            ...(v.scalingEnabled && { scalingRule: this.scalingRuleFor_(v, false) }),
+            ...(v.scalingEnabled && { scalingRule: scalingRuleFrom(v, false) }),
             createdAt: now,
             updatedAt: now
           })

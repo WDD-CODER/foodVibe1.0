@@ -7,9 +7,11 @@ import {
   signal,
   OnInit,
   OnDestroy,
-  WritableSignal
+  WritableSignal,
+  DestroyRef
 } from '@angular/core'
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -44,6 +46,8 @@ import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
+import { scalingRuleFrom, scalingRuleErrors } from 'src/app/core/utils/scaling-rule.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 
@@ -57,6 +61,7 @@ type EquipmentBulkField = 'category' | 'isConsumable'
   standalone: true,
   imports: [
     SelectOnFocusDirective,
+    NumberBoxDirective,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -87,6 +92,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
   private readonly logging = inject(LoggingService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly fb = inject(FormBuilder)
+  private readonly destroyRef = inject(DestroyRef)
   private readonly translationKeyModal = inject(TranslationKeyModalService)
   private readonly equipmentCategoryRegistry = inject(EquipmentCategoryRegistryService)
 
@@ -183,6 +189,9 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
     }
   ])
   protected editForm_!: FormGroup
+  /** Plan 640: the popup's loading-rule switch (the three numbers show only while on) and its field errors. */
+  protected scalingEnabled_ = signal(false)
+  protected scalingErrors_ = signal<Record<string, string>>({})
   private isAsking_ = false
   /** The row panel's fields as loaded: a value changed and put back is not a change (plan 498). Idle while no row is open. */
   private readonly unsaved_ = useUnsavedChanges({
@@ -260,8 +269,16 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
       category: ['tool', [Validators.required]],
       ownedQuantity: [1, [Validators.required, Validators.min(0)]],
       isConsumable: [false],
-      notes: ['']
+      notes: [''],
+      scalingEnabled: [false],
+      perGuests: [null],
+      minQuantity: [1],
+      maxQuantity: [null]
     })
+    this.editForm_
+      .get('scalingEnabled')!
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((on: boolean) => this.scalingEnabled_.set(!!on))
   }
 
   private hydrateEditForm(e: Equipment): void {
@@ -270,13 +287,20 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
       this.customCategories_.update((list) => (list.includes(cat) ? list : [...list, cat]))
     }
     this.lastCategory_.set(cat && cat !== ADD_NEW_CATEGORY_VALUE ? cat : 'tool')
+    const hasRule = (e.scalingRule?.perGuests ?? 0) > 0
     this.editForm_.patchValue({
       nameHebrew: e.nameHebrew ?? '',
       category: cat,
       ownedQuantity: e.ownedQuantity ?? 0,
       isConsumable: e.isConsumable ?? false,
-      notes: e.notes ?? ''
+      notes: e.notes ?? '',
+      scalingEnabled: hasRule,
+      perGuests: hasRule ? e.scalingRule!.perGuests : null,
+      minQuantity: hasRule ? e.scalingRule!.minQuantity : 1,
+      maxQuantity: hasRule ? (e.scalingRule!.maxQuantity ?? null) : null
     })
+    this.scalingEnabled_.set(hasRule)
+    this.scalingErrors_.set({})
     this.unsaved_.markSaved()
   }
 
@@ -413,6 +437,9 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
     if (!id || this.editForm_.invalid) return false
     const equipment = this.equipmentData.allEquipment_().find((e) => e._id === id)
     if (!equipment) return false
+    const ruleErrors = scalingRuleErrors(this.editForm_.getRawValue())
+    this.scalingErrors_.set(ruleErrors)
+    if (Object.keys(ruleErrors).length > 0) return false
     this.isSavingEdit_.set(true)
     try {
       const v = this.editForm_.getRawValue()
@@ -426,6 +453,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
         notes: v.notes ?? undefined,
         updatedAt: now
       }
+      const rule = scalingRuleFrom(v, !!equipment.scalingRule)
+      if (rule) updated.scalingRule = rule
       await this.equipmentData.updateEquipment(updated)
       return true
     } catch (err) {
