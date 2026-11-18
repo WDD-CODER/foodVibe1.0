@@ -324,6 +324,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
+- Plan 629: `ProductImportService.getPriceRises` (`src/app/core/services/product-import.service.ts`) reads `GET /product-import/price-rises` through `API.productImport`, the same client as `apply` and `resolve`.
 - Plan 628: `GeminiService.readInvoice`, `ProductImportService.resolve`, the `invoice` argument of `apply`, `API.files` call the invoice read, memory, apply and file routes through the same `API` map (GeminiService.readInvoice, ProductImportService.resolve, the invoice argument of apply, API.files).
 - `PlatformAdminService.getLearningStats`, `PlatformAdminService.getLearningStatus` (`src/app/core/services/platform-admin.service.ts`) read the platform learning numbers through `API.admin(...)` (plan 630).
 - Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
@@ -498,5 +499,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 628
 - Use: `src/app/core/utils/price-change.util.ts` — `priceChangePct(old, new)` is the one browser rule for "by how many percent did a price move" (two decimals, null when there is no old price); `src/app/core/utils/invoice-lines.util.ts` — `buildInvoiceLines(keptRows, printed)` maps kept preview rows to the `invoice.lines` of the apply body; `app-invoice-header-strip` (supplier, date, number above the import preview); `InvoiceDataService` reads the saved invoices and opens a stored file in a new tab.
+- Plan 629: `isPriceRiseAlert(changePct, thresholdPct)` is the one rule for "a rise worth marking" (at or above the business's `priceRiseAlertPct`); `recipesUsingProducts(recipes, productIds)` finds the recipes and dishes that use a product directly or through preparations; `ProductImportService.getPriceRises` reads `GET /product-import/price-rises`; `app-price-impact-panel` and `app-price-rises-card` are page-local.
 - When: any browser screen that shows a price change, sends an invoice with the import save, or lists saved invoices.
+- Known copies: none.
+
+### price-impact-panel — `app-price-impact-panel`, `PriceImpactRow`
+
+- Status: stable — plan 629
+- Use: `src/app/pages/inventory/components/product-import/price-impact-panel/` — a read-only panel under the import save summary listing recipes and dishes with their cost before and after (30 rows, then "and N more").
+- When: a screen must show what a price change does to recipe cost, computed by `RecipeCostService` before and after.
+- Known copies: none.
+
+### price-rises-card — `app-price-rises-card`
+
+- Status: stable — plan 629
+- Use: `src/app/pages/dashboard/components/price-rises-card/` — the dashboard card of prices that rose in the last 60 days (`getPriceRises`); owner or consultant; hidden when empty.
+- When: the dashboard shows recent price rises.
 - Known copies: none.

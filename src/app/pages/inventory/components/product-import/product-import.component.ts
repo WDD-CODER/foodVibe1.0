@@ -20,15 +20,19 @@ import { PermissionService } from '@services/permission.service'
 import { ApplyRow, ImportRow, InvoiceReadResult, ProductImportService } from '@services/product-import.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { formatMoney } from 'src/app/core/engine/rounding'
+import { formatMoney, roundMoney } from 'src/app/core/engine/rounding'
+import { BusinessService } from '@services/business.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { BUSINESS_SETTINGS_DEFAULTS } from '@schemas/entities'
 import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
-import { priceChangePct } from '@utils/price-change.util'
+import { isPriceRiseAlert, priceChangePct, recipesUsingProducts } from '@utils/price-change.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { InvoiceHeaderStripComponent } from './invoice-header-strip/invoice-header-strip.component'
+import { PriceImpactPanelComponent, PriceImpactRow } from './price-impact-panel/price-impact-panel.component'
 import {
   buildApplyInvoice,
   changeText,
@@ -61,7 +65,8 @@ const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
     EmptyStateComponent,
     PageHeaderComponent,
     TextareaAutoGrowDirective,
-    InvoiceHeaderStripComponent
+    InvoiceHeaderStripComponent,
+    PriceImpactPanelComponent
   ],
   templateUrl: './product-import.component.html',
   styleUrl: './product-import.component.scss',
@@ -80,6 +85,8 @@ export class ProductImportComponent {
   private readonly logging_ = inject(LoggingService)
   private readonly matcher_ = inject(ProductNameMatcherService)
   private readonly unitRegistry_ = inject(UnitRegistryService)
+  private readonly business_ = inject(BusinessService)
+  private readonly recipeCost_ = inject(RecipeCostService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly text_ = signal('')
@@ -101,6 +108,8 @@ export class ProductImportComponent {
   protected readonly deleted_ = signal(0)
   protected readonly errorKey_ = signal<string | null>(null)
   protected readonly summary_ = signal<ImportSummary | null>(null)
+  /** Plan 629: the recipes and dishes a save made dearer (null = no price went up, no panel). Cleared with summary_. */
+  protected readonly impact_ = signal<PriceImpactRow[] | null>(null)
   protected readonly changeText = changeText
   protected readonly invoice_ = signal<InvoiceState | null>(null)
   protected readonly invoiceDate_ = signal('')
@@ -137,6 +146,8 @@ export class ProductImportComponent {
     const products = this.kitchenState_.products_()
     const knownUnits = this.knownPurchaseUnits_()
     const pendingIds = this.pendingIds_()
+    const threshold =
+      this.business_.business_()?.settings?.priceRiseAlertPct ?? BUSINESS_SETTINGS_DEFAULTS.priceRiseAlertPct
     return this.rows_().map((row) => {
       const match = this.matchOf_(row, products)
       let status: ImportRowStatus = !match && pendingIds.has(row.id) ? 'matching' : 'new'
@@ -148,7 +159,8 @@ export class ProductImportComponent {
       const unitText = row.purchaseUnit.trim()
       const hasUnknownPurchaseUnit = !match && status !== 'matching' && unitText !== '' && !knownUnits.has(unitText)
       const changePct = status === 'update' ? priceChangePct(oldPrice, row.price) : null
-      return { row, status, match, oldPrice, changePct, hasUnknownPurchaseUnit }
+      const isRiseAlert = isPriceRiseAlert(changePct, threshold)
+      return { row, status, match, oldPrice, changePct, isRiseAlert, hasUnknownPurchaseUnit }
     })
   })
 
@@ -209,6 +221,7 @@ export class ProductImportComponent {
     this.isParsing_.set(true)
     this.errorKey_.set(null)
     this.summary_.set(null)
+    this.impact_.set(null)
     this.hasMatchFailed_.set(false)
     try {
       const result = await call()
@@ -302,7 +315,15 @@ export class ProductImportComponent {
             this.view_().map(({ row }) => row)
           )
         : undefined
+      // Plan 629: the cost of every affected recipe at the OLD prices (apply reloads the products).
+      const risen = new Set<string>()
+      for (const { status, match, changePct } of this.view_()) {
+        if (status === 'update' && match && changePct !== null && changePct > 0) risen.add(match._id)
+      }
+      const affected = risen.size ? recipesUsingProducts(this.kitchenState_.recipes_(), risen) : []
+      const before = new Map(affected.map((recipe) => [recipe._id, this.recipeCost_.computeRecipeCost(recipe)]))
       const result = await this.importService_.apply(supplierId, rows, invoice)
+      if (risen.size) this.impact_.set(this.impactRows_(affected, before))
       const summary = {
         created: result.created,
         updated: result.updated,
@@ -328,6 +349,28 @@ export class ProductImportComponent {
     } finally {
       this.isSaving_.set(false)
     }
+  }
+
+  /** The recipes whose cost changed once the new prices are loaded, biggest rise first. */
+  private impactRows_(
+    affected: ReturnType<typeof recipesUsingProducts>,
+    before: Map<string, number>
+  ): PriceImpactRow[] {
+    const rows: PriceImpactRow[] = []
+    for (const recipe of affected) {
+      const was = before.get(recipe._id) ?? 0
+      const now = this.recipeCost_.computeRecipeCost(recipe)
+      if (roundMoney(now) === roundMoney(was)) continue
+      rows.push({
+        id: recipe._id,
+        name: recipe.nameHebrew,
+        isDish: recipe.recipeType === 'dish',
+        before: was,
+        after: now,
+        changePct: priceChangePct(was, now)
+      })
+    }
+    return rows.sort((a, b) => b.after - b.before - (a.after - a.before))
   }
 
   protected removeRow(id: number): void {

@@ -19,6 +19,7 @@ import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.comp
 import type { DashboardTab } from '../../dashboard.page'
 import { SetupChecklistCardComponent } from '../setup-checklist-card/setup-checklist-card.component'
 import { FrontDeskWeekCardComponent } from '../frontdesk-week-card/frontdesk-week-card.component'
+import { PriceRisesCardComponent } from '../price-rises-card/price-rises-card.component'
 import { FrontDeskChecklistCardComponent } from '../front-desk-checklist-card/front-desk-checklist-card.component'
 import { BusinessPerformanceComponent } from '../business-performance/business-performance.component'
 import { FrontDeskStatusBannerComponent } from 'src/app/shared/front-desk-status-banner/front-desk-status-banner.component'
@@ -50,6 +51,7 @@ interface ActivityDayGroup {
     FrontDeskChecklistCardComponent,
     BusinessPerformanceComponent,
     FrontDeskWeekCardComponent,
+    PriceRisesCardComponent,
     OpeningDetailsBannerComponent,
     FrontDeskStatusBannerComponent
   ],

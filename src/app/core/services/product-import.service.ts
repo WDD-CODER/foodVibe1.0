@@ -94,6 +94,16 @@ export interface ApplyResult {
   skippedRows: { name: string; reason: 'same_price' | 'no_price' | 'invalid' | 'duplicate' }[]
 }
 
+/** One recent price rise of GET /api/v1/product-import/price-rises (C-INVOICE). */
+export interface PriceRise {
+  productId: string
+  supplierId: string
+  from: number
+  to: number
+  changePct: number
+  at: number
+}
+
 /** Saves a whole price-list import in one server request (owner only, plan 432). */
 @Injectable({ providedIn: 'root' })
 export class ProductImportService {
@@ -109,6 +119,13 @@ export class ProductImportService {
       })
     )
     return data.matches
+  }
+
+  /** The latest rise per product and supplier at or above the business's alert percent, within days (owner only). */
+  getPriceRises(days = 60): Promise<PriceRise[]> {
+    return firstValueFrom(
+      this.http_.get<PriceRise[]>(`${environment.authApiUrl}${API.productImport('price-rises')}`, { params: { days } })
+    )
   }
 
   async apply(supplierId: string | null, rows: ApplyRow[], invoice?: ApplyInvoice): Promise<ApplyResult> {

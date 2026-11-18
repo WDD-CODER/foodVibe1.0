@@ -41,6 +41,7 @@ const { invoiceApplyInputSchema } = require('../generated/schemas/entities/invoi
 const { invoiceResolveRequestSchema } = require('../generated/schemas/entities/invoice-alias.schema')
 const { learnFromApply, resolveNames } = require('../services/invoice-memory')
 const { getBusiness } = require('../services/business')
+const { BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 
 const router = Router()
 
@@ -299,6 +300,40 @@ router.post('/resolve', verifyToken, (req, res, next) => {
     res.json({ matches })
   } catch (err) {
     req.log.error({ err, event: 'product_import.resolve_failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+/**
+ * Plan 629: GET /api/v1/product-import/price-rises?days=60 -> [{ productId, supplierId, from, to, changePct, at }]
+ * The newest price-history row per product + supplier whose changePct is at or above the business's priceRiseAlertPct,
+ * within the last `days` (1-365). Owner or consultant (editMoney on products). No product name or price is logged.
+ */
+router.get('/price-rises', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'editMoney', { type: 'products' })) next()
+}, async (req, res) => {
+  try {
+    const raw = req.query.days
+    const days = raw === undefined ? 60 : (typeof raw === 'string' && /^\d+$/.test(raw) ? Number(raw) : NaN)
+    if (!Number.isInteger(days) || days < 1 || days > 365) return res.status(400).json({ error: 'BAD_DAYS' })
+    const business = await getBusiness(req.user.businessId)
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    const threshold = { ...BUSINESS_SETTINGS_DEFAULTS, ...(business.settings ?? {}) }.priceRiseAlertPct
+    const rows = await col('priceHistory')
+      .find({ ...scopeFilter(req), at: { $gte: Date.now() - days * 86400000 }, changePct: { $gte: threshold } })
+      .sort({ at: -1 }).limit(2000).toArray()
+    const seen = new Set()
+    const answer = []
+    for (const row of rows) {
+      const key = `${row.productId} ${row.supplierId}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      answer.push({ productId: row.productId, supplierId: row.supplierId, from: row.prevPrice, to: row.price, changePct: row.changePct, at: row.at })
+      if (answer.length >= 200) break
+    }
+    res.json(answer)
+  } catch (err) {
+    req.log.error({ err, event: 'product_import.price_rises.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

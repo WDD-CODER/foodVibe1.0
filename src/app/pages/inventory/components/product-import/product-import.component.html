@@ -12,6 +12,9 @@
         </a>
       </section>
     }
+    @if (impact_(); as impact) {
+      <app-price-impact-panel [rows]="impact" />
+    }
 
     <section class="import-paste c-glass-panel" [class.import-paste--compact]="rows_().length > 0">
       <label class="import-field" for="import-text">
@@ -280,6 +283,12 @@
                     >
                       {{ statusKey(item.status) | translatePipe }}
                     </span>
+                    @if (item.isRiseAlert) {
+                      <span class="c-chip amber" data-testid="import-flag-rise">
+                        <lucide-icon name="trending-up" [size]="12" />
+                        {{ 'import_flag_price_rise' | translatePipe }}
+                      </span>
+                    }
                     @if (item.row.needsReview) {
                       <span class="c-chip amber" data-testid="import-flag-review">
                         {{ 'import_flag_review' | translatePipe }}

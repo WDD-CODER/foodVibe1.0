@@ -2466,6 +2466,16 @@
     "invoice_open_file": "פתח את הקובץ",
     "invoice_no_file": "הקובץ לא נשמר",
     "invoice_file_open_failed": "לא הצלחנו לפתוח את הקובץ – נסו שוב",
-    "invoice_trail_failed": "המחירים נשמרו, אבל החשבונית לא נרשמה ברשימת החשבוניות"
+    "invoice_trail_failed": "המחירים נשמרו, אבל החשבונית לא נרשמה ברשימת החשבוניות",
+    "price_rise_alert_pct": "התראת עליית מחיר (%)",
+    "price_rise_alert_help": "מחיר שעלה באחוז הזה או יותר יסומן בייבוא חשבונית ויופיע בלוח הבקרה",
+    "import_flag_price_rise": "עליית מחיר",
+    "price_impact_title": "מה זה עושה למנות ולמתכונים",
+    "price_impact_none": "אף מנה או מתכון לא התייקרו מהמחירים שעלו",
+    "price_impact_before": "לפני",
+    "price_impact_after": "אחרי",
+    "price_impact_more": "ועוד {count}",
+    "price_rises_card_title": "מחירים שעלו ב-60 הימים האחרונים",
+    "price_rises_card_all": "לכל החשבוניות"
   }
 }
