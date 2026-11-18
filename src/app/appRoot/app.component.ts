@@ -12,6 +12,7 @@ import { UserService } from '../core/services/user.service'
 import { ServerHeartbeatService } from '../core/services/server-heartbeat.service'
 import { LoadingService } from '../core/services/loading.service'
 import { HeaderComponent } from '../core/components/header/header.component'
+import { ActingBannerComponent } from '../core/components/acting-banner/acting-banner.component'
 import { TabChipsComponent } from '../core/components/tab-chips/tab-chips.component'
 import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component'
@@ -57,6 +58,7 @@ import { LayoutModeService } from '@services/layout-mode.service'
   imports: [
     RouterOutlet,
     HeaderComponent,
+    ActingBannerComponent,
     TabChipsComponent,
     UserMsg,
     UnitCreatorModal,

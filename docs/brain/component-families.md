@@ -312,6 +312,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
+- Plan 632: `APP_RELOAD` in `src/app/core/utils/app-reload.util.ts` is the one way to reload the whole application at a path (`UserService.switchBusiness` and a refresh that moves the business call it); specs replace the token, no page calls `window.location` itself.
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
 - `scalingRuleFrom(values, hadRule)` / `scalingRuleErrors(values)` in `src/app/core/utils/scaling-rule.util.ts`: the equipment loading rule (one per N guests, min, max) built and checked from form values; the full equipment form and the list's quick-edit popup both call it (plan 640).
@@ -325,6 +326,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
+- Plan 632: `AccessService` (`src/app/core/services/access.service.ts`) reads and writes the consultant access routes through `API.access(...)`; `UserService.switchBusiness` posts `API.auth('switch-business')`.
 - Plan 629: `ProductImportService.getPriceRises` (`src/app/core/services/product-import.service.ts`) reads `GET /product-import/price-rises` through `API.productImport`, the same client as `apply` and `resolve`.
 - Plan 628: `GeminiService.readInvoice`, `ProductImportService.resolve`, the `invoice` argument of `apply`, `API.files` call the invoice read, memory, apply and file routes through the same `API` map (GeminiService.readInvoice, ProductImportService.resolve, the invoice argument of apply, API.files).
 - `PlatformAdminService.getLearningStats`, `PlatformAdminService.getLearningStatus` (`src/app/core/services/platform-admin.service.ts`) read the platform learning numbers through `API.admin(...)` (plan 630).
@@ -516,4 +518,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 629
 - Use: `src/app/pages/dashboard/components/price-rises-card/` — the dashboard card of prices that rose in the last 60 days (`getPriceRises`); owner or consultant; hidden when empty.
 - When: the dashboard shows recent price rises.
+- Known copies: none.
+
+### acting-banner — `app-acting-banner`
+
+- Status: stable — plan 632
+- Use: `src/app/core/components/acting-banner/` (`app-acting-banner`, rendered by the app shell right after the header on every non-bare screen) — the persistent bar that names the business a consultant or the platform admin is acting in, with one button back to their own (`UserService.switchBusiness(null)`); hidden at home and in print.
+- When: a persistent notice with an action must stay on every screen; a toast disappears and `app-front-desk-status-banner` has no action.
 - Known copies: none.

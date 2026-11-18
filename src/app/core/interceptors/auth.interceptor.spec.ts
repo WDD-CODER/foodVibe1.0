@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing'
 import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { Router } from '@angular/router'
-import { Subject } from 'rxjs'
+import { EMPTY, Subject } from 'rxjs'
 import { authInterceptor } from './auth.interceptor'
 import { LoggingService } from '@services/logging.service'
 import { UserService } from '@services/user.service'
@@ -29,6 +29,8 @@ describe('authInterceptor — concurrent 401 refresh gate', () => {
         storedToken = t
       },
       isLoggedIn: () => true,
+      tokenBusinessId: () => 'b1',
+      refreshToken: () => EMPTY,
       callBackendRefresh: () => {
         refreshCalls++
         return refresh$
@@ -192,5 +194,83 @@ describe('authInterceptor — 403 no_permission (plan 428)', () => {
       .flush({ error: 'Bad filter' }, { status: 400, statusText: 'Bad Request' })
     expect(errorMsg).not.toHaveBeenCalled()
     expect(error).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'http.error' }))
+  })
+})
+
+describe('authInterceptor — never replays into another business (plan 632)', () => {
+  let http: HttpClient
+  let backend: HttpTestingController
+  let refresh$: Subject<{ token: string }>
+  let refreshToken: jasmine.Spy
+  let refreshing$: Subject<unknown>
+  let businessOf: Record<string, string>
+  const unauthorized = { status: 401, statusText: 'Unauthorized' }
+
+  beforeEach(() => {
+    refresh$ = new Subject<{ token: string }>()
+    refreshing$ = new Subject<unknown>()
+    refreshToken = jasmine.createSpy('refreshToken').and.callFake(() => refreshing$)
+    businessOf = { old: 'b1', same: 'b1', other: 'b2' }
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        {
+          provide: UserService,
+          useValue: {
+            getToken: () => 'old',
+            storeToken: () => undefined,
+            isLoggedIn: () => true,
+            tokenBusinessId: (t: string) => businessOf[t] ?? null,
+            callBackendRefresh: () => refresh$,
+            refreshToken,
+            logout: () => new Subject<void>()
+          }
+        },
+        { provide: LoggingService, useValue: { info: () => undefined, error: () => undefined } },
+        { provide: AuthModalService, useValue: { open: () => undefined } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } }
+      ]
+    })
+    http = TestBed.inject(HttpClient)
+    backend = TestBed.inject(HttpTestingController)
+  })
+
+  afterEach(() => {
+    // Ends the pending refresh so the interceptor's one-refresh flag is free for the next case.
+    refreshing$.complete()
+    backend.verify()
+  })
+
+  it('a 401 ACCESS_ENDED is never replayed: one refresh of the user, the error is rethrown', () => {
+    const errors: HttpErrorResponse[] = []
+    http.get('/a').subscribe({ error: (e) => errors.push(e) })
+    http.get('/b').subscribe({ error: (e) => errors.push(e) })
+    backend.expectOne('/a').flush({ error: 'ACCESS_ENDED' }, unauthorized)
+    backend.expectOne('/b').flush({ error: 'ACCESS_ENDED' }, unauthorized)
+    expect(errors.length).toBe(2)
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('a refresh that returns a token of another business does not replay the request', () => {
+    const errors: number[] = []
+    http.post('/a', {}).subscribe({ error: (e: HttpErrorResponse) => errors.push(e.status) })
+    backend.expectOne('/a').flush(null, unauthorized)
+    refresh$.next({ token: 'other' })
+    refresh$.complete()
+    backend.expectNone('/a')
+    expect(errors).toEqual([401])
+    expect(refreshToken).toHaveBeenCalledTimes(1)
+  })
+
+  it('a refresh that stays in the same business still replays the request', () => {
+    const results: string[] = []
+    http.get<string>('/a').subscribe((r) => results.push(r))
+    backend.expectOne('/a').flush(null, unauthorized)
+    refresh$.next({ token: 'same' })
+    refresh$.complete()
+    backend.expectOne('/a').flush('A')
+    expect(results).toEqual(['A'])
+    expect(refreshToken).not.toHaveBeenCalled()
   })
 })

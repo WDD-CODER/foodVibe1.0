@@ -54,7 +54,7 @@ describe('SetupChecklistCardComponent', () => {
       providers: [
         moduleStub,
         { provide: BusinessService, useValue: { business_: business_.asReadonly(), loadSetupStatus } },
-        { provide: PermissionService, useValue: { isOwner_: isOwner_.asReadonly() } },
+        { provide: PermissionService, useValue: { isOwner_: isOwner_.asReadonly(), can: () => isOwner_() } },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['warn']) },
         { provide: KitchenStateService, useValue: { products_: products_.asReadonly() } },
         {

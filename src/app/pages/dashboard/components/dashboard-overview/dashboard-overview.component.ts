@@ -100,7 +100,7 @@ export class DashboardOverviewComponent {
   /** Owner whose opening details were never answered (`undefined`; `{}` = skipped): a banner stands where the performance area would be. */
   protected readonly needsOpeningDetails_ = computed(
     () =>
-      this.permission.isOwner_() &&
+      this.permission.can('editSettings') &&
       this.businessService.business_()?.baseline === undefined &&
       this.businessService.business_() !== null
   )

@@ -8,6 +8,7 @@ import { PageHeaderComponent } from '../../shared/page-header/page-header.compon
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component'
 import { SETTINGS_TABS, SettingsTab } from './settings-tabs'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
+import { AccessTabComponent } from './components/access-tab/access-tab.component'
 import { TeamTabComponent } from './components/team-tab/team-tab.component'
 import { BusinessSettingsTabComponent } from './components/business-settings-tab/business-settings-tab.component'
 import { BaselineTabComponent } from './components/baseline-tab/baseline-tab.component'
@@ -24,6 +25,7 @@ import type { PendingChangesComponent } from 'src/app/core/guards/pending-change
     EmptyStateComponent,
     ScrollRailComponent,
     TeamTabComponent,
+    AccessTabComponent,
     BusinessSettingsTabComponent,
     BaselineTabComponent
   ],
@@ -47,8 +49,10 @@ export class SettingsPage implements PendingChangesComponent {
   private readonly queryParams_ = toSignal(this.route.queryParams, { initialValue: {} as Record<string, string> })
 
   // 5. COMPUTED
-  /** Tabs the signed-in user may open; empty for staff. */
-  readonly visibleTabs_ = computed(() => SETTINGS_TABS.filter((tab) => !tab.ownerOnly || this.permission.isOwner_()))
+  /** Tabs the signed-in user may open: each one asks its own permission (a consultant gets none); empty for staff. */
+  readonly visibleTabs_ = computed(() =>
+    SETTINGS_TABS.filter((tab) => !tab.ownerOnly || this.permission.can(tab.action))
+  )
 
   /** The `?tab=` value when it is a visible tab, else the first visible tab. */
   readonly activeTab_ = computed<SettingsTab | null>(() => {

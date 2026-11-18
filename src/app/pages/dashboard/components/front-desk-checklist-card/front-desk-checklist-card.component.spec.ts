@@ -40,7 +40,7 @@ describe('FrontDeskChecklistCardComponent (plan 556)', () => {
           provide: BusinessService,
           useValue: { business_: signal(BUSINESS).asReadonly(), loadSetupStatus: () => Promise.resolve({ frontDesk }) }
         },
-        { provide: PermissionService, useValue: { isOwner_: signal(owner).asReadonly() } },
+        { provide: PermissionService, useValue: { isOwner_: signal(owner).asReadonly(), can: () => owner } },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['warn']) },
         {
           provide: TranslationService,

@@ -6,6 +6,15 @@ import type { User } from '../models/user.model'
 import type { Recipe } from '../models/recipe.model'
 
 const OWNER: User = { _id: 'o1', name: 'owner', email: 'o@x', businessId: 'b1', businessRole: 'owner' }
+const CONSULTANT: User = {
+  _id: 'c1',
+  name: 'consultant',
+  email: 'c@x',
+  businessId: 'b2',
+  businessRole: 'consultant',
+  homeBusinessId: 'b1',
+  acting: 'consultant'
+}
 const STAFF: User = { _id: 's1', name: 'cook', email: 's@x', businessId: 'b1', businessRole: 'staff' }
 const ACTIONS: PermissionAction[] = [
   'create',
@@ -39,6 +48,15 @@ describe('PermissionService.can', () => {
   it('signed out: nothing is allowed', () => {
     for (const action of ACTIONS) expect(service.can(action, { type: 'recipes', doc: { createdBy: 's1' } })).toBeFalse()
     expect(service.isOwner_()).toBeFalse()
+  })
+
+  it('consultant: every action except manageTeam and editSettings; isOwner_ is true', () => {
+    user_.set(CONSULTANT)
+    for (const action of ACTIONS) {
+      const denied = action === 'manageTeam' || action === 'editSettings'
+      expect(service.can(action, { type: 'recipes', doc: { createdBy: 'someone' } })).toBe(!denied)
+    }
+    expect(service.isOwner_()).toBeTrue()
   })
 
   it('owner: every action is allowed', () => {

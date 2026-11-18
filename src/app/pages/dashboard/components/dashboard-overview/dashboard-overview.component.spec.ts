@@ -117,7 +117,7 @@ describe('DashboardOverviewComponent', () => {
           // user_/isOwner_: the setup card (plan 431) reads them through PermissionService and BusinessService.
           useValue: { isLoggedIn: mockIsLoggedIn, user_: signal(null), isOwner_: signal(false) }
         },
-        { provide: PermissionService, useValue: { isOwner_: mockIsOwner.asReadonly(), can: () => false } },
+        { provide: PermissionService, useValue: { isOwner_: mockIsOwner.asReadonly(), can: () => mockIsOwner() } },
         {
           provide: BusinessService,
           useValue: {
