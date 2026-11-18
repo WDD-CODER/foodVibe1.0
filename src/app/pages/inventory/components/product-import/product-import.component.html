@@ -30,17 +30,19 @@
       </label>
 
       <div class="import-paste__row">
-        <div class="import-field import-field--supplier">
-          <span class="import-field__label">{{ 'import_supplier_optional' | translatePipe }}</span>
-          <app-custom-select
-            [ngModel]="supplierId_()"
-            (ngModelChange)="supplierId_.set($event)"
-            [options]="supplierOptions_()"
-            placeholder="import_no_supplier"
-            [typeToFilter]="true"
-            data-testid="import-supplier"
-          />
-        </div>
+        @if (!showStrip_()) {
+          <div class="import-field import-field--supplier">
+            <span class="import-field__label">{{ 'import_supplier_optional' | translatePipe }}</span>
+            <app-custom-select
+              [ngModel]="supplierId_()"
+              (ngModelChange)="supplierId_.set($event)"
+              [options]="supplierOptions_()"
+              placeholder="import_no_supplier"
+              [typeToFilter]="true"
+              data-testid="import-supplier"
+            />
+          </div>
+        }
         <input
           #cameraInput
           type="file"
@@ -48,15 +50,15 @@
           capture="environment"
           hidden
           data-testid="import-photo-camera-input"
-          (change)="onPhotoChosen($event)"
+          (change)="onFileChosen($event)"
         />
         <input
           #uploadInput
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
           hidden
           data-testid="import-photo-upload-input"
-          (change)="onPhotoChosen($event)"
+          (change)="onFileChosen($event)"
         />
         <button
           type="button"
@@ -75,8 +77,8 @@
           [disabled]="isParsing_() || isSaving_()"
           (click)="uploadInput.click()"
         >
-          <lucide-icon name="image" [size]="16" />
-          {{ 'import_photo_upload' | translatePipe }}
+          <lucide-icon name="file-text" [size]="16" />
+          {{ 'import_file_upload' | translatePipe }}
         </button>
         <button
           type="button"
@@ -90,7 +92,7 @@
         </button>
       </div>
 
-      <p class="import-hint" data-testid="import-photo-privacy">{{ 'import_photo_privacy' | translatePipe }}</p>
+      <p class="import-hint" data-testid="import-photo-privacy">{{ 'invoice_file_privacy' | translatePipe }}</p>
 
       @if (errorKey_(); as errorKey) {
         <p class="import-message import-message--error" role="alert" data-testid="import-error">
@@ -106,10 +108,25 @@
         </p>
       }
 
+      @if (showStrip_() && invoice_(); as invoice) {
+        <app-invoice-header-strip
+          [(supplierId)]="supplierId_"
+          [(invoiceDate)]="invoiceDate_"
+          [(invoiceNumber)]="invoiceNumber_"
+          [supplierOptions]="supplierOptions_()"
+          [printedSupplierName]="invoice.header.supplierName ?? null"
+          [isSuggested]="invoice.suggestedSupplierId !== '' && supplierId_() === invoice.suggestedSupplierId"
+          [taxId]="invoice.header.supplierTaxId ?? null"
+          [vatIncluded]="invoice.header.vatIncluded ?? null"
+          [isSupplierMissing]="isSupplierMissing_()"
+          [disabled]="isSaving_()"
+        />
+      }
+
       <section class="import-preview c-glass-panel" data-testid="import-preview">
         @if (isFromPhoto_()) {
           <p class="import-hint" role="status" data-testid="import-photo-hint">
-            {{ 'import_photo_check_hint' | translatePipe }}
+            {{ 'import_file_check_hint' | translatePipe }}
           </p>
         }
         @if (isMatching_()) {
@@ -195,6 +212,18 @@
                       <span class="import-old-price" dir="ltr" data-testid="import-old-price">
                         {{ 'import_old_price' | translatePipe }} {{ formatMoney(item.oldPrice) }}
                       </span>
+                      @if (item.changePct !== null) {
+                        <span
+                          class="import-change"
+                          [class.import-change--up]="item.changePct > 0"
+                          [class.import-change--down]="item.changePct < 0"
+                          dir="ltr"
+                          data-testid="import-change"
+                          [attr.aria-label]="'import_price_change' | translatePipe"
+                        >
+                          {{ changeText(item.changePct) }}
+                        </span>
+                      }
                     }
                   </td>
                   <td [attr.data-label]="'import_col_purchase_unit' | translatePipe">

@@ -2,7 +2,7 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { CalendarDays, ClipboardCheck, LucideAngularModule, Settings, Wrench } from 'lucide-angular'
+import { CalendarDays, ClipboardCheck, FileText, LucideAngularModule, Settings, Wrench } from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -47,7 +47,7 @@ describe('TabChipsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TabChipsComponent,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings })
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings, FileText })
       ],
       providers: [
         moduleStub,
@@ -58,6 +58,7 @@ describe('TabChipsComponent', () => {
           { path: 'trash', component: BlankStubComponent },
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
+          { path: 'inventory/invoices', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
           { path: 'frontdesk/knowledge', component: BlankStubComponent }
@@ -86,13 +87,13 @@ describe('TabChipsComponent', () => {
     expect(paths).toEqual(jasmine.arrayContaining(['/venues', '/dashboard?tab=metadata', '/suppliers', '/trash']))
   })
 
-  it('should render products then equipment chips on both inventory screens', async () => {
-    for (const url of ['/inventory/list', '/inventory/equipment']) {
+  it('should render products, equipment then invoices chips on the inventory screens', async () => {
+    for (const url of ['/inventory/list', '/inventory/equipment', '/inventory/invoices']) {
       await router.navigateByUrl(url)
       fixture.detectChanges()
       const links = fixture.debugElement.queryAll(By.directive(RouterLink))
       const paths = links.map((de) => de.injector.get(RouterLink).href)
-      expect(paths).toEqual(['/inventory/list', '/inventory/equipment'])
+      expect(paths).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices'])
     }
   })
 

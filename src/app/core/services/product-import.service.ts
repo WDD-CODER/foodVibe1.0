@@ -27,10 +27,70 @@ export interface ApplyRow {
   purchaseQty: number | null
 }
 
+/** The header the invoice read printed (C-INVREAD); a value that was not read is absent. */
+export interface InvoiceHeader {
+  supplierName?: string
+  supplierTaxId?: string
+  supplierPhone?: string
+  invoiceNumber?: string
+  invoiceDate?: string
+  vatIncluded?: boolean
+}
+
+/** One line as printed on the invoice, before the rows were cleaned. */
+export interface PrintedLine {
+  name: string
+  quantity: number | null
+  unit: string | null
+  unitPrice: number | null
+  lineTotal: number | null
+}
+
+/** The answer of POST /api/v1/ai/invoices/read (C-INVREAD). */
+export interface InvoiceReadResult {
+  header: InvoiceHeader
+  supplier: { supplierId?: string; matchedBy?: 'taxId' | 'phone' | 'name'; supplierKey: string }
+  rows: ImportRow[]
+  printed: PrintedLine[]
+  truncated: boolean
+  draftId: string | null
+  fileId: string | null
+}
+
+/** One memory match of POST /api/v1/product-import/resolve (C-ALIAS): row i is product productId. */
+export interface ResolveMatch {
+  i: number
+  productId: string
+  source: 'own' | 'shared'
+}
+
+/** The optional invoice header of the apply body (C-INVOICE). row = index into rows. */
+export interface ApplyInvoice {
+  supplierName: string
+  supplierTaxId?: string
+  invoiceNumber?: string
+  invoiceDate?: string
+  vatIncluded?: boolean
+  source: 'photo' | 'pdf' | 'text'
+  fileId?: string
+  draftId?: string
+  supplierKey?: string
+  lines: {
+    printedName: string
+    quantity?: number
+    unit?: string
+    unitPrice?: number
+    lineTotal?: number
+    needsReview: boolean
+    row: number
+  }[]
+}
+
 export interface ApplyResult {
   created: number
   updated: number
   skipped: number
+  invoiceId?: string | null
   skippedRows: { name: string; reason: 'same_price' | 'no_price' | 'invalid' | 'duplicate' }[]
 }
 
@@ -40,9 +100,21 @@ export class ProductImportService {
   private readonly http_ = inject(HttpClient)
   private readonly productData_ = inject(ProductDataService)
 
-  async apply(supplierId: string | null, rows: ApplyRow[]): Promise<ApplyResult> {
+  /** Memory first (plan 627): which rows of this supplier's invoice the business already linked. No model call. */
+  async resolve(supplierKey: string, names: string[]): Promise<ResolveMatch[]> {
+    const data = await firstValueFrom(
+      this.http_.post<{ matches: ResolveMatch[] }>(`${environment.authApiUrl}${API.productImport('resolve')}`, {
+        supplierKey,
+        names
+      })
+    )
+    return data.matches
+  }
+
+  async apply(supplierId: string | null, rows: ApplyRow[], invoice?: ApplyInvoice): Promise<ApplyResult> {
+    const body = invoice ? { supplierId, rows, invoice } : { supplierId, rows }
     const result = await firstValueFrom(
-      this.http_.post<ApplyResult>(`${environment.authApiUrl}${API.productImport('apply')}`, { supplierId, rows })
+      this.http_.post<ApplyResult>(`${environment.authApiUrl}${API.productImport('apply')}`, body)
     )
     await this.productData_.reloadFromStorage()
     return result

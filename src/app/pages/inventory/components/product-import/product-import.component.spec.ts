@@ -3,14 +3,14 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
 import { Observable, of, throwError } from 'rxjs'
-import { LucideAngularModule } from 'lucide-angular'
+import { FileText, LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { GeminiService } from '@services/gemini.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { LoggingService } from '@services/logging.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { PermissionService } from '@services/permission.service'
-import { ImportRow, ProductImportService } from '@services/product-import.service'
+import { ImportRow, InvoiceReadResult, ProductImportService } from '@services/product-import.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { NameMatchItem, NameMatchResult, ProductNameMatcherService } from '@services/product-name-matcher.service'
@@ -32,6 +32,18 @@ const row = (name: string, price: number | null, extra: Partial<ImportRow> = {})
   ...extra
 })
 
+/** A full answer of the invoice read (C-INVREAD) around the given rows. */
+const readResult = (rows: ImportRow[], extra: Partial<InvoiceReadResult> = {}): InvoiceReadResult => ({
+  header: {},
+  supplier: { supplierKey: 'name:ירקן' },
+  rows,
+  printed: [],
+  truncated: false,
+  draftId: null,
+  fileId: null,
+  ...extra
+})
+
 const PRODUCTS = [
   { _id: 'p1', nameHebrew: 'עגבנייה', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 5 }] },
   { _id: 'p2', nameHebrew: 'מלפפון', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 4.5 }] },
@@ -43,9 +55,11 @@ describe('ProductImportComponent', () => {
   let parsePriceList: jasmine.Spy
   let apply: jasmine.Spy
   let onSetSuccessMsg: jasmine.Spy
+  let onSetErrorMsg: jasmine.Spy
   let allowed: boolean
   let matchNames: jasmine.Spy
-  let parseReceiptPhoto: jasmine.Spy
+  let readInvoice: jasmine.Spy
+  let resolve: jasmine.Spy
 
   async function setup(
     parsed: Observable<unknown>,
@@ -55,15 +69,17 @@ describe('ProductImportComponent', () => {
     allowed = can
     matchNames = jasmine.createSpy('matchNames').and.callFake((_items: NameMatchItem[]) => aiAnswer())
     parsePriceList = jasmine.createSpy('parsePriceList').and.returnValue(parsed)
-    parseReceiptPhoto = jasmine.createSpy('parseReceiptPhoto').and.resolveTo({ rows: [], truncated: false })
+    readInvoice = jasmine.createSpy('readInvoice').and.resolveTo(readResult([]))
+    resolve = jasmine.createSpy('resolve').and.resolveTo([])
     apply = jasmine.createSpy('apply').and.resolveTo({ created: 1, updated: 1, skipped: 1, skippedRows: [] })
     onSetSuccessMsg = jasmine.createSpy('onSetSuccessMsg')
+    onSetErrorMsg = jasmine.createSpy('onSetErrorMsg')
     TestBed.configureTestingModule({
-      imports: [ProductImportComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [ProductImportComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, FileText })],
       providers: [
         provideRouter([]),
-        { provide: GeminiService, useValue: { parsePriceList, parseReceiptPhoto } },
-        { provide: ProductImportService, useValue: { apply } },
+        { provide: GeminiService, useValue: { parsePriceList, readInvoice } },
+        { provide: ProductImportService, useValue: { apply, resolve } },
         {
           provide: ProductNameMatcherService,
           useValue: { matchExact: (name: string) => matchProductName(name, PRODUCTS), matchNames }
@@ -91,7 +107,7 @@ describe('ProductImportComponent', () => {
           provide: UserMsgService,
           useValue: {
             onSetSuccessMsg,
-            onSetErrorMsg: jasmine.createSpy('onSetErrorMsg'),
+            onSetErrorMsg,
             onLineRemoved: jasmine.createSpy('onLineRemoved')
           }
         },
@@ -440,7 +456,7 @@ describe('ProductImportComponent', () => {
     expect(byId('import-text')).toBeNull()
   })
 
-  describe('receipt photo (plan 465)', () => {
+  describe('invoice file (plan 628)', () => {
     const receiptFile = () => new File(['x'], 'receipt.jpg', { type: 'image/jpeg' })
 
     async function choosePhoto(
@@ -456,22 +472,22 @@ describe('ProductImportComponent', () => {
       fixture.detectChanges()
     }
 
-    it('shows a camera button (capture) and an upload button (no capture), both for jpg, png and webp', async () => {
+    it('shows a camera button (capture) and an upload button (no capture), the upload one takes a PDF too', async () => {
       await setup(of({ rows: [], truncated: false }))
       const camera = byId<HTMLInputElement>('import-photo-camera-input')!
       const upload = byId<HTMLInputElement>('import-photo-upload-input')!
       expect(camera.getAttribute('capture')).toBe('environment')
       expect(camera.getAttribute('accept')).toBe('image/jpeg,image/png,image/webp')
       expect(upload.hasAttribute('capture')).toBeFalse()
-      expect(upload.getAttribute('accept')).toBe('image/jpeg,image/png,image/webp')
+      expect(upload.getAttribute('accept')).toBe('image/jpeg,image/png,image/webp,application/pdf')
       expect(byId('import-photo-camera')?.textContent).toContain('import_photo_camera')
-      expect(byId('import-photo-upload')?.textContent).toContain('import_photo_upload')
-      expect(byId('import-photo-privacy')?.textContent?.trim()).toBe('import_photo_privacy')
+      expect(byId('import-photo-upload')?.textContent).toContain('import_file_upload')
+      expect(byId('import-photo-privacy')?.textContent?.trim()).toBe('invoice_file_privacy')
     })
 
     it('a chosen photo is read once, fills the preview, shows the hint, counts one use and leaves the text box alone', async () => {
       await setup(of({ rows: [], truncated: false }))
-      parseReceiptPhoto.and.resolveTo({ rows: [row('בצל', 3.5), row('גזר', 4)], truncated: false })
+      readInvoice.and.resolveTo(readResult([row('בצל', 3.5), row('גזר', 4)]))
       const box = byId<HTMLTextAreaElement>('import-text')!
       box.value = 'my pasted text'
       box.dispatchEvent(new Event('input'))
@@ -480,10 +496,10 @@ describe('ProductImportComponent', () => {
       const file = receiptFile()
       await choosePhoto('import-photo-camera-input', file)
 
-      expect(parseReceiptPhoto).toHaveBeenCalledTimes(1)
-      expect(parseReceiptPhoto.calls.mostRecent().args[0]).toBe(file)
+      expect(readInvoice).toHaveBeenCalledTimes(1)
+      expect(readInvoice.calls.mostRecent().args[0]).toBe(file)
       expect(all('import-row').length).toBe(2)
-      expect(byId('import-photo-hint')?.textContent?.trim()).toBe('import_photo_check_hint')
+      expect(byId('import-photo-hint')?.textContent?.trim()).toBe('import_file_check_hint')
       expect(getGeminiUsage().count).toBe(before + 1)
       expect(byId<HTMLTextAreaElement>('import-text')!.value).toBe('my pasted text')
       expect(parsePriceList).not.toHaveBeenCalled()
@@ -491,7 +507,7 @@ describe('ProductImportComponent', () => {
 
     it('the hint goes away after the next pasted-text read', async () => {
       await setup(of({ rows: [row('בצל', 3)], truncated: false }))
-      parseReceiptPhoto.and.resolveTo({ rows: [row('גזר', 4)], truncated: false })
+      readInvoice.and.resolveTo(readResult([row('גזר', 4)]))
       await choosePhoto('import-photo-upload-input')
       expect(byId('import-photo-hint')).not.toBeNull()
       await pasteAndParse('בצל 3')
@@ -500,7 +516,7 @@ describe('ProductImportComponent', () => {
 
     it('photo rows get the same name matching as pasted rows', async () => {
       await setup(of({ rows: [], truncated: false }))
-      parseReceiptPhoto.and.resolveTo({ rows: [row('עגבניות', 6.2)], truncated: false })
+      readInvoice.and.resolveTo(readResult([row('עגבניות', 6.2)]))
       await choosePhoto('import-photo-upload-input')
       expect(all('import-status').map((chip) => chip.textContent?.trim())).toEqual(['import_status_update'])
     })
@@ -512,9 +528,20 @@ describe('ProductImportComponent', () => {
         () => Promise.reject(new HttpErrorResponse({ status: 400, error: { error: 'daily_limit_reached' } })),
         'ai_daily_limit_reached_all'
       ],
-      ['IMAGE_TOO_LARGE', () => Promise.reject(new Error('IMAGE_TOO_LARGE')), 'import_photo_too_big'],
-      ['IMAGE_TYPE_UNSUPPORTED', () => Promise.reject(new Error('IMAGE_TYPE_UNSUPPORTED')), 'import_photo_unsupported'],
-      ['any other failure', () => Promise.reject(new HttpErrorResponse({ status: 502 })), 'import_photo_failed']
+      ['FILE_TOO_LARGE', () => Promise.reject(new Error('FILE_TOO_LARGE')), 'import_file_too_big'],
+      ['HTTP 413', () => Promise.reject(new HttpErrorResponse({ status: 413 })), 'import_file_too_big'],
+      ['FILE_TYPE_UNSUPPORTED', () => Promise.reject(new Error('FILE_TYPE_UNSUPPORTED')), 'import_file_unsupported'],
+      [
+        'UNSUPPORTED_FILE_TYPE',
+        () => Promise.reject(new HttpErrorResponse({ status: 400, error: { error: 'UNSUPPORTED_FILE_TYPE' } })),
+        'import_file_unsupported'
+      ],
+      [
+        'ai_monthly_cap_reached',
+        () => Promise.reject(new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached' } })),
+        'ai_monthly_cap_reached'
+      ],
+      ['any other failure', () => Promise.reject(new HttpErrorResponse({ status: 502 })), 'import_file_failed']
     ]
     for (const [label, fail, messageKey] of failures) {
       it(`${label} shows ${messageKey} and keeps the existing preview rows`, async () => {
@@ -522,7 +549,7 @@ describe('ProductImportComponent', () => {
         await pasteAndParse('בצל 3')
         expect(all('import-row').length).toBe(2)
 
-        parseReceiptPhoto.and.callFake(fail)
+        readInvoice.and.callFake(fail)
         await choosePhoto('import-photo-camera-input')
 
         expect(byId('import-error')?.textContent?.trim()).toBe(messageKey)
@@ -533,12 +560,179 @@ describe('ProductImportComponent', () => {
 
     it('an empty photo result shows import_nothing_found and the paste box still works', async () => {
       await setup(of({ rows: [row('בצל', 3)], truncated: false }))
-      parseReceiptPhoto.and.resolveTo({ rows: [], truncated: false })
+      readInvoice.and.resolveTo(readResult([]))
       await choosePhoto('import-photo-camera-input')
       expect(byId('import-error')?.textContent?.trim()).toBe('import_nothing_found')
       await pasteAndParse('בצל 3')
       expect(all('import-row').length).toBe(1)
       expect(byId('import-error')).toBeNull()
+    })
+
+    describe('header, memory and the invoice save', () => {
+      const withRead = (rows: ImportRow[], extra: Partial<InvoiceReadResult> = {}) =>
+        readInvoice.and.resolveTo(readResult(rows, extra))
+
+      async function readFile(file = receiptFile()) {
+        await choosePhoto('import-photo-upload-input', file)
+      }
+
+      const clickSave = async () => {
+        byId<HTMLButtonElement>('import-save')!.click()
+        await fixture.whenStable()
+        fixture.detectChanges()
+      }
+
+      it('a PDF chosen in the upload input calls readInvoice once and fills the preview', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('בצל', 3)])
+        const pdf = new File(['%PDF'], 'i.pdf', { type: 'application/pdf' })
+        await readFile(pdf)
+        expect(readInvoice).toHaveBeenCalledTimes(1)
+        expect(readInvoice.calls.mostRecent().args[0]).toBe(pdf)
+        expect(all('import-row').length).toBe(1)
+        expect(byId('invoice-strip')).not.toBeNull()
+        expect(byId('import-supplier')).toBeNull()
+      })
+
+      it('asks memory once with the supplier key and every name, and the model only for the rest', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('שם מודפס א', 3), row('שם מודפס ב', 4), row('שם מודפס ג', 5)], {
+          supplier: { supplierKey: 'tax:123456789' }
+        })
+        resolve.and.resolveTo([{ i: 1, productId: 'p2', source: 'own' }])
+        await readFile()
+        expect(resolve).toHaveBeenCalledTimes(1)
+        expect(resolve).toHaveBeenCalledWith('tax:123456789', ['שם מודפס א', 'שם מודפס ב', 'שם מודפס ג'])
+        expect(matchNames).toHaveBeenCalledTimes(1)
+        expect((matchNames.calls.mostRecent().args[0] as NameMatchItem[]).map((i) => i.name)).toEqual([
+          'שם מודפס א',
+          'שם מודפס ג'
+        ])
+        expect(all('import-matches').map((m) => m.textContent?.trim())).toEqual(['import_matches_existing מלפפון'])
+      })
+
+      it('makes no model call when memory settled every name', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('שם א', 3), row('שם ב', 4)])
+        resolve.and.resolveTo([
+          { i: 0, productId: 'p1', source: 'own' },
+          { i: 1, productId: 'p2', source: 'shared' }
+        ])
+        await readFile()
+        expect(matchNames).not.toHaveBeenCalled()
+      })
+
+      it('a failed resolve still asks the model for every unmatched name and shows no error', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('שם א', 3), row('שם ב', 4)])
+        resolve.and.rejectWith(new HttpErrorResponse({ status: 500 }))
+        await readFile()
+        expect(matchNames).toHaveBeenCalledTimes(1)
+        expect((matchNames.calls.mostRecent().args[0] as NameMatchItem[]).length).toBe(2)
+        expect(byId('import-error')).toBeNull()
+      })
+
+      it('shows +6.0% for 5 → 5.3, -4.0% for 5 → 4.8 and nothing for a new row', async () => {
+        await setup(of({ rows: [row('עגבנייה', 5.3), row('מלפפון', 4.32), row('בצל', 3)], truncated: false }))
+        fixture.componentInstance['supplierId_'].set('sup1')
+        await pasteAndParse()
+        expect(all('import-change').map((c) => c.textContent?.trim())).toEqual(['+6.0%', '-4.0%'])
+        expect(all('import-change')[0].classList).toContain('import-change--up')
+        expect(all('import-change')[1].classList).toContain('import-change--down')
+      })
+
+      it('a row with old price 5 and new price 4.8 shows -4.0%', async () => {
+        await setup(of({ rows: [row('עגבנייה', 4.8)], truncated: false }))
+        fixture.componentInstance['supplierId_'].set('sup1')
+        await pasteAndParse()
+        expect(byId('import-change')?.textContent?.trim()).toBe('-4.0%')
+      })
+
+      it('the save after a file read sends the invoice with the edited header and one line per kept row', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('שם א', 3), row('שם ב', 4), row('שם ג', 5)], {
+          header: {
+            supplierName: 'ירקות בע״מ',
+            supplierTaxId: '123456789',
+            invoiceDate: '2026-11-01',
+            vatIncluded: true
+          },
+          supplier: { supplierId: 'sup1', matchedBy: 'taxId', supplierKey: 'tax:123456789' },
+          printed: [{ name: 'שם ג', quantity: 2, unit: 'kg', unitPrice: 5, lineTotal: 10 }],
+          draftId: 'd1',
+          fileId: 'f1'
+        })
+        await readFile(new File(['%PDF'], 'i.pdf', { type: 'application/pdf' }))
+        fixture.componentInstance['invoiceNumber_'].set('  INV-1 ')
+        fixture.componentInstance['invoiceDate_'].set('2026-11-02')
+        byId<HTMLButtonElement>('import-delete')!.click() // the first row
+        fixture.detectChanges()
+        await clickSave()
+        const [supplierId, rows, invoice] = apply.calls.mostRecent().args
+        expect(supplierId).toBe('sup1')
+        expect(rows.length).toBe(2)
+        expect(invoice).toEqual({
+          supplierName: 'ירקן',
+          supplierTaxId: '123456789',
+          invoiceNumber: 'INV-1',
+          invoiceDate: '2026-11-02',
+          vatIncluded: true,
+          source: 'pdf',
+          fileId: 'f1',
+          draftId: 'd1',
+          supplierKey: 'tax:123456789',
+          lines: [
+            { printedName: 'שם ב', needsReview: false, row: 0 },
+            { printedName: 'שם ג', needsReview: false, row: 1, quantity: 2, unit: 'kg', unitPrice: 5, lineTotal: 10 }
+          ]
+        })
+      })
+
+      it('the save after a pasted list sends no invoice', async () => {
+        await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+        await pasteAndParse('בצל 3')
+        await clickSave()
+        expect(apply.calls.mostRecent().args[2]).toBeUndefined()
+        expect(resolve).not.toHaveBeenCalled()
+      })
+
+      it('a paste after a file read clears the strip', async () => {
+        await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+        withRead([row('גזר', 4)])
+        await readFile()
+        expect(byId('invoice-strip')).not.toBeNull()
+        await pasteAndParse('בצל 3')
+        expect(byId('invoice-strip')).toBeNull()
+        expect(byId('import-supplier')).not.toBeNull()
+      })
+
+      it('with no supplier chosen and none printed the save is disabled and the message shows', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('בצל', 3)])
+        await readFile()
+        expect(byId<HTMLButtonElement>('import-save')!.disabled).toBeTrue()
+        expect(byId('invoice-supplier-required')).not.toBeNull()
+      })
+
+      it('a printed supplier name is enough to save', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('בצל', 3)], { header: { supplierName: 'ספק מודפס' } })
+        await readFile()
+        expect(byId<HTMLButtonElement>('import-save')!.disabled).toBeFalse()
+        await clickSave()
+        expect(apply.calls.mostRecent().args[2].supplierName).toBe('ספק מודפס')
+      })
+
+      it('a save answered with invoiceId null shows the summary and the invoice_trail_failed message', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        apply.and.resolveTo({ created: 1, updated: 0, skipped: 0, skippedRows: [], invoiceId: null })
+        withRead([row('בצל', 3)], { supplier: { supplierId: 'sup1', supplierKey: 'name:ירקן' } })
+        await readFile()
+        await clickSave()
+        expect(onSetSuccessMsg).toHaveBeenCalledTimes(1)
+        expect(onSetErrorMsg).toHaveBeenCalledWith('invoice_trail_failed')
+        expect(byId('invoice-strip')).toBeNull()
+      })
     })
   })
 })

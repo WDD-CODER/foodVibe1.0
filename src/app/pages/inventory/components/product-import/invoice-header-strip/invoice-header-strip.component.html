@@ -1,0 +1,68 @@
+<section class="invoice-strip c-glass-panel" data-testid="invoice-strip">
+  <h2 class="invoice-strip__title">{{ 'invoice_header_title' | translatePipe }}</h2>
+  <div class="invoice-strip__fields">
+    <app-form-field label="supplier" class="invoice-strip__supplier">
+      <app-custom-select
+        [ngModel]="supplierId()"
+        (ngModelChange)="supplierId.set($event)"
+        [options]="supplierOptions()"
+        placeholder="import_no_supplier"
+        [typeToFilter]="true"
+        [disabled]="disabled()"
+        data-testid="invoice-supplier"
+      />
+    </app-form-field>
+    <app-form-field label="invoice_date" forId="invoice-date-input">
+      <app-date-field
+        inputId="invoice-date-input"
+        ariaLabelKey="invoice_date"
+        [value]="invoiceDate()"
+        (valueChange)="invoiceDate.set($event)"
+        [disabled]="disabled()"
+        data-testid="invoice-date"
+      />
+    </app-form-field>
+    <app-form-field label="invoice_number" forId="invoice-number-input">
+      <input
+        id="invoice-number-input"
+        type="text"
+        class="c-input"
+        maxlength="40"
+        dir="auto"
+        data-testid="invoice-number"
+        [disabled]="disabled()"
+        [ngModel]="invoiceNumber()"
+        (ngModelChange)="invoiceNumber.set($event)"
+      />
+    </app-form-field>
+  </div>
+
+  @if (printedSupplierName() && !supplierId()) {
+    <p class="invoice-strip__note" data-testid="invoice-supplier-printed">
+      {{ 'invoice_supplier_printed' | translatePipe }} {{ printedSupplierName() }}
+    </p>
+  }
+  @if (isSuggested() && supplierId()) {
+    <span
+      class="c-chip c-chip--tag c-chip--sm c-chip--teal invoice-strip__chip"
+      data-testid="invoice-supplier-suggested"
+    >
+      {{ 'invoice_supplier_suggested' | translatePipe }}
+    </span>
+  }
+  @if (taxId()) {
+    <p class="invoice-strip__note" data-testid="invoice-tax-id">
+      {{ 'invoice_tax_id' | translatePipe }}: <span dir="ltr">{{ taxId() }}</span>
+    </p>
+  }
+  @if (vatIncluded() !== null) {
+    <p class="invoice-strip__note" data-testid="invoice-vat">
+      {{ (vatIncluded() ? 'invoice_vat_included' : 'invoice_vat_excluded') | translatePipe }}
+    </p>
+  }
+  @if (isSupplierMissing()) {
+    <p class="c-field-error" role="alert" data-testid="invoice-supplier-required">
+      {{ 'invoice_supplier_required' | translatePipe }}
+    </p>
+  }
+</section>
