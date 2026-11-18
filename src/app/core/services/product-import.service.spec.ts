@@ -35,6 +35,16 @@ describe('ProductImportService', () => {
     expect(await result).toEqual([{ i: 0, productId: 'p1', source: 'own' }])
   })
 
+  it('getPriceRises asks for the last 60 days by default and returns the rows', async () => {
+    const result = service.getPriceRises()
+    const req = http.expectOne((r) => r.url === `${BASE}/price-rises`)
+    expect(req.request.method).toBe('GET')
+    expect(req.request.params.get('days')).toBe('60')
+    const rows = [{ productId: 'p1', supplierId: '', from: 5, to: 5.3, changePct: 6, at: 1 }]
+    req.flush(rows)
+    expect(await result).toEqual(rows)
+  })
+
   it('resolve rejects on an HTTP error', async () => {
     const result = service.resolve('name:x', ['a'])
     http.expectOne(`${BASE}/resolve`).flush({ error: 'x' }, { status: 500, statusText: 'Server Error' })

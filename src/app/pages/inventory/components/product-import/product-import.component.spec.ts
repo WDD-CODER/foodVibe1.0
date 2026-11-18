@@ -3,8 +3,11 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
 import { Observable, of, throwError } from 'rxjs'
-import { FileText, LucideAngularModule } from 'lucide-angular'
+import { FileText, LucideAngularModule, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { BusinessService } from '@services/business.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { Recipe } from '@models/recipe.model'
 import { GeminiService } from '@services/gemini.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { LoggingService } from '@services/logging.service'
@@ -60,6 +63,10 @@ describe('ProductImportComponent', () => {
   let matchNames: jasmine.Spy
   let readInvoice: jasmine.Spy
   let resolve: jasmine.Spy
+  /** Plan 629: the stored settings of the business and the cost the engine stub answers (apply raises it). */
+  let storedSettings: Record<string, number> | undefined
+  let recipes: Recipe[]
+  let cost: number
 
   async function setup(
     parsed: Observable<unknown>,
@@ -67,15 +74,21 @@ describe('ProductImportComponent', () => {
     aiAnswer: () => Promise<Map<string, NameMatchResult>> = () => Promise.resolve(new Map())
   ): Promise<void> {
     allowed = can
+    storedSettings = undefined
+    recipes = []
+    cost = 10
     matchNames = jasmine.createSpy('matchNames').and.callFake((_items: NameMatchItem[]) => aiAnswer())
     parsePriceList = jasmine.createSpy('parsePriceList').and.returnValue(parsed)
     readInvoice = jasmine.createSpy('readInvoice').and.resolveTo(readResult([]))
     resolve = jasmine.createSpy('resolve').and.resolveTo([])
-    apply = jasmine.createSpy('apply').and.resolveTo({ created: 1, updated: 1, skipped: 1, skippedRows: [] })
+    apply = jasmine.createSpy('apply').and.callFake(async () => {
+      cost = 10.6
+      return { created: 1, updated: 1, skipped: 1, skippedRows: [] }
+    })
     onSetSuccessMsg = jasmine.createSpy('onSetSuccessMsg')
     onSetErrorMsg = jasmine.createSpy('onSetErrorMsg')
     TestBed.configureTestingModule({
-      imports: [ProductImportComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, FileText })],
+      imports: [ProductImportComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, FileText, TrendingUp })],
       providers: [
         provideRouter([]),
         { provide: GeminiService, useValue: { parsePriceList, readInvoice } },
@@ -89,6 +102,7 @@ describe('ProductImportComponent', () => {
           provide: KitchenStateService,
           useValue: {
             products_: signal(PRODUCTS),
+            recipes_: () => recipes,
             suppliers_: signal([{ _id: 'sup1', nameHebrew: 'ירקן' }])
           }
         },
@@ -102,6 +116,11 @@ describe('ProductImportComponent', () => {
           }
         },
         { provide: PermissionService, useValue: { can: () => allowed } },
+        {
+          provide: BusinessService,
+          useValue: { business_: () => (storedSettings ? { settings: storedSettings } : { settings: undefined }) }
+        },
+        { provide: RecipeCostService, useValue: { computeRecipeCost: () => cost } },
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
         {
           provide: UserMsgService,
@@ -142,6 +161,63 @@ describe('ProductImportComponent', () => {
       'import_status_same',
       'import_status_new'
     ])
+  })
+
+  describe('price rise mark and impact panel (plan 629)', () => {
+    const USER_RECIPE = {
+      _id: 'r1',
+      nameHebrew: 'מתכון בדיקה',
+      recipeType: 'dish',
+      ingredients: [{ _id: 'i1', type: 'product', referenceId: 'p1', amount: 1, unit: 'kg' }]
+    } as unknown as Recipe
+
+    it('marks a 5 → 5.3 row at the default threshold 5 and not a 5 → 5.2 row', async () => {
+      await setup(of({ rows: [row('עגבנייה', 5.3), row('מלפפון', 4.6)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      expect(all('import-flag-rise').length).toBe(1)
+      expect(all('import-row')[0].querySelector('[data-testid="import-flag-rise"]')).not.toBeNull()
+    })
+
+    it('with a stored threshold of 10 a 6% row has no mark', async () => {
+      await setup(of({ rows: [row('עגבנייה', 5.3)], truncated: false }))
+      storedSettings = { priceRiseAlertPct: 10 }
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      expect(all('import-flag-rise').length).toBe(0)
+    })
+
+    it('after a save lists the recipe that uses the product with the cost before and after', async () => {
+      await setup(of({ rows: [row('עגבנייה', 6.2)], truncated: false }))
+      recipes = [USER_RECIPE]
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      await fixture.componentInstance['saveAll']()
+      fixture.detectChanges()
+      const text = byId('price-impact')?.textContent ?? ''
+      expect(text).toContain('מתכון בדיקה')
+      expect(text).toContain('₪10.00')
+      expect(text).toContain('₪10.60')
+    })
+
+    it('shows the panel with its empty line when no recipe uses the product', async () => {
+      await setup(of({ rows: [row('עגבנייה', 6.2)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      await fixture.componentInstance['saveAll']()
+      fixture.detectChanges()
+      expect(byId('price-impact-none')).not.toBeNull()
+    })
+
+    it('shows no panel when no price rose', async () => {
+      await setup(of({ rows: [row('עגבנייה', 4)], truncated: false }))
+      recipes = [USER_RECIPE]
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      await fixture.componentInstance['saveAll']()
+      fixture.detectChanges()
+      expect(byId('price-impact')).toBeNull()
+    })
   })
 
   it('compares the price with the chosen supplier only', async () => {

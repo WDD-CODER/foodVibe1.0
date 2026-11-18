@@ -20,7 +20,9 @@ import { BUSINESS_SETTINGS_DEFAULTS, type BusinessSettings } from '@schemas/enti
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 
-type SettingsField = keyof BusinessSettings
+/** The four numbers of the form (`BusinessSettings` still lists three; the fourth is plan 629's). */
+type SettingsNumbers = BusinessSettings & { priceRiseAlertPct: number }
+type SettingsField = keyof SettingsNumbers
 
 /** One number field of the form: its label, help text and range-error dictionary keys. */
 interface FieldDef {
@@ -63,6 +65,11 @@ export class BusinessSettingsTabComponent {
       Validators.required,
       Validators.min(0.1),
       Validators.max(100)
+    ]),
+    priceRiseAlertPct: this.fb.control<number>(BUSINESS_SETTINGS_DEFAULTS.priceRiseAlertPct, [
+      Validators.required,
+      Validators.min(0.1),
+      Validators.max(100)
     ])
   })
   readonly fields: FieldDef[] = [
@@ -83,6 +90,12 @@ export class BusinessSettingsTabComponent {
       labelKey: 'overrun_threshold_pct',
       helpKey: 'overrun_threshold_help',
       errorKey: 'pct_range_overrun'
+    },
+    {
+      key: 'priceRiseAlertPct',
+      labelKey: 'price_rise_alert_pct',
+      helpKey: 'price_rise_alert_help',
+      errorKey: 'pct_range_overrun'
     }
   ]
   protected readonly isSaving_ = signal(false)
@@ -91,7 +104,7 @@ export class BusinessSettingsTabComponent {
 
   // 5. COMPUTED
   /** The stored numbers (defaults already filled by the server). */
-  private readonly stored = computed<BusinessSettings>(() => ({
+  private readonly stored = computed<SettingsNumbers>(() => ({
     ...BUSINESS_SETTINGS_DEFAULTS,
     ...(this.businessService.business_()?.settings ?? {})
   }))

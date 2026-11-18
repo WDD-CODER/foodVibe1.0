@@ -80,7 +80,9 @@ describe('DashboardOverviewComponent', () => {
       products_: mockProducts.asReadonly(),
       recipes_: mockRecipes.asReadonly(),
       lowStockProducts_: mockLowStock.asReadonly(),
-      suppliersById_: signal(new Map([['s1', { _id: 's1', nameHebrew: 'ירקות כהן' }]]))
+      suppliersById_: signal(new Map([['s1', { _id: 's1', nameHebrew: 'ירקות כהן' }]])),
+      productsById_: signal(new Map()),
+      suppliers_: signal([])
     }
 
     // totalRecipes_/unapprovedCount_ come from the lightweight /count endpoint now
@@ -115,7 +117,7 @@ describe('DashboardOverviewComponent', () => {
           // user_/isOwner_: the setup card (plan 431) reads them through PermissionService and BusinessService.
           useValue: { isLoggedIn: mockIsLoggedIn, user_: signal(null), isOwner_: signal(false) }
         },
-        { provide: PermissionService, useValue: { isOwner_: mockIsOwner.asReadonly() } },
+        { provide: PermissionService, useValue: { isOwner_: mockIsOwner.asReadonly(), can: () => false } },
         {
           provide: BusinessService,
           useValue: {
