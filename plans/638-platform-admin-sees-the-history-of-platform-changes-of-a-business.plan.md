@@ -7,7 +7,9 @@ Snapshot: 65e510e0e0b530e69e34ba74a905558768f24a89
 ## Problem Statement
 Since plans 616 and 620 the platform admin switches modules, sets the monthly AI cap and turns private mode on or off
 for a business, and must type a reason every time. The reason is stored, but nobody can read it: no screen shows it.
-Dandan asked on 2026-11-18 where the changes and the reasons are kept, and then asked for a view.
+Dandan asked on 2026-11-18 where the changes and the reasons are kept, and then asked for a view. The same day Dandan
+set its form: the history stays closed, because it is read only when somebody wants to check why a change happened.
+A small button with a tooltip opens it as a scrollable panel that has its own close button.
 
 Verified on `origin/main` (65e510e0, 2026-11-18):
 - `server/routes/admin.js` `PUT /businesses/:id/platform` (the handler around lines 255–310) appends one row to
@@ -28,11 +30,14 @@ Verified on `origin/main` (65e510e0, 2026-11-18):
   line). `e2e/ui/620-3.spec.ts` opens the dialog from the `biz-edit` button.
 - The Lucide icon `History` is not registered in `src/app/app.config.ts`. The dictionary has no `platform_history_*`
   key.
+- The project has no shared tooltip piece (`docs/brain/component-families.md` names none); icon buttons use the
+  native `title` with an `aria-label`, and `.c-icon-btn` is the engine class for a small icon button
+  (`src/styles.scss:936`).
 - Lesson from run `mod-0` (plans 617–620 each had to ask for it): a plan that adds a named piece needs
   `docs/brain/component-families.md` and the generated `docs/brain/inventory.md` in its scope, or the kit check stops it.
 
 ## Goals & Success Criteria
-**Primary:** in the platform dialog of a business, the platform admin reads every stored change — when, who, what
+**Primary:** in the platform dialog of a business, the platform admin presses a small history button and reads every stored change — when, who, what
 changed (with the old and the new value for changes made from now on) and the reason — newest first.
 
 - [auto] `pnpm run test:server` passes, including `server/test/admin-platform.test.js` with these new cases:
@@ -48,18 +53,22 @@ changed (with the old and the new value for changes made from now on) and the re
   `businessSchema`.
 - [auto] `pnpm run test:ci` passes, including
   `src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.spec.ts`
-  with these new cases: the history is requested once when the dialog opens; rows render newest first with date, name,
-  reason and one line per change; a row without `changes` shows the field labels only; no rows shows the empty text;
-  a failed load shows the error text and the rest of the dialog still works; after a successful save the list is
-  requested again.
+  with these new cases: when the dialog opens the panel is not in the page and the history is not requested; the
+  history button carries the tooltip text in `title` and `aria-label`; pressing it shows the panel and requests the
+  history once; rows render newest first with date, name, reason and one line per change; a row without `changes`
+  shows the field labels only; no rows shows the empty text; a failed load shows the error text and the rest of the
+  dialog still works; the close button of the panel removes the panel and the form is unchanged; opening it again
+  requests the history again.
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm --dir server run lint` exits 0;
   `pnpm run lint:icons` exits 0; `pnpm run lint:reuse` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [ui] On `/platform`, pressing "מודולים ו-AI" on a business row opens the dialog, and it shows the heading
-  "היסטוריית שינויים" (`e2e/ui/638-1.spec.ts`, the history route answered from a fixture with one row whose reason is
-  "בדיקת היסטוריה"; the spec asserts that reason text is visible).
-- [human] Dandan changes a module for a test business with a reason, opens the dialog again, and reads the change with
-  its reason at the top of the list, in clear Hebrew.
+- [ui] On `/platform`, pressing "מודולים ו-AI" on a business row opens the dialog with no history list in it;
+  pressing the history button shows the heading "היסטוריית שינויים" and the reason text; pressing the close button of
+  the panel hides both (`e2e/ui/638-1.spec.ts`, the history route answered from a fixture with one row whose reason
+  is "בדיקת היסטוריה").
+- [human] Dandan changes a module for a test business with a reason, opens the dialog again, sees no history until the
+  small button is pressed, reads its tooltip, presses it, reads the change with its reason at the top of a scrollable
+  list in clear Hebrew, and closes the panel with its close button.
 
 ## Execution Mode
 - Parallel: no — it edits `src/app/pages/platform-dashboard/**` (also 630 and 632), `public/assets/data/dictionary.json`
@@ -116,8 +125,10 @@ append the path to the scope block above and retry.
 
 - `PlatformAdminService.getPlatformHistory(businessId)` — family: http — rung: 3 — why: one more method on the
   existing admin service, same `environment.apiUrl` + `API.admin(...)` pattern.
-- history list inside `platform-business-dialog` — family: modal-shell — rung: 1 — why: a section in the body of the
-  existing dialog; no new popup.
+- history panel inside `platform-business-dialog` — family: modal-shell — rung: 1 — why: a panel in the body of the
+  existing dialog, shown by a signal; no new popup and no second dialog. Its open and close buttons are plain
+  `.c-icon-btn` buttons with a Lucide icon and the native `title` as the tooltip (the project has no tooltip piece
+  and this plan adds none).
 - empty text of the list — family: empty-state — rung: 1 — why: `app-empty-state` in its small form, as the platform
   tables use it.
 - loading line of the list — family: feedback — rung: 1 — why: `app-loader`, as the platform page uses it.
@@ -168,28 +179,38 @@ line or file this plan names was removed, renamed or rewritten).
   `platform-admin.service.spec.ts` (URL and the unwrapped rows); create the spec file with only this case if the
   service has none.
 - [ ] `platform-business-dialog.component.ts`:
-  - signals `history_ = signal<PlatformHistoryRow[] | null>(null)` (null = loading) and
-    `historyFailed_ = signal(false)`; a private `loadHistory_()` that calls the service for the open target, sets
+  - signals `isHistoryOpen_ = signal(false)`, `history_ = signal<PlatformHistoryRow[] | null>(null)` (null = loading)
+    and `historyFailed_ = signal(false)`; a private `loadHistory_()` that calls the service for the open target, sets
     the rows, and on failure sets `historyFailed_` and logs `platform.history_load_failed` (business id only).
-  - `loadHistory_()` runs when the dialog opens for a target (the same place the form is filled from the target) and
-    again after a successful save, before the dialog closes — so the next opening is not needed to see the new row
-    when the dialog stays open on an error path; a failed history load never blocks saving or closing.
+  - `openHistory()` sets `isHistoryOpen_` true, resets `history_` to null and `historyFailed_` to false, and calls
+    `loadHistory_()`; `closeHistory()` sets `isHistoryOpen_` false. The history is never requested before the
+    button is pressed. Opening the dialog for a target resets `isHistoryOpen_` to false. A reply that arrives after
+    the panel was closed or the target changed is dropped. A failed history load never blocks saving or closing.
   - `describePlatformChange(change)` → one Hebrew line from dictionary keys (see UI/UX Notes): modules list the
     added and the removed modules by their `module_*` labels; cap shows old → new with `platform_ai_no_cap` for
     empty; private shows `platform_history_private_on` / `_off`. An unknown `field` shows the raw field name.
   - A row without `changes` (written before this plan) shows its `changed` fields through
     `platform_history_field_*` labels, with no values.
-- [ ] `platform-business-dialog.component.html`: below the form fields and above the dialog's buttons, a section
-  with the heading `platform_history_title`: while `history_()` is null and not failed → `app-loader` (small);
-  failed → the text `platform_history_failed`; empty → `app-empty-state` with `platform_history_empty`; else a list
-  (`<ul>`, at most 50 rows, own scroll with `max-block-size`) of rows: first line = date and time
-  (`DatePipe`, `'dd/MM/yy HH:mm'`) · `byName`; then one line per change; then the reason in quotes. `data-testid`:
-  `biz-history`, `biz-history-row`, `biz-history-reason`.
+- [ ] `platform-business-dialog.component.html`:
+  - In the header row of the dialog, a small icon button (`type="button"`, `.c-icon-btn`,
+    `<lucide-icon name="history" [size]="16" />`, `data-testid="biz-history-open"`) with
+    `[attr.title]` and `[attr.aria-label]` = `platform_history_tip`, `[attr.aria-expanded]` = `isHistoryOpen_()`.
+    Pressing it while the panel is open closes the panel.
+  - `@if (isHistoryOpen_())`: below the form fields and above the buttons of the dialog, a panel
+    (`data-testid="biz-history"`, `role="region"`, labelled by its heading) with a head row — the heading
+    `platform_history_title` and a close icon button (`.c-icon-btn`, Lucide `x`, `aria-label` = the existing
+    key `close`, `data-testid="biz-history-close"`) — and a body with its own scroll
+    (`max-block-size: 40vh; overflow-y: auto`): while `history_()` is null and not failed → `app-loader` (small);
+    failed → the text `platform_history_failed`; empty → `app-empty-state` with `platform_history_empty`; else a
+    `<ul>` (at most 50 rows) of rows: first line = date and time (`DatePipe`, `'dd/MM/yy HH:mm'`) · `byName`;
+    then one line per change; then the reason in quotes. `data-testid`: `biz-history-row`, `biz-history-reason`.
+  - Closed, the panel is not in the page at all (no hidden copy). Focus: opening moves focus to the close button of
+    the panel; closing returns it to the history button. Escape keeps its meaning of today (it closes the dialog).
 - [ ] Styles: the few list rules go in `platform-dashboard.page.scss` beside the dialog's existing rules if the dialog
   has no stylesheet of its own (check first; if it has one, use it and add that file to the scope through
   `approved:`). Logical properties only; no new `.c-*` class.
-- [ ] `src/app/app.config.ts`: register the Lucide icon `History`; the section heading uses
-  `<lucide-icon name="history" [size]="14" />`.
+- [ ] `src/app/app.config.ts`: register the Lucide icon `History` (the history button uses it). The close button uses
+  `X`, which is registered already (`app.config.ts:91`).
 - [ ] `docs/brain/component-families.md` (+ regenerated `docs/brain/inventory.md`): `getPlatformHistory` under
   `http`, `describePlatformChange` under `helpers`. `docs/agent/standards-backend.md` §5 and `server/breadcrumbs.md`:
   one row for the new route.
@@ -201,12 +222,15 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] none
 
 ## UI/UX Notes
-- Hebrew RTL; logical CSS only. The section is always open: no expand control, no pagination, no filter (at most 50
+- Hebrew RTL; logical CSS only. The history is closed by default: the dialog looks as it does today plus one small
+  icon button. The tooltip of the button says what it opens. Pressing it opens a panel inside the dialog with its own
+  scroll and its own close button; the dialog does not grow past the screen. No pagination, no filter (at most 50
   rows exist per business).
-- States: loading (loader line), failed (one text line, the form above stays usable), empty, list.
+- States of the open panel: loading (loader line), failed (one text line, the form stays usable), empty, list.
 - Nothing in the section can be edited or deleted. Cancel, Escape and save behave exactly as today.
 - New keys in `public/assets/data/dictionary.json` (append-only; none exists today):
   - `platform_history_title` — "היסטוריית שינויים" (history of changes)
+  - `platform_history_tip` — "היסטוריית שינויים: מי שינה, מה ולמה" (history of changes: who changed, what and why)
   - `platform_history_empty` — "עוד לא נעשו שינויים לעסק הזה" (no changes were made for this business yet)
   - `platform_history_failed` — "לא הצלחנו לטעון את ההיסטוריה" (the history could not be loaded)
   - `platform_history_field_modules` — "מודולים" (modules)
@@ -218,9 +242,9 @@ line or file this plan names was removed, renamed or rewritten).
   - `platform_history_private_on` — "מצב פרטי הופעל" (private mode turned on)
   - `platform_history_private_off` — "מצב פרטי בוטל" (private mode turned off)
   - `platform_history_reason` — "סיבה:" (reason:)
-- Existing keys reused: `module_events`, `module_event_logistics`, `module_frontdesk`, `module_ai_create`,
+- Existing keys reused: `close`, `module_events`, `module_event_logistics`, `module_frontdesk`, `module_ai_create`,
   `module_consultant_diag`, `platform_ai_no_cap`.
-- Lucide: `History` (new registration).
+- Lucide: `History` (new registration); `X` (registered already).
 
 ## Atomic Sub-tasks
 
@@ -230,9 +254,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A2: Store the old and new value with every platform save, only for what really changed — read the business first, platformChangesOf, the row with changes; the three new write cases — server/routes/admin.js, server/test/admin-platform.test.js
 - [ ] A3: Give the platform admin a way to read a business's history from the server — the GET route, newest first, with its five access and empty cases — server/routes/admin.js, server/test/admin-platform.test.js
 - [ ] A4: Fetch the history in the browser through the admin service — getPlatformHistory and its spec case — src/app/core/services/platform-admin.service.ts, src/app/core/services/platform-admin.service.spec.ts
-- [ ] A5: Show the history in the business dialog with its loading, empty and failed states — signals, loadHistory_, describePlatformChange, the section and its styles, the History icon, the twelve dictionary keys, the six spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts, .html, .spec.ts, src/app/pages/platform-dashboard/platform-dashboard.page.scss, public/assets/data/dictionary.json, src/app/app.config.ts
+- [ ] A5: Show the history in the business dialog only when asked for: a small button with a tooltip opens a scrollable panel with a close button, with loading, empty and failed states — signals, openHistory, closeHistory, loadHistory_, describePlatformChange, the button, the panel and its styles, the History icon, the thirteen dictionary keys, the nine spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts, .html, .spec.ts, src/app/pages/platform-dashboard/platform-dashboard.page.scss, public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A6: Record the new route and the two new pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row — docs/brain/component-families.md, docs/brain/inventory.md, docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A7: Prove it in the running app and run every check — the one screen check with a fixture row, then the Done-when commands in order — e2e/ui/638-1.spec.ts
+- [ ] A7: Prove it in the running app and run every check — the one screen check (closed, opened, closed again) with a fixture row, then the Done-when commands in order — e2e/ui/638-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: `PlatformBusinessDialogComponent`, `PlatformAdminService`, the platform write route of plan 616.
@@ -262,8 +286,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
-- decided: the list sits inside the existing dialog, always open, not on a new page — why: at most 50 short rows, and
-  the dialog is where the change is made.
+- decided (Dandan, 2026-11-18): the history is closed by default; a small button with a tooltip opens it as a
+  scrollable panel with a close button — why: it is read only to check why a change happened, not on every visit.
+- decided: the panel sits inside the existing dialog, not in a second dialog or a new page — why: at most 50 short
+  rows, and the dialog is where the change is made.
+- decided: the history is requested when the panel opens, every time, not when the dialog opens — why: most visits
+  never read it, and a fresh read needs no cache rule.
+- decided: the tooltip is the native `title` — why: the project has no tooltip piece, and one button does not
+  justify adding one.
 - decided: values are stored as short strings from now on; old rows show field names only — why: the stored rows
   hold no values and nothing can rebuild them.
 - decided: a field sent with the value it already has is left out of `changes` but stays in `changed` — why: the
