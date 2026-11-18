@@ -823,9 +823,19 @@
       "tier": "judgment",
       "models": {
         "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T07:26:57.452Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T07:43:55.683Z"
+        },
+        "judgment builder": {
           "model": "opus",
           "tier": "judgment",
-          "at": "2026-11-18T07:09:56.309Z"
+          "at": "2026-11-18T07:44:20.085Z"
         }
       },
       "humanItems": [
@@ -1001,6 +1011,76 @@
         },
         {
           "at": "2026-11-18T07:19:32.418Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T07:26:57.295Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T07:26:57.453Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T07:43:55.279Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T07:43:55.440Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T07:43:55.564Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T07:43:55.684Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T07:44:15.003Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T07:44:15.160Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T07:44:19.969Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T07:44:20.086Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T07:52:40.819Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T07:52:41.166Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T07:55:31.980Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-18T07:55:32.110Z",
           "state": "parked",
           "round": 2
         }
@@ -1212,26 +1292,112 @@
             "reason": "Done-when item left undone: [auto] `src/app/core/services/module.service.spec.ts`: a business without `modules` has `events`, `event_logistics`, `frontdesk`, (fix rounds used: 2 of 2) — needs the Human"
           },
           "parkBranch": "park/mod-0-620"
+        },
+        {
+          "nnn": "620",
+          "title": "Show each business only the modules it has, and give the platform admin one dialog for modules, AI cap and private mode",
+          "branch": "feat/620-modules-and-ai-rules",
+          "state": "parked",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-18T07:09:56.309Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 20.2,
+          "sha": "4cc2d062070269a0efaa29567a8f921e932ecfa9",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "opus",
+              "seconds": 398.2,
+              "tokens": {
+                "input": 204939,
+                "output": 5052
+              },
+              "exit": 0
+            }
+          ],
+          "uiCards": [
+            {
+              "card": "On `/dashboard?tab=metadata` the owner's card shows the chip \"משותף עם FoodVibe\" (`e2e/ui/620-4.spec.ts`).",
+              "status": "unchecked",
+              "via": "none",
+              "page": "",
+              "screenshots": [],
+              "round": 2
+            }
+          ],
+          "roundCauses": [
+            "round 3: gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md"
+          ],
+          "reason": "gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)",
+          "park": {
+            "at": "2026-11-18T07:20:16.680Z",
+            "reason": "gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)"
+          },
+          "parkBranch": "park/mod-0-620"
         }
       ],
       "tiers": [
         "build",
         "judgment"
       ],
-      "freeDiskGb": 20.2,
-      "sha": "4cc2d062070269a0efaa29567a8f921e932ecfa9",
+      "freeDiskGb": 18.7,
+      "sha": "49bed395b1e1cccca7f4957847caba8b156d5dbc",
       "calls": [
         {
           "stage": "builder",
-          "model": "opus",
-          "seconds": 398.2,
+          "model": "sonnet",
+          "seconds": 1015.6,
           "tokens": {
-            "input": 204939,
-            "output": 5052
+            "input": 15636412,
+            "output": 83019
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 17.2,
+          "tokens": {
+            "input": 87884,
+            "output": 1902
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 497.9,
+          "tokens": {
+            "input": 2739287,
+            "output": 17419
           },
           "exit": 0
         }
       ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [auto] `src/app/core/services/module.service.spec.ts`: a business without `modules` has `events`, `event_logistics`, `frontdesk`,",
+        "round 2: Done-when item left undone: [auto] `src/app/core/services/module.service.spec.ts`: a business without `modules` has `events`, `event_logistics`, `frontdesk`,",
+        "round 3: gate: pnpm run test:ci"
+      ],
+      "escalations": [
+        {
+          "step": "round 2",
+          "check": "done-when"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "resetToBase": "f6a614890c2534839c8e2c17387f0946b4c349c5",
+      "resetFrom": "fa382457dbddd70eb33d7bbbbd5d38cc293974cd",
       "uiCards": [
         {
           "card": "On `/dashboard?tab=metadata` the owner's card shows the chip \"משותף עם FoodVibe\" (`e2e/ui/620-4.spec.ts`).",
@@ -1242,13 +1408,10 @@
           "round": 2
         }
       ],
-      "roundCauses": [
-        "round 3: gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md"
-      ],
-      "reason": "gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)",
+      "reason": "gate: pnpm run test:ci (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)",
       "park": {
-        "at": "2026-11-18T07:20:16.680Z",
-        "reason": "gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)"
+        "at": "2026-11-18T07:56:10.194Z",
+        "reason": "gate: pnpm run test:ci (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)"
       },
       "parkBranch": "park/mod-0-620"
     }
@@ -1611,12 +1774,47 @@
       "at": "2026-11-18T07:20:23.938Z",
       "plan": "620",
       "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-18T07:26:57.139Z",
+      "plan": "620",
+      "text": "the folder foodVibe1.0-orch-mod-0-620 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T07:43:53.261Z",
+      "plan": "620",
+      "text": "builder left undone (round 0): 620-1: written, not run; 620-2: written, not run; 620-3: written, not run; 620-4: written, not run; ci-scope-check --checkout-branch: not run on the feat branch (the shell reported an empty branch name)"
+    },
+    {
+      "at": "2026-11-18T07:44:13.055Z",
+      "plan": "620",
+      "text": "builder left undone (round 1): [human] Dandan: event_logistics off and back on; a 1-token cap shows the Hebrew message; the dialog and the two columns read right on PC and phone — for Dandan, not a builder; [ui] 620-1…620-4: written, not run"
+    },
+    {
+      "at": "2026-11-18T07:44:19.853Z",
+      "plan": "620",
+      "text": "escalated to a fresh judgment-tier builder (round 2): Done-when item left undone: [auto] `src/app/core/services/module.service.spec.ts`: a business without `modules` has `events`, `event_logistics`, `frontdesk`,"
+    },
+    {
+      "at": "2026-11-18T07:52:38.080Z",
+      "plan": "620",
+      "text": "builder left undone (round 2): e2e/ui/620-1.spec.ts: written, not run; e2e/ui/620-2.spec.ts: written, not run; e2e/ui/620-3.spec.ts: written, not run; e2e/ui/620-4.spec.ts: written, not run; The three [human] items are left for the Human"
+    },
+    {
+      "at": "2026-11-18T07:52:41.012Z",
+      "plan": "620",
+      "text": "[ui] On `/dashboard?tab=metadata` the owner's card shows the chip \"משותף עם FoodVibe\" (`e2e/ui/620-4.spec.ts`).: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T07:56:17.951Z",
+      "plan": "620",
+      "text": "parked: nothing to save (nothing uncommitted)"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 20.2,
-  "updatedAt": "2026-11-18T07:23:45.784Z",
+  "freeDiskGb": 18.7,
+  "updatedAt": "2026-11-18T07:59:57.214Z",
   "decisions": [
     {
       "id": "D1",
@@ -1812,13 +2010,104 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "620",
+      "type": "behaviour",
+      "text": "behaviour: a stray call to AiRecipeModalService.open, AiMenuModalService.open or AiProductModalService.open without ai_create returns silently, with no message (the simplest option) — reverse: show a toast before the early return",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "620",
+      "type": "behaviour",
+      "text": "behaviour: a chip group the modules cut down to fewer than two chips shows no row; the rule applies only when filtering removed a chip, so the inventory and recipe groups are untouched — reverse: drop the `chips.length < all.length` guard in tab-chips.component.ts",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "620",
+      "type": "behaviour",
+      "text": "behaviour: the Trash page's `sections` is now a getter over `TrashService.sections_()`, so `trash.page.html` stays unchanged — reverse: make it a signal and edit the template",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "620",
+      "type": "behaviour",
+      "text": "behaviour: HttpStorageAdapter loads ModuleService through a dynamic `import()` at call time to avoid an import cycle with BusinessService — reverse: a static import if the cycle proves harmless",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "620",
+      "type": "behaviour",
+      "text": "behaviour: the dialog's cap input is on one line inside `<div appNumberBox>` under `<!-- prettier-ignore -->`, because reuse-lint is line-based and the pre-commit hook splits long tags — reverse: remove the comment and accept the reuse debt",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "620",
+      "type": "seen",
+      "text": "seen: `pnpm run lint:reuse` fails with a usage error when run without --diff (package.json:12); the gate list's `lint:reuse` entry needs `--diff=<base>`",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "620",
+      "type": "seen",
+      "text": "seen: the initial bundle (592.66 kB) is over the 570 kB budget as a warning, and cook-view.page.scss is over its 20 kB budget by 6.23 kB; both existed before this plan",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-18T07:23:45.781Z",
+  "finishedAt": "2026-11-18T07:59:57.210Z",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-18T07:23:45.783Z",
+    "at": "2026-11-18T07:59:57.213Z",
     "attempt": 1,
     "blamed": []
   }
