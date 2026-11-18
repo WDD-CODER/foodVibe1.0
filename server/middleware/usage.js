@@ -52,6 +52,8 @@ async function writeUsage(userId, businessId, write) {
 
 /** Fire-and-forget: registers a `finish` listener, so the response is never delayed and errors never reach the caller. */
 function recordUsage(req, res) {
+  // Plan 631 (ADR 0032): a session acting in another business is not that business's own activity.
+  if (req.user?.acting) return
   const userId = req.user?.userId
   const businessId = req.user?.businessId
   if (!userId || !businessId) return

@@ -26,3 +26,5 @@ Earlier (45 runs): plans 136 · merged 115 · parked 18 · fix rounds 51 · esca
 | 2026-11-18 | mod-invoices-srv | 625,626,627 | 3 | 0 | - | 2 | 0 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-18 | mod-events-srv | 621,622 | 2 | 0 | - | 2 | 0 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-18 | mod-events-ui | 623,624 | 2 | 0 | - | 2 | 1 | 2 | ok | - | - | - |
+| 2026-11-18 | mod-access-srv | 631 | 1 | 0 | - | 2 | 1 | 2 | ok | - | - | - |
+| 2026-11-18 | mod-events-srv | 621,622 | 2 | 0 | - | 2 | 0 | 2 | ok | - | - | - |

@@ -211,6 +211,67 @@ describe('INV-1 guest door', () => {
   });
 });
 
+// Plan 631 (ADR 0032): a consultant with a live grant, and the platform admin acting in a business.
+describe('INV-1 consultant and acting admin', () => {
+  const CONSULTANT = { userId: 'consultX', name: 'consultX', businessId: 'b_userA', businessRole: 'consultant', homeBusinessId: 'b_consultX', acting: 'consultant' };
+  const BUSINESS_A = { _id: 'b_userA', name: 'A', ownerId: 'userA', createdAt: 1, internal: false, lastSyncedMasterVersion: 0, settings: { targetFoodCostPct: 30 } };
+
+  beforeEach(async () => {
+    const db = testDb();
+    for (const c of ['businessAccess', 'users', 'businesses']) await db.collection(c).deleteMany({});
+    await db.collection('businesses').insertOne(BUSINESS_A);
+    await db.collection('users').insertMany([
+      { _id: 'consultX', name: 'consultX', email: 'c@x.com', businessId: 'b_consultX', businessRole: 'owner', removedAt: null },
+      { _id: 'admin1', name: 'admin1', email: 'a@x.com', businessId: 'b_admin1', businessRole: 'owner', isPlatformAdmin: true, removedAt: null },
+    ]);
+    await db.collection('businessAccess').insertOne({ _id: 'gA', userId: 'consultX', businessId: 'b_userA', role: 'consultant', grantedBy: 'admin1', grantedByName: 'admin1', grantedAt: 1 });
+  });
+
+  it('INV-1 consultant: lists and creates recipes in the business he has a grant for, stamped with his own id', async () => {
+    await seed('recipes', 'userA', 'aRecipe');
+    const list = await request(app).get('/api/v1/data/recipes').set(as(CONSULTANT));
+    expect(list.status).toBe(200);
+    expect(list.body.map((r) => r._id)).toEqual(['aRecipe']);
+    const created = await request(app).post('/api/v1/data/recipes').set(as(CONSULTANT)).send(recipeBody());
+    expect(created.status).toBe(201);
+    const doc = await testDb().collection('recipes').findOne({ _id: created.body._id });
+    expect(doc).toMatchObject({ businessId: 'b_userA', createdBy: 'consultX' });
+  });
+
+  it("INV-1 consultant: 403 on the business's team and settings, and the business document is unchanged", async () => {
+    const team = await request(app).get('/api/v1/business/team').set(as(CONSULTANT));
+    expect(team.status).toBe(403);
+    const settings = await request(app).put('/api/v1/business/settings').set(as(CONSULTANT)).send({ targetFoodCostPct: 10 });
+    expect(settings.status).toBe(403);
+    expect(await testDb().collection('businesses').findOne({ _id: 'b_userA' })).toEqual(BUSINESS_A);
+  });
+
+  it('INV-1 consultant: a forged acting token for a business without a grant gets 401 and reads nothing', async () => {
+    await seed('recipes', 'userC', 'cRecipe');
+    const res = await request(app).get('/api/v1/data/recipes').set(as({ ...CONSULTANT, businessId: 'b_userC' }));
+    expect(res.status).toBe(401);
+    expect(res.body).not.toEqual(expect.arrayContaining([expect.objectContaining({ _id: 'cRecipe' })]));
+  });
+
+  it('INV-1 consultant: after the grant is removed the very next request answers 401 ACCESS_ENDED', async () => {
+    expect((await request(app).get('/api/v1/data/recipes').set(as(CONSULTANT))).status).toBe(200);
+    await testDb().collection('businessAccess').updateOne({ _id: 'gA' }, { $set: { revokedAt: Date.now(), revokedBy: 'userA' } });
+    const res = await request(app).get('/api/v1/data/recipes').set(as(CONSULTANT));
+    expect(res.status).toBe(401);
+    expect(res.body).toEqual({ error: 'ACCESS_ENDED' });
+  });
+
+  it("INV-1 platform admin acting: edits a business's product price; a non-admin with acting platform gets 401", async () => {
+    await testDb().collection('products').insertOne(stored(productBody({ sources: [{ supplierId: 's1', price: 5 }] }), { _id: 'pA', userId: 'userA', _masterId: 'pA', _userModified: false }));
+    const ADMIN_ACTING = { userId: 'admin1', name: 'admin1', businessId: 'b_userA', businessRole: 'owner', isPlatformAdmin: true, homeBusinessId: 'b_admin1', acting: 'platform' };
+    const res = await request(app).put('/api/v1/data/products/pA').set(as(ADMIN_ACTING)).send({ sources: [{ supplierId: 's1', price: 9 }] });
+    expect(res.status).toBe(200);
+    expect((await testDb().collection('products').findOne({ _id: 'pA' })).sources[0].price).toBe(9);
+    const fake = { ...ADMIN_ACTING, userId: 'consultX', isPlatformAdmin: false };
+    expect((await request(app).get('/api/v1/data/products').set(as(fake))).status).toBe(401);
+  });
+});
+
 describe('INV-2 Tenancy', () => {
   it('INV-2 a business never reads another business items; its own term is invisible to others while master terms reach both', async () => {
     await seed('products', 'userB', 'theirs');

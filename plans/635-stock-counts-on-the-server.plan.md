@@ -99,6 +99,8 @@ src/app/core/engine/units.ts
 src/app/core/utils/purchase-option-rate.util.ts
 src/app/core/utils/recipe-cost.constants.ts
 src/app/core/services/unit-registry.service.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope

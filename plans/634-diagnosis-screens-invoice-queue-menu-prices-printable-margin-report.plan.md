@@ -98,6 +98,8 @@ src/app/app.config.ts
 src/app/pages/breadcrumbs.md
 public/assets/data/dictionary.json
 e2e/ui/634-1.spec.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope

@@ -99,6 +99,8 @@ public/assets/data/dictionary.json
 e2e/ui/629-1.spec.ts
 e2e/ui/629-2.spec.ts
 e2e/ui/629-3.spec.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope

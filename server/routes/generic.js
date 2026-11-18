@@ -182,7 +182,7 @@ function authorizeEdit(req, res, type, current, merged) {
  */
 function trashOwnerFilter(req, res) {
   const role = req.user?.businessRole;
-  if (role === 'owner') return {};
+  if (role === 'owner' || role === 'consultant') return {};
   if (role === 'staff') return { createdBy: req.user.userId };
   assertCan(req, res, 'delete', {});
   return null;

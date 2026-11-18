@@ -110,6 +110,8 @@ src/app/app.config.ts
 public/assets/data/dictionary.json
 e2e/ui/628-1.spec.ts
 e2e/ui/628-2.spec.ts
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope
