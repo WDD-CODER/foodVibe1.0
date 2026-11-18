@@ -688,6 +688,23 @@ describe('ProductImportComponent', () => {
         })
       })
 
+      it('a row deleted before saving after a file read has no invoice line', async () => {
+        await setup(of({ rows: [], truncated: false }))
+        withRead([row('שם א', 3), row('שם ב', 4), row('שם ג', 5)], {
+          supplier: { supplierId: 'sup1', supplierKey: 'name:ירקן' }
+        })
+        await readFile()
+        byId<HTMLButtonElement>('import-delete')!.click() // the first row
+        fixture.detectChanges()
+        await clickSave()
+        const [, rows, invoice] = apply.calls.mostRecent().args
+        expect(rows.length).toBe(2)
+        const names = invoice.lines.map((l: { printedName: string }) => l.printedName)
+        expect(names).toEqual(['שם ב', 'שם ג'])
+        expect(names).not.toContain('שם א')
+        expect(invoice.lines.map((l: { row: number }) => l.row)).toEqual([0, 1])
+      })
+
       it('the save after a pasted list sends no invoice', async () => {
         await setup(of({ rows: [row('בצל', 3)], truncated: false }))
         await pasteAndParse('בצל 3')
@@ -712,6 +729,7 @@ describe('ProductImportComponent', () => {
         await readFile()
         expect(byId<HTMLButtonElement>('import-save')!.disabled).toBeTrue()
         expect(byId('invoice-supplier-required')).not.toBeNull()
+        expect(byId('invoice-supplier-required')!.textContent).toContain('invoice_supplier_required')
       })
 
       it('a printed supplier name is enough to save', async () => {
