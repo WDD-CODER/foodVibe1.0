@@ -322,6 +322,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
+- Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
 - Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
@@ -473,4 +474,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 622
 - Use: `shared/schemas/logistics/extract.schema.ts` — request, model answer, draft and confirm shapes of the notes-to-checklist draft; `server/utils/logistics-extract.js` — `buildQuestionList` (the questions sent to the model), `cleanLogisticsDraft` (drops what the model got wrong), `keptRatio` (share of the draft kept).
 - When: a route turns an event's free-text notes into a draft logistics checklist.
+- Known copies: none.
+
+### loading-list — `buildLoadingList`, `LoadingRow`
+
+- Status: stable — plan 624
+- Use: `shared/schemas/logistics/loading-list.ts` — `buildLoadingList({ equipment, guestCount, answers })` is the one pure function that builds an event's loading rows (equipment by scaling rule, logistics items needed and paid by us or the chef); the sheet is `app-loading-list` inside the event's logistics card.
+- When: any screen or test that needs "what goes on the truck" for an event.
 - Known copies: none.
