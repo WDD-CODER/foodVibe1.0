@@ -1,6 +1,6 @@
 # Plan 622 — Site-visit notes become a checklist draft on the server
 
-Status: draft
+Status: done
 Depends-on: 618
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

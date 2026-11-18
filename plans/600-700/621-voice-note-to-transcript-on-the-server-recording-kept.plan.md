@@ -1,6 +1,6 @@
 # Plan 621 — Voice note to transcript on the server, with the recording kept
 
-Status: draft
+Status: done
 Depends-on: 619
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
