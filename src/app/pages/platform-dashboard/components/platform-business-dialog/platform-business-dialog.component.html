@@ -1,6 +1,19 @@
 <app-modal-shell size="sm" titleKey="platform_biz_dialog_title" [dismissible]="!isSaving_()" (dismissed)="cancel()">
   <div class="fda-body" data-testid="biz-dialog">
-    <p class="fda-name">{{ target()?.name }}</p>
+    <div class="pbd-top">
+      <p class="fda-name">{{ target()?.name }}</p>
+      <button
+        type="button"
+        class="c-icon-btn"
+        data-testid="biz-history-open"
+        [attr.title]="'platform_history_tip' | translatePipe"
+        [attr.aria-label]="'platform_history_tip' | translatePipe"
+        [attr.aria-expanded]="isHistoryOpen_()"
+        (click)="toggleHistory()"
+      >
+        <lucide-icon name="history" [size]="16" />
+      </button>
+    </div>
     <app-form-field label="platform_biz_modules">
       <div class="c-chip-group">
         @for (key of moduleKeys; track key) {
@@ -56,6 +69,49 @@
         (input)="reason_.set($any($event.target).value); reasonError_.set(null)"
       ></textarea>
     </app-form-field>
+    @if (isHistoryOpen_()) {
+      <section class="pbd-history" data-testid="biz-history" role="region" aria-labelledby="biz-history-title">
+        <div class="pbd-history__head">
+          <h3 id="biz-history-title">{{ 'platform_history_title' | translatePipe }}</h3>
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="biz-history-close"
+            [attr.aria-label]="'close' | translatePipe"
+            (click)="closeHistory()"
+          >
+            <lucide-icon name="x" [size]="16" />
+          </button>
+        </div>
+        <div class="pbd-history__body">
+          @if (historyFailed_()) {
+            <p data-testid="biz-history-failed">{{ 'platform_history_failed' | translatePipe }}</p>
+          } @else if (history_() === null) {
+            <app-loader size="small" [inline]="true" />
+          } @else if (history_()!.length === 0) {
+            <app-empty-state messageKey="platform_history_empty" />
+          } @else {
+            <ul class="pbd-history__list">
+              @for (row of history_(); track $index) {
+                <li class="pbd-history__row" data-testid="biz-history-row">
+                  <span class="pbd-history__meta">{{ row.at | date: 'dd/MM/yy HH:mm' }} · {{ row.byName }}</span>
+                  @if (row.changes) {
+                    @for (change of row.changes; track change.field) {
+                      <span>{{ describeChange(change) }}</span>
+                    }
+                  } @else {
+                    <span>{{ oldFieldLabels(row) }}</span>
+                  }
+                  <span data-testid="biz-history-reason"
+                    >{{ 'platform_history_reason' | translatePipe }} "{{ row.reason }}"</span
+                  >
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    }
   </div>
   <div class="c-modal-actions">
     <button type="button" class="c-btn-ghost" data-testid="biz-cancel" [disabled]="isSaving_()" (click)="cancel()">

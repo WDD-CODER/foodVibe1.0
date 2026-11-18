@@ -257,6 +257,39 @@ router.put('/businesses/:id/front-desk', verifyToken, requirePlatformAdmin, asyn
   }
 })
 
+// Plan 638: the entries of a history row — only the fields that were sent and differ from the stored value (strings).
+function platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate }) {
+  const changes = []
+  if (modules !== undefined) {
+    const from = modulesOf(before).join(',')
+    const to = MODULE_KEYS.filter(k => modules.includes(k)).join(',')
+    if (from !== to) changes.push({ field: 'modules', from, to })
+  }
+  if (aiMonthlyTokenCap !== undefined) {
+    const from = before.aiMonthlyTokenCap == null ? '' : String(before.aiMonthlyTokenCap)
+    const to = aiMonthlyTokenCap === null ? '' : String(aiMonthlyTokenCap)
+    if (from !== to) changes.push({ field: 'aiMonthlyTokenCap', from, to })
+  }
+  if (aiPrivate !== undefined) {
+    const from = String(before.aiPrivate === true)
+    const to = String(aiPrivate)
+    if (from !== to) changes.push({ field: 'aiPrivate', from, to })
+  }
+  return changes
+}
+
+// Plan 638: the platform admin reads one business's change history, newest first.
+router.get('/businesses/:id/platform-history', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const business = await col('businesses').findOne({ _id: req.params.id }, { projection: { platformHistory: 1 } })
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    res.json({ rows: [...(business.platformHistory ?? [])].reverse() })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.platform_history.failed', businessId: req.params.id })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
 // Plan 616: the platform admin sets one business's modules, AI token cap and private flag, and the reason is kept.
 router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async (req, res) => {
   const parsed = platformUpdateSchema.safeParse(req.body ?? {})
@@ -268,6 +301,8 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
   }
   const { modules, aiMonthlyTokenCap, aiPrivate, reason } = parsed.data
   try {
+    const before = await col('businesses').findOne({ _id: req.params.id })
+    if (!before) return res.status(404).json({ error: 'Business not found' })
     const actor = actorOf(req)
     const $set = {}
     const $unset = {}
@@ -286,7 +321,7 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
       removed = priv.removed
       changed.push('aiPrivate')
     }
-    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed }
+    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed, changes: platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate }) }
     const update = { $push: { platformHistory: { $each: [row], $slice: -50 } } }
     if (Object.keys($set).length) update.$set = $set
     if (Object.keys($unset).length) update.$unset = $unset
