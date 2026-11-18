@@ -1,3 +1,4 @@
+import type { Equipment } from '@models/equipment.model'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
 import { Router } from '@angular/router'
@@ -158,8 +159,34 @@ describe('EquipmentListComponent', () => {
     })
   })
 
-  it('titles the list with the equipment key and has no scaling column', () => {
+  it('titles the list with the equipment key and has a rule column', () => {
     expect(fixture.nativeElement.querySelector('app-page-header h1.ph-title').textContent.trim()).toBe('equipment')
-    expect(fixture.nativeElement.querySelector('.col-scaling')).toBeNull()
+    expect(fixture.nativeElement.querySelector('.col-scaling')).not.toBeNull()
+  })
+
+  describe('rule column (plan 624)', () => {
+    const item = (scalingRule?: Equipment['scalingRule']) =>
+      ({
+        _id: 'x',
+        nameHebrew: 'סיר',
+        category: 'tool',
+        ownedQuantity: 1,
+        isConsumable: false,
+        scalingRule
+      }) as Equipment
+    const summary = (e: Equipment) =>
+      (component as unknown as { scalingSummary(e: Equipment): string }).scalingSummary(e)
+
+    it('an item with a rule shows the guests and the range', () => {
+      expect(summary(item({ perGuests: 50, minQuantity: 2, maxQuantity: 4 }))).toBe(
+        'scaling_summary'.replace('{n}', '50').replace('{range}', '2–4')
+      )
+    })
+
+    it('an open maximum shows only the minimum; none shows the dash key', () => {
+      expect(summary(item({ perGuests: 25, minQuantity: 1 }))).toBe('scaling_summary')
+      expect(summary(item())).toBe('no_scaling')
+      expect(summary(item({ perGuests: 0, minQuantity: 0 }))).toBe('no_scaling')
+    })
   })
 })

@@ -397,6 +397,17 @@ export class EquipmentListComponent implements OnInit, OnDestroy, PendingChanges
     this.hydrateEditForm(item)
   }
 
+  /** Plan 624: "N guests · min X–Y" for an item with a loading-list rule, a dash for none. */
+  protected scalingSummary(item: Equipment): string {
+    const rule = item.scalingRule
+    if (!rule || !(rule.perGuests > 0)) return this.translation.translate('no_scaling')
+    const range = rule.maxQuantity !== undefined ? `${rule.minQuantity}–${rule.maxQuantity}` : String(rule.minQuantity)
+    return this.translation
+      .translate('scaling_summary')
+      .replace('{n}', String(rule.perGuests))
+      .replace('{range}', range)
+  }
+
   private async saveCurrentInlineEdit(): Promise<boolean> {
     const id = this.editingId_()
     if (!id || this.editForm_.invalid) return false

@@ -162,6 +162,8 @@ export interface SiteLogistics {
   meetingAt?: string
   meetingWith?: string
   phaseDone?: { intake?: number; site_visit?: number }
+  /** Plan 624: loading-list ticks; server-owned, written by `PUT /events/:id/loading`. */
+  loaded?: { key: string; at: number; by: string; byName: string }[]
 }
 
 export interface MenuEvent {

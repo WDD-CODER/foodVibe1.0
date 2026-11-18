@@ -2411,6 +2411,16 @@
     "voice_note_mic_denied": "אין גישה למיקרופון – אשרו גישה בדפדפן או הדביקו טקסט",
     "voice_note_too_large": "ההקלטה גדולה מדי – הקליטו קטע קצר יותר",
     "voice_note_failed": "התמלול נכשל – ההקלטה נשארה כאן, נסו שוב",
-    "voice_note_empty": "לא נשמע דיבור בהקלטה"
+    "voice_note_empty": "לא נשמע דיבור בהקלטה",
+    "loading_list": "רשימת העמסה",
+    "loading_list_col_item": "פריט",
+    "loading_list_col_shortage": "חסר",
+    "loading_list_progress": "נטענו {x} מתוך {y}",
+    "loading_list_mark_loaded": "סמן שנטען:",
+    "loading_list_empty": "אין עדיין מה להעמיס. סמנו פריטים בלוגיסטיקה כ״נדרש״ ו״עלינו״, או הגדירו כלל סקלה לציוד.",
+    "scaling_rule_hint": "פריט אחד לכל מספר האורחים שתקבעו, בין המינימום למקסימום. לפי זה נבנית רשימת ההעמסה לאירוע.",
+    "scaling_per_guests_required": "יש להזין מספר אורחים שלם, 1 לפחות",
+    "scaling_min_required": "יש להזין כמות מינימלית, 0 לפחות",
+    "scaling_max_below_min": "הכמות המקסימלית קטנה מהמינימלית"
   }
 }
