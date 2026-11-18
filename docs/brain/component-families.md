@@ -421,3 +421,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: needsMedia in callGemini (server/services/gemini-client.js) picks a media-capable model in the chain.
 - When: a model call carries audio or a PDF.
 - Known copies: none.
+
+### invoice-trail — `invoiceApplyInputSchema`, `SUPPLIER_KEY_PATTERN`, `changePct`, `invoiceKeptRatio`, `buildInvoiceLines`
+
+- Status: stable — plan 625
+- Use: `server/utils/invoice-trail.js` — `changePct`, `invoiceKeptRatio`, `buildInvoiceLines`; the request shape is
+  `invoiceApplyInputSchema` and `SUPPLIER_KEY_PATTERN` in `shared/schemas/entities/invoice.schema.ts`.
+- When: the invoice apply route stores the invoice record, the price history rows and the draft closeness score.
+- Known copies: none.

@@ -100,8 +100,8 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 
-- `server/utils/invoice-trail.js` (`changePct`, `invoiceKeptRatio`, `buildInvoiceLines`) — family: none — rung: 4 — why: server-side pure helpers; no price-change or draft-closeness helper for invoices exists, and keeping them out of the route makes them testable without a database.
-- `invoiceApplyInputSchema`, `SUPPLIER_KEY_PATTERN` in `shared/schemas/entities/invoice.schema.ts` — family: none — rung: 4 — why: the request shape of C-INVOICE; it lives in the invoice schema file wave 0 created so the screen (628) and the server read one definition.
+- `server/utils/invoice-trail.js` (`changePct`, `invoiceKeptRatio`, `buildInvoiceLines`) — family: invoice-trail — rung: 4 — why: server-side pure helpers; no price-change or draft-closeness helper for invoices exists, and keeping them out of the route makes them testable without a database.
+- `invoiceApplyInputSchema` — family: invoice-trail — rung: 4 — why: the request shape of C-INVOICE; it lives in the invoice schema file wave 0 created so the screen (628) and the server read one definition.
 
 ## Step 0 — Reality Check
 
@@ -191,15 +191,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Describe the invoice header an approval may carry so a wrong one is refused before any write — add SUPPLIER_KEY_PATTERN, invoiceApplyInputSchema and its type beside what 615 wrote; run pnpm run build:schemas — shared/schemas/entities/invoice.schema.ts
-- [ ] A2: Add the pure rules that work out a price change in percent and how close a draft was — changePct, buildInvoiceLines, invoiceKeptRatio with unit tests (10 percent fixture, null equals absent, a repeated printed name counts once with its last line, empty draft gives 0, never above 1) — server/utils/invoice-trail.js, server/test/invoice-trail.test.js
-- [ ] A3: Refuse a broken invoice header or one pointing at another business before anything is saved — steps 1 and 2 of the route requirement with the four 400 cases — server/routes/product-import.js, server/test/product-import-invoice.test.js
-- [ ] A4: Remember the old price of every product the approval changes, with or without an invoice — per-row outcomes, queued history entries, the history step, the applied log counts; tests for source invoice and source import, none for same price — server/routes/product-import.js, server/test/product-import-invoice.test.js
-- [ ] A5: Save the invoice itself as one record whose lines say what happened to each product — the invoice step, keeping its stored file, invoiceId in the answer, the header comment; tests for the stored lines, the kept file and the answer — server/routes/product-import.js, server/test/product-import-invoice.test.js
-- [ ] A6: Keep the approved prices and answer normally when the record keeping fails — per-step try and catch, the trail_failed log line, invoiceId null; tests with the throwing insert spies and the log capture — server/routes/product-import.js, server/test/product-import-invoice.test.js
-- [ ] A7: Close the AI draft with what was really saved so scan accuracy can be measured later — the draft step with invoiceKeptRatio; test with a seeded pending draft ending confirmed at 0.5 — server/routes/product-import.js, server/test/product-import-invoice.test.js
-- [ ] A8: Prove who may read an invoice and that nobody can write one around the approval — generic read as owner, staff and another business, the 405 on writes, staff 403 on apply — server/test/product-import-invoice.test.js
-- [ ] A9: Run the full checks and confirm the old apply tests still pass untouched — pnpm run test:server, server lint, build, log-query — no file
+- [x] A1: Describe the invoice header an approval may carry so a wrong one is refused before any write — add SUPPLIER_KEY_PATTERN, invoiceApplyInputSchema and its type beside what 615 wrote; run pnpm run build:schemas — shared/schemas/entities/invoice.schema.ts
+- [x] A2: Add the pure rules that work out a price change in percent and how close a draft was — changePct, buildInvoiceLines, invoiceKeptRatio with unit tests (10 percent fixture, null equals absent, a repeated printed name counts once with its last line, empty draft gives 0, never above 1) — server/utils/invoice-trail.js, server/test/invoice-trail.test.js
+- [x] A3: Refuse a broken invoice header or one pointing at another business before anything is saved — steps 1 and 2 of the route requirement with the four 400 cases — server/routes/product-import.js, server/test/product-import-invoice.test.js
+- [x] A4: Remember the old price of every product the approval changes, with or without an invoice — per-row outcomes, queued history entries, the history step, the applied log counts; tests for source invoice and source import, none for same price — server/routes/product-import.js, server/test/product-import-invoice.test.js
+- [x] A5: Save the invoice itself as one record whose lines say what happened to each product — the invoice step, keeping its stored file, invoiceId in the answer, the header comment; tests for the stored lines, the kept file and the answer — server/routes/product-import.js, server/test/product-import-invoice.test.js
+- [x] A6: Keep the approved prices and answer normally when the record keeping fails — per-step try and catch, the trail_failed log line, invoiceId null; tests with the throwing insert spies and the log capture — server/routes/product-import.js, server/test/product-import-invoice.test.js
+- [x] A7: Close the AI draft with what was really saved so scan accuracy can be measured later — the draft step with invoiceKeptRatio; test with a seeded pending draft ending confirmed at 0.5 — server/routes/product-import.js, server/test/product-import-invoice.test.js
+- [x] A8: Prove who may read an invoice and that nobody can write one around the approval — generic read as owner, staff and another business, the 405 on writes, staff 403 on apply — server/test/product-import-invoice.test.js
+- [x] A9: Run the full checks and confirm the old apply tests still pass untouched — pnpm run test:server, server lint, build, log-query — no file
 
 ## Technical Considerations
 - Dependencies: `server/services/ai-drafts.js` (`confirmAiDraft`, plan 618), the `invoices` / `priceHistory` schemas, collections, indexes and field lists (plan 615), `storedFiles` and `keepStoredFile(db, businessId, fileId)` in `server/services/file-store.js` (plan 619, merged in `mod-0` before this run). `normalizeProductName` from `server/utils/price-list-import.js`.
@@ -235,3 +235,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: `server/test/product-import-route.test.js` is left out of the scope on purpose — why: the Done-when is that it passes unchanged; out of scope means it cannot be edited to pass.
 - decided: no row is added to `docs/agent/standards-backend.md` or `server/breadcrumbs.md` — why: neither file lists the product-import router today, and three server runs edit side by side; a docs row would be the only cross-run conflict.
 - decided: the invoice's stored file is kept by `keepStoredFile` right after the invoice insert — why: C-FILES gives a freshly read file 30 days; only a saved invoice lifts that, so a file whose invoice failed to save is still cleaned up.
+- evidence: `pnpm run test:server` → exit 0, 122 files / 1629 tests passed (incl. product-import-invoice, invoice-trail, the 23 unchanged product-import-route tests).
+- evidence: `pnpm --dir server run lint` → exit 0 (0 errors); `pnpm run lint` → 0 errors; `pnpm run build` → ok; `plan-ledger-check` OK; `log-query` → SKIP: no database configured.
+
+- Fix round 1: added family `invoice-trail` to docs/brain/component-families.md, regenerated docs/brain/inventory.md; Reuse Check rows now name the family. kit-checks → ok (6 checks).
