@@ -17,7 +17,7 @@ import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
-import type { ImportRow } from './product-import.service'
+import type { ImportRow, InvoiceReadResult } from './product-import.service'
 import type { ProductNameMatchRequest, ProductNameMatchResponse } from '@schemas/ai-product-match.schema'
 import {
   VOICE_AUDIO_MAX_BASE64,
@@ -29,7 +29,7 @@ import type {
   LogisticsExtractRequest,
   LogisticsExtractResponse
 } from '@schemas/logistics/extract.schema'
-import { RECEIPT_IMAGE_MAX_BASE64, RECEIPT_IMAGE_MIME_TYPES } from '@schemas/ai-receipt-photo.schema'
+import { INVOICE_FILE_MAX_BASE64, INVOICE_FILE_MIME_TYPES } from '@schemas/ai-invoice-read.schema'
 
 export type VoicePurpose = VoiceTranscribeRequest['purpose']
 export type LogisticsConfirmLine = LogisticsConfirmRequest['saved'][number]
@@ -161,19 +161,29 @@ export class GeminiService {
   }
 
   /**
-   * Owner only (plan 465): one AI call reads a photo of a supplier receipt into cleaned product rows. The photo is
-   * shrunk to fit the server's body limit (second, smaller attempt when still too big) and never kept. Rejects with
-   * an Error whose message is `IMAGE_TYPE_UNSUPPORTED` (not jpeg, png or webp) or `IMAGE_TOO_LARGE` before any
-   * request. The caller counts the usage (incrementGeminiUsage) on success.
+   * Plan 628 (C-INVREAD): one call reads a photo or a PDF of a supplier invoice into a header, cleaned rows and the
+   * printed lines. An image is shrunk to fit the server's body limit (a second, smaller attempt when still too big)
+   * a PDF is sent as it is. Rejects with `FILE_TYPE_UNSUPPORTED` or `FILE_TOO_LARGE` before any request. The caller
+   * counts the usage (incrementGeminiUsage) on success.
    */
-  async parseReceiptPhoto(file: File, knownCategories: string[]): Promise<{ rows: ImportRow[]; truncated: boolean }> {
-    if (!(RECEIPT_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) throw new Error('IMAGE_TYPE_UNSUPPORTED')
-    let image = await this.encodeImage_(file, 2000, 0.75)
-    if (image.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) image = await this.encodeImage_(file, 1400, 0.6)
-    if (image.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) throw new Error('IMAGE_TOO_LARGE')
+  async readInvoice(file: File, knownCategories: string[]): Promise<InvoiceReadResult> {
+    if (!(INVOICE_FILE_MIME_TYPES as readonly string[]).includes(file.type)) throw new Error('FILE_TYPE_UNSUPPORTED')
+    let fileBase64: string
+    let mimeType: string
+    if (file.type === 'application/pdf') {
+      fileBase64 = await this.blobToBase64_(file)
+      mimeType = file.type
+    } else {
+      let image = await this.encodeImage_(file, 2000, 0.75)
+      if (image.imageBase64.length > INVOICE_FILE_MAX_BASE64) image = await this.encodeImage_(file, 1400, 0.6)
+      fileBase64 = image.imageBase64
+      mimeType = image.mimeType
+    }
+    if (fileBase64.length > INVOICE_FILE_MAX_BASE64) throw new Error('FILE_TOO_LARGE')
     return firstValueFrom(
-      this.http_.post<{ rows: ImportRow[]; truncated: boolean }>(`${this.authBase_}${API.ai('parse-receipt-photo')}`, {
-        ...image,
+      this.http_.post<InvoiceReadResult>(`${this.authBase_}${API.ai('invoices/read')}`, {
+        fileBase64,
+        mimeType,
         knownCategories,
         ...this.modelParam_()
       })

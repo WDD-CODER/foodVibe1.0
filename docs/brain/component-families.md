@@ -311,6 +311,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
 - `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key `ai_monthly_cap_reached` for the server's monthly-cap refusal, else null; every place that maps an AI 429 asks it first (plan 620).
@@ -323,6 +324,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
+- Plan 628: `GeminiService.readInvoice`, `ProductImportService.resolve`, the `invoice` argument of `apply`, `API.files` call the invoice read, memory, apply and file routes through the same `API` map (GeminiService.readInvoice, ProductImportService.resolve, the invoice argument of apply, API.files).
 - Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
@@ -482,4 +484,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 624
 - Use: `shared/schemas/logistics/loading-list.ts` — `buildLoadingList({ equipment, guestCount, answers })` is the one pure function that builds an event's loading rows (equipment by scaling rule, logistics items needed and paid by us or the chef); the sheet is `app-loading-list` inside the event's logistics card.
 - When: any screen or test that needs "what goes on the truck" for an event.
+- Known copies: none.
+
+### invoice-screen — `priceChangePct`, `buildInvoiceLines` (browser), `app-invoice-header-strip`, `InvoiceDataService`
+
+- Status: stable — plan 628
+- Use: `src/app/core/utils/price-change.util.ts` — `priceChangePct(old, new)` is the one browser rule for "by how many percent did a price move" (two decimals, null when there is no old price); `src/app/core/utils/invoice-lines.util.ts` — `buildInvoiceLines(keptRows, printed)` maps kept preview rows to the `invoice.lines` of the apply body; `app-invoice-header-strip` (supplier, date, number above the import preview); `InvoiceDataService` reads the saved invoices and opens a stored file in a new tab.
+- When: any browser screen that shows a price change, sends an invoice with the import save, or lists saved invoices.
 - Known copies: none.

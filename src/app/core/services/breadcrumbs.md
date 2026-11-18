@@ -14,6 +14,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `recipe-data.service.ts` | Recipe CRUD (on BaseEntityDataService) | RecipeDataService |
 | `supplier-data.service.ts` | Supplier CRUD | SupplierDataService |
 | `equipment-data.service.ts` | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
+| `invoice-data.service.ts` | Saved invoices, read-only list; `openFile(fileId)` opens the stored file in a new tab | InvoiceDataService |
 | `venue-data.service.ts` | Venue CRUD | VenueDataService |
 | `kitchen-state.service.ts` | Central state for kitchen flows; save/delete methods return Promises | KitchenStateService |
 | `metadata-registry.service.ts` | Categories, allergens, units registry | MetadataRegistryService |
