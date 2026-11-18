@@ -326,3 +326,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A5: Write the new rule where the program and the lawyer read it — C-LEARN and G4 in the map, the private and leaving lines of the pilot terms
 - [ ] A6: Record the new route and pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row
 - [ ] A7: Prove it in the running app and run every check — the two screen checks with fixtures, then the Done-when commands in order
+
+### Plan 640 — The equipment quick-edit popup sets the loading rule (per guests, minimum, maximum) (`plans/640-equipment-quick-edit-sets-the-loading-rule.plan.md`)
+- [ ] A1: Move the loading-rule logic into one shared helper the form and the popup both use — scalingRuleFrom, scalingRuleErrors, the form calls them, the util spec
+- [ ] A2: Let the owner set the rule in the list's quick-edit popup — the four controls, hydrate, save with the checks, the template block, the six spec cases
+- [ ] A3: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order
