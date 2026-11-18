@@ -1,6 +1,6 @@
 # Orchestrator run mod-0
 
-Run branch: `orch/mod-0` (from `origin/main` at 9a3a74e) · started 2026-11-17T12:23:20.209Z · finished 2026-11-18T07:23:45.781Z
+Run branch: `orch/mod-0` (from `origin/main` at 9a3a74e) · started 2026-11-17T12:23:20.209Z · finished 2026-11-18T07:59:57.210Z
 Result: 5 merged, 1 parked, skipped or left out, 6 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 9a3a74e.
 
@@ -15,7 +15,7 @@ Final gate: ok (attempt 1)
 | 617 Monthly AI cap per business, read from the usage ledger and enforced before the model call | merged | 1 | build | ac5f0e8 |  |
 | 618 Every business teaches the AI by default, and every AI draft keeps its trail | merged | 2 | build → judgment | b7cac68 |  |
 | 619 Keep invoice files and voice recordings privately, and let the AI read audio and PDF | merged | 0 | build | a22e6da |  |
-| 620 Show each business only the modules it has, and give the platform admin one dialog for modules, AI cap and private mode | parked | 2 | build → judgment |  | gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run) |
+| 620 Show each business only the modules it has, and give the platform admin one dialog for modules, AI cap and private mode | parked | 2 | build → judgment |  | gate: pnpm run test:ci (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run) |
 
 ## App errors since the run started
 
@@ -47,6 +47,13 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - D13 · 620 · none · seen: scripts/reuse-lint.mjs:81 — with no argument the script only prints usage and exits 1, so every plan whose Done-when names a bare `pnpm run lint:reuse` (630, 632, 634, 636, 637) fails the gate the same way
 - D14 · 620 · none · seen: docs/brain/component-families.md lines 23, 164, 197, 312 on origin/orch/mod-0 — `reuse-lint --check-registry` reports 4 registry paths that no longer exist (origin/mvp-review, @utils/server-refusal.util, .teal/.amber/.red, pages/public-request/services/public-request.service.ts)
 - D15 · 620 · none · seen: src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.spec.ts:217 and :261 — the partial-badge layout specs failed once and passed on the rerun with no change (flaky)
+- D16 · 620 · none · behaviour: a stray call to AiRecipeModalService.open, AiMenuModalService.open or AiProductModalService.open without ai_create returns silently, with no message (the simplest option) — reverse: show a toast before the early return
+- D17 · 620 · none · behaviour: a chip group the modules cut down to fewer than two chips shows no row; the rule applies only when filtering removed a chip, so the inventory and recipe groups are untouched — reverse: drop the `chips.length < all.length` guard in tab-chips.component.ts
+- D18 · 620 · none · behaviour: the Trash page's `sections` is now a getter over `TrashService.sections_()`, so `trash.page.html` stays unchanged — reverse: make it a signal and edit the template
+- D19 · 620 · none · behaviour: HttpStorageAdapter loads ModuleService through a dynamic `import()` at call time to avoid an import cycle with BusinessService — reverse: a static import if the cycle proves harmless
+- D20 · 620 · none · behaviour: the dialog's cap input is on one line inside `<div appNumberBox>` under `<!-- prettier-ignore -->`, because reuse-lint is line-based and the pre-commit hook splits long tags — reverse: remove the comment and accept the reuse debt
+- D21 · 620 · none · seen: `pnpm run lint:reuse` fails with a usage error when run without --diff (package.json:12); the gate list's `lint:reuse` entry needs `--diff=<base>`
+- D22 · 620 · none · seen: the initial bundle (592.66 kB) is over the 570 kB budget as a warning, and cook-view.page.scss is over its 20 kB budget by 6.23 kB; both existed before this plan
 
 ## Run notes
 
@@ -122,6 +129,13 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 620: builder left undone (round 2): e2e/ui/620-1.spec.ts: written, not run; e2e/ui/620-2.spec.ts: written, not run; e2e/ui/620-3.spec.ts: written, not run; e2e/ui/620-4.spec.ts: written, not run; The three [human] items are left for the Human
 - 620: [ui] On `/dashboard?tab=metadata` the owner's card shows the chip "משותף עם FoodVibe" (`e2e/ui/620-4.spec.ts`).: written, not run — checked by the run's [ui] step / the Human
 - 620: parked: nothing to save (nothing uncommitted)
+- 620: the folder foodVibe1.0-orch-mod-0-620 was installed (root, scripts, server)
+- 620: builder left undone (round 0): 620-1: written, not run; 620-2: written, not run; 620-3: written, not run; 620-4: written, not run; ci-scope-check --checkout-branch: not run on the feat branch (the shell reported an empty branch name)
+- 620: builder left undone (round 1): [human] Dandan: event_logistics off and back on; a 1-token cap shows the Hebrew message; the dialog and the two columns read right on PC and phone — for Dandan, not a builder; [ui] 620-1…620-4: written, not run
+- 620: escalated to a fresh judgment-tier builder (round 2): Done-when item left undone: [auto] `src/app/core/services/module.service.spec.ts`: a business without `modules` has `events`, `event_logistics`, `frontdesk`,
+- 620: builder left undone (round 2): e2e/ui/620-1.spec.ts: written, not run; e2e/ui/620-2.spec.ts: written, not run; e2e/ui/620-3.spec.ts: written, not run; e2e/ui/620-4.spec.ts: written, not run; The three [human] items are left for the Human
+- 620: [ui] On `/dashboard?tab=metadata` the owner's card shows the chip "משותף עם FoodVibe" (`e2e/ui/620-4.spec.ts`).: written, not run — checked by the run's [ui] step / the Human
+- 620: parked: nothing to save (nothing uncommitted)
 
 ## Models per agent
 
@@ -138,7 +152,9 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 618 reviewer: sonnet
 - 619 builder: sonnet
 - 619 reviewer: sonnet
-- 620 builder: opus
+- 620 builder: sonnet
+- 620 builder fix: sonnet
+- 620 judgment builder: opus
 
 ## What only the Human can do
 
@@ -147,7 +163,7 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 1. 618: On `/dashboard?tab=metadata`, signed in as the owner, the card titled "שיתוף דוגמאות AI" has no control that — a [ui] card no script could check and the browser step was off; on a page not named
 2. 619 Keep invoice files and voice recordings privately, and let the AI read audio and PDF: After gate G3 (Dandan set the three keys on Render and allowed PDF delivery in the provider's Security
 
-- Decide on 620: gate: scope-check (kit copy) --diff=origin/orch/mod-0 --plan=plans/620-modules-and-ai-rules-in-the-browser.plan.md (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)
+- Decide on 620: gate: pnpm run test:ci (fix rounds used: 2 of 2) — needs the Human (asked 3 times in this run)
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
