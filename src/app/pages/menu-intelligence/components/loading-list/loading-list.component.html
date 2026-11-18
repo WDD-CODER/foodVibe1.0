@@ -1,0 +1,69 @@
+<app-modal-shell size="fluid" titleKey="loading_list" (dismissed)="close.emit()">
+  <div class="loading-list" dir="rtl">
+    <div class="loading-bar no-print">
+      <span class="loading-progress">{{ progress_() }}</span>
+      <div class="loading-actions">
+        <button type="button" class="c-btn-primary" [disabled]="rows_().length === 0" (click)="print()">
+          <lucide-icon name="printer" [size]="16"></lucide-icon>
+          {{ 'prep_sheets_print' | translatePipe }}
+        </button>
+        <button type="button" class="c-icon-btn" (click)="close.emit()" [attr.aria-label]="'close' | translatePipe">
+          <lucide-icon name="x" [size]="18"></lucide-icon>
+        </button>
+      </div>
+    </div>
+    <p class="loading-meta">{{ metaLine_() }}</p>
+
+    @if (!equipmentReady_()) {
+      <app-loader size="small" [inline]="true" />
+    }
+
+    @if (rows_().length === 0 && equipmentReady_()) {
+      <app-empty-state messageKey="loading_list_empty" icon="truck" />
+    } @else {
+      @for (group of groups_(); track group.key) {
+        <section class="loading-group">
+          <h4 class="loading-group-title">{{ group.title | translatePipe }}</h4>
+          <table class="loading-table">
+            <thead>
+              <tr>
+                <th class="col-tick"></th>
+                <th>{{ 'loading_list_col_item' | translatePipe }}</th>
+                <th class="c-num">{{ 'prep_sheets_col_qty' | translatePipe }}</th>
+                @if (group.equipment) {
+                  <th class="c-num">{{ 'owned_quantity' | translatePipe }}</th>
+                  <th>{{ 'loading_list_col_shortage' | translatePipe }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of group.rows; track row.key) {
+                <tr [class.is-loaded]="isLoaded(row.key)">
+                  <td class="col-tick">
+                    <input
+                      type="checkbox"
+                      [checked]="isLoaded(row.key)"
+                      [disabled]="finished_() || isPending(row.key)"
+                      [attr.aria-label]="('loading_list_mark_loaded' | translatePipe) + ' ' + row.label"
+                      (change)="tick(row, $event)"
+                    />
+                  </td>
+                  <td class="loading-label">{{ row.label }}</td>
+                  <td class="c-num">{{ row.quantity }}</td>
+                  @if (group.equipment) {
+                    <td class="c-num">{{ row.owned }}</td>
+                    <td>
+                      @if ((row.shortage ?? 0) > 0) {
+                        <span class="c-chip c-chip--tag c-chip--red">{{ row.shortage }}</span>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+    }
+  </div>
+</app-modal-shell>

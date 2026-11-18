@@ -15,7 +15,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
-import { Equipment, EquipmentCategory } from '@models/equipment.model'
+import { Equipment, EquipmentCategory, ScalingRule } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -25,6 +25,7 @@ import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
@@ -49,7 +50,8 @@ const CATEGORIES: EquipmentCategory[] = [
     TranslatePipe,
     LoaderComponent,
     CustomSelectComponent,
-    FormFieldComponent
+    FormFieldComponent,
+    NumberBoxDirective
   ],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',
@@ -82,6 +84,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
   protected validationErrors_ = signal<Record<string, string>>({})
   /** Mirrors the category control so the OnPush template redraws when it changes. */
   protected category_ = signal<string>('tool')
+  /** Plan 624: mirrors the `scalingEnabled` control so the OnPush template shows the rule rows. */
+  protected scalingEnabled_ = signal(false)
 
   ngOnInit(): void {
     this.buildForm()
@@ -89,6 +93,10 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
     categoryCtrl?.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((value: string) => this.category_.set(value))
+    this.equipmentForm_
+      .get('scalingEnabled')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value: boolean) => this.scalingEnabled_.set(!!value))
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
       const equipment = data['equipment'] as Equipment | null | undefined
       if (equipment) {
@@ -113,7 +121,12 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
       category: ['tool', [Validators.required]],
       ownedQuantity: [1, [Validators.required, Validators.min(0)]],
       isConsumable: [false],
-      notes: ['']
+      notes: [''],
+      // Plan 624: "one per `perGuests` guests, between min and max" (the loading list reads it)
+      scalingEnabled: [false],
+      perGuests: [null],
+      minQuantity: [1],
+      maxQuantity: [null]
     })
   }
 
@@ -123,8 +136,29 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
       category: e.category ?? 'tool',
       ownedQuantity: e.ownedQuantity ?? 0,
       isConsumable: e.isConsumable ?? false,
-      notes: e.notes ?? ''
+      notes: e.notes ?? '',
+      scalingEnabled: (e.scalingRule?.perGuests ?? 0) > 0,
+      perGuests: e.scalingRule && e.scalingRule.perGuests > 0 ? e.scalingRule.perGuests : null,
+      minQuantity: e.scalingRule && e.scalingRule.perGuests > 0 ? e.scalingRule.minQuantity : 1,
+      maxQuantity: e.scalingRule && e.scalingRule.perGuests > 0 ? (e.scalingRule.maxQuantity ?? null) : null
     })
+    this.scalingEnabled_.set((e.scalingRule?.perGuests ?? 0) > 0)
+  }
+
+  private isBlank_(v: unknown): boolean {
+    return v === null || v === undefined || v === ''
+  }
+
+  /** The rule to store: on = the three numbers; off on an item that had one = `perGuests: 0` (a PUT keeps a field left out). */
+  private scalingRuleFor_(v: Record<string, unknown>, hadRule: boolean): ScalingRule | undefined {
+    if (v['scalingEnabled']) {
+      return {
+        perGuests: Number(v['perGuests']),
+        minQuantity: Number(v['minQuantity']),
+        ...(!this.isBlank_(v['maxQuantity']) && { maxQuantity: Number(v['maxQuantity']) })
+      }
+    }
+    return hadRule ? { perGuests: 0, minQuantity: 0 } : undefined
   }
 
   private validateForm_(): boolean {
@@ -132,6 +166,16 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
     const val = this.equipmentForm_.getRawValue()
     if (!val.nameHebrew?.trim()) errors['nameHebrew'] = 'field_name_required'
     if (!val.category?.trim()) errors['category'] = 'field_category_required'
+    if (val.scalingEnabled) {
+      const per = Number(val.perGuests)
+      if (this.isBlank_(val.perGuests) || !Number.isInteger(per) || per < 1)
+        errors['perGuests'] = 'scaling_per_guests_required'
+      const min = Number(val.minQuantity)
+      if (this.isBlank_(val.minQuantity) || !Number.isFinite(min) || min < 0)
+        errors['minQuantity'] = 'scaling_min_required'
+      else if (!this.isBlank_(val.maxQuantity) && Number(val.maxQuantity) < min)
+        errors['maxQuantity'] = 'scaling_max_below_min'
+    }
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -168,6 +212,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
             notes: v.notes ?? undefined,
             updatedAt: now
           }
+          const rule = this.scalingRuleFor_(v, !!equipment.scalingRule)
+          if (rule) updated.scalingRule = rule
           await this.equipmentData.updateEquipment(updated)
         } else {
           await this.equipmentData.addEquipment({
@@ -176,6 +222,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingCha
             ownedQuantity: Number(v.ownedQuantity),
             isConsumable: !!v.isConsumable,
             notes: v.notes || undefined,
+            ...(v.scalingEnabled && { scalingRule: this.scalingRuleFor_(v, false) }),
             createdAt: now,
             updatedAt: now
           })

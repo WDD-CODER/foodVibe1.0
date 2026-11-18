@@ -36,6 +36,33 @@
       <app-form-field label="owned_quantity" forId="ownedQuantity">
         <input id="ownedQuantity" type="number" formControlName="ownedQuantity" min="0" class="c-input" />
       </app-form-field>
+      <div class="scaling-block">
+        <h3 class="scaling-title">{{ 'scaling_rule' | translatePipe }}</h3>
+        <p class="category-hint">{{ 'scaling_rule_hint' | translatePipe }}</p>
+        <div class="c-chip-group">
+          <label class="c-chip c-chip--toggle">
+            <input type="checkbox" formControlName="scalingEnabled" />
+            <span>{{ 'scaling_enabled' | translatePipe }}</span>
+          </label>
+        </div>
+        @if (scalingEnabled_()) {
+          <app-form-field label="per_guests" forId="perGuests" [error]="validationErrors_()['perGuests'] || null">
+            <div appNumberBox>
+              <input id="perGuests" type="number" formControlName="perGuests" min="1" step="1" class="c-input" />
+            </div>
+          </app-form-field>
+          <app-form-field label="min_quantity" forId="minQuantity" [error]="validationErrors_()['minQuantity'] || null">
+            <div appNumberBox>
+              <input id="minQuantity" type="number" formControlName="minQuantity" min="0" step="1" class="c-input" />
+            </div>
+          </app-form-field>
+          <app-form-field label="max_quantity" forId="maxQuantity" [error]="validationErrors_()['maxQuantity'] || null">
+            <div appNumberBox>
+              <input id="maxQuantity" type="number" formControlName="maxQuantity" min="0" step="1" class="c-input" />
+            </div>
+          </app-form-field>
+        }
+      </div>
       <div class="c-chip-group">
         <label class="c-chip c-chip--toggle">
           <input type="checkbox" formControlName="isConsumable" />

@@ -107,4 +107,67 @@ describe('EquipmentFormComponent unsaved work (plan 498)', () => {
     const msg = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>
     expect(msg.onSetErrorMsg).not.toHaveBeenCalled()
   })
+
+  describe('scaling rule (plan 624)', () => {
+    type FormShape = { patchValue(v: object): void }
+    const formOf = (page: EquipmentFormComponent) => (page as unknown as { equipmentForm_: FormShape }).equipmentForm_
+    const errorsOf = (page: EquipmentFormComponent) =>
+      (page as unknown as { validationErrors_(): Record<string, string> }).validationErrors_()
+    const savedBody = (): Equipment => equipmentData.updateEquipment.calls.mostRecent().args[0]
+
+    it('a rule is saved with the three numbers', async () => {
+      const page = setup(EQUIPMENT)
+      formOf(page).patchValue({ scalingEnabled: true, perGuests: 50, minQuantity: 2, maxQuantity: 4 })
+      await page.onSubmit()
+      expect(savedBody().scalingRule).toEqual({ perGuests: 50, minQuantity: 2, maxQuantity: 4 })
+    })
+
+    it('an empty maximum leaves maxQuantity out', async () => {
+      const page = setup(EQUIPMENT)
+      formOf(page).patchValue({ scalingEnabled: true, perGuests: 25, minQuantity: 1, maxQuantity: null })
+      await page.onSubmit()
+      expect(savedBody().scalingRule).toEqual({ perGuests: 25, minQuantity: 1 })
+    })
+
+    it('switching a stored rule off saves perGuests 0', async () => {
+      const page = setup({ ...EQUIPMENT, scalingRule: { perGuests: 50, minQuantity: 2 } })
+      formOf(page).patchValue({ scalingEnabled: false })
+      await page.onSubmit()
+      expect(savedBody().scalingRule).toEqual({ perGuests: 0, minQuantity: 0 })
+    })
+
+    it('an item that never had a rule saves none', async () => {
+      const page = setup(EQUIPMENT)
+      await page.onSubmit()
+      expect('scalingRule' in savedBody()).toBeFalse()
+    })
+
+    it('a maximum below the minimum blocks the save', async () => {
+      const page = setup(EQUIPMENT)
+      formOf(page).patchValue({ scalingEnabled: true, perGuests: 50, minQuantity: 3, maxQuantity: 2 })
+      await page.onSubmit()
+      expect(equipmentData.updateEquipment).not.toHaveBeenCalled()
+      expect(errorsOf(page)['maxQuantity']).toBe('scaling_max_below_min')
+    })
+
+    it('perGuests must be a whole number of at least 1', async () => {
+      const page = setup(EQUIPMENT)
+      formOf(page).patchValue({ scalingEnabled: true, perGuests: 0, minQuantity: 1 })
+      await page.onSubmit()
+      expect(errorsOf(page)['perGuests']).toBe('scaling_per_guests_required')
+    })
+
+    it('hydrates a stored rule and shows the fields; a stored perGuests 0 shows as off', () => {
+      const page = setup({ ...EQUIPMENT, scalingRule: { perGuests: 50, minQuantity: 2, maxQuantity: 4 } })
+      fixture.detectChanges()
+      const el = fixture.nativeElement as HTMLElement
+      expect(el.querySelector<HTMLInputElement>('#perGuests')?.value).toBe('50')
+      expect(el.querySelector<HTMLInputElement>('#maxQuantity')?.value).toBe('4')
+      expect(page.hasRealChanges()).toBeFalse()
+      TestBed.resetTestingModule()
+      setup({ ...EQUIPMENT, scalingRule: { perGuests: 0, minQuantity: 0 } })
+      fixture.detectChanges()
+      expect((fixture.nativeElement as HTMLElement).querySelector('#perGuests')).toBeNull()
+    })
+  })
 })

@@ -366,4 +366,25 @@ describe('EventLogisticsPanelComponent', () => {
       expect(noteBlock()).toBeNull()
     })
   })
+
+  describe('loading list (plan 624)', () => {
+    const loadingButton = () =>
+      el.querySelector<HTMLButtonElement>('.logistics-footer button:has(lucide-icon[name="truck"])')
+
+    it('a read-only member sees the button and it opens the sheet', async () => {
+      create(false)
+      openPanel()
+      expect(loadingButton()).toBeTruthy()
+      expect(el.querySelector('app-loading-list')).toBeNull()
+      loadingButton()!.click()
+      fixture.detectChanges()
+      // The sheet sits in a `@defer` block that loads on idle.
+      for (let i = 0; i < 40 && !el.querySelector('app-loading-list'); i++) {
+        await new Promise((r) => setTimeout(r, 25))
+        await fixture.whenStable()
+        fixture.detectChanges()
+      }
+      expect(el.querySelector('app-loading-list')).not.toBeNull()
+    })
+  })
 })

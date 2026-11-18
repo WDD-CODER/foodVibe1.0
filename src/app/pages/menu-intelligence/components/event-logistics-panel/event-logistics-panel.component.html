@@ -265,6 +265,10 @@
               {{ hiddenCount_() }} {{ 'logistics_hidden_count' | translatePipe }}
             </button>
           }
+          <button type="button" class="c-btn-ghost" (click)="loadingOpen_.set(true)">
+            <lucide-icon name="truck" [size]="16"></lucide-icon>
+            {{ 'loading_list' | translatePipe }}
+          </button>
           <button type="button" class="c-btn-primary" (click)="copySummary()">
             <lucide-icon name="copy" [size]="16"></lucide-icon>
             {{ 'logistics_copy_summary' | translatePipe }}
@@ -273,4 +277,9 @@
       </div>
     }
   </section>
+}
+@if (loadingOpen_()) {
+  @defer {
+    <app-loading-list [eventId]="eventId()!" (close)="loadingOpen_.set(false)" />
+  }
 }
