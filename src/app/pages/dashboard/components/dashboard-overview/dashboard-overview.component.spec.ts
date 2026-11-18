@@ -57,6 +57,9 @@ describe('DashboardOverviewComponent', () => {
   })
 
   beforeEach(async () => {
+    // The module list is shared by the whole file: reset it for every case, so a case that turns a module off
+    // cannot change what a later, unrelated case renders (the specs run in random order).
+    modulesOn.set(ALL_MODULES)
     mockProducts = signal<Product[]>([])
     mockRecipes = signal<Recipe[]>([])
     mockLowStock = signal<Product[]>([])
