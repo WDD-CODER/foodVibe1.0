@@ -429,3 +429,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `invoiceApplyInputSchema` and `SUPPLIER_KEY_PATTERN` in `shared/schemas/entities/invoice.schema.ts`.
 - When: the invoice apply route stores the invoice record, the price history rows and the draft closeness score.
 - Known copies: none.
+
+### invoice-read — `supplierKey`, `cleanInvoiceHeader`, `parsePrintedDate`, `cleanPrintedLines`, `suggestSupplier`, `INVOICE_READ_SYSTEM_PROMPT`, `invoiceReadRequestSchema`
+
+- Status: stable — plan 626
+- Use: `server/utils/supplier-key.js` — `supplierKey` (the one key naming a supplier across businesses);
+  `server/utils/invoice-read.js` — the prompt and the pure cleaning of a model read; request and model-answer shapes in
+  `shared/schemas/ai-invoice-read.schema.ts`.
+- When: the invoice read route (`POST /api/v1/ai/invoices/read`) turns a photo or PDF into a header, a supplier suggestion and rows.
+- Known copies: none.

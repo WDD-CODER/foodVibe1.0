@@ -315,3 +315,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the pure cleaning and the prompt live in `server/utils/invoice-read.js`, the schemas in a new `shared/schemas/ai-invoice-read.schema.ts` — why: the router file stays short, and neither needs an index or registry edit.
 - evidence: `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors); `pnpm --dir server run lint` -> exit 0; `pnpm run test:server` -> exit 0 (incl. ai-invoice-read, supplier-key, product-import-invoice, ai-receipt-photo unchanged).
 - decided: the apply's supplier step also requires the invoice to have been written (`invoiceOk`) — why: no tax id is filed from an invoice that was not saved; reverse: drop `invoiceOk &&`.
+- scope extended: docs/brain/component-families.md — the reuse-registry check needs a family heading for the three new rung-4 pieces
