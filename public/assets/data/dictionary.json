@@ -2498,6 +2498,19 @@
     "platform_grant_done": "הגישה ניתנה",
     "access_err_user_not_found": "לא נמצא משתמש פעיל בשם הזה",
     "access_err_already_member": "המשתמש כבר שייך לעסק הזה",
-    "access_err_already_granted": "למשתמש כבר יש גישה לעסק הזה"
+    "access_err_already_granted": "למשתמש כבר יש גישה לעסק הזה",
+    "platform_history_title": "היסטוריית שינויים",
+    "platform_history_tip": "היסטוריית שינויים: מי שינה, מה ולמה",
+    "platform_history_empty": "עוד לא נעשו שינויים לעסק הזה",
+    "platform_history_failed": "לא הצלחנו לטעון את ההיסטוריה",
+    "platform_history_field_modules": "מודולים",
+    "platform_history_field_aiMonthlyTokenCap": "תקרת AI חודשית",
+    "platform_history_field_aiPrivate": "מצב פרטי",
+    "platform_history_added": "נוספו:",
+    "platform_history_removed": "הוסרו:",
+    "platform_history_cap_change": "תקרת AI חודשית: {from} ← {to}",
+    "platform_history_private_on": "מצב פרטי הופעל",
+    "platform_history_private_off": "מצב פרטי בוטל",
+    "platform_history_reason": "סיבה:"
   }
 }

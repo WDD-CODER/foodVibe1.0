@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { DEFAULT_MODULES, type ModuleKey } from '@schemas/modules-pure'
+import type { PlatformHistoryRow } from '@schemas/modules'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import type { FrontDeskAdminStats } from '../models/frontdesk-stats.model'
@@ -228,5 +229,15 @@ export class PlatformAdminService {
   async updatePlatform(id: string, body: PlatformUpdateBody): Promise<void> {
     await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/platform`)}`, body))
     await this.load()
+  }
+
+  /** Plan 638: the change history of one business (newest first), read when the panel is opened. */
+  async getPlatformHistory(businessId: string): Promise<PlatformHistoryRow[]> {
+    const res = await firstValueFrom(
+      this.http.get<{ rows: PlatformHistoryRow[] }>(
+        `${environment.apiUrl}${API.admin(`businesses/${businessId}/platform-history`)}`
+      )
+    )
+    return res.rows
   }
 }
