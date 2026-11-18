@@ -122,6 +122,15 @@ export class BusinessService {
     this._business_.update((business) => (business ? { ...business, ...res } : business))
   }
 
+  /**
+   * Reads the business again from the server, so a change made elsewhere (the platform admin's modules, AI cap or
+   * private mode) shows at once, with no page refresh. `loaded_` stays as it is: nothing flickers while it reads.
+   */
+  reload(): void {
+    const userId = this._userId_()
+    if (userId) this._load(userId)
+  }
+
   private _load(userId: string): void {
     this.http.get<Business>(`${environment.apiUrl}${API.business()}`).subscribe({
       next: (business) => {

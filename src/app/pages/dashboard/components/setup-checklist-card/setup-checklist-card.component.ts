@@ -100,14 +100,15 @@ export class SetupChecklistCardComponent {
     return this.modules.has('events') ? steps : steps.filter((step) => step.key !== 'event')
   })
   protected readonly doneRequired = computed(() => this.steps().filter((step) => !step.optional && step.done).length)
-  private readonly requiredTotal_ = computed(() => this.steps().filter((step) => !step.optional).length)
-  /** Shown only to the owner, after the status arrived, until the four required steps are done or the owner hides it. */
+  /** How many required steps this business has: four, or three without the events module. Shown in the counter. */
+  protected readonly requiredTotal = computed(() => this.steps().filter((step) => !step.optional).length)
+  /** Shown only to the owner, after the status arrived, until the required steps are done or the owner hides it. */
   protected readonly visible = computed(
     () =>
       this.permission.isOwner_() &&
       this.status_() !== null &&
       !this.isHidden_() &&
-      this.doneRequired() < this.requiredTotal_()
+      this.doneRequired() < this.requiredTotal()
   )
 
   constructor() {

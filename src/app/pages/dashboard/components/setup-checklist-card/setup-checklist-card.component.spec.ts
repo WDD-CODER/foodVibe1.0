@@ -151,6 +151,16 @@ describe('SetupChecklistCardComponent', () => {
     expect(card()).toBeNull()
   })
 
+  it('counts out of the steps this business has: 4 with events, 3 without', async () => {
+    await setup({ pricedProducts: 5, suppliers: 1, recipes: 0, events: 0, staff: 0 }, true, BUSINESS)
+    const progress = () =>
+      el().querySelector('[data-testid="setup-progress"]')?.textContent?.replace(/\s+/g, ' ').trim()
+    expect(progress()).toBe('2 setup_progress_of 4')
+    modulesOn.set(['frontdesk', 'ai_create'])
+    fixture.detectChanges()
+    expect(progress()).toBe('2 setup_progress_of 3')
+  })
+
   it('is hidden when the four required steps are done even if staff is 0', async () => {
     await setup({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 1, staff: 0 })
     expect(card()).toBeNull()

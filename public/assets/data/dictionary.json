@@ -2381,6 +2381,7 @@
     "ai_feature_invoice_read": "קריאת חשבונית",
     "ai_feature_menu_prices_parse": "תפריט עם מחירים",
     "ai_feature_stock_extract": "ספירת מלאי בקול או בטקסט",
-    "ai_fail_business_cap": "תקרה חודשית"
+    "ai_fail_business_cap": "תקרה חודשית",
+    "setup_progress_of": "מתוך"
   }
 }

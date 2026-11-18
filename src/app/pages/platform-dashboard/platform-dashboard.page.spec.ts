@@ -5,6 +5,7 @@ import { LucideAngularModule, Settings, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
+import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
@@ -72,6 +73,8 @@ describe('PlatformDashboardPage', () => {
   })
   const downloadFrontDeskCsv = jasmine.createSpy('downloadFrontDeskCsv').and.resolveTo()
   let getAiUsage: jasmine.Spy<(params?: AiUsageParams) => Promise<AiUsageReport>>
+  /** The signed-in session works in business 'a'. */
+  const reloadBusiness = jasmine.createSpy('reload')
 
   async function setup(rows: BusinessRow[], aiRows: AiUsageRow[] = []): Promise<void> {
     rows_ = signal(rows)
@@ -115,6 +118,10 @@ describe('PlatformDashboardPage', () => {
             downloadAiUsageCsv: jasmine.createSpy('downloadAiUsageCsv').and.resolveTo(),
             setInternal: jasmine.createSpy('setInternal').and.resolveTo()
           }
+        },
+        {
+          provide: BusinessService,
+          useValue: { business_: signal({ _id: 'a' }).asReadonly(), reload: reloadBusiness }
         },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error']) },
         {
@@ -283,6 +290,32 @@ describe('PlatformDashboardPage', () => {
         aiMonthlyTokenCap: 5,
         aiTokensThisMonth: 2
       })
+    })
+
+    it('reads the business again after a save on the business this session works in, so no refresh is needed', async () => {
+      await setup([row('a')])
+      reloadBusiness.calls.reset()
+      spyOn(TestBed.inject(PlatformBusinessDialogService), 'open').and.resolveTo(true)
+      ;((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      await fixture.whenStable()
+      expect(reloadBusiness).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not read the business again after a cancel, or after a save on another business', async () => {
+      await setup([row('a')])
+      reloadBusiness.calls.reset()
+      const open = spyOn(TestBed.inject(PlatformBusinessDialogService), 'open').and.resolveTo(false)
+      const press = () =>
+        ((fixture.nativeElement as HTMLElement).querySelector('[data-testid="biz-edit"]') as HTMLButtonElement).click()
+      press()
+      await fixture.whenStable()
+      expect(reloadBusiness).not.toHaveBeenCalled()
+      rows_.set([row('b')])
+      fixture.detectChanges()
+      open.and.resolveTo(true)
+      press()
+      await fixture.whenStable()
+      expect(reloadBusiness).not.toHaveBeenCalled()
     })
   })
 

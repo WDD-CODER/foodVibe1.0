@@ -10,6 +10,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import type { FrontDeskAdminRow } from 'src/app/core/models/frontdesk-stats.model'
 import type { AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
+import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
@@ -92,6 +93,7 @@ export class PlatformDashboardPage implements OnInit {
   private readonly translation = inject(TranslationService)
   protected readonly fdDialog = inject(FrontDeskAdminDialogService)
   protected readonly bizDialog = inject(PlatformBusinessDialogService)
+  private readonly businessService = inject(BusinessService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly sortKey_ = signal<SortKey>('lastActivityAt')
@@ -345,7 +347,7 @@ export class PlatformDashboardPage implements OnInit {
 
   /** Plan 620: opens the modules, AI cap and private-mode dialog for one row; the table reloads in the service after a save. */
   protected async editPlatform(row: BusinessRow): Promise<void> {
-    await this.bizDialog.open({
+    const saved = await this.bizDialog.open({
       businessId: row._id,
       name: row.name,
       modules: row.modules,
@@ -353,5 +355,8 @@ export class PlatformDashboardPage implements OnInit {
       aiMonthlyTokenCap: row.aiMonthlyTokenCap,
       aiTokensThisMonth: row.aiTokensThisMonth
     })
+    // A change to the business this session works in shows at once: the header, the chips and the screens read the
+    // modules from the business document, so reading it again is enough. No page refresh.
+    if (saved && row._id === this.businessService.business_()?._id) this.businessService.reload()
   }
 }
