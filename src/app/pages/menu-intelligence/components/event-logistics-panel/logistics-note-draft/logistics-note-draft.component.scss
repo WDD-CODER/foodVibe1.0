@@ -1,7 +1,6 @@
 @layer components.logistics-note-draft {
   :host {
     display: block;
-    inline-size: 100%;
   }
 
   .note-draft {
@@ -16,7 +15,7 @@
   }
 
   .note-draft-hint {
-    margin: 0;
+    margin-block: 0;
 
     color: var(--color-text-muted);
     font-size: var(--fs-sm);
@@ -26,13 +25,15 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
+    min-inline-size: 0;
+    align-items: stretch;
   }
 
   .note-draft-title {
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    margin: 0;
+    margin-block: 0;
 
     color: var(--color-text-main);
     font-size: var(--fs-md);
@@ -58,6 +59,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
+    min-inline-size: 0;
   }
 
   .note-draft-text {
@@ -75,6 +77,7 @@
   .note-draft-small {
     color: var(--color-text-muted);
     font-size: var(--fs-xs);
+    overflow-wrap: anywhere;
   }
 
   .note-draft-line {
@@ -94,6 +97,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
+    min-inline-size: 0;
   }
 
   .note-draft-note {
@@ -107,11 +111,5 @@
 
     color: var(--color-text-main);
     font-size: var(--fs-sm);
-  }
-
-  .note-draft-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
   }
 }

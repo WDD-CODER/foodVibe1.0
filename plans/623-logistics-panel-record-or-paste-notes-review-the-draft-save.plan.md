@@ -121,6 +121,8 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `voice-note` (`app-voice-note`, `src/app/shared/voice-note/`) — family: none — rung: 4 — why: no audio piece exists anywhere in the app; record, stop, replay, transcribe and the typed fallback are needed by two screens (this one and the stock count of plan 637), so it is a shared family from the start and gets its `### voice-note` entry in the registry.
+- Layout classes `.note-draft` `.note-draft-hint` `.note-draft-group` `.note-draft-title` `.note-draft-row` `.is-dropped` `.note-draft-head` `.note-draft-text` `.note-draft-label` `.note-draft-small` `.note-draft-line` `.note-draft-adhoc-label` `.note-draft-detail` `.note-draft-note` `.note-draft-open` `.logistics-notes-open` — family: chip — rung: 1 — why: wrappers of the draft view and the open button, spacing tokens only.
+- Classes `.voice-note-muted` `.voice-note-clock` `.voice-note-audio` `.voice-note-send` `.voice-note-text` `.voice-note-controls` — family: voice-note — rung: 1 — why: parts of the new shared piece, used nowhere else.
 - `logistics-note-draft` (`app-logistics-note-draft`, child of the panel) — family: chip — rung: 1 — why: every control is an existing piece: keep / replace / "נדרש" are `c-chip c-chip--toggle`, the two provider radios sit in `c-chip-group c-chip-group--tight` exactly as in the panel row.
 - Open button "מילוי מהערות" in the panel — family: chip — rung: 1 — why: `c-chip c-chip--tap` button with `aria-expanded`, the shape the panel header already uses.
 - Quantity of a suggested line — family: stepper — rung: 1 — why: `app-counter`, as in the panel row.
