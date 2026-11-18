@@ -1,0 +1,103 @@
+<section class="learning c-glass-panel" data-testid="platform-learning">
+  <h2 class="learning__title">{{ 'platform_learning_title' | translatePipe }}</h2>
+  <p class="learning__desc">{{ 'platform_learning_desc' | translatePipe }}</p>
+
+  @if (!isLoading_()) {
+    @if (fileStore_() === false) {
+      <p class="learning__warn" role="status" data-testid="learning-no-file-store">
+        <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
+        {{ 'platform_learning_no_file_store' | translatePipe }}
+      </p>
+    }
+
+    @if (!stats_()?.flows?.length) {
+      <app-empty-state messageKey="platform_learning_empty" />
+    } @else {
+      <div class="learning__scroll">
+        <table class="learning__table">
+          <thead>
+            <tr>
+              <th>{{ 'platform_learning_col_flow' | translatePipe }}</th>
+              <th>{{ 'platform_learning_col_model' | translatePipe }}</th>
+              <th>{{ 'platform_learning_col_drafts' | translatePipe }}</th>
+              <th>{{ 'platform_learning_col_confirmed' | translatePipe }}</th>
+              <th>{{ 'platform_learning_col_kept' | translatePipe }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (flow of stats_()!.flows; track rowKey(flow.feature, flow.model)) {
+              <tr data-testid="learning-flow-row">
+                <td>{{ 'ai_feature_' + flow.feature | translatePipe }}</td>
+                <td>
+                  @if (flow.model) {
+                    <span dir="ltr" class="c-num">{{ flow.model }}</span>
+                  } @else {
+                    {{ 'platform_learning_model_unknown' | translatePipe }}
+                  }
+                </td>
+                <td dir="ltr" class="c-num">{{ flow.drafts }}</td>
+                <td dir="ltr" class="c-num">{{ flow.confirmed }}</td>
+                <td dir="ltr" class="c-num">{{ pct(flow.avgKeptRatio) }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="c-chip c-chip--tap"
+                    data-testid="learning-by-week"
+                    [attr.aria-expanded]="openKey_() === rowKey(flow.feature, flow.model)"
+                    (click)="toggle(rowKey(flow.feature, flow.model))"
+                  >
+                    {{ 'platform_learning_by_week' | translatePipe }}
+                    <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+                  </button>
+                </td>
+              </tr>
+              @if (openKey_() === rowKey(flow.feature, flow.model)) {
+                @for (w of flow.weeks; track w.week) {
+                  <tr class="learning__week" data-testid="learning-week-row">
+                    <td colspan="2">
+                      {{ 'platform_learning_col_week' | translatePipe }}
+                      <span dir="ltr" class="c-num">{{ w.week | date: 'dd/MM/yy' }}</span>
+                    </td>
+                    <td dir="ltr" class="c-num">{{ w.drafts }}</td>
+                    <td dir="ltr" class="c-num">{{ w.confirmed }}</td>
+                    <td dir="ltr" class="c-num">{{ pct(w.avgKeptRatio) }}</td>
+                    <td></td>
+                  </tr>
+                }
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (stats_()?.truncated) {
+      <p class="learning__hint">{{ 'platform_learning_truncated' | translatePipe }}</p>
+    }
+
+    @if (stats_(); as stats) {
+      <div class="learning__brain" data-testid="learning-brain">
+        <h3 class="learning__heading">{{ 'platform_learning_brain_title' | translatePipe }}</h3>
+        <dl class="learning__numbers">
+          <div>
+            <dt>{{ 'platform_learning_brain_suppliers' | translatePipe }}</dt>
+            <dd dir="ltr" class="c-num">{{ stats.brain.suppliers }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'platform_learning_brain_names' | translatePipe }}</dt>
+            <dd dir="ltr" class="c-num">{{ stats.brain.names }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'platform_learning_brain_businesses' | translatePipe }}</dt>
+            <dd dir="ltr" class="c-num">{{ stats.brain.businesses }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      @if (stats.privateBusinesses > 0) {
+        <p class="learning__hint" data-testid="learning-private-note">{{ privateNote(stats.privateBusinesses) }}</p>
+      }
+    }
+  }
+</section>

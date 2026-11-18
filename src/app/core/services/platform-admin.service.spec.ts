@@ -30,3 +30,35 @@ describe('PlatformAdminService.loadTerms', () => {
     http.verify()
   })
 })
+
+describe('PlatformAdminService learning reads (plan 630)', () => {
+  it('GETs the learning stats with the days', async () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] })
+    const service = TestBed.inject(PlatformAdminService)
+    const http = TestBed.inject(HttpTestingController)
+    const body = {
+      days: 90,
+      from: 'a',
+      to: 'b',
+      flows: [],
+      brain: { suppliers: 1, names: 2, businesses: 3 },
+      privateBusinesses: 0,
+      truncated: false
+    }
+    const done = service.getLearningStats()
+    const req = http.expectOne((r) => r.url.endsWith('/admin/learning/stats') && r.params.get('days') === '90')
+    req.flush(body)
+    expect(await done).toEqual(body)
+    http.verify()
+  })
+
+  it('GETs the file store status', async () => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] })
+    const service = TestBed.inject(PlatformAdminService)
+    const http = TestBed.inject(HttpTestingController)
+    const done = service.getLearningStatus()
+    http.expectOne((r) => r.url.endsWith('/admin/learning/status')).flush({ fileStore: false })
+    expect(await done).toEqual({ fileStore: false })
+    http.verify()
+  })
+})
