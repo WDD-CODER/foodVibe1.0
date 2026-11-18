@@ -70,6 +70,21 @@
           }
         </div>
 
+        @if (canEdit_()) {
+          <button
+            type="button"
+            class="c-chip c-chip--tap logistics-notes-open"
+            [attr.aria-expanded]="notesOpen_()"
+            (click)="notesOpen_.set(!notesOpen_())"
+          >
+            <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+            <span>{{ 'logistics_notes_open' | translatePipe }}</span>
+          </button>
+          @if (notesOpen_()) {
+            <app-logistics-note-draft [eventId]="eventId()!" [phase]="phase_()" (done)="notesOpen_.set(false)" />
+          }
+        }
+
         @for (s of sections_(); track s.section) {
           <details class="logistics-section" open>
             <summary class="logistics-section-title">

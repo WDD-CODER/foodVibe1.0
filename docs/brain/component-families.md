@@ -20,7 +20,7 @@ How this file is checked:
   section) whose `## Reuse Check` is missing or incomplete.
 
 Each family: `Status` (`stable` = use it as is; `converging` = a refactor plan is removing the copies) · `Use` (base
-path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on `origin/mvp-review`
+path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on the mvp-review branch
 `1953dcb5`, 2026-10-21; the audit numbers were from `8ffda3d2`) and the plan that removes them.
 
 Optional field `Design changes`, written by `/design-port` Step 6 when a family's look changed:
@@ -161,7 +161,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
   clear button: `src/app/shared/input-clear/` (`app-input-clear`).
 - When: any form input with a label.
-- Server refusals (plan 540): `serverFieldErrors(err, map)` from `@utils/server-refusal.util` fills `validationErrors_`; templates read the key from the map.
+- Server refusals (plan 540): `serverFieldErrors(err, map)` from the server-refusal util (alias utils) fills `validationErrors_`; templates read the key from the map.
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
@@ -194,7 +194,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### chip — chips, badges, pills
 
 - Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
-- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones teal, amber, red or `--teal|--amber|--red`) plus variants
   `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
   `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
   `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
@@ -253,6 +253,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
+### voice-note — record or type a spoken note
+
+- Status: stable (plan 623)
+- Use: `src/app/shared/voice-note/` · `app-voice-note`.
+- When: a screen takes a spoken or typed note and needs it as text.
+- Inputs `purpose`, `placeholderKey`, `sendLabelKey`, `busyLabelKey`, `busy`, `disabled`, `[(text)]`; output `send` = `{ text, source: 'voice' | 'text', fileId: string | null }` (`'voice'` when the text is the transcript of a recording, with the id the transcribe route returned; `'text'` when pasted or typed). Stops at 180 seconds; typed fallback when the browser cannot record.
+- Known copies: none; first user `logistics-note-draft`.
+
 ## Logic families
 
 ### entity-data-service — load and save one entity type
@@ -285,6 +293,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
 - Plan 579: kind `logisticsSection` (a business's own sections); `logisticsItem` gains `removedAt` (removed from that date, older events keep it) and `foldedAt` (server-written when promoted: the business's own copy is kept, not deleted, so it still dates the question). `LogisticsItemRegistryService` adds `allItems_`, `hiddenAt_`, `defaultItems_`, `sections_`, `sectionLabel()` and `forEvent()` (the date rule); `items_` is the live list.
 - Plan 622: `visibleLogisticsItems` in `shared/schemas/logistics/visible-items.ts` is the one date and environment rule for which logistics questions an event sees; the server's notes-to-checklist draft and the browser both call it.
+- Plan 623: LogisticsItemRegistryService.forEvent calling visibleLogisticsItems in `shared/schemas/logistics/visible-items.ts`, the one rule the server uses too.
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
@@ -312,7 +321,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
-- `PublicRequestService` (`pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
+- `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
+- Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
@@ -352,7 +362,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `ModuleService` (`src/app/core/services/module.service.ts`) — `has`, `hasType`, `ready`; `moduleGuard(keys)`
   (`src/app/core/guards/module.guard.ts`) sends a screen of a missing module to `/dashboard`; the module field on
   `HeroFabAction` (`module?: ModuleKey`) hides an action in the floating button; `HttpStorageAdapter` returns an empty
-  result without a request for a type whose module is off. Import the helpers from `@schemas/modules-pure` (no zod in
+  result without a request for a type whose module is off. Import the helpers from the modules-pure schema alias (no zod in
   the first bundle).
 - When: a link, chip, screen, button or request belongs to a module. The server is the gate; the browser only hides.
 - Known copies: none.

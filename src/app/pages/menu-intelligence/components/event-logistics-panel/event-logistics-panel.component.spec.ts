@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { WritableSignal, computed, signal } from '@angular/core'
-import { CircleCheckBig, ClipboardCheck, EyeOff, LucideAngularModule, Undo2 } from 'lucide-angular'
+import { CircleCheckBig, ClipboardCheck, EyeOff, LucideAngularModule, Mic, Square, Undo2 } from 'lucide-angular'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { EventLogisticsPanelComponent } from './event-logistics-panel.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
+import { GeminiService } from '@services/gemini.service'
 import { LogisticsItemRegistryService, type LogisticsItemTerm } from '@services/logistics-item-registry.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { ModuleService } from '@services/module.service'
@@ -103,7 +104,7 @@ describe('EventLogisticsPanelComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         EventLogisticsPanelComponent,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, CircleCheckBig, ClipboardCheck, EyeOff, Undo2 })
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, CircleCheckBig, ClipboardCheck, EyeOff, Mic, Square, Undo2 })
       ],
       providers: [
         provideHttpClient(),
@@ -111,6 +112,14 @@ describe('EventLogisticsPanelComponent', () => {
         { provide: MenuEventDataService, useValue: { allMenuEvents_: store.asReadonly() } },
         { provide: EventPipelineService, useValue: pipeline },
         { provide: ConfirmModalService, useValue: confirm },
+        {
+          provide: GeminiService,
+          useValue: jasmine.createSpyObj<GeminiService>('GeminiService', [
+            'extractLogistics',
+            'confirmLogisticsDraft',
+            'transcribeVoice'
+          ])
+        },
         { provide: PermissionService, useValue: { can: () => canEdit } },
         { provide: ModuleService, useValue: { has: () => logisticsOn } },
         {
@@ -316,5 +325,45 @@ describe('EventLogisticsPanelComponent', () => {
     fixture.detectChanges()
     expect(rows()[0].querySelector<HTMLInputElement>('.logistics-status input')!.checked).toBe(true)
     expect(radios(0)[1].checked).toBe(true)
+  })
+
+  describe('fill from notes (plan 623)', () => {
+    const notesButton = () => el.querySelector<HTMLButtonElement>('.logistics-notes-open')
+    const noteBlock = () => el.querySelector('app-logistics-note-draft')
+
+    it('shows the button to an editor and toggles the block in place', () => {
+      create()
+      openPanel()
+      expect(notesButton()?.getAttribute('aria-expanded')).toBe('false')
+      expect(noteBlock()).toBeNull()
+      notesButton()!.click()
+      fixture.detectChanges()
+      expect(notesButton()!.getAttribute('aria-expanded')).toBe('true')
+      expect(noteBlock()).not.toBeNull()
+    })
+
+    it('does not show the button to a member who cannot edit', () => {
+      create(false)
+      openPanel()
+      expect(notesButton()).toBeNull()
+    })
+
+    it('does not show the button on a finished event', () => {
+      store.set([{ ...event, stage: 'finished' }])
+      create()
+      openPanel()
+      expect(notesButton()).toBeNull()
+    })
+
+    it('closes the block when the draft says done', () => {
+      create()
+      openPanel()
+      notesButton()!.click()
+      fixture.detectChanges()
+      const draft = fixture.debugElement.query((d) => d.name === 'app-logistics-note-draft')
+      draft.componentInstance.done.emit()
+      fixture.detectChanges()
+      expect(noteBlock()).toBeNull()
+    })
   })
 })
