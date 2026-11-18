@@ -203,6 +203,7 @@ shared/schemas/modules-pure.ts
 shared/schemas/modules.ts
 docs/brain/component-families.md
 src/app/pages/trash/trash.page.ts
+package.json
 ```
 
 ## Read Scope
