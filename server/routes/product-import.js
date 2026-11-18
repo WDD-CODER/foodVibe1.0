@@ -74,9 +74,12 @@ router.post('/apply', verifyToken, (req, res, next) => {
     }
 
     const supplierId = typeof req.body.supplierId === 'string' && req.body.supplierId ? req.body.supplierId : null
+    let chosenSupplier = null
     if (supplierId) {
-      const supplier = await col('suppliers').findOne({ _id: supplierId, ...scopeFilter(req), ...LIVE }, { projection: { _id: 1 } })
-      if (!supplier) return res.status(400).json({ error: 'UNKNOWN_SUPPLIER' })
+      // Plan 626: the whole document is loaded only when a tax id may be set on it (it is checked as a whole).
+      const projection = invoice?.supplierTaxId ? undefined : { _id: 1, taxId: 1 }
+      chosenSupplier = await col('suppliers').findOne({ _id: supplierId, ...scopeFilter(req), ...LIVE }, projection ? { projection } : {})
+      if (!chosenSupplier) return res.status(400).json({ error: 'UNKNOWN_SUPPLIER' })
     }
     const sourceKey = supplierId ?? ''
 
@@ -187,6 +190,7 @@ router.post('/apply', verifyToken, (req, res, next) => {
     }
 
     let invoiceOk = false
+    let supplierTaxSet = false
     if (invoice) {
       const savedLines = buildInvoiceLines(invoice.lines, outcomes)
       if (historyOk) {
@@ -222,6 +226,19 @@ router.post('/apply', verifyToken, (req, res, next) => {
           }
         }
       }
+      if (invoiceOk && supplierId && invoice.supplierTaxId && chosenSupplier && !chosenSupplier.taxId) {
+        try {
+          const taxId = invoice.supplierTaxId
+          if (!checkStoredDoc('suppliers', { ...chosenSupplier, taxId, updatedAt: now }).ok) throw new Error('supplier failed the schema')
+          const result = await col('suppliers').updateOne(
+            { _id: supplierId, ...scopeFilter(req), ...LIVE, taxId: { $exists: false } },
+            { $set: { taxId, updatedAt: now } },
+          )
+          supplierTaxSet = result.modifiedCount === 1
+        } catch (err) {
+          trailFailed('supplier', err)
+        }
+      }
       if (invoice.draftId) {
         try {
           await confirmAiDraft(req, invoice.draftId, savedLines, invoiceKeptRatio)
@@ -233,7 +250,7 @@ router.post('/apply', verifyToken, (req, res, next) => {
 
     req.log.info({
       event: 'product_import.applied', created: created.length, updated: updates.length, skipped: skippedRows.length,
-      historyRows: historyQueue.length - historySkipped, historySkipped, invoice: invoice !== null,
+      historyRows: historyQueue.length - historySkipped, historySkipped, invoice: invoice !== null, supplierTaxSet,
     })
     const answer = { created: created.length, updated: updates.length, skipped: skippedRows.length, skippedRows }
     if (invoice) answer.invoiceId = historyOk && invoiceOk ? invoiceId : null
