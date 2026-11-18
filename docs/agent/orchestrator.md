@@ -307,9 +307,11 @@ is refused when the review folder holds a `.claude/settings.local.json`.
 - Merging a plan into `orch/<run>` is the run's own step and is never asked, including a
   dependent plan that starts after the plan it depends on is merged into `orch/<run>`. The
   run calls git from the script, never through the Bash tool, so no permission rule touches it.
-- The merge of `orch/<run>` into `main` is the Human's: `permissions.ask` in
-  `.claude/settings.json` holds `Bash(gh pr merge*)`, so Claude Code asks the Human before any PR merge, in every
-  permission mode. A push to `main` is not asked (the Planner pushes plan files there); `branch-guard.sh`
+- The merge of `orch/<run>` into `main` is the Human's: the merge guard
+  (`node scripts/lib/guard.mjs merge`, a Bash hook) lets `gh pr merge` run only when the Human's own latest
+  chat message says `merge it` (or `merge <n>`, or the session said "merges pre-approved") and every check on the PR
+  passed. Otherwise it refuses with one `MERGE_GUARD:` line and no dialog; what it cannot read (the transcript, gh, a
+  PR with no checks) falls back to Claude Code's permission dialog. A push to `main` is not asked (the Planner pushes plan files there); `branch-guard.sh`
   and the pre-push hook limit what a push may carry.
 - No plan's Execution Mode may pre-approve that merge.
 - When the run branch needs `main` merged in (its pull request conflicts), do it after the run ended,
