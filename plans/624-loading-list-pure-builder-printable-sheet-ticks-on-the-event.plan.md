@@ -123,6 +123,7 @@ src/app/pages/equipment/components/equipment-list/equipment-list.component.spec.
 public/assets/data/dictionary.json
 e2e/ui/624-1.spec.ts
 e2e/ui/624-2.spec.ts
+docs/brain/component-families.md
 ```
 
 ## Read Scope
