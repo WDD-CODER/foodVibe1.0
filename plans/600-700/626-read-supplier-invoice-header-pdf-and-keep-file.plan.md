@@ -1,6 +1,6 @@
 # Plan 626 — Read a supplier invoice with its header, from a photo or a PDF, and keep the file
 
-Status: draft
+Status: done
 Depends-on: 619, 625
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

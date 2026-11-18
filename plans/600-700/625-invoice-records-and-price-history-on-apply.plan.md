@@ -1,6 +1,6 @@
 # Plan 625 — Keep every approved invoice and every price change when prices are applied
 
-Status: draft
+Status: done
 Depends-on: 618, 619
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
