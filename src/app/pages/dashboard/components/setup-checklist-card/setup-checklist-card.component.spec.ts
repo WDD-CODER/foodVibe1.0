@@ -1,3 +1,6 @@
+import { signal as modSignal } from '@angular/core'
+import type { ModuleKey } from '@schemas/modules-pure'
+import { ModuleService } from '@services/module.service'
 import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
@@ -23,6 +26,14 @@ const BUSINESS: Business = {
 const EMPTY: SetupStatus = { pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 }
 const KEY = 'fv_setup_card_hidden_b1'
 
+/** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
+const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
+const modulesOn = modSignal<ModuleKey[]>(ALL_MODULES)
+const moduleStub = {
+  provide: ModuleService,
+  useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
+}
+
 describe('SetupChecklistCardComponent', () => {
   let fixture: ComponentFixture<SetupChecklistCardComponent>
   let business_: ReturnType<typeof signal<Business | null>>
@@ -35,11 +46,13 @@ describe('SetupChecklistCardComponent', () => {
   async function setup(status: SetupStatus = EMPTY, owner = true, business: Business | null = BUSINESS): Promise<void> {
     business_ = signal<Business | null>(business)
     isOwner_ = signal(owner)
+    modulesOn.set(ALL_MODULES)
     products_ = signal<unknown[]>([])
     loadSetupStatus = jasmine.createSpy('loadSetupStatus').and.resolveTo(status)
     TestBed.configureTestingModule({
       imports: [SetupChecklistCardComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        moduleStub,
         { provide: BusinessService, useValue: { business_: business_.asReadonly(), loadSetupStatus } },
         { provide: PermissionService, useValue: { isOwner_: isOwner_.asReadonly() } },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['warn']) },
@@ -127,6 +140,15 @@ describe('SetupChecklistCardComponent', () => {
     expect(isDone('event')).toBeFalse()
     expect(isDone('staff')).toBeTrue()
     expect(el().querySelector('[data-testid="setup-progress"]')?.textContent).toContain('2')
+  })
+
+  it('leaves the events step out without events and counts three required steps (plan 620)', async () => {
+    await setup({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 0, staff: 0 }, true, BUSINESS)
+    expect(step('event')).not.toBeNull()
+    modulesOn.set(['frontdesk', 'ai_create'])
+    fixture.detectChanges()
+    expect(el().querySelector('[data-testid="setup-step-event"]')).toBeNull()
+    expect(card()).toBeNull()
   })
 
   it('is hidden when the four required steps are done even if staff is 0', async () => {

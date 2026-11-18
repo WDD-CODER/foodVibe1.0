@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { TrashService, TRASH_SECTIONS } from './trash.service'
+import { signal } from '@angular/core'
+import { ModuleService } from './module.service'
 import { StorageService } from './async-storage.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
@@ -22,8 +24,10 @@ describe('TrashService (plan 407)', () => {
   const recipes = list(true)
   const dishes = list(false)
   const clients = list(true)
+  const eventsOn = signal(true)
 
   beforeEach(() => {
+    eventsOn.set(true)
     storage = jasmine.createSpyObj<StorageService>('StorageService', [
       'trash',
       'restore',
@@ -53,6 +57,10 @@ describe('TrashService (plan 407)', () => {
     TestBed.configureTestingModule({
       providers: [
         TrashService,
+        {
+          provide: ModuleService,
+          useValue: { hasType: (type: string) => eventsOn() || !['venues', 'menuEvents', 'clients'].includes(type) }
+        },
         { provide: StorageService, useValue: storage },
         { provide: RecipeDataService, useValue: recipes },
         { provide: DishDataService, useValue: dishes },
@@ -75,6 +83,18 @@ describe('TrashService (plan 407)', () => {
     expect(service.items().recipes).toEqual([{ _id: 'r1', name: 'מרק', deletedAt: 1 }])
     expect(service.items().menuEvents).toEqual([{ _id: 'e1', name: 'חתונה', deletedAt: 2 }])
     expect(service.hasAnyTrash()).toBeTrue()
+  })
+
+  it('with events off the sections hold no venues, menuEvents or clients and Trash asks no request for them (plan 620)', async () => {
+    eventsOn.set(false)
+    await service.loadTrash()
+    const types = service.sections_().map((s) => s.type)
+    expect(types).not.toContain('venues')
+    expect(types).not.toContain('menuEvents')
+    expect(types).not.toContain('clients')
+    expect(storage.trash).toHaveBeenCalledTimes(types.length)
+    expect(storage.trash).not.toHaveBeenCalledWith('venues')
+    expect(storage.trash).not.toHaveBeenCalledWith('menuEvents')
   })
 
   it('restore refreshes a list that already loaded, and leaves an unloaded one alone', async () => {

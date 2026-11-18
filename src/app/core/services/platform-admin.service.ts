@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
+import { DEFAULT_MODULES, type ModuleKey } from '@schemas/modules-pure'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import type { FrontDeskAdminStats } from '../models/frontdesk-stats.model'
@@ -29,6 +30,19 @@ export interface BusinessRow {
     /** Plan 557: the assistant level; absent means 0 (the server sends it only when raised). */
     assistantLevel?: number
   } | null
+  /** Plan 620: the resolved modules, the private-mode flag, the monthly token cap (null = none) and this month's tokens. */
+  modules: ModuleKey[]
+  aiPrivate: boolean
+  aiMonthlyTokenCap: number | null
+  aiTokensThisMonth: number
+}
+
+/** Plan 620: body of the platform admin's modules, AI cap and private-mode change; `reason` is required. */
+export interface PlatformUpdateBody {
+  modules?: ModuleKey[]
+  aiMonthlyTokenCap?: number | null
+  aiPrivate?: boolean
+  reason: string
 }
 
 /** Plan 557: body of the platform admin's front desk change; `reason` is required and kept on the profile. */
@@ -53,6 +67,17 @@ export interface AdminTermRow {
   createdAt: number | null
 }
 
+/** Plan 620: a row from an older server answer has no module or AI fields; give it the defaults. */
+function withPlatformFields(row: BusinessRow): BusinessRow {
+  return {
+    ...row,
+    modules: row.modules ?? [...DEFAULT_MODULES],
+    aiPrivate: row.aiPrivate ?? false,
+    aiMonthlyTokenCap: row.aiMonthlyTokenCap ?? null,
+    aiTokensThisMonth: row.aiTokensThisMonth ?? 0
+  }
+}
+
 /** Cross-business numbers for the platform admin. The server refuses everyone else. */
 @Injectable({ providedIn: 'root' })
 export class PlatformAdminService {
@@ -65,7 +90,7 @@ export class PlatformAdminService {
     const res = await firstValueFrom(
       this.http.get<{ rows: BusinessRow[] }>(`${environment.apiUrl}${API.admin('businesses')}`)
     )
-    this._rows_.set(res.rows)
+    this._rows_.set(res.rows.map(withPlatformFields))
   }
 
   private readonly _termRows_ = signal<AdminTermRow[]>([])
@@ -156,6 +181,12 @@ export class PlatformAdminService {
   /** Plan 557: sets one business's front desk status, assistant level and plan, then reloads the table. */
   async updateFrontDesk(id: string, body: FrontDeskAdminBody): Promise<void> {
     await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/front-desk`)}`, body))
+    await this.load()
+  }
+
+  /** Plan 620: sets one business's modules, monthly AI cap and private mode (with a reason), then reloads the table. */
+  async updatePlatform(id: string, body: PlatformUpdateBody): Promise<void> {
+    await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/platform`)}`, body))
     await this.load()
   }
 }

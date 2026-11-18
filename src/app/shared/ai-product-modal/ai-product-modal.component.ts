@@ -1,3 +1,4 @@
+import { aiCapErrorKey } from '@utils/ai-error.util'
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core'
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { CommonModule } from '@angular/common'
@@ -349,6 +350,8 @@ export class AiProductModalComponent implements OnInit {
   }
 
   private resolveErrorKey_(err: unknown): string {
+    const capKey = aiCapErrorKey(err)
+    if (capKey) return capKey
     if (this.gemini_.offerModelSwitch(err)) return 'ai_model_exhausted_prompt'
     if (err instanceof HttpErrorResponse) {
       const msg: string = err.error?.error ?? ''

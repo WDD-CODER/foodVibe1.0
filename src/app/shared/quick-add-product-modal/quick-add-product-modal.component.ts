@@ -1,3 +1,4 @@
+import { ModuleService } from '@services/module.service'
 import {
   ChangeDetectionStrategy,
   Component,
@@ -51,6 +52,7 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
 })
 export class QuickAddProductModalComponent {
   private readonly modalService = inject(QuickAddProductModalService)
+  protected readonly modules = inject(ModuleService)
   private readonly productData = inject(ProductDataService)
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly metadataRegistry = inject(MetadataRegistryService)

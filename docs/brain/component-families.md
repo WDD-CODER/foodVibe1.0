@@ -303,12 +303,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
+- `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key `ai_monthly_cap_reached` for the server's monthly-cap refusal, else null; every place that maps an AI 429 asks it first (plan 620).
 
 ### http — talking to the server
 
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PublicRequestService` (`pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
@@ -336,8 +338,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### modules-registry — which program modules a business has
 
 - Status: stable — plan 615
-- Use: `shared/schemas/modules.ts` — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
-  `platformUpdateSchema`.
+- Use: `shared/schemas/modules-pure.ts` (the helpers, no zod; the browser imports this) and `shared/schemas/modules.ts`
+  (re-exports them and adds the zod schemas) — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
+  `platformUpdateSchema`. Browser (plan 620): `ModuleService` (`src/app/core/services/module.service.ts`) — `has`,
+  `hasType`, `ready`; `moduleGuard(keys)` (`src/app/core/guards/module.guard.ts`) sends a screen of a missing module to
+  `/dashboard`; `HeroFabAction.module` hides a floating-button action; `HttpStorageAdapter` returns an empty result
+  without a request for a type whose module is off. The browser imports the helpers from `@schemas/modules-pure`.
 - When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
   same rule.
 - Known copies: none.

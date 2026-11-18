@@ -9,6 +9,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { LogisticsItemRegistryService, type LogisticsItemTerm } from '@services/logistics-item-registry.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import type { MenuEvent } from '@models/menu-event.model'
 import type { EnvironmentType } from '@models/venue.model'
@@ -39,6 +40,7 @@ describe('EventLogisticsPanelComponent', () => {
   let pipeline: jasmine.SpyObj<EventPipelineService>
   let confirm: jasmine.SpyObj<ConfirmModalService>
   let canEdit: boolean
+  let logisticsOn = true
   let itemSignal: WritableSignal<LogisticsItemTerm[]>
 
   const event: MenuEvent = {
@@ -91,6 +93,7 @@ describe('EventLogisticsPanelComponent', () => {
 
   beforeEach(async () => {
     canEdit = true
+    logisticsOn = true
     store.set([event])
     pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['saveLogistics'])
     pipeline.saveLogistics.and.resolveTo({ ok: true, event })
@@ -109,6 +112,7 @@ describe('EventLogisticsPanelComponent', () => {
         { provide: EventPipelineService, useValue: pipeline },
         { provide: ConfirmModalService, useValue: confirm },
         { provide: PermissionService, useValue: { can: () => canEdit } },
+        { provide: ModuleService, useValue: { has: () => logisticsOn } },
         {
           provide: LogisticsItemRegistryService,
           useValue: {
@@ -134,6 +138,13 @@ describe('EventLogisticsPanelComponent', () => {
         }
       ]
     }).compileComponents()
+  })
+
+  it('renders nothing without the event_logistics module (plan 620)', () => {
+    logisticsOn = false
+    create()
+    expect(el.querySelector('.logistics')).toBeNull()
+    expect(el.querySelector('.logistics-toggle')).toBeNull()
   })
 
   it('starts closed with the open count in the header', () => {

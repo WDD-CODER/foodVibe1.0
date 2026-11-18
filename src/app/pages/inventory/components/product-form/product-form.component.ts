@@ -322,7 +322,14 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.initForm()
     this.productAiFlow_.init(this.productForm_)
     this.heroFab_.setPageActions(
-      [{ labelKey: 'ai_product_title_edit', icon: 'sparkles', run: () => this.openAiProductModal() }],
+      [
+        {
+          labelKey: 'ai_product_title_edit',
+          icon: 'sparkles',
+          run: () => this.openAiProductModal(),
+          module: 'ai_create'
+        }
+      ],
       'replace'
     )
     this.destroyRef.onDestroy(() => this.heroFab_.clearPageActions())

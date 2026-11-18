@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { filter } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
+import type { ModuleKey } from '@schemas/modules-pure'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
@@ -22,6 +24,8 @@ interface TabChip {
   home?: boolean
   /** Shows the waiting-requests count (plan 552). */
   badge?: boolean
+  /** Plan 620: shown only when the business has any one of these modules. */
+  modules?: readonly ModuleKey[]
 }
 
 type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk'
@@ -46,7 +50,7 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
 
 const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
   dashboard: [
-    { id: 'venues', labelKey: 'venues', icon: 'map-pin', path: '/venues' },
+    { id: 'venues', labelKey: 'venues', icon: 'map-pin', path: '/venues', modules: ['events'] },
     {
       id: 'metadata',
       labelKey: 'metadata_manager',
@@ -66,15 +70,40 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'cook-view', labelKey: 'cook_view', icon: 'flame', path: '/cook' }
   ],
   menus: [
-    { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library' },
-    { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'clipboard-list', path: '/menu-intelligence' }
+    { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library', modules: ['events'] },
+    {
+      id: 'menu-intelligence',
+      labelKey: 'menu_intelligence',
+      icon: 'clipboard-list',
+      path: '/menu-intelligence',
+      modules: ['events']
+    }
   ],
   frontdesk: [
-    { id: 'requests', labelKey: 'fd_chip_requests', icon: 'clipboard-check', path: '/requests', badge: true },
-    { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings' },
-    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients' },
-    { id: 'knowledge', labelKey: 'knowledge_chip', icon: 'book-open', path: '/frontdesk/knowledge' },
-    { id: 'settings', labelKey: 'fd_chip_settings', icon: 'settings', path: '/frontdesk/settings' }
+    {
+      id: 'requests',
+      labelKey: 'fd_chip_requests',
+      icon: 'clipboard-check',
+      path: '/requests',
+      badge: true,
+      modules: ['frontdesk']
+    },
+    { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings', modules: ['frontdesk'] },
+    { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients', modules: ['events', 'frontdesk'] },
+    {
+      id: 'knowledge',
+      labelKey: 'knowledge_chip',
+      icon: 'book-open',
+      path: '/frontdesk/knowledge',
+      modules: ['frontdesk']
+    },
+    {
+      id: 'settings',
+      labelKey: 'fd_chip_settings',
+      icon: 'settings',
+      path: '/frontdesk/settings',
+      modules: ['frontdesk']
+    }
   ]
 }
 
@@ -125,6 +154,7 @@ export class TabChipsComponent {
   private readonly router = inject(Router)
   private readonly destroyRef = inject(DestroyRef)
   private readonly permission = inject(PermissionService)
+  private readonly modules = inject(ModuleService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly translation = inject(TranslationService)
   protected readonly waitingCount_ = inject(FrontDeskBadgeService).waitingCount_
@@ -138,7 +168,10 @@ export class TabChipsComponent {
     const path = this.currentUrl_().split('?')[0]
     const group = GROUP_BY_PATH_PREFIX.find(([prefix]) => path.startsWith(prefix))?.[1]
     if (!group) return []
-    const chips = CHIPS_BY_GROUP[group]
+    const all = CHIPS_BY_GROUP[group]
+    const chips = all.filter((chip) => !chip.modules || this.modules.has(chip.modules))
+    // Plan 620: a group the modules cut down to fewer than two chips has nothing to switch to.
+    if (chips.length < all.length && chips.length < 2) return []
     if (group === 'dashboard') {
       const currentId = currentDashboardChipId(this.currentUrl_())
       return currentId ? chips.map((chip) => (chip.id === currentId ? DASHBOARD_HOME_CHIP : chip)) : chips

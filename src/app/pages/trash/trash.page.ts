@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { TrashService, TRASH_SECTIONS, type TrashType } from '@services/trash.service'
+import { TrashService, type TrashSection, type TrashType } from '@services/trash.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
@@ -35,7 +35,10 @@ export class TrashPage implements OnInit {
   readonly isLoading = signal(true)
   readonly loadError = signal<string | null>(null)
 
-  readonly sections = TRASH_SECTIONS
+  /** Plan 620: a type whose module is off has no section (read in the template, so the signal is tracked). */
+  get sections(): readonly TrashSection[] {
+    return this.trash.sections_()
+  }
   readonly items = this.trash.items
 
   readonly historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null)

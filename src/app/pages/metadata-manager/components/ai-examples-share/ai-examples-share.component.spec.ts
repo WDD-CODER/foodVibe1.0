@@ -7,7 +7,7 @@ import { BusinessService } from '@services/business.service'
 import { TranslationService } from '@services/translation.service'
 import { AiExamplesShareComponent } from './ai-examples-share.component'
 
-describe('AiExamplesShareComponent (plan 618)', () => {
+describe('AiExamplesShareComponent (plan 618, 620)', () => {
   let fixture: ComponentFixture<AiExamplesShareComponent>
   let business: WritableSignal<Business | null>
 
@@ -20,7 +20,7 @@ describe('AiExamplesShareComponent (plan 618)', () => {
     lastSyncedMasterVersion: 0
   }
 
-  const box = (): HTMLInputElement => fixture.nativeElement.querySelector('.c-chip--toggle input')
+  const chip = (): HTMLElement => fixture.nativeElement.querySelector('span.c-chip.is-locked')
 
   beforeEach(async () => {
     business = signal<Business | null>(base)
@@ -35,15 +35,18 @@ describe('AiExamplesShareComponent (plan 618)', () => {
     fixture.detectChanges()
   })
 
-  it('is ticked and disabled when the business is not private', () => {
-    expect(box().checked).toBeTrue()
-    expect(box().disabled).toBeTrue()
+  it('shows the shared text by default', () => {
+    expect(chip().textContent).toContain('metadata_ai_state_shared')
   })
 
-  it('is unticked and disabled when aiPrivate is true', () => {
+  it('shows the private text when aiPrivate is true', () => {
     business.set({ ...base, aiPrivate: true })
     fixture.detectChanges()
-    expect(box().checked).toBeFalse()
-    expect(box().disabled).toBeTrue()
+    expect(chip().textContent).toContain('metadata_ai_state_private')
+  })
+
+  it('carries the tooltip as its title and has no input', () => {
+    expect(chip().getAttribute('title')).toBe('metadata_ai_private_tooltip')
+    expect(fixture.nativeElement.querySelector('input')).toBeNull()
   })
 })

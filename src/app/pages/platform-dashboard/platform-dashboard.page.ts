@@ -1,3 +1,4 @@
+import { MODULE_KEYS } from '@schemas/modules-pure'
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { DatePipe } from '@angular/common'
 import { RouterLink } from '@angular/router'
@@ -13,6 +14,8 @@ import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { FrontDeskAdminDialogComponent } from './components/front-desk-admin-dialog/front-desk-admin-dialog.component'
+import { PlatformBusinessDialogComponent } from './components/platform-business-dialog/platform-business-dialog.component'
+import { PlatformBusinessDialogService } from './components/platform-business-dialog/platform-business-dialog.service'
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
@@ -73,6 +76,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     PlatformLogisticsItemsComponent,
     PlatformAiShotsComponent,
     FrontDeskAdminDialogComponent,
+    PlatformBusinessDialogComponent,
     ...COLUMN_CAROUSEL,
     RowActionsMenuComponent
   ],
@@ -87,6 +91,7 @@ export class PlatformDashboardPage implements OnInit {
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
   protected readonly fdDialog = inject(FrontDeskAdminDialogService)
+  protected readonly bizDialog = inject(PlatformBusinessDialogService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly sortKey_ = signal<SortKey>('lastActivityAt')
@@ -313,6 +318,40 @@ export class PlatformDashboardPage implements OnInit {
       businessId: row._id,
       name: row.name,
       status: fd.status
+    })
+  }
+
+  /** Plan 620: the short module names of one row, in MODULE_KEYS order; a dash when none is on. */
+  protected modulesText(row: BusinessRow): string {
+    const names = MODULE_KEYS.filter((key) => row.modules.includes(key)).map((key) =>
+      this.translation.translate('module_' + key)
+    )
+    return names.length ? names.join(' · ') : '—'
+  }
+
+  /** Plan 620: this month's tokens over the cap, or "no cap". */
+  protected aiMonthText(row: BusinessRow): string {
+    const cap =
+      row.aiMonthlyTokenCap === null
+        ? this.translation.translate('platform_ai_no_cap')
+        : this.tokens(row.aiMonthlyTokenCap)
+    return `${this.tokens(row.aiTokensThisMonth)} / ${cap}`
+  }
+
+  /** Plan 620: a number with thousands separators. */
+  protected tokens(n: number): string {
+    return n.toLocaleString('en-US')
+  }
+
+  /** Plan 620: opens the modules, AI cap and private-mode dialog for one row; the table reloads in the service after a save. */
+  protected async editPlatform(row: BusinessRow): Promise<void> {
+    await this.bizDialog.open({
+      businessId: row._id,
+      name: row.name,
+      modules: row.modules,
+      aiPrivate: row.aiPrivate,
+      aiMonthlyTokenCap: row.aiMonthlyTokenCap,
+      aiTokensThisMonth: row.aiTokensThisMonth
     })
   }
 }

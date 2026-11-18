@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
@@ -124,6 +125,13 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     await internals().onParsePasted()
     expect(internals().draft_()).toBeNull()
     expect(internals().errorKey_()).toBe('ai_recipe_error')
+  })
+
+  it('shows the monthly cap message for the cap refusal (plan 620)', () => {
+    const key = (component as unknown as { resolveErrorKey_(e: unknown): string }).resolveErrorKey_(
+      new HttpErrorResponse({ status: 429, error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' } })
+    )
+    expect(key).toBe('ai_monthly_cap_reached')
   })
 
   it('does not save a pasted recipe as a few-shot example when approved', async () => {

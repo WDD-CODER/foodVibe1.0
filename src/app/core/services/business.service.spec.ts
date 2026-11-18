@@ -40,6 +40,27 @@ describe('BusinessService', () => {
     http.expectNone(URL)
   })
 
+  it('loaded_ is false while loading, then true after the answer', () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    expect(service.loaded_()).toBeFalse()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    expect(service.loaded_()).toBeTrue()
+  })
+
+  it('loaded_ is true after an error', () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush('boom', { status: 500, statusText: 'err' })
+    expect(service.loaded_()).toBeTrue()
+    expect(service.business_()).toBeNull()
+  })
+
+  it('loaded_ is true when nobody is signed in', () => {
+    TestBed.flushEffects()
+    expect(service.loaded_()).toBeTrue()
+  })
+
   it('an update of the same _id triggers no second GET', () => {
     user.set({ _id: 'u1', name: 'u', email: 'u@x' })
     TestBed.flushEffects()

@@ -177,6 +177,20 @@ describe('ProductImportComponent', () => {
     expect(byId('import-preview')).toBeNull()
   })
 
+  it('on the monthly cap refusal the monthly cap message is shown (plan 620)', async () => {
+    await setup(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 429,
+            error: { error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' }
+          })
+      )
+    )
+    await pasteAndParse('עגבנייה 6.2')
+    expect(byId('import-error')?.textContent?.trim()).toBe('ai_monthly_cap_reached')
+  })
+
   it('any other AI failure shows import_ai_failed and keeps the text', async () => {
     await setup(throwError(() => new HttpErrorResponse({ status: 502 })))
     await pasteAndParse('x')
