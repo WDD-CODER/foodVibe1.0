@@ -356,3 +356,12 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A8: Prove the whole flow with tests, including the ownership invariant — the switch, refresh, grant and list cases; the acting, usage, write-limit and log cases; the new INV-1 tests
 - [ ] A9: Record the new service, collection and routes where the next developer looks — a row for the access service in the server map, the businessAccess collection and the five routes in the backend standards, the service on the server-auth family line
 - [ ] A10: Run every check and hand Dandan the one reading check — the Done-when commands in order; then the human card for the ADR and INV-1 text
+
+### Plan 638 — Platform admin sees the history of module and AI changes of a business, with the reasons (`plans/638-platform-admin-sees-the-history-of-platform-changes-of-a-business.plan.md`)
+- [ ] A1: Let a history row say what the value was and what it became — the optional changes field on the row shape
+- [ ] A2: Store the old and new value with every platform save, only for what really changed — read the business first, platformChangesOf, the row with changes; the three new write cases
+- [ ] A3: Give the platform admin a way to read a business's history from the server — the GET route, newest first, with its five access and empty cases
+- [ ] A4: Fetch the history in the browser through the admin service — getPlatformHistory and its spec case
+- [ ] A5: Show the history in the business dialog with its loading, empty and failed states — signals, loadHistory_, describePlatformChange, the section and its styles, the History icon, the twelve dictionary keys, the six spec cases
+- [ ] A6: Record the new route and the two new pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row
+- [ ] A7: Prove it in the running app and run every check — the one screen check with a fixture row, then the Done-when commands in order
