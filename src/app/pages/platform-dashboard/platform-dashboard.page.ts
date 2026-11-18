@@ -19,6 +19,7 @@ import { PlatformBusinessDialogComponent } from './components/platform-business-
 import { PlatformBusinessDialogService } from './components/platform-business-dialog/platform-business-dialog.service'
 import { FrontDeskAdminDialogService } from './components/front-desk-admin-dialog/front-desk-admin-dialog.service'
 import { PlatformAiShotsComponent } from './components/platform-ai-shots/platform-ai-shots.component'
+import { PlatformLearningComponent } from './components/platform-learning/platform-learning.component'
 import { PlatformLogisticsItemsComponent } from './components/platform-logistics-items/platform-logistics-items.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
@@ -76,6 +77,7 @@ function sortValue(row: BusinessRow, key: SortKey): string | number | null {
     EmptyStateComponent,
     PlatformLogisticsItemsComponent,
     PlatformAiShotsComponent,
+    PlatformLearningComponent,
     FrontDeskAdminDialogComponent,
     PlatformBusinessDialogComponent,
     ...COLUMN_CAROUSEL,

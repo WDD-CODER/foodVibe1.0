@@ -325,6 +325,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
 - Plan 628: `GeminiService.readInvoice`, `ProductImportService.resolve`, the `invoice` argument of `apply`, `API.files` call the invoice read, memory, apply and file routes through the same `API` map (GeminiService.readInvoice, ProductImportService.resolve, the invoice argument of apply, API.files).
+- `PlatformAdminService.getLearningStats`, `PlatformAdminService.getLearningStatus` (`src/app/core/services/platform-admin.service.ts`) read the platform learning numbers through `API.admin(...)` (plan 630).
 - Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
@@ -413,6 +414,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `server/services/file-store.js` — `isFileStoreConfigured`, `putPrivateFile`, `keepStoredFile`, `signedFileUrl`,
   `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`.
 - When: a server path stores, reads, links or deletes a private uploaded file.
+- Known copies: none.
+
+### learning-stats — `buildLearningStats`, `weekStart` in `server/utils/learning-stats.js`
+
+- Status: stable — plan 630
+- Use: `server/utils/learning-stats.js` — `buildLearningStats` groups AI draft rows by flow, model and Sunday-start week; `weekStart` gives the week.
+- When: the platform admin needs accuracy numbers per flow over time (`GET /stats` in `server/routes/admin-learning.js`).
 - Known copies: none.
 
 ### cloudinary-requests — signed requests to the file provider
