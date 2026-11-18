@@ -447,3 +447,4 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `invoiceResolveRequestSchema` in `shared/schemas/entities/invoice-alias.schema.ts`.
 - When: an invoice apply remembers printed names, a read looks them up, or a business is deleted and its memory must go.
 - Known copies: none.
+- Request shape: invoiceResolveRequestSchema in shared/schemas/entities/invoice-alias.schema.ts (the resolve read).
