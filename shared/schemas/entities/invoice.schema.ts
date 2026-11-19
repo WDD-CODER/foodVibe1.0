@@ -15,6 +15,8 @@ export const invoiceLineSchema = z.strictObject({
   price: z.number().nullable(),
   needsReview: z.boolean(),
   productId: z.string().optional(),
+  /** Plan 641: the supplier whose price this line changed (the target supplier when the owner chose to update it). */
+  supplierId: z.string().optional(),
   result: z.enum(INVOICE_LINE_RESULTS)
 })
 

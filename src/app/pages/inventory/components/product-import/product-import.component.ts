@@ -37,7 +37,7 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { BUSINESS_SETTINGS_DEFAULTS } from '@schemas/entities'
 import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
-import { isPriceRiseAlert, priceChangePct, recipesUsingProducts } from '@utils/price-change.util'
+import { isPriceRiseAlert, previousPriceOf, priceChangePct, recipesUsingProducts } from '@utils/price-change.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
@@ -175,21 +175,55 @@ export class ProductImportComponent {
     const products = this.kitchenState_.products_()
     const knownUnits = this.knownPurchaseUnits_()
     const pendingIds = this.pendingIds_()
+    const suppliers = new Map(this.kitchenState_.suppliers_().map((s) => [s._id, s]))
+    const sameName = (a: string | null | undefined, b: string | null | undefined) =>
+      !!a?.trim() && !!b?.trim() && a.trim().toLowerCase() === b.trim().toLowerCase()
     const threshold =
       this.business_.business_()?.settings?.priceRiseAlertPct ?? BUSINESS_SETTINGS_DEFAULTS.priceRiseAlertPct
     return this.rows_().map((row) => {
       const match = this.matchOf_(row, products)
       let status: ImportRowStatus = !match && pendingIds.has(row.id) ? 'matching' : 'new'
       let oldPrice: number | null = null
+      let otherSupplierName: string | null = null
+      let targetSupplierId: string | null = null
+      let canChoose = false
+      let choice: 'update' | 'add' | null = null
       if (match) {
-        oldPrice = match.sources?.find((source) => source.supplierId === supplierKey)?.price ?? null
-        status = row.price === null || oldPrice === row.price ? 'same' : 'update'
+        const previous = previousPriceOf(match, supplierKey)
+        oldPrice = previous?.price ?? null
+        if (previous && !previous.isOwnSupplier) {
+          // Plan 641: the price comes from another supplier; an equal price is still a change of supplier.
+          status = row.price === null ? 'same' : 'update'
+          otherSupplierName = suppliers.get(previous.supplierId)?.nameHebrew ?? ''
+          if (supplierKey !== '') {
+            canChoose = true
+            choice =
+              row.supplierChoice ??
+              (sameName(otherSupplierName, suppliers.get(supplierKey)?.nameHebrew) ? 'update' : 'add')
+            if (choice === 'update') targetSupplierId = previous.supplierId
+          }
+        } else {
+          status = row.price === null || oldPrice === row.price ? 'same' : 'update'
+        }
       }
       const unitText = row.purchaseUnit.trim()
       const hasUnknownPurchaseUnit = !match && status !== 'matching' && unitText !== '' && !knownUnits.has(unitText)
       const changePct = status === 'update' ? priceChangePct(oldPrice, row.price) : null
       const isRiseAlert = isPriceRiseAlert(changePct, threshold)
-      return { row, status, match, oldPrice, changePct, isRiseAlert, hasUnknownPurchaseUnit }
+      return {
+        row,
+        status,
+        match,
+        oldPrice,
+        changePct,
+        isRiseAlert,
+        hasUnknownPurchaseUnit,
+        otherSupplierName,
+        targetSupplierId,
+        canChoose,
+        choice,
+        invoiceSupplierName: suppliers.get(supplierKey)?.nameHebrew ?? ''
+      }
     })
   })
 
@@ -340,13 +374,14 @@ export class ProductImportComponent {
     this.isSaving_.set(true)
     try {
       const categoryKeys = await this.resolveCategories_()
-      const rows: ApplyRow[] = this.view_().map(({ row, status, match }) => ({
+      const rows: ApplyRow[] = this.view_().map(({ row, status, match, targetSupplierId }) => ({
         name: match ? match.nameHebrew : row.name.trim(),
         baseUnit: row.baseUnit,
         price: row.price,
         category: status === 'new' ? (categoryKeys.get(row.category) ?? null) : null,
         purchaseUnit: status === 'new' && row.purchaseUnit.trim() ? row.purchaseUnit.trim() : null,
-        purchaseQty: status === 'new' ? row.purchaseQty : null
+        purchaseQty: status === 'new' ? row.purchaseQty : null,
+        ...(targetSupplierId ? { targetSupplierId } : {})
       }))
       const supplierId = this.supplierId_() || null
       const state = this.invoice_()
@@ -451,6 +486,22 @@ export class ProductImportComponent {
     }
   }
 
+  /** «היה {price} אצל {name}» for a row compared with another supplier's price. */
+  protected wasAtText(price: number, name: string): string {
+    return this.translation_
+      .translate('import_price_was_at')
+      .replace('{price}', formatMoney(price))
+      .replace('{name}', name)
+  }
+
+  protected choiceText(key: 'import_update_supplier_price' | 'import_add_as_new_supplier', name: string): string {
+    return this.translation_.translate(key).replace('{name}', name)
+  }
+
+  protected setChoice(id: number, choice: 'update' | 'add'): void {
+    this.updateRow(id, { supplierChoice: choice })
+  }
+
   protected setPrice(id: number, value: string | number | null): void {
     this.updateRow(id, { price: positiveNumber(value) })
   }
@@ -485,7 +536,8 @@ export class ProductImportComponent {
       category: row.category ?? '',
       needsReview: row.needsReview,
       duplicate: row.duplicate,
-      matchedId: null
+      matchedId: null,
+      supplierChoice: null
     }
   }
 
