@@ -1,0 +1,53 @@
+@layer components.diagnosis-page {
+  :host {
+    display: block;
+  }
+
+  .diagnosis-page {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+
+    max-inline-size: 48rem;
+    margin-inline: auto;
+
+    padding: var(--space-4);
+  }
+
+  .diagnosis-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    align-items: end;
+    gap: var(--space-3);
+
+    padding: var(--space-4);
+  }
+
+  .diagnosis-form__period {
+    display: grid;
+    gap: var(--space-1);
+    justify-items: start;
+  }
+
+  .diagnosis-form__label {
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-snug);
+  }
+
+  .diagnosis-list {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .diagnosis-list__row {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .diagnosis-list__name {
+    justify-content: start;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+}

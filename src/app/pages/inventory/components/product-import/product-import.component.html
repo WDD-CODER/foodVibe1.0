@@ -1,5 +1,7 @@
 <div class="product-import" dir="rtl">
-  <app-page-header titleKey="import_products" backLink="/inventory/list" backLabelKey="import_back_to_inventory" />
+  @if (!embedded()) {
+    <app-page-header titleKey="import_products" backLink="/inventory/list" backLabelKey="import_back_to_inventory" />
+  }
 
   @if (!allowed_()) {
     <app-empty-state messageKey="no_permission" icon="lock" data-testid="import-forbidden" />
@@ -7,102 +9,108 @@
     @if (summary_(); as summary) {
       <section class="import-summary c-glass-panel" data-testid="import-summary" role="status">
         <p class="import-summary__text">{{ summaryText_(summary) }}</p>
-        <a class="c-btn-primary" routerLink="/inventory/list" data-testid="import-back">
-          {{ 'import_back_to_inventory' | translatePipe }}
-        </a>
+        @if (!embedded()) {
+          <a class="c-btn-primary" routerLink="/inventory/list" data-testid="import-back">
+            {{ 'import_back_to_inventory' | translatePipe }}
+          </a>
+        }
       </section>
     }
     @if (impact_(); as impact) {
       <app-price-impact-panel [rows]="impact" />
     }
 
-    <section class="import-paste c-glass-panel" [class.import-paste--compact]="rows_().length > 0">
-      <label class="import-field" for="import-text">
-        <span class="import-field__label">{{ 'import_paste_hint' | translatePipe }}</span>
-        <textarea
-          appTextareaAutoGrow
-          id="import-text"
-          class="c-input import-paste__box"
-          dir="auto"
-          maxlength="20000"
-          data-testid="import-text"
-          [ngModel]="text_()"
-          (ngModelChange)="text_.set($event)"
-          [disabled]="isParsing_() || isSaving_()"
-        ></textarea>
-      </label>
+    @if (!embedded() || errorKey_()) {
+      <section class="import-paste c-glass-panel" [class.import-paste--compact]="rows_().length > 0">
+        @if (!embedded()) {
+          <label class="import-field" for="import-text">
+            <span class="import-field__label">{{ 'import_paste_hint' | translatePipe }}</span>
+            <textarea
+              appTextareaAutoGrow
+              id="import-text"
+              class="c-input import-paste__box"
+              dir="auto"
+              maxlength="20000"
+              data-testid="import-text"
+              [ngModel]="text_()"
+              (ngModelChange)="text_.set($event)"
+              [disabled]="isParsing_() || isSaving_()"
+            ></textarea>
+          </label>
 
-      <div class="import-paste__row">
-        @if (!showStrip_()) {
-          <div class="import-field import-field--supplier">
-            <span class="import-field__label">{{ 'import_supplier_optional' | translatePipe }}</span>
-            <app-custom-select
-              [ngModel]="supplierId_()"
-              (ngModelChange)="supplierId_.set($event)"
-              [options]="supplierOptions_()"
-              placeholder="import_no_supplier"
-              [typeToFilter]="true"
-              data-testid="import-supplier"
+          <div class="import-paste__row">
+            @if (!showStrip_()) {
+              <div class="import-field import-field--supplier">
+                <span class="import-field__label">{{ 'import_supplier_optional' | translatePipe }}</span>
+                <app-custom-select
+                  [ngModel]="supplierId_()"
+                  (ngModelChange)="supplierId_.set($event)"
+                  [options]="supplierOptions_()"
+                  placeholder="import_no_supplier"
+                  [typeToFilter]="true"
+                  data-testid="import-supplier"
+                />
+              </div>
+            }
+            <input
+              #cameraInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              hidden
+              data-testid="import-photo-camera-input"
+              (change)="onFileChosen($event)"
             />
+            <input
+              #uploadInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              hidden
+              data-testid="import-photo-upload-input"
+              (change)="onFileChosen($event)"
+            />
+            <button
+              type="button"
+              class="c-btn-ghost import-photo-btn"
+              data-testid="import-photo-camera"
+              [disabled]="isParsing_() || isSaving_()"
+              (click)="cameraInput.click()"
+            >
+              <lucide-icon name="camera" [size]="16" />
+              {{ 'import_photo_camera' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              class="c-btn-ghost import-photo-btn"
+              data-testid="import-photo-upload"
+              [disabled]="isParsing_() || isSaving_()"
+              (click)="uploadInput.click()"
+            >
+              <lucide-icon name="file-text" [size]="16" />
+              {{ 'import_file_upload' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              class="c-btn-primary"
+              data-testid="import-parse"
+              [disabled]="!text_().trim() || isParsing_() || isSaving_()"
+              (click)="parse()"
+            >
+              <lucide-icon name="sparkles" [size]="16" />
+              {{ 'import_parse' | translatePipe }}
+            </button>
           </div>
+
+          <p class="import-hint" data-testid="import-photo-privacy">{{ 'invoice_file_privacy' | translatePipe }}</p>
         }
-        <input
-          #cameraInput
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          capture="environment"
-          hidden
-          data-testid="import-photo-camera-input"
-          (change)="onFileChosen($event)"
-        />
-        <input
-          #uploadInput
-          type="file"
-          accept="image/jpeg,image/png,image/webp,application/pdf"
-          hidden
-          data-testid="import-photo-upload-input"
-          (change)="onFileChosen($event)"
-        />
-        <button
-          type="button"
-          class="c-btn-ghost import-photo-btn"
-          data-testid="import-photo-camera"
-          [disabled]="isParsing_() || isSaving_()"
-          (click)="cameraInput.click()"
-        >
-          <lucide-icon name="camera" [size]="16" />
-          {{ 'import_photo_camera' | translatePipe }}
-        </button>
-        <button
-          type="button"
-          class="c-btn-ghost import-photo-btn"
-          data-testid="import-photo-upload"
-          [disabled]="isParsing_() || isSaving_()"
-          (click)="uploadInput.click()"
-        >
-          <lucide-icon name="file-text" [size]="16" />
-          {{ 'import_file_upload' | translatePipe }}
-        </button>
-        <button
-          type="button"
-          class="c-btn-primary"
-          data-testid="import-parse"
-          [disabled]="!text_().trim() || isParsing_() || isSaving_()"
-          (click)="parse()"
-        >
-          <lucide-icon name="sparkles" [size]="16" />
-          {{ 'import_parse' | translatePipe }}
-        </button>
-      </div>
 
-      <p class="import-hint" data-testid="import-photo-privacy">{{ 'invoice_file_privacy' | translatePipe }}</p>
-
-      @if (errorKey_(); as errorKey) {
-        <p class="import-message import-message--error" role="alert" data-testid="import-error">
-          {{ errorKey | translatePipe }}
-        </p>
-      }
-    </section>
+        @if (errorKey_(); as errorKey) {
+          <p class="import-message import-message--error" role="alert" data-testid="import-error">
+            {{ errorKey | translatePipe }}
+          </p>
+        }
+      </section>
+    }
 
     @if (rows_().length > 0) {
       @if (isTruncated_()) {

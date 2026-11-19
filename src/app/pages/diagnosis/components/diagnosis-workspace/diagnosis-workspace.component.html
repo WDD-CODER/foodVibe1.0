@@ -1,0 +1,64 @@
+<div class="diagnosis-workspace" dir="rtl">
+  @if (isLoading_()) {
+    <app-loader />
+  } @else {
+    @if (item_(); as item) {
+      <div class="diagnosis-workspace__back">
+        <app-page-header [titleKey]="null" backLink="/diagnosis" />
+      </div>
+      <div class="diagnosis-workspace__head">
+        <h1 class="diagnosis-workspace__title" dir="auto" data-testid="diagnosis-title">{{ item.name }}</h1>
+        <span class="c-chip c-chip--tag" [class.c-chip--green]="item.status === 'done'" data-testid="diagnosis-status">
+          {{ (item.status === 'done' ? 'diag_status_done' : 'diag_status_open') | translatePipe }}
+        </span>
+        <button
+          type="button"
+          class="c-btn-ghost"
+          data-testid="diagnosis-toggle-done"
+          [disabled]="isBusy_()"
+          (click)="toggleDone()"
+        >
+          {{ (item.status === 'done' ? 'diag_reopen' : 'diag_mark_done') | translatePipe }}
+        </button>
+      </div>
+
+      <div class="diagnosis-workspace__tabs" role="tablist">
+        <app-scroll-rail>
+          @for (tab of tabs; track tab.key) {
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab"
+              [class.active]="tab_() === tab.key"
+              [attr.aria-selected]="tab_() === tab.key"
+              [attr.data-testid]="'diagnosis-tab-' + tab.key"
+              (click)="setTab(tab.key)"
+            >
+              <lucide-icon [name]="tab.icon" [size]="16" />
+              {{ tab.labelKey | translatePipe }}
+            </button>
+          }
+        </app-scroll-rail>
+      </div>
+
+      <div class="diagnosis-workspace__body" role="tabpanel">
+        @switch (tab_()) {
+          @case ('invoices') {
+            <app-diag-invoice-queue
+              [diagnosisId]="item._id"
+              [invoiceIds]="item.invoiceIds"
+              [locked]="isDone_()"
+              (invoiceIdsChange)="onInvoiceIds($event)"
+            />
+          }
+          @case ('menu') {
+            <app-diag-menu [diagnosis]="item" [locked]="isDone_()" (saved)="onSaved($event)" />
+          }
+          @case ('report') {
+            <app-diag-report [diagnosis]="item" [volatility]="volatility_()" />
+          }
+        }
+      </div>
+    }
+  }
+</div>
