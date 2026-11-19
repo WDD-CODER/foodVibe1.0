@@ -57,9 +57,9 @@ const RUN_PREFIX = "orch/"
 const PM = "pnpm" === 'pnpm' ? 'pnpm' : 'npm'
 const COMMANDS = { build: "build", lint: "lint", test: "test:ci", testCi: "" }
 const PREPARE = [{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]
-const CI_MIRROR = ["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]
+const CI_MIRROR = ["node scripts/override-check.mjs",{"command":"pnpm run lint:icons","touches":["src/**/*.html","src/app/app.config.ts","scripts/check-lucide-icons.mjs"]},{"command":"pnpm run lint:no-native-select","touches":["src/**/*.html","scripts/check-no-native-select.mjs"]},"node scripts/plan-ledger-check.mjs",{"command":"node scripts/breadcrumbs-check.mjs","touches":["src/app/**","scripts/breadcrumbs-check.mjs"]},"node scripts/ci-scope-check.mjs --checkout-branch",{"command":"pnpm run test:server","touches":["server/**","shared/**","public/assets/data/**"]}]
 // [{ command, touches }]: the test script and plan-own [auto] commands a gate may skip (test script) or reuse (both)
-const SUITE_TOUCHES = [{"command":"pnpm run test:ci","touches":["src/**","public/**","shared/**","angular.json","tsconfig*.json","karma.conf.*"]},{"command":"pnpm run test:server","touches":["server/**","shared/**"]}]
+const SUITE_TOUCHES = [{"command":"pnpm run test:ci","touches":["src/**","public/**","shared/**","angular.json","tsconfig*.json","karma.conf.*"]},{"command":"pnpm run test:server","touches":["server/**","shared/**","public/assets/data/**"]}]
 const SUITES = Array.isArray(SUITE_TOUCHES) ? SUITE_TOUCHES : []
 // full (default) = the final gate runs everything again; ci = it runs only the suites the run changed and not yet passed, CI runs the full set
 const FINAL_GATE = "full" === 'ci' ? 'ci' : 'full'
