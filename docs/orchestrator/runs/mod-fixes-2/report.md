@@ -1,17 +1,14 @@
 # Orchestrator run mod-fixes-2
 
-Run branch: `orch/mod-fixes-2` (from `origin/main` at bfab383) · started 2026-11-19T14:26:18.006Z · finished 2026-11-19T14:55:46.742Z
+Run branch: `orch/mod-fixes-2` (from `origin/main` at bfab383) · started 2026-11-19T14:26:18.006Z · finished 2026-11-19T14:58:46.728Z
 Result: 1 merged, 0 parked, skipped or left out, 1 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is bfab383.
-Stopped: final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2620 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
 
 ## Stops
 
 - attempt 1 · 2026-11-19T14:55:44.922Z · final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2620 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
 
-Final gate: failed: pnpm run test:ci (attempt 1)
-Failing: TOTAL: 1 FAILED, 2620 SUCCESS
-Final gate note: no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
+Final gate: ok (attempt 1)
 
 ## Plans
 

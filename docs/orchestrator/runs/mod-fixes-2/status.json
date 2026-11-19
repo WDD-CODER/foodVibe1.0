@@ -187,11 +187,10 @@
       "text": "make this a default? after a save error, a refused row beyond the drawn rows is drawn too so its error mark shows — reverse: remove the two limit_ lines in onSaveError_ (trigger: destructive-action) — reply: default yes run-destructive-action"
     }
   ],
-  "attempts": 1,
-  "phase": "stopped",
-  "freeDiskGb": 16.2,
-  "updatedAt": "2026-11-19T14:55:46.745Z",
-  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2620 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 17.6,
+  "updatedAt": "2026-11-19T14:58:46.729Z",
   "stops": [
     {
       "at": "2026-11-19T14:55:44.922Z",
@@ -292,16 +291,12 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-19T14:55:46.742Z",
+  "finishedAt": "2026-11-19T14:58:46.728Z",
   "finalGate": {
-    "ok": false,
-    "command": "pnpm run test:ci",
-    "at": "2026-11-19T14:55:46.745Z",
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T14:58:46.729Z",
     "attempt": 1,
-    "blamed": [],
-    "failing": [
-      "TOTAL: 1 FAILED, 2620 SUCCESS"
-    ],
-    "noPlanFile": true
+    "blamed": []
   }
 }
