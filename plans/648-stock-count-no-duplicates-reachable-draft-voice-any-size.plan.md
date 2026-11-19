@@ -35,11 +35,14 @@ button, and voice/text counting works with 3,000 products.
   products: posting "קמח 4 קילו" answers 200 with one line for the קמח product; the request sent to the model has no
   product list (only the spoken text and the units); a spoken name matching two products comes back unmatched with
   both as candidates; an empty or unknown name comes back unmatched.
-- [auto] `pnpm run test:ci` passes, including `stock-count.component.spec.ts`: the three header controls sit in one
-  `.stock-count__actions` wrapper; and `stock-ai-draft.component.spec.ts` no longer expects `stk_ai_too_many_products`.
-- [auto] `node server/scripts/dedupe-business-products.js --target=local --business=f0b4ea17-1ddd-443a-9cdf-5e2b07f07dca`
-  (dry run) reports the 1,439 duplicate pairs and which copy it keeps (the one referenced by recipes, counts or price
-  history; else the older); the builder does not run `--write` (the Human runs it, see the card).
+- [auto] `pnpm run test:ci` passes, including `src/app/pages/inventory/components/stock-count/stock-count.component.spec.ts`: the three
+  header controls sit in one `.stock-count__actions` wrapper; and
+  `src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.spec.ts` no longer expects `stk_ai_too_many_products`.
+- [auto] The same command, `server/test/dedupe-business-products.test.js` (new): on a seeded business with two copies
+  of each of three master products, the script's dry run reports three pairs and the copy it keeps (the one referenced
+  by recipes, counts or price history; else the older) and writes nothing; `--write` repoints those references to the
+  kept copy and deletes the other; `--target` other than `local` without `--confirm-remote` exits 1. The builder never
+  runs the script against a real database (the Human runs it, see the card).
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm --dir server run lint` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [ui] On `/inventory/count`, the element at the centre of "שמירת טיוטה" is that button (`e2e/ui/648-1.spec.ts`).
@@ -64,6 +67,7 @@ server/services/sync-master.js
 server/test/sync-master.test.js
 server/db.js
 server/scripts/dedupe-business-products.js
+server/test/dedupe-business-products.test.js
 server/routes/ai/stock.js
 server/utils/stock-extract.js
 server/test/ai-stock-extract.test.js
