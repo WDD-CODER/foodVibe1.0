@@ -313,6 +313,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
 - Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
+- Plan 641: previousPriceOf(product, supplierId) in src/app/core/utils/price-change.util.ts is the one browser rule for the price an invoice line is compared with (the invoice supplier's own price, else the lowest other source's; null with none).
 - Plan 632: `APP_RELOAD` in `src/app/core/utils/app-reload.util.ts` is the one way to reload the whole application at a path (`UserService.switchBusiness` and a refresh that moves the business call it); specs replace the token, no page calls `window.location` itself.
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
@@ -523,6 +524,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 628
 - Use: `src/app/core/utils/price-change.util.ts` — `priceChangePct(old, new)` is the one browser rule for "by how many percent did a price move" (two decimals, null when there is no old price); `src/app/core/utils/invoice-lines.util.ts` — `buildInvoiceLines(keptRows, printed)` maps kept preview rows to the `invoice.lines` of the apply body; `app-invoice-header-strip` (supplier, date, number above the import preview); `InvoiceDataService` reads the saved invoices and opens a stored file in a new tab.
 - Plan 629: `isPriceRiseAlert(changePct, thresholdPct)` is the one rule for "a rise worth marking" (at or above the business's `priceRiseAlertPct`); `recipesUsingProducts(recipes, productIds)` finds the recipes and dishes that use a product directly or through preparations; `ProductImportService.getPriceRises` reads `GET /product-import/price-rises`; `app-price-impact-panel` and `app-price-rises-card` are page-local.
+- Plan 641: `previousPriceOf(product, supplierId)` is the one rule for "the price to compare an invoice price with": the invoice supplier's own price, else the lowest other one (with its supplier); the import row sends `targetSupplierId` to update that supplier's price instead of adding a source.
 - When: any browser screen that shows a price change, sends an invoice with the import save, or lists saved invoices.
 - Known copies: none.
 

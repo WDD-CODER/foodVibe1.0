@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, Settings, TrendingUp, UserPlus } from 'lucide-angular'
+import { LucideAngularModule, Settings, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { PlatformAdminService, type BusinessRow } from '@services/platform-admin.service'
 import type { AiUsageParams, AiUsageReport, AiUsageRow } from 'src/app/core/models/ai-usage.model'
@@ -95,10 +95,7 @@ describe('PlatformDashboardPage', () => {
         )
       )
     TestBed.configureTestingModule({
-      imports: [
-        PlatformDashboardPage,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, TrendingUp, UserPlus })
-      ],
+      imports: [PlatformDashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, TrendingUp })],
       providers: [
         {
           provide: PlatformAdminService,

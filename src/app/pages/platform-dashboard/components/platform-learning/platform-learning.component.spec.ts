@@ -9,7 +9,9 @@ import { PlatformLearningComponent } from './platform-learning.component'
 
 const DICT: Record<string, string> = {
   ai_feature_invoice_read: 'קריאת חשבונית',
-  platform_learning_private_note: '{count} עסקים במצב פרטי'
+  platform_learning_private_note: '{count} עסקים במצב פרטי',
+  platform_learning_saved_of: '{confirmed} מתוך {drafts} ({rate}%)',
+  platform_learning_low_sample: 'מעט'
 }
 
 const stats = (over: Partial<LearningStats> = {}): LearningStats => ({
@@ -70,6 +72,32 @@ describe('PlatformLearningComponent (plan 630)', () => {
     expect(rows[0].textContent).toContain('75%')
     expect(rows[1].textContent).toContain('platform_learning_model_unknown')
     expect(rows[1].textContent).toContain('—')
+  })
+
+  it('plan 642: shows saved out of made, and greys the accuracy below five saves', async () => {
+    const one = stats({
+      flows: [
+        { feature: 'invoice_read', model: 'a', drafts: 9, confirmed: 1, avgKeptRatio: 1, weeks: [] },
+        { feature: 'invoice_read', model: 'b', drafts: 9, confirmed: 5, avgKeptRatio: 0.8, weeks: [] }
+      ]
+    })
+    await setup(() => Promise.resolve(one))
+    const saved = el().querySelectorAll('[data-testid="learning-saved"]')
+    const acc = el().querySelectorAll<HTMLElement>('[data-testid="learning-accuracy"]')
+    expect(saved[0].textContent).toContain('1 מתוך 9 (11%)')
+    expect(acc[0].textContent).toContain('100% (1)')
+    expect(acc[0].classList).toContain('learning__low')
+    expect(acc[0].getAttribute('title')).toBe('מעט')
+    expect(acc[1].textContent).toContain('80% (5)')
+    expect(acc[1].classList).not.toContain('learning__low')
+    expect(acc[1].getAttribute('title')).toBeNull()
+  })
+
+  it('plan 642: a null average shows a dash and no low-sample style', async () => {
+    await setup(() => Promise.resolve(stats()))
+    const acc = el().querySelectorAll<HTMLElement>('[data-testid="learning-accuracy"]')
+    expect(acc[1].textContent?.trim()).toBe('—')
+    expect(acc[1].classList).not.toContain('learning__low')
   })
 
   it('opens and closes the week list on the chip, one at a time', async () => {

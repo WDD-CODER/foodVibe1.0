@@ -17,8 +17,8 @@ export const businessSettingsSchema = z.strictObject({
   priceRiseAlertPct: z.number().gt(0).max(100).optional()
 })
 
-/** The three numbers the settings tab edits. `priceRiseAlertPct` (plan 615) has no input yet (plan 629 adds it and widens this type). */
-export type BusinessSettings = Omit<z.infer<typeof businessSettingsSchema>, 'priceRiseAlertPct'>
+/** The four numbers the settings tab edits (plan 643: `priceRiseAlertPct` is optional on stored documents; reads fill 5). */
+export type BusinessSettings = z.infer<typeof businessSettingsSchema>
 
 /** Plan 472: the owner renames the business. Trimmed, 1–200 characters. */
 export const businessNameInputSchema = z.strictObject({ name: nameField.trim().min(1) })

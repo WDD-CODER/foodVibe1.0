@@ -2368,7 +2368,7 @@
     "platform_ai_no_cap": "ללא תקרה",
     "platform_ai_used_month": "נוצלו החודש:",
     "platform_ai_private": "מצב פרטי",
-    "platform_ai_private_hint": "במצב פרטי לא לומדים מהעסק מעכשיו. מה שכבר נלמד נשאר, אלא אם מוחקים אותו כאן.",
+    "platform_ai_private_hint": "במצב פרטי המידע של העסק כבר לא משמש לאימון ולשיפור המודלים. מה שכבר נלמד נשאר, אלא אם מוחקים אותו בכפתור המחיקה.",
     "platform_ai_private_tag": "פרטי",
     "platform_ai_shots_desc_all": "כאן מופיעות דוגמאות של מתכונים שנוצרו ב-AI ונשמרו בכל עסק שאינו במצב פרטי. «הוספה למאגר» מלמדת את ה-AI של כל העסקים מהדוגמה. «דיוק ה-AI» אומר כמה הטיוטה של ה-AI הייתה קרובה למה שנשמר בסוף.",
     "platform_ai_shots_candidates_hint_all": "מכל עסק שאינו במצב פרטי, עוד לא במאגר",
@@ -2387,6 +2387,9 @@
     "platform_learning_col_model": "מודל",
     "platform_learning_col_drafts": "טיוטות",
     "platform_learning_col_confirmed": "אושרו",
+    "platform_learning_saved_of": "{confirmed} מתוך {drafts} ({rate}%)",
+    "platform_learning_low_sample": "מעט מדי שמירות כדי לסמוך על המספר",
+    "platform_learning_kept_hint": "הדיוק מחושב רק על סריקות שנשמרו: כמה מהשורות שה-AI הציע נשמרו בלי שינוי",
     "platform_learning_col_kept": "דיוק ממוצע",
     "platform_learning_by_week": "לפי שבוע",
     "platform_learning_col_week": "שבוע שמתחיל ב-",
@@ -2513,6 +2516,7 @@
     "platform_history_private_off": "מצב פרטי בוטל",
     "platform_history_reason": "סיבה:",
     "platform_erase_learned": "מחיקת מה שנלמד מהעסק",
+    "platform_erase_learned_tip": "מוחק את מה שהמערכת למדה מהעסק הזה: שמות מוצרים מחשבוניות בזיכרון המשותף, דוגמאות מתכונים ששותפו ונתוני הדיוק. המוצרים, המחירים והנתונים של העסק עצמו לא נמחקים.",
     "platform_erase_reason": "סיבת המחיקה (למשל: בקשת העסק)",
     "platform_erase_confirm": "למחוק את כל מה שנלמד מ-{name}? אי אפשר לבטל את זה.",
     "platform_erase_done": "נמחקו {count} רשומות שנלמדו",
@@ -2620,6 +2624,10 @@
     "stk_ai_replace": "החלפה",
     "stk_ai_keep": "השארה",
     "stk_ai_failed": "קריאת הספירה נכשלה. אפשר לנסות שוב או לספור ידנית",
-    "stk_ai_too_many_products": "יש יותר מ-800 מוצרים, ולכן ספירה בקול לא זמינה כרגע"
+    "stk_ai_too_many_products": "יש יותר מ-800 מוצרים, ולכן ספירה בקול לא זמינה כרגע",
+    "import_price_was_at": "היה {price} אצל {name}",
+    "import_update_supplier_price": "עדכון המחיר של {name}",
+    "import_add_as_new_supplier": "הוספת {name} כספק נוסף",
+    "supplier_exists_selected": "הספק {name} כבר קיים – נבחר הקיים"
   }
 }

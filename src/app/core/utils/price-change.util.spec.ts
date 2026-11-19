@@ -1,5 +1,5 @@
 import type { Recipe } from '@models/recipe.model'
-import { isPriceRiseAlert, priceChangePct, recipesUsingProducts } from './price-change.util'
+import { isPriceRiseAlert, previousPriceOf, priceChangePct, recipesUsingProducts } from './price-change.util'
 
 describe('priceChangePct', () => {
   it('is the change in percent with two decimals', () => {
@@ -61,5 +61,30 @@ describe('recipesUsingProducts', () => {
       recipe('b', [{ type: 'recipe', referenceId: 'a' }])
     ]
     expect(recipesUsingProducts(recipes, new Set(['p1']))).toEqual([])
+  })
+})
+
+describe('previousPriceOf', () => {
+  const src = (supplierId: string, price: number) => ({ supplierId, price, addedBy: 'u', addedAt: 1 })
+
+  it('takes the invoice supplier own price first', () => {
+    expect(previousPriceOf({ sources: [src('a', 90), src('b', 100)] }, 'b')).toEqual({
+      price: 100,
+      supplierId: 'b',
+      isOwnSupplier: true
+    })
+  })
+
+  it('takes the lowest other price and names its supplier', () => {
+    expect(previousPriceOf({ sources: [src('a', 120), src('c', 100)] }, 'b')).toEqual({
+      price: 100,
+      supplierId: 'c',
+      isOwnSupplier: false
+    })
+  })
+
+  it('is null when no source has a price', () => {
+    expect(previousPriceOf({ sources: [] }, 'b')).toBeNull()
+    expect(previousPriceOf({ sources: [src('a', 0)] }, 'b')).toBeNull()
   })
 })

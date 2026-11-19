@@ -1,7 +1,7 @@
 import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, Stethoscope, Undo2 } from 'lucide-angular'
+import { LucideAngularModule, Stethoscope } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { BusinessService } from '@services/business.service'
 import { TranslationService } from '@services/translation.service'
@@ -25,7 +25,7 @@ describe('ActingBannerComponent', () => {
     switchBusiness.calls.reset()
     onSetErrorMsg.calls.reset()
     await TestBed.configureTestingModule({
-      imports: [ActingBannerComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Undo2, Stethoscope })],
+      imports: [ActingBannerComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Stethoscope })],
       providers: [
         provideRouter([]),
         { provide: UserService, useValue: { acting_, homeModules_, switchBusiness } },

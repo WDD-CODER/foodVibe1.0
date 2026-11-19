@@ -43,10 +43,15 @@
       {{ 'platform_ai_used_month' | translatePipe }} <span class="c-num">{{ target()?.aiTokensThisMonth ?? 0 }}</span>
     </p>
     <div class="c-chip-group">
-      <label class="c-chip c-chip--toggle">
+      <label
+        class="c-chip c-chip--toggle"
+        data-testid="biz-private-label"
+        [attr.title]="'platform_ai_private_hint' | translatePipe"
+      >
         <input
           type="checkbox"
           data-testid="biz-private"
+          aria-describedby="biz-private-tip"
           [checked]="private_()"
           [disabled]="isSaving_()"
           (change)="private_.set($any($event.target).checked)"
@@ -54,17 +59,20 @@
         <span>{{ 'platform_ai_private' | translatePipe }}</span>
       </label>
     </div>
-    <p class="fda-name">{{ 'platform_ai_private_hint' | translatePipe }}</p>
+    <span id="biz-private-tip" class="visually-hidden">{{ 'platform_ai_private_hint' | translatePipe }}</span>
     <button
       type="button"
       class="c-btn-ghost c-btn-ghost--sm pbd-erase"
       data-testid="biz-erase-learned"
+      [attr.title]="'platform_erase_learned_tip' | translatePipe"
+      aria-describedby="biz-erase-tip"
       [attr.aria-expanded]="isEraseOpen_()"
       [disabled]="isSaving_() || isErasing_()"
       (click)="toggleErase()"
     >
       {{ 'platform_erase_learned' | translatePipe }}
     </button>
+    <span id="biz-erase-tip" class="visually-hidden">{{ 'platform_erase_learned_tip' | translatePipe }}</span>
     @if (isEraseOpen_()) {
       <div class="pbd-erase__box" data-testid="biz-erase-box">
         <app-form-field label="platform_erase_reason" forId="biz-erase-reason">
@@ -138,10 +146,10 @@
                   <span class="pbd-history__meta">{{ row.at | date: 'dd/MM/yy HH:mm' }} · {{ row.byName }}</span>
                   @if (row.changes) {
                     @for (change of row.changes; track change.field) {
-                      <span>{{ describeChange(change) }}</span>
+                      <span class="pbd-history__change">{{ describeChange(change) }}</span>
                     }
                   } @else {
-                    <span>{{ oldFieldLabels(row) }}</span>
+                    <span class="pbd-history__change">{{ oldFieldLabels(row) }}</span>
                   }
                   <span data-testid="biz-history-reason"
                     >{{ 'platform_history_reason' | translatePipe }} "{{ row.reason }}"</span

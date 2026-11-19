@@ -9,6 +9,9 @@ import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
 import { formatPctInt } from 'src/app/core/engine/rounding'
 
+/** Plan 642: fewer saves than this and the accuracy is greyed out. */
+const LOW_SAMPLE = 5
+
 /**
  * Plan 630: the platform admin reads how close each AI flow's drafts were to what people saved (per model, by week),
  * how big the shared supplier brain is, and whether the private file store is configured. Read-only.
@@ -50,6 +53,25 @@ export class PlatformLearningComponent implements OnInit {
 
   protected pct(ratio: number | null): string {
     return ratio === null ? '—' : formatPctInt(ratio * 100)
+  }
+
+  /** Plan 642: "{confirmed} מתוך {drafts} ({rate}%)". */
+  protected savedOf(row: { drafts: number; confirmed: number }): string {
+    const rate = row.drafts ? Math.round((row.confirmed / row.drafts) * 100) : 0
+    return this.translation
+      .translate('platform_learning_saved_of')
+      .replace('{confirmed}', String(row.confirmed))
+      .replace('{drafts}', String(row.drafts))
+      .replace('{rate}', String(rate))
+  }
+
+  /** Plan 642: "{pct}% ({n})", "—" when there is no average. */
+  protected accuracy(row: { confirmed: number; avgKeptRatio: number | null }): string {
+    return row.avgKeptRatio === null ? '—' : `${this.pct(row.avgKeptRatio)} (${row.confirmed})`
+  }
+
+  protected isLowSample(row: { confirmed: number; avgKeptRatio: number | null }): boolean {
+    return row.avgKeptRatio !== null && row.confirmed < LOW_SAMPLE
   }
 
   protected privateNote(count: number): string {

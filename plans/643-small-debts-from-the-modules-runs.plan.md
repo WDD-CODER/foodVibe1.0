@@ -93,11 +93,11 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `BusinessSettings` = `z.infer<typeof businessSettingsSchema>`; the comment updated; the tab drops
+- [x] `BusinessSettings` = `z.infer<typeof businessSettingsSchema>`; the comment updated; the tab drops
   `SettingsNumbers`; every user of `BusinessSettings` still compiles (the three-number save keeps the stored threshold,
   `server/routes/business.js:58`).
-- [ ] `test-lucide-icons.ts` gains `UserCheck`, `UserPlus`, `ArrowLeftRight`, `Undo2`; the specs drop their own copies.
-- [ ] The export test: find which load reaches it (the CI log names `crud.requests.hydrate_error`) and make the test
+- [x] `test-lucide-icons.ts` gains `UserCheck`, `UserPlus`, `ArrowLeftRight`, `Undo2`; the specs drop their own copies.
+- [x] The export test: find which load reaches it (the CI log names `crud.requests.hydrate_error`) and make the test
   independent of it (stub the requests source or await its settle); no change to the component's behaviour.
 
 ### Should Have (P1)
@@ -113,10 +113,10 @@ None.
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the shared settings type carry the price-rise threshold — the type, the tab, the compile — shared/schemas/entities/business.schema.ts, src/app/pages/settings/components/business-settings-tab/**
-- [ ] A2: Put the four new icons in the shared test list — the list and the specs that copied them — src/testing/test-lucide-icons.ts
-- [ ] A3: Make the export test independent of other tests' loads — the fix and the 20 runs — src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/**
-- [ ] A4: Run every check — the Done-when commands in order — docs/brain/inventory.md
+- [x] A1: Let the shared settings type carry the price-rise threshold — the type, the tab, the compile — shared/schemas/entities/business.schema.ts, src/app/pages/settings/components/business-settings-tab/**
+- [x] A2: Put the four new icons in the shared test list — the list and the specs that copied them — src/testing/test-lucide-icons.ts
+- [x] A3: Make the export test independent of other tests' loads — the fix and the 20 runs — src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/**
+- [x] A4: Run every check — the Done-when commands in order — docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 629, 632. Model, backend, auth, data: none.
@@ -129,3 +129,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - decided: one plan for three small debts — why: each is a few lines and none touches a screen.
+- evidence: pnpm run build → 0; pnpm run lint → 0 (0 errors); pnpm run test:ci ×3 → 0,0,0; pnpm run test:server → 0; data-export-card spec alone ×20 → 20 passes.
+- cause of the flake: the spec read the download text with `Blob.text()` and the click's 20 ms wait did not always cover it, so the file looked empty (`Expected 0 to be 2`); `click()` now awaits every pending blob read. Component unchanged.
+- icons: `UserCheck`, `UserPlus`, `ArrowLeftRight`, `Undo2` added to the shared list; acting-banner, platform-dashboard and access-tab specs dropped their own copies.

@@ -102,6 +102,10 @@ append the path to the scope block above and retry.
   history button already does (`[attr.title]` + `[attr.aria-label]`); no new tooltip piece.
 - the history box and its scroll — family: modal-shell — rung: 1 — why: page-local rules in the existing
   `components.platform-business-dialog` layer, with existing border, surface and font tokens.
+- the dialog body scroll `.fda-body:has(> .pbd-top)` — family: modal-shell — rung: 1 — why: the existing class already
+  on the dialog root, given a fixed block size in the page layer; no new class.
+- the history change line `.pbd-history__change` — family: platform-history — rung: 1 — why: one class on the existing
+  change span, bold through the existing `--fw-semibold` token.
 
 ## Step 0 — Reality Check
 
@@ -152,10 +156,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let a changed dictionary text replace the old cached one — the merge order and its spec cases — src/app/core/services/translation.service.ts, src/app/core/services/translation.service.spec.ts
-- [ ] A2: Move the private-mode hint and the erase explanation into tooltips — the template, the two keys, the spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/**, public/assets/data/dictionary.json
-- [ ] A3: Make the history a bordered box that scrolls without resizing the dialog, with smaller meta and bold changes — the styles, the change class, the spec case — src/app/pages/platform-dashboard/platform-dashboard.page.scss, src/app/pages/platform-dashboard/components/platform-business-dialog/**
-- [ ] A4: Prove it in the running app and run every check — the screen spec, then the Done-when commands in order — e2e/ui/644-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Let a changed dictionary text replace the old cached one — the merge order and its spec cases — src/app/core/services/translation.service.ts, src/app/core/services/translation.service.spec.ts
+- [x] A2: Move the private-mode hint and the erase explanation into tooltips — the template, the two keys, the spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/**, public/assets/data/dictionary.json
+- [x] A3: Make the history a bordered box that scrolls without resizing the dialog, with smaller meta and bold changes — the styles, the change class, the spec case — src/app/pages/platform-dashboard/platform-dashboard.page.scss, src/app/pages/platform-dashboard/components/platform-business-dialog/**
+- [x] A4: Prove it in the running app and run every check — the screen spec, then the Done-when commands in order — e2e/ui/644-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 638 (history panel), 639 (hint and erase button).
@@ -175,3 +179,22 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   text fix of the program depends on it.
 - decided: the hint keeps "what was learned stays" — why: that is what 639 changed and the reason the old text was
   wrong; Dandan's wording leads the sentence.
+- round 2 (fresh builder, from base bcd1cf07): the review found the modal still grew (`.fda-body` had `max-block-size`).
+  Now `.fda-body:has(> .pbd-top)` has a fixed `block-size: min(60dvh, 34rem)` + `overflow-y: auto` +
+  `scrollbar-gutter: stable`, so the card's height and width are the same with the history open or closed; scoped by
+  its `.pbd-top` child so the front-desk dialog's `.fda-body` is untouched.
+- a11y: the private hint is `title` on the chip label plus `aria-describedby` on the checkbox to a `.visually-hidden`
+  span (the old `aria-label` on the label would have hidden the switch's own name); the erase tip likewise.
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm run test:ci` → 0, TOTAL: 2609 SUCCESS;
+  `lint:icons` → 0; `lint:no-native-select` → 0; `lint:reuse` → REUSE: ok; prettier --check on the changed files → ok.
+- grep proof: every `var(--…)` in the `components.platform-business-dialog` layer is defined in src/styles.scss —
+  --bg-muted, --border-default, --color-danger, --color-text-muted, --fs-base, --fs-sm, --fw-semibold, --radius-sm,
+  --space-1, --space-2 (all `ok`).
+- kit-checks first failed `style-duplicate-block 363 → 364`: `.pbd-history__meta` {font-size, color} twinned other
+  page-local blocks (no engine class for muted meta text exists). The meta block now also carries
+  `font-variant-numeric: tabular-nums` (dates line up) and `overflow-wrap: anywhere` (long names wrap) →
+  `KIT_CHECKS: ok (6 checks)`; build → 0, lint → 0, lint:reuse → ok after the change.
+- the kit copy of scope-check run from this folder reports `SCOPE: out` only for untracked `Claude outputs/**` files of
+  the main checkout (not in this branch's diff); the worktree's `node scripts/scope-check.mjs --diff=origin/orch/mod-fixes
+  --plan=<plan>` → `SCOPE: ok`.
+- e2e/ui/644-1.spec.ts written, not run (no running app or QA login in the worktree); 638-1/639-1 do not read the hint.

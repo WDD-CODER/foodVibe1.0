@@ -74,6 +74,8 @@ append the path to the scope block above and retry.
 
 - the saved-of-made cell and the low-sample style — family: empty-state — rung: 1 — why: page-local cells in the
   existing learning table, as plan 630 declared its classes.
+- new class `.learning__low` (muted low-sample accuracy figure) — family: learning-stats — rung: 1 — why: page-local
+  modifier on the existing learning table cell; no shared family covers a low-sample state.
 
 ## Step 0 — Reality Check
 
@@ -114,9 +116,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Count how many drafts were saved, abandoned and on how many saves the accuracy rests — the new fields and their server cases — server/utils/learning-stats.js, server/test/learning-stats.test.js
-- [ ] A2: Show saved out of made and grey out an accuracy from fewer than five saves — the cells, the hint, the dictionary keys, the spec cases — src/app/pages/platform-dashboard/components/platform-learning/**, public/assets/data/dictionary.json
-- [ ] A3: Run every check — the Done-when commands in order — docs/brain/inventory.md
+- [x] A1: Count how many drafts were saved, abandoned and on how many saves the accuracy rests — the new fields and their server cases — server/utils/learning-stats.js, server/test/learning-stats.test.js
+- [x] A2: Show saved out of made and grey out an accuracy from fewer than five saves — the cells, the hint, the dictionary keys, the spec cases — src/app/pages/platform-dashboard/components/platform-learning/**, public/assets/data/dictionary.json
+- [x] A3: Run every check — the Done-when commands in order — docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 630. Backend: response fields added, none removed. Data, auth: none.
@@ -130,3 +132,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - decided: five saves is the line for a trusted figure — why: below that one or two scans swing it from 0 to 100.
+- pnpm run test:server, lint, build, test:ci -> all exit 0 (2604 SUCCESS)
+- added optional now to buildLearningStats; route passes its own now (abandoned = pending older than 24h)

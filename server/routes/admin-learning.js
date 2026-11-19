@@ -43,7 +43,7 @@ router.get('/stats', verifyToken, requirePlatformAdmin, async (req, res) => {
       .toArray();
     const flows = buildLearningStats(
       rows.filter(r => !priv.has(r.businessId)),
-      { dayOf: jerusalemDate }
+      { dayOf: jerusalemDate, now }
     );
     const suppliers = await db.collection('supplierProfiles').countDocuments({});
     const names = await db.collection('invoiceAliases').countDocuments({ businessId: MASTER_BUSINESS_ID });
