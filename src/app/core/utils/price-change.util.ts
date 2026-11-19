@@ -33,6 +33,11 @@ export function isPriceRiseAlert(changePct: number | null, thresholdPct: number)
   return changePct !== null && changePct >= thresholdPct
 }
 
+/** Plan 645: a change of `thresholdPct` or more in either direction asks the owner before saving. */
+export function isBigPriceChange(changePct: number | null, thresholdPct: number): boolean {
+  return changePct !== null && Math.abs(changePct) >= thresholdPct
+}
+
 /** The engine's own depth limit for a recipe inside a recipe. */
 const MAX_DEPTH = 5
 

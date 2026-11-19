@@ -6,7 +6,8 @@ import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
 import { ArrowLeftRight, LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
-import { signal } from '@angular/core'
+import { Component, signal } from '@angular/core'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { of } from 'rxjs'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
@@ -426,5 +427,61 @@ describe('HeaderComponent business switcher (plan 632)', () => {
     await setup()
     // the toast service is real here: the call is what matters
     expect(consume).toHaveBeenCalledTimes(1)
+  })
+})
+
+@Component({
+  standalone: true,
+  imports: [HeaderComponent, LoaderComponent],
+  template: `<app-header />
+    <div class="app-content"><app-loader size="large" [overlay]="true" /></div>`
+})
+class ShellWithLoaderComponent {}
+
+describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
+  let fixture: ComponentFixture<ShellWithLoaderComponent>
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ShellWithLoaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        moduleStub,
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: signal({ _id: 'u1', name: 'dana' }),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
+            logout: () => of(null)
+          }
+        }
+      ]
+    }).compileComponents()
+    fixture = TestBed.createComponent(ShellWithLoaderComponent)
+    document.body.appendChild(fixture.nativeElement)
+    fixture.detectChanges()
+  })
+
+  afterEach(() => (fixture.nativeElement as HTMLElement).remove())
+
+  it('the avatar button is the element at its point and a click signs out', () => {
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('.loader-wrap.overlay')).not.toBeNull()
+    const header = fixture.debugElement.query(By.directive(HeaderComponent)).componentInstance as HeaderComponent
+    const logout = spyOn(header as unknown as { logout: () => Promise<void> }, 'logout').and.resolveTo()
+    fixture.detectChanges()
+    const avatar = host.querySelector<HTMLButtonElement>('.auth-username-btn')!
+    const box = avatar.getBoundingClientRect()
+    expect(box.width).toBeGreaterThan(0)
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+    expect(hit).not.toBeNull()
+    expect(hit === avatar || avatar.contains(hit)).toBeTrue()
+    ;(hit as HTMLElement).click()
+    expect(logout).toHaveBeenCalledTimes(1)
   })
 })

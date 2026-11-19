@@ -231,9 +231,9 @@
                       }
                       @if (item.changePct !== null) {
                         <span
-                          class="import-change"
-                          [class.import-change--up]="item.changePct > 0"
-                          [class.import-change--down]="item.changePct < 0"
+                          class="c-chip c-chip--tag c-chip--sm import-change"
+                          [class.c-chip--red]="item.changePct > 0"
+                          [class.c-chip--green]="item.changePct < 0"
                           dir="ltr"
                           data-testid="import-change"
                           [attr.aria-label]="'import_price_change' | translatePipe"
@@ -254,17 +254,19 @@
                             />
                             <span>{{ choiceText('import_update_supplier_price', item.otherSupplierName) }}</span>
                           </label>
-                          <label class="c-chip c-chip--toggle">
-                            <input
-                              type="radio"
-                              [name]="'import-choice-' + item.row.id"
-                              data-testid="import-choice-add"
-                              [checked]="item.choice === 'add'"
-                              [disabled]="isSaving_()"
-                              (change)="setChoice(item.row.id, 'add')"
-                            />
-                            <span>{{ choiceText('import_add_as_new_supplier', item.invoiceSupplierName) }}</span>
-                          </label>
+                          @if (!item.isSameSupplier) {
+                            <label class="c-chip c-chip--toggle">
+                              <input
+                                type="radio"
+                                [name]="'import-choice-' + item.row.id"
+                                data-testid="import-choice-add"
+                                [checked]="item.choice === 'add'"
+                                [disabled]="isSaving_()"
+                                (change)="setChoice(item.row.id, 'add')"
+                              />
+                              <span>{{ choiceText('import_add_as_new_supplier', item.invoiceSupplierName) }}</span>
+                            </label>
+                          }
                         </div>
                       }
                     }
