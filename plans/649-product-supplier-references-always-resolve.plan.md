@@ -166,7 +166,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: an unknown supplier keeps the source's price and loses the supplier, rather than deleting the source — why:
   the price is the owner's data; the supplier can be picked again.
 - evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm --dir server run lint` → 0; `pnpm run test:server` → 0, 147 files / 1949 tests pass (new: sync-master x3, push-to-master x3, repair-supplier-refs x3); kit-manifest-check, kit-checks (6 ok), override-check, plan-ledger-check, breadcrumbs-check, lint:icons, lint:no-native-select, scope-check → ok.
-- `pnpm run test:ci` → 2646 pass, 1 FAIL (rerun once, same): `HeaderComponent above the route-loading overlay (plan 645) … avatar button is the element at its point` in `header.component.spec.ts:457` — an element-at-point test, not touched by this plan; probably headless-window dependent (environment). My new specs (product form x2, product list x1) pass.
+- `pnpm run test:ci` → exit 0, TOTAL: 2647 SUCCESS (round 2; the earlier header avatar-click failure was environment-dependent and did not recur).
 - `node scripts/log-query.mjs --since=plan-start --level=error` → SKIP: no database configured.
 - exact save check that fails on an unknown supplier: not found in the browser form (`buildSources` keeps the source and its price) nor in the server's PUT; the form save with such a source is now covered by a spec and succeeds.
 - no shared (admin) product create path exists in `generic.js` (`shared` is taxonomy only), so the mapping is in the push-to-master path, the one route that writes products to master.
