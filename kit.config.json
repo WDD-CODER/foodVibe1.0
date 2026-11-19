@@ -59,11 +59,24 @@
     ],
     "ciMirror": [
       "node scripts/override-check.mjs",
-      "pnpm run lint:icons",
-      "pnpm run lint:no-native-select",
+      {
+        "command": "pnpm run lint:icons",
+        "touches": ["src/**/*.html", "src/app/app.config.ts", "scripts/check-lucide-icons.mjs"]
+      },
+      {
+        "command": "pnpm run lint:no-native-select",
+        "touches": ["src/**/*.html", "scripts/check-no-native-select.mjs"]
+      },
       "node scripts/plan-ledger-check.mjs",
-      "node scripts/breadcrumbs-check.mjs",
-      "node scripts/ci-scope-check.mjs --checkout-branch"
+      {
+        "command": "node scripts/breadcrumbs-check.mjs",
+        "touches": ["src/app/**", "scripts/breadcrumbs-check.mjs"]
+      },
+      "node scripts/ci-scope-check.mjs --checkout-branch",
+      {
+        "command": "pnpm run test:server",
+        "touches": ["server/**", "shared/**", "public/assets/data/**"]
+      }
     ],
     "suiteTouches": [
       {
@@ -81,7 +94,8 @@
         "command": "pnpm run test:server",
         "touches": [
           "server/**",
-          "shared/**"
+          "shared/**",
+          "public/assets/data/**"
         ]
       }
     ]
