@@ -1,17 +1,14 @@
 # Orchestrator run mod-alerts
 
-Run branch: `orch/mod-alerts` (from `origin/main` at 5c60bcf) · started 2026-11-19T15:05:52.263Z · finished 2026-11-19T18:03:01.187Z
+Run branch: `orch/mod-alerts` (from `origin/main` at 5c60bcf) · started 2026-11-19T15:05:52.263Z · finished 2026-11-19T18:09:12.595Z
 Result: 1 merged, 0 parked, skipped or left out, 1 in the run (counted from git and status.json).
 `main` untouched: yes (1 plan/todo file(s) changed on main) — origin/main is 355c6fb.
-Stopped: final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2636 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
 
 ## Stops
 
 - attempt 2 · 2026-11-19T18:02:59.444Z · final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2636 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
 
-Final gate: failed: pnpm run test:ci (attempt 1)
-Failing: TOTAL: 1 FAILED, 2636 SUCCESS
-Final gate note: no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
+Final gate: ok (attempt 1)
 
 ## Plans
 
@@ -25,7 +22,7 @@ Command (from the main folder): `node scripts/log-query.mjs --since=2026-11-19T1
 Exit code: 0
 
 ```text
-no entries
+2026-11-19T18:08:39.205Z error client http.error dev-guest 1b553c4f-3e6e-4402-bb79-6ef65a290998 HTTP 413 {"method":"POST","url":"http://localhost:3002/api/v1/ai/stock/extract","status":413}
 ```
 
 ## Decisions

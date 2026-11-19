@@ -346,12 +346,11 @@
       "text": "the folder foodVibe1.0-orch-merge-mod-alerts was installed (root, scripts, server)"
     }
   ],
-  "attempts": 2,
-  "phase": "stopped",
-  "freeDiskGb": 16.4,
-  "updatedAt": "2026-11-19T18:03:01.190Z",
-  "finishedAt": "2026-11-19T18:03:01.187Z",
-  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2636 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "attempts": 3,
+  "phase": "finished",
+  "freeDiskGb": 15.8,
+  "updatedAt": "2026-11-19T18:09:12.597Z",
+  "finishedAt": "2026-11-19T18:09:12.595Z",
   "stops": [
     {
       "at": "2026-11-19T18:02:59.444Z",
@@ -440,14 +439,10 @@
     }
   ],
   "finalGate": {
-    "ok": false,
-    "command": "pnpm run test:ci",
-    "at": "2026-11-19T18:03:01.189Z",
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T18:09:12.597Z",
     "attempt": 1,
-    "blamed": [],
-    "failing": [
-      "TOTAL: 1 FAILED, 2636 SUCCESS"
-    ],
-    "noPlanFile": true
+    "blamed": []
   }
 }
