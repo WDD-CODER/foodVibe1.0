@@ -1,0 +1,1 @@
+{"date":"2026-11-19","branch":"chore/remarks-2026-11-19","tag":"hints-in-tooltips","text":"Private-mode hint: instead of text on top of the modal, show it as a tooltip when hovering the private-mode switch; the erase button gets a tooltip explaining what it does","source":"plan 639 validation"}
