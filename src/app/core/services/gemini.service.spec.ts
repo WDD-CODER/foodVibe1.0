@@ -266,6 +266,22 @@ describe('GeminiService voice and logistics notes (plan 623)', () => {
     expect(await result).toEqual(draft)
   })
 
+  it('extractStockCount posts the text, adds the file id only when there is one, and returns the answer', async () => {
+    const answer = { draftId: 'd1', lines: [{ productId: 'p1', quantity: 4, unit: 'kg' }], unmatched: [] }
+    const first = service.extractStockCount('קמח 4 קילו', 'f1')
+    const req = http.expectOne(`${BASE}/stock/extract`)
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({ text: 'קמח 4 קילו', fileId: 'f1' })
+    req.flush(answer)
+    expect(await first).toEqual(answer)
+
+    const second = service.extractStockCount('אורז 2')
+    const req2 = http.expectOne(`${BASE}/stock/extract`)
+    expect(req2.request.body).toEqual({ text: 'אורז 2' })
+    req2.flush({ draftId: null, lines: [], unmatched: [] })
+    await second
+  })
+
   it('confirmLogisticsDraft posts the kept lines to the draft url', async () => {
     const saved = [{ itemKey: 'k', status: 'needed' as const }]
     const result = service.confirmLogisticsDraft('d1', saved)

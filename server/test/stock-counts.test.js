@@ -187,3 +187,46 @@ describe('the generic data API', () => {
     expect(items.map(c => c._id)).toEqual([d.body._id])
   })
 })
+
+describe('finalize confirms the AI drafts of the count (plan 637)', () => {
+  const drafts = () => testDb().collection('aiDrafts')
+  const aiDraft = (...lines) => ({ lines, unmatched: [] })
+  const seed = (_id, businessId, extra = {}) => drafts().insertOne({
+    _id, businessId, userId: 'own1', feature: 'stock_extract', subject: { type: 'stockCount' }, input: { text: 't' },
+    aiDraft: aiDraft(line('flour', 4, 'kg'), line('rice', 2, 'kg')), status: 'pending', at: 1, ...extra,
+  })
+
+  beforeEach(async () => {
+    await drafts().deleteMany({})
+  })
+
+  it('confirms two pending drafts, each with its own keptRatio, and skips a confirmed one', async () => {
+    await seed('d1', 'b1')
+    await seed('d2', 'b1', { aiDraft: aiDraft(line('flour', 4, 'kg')) })
+    await seed('d3', 'b1', { status: 'confirmed', confirmedAt: 7, keptRatio: 0.25 })
+    const c = await post(OWNER, body([line('flour', 4, 'kg'), line('rice', 3, 'kg')], NOW - HOUR, {
+      source: 'voice', draftIds: ['d1', 'd2', 'd3'],
+    }))
+    expect(c.status).toBe(201)
+    const res = await finalize(OWNER, c.body._id)
+    expect(res.status).toBe(200)
+    const d1 = await drafts().findOne({ _id: 'd1' })
+    const d2 = await drafts().findOne({ _id: 'd2' })
+    const d3 = await drafts().findOne({ _id: 'd3' })
+    expect(d1).toMatchObject({ status: 'confirmed', keptRatio: 0.5 })
+    expect(d2).toMatchObject({ status: 'confirmed', keptRatio: 1 })
+    expect(d1.saved.lines).toEqual([line('flour', 4, 'kg'), line('rice', 3, 'kg')])
+    expect(d3).toMatchObject({ status: 'confirmed', confirmedAt: 7, keptRatio: 0.25 })
+  })
+
+  it('leaves a draft of another business pending and still answers 200', async () => {
+    await seed('d1', 'b1')
+    await seed('foreign', 'b2')
+    const c = await post(OWNER, body([line('flour', 4, 'kg')], NOW - HOUR, { draftIds: ['foreign', 'nope', 'd1'] }))
+    const res = await finalize(OWNER, c.body._id)
+    expect(res.status).toBe(200)
+    expect(res.body.status).toBe('final')
+    expect((await drafts().findOne({ _id: 'foreign' })).status).toBe('pending')
+    expect((await drafts().findOne({ _id: 'd1' })).status).toBe('confirmed')
+  })
+})

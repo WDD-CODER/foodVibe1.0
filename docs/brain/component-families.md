@@ -328,6 +328,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
+- Plan 637: `GeminiService.extractStockCount` (`src/app/core/services/gemini.service.ts`) — one POST of a spoken or typed stock count to `API.ai('stock/extract')`, same `withRetry` + `modelParam_` pattern as `matchProductNames`; returns suggested lines, never saves a count.
 - `StockCountService` (`src/app/pages/inventory/services/stock-count.service.ts`): page-scoped client of `API.stock` for the stock count screen — on-hand, the open draft, save draft (POST then PUT), finalize (plan 636).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
@@ -599,4 +600,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/pages/inventory/components/product-import/product-import.component.ts` — the `embedded`, `file` inputs and `applied` output on `app-product-import`: `embedded` hides the page header, the back link and the paste box; `file` starts the file read once per file object; `applied` reports the apply with its invoice id.
 - Pieces: embedded, file inputs and applied output on app-product-import.
 - When: a second screen hosts the import preview; never copy the preview.
+- Known copies: none.
+
+### stock-ai-draft — `StockAiDraftComponent`
+
+- Status: stable — plan 637
+- Use: `src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.ts` — the "count by voice or text" section of the stock count sheet: the open button, the shared recorder (`app-voice-note`, purpose `stock`), the waiting state, the "not recognised" and "already counted" lists; it emits the server's answer and the sheet applies it.
+- Pieces: StockAiDraftComponent, app-stock-ai-draft.
+- When: a stock suggestion from voice or text is read and reviewed; never a second review UI for stock.
+- Known copies: none.
+
+### stock-extract — `server/utils/stock-extract.js`
+
+- Status: stable — plan 637
+- Use: `server/utils/stock-extract.js` — `STOCK_EXTRACT_SYSTEM_PROMPT`, `unitList`, `userPart`, `cleanStockLines` (positions in, checked lines out) and `stockKeptRatio`; `server/routes/ai/stock.js` and `server/routes/stock.js` (finalise) use it; the request and answer schemas are `shared/schemas/ai-stock-extract.schema.ts`.
+- Pieces: server/utils/stock-extract.js, cleanStockLines, stockKeptRatio.
+- When: a stock count text is turned into lines or a stock draft is scored; the model only returns positions, never ids or sums.
 - Known copies: none.

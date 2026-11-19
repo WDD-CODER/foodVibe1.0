@@ -19,6 +19,7 @@ import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
 import type { ImportRow, InvoiceReadResult } from './product-import.service'
 import type { ProductNameMatchRequest, ProductNameMatchResponse } from '@schemas/ai-product-match.schema'
+import type { StockExtractResponse } from '@schemas/ai-stock-extract.schema'
 import {
   VOICE_AUDIO_MAX_BASE64,
   type VoiceTranscribeRequest,
@@ -238,6 +239,25 @@ export class GeminiService {
         ...body,
         ...this.modelParam_()
       })
+    )
+    incrementGeminiUsage()
+    return data
+  }
+
+  /**
+   * Plan 637 (C-STOCK): a spoken or typed stock count → suggested count lines (never saved by this call).
+   * The answer holds positions already resolved by the server to product ids. Throws on an HTTP error; the caller
+   * offers the model switch (`offerModelSwitch`) for 'model_exhausted'.
+   */
+  async extractStockCount(text: string, fileId?: string): Promise<StockExtractResponse> {
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<StockExtractResponse>(`${this.authBase_}${API.ai('stock/extract')}`, {
+          text,
+          ...(fileId && { fileId }),
+          ...this.modelParam_()
+        })
+      )
     )
     incrementGeminiUsage()
     return data

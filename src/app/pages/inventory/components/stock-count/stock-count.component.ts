@@ -26,6 +26,13 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { StockCountService } from '../../services/stock-count.service'
 import { StockBelowMinimumComponent } from './stock-below-minimum/stock-below-minimum.component'
+import {
+  StockAiDraftComponent,
+  type StockAiConflict,
+  type StockAiExtracted,
+  type StockAiUnmatched
+} from './stock-ai-draft/stock-ai-draft.component'
+import type { StockExtractLine } from '@schemas/ai-stock-extract.schema'
 
 interface RowState {
   counted: boolean
@@ -36,6 +43,15 @@ interface RowState {
 type SheetView = 'sheet' | 'below'
 type ShowFilter = 'all' | 'counted' | 'uncounted'
 type LoadState = 'loading' | 'ready' | 'failed'
+type CountSource = 'manual' | 'voice' | 'text'
+
+/** A suggestion waiting beside a row the person already counted differently. */
+interface PendingConflict extends StockAiConflict {
+  line: StockExtractLine
+}
+
+/** The most drafts one count may carry (C-STOCK). */
+const MAX_DRAFT_IDS = 20
 
 const LINE_ERRORS = ['UNIT_NOT_CONVERTIBLE', 'UNKNOWN_PRODUCT', 'DUPLICATE_PRODUCT']
 
@@ -59,7 +75,8 @@ function todayIso(): string {
     InputClearComponent,
     ListShellComponent,
     LoaderComponent,
-    StockBelowMinimumComponent
+    StockBelowMinimumComponent,
+    StockAiDraftComponent
   ],
   templateUrl: './stock-count.component.html',
   styleUrl: './stock-count.component.scss',
@@ -86,6 +103,14 @@ export class StockCountComponent implements OnInit {
   protected readonly loadState_ = signal<LoadState>('loading')
   protected readonly onHand_ = signal<OnHandRow[]>([])
   private readonly savedSnapshot_ = signal('')
+  /** Plan 637: rows that carry the "AI suggestion" mark until the person changes them. */
+  protected readonly aiRows_ = signal<ReadonlySet<string>>(new Set())
+  protected readonly conflicts_ = signal<PendingConflict[]>([])
+  protected readonly unmatched_ = signal<StockAiUnmatched[]>([])
+  protected readonly aiBusy_ = signal(false)
+  private readonly source_ = signal<CountSource>('manual')
+  private readonly draftIds_ = signal<string[]>([])
+  private unmatchedSeq_ = 0
 
   protected readonly products_ = computed(() =>
     [...this.kitchen_.products_()].sort((a, b) => a.nameHebrew.localeCompare(b.nameHebrew, 'he'))
@@ -170,6 +195,7 @@ export class StockCountComponent implements OnInit {
 
   protected toggleCounted(product: Product): void {
     const current = this.rows_()[product._id]
+    this.unmark_(product._id)
     if (current?.counted) {
       this.rows_.update((rows) => Object.fromEntries(Object.entries(rows).filter(([id]) => id !== product._id)))
     } else {
@@ -196,7 +222,76 @@ export class StockCountComponent implements OnInit {
     return this.run(true)
   }
 
+  /** Plan 637: applies a suggestion; it never overwrites a row the person already counted differently. */
+  protected onExtracted(e: StockAiExtracted): void {
+    const known = new Map(this.kitchen_.products_().map((p) => [p._id, p]))
+    const { lines, unmatched, draftId } = e.answer
+    let applied = 0
+    for (const line of lines) {
+      const product = known.get(line.productId)
+      if (!product) continue
+      const state = this.rows_()[product._id]
+      if (!state?.counted) {
+        this.suggest_(product._id, line)
+        applied++
+      } else if (state.amount !== line.quantity || state.unit !== line.unit) {
+        const entry: PendingConflict = {
+          productId: product._id,
+          name: product.nameHebrew,
+          onSheet: `${state.amount} ${state.unit}`,
+          suggested: `${line.quantity} ${line.unit}`,
+          line
+        }
+        this.conflicts_.update((list) => [...list.filter((c) => c.productId !== product._id), entry])
+      }
+    }
+    if (unmatched.length) {
+      const added = unmatched.map((u) => ({
+        id: ++this.unmatchedSeq_,
+        text: [u.spoken, u.quantity, u.unit].filter((v) => v !== undefined && v !== '').join(' ')
+      }))
+      this.unmatched_.update((list) => [...list, ...added])
+    }
+    if (draftId && !this.draftIds_().includes(draftId) && this.draftIds_().length < MAX_DRAFT_IDS) {
+      this.draftIds_.update((ids) => [...ids, draftId])
+    }
+    if (e.source === 'voice') this.source_.set('voice')
+    else if (this.source_() === 'manual') this.source_.set('text')
+    if (lines.length === 0 && unmatched.length === 0) {
+      this.userMsg_.onSetWarningMsg(this.translation_.translate('stk_ai_nothing_found'))
+    } else if (applied > 0) {
+      this.userMsg_.onSetSuccessMsg(this.translation_.translate('stk_ai_applied').replace('{n}', String(applied)))
+    }
+  }
+
+  protected replaceWithSuggestion(productId: string): void {
+    const entry = this.conflicts_().find((c) => c.productId === productId)
+    if (!entry) return
+    this.suggest_(productId, entry.line)
+    this.keepOnSheet(productId)
+  }
+
+  protected keepOnSheet(productId: string): void {
+    this.conflicts_.update((list) => list.filter((c) => c.productId !== productId))
+  }
+
+  protected dismissUnmatched(id: number): void {
+    this.unmatched_.update((list) => list.filter((u) => u.id !== id))
+  }
+
+  private suggest_(productId: string, line: StockExtractLine): void {
+    this.errorProductId_.update((id) => (id === productId ? null : id))
+    this.rows_.update((rows) => ({ ...rows, [productId]: { counted: true, amount: line.quantity, unit: line.unit } }))
+    this.aiRows_.update((set) => new Set(set).add(productId))
+  }
+
+  private unmark_(productId: string): void {
+    if (!this.aiRows_().has(productId)) return
+    this.aiRows_.update((set) => new Set([...set].filter((id) => id !== productId)))
+  }
+
   private patch_(product: Product, change: Partial<RowState>): void {
+    this.unmark_(product._id)
     this.errorProductId_.update((id) => (id === product._id ? null : id))
     this.rows_.update((rows) => ({
       ...rows,
@@ -226,6 +321,11 @@ export class StockCountComponent implements OnInit {
     this.draftSavedAt_.set(draft ? (draft.updatedAt ?? null) : null)
     this.countedDate_.set(draft ? isoFromCountedAt(draft.countedAt) : todayIso())
     this.errorProductId_.set(null)
+    this.aiRows_.set(new Set())
+    this.conflicts_.set([])
+    this.unmatched_.set([])
+    this.source_.set(draft?.source ?? 'manual')
+    this.draftIds_.set(draft?.draftIds ?? [])
     this.savedSnapshot_.set(this.snapshot_())
   }
 
@@ -241,7 +341,8 @@ export class StockCountComponent implements OnInit {
     const lines = this.countedLines_()
     const input: StockCountInput = {
       countedAt: countedAtFromIso(this.countedDate_(), Date.now()),
-      source: 'manual',
+      source: this.source_(),
+      ...(this.draftIds_().length > 0 && { draftIds: this.draftIds_() }),
       lines
     }
     try {

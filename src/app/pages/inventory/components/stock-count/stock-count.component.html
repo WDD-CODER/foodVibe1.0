@@ -38,7 +38,7 @@
       type="button"
       class="c-btn-ghost"
       data-testid="stk-save-draft"
-      [disabled]="saving_() || !dateOk_() || (countedCount_() === 0 && !draftId_())"
+      [disabled]="saving_() || aiBusy_() || !dateOk_() || (countedCount_() === 0 && !draftId_())"
       (click)="saveDraft()"
     >
       <lucide-icon name="save" [size]="18"></lucide-icon>
@@ -48,7 +48,7 @@
       type="button"
       class="c-btn-primary"
       data-testid="stk-finalize"
-      [disabled]="saving_() || !dateOk_() || countedCount_() === 0"
+      [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
       (click)="finalize()"
     >
       <lucide-icon name="check" [size]="18"></lucide-icon>
@@ -107,6 +107,16 @@
         <app-empty-state messageKey="stk_empty_products" icon="list-checks" />
       </div>
     } @else {
+      <app-stock-ai-draft
+        [conflicts]="conflicts_()"
+        [unmatched]="unmatched_()"
+        [disabled]="saving_()"
+        (busyChange)="aiBusy_.set($event)"
+        (extracted)="onExtracted($event)"
+        (replace)="replaceWithSuggestion($event)"
+        (keep)="keepOnSheet($event)"
+        (dismiss)="dismissUnmatched($event)"
+      />
       @if (draftId_() && draftSavedAt_() !== null) {
         <p class="stock-count__draft-note" data-testid="stk-draft-note">{{ draftFromText_() }}</p>
       }
@@ -121,6 +131,11 @@
               <lucide-icon name="alert-triangle" [size]="16" class="stock-count__error-icon"></lucide-icon>
             }
             {{ row.product.nameHebrew }}
+            @if (aiRows_().has(row.product._id)) {
+              <span class="c-chip c-chip--tag c-chip--amber stock-count__ai-tag" data-testid="stk-ai-tag">{{
+                'stk_ai_tag' | translatePipe
+              }}</span>
+            }
           </div>
           <div class="c-list-body-cell" role="cell" dir="ltr">
             <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
