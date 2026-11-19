@@ -259,7 +259,6 @@ $break-desktop: 1200px; // mirrors src/styles.scss
       block-size: min(60dvh, 34rem);
       min-inline-size: 0;
       overflow-y: auto;
-      overflow-wrap: anywhere;
       scrollbar-gutter: stable;
     }
 
@@ -323,6 +322,8 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 
     .pbd-history__meta {
       font-size: var(--fs-sm);
+      font-variant-numeric: tabular-nums; // the dates line up from row to row
+      overflow-wrap: anywhere; // a long editor name wraps inside the box
       color: var(--color-text-muted);
     }
 

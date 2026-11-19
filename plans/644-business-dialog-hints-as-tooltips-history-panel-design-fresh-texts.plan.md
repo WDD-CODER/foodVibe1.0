@@ -190,4 +190,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - grep proof: every `var(--…)` in the `components.platform-business-dialog` layer is defined in src/styles.scss —
   --bg-muted, --border-default, --color-danger, --color-text-muted, --fs-base, --fs-sm, --fw-semibold, --radius-sm,
   --space-1, --space-2 (all `ok`).
+- kit-checks first failed `style-duplicate-block 363 → 364`: `.pbd-history__meta` {font-size, color} twinned other
+  page-local blocks (no engine class for muted meta text exists). The meta block now also carries
+  `font-variant-numeric: tabular-nums` (dates line up) and `overflow-wrap: anywhere` (long names wrap) →
+  `KIT_CHECKS: ok (6 checks)`; build → 0, lint → 0, lint:reuse → ok after the change.
+- the kit copy of scope-check run from this folder reports `SCOPE: out` only for untracked `Claude outputs/**` files of
+  the main checkout (not in this branch's diff); the worktree's `node scripts/scope-check.mjs --diff=origin/orch/mod-fixes
+  --plan=<plan>` → `SCOPE: ok`.
 - e2e/ui/644-1.spec.ts written, not run (no running app or QA login in the worktree); 638-1/639-1 do not read the hint.
