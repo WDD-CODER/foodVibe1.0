@@ -1,0 +1,188 @@
+<app-list-shell
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="isPanelOpen_.set(!isPanelOpen_())"
+  [gridTemplate]="gridTemplate_()"
+  [mobileGridTemplate]="view_() === 'sheet' ? '1.6fr 1fr 1.2fr' : '1fr'"
+  [resultCount]="countedCount_()"
+  [resultTotal]="products_().length"
+>
+  <ng-container shell-title>{{ 'stk_title' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="stock-count-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="stock-count-search"
+        type="text"
+        [ngModel]="search_()"
+        (ngModelChange)="search_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <app-input-clear [visible]="!!search_()" (clear)="search_.set('')" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    <app-date-field
+      inputId="stock-count-date"
+      ariaLabelKey="stk_count_date"
+      variant="outline"
+      [value]="countedDate_()"
+      (valueChange)="setDate($event)"
+    />
+    <button
+      type="button"
+      class="c-btn-ghost"
+      data-testid="stk-save-draft"
+      [disabled]="saving_() || aiBusy_() || !dateOk_() || (countedCount_() === 0 && !draftId_())"
+      (click)="saveDraft()"
+    >
+      <lucide-icon name="save" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ (saving_() ? 'saving' : 'stk_save_draft') | translatePipe }}</span>
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="stk-finalize"
+      [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
+      (click)="finalize()"
+    >
+      <lucide-icon name="check" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'stk_finalize' | translatePipe }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="stock-count__tabs">
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        data-testid="stk-tab-sheet"
+        [class.active]="view_() === 'sheet'"
+        (click)="view_.set('sheet')"
+      >
+        {{ 'stk_tab_sheet' | translatePipe }}
+      </button>
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        data-testid="stk-tab-below"
+        [class.active]="view_() === 'below'"
+        (click)="view_.set('below')"
+      >
+        {{ 'stk_tab_below_min' | translatePipe }}
+        <span class="c-chip__count" [class.c-chip__count--zero]="below_().rows.length === 0">{{
+          below_().rows.length
+        }}</span>
+      </button>
+    </div>
+    @if (view_() === 'sheet') {
+      <div class="c-grid-header-cell" role="columnheader">{{ 'product' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_in_base' | translatePipe }}</div>
+    }
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (loadState_() === 'loading') {
+      <div class="stock-count__state"><app-loader /></div>
+    } @else if (loadState_() === 'failed') {
+      <div class="stock-count__state" data-testid="stk-load-failed">
+        <app-empty-state messageKey="stk_load_failed" icon="alert-triangle" ctaLabelKey="retry" (ctaClick)="load()" />
+      </div>
+    } @else if (view_() === 'below') {
+      <app-stock-below-minimum
+        [rows]="below_().rows"
+        [uncounted]="below_().uncounted"
+        [hasFinalCount]="onHand_().length > 0"
+      />
+    } @else if (products_().length === 0) {
+      <div class="stock-count__state" data-testid="stk-empty-products">
+        <app-empty-state messageKey="stk_empty_products" icon="list-checks" />
+      </div>
+    } @else {
+      <app-stock-ai-draft
+        [conflicts]="conflicts_()"
+        [unmatched]="unmatched_()"
+        [disabled]="saving_()"
+        (busyChange)="aiBusy_.set($event)"
+        (extracted)="onExtracted($event)"
+        (replace)="replaceWithSuggestion($event)"
+        (keep)="keepOnSheet($event)"
+        (dismiss)="dismissUnmatched($event)"
+      />
+      @if (draftId_() && draftSavedAt_() !== null) {
+        <p class="stock-count__draft-note" data-testid="stk-draft-note">{{ draftFromText_() }}</p>
+      }
+      @for (row of visibleRows_(); track row.product._id) {
+        <div
+          class="c-list-row"
+          data-testid="stk-row"
+          [class.stock-count__row--error]="errorProductId_() === row.product._id"
+        >
+          <div class="c-list-body-cell stock-count__name" role="cell">
+            @if (errorProductId_() === row.product._id) {
+              <lucide-icon name="alert-triangle" [size]="16" class="stock-count__error-icon"></lucide-icon>
+            }
+            {{ row.product.nameHebrew }}
+            @if (aiRows_().has(row.product._id)) {
+              <span class="c-chip c-chip--tag c-chip--amber stock-count__ai-tag" data-testid="stk-ai-tag">{{
+                'stk_ai_tag' | translatePipe
+              }}</span>
+            }
+          </div>
+          <div class="c-list-body-cell" role="cell" dir="ltr">
+            <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
+          </div>
+          <div class="c-list-body-cell" role="cell">
+            <app-custom-select
+              [options]="unitOptions_(row.product)"
+              [compact]="true"
+              [ngModel]="row.state.unit"
+              (valueChange)="setUnit(row.product, $event)"
+            />
+          </div>
+          <div class="c-list-body-cell stock-count__counted" role="cell">
+            <label class="c-chip c-chip--toggle">
+              <input type="checkbox" [checked]="row.state.counted" (change)="toggleCounted(row.product)" />
+              <span>{{ 'stk_counted' | translatePipe }}</span>
+            </label>
+          </div>
+          <div class="c-list-body-cell stock-count__base" role="cell" dir="ltr">
+            {{ baseText_(row.product, row.state) ?? '' }}
+          </div>
+        </div>
+      } @empty {
+        <div class="stock-count__state" data-testid="stk-no-match">
+          <app-empty-state messageKey="no_products_match" icon="search" />
+        </div>
+      }
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="c-filter-section">
+      <p class="stock-count__filter-title">{{ 'stk_show' | translatePipe }}</p>
+      <div class="c-chip-group">
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="stock-show" [checked]="show_() === 'all'" (change)="show_.set('all')" />
+          <span>{{ 'stk_show_all' | translatePipe }}</span>
+        </label>
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="stock-show" [checked]="show_() === 'counted'" (change)="show_.set('counted')" />
+          <span>{{ 'stk_show_counted' | translatePipe }}</span>
+        </label>
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="stock-show" [checked]="show_() === 'uncounted'" (change)="show_.set('uncounted')" />
+          <span>{{ 'stk_show_uncounted' | translatePipe }}</span>
+        </label>
+      </div>
+    </div>
+  </ng-container>
+</app-list-shell>

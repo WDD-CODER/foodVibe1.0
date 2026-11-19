@@ -15,6 +15,7 @@ const { newId } = require('../utils/id')
 const { loadUnitRates } = require('../utils/unit-rates')
 const { LIVE } = require('../jobs/purge-deleted')
 const { confirmAiDraft } = require('../services/ai-drafts')
+const { stockKeptRatio } = require('../utils/stock-extract')
 const { toBase } = require('../generated/schemas/units/to-base')
 const { stockCountInputSchema } = require('../generated/schemas/stock/stock-count-input.schema')
 
@@ -133,14 +134,6 @@ router.put('/counts/:id', verifyToken, async (req, res) => {
   }
 })
 
-/** Closeness of the model's draft to the saved count: the share of the saved products the draft listed. */
-function keptRatio(aiDraft, saved) {
-  const drafted = new Set((aiDraft?.lines ?? []).map(l => l?.productId))
-  const lines = saved?.lines ?? []
-  if (!lines.length) return 0
-  return lines.filter(l => drafted.has(l.productId)).length / lines.length
-}
-
 // POST /api/v1/stock/counts/:id/finalize
 router.post('/counts/:id/finalize', verifyToken, async (req, res) => {
   try {
@@ -158,11 +151,13 @@ router.post('/counts/:id/finalize', verifyToken, async (req, res) => {
     const result = await db().collection(TYPE).findOneAndUpdate(
       { ...scopeOf(req), status: 'draft' }, { $set: set }, { returnDocument: 'after' })
     if (!result) return res.status(409).json({ error: 'COUNT_FINAL' })
+    // Plan 637: each pending draft is scored against its own suggested lines. A failure never fails the finalise.
+    const saved = { lines: converted.lines.map(l => ({ productId: l.productId, quantity: l.quantity, unit: l.unit })) }
     for (const draftId of current.draftIds ?? []) {
       try {
-        await confirmAiDraft(req, draftId, { lines: converted.lines }, keptRatio)
-      } catch (err) {
-        req.log.error({ err, event: 'stock.count.confirm_draft_failed' })
+        await confirmAiDraft(req, draftId, saved, stockKeptRatio)
+      } catch {
+        req.log.warn({ event: 'stock.count.draft_confirm_failed' })
       }
     }
     req.log.info({ event: 'stock.count.finalized', lines: converted.lines.length })
