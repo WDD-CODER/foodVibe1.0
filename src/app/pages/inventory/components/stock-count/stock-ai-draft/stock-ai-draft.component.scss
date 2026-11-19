@@ -67,6 +67,12 @@
     overflow-wrap: anywhere;
   }
 
+  .stock-ai__choices,
+  .stock-ai__search {
+    flex: 1 1 100%;
+    min-inline-size: 0;
+  }
+
   .stock-ai__muted {
     color: var(--color-text-muted);
     font-size: var(--fs-sm);

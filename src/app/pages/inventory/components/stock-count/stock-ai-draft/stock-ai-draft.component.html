@@ -70,8 +70,11 @@
     >
       <h4 class="stock-ai__title">{{ 'stk_ai_unmatched_title' | translatePipe }}</h4>
       @for (u of unmatched(); track u.id) {
-        <div class="stock-ai__row">
+        <div class="stock-ai__row stock-ai__row--line" data-testid="stk-ai-line">
           <span class="stock-ai__name">{{ u.text }}</span>
+          <span class="stock-ai__muted">{{
+            (u.status === 'choose' ? 'stk_ai_choose' : 'stk_ai_not_found') | translatePipe
+          }}</span>
           <button
             type="button"
             class="c-icon-btn"
@@ -80,6 +83,42 @@
             (click)="dismiss.emit(u.id)"
           >
             <lucide-icon name="x" [size]="16"></lucide-icon>
+          </button>
+          @if (u.hasAmount) {
+            @if (u.candidates.length) {
+              <div class="c-chip-group stock-ai__choices" data-testid="stk-ai-candidates">
+                @for (c of u.candidates; track c.productId) {
+                  <label class="c-chip c-chip--toggle">
+                    <input
+                      type="radio"
+                      [name]="'stk-ai-pick-' + u.id"
+                      [value]="c.productId"
+                      [checked]="false"
+                      (change)="pickProduct_(u.id, c.productId)"
+                    />
+                    <span>{{ c.name }}</span>
+                  </label>
+                }
+              </div>
+            }
+            <div class="stock-ai__search" data-testid="stk-ai-search">
+              <app-search-combobox
+                [options]="products()"
+                [labelOf]="labelOf_"
+                [keyOf]="keyOf_"
+                [query]="query_(u.id)"
+                (queryChange)="setQuery_(u.id, $event)"
+                [open]="true"
+                [minChars]="1"
+                [maxResults]="5"
+                listPosition="inline"
+                placeholder="stk_ai_search"
+                (picked)="pickFromSearch_(u.id, $event)"
+              />
+            </div>
+          }
+          <button type="button" class="c-chip c-chip--tap" data-testid="stk-ai-add-new" (click)="addNew.emit(u.id)">
+            {{ 'stk_ai_add_new' | translatePipe }}
           </button>
         </div>
       }

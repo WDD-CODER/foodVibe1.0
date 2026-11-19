@@ -84,6 +84,9 @@ append the path to the scope block above and retry.
 - the Hebrew name folding — family: helpers — rung: 3 — why: extend the stock extract matcher beside
   `normalizeProductName`.
 
+- .stock-ai__choices — family: stock-ai-draft — rung: 1 — why: layout of the candidate chips inside the component's own stylesheet.
+- .stock-ai__search — family: stock-ai-draft — rung: 1 — why: layout of the product search inside the component's own stylesheet.
+
 ## Step 0 — Reality Check
 
 Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits
@@ -119,9 +122,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Find the best fitting product for each spoken name and say when several fit — the scoring, the folding, the statuses, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, shared/schemas/ai-stock-extract.schema.ts, server/test/stock-extract-util.test.js, server/test/ai-stock-extract.test.js
-- [ ] A2: Let the user pick the product per line and never add an item by itself — the chips, the search, the add-new button, the keys, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
-- [ ] A3: Run every check — the Done-when commands in order — docs/brain/inventory.md
+- [x] A1: Find the best fitting product for each spoken name and say when several fit — the scoring, the folding, the statuses, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, shared/schemas/ai-stock-extract.schema.ts, server/test/stock-extract-util.test.js, server/test/ai-stock-extract.test.js
+- [x] A2: Let the user pick the product per line and never add an item by itself — the chips, the search, the add-new button, the keys, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
+- [x] A3: Run every check — the Done-when commands in order — docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 648 (the server-side match without the catalog sent to the model).
@@ -134,3 +137,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - decided: an unmatched line never becomes a new item without a press — why: Dandan's rule, the count is on the list.
+- evidence: `pnpm run test:server` → exit 0, 1956 passed; `pnpm run test:ci` → exit 0, 2652 SUCCESS; `pnpm run build` → 0; `pnpm run lint` → 0 errors; `pnpm --dir server run lint` → 0 errors; kit-checks ok, kit-manifest ok, scope-check ok, breadcrumbs clean, log-query no entries.
+- behaviour: «הוספת מוצר חדש» opens the existing add-product page (`/inventory/add`), the simplest way to add an item — reverse: change `addNewForSpoken` in stock-count.component.ts.
+- behaviour: a spoken line with no amount shows no candidate chips or search (nothing to fill a row with), only the add-new button — reverse: drop `hasAmount` in stock-ai-draft.component.html.

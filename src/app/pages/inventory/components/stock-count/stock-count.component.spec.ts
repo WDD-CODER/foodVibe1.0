@@ -1,4 +1,5 @@
 import { signal } from '@angular/core'
+import { Router } from '@angular/router'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ListChecks, LucideAngularModule } from 'lucide-angular'
@@ -26,6 +27,7 @@ describe('StockCountComponent', () => {
   let onSetSuccessMsg: jasmine.Spy
   let onSetWarningMsg: jasmine.Spy
   let logError: jasmine.Spy
+  let navigate: jasmine.Spy
 
   async function setup(
     products: Product[] = [product('a', 'אורז'), product('b', 'קמח')],
@@ -45,6 +47,7 @@ describe('StockCountComponent', () => {
     onSetSuccessMsg = jasmine.createSpy('onSetSuccessMsg')
     onSetWarningMsg = jasmine.createSpy('onSetWarningMsg')
     logError = jasmine.createSpy('error')
+    navigate = jasmine.createSpy('navigate').and.resolveTo(true)
     TestBed.configureTestingModule({
       imports: [StockCountComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ListChecks })],
       providers: [
@@ -54,6 +57,7 @@ describe('StockCountComponent', () => {
         { provide: UserMsgService, useValue: { onSetErrorMsg, onSetSuccessMsg, onSetWarningMsg } },
         { provide: GeminiService, useValue: jasmine.createSpyObj('GeminiService', ['extractStockCount']) },
         { provide: LoggingService, useValue: { error: logError } },
+        { provide: Router, useValue: { navigate } },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     })
@@ -237,6 +241,54 @@ describe('StockCountComponent', () => {
       expect(el().querySelector('[data-testid="stk-ai-conflicts"]')).toBeNull()
       expect(el().querySelector('[data-testid="stk-ai-unmatched"]')).toBeNull()
       expect(tag(rows()[1])).toBeNull()
+    })
+
+    it('plan 650: a choose line shows its candidates and the pick fills that row; no row is added by itself', async () => {
+      await setup([product('a', 'בצל צהוב'), product('b', 'בצל סגול')])
+      child().extracted.emit({
+        answer: answer({
+          unmatched: [
+            {
+              spoken: 'בצל',
+              status: 'choose',
+              quantity: 2,
+              unit: 'kg',
+              candidates: [
+                { productId: 'a', nameHebrew: 'בצל צהוב' },
+                { productId: 'b', nameHebrew: 'בצל סגול' }
+              ]
+            }
+          ]
+        }),
+        source: 'voice'
+      })
+      await settle()
+      expect(rows().length).toBe(2)
+      expect(chipOf(rows()[1]).checked).toBeFalse()
+      const chips = el().querySelectorAll<HTMLInputElement>('[data-testid="stk-ai-candidates"] .c-chip--toggle input')
+      expect(chips.length).toBe(2)
+      chips[0].click()
+      await settle()
+      expect(chipOf(rows()[1]).checked).toBeTrue()
+      expect(tag(rows()[1])).not.toBeNull()
+      expect(rows().length).toBe(2)
+      expect(el().querySelector('[data-testid="stk-ai-unmatched"]')).toBeNull()
+      expect(onSetSuccessMsg).toHaveBeenCalledWith('stk_ai_applied')
+    })
+
+    it('plan 650: an unmatched line adds nothing; «הוספת מוצר חדש» opens the add page only when pressed', async () => {
+      await setup()
+      child().extracted.emit({
+        answer: answer({ unmatched: [{ spoken: 'בננות', status: 'unmatched', quantity: 3 }] }),
+        source: 'text'
+      })
+      await settle()
+      expect(rows().length).toBe(2)
+      expect(onSetSuccessMsg).not.toHaveBeenCalled()
+      expect(navigate).not.toHaveBeenCalled()
+      expect(el().querySelector('[data-testid="stk-ai-search"]')).not.toBeNull()
+      btn('stk-ai-add-new').click()
+      expect(navigate).toHaveBeenCalledWith(['/inventory/add'])
     })
 
     it('says so when nothing was found', async () => {
