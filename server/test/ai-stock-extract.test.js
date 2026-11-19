@@ -63,53 +63,64 @@ describe('POST /ai/stock/extract', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('returns only the caller products; position 99, null and no number land in unmatched', async () => {
+  it('returns only the caller products; an unknown name, no number and an empty name are not lines', async () => {
     fetchMock.mockResolvedValue(modelAnswer({ lines: [
-      { p: 2, spoken: 'קמח', quantity: 4, u: null },
-      { p: 99, spoken: 'בננות', quantity: 2, u: null },
-      { p: null, spoken: 'חמוצים', quantity: 1, u: null },
-      { p: 0, spoken: 'אורז', quantity: null, u: null },
+      { spoken: 'קמח', quantity: 4, unit: null },
+      { spoken: 'בננות', quantity: 2, unit: null },
+      { spoken: 'חמוצים', quantity: 1, unit: 'kg' },
+      { spoken: 'אורז', quantity: null, unit: null },
+      { spoken: '', quantity: 3, unit: null },
     ] }))
     const res = await post({ text: 'קמח 4 קילו, בננות 2, חמוצים 1, אורז' })
     expect(res.status).toBe(200)
     expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
     expect(res.body.unmatched).toEqual([
-      { spoken: 'בננות', quantity: 2 }, { spoken: 'חמוצים', quantity: 1 }, { spoken: 'אורז' },
+      { spoken: 'בננות', quantity: 2 }, { spoken: 'חמוצים', quantity: 1, unit: 'kg' }, { spoken: 'אורז' },
     ])
     const sent = sentBody()
     const user = sent.contents[0].parts[0].text
-    expect(user).toContain('0. "אורז" [kg]')
     expect(user).toContain('קמח 4 קילו')
-    expect(JSON.stringify(sent.system_instruction)).not.toContain('קמח')
-    expect(JSON.stringify(sent.system_instruction)).not.toContain('אורז')
+    expect(user).toContain('UNITS:')
     expect(sent.contents).toHaveLength(1)
   })
 
-  it('refuses 801 live products with 413 and no model call; 800 answers 200', async () => {
-    const docs = Array.from({ length: 797 }, (_, i) => ({
+  it('works with 3,000 products: one line for קמח, and the model gets no product list', async () => {
+    const docs = Array.from({ length: 2997 }, (_, i) => ({
       _id: `bulk${i}`, businessId: 'b1', schemaVersion: 2, createdBy: 'own1', createdAt: 1, updatedAt: 1,
       name: `bulk${i}`, nameHebrew: `מוצר ${i}`, baseUnit: 'kg', purchaseOptions: [],
     }))
     await testDb().collection('products').insertMany(docs)
-    fetchMock.mockResolvedValue(modelAnswer({ lines: [] }))
-    expect((await post({ text: 'קמח 1' })).status).toBe(200)
-    await product('extra', 'עוד')
-    fetchMock.mockClear()
-    const res = await post({ text: 'קמח 1' })
-    expect(res.status).toBe(413)
-    expect(res.body).toEqual({ error: 'TOO_MANY_PRODUCTS', max: 800 })
-    expect(fetchMock).not.toHaveBeenCalled()
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [{ spoken: 'קמח', quantity: 4, unit: 'kg' }] }))
+    const res = await post({ text: 'קמח 4 קילו' })
+    expect(res.status).toBe(200)
+    expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
+    const sent = JSON.stringify(sentBody())
+    expect(sent).not.toContain('מוצר 1')
+    expect(sent).not.toContain('אורז')
+    expect(sent).not.toContain('PRODUCTS')
+    expect(sent).toContain('קמח 4 קילו')
+  })
+
+  it('a spoken name matching two products is unmatched with both as candidates', async () => {
+    await product('whole', 'קמח מלא')
+    await testDb().collection('products').updateOne({ _id: 'flour' }, { $set: { nameHebrew: 'קמח לבן' } })
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [{ spoken: 'קמח', quantity: 4, unit: 'kg' }] }))
+    const res = await post({ text: 'קמח 4' })
+    expect(res.body.lines).toEqual([])
+    expect(res.body.unmatched).toHaveLength(1)
+    expect(res.body.unmatched[0]).toMatchObject({ spoken: 'קמח', quantity: 4, unit: 'kg' })
+    expect(res.body.unmatched[0].candidates.map(c => c.productId).sort()).toEqual(['flour', 'whole'])
   })
 
   it('leaves out a product in the Trash and a product of another business', async () => {
     await testDb().collection('products').updateOne({ _id: 'rice' }, { $set: { deletedAt: 5 } })
     await product('foreign', 'סוכר-זר', 'b2')
-    fetchMock.mockResolvedValue(modelAnswer({ lines: [] }))
-    await post({ text: 'אורז 1' })
-    const user = sentBody().contents[0].parts[0].text
-    expect(user).not.toContain('אורז [kg]')
-    expect(user).not.toContain('סוכר-זר')
-    expect(user).toContain('"קמח"')
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [
+      { spoken: 'אורז', quantity: 1, unit: null }, { spoken: 'סוכר-זר', quantity: 1, unit: null },
+    ] }))
+    const res = await post({ text: 'אורז 1, סוכר-זר 1' })
+    expect(res.body.lines).toEqual([])
+    expect(res.body.unmatched.map(u => u.spoken)).toEqual(['אורז', 'סוכר-זר'])
   })
 
   it('answers 200 with empty lists and no model call when the business has no product', async () => {
@@ -120,7 +131,7 @@ describe('POST /ai/stock/extract', () => {
   })
 
   it('writes no count, one pending draft, one usage row, and logs no name or count word', async () => {
-    fetchMock.mockResolvedValue(modelAnswer({ lines: [{ p: 2, spoken: 'קמח', quantity: 4, u: null }] }))
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [{ spoken: 'קמח', quantity: 4, unit: null }] }))
     const res = await post({ text: 'קמח סודי 4 קילו' })
     expect(res.status).toBe(200)
     expect(await testDb().collection('stockCounts').countDocuments({})).toBe(0)

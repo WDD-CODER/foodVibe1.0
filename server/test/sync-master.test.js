@@ -216,3 +216,18 @@ describe('refresh sync gate (businesses.lastSyncedMasterVersion)', () => {
     expect(await testDb().collection('venues').countDocuments({ businessId: 'bA' })).toBe(0);
   });
 });
+
+describe('plan 648 — one copy of each master product', () => {
+  it('two syncs at once leave exactly one product per _masterId, and the unique partial index exists', async () => {
+    const db = testDb();
+    await db.collection('products').insertMany(
+      Array.from({ length: 40 }, (_, i) => ({ _id: `mp${i}`, ...M, nameHebrew: `מוצר ${i}`, baseUnit: 'kg' }))
+    );
+    await Promise.all([syncMasterToBusiness(), syncMasterToBusiness()]);
+    const docs = await db.collection('products').find({ businessId: 'bA' }).toArray();
+    expect(docs).toHaveLength(40);
+    expect(new Set(docs.map(d => d._masterId)).size).toBe(40);
+    const index = (await db.collection('products').indexes()).find(i => i.name === 'product_business_master_unique');
+    expect(index).toMatchObject({ unique: true, key: { businessId: 1, _masterId: 1 } });
+  });
+});

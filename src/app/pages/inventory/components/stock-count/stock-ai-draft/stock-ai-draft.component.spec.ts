@@ -87,13 +87,11 @@ describe('StockAiDraftComponent', () => {
     fixture.detectChanges()
   })
 
-  it('on 413 says too many products and keeps the recorder with its text', async () => {
-    gemini.extractStockCount.and.rejectWith(
-      new HttpErrorResponse({ status: 413, error: { error: 'TOO_MANY_PRODUCTS' } })
-    )
+  it('on 413 shows the general failure (no product cap any more) and keeps the recorder with its text', async () => {
+    gemini.extractStockCount.and.rejectWith(new HttpErrorResponse({ status: 413 }))
     await open()
     await send()
-    expect(onSetErrorMsg).toHaveBeenCalledWith('stk_ai_too_many_products')
+    expect(onSetErrorMsg).toHaveBeenCalledWith('stk_ai_failed')
     expect(note()).not.toBeNull()
     expect(extracted).toEqual([])
   })

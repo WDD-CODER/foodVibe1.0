@@ -1,7 +1,6 @@
 import { z } from 'zod'
 
 /** Plan 637 (C-STOCK) — stock count by voice or text: the request, the model's loose answer and the response. */
-export const STOCK_EXTRACT_MAX_PRODUCTS = 800
 export const STOCK_EXTRACT_MAX_TEXT = 20000
 
 export const stockExtractRequestSchema = z.object({
@@ -14,26 +13,33 @@ export const stockExtractRequestSchema = z.object({
 export type StockExtractRequest = z.infer<typeof stockExtractRequestSchema>
 
 /**
- * The model's raw answer, loose on purpose: a missing `spoken` reads as '', a missing `p`, `quantity` or `u` as null,
- * so one odd entry never refuses the whole answer. `p` = position in the product list, `u` = position in the unit list.
+ * The model's raw answer, loose on purpose: a missing `spoken` reads as '', a missing `quantity` or `unit` as null,
+ * so one odd entry never refuses the whole answer. Plan 648: the model sees no product list — `unit` is a name from
+ * the unit list, and the server matches `spoken` to the business's products.
  */
-const looseInt = z.preprocess((v) => (typeof v === 'number' && Number.isInteger(v) ? v : null), z.number().int().nullable())
 const looseNumber = z.preprocess((v) => (typeof v === 'number' && Number.isFinite(v) ? v : null), z.number().nullable())
 const looseText = z.preprocess((v) => (typeof v === 'string' ? v : ''), z.string())
+const looseUnit = z.preprocess((v) => (typeof v === 'string' && v.trim() ? v.trim() : null), z.string().nullable())
 
 export const stockExtractModelAnswerSchema = z.object({
   lines: z.array(
     z.object({
-      p: looseInt,
       spoken: looseText,
       quantity: looseNumber,
-      u: looseInt
+      unit: looseUnit
     })
   )
 })
 
 export type StockExtractLine = { productId: string; quantity: number; unit: string }
-export type StockExtractUnmatched = { spoken: string; quantity?: number; unit?: string }
+/** `candidates`: up to 5 products a spoken name could mean, when it matched more than one. */
+export type StockExtractCandidate = { productId: string; nameHebrew: string }
+export type StockExtractUnmatched = {
+  spoken: string
+  quantity?: number
+  unit?: string
+  candidates?: StockExtractCandidate[]
+}
 export type StockExtractResponse = {
   draftId: string | null
   lines: StockExtractLine[]
