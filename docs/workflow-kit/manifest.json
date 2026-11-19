@@ -4994,6 +4994,14 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.5.0): the /default skill. Classified project/stay like the other kit-synced files."
     },
     {
+      "path": "scripts/lib/notify.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.7.0): the Windows desktop notice when a run asks. Classified project/stay like the other kit-synced files."
+    },
+    {
       "path": "scripts/lib/orch-folders.mjs",
       "tier": "project",
       "action": "stay",

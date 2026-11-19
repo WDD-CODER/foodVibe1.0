@@ -1,0 +1,27 @@
+# Component families — what to reuse before you build
+
+The single list of this project's shared pieces ("families"): for each job, which piece to use, where it lives and when.
+Before you create a component, util, pipe, service or class, find its family here, or say in the plan's `## Reuse Check`
+why a new one is needed.
+
+Reuse enforced from plan: 1
+
+`node scripts/scope-check.mjs --reuse --plan=<path>` blocks a plan (numbered from the line above, or any plan that has the
+section) whose `## Reuse Check` is missing or incomplete. `node scripts/inventory.mjs` writes the short list agents read
+(`docs/brain/inventory.md`) from this file and the code.
+
+## Format
+
+One heading per family, then bullet fields:
+
+```
+### <family-id> — <title>
+
+- selector: the class or component selector a template uses
+- when: the one line that says when to use it
+- files: the repo paths that hold it
+```
+
+## Families
+
+<!-- Add one `### <family-id> — <title>` block per family below. -->
