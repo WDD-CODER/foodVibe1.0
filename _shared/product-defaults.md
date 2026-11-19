@@ -73,3 +73,15 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - check: card
 - card: the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page
 - exceptions: a static screen with no data request; declare `exception — why: <one line>`
+
+### hints-in-tooltips
+
+- status: on
+- rule: An explanation of a control in a dialog shows as a hover tooltip on that control (a title plus an accessible description), not as text on the modal.
+- applies when: custom
+- plan words: \b(hint|tooltip|explanation|explain)s?\b|רמז|הסבר
+- how: native [attr.title] plus [attr.aria-label] or aria-describedby on the control, as the history button of platform-business-dialog does (plan 638); no new tooltip piece
+- check: card
+- card: a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-19
