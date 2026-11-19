@@ -1,0 +1,248 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      run-gates: ${{ steps.detect.outputs.run-gates }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: detect
+        name: Detect app/code changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
+            echo "run-gates=true" >> "$GITHUB_OUTPUT"
+            echo "Non-PR event: running full gates"
+            exit 0
+          fi
+
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          mapfile -t FILES < <(git diff --name-only "$BASE" "$HEAD")
+
+          if [[ ${#FILES[@]} -eq 0 ]]; then
+            echo "run-gates=true" >> "$GITHUB_OUTPUT"
+            echo "No files listed; running full gates (safe default)"
+            exit 0
+          fi
+
+          run_gates=false
+          for f in "${FILES[@]}"; do
+            case "$f" in
+              docs/*|plans/*|sessions/*|notes/*|bugs/*|archive/*|.claude/*|.cursor/*|*.md)
+                ;;
+              *)
+                run_gates=true
+                break
+                ;;
+            esac
+          done
+
+          echo "run-gates=${run_gates}" >> "$GITHUB_OUTPUT"
+          echo "Changed files:"
+          printf '%s\n' "${FILES[@]}"
+          echo "Decision: run-gates=${run_gates}"
+
+  lint:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: ESLint
+        run: pnpm run lint
+      # The workflow scripts' own dependencies live in scripts/package.json (kit-managed); install them
+      # inside scripts/ (not with --prefix) before anything runs those scripts.
+# KIT:required — a project override must keep this step
+      - name: Install workflow script dependencies
+        if: hashFiles('scripts/package-lock.json') != ''
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
+      # A project that overrides this workflow keeps its own copy: this step fails by name when that copy
+      # lost a step the kit requires, instead of the loss surfacing as a broken script later.
+# KIT:required — a project override must keep this step
+      - name: Kit override check
+        run: node scripts/override-check.mjs
+# KIT:required — a project override must keep this step
+      - name: Workflow script tests
+        run: pnpm run --if-present test:scripts
+
+  # The diff checks and the debt ratchet (scripts/kit-checks.mjs): what this change adds is compared with the
+  # project's rules and its debt baseline (docs/project/debt-baseline.json by default). Blocking. A PR compares its merge
+  # commit with the base side (HEAD^1); a push with the commit before it.
+  kit-checks:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+# KIT:required — a project override must keep this step
+      - name: Install workflow script dependencies for the diff checks
+        if: hashFiles('scripts/package-lock.json') != ''
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
+# KIT:required — a project override must keep this step
+      - name: Kit diff checks
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            BASE="$(git rev-parse --verify 'HEAD^1')"
+          else
+            BASE="$PUSH_BEFORE"
+            if [[ -z "$BASE" || "$BASE" =~ ^0+$ ]] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+              BASE="$(git rev-parse -q --verify 'HEAD~1' || true)"
+            fi
+          fi
+          if [[ -z "$BASE" ]]; then
+            echo "No commit to compare with: nothing to check"
+            exit 0
+          fi
+          node scripts/kit-checks.mjs --base "$BASE"
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      # <!-- PACK:stack — build cache step (framework cache dir) comes from the stack pack -->
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm run build
+
+  test:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      # <!-- PACK:stack — build cache step (framework cache dir) comes from the stack pack -->
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm run test:ci
+
+  # The backend's own tests: only when the project has one (paths.serverRoot).
+  server-tests:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: server/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Server tests
+        run: pnpm test
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    # The default token may be read-only; the action reads the PR's commits and must not post comments.
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+# KIT:required — a project override must keep this step
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
+
+  ci:
+    needs:
+      - changes
+      - lint
+      - kit-checks
+      - build
+      - test
+      - server-tests
+      - gitleaks
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+# KIT:required — a project override must keep this step
+      - name: Require quality gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ needs.changes.result }}" != "success" ]]; then
+            echo "changes job failed: ${{ needs.changes.result }}"
+            exit 1
+          fi
+          if [[ "${{ needs.gitleaks.result }}" != "success" ]]; then
+            echo "gitleaks failed: ${{ needs.gitleaks.result }}"
+            exit 1
+          fi
+          if [[ "${{ needs.changes.outputs.run-gates }}" == "true" ]]; then
+            if [[ "${{ needs.lint.result }}" != "success" ]]; then
+              echo "lint failed: ${{ needs.lint.result }}"
+              exit 1
+            fi
+            if [[ "${{ needs.kit-checks.result }}" != "success" ]]; then
+              echo "kit-checks failed: ${{ needs.kit-checks.result }}"
+              exit 1
+            fi
+            if [[ "${{ needs.build.result }}" != "success" ]]; then
+              echo "build failed: ${{ needs.build.result }}"
+              exit 1
+            fi
+            if [[ "${{ needs.test.result }}" != "success" ]]; then
+              echo "test failed: ${{ needs.test.result }}"
+              exit 1
+            fi
+            if [[ "${{ needs.server-tests.result }}" != "success" ]]; then
+              echo "server-tests failed: ${{ needs.server-tests.result }}"
+              exit 1
+            fi
+            echo "All quality gates passed"
+          else
+            echo "Docs-only PR: lint/build/test skipped; gitleaks passed"
+          fi

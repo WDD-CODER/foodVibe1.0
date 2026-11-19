@@ -39,8 +39,8 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
    **Removing is a decision:** removing or narrowing existing user-facing behaviour the plan does not name (a key
    handler, an input mode, a field, a screen, a shortcut) gets a `decisions` entry `removes: <what users lose> — reverse:
    <how>`; when the plan cannot be done without that removal, return `ESCALATE` instead.
-4. Write real tests for the plan's `[auto]` Done-when items. Run the project checks and every `[auto]` command; all
-   must pass before you return `built`. A check that fails for an environment reason (network, a temp folder in use)
+4. Write real tests for the plan's `[auto]` Done-when items. Run every `CHECKS` entry (the `node …` ones too: seconds)
+   after your last commit; all must pass before you return `built`, and each is in `checksRun`. A check that fails for an environment reason (network, a temp folder in use)
    is rerun once, and you say so.
 5. For each `[ui]` Done-when item (`docs/agent/job-validation.md` Tier 1b) write **one short end-to-end test** with
    the project's e2e command (`commands.e2e`; Playwright when the project has none): open the item's page, do its one

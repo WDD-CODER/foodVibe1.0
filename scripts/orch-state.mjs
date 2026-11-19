@@ -78,7 +78,7 @@ import { listSlots } from './lib/slot.mjs'
 import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit, isWorktree, branchHolder, samePath, removeFolder, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 import { removeMergedBuilder } from './worktree-clean.mjs'
 import { agreementStats, addLesson, lessonParts, ruleLines, LESSON_ROLES } from './decision-log.mjs'
-import { failingLines, planWithoutNotes, triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, planLines, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES, askCard, ASK_ID_RE } from './lib/orch-run.mjs'
+import { failingLines, planWithoutNotes, triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, planLines, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES, askCard, ASK_ID_RE, scorecard } from './lib/orch-run.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const MAIN = 'main'
@@ -114,7 +114,7 @@ const SENSITIVE_CODE_RE = /auth|permission|password|jwt|session[_-]?id|tokens?\b
 // Every flag takes a value. run-plans.mjs passes `--key=value` (one token, so a value can never become a flag); a
 // human may write `--key value`, where a value starting with "-" is refused. An unknown flag (--root among them: the
 // folder is always this script's own project) or a second positional word stops the command.
-const FLAGS = new Set(['run', 'started', 'plans', 'plan', 'state', 'round', 'tier', 'sha', 'checked-head','role', 'model', 'effort', 'roles', 'reason', 'card', 'card-status', 'page', 'shots', 'via', 'step', 'check', 'tail', 'tried', 'text', 'min', 'stale-min', 'files', 'cmd', 'id', 'verdict', 'kind', 'confidence', 'rec', 'why', 'forced', 'dup-of', 'command', 'where',
+const FLAGS = new Set(['from', 'run', 'started', 'plans', 'plan', 'state', 'round', 'tier', 'sha', 'checked-head','role', 'model', 'effort', 'roles', 'reason', 'card', 'card-status', 'page', 'shots', 'via', 'step', 'check', 'tail', 'tried', 'text', 'min', 'stale-min', 'files', 'cmd', 'id', 'verdict', 'kind', 'confidence', 'rec', 'why', 'forced', 'dup-of', 'command', 'where',
   // facts recorded for the lessons (docs/agent/orchestrator.md "State rules"), and `finish` options
   'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'final-gate-command', 'final-gate-command-b64', 'final-gate-tail-b64', 'final-gate-plans', 'final-gate-no-plan-file', 'result',
   // the hand-off's replan verdict and the builder's receipt
@@ -412,6 +412,12 @@ function writeStatus(run, status) {
       pause(25)
     }
   }
+}
+/** The scorecard of a run folder (calls.csv and asks/ beside status.json). */
+function scoreOf(dir, status) {
+  const calls = existsSync(join(dir, 'calls.csv')) ? readFileSync(join(dir, 'calls.csv'), 'utf8') : ''
+  const asks = existsSync(join(dir, 'asks')) ? readdirSync(join(dir, 'asks')).filter((f) => ASK_ID_RE.test(f.replace(/\.json$/, ''))).length : 0
+  return scorecard({ status, calls, asks, finishedAt: status.finishedAt ?? null })
 }
 function needStatus(run) {
   const s = readStatus(run)
@@ -1754,6 +1760,17 @@ const commands = {
   // The report, every time: the local copy (.claude/orchestrator-runs/<run>.md) is written first, from status.json and
   // the merges git shows, so a merge folder that is dirty or cannot fast-forward still leaves a report; the copy on the
   // run branch is committed after, and a failure there names the local file.
+  // Read-only: where a run's minutes went (lib/orch-run.mjs scorecard). --from <project> reads another project's runs
+  // (never --root: no command of this script works on another folder's state).
+  scorecard() {
+    const run = runName()
+    const dir = join(args.from ? resolve(args.from) : root, '.claude', 'orchestrator-runs', run)
+    const p = join(dir, 'status.json')
+    if (!existsSync(p)) fail(`no status.json for run "${run}" in ${dir}`)
+    const s = scoreOf(dir, JSON.parse(readFileSync(p, 'utf8')))
+    console.log(`SCORECARD ${run}`)
+    for (const l of s.lines) console.log(l)
+  },
   finish() {
     const run = runName()
     const branch = runBranch(run)
@@ -1832,7 +1849,7 @@ function publishReport(run, status, { merged, slots, message, brain }) {
     } catch (e) {
       learnError = e.message
     }
-    const report = withPlansChanged(status, formatReport({ status, merged, mainShaNow, finishedAt: status.finishedAt, runBranch: branch, mainBranch: MAIN, mainChangedFiles, appErrors, decisions: status.decisions ?? [], triage, learning: learned ? { budget: learned.budget.line, trend: learned.trend.line } : null }))
+    const report = withPlansChanged(status, formatReport({ status, merged, mainShaNow, finishedAt: status.finishedAt, runBranch: branch, mainBranch: MAIN, mainChangedFiles, appErrors, decisions: status.decisions ?? [], triage, learning: learned ? { budget: learned.budget.line, trend: learned.trend.line } : null, score: (() => { try { return scoreOf(join(runsDir(), run), status) } catch { return null } })() }))
     // What the command prints: this launch's decisions, and an earlier launch's that has no grade for this run yet.
     const attempt = status.attempts ?? 1
     const inView = decisionsInView(status.decisions ?? [], { attempt, run, gradeRows })

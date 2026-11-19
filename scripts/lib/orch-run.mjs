@@ -529,7 +529,77 @@ export function failingLines(tail, { max = 5, last = 3 } = {}) {
   return picked.length ? picked : lines.slice(-last)
 }
 
-export function formatReport({ status, merged, mainShaNow, finishedAt, runBranch, mainBranch, mainChangedFiles = null, appErrors = null, decisions = null, triage = {}, learning = null }) {
+/** calls.csv text → rows { plan, stage, model, seconds, exit } (a quoted cell may hold commas). */
+export function parseCalls(text) {
+  const rows = []
+  const lines = String(text ?? '').replace(/\r\n/g, '\n').split('\n').slice(1).filter(Boolean)
+  for (const line of lines) {
+    const cells = []
+    let cur = ''
+    let q = false
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i]
+      if (q) { if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++ } else if (ch === '"') q = false; else cur += ch }
+      else if (ch === '"') q = true
+      else if (ch === ',') { cells.push(cur); cur = '' } else cur += ch
+    }
+    cells.push(cur)
+    rows.push({ plan: cells[0], stage: cells[1] ?? '', model: cells[2] ?? '', seconds: Number(cells[3]) || 0, exit: cells[6] ?? '' })
+  }
+  return rows
+}
+const END_STATES = new Set(['merged', 'skipped', 'left-run', 'done'])
+const minutesBetween = (a, b) => Math.max(0, (Date.parse(b) - Date.parse(a)) / 60000)
+const median = (xs) => { const s = [...xs].sort((a, b) => a - b); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : null }
+/** The commands a GATE:/FINAL: line left out (cached, skipped, not run, same tree), or []. */
+export function skippedByLine(text) {
+  const t = String(text ?? '')
+  let m = /^GATE: (?:cached|skip) (.+?) — /.exec(t)
+  if (m) return [m[1]]
+  m = /^GATE: not run — .* runs after the fix: (.+)$/.exec(t)
+  if (m) return [m[1]]
+  m = /^FINAL: same tree as plan \S+ gate — (.+) skipped$/.exec(t)
+  return m ? m[1].split(', ') : []
+}
+/**
+ * Where a run's minutes went, from status.json, calls.csv and the asks: wall minutes, minutes per state (plans'
+ * history), gate passes, each left-out check with the seconds it saved (the median of that command's passing rows in
+ * the run; `?` when it never ran) and the asks raised. Returns { lines, data }.
+ */
+export function scorecard({ status, calls = '', asks = 0, finishedAt = null }) {
+  // The run's end is its last state change (a plan merged, parked, or the last one still open): never "now" and never
+  // the time `finish` ran, so the same status always gives the same scorecard. finishedAt only when no plan moved.
+  const lastAt = Object.values(status.plans ?? {}).flatMap((p) => (p.history ?? []).map((x) => x?.at)).filter(Boolean).sort().at(-1)
+  const end = lastAt ?? finishedAt ?? status.finishedAt ?? status.startedAt
+  const wall = status.startedAt ? minutesBetween(status.startedAt, end) : null
+  const perState = {}
+  for (const p of Object.values(status.plans ?? {})) {
+    const h = (p.history ?? []).filter((x) => x?.at && x?.state)
+    // An end state (merged, skipped, left the run) is not time the plan spent.
+    for (let i = 0; i < h.length; i++) if (!END_STATES.has(h[i].state)) perState[h[i].state] = (perState[h[i].state] ?? 0) + minutesBetween(h[i].at, h[i + 1]?.at ?? end)
+  }
+  const rows = parseCalls(calls)
+  let passes = 0
+  const lastWasGate = {}
+  for (const r of rows) {
+    const gate = /^gate: /.test(r.stage)
+    if (gate && !lastWasGate[r.plan]) passes++
+    lastWasGate[r.plan] = gate
+  }
+  const secondsOf = (command) => median(rows.filter((r) => (r.stage === `gate: ${command}` || r.stage === `final gate: ${command}`) && String(r.exit) === '0').map((r) => r.seconds))
+  const left = (status.notes ?? []).flatMap((n) => skippedByLine(n.text).map((command) => ({ plan: n.plan ?? 'final', command, seconds: secondsOf(command) })))
+  const saved = left.reduce((s, x) => s + (x.seconds ?? 0), 0)
+  const fmt = (n) => (n == null ? '?' : Math.round(n * 10) / 10)
+  const lines = [
+    `- Wall: ${fmt(wall)} min · gate passes: ${passes} · asks raised mid-run: ${asks}`,
+    `- Minutes per state (summed over plans): ${Object.entries(perState).sort((a, b) => b[1] - a[1]).map(([s, m]) => `${s} ${fmt(m)}`).join(' · ') || 'none'}`,
+    `- Checks left out (cached, skipped, not run, same tree): ${left.length}, about ${fmt(saved / 60)} min saved`,
+    ...left.map((x) => `  - ${x.plan}: ${x.command} — ${x.seconds == null ? '?' : `${fmt(x.seconds)} s`}`),
+  ]
+  return { lines, data: { wall, perState, passes, left, saved, asks } }
+}
+
+export function formatReport({ status, merged, mainShaNow, finishedAt, runBranch, mainBranch, mainChangedFiles = null, appErrors = null, decisions = null, triage = {}, learning = null, score = null }) {
   const plans = Object.values(status.plans ?? {}).sort((a, b) => (a.nnn < b.nnn ? -1 : 1))
   const mergedSet = new Map(merged.map((m) => [m.nnn, m]))
   const parked = plans.filter((p) => !mergedSet.has(p.nnn) && ['parked', 'left-run', 'skipped'].includes(p.state))
@@ -558,6 +628,7 @@ export function formatReport({ status, merged, mainShaNow, finishedAt, runBranch
       return `| ${p.nnn} ${p.title ?? ''} | ${state} | ${p.round ?? 0} | ${builderTiers(p)} | ${m ? m.sha.slice(0, 7) : ''} | ${(p.reason ?? '').replace(/\|/g, '/')} |`
     }),
     '',
+    ...(score?.lines?.length ? ['## Scorecard', '', ...score.lines, ''] : []),
     ...flakySection(status, plans),
     ...appErrorsSection(appErrors),
     ...decisionsSection(decisions ?? status.decisions, triage),

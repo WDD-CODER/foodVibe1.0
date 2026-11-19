@@ -172,14 +172,63 @@ function excludeReceipt(folder) {
   } catch { /* the receipt may then show as untracked; it is never committed by the script */ }
 }
 
+/** The run folder's record of which gate commands passed on which tree (content, not commit): { tree: { plan, commands } }. */
+export const TREE_PASSES_FILE = 'gate-trees.json'
+/** The tree hash of `rev` (default HEAD) in `folder`, or null. */
+export function treeOf(folder, rev = 'HEAD') {
+  const r = spawnSync('git', ['rev-parse', `${rev || 'HEAD'}^{tree}`], { cwd: folder, encoding: 'utf8' })
+  return r.status === 0 ? String(r.stdout).trim() : null
+}
+export function readTreePasses(file) {
+  try { return JSON.parse(readFileSync(file, 'utf8')) ?? {} } catch { return {} }
+}
+/** Adds the commands that passed on `tree` (kept with the earlier passes on the same tree). Never throws. */
+export function recordTreePasses(file, { tree, plan, passed }) {
+  if (!tree || !passed?.length) return
+  try {
+    const all = readTreePasses(file)
+    const prev = all[tree]?.commands ?? []
+    all[tree] = { plan: String(plan), commands: [...new Set([...prev, ...passed])] }
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, `${JSON.stringify(all, null, 2)}\n`)
+  } catch { /* a record that cannot be written only costs a rerun */ }
+}
+/**
+ * The final gate's commands split by the record: `skipped` passed on exactly this tree in a plan's gate, `run` did not.
+ * `line` is the FINAL: line to print, or '' when nothing is skipped.
+ */
+export function sameTreeSplit(commands, tree, passes) {
+  const hit = tree ? passes?.[tree] : null
+  const done = new Set(hit?.commands ?? [])
+  const skipped = commands.filter((c) => done.has(c))
+  const run = commands.filter((c) => !done.has(c))
+  return { run, skipped, line: skipped.length ? `FINAL: same tree as plan ${hit.plan}'s gate — ${skipped.join(', ')} skipped` : '' }
+}
+
+/**
+ * A check that takes seconds: a `node …` command (the manifest check, kit-checks, a node-script ciMirror entry, a
+ * plan's `node --test` item) or a builtin (the trusted scope check), never a `prepare` step (it makes files the slow
+ * checks need, so it stays first among them).
+ */
+export function isCheapCheck(command, builtins = {}) {
+  const c = String(command ?? '').trim()
+  if (typeof builtins[c] === 'function') return true
+  return /^node\s/.test(c) && !/\borch-state\.mjs"?\s+prepare\b/.test(c)
+}
+
 /**
  * Run the commands in order in `folder`. Every command runs (a failure does not stop the next one), so the receipt and
  * a fix round see every failing check at once. `onResult(result)` is called after each command (the caller's calls.csv);
  * `onStart({ command, index, total })` before each one (index from 1; a retry keeps its index), for a live view.
  */
-export async function runGate({ folder, commands, timeoutMin = 15, receipt = true, onResult = null, onStart = null, env = process.env, builtins = {}, beforeRetry = null }) {
+export async function runGate({ folder, commands: given, timeoutMin = 15, receipt = true, onResult = null, onStart = null, env = process.env, builtins = {}, beforeRetry = null, cheapFirst = false, stopOnCheap = false }) {
   const results = []
   const flaky = []
+  // cheapFirst: the seconds-long checks (isCheapCheck) run before the rest, in their order; stopOnCheap: a cheap check
+  // that fails stops the gate before the slow ones, which are reported `not-run` (never a pass, never a failure).
+  const cheap = cheapFirst ? given.filter((c) => isCheapCheck(c, builtins)) : []
+  const commands = cheapFirst ? [...cheap, ...given.filter((c) => !cheap.includes(c))] : given
+  const notRun = []
   const timeoutMs = Math.max(1, Number(timeoutMin) || 15) * 60_000
   // `builtins`: a gate line run in this process (the trusted scope check) → () => { exit, out }.
   const run = async (command) => {
@@ -189,6 +238,11 @@ export async function runGate({ folder, commands, timeoutMin = 15, receipt = tru
     return { exit: b.exit, seconds: Math.round((Date.now() - started) / 100) / 10, out: b.out, timedOut: false, startError: false }
   }
   for (const [i, command] of commands.entries()) {
+    if (stopOnCheap && i === cheap.length && results.some((x) => x.status === 'fail')) {
+      notRun.push(...commands.slice(i))
+      for (const c of notRun) results.push({ command: c, exit: null, seconds: 0, status: 'not-run', tail: '' })
+      break
+    }
     if (onStart) {
       try { onStart({ command, index: i + 1, total: commands.length }) } catch { /* a live view never breaks the gate */ }
     }
@@ -215,7 +269,7 @@ export async function runGate({ folder, commands, timeoutMin = 15, receipt = tru
   const status = !commands.length ? 'fail' : failed.length ? 'fail' : env_.length ? 'env' : 'pass'
   const exit = status === 'pass' ? 0 : status === 'env' ? 2 : 1
   const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: folder, encoding: 'utf8' })
-  const out = { status, exit, head: head.status === 0 ? String(head.stdout).trim() : null, results, flaky, failed: [...failed, ...env_].map((x) => x.command) }
+  const out = { status, exit, head: head.status === 0 ? String(head.stdout).trim() : null, results, flaky, failed: [...failed, ...env_].map((x) => x.command), notRun }
   if (receipt) {
     try {
       excludeReceipt(folder)

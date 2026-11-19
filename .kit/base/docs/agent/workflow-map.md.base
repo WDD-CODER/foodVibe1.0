@@ -1,0 +1,362 @@
+# FoodVibe — Agent Workflow Map
+
+> Purpose: precise, hand-off-ready inventory of every workflow, command, skill, hook,
+> script, rule source, and state store in this project, plus how they connect.
+> Written for a visualization agent — every node is a real file path; every edge is
+> labeled `invokes`, `loads`, `reads`, `writes`, `gates`, or `triggers`.
+> Generated from the kit; regenerate per project after install.
+
+---
+
+## 1. Roles
+
+| Role | Who | Responsibility |
+| --- | --- | --- |
+| Human Director | The user | Approves plans, validates jobs (`done` / ship `Y`), answers gates |
+| Planner (Architect + Product Manager) | Claude Code in the main folder, on `main` | Scopes with the Human and writes Plan Contracts via `/plan`; runs the Architect + PM review on every plan it saves (its own and received ones) before saving and pushing it. Read-only against the app |
+| Drafting tool (optional) | Claude.ai, Cursor or another agent | May draft a plan or brief; the Planner reviews it before it is saved |
+| Worker (Contractor) | Claude Code or Cursor in a `wt-N` slot | Claims a plan ("execute plan NNN"), executes **one milestone at a time** inside its `## Read-Write Scope`, writes `sessions/[date].md`, stops |
+| Reviewer | Claude Code via `/review-it` | Checks a Worker branch against its plan with the checker pipeline (finders → verifier). Report-only, never fixes, never commits |
+| Shipping agent | Whichever agent runs `/ship` | Build gate → review → commit approval → merge gate → brain capture |
+
+Rule: **a job is never done until every Done-when item is validated** — `[auto]` by agent evidence, `[human]`/untagged by the Human (`docs/agent/job-validation.md`).
+
+---
+
+## 2. Rule sources (precedence roots)
+
+| File | Scope | Notes |
+| --- | --- | --- |
+| `AGENTS.md` | Both agents | Single source of truth: hard rules, skill triggers, standards index, job validation, Plan Contracts |
+| `CLAUDE.md` | Claude Code only | Imports `AGENTS.md` + addendum: branch guard, session hooks, "Yes chef!" gate |
+| `.cursor/rules/*.mdc` | Cursor only | Ships with the optional `layer:cursor` (phase 3): advisory skill/convention mirrors, two `alwaysApply: true` role rules. |
+| `docs/agent/` | Both, load-on-demand | conventions, standards-<stack> (stack pack), standards-security/-git, brain-capture, job-validation, pr-check-fix-loop |
+| `_shared/tech-stack.md` | Both | Stack detail |
+| `docs/brain/` | Both | Second brain: `index.md`, `invariants.md` (architecture invariants the `--arch` gate checks), `gotchas.md` (index) + `gotchas/` (domain files), `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
+
+Cursor rule files ship with the optional `layer:cursor`; the stack pack adds stack-specific rules.
+
+---
+
+## 3. Commands — Claude Code (`.claude/commands/`)
+
+### Core plan/execute/ship pipeline
+
+| Command | Invokes / loads | Reads | Writes |
+| --- | --- | --- | --- |
+| `/plan` | loads `.claude/references/prd-template.md`, `hld-template.md`, `_shared/*`, `docs/brain/invariants.md`, `docs/agent/plan-checks.md` (when present), `docs/agent/*` (path-scoped); runs the Architect + PM review before the Planner protocol saves | codebase (read-only) | Plan Contract under `plans/` |
+| `/feat` | invokes `/plan` then `/review-it`; loads the stack pack's `standards-*.md`, `docs/agent/standards-domain.md`, `_shared/tech-stack.md` | — | product code (via Contractor milestones) |
+| `/fix` | bug-fix path (analog of `/feat` for fixes) | — | product code |
+| `/refactor` | refactor path | — | product code |
+| `/brief` | see §6 flow F2; syncs parent plan via save-plan Phase 4 | `git diff/log`, `.claude/todo.md` (retroactive mode) | `.claude/sessions/{session-id}/brief.md` |
+| `/review-it` | Reviewer protocol; runs `scripts/ship-prep.mjs --gate` (the project checks), the `orch-check-*` finders and `orch-verify` (`docs/agent/agent-roles.md`), each with its checker `LESSONS` and `RULES` from the main folder's `orch-state.mjs context`; also `/ship` Phase 2 on a plan branch | the branch diff against `origin/main`, its plan in `plans/` | verdict in chat only (never `[x]`, never commits) |
+| `/ship` | Phase 0 classifies FAST/ULTRA-TRIVIAL/REGULAR first (`/ship fast`\|`regular` overrides); Phase 1 is `ship-prep.mjs --gate` (build, lint, tests on REGULAR, ledger, override check — in code); REGULAR on a plan branch reviews by `review.ship`: `checkers` (the default) runs the `/review-it` checker pipeline, `reviewer` runs `scripts/lib/plan-review.mjs`, `light` runs `/review` (`fast` keeps `/review` unless the diff is sensitive); only with `review.learn` `on`, grades the shown decisions (`decision-log.mjs pending` / `grade --run ship-<NNN> --mark`) and proposes brain entries; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (`review.learn` `on` only: auto-writes on `Y`, unless `no brain`; skipped by default on FAST/ULTRA-TRIVIAL) |
+| `/orchestrate` | opt-in: `scripts/run-plans.mjs` (dry run first, then the line for the Human, `start` in the background), which runs `orch-state.mjs` / `orch-preflight.mjs`, `orch-builder` and `plan-reviewer` (`docs/agent/orchestrator.md`); one final gate on the run branch, the decisions numbered `D1…Dn` | the named plans, `plan-order.mjs --json`, the run branch's merge subjects, `docs/brain/agent-rules.md` (builders) | merges into `orch/<run>` only; `.claude/orchestrator-runs/<run>/status.json`; the run report |
+| `/kit-feedback` | `scripts/kit-feedback.mjs` (`--dry-run` first) | `.kit/install.json` `source`, the project's `kit.config.json` | a pull request on the kit repository with one file under `feedback/inbox/`; nothing else |
+| `/scout` | `scripts/scout/render.mjs`, `scripts/scout/pr.mjs` (`--dry-run` first); a weekly cloud scheduled run after the Human's go | `docs/scout/sources.json`, the cursors in `docs/scout/`, the project's setup files (never `.env*`); public Claude Code and community sources | `docs/scout/<date>.html` + cursors on `chore/scout-<date>`, one pull request; applies nothing |
+| `/done` | job-validation Path B close-out | `.claude/todo.md`, parent plan | marks `[x]` on Human confirm (or Tier 1 evidence for all-`[auto]`) |
+| `/review` | standalone review pass (used by `/ship` Phase 2) | session diff | report only |
+| `/end-session` | alias territory of `/ship` ("wrap up") | — | — |
+
+### Support / maintenance commands
+
+| Command | Purpose |
+| --- | --- |
+| `/security` | security review path |
+| `/fix-pr-checks` | runs `docs/agent/pr-check-fix-loop.md` (bounded: 2 rounds; security findings always surfaced) |
+| `/cleanup` | session & worktree pruning (`scripts/prune-merged-worktrees.sh`, `scripts/prune-old-sessions.sh`) |
+| `/sweep-stale-todos` | prune stale `.claude/todo.md` entries |
+| `/docs-refresh` | on-demand documentation refresh |
+| `/skills`, `/commands` | listings |
+
+### Commands — Cursor (`.cursor/commands/`)
+
+Redirect stubs for palette discoverability ship with the optional `layer:cursor`.
+
+---
+
+## 4. Skills (`.claude/skills/*/SKILL.md`) — shared by both agents
+
+| Skill | Trigger | Key connections | Cursor `.mdc` |
+| --- | --- | --- | --- |
+| `save-plan` | Plan Contract pasted / "save the plan" / plan not yet under `plans/` | runs `scripts/plan-name-similarity.mjs`; writes `plans/NNN-slug.plan.md` + `.claude/todo.md`; `.claude/.plan-write-ack` handshake with `plan-write-guard.sh`; mid-flight brief↔plan sync in `reference/mid-flight-sync.md` | `save-plan-must-use-skill` |
+| `brief-detection` | a pasted Plan Contract or structured brief (H2 markers), or a feature request in prose in the main folder | gates it: a = Architect + PM review, nothing saved · b = `/plan` → save-plan → a Worker claims it with `take-plan` · c = discussion | `brief-detection-must-use-skill` |
+| `github-sync` | session start, once per day | forked, `mechanical` tier (questions come back as `ASK:` lines); `scripts/github-sync-gate.mjs` (injected gate); writes `notes/github-sync/YYYY-MM-DD.md` | `github-sync-must-use-skill` — best-effort, no `SessionStart`-hook equivalent in Cursor |
+| `preflight` | before dev server / browser / DB workflows | `scripts/preflight.mjs` | `preflight-must-use-skill` |
+| `styleqa` | `/styleqa` — a style or visual QA of pages | inline; `scripts/styleqa/run.mjs`, `queue.mjs`, `merge.mjs`; `styleqa-reviewer` (review tier, at most 3 at once); `docs/agent/styleqa.md` | — |
+| `techdebt` | before PR / audit | forked, `analysis` tier; `scripts/techdebt-report.mjs` (rolling 7 reports + trend) | `techdebt-must-use-skill` |
+| `worktree-setup` | "setup worktree" (explicit only) | — | `worktree-setup-must-use-skill` |
+
+<!-- PACK:stack — stack skill rows (component structure, auth, styling layer, breadcrumbs) come from the stack pack -->
+
+### Agents (`.claude/agents/`) and model tiers — Claude Code only
+
+Rules and the tier table: `docs/agent/model-routing.md` (`kit.config.json` → `models`). Planning, review, fixes and code
+writing stay on the main session's model.
+
+| Agent | Tier | Called by | Returns |
+| --- | --- | --- | --- |
+| `git-agent` | mechanical | commit prep on request | proposed commit + commands for the Human |
+| `orch-builder` | build (escalation: judgment) | `scripts/run-plans.mjs` | `{status, branch, summary, evidence[]}` JSON |
+| `plan-reviewer` | `orchestrator.reviewerModel` | `scripts/run-plans.mjs`, `/ship` with `review.ship` = `reviewer` | problems with file:line and `verdict: PASS\|STOP` |
+| `orch-check-plan`, `orch-check-bugs`, `orch-check-rules`, `orch-verify` | review | `/review-it` (the default `/ship` review) | candidate problems with file:line; keep / refuted verdicts with confidence |
+| `orch-security`, `orch-ui` | review | `/review-it` (sensitive paths only); `[ui]` cards no script can check | security problems; UI card results |
+| `skill-judge` | review | the nightly skill improver | a blind grade against assertions |
+| `styleqa-reviewer` | review | `/styleqa` (at most 3 at once) | one review file per page under the Style QA output folder (`docs/agent/styleqa.md`) |
+
+Every role agent follows `docs/agent/agent-roles.md`: non-interactive, evidence for every claim, a JSON result naming its model and effort.
+
+---
+
+## 5. Automation: hooks + scripts
+
+### Claude Code hooks (`.claude/settings.json`)
+
+| Event | Script | Effect |
+| --- | --- | --- |
+| PreToolUse (Edit\|Write\|MultiEdit, Bash) | `scripts/branch-guard.sh` | **blocks writes on `main`**, except the Planner's `plans/*.plan.md` / `.claude/todo.md` admin-bypass and gitignored runtime files (`.claude/sessions/**`, `.claude/.plan-write-ack`); a slot on `main` auto-switches to a session branch; **strict mode** (Bash): a command that writes and uses `$(…)`/`${…}`/backticks/`<(…)`/`[[`/`((`/`$'…'` is refused unless every write is a top-level plain literal target (use Write/Edit or a plain redirect) |
+| PreToolUse (Edit\|Write\|MultiEdit) | `scripts/plan-write-guard.sh` | gates **new** `plans/*.plan.md` writes: runs similarity check; denies when similar plans exist unless `.claude/.plan-write-ack` names the target; existing-plan edits always allowed |
+| PreToolUse (Bash) | `node scripts/lib/guard.mjs plan` | the same rule for a **new** `plans/*.plan.md` that a shell command writes (redirect, heredoc, `tee`, `cp`/`mv`) |
+| PreToolUse (Edit\|Write\|MultiEdit, Bash) | `scripts/scope-guard.sh` | denies a write outside the plan's `## Read-Write Scope` (`SCOPE_GUARD:` message, with the `approved: <path>` route) in a `wt-N` slot with an active plan **and**, outside a slot, on a branch other than `main` that names a plan (`.worktree-plan` — a run's merge folder — or `<type>/NNN-<slug>`); silent allow elsewhere; a check that cannot run refuses the write on a guarded folder (fail closed); the same Bash **strict mode** as `branch-guard.sh` — the `/ship` scope gate is the backstop |
+| SessionStart (startup) | `scripts/session-startup.sh` | frees merged slots, sweeps idle dev watchers; injects `PLANNER:` / `WORKER: plan=…` / `IDLE SLOT:` via `scripts/lib/slot.mjs --describe` (see slot model below) |
+| PostToolUse (Edit\|Write) | `scripts/session-manifest-hook.py` | records this-session file touches (multi-worktree staging safety); refreshes this slot's liveness heartbeat |
+| PreCompact | `scripts/pre-compact-reminder.sh` | reminds the agent to keep open work in the plan or in chat before compaction |
+| Stop | `scripts/handoff-check.sh` | releases this slot's liveness lock at turn end |
+
+Both write guards run `scripts/lib/guard.mjs` (one node process) and judge **the file being written**, not the folder
+the session started in: a file in another worktree of the repo is judged by that worktree's own guard. On `Bash` they
+judge the files the command writes — redirects (`>`, `>>`, heredocs), `tee`, `sed -i` / `perl -i`, `cp` / `mv` /
+`install` targets, `touch`, following `cd` and `bash -c`; read-only commands pass. The detector is best-effort: a
+target it cannot resolve (`$VAR`, `$(...)`) is refused where a write needs a check, and `node -e` or a script that
+writes files is not seen — `/ship`'s scope gate and CI drift-check stay the backstop.
+
+**Cursor runs none of these hooks.** Its equivalent enforcement is advisory `.mdc` rules + the shared pre-commit/pre-push
+hooks below — the `/ship` scope gate and `.husky/pre-push` are what make scope enforcement hold for Cursor too, since it
+has no PreToolUse hook of its own.
+
+### Git hooks (`.husky/`, shared by both agents)
+
+| Hook | Effect |
+| --- | --- |
+| `pre-commit` | `lint-staged`, secret-scan, `plan-ledger-check.mjs` (+ stack-pack checks) |
+| `pre-push` | On a push whose remote ref is `refs/heads/main`: diffs the pushed range and exits 1 unless every file matches `plans/<name>.plan.md` or `.claude/todo.md` — the Planner's admin-bypass shape. Other branches pass untouched. Human-only override: `git push --no-verify`. |
+
+`scripts/override-check.mjs` (CI `lint` step **Kit override check**, and `/ship` Phase 1) reads `kit.config.json` `overrides` and
+`.kit/install.json` `required` and fails by name when an overridden workflow lacks a step the kit marks `# KIT:required`;
+`--list` prints the steps an override must keep. Read-only.
+
+Claude Code backs this up in `.claude/settings.json`: `permissions.deny` refuses the hook bypasses (`--no-verify`,
+`commit -n`, `core.hooksPath`) and force pushes, and `permissions.ask` puts `git reset --hard`, `git clean` and
+`rm -rf` on absolute, home or `.git` paths in front of the Human. The Human runs those with the `!` prefix.
+
+### Planner-Worker slot model (replaces the retired two-slot system)
+
+3 permanent worktrees, fixed ports, no auto-claim:
+
+| Slot | Frontend | Backend |
+| --- | --- | --- |
+| `main` (Planner) | 4200 | 3000 |
+| `wt-N` | 4200+1 | 3000+1 |
+| `wt-N` | 4200+2 | 3000+2 |
+| `wt-N` | 4200+3 | 3000+3 |
+
+- **Planner** (main folder, on `main`): plans only. Writes and pushes `plans/*.plan.md` +
+  `.claude/todo.md` directly — the admin-bypass restricted by `branch-guard.sh` +
+  `.husky/pre-push`.
+- **Worker** (a `wt-N` slot): says "execute plan NNN" → `scripts/take-plan.mjs` (see
+  `.claude/commands/take-plan.md`) claims the slot — safety checks (dirty tree, busy slot,
+  plan must exist on `origin/main`), branch `feat/NNN-<slug>`, conditional `npm install`,
+  generated `src/environments/environment.slot.ts`, optional isolated per-slot MongoDB database
+  (`foodvibe_wt${n}`), then reports `scope-check.mjs --drift` so the Worker knows whether to run the
+  plan's Step 0 reality check before starting milestones. It starts **no** servers.
+- **Slot dev servers are on demand.** `scripts/slot-serve.mjs` starts them when a step needs the app
+  (browser check, validation cards, `/remote`, preflight, or the Human's "start servers"): frontend on
+  4200+N, backend `npm run dev:local` with `PORT=3000+N`/`ALLOWED_ORIGIN`. It never
+  spawns while a port is held. `scripts/slot-stop.mjs` stops them — every chain from its root, orphaned
+  `node --watch` watchers included — and runs at the slot merge, in `free-merged-slots.mjs` and as the
+  `SessionEnd` hook. `scripts/orphan-sweep.mjs` (session start, slot and main folder) kills only idle
+  watchers that hold no port.
+- Idle slots are always detached at `origin/main`, never on `main`. Releasing a slot
+  (taking a new plan into it) only happens once its current branch is merged.
+- Liveness lock (`.claude/.session-lock`, `scripts/session-lock.sh`) is claimed by
+  `take-plan.mjs` and released by `handoff-check.sh` on `Stop` — same file format as
+  before, no separate two-slot pairing logic left to maintain.
+
+### Workflow scripts (shared, `scripts/`)
+
+| Script | Called by |
+| --- | --- |
+| `plan-name-similarity.mjs` | save-plan Phase 0 (both agents), `plan-write-guard.sh` |
+| `next-plan-number.mjs` | save-plan Phase 1 numbering (Planner) |
+| `session-manifest-ship.py` | `/ship` Phase 3, outside a slot, only when another slot is on a live (non-detached) branch — otherwise skipped in favor of `scope-check.mjs` |
+| `brain-review-check.mjs` | `/ship` feature-complete path (advisory) |
+| `brain-capture-comment.mjs` | PR sticky brain-capture comment |
+| `pre-commit-secret-scan.mjs` (+ stack-pack checks) | pre-commit hooks (source of truth for enforcement per `AGENTS.md`) |
+| `prune-merged-worktrees.sh`, `prune-old-sessions.sh` | `/cleanup` |
+| `worktree-clean.mjs` | `run-supervisor.mjs` (run start and end), `free-merged-slots.mjs`, `prune-merged-worktrees.sh`, `/review-it`, `/fix`, agents' scratch checkouts — removes the kit-made worktrees that are safe to remove, one reason line each |
+| `lib/slot.mjs` | `session-startup.sh` (`--describe`), `scope-check.mjs`, `ship-prep.mjs` (`scopedPlanPath`), `take-plan.mjs`; `--list` for the Planner protocol; `--scoped-plan` prints the plan whose scope governs this folder |
+| `lib/guard.mjs` | `scope-guard.sh`, `branch-guard.sh` — the write-guard rules for Edit/Write and Bash; `KIT_GUARD_TRACE=1` prints `GUARD_GIT_CALLS: <n>` |
+| `scope-check.mjs` | `scope-guard.sh` (`--file`), `ship-prep.mjs` (`--diff`, `--arch --diff` warn), the Planner protocol (`--overlap`, `--deps`), save-plan Shape lint (`--arch --plan` block, `--deps`), `/review-it` step 2 (`--arch --diff`), `take-plan.mjs` + `take-plan.md` (`--drift`) |
+| `lib/invariants.mjs` | `scope-check.mjs --arch` and `take-plan.mjs` (pre-claim architecture gate, judged against the main branch): parses `docs/brain/invariants.md` and a plan's `## Architecture Impact` |
+| `plan-order.mjs` | the Planner protocol (`/plan` step 3) and the orchestrator (`--json`): run order of a set of plans — waves, lanes, lock groups from scope overlap (hotspots left out), the reason of every edge; `--branch <b> --merged-from git` counts a plan merged only on the exact subject `Merge <src> into <b> (plan NNN)` |
+| `orch-state.mjs` | `scripts/run-plans.mjs` — run branch, merge folder, builder folders, `status.json`, hand-off files, the run report; merged plans read only from the anchored merge subjects |
+| `orch-preflight.mjs` | `scripts/run-plans.mjs` (start, and `--env-only` before a retry after an environment failure); starts a missing main-folder frontend, and the backend for a plan with an open `[auto:main]` item (`--db remote` when the request said `remote`), through `slot-serve.mjs --main` |
+| `lib/orch-run.mjs` | `orch-state.mjs`, `orch-preflight.mjs` — run names, plan branches, the start tier, `[human]` items, the report text |
+| `decision-log.mjs` | the learning step of `/ship` (On approval, step 2) and `/orchestrate` (step 5), `docs/agent/decision-review.md` — `pending` (`/ship`: a plan's ungraded `- decision:` lines as a grade list), `grade` (every graded item, `ok` too, -> `decision-grades.jsonl` and `follow-ups.md`; `--mark` tags the plan lines), `learn` (the gate: no `✗` / `failed:` = no model call), `add` (graded reply -> `docs/brain/decision-log.md`), `repeats` (promotes a rule marked `(pending — seen once)`), `rules --check` / `--add [--section] [--pending --kind]` / `--enforce` (`docs/brain/agent-rules.md`, one section per role, 30 lines / 2,400 characters each; `enforce:` lines in `## enforce candidates`), `lessons --check` / `--add` (`docs/brain/agent-lessons/<role>.md`, 40 lines / 3,000 characters), `case --from D<n>` (an eval-case scaffold for a checker miss, no model call) |
+| `orch-state.mjs lessons` / `context` / `trend` | `finish` and `/orchestrate`  — `lessons` writes lesson lines from `status.json` (no model call), `context` reads `LESSONS` / `RULES` / `RECENT_RUNS` for the role tasks, `trend` prints the run-log trend (`docs/agent/decision-review.md` §0) |
+| `kit-feedback.mjs` | the learning step and `/kit-feedback` — one general lesson as a pull request on the kit repository (`feedback/inbox/`); with `KIT_BRAIN_URI` set it goes to the kit brain instead (`docs/agent/kit-brain.md`); refuses project names, project paths and code fences either way |
+| `brain.mjs` | `orch-state.mjs finish`, `decision-log.mjs grade`, `kit-feedback.mjs` and `/orchestrate` step 5 — sends a run's facts (runs, plans, events, grades, the Planner's toil lines, lessons) to the kit's private document store with no model call; a local queue holds what could not go out; redacted, never fails a run (`docs/agent/kit-brain.md`) |
+| `scout/render.mjs`, `scout/pr.mjs` | `/scout` — the scout's JSON report into the fixed `scripts/scout/page-template.html` page plus the cursors in `docs/scout/`; then the weekly pull request through `gh api` (top items, page link, a useful-checkbox list); both refuse secrets, machine paths and transcript text |
+| `lib/plan-deps.mjs` | `plan-order.mjs`, `scope-check.mjs --deps`, `take-plan.mjs` — the one parser of a plan's `Depends-on:` line and legacy prose prerequisites |
+| `lib/plan-graph.mjs` | `plan-order.mjs` — waves, lanes, lock groups and edges as data |
+| `take-plan.mjs` | "execute plan NNN" / "take plan NNN" (`.claude/commands/take-plan.md`) |
+| `slot-serve.mjs` | a Worker step that needs the running app; preflight in a slot; validation cards; the Human's "start servers"; `--main`: the orchestrator preflight starts the main folder's frontend (and, for an `[auto:main]` plan, its backend on the local or remote database), recorded in `.main-serve-pids` under `.claude/` |
+| `slot-stop.mjs` | "Merging from a slot" (`standards-git.md`), the `SessionEnd` hook (`--if-slot`), by hand; `--main` stops only what `slot-serve.mjs --main` started |
+| `orphan-sweep.mjs` | `session-startup.sh` (every folder; orphans only) |
+| `lib/slot-procs.mjs` | `take-plan.mjs`, `slot-serve.mjs`, `slot-stop.mjs`, `orphan-sweep.mjs`, `free-merged-slots.mjs` — process chains, port state, start/stop |
+| `todo-query.mjs sync --plan NNN` / `sync --merged` | the todo-sync Action (`.github/workflows/todo-sync.yml`) on every push to main touching `plans/**`; the Planner protocol (`.claude/commands/plan.md`) re-runs it as a no-op |
+| `free-merged-slots.mjs` | the Planner protocol (`.claude/commands/plan.md`), step 2 — detaches a `wt-N` back to idle once its branch merges into `origin/main`, stopping its servers |
+
+
+---
+
+## 6. State stores (the "ledger" layer)
+
+| Store | Written by | Read by |
+| --- | --- | --- |
+| `plans/NNN-slug.plan.md` (+ `plans/1-100/` archive) | save-plan; mid-flight Phase 4 appends | `/review-it`, `/brief`, `/ship` todo sync, Contractor |
+| `.claude/todo.md` | save-plan Phase 1; mid-flight sync; `/ship`/`/done` mark `[x]` | `/brief` retroactive, `/ship`, `/done`, session startup |
+| `.claude/todo-archive/NNN.md` (300-line volumes) | `scripts/todo-archive.mjs`, run by the todo-sync workflow after a merge (archives fully-complete plan sections) | `/sweep-stale-todos` |
+| `.claude/sessions/{session-id}/brief.md` | `/brief` | `/ship` Done-when check |
+| `sessions/YYYY-MM-DD.md` | Contractor after each milestone | brain capture (Decisions) |
+| `docs/brain/**` | `/ship` brain capture (auto-write on gate reply, opt out with `no brain`) | session start on unfamiliar work; architectural choices |
+| `docs/brain/decision-log.md`, `docs/brain/agent-rules.md` | the learning step (`scripts/decision-log.mjs`), after a graded `✗` / `failed:` reply | builders read `agent-rules.md` `## builder` (`orch-builder`, `/take-plan`); the other sections go to the checkers and the browser agent as `RULES`; the log is for the Human and the repeat check |
+| `docs/brain/agent-lessons/<role>.md` (10 roles), `docs/brain/run-log.md` | `orch-state.mjs lessons` / `finish` from the run's `status.json` (scripts only, no model call); `decision-log.mjs lessons --add` | each orchestrator role as `LESSONS`; `/plan`'s review reads `planner.md`; the report's trend line |
+| `docs/agent/kit-lessons/<role>.md` (10 roles, kit-owned, managed) and `triage-calibration.md` | the kit's `tools/kit-lessons.mjs` and `tools/kit-learn.mjs triage-prior` (kit repository only; `kit-sync` brings the files to a project) | each orchestrator role as `LESSONS`, before the project's own lines; `/plan`'s review reads `planner.md` from both folders (`docs/agent/kit-brain.md` "Kit side") |
+| `decision-grades.jsonl` (in `docs/brain/`, created on the first grade), `docs/brain/follow-ups.md` | `decision-log.mjs grade`: the orchestrator after the decisions reply, and `/ship` after a grade reply (run `ship-<NNN>`, `--mark` tags the graded `- decision:` lines of the plan) | `decision-log.mjs stats` (agreement per kind, printed; `triageVerdict: none` rows not counted), `/plan`'s follow-ups check (`follow-ups --open`), `/ship`'s `pending` (via the plan's tags), the kit brain |
+| `docs/agent-evals/cases/<checker>/<date>-<kind>/` | `decision-log.mjs case` (a graded `checker-miss: yes`), committed on the run branch by `brain-commit` | the agent-eval harness (`tools/agent-eval.mjs`) |
+| `.claude/.plan-write-ack` | save-plan (save-as-new after Human confirm) | consumed once by `plan-write-guard.sh` |
+| `.claude/orchestrator-runs/<run>/status.json`, `<run>.md` | `orch-state.mjs` only (after every step of a run; the report copy at the end) | `/orchestrate` step 4, a relaunch of the run |
+| `docs/orchestrator/runs/<run>/` on `orch/<run>` | `orch-state.mjs finish` (report + status.json) | the Human, before merging the run branch |
+| `notes/github-sync/YYYY-MM-DD.md` | github-sync skill | — |
+| `.qa-reports/` | QA/audit runs | audits |
+
+---
+
+## 7. Flows (edges for the diagram)
+
+### F1 — Plan lifecycle (persist gate)
+
+```
+Human describes feature
+  → Planner (/plan) scopes with the Human and drafts the Plan Contract
+      (or the Human pastes a draft from Claude.ai / Cursor / another agent)
+  → [gate] Architect + PM review (.claude/commands/plan.md) — prints ARCHITECT + PM REVIEW
+      → no gaps → continue
+      → gaps    → Human accepts / rejects each fix → continue
+  → [gate] save-plan skill (MANDATORY before any milestone work)
+      → Phase 0: node scripts/plan-name-similarity.mjs --name="…"
+          → no hits  → save as next NNN, no questions
+          → hits     → STOP → Human: rewrite existing | save as new | cancel
+      → Phase 1: append Atomic Sub-tasks to .claude/todo.md; allocate NNN (collision guard)
+      → Phase 3: write plans/NNN-slug.plan.md
+          (Claude Code: plan-write-guard.sh hook re-checks; .plan-write-ack unlocks save-as-new)
+  → only now: brief/milestone execution may begin
+```
+
+### F2 — Milestone / brief execution loop
+
+```
+/brief (proactive) → brief.md names Parent plan path
+  → Contractor executes ONE milestone → writes sessions/[date].md → STOPS
+  → /review-it: reads the branch diff and its plan → finders → verifier
+      → APPROVE | RETURN TO WORKER | ESCALATE TO ARCHITECT
+  → mid-flight scope change (review fallout / Human adds stage):
+      [gate] append [ ] to parent plan Atomic Sub-tasks + .claude/todo.md BEFORE doing the work
+      (save-plan Phase 4 + job-validation "Plan file sync")
+  → validation (Human done / ship Y / Tier 1 evidence) → next milestone or /ship
+```
+
+### F3 — Ship pipeline (`/ship`)
+
+```
+Phase 0  lane classification — FAST / ULTRA-TRIVIAL / REGULAR by diff size + sensitive-path check; /ship fast|regular overrides
+Phase 1  ship-prep.mjs --gate — build, lint, tests (REGULAR), ledger, override check by code; hard stop on fail, all lanes
+Phase 2  review by review.ship — REGULAR plan branch: checkers (/review-it, default) | reviewer (plan-review.mjs) | light (/review);
+                                one fix-and-recheck cycle max (or --skip-review "reason"); FAST/ULTRA-TRIVIAL: eslint --fix + one diff read
+Phase 3  manifest check      — >1 worktree: session-manifest-ship.py; ≤1 worktree: branch/HEAD-drift check (baseline captured at ship start)
+Phase 4  approval gate       — REGULAR: visual tree, Human Y = job validation, separate Phase 4.5 wait
+                                FAST: same tree, single Y also answers Phase 4.5 (merge/later/open-pr-only)
+                                ULTRA-TRIVIAL: no wait — auto-commit+push, tree printed as receipt after
+         on Y (hard order): mark todos/plan [x] → (review.learn on: brain drafts, grade, learn)
+                            → git add listed paths → one commit → rename branch → push if asked
+         commit-vs-PR judgment (standards-git.md): brief Done-when met → PR; else checkpoint (no PR); ad-hoc → ask
+Phase 4.5 Merge Gate         — mandatory after any successful push (standards-git.md); folded into Phase 4's single Y for FAST lane
+         replies: merge | later | open-pr-only (brain draft auto-writes; add "no brain" to opt out, "brain edit …" to revise)
+         open items — into the plan's Execution Notes or the PR body, in the same commit (no file)
+```
+
+### F4 — Job validation without ship (Path B)
+
+```
+Agent finishes job → MUST print HOW TO VALIDATE cards (first ask only; /ship later shows VALIDATED BY HUMAN), then "JOB DONE" block
+  → Human: done/verified/approved → mark matching todo + plan [x] on disk
+  → verify → agent walks checklist, then re-show JOB DONE
+  → not yet → keep [ ]   |   edit list → revise, re-show
+(thanks/ok/silence/CI-green never count)
+```
+
+### F5 — Session lifecycle (Claude Code)
+
+```
+SessionStart → session-startup.sh → role line (Planner / Worker plan / idle slot)
+  → github-sync skill (once per calendar day)
+  → work … (branch-guard + plan-write-guard on every write; session-manifest on every edit)
+  → context full → PreCompact reminder fires → /compact focus … (or /clear + state reload)
+  → Stop → handoff-check.sh
+```
+
+### F6 — PR checks fix loop
+
+```
+PR checks fail → /fix-pr-checks → docs/agent/pr-check-fix-loop.md
+  → max 2 rounds; security-scan findings ALWAYS surfaced to Human; then stop
+```
+
+### F7 — Brain capture (knowledge loop)
+
+```
+Durable learning in session (decision/gotcha/pattern)
+  → /ship Phase 4/4.5 proposes: path + title + FULL draft body (fenced)
+  → usefulness gate; one-liner proposals forbidden
+  → auto-writes verbatim to docs/brain/** on the gate reply (Y / merge / later / open-pr-only); "no brain" opts out
+  → next sessions: read docs/brain/index.md → relevant sub-file only
+```
+
+---
+
+## 8. Connection matrix (quick edge list)
+
+```
+/feat        --invokes-->  /plan, /review-it
+/ship        --invokes-->  /review-it (REGULAR plan branch, review.ship=checkers), plan-review.mjs (review.ship=reviewer) or /review; --runs--> ship-prep.mjs --gate, session-manifest-ship.py, brain-review-check.mjs, decision-log.mjs pending/grade
+/ship        --writes-->   .claude/todo.md, plans/*.plan.md ([x]), docs/brain/**
+/review-it   --reads-->    git diff, plans/*; --runs--> ship-prep.mjs --gate; --invokes--> orch-check-*, orch-verify
+/orchestrate --runs-->     run-plans.mjs (orch-state.mjs, orch-preflight.mjs); --invokes--> orch-builder, plan-reviewer; --merges--> orch/<run> only
+/brief       --writes-->   .claude/sessions/{id}/brief.md; --reads--> plans/* (parent)
+save-plan    --runs-->     plan-name-similarity.mjs; --writes--> plans/*, .claude/todo.md, .plan-write-ack
+plan-write-guard.sh --gates--> Write/Edit on plans/*.plan.md; --runs--> plan-name-similarity.mjs
+branch-guard.sh     --gates--> all Write/Edit and Bash writes (blocks main)
+scope-guard.sh      --gates--> all Write/Edit and Bash writes (plan scope); --runs--> scope-check.mjs --file
+brief-detection     --gates--> pasted briefs and prose feature requests; --routes--> review | /plan -> save-plan -> take-plan | discussion
+job-validation      --gates--> marking any [x]; --requires--> Human done / ship Y / Tier 1 evidence
+brain-capture.md    --gates--> any docs/brain write (shown, then auto-writes; "no brain" opts out)
+standards-git.md    --gates--> post-push (Merge Gate, mandatory)
+pre-commit hooks    --gate--> every commit (secret-scan, plan-ledger-check, stack-pack checks) [shared with Cursor]
+```
+
+---
+
+## 9. Known inconsistencies
+
+Recorded per project, in the project's own copy of this file after install.

@@ -82,8 +82,12 @@ function walk(rel) {
   return out
 }
 
+// The folders kit features write at run time (project data, never workflow files): left out of every project's
+// inventory, so a project's manifest never has to list them. One list, here (kit v3.6.0).
+const KIT_DATA_DIRS = ['docs/brain/remarks/**']
+
 function inventory(excludedGlobs) {
-  const excluded = excludedGlobs.map(globToRegExp)
+  const excluded = [...KIT_DATA_DIRS, ...excludedGlobs].map(globToRegExp)
   const files = new Set()
   for (const f of ROOT_FILES) if (existsSync(join(repoRoot, f))) files.add(f)
   for (const d of ROOT_DIRS) for (const f of walk(d)) files.add(f)
