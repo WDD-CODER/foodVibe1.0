@@ -173,10 +173,6 @@
       "reason": "pnpm: root pnpm install for build:schemas, server installed with pnpm --dir server; Angular build cache keyed on pnpm-lock.yaml"
     },
     {
-      "path": ".github/workflows/security.yml",
-      "reason": "pnpm: root and server production audit run pnpm audit --prod (kit v1.9.0 still renders npm audit, which needs a package-lock.json); drop this override when a kit release renders pnpm audit"
-    },
-    {
       "path": "docs/agent/standards-security.md",
       "reason": "FoodVibe concrete security rules (authGuard, auth-crypto, sessionStorage)"
     },

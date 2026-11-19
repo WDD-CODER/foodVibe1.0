@@ -104,7 +104,7 @@ End the turn with the combined visual block below and **wait** for Human choice.
 
 | Reply | Action |
 | --- | --- |
-| `merge` | Write any proposed brain draft first (unless opted out), then: if no open PR, `gh pr create`. Then merge — outside a slot `gh pr merge --merge --delete-branch`; inside a `wt-N` slot see "Merging from a slot" below. Never force-merge. Never merge without this literal word — a `Y`, `--yes` or "ship fast y" is not a merge. A `merge` already in the `/ship` request (e.g. `/ship fast merge`) counts as this reply: don't stop to ask again. |
+| `merge` | Write any proposed brain draft first (unless opted out), then: if no open PR, `gh pr create`. Then merge — outside a slot `gh pr merge --merge --delete-branch`; inside a `wt-N` slot see "Merging from a slot" below. Never force-merge. Never merge without this literal word — a `Y`, `--yes` or "ship fast y" is not a merge. A `merge` already in the `/ship` request (e.g. `/ship fast merge`) counts as this reply: don't stop to ask again. The merge guard refuses `gh pr merge` while a check fails or runs, or without this reply. |
 | `later` | Write any proposed brain draft first (unless opted out). Leave branch/PR open. Put the PR URL in session Next Steps. Stop. |
 | `open-pr-only` | Write any proposed brain draft first (unless opted out). Ensure a PR exists (`gh pr create` if needed). Do **not** merge. Re-show Merge Gate after PR URL is known, or stop if Human said later. |
 | `no brain` / `skip brain` (combined with any of the above) | Do not write the proposed draft this ship. Explicit no-op on the brain side only. |
@@ -116,13 +116,20 @@ Dirty-tree merge fallback (same as `/ship`): if `gh pr merge --merge --delete-br
 
 ```bash
 node scripts/slot-stop.mjs
+node scripts/branch-autodelete-check.mjs
 gh pr merge {n} --merge
-git push origin --delete <branch>
+git push origin --delete <branch>   # only on AUTODELETE: manual or unknown
 git fetch origin --prune
 node scripts/free-merged-slots.mjs
 ```
 
 The first line stops the slot's dev servers (servers are off unless a session needs them). The fetch matters: `gh` merges on GitHub, so without it `origin/main` is one commit behind. The last line frees the slot: it stops any server still running there, detaches to `origin/main` (idle) and clears `.worktree-plan`, so a later "pull main" cannot fast-forward the merged branch. Stay in the slot folder. Do not `cd` to the main folder and do not check out `main`. Next job: the Human runs `/clear`, then `take plan NNN` in the same slot — `take-plan.mjs` fetches, releases the merged branch, and claims the new plan without starting servers (`node scripts/slot-serve.mjs` starts them when a step needs the app).
+
+`branch-autodelete-check.mjs` says whether the repo already deletes a merged branch. `AUTODELETE: auto` (the repo setting `delete_branch_on_merge`, or a workflow on `pull_request` that deletes branches) → skip `git push origin --delete`: GitHub removes the branch. `AUTODELETE: manual` or `AUTODELETE: unknown` → delete it as above. `git fetch origin --prune` and `free-merged-slots.mjs` run in every case. A `git push origin --delete` rejected because the branch is already gone (`remote ref does not exist`) means it was deleted: not a loose end, never reported as open.
+
+### Plan close after the merge (every repo, every lane)
+
+After every merge, check whether the merged work finished a plan: run `node scripts/plan-close.mjs --dry-run`. It lists each open plan whose Atomic Sub-tasks are all ticked (and no `[auto]` Done-when item is open). When it lists any, run `node scripts/plan-close.mjs` — it sets `Status: done` and files the plan under `plans/<range>/` — then commit only `plans/` with `plan(NNN): close — merged` and push (plans may be written on `main`). Never move a plan by hand. Skip it when `todo-sync` already closed the plan on origin (the script reports `already closed`). A plan that is not fully ticked stays open — never force it.
 
 ### Brain capture — auto-write with opt-out
 

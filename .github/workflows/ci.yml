@@ -69,12 +69,17 @@ jobs:
         run: pnpm run lint
       # The workflow scripts' own dependencies live in scripts/package.json (kit-managed, npm); pnpm does not
       # hoist them into the root node_modules the way npm did, so install them inside scripts/ first.
+# KIT:required — a project override must keep this step
       - name: Install workflow script dependencies
         if: hashFiles('scripts/package-lock.json') != ''
         working-directory: scripts
         run: npm ci --no-audit --no-fund
+      # A project that overrides this workflow keeps its own copy: this step fails by name when that copy
+      # lost a step the kit requires, instead of the loss surfacing as a broken script later.
+# KIT:required — a project override must keep this step
       - name: Kit override check
         run: node scripts/override-check.mjs
+# KIT:required — a project override must keep this step
       - name: Workflow script tests
         run: pnpm run --if-present test:scripts
 
@@ -91,10 +96,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+# KIT:required — a project override must keep this step
       - name: Install workflow script dependencies for the diff checks
         if: hashFiles('scripts/package-lock.json') != ''
         working-directory: scripts
         run: npm ci --no-audit --no-fund
+# KIT:required — a project override must keep this step
       - name: Kit diff checks
         shell: bash
         env:
@@ -185,20 +192,27 @@ jobs:
 
   gitleaks:
     runs-on: ubuntu-latest
+    # The default token may be read-only; the action reads the PR's commits and must not post comments.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+# KIT:required — a project override must keep this step
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: false
 
   ci:
     needs: [changes, lint, kit-checks, build, test, server-tests, gitleaks]
     if: always()
     runs-on: ubuntu-latest
     steps:
+# KIT:required — a project override must keep this step
       - name: Require quality gates
         shell: bash
         run: |
