@@ -26,3 +26,4 @@ Earlier (50 runs): plans 158 · merged 137 · parked 18 · fix rounds 58 · esca
 | 2026-11-18 | mod-invoices-ui | 628,629,630 | 3 | 0 | - | 2 | 1 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-18 | mod-access-ui | 632 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-history | 638,639 | 2 | 0 | - | 2 | 1 | 2 | ok | - | - | - |
+| 2026-11-18 | mod-stock-srv | 635 | 1 | 0 | - | 1 | 0 | 0 | ok | - | - | - |

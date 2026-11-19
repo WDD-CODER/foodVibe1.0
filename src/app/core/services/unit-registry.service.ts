@@ -5,6 +5,7 @@ import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { TaxonomyStore } from './taxonomy-store.service'
+import { SYSTEM_UNITS } from '@schemas/units/to-base'
 
 export type RegisterUnitResult =
   { success: true; alreadyInRegistry?: boolean } | { success: false; alreadyOnProduct?: boolean; error?: string }
@@ -27,20 +28,8 @@ export interface ProductUnitAdded {
 /** Log entry for a failed unit load (plan 454: logged by TaxonomyStore.loadSafely / reloadSafely). */
 const UNIT_LOAD_LOG = { event: 'crud.units.hydrate_error', message: 'Failed to hydrate units' }
 
-/** System units: constant, non-removable, values never overwritten. */
-export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
-  kg: 1000,
-  liter: 1000,
-  gram: 1,
-  ml: 1,
-  unit: 1,
-  dish: 1,
-  tablespoon: 15,
-  teaspoon: 5,
-  cup: 240,
-  pinch: 1,
-  portion: 1
-}
+/** System units: constant, non-removable (plan 635: defined in the shared package, re-exported here). */
+export { SYSTEM_UNITS }
 
 /**
  * Plan 321 Phase 3 — unit registry as a thin facade over TaxonomyStore (`unit` terms, each

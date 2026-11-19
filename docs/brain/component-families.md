@@ -350,7 +350,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable (MVP)
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
-  `src/app/core/engine/units.ts`; portions: `src/app/core/engine/portions.ts`.
+  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`.
 - When: anything that computes quantities, costs or prices for an event.
 - Known copies: none.
 
@@ -556,4 +556,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable (plan 639)
 - Use: `src/app/pages/platform-dashboard/platform-dashboard.page.scss` · `.pbd-erase` (danger ghost button), `.pbd-erase__box` (reason field stack) in the platform business dialog.
 - When: page-local layout of the erase action; no shared family fits.
+### unit-rates — `unitRatesFrom`, `loadUnitRates`, `toBase` (shared unit rule)
+
+- Status: stable — plan 635
+- Use: `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, `SYSTEM_UNITS`, the unit constants and `unitRatesFrom(terms)`; the browser reaches it through `@schemas/units/to-base` (`units.ts` and the other app files re-export it), the server through `server/generated/schemas/units/to-base`. `server/utils/unit-rates.js` — `loadUnitRates(req)` reads the master and the business's own `unit` terms and returns the rates the server converts with.
+- When: server code converts an amount into a product's base unit (a stock count); never write a second conversion.
 - Known copies: none.
