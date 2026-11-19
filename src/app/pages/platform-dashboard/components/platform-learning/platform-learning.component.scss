@@ -20,7 +20,8 @@
   }
 
   .learning__desc,
-  .learning__hint {
+  .learning__hint,
+  .learning__empty {
     margin: 0;
 
     font-size: var(--fs-sm);
@@ -42,32 +43,93 @@
     border-radius: var(--radius-md);
   }
 
-  .learning__scroll {
-    overflow-x: auto;
-    max-inline-size: 100%;
+  .learning__cards,
+  .learning__tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-3);
   }
 
-  .learning__table {
-    inline-size: 100%;
-    font-size: var(--fs-sm);
-    font-variant-numeric: tabular-nums;
-    border-collapse: collapse;
+  .learning__card,
+  .learning__tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 
-    th,
-    td {
-      padding: var(--space-2) var(--space-3);
-      vertical-align: middle;
-      text-align: start;
-      white-space: nowrap;
-    }
+    min-inline-size: 0;
+    padding: var(--space-3);
+
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+  }
+
+  .learning__card-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .learning__card-name {
+    margin: 0;
+    font-size: var(--fs-md);
+    font-weight: 600;
+  }
+
+  .learning__model,
+  .learning__meaning {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+
+  .learning__metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .learning__value {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
   }
 
   .learning__low {
     color: var(--text-muted);
   }
 
-  .learning__week td {
+  .learning__weeks-btn {
+    align-self: flex-start;
+  }
+
+  .learning__weeks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    margin: 0;
+    padding: 0;
+
+    font-size: var(--fs-sm);
     color: var(--text-muted);
+
+    list-style: none;
+  }
+
+  .learning__week {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+    justify-content: space-between;
+  }
+
+  .learning__brain {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
   .learning__heading {
@@ -75,35 +137,5 @@
     font-size: var(--fs-md);
     font-weight: 600;
     color: var(--text-muted);
-  }
-
-  .learning__numbers {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-5);
-
-    margin: var(--space-2) 0 0;
-
-    div {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-
-      min-inline-size: 6rem;
-    }
-
-    dt {
-      font-size: var(--fs-sm);
-      font-weight: 500;
-      letter-spacing: 0.01em;
-      color: var(--text-muted);
-    }
-
-    dd {
-      margin: 0;
-      font-size: var(--fs-lg);
-      font-weight: 700;
-      line-height: 1.2;
-    }
   }
 }

@@ -119,9 +119,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show each AI action as a card whose numbers say what they mean — the cards, the weekly breakdown inside, the tiles, the banner, the keys, the spec cases — src/app/pages/platform-dashboard/components/platform-learning/**, public/assets/data/dictionary.json
-- [ ] A2: Say why the section is empty — the empty state with the private count and its case — src/app/pages/platform-dashboard/components/platform-learning/**
-- [ ] A3: Prove it in the running app and run every check — the screen spec, then the Done-when commands in order — e2e/ui/647-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Show each AI action as a card whose numbers say what they mean — the cards, the weekly breakdown inside, the tiles, the banner, the keys, the spec cases — src/app/pages/platform-dashboard/components/platform-learning/**, public/assets/data/dictionary.json
+- [x] A2: Say why the section is empty — the empty state with the private count and its case — src/app/pages/platform-dashboard/components/platform-learning/**
+- [x] A3: Prove it in the running app and run every check — the screen spec, then the Done-when commands in order — e2e/ui/647-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 630 (section and numbers), 642 (saved-of-made and the low-sample style).
@@ -134,3 +134,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - decided: private businesses stay out of the numbers — why: Dandan's answer of 2026-11-19 ("keep them out").
+- A1–A3 built: cards, tiles, banner, private empty state, keys, spec cases, e2e/ui/647-1.spec.ts (written, not run).
+- build exit 0; lint exit 0; lint:reuse/icons/no-native-select/override/ledger/breadcrumbs/log-query exit 0.
+- `pnpm run test:ci` exit 1: 3 AppComponent specs fail with `The "bell" icon has not been provided` — plan 646's bell is missing from `src/testing/test-lucide-icons.ts` (outside scope, fails on the run branch too). 2640 other specs pass, including all platform-learning cases.
