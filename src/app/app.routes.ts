@@ -21,6 +21,7 @@ import { environment } from '../environments/environment'
 import { devCatalogRoutes } from './pages/dev-catalog/dev-catalog.routes'
 import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
 import { moduleGuard } from './core/guards/module.guard'
+import { diagnosisGuard } from './pages/diagnosis/diagnosis.guard'
 import { KnowledgeItemDataService } from './core/services/knowledge-item-data.service'
 
 export const routes: Routes = [
@@ -302,6 +303,22 @@ export const routes: Routes = [
   },
   { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
   { path: 'report', loadComponent: () => import('./pages/report/report.page').then(m => m.ReportPage), canActivate: [authGuard] },
+  // Plan 634: the consultant's diagnosis (home module consultant_diag; the server is the real gate).
+  {
+    path: 'diagnosis',
+    loadComponent: () => import('./pages/diagnosis/diagnosis.page').then(m => m.DiagnosisPage),
+    canActivate: [authGuard, diagnosisGuard],
+  },
+  {
+    path: 'diagnosis/:id',
+    loadComponent: () =>
+      import('./pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace.component').then(m => m.DiagnosisWorkspaceComponent),
+    canActivate: [authGuard, diagnosisGuard],
+    resolve: { kitchenLoaded: kitchenDataEnsureLoadedResolver },
+    canDeactivate: [pendingChangesGuard],
+    // A ?tab= change asks the leave question too, since it drops the open tab.
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+  },
   // Plan 535: dev-only catalog; empty in production, remote and gh-pages builds.
   ...devCatalogRoutes(environment.localDev),
   // Plan 555: the public request pages. `bare` hides the app header, tabs and quick-add button; no guard, no resolver.

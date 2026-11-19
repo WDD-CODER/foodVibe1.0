@@ -1,6 +1,7 @@
 import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { LucideAngularModule, Undo2 } from 'lucide-angular'
+import { provideRouter } from '@angular/router'
+import { LucideAngularModule, Stethoscope, Undo2 } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { BusinessService } from '@services/business.service'
 import { TranslationService } from '@services/translation.service'
@@ -10,6 +11,7 @@ import { ActingBannerComponent } from './acting-banner.component'
 
 describe('ActingBannerComponent', () => {
   const acting_ = signal<'consultant' | 'platform' | null>(null)
+  const homeModules_ = signal<string[]>([])
   const business_ = signal<{ name: string } | null>({ name: 'Client kitchen' })
   const switchBusiness = jasmine.createSpy('switchBusiness')
   const onSetErrorMsg = jasmine.createSpy('onSetErrorMsg')
@@ -18,13 +20,15 @@ describe('ActingBannerComponent', () => {
 
   beforeEach(async () => {
     acting_.set(null)
+    homeModules_.set([])
     business_.set({ name: 'Client kitchen' })
     switchBusiness.calls.reset()
     onSetErrorMsg.calls.reset()
     await TestBed.configureTestingModule({
-      imports: [ActingBannerComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Undo2 })],
+      imports: [ActingBannerComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Undo2, Stethoscope })],
       providers: [
-        { provide: UserService, useValue: { acting_, switchBusiness } },
+        provideRouter([]),
+        { provide: UserService, useValue: { acting_, homeModules_, switchBusiness } },
         { provide: BusinessService, useValue: { business_ } },
         { provide: UserMsgService, useValue: { onSetErrorMsg } },
         {
@@ -53,6 +57,17 @@ describe('ActingBannerComponent', () => {
     acting_.set('platform')
     fixture.detectChanges()
     expect(host().querySelector('[data-testid="acting-banner"]')?.textContent).toContain('P Client kitchen')
+  })
+
+  it('shows the diagnosis link only with the home module consultant_diag (plan 634)', () => {
+    acting_.set('consultant')
+    fixture.detectChanges()
+    expect(host().querySelector('[data-testid="acting-diagnosis"]')).toBeNull()
+    homeModules_.set(['consultant_diag'])
+    fixture.detectChanges()
+    const link = host().querySelector('[data-testid="acting-diagnosis"]')
+    expect(link).not.toBeNull()
+    expect(link?.getAttribute('href')).toBe('/diagnosis')
   })
 
   it('the back button switches home and is disabled while it runs', () => {

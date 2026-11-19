@@ -16,6 +16,8 @@
 | `services/knowledge-import-prompt.js` | The English prompt and generation config of `POST /ai/knowledge-import` (plan 554) |
 | `utils/terms-version.js` | `currentTermsVersion()` — reads `version` from `public/assets/legal/terms.he.json`, the file the app shows (plan 584) |
 | `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests` |
+| `routes/diag.js` | Diagnosis record at `/api/v1/diag` (plan 633); the only writer of `diagnoses`; gate reads the home business |
+| `routes/ai/diag.js` | `POST /api/v1/ai/diag/menu`: a pasted menu → names and prices (plan 633) |
 | `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
 | `routes/access.js` | Mounted at `/api/v1/access` (plan 615; filled by plan 631, C-ACCESS): `GET /businesses` (where the user may go), `POST` / `DELETE` / `GET /grants` (platform admin grants, owner lists and removes); no query of its own |

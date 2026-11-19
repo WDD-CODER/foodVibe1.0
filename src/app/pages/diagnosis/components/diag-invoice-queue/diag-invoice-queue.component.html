@@ -1,0 +1,49 @@
+<div class="diag-queue" dir="rtl">
+  @if (locked()) {
+    <p class="diag-queue__locked" role="status" data-testid="diag-locked">{{ 'diag_done_locked' | translatePipe }}</p>
+  } @else {
+    <section class="diag-queue__pick c-glass-panel">
+      <input
+        #fileInput
+        type="file"
+        multiple
+        hidden
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        data-testid="diag-queue-input"
+        (change)="onFilesChosen($event)"
+      />
+      <button type="button" class="c-btn-ghost" data-testid="diag-queue-pick" (click)="fileInput.click()">
+        <lucide-icon name="upload" [size]="16" />
+        {{ 'diag_choose_files' | translatePipe }}
+      </button>
+      <p class="diag-queue__hint">{{ 'diag_queue_hint' | translatePipe }}</p>
+      <p class="diag-queue__count" data-testid="diag-queue-count">
+        {{ ('diag_invoices_count' | translatePipe).replace('{count}', '' + invoiceIds().length) }}
+      </p>
+    </section>
+
+    @if (files_().length > 0) {
+      <ul class="diag-queue__list" data-testid="diag-queue-list">
+        @for (item of files_(); track item.id) {
+          <li class="diag-queue__item" data-testid="diag-queue-item">
+            <span class="diag-queue__name" dir="auto">{{ item.file.name }}</span>
+            <span
+              class="c-chip c-chip--tag"
+              [class.c-chip--green]="item.status === 'done'"
+              [class.c-chip--amber]="item.status === 'skipped'"
+              >{{ statusKey(item.status) | translatePipe }}</span
+            >
+          </li>
+        }
+      </ul>
+    }
+
+    @if (current_(); as current) {
+      <button type="button" class="c-btn-ghost" data-testid="diag-queue-skip" (click)="skip()">
+        <lucide-icon name="x" [size]="16" />
+        {{ 'diag_skip_file' | translatePipe }}
+      </button>
+      <app-product-import [embedded]="true" [file]="current.file" (applied)="onApplied($event)" />
+    }
+  }
+</div>
