@@ -544,9 +544,16 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a persistent notice with an action must stay on every screen; a toast disappears and `app-front-desk-status-banner` has no action.
 - Known copies: none.
 
-### learned-data-erase — erase what the platform learned from one business
+### learned-data-erase — `eraseLearnedData(db, businessId)` erases what the platform learned from one business
 
 - Status: stable (plan 639)
-- Use: `server/services/business.js` · `eraseLearnedData(db, businessId)` (called by the admin erase route and by the business delete when asked); client `PlatformAdminService.eraseLearnedData`.
+- Use: eraseLearnedData(db, businessId) in server/services/business.js (called by the admin erase route and by the business delete when asked); client `PlatformAdminService.eraseLearnedData`.
 - When: learned data of a business must be removed; going private never erases (it only stops learning).
+- Known copies: none.
+
+### platform-erase-box — `.pbd-erase` and `.pbd-erase__box`
+
+- Status: stable (plan 639)
+- Use: `src/app/pages/platform-dashboard/platform-dashboard.page.scss` · `.pbd-erase` (danger ghost button), `.pbd-erase__box` (reason field stack) in the platform business dialog.
+- When: page-local layout of the erase action; no shared family fits.
 - Known copies: none.
