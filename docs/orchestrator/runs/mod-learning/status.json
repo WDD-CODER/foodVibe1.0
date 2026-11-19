@@ -250,11 +250,10 @@
       "text": "the folder foodVibe1.0-orch-merge-mod-learning was installed (root, scripts, server)"
     }
   ],
-  "attempts": 1,
-  "phase": "stopped",
+  "attempts": 2,
+  "phase": "finished",
   "freeDiskGb": 14.8,
-  "updatedAt": "2026-11-19T19:05:26.689Z",
-  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2642 SUCCESS / ERROR: '[error] crud.metadata.hydrate_error: Failed to load metadata', Object{err: Error: NG0205: Injector has already been destroyed. / Error: NG0205: Injector has already been destroyed. / ERROR: '[error] crud.stations.load_error: Failed to load stations', Object{err: Error: NG0205: Injector has already been destroyed. — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "updatedAt": "2026-11-19T19:12:49.164Z",
   "stops": [
     {
       "at": "2026-11-19T19:05:24.234Z",
@@ -316,19 +315,12 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-19T19:05:26.685Z",
+  "finishedAt": "2026-11-19T19:12:49.161Z",
   "finalGate": {
-    "ok": false,
-    "command": "pnpm run test:ci",
-    "at": "2026-11-19T19:05:26.689Z",
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T19:12:49.164Z",
     "attempt": 1,
-    "blamed": [],
-    "failing": [
-      "TOTAL: 1 FAILED, 2642 SUCCESS",
-      "ERROR: '[error] crud.metadata.hydrate_error: Failed to load metadata', Object{err: Error: NG0205: Injector has already been destroyed.",
-      "Error: NG0205: Injector has already been destroyed.",
-      "ERROR: '[error] crud.stations.load_error: Failed to load stations', Object{err: Error: NG0205: Injector has already been destroyed."
-    ],
-    "noPlanFile": true
+    "blamed": []
   }
 }

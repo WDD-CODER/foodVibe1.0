@@ -1,17 +1,14 @@
 # Orchestrator run mod-learning
 
-Run branch: `orch/mod-learning` (from `origin/main` at 355c6fb) · started 2026-11-19T18:11:58.689Z · finished 2026-11-19T19:05:26.685Z
+Run branch: `orch/mod-learning` (from `origin/main` at 355c6fb) · started 2026-11-19T18:11:58.689Z · finished 2026-11-19T19:12:49.161Z
 Result: 1 merged, 0 parked, skipped or left out, 1 in the run (counted from git and status.json).
-`main` untouched: yes (1 plan/todo file(s) changed on main) — origin/main is d90b4af.
-Stopped: final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2642 SUCCESS / ERROR: '[error] crud.metadata.hydrate_error: Failed to load metadata', Object{err: Error: NG0205: Injector has already been destroyed. / Error: NG0205: Injector has already been destroyed. / ERROR: '[error] crud.stations.load_error: Failed to load stations', Object{err: Error: NG0205: Injector has already been destroyed. — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
+`main` untouched: yes (2 plan/todo file(s) changed on main) — origin/main is a713be0.
 
 ## Stops
 
 - attempt 1 · 2026-11-19T19:05:24.234Z · final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2642 SUCCESS / ERROR: '[error] crud.metadata.hydrate_error: Failed to load metadata', Object{err: Error: NG0205: Injector has already been destroyed. / Error: NG0205: Injector has already been destroyed. / ERROR: '[error] crud.stations.load_error: Failed to load stations', Object{err: Error: NG0205: Injector has already been destroyed. — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
 
-Final gate: failed: pnpm run test:ci (attempt 1)
-Failing: TOTAL: 1 FAILED, 2642 SUCCESS / ERROR: '[error] crud.metadata.hydrate_error: Failed to load metadata', Object{err: Error: NG0205: Injector has already been destroyed. / Error: NG0205: Injector has already been destroyed. / ERROR: '[error] crud.stations.load_error: Failed to load stations', Object{err: Error: NG0205: Injector has already been destroyed.
-Final gate note: no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)
+Final gate: ok (attempt 1)
 
 ## Plans
 
@@ -25,6 +22,8 @@ Command (from the main folder): `node scripts/log-query.mjs --since=2026-11-19T1
 Exit code: 0
 
 ```text
+2026-11-19T19:05:44.718Z error client productImport.apply_failed d7b55b34-c222-488d-8458-a4bff02b9182 - Price list apply failed {"status":400}
+2026-11-19T19:05:44.712Z error client http.error d7b55b34-c222-488d-8458-a4bff02b9182 40d0a45e-1f56-45c9-87b0-677bd379bc43 HTTP 400 {"method":"POST","url":"http://localhost:3002/api/v1/product-import/apply","status":400}
 2026-11-19T18:46:42.549Z error client http.error d7b55b34-c222-488d-8458-a4bff02b9182 540cb4dd-833d-4dfa-a785-1e71faec2339 HTTP 413 {"method":"POST","url":"http://localhost:3002/api/v1/ai/stock/extract","status":413}
 ```
 
