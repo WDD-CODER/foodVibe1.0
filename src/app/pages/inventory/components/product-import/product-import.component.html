@@ -220,9 +220,15 @@
                       (ngModelChange)="setPrice(item.row.id, $event)"
                     />
                     @if (item.status === 'update' && item.oldPrice !== null) {
-                      <span class="import-old-price" dir="ltr" data-testid="import-old-price">
-                        {{ 'import_old_price' | translatePipe }} {{ formatMoney(item.oldPrice) }}
-                      </span>
+                      @if (item.otherSupplierName !== null) {
+                        <span class="import-old-price" data-testid="import-old-price">
+                          {{ wasAtText(item.oldPrice, item.otherSupplierName) }}
+                        </span>
+                      } @else {
+                        <span class="import-old-price" dir="ltr" data-testid="import-old-price">
+                          {{ 'import_old_price' | translatePipe }} {{ formatMoney(item.oldPrice) }}
+                        </span>
+                      }
                       @if (item.changePct !== null) {
                         <span
                           class="import-change"
@@ -234,6 +240,32 @@
                         >
                           {{ changeText(item.changePct) }}
                         </span>
+                      }
+                      @if (item.canChoose && item.otherSupplierName !== null) {
+                        <div class="c-chip-group import-choice" data-testid="import-choice">
+                          <label class="c-chip c-chip--toggle">
+                            <input
+                              type="radio"
+                              [name]="'import-choice-' + item.row.id"
+                              data-testid="import-choice-update"
+                              [checked]="item.choice === 'update'"
+                              [disabled]="isSaving_()"
+                              (change)="setChoice(item.row.id, 'update')"
+                            />
+                            <span>{{ choiceText('import_update_supplier_price', item.otherSupplierName) }}</span>
+                          </label>
+                          <label class="c-chip c-chip--toggle">
+                            <input
+                              type="radio"
+                              [name]="'import-choice-' + item.row.id"
+                              data-testid="import-choice-add"
+                              [checked]="item.choice === 'add'"
+                              [disabled]="isSaving_()"
+                              (change)="setChoice(item.row.id, 'add')"
+                            />
+                            <span>{{ choiceText('import_add_as_new_supplier', item.invoiceSupplierName) }}</span>
+                          </label>
+                        </div>
                       }
                     }
                   </td>

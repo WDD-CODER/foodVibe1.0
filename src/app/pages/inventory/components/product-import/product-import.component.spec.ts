@@ -50,7 +50,18 @@ const readResult = (rows: ImportRow[], extra: Partial<InvoiceReadResult> = {}): 
 const PRODUCTS = [
   { _id: 'p1', nameHebrew: 'עגבנייה', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 5 }] },
   { _id: 'p2', nameHebrew: 'מלפפון', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 4.5 }] },
-  { _id: 'p3', nameHebrew: 'פטרוזיליה', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 7 }] }
+  { _id: 'p3', nameHebrew: 'פטרוזיליה', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 7 }] },
+  { _id: 'p4', nameHebrew: 'לחם', baseUnit: 'kg', sources: [{ supplierId: 'supA', price: 100 }] },
+  {
+    _id: 'p5',
+    nameHebrew: 'חלב',
+    baseUnit: 'liter',
+    sources: [
+      { supplierId: 'supC', price: 120 },
+      { supplierId: 'supD', price: 110 }
+    ]
+  },
+  { _id: 'p6', nameHebrew: 'שמן', baseUnit: 'liter', sources: [{ supplierId: 'supB', price: 20 }] }
 ] as unknown as Product[]
 
 describe('ProductImportComponent', () => {
@@ -103,7 +114,14 @@ describe('ProductImportComponent', () => {
           useValue: {
             products_: signal(PRODUCTS),
             recipes_: () => recipes,
-            suppliers_: signal([{ _id: 'sup1', nameHebrew: 'ירקן' }])
+            suppliers_: signal([
+              { _id: 'sup1', nameHebrew: 'ירקן' },
+              { _id: 'supA', nameHebrew: 'ווילד בייקרי' },
+              { _id: 'supB', nameHebrew: 'ווילד בייקרי ' },
+              { _id: 'supC', nameHebrew: 'מחלבת ג' },
+              { _id: 'supD', nameHebrew: 'מחלבת ד' },
+              { _id: 'supE', nameHebrew: 'ספק ה' }
+            ])
           }
         },
         {
@@ -121,7 +139,19 @@ describe('ProductImportComponent', () => {
           useValue: { business_: () => (storedSettings ? { settings: storedSettings } : { settings: undefined }) }
         },
         { provide: RecipeCostService, useValue: { computeRecipeCost: () => cost } },
-        { provide: TranslationService, useValue: { translate: (key: string) => key } },
+        {
+          provide: TranslationService,
+          useValue: {
+            translate: (key: string) =>
+              (
+                ({
+                  import_price_was_at: 'WAS {price} AT {name}',
+                  import_update_supplier_price: 'UPDATE {name}',
+                  import_add_as_new_supplier: 'ADD {name}'
+                }) as Record<string, string>
+              )[key] ?? key
+          }
+        },
         {
           provide: UserMsgService,
           useValue: {
@@ -217,6 +247,88 @@ describe('ProductImportComponent', () => {
       await fixture.componentInstance['saveAll']()
       fixture.detectChanges()
       expect(byId('price-impact')).toBeNull()
+    })
+  })
+
+  describe('a price set by another supplier (plan 641)', () => {
+    const choose = (testId: string, index = 0) => {
+      all(testId)[index].click()
+      fixture.detectChanges()
+    }
+
+    it('shows +42.0%, the rise mark and offers the two choices; saving after the impact lists the recipes', async () => {
+      await setup(of({ rows: [row('לחם', 142)], truncated: false }))
+      recipes = [
+        {
+          _id: 'r9',
+          nameHebrew: 'כריך',
+          recipeType: 'dish',
+          ingredients: [{ _id: 'i9', type: 'product', referenceId: 'p4', amount: 1, unit: 'kg' }]
+        } as unknown as Recipe
+      ]
+      fixture.componentInstance['supplierId_'].set('supE')
+      await pasteAndParse()
+      expect(byId('import-change')?.textContent?.trim()).toBe('+42.0%')
+      expect(all('import-flag-rise').length).toBe(1)
+      expect(byId('import-old-price')?.textContent).toContain('WAS ₪100.00 AT ווילד בייקרי')
+      expect(all('import-choice-update').length).toBe(1)
+      expect(all('import-choice-add').length).toBe(1)
+      await fixture.componentInstance['saveAll']()
+      fixture.detectChanges()
+      expect(byId('price-impact')?.textContent).toContain('כריך')
+    })
+
+    it('defaults to adding the invoice supplier when the names differ, and sends no target', async () => {
+      await setup(of({ rows: [row('לחם', 142)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supE')
+      await pasteAndParse()
+      expect((all('import-choice-add')[0] as HTMLInputElement).checked).toBeTrue()
+      await fixture.componentInstance['saveAll']()
+      expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBeUndefined()
+    })
+
+    it('defaults to updating when both suppliers have the same trimmed name, and sends the target', async () => {
+      await setup(of({ rows: [row('לחם', 142)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supB')
+      await pasteAndParse()
+      expect((all('import-choice-update')[0] as HTMLInputElement).checked).toBeTrue()
+      await fixture.componentInstance['saveAll']()
+      expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBe('supA')
+    })
+
+    it('choosing update sends the target, choosing add sends none, and the pick survives editing the row', async () => {
+      await setup(of({ rows: [row('לחם', 142)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supE')
+      await pasteAndParse()
+      choose('import-choice-update')
+      fixture.componentInstance['setPrice'](fixture.componentInstance['rows_']()[0].id, 150)
+      fixture.detectChanges()
+      expect((all('import-choice-update')[0] as HTMLInputElement).checked).toBeTrue()
+      await fixture.componentInstance['saveAll']()
+      expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBe('supA')
+
+      await pasteAndParse()
+      choose('import-choice-add')
+      await fixture.componentInstance['saveAll']()
+      expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBeUndefined()
+    })
+
+    it('a product priced by the invoice supplier itself shows no choice', async () => {
+      await setup(of({ rows: [row('שמן', 25)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supB')
+      await pasteAndParse()
+      expect(byId('import-change')?.textContent?.trim()).toBe('+25.0%')
+      expect(byId('import-choice')).toBeNull()
+    })
+
+    it('compares with the lowest of two other suppliers and names it', async () => {
+      await setup(of({ rows: [row('חלב', 121)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supE')
+      await pasteAndParse()
+      expect(byId('import-change')?.textContent?.trim()).toBe('+10.0%')
+      expect(byId('import-old-price')?.textContent).toContain('WAS ₪110.00 AT מחלבת ד')
+      expect(byId('import-choice')?.textContent).toContain('מחלבת ד')
+      expect(byId('import-choice')?.textContent).not.toContain('מחלבת ג')
     })
   })
 

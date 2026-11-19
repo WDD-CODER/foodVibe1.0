@@ -25,6 +25,8 @@ export interface ApplyRow {
   category: string | null
   purchaseUnit: string | null
   purchaseQty: number | null
+  /** Plan 641: update this supplier's existing price of the product instead of adding the invoice's supplier. */
+  targetSupplierId?: string
 }
 
 /** The header the invoice read printed (C-INVREAD); a value that was not read is absent. */

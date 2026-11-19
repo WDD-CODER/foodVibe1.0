@@ -2620,6 +2620,10 @@
     "stk_ai_replace": "החלפה",
     "stk_ai_keep": "השארה",
     "stk_ai_failed": "קריאת הספירה נכשלה. אפשר לנסות שוב או לספור ידנית",
-    "stk_ai_too_many_products": "יש יותר מ-800 מוצרים, ולכן ספירה בקול לא זמינה כרגע"
+    "stk_ai_too_many_products": "יש יותר מ-800 מוצרים, ולכן ספירה בקול לא זמינה כרגע",
+    "import_price_was_at": "היה {price} אצל {name}",
+    "import_update_supplier_price": "עדכון המחיר של {name}",
+    "import_add_as_new_supplier": "הוספת {name} כספק נוסף",
+    "supplier_exists_selected": "הספק {name} כבר קיים – נבחר הקיים"
   }
 }

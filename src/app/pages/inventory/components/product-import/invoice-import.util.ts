@@ -20,6 +20,8 @@ export interface PreviewRow {
   duplicate: boolean
   /** The product the AI step linked this row to; dropped as soon as the name is edited. */
   matchedId: string | null
+  /** Plan 641: the owner's pick for a row compared with another supplier's price; null = the default. */
+  supplierChoice: 'update' | 'add' | null
 }
 
 export interface ImportSummary {

@@ -6,6 +6,7 @@ import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import { AddItemModalService } from './add-item-modal.service'
+import { KitchenStateService } from './kitchen-state.service'
 import { refusalShownToUser } from '@utils/server-refusal.util'
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +17,7 @@ export class AddSupplierFlowService {
   private translationService = inject(TranslationService)
   private translationKeyModal = inject(TranslationKeyModalService)
   private addItemModal = inject(AddItemModalService)
+  private kitchenState = inject(KitchenStateService)
 
   /** prefillName: the supplier name the chef already typed in the dropdown (add-option rule W). */
   async open(prefillName?: string): Promise<Supplier | null> {
@@ -26,6 +28,16 @@ export class AddSupplierFlowService {
       initialValue: prefillName?.trim() || undefined
     })
     if (!nameHebrew?.trim()) return null
+
+    // Plan 641: a name that is already a supplier picks the existing one; nothing is saved.
+    const typed = nameHebrew.trim().toLowerCase()
+    const existing = this.kitchenState.suppliers_().find((s) => s.nameHebrew.trim().toLowerCase() === typed)
+    if (existing) {
+      this.userMsgService.onSetSuccessMsg(
+        this.translationService.translate('supplier_exists_selected').replace('{name}', existing.nameHebrew)
+      )
+      return existing
+    }
 
     if (!this.translationService.isHebrewLabelDuplicate(nameHebrew)) {
       const result = await this.translationKeyModal.open(nameHebrew, 'supplier')
