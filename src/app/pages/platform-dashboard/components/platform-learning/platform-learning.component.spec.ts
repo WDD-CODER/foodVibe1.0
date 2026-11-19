@@ -35,7 +35,7 @@ const stats = (over: Partial<LearningStats> = {}): LearningStats => ({
   ...over
 })
 
-describe('PlatformLearningComponent (plan 630)', () => {
+describe('PlatformLearningComponent (plans 630, 647)', () => {
   let fixture: ComponentFixture<PlatformLearningComponent>
   let userMsg: jasmine.SpyObj<UserMsgService>
   let logging: jasmine.SpyObj<LoggingService>
@@ -65,7 +65,7 @@ describe('PlatformLearningComponent (plan 630)', () => {
 
   it('shows rows with flow, model, counts and percent; null model and null average read plainly', async () => {
     await setup(() => Promise.resolve(stats()))
-    const rows = el().querySelectorAll('[data-testid="learning-flow-row"]')
+    const rows = el().querySelectorAll('[data-testid="learning-flow-card"]')
     expect(rows.length).toBe(2)
     expect(rows[0].textContent).toContain('קריאת חשבונית')
     expect(rows[0].textContent).toContain('gemini-x')
@@ -90,7 +90,7 @@ describe('PlatformLearningComponent (plan 630)', () => {
     expect(acc[0].getAttribute('title')).toBe('מעט')
     expect(acc[1].textContent).toContain('80% (5)')
     expect(acc[1].classList).not.toContain('learning__low')
-    expect(acc[1].getAttribute('title')).toBeNull()
+    expect(acc[1].getAttribute('title')).toBe('platform_learning_kept_meaning')
   })
 
   it('plan 642: a null average shows a dash and no low-sample style', async () => {
@@ -158,7 +158,63 @@ describe('PlatformLearningComponent (plan 630)', () => {
   it('shows the empty state with no flows', async () => {
     await setup(() => Promise.resolve(stats({ flows: [] })))
     expect(el().querySelector('app-empty-state')).not.toBeNull()
-    expect(el().querySelector('table')).toBeNull()
+    expect(el().querySelector('[data-testid="learning-flow-card"]')).toBeNull()
+  })
+
+  it('plan 647: cards show name, saved-of-made, accuracy and a meaning line under each number', async () => {
+    await setup(() => Promise.resolve(stats()))
+    const cards = el().querySelectorAll('[data-testid="learning-flow-card"]')
+    expect(cards.length).toBe(2)
+    expect(cards[0].textContent).toContain('קריאת חשבונית')
+    expect(cards[0].textContent).toContain('3 מתוך 4 (75%)')
+    expect(cards[0].textContent).toContain('75% (3)')
+    expect(cards[0].querySelectorAll('.learning__meaning').length).toBe(2)
+    expect(cards[0].textContent).toContain('platform_learning_saved_meaning')
+    expect(cards[0].textContent).toContain('platform_learning_kept_meaning')
+  })
+
+  it('plan 647: the weekly breakdown is inside the card, closed by default', async () => {
+    await setup(() => Promise.resolve(stats()))
+    const card = el().querySelector('[data-testid="learning-flow-card"]') as HTMLElement
+    expect(card.querySelector('[data-testid="learning-week-row"]')).toBeNull()
+    ;(card.querySelector('[data-testid="learning-by-week"]') as HTMLButtonElement).click()
+    fixture.detectChanges()
+    expect(card.querySelector('[data-testid="learning-week-row"]')).not.toBeNull()
+  })
+
+  it('plan 647: the supplier memory is three stat tiles', async () => {
+    await setup(() => Promise.resolve(stats()))
+    const tiles = el().querySelectorAll('[data-testid="learning-tile"]')
+    expect(tiles.length).toBe(3)
+    expect(tiles[0].textContent).toContain('7')
+  })
+
+  it('plan 647: no drafts and private businesses read the private empty state with the count', async () => {
+    const dict = DICT
+    dict['platform_learning_empty_private'] = '{count} פרטיים ואין נתונים'
+    await setup(() => Promise.resolve(stats({ flows: [], privateBusinesses: 2 })))
+    expect(el().querySelector('[data-testid="learning-empty-private"]')?.textContent).toContain('2 פרטיים')
+    expect(el().querySelector('app-empty-state')).toBeNull()
+    delete dict['platform_learning_empty_private']
+  })
+
+  it('plan 647: no drafts and no private business read the plain empty state', async () => {
+    await setup(() => Promise.resolve(stats({ flows: [], privateBusinesses: 0 })))
+    expect(el().querySelector('app-empty-state')).not.toBeNull()
+    expect(el().querySelector('[data-testid="learning-empty-private"]')).toBeNull()
+  })
+
+  it('plan 647: the file-store note is a warning banner and the numbers carry tooltips', async () => {
+    await setup(
+      () => Promise.resolve(stats()),
+      () => Promise.resolve({ fileStore: false })
+    )
+    const warn = el().querySelector('[data-testid="learning-no-file-store"]') as HTMLElement
+    expect(warn.classList).toContain('learning__warn')
+    expect(warn.getAttribute('role')).toBe('status')
+    const saved = el().querySelector('[data-testid="learning-saved"]') as HTMLElement
+    expect(saved.getAttribute('title')).toBe('platform_learning_saved_meaning')
+    expect(saved.getAttribute('aria-label')).toBe('platform_learning_saved_meaning')
   })
 
   it('a failed stats load shows the error, logs, and the empty state', async () => {

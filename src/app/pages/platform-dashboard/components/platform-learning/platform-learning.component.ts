@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -36,6 +36,7 @@ export class PlatformLearningComponent implements OnInit {
   protected readonly stats_ = signal<LearningStats | null>(null)
   protected readonly fileStore_ = signal<boolean | null>(null)
   protected readonly openKey_ = signal<string | null>(null)
+  protected readonly privateCount = computed(() => this.stats_()?.privateBusinesses ?? 0)
 
   // 6. METHODS
   async ngOnInit(): Promise<void> {
@@ -76,6 +77,10 @@ export class PlatformLearningComponent implements OnInit {
 
   protected privateNote(count: number): string {
     return this.translation.translate('platform_learning_private_note').replace('{count}', String(count))
+  }
+
+  protected emptyPrivate(count: number): string {
+    return this.translation.translate('platform_learning_empty_private').replace('{count}', String(count))
   }
 
   private async loadStats(): Promise<void> {
