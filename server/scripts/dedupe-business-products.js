@@ -15,7 +15,7 @@
  *
  * Dry run by default (writes nothing). Add --write to apply:
  *   node server/scripts/dedupe-business-products.js --target=local [--business=<id>] [--write]
- *   (Atlas also needs --confirm-host=<host>; take a backup first: node server/scripts/db-backup.js --target=atlas)
+ *   (Atlas also needs --confirm-remote and --confirm-host=<host>; take a backup first: node server/scripts/db-backup.js --target=atlas)
  */
 
 const { normalizeProductName } = require('../utils/price-list-import');
@@ -28,11 +28,14 @@ function parseArgs(argv) {
   const args = { write: false };
   for (const arg of argv.slice(2)) {
     if (arg === '--write') { args.write = true; continue; }
+    if (arg === '--confirm-remote') { args.confirmRemote = true; continue; }
     const m = /^--(target|confirm-host|business|db)=(.*)$/.exec(arg);
     if (!m) throw new Error(`Unknown argument: ${arg}`);
     args[m[1]] = m[2];
   }
   if (!['local', 'atlas'].includes(args.target)) throw new Error("--target must be 'local' or 'atlas'");
+  // Plan 648: anything but the local database needs the explicit flag, on top of --confirm-host.
+  if (args.target !== 'local' && !args.confirmRemote) throw new Error('--target other than local needs --confirm-remote');
   return args;
 }
 
@@ -106,8 +109,19 @@ async function dedupeBusiness(db, businessId, { write, log }) {
       if (ing?.referenceId) refCount.set(ing.referenceId, (refCount.get(ing.referenceId) ?? 0) + 1);
     }
   }
+  // Plan 648: stock count lines, price history rows, invoice lines and invoice aliases count as references too.
+  const flatRefs = [
+    ['stockCounts', 'lines.productId', (d) => (d.lines ?? []).map((l) => l?.productId)],
+    ['invoices', 'lines.productId', (d) => (d.lines ?? []).map((l) => l?.productId)],
+    ['priceHistory', 'productId', (d) => [d.productId]],
+    ['invoiceAliases', 'productId', (d) => [d.productId]],
+  ];
+  for (const [type, field, pick] of flatRefs) {
+    const docs = await db.collection(type).find({ businessId, [field]: { $in: ids } }).toArray();
+    for (const d of docs) for (const id of pick(d)) if (id) refCount.set(id, (refCount.get(id) ?? 0) + 1);
+  }
   const plans = planGroups(products, refCount);
-  const summary = { groups: plans.length, removed: 0, linesRepointed: 0, historyRepointed: 0 };
+  const summary = { groups: plans.length, removed: 0, linesRepointed: 0, historyRepointed: 0, otherRepointed: 0 };
   if (!plans.length) return summary;
 
   const idMap = new Map();
@@ -135,6 +149,18 @@ async function dedupeBusiness(db, businessId, { write, log }) {
     }
   }
 
+  // Plan 648: stock count lines, invoice lines, price history rows and invoice aliases → keeper.
+  for (const [type, field] of [['stockCounts', 'lines.productId'], ['invoices', 'lines.productId'], ['priceHistory', 'productId'], ['invoiceAliases', 'productId']]) {
+    const docs = await db.collection(type).find({ businessId, [field]: { $in: [...idMap.keys()] } }).toArray();
+    for (const d of docs) {
+      const set = field === 'productId'
+        ? { productId: idMap.get(d.productId) }
+        : { lines: d.lines.map((l) => (l?.productId && idMap.has(l.productId) ? { ...l, productId: idMap.get(l.productId) } : l)) };
+      summary.otherRepointed++;
+      if (write) await db.collection(type).updateOne({ _id: d._id }, { $set: set });
+    }
+  }
+
   // Version history: entries about a removed copy, and snapshots that point at one.
   const history = await db.collection('VERSION_HISTORY').find({ businessId }).toArray();
   for (const h of history) {
@@ -149,10 +175,17 @@ async function dedupeBusiness(db, businessId, { write, log }) {
     for (const { keeper, losers } of plans) {
       const sources = mergeSources([keeper.sources ?? [], ...losers.map((l) => l.sources ?? [])]);
       await db.collection('products').updateOne({ _id: keeper._id }, { $set: { sources, updatedAt: now } });
-      await db.collection('products').updateMany(
-        { _id: { $in: losers.map((l) => l._id) }, ...LIVE },
-        { $set: { deletedAt: now, deletedBy: DELETED_BY } }
-      );
+      // Plan 648: a copy of the same master product is deleted (the unique index allows one per business); a
+      // same-name copy with another origin goes to the Trash as before.
+      const twins = losers.filter((l) => typeof l._masterId === 'string' && l._masterId === keeper._masterId);
+      const rest = losers.filter((l) => !twins.includes(l));
+      if (twins.length) await db.collection('products').deleteMany({ _id: { $in: twins.map((l) => l._id) } });
+      if (rest.length) {
+        await db.collection('products').updateMany(
+          { _id: { $in: rest.map((l) => l._id) }, ...LIVE },
+          { $set: { deletedAt: now, deletedBy: DELETED_BY } }
+        );
+      }
     }
   }
   return summary;
@@ -167,17 +200,17 @@ async function main() {
       ? [args.business]
       : (await db.collection('products').distinct('businessId', LIVE)).filter((b) => b && b !== MASTER);
     console.log(`[dedupe-485] ${args.write ? 'WRITE' : 'dry run'} · ${businesses.length} business(es)`);
-    const total = { groups: 0, removed: 0, linesRepointed: 0, historyRepointed: 0 };
+    const total = { groups: 0, removed: 0, linesRepointed: 0, historyRepointed: 0, otherRepointed: 0 };
     for (const businessId of businesses) {
       const lines = [];
       const s = await dedupeBusiness(db, businessId, { write: args.write, log: (l) => lines.push(l) });
       if (!s.groups) continue;
       const biz = await db.collection('businesses').findOne({ _id: businessId }, { projection: { name: 1 } });
-      console.log(`business ${biz?.name ?? businessId}: ${s.groups} names, ${s.removed} copies to remove, ${s.linesRepointed} recipe lines, ${s.historyRepointed} history entries`);
+      console.log(`business ${biz?.name ?? businessId}: ${s.groups} names, ${s.removed} copies to remove, ${s.linesRepointed} recipe lines, ${s.historyRepointed} history entries, ${s.otherRepointed} count/price/invoice rows`);
       lines.forEach((l) => console.log(l));
       for (const k of Object.keys(total)) total[k] += s[k];
     }
-    console.log(`[dedupe-485] total: ${total.groups} names, ${total.removed} copies, ${total.linesRepointed} recipe lines, ${total.historyRepointed} history entries${args.write ? '' : ' (dry run — nothing written; add --write)'}`);
+    console.log(`[dedupe-485] total: ${total.groups} names, ${total.removed} copies, ${total.linesRepointed} recipe lines, ${total.historyRepointed} history entries, ${total.otherRepointed} count/price/invoice rows${args.write ? '' : ' (dry run — nothing written; add --write)'}`);
   } finally {
     await client.close();
   }
@@ -187,4 +220,4 @@ if (require.main === module) {
   main().catch((err) => { console.error('[dedupe-485] failed:', err.message); process.exit(1); });
 }
 
-module.exports = { planGroups, mergeSources, replaceIds, dedupeBusiness };
+module.exports = { parseArgs, planGroups, mergeSources, replaceIds, dedupeBusiness };

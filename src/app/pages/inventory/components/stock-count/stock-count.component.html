@@ -27,33 +27,35 @@
   </ng-container>
 
   <ng-container shell-actions>
-    <app-date-field
-      inputId="stock-count-date"
-      ariaLabelKey="stk_count_date"
-      variant="outline"
-      [value]="countedDate_()"
-      (valueChange)="setDate($event)"
-    />
-    <button
-      type="button"
-      class="c-btn-ghost"
-      data-testid="stk-save-draft"
-      [disabled]="saving_() || aiBusy_() || !dateOk_() || (countedCount_() === 0 && !draftId_())"
-      (click)="saveDraft()"
-    >
-      <lucide-icon name="save" [size]="18"></lucide-icon>
-      <span class="btn-label">{{ (saving_() ? 'saving' : 'stk_save_draft') | translatePipe }}</span>
-    </button>
-    <button
-      type="button"
-      class="c-btn-primary"
-      data-testid="stk-finalize"
-      [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
-      (click)="finalize()"
-    >
-      <lucide-icon name="check" [size]="18"></lucide-icon>
-      <span class="btn-label">{{ 'stk_finalize' | translatePipe }}</span>
-    </button>
+    <div class="stock-count__actions">
+      <app-date-field
+        inputId="stock-count-date"
+        ariaLabelKey="stk_count_date"
+        variant="outline"
+        [value]="countedDate_()"
+        (valueChange)="setDate($event)"
+      />
+      <button
+        type="button"
+        class="c-btn-ghost"
+        data-testid="stk-save-draft"
+        [disabled]="saving_() || aiBusy_() || !dateOk_() || (countedCount_() === 0 && !draftId_())"
+        (click)="saveDraft()"
+      >
+        <lucide-icon name="save" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ (saving_() ? 'saving' : 'stk_save_draft') | translatePipe }}</span>
+      </button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="stk-finalize"
+        [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
+        (click)="finalize()"
+      >
+        <lucide-icon name="check" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'stk_finalize' | translatePipe }}</span>
+      </button>
+    </div>
   </ng-container>
 
   <ng-container shell-table-header>

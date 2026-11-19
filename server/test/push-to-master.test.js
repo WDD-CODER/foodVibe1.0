@@ -162,3 +162,52 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('plan 649 — a shared product carries shared suppliers only', () => {
+  const push = (id) => request(app).put(`/api/v1/data/products/${id}/push-to-master`).set('Authorization', `Bearer ${tokenA()}`);
+  const src = (supplierId) => [{ supplierId, price: 5, addedAt: 1 }];
+
+  it('a source whose supplier has a master copy is stored with the master supplier id', async () => {
+    const db = testDb();
+    await db.collection('suppliers').insertMany([
+      { _id: 'ms1', userId: '__master__', businessId: '__master__', nameHebrew: 'ספק' },
+      { _id: 'us1', userId: 'userA', businessId: 'b_userA', _masterId: 'ms1', nameHebrew: 'ספק' },
+    ]);
+    await db.collection('products').insertMany([
+      { _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'old' },
+      { _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', nameHebrew: 'new', sources: src('us1') },
+    ]);
+    expect((await push('u1')).status).toBe(200);
+    expect((await db.collection('products').findOne({ _id: 'm1' })).sources[0]).toMatchObject({ supplierId: 'ms1', price: 5 });
+    expect((await db.collection('products').findOne({ _id: 'u1' })).sources[0].supplierId).toBe('us1');
+  });
+
+  it('a supplier with no master copy is pushed to master first, and its master id is stored', async () => {
+    const db = testDb();
+    await db.collection('suppliers').insertOne({ _id: 'us2', userId: 'userA', businessId: 'b_userA', _masterId: 'us2', nameHebrew: 'ספק חדש' });
+    await db.collection('products').insertOne({ _id: 'u2', userId: 'userA', businessId: 'b_userA', _masterId: 'u2', nameHebrew: 'מוצר חדש', sources: src('us2') });
+    expect((await push('u2')).status).toBe(200);
+    const masterSupplier = await db.collection('suppliers').findOne({ businessId: '__master__', nameHebrew: 'ספק חדש' });
+    expect(masterSupplier).toBeTruthy();
+    const masterProduct = await db.collection('products').findOne({ businessId: '__master__', nameHebrew: 'מוצר חדש' });
+    expect(masterProduct.sources[0].supplierId).toBe(masterSupplier._id);
+  });
+
+  it('a foreign or unknown supplier id is refused with 400 BAD_SUPPLIER_REF and nothing is written', async () => {
+    const db = testDb();
+    await db.collection('suppliers').insertOne({ _id: 'other', userId: 'userB', businessId: 'b_userB', _masterId: 'other', nameHebrew: 'זר' });
+    await db.collection('products').insertMany([
+      { _id: 'm3', userId: '__master__', businessId: '__master__', nameHebrew: 'old3' },
+      { _id: 'u3', userId: 'userA', businessId: 'b_userA', _masterId: 'm3', nameHebrew: 'new3', sources: src('other') },
+      { _id: 'm4', userId: '__master__', businessId: '__master__', nameHebrew: 'old4' },
+      { _id: 'u4', userId: 'userA', businessId: 'b_userA', _masterId: 'm4', nameHebrew: 'new4', sources: src('nowhere') },
+    ]);
+    for (const id of ['u3', 'u4']) {
+      const res = await push(id);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('BAD_SUPPLIER_REF');
+    }
+    expect((await db.collection('products').findOne({ _id: 'm3' })).nameHebrew).toBe('old3');
+    expect(await db.collection('suppliers').countDocuments({ businessId: '__master__' })).toBe(0);
+  });
+});

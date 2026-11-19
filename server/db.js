@@ -84,6 +84,16 @@ async function connectDb() {
     )
   )
   await db.collection('products').createIndex({ businessId: 1, minStockLevel: 1 }, { background: true })
+  // Plan 648: one copy of each master product per business. Partial, so own products (no _masterId) are free.
+  // A business that already has doubles makes the build fail: logged, not fatal — run dedupe-business-products.js.
+  try {
+    await db.collection('products').createIndex(
+      { businessId: 1, _masterId: 1 },
+      { unique: true, name: 'product_business_master_unique', partialFilterExpression: { _masterId: { $type: 'string' } } }
+    )
+  } catch (err) {
+    logger.warn({ event: 'mongo.index.failed', index: 'product_business_master_unique', err: err.message })
+  }
   await Promise.all(
     ['recipes', 'dishes'].flatMap(type => [
       db.collection(type).createIndex({ businessId: 1, isApproved: 1 }, { background: true }),

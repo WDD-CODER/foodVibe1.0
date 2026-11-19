@@ -229,6 +229,14 @@ describe('InventoryProductListComponent', () => {
       expect(confirmOpen).not.toHaveBeenCalled()
     })
   })
+  describe('unknown supplier (plan 649)', () => {
+    it('shows supplier_unknown for a supplier outside the business list, never its id', () => {
+      const names = (component as any).getSupplierNames(['Supplier A', 'ghost-id-123']) as string
+      expect(names).toBe('Supplier A, supplier_unknown')
+      expect(names).not.toContain('ghost-id-123')
+      expect((component as any).getSupplierName('')).toBe('')
+    })
+  })
   describe('one status mark per row (plan 462)', () => {
     const base = {
       nameHebrew: 'Item',

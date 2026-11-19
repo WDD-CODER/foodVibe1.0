@@ -55,6 +55,7 @@
 | `constants/report.js` | `REPORT_METRICS`, `REPORT_MIN_EVENTS`, finding thresholds (plan 568) |
 | `jobs/retention.js` | `purgeRetained(db, businessId, now)` — lazy 24-month delete of final requests and bookings, stored files (voice recordings, abandoned invoice reads) past their `deleteAfter`, 12 months of messages; throttled to once a day per business; run from the generic GET (plan 558) |
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
+| `scripts/repair-supplier-refs.js` | Plan 649: lists (dry run) or repairs (`--write`) product sources whose supplier is foreign, unknown or empty — map by `_masterId`, by trimmed name, or clear; prices never change; `--target` other than `local` needs `--confirm-remote` |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
 | `middleware/require-module.js` | Plan 616: `requireModule`, `requireHomeModule`, `requireModuleForType` — 403 `MODULE_OFF` when the business lacks a module; 30 s cache, `clearModuleCache` |
