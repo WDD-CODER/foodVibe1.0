@@ -313,6 +313,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
 - Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
+- Plan 648: matching spoken names to products — `matchSpoken` in `server/utils/stock-extract.js`, on the server (normalized exact, then contains, then token overlap; more than one match = unmatched with up to 5 candidates), so the model never gets the catalog.
 - Plan 641: previousPriceOf(product, supplierId) in src/app/core/utils/price-change.util.ts is the one browser rule for the price an invoice line is compared with (the invoice supplier's own price, else the lowest other source's; null with none).
 - Plan 632: `APP_RELOAD` in `src/app/core/utils/app-reload.util.ts` is the one way to reload the whole application at a path (`UserService.switchBusiness` and a refresh that moves the business call it); specs replace the token, no page calls `window.location` itself.
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
@@ -616,9 +617,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### stock-extract — `server/utils/stock-extract.js`
 
 - Status: stable — plan 637
-- Use: `server/utils/stock-extract.js` — `STOCK_EXTRACT_SYSTEM_PROMPT`, `unitList`, `userPart`, `cleanStockLines` (positions in, checked lines out) and `stockKeptRatio`; `server/routes/ai/stock.js` and `server/routes/stock.js` (finalise) use it; the request and answer schemas are `shared/schemas/ai-stock-extract.schema.ts`.
+- Use: `server/utils/stock-extract.js` — `STOCK_EXTRACT_SYSTEM_PROMPT`, `unitList`, `userPart`, `cleanStockLines` (spoken lines in, name-matched and unit-checked lines out, plan 648), `matchSpoken` and `stockKeptRatio`; `server/routes/ai/stock.js` and `server/routes/stock.js` (finalise) use it; the request and answer schemas are `shared/schemas/ai-stock-extract.schema.ts`.
 - Pieces: server/utils/stock-extract.js, cleanStockLines, stockKeptRatio.
-- When: a stock count text is turned into lines or a stock draft is scored; the model only returns positions, never ids or sums.
+- When: a stock count text is turned into lines or a stock draft is scored; the model only returns spoken words, a number and a unit, never ids or sums.
 - Known copies: none.
 
 ### user-alerts — `NotificationsService`, `app-notification-bell`

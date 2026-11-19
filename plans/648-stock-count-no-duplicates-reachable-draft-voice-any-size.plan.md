@@ -104,7 +104,7 @@ append the path to the scope block above and retry.
 
 - matching spoken names to products — family: helpers — rung: 3 — why: extend the stock extract util with a
   normalized-name match (`normalizeProductName`) on the server instead of sending the list to the model.
-- the actions wrapper — family: engine-classes — rung: 1 — why: page-local flex with a gap.
+- the actions wrapper `.stock-count__actions` — family: stock-ai-draft — rung: 1 — why: page-local flex with a gap.
 
 ## Step 0 — Reality Check
 
