@@ -91,6 +91,10 @@ e2e/ui/646-1.spec.ts
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/brain/invariants.md
+src/app/core/services/breadcrumbs.md
+src/app/core/components/breadcrumbs.md
+server/constants/collections.js
+server/db.js
 ```
 
 ## Read Scope
