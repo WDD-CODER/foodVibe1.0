@@ -1,0 +1,113 @@
+{
+  "run": "mod-alerts",
+  "branch": "orch/mod-alerts",
+  "base": "main",
+  "startedAt": "2026-11-19T15:05:52.263Z",
+  "mainShaAtStart": "5c60bcfb358c7a71764a76b31f67f5ffe0a32a92",
+  "plans": {
+    "646": {
+      "nnn": "646",
+      "title": "In-app alerts: a big price change reaches the owner and the consultant; diagnosis in the main menu; module changes show at once",
+      "branch": "feat/646-in-app-alerts-big",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T15:07:14.706Z"
+        }
+      },
+      "humanItems": [
+        "Dandan imports an invoice with a price change beyond 5%: the bell shows 1, the alert reads clearly in Hebrew"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T15:07:14.573Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:07:14.707Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:07:38.535Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:08:18.070Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:09:20.119Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 18.4,
+      "reason": "ESCALATE scope: ESCALATE: scope plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts. Commit it to the run branch (or merge main into it), then re-run the builder. — ask 646-1 answered, but the scope could not be extended: plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 23.6,
+          "tokens": {
+            "input": 122948,
+            "output": 1876
+          },
+          "exit": 0
+        }
+      ],
+      "park": {
+        "at": "2026-11-19T15:08:12.805Z",
+        "reason": "ESCALATE scope: ESCALATE: scope plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts. Commit it to the run branch (or merge main into it), then re-run the builder."
+      },
+      "parkBranch": "park/mod-alerts-646"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T15:07:14.436Z",
+      "plan": "646",
+      "text": "the folder foodVibe1.0-orch-mod-alerts-646 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T15:07:38.379Z",
+      "plan": "646",
+      "text": "builder left undone (round 0): All sub-tasks: the plan file is missing from the run branch, so its scope, Done-when items and scope-check/kit-checks (which take --plan=plans/646-...) cannot be read or run here."
+    },
+    {
+      "at": "2026-11-19T15:08:17.849Z",
+      "plan": "646",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-19T15:08:18.190Z",
+      "plan": "646",
+      "text": "ask 646-1 (scope, the Human or the advisor answers): Plan 646 is missing from orch/mod-alerts; should I copy it from main into my branch and build from it?"
+    },
+    {
+      "at": "2026-11-19T15:09:18.601Z",
+      "plan": "646",
+      "text": "ask 646-1 answered by the human: approved: plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md"
+    },
+    {
+      "at": "2026-11-19T15:09:20.302Z",
+      "plan": "646",
+      "text": "ask 646-1 answered, but the scope could not be extended: plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts — plan 646 parked; the question was: Plan 646 is missing from orch/mod-alerts; should I copy it from main into my branch and build from it?"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 18.4,
+  "updatedAt": "2026-11-19T15:09:21.851Z",
+  "finishedAt": "2026-11-19T15:09:21.850Z"
+}
