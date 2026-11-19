@@ -562,3 +562,24 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, `SYSTEM_UNITS`, the unit constants and `unitRatesFrom(terms)`; the browser reaches it through `@schemas/units/to-base` (`units.ts` and the other app files re-export it), the server through `server/generated/schemas/units/to-base`. `server/utils/unit-rates.js` — `loadUnitRates(req)` reads the master and the business's own `unit` terms and returns the rates the server converts with.
 - When: server code converts an amount into a product's base unit (a stock count); never write a second conversion.
 - Known copies: none.
+
+### diag-margin-report — `buildMarginReport`
+
+- Status: stable — plan 633
+- Use: `shared/schemas/diag/margin-report.ts` — `buildMarginReport`; the diagnosis route in `server/routes/diag.js` calls it.
+- When: the diagnosis needs the menu margin per dish from recorded prices; never write a second margin calculation.
+- Known copies: none.
+
+### diag-volatility — `priceVolatility`
+
+- Status: stable — plan 633
+- Use: `shared/schemas/diag/volatility.ts` — `priceVolatility`; the diagnosis route in `server/routes/diag.js` calls it.
+- When: the diagnosis scores how much a product's price moved over time.
+- Known copies: none.
+
+### diag-menu-draft — `shared/schemas/diag/diag-inputs.ts`, `shared/schemas/diag/menu-draft.ts`, `menuKeptRatio`
+
+- Status: stable — plan 633
+- Use: `shared/schemas/diag/diag-inputs.ts` (request schemas) and `shared/schemas/diag/menu-draft.ts` (model-reply schema, `menuKeptRatio`); `server/routes/ai/diag.js` uses them.
+- When: the diagnosis menu-reading route validates a request or a model reply and scores the draft closeness.
+- Known copies: none.
