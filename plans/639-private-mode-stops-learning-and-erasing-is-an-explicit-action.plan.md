@@ -125,6 +125,7 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 docs/agent/standards-backend.md
 server/breadcrumbs.md
+server/test/ai-shots-shared.test.js
 ```
 
 ## Read Scope
