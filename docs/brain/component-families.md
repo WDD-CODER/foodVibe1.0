@@ -311,6 +311,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
 - Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
 - Plan 632: `APP_RELOAD` in `src/app/core/utils/app-reload.util.ts` is the one way to reload the whole application at a path (`UserService.switchBusiness` and a refresh that moves the business call it); specs replace the token, no page calls `window.location` itself.
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
@@ -324,6 +325,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
+- `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
+- `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
 - `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
 - Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
 - Plan 632: `AccessService` (`src/app/core/services/access.service.ts`) reads and writes the consultant access routes through `API.access(...)`; `UserService.switchBusiness` posts `API.auth('switch-business')`.
@@ -334,6 +337,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
+
+### platform-history — the platform change history of a business (plan 638)
+
+- Status: stable
+- Use: `platformChangesOf(before, after)` in `server/routes/admin.js` compares the stored business with the values being saved and returns the `{ field, from, to }` rows written to `platformHistory`.
+- Use: `describePlatformChange(change, translate)` in `src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts` turns one row into the Hebrew line.
+- Use: the panel's layout classes `.pbd-top`, `.pbd-history`, `.pbd-history__head`, `.pbd-history__body`, `.pbd-history__list`, `.pbd-history__row`, `.pbd-history__meta` in `platform-dashboard.page.scss`.
+- When: any platform change line of the business history; never format `{ field, from, to }` elsewhere.
 
 ### event-plan — event costing and planning engine
 
@@ -398,8 +409,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 618
 - Use: `server/utils/ai-learning.js` — `mayLearnFrom(business)` (`aiPrivate !== true`); the private mark is written
-  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` deletes the promoted
-  `GEMINI_SHOTS` copies).
+  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` only writes the flag; plan 639).
 - When: code copies something into a `'__master__'` pool or lists a business's AI material for the platform admin.
 - Known copies: none.
 
@@ -435,10 +445,17 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: building a signed upload, expiring download link or delete request.
 - Known copies: none.
 
+### learning — erasing what the platform learned from one business (plan 639)
+
+- Status: stable
+- Use: `eraseLearnedData(db, businessId)` in `server/services/business.js` — deletes the promoted `GEMINI_SHOTS` copies, every `aiDrafts` row of the business and its share of the shared name memory (`forgetBusiness`); returns counts.
+- When: the platform admin explicitly erases what was learned (`POST /admin/businesses/:id/erase-learned`, `DELETE /admin/users/:userId?eraseLearned=true`); nothing else erases learned data.
+- Known copies: none.
+
 ### business-delete — `deleteBusinessServerData` removes a business's server data
 
 - Status: stable — plan 619
-- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files).
+- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files). Keeps what was learned for every business; `eraseLearnedData` erases it (plan 639).
 - When: a business is deleted and everything it owns on the server must go.
 - Known copies: none.
 
@@ -525,4 +542,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 632
 - Use: `src/app/core/components/acting-banner/` (`app-acting-banner`, rendered by the app shell right after the header on every non-bare screen) — the persistent bar that names the business a consultant or the platform admin is acting in, with one button back to their own (`UserService.switchBusiness(null)`); hidden at home and in print.
 - When: a persistent notice with an action must stay on every screen; a toast disappears and `app-front-desk-status-banner` has no action.
+- Known copies: none.
+
+### learned-data-erase — `eraseLearnedData(db, businessId)` erases what the platform learned from one business
+
+- Status: stable (plan 639)
+- Use: eraseLearnedData(db, businessId) in server/services/business.js (called by the admin erase route and by the business delete when asked); client `PlatformAdminService.eraseLearnedData`.
+- When: learned data of a business must be removed; going private never erases (it only stops learning).
+- Known copies: none.
+
+### platform-erase-box — `.pbd-erase` and `.pbd-erase__box`
+
+- Status: stable (plan 639)
+- Use: `src/app/pages/platform-dashboard/platform-dashboard.page.scss` · `.pbd-erase` (danger ghost button), `.pbd-erase__box` (reason field stack) in the platform business dialog.
+- When: page-local layout of the erase action; no shared family fits.
 - Known copies: none.

@@ -11,6 +11,7 @@ const { productBody, stored } = require('./helpers/v2-docs')
 const { sharedInvoiceAliasSchema, ownInvoiceAliasSchema } = require('../generated/schemas/entities/invoice-alias.schema')
 const { supplierProfileSchema } = require('../generated/schemas/entities/supplier-profile.schema')
 const { setAiPrivate } = require('../services/business')
+const { forgetBusiness } = require('../services/invoice-memory')
 
 let app
 beforeAll(async () => { app = await buildTestApp() }, 60000)
@@ -151,6 +152,8 @@ describe('forget', () => {
     await db().collection('products').insertOne(stored(productBody({ nameHebrew: 'ש2' }), { _id: 'a2', businessId: 'bA', userId: 'uA', _masterId: 'm2' }))
     await approve(OWNER_A, 'ש2', 'אחר לגמרי')
     await setAiPrivate('bA', true)
+    expect((await db().collection('invoiceAliases').findOne({ businessId: '__master__' })).contributors).toContain('bA')
+    await forgetBusiness(db(), 'bA')
     const shared = await db().collection('invoiceAliases').find({ businessId: '__master__' }).toArray()
     expect(shared).toHaveLength(1)
     expect(shared[0].contributors).toEqual(['bB'])

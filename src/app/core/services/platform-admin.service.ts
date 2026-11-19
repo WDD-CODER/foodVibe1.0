@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { DEFAULT_MODULES, type ModuleKey } from '@schemas/modules-pure'
+import type { PlatformHistoryRow } from '@schemas/modules'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import type { FrontDeskAdminStats } from '../models/frontdesk-stats.model'
@@ -91,6 +92,16 @@ export interface AdminTermRow {
   environments: string[] | null
   hint: string | null
   createdAt: number | null
+}
+
+/** Plan 639: what the platform admin's erase of learned data removed, per kind. */
+export interface EraseCounts {
+  promoted: number
+  drafts: number
+  aliasesPulled: number
+  aliasesDeleted: number
+  profilesPulled: number
+  profilesDeleted: number
 }
 
 /** Plan 620: a row from an older server answer has no module or AI fields; give it the defaults. */
@@ -228,5 +239,26 @@ export class PlatformAdminService {
   async updatePlatform(id: string, body: PlatformUpdateBody): Promise<void> {
     await firstValueFrom(this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/platform`)}`, body))
     await this.load()
+  }
+
+  /** Plan 638: the change history of one business (newest first), read when the panel is opened. */
+  async getPlatformHistory(businessId: string): Promise<PlatformHistoryRow[]> {
+    const res = await firstValueFrom(
+      this.http.get<{ rows: PlatformHistoryRow[] }>(
+        `${environment.apiUrl}${API.admin(`businesses/${businessId}/platform-history`)}`
+      )
+    )
+    return res.rows
+  }
+
+  /** Plan 639: erases what the platform learned from one business; the reason is kept in its history. */
+  async eraseLearnedData(businessId: string, reason: string): Promise<EraseCounts> {
+    const res = await firstValueFrom(
+      this.http.post<{ ok: boolean; counts: EraseCounts }>(
+        `${environment.apiUrl}${API.admin(`businesses/${businessId}/erase-learned`)}`,
+        { reason }
+      )
+    )
+    return res.counts
   }
 }
