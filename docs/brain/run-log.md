@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (56 runs): plans 178 · merged 157 · parked 18 · fix rounds 64 · escalations 32 · gate fails 5 · ✗ 14 · checker misses 0 — per run: plans 3.18 · parked 0.32 · fix rounds 1.14 · ✗ per plan 0.08
+Earlier (57 runs): plans 180 · merged 159 · parked 18 · fix rounds 64 · escalations 32 · gate fails 5 · ✗ 14 · checker misses 0 — per run: plans 3.16 · parked 0.32 · fix rounds 1.12 · ✗ per plan 0.08
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-14 | run-607 | 607,610 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-604 | 604 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-600 | 600,612,613 | 3 | 0 | - | 2 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-15 | run-608 | 608 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (56 runs): plans 178 · merged 157 · parked 18 · fix rounds 64 · esca
 | 2026-11-19 | mod-stock | 636,637 | 2 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-fixes | 641,642,643,644 | 4 | 0 | - | 5 | 1 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-fixes-2 | 645 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-19 | mod-alerts | 646 | 1 | 0 | - | 1 | 0 | 1 | ok | - | - | - |
+| 2026-11-19 | mod-alerts | 646 | 1 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
+| 2026-11-19 | mod-learning | 647 | 1 | 0 | - | 1 | 1 | 1 | ok | - | - | - |
