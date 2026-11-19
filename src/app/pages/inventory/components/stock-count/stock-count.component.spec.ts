@@ -273,4 +273,64 @@ describe('StockCountComponent', () => {
       expect(sent.draftIds![0]).toBe('old')
     })
   })
+
+  describe('thousands of products (plan 645)', () => {
+    const many = Array.from({ length: 3000 }, (_, i) => product(`p${i}`, `מוצר ${String(i).padStart(4, '0')}`))
+    const search = async (text: string) => {
+      const input = el().querySelector<HTMLInputElement>('#stock-count-search')!
+      input.value = text
+      input.dispatchEvent(new Event('input'))
+      await settle()
+    }
+    const rowOf = (name: string) => rows().find((r) => r.textContent!.includes(name))
+    const amountIn = (row: HTMLElement) => row.querySelector<HTMLInputElement>('app-counter input')!.value
+
+    it('draws fewer than 100 rows at first, more on "show more"', async () => {
+      await setup(many)
+      expect(rows().length).toBeLessThan(100)
+      expect(rows().length).toBeGreaterThan(0)
+      btn('stk-show-more').click()
+      await settle()
+      expect(rows().length).toBe(100)
+      expect(btn('stk-show-more').textContent).toContain('2900')
+    })
+
+    it('search filters the whole list, not only the drawn rows', async () => {
+      await setup(many)
+      await search('מוצר 2999')
+      expect(rows().length).toBe(1)
+      expect(rows()[0].textContent).toContain('מוצר 2999')
+      expect(el().querySelector('[data-testid="stk-show-more"]')).toBeNull()
+    })
+
+    it('keeps a counted value after it leaves the drawn rows and comes back', async () => {
+      await setup(many)
+      btn('stk-show-more').click()
+      btn('stk-show-more').click()
+      await settle()
+      comp().setAmount(many[120], 7)
+      await settle()
+      expect(amountIn(rowOf('מוצר 0120')!)).toBe('7')
+      await search('מוצר 0001')
+      expect(rowOf('מוצר 0120')).toBeUndefined()
+      await search('')
+      expect(rowOf('מוצר 0120')).toBeUndefined()
+      btn('stk-show-more').click()
+      btn('stk-show-more').click()
+      await settle()
+      expect(amountIn(rowOf('מוצר 0120')!)).toBe('7')
+      expect(chipOf(rowOf('מוצר 0120')!).checked).toBeTrue()
+    })
+
+    it('unit options are a computed map by product id, not a template method', async () => {
+      await setup(many)
+      const c = fixture.componentInstance as unknown as Record<string, unknown> & {
+        unitOptionsById_: () => Record<string, unknown[]>
+      }
+      expect(c['unitOptions_']).toBeUndefined()
+      const map = c.unitOptionsById_()
+      expect(Object.keys(map).length).toBe(3000)
+      expect(c.unitOptionsById_()).toBe(map)
+    })
+  })
 })

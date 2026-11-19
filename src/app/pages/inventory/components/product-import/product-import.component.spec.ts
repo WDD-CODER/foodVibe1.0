@@ -6,6 +6,7 @@ import { Observable, of, throwError } from 'rxjs'
 import { FileText, LucideAngularModule, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { BusinessService } from '@services/business.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { Recipe } from '@models/recipe.model'
 import { GeminiService } from '@services/gemini.service'
@@ -61,7 +62,8 @@ const PRODUCTS = [
       { supplierId: 'supD', price: 110 }
     ]
   },
-  { _id: 'p6', nameHebrew: 'שמן', baseUnit: 'liter', sources: [{ supplierId: 'supB', price: 20 }] }
+  { _id: 'p6', nameHebrew: 'שמן', baseUnit: 'liter', sources: [{ supplierId: 'supB', price: 20 }] },
+  { _id: 'p7', nameHebrew: 'קמח', baseUnit: 'kg', sources: [{ supplierId: 'supF', price: 10 }] }
 ] as unknown as Product[]
 
 describe('ProductImportComponent', () => {
@@ -78,6 +80,8 @@ describe('ProductImportComponent', () => {
   let storedSettings: Record<string, number> | undefined
   let recipes: Recipe[]
   let cost: number
+  /** Plan 645: the big-change confirm; confirms by default so the older cases save as before. */
+  let confirmOpen: jasmine.Spy
 
   async function setup(
     parsed: Observable<unknown>,
@@ -98,6 +102,7 @@ describe('ProductImportComponent', () => {
     })
     onSetSuccessMsg = jasmine.createSpy('onSetSuccessMsg')
     onSetErrorMsg = jasmine.createSpy('onSetErrorMsg')
+    confirmOpen = jasmine.createSpy('confirmOpen').and.resolveTo(true)
     TestBed.configureTestingModule({
       imports: [ProductImportComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, FileText, TrendingUp })],
       providers: [
@@ -120,7 +125,9 @@ describe('ProductImportComponent', () => {
               { _id: 'supB', nameHebrew: 'ווילד בייקרי ' },
               { _id: 'supC', nameHebrew: 'מחלבת ג' },
               { _id: 'supD', nameHebrew: 'מחלבת ד' },
-              { _id: 'supE', nameHebrew: 'ספק ה' }
+              { _id: 'supE', nameHebrew: 'ספק ה' },
+              { _id: 'supF', nameHebrew: 'Fresh Mill' },
+              { _id: 'supG', nameHebrew: '  fresh MILL ' }
             ])
           }
         },
@@ -139,6 +146,7 @@ describe('ProductImportComponent', () => {
           useValue: { business_: () => (storedSettings ? { settings: storedSettings } : { settings: undefined }) }
         },
         { provide: RecipeCostService, useValue: { computeRecipeCost: () => cost } },
+        { provide: ConfirmModalService, useValue: { open: confirmOpen } },
         {
           provide: TranslationService,
           useValue: {
@@ -147,7 +155,8 @@ describe('ProductImportComponent', () => {
                 ({
                   import_price_was_at: 'WAS {price} AT {name}',
                   import_update_supplier_price: 'UPDATE {name}',
-                  import_add_as_new_supplier: 'ADD {name}'
+                  import_add_as_new_supplier: 'ADD {name}',
+                  import_confirm_big_change_row: '{name}: {from} <- {to} ({pct})'
                 }) as Record<string, string>
               )[key] ?? key
           }
@@ -287,13 +296,36 @@ describe('ProductImportComponent', () => {
       expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBeUndefined()
     })
 
-    it('defaults to updating when both suppliers have the same trimmed name, and sends the target', async () => {
+    it('offers only update when both suppliers have the same trimmed name, and sends the target (plan 645)', async () => {
       await setup(of({ rows: [row('לחם', 142)], truncated: false }))
       fixture.componentInstance['supplierId_'].set('supB')
       await pasteAndParse()
+      expect(all('import-choice-update').length).toBe(1)
       expect((all('import-choice-update')[0] as HTMLInputElement).checked).toBeTrue()
+      expect(all('import-choice-add').length).toBe(0)
       await fixture.componentInstance['saveAll']()
       expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBe('supA')
+    })
+
+    it('the same name in another case is the same supplier too; an old "add" pick cannot win (plan 645)', async () => {
+      await setup(of({ rows: [row('קמח', 10.2)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supG')
+      await pasteAndParse()
+      expect(all('import-choice-update').length).toBe(1)
+      expect(all('import-choice-add').length).toBe(0)
+      fixture.componentInstance['setChoice'](fixture.componentInstance['rows_']()[0].id, 'add')
+      fixture.detectChanges()
+      expect(all('import-choice-add').length).toBe(0)
+      await fixture.componentInstance['saveAll']()
+      expect(apply.calls.mostRecent().args[1][0].targetSupplierId).toBe('supF')
+    })
+
+    it('different names still offer both choices (plan 645)', async () => {
+      await setup(of({ rows: [row('קמח', 10.2)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('supE')
+      await pasteAndParse()
+      expect(all('import-choice-update').length).toBe(1)
+      expect(all('import-choice-add').length).toBe(1)
     })
 
     it('choosing update sends the target, choosing add sends none, and the pick survives editing the row', async () => {
@@ -329,6 +361,43 @@ describe('ProductImportComponent', () => {
       expect(byId('import-old-price')?.textContent).toContain('WAS ₪110.00 AT מחלבת ד')
       expect(byId('import-choice')?.textContent).toContain('מחלבת ד')
       expect(byId('import-choice')?.textContent).not.toContain('מחלבת ג')
+    })
+  })
+
+  describe('a change beyond the threshold asks first (plan 645)', () => {
+    const bigRows = () => [row('עגבנייה', 5.3), row('מלפפון', 4.23), row('פטרוזיליה', 7.2)]
+
+    it('one confirm lists the rise and the drop with old price, new price and percent; cancel sends nothing', async () => {
+      await setup(of({ rows: bigRows(), truncated: false }))
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      confirmOpen.and.resolveTo(false)
+      await fixture.componentInstance['saveAll']()
+      expect(confirmOpen).toHaveBeenCalledTimes(1)
+      const [message, options] = confirmOpen.calls.mostRecent().args as [string, Record<string, string>]
+      expect(message.split('\n')).toEqual(['עגבנייה: ₪5.00 <- ₪5.30 (+6.0%)', 'מלפפון: ₪4.50 <- ₪4.23 (-6.0%)'])
+      expect(options['headerKey']).toBe('import_confirm_big_change_title')
+      expect(options['saveLabel']).toBe('import_confirm_big_change_ok')
+      expect(apply).not.toHaveBeenCalled()
+      expect(fixture.componentInstance['rows_']().length).toBe(3)
+    })
+
+    it('confirm sends the apply', async () => {
+      await setup(of({ rows: bigRows(), truncated: false }))
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      await fixture.componentInstance['saveAll']()
+      expect(confirmOpen).toHaveBeenCalledTimes(1)
+      expect(apply).toHaveBeenCalledTimes(1)
+    })
+
+    it('rows within the threshold save without a confirm', async () => {
+      await setup(of({ rows: [row('עגבנייה', 5.2), row('מלפפון', 4.4)], truncated: false }))
+      fixture.componentInstance['supplierId_'].set('sup1')
+      await pasteAndParse()
+      await fixture.componentInstance['saveAll']()
+      expect(confirmOpen).not.toHaveBeenCalled()
+      expect(apply).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -825,8 +894,11 @@ describe('ProductImportComponent', () => {
         fixture.componentInstance['supplierId_'].set('sup1')
         await pasteAndParse()
         expect(all('import-change').map((c) => c.textContent?.trim())).toEqual(['+6.0%', '-4.0%'])
-        expect(all('import-change')[0].classList).toContain('import-change--up')
-        expect(all('import-change')[1].classList).toContain('import-change--down')
+        // Plan 645: the change sits in a chip — red when the price rises, green when it drops.
+        expect(all('import-change')[0].classList).toContain('c-chip')
+        expect(all('import-change')[0].classList).toContain('c-chip--red')
+        expect(all('import-change')[1].classList).toContain('c-chip')
+        expect(all('import-change')[1].classList).toContain('c-chip--green')
       })
 
       it('a row with old price 5 and new price 4.8 shows -4.0%', async () => {

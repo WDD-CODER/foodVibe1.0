@@ -8,7 +8,10 @@ import {
   effect,
   viewChild,
   ElementRef,
-  AfterViewChecked
+  afterNextRender,
+  inject,
+  Injector,
+  untracked
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
@@ -25,7 +28,9 @@ import { StepHoldDirective } from './step-hold.directive'
   styleUrl: './counter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CounterComponent implements AfterViewChecked {
+export class CounterComponent {
+  private readonly injector_ = inject(Injector)
+
   // INPUTS
   value = input.required<number>()
   min = input<number>(0)
@@ -77,18 +82,16 @@ export class CounterComponent implements AfterViewChecked {
   readonly valueInput = viewChild<ElementRef<HTMLInputElement>>('valueInput')
 
   constructor() {
+    // Plan 645: measure the value width once after the shown text changes (and after the first render),
+    // never on every view check — reading offsetWidth on each check forced a page layout per counter.
     effect(() => {
       this.displayValue_()
       this.inputValue_()
-      this.value()
+      untracked(() => afterNextRender(() => this.measureValueWidth(), { injector: this.injector_ }))
     })
   }
 
-  ngAfterViewChecked(): void {
-    this.measureValueWidth()
-  }
-
-  private measureValueWidth(): void {
+  protected measureValueWidth(): void {
     const span = this.mirrorSpan()?.nativeElement
     if (!span) return
     const w = span.offsetWidth

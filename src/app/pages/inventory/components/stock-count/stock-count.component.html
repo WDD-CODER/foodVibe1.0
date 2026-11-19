@@ -120,7 +120,7 @@
       @if (draftId_() && draftSavedAt_() !== null) {
         <p class="stock-count__draft-note" data-testid="stk-draft-note">{{ draftFromText_() }}</p>
       }
-      @for (row of visibleRows_(); track row.product._id) {
+      @for (row of shownRows_(); track row.product._id) {
         <div
           class="c-list-row"
           data-testid="stk-row"
@@ -142,7 +142,7 @@
           </div>
           <div class="c-list-body-cell" role="cell">
             <app-custom-select
-              [options]="unitOptions_(row.product)"
+              [options]="row.options"
               [compact]="true"
               [ngModel]="row.state.unit"
               (valueChange)="setUnit(row.product, $event)"
@@ -155,12 +155,19 @@
             </label>
           </div>
           <div class="c-list-body-cell stock-count__base" role="cell" dir="ltr">
-            {{ baseText_(row.product, row.state) ?? '' }}
+            {{ row.base }}
           </div>
         </div>
       } @empty {
         <div class="stock-count__state" data-testid="stk-no-match">
           <app-empty-state messageKey="no_products_match" icon="search" />
+        </div>
+      }
+      @if (hiddenCount_() > 0) {
+        <div class="stock-count__state">
+          <button type="button" class="c-btn-ghost" data-testid="stk-show-more" (click)="showMore()">
+            {{ 'stk_show_more' | translatePipe }} ({{ hiddenCount_() }})
+          </button>
         </div>
       }
     }

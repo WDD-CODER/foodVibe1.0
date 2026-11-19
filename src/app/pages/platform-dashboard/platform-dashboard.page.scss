@@ -284,6 +284,8 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     .pbd-history {
       display: grid;
       gap: var(--space-2);
+      // Plan 645: the box sits right under the reason field; keep a gap so they do not touch.
+      margin-block-start: var(--space-3);
       padding: var(--space-2);
       border: 1px solid var(--border-default);
       border-radius: var(--radius-sm);
