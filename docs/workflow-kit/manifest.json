@@ -10,6 +10,10 @@
       "reason": "per-session runtime history"
     },
     {
+      "path": "docs/brain/remarks/**",
+      "reason": "the Human's recorded remarks (product-defaults, one jsonl per branch and day): project history, never a workflow file"
+    },
+    {
       "path": ".claude/reports/**",
       "reason": "generated reports (project history)"
     },
