@@ -308,4 +308,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the erase reason rule is trimmed 1–300 characters (the plan's explicit number), not the platform write's 3–200.
 - `[ui]` items 639-1 and 639-2 are written, not run (no QA login in the builder folder).
 - created `src/app/core/services/user-admin.service.spec.ts` (new, the plan names it in scope; no spec existed).
-- BLOCKED: `pnpm run test:server` fails 1 test: server/test/ai-shots-shared.test.js:152 (plan 618 case "aiPrivate true removes only that business promoted copies") checks the old erase rule; the file is outside the scope. Needed: approved: server/test/ai-shots-shared.test.js (change the case to expect the promoted copy is kept after aiPrivate true).
+- scope extended by Human answer 639-1: server/test/ai-shots-shared.test.js — plan-618 case now expects promoted copies kept after aiPrivate true. pnpm run test:server -> exit 0, 1842 passed.

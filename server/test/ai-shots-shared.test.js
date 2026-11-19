@@ -141,7 +141,7 @@ describe('shared recipe AI examples', () => {
     expect(await testDb().collection('GEMINI_SHOTS').countDocuments({ businessId: 'bizShareA' })).toBe(1);
   });
 
-  it('the platform route: aiPrivate true removes only that business promoted copies; false restores and deletes nothing (plan 618)', async () => {
+  it('the platform route: aiPrivate true keeps every promoted copy (plan 639); false deletes nothing (plan 618)', async () => {
     const a = await approvedShot('bizShareA', 'soup a');
     const b = await approvedShot('bizNewB', 'soup b');
     expect((await promote(a)).status).toBe(200);
@@ -149,11 +149,11 @@ describe('shared recipe AI examples', () => {
     const platform = body => request(app).put('/api/v1/admin/businesses/bizShareA/platform').set(auth(adminToken())).send(body);
     const shots = filter => testDb().collection('GEMINI_SHOTS').countDocuments(filter);
     expect((await platform({ aiPrivate: true, reason: 'test reason' })).status).toBe(200);
-    expect(await shots({ businessId: '__master__', 'promotedFrom.businessId': 'bizShareA' })).toBe(0);
+    expect(await shots({ businessId: '__master__', 'promotedFrom.businessId': 'bizShareA' })).toBe(1);
     expect(await shots({ businessId: '__master__', 'promotedFrom.businessId': 'bizNewB' })).toBe(1);
     expect(await shots({ businessId: 'bizShareA' })).toBe(1);
     expect((await platform({ aiPrivate: false, reason: 'test reason' })).status).toBe(200);
-    expect(await shots({ businessId: '__master__' })).toBe(1);
+    expect(await shots({ businessId: '__master__' })).toBe(2);
     expect(await shots({ businessId: 'bizShareA' })).toBe(1);
     expect((await testDb().collection('businesses').findOne({ _id: 'bizShareA' })).aiPrivate).toBe(false);
   });
