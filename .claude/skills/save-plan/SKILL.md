@@ -18,7 +18,7 @@ save-plan:
 - [ ] 1 number (Planner, save-as-new only): node scripts/next-plan-number.mjs → NNN
 - [ ] 1 ledger (Planner): Atomic Sub-tasks appended to .claude/todo.md via todo-query.mjs append
 - [ ] 2 shape: Read-Write Scope parses, exactly one Status:, Snapshot: present, Depends-on: present (node scripts/scope-check.mjs --deps --plan=<path> → DEPENDS_ON: ok), every Done-when tagged [auto]/[ui]/[human] (node scripts/scope-check.mjs --tags --plan=<path> → DONE_WHEN_TAGS: ok), every Atomic Sub-task opens with a plain explanatory title
-- [ ] 2 test location: node scripts/scope-check.mjs --tests --plan=<path> → SCOPE_TESTS: ok | skipped (a warn is shown to the Human, never blocks)
+- [ ] 2 test location: node scripts/scope-check.mjs --tests --plan=<path> → SCOPE_TESTS: ok | skipped (a warn is shown to the Human, never blocks; bad → write each listed line as a path from the repo root)
 - [ ] 2 arch gate: node scripts/scope-check.mjs --arch --plan=<path> → exit 0
 - [ ] 2 reuse gate: node scripts/scope-check.mjs --reuse --plan=<path> → exit 0
 - [ ] 2 prerequisites (Planner): already true on origin/main, or split into NNN-1
@@ -29,7 +29,7 @@ save-plan:
 
 ## Plan rules (what a saved plan looks like)
 
-- Path `plans/<NNN>-<slug>.plan.md`. Open plans live directly in one of the open plan folders (plans, plans/design); when `plans/design` is one of them, a plan with `Track: design` or `Track: split` (Claude Design work: mostly style and layout) goes to `plans/design/<NNN>-<slug>.plan.md`. Closed plans always go to the range folder `plans/<range>/`, design or not. H1 `# Plan NNN — <Human Title>` (the title drives similarity — make it describe the work). Refactor variant: `NNN-R`.
+- Path `plans/<NNN>-<slug>.plan.md`, the file name 100 characters or fewer: the slug is a short form of the title (a few words), never the whole title — `plan-write-guard.sh` refuses a longer new name, because a long path cannot be cloned on Windows. Open plans live directly in one of the open plan folders (plans, plans/design); when `plans/design` is one of them, a plan with `Track: design` or `Track: split` (Claude Design work: mostly style and layout) goes to `plans/design/<NNN>-<slug>.plan.md`. Closed plans always go to the range folder `plans/<range>/`, design or not. H1 `# Plan NNN — <Human Title>` (the title drives similarity — make it describe the work). Refactor variant: `NNN-R`.
 - `## Read-Write Scope` in a shape `scripts/lib/plan-scope.mjs` parses: a fenced ```` ```scope ```` block, one glob per line, **or** a `**Scope:**` line followed by bullets whose first token is a `` `backticked` `` glob. A bare `scope` line or un-backticked bullets are not parsed and `take-plan` refuses the plan. When a step changes or adds code that has tests, a scope line must name the test location itself (a tests folder glob or a single test file); a code-folder glob does not cover the tests under it, and the test-file gate blocks a changed test that no such line lists.
 - Exactly one `Status:` line (`Status: draft` for new; `take-plan` sets `active`; after the merge the todo-sync workflow's `plan-close.mjs` sets `done` and moves the plan into `plans/<range>/`). One `Snapshot:` line (filled in Phase 3). One `Depends-on:` line: the plan numbers that must be merged first (`Depends-on: 007, 012`), or `Depends-on: none`. It is read by `scripts/lib/plan-deps.mjs` — the one parser `plan-order`, `scope-check --deps` and `take-plan` share; legacy prose (`Prerequisite: plan NNN merged`) is still read, but a new plan says it in the header.
 - The shape is `.claude/references/prd-template.md`. Its `## Atomic Sub-tasks` are the milestones: there is no separate milestone list and no per-step Verify field (the checks are the `[auto]` success criteria). `## Execution Notes` collects decisions and evidence while the plan runs.
@@ -88,7 +88,7 @@ A Worker never assigns `NNN` and never touches `.claude/todo.md` (it is Planner-
 
 1. `git branch --show-current` **immediately before committing** — if it is not `main` (e.g. `branch-guard.sh` auto-switched to `feat/session-*`), `git checkout main` first. Catch it here, not after.
 2. `git add` the plan file and `.claude/todo.md` only (never `-A`), commit. This is the Planner's admin write to `main` (`AGENTS.md` Planner-Worker bullet; enforced by `scripts/branch-guard.sh` and `.husky/pre-push`).
-3. `git push origin main`. Blocked, rejected or non-zero → **stop**; surface the blocker and ask. Do not tell the Human the plan is ready.
+3. `git push origin main`. Blocked, rejected or non-zero → **stop**; surface the blocker and ask. Do not tell the Human the plan is ready. The line `remote: Bypassed rule violations for refs/heads/main: Changes must be made through a pull request.` is expected on this push and is not an error. Judge the push only by its exit code and by `! [rejected]` and `error:` lines; a `non-fast-forward` rejection hides easily under that remote message.
 4. `git fetch origin --quiet` then `git ls-tree origin/main --name-only -- <plan path>` must print the path. Empty → the push did not land; stop and investigate.
 
 A Worker saving mid-brief does not commit here — its plan-file change rides its `feat/NNN-*` branch at `/ship`.

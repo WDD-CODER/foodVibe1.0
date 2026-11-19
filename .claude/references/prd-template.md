@@ -28,9 +28,10 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
-[one glob per line, prefer folder globs for code]
-[and one line that must name the test location itself — a tests folder glob or a single test file — when a step
-changes code that has tests; a code-folder glob does not cover the tests under it]
+[one glob per line, each a path from the repo root, prefer folder globs for code]
+[and, when a step changes code that has tests elsewhere, one line that must name the test location itself — a tests
+folder glob or a single test file; a test beside a scoped file (same folder or its __tests__/) needs no line, but
+beyond that a code-folder glob does not cover the tests under it]
 ```
 
 ## Read Scope
@@ -58,13 +59,23 @@ in chat first — never write `Arch-approved:` without it.
 
 ## Reuse Check
 
-One line per new component, util, pipe, service or `.c-*` class this plan creates. Search
-`docs/brain/component-families.md` first; climb the ladder in `docs/agent/standards-reuse.md`
-(1 use as is · 2 existing inputs · 3 extend the family · 4 new family + why). Gate:
+One line per new component, util, pipe, service or `.c-*` class this plan creates. Read
+`docs/brain/inventory.md` first, then `docs/brain/component-families.md`; climb the ladder in
+`docs/agent/standards-reuse.md` (1 use as is · 2 existing inputs · 3 extend the family · 4 new family + why).
+`family:` is a `###` heading of `docs/brain/component-families.md`, or `none` (rung 4 only). Gate:
 `node scripts/scope-check.mjs --reuse --plan=<this file>`.
 
 - [new piece] — family: [family-id | none] — rung: [1-4] — why: [one line; required for rung 4]
 - none — [why this plan creates no new piece]
+
+## Defaults
+
+One line per `on` product default the plan triggers (`_shared/product-defaults.md`); none triggered: leave empty.
+A `check: card` default also needs a `[human]` Done-when item with the contract's card text. Gate:
+`node scripts/scope-check.mjs --defaults --plan=<this file>`.
+
+- [default-id] — applies — how: [the piece the contract names]
+- [default-id] — exception — why: [one line]
 
 ## Step 0 — Reality Check
 
