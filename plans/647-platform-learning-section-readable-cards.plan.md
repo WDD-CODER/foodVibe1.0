@@ -75,6 +75,7 @@ append the path to the scope block above and retry.
 
 - the flow cards and the stat tiles — family: engine-classes — rung: 1 — why: the existing card and stat classes of the
   platform page; no new piece.
+- new classes .learning__cards, .learning__tiles, .learning__card, .learning__tile, .learning__card-head, .learning__card-name, .learning__model, .learning__meaning, .learning__metric, .learning__value, .learning__weeks-btn, .learning__weeks, .learning__brain, .learning__empty — family: learning-stats — rung: 1 — why: the section's own layout classes, extending the existing learning__ block of this component.
 - the empty state — family: empty-state — rung: 1 — why: `app-empty-state` with a new message key.
 
 ## Defaults
