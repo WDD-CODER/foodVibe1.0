@@ -1,0 +1,448 @@
+{
+  "run": "mod-alerts",
+  "branch": "orch/mod-alerts",
+  "base": "main",
+  "startedAt": "2026-11-19T15:05:52.263Z",
+  "mainShaAtStart": "5c60bcfb358c7a71764a76b31f67f5ffe0a32a92",
+  "plans": {
+    "646": {
+      "nnn": "646",
+      "title": "In-app alerts: a big price change reaches the owner and the consultant; diagnosis in the main menu; module changes show at once",
+      "branch": "feat/646-in-app-alerts-big",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T17:34:59.944Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T17:44:46.616Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T17:56:54.017Z"
+        }
+      },
+      "humanItems": [
+        "Dandan imports an invoice with a price change beyond 5%: the bell shows 1, the alert reads clearly in Hebrew"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T15:07:14.573Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:07:14.707Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:07:38.535Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:08:18.070Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:09:20.119Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:12:34.022Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:12:34.259Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:27:39.029Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T15:28:22.758Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T17:34:59.753Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T17:34:59.946Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T17:36:28.420Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T17:44:46.129Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T17:44:46.363Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T17:44:46.618Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T17:50:31.284Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T17:56:46.849Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T17:56:54.019Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T17:57:08.963Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T17:58:13.280Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "646",
+          "title": "In-app alerts: a big price change reaches the owner and the consultant; diagnosis in the main menu; module changes show at once",
+          "branch": "feat/646-in-app-alerts-big",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-19T15:07:14.706Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 18.4,
+          "reason": "ESCALATE scope: ESCALATE: scope plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts. Commit it to the run branch (or merge main into it), then re-run the builder. — ask 646-1 answered, but the scope could not be extended: plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-a",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 23.6,
+              "tokens": {
+                "input": 122948,
+                "output": 1876
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-19T15:08:12.805Z",
+            "reason": "ESCALATE scope: ESCALATE: scope plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts. Commit it to the run branch (or merge main into it), then re-run the builder."
+          },
+          "parkBranch": "park/mod-alerts-646"
+        },
+        {
+          "nnn": "646",
+          "title": "In-app alerts: a big price change reaches the owner and the consultant; diagnosis in the main menu; module changes show at once",
+          "branch": "feat/646-in-app-alerts-big",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-19T15:12:34.258Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: ESCALATE scope: ESCALATE: scope plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts. Commit it",
+              "check": "(not given)"
+            }
+          ],
+          "replan": "no — (not given)",
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 18.3,
+          "reason": "asking 646-2: replan needed: ESCALATE: scope — node scripts/breadcrumbs-check.mjs fails (not mentioned: notifications.service.ts, notification-bell/) and the scope guard refuses writes to src/app/core/services/breadcrumbs.md and src/app/core/components/breadcrumbs.md; server/constants/collections.js and server/db.js were also c",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 904.5,
+              "tokens": {
+                "input": 5694443,
+                "output": 52824
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-19T15:28:14.683Z",
+            "reason": "replan needed: ESCALATE: scope — node scripts/breadcrumbs-check.mjs fails (not mentioned: notifications.service.ts, notification-bell/) and the scope guard refuses writes to src/app/core/services/breadcrumbs.md and src/app/core/components/breadcrumbs.md; server/constants/collections.js and server/db.js were also c"
+          },
+          "parkBranch": "park/mod-alerts-646"
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.4,
+      "sha": "b3080e420eea5383ddf55c4d2d766fa5d8ee8ac3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 86,
+          "tokens": {
+            "input": 222161,
+            "output": 3773
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 342.4,
+          "tokens": {
+            "input": 508648,
+            "output": 8862
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.8,
+          "tokens": {
+            "input": 167266,
+            "output": 1096
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci, node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-alerts --plan plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md"
+      ],
+      "checkedHead": "915369edb31958d895d2eedebed1b44e7bb8da66"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T15:07:14.436Z",
+      "plan": "646",
+      "text": "the folder foodVibe1.0-orch-mod-alerts-646 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T15:07:38.379Z",
+      "plan": "646",
+      "text": "builder left undone (round 0): All sub-tasks: the plan file is missing from the run branch, so its scope, Done-when items and scope-check/kit-checks (which take --plan=plans/646-...) cannot be read or run here."
+    },
+    {
+      "at": "2026-11-19T15:08:17.849Z",
+      "plan": "646",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-19T15:08:18.190Z",
+      "plan": "646",
+      "text": "ask 646-1 (scope, the Human or the advisor answers): Plan 646 is missing from orch/mod-alerts; should I copy it from main into my branch and build from it?"
+    },
+    {
+      "at": "2026-11-19T15:09:18.601Z",
+      "plan": "646",
+      "text": "ask 646-1 answered by the human: approved: plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md"
+    },
+    {
+      "at": "2026-11-19T15:09:20.302Z",
+      "plan": "646",
+      "text": "ask 646-1 answered, but the scope could not be extended: plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts — plan 646 parked; the question was: Plan 646 is missing from orch/mod-alerts; should I copy it from main into my branch and build from it?"
+    },
+    {
+      "at": "2026-11-19T15:12:28.390Z",
+      "plan": "646",
+      "text": "resumed from park/mod-alerts-646: round 0, tier build, after: ESCALATE scope: ESCALATE: scope plans/646-in-app-alerts-big-price-change-diagnosis-in-menu-module-refresh.plan.md is not on orch/mod-alerts. Commit it to the ru"
+    },
+    {
+      "at": "2026-11-19T15:12:33.890Z",
+      "plan": "646",
+      "text": "the folder foodVibe1.0-orch-mod-alerts-646 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T15:27:38.857Z",
+      "plan": "646",
+      "text": "builder left undone (round 0): A5: add rows to src/app/core/services/breadcrumbs.md and src/app/core/components/breadcrumbs.md (waiting on scope approval); e2e/ui/646-1.spec.ts: written, not run; A5: the Done-when commands are not rerun in order after the breadcrumb rows"
+    },
+    {
+      "at": "2026-11-19T15:28:22.635Z",
+      "plan": "646",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-19T15:28:22.972Z",
+      "plan": "646",
+      "text": "ask 646-2 (scope, the Human or the advisor answers): May this plan write src/app/core/services/breadcrumbs.md, src/app/core/components/breadcrumbs.md, server/constants/collections.js and server/db.js (the last two are already changed on the branch)?"
+    },
+    {
+      "at": "2026-11-19T17:32:25.268Z",
+      "plan": "646",
+      "text": "ask 646-2 answered by the human: approved: src/app/core/services/breadcrumbs.md, src/app/core/components/breadcrumbs.md, server/constants/collections.js, server/db.js"
+    },
+    {
+      "at": "2026-11-19T17:32:49.626Z",
+      "plan": "646",
+      "text": "scope of plan 646 extended on orch/mod-alerts by the answer to 646-2: src/app/core/services/breadcrumbs.md, src/app/core/components/breadcrumbs.md, server/constants/collections.js, server/db.js"
+    },
+    {
+      "at": "2026-11-19T17:34:46.944Z",
+      "plan": "646",
+      "text": "resumed from park/mod-alerts-646: round 0, tier build, after: asking 646-2: replan needed: ESCALATE: scope — node scripts/breadcrumbs-check.mjs fails (not mentioned: notifications.service.ts, notification-bell/) and the sc"
+    },
+    {
+      "at": "2026-11-19T17:34:59.561Z",
+      "plan": "646",
+      "text": "the folder foodVibe1.0-orch-mod-alerts-646 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T17:36:26.073Z",
+      "plan": "646",
+      "text": "builder left undone (round 0): [ui] e2e/ui/646-1.spec.ts: written, not run; [human] Dandan's import and consultant check"
+    },
+    {
+      "at": "2026-11-19T17:57:18.125Z",
+      "plan": "646",
+      "text": "the folder foodVibe1.0-orch-merge-mod-alerts was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 3,
+  "phase": "finished",
+  "freeDiskGb": 15.8,
+  "updatedAt": "2026-11-19T18:09:12.597Z",
+  "finishedAt": "2026-11-19T18:09:12.595Z",
+  "stops": [
+    {
+      "at": "2026-11-19T18:02:59.444Z",
+      "reason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2636 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+      "attempt": 2
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "646",
+      "type": "behaviour",
+      "text": "behaviour: an alert of another business switches into that business and lands on /dashboard, because UserService.switchBusiness always reloads there — reverse: pass a target URL through switchBusiness",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "646",
+      "type": "behaviour",
+      "text": "behaviour: a read call on an alert already read sets readAt again (no extra guard) — reverse: add readAt: { $exists: false } to the filter in server/routes/notifications.js",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "646",
+      "type": "behaviour",
+      "text": "behaviour: the alert is written even when the price-history write failed, since the prices were saved — reverse: guard the alert hook with historyOk",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "646",
+      "type": "seen",
+      "text": "seen: docs/brain/component-families.md:568 — reuse-lint --check-registry reports missing paths @schemas/units/to-base and server/generated/schemas/units/to-base (not from this plan)",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "646",
+      "type": "behaviour",
+      "text": "behaviour: an alert for another business switches into it and lands on /dashboard, because UserService.switchBusiness always reloads there — reverse: pass a target url through switchBusiness",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "646",
+      "type": "behaviour",
+      "text": "behaviour: the bell sits after the user chip in the header, not before it — reverse: move <app-notification-bell /> back above .user-chip in header.component.html and fix the avatar overlay test",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T18:09:12.597Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

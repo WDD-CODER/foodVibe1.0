@@ -91,6 +91,10 @@ e2e/ui/646-1.spec.ts
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/brain/invariants.md
+src/app/core/services/breadcrumbs.md
+src/app/core/components/breadcrumbs.md
+server/constants/collections.js
+server/db.js
 ```
 
 ## Read Scope
@@ -122,6 +126,19 @@ append the path to the scope block above and retry.
   `c-chip` for the count and the empty-state family for "no alerts".
 - the diagnosis main-menu entry — family: module-gate — rung: 1 — why: the same `modules.has` pattern the events entry
   uses (`header.component.ts:70`).
+- new component notification-bell — family: none — rung: 4 — why: no header popover exists.
+- new class .bell__btn — family: none — rung: 4 — why: the bell button wrapper over `c-icon-btn`.
+- new class .bell__count — family: none — rung: 4 — why: positions the `c-chip__count` badge.
+- new class .bell__panel — family: none — rung: 4 — why: the popover box.
+- new class .bell__head — family: none — rung: 4 — why: the popover heading row.
+- new class .bell__all — family: none — rung: 4 — why: the mark-all link button.
+- new class .bell__empty — family: none — rung: 4 — why: the "no alerts" line.
+- new class .bell__list — family: none — rung: 4 — why: the popover list.
+- new class .bell__item — family: none — rung: 4 — why: one alert row button.
+- new class .bell__item--up — family: none — rung: 4 — why: price-rise accent.
+- new class .bell__item--down — family: none — rung: 4 — why: price-fall accent.
+- new class .bell__item--unread — family: none — rung: 4 — why: unread weight.
+- new class .bell__meta — family: none — rung: 4 — why: the time and business line.
 
 ## Defaults
 
@@ -176,11 +193,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Store an alert for each person who must know about a big price change — the schema, the service, the apply hook, the server cases — shared/schemas/entities/notification.schema.ts, server/services/notifications.js, server/routes/product-import.js, server/test/notifications.test.js
-- [ ] A2: Let each person read and clear only his own alerts — the routes, the mount, the access checks, the cases — server/routes/notifications.js, server/index.js, server/test/notifications.test.js
-- [ ] A3: Show the alerts under a bell in the header and open the product from one — the service, the bell, the keys, the icon, the specs — src/app/core/services/notifications.service.ts, src/app/core/components/notification-bell/**, src/app/core/components/header/**, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A4: Put the diagnosis in the main menu and show a module change at once — the menu entry, the reload after the platform save, the specs — src/app/core/components/header/**, src/app/pages/platform-dashboard/components/platform-business-dialog/**
-- [ ] A5: Record the new pieces and prove it in the running app — the registry rows, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/646-1.spec.ts
+- [x] A1: Store an alert for each person who must know about a big price change — the schema, the service, the apply hook, the server cases — shared/schemas/entities/notification.schema.ts, server/services/notifications.js, server/routes/product-import.js, server/test/notifications.test.js
+- [x] A2: Let each person read and clear only his own alerts — the routes, the mount, the access checks, the cases — server/routes/notifications.js, server/index.js, server/test/notifications.test.js
+- [x] A3: Show the alerts under a bell in the header and open the product from one — the service, the bell, the keys, the icon, the specs — src/app/core/services/notifications.service.ts, src/app/core/components/notification-bell/**, src/app/core/components/header/**, public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A4: Put the diagnosis in the main menu and show a module change at once — the menu entry, the reload after the platform save, the specs — src/app/core/components/header/**, src/app/pages/platform-dashboard/components/platform-business-dialog/**
+- [x] A5: Record the new pieces and prove it in the running app — the registry rows, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/646-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: 631 (grants), 634 (diagnosis), 641 (the apply's per-row change), 645 (the threshold rule both ways).
@@ -199,3 +216,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: in-app only — why: Dandan's choice of 2026-11-19 ("alerts in the app").
 - decided: staff get no price alerts — why: prices are the owner's (INV-1 rule on money).
 - decided: one alert per row and recipient, kept 200 per user — why: simple to read and bounded.
+- evidence: pnpm run test:server -> exit 0 (146 files, 1933 tests incl. server/test/notifications.test.js); pnpm run build -> exit 0; pnpm run lint -> 0 errors; pnpm run lint:icons -> exit 0; pnpm run lint:reuse -> ok; pnpm run test:ci full run passed except one header spec assertion, fixed and the header specs rerun 21/21; node scripts/breadcrumbs-check.mjs -> FAIL: src/app/core/services/breadcrumbs.md and src/app/core/components/breadcrumbs.md do not mention notifications.service.ts / notification-bell/ (both outside scope; ESCALATE asked)
+- decided: behaviour: an alert of another business switches into it and lands on /dashboard (UserService.switchBusiness always reloads there) — reverse: pass a target url through switchBusiness
+- A5 not ticked: e2e/ui/646-1.spec.ts written, not run; breadcrumb rows waiting on scope approval
+- breadcrumbs rows added in services/ and components/ after approval 646-2; breadcrumbs-check -> clean; e2e 646-1 written, not run

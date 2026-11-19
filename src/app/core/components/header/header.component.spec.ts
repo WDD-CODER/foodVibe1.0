@@ -4,7 +4,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
 import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { ArrowLeftRight, LucideAngularModule } from 'lucide-angular'
+import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { Component, signal } from '@angular/core'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
@@ -15,6 +15,9 @@ import { AccessService } from '@services/access.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
+
+/** Plan 646: the header now holds the bell and the diagnosis entry. */
+const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope }
 
 /** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
 const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
@@ -31,7 +34,7 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
@@ -110,6 +113,19 @@ describe('HeaderComponent', () => {
       fixture.detectChanges()
       expect(clients().length).toBeGreaterThan(0)
     })
+
+    it('shows the diagnosis entry (אבחון, stethoscope) only with consultant_diag (plan 646)', () => {
+      const diag = () => Array.from<Element>(fixture.nativeElement.querySelectorAll('.nav-pills a[href="/diagnosis"]'))
+      expect(diag().length).toBe(0)
+      modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+      fixture.detectChanges()
+      expect(diag().length).toBe(1)
+      expect(diag()[0].textContent).toContain('diagnosis')
+      expect(diag()[0].querySelector('svg')?.getAttribute('class')).toContain('stethoscope')
+      modulesOn.set(ALL_MODULES)
+      fixture.detectChanges()
+      expect(diag().length).toBe(0)
+    })
   })
 })
 
@@ -118,7 +134,7 @@ describe('HeaderComponent avatar fallback', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -166,7 +182,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
     isOwner.set(false)
     business.set(null)
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -233,7 +249,7 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -275,7 +291,7 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
 describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
   it('renders no count in the bottom bar and still renders it in the top nav', async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -319,7 +335,7 @@ describe('HeaderComponent business switcher (plan 632)', () => {
       imports: [
         HeaderComponent,
         HttpClientTestingModule,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ArrowLeftRight })
+        LucideAngularModule.pick({ ...HEADER_ICONS, ArrowLeftRight })
       ],
       providers: [
         moduleStub,
@@ -443,7 +459,7 @@ describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShellWithLoaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [ShellWithLoaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),

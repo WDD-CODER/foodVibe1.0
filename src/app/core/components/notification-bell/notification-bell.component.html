@@ -1,0 +1,61 @@
+<div class="bell" dir="rtl">
+  <button
+    type="button"
+    class="c-icon-btn bell__btn"
+    data-testid="notification-bell"
+    [title]="'alerts_bell_tip' | translatePipe"
+    [attr.aria-label]="'alerts_title' | translatePipe"
+    [attr.aria-expanded]="isOpen_()"
+    (click)="toggle()"
+  >
+    <lucide-icon name="bell" [size]="18"></lucide-icon>
+    @if (unread_() > 0) {
+      <span class="c-chip__count bell__count" data-testid="notification-count">{{ unread_() }}</span>
+    }
+  </button>
+
+  @if (isOpen_()) {
+    <div
+      class="bell__panel"
+      role="dialog"
+      [attr.aria-label]="'alerts_title' | translatePipe"
+      data-testid="notification-panel"
+    >
+      <div class="bell__head">
+        <strong>{{ 'alerts_title' | translatePipe }}</strong>
+        @if (unread_() > 0) {
+          <button type="button" class="bell__all" data-testid="notification-mark-all" (click)="markAll()">
+            {{ 'alerts_mark_all' | translatePipe }}
+          </button>
+        }
+      </div>
+      @if (rows_().length === 0) {
+        <p class="bell__empty" data-testid="notification-empty">{{ 'alerts_empty' | translatePipe }}</p>
+      } @else {
+        <ul class="bell__list">
+          @for (row of rows_(); track row._id) {
+            <li>
+              <button
+                type="button"
+                class="bell__item"
+                [class.bell__item--unread]="row.readAt === undefined"
+                [class.bell__item--up]="row.changePct > 0"
+                [class.bell__item--down]="row.changePct < 0"
+                data-testid="notification-item"
+                (click)="open(row)"
+              >
+                <span class="bell__text">{{ text(row) }}</span>
+                <span class="bell__meta">
+                  @if (otherBusiness(row)) {
+                    <span class="bell__biz" data-testid="notification-business">{{ otherBusiness(row) }}</span>
+                  }
+                  <span>{{ row.createdAt | date: 'dd/MM HH:mm' }}</span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

@@ -20,6 +20,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { BusinessService } from '@services/business.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { PlatformAdminService, type PlatformUpdateBody } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
@@ -79,6 +80,7 @@ export function describePlatformChange(change: PlatformChange, translate: (key: 
 export class PlatformBusinessDialogComponent {
   private readonly dialog = inject(PlatformBusinessDialogService)
   private readonly admin = inject(PlatformAdminService)
+  private readonly business = inject(BusinessService)
   private readonly logging = inject(LoggingService)
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
@@ -253,6 +255,8 @@ export class PlatformBusinessDialogComponent {
     try {
       await this.admin.updatePlatform(t.businessId, { ...this.body_(), reason: this.reason_().trim() })
       this.userMsg.onSetSuccessMsg(this.translation.translate('platform_fd_saved'))
+      // Plan 646: the business the admin is working in shows its new modules at once, with no page reload.
+      if (this.business.business_()?._id === t.businessId) this.business.reload()
       this.dialog.close(true)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 400) {
