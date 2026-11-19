@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, OnInit, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { DatePipe } from '@angular/common'
@@ -54,6 +54,21 @@ interface PendingConflict extends StockAiConflict {
 const MAX_DRAFT_IDS = 20
 
 const LINE_ERRORS = ['UNIT_NOT_CONVERTIBLE', 'UNKNOWN_PRODUCT', 'DUPLICATE_PRODUCT']
+
+/** Plan 645: rows drawn at first and added per "show more" — a business has thousands of products. */
+const PAGE_SIZE = 50
+
+interface UnitOption {
+  value: string
+  label: string
+}
+
+interface SheetRow {
+  product: Product
+  state: RowState
+  options: UnitOption[]
+  base: string
+}
 
 function todayIso(): string {
   return isoFromCountedAt(Date.now())
@@ -122,15 +137,56 @@ export class StockCountComponent implements OnInit {
   )
   protected readonly gridTemplate_ = computed(() => (this.view_() === 'sheet' ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '1fr'))
 
-  protected readonly visibleRows_ = computed(() => {
+  /** Plan 645: built once per product list, not per row per check. */
+  private readonly searchNames_ = computed(
+    () => new Map(this.products_().map((p) => [p._id, normalizeHebrew(p.nameHebrew)]))
+  )
+  protected readonly unitOptionsById_ = computed<Record<string, UnitOption[]>>(() =>
+    Object.fromEntries(this.products_().map((p) => [p._id, unitOptionsFor(p).map((u) => ({ value: u, label: u }))]))
+  )
+  /** The amount in the base unit, only for rows typed in another unit (every other row shows nothing). */
+  protected readonly baseTextById_ = computed<Record<string, string>>(() => {
+    const byId = new Map(this.products_().map((p) => [p._id, p]))
+    const out: Record<string, string> = {}
+    for (const [id, state] of Object.entries(this.rows_())) {
+      const product = byId.get(id)
+      if (!product) continue
+      const text = this.baseText_(product, state)
+      if (text !== null) out[id] = text
+    }
+    return out
+  })
+
+  /** Every product that matches the search and the filter; counted values live in `rows_`, not in the DOM. */
+  protected readonly visibleRows_ = computed<SheetRow[]>(() => {
     const query = normalizeHebrew(this.search_().trim())
     const show = this.show_()
     const rows = this.rows_()
+    const names = this.searchNames_()
+    const options = this.unitOptionsById_()
+    const base = this.baseTextById_()
     return this.products_()
-      .filter((p) => !query || normalizeHebrew(p.nameHebrew).includes(query))
-      .map((product) => ({ product, state: rows[product._id] ?? this.blank_(product) }))
+      .filter((p) => !query || (names.get(p._id) ?? '').includes(query))
+      .map((product) => ({
+        product,
+        state: rows[product._id] ?? this.blank_(product),
+        options: options[product._id] ?? [],
+        base: base[product._id] ?? ''
+      }))
       .filter(({ state }) => show === 'all' || (show === 'counted' ? state.counted : !state.counted))
   })
+
+  /** Plan 645: how many matching rows are drawn; a new search or filter starts again at one page. */
+  protected readonly limit_ = linkedSignal({
+    source: () => `${this.search_()}\u0000${this.show_()}`,
+    computation: () => PAGE_SIZE
+  })
+  protected readonly shownRows_ = computed(() => this.visibleRows_().slice(0, this.limit_()))
+  protected readonly hiddenCount_ = computed(() => Math.max(0, this.visibleRows_().length - this.limit_()))
+
+  protected showMore(): void {
+    this.limit_.update((n) => n + PAGE_SIZE)
+  }
 
   constructor() {
     warnBeforeUnload(() => this.hasRealChanges())
@@ -172,12 +228,8 @@ export class StockCountComponent implements OnInit {
     return { counted: false, amount: 0, unit: product.baseUnit }
   }
 
-  protected unitOptions_(product: Product): { value: string; label: string }[] {
-    return unitOptionsFor(product).map((u) => ({ value: u, label: u }))
-  }
-
   /** The amount in the base unit, for display only; the server stores the real value. */
-  protected baseText_(product: Product, state: RowState): string | null {
+  private baseText_(product: Product, state: RowState): string | null {
     if (state.unit === product.baseUnit) return null
     const base = toBase(state.amount, state.unit, product, this.units_)
     if (base === null) return null
@@ -384,7 +436,11 @@ export class StockCountComponent implements OnInit {
       context: { status, code: body?.error }
     })
     if (status === 400 && body?.error && LINE_ERRORS.includes(body.error) && typeof body.line === 'number') {
-      this.errorProductId_.set(sentIds[body.line] ?? null)
+      const errorId = sentIds[body.line] ?? null
+      this.errorProductId_.set(errorId)
+      // Plan 645: a refused row beyond the drawn page is drawn too, so its mark is visible.
+      const at = errorId === null ? -1 : this.visibleRows_().findIndex((r) => r.product._id === errorId)
+      if (at >= this.limit_()) this.limit_.set(at + 1)
       this.userMsg_.onSetErrorMsg(this.translation_.translate('stk_line_refused'))
     } else if (status === 409 && body?.error === 'COUNT_FINAL') {
       this.userMsg_.onSetErrorMsg(this.translation_.translate('stk_count_final'))

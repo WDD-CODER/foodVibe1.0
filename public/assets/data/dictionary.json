@@ -2628,6 +2628,10 @@
     "import_price_was_at": "היה {price} אצל {name}",
     "import_update_supplier_price": "עדכון המחיר של {name}",
     "import_add_as_new_supplier": "הוספת {name} כספק נוסף",
-    "supplier_exists_selected": "הספק {name} כבר קיים – נבחר הקיים"
+    "supplier_exists_selected": "הספק {name} כבר קיים – נבחר הקיים",
+    "stk_show_more": "להציג עוד",
+    "import_confirm_big_change_title": "שינוי מחיר חריג",
+    "import_confirm_big_change_row": "{name}: {from} ← {to} ({pct})",
+    "import_confirm_big_change_ok": "לשמור את המחירים"
   }
 }

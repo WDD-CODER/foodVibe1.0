@@ -1,5 +1,23 @@
 import type { Recipe } from '@models/recipe.model'
-import { isPriceRiseAlert, previousPriceOf, priceChangePct, recipesUsingProducts } from './price-change.util'
+import {
+  isBigPriceChange,
+  isPriceRiseAlert,
+  previousPriceOf,
+  priceChangePct,
+  recipesUsingProducts
+} from './price-change.util'
+
+describe('isBigPriceChange (plan 645)', () => {
+  it('is true at or beyond the threshold up or down, false within it or without a change', () => {
+    expect(isBigPriceChange(6, 5)).toBe(true)
+    expect(isBigPriceChange(-6, 5)).toBe(true)
+    expect(isBigPriceChange(5, 5)).toBe(true)
+    expect(isBigPriceChange(-5, 5)).toBe(true)
+    expect(isBigPriceChange(4.99, 5)).toBe(false)
+    expect(isBigPriceChange(-4, 5)).toBe(false)
+    expect(isBigPriceChange(null, 5)).toBe(false)
+  })
+})
 
 describe('priceChangePct', () => {
   it('is the change in percent with two decimals', () => {

@@ -37,7 +37,14 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { BUSINESS_SETTINGS_DEFAULTS } from '@schemas/entities'
 import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
-import { isPriceRiseAlert, previousPriceOf, priceChangePct, recipesUsingProducts } from '@utils/price-change.util'
+import {
+  isBigPriceChange,
+  isPriceRiseAlert,
+  previousPriceOf,
+  priceChangePct,
+  recipesUsingProducts
+} from '@utils/price-change.util'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
@@ -98,6 +105,7 @@ export class ProductImportComponent {
   private readonly unitRegistry_ = inject(UnitRegistryService)
   private readonly business_ = inject(BusinessService)
   private readonly recipeCost_ = inject(RecipeCostService)
+  private readonly confirmModal_ = inject(ConfirmModalService)
 
   // 3. INPUTS & OUTPUTS (plan 634: a second host, the diagnosis queue, hands over one file and hears about the apply)
   /** Hides the page header, the back link and the paste box; nothing else changes. */
@@ -187,6 +195,7 @@ export class ProductImportComponent {
       let otherSupplierName: string | null = null
       let targetSupplierId: string | null = null
       let canChoose = false
+      let isSameSupplier = false
       let choice: 'update' | 'add' | null = null
       if (match) {
         const previous = previousPriceOf(match, supplierKey)
@@ -197,9 +206,9 @@ export class ProductImportComponent {
           otherSupplierName = suppliers.get(previous.supplierId)?.nameHebrew ?? ''
           if (supplierKey !== '') {
             canChoose = true
-            choice =
-              row.supplierChoice ??
-              (sameName(otherSupplierName, suppliers.get(supplierKey)?.nameHebrew) ? 'update' : 'add')
+            // Plan 645: a supplier with the same name is the same supplier — only "update" exists.
+            isSameSupplier = sameName(otherSupplierName, suppliers.get(supplierKey)?.nameHebrew)
+            choice = isSameSupplier ? 'update' : (row.supplierChoice ?? 'add')
             if (choice === 'update') targetSupplierId = previous.supplierId
           }
         } else {
@@ -217,10 +226,12 @@ export class ProductImportComponent {
         oldPrice,
         changePct,
         isRiseAlert,
+        isBigChange: isBigPriceChange(changePct, threshold),
         hasUnknownPurchaseUnit,
         otherSupplierName,
         targetSupplierId,
         canChoose,
+        isSameSupplier,
         choice,
         invoiceSupplierName: suppliers.get(supplierKey)?.nameHebrew ?? ''
       }
@@ -371,6 +382,8 @@ export class ProductImportComponent {
   /** Saves every kept row in one request. */
   protected async saveAll(): Promise<void> {
     if (!this.canSave_()) return
+    const bigChanges = this.bigChangeMessage_()
+    if (bigChanges !== null && !(await this.confirmBigChanges_(bigChanges))) return
     this.isSaving_.set(true)
     try {
       const categoryKeys = await this.resolveCategories_()
@@ -429,6 +442,34 @@ export class ProductImportComponent {
     } finally {
       this.isSaving_.set(false)
     }
+  }
+
+  /**
+   * Plan 645: a price that moves by the business threshold or more, up or down, is saved only after one confirm
+   * that lists each such item (one line each). Null when no row needs it.
+   */
+  private bigChangeMessage_(): string | null {
+    const big = this.view_().filter((item) => item.status === 'update' && item.isBigChange)
+    if (big.length === 0) return null
+    const line = this.translation_.translate('import_confirm_big_change_row')
+    return big
+      .map((item) =>
+        line
+          .replace('{name}', item.match?.nameHebrew ?? item.row.name.trim())
+          .replace('{from}', formatMoney(item.oldPrice ?? 0))
+          .replace('{to}', formatMoney(item.row.price ?? 0))
+          .replace('{pct}', changeText(item.changePct ?? 0))
+      )
+      .join('\n')
+  }
+
+  /** True when the owner confirmed the listed price changes. */
+  private confirmBigChanges_(message: string): Promise<boolean> {
+    return this.confirmModal_.open(message, {
+      headerKey: 'import_confirm_big_change_title',
+      saveLabel: 'import_confirm_big_change_ok',
+      variant: 'warning'
+    })
   }
 
   /** The recipes whose cost changed once the new prices are loaded, biggest rise first. */
