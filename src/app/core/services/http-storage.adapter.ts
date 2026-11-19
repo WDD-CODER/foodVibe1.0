@@ -17,6 +17,7 @@ export const API = {
   diag: (path?: string) => (path ? `${API_ROOT}/diag/${path}` : `${API_ROOT}/diag`),
   business: (path?: string) => (path ? `${API_ROOT}/business/${path}` : `${API_ROOT}/business`),
   stats: (path: string) => `${API_ROOT}/stats/${path}`,
+  stock: (path: string) => `${API_ROOT}/stock/${path}`,
   productImport: (path: string) => `${API_ROOT}/product-import/${path}`,
   files: (id: string) => `${API_ROOT}/files/${id}`,
   events: `${API_ROOT}/events`,

@@ -1,0 +1,61 @@
+@layer components.stock-count {
+  :host {
+    display: block;
+  }
+
+  .stock-count__tabs {
+    display: flex;
+    grid-column: 1 / -1;
+    gap: var(--space-2);
+
+    padding-block: var(--space-2);
+  }
+
+  .stock-count__state {
+    grid-column: 1 / -1;
+
+    padding-block: var(--space-8);
+    padding-inline: var(--space-4);
+
+    text-align: center;
+  }
+
+  .stock-count__draft-note {
+    grid-column: 1 / -1;
+
+    margin-block: var(--space-2);
+    padding-inline: var(--space-4);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .stock-count__filter-title {
+    margin-block-end: var(--space-2);
+
+    font-weight: 600;
+  }
+
+  .stock-count__error-icon {
+    margin-inline-end: var(--space-1);
+
+    color: var(--color-danger);
+  }
+
+  .stock-count__row--error > * {
+    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  }
+
+  .stock-count__base {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  // Phone: name, amount and unit on the first line; the counted chip and the base amount on the second.
+  @media (max-width: 40rem) {
+    .stock-count__counted {
+      grid-column: span 2;
+    }
+  }
+}

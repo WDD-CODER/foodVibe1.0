@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   FileText,
+  ListChecks,
   LucideAngularModule,
   Settings,
   Stethoscope,
@@ -62,7 +63,8 @@ describe('TabChipsComponent', () => {
           CalendarDays,
           Settings,
           FileText,
-          Stethoscope
+          Stethoscope,
+          ListChecks
         })
       ],
       providers: [
@@ -75,6 +77,7 @@ describe('TabChipsComponent', () => {
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
           { path: 'inventory/invoices', component: BlankStubComponent },
+          { path: 'inventory/count', component: BlankStubComponent },
           { path: 'diagnosis', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
@@ -104,13 +107,13 @@ describe('TabChipsComponent', () => {
     expect(paths).toEqual(jasmine.arrayContaining(['/venues', '/dashboard?tab=metadata', '/suppliers', '/trash']))
   })
 
-  it('should render products, equipment then invoices chips on the inventory screens', async () => {
-    for (const url of ['/inventory/list', '/inventory/equipment', '/inventory/invoices']) {
+  it('should render products, equipment, invoices then stock count chips on the inventory screens', async () => {
+    for (const url of ['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/inventory/count']) {
       await router.navigateByUrl(url)
       fixture.detectChanges()
       const links = fixture.debugElement.queryAll(By.directive(RouterLink))
       const paths = links.map((de) => de.injector.get(RouterLink).href)
-      expect(paths).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices'])
+      expect(paths).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/inventory/count'])
     }
   })
 
@@ -124,14 +127,14 @@ describe('TabChipsComponent', () => {
         .map((de) => de.injector.get(RouterLink).href)
       expect(paths)
         .withContext(url)
-        .toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/diagnosis'])
+        .toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/diagnosis', '/inventory/count'])
     }
     modulesOn.set(ALL_MODULES)
     await router.navigateByUrl('/diagnosis')
     fixture.detectChanges()
     expect(
       fixture.debugElement.queryAll(By.directive(RouterLink)).map((de) => de.injector.get(RouterLink).href)
-    ).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices'])
+    ).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/inventory/count'])
   })
 
   const chipIds = (): string[] =>
