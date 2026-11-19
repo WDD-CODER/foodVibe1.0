@@ -48,7 +48,7 @@ unless the Human asked to be asked.
 
 Read `.claude/orchestrator-runs/<run>/status.json` and print: merged, parked (each with its reason), skipped (each with
 its reason), `stopReason` when set, the report (`.claude/orchestrator-runs/<run>.md`) and `calls.csv` beside the status
-file; every stop is in `status.json` `stops[]`. **The merge is the Human's yes, the work is yours.** Never hand the Human commands to type: end with one line, `merge it` ⏎. Only on that reply (or merges pre-approved): `gh pr create --base main --head orch/<run> --body-file .claude/orchestrator-runs/<run>.md`, wait for its checks, fix a failing one per `docs/agent/pr-check-fix-loop.md` (2 rounds, on the run branch), then `gh pr merge <n> --merge` (the merge guard checks the yes and the checks; no dialog). Never merge without that yes, never push to `main`.
+file; every stop is in `status.json` `stops[]`; each `make this a default?` line of the run notes with its `default yes <id>` ⏎ reply (`.claude/skills/product-defaults/SKILL.md`). **The merge is the Human's yes, the work is yours.** Never hand the Human commands to type: end with one line, `merge it` ⏎. Only on that reply (or merges pre-approved): `gh pr create --base main --head orch/<run> --body-file .claude/orchestrator-runs/<run>.md`, wait for its checks, fix a failing one per `docs/agent/pr-check-fix-loop.md` (2 rounds, on the run branch), then `gh pr merge <n> --merge` (the merge guard checks the yes and the checks; no dialog). Never merge without that yes, never push to `main`.
 
 ## 5. The cards — without being asked
 
