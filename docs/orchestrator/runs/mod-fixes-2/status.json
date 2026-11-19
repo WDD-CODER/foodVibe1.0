@@ -1,0 +1,307 @@
+{
+  "run": "mod-fixes-2",
+  "branch": "orch/mod-fixes-2",
+  "base": "main",
+  "startedAt": "2026-11-19T14:26:18.006Z",
+  "mainShaAtStart": "bfab383a858d06c952280d5a6d54555c067fdfd5",
+  "plans": {
+    "645": {
+      "nnn": "645",
+      "title": "Import shows the change in a chip and never adds a same-name supplier; the stock count sheet stays fast; the header always answers",
+      "branch": "feat/645-import-chip-same-supplier",
+      "state": "merged",
+      "round": 1,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T14:28:31.958Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-19T14:29:05.648Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T14:50:37.572Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens the stock count on his business, scrolls, searches, counts and leaves: nothing freezes. He"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T14:28:31.511Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T14:28:31.960Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T14:29:00.297Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T14:29:05.377Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:29:05.650Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:48:04.845Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:48:05.139Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:50:31.371Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:50:37.573Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:50:47.461Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T14:51:48.028Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 16.2,
+      "roundCauses": [
+        "round 1: builder blocked: Plan file plans/645-import-chip-same-supplier-confirm-stock-sheet-speed-header.plan.md is absent from origin/orch/mod-fixes-2 (it is only on main, bfab383a); the orchestrator must merge or cherry-pick it into the run branch and re-cut my branch."
+      ],
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 27.8,
+          "tokens": {
+            "input": 84250,
+            "output": 1400
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 1136.7,
+          "tokens": {
+            "input": 9585681,
+            "output": 54298
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.8,
+          "tokens": {
+            "input": 46720,
+            "output": 757
+          },
+          "exit": 0
+        }
+      ],
+      "escalations": [
+        {
+          "step": "round 1",
+          "check": "builder blocked: Plan file plans/645-import-chip-same-supplier-confirm-stock-sheet-speed-header.plan.md is absent from origin/orch/mod-fixes-2 (it is only on main, bfab383a); the orchestrator must mer"
+        }
+      ],
+      "replan": "no — The plan itself is fine; it was not carried into the run branch.",
+      "resetToBase": "aacec3750d0005f4935fcb5a70c2a5517fb12fd0",
+      "resetFrom": "aacec3750d0005f4935fcb5a70c2a5517fb12fd0",
+      "sha": "523f7b174345b43404c26de451615d30336191bc",
+      "uiCards": [
+        {
+          "card": "On `/inventory/count` with the demo business, the page answers a click within 1 second after load and after a",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 1
+        }
+      ],
+      "checkedHead": "bc99a75c0acb5faa284c49baa0e2fde7587c7bf6"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T14:28:31.207Z",
+      "plan": "645",
+      "text": "the folder foodVibe1.0-orch-mod-fixes-2-645 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T14:29:00.080Z",
+      "plan": "645",
+      "text": "builder left undone (round 0): All sub-tasks: the plan file is missing from the run branch, so the scope, sub-tasks and Done-when items cannot be read"
+    },
+    {
+      "at": "2026-11-19T14:29:05.093Z",
+      "plan": "645",
+      "text": "escalated to a fresh judgment-tier builder (round 1): builder blocked: Plan file plans/645-import-chip-same-supplier-confirm-stock-sheet-speed-header.plan.md is absent from origin/orch/mod-fixes-2 (it is only on main, bfab383a); the orchestrator must merge or cherry-pick it into the run branch and re-cut my branch."
+    },
+    {
+      "at": "2026-11-19T14:48:02.495Z",
+      "plan": "645",
+      "text": "builder left undone (round 1): [ui] On /inventory/count the page answers a click within 1 second after load and after a scroll to the end: written, not run"
+    },
+    {
+      "at": "2026-11-19T14:48:05.016Z",
+      "plan": "645",
+      "text": "[ui] On `/inventory/count` with the demo business, the page answers a click within 1 second after load and after a: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-19T14:50:57.357Z",
+      "plan": "645",
+      "text": "the folder foodVibe1.0-orch-merge-mod-fixes-2 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T14:55:45.208Z",
+      "text": "make this a default? after a save error, a refused row beyond the drawn rows is drawn too so its error mark shows — reverse: remove the two limit_ lines in onSaveError_ (trigger: destructive-action) — reply: default yes run-destructive-action"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 16.2,
+  "updatedAt": "2026-11-19T14:55:46.745Z",
+  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2620 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "stops": [
+    {
+      "at": "2026-11-19T14:55:44.922Z",
+      "reason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2620 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "645",
+      "type": "behaviour",
+      "text": "behaviour: the stock sheet uses 'show more' (50 rows at a time, the same page size as the inventory list) instead of CDK virtual scroll, because the inventory and recipe lists note that virtual scroll breaks the shared .c-list-row grid. A new search or filter starts again at 50 rows — reverse: drop the linkedSignal reset in stock-count.component.ts so the window keeps its size",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "645",
+      "type": "behaviour",
+      "text": "behaviour: after a save error, a refused row beyond the drawn rows is drawn too so its error mark shows — reverse: remove the two limit_ lines in onSaveError_",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "645",
+      "type": "behaviour",
+      "text": "behaviour: when the names match, an earlier 'add' pick on that row is ignored and update always wins — reverse: use row.supplierChoice ?? 'update' for same-name rows",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "645",
+      "type": "behaviour",
+      "text": "behaviour: the confirm uses the existing ConfirmModalService in its warning variant. To show one line per item, I appended .confirm-modal-message { white-space: pre-line } to src/styles.scss (an append-only file). No dictionary text has a line break, so other confirms look the same — reverse: remove that block at the end of src/styles.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "645",
+      "type": "seen",
+      "text": "seen: src/styles.scss:2646 — a comment says the app header is at z-index 100; it is now 160. styles.scss is append-only for this plan, so I did not edit the comment",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "645",
+      "type": "seen",
+      "text": "seen: src/app/pages/inventory/components/stock-count/stock-count.component.ts:3 — DatePipe is imported but the template never uses it (build warning TS-998113); this was already there",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "645",
+      "type": "seen",
+      "text": "seen: the plan's scope lists src/app/app.component.*, but the root component is at src/app/appRoot/app.component.*; A3 did not need it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T14:55:46.742Z",
+  "finalGate": {
+    "ok": false,
+    "command": "pnpm run test:ci",
+    "at": "2026-11-19T14:55:46.745Z",
+    "attempt": 1,
+    "blamed": [],
+    "failing": [
+      "TOTAL: 1 FAILED, 2620 SUCCESS"
+    ],
+    "noPlanFile": true
+  }
+}
