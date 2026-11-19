@@ -175,6 +175,8 @@ async function connectDb() {
   // The three readable collections are not cloneable, so the generic businessId index loop does not cover them.
   await db.collection('invoices').createIndex({ businessId: 1, createdAt: -1 }, { name: 'invoices_business_created' })
   await db.collection('diagnoses').createIndex({ businessId: 1, createdAt: -1 }, { name: 'diagnoses_business_created' })
+  // Plan 646: a user's alerts, newest first.
+  await db.collection('notifications').createIndex({ userId: 1, createdAt: -1 }, { name: 'notifications_user_created' })
   // C-STOCK: the on-hand read.
   await db.collection('stockCounts').createIndex({ businessId: 1, status: 1, countedAt: -1 }, { name: 'stock_counts_business_status_counted' })
   logger.debug({ event: 'mongo.index.ensured', index: 'modules' })

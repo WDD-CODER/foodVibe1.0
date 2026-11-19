@@ -2632,6 +2632,11 @@
     "stk_show_more": "להציג עוד",
     "import_confirm_big_change_title": "שינוי מחיר חריג",
     "import_confirm_big_change_row": "{name}: {from} ← {to} ({pct})",
-    "import_confirm_big_change_ok": "לשמור את המחירים"
+    "import_confirm_big_change_ok": "לשמור את המחירים",
+    "alerts_title": "התראות",
+    "alerts_empty": "אין התראות חדשות",
+    "alerts_mark_all": "סמן הכול כנקרא",
+    "alert_price_change": "{product}: {from} ← {to} ({pct}) אצל {supplier}",
+    "alerts_bell_tip": "התראות על שינויי מחיר חריגים"
   }
 }

@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { History, LucideAngularModule, X } from 'lucide-angular'
+import { BusinessService } from '@services/business.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { PlatformAdminService } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
@@ -14,6 +15,8 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
   let history: jasmine.Spy
   let erase: jasmine.Spy
   let confirmOpen: jasmine.Spy
+  let reload: jasmine.Spy
+  let activeBusinessId = 'other'
   let success: string[]
   let errors: string[]
   let service: PlatformBusinessDialogService
@@ -36,6 +39,7 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
       profilesDeleted: 0
     })
     confirmOpen = jasmine.createSpy('open').and.resolveTo(true)
+    reload = jasmine.createSpy('reload')
     TestBed.configureTestingModule({
       imports: [PlatformBusinessDialogComponent, LucideAngularModule.pick({ History, X })],
       providers: [
@@ -43,6 +47,7 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
           provide: PlatformAdminService,
           useValue: { updatePlatform: update, getPlatformHistory: history, eraseLearnedData: erase }
         },
+        { provide: BusinessService, useValue: { business_: () => ({ _id: activeBusinessId }), reload } },
         { provide: ConfirmModalService, useValue: { open: confirmOpen } },
         { provide: TranslationService, useValue: { translate: (k: string | undefined) => k ?? '' } },
         {
@@ -76,6 +81,26 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
     capInvalid_(): boolean
     save(): Promise<void>
   } => component as never
+
+  it('reloads the business after a save for the business the admin is in (plan 646)', async () => {
+    activeBusinessId = 'b1'
+    setup()
+    api().private_.set(true)
+    api().reason_.set('pilot')
+    await api().save()
+    expect(update).toHaveBeenCalled()
+    expect(reload).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not reload after a save for another business (plan 646)', async () => {
+    activeBusinessId = 'other'
+    setup()
+    api().private_.set(true)
+    api().reason_.set('pilot')
+    await api().save()
+    expect(update).toHaveBeenCalled()
+    expect(reload).not.toHaveBeenCalled()
+  })
 
   it('sends nothing without a reason of at least 3 characters', async () => {
     setup()

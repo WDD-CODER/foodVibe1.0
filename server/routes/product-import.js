@@ -43,6 +43,7 @@ const { invoiceApplyInputSchema } = require('../generated/schemas/entities/invoi
 const { invoiceResolveRequestSchema } = require('../generated/schemas/entities/invoice-alias.schema')
 const { learnFromApply, resolveNames } = require('../services/invoice-memory')
 const { getBusiness } = require('../services/business')
+const { createPriceChangeAlerts } = require('../services/notifications')
 const { BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 
 const router = Router()
@@ -129,6 +130,7 @@ router.post('/apply', verifyToken, (req, res, next) => {
     const seen = new Set()
     const outcomes = []
     const historyQueue = []
+    const alertQueue = []
 
     for (const [index, row] of rows.entries()) {
       const name = typeof row?.name === 'string' ? row.name.trim().replace(/\s+/g, ' ') : ''
@@ -157,6 +159,7 @@ router.post('/apply', verifyToken, (req, res, next) => {
         const entry = { productId: match._id, supplierId: rowSupplierKey, price }
         if (prevPrice !== undefined) { entry.prevPrice = prevPrice; entry.changePct = changePct(prevPrice, price) }
         historyQueue.push(entry)
+        if (entry.changePct !== undefined) alertQueue.push({ productId: match._id, productName: name, supplierId: rowSupplierKey, from: prevPrice, to: price, changePct: entry.changePct })
         outcomes[index] = { result: 'updated', productId: match._id, price, ...(rowSupplierKey ? { supplierId: rowSupplierKey } : {}) }
         updates.push({ updateOne: { filter: { _id: match._id, ...scopeFilter(req), ...LIVE }, update: { $set: { sources, updatedAt: now, _userModified: true } } } })
         continue
@@ -216,6 +219,19 @@ router.post('/apply', verifyToken, (req, res, next) => {
     } catch (err) {
       historyOk = false
       trailFailed('history', err)
+    }
+
+    // Plan 646: a big price change reaches the owner and the consultants; a failure is logged inside and never changes the answer.
+    if (alertQueue.length) {
+      try {
+        const business = await getBusiness(req.user.businessId)
+        const ids = [...new Set(alertQueue.map(a => a.supplierId).filter(Boolean))]
+        const found = ids.length ? await col('suppliers').find({ _id: { $in: ids }, ...scopeFilter(req) }, { projection: { nameHebrew: 1 } }).toArray() : []
+        const names = new Map(found.map(sup => [sup._id, sup.nameHebrew ?? '']))
+        await createPriceChangeAlerts(mongoose.connection.db, business, alertQueue.map(a => ({ ...a, supplierName: names.get(a.supplierId) ?? '' })), req.log)
+      } catch (err) {
+        req.log.error({ err, event: 'notifications.write_failed', rows: alertQueue.length })
+      }
     }
 
     let invoiceOk = false
