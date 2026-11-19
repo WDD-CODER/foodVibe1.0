@@ -107,6 +107,12 @@ export const routes: Routes = [
         canDeactivate: [pendingChangesGuard],
       },
       {
+        path: 'count',
+        loadComponent: () => import('./pages/inventory/components/stock-count/stock-count.component').then(m => m.StockCountComponent),
+        canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
+      },
+      {
         path: 'equipment/add',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
         resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },

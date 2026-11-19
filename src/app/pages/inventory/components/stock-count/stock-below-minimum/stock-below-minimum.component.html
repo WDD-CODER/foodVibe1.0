@@ -1,0 +1,31 @@
+@if (!hasFinalCount()) {
+  <div class="stock-below-min__state" data-testid="stk-no-final">
+    <app-empty-state messageKey="stk_no_final_count" icon="list-checks" />
+  </div>
+} @else if (rows().length === 0) {
+  <div class="stock-below-min__state" data-testid="stk-empty-below">
+    <app-empty-state messageKey="stk_empty_below_min" icon="check" />
+  </div>
+} @else {
+  <div class="stock-below-min__table" role="table">
+    <div class="stock-below-min__head" role="row">
+      <div class="c-grid-header-cell" role="columnheader">{{ 'product' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_on_hand' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_minimum' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_counted_on' | translatePipe }}</div>
+    </div>
+    @for (row of rows(); track row.product._id) {
+      <div class="stock-below-min__row c-list-row" role="row" data-testid="stk-below-row">
+        <div class="c-list-body-cell" role="cell">{{ row.product.nameHebrew }}</div>
+        <div class="c-list-body-cell" role="cell" dir="ltr">{{ shown(row.baseQuantity, row.product.baseUnit) }}</div>
+        <div class="c-list-body-cell" role="cell" dir="ltr">{{ shown(row.minStockLevel, row.product.baseUnit) }}</div>
+        <div class="c-list-body-cell" role="cell" dir="ltr">{{ row.countedAt | date: 'dd/MM/yyyy' }}</div>
+      </div>
+    }
+  </div>
+}
+@if (hasFinalCount() && uncounted() > 0) {
+  <p class="stock-below-min__note" data-testid="stk-uncounted-note">
+    {{ uncountedNote_() }}
+  </p>
+}

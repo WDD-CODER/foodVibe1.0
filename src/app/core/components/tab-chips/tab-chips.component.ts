@@ -66,7 +66,8 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'products', labelKey: 'products', icon: 'package', path: '/inventory/list' },
     { id: 'equipment', labelKey: 'equipment', icon: 'wrench', path: '/inventory/equipment' },
     { id: 'invoices', labelKey: 'invoices', icon: 'file-text', path: '/inventory/invoices' },
-    { id: 'diagnosis', labelKey: 'diagnosis', icon: 'stethoscope', path: '/diagnosis', modules: ['consultant_diag'] }
+    { id: 'diagnosis', labelKey: 'diagnosis', icon: 'stethoscope', path: '/diagnosis', modules: ['consultant_diag'] },
+    { id: 'stock-count', labelKey: 'stk_chip', icon: 'list-checks', path: '/inventory/count' }
   ],
   recipes: [
     { id: 'recipe-builder', labelKey: 'recipe_builder', icon: 'chef-hat', path: '/recipe-builder' },
