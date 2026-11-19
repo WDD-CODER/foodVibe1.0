@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.4.2"
+    "version": "3.5.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.4.2",
-  "commit": "d5ccfac597c6dbb2aa19fa85647e4356d4154b73",
+  "ref": "v3.5.0",
+  "commit": "bf394cfb98598efc88426f54768e5a91978b853d",
   "packs": [
     "angular",
     "node-express"
@@ -113,12 +113,12 @@
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "9bb3095fa8dbc0a958793ae655d230c2631dd1cbeee807fc59ddeb4a586af182",
+      "sha256": "61b284920fbe61b065c3e07febf5c82c22d2bf715bcf384c318f019478f2694f",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "d88c95e8a8b5ab5ae33c46aab550551deec49a3b780692a7e63adfb823bf44e1",
+      "sha256": "a6b4e32c97595772cb055ee866f9a6b8d2204cfdc05d6017fe498c0205498256",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
@@ -148,12 +148,12 @@
       "source": "core/.claude/commands/security.md"
     },
     ".claude/commands/ship.md": {
-      "sha256": "a5180c5b06fbe74057152e6d49f1e29caf732b9718527f0169d3ad965dbf9407",
+      "sha256": "8dd3d234ec78243562785117e2caca2b776df7d8cb3f35e7be79689a0b292f96",
       "kind": "managed",
       "source": "core/.claude/commands/ship.md"
     },
     ".claude/commands/skills.md": {
-      "sha256": "09cf549206ba1853b3cc4e8e55a2f88d45181ad2eea6eacb1707235cc74f0214",
+      "sha256": "44200aceca2f07b5f82f7d9893138e0df93e78a1564d4989a412c9080a64a497",
       "kind": "managed",
       "source": "core/.claude/commands/skills.md"
     },
@@ -226,6 +226,11 @@
       "sha256": "b548e5b0f6726537b2c98c34086fc4996ea499e30a514d0efd35a5188926d7d2",
       "kind": "managed",
       "source": "core/.claude/skills/github-sync/SKILL.md"
+    },
+    ".claude/skills/product-defaults/SKILL.md": {
+      "sha256": "f0dd8f32618c915eb5ee0af1b9f271105c0c86fdc60f6c81b46de4108e194959",
+      "kind": "managed",
+      "source": "core/.claude/skills/product-defaults/SKILL.md"
     },
     ".claude/skills/save-plan/SKILL.md": {
       "sha256": "7c01db1ee673ce96291c9ac5ff75a86be238bd4551dd31dd5d5aae8c06cc74f3",
@@ -433,7 +438,7 @@
       "source": "core/.github/workflows/brain-capture-reminder.yml"
     },
     ".github/workflows/security.yml": {
-      "sha256": "b7795c63ee9b35398503dc65f6811a44a9d1e8541dfc71476f2ae6454c05014a",
+      "sha256": "933e9af7045b9cd51f6d19131a0bf579a3e29fb953f4684f699f14f381668624",
       "kind": "managed",
       "source": "core/.github/workflows/security.yml"
     },
@@ -548,7 +553,7 @@
       "source": "core/docs/agent/brain-capture.md"
     },
     "docs/agent/decision-review.md": {
-      "sha256": "7fdcc84562fb8f5a1e0e291cb227d69067a906848eca766777c8c92b3f20834b",
+      "sha256": "23fe6c79b20b45941fbd5b8d807e9198789839ab99099cad9b982ef4f663fdf3",
       "kind": "managed",
       "source": "core/docs/agent/decision-review.md"
     },
@@ -623,7 +628,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "309ad5dd4451732ab3d99c0b1f22540f76264615d8457443a47b3e985518ac17",
+      "sha256": "384bc5e40164c91e53851978e6290d0c6d1927673f9ca49ca4336488baab2dcb",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -1048,7 +1053,7 @@
       "source": "core/scripts/lib/fe-command.mjs"
     },
     "scripts/lib/gate-select.mjs": {
-      "sha256": "0557a4a60c045cc409927d0a03dbf519fd95145da4659d6faf9f1167bcf0be2c",
+      "sha256": "0402a5e10318bc33d440a917f1a1f90adc1fc3538d30e510e94a5d6d8db75d66",
       "kind": "managed",
       "source": "core/scripts/lib/gate-select.mjs"
     },
@@ -1133,7 +1138,7 @@
       "source": "core/scripts/lib/proc.mjs"
     },
     "scripts/lib/product-defaults.mjs": {
-      "sha256": "c7d696886dbe135e1aebe9a0390190bb672e206ba4c894d16321e904682561a8",
+      "sha256": "27cb45b44b855eaac8971c944613b48a1aadd94953a9bad1eb07b14afc8535b1",
       "kind": "managed",
       "source": "core/scripts/lib/product-defaults.mjs"
     },
@@ -1268,7 +1273,7 @@
       "source": "core/scripts/pre-compact-reminder.sh"
     },
     "scripts/product-defaults.mjs": {
-      "sha256": "7cdaad9a73bd41577174a49a423c19b25bf65f11659685070ea9f51f47d032d4",
+      "sha256": "02a098cf9e5795e9414130ed1bccd8c3651d632b89c24f6b1586b8540837e6ac",
       "kind": "managed",
       "source": "core/scripts/product-defaults.mjs"
     },
@@ -1293,7 +1298,7 @@
       "source": "core/scripts/reuse-scan.mjs"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "bb87b6180ecccf1aaeda1a050bbbcd47a6ab5fddc59db4e73ce10285132ea32d",
+      "sha256": "d4c8d6c98251b22aef925e9faa6ecfbeb5266aed1ab9970ff725d8887bdbbc0b",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
@@ -1467,5 +1472,69 @@
       "npm audit (workflow scripts, report only)",
       "Semgrep OWASP Top Ten"
     ]
+  },
+  "kitCopies": {
+    ".claude/commands/commands.md": "66ee79291af577a0a9170f7c6f79b2ef357a66d375b29bfd3eed60257d9ea125",
+    ".claude/commands/fix.md": "67c15c0c6922125b123e7760a9ff2240070312e8d5f10d15e93c6a4ecf3567bc",
+    ".claude/references/prd-template.md": "3c05f0d67b20695755a94a44ac074183a858e0fdef99b0a54a3dba5695409732",
+    ".claude/settings.json": "4b4d0e0e8f51f5165f36fff207ba6fbfd2337ce6b2a197444f32ab2681d84823",
+    ".claude/skills/angularComponentStructure/SKILL.md": "f581029357ac6529d751ddcf000d9739d5108eea49674f08d011ac9db30a110f",
+    ".claude/skills/angularComponentStructure/evals/evals.json": "89d99840e8f006aefbb5ccc54712092354c0d6700218db370696edb42e4e71dd",
+    ".claude/skills/preflight/SKILL.md": "29e633ff547f99772acb8d37704727dbc0fdb48e37d4afac0539a6dd5bc3e05b",
+    ".claude/skills/save-plan/SKILL.md": "fb04ab24496588ae1ae0a9a145cd12b48d8dc9de5638608b0fed8ab3354b18e0",
+    ".claude/skills/techdebt/SKILL.md": "059df6041f98205c531e8fbe04ca23a41191951cfb7b5c158af994cd01a77f52",
+    ".cursor/rules/auth-and-logging-must-use-skill.mdc": "ea769c78d32aff10153c4058042ee49b7f3e8d42099e6e233a4c20117c419cad",
+    ".cursor/rules/security.mdc": "a6cae5ccae91d2e6edc94dd5d7f1bf60c2602de860a21e791cafaf4a25320ec1",
+    ".github/workflows/ci.yml": "b8c5df3fb2b8c8e3d04fee17c5bc9eac0fe3bc924183d5d25848614dd5eb188a",
+    ".gitignore": "a8edab5e475edea8e103799b0a83e0e3c2fd29001756cdd4d2ef6402a8937e17",
+    ".mcp.json": "e7c01fbc3d15b719bdbcbd1f4ae26ab38d65340e7e49c0bf53e9d209207eedd5",
+    ".nvmrc": "55075b5ec4e8b31936cbbc282b8829116d1fd48f2f2f1856dee592a6650700ce",
+    "AGENTS.md": "63a938f5a2cf7eab3bfa694da38a3ac5838f9adfc88a47141ddc15dfdef8b150",
+    "CLAUDE.md": "3101840353f1d783a31cd138ec29e74dcefe920dae371769f5fffc159ee80e4f",
+    "_shared/current-state.md": "29dc119a1fca2d9255056c15187dd23fb7990b54a3d3504a2c33196e8fc0674b",
+    "_shared/debt-baseline.json": "5d00bc6f73b586e76af9475537226618dd5336daebe970e9269640b16fe54333",
+    "_shared/product-defaults.md": "01186ea0b745c7d34721f55072b34d0b1f03938cc8e49f391d058c5c96d0aec9",
+    "_shared/tech-stack.md": "166dbec742ad26d14b948b202f550790d7c9920d7f4e07ec4c82bb66e1820d10",
+    "docs/agent/conventions.md": "6e49d4006e1bbfabc1c0533055c65d58ebb4d0bbe905b3c7607ba4d0935f746e",
+    "docs/agent/standards-backend.md": "4e0cff35e9c1638c11b4a5e8ee06279bf3640bf7fef6afd87fd506d0dfa497eb",
+    "docs/agent/standards-git.md": "0bc6194dfd50b856ad12e20473555bacc0c4f56bf85b744fafe1593e53a48216",
+    "docs/agent/standards-security.md": "f6a30973cba89b40ab16e2542e2a0147a2f382223f9a84ebb13182dcfc33ffb2",
+    "docs/agent/workflow-map.md": "248efb29af105b46f185ecc171b4ccac18d5557d7376df256593d5a7957a5aa0",
+    "docs/brain/agent-lessons/builder.md": "73bcbe105778217c7322d8d6a50bf40dbe396f0b17822d6fad871309712424fa",
+    "docs/brain/agent-lessons/check-plan.md": "4fdda319fde5a74a9dc084d239fa4e1fafffc435f2dfd5b4bea8fae28829794a",
+    "docs/brain/agent-lessons/planner.md": "c030d7136b0ca64d4ad32ba1c01d917d7d9a67b3cb29e01748da7ecef8c9147a",
+    "docs/brain/agent-lessons/readiness.md": "705eb6fe70775108f6d44807694b5c106963307af29921fb0e789274702465e7",
+    "docs/brain/agent-rules.md": "eb3d2492962b23bb201ba97aa5900d001ce78e20bf2c0af88558772788e6c762",
+    "docs/brain/component-families.md": "9df7dd68a9c8ac5e1d09d035045d9a3ef57ab61b4805d17ec9a3f3219017c0e3",
+    "docs/brain/decision-log.md": "f899bf422310edfdb1d53ef505c84f410e8888e23baf9156a659af3c763a528a",
+    "docs/brain/decisions/0001-lean-native-workflow.md": "695a92713a6a5d6ea54eb11cefedc360233e29887d577f9b1cd8ea0394d24294",
+    "docs/brain/decisions/0004-full-draft-brain-proposals.md": "432a748d8e68417fed133e4fc89a244c33aec9470c4fcca63d40fc2ccbbcfdb0",
+    "docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md": "1f5fb25f5816ef89cf73cd953e85c07dfba30462d78a1cd03a818d0d017e0661",
+    "docs/brain/decisions/0007-ship-fast-decouples-approval-from-classification.md": "156c24842cd2152fb9c3990153c1d7b1ad2f068e635fbfd795f4886aab5027e9",
+    "docs/brain/decisions/0009-planner-worker-worktrees.md": "96c155bd42e9dc1ea11d65bbf51c75f5ac33025f1e128c7fdebe69711052161b",
+    "docs/brain/decisions/0014-validation-gate-tiers.md": "4d65ee9392a6c5045a6abcfe19d335a5534d1c4529f66fbd727f6bbf594a545d",
+    "docs/brain/follow-ups.md": "642cf3547c996af1362df370aa991540b455e4dd1f58b7dd05d0c4599fe5c4d8",
+    "docs/brain/glossary.md": "a83a6c9907463a7bd9ae6780e1b14f9af2093ce26604f05c7c3526f5ca35cb68",
+    "docs/brain/gotchas.md": "8e1107c13c6695823130495e3b7cfe01e25755ba380355eec50e712a815b6e7f",
+    "docs/brain/gotchas/agent-workflow.md": "8cc35fe30f42d637ffe74cca2950f5349cf9f9bc5828d0aabcaa1a977027e6f7",
+    "docs/brain/gotchas/angular.md": "ef209d9559366858f53c613cbb627982f8c71f35191bba7aba8230104397ecab",
+    "docs/brain/gotchas/backend.md": "62d1b6f44b6b01bab44f9191aa6d7c205c6613e2908825ff7754a6f1f0e64e33",
+    "docs/brain/gotchas/ci.md": "80b56165158d3bfeac1f25b75f5b983001be9f2460270922f028330b6565603b",
+    "docs/brain/gotchas/git-workflow.md": "c4a6565a06cade626d809166b4560e93900bb3b120560ca23fef468f1c140f60",
+    "docs/brain/how-it-works.md": "4a4819e63c1a610a2ba9158bcd6d04f340bce2d32be7cda836958574d32f26c9",
+    "docs/brain/index.md": "229004a1d421ad7266972026930f8ac1be18b855c4d112adea32119b7d2373a1",
+    "docs/brain/invariants.md": "946a07c00eb8eb6e9113d8b1ec04fd4cd402d7175e4f483ea99b34054f383b0f",
+    "docs/brain/inventory.md": "233e6b4e2a8a41846ebd9853cd559100a1223871c7c79916b7dd6252cb836daa",
+    "docs/brain/patterns/atomic-bulk-replace-with-standalone-fallback.md": "4c9e1cdc01699b224031d3af5816d1d6690a4ed9ca39ba8fa603e4cc335db31f",
+    "docs/brain/patterns/defer-singleton-data-ensureLoaded.md": "e327c9cf1d34ce7cd5048488ca3dd6aed326c9a3d617c5bd5b3a5fb134379bd5",
+    "docs/brain/patterns/llm-backend-proxy.md": "65f74a3de25acdaadc43daeaac601dc0e6d555a096923d4049e0cf53c69bc870",
+    "docs/brain/projectbrief.md": "2fc42ab424502fddc73f9fb94a85bac60bd89a2211c304dd17a91401ca3c799c",
+    "docs/brain/run-log.md": "65067b3dc5e879fdf318360d39b7510c7cc202a7283b4667dfa8c23d26d3770b",
+    "docs/qa/styleqa-pages.json": "9fac18e5130b589f12adb10304bd6301a94f6109a3c0b49b0b5b9ad60819c882",
+    "docs/qa/styleqa-theme.md": "fbcf66ad61d3ab29a8b27dd8916a1e9a68ee806299601154898044d4ca3d21d2",
+    "scripts/kit-manifest-check.mjs": "5d47c9ffa7e856734565a42ed572c167764d6faa0796ea3485a99032bcd4a8ac",
+    "scripts/lib/registry-families.mjs": "48b4a51b771e92b2c978bfc2b6379c6210f8618aebf9480cc43923e42e2c6a5c",
+    "scripts/pre-commit-security-grep.mjs": "c36eb001a4facd1dadd336b963bdb9dd533e2f853f8904d119c5bd8d5365f2d1",
+    "scripts/preflight.mjs": "933b8f2b460cd590c34602d3ce788b6beff098482508455ec832daea9cb5d68d"
   }
 }

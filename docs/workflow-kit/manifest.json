@@ -10,6 +10,10 @@
       "reason": "per-session runtime history"
     },
     {
+      "path": "docs/brain/remarks/**",
+      "reason": "the Human's recorded remarks (product-defaults, one jsonl per branch and day): project history, never a workflow file"
+    },
+    {
       "path": ".claude/reports/**",
       "reason": "generated reports (project history)"
     },
@@ -4980,6 +4984,14 @@
       "params": [],
       "refs": [],
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.4.2): the merge guard behind guard.mjs merge. Classified project/stay like guard.mjs."
+    },
+    {
+      "path": ".claude/skills/product-defaults/SKILL.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.5.0): the /default skill. Classified project/stay like the other kit-synced files."
     },
     {
       "path": "scripts/lib/orch-folders.mjs",

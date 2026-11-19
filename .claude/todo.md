@@ -326,3 +326,26 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A5: Write the new rule where the program and the lawyer read it — C-LEARN and G4 in the map, the private and leaving lines of the pilot terms
 - [ ] A6: Record the new route and pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row
 - [ ] A7: Prove it in the running app and run every check — the two screen checks with fixtures, then the Done-when commands in order
+
+### Plan 640 — The equipment quick-edit popup sets the loading rule (per guests, minimum, maximum) (`plans/640-equipment-quick-edit-sets-the-loading-rule.plan.md`)
+- [ ] A1: Move the loading-rule logic into one shared helper the form and the popup both use — scalingRuleFrom, scalingRuleErrors, the form calls them, the util spec
+- [ ] A2: Let the owner set the rule in the list's quick-edit popup — the four controls, hydrate, save with the checks, the template block, the six spec cases
+- [ ] A3: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order
+
+### Plan 641 — Invoice import compares with the product's current price and asks which supplier to update; no duplicate suppliers (`plans/641-invoice-import-compares-with-the-current-price-and-asks-which-supplier.plan.md`)
+- [ ] A1: Compare an invoice price with the product's current price even when another supplier set it — previousPriceOf and its cases
+- [ ] A2: Let the server update an existing supplier's price on request instead of adding a supplier — targetSupplierId on the apply row, the check, the history and invoice line, the server cases
+- [ ] A3: Show the change and ask which supplier to update in the import preview — view_, the row choice, the apply body, the dictionary keys, the spec cases
+- [ ] A4: Pick the existing supplier instead of creating a second one with the same name — the name check in the add-supplier flow and its spec
+- [ ] A5: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order
+
+### Plan 642 — The platform's learning numbers say how many scans were saved and do not show a sure percent from one save (`plans/642-learning-accuracy-shows-how-many-were-saved-and-on-how-few.plan.md`)
+- [ ] A1: Count how many drafts were saved, abandoned and on how many saves the accuracy rests — the new fields and their server cases
+- [ ] A2: Show saved out of made and grey out an accuracy from fewer than five saves — the cells, the hint, the dictionary keys, the spec cases
+- [ ] A3: Run every check — the Done-when commands in order
+
+### Plan 643 — Small debts the Modules runs left: the settings type, the test icon list and the flaky export test (`plans/643-small-debts-from-the-modules-runs.plan.md`)
+- [ ] A1: Let the shared settings type carry the price-rise threshold — the type, the tab, the compile
+- [ ] A2: Put the four new icons in the shared test list — the list and the specs that copied them
+- [ ] A3: Make the export test independent of other tests' loads — the fix and the 20 runs
+- [ ] A4: Run every check — the Done-when commands in order

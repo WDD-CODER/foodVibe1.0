@@ -41,6 +41,7 @@ now are ignored by install and sync with a `NOTE orchestrator: <key> removed` li
 | `mergeChecks` | `build` | What the merge step runs on the merged tree: `build` = the project build plus the plan's scope check, `full` = the plan's whole check list on every merge |
 | `ciMirror` | `["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]` | CI commands (`npm run <script>`, `pnpm run <script>`, `node scripts/…` or `node tools/…`, no write flag) the final gate runs after the project checks and the kit manifest check. Install and sync print a `NOTE ci-mirror:` line for each CI command the final gate does not run; they never write the list |
 | `finalGate` | `full` | `full` (default) = the final gate runs every `ciMirror` command again; `ci` = it runs the project checks and only the suites the run changed and that have not passed on the run branch's files; CI runs the full set on the pull request. Install and sync print `NOTE final-gate: ci — <command> is not run by any CI workflow` for a `ciMirror` command no workflow runs. See "What a gate runs" |
+| `suiteTouches` | `[{"command":"pnpm run test:ci","touches":["src/**","public/**","shared/**","angular.json","tsconfig*.json","karma.conf.*"]},{"command":"pnpm run test:server","touches":["server/**","shared/**"]}]` | Optional `[{ "command", "touches": [globs] }]` for the test script (skipped when no changed file matches, reused from the cache) and a plan's own `[auto]` commands (reused only). Unset: both always run. See "What a gate runs" |
 | `prepare` | `[{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]` | Files the gate generates before the tests: `{ "missing": "<path>", "script": "<npm script>", "in": "<folder, default .>" }`, run as `node scripts/orch-state.mjs prepare …` first in every plan gate and the final gate, only when the path is absent |
 | `useSlots` | `false` | Whether a builder takes an idle `wt-N` slot before making its own folder. The scaffold says `false`: builders get folders of their own (one per plan in flight, at most `concurrency`), and the Human's slots stay free |
 | `reviewerMode` | `gate` | What a reviewer STOP does (default `gate`): `advisory` = a run note, the plan still merges; `gate` = one fix round with the findings, then the plan parks (and a review that could not run parks). `advisory` applies only to a plan whose `## Execution Mode` says `Reviewer: advisory` (any other plan is reviewed as `gate`), and never to a diff that touches a sensitive path (ship-prep's check, `security.sensitivePaths` included): that diff is always `gate`. `--reviewer-mode` overrides it for one run, within the same two rules |
@@ -182,8 +183,22 @@ the plan's diff (against the run branch) matches a glob. A diff that touches `ki
 - `GATE: cached <command> — passed on the same files in plan <NNN>` (same command, same content of every file its
   `touches` match, earlier in this run: `.claude/orchestrator-runs/<run>/gate-cache.json`)
 
+The test script and the plan's own `[auto]` commands get globs through the optional `orchestrator.suiteTouches`, a list of
+`{ "command", "touches": [globs] }` (unset: they always run). The test script named there is skipped like a `ciMirror`
+entry and reused from the cache; a plan's own command named there is never skipped by its globs (its Done-when must pass
+once on the plan's code), only reused when it passed on the same files. A glob list that is too narrow is the only way
+to miss a failure, and CI runs everything on the pull request. Example for a project with a browser and a server suite:
+
+```json
+"suiteTouches": [
+  { "command": "pnpm run test:ci", "touches": ["src/**", "public/**", "shared/**", "tsconfig*.json"] },
+  { "command": "pnpm run test:server", "touches": ["server/**", "shared/**"] }
+]
+```
+
 Nothing is skipped without a line. With `finalGate: ci` the final gate on the run branch runs the project checks and the
-suites the run's diff selects that are not cached for the run branch's files, prints `FINAL: ci — the full set runs in CI
+suites the run's diff selects that are not cached for the run branch's files (`suiteTouches` applies there too; `full`
+runs the test script and every suite), prints `FINAL: ci — the full set runs in CI
 on the pull request`, and a failure blames and fixes a plan as with `full`. CI runs the full set on Linux; the short
 final pass is the Windows run. Default: `full`, plain strings: today's behaviour. `/ship` is unchanged.
 
@@ -333,3 +348,11 @@ the reply format `decisions: ok` | `D<n> ✗ <what I'd choose>` (`docs/agent/dec
 models each call ran on; `## Flaky checks` when there are any; one validation list of what only the Human can do —
 the `[ui]` cards per page with their screenshots, plan drift, every `[human]` item of the merged plans and a decision
 per parked plan; and the PowerShell lines that open the pull request of the run branch.
+
+Product defaults in a run: before the first builder, the dry run and the start print for each plan
+`defaults: proposed <id> triggered — answer: default yes <id> | default no <id>` for a `proposed` default the plan
+triggers and its `## Defaults` does not answer (shown, not a refusal: a proposed default changes no check), so every
+question comes before the build and none mid-run. After the run, two or more builder `behaviour:` decisions that match
+the same trigger give one `make this a default? <rule> (trigger: <word>) — reply: default yes run-<word>` line in the
+run notes, for later plans only; `/orchestrate` step 4 shows it and the reply goes through
+`.claude/skills/product-defaults/SKILL.md`.

@@ -28,19 +28,22 @@ jobs:
       - name: Install server
         run: pnpm install --frozen-lockfile
         working-directory: server/
-      # --prod (pnpm's --omit=dev): devDependencies are build/dev-server tooling (Angular CLI, vite,
+      # --omit=dev: devDependencies are build/dev-server tooling (Angular CLI, vite,
       # webpack-dev-server, ...) that never ships to production, so their audit
       # findings are noise for this app's real attack surface — permanent, not a
       # workaround. --audit-level=critical stays until a framework major-version upgrade
       # (tracked in .claude/todo.md) clears the current framework-package high findings;
       # restore --audit-level=high on production deps after that migration lands.
-      - name: pnpm audit (root)
+      # The audit renders by project.packageManager: pnpm audit --prod reads pnpm-lock.yaml (npm audit fails
+      # without a package-lock.json). The step names stay "npm audit" so pr-check-fix-loop.md finds them.
+      - name: npm audit (root)
         run: pnpm audit --prod --audit-level critical
-      - name: pnpm audit (server)
+      - name: npm audit (server)
         run: pnpm audit --prod --audit-level critical
         working-directory: server/
       # The workflow scripts' own dependencies (scripts/package.json) are kit-managed: a kit release fixes
       # them, not the project, so their audit is reported (job summary + warning) and never fails the job.
+# KIT:required — a project override must keep this step
       - name: npm audit (workflow scripts, report only)
         if: hashFiles('scripts/package-lock.json') != ''
         shell: bash
@@ -60,6 +63,7 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           exit 0
+# KIT:required — a project override must keep this step
       - name: Semgrep OWASP Top Ten
         uses: semgrep/semgrep-action@v1
         with:

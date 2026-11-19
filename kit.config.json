@@ -64,6 +64,26 @@
       "node scripts/plan-ledger-check.mjs",
       "node scripts/breadcrumbs-check.mjs",
       "node scripts/ci-scope-check.mjs --checkout-branch"
+    ],
+    "suiteTouches": [
+      {
+        "command": "pnpm run test:ci",
+        "touches": [
+          "src/**",
+          "public/**",
+          "shared/**",
+          "angular.json",
+          "tsconfig*.json",
+          "karma.conf.*"
+        ]
+      },
+      {
+        "command": "pnpm run test:server",
+        "touches": [
+          "server/**",
+          "shared/**"
+        ]
+      }
     ]
   },
   "ci": {
@@ -108,7 +128,11 @@
     "browser": "gstack /browse"
   },
   "mods": {
-    "enabled": ["fleet", "guards", "ship-pilot"],
+    "enabled": [
+      "fleet",
+      "guards",
+      "ship-pilot"
+    ],
     "marketplaceRepo": "WDD-CODER/ai-workflow-kit"
   },
   "docs": {
@@ -147,10 +171,6 @@
     {
       "path": ".github/workflows/ci.yml",
       "reason": "pnpm: root pnpm install for build:schemas, server installed with pnpm --dir server; Angular build cache keyed on pnpm-lock.yaml"
-    },
-    {
-      "path": ".github/workflows/security.yml",
-      "reason": "pnpm: root and server production audit run pnpm audit --prod (kit v1.9.0 still renders npm audit, which needs a package-lock.json); drop this override when a kit release renders pnpm audit"
     },
     {
       "path": "docs/agent/standards-security.md",

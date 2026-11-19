@@ -23,6 +23,7 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 - **Planner-Worker workflow:** Planner (main, on `main`) writes/pushes `plans/*.plan.md` + `.claude/todo.md` directly; Workers use slots `wt-1`=4201/3001, `wt-2`=4202/3002, `wt-3`=4203/3003 (`main`=4200/3000), writing only inside their plan's `## Read-Write Scope`. Hotspots (`styles.scss`, `dictionary.json`, `app.routes.ts`) are append-only; Workers never write `.claude/todo.md`; `--no-verify` push to `main` is human-only. Rest: `docs/brain/decisions/0009-planner-worker-worktrees.md`.
 - **Architecture invariants (`docs/brain/invariants.md`):** every plan fills `## Architecture Impact`. Any question to the Human whose answer could break an invariant is asked as: INV-n · current rule · proposed change · who loses what. A yes becomes an ADR (supersede) plus an `Arch-approved:` line, never only a chat or commit note. Agents never write `Arch-approved:` without the Human's explicit `approve arch change INV-n` in chat. Blocking is bypassed only by that explicit Human approval.
 - **Architect + PM review (Planner):** the Planner is the Architect and the Product Manager. Every plan the Planner saves — written here or received from Claude.ai, Cursor or another agent — gets `/plan`'s `## Architect + PM review (always)` before it is saved, plus this project's own checks in `docs/agent/plan-checks.md` when that file exists. A received plan is reviewed, not silently rewritten.
+- **Unasked choices are logged as decisions:** a behaviour the plan does not describe gets the simplest option and a `behaviour:` decision; the Human grades them in one reply and wrong ones become rules in `docs/brain/agent-rules.md`. Every orchestrator role and the Planner read their own lessons and rules section; see `docs/agent/decision-review.md`.
 - **Worker blocked outside scope (including an unmet plan Prerequisite):** offer `approved: <path>` first — per the plan's Escalation Protocol — never conclude unprompted that "this needs its own plan." That costs a full Planner round trip; a one-line `approved:` reply does not.
 - **Open design plans** (Track `design`/`split`) live in `plans/design/`; other open plans in `plans/`; closed plans always go to `plans/<range>/`. Plan tools find them through `scripts/lib/plan-paths.mjs`: `docs/brain/decisions/0020-plans-design-folder.md`.
 - **Kit-owned files** (`docs/workflow-kit/kit-owned.json`): change them in `../ai-workflow-kit` (kit branch + PR), release a kit version, then run `kit-sync -Ref vX.Y.Z -Apply` on FoodVibe and `/ship` the result. A FoodVibe-only change is an `overrides` entry in `kit.config.json`. Steps: `docs/brain/decisions/0021-kit-changes-reach-foodvibe-by-release-and-kit-sync.md`.
@@ -31,6 +32,10 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 ## Compact instructions
 
 Preserve across `/compact`: current plan number + branch, open todos, and any failing checks.
+
+## Job validation (all agents)
+
+`[auto]` items self-verify by agent evidence (exact output/exit code/build pass — only the plan author tags `[auto]`); `[human]`/untagged need the Human. Counts: `done`/`verified`/`approved`, `/done`. Doesn't: `/ship` **Y**/`--yes` alone (commit consent), `thanks`/`ok`/silence/CI green alone. Full procedure: `docs/agent/job-validation.md`.
 
 ## Skill triggers
 
@@ -41,6 +46,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | New `pages/<x>/` or top-level subtree; files moved/deleted; before a PR that reshaped folders | `.claude/skills/breadcrumbs/SKILL.md` (+ `scripts/breadcrumbs-check.mjs`) |
 | Before any `.scss` / `.css` edit in `src/` | `.claude/skills/cssLayer/SKILL.md` |
 | Before creating any new component, util, pipe, service or `.c-*` class → find its family, climb the decision ladder | `docs/agent/standards-reuse.md` + `docs/brain/component-families.md` (`scripts/reuse-lint.mjs`) |
+| Building or changing UI or a shared util | `docs/brain/inventory.md`, then `docs/agent/standards-reuse.md` |
 | New dropdown / search picker, or changing one → follow the add-option rule (incl. keyboard) | `docs/agent/standards-domain.md` → Add-option rule |
 | Session start or after time away (once/day) | `.claude/skills/github-sync/SKILL.md` (gate: `scripts/github-sync-gate.mjs`) |
 | Before dev server / browser / database workflows | `.claude/skills/preflight/SKILL.md` (`node scripts/preflight.mjs`) |
@@ -58,6 +64,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | Session start on unfamiliar work | `docs/brain/index.md`, then the relevant sub-file |
 | Architectural choice | `docs/brain/invariants.md` first, then `docs/brain/decisions/`; supersede, never edit in place |
 | Surprising behavior / a trap cost time | `docs/brain/gotchas.md` first |
+| "make this a default", `default yes/no/on/off <id>`, `/default`, or the Human corrects a look/behaviour meant to hold everywhere | `.claude/skills/product-defaults/SKILL.md` |
 
 ## Standards index
 

@@ -54,7 +54,7 @@ Exactly one validation block, never none (`docs/agent/job-validation.md` → "Wh
 - **HOW TO VALIDATE** — `[human]` items and no answered cards: servers first (every page URL answers), then the cards per `job-validation.md` → Format and Card rules (one line when nothing is user-visible). **Y** alone does not validate them: wait for `done` / `verified` / `approved` (`done Y` answers both); `not yet` / `failed: <numbers>` → no commit; fix and re-show.
 - **VERIFIED BY AGENT** — every Done-when item `[auto]` or `[ui]`: `✓ [auto] {item} — {command} → {output}`, `✓ [ui] {item} — {its e2e test} → pass; screenshot {path}`. A `[ui]` item whose test fails or that no test checks becomes `⚠ [ui→human] {item} — {why}` with a card; plan drift is listed apart.
 
-A mix shows VALIDATED BY HUMAN with the unanswered cards beneath it.
+A mix shows VALIDATED BY HUMAN with the unanswered cards beneath it. Before the tree, record every correction the Human made in this job that is not recorded yet (`.claude/skills/product-defaults/SKILL.md` §1, `remark`); its `DEFAULTS: suggest` lines go under the tree with their `default yes <id>` / `default no <id>` replies.
 
 ### On approval (order is hard)
 **Y** (or `--yes`) is commit/push consent; it validates `[human]` items only together with a validation word for cards the Human was shown.

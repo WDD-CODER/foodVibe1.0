@@ -43,6 +43,7 @@ import { isSensitive } from './ship-prep.mjs'
 import { gateCommands, runGate, scopeCheck, scopeMarker } from './lib/plan-gate.mjs'
 import { selectGate, entryOf, readCache, writeCache, cacheFileOf } from './lib/gate-select.mjs'
 import { createLive } from './lib/run-live.mjs'
+import { readContract, unansweredProposed, repeatedBehaviours } from './lib/product-defaults.mjs'
 import { review, blocking, problemLine } from './lib/plan-review.mjs'
 import { mergePlan, orchState } from './lib/plan-merge.mjs'
 import { runOrder, unitsOf, afterPark, blockedBy } from './lib/run-order.mjs'
@@ -57,6 +58,9 @@ const PM = "pnpm" === 'pnpm' ? 'pnpm' : 'npm'
 const COMMANDS = { build: "build", lint: "lint", test: "test:ci", testCi: "" }
 const PREPARE = [{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]
 const CI_MIRROR = ["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]
+// [{ command, touches }]: the test script and plan-own [auto] commands a gate may skip (test script) or reuse (both)
+const SUITE_TOUCHES = [{"command":"pnpm run test:ci","touches":["src/**","public/**","shared/**","angular.json","tsconfig*.json","karma.conf.*"]},{"command":"pnpm run test:server","touches":["server/**","shared/**"]}]
+const SUITES = Array.isArray(SUITE_TOUCHES) ? SUITE_TOUCHES : []
 // full (default) = the final gate runs everything again; ci = it runs only the suites the run changed and not yet passed, CI runs the full set
 const FINAL_GATE = "full" === 'ci' ? 'ci' : 'full'
 const SERVER_ROOT = 'server/'
@@ -447,6 +451,10 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const decided = [...decisionProblems(text, statuses), ...productionProblems(nnn, text), ...opt.problems]
   problems.push(...decided)
   lines.push(`decisions: ${decided.length ? `${decided.length} problem(s)` : 'ok'}${opt.notes.length ? ` · ${opt.notes.join(' · ')}` : ''}`)
+  // A `proposed` product default the plan triggers is a question for the Human before any builder starts, never mid-run.
+  // Shown, not a refusal: the seed's starter defaults are all `proposed`, and a proposed default changes no check.
+  const unanswered = unansweredProposed(text, readContract(ROOT))
+  lines.push(`defaults: ${unanswered.length ? unanswered.join(' · ') : 'ok'}`)
   for (const mode of ['deps', 'arch', 'tags']) {
     const r = node('scope-check.mjs', [`--${mode}`, `--plan=${path}`])
     const line = lastLine(r.out) || `exit ${r.status}`
@@ -514,7 +522,7 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const checks = gateCommands({ ...gateOpts, ciMirror: mirror, extra: own })
   // `always` = what runs whatever the diff changed (the project checks and the plan's own [auto] commands); `mirror` = what the diff picks from.
   const always = [...gateCommands({ ...gateOpts, extra: own })]
-  return { nnn, path, mirror, always, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
+  return { nnn, path, mirror, always, own, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
 }
 
 /**
@@ -1402,8 +1410,9 @@ async function main() {
         if (FINAL_GATE === 'ci') {
           // The full set runs in CI on the pull request; here only the suites the run changed and that have not passed on this tree.
           const changed = git(mergeFolder, 'diff', '--name-only', '--no-renames', `origin/${MAIN}...HEAD`).out.split('\n').map((f) => f.trim()).filter(Boolean)
-          sel = selectGate({ commands: finalMirror, changed, ownCommands: finalBase, testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, RUN)), root: mergeFolder })
-          commands = [...new Set([...finalBase, ...sel.run])]
+          sel = selectGate({ commands: finalMirror, changed, ownCommands: finalBase, testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, RUN)), root: mergeFolder, suites: SUITES, testCommand: testCommandOf() })
+          const left = new Set(sel.skipped)
+          commands = [...new Set([...finalBase.filter((c) => !left.has(c)), ...sel.run])]
           for (const line of sel.lines) say(`  ${line}`)
           say('FINAL: ci — the full set runs in CI on the pull request')
           note('FINAL: ci — the full set runs in CI on the pull request')
@@ -1471,6 +1480,13 @@ async function main() {
   // ---- decisions, then the report (orch-state.mjs finish writes it, unchanged) ----
   const rows = decisions.map((d, i) => ({ plan: d.plan, id: `D${priorTop + i + 1}`, text: d.text }))
   if (rows.length) state('decisions', { run: RUN, b64: b64(JSON.stringify(rows)) })
+  // Behaviours the builders kept deciding the same way: a suggestion in the run notes for later plans (this run's
+  // plans never change). Nothing is written to the main folder; the Human's `default yes` goes through the skill.
+  for (const s of repeatedBehaviours(decisions.map((d) => d.text), (readContract(ROOT)?.entries ?? []).map((e) => e.id))) {
+    const line = `make this a default? ${s.rule} (trigger: ${s.trigger}) — reply: default yes ${s.tag}`
+    say(`  ${line}`)
+    note(line)
+  }
   const fin = state('finish', {
     run: RUN, 'final-gate': finalGate ? (finalGate.ok ? 'ok' : 'failed') : 'none',
     ...(finalGate && !finalGate.ok && finalGate.command ? { 'final-gate-command-b64': b64(finalGate.command), 'final-gate-tail-b64': b64([...failingLines(finalGate.tail), String(finalGate.tail).slice(-2000)].join('\n')), ...(finalGate.noPlanFile ? { 'final-gate-no-plan-file': 'yes' } : {}) } : {}),
@@ -1515,6 +1531,11 @@ export function builderSettings(runDir, { write = true } = {}) {
 function testScriptBody() {
   return String(npmScripts()[COMMANDS.testCi || COMMANDS.test] ?? '')
 }
+/** The gate's test command as gateCommands writes it (`<pm> run <testCi or test>`), or ''. */
+function testCommandOf() {
+  const s = COMMANDS.testCi || COMMANDS.test
+  return typeof s === 'string' && s ? `${PM} run ${s}` : ''
+}
 /**
  * A plan's gate list for the diff in `folder`: the project checks and the plan's own commands always, the ciMirror suites
  * its diff touches (a suite that npm run test already runs, or that passed on the same files earlier in this run, is
@@ -1522,9 +1543,9 @@ function testScriptBody() {
  */
 function selectedChecks(l, folder, run, runBranch) {
   const mirror = Array.isArray(l.mirror) ? l.mirror : []
-  if (!mirror.length) return { checks: l.checks, lines: [], keys: {} }
+  if (!mirror.length && !SUITES.length) return { checks: l.checks, lines: [], keys: {} }
   const changed = git(folder, 'diff', '--name-only', '--no-renames', `origin/${runBranch}...HEAD`).out.split('\n').map((f) => f.trim()).filter(Boolean)
-  const sel = selectGate({ commands: mirror, changed, ownCommands: l.always ?? [], testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, run)), root: folder })
+  const sel = selectGate({ commands: mirror, changed, ownCommands: l.always ?? [], testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, run)), root: folder, suites: SUITES, testCommand: testCommandOf(), planOwn: l.own ?? [] })
   const drop = new Set(sel.skipped)
   return { checks: l.checks.filter((c) => !drop.has(c)), lines: sel.lines, keys: sel.keys }
 }
