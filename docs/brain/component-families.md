@@ -543,3 +543,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/components/acting-banner/` (`app-acting-banner`, rendered by the app shell right after the header on every non-bare screen) — the persistent bar that names the business a consultant or the platform admin is acting in, with one button back to their own (`UserService.switchBusiness(null)`); hidden at home and in print.
 - When: a persistent notice with an action must stay on every screen; a toast disappears and `app-front-desk-status-banner` has no action.
 - Known copies: none.
+
+### learned-data-erase — erase what the platform learned from one business
+
+- Status: stable (plan 639)
+- Use: `server/services/business.js` · `eraseLearnedData(db, businessId)` (called by the admin erase route and by the business delete when asked); client `PlatformAdminService.eraseLearnedData`.
+- When: learned data of a business must be removed; going private never erases (it only stops learning).
+- Known copies: none.

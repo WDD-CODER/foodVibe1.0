@@ -162,6 +162,10 @@ append the path to the scope block above and retry.
   `PlatformLogisticsItemsComponent` uses it; the reason field goes in the dialog itself, beside the button, so the
   popup only confirms.
 
+- `.pbd-erase` and `.pbd-erase__box` in `platform-dashboard.page.scss` — family: none — rung: 4 — why: a danger-tinted
+  ghost button and a one-column stack for the erase reason field inside the platform dialog; page-local layout only, no
+  shared family fits.
+
 ## Step 0 — Reality Check
 
 Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits
