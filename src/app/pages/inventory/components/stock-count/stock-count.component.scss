@@ -3,6 +3,15 @@
     display: block;
   }
 
+  // Plan 648: date, "save draft" and "finish count" are one child of the header's action cell, so none covers another.
+  .stock-count__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+  }
+
   .stock-count__tabs {
     display: flex;
     grid-column: 1 / -1;

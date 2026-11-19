@@ -17,7 +17,7 @@ const {
   STOCK_EXTRACT_SYSTEM_PROMPT, unitList, userPart, cleanStockLines,
 } = require('../../utils/stock-extract');
 const {
-  stockExtractRequestSchema, STOCK_EXTRACT_MAX_PRODUCTS,
+  stockExtractRequestSchema,
 } = require('../../generated/schemas/ai-stock-extract.schema');
 
 const router = Router();
@@ -38,11 +38,7 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
     const db = mongoose.connection.db;
     const found = await db.collection('products')
       .find({ ...scopeFilter(req), ...LIVE }, { projection: { nameHebrew: 1, baseUnit: 1, purchaseOptions: 1 } })
-      .limit(STOCK_EXTRACT_MAX_PRODUCTS + 1)
       .toArray();
-    if (found.length > STOCK_EXTRACT_MAX_PRODUCTS) {
-      return res.status(413).json({ error: 'TOO_MANY_PRODUCTS', max: STOCK_EXTRACT_MAX_PRODUCTS });
-    }
     if (found.length === 0) return res.json({ draftId: null, lines: [], unmatched: [] });
     const products = found.sort((a, b) =>
       String(a.nameHebrew ?? '').localeCompare(String(b.nameHebrew ?? '')) || String(a._id).localeCompare(String(b._id)));
@@ -56,7 +52,7 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
     const call = await callGemini({
       body: {
         system_instruction: { parts: [{ text: STOCK_EXTRACT_SYSTEM_PROMPT }] },
-        contents: [{ role: 'user', parts: [{ text: userPart(products, units, text) }] }],
+        contents: [{ role: 'user', parts: [{ text: userPart(units, text) }] }],
         generationConfig: { temperature: 0, maxOutputTokens: 8192 },
       },
       timeoutMs: 30000,

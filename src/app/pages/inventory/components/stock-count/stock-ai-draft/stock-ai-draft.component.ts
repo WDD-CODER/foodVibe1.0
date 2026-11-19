@@ -110,10 +110,6 @@ export class StockAiDraftComponent {
       this.userMsg_.onSetErrorMsg(this.translation_.translate('ai_model_exhausted_prompt'))
       return
     }
-    if (status === 413) {
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('stk_ai_too_many_products'))
-      return
-    }
     this.logging_.error({
       event: 'stock.extract.failed',
       message: 'Stock count extract failed',

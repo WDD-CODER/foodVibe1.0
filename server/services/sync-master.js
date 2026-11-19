@@ -369,7 +369,22 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
       logger.info({ event: 'sync.master.clones_skipped', type: 'products', count: productNameCollisions, reason: 'name collision' });
     }
 
-    if (toInsert.length > 0) {
+    if (toInsert.length > 0 && entityType === 'products') {
+      // Plan 648: an upsert keyed by { businessId, _masterId } (unique partial index, server/db.js) — two syncs at
+      // once cannot both insert a copy. A duplicate-key error means "already there": ignored.
+      const ops = toInsert.map(({ businessId: b, _masterId: m, ...doc }) => ({
+        updateOne: { filter: { businessId: b, _masterId: m }, update: { $setOnInsert: doc }, upsert: true },
+      }));
+      try {
+        const res = await col.bulkWrite(ops, { ordered: false });
+        totalInserted += res.upsertedCount ?? 0;
+      } catch (err) {
+        const errors = err?.writeErrors ?? [];
+        const onlyDuplicates = errors.length > 0 && errors.every(e => (e.code ?? e.err?.code) === 11000);
+        if (!onlyDuplicates) throw err;
+        totalInserted += err.result?.upsertedCount ?? err.result?.nUpserted ?? 0;
+      }
+    } else if (toInsert.length > 0) {
       await col.insertMany(toInsert, { ordered: false });
       totalInserted += toInsert.length;
     }

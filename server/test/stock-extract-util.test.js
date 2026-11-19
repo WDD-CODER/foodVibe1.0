@@ -1,5 +1,5 @@
 'use strict'
-/** Plan 637 - the pure rules of the stock extract: numbered lists, cleaning of the model's answer, the kept ratio. */
+/** Plans 637 and 648 - the pure rules of the stock extract: unit list, the server name match, the kept ratio. */
 const {
   STOCK_EXTRACT_SYSTEM_PROMPT, unitList, userPart, cleanStockLines, stockKeptRatio,
 } = require('../utils/stock-extract')
@@ -10,8 +10,8 @@ const flour = { _id: 'flour', nameHebrew: 'קמח', baseUnit: 'kg', purchaseOpti
 const tomato = { _id: 'tomato', nameHebrew: 'עגבניות', baseUnit: 'kg', purchaseOptions: [{ unitSymbol: 'crate', conversionRate: 10 }] }
 const products = [flour, tomato]
 const units = ['kg', 'liter', 'crate']
-const clean = lines => cleanStockLines({ lines }, products, units, rates)
-const entry = (p, quantity, u, spoken = 'x') => ({ p, spoken, quantity, u })
+const clean = (lines, list = products) => cleanStockLines({ lines }, list, units, rates)
+const entry = (spoken, quantity, unit) => ({ spoken, quantity, unit })
 
 describe('unitList and userPart', () => {
   it('lists system units, term keys and pack units once each', () => {
@@ -23,54 +23,82 @@ describe('unitList and userPart', () => {
     expect(unitList([], Array.from({ length: 500 }, (_, i) => `u${i}`))).toHaveLength(200)
   })
 
-  it('numbers both lists from 0 and puts the count last', () => {
-    const text = userPart(products, ['kg', 'crate'], 'קמח 4')
-    expect(text).toBe('PRODUCTS:\n0. "קמח" [kg]\n1. "עגבניות" [kg]\n\nUNITS:\n0. "kg"\n1. "crate"\n\nCOUNT:\nקמח 4')
+  it('numbers the units from 0, puts the count last and carries no product name', () => {
+    const text = userPart(['kg', 'crate'], 'קמח 4')
+    expect(text).toBe('UNITS:\n0. "kg"\n1. "crate"\n\nCOUNT:\nקמח 4')
     expect(STOCK_EXTRACT_SYSTEM_PROMPT).not.toContain('קמח 4')
+    expect(STOCK_EXTRACT_SYSTEM_PROMPT).not.toContain('PRODUCTS')
   })
 })
 
 describe('cleanStockLines', () => {
-  it('keeps a good line and defaults the unit to the base unit', () => {
-    expect(clean([entry(0, 4, 0), entry(1, 3, null)])).toEqual({
+  it('matches the spoken name to a product and defaults the unit to the base unit', () => {
+    expect(clean([entry('קמח', 4, 'kg'), entry('עגבניות', 3, null)])).toEqual({
       lines: [{ productId: 'flour', quantity: 4, unit: 'kg' }, { productId: 'tomato', quantity: 3, unit: 'kg' }],
       unmatched: [],
     })
   })
 
-  it('sends a unit the product cannot convert to unmatched', () => {
-    expect(clean([entry(0, 2, 1, 'קמח')])).toEqual({ lines: [], unmatched: [{ spoken: 'קמח', quantity: 2, unit: 'liter' }] })
+  it('matches ignoring case and spaces, then by contained name, then by shared words', () => {
+    const list = [
+      { _id: 'a', nameHebrew: 'Olive Oil', baseUnit: 'liter', purchaseOptions: [] },
+      { _id: 'b', nameHebrew: 'שמן זית מעולה', baseUnit: 'liter', purchaseOptions: [] },
+      { _id: 'c', nameHebrew: 'פלפל אדום חריף', baseUnit: 'kg', purchaseOptions: [] },
+    ]
+    expect(clean([entry('  olive   OIL ', 1, null)], list).lines).toEqual([{ productId: 'a', quantity: 1, unit: 'liter' }])
+    expect(clean([entry('שמן זית', 2, null)], list).lines).toEqual([{ productId: 'b', quantity: 2, unit: 'liter' }])
+    expect(clean([entry('פלפל חריף', 3, null)], list).lines).toEqual([{ productId: 'c', quantity: 3, unit: 'kg' }])
   })
 
-  it('sends a bad position, a null position and a missing number to unmatched', () => {
-    const out = clean([entry(99, 1, 0, 'a'), entry(null, 2, null, 'b'), entry(0, null, 0, 'c'), entry(-1, 1, 7, 'd')])
+  it('a name that matches two products is unmatched with both as candidates (at most 5)', () => {
+    const two = [
+      { _id: 'w', nameHebrew: 'קמח לבן', baseUnit: 'kg', purchaseOptions: [] },
+      { _id: 'x', nameHebrew: 'קמח מלא', baseUnit: 'kg', purchaseOptions: [] },
+    ]
+    expect(clean([entry('קמח', 4, 'kg')], two)).toEqual({
+      lines: [],
+      unmatched: [{ spoken: 'קמח', quantity: 4, unit: 'kg', candidates: [
+        { productId: 'w', nameHebrew: 'קמח לבן' }, { productId: 'x', nameHebrew: 'קמח מלא' },
+      ] }],
+    })
+    const many = Array.from({ length: 9 }, (_, i) => ({ _id: `p${i}`, nameHebrew: `קמח ${i}`, baseUnit: 'kg', purchaseOptions: [] }))
+    expect(clean([entry('קמח', 1, null)], many).unmatched[0].candidates).toHaveLength(5)
+  })
+
+  it('sends a unit the product cannot convert to unmatched', () => {
+    expect(clean([entry('קמח', 2, 'liter')])).toEqual({ lines: [], unmatched: [{ spoken: 'קמח', quantity: 2, unit: 'liter' }] })
+  })
+
+  it('sends an unknown name and a missing number to unmatched; a unit not on the list is dropped', () => {
+    const out = clean([entry('בננות', 1, 'kg'), entry('חמוצים', 2, null), entry('קמח', null, 'kg'), entry('בננות', 1, 'bucket')])
     expect(out.lines).toEqual([])
     expect(out.unmatched).toEqual([
-      { spoken: 'a', quantity: 1, unit: 'kg' }, { spoken: 'b', quantity: 2 }, { spoken: 'c' }, { spoken: 'd', quantity: 1 },
+      { spoken: 'בננות', quantity: 1, unit: 'kg' }, { spoken: 'חמוצים', quantity: 2 }, { spoken: 'קמח' }, { spoken: 'בננות', quantity: 1 },
     ])
   })
 
-  it('skips an unmatched entry with no spoken words, and cuts spoken at 80 characters', () => {
-    const out = clean([entry(null, 1, null, '  '), entry(null, 1, null, 'y'.repeat(100))])
+  it('never matches an empty name; skips an entry with no spoken words, and cuts spoken at 80 characters', () => {
+    const out = clean([entry('  ', 1, null), entry('y'.repeat(100), 1, null)])
+    expect(out.lines).toEqual([])
     expect(out.unmatched).toHaveLength(1)
     expect(out.unmatched[0].spoken).toHaveLength(80)
   })
 
   it('refuses a quantity that is negative or over 1,000,000', () => {
-    expect(clean([entry(0, -1, 0, 'a'), entry(1, 1_000_001, 0, 'b')]).unmatched).toEqual([{ spoken: 'a' }, { spoken: 'b' }])
-    expect(clean([entry(0, 0, 0)]).lines).toEqual([{ productId: 'flour', quantity: 0, unit: 'kg' }])
+    expect(clean([entry('קמח', -1, 'kg'), entry('עגבניות', 1_000_001, 'kg')]).unmatched).toEqual([{ spoken: 'קמח' }, { spoken: 'עגבניות' }])
+    expect(clean([entry('קמח', 0, 'kg')]).lines).toEqual([{ productId: 'flour', quantity: 0, unit: 'kg' }])
   })
 
   it('sums the same product in the same unit; another unit goes to unmatched', () => {
-    const out = clean([entry(0, 1.1, 0), entry(0, 2.2, 0), entry(1, 1, 2, 'c1'), entry(1, 5, 0, 'c2')])
+    const out = clean([entry('קמח', 1.1, 'kg'), entry('קמח', 2.2, 'kg'), entry('עגבניות', 1, 'crate'), entry('עגבניות', 5, 'kg')])
     expect(out.lines).toEqual([{ productId: 'flour', quantity: 3.3, unit: 'kg' }, { productId: 'tomato', quantity: 1, unit: 'crate' }])
-    expect(out.unmatched).toEqual([{ spoken: 'c2', quantity: 5, unit: 'kg' }])
+    expect(out.unmatched).toEqual([{ spoken: 'עגבניות', quantity: 5, unit: 'kg' }])
   })
 
   it('returns null for an answer that is not { lines: [...] } and reads only the first 800 entries', () => {
     expect(cleanStockLines({ nope: 1 }, products, units, rates)).toBeNull()
     expect(cleanStockLines(null, products, units, rates)).toBeNull()
-    const many = Array.from({ length: 900 }, () => entry(null, null, null, 'z'))
+    const many = Array.from({ length: 900 }, () => entry('zzz', null, null))
     expect(clean(many).unmatched).toHaveLength(200)
     expect(clean([{}]).unmatched).toEqual([])
   })

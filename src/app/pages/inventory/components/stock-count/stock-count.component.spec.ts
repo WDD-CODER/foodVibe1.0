@@ -82,6 +82,16 @@ describe('StockCountComponent', () => {
     expect(chipOf(rows()[0]).checked).toBeTrue()
   })
 
+  it('keeps the date, save draft and finish count in one actions wrapper (plan 648)', async () => {
+    await setup()
+    const wrapper = el().querySelector<HTMLElement>('.stock-count__actions')!
+    expect(wrapper).not.toBeNull()
+    expect(wrapper.querySelector('app-date-field')).not.toBeNull()
+    expect(wrapper.contains(btn('stk-save-draft'))).toBeTrue()
+    expect(wrapper.contains(btn('stk-finalize'))).toBeTrue()
+    expect(el().querySelectorAll('.stock-count__actions').length).toBe(1)
+  })
+
   it('saves only counted rows, then uses PUT (same id) for the second save', async () => {
     await setup()
     comp().setAmount(product('a', 'אורז'), 3)
