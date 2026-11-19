@@ -16,12 +16,15 @@ describe('DataExportCardComponent (plan 557)', () => {
   let requestRows: unknown[]
   let errors: string[]
   let downloads: { name: string; text: string }[]
+  let blobReads: Promise<void>[]
 
   async function setup(): Promise<HTMLElement> {
     errors = []
     downloads = []
+    blobReads = []
     spyOn(URL, 'createObjectURL').and.callFake((blob: Blob | MediaSource) => {
-      void (blob as Blob).text().then((text) => (downloads[downloads.length - 1].text = text))
+      // The anchor click (which pushes the download) comes after this call, so look the entry up once the text is read.
+      blobReads.push((blob as Blob).text().then((text) => void (downloads[downloads.length - 1].text = text)))
       return 'blob:x'
     })
     spyOn(URL, 'revokeObjectURL')
@@ -57,6 +60,8 @@ describe('DataExportCardComponent (plan 557)', () => {
   const click = async (el: HTMLElement, id: string): Promise<void> => {
     ;(el.querySelector(`[data-testid="${id}"]`) as HTMLButtonElement).click()
     await new Promise((r) => setTimeout(r, 20))
+    // Blob.text() settles on its own clock; wait for every read so assertions never see an empty file.
+    await Promise.all(blobReads)
   }
 
   beforeEach(() => {
