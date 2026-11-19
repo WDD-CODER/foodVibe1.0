@@ -1,0 +1,187 @@
+{
+  "run": "mod-voice-match",
+  "branch": "orch/mod-voice-match",
+  "base": "main",
+  "startedAt": "2026-11-19T21:29:42.954Z",
+  "mainShaAtStart": "a686da9ac23a692f72533f193bd6e9b3f1ff8b11",
+  "plans": {
+    "650": {
+      "nnn": "650",
+      "title": "Voice or text count fills the existing product rows: the best match, a choice when several fit, never a silent new item",
+      "branch": "feat/650-voice-count-picks-the",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T21:32:49.827Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T22:21:36.427Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T22:28:31.342Z"
+        }
+      },
+      "humanItems": [
+        "Dandan says «שלושה ארגזים עגבניות ושני קילו בצל»: the tomato row gets 3 crates; onions show the onion"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T21:32:49.299Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T21:32:49.829Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T22:12:01.193Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T22:21:35.947Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T22:21:36.201Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T22:21:36.430Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T22:24:34.255Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T22:28:23.156Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T22:28:31.344Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T22:28:51.215Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T22:30:05.704Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 11.3,
+      "sha": "a48026b0772e026f10cb24061bd901f477edf662",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2348.4,
+          "tokens": {
+            "input": 139506,
+            "output": 133
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 174.2,
+          "tokens": {
+            "input": 73903,
+            "output": 1026
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.1,
+          "tokens": {
+            "input": 90638,
+            "output": 1484
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci"
+      ],
+      "checkedHead": "427d8e449bac297b31a52bebd36707029020bc25"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T21:32:48.764Z",
+      "plan": "650",
+      "text": "the folder foodVibe1.0-orch-mod-voice-match-650 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T22:24:30.877Z",
+      "plan": "650",
+      "text": "builder left undone (round 1): Not rerun: the other CHECKS entries (build, lint, test:server, kit and scope checks). Only test:ci was rerun after the finding."
+    },
+    {
+      "at": "2026-11-19T22:24:37.733Z",
+      "plan": "650",
+      "text": "GATE: cached pnpm run test:server — passed on the same files in plan 650"
+    },
+    {
+      "at": "2026-11-19T22:29:02.853Z",
+      "plan": "650",
+      "text": "the folder foodVibe1.0-orch-merge-mod-voice-match was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T22:30:55.583Z",
+      "text": "FINAL: same tree as plan 650's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 11.3,
+  "updatedAt": "2026-11-19T22:30:58.284Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "650",
+      "type": "seen",
+      "text": "seen: the test:ci log on rerun shows a stack trace from src/app/core/services/http-storage.adapter.ts:97-130 printed during passing tests. It may be the source of the earlier flaky failure (unconfirmed) — reverse: n/a",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T22:30:58.281Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T22:30:58.284Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
