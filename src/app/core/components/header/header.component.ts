@@ -21,6 +21,7 @@ import { TranslationService } from '@services/translation.service'
 import { AccessService } from '@services/access.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { CustomSelectComponent } from '../../../shared/custom-select/custom-select.component'
+import { NotificationBellComponent } from '../notification-bell/notification-bell.component'
 import { authGuard } from '../../guards/auth.guard'
 
 /** The top-level pages every signed-in or guest user can open (desktop pills and drawer). */
@@ -31,6 +32,8 @@ const NAV_LINKS = [
   { path: '/menu-library', key: 'menu_library', icon: 'library' },
   { path: '/clients', key: 'frontdesk_section', icon: 'users' }
 ]
+/** Plan 646: the consultant's tool, shown with the consultant_diag module (the home module while acting). */
+const DIAGNOSIS_LINK = { path: '/diagnosis', key: 'diagnosis', icon: 'stethoscope' }
 /** Only the business owner gets this one (plan 428). */
 const SETTINGS_LINK = { path: '/settings', key: 'settings', icon: 'sliders-vertical' }
 /** Only the platform admin gets this one (plan 448). */
@@ -39,7 +42,15 @@ const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'act
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe, FormsModule, CustomSelectComponent],
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    LucideAngularModule,
+    TranslatePipe,
+    FormsModule,
+    CustomSelectComponent,
+    NotificationBellComponent
+  ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -69,11 +80,18 @@ export class HeaderComponent {
   /** Plan 620: the events and clients entries follow the business's modules. */
   protected readonly showEvents_ = computed(() => this.modules.has('events'))
   protected readonly showClients_ = computed(() => this.modules.has(['events', 'frontdesk']))
+  /** Plan 646: while acting the home modules decide (as the diagnosis guard does), else the business modules. */
+  protected readonly showDiagnosis_ = computed(() =>
+    this.userService.acting_()
+      ? this.userService.homeModules_().includes('consultant_diag')
+      : this.modules.has('consultant_diag')
+  )
   protected readonly navLinks_ = computed(() => [
     ...NAV_LINKS.filter(
       (link) =>
         (link.path !== '/menu-library' || this.showEvents_()) && (link.path !== '/clients' || this.showClients_())
     ),
+    ...(this.showDiagnosis_() ? [DIAGNOSIS_LINK] : []),
     ...(this.isOwner_() ? [SETTINGS_LINK] : []),
     ...(this.isPlatformAdmin_() ? [PLATFORM_LINK] : [])
   ])

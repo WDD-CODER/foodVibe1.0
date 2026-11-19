@@ -176,10 +176,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Store an alert for each person who must know about a big price change — the schema, the service, the apply hook, the server cases — shared/schemas/entities/notification.schema.ts, server/services/notifications.js, server/routes/product-import.js, server/test/notifications.test.js
-- [ ] A2: Let each person read and clear only his own alerts — the routes, the mount, the access checks, the cases — server/routes/notifications.js, server/index.js, server/test/notifications.test.js
-- [ ] A3: Show the alerts under a bell in the header and open the product from one — the service, the bell, the keys, the icon, the specs — src/app/core/services/notifications.service.ts, src/app/core/components/notification-bell/**, src/app/core/components/header/**, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A4: Put the diagnosis in the main menu and show a module change at once — the menu entry, the reload after the platform save, the specs — src/app/core/components/header/**, src/app/pages/platform-dashboard/components/platform-business-dialog/**
+- [x] A1: Store an alert for each person who must know about a big price change — the schema, the service, the apply hook, the server cases — shared/schemas/entities/notification.schema.ts, server/services/notifications.js, server/routes/product-import.js, server/test/notifications.test.js
+- [x] A2: Let each person read and clear only his own alerts — the routes, the mount, the access checks, the cases — server/routes/notifications.js, server/index.js, server/test/notifications.test.js
+- [x] A3: Show the alerts under a bell in the header and open the product from one — the service, the bell, the keys, the icon, the specs — src/app/core/services/notifications.service.ts, src/app/core/components/notification-bell/**, src/app/core/components/header/**, public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A4: Put the diagnosis in the main menu and show a module change at once — the menu entry, the reload after the platform save, the specs — src/app/core/components/header/**, src/app/pages/platform-dashboard/components/platform-business-dialog/**
 - [ ] A5: Record the new pieces and prove it in the running app — the registry rows, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/646-1.spec.ts
 
 ## Technical Considerations
@@ -199,3 +199,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: in-app only — why: Dandan's choice of 2026-11-19 ("alerts in the app").
 - decided: staff get no price alerts — why: prices are the owner's (INV-1 rule on money).
 - decided: one alert per row and recipient, kept 200 per user — why: simple to read and bounded.
+- evidence: pnpm run test:server -> exit 0 (146 files, 1933 tests incl. server/test/notifications.test.js); pnpm run build -> exit 0; pnpm run lint -> 0 errors; pnpm run lint:icons -> exit 0; pnpm run lint:reuse -> ok; pnpm run test:ci full run passed except one header spec assertion, fixed and the header specs rerun 21/21; node scripts/breadcrumbs-check.mjs -> FAIL: src/app/core/services/breadcrumbs.md and src/app/core/components/breadcrumbs.md do not mention notifications.service.ts / notification-bell/ (both outside scope; ESCALATE asked)
+- decided: behaviour: an alert of another business switches into it and lands on /dashboard (UserService.switchBusiness always reloads there) — reverse: pass a target url through switchBusiness
+- A5 not ticked: e2e/ui/646-1.spec.ts written, not run; breadcrumb rows waiting on scope approval

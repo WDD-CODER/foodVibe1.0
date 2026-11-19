@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing'
 import { Router, UrlTree, type ActivatedRouteSnapshot, type RouterStateSnapshot } from '@angular/router'
 import { signal } from '@angular/core'
 import type { ModuleKey } from '@schemas/modules-pure'
+import { BusinessService } from '@services/business.service'
 import { ModuleService } from '@services/module.service'
 import { UserService } from '@services/user.service'
 import { moduleGuard } from './module.guard'
@@ -52,6 +53,22 @@ describe('moduleGuard', () => {
     resolveReady()
     await p
     expect(answered).toBeTrue()
+  })
+
+  it('lets /diagnosis open as soon as the business is read again with the module on (plan 646)', async () => {
+    const business = signal<{ _id: string; modules?: ModuleKey[] }>({ _id: 'b1', modules: ['events'] })
+    TestBed.resetTestingModule()
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: UserService, useValue: { user_: user } },
+        { provide: BusinessService, useValue: { business_: business, loaded_: signal(true) } },
+        { provide: Router, useValue: { createUrlTree: (c: string[]) => ({ path: c.join('/') }) as unknown as UrlTree } }
+      ]
+    })
+    const before = (await run(['consultant_diag'])) as unknown as { path: string }
+    expect(before.path).toBe('/dashboard')
+    business.set({ _id: 'b1', modules: ['events', 'consultant_diag'] })
+    expect(await run(['consultant_diag'])).toBeTrue()
   })
 
   it('returns true when signed out', async () => {

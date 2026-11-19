@@ -620,3 +620,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: server/utils/stock-extract.js, cleanStockLines, stockKeptRatio.
 - When: a stock count text is turned into lines or a stock draft is scored; the model only returns positions, never ids or sums.
 - Known copies: none.
+
+### user-alerts — `NotificationsService`, `app-notification-bell`
+
+- Status: stable — plan 646
+- Use: `src/app/core/services/notifications.service.ts` (the signed-in user's alerts, polled every 60 s while the tab is visible) and `src/app/core/components/notification-bell/notification-bell.component.ts` (the header bell with the unread count and the list); the server side is `server/services/notifications.js` (`createPriceChangeAlerts`, called by the invoice apply) and `server/routes/notifications.js`; the shape is `shared/schemas/entities/notification.schema.ts`.
+- Pieces: NotificationsService, NotificationBellComponent, app-notification-bell, createPriceChangeAlerts.
+- When: a person must be told something at once (a price moved beyond the threshold); a new alert kind adds a `kind` to the schema and a writer next to `createPriceChangeAlerts`, never a second list or bell.
+- Known copies: none.
