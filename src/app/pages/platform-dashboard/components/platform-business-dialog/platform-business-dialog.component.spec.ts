@@ -148,6 +148,39 @@ describe('PlatformBusinessDialogComponent (plan 620)', () => {
     expect(update).not.toHaveBeenCalled()
   })
 
+  describe('tooltips (plan 644)', () => {
+    it('shows no hint text; the private label and the erase button carry tooltips', () => {
+      setup()
+      // only the screen-reader description (visually hidden) may hold the hint text
+      const shown = Array.from(el.querySelectorAll('*')).filter(
+        (n) =>
+          !n.closest('.visually-hidden') &&
+          Array.from(n.childNodes).some(
+            (c) => c.nodeType === Node.TEXT_NODE && c.textContent?.includes('platform_ai_private_hint')
+          )
+      )
+      expect(shown.length).toBe(0)
+      const label = el.querySelector('[data-testid="biz-private-label"]') as HTMLElement
+      expect(label.getAttribute('title')).toBe('platform_ai_private_hint')
+      const box = el.querySelector('[data-testid="biz-private"]') as HTMLElement
+      const tipId = box.getAttribute('aria-describedby')!
+      expect(el.querySelector(`#${tipId}`)?.textContent?.trim()).toBe('platform_ai_private_hint')
+      const eraseBtn = el.querySelector('[data-testid="biz-erase-learned"]') as HTMLElement
+      expect(eraseBtn.getAttribute('title')).toBe('platform_erase_learned_tip')
+      const eraseTip = eraseBtn.getAttribute('aria-describedby')!
+      expect(el.querySelector(`#${eraseTip}`)?.textContent?.trim()).toBe('platform_erase_learned_tip')
+    })
+
+    it('a history row renders the change in pbd-history__change', async () => {
+      setup()
+      history.and.resolveTo([{ at: 1, by: 'u', byName: 'D', reason: 'r', changed: ['modules'] }])
+      ;(el.querySelector('[data-testid="biz-history-open"]') as HTMLElement).click()
+      await new Promise((r) => setTimeout(r))
+      fixture.detectChanges()
+      expect(el.querySelector('.pbd-history__change')).not.toBeNull()
+    })
+  })
+
   describe('history panel (plan 638)', () => {
     const q = (id: string): HTMLElement | null => el.querySelector(`[data-testid="${id}"]`)
     const click = async (id: string): Promise<void> => {
