@@ -214,6 +214,27 @@ describe('ProductFormComponent', () => {
     })
   })
 
+  // Plan 649 — a source whose supplier is not in the business's list never shows an id and never blocks a save.
+  describe('plan 649: unknown supplier', () => {
+    it('shows supplier_unknown, never the id', () => {
+      expect(component['supplierDisplayFn']('ghost-id-123')).toBe('supplier_unknown')
+    })
+
+    it('saves a product with such a source and keeps its price', async () => {
+      const kitchen = TestBed.inject(KitchenStateService)
+      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(Promise.resolve(null as unknown as Product))
+      component['productForm_'].patchValue({
+        productName: 'בצל',
+        baseUnit: 'kg',
+        supplierIds_: ['ghost-id-123'],
+        supplierPrices_: { 'ghost-id-123': 12.5 }
+      })
+      expect(await component.saveAndWait()).toBe(true)
+      const saved = saveSpy.calls.mostRecent().args[0] as Product
+      expect(saved.sources.map((s) => [s.supplierId, s.price])).toEqual([['ghost-id-123', 12.5]])
+    })
+  })
+
   describe('plan 540: server refusal', () => {
     it('a 400 too_big on nameHebrew marks the name field', async () => {
       const kitchen = TestBed.inject(KitchenStateService)

@@ -653,8 +653,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected getSupplierName(supplierId: string): string {
+    if (!supplierId) return ''
     const supplier = this.kitchenStateService.suppliersById_().get(supplierId)
-    return supplier?.nameHebrew ?? supplierId
+    // Plan 649: a supplier that is not in this business's list never shows its id.
+    return supplier?.nameHebrew ?? this.translationService.translate('supplier_unknown')
   }
 
   //GETERS

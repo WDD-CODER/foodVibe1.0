@@ -888,6 +888,32 @@ class MasterNameTakenError extends Error {
   }
 }
 
+// Plan 649: a pushed product's source points at a supplier the shared catalog does not have (another business's, or none).
+class BadSupplierRefError extends Error {
+  constructor(supplierId) {
+    super(`Supplier ${supplierId} is not a supplier of this business`);
+    this.supplierId = supplierId;
+  }
+}
+
+/**
+ * Plan 649: a business supplier id → the master supplier id. A supplier with no master copy is pushed first;
+ * an id that is already a master supplier stays; an id that is neither the business's nor master's throws.
+ */
+async function toMasterSupplierId(supplierId, businessId, visited, pusherId) {
+  if (typeof supplierId !== 'string') throw new BadSupplierRefError(String(supplierId));
+  const own = await col('suppliers').findOne({ _id: supplierId, businessId }, { projection: { _masterId: 1, _id: 1 } });
+  if (!own) {
+    const shared = await col('suppliers').findOne({ _id: supplierId, businessId: MASTER_BUSINESS_ID, ...LIVE }, { projection: { _id: 1 } });
+    if (shared) return supplierId;
+    throw new BadSupplierRefError(supplierId);
+  }
+  if (typeof own._masterId === 'string' && own._masterId !== own._id) return own._masterId;
+  const pushed = await pushDocToMasterRecursive('suppliers', own._id, businessId, visited, pusherId);
+  if (!pushed) throw new BadSupplierRefError(supplierId);
+  return pushed;
+}
+
 async function pushDocToMasterRecursive(type, id, businessId, visited, pusherId) {
   const key = `${type}:${id}`;
   if (visited.has(key)) return null;
@@ -926,9 +952,18 @@ async function pushDocToMasterRecursive(type, id, businessId, visited, pusherId)
   // Plan 536: a line's supplier id belongs to one business; it never reaches the shared catalog.
   const ingredients = repointed.map(({ supplierId: _s, ...rest }) => rest);
 
+  // Plan 649: the shared product carries shared suppliers only. Checked before anything is written.
+  let masterSources = null;
+  if (type === 'products' && Array.isArray(existing.sources)) {
+    masterSources = [];
+    for (const src of existing.sources) {
+      masterSources.push(src && src.supplierId ? { ...src, supplierId: await toMasterSupplierId(src.supplierId, businessId, visited, pusherId) } : src);
+    }
+  }
+
   // Per-user state never reaches the shared copy (plan 407): the owner's favorite mark and delete stamps.
   const { userId: _u, businessId: _bz, createdBy: _cz, _masterId: _m, _userModified: _um, _id: _i, favorite: _f, deletedAt: _da, deletedBy: _db, purgedAt: _pa, ...safeBody } = existing;
-  const ingredientsField = hasIngredients ? { ingredients } : {};
+  const ingredientsField = { ...(hasIngredients ? { ingredients } : {}), ...(masterSources ? { sources: masterSources } : {}) };
   // 2026-09-30 fix (take 2): every new doc self-links (_masterId = its own _id, see POST
   // above). A naive upsert with that same _id fails — `_id` is uniquely indexed across the
   // WHOLE collection regardless of userId, and that exact _id is already taken by the
@@ -1021,6 +1056,9 @@ router.put('/:type/:id/push-to-master', verifyToken, requirePlatformAdmin, async
   } catch (err) {
     if (err instanceof MasterNameTakenError) {
       return res.status(409).json({ error: err.message, nameHebrew: err.nameHebrew });
+    }
+    if (err instanceof BadSupplierRefError) {
+      return res.status(400).json({ error: 'BAD_SUPPLIER_REF', supplierId: err.supplierId });
     }
     req.log.error({ err, event: 'data.push_to_master.failed' });
     res.status(500).json({ error: 'Server error' });
