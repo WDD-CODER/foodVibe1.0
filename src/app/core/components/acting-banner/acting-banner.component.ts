@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { BusinessService } from '@services/business.service'
@@ -13,7 +14,7 @@ import { UserService } from '@services/user.service'
 @Component({
   selector: 'app-acting-banner',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, RouterLink, TranslatePipe],
   templateUrl: './acting-banner.component.html',
   styleUrl: './acting-banner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,6 +27,8 @@ export class ActingBannerComponent {
 
   protected readonly acting_ = this.userService.acting_
   protected readonly isSwitching_ = signal(false)
+  /** Plan 634: the diagnosis entry shows by the consultant's OWN (home) modules, not the client's. */
+  protected readonly hasDiagnosis_ = computed(() => this.userService.homeModules_().includes('consultant_diag'))
 
   /** The banner text with the active business's name in it (empty name until the business loads). */
   protected readonly text_ = computed(() => {

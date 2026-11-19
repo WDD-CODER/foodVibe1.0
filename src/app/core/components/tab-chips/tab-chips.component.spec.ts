@@ -2,7 +2,15 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { CalendarDays, ClipboardCheck, FileText, LucideAngularModule, Settings, Wrench } from 'lucide-angular'
+import {
+  CalendarDays,
+  ClipboardCheck,
+  FileText,
+  LucideAngularModule,
+  Settings,
+  Stethoscope,
+  Wrench
+} from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -47,7 +55,15 @@ describe('TabChipsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TabChipsComponent,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings, FileText })
+        LucideAngularModule.pick({
+          ...TEST_LUCIDE_ICONS,
+          Wrench,
+          ClipboardCheck,
+          CalendarDays,
+          Settings,
+          FileText,
+          Stethoscope
+        })
       ],
       providers: [
         moduleStub,
@@ -59,6 +75,7 @@ describe('TabChipsComponent', () => {
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
           { path: 'inventory/invoices', component: BlankStubComponent },
+          { path: 'diagnosis', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
           { path: 'frontdesk/knowledge', component: BlankStubComponent }
@@ -95,6 +112,26 @@ describe('TabChipsComponent', () => {
       const paths = links.map((de) => de.injector.get(RouterLink).href)
       expect(paths).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices'])
     }
+  })
+
+  it('adds the diagnosis chip last, on the inventory and diagnosis screens, only with the consultant_diag module (plan 634)', async () => {
+    modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+    for (const url of ['/inventory/list', '/diagnosis']) {
+      await router.navigateByUrl(url)
+      fixture.detectChanges()
+      const paths = fixture.debugElement
+        .queryAll(By.directive(RouterLink))
+        .map((de) => de.injector.get(RouterLink).href)
+      expect(paths)
+        .withContext(url)
+        .toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/diagnosis'])
+    }
+    modulesOn.set(ALL_MODULES)
+    await router.navigateByUrl('/diagnosis')
+    fixture.detectChanges()
+    expect(
+      fixture.debugElement.queryAll(By.directive(RouterLink)).map((de) => de.injector.get(RouterLink).href)
+    ).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices'])
   })
 
   const chipIds = (): string[] =>

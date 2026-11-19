@@ -14,6 +14,7 @@ export const API = {
   auth: (path: string) => `${API_ROOT}/auth/${path}`,
   admin: (path: string) => `${API_ROOT}/admin/${path}`,
   access: (path: string) => `${API_ROOT}/access/${path}`,
+  diag: (path?: string) => (path ? `${API_ROOT}/diag/${path}` : `${API_ROOT}/diag`),
   business: (path?: string) => (path ? `${API_ROOT}/business/${path}` : `${API_ROOT}/business`),
   stats: (path: string) => `${API_ROOT}/stats/${path}`,
   productImport: (path: string) => `${API_ROOT}/product-import/${path}`,

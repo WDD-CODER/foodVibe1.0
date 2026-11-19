@@ -829,4 +829,54 @@ describe('ProductImportComponent', () => {
       })
     })
   })
+
+  describe('embedded mode (plan 634)', () => {
+    const invoiceFile = (name = 'a.jpg') => new File(['x'], name, { type: 'image/jpeg' })
+    const setInput = async (name: 'embedded' | 'file', value: unknown) => {
+      fixture.componentRef.setInput(name, value)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      fixture.detectChanges()
+    }
+
+    it('embedded hides the page header and the paste box; the routed page keeps them', async () => {
+      await setup(of({ rows: [], truncated: false }))
+      expect(el().querySelector('app-page-header')).not.toBeNull()
+      expect(byId('import-text')).not.toBeNull()
+      await setInput('embedded', true)
+      expect(el().querySelector('app-page-header')).toBeNull()
+      expect(byId('import-text')).toBeNull()
+    })
+
+    it('a file input is read once per file object, and null drops the preview', async () => {
+      await setup(of({ rows: [], truncated: false }))
+      readInvoice.and.resolveTo(readResult([row('בצל', 3)]))
+      const file = invoiceFile()
+      await setInput('embedded', true)
+      await setInput('file', file)
+      expect(readInvoice).toHaveBeenCalledTimes(1)
+      expect(readInvoice.calls.mostRecent().args[0]).toBe(file)
+      expect(all('import-row').length).toBe(1)
+      await setInput('file', file)
+      expect(readInvoice).toHaveBeenCalledTimes(1)
+      await setInput('file', null)
+      expect(all('import-row').length).toBe(0)
+    })
+
+    it('applied is emitted after a save, with the invoice id (null when no invoice was recorded)', async () => {
+      await setup(of({ rows: [], truncated: false }))
+      apply.and.resolveTo({ created: 1, updated: 0, skipped: 0, skippedRows: [], invoiceId: 'inv1' })
+      readInvoice.and.resolveTo(
+        readResult([row('בצל', 3)], { supplier: { supplierId: 'sup1', supplierKey: 'name:ירקן' } })
+      )
+      const emitted: Array<{ invoiceId: string | null }> = []
+      fixture.componentInstance.applied.subscribe((value) => emitted.push(value))
+      await setInput('embedded', true)
+      await setInput('file', invoiceFile())
+      byId<HTMLButtonElement>('import-save')!.click()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(emitted).toEqual([{ invoiceId: 'inv1' }])
+    })
+  })
 })

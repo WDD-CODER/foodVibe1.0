@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked
+} from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
@@ -88,7 +99,16 @@ export class ProductImportComponent {
   private readonly business_ = inject(BusinessService)
   private readonly recipeCost_ = inject(RecipeCostService)
 
+  // 3. INPUTS & OUTPUTS (plan 634: a second host, the diagnosis queue, hands over one file and hears about the apply)
+  /** Hides the page header, the back link and the paste box; nothing else changes. */
+  readonly embedded = input(false)
+  /** A file to read as if it was chosen (once per file object); null clears the preview. */
+  readonly file = input<File | null>(null)
+  /** Emitted after a successful apply; `invoiceId` is null when the apply recorded no invoice. */
+  readonly applied = output<{ invoiceId: string | null }>()
+
   // 4. SIGNALS & CONSTANTS
+  private lastFile_: File | null = null
   protected readonly text_ = signal('')
   protected readonly supplierId_ = signal('')
   protected readonly rows_ = signal<PreviewRow[]>([])
@@ -118,6 +138,15 @@ export class ProductImportComponent {
 
   constructor() {
     warnBeforeUnload(() => this.hasRealChanges())
+    effect(() => {
+      const file = this.file()
+      untracked(() => {
+        if (file === this.lastFile_) return
+        this.lastFile_ = file
+        if (file) void this.readFile_(file)
+        else this.resetPreview_()
+      })
+    })
   }
 
   // 5. COMPUTED
@@ -206,7 +235,22 @@ export class ProductImportComponent {
     const file = input.files?.[0] ?? null
     input.value = '' // the same file can be chosen again
     if (!file || this.isParsing_() || this.isSaving_()) return
+    await this.readFile_(file)
+  }
+
+  private async readFile_(file: File): Promise<void> {
     await this.readAndFill_(() => this.gemini_.readInvoice(file, this.metadataRegistry_.allCategories_()), file)
+  }
+
+  /** The preview of a file that was skipped is dropped. */
+  private resetPreview_(): void {
+    this.rows_.set([])
+    this.isParsed_.set(false)
+    this.isFromPhoto_.set(false)
+    this.errorKey_.set(null)
+    this.summary_.set(null)
+    this.impact_.set(null)
+    this.clearInvoice_()
   }
 
   /**
@@ -339,6 +383,7 @@ export class ProductImportComponent {
       if (invoice && result.invoiceId === null) {
         this.userMsg_.onSetErrorMsg(this.translation_.translate('invoice_trail_failed'))
       }
+      this.applied.emit({ invoiceId: invoice ? (result.invoiceId ?? null) : null })
     } catch (err) {
       this.logging_.error({
         event: 'productImport.apply_failed',

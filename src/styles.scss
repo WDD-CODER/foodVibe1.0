@@ -2859,3 +2859,10 @@ input[type='number']::-webkit-outer-spin-button {
     box-shadow: none;
   }
 }
+
+/* Plan 634: the diagnosis report prints alone — the app header and chips stay out of the A4 page. */
+@media print {
+  body:has(app-diag-report) :is(app-header, app-tab-chips, app-acting-banner) {
+    display: none !important;
+  }
+}

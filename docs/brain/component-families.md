@@ -299,8 +299,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### page-entry-loading — data ready before a page opens
 
 - Status: stable
-- Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`.
-- When: a route needs its collection loaded first.
+- Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`; the consultant's entry check `diagnosisGuard` in `src/app/pages/diagnosis/diagnosis.guard.ts` (plan 634: home modules while acting, `moduleGuard` at home).
+- When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
 
 ### helpers — pure functions
@@ -582,4 +582,19 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 633
 - Use: `shared/schemas/diag/diag-inputs.ts` (request schemas) and `shared/schemas/diag/menu-draft.ts` (model-reply schema, `menuKeptRatio`); `server/routes/ai/diag.js` uses them.
 - When: the diagnosis menu-reading route validates a request or a model reply and scores the draft closeness.
+- Known copies: none.
+
+### diag-invoice-queue — `app-diag-invoice-queue`
+
+- Status: stable — plan 634
+- Use: `src/app/pages/diagnosis/components/diag-invoice-queue/diag-invoice-queue.component.ts` — a batch of chosen invoice files held in memory and handed one at a time to the embedded import preview.
+- When: several invoice files are approved one after another; never read or apply several at once.
+- Known copies: none.
+
+### import-preview-embedded — `embedded`, `file` inputs and `applied` output on `app-product-import`
+
+- Status: stable — plan 634
+- Use: `src/app/pages/inventory/components/product-import/product-import.component.ts` — the `embedded`, `file` inputs and `applied` output on `app-product-import`: `embedded` hides the page header, the back link and the paste box; `file` starts the file read once per file object; `applied` reports the apply with its invoice id.
+- Pieces: embedded, file inputs and applied output on app-product-import.
+- When: a second screen hosts the import preview; never copy the preview.
 - Known copies: none.

@@ -1,0 +1,100 @@
+<div class="diag-report" dir="rtl">
+  @if (diagnosis().menu.length === 0) {
+    <app-empty-state messageKey="diag_report_empty" icon="file-text" data-testid="diag-report-empty" />
+  } @else {
+    <div class="diag-report__top">
+      <p class="diag-report__target" data-testid="diag-target">{{ targetText_() }}</p>
+      <button type="button" class="c-btn-ghost diag-report__print" data-testid="diag-print" (click)="print()">
+        <lucide-icon name="printer" [size]="16" />
+        {{ 'print' | translatePipe }}
+      </button>
+    </div>
+    <p class="diag-report__note" data-testid="diag-vat-note">
+      {{ noteText_() }} {{ 'diag_cost_note' | translatePipe }}
+    </p>
+
+    <div class="diag-report__wrap">
+      <table class="diag-report__table" data-testid="diag-dishes">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'diag_col_dish' | translatePipe }}</th>
+            <th scope="col">{{ 'diag_col_sell_price' | translatePipe }}</th>
+            @if (diagnosis().pricesIncludeVat) {
+              <th scope="col" data-testid="diag-col-net">{{ 'diag_col_net_price' | translatePipe }}</th>
+            }
+            <th scope="col">{{ 'diag_col_cost' | translatePipe }}</th>
+            <th scope="col">{{ 'diag_col_margin' | translatePipe }}</th>
+            <th scope="col">{{ 'diag_col_suggested_price' | translatePipe }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (dish of report_().dishes; track $index) {
+            <tr data-testid="diag-dish-row">
+              <td dir="auto">
+                {{ dish.name }}
+                @if (dish.underTarget) {
+                  <span class="c-chip c-chip--tag c-chip--red diag-report__tag" data-testid="diag-under-target">{{
+                    'diag_under_target' | translatePipe
+                  }}</span>
+                }
+                @if (dish.marginPct === undefined) {
+                  <span class="c-chip c-chip--tag c-chip--amber diag-report__tag" data-testid="diag-no-cost">{{
+                    'diag_no_cost' | translatePipe
+                  }}</span>
+                }
+              </td>
+              <td class="c-num" dir="ltr">{{ formatMoney(dish.sellPrice) }}</td>
+              @if (diagnosis().pricesIncludeVat) {
+                <td class="c-num" dir="ltr">{{ formatMoney(dish.netPrice) }}</td>
+              }
+              <td class="c-num" dir="ltr">{{ dish.cost !== undefined ? formatMoney(dish.cost) : '—' }}</td>
+              <td class="c-num" dir="ltr">{{ dish.marginPct !== undefined ? formatPct(dish.marginPct) : '—' }}</td>
+              <td class="c-num" dir="ltr" data-testid="diag-suggested">
+                {{ dish.suggestedPrice !== undefined ? formatMoney(dish.suggestedPrice) : '—' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (findings_().length > 0) {
+      <h2 class="diag-report__h2">{{ 'diag_findings_title' | translatePipe }}</h2>
+      <ul class="diag-report__findings" data-testid="diag-findings">
+        @for (finding of findings_(); track finding.key) {
+          <li>{{ finding.text }}</li>
+        }
+      </ul>
+    }
+
+    <h2 class="diag-report__h2">{{ volatilityTitle_() }}</h2>
+    @if (moves_().length === 0) {
+      <p class="diag-report__note" data-testid="diag-volatility-empty">{{ 'diag_volatility_empty' | translatePipe }}</p>
+    } @else {
+      <div class="diag-report__wrap">
+        <table class="diag-report__table" data-testid="diag-moves">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'diag_col_product' | translatePipe }}</th>
+              <th scope="col">{{ 'supplier' | translatePipe }}</th>
+              <th scope="col">{{ 'diag_col_min' | translatePipe }}</th>
+              <th scope="col">{{ 'diag_col_max' | translatePipe }}</th>
+              <th scope="col">{{ 'diag_col_move' | translatePipe }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (move of moves_(); track move.key) {
+              <tr data-testid="diag-move-row">
+                <td dir="auto">{{ move.name }}</td>
+                <td dir="auto">{{ move.supplier }}</td>
+                <td class="c-num" dir="ltr">{{ formatMoney(move.min) }}</td>
+                <td class="c-num" dir="ltr">{{ formatMoney(move.max) }}</td>
+                <td class="c-num" dir="ltr">{{ formatPct(move.movePct) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
