@@ -231,3 +231,41 @@ describe('plan 648 — one copy of each master product', () => {
     expect(index).toMatchObject({ unique: true, key: { businessId: 1, _masterId: 1 } });
   });
 });
+
+describe('plan 649 — every synced source points at a supplier of the business', () => {
+  const src = (supplierId) => [{ supplierId, price: 7, addedAt: 1 }];
+
+  it('a supplier the business has a copy of maps to it', async () => {
+    const db = testDb();
+    await db.collection('suppliers').insertOne({ _id: 'ms1', ...M, nameHebrew: 'ספק' });
+    await db.collection('suppliers').insertOne({ _id: 'us1', ...mine(), _masterId: 'ms1', _userModified: false, nameHebrew: 'ספק' });
+    await db.collection('products').insertOne({ _id: 'mp1', ...M, nameHebrew: 'קמח', sources: src('ms1') });
+    await syncMasterToBusiness();
+    expect((await db.collection('products').findOne({ businessId: 'bA' })).sources[0]).toMatchObject({ supplierId: 'us1', price: 7 });
+  });
+
+  it('a master supplier the business has no copy of is copied, and the source maps to the copy', async () => {
+    const db = testDb();
+    await db.collection('suppliers').insertOne({ _id: 'ms2', ...M, nameHebrew: 'ספק חדש' });
+    await db.collection('products').insertOne({ _id: 'mp2', ...M, nameHebrew: 'סוכר', sources: src('ms2') });
+    await syncMasterToBusiness();
+    const copy = await db.collection('suppliers').findOne({ businessId: 'bA', _masterId: 'ms2' });
+    expect(copy).toMatchObject({ nameHebrew: 'ספק חדש', _userModified: false });
+    expect(copy._id).not.toBe('ms2');
+    expect((await db.collection('products').findOne({ businessId: 'bA' })).sources[0].supplierId).toBe(copy._id);
+  });
+
+  it('a supplier that exists nowhere is cleared, the price stays, and it is logged as sync.supplier_unknown (counts only)', async () => {
+    const db = testDb();
+    const { logger } = require('../logger');
+    const spy = vi.spyOn(logger, 'info');
+    await db.collection('products').insertOne({ _id: 'mp3', ...M, nameHebrew: 'מלח', sources: src('gone') });
+    await syncMasterToBusiness();
+    await syncMasterToBusiness();
+    const sources = (await db.collection('products').findOne({ businessId: 'bA' })).sources;
+    expect(sources).toEqual([expect.objectContaining({ supplierId: '', price: 7 })]);
+    const logged = spy.mock.calls.map(c => c[0]).find(e => e?.event === 'sync.supplier_unknown');
+    expect(logged).toEqual({ event: 'sync.supplier_unknown', count: 1 });
+    spy.mockRestore();
+  });
+});

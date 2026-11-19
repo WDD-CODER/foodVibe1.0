@@ -321,6 +321,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `scalingRuleFrom(values, hadRule)` / `scalingRuleErrors(values)` in `src/app/core/utils/scaling-rule.util.ts`: the equipment loading rule (one per N guests, min, max) built and checked from form values; the full equipment form and the list's quick-edit popup both call it (plan 640).
 - `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key `ai_monthly_cap_reached` for the server's monthly-cap refusal, else null; every place that maps an AI 429 asks it first (plan 620).
 - Plan 636: `stock-count.util.ts` (`src/app/core/utils/stock-count.util.ts`) — `unitOptionsFor`, `belowMinimum` and `countedAtFromIso`, the pure rules of the stock count sheet; conversion itself stays the shared `toBase`.
+- Plan 649: the reference mapping — `supplierIdMap` / `resolveSourceSupplier` in `server/services/sync-master.js` (master supplier id → the business copy) is the one map; push (`toMasterSupplierId`) and the repair (`planProductRepair`) use the same rule; see the supplier-refs family.
 
 ### http — talking to the server
 
@@ -628,4 +629,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/notifications.service.ts` (the signed-in user's alerts, polled every 60 s while the tab is visible) and `src/app/core/components/notification-bell/notification-bell.component.ts` (the header bell with the unread count and the list); the server side is `server/services/notifications.js` (`createPriceChangeAlerts`, called by the invoice apply) and `server/routes/notifications.js`; the shape is `shared/schemas/entities/notification.schema.ts`.
 - Pieces: NotificationsService, NotificationBellComponent, app-notification-bell, createPriceChangeAlerts, .bell__btn, .bell__count, .bell__panel, .bell__head, .bell__all, .bell__empty, .bell__list, .bell__item, .bell__item--up, .bell__item--down, .bell__item--unread, .bell__meta.
 - When: a person must be told something at once (a price moved beyond the threshold); a new alert kind adds a `kind` to the schema and a writer next to `createPriceChangeAlerts`, never a second list or bell.
+- Known copies: none.
+
+### supplier-refs — a product's source points at a supplier of its own business (plan 649)
+
+- Status: stable
+- Use: `resolveSourceSupplier` in `server/services/sync-master.js` (master supplier id → the business's copy, creating it; unknown → cleared and counted as `sync.supplier_unknown`), `toMasterSupplierId` in `server/routes/generic.js` (push to master: business supplier → master supplier, else 400 `BAD_SUPPLIER_REF`), and `planProductRepair` / `repairBusiness` in `server/scripts/repair-supplier-refs.js` (dry run, `--write`, `--confirm-remote`) for references already wrong; the browser shows `supplier_unknown` for a supplier outside the business list.
+- Pieces: resolveSourceSupplier, toMasterSupplierId, planProductRepair, repairBusiness, BAD_SUPPLIER_REF, supplier_unknown.
+- When: any code that copies or maps a product's `sources[].supplierId` between master and a business; never keep a master or foreign id.
+- Known copies: none.
+
+### repair-script — the repair script for wrong supplier references (plan 649)
+
+- Status: stable
+- Use: `server/scripts/repair-supplier-refs.js` — a one-off data repair beside `dedupe-business-products.js`, with the same dry-run default, `--write` and `--confirm-remote` rules; it never touches prices.
+- Pieces: repair-supplier-refs.js, planProductRepair, repairBusiness.
+- When: product sources already point at a foreign, unknown or empty supplier; the Human runs it (dry run first), never a build step.
 - Known copies: none.

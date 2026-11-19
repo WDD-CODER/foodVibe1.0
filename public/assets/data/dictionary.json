@@ -234,6 +234,7 @@
     "allergens": "אלרגנים",
     "do_not_include_allergens": "אל תכלול אלרגנים",
     "supplier": "ספק",
+    "supplier_unknown": "ספק לא ידוע",
     "sort": "מיון",
     "sort_by_name": "לפי שם",
     "sort_by_category": "לפי קטגוריה",
