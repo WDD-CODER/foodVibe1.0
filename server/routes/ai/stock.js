@@ -37,11 +37,19 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
     if (!assertCan(req, res, 'create', { type: 'stockCounts' })) return;
     const db = mongoose.connection.db;
     const found = await db.collection('products')
-      .find({ ...scopeFilter(req), ...LIVE }, { projection: { nameHebrew: 1, baseUnit: 1, purchaseOptions: 1 } })
+      .find({ ...scopeFilter(req), ...LIVE }, { projection: { nameHebrew: 1, baseUnit: 1, purchaseOptions: 1, minStockLevel: 1 } })
       .toArray();
     if (found.length === 0) return res.json({ draftId: null, lines: [], unmatched: [] });
     const products = found.sort((a, b) =>
       String(a.nameHebrew ?? '').localeCompare(String(b.nameHebrew ?? '')) || String(a._id).localeCompare(String(b._id)));
+
+    // Plan 650: a product counted before ranks above an equal-scoring one.
+    const countedRows = await db.collection('stockCounts').aggregate([
+      { $match: { ...scopeFilter(req), ...LIVE } },
+      { $unwind: '$lines' },
+      { $group: { _id: '$lines.productId' } },
+    ]).toArray();
+    const countedIds = new Set(countedRows.map(r => String(r._id)));
 
     const rates = await loadUnitRates(req);
     const terms = await db.collection('taxonomyTerms')
@@ -65,7 +73,7 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
 
     const raw = responseText(call.data);
     const payload = extractJsonPayload(raw);
-    const cleaned = payload.error ? null : cleanStockLines(payload.value, products, units, rates);
+    const cleaned = payload.error ? null : cleanStockLines(payload.value, products, units, rates, countedIds);
     if (!cleaned) {
       // Length only: the raw answer repeats the product names and the count text.
       req.log.error({ event: 'ai.stock_extract.parse_failed', rawLength: raw.length });

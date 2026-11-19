@@ -118,7 +118,9 @@ describe('StockAiDraftComponent', () => {
 
   it('lists the conflicts and unmatched words and emits the button choices', () => {
     fixture.componentRef.setInput('conflicts', [{ productId: 'p1', name: 'קמח', onSheet: '4 kg', suggested: '9 kg' }])
-    fixture.componentRef.setInput('unmatched', [{ id: 7, text: 'בננות 3' }])
+    fixture.componentRef.setInput('unmatched', [
+      { id: 7, text: 'בננות 3', status: 'unmatched', candidates: [], hasAmount: false }
+    ])
     fixture.detectChanges()
     const conflicts = el().querySelector('[data-testid="stk-ai-conflicts"]')!
     expect(conflicts.textContent).toContain('4 kg')
@@ -135,5 +137,61 @@ describe('StockAiDraftComponent', () => {
     chips[1].click()
     el().querySelector<HTMLButtonElement>('[data-testid="stk-ai-unmatched"] button')!.click()
     expect([replaced, kept, dismissed]).toEqual([['p1'], ['p1'], [7]])
+  })
+
+  describe('plan 650 — choose, nearest, add new', () => {
+    const products = [
+      { productId: 'a', name: 'בצל צהוב' },
+      { productId: 'b', name: 'בצל סגול' },
+      { productId: 'c', name: 'כרוב' }
+    ]
+    const picks: unknown[] = []
+    const added: number[] = []
+
+    beforeEach(() => {
+      picks.length = 0
+      added.length = 0
+      fixture.componentInstance.pick.subscribe((p) => picks.push(p))
+      fixture.componentInstance.addNew.subscribe((id) => added.push(id))
+      fixture.componentRef.setInput('products', products)
+    })
+
+    it('shows a choose line as toggle chips plus a search, and a chip emits the pick', () => {
+      fixture.componentRef.setInput('unmatched', [
+        { id: 1, text: 'בצל 2 kg', status: 'choose', candidates: products.slice(0, 2), hasAmount: true }
+      ])
+      fixture.detectChanges()
+      expect(el().textContent).toContain('stk_ai_choose')
+      const chips = el().querySelectorAll<HTMLInputElement>('[data-testid="stk-ai-candidates"] .c-chip--toggle input')
+      expect(chips.length).toBe(2)
+      expect(el().querySelector('[data-testid="stk-ai-search"] app-search-combobox')).not.toBeNull()
+      chips[1].click()
+      expect(picks).toEqual([{ id: 1, productId: 'b' }])
+    })
+
+    it('shows an unmatched line with the nearest, the search and add-new, which only emits when pressed', () => {
+      fixture.componentRef.setInput('unmatched', [
+        { id: 2, text: 'בננות 3', status: 'unmatched', candidates: [products[2]], hasAmount: true }
+      ])
+      fixture.detectChanges()
+      expect(el().textContent).toContain('stk_ai_not_found')
+      expect(el().querySelectorAll('[data-testid="stk-ai-candidates"] .c-chip--toggle').length).toBe(1)
+      expect(added).toEqual([])
+      el().querySelector<HTMLButtonElement>('[data-testid="stk-ai-add-new"]')!.click()
+      expect(added).toEqual([2])
+    })
+
+    it('a pick from the search emits the product, and a line without an amount offers no pick', () => {
+      fixture.componentRef.setInput('unmatched', [
+        { id: 3, text: 'x', status: 'unmatched', candidates: [], hasAmount: true },
+        { id: 4, text: 'y', status: 'choose', candidates: [products[0]], hasAmount: false }
+      ])
+      fixture.detectChanges()
+      expect(el().querySelectorAll('[data-testid="stk-ai-search"]').length).toBe(1)
+      expect(el().querySelectorAll('[data-testid="stk-ai-candidates"]').length).toBe(0)
+      const combobox = fixture.debugElement.query(By.css('app-search-combobox')).componentInstance
+      combobox.picked.emit({ option: products[1], source: 'pointer' })
+      expect(picks).toEqual([{ id: 3, productId: 'b' }])
+    })
   })
 })
