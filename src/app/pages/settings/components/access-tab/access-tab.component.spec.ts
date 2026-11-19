@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
-import { LucideAngularModule, UserCheck } from 'lucide-angular'
+import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { AccessGrant, AccessService } from '@services/access.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -23,7 +23,7 @@ describe('AccessTabComponent (plan 632)', () => {
     confirm = jasmine.createSpyObj<ConfirmModalService>('ConfirmModalService', ['open'])
     confirm.open.and.resolveTo(true)
     TestBed.configureTestingModule({
-      imports: [AccessTabComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, UserCheck })],
+      imports: [AccessTabComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         {
           provide: AccessService,

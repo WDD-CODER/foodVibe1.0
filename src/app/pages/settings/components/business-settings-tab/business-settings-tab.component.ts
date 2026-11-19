@@ -20,9 +20,7 @@ import { BUSINESS_SETTINGS_DEFAULTS, type BusinessSettings } from '@schemas/enti
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 
-/** The four numbers of the form (`BusinessSettings` still lists three; the fourth is plan 629's). */
-type SettingsNumbers = BusinessSettings & { priceRiseAlertPct: number }
-type SettingsField = keyof SettingsNumbers
+type SettingsField = keyof BusinessSettings
 
 /** One number field of the form: its label, help text and range-error dictionary keys. */
 interface FieldDef {
@@ -104,7 +102,7 @@ export class BusinessSettingsTabComponent {
 
   // 5. COMPUTED
   /** The stored numbers (defaults already filled by the server). */
-  private readonly stored = computed<SettingsNumbers>(() => ({
+  private readonly stored = computed<Required<BusinessSettings>>(() => ({
     ...BUSINESS_SETTINGS_DEFAULTS,
     ...(this.businessService.business_()?.settings ?? {})
   }))
