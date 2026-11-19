@@ -85,6 +85,7 @@ public/assets/data/dictionary.json
 e2e/ui/641-1.spec.ts
 docs/brain/component-families.md
 docs/brain/inventory.md
+shared/schemas/entities/invoice.schema.ts
 ```
 
 ## Read Scope
