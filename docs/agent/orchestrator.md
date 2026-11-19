@@ -202,6 +202,22 @@ runs the test script and every suite), prints `FINAL: ci — the full set runs i
 on the pull request`, and a failure blames and fixes a plan as with `full`. CI runs the full set on Linux; the short
 final pass is the Windows run. Default: `full`, plain strings: today's behaviour. `/ship` is unchanged.
 
+**Cheap checks first.** A plan's gate runs the seconds-long checks first: every `node …` command (the manifest check,
+`kit-checks`, a node-script `ciMirror` entry, a plan's `node --test` item) and the scope check, never a `prepare` step.
+When one fails, the slow ones wait (`GATE: not run — <check> failed first; runs after the fix: <command>`) and the plan
+goes back to its builder at once: a **bounce**, one per round, not counted in `round` or `maxFixRounds`. The gate after a
+bounce runs every check (cheap first, no stop), so a second failure is a normal fix round with every failure in it.
+
+**Same tree.** Every passing plan-gate command is recorded with the tree (content) it ran on
+(`.claude/orchestrator-runs/<run>/gate-trees.json`). When the run branch's tree is one a plan's gate passed on (a
+1-plan run, nothing merged after it), the final gate leaves out the commands that passed there:
+`FINAL: same tree as plan NNN's gate — <commands> skipped`; the rest run, and CI runs the full set on the pull request.
+
+**Alerts and the scorecard.** When a plan asks, a Windows desktop notice shows the run, the plan, the question and the
+reply line (`ORCH_NOTIFY=off` turns it off; never in CI or under `node --test`). The report's `## Scorecard` gives the
+wall minutes, minutes per state, gate passes, the checks left out with the seconds they saved, and the asks;
+`node scripts/orch-state.mjs scorecard --run <name> [--from <project>]` prints it for any run, read-only.
+
 ## Live view
 
 For fleet's run panel (`mods/README.md`), the run also writes, in the run's folder (local and git-ignored; nothing

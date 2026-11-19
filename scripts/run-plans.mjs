@@ -40,7 +40,8 @@ import { createRequire } from 'node:module'
 import { extractScopeGlobs, testRefusals, plannedTestPaths, bareTestLines, bareLineReason } from './lib/plan-scope.mjs'
 import { readAgent, claudeArgs, runAgent, parseResult, passedModel } from './lib/claude-run.mjs'
 import { isSensitive } from './ship-prep.mjs'
-import { gateCommands, runGate, scopeCheck, scopeMarker } from './lib/plan-gate.mjs'
+import { notifyHuman } from './lib/notify.mjs'
+import { gateCommands, runGate, scopeCheck, scopeMarker, TREE_PASSES_FILE, treeOf, readTreePasses, recordTreePasses, sameTreeSplit } from './lib/plan-gate.mjs'
 import { selectGate, entryOf, readCache, writeCache, cacheFileOf } from './lib/gate-select.mjs'
 import { createLive } from './lib/run-live.mjs'
 import { readContract, unansweredProposed, repeatedBehaviours } from './lib/product-defaults.mjs'
@@ -594,6 +595,13 @@ function goalLine(planText) {
   const at = lines.findIndex((l) => /^##\s+Goals?\b/i.test(l))
   return (at >= 0 ? lines.slice(at + 1).find((l) => l.trim() && !/^#/.test(l)) : lines.find((l) => /^#\s/.test(l)))?.trim().slice(0, 300) ?? ''
 }
+/** The desktop notice of an ask: the plan, the ask id, the question (200 characters) and the reply line. */
+export function askNotice(run, a) {
+  return {
+    title: `Run ${run}: plan ${a.plan} asks (${a.kind})`,
+    text: `${a.id}: ${String(a.question ?? '').slice(0, 200)}\nReply: node scripts/orch-state.mjs answer --run ${run} --id ${a.id} --choice <n>`,
+  }
+}
 /** Writes asks/<NNN>-<n>.json in the run's folder (n: the plan's next ask) and returns the ask. */
 export function writeAsk(runDir, { nnn, kind, humanOnly, question, options, recommendation, context }) {
   const dir = join(runDir, 'asks')
@@ -981,6 +989,7 @@ async function main() {
       note(`ask ${a.id} (${a.kind}, ${a.humanOnly ? 'only the Human answers' : 'the Human or the advisor answers'}): ${a.question}`, nnn)
       say(`RUN_PLANS: plan ${nnn} asks ${a.id} — it waits; the run goes on with the plans it does not block`)
       for (const line of askCard(a, RUN)) say(line)
+      notifyHuman(askNotice(RUN, a))
       return { nnn, state: 'asking', ask: a, reason, round: ctx.round }
     }
     if (!ctx.wt?.ok) {
@@ -1087,23 +1096,29 @@ async function main() {
         const onStart = (s) => live.gate(nnn, s)
         const sel = selectedChecks(l, wt, RUN, RUN_BRANCH)
         for (const line of sel.lines) { say(`  ${line}`); note(line, nnn) }
-        let g = await runGate({ folder: wt, commands: sel.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry })
+        // The seconds-long checks first; one that fails sends the plan back before the slow ones (once per round).
+        const gateOrder = { cheapFirst: true, stopOnCheap: !ctx.bounced }
+        let g = await runGate({ folder: wt, commands: sel.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry, ...gateOrder })
         if (g.status === 'env') {
           setPlan(nnn, { state: 'env-paused', round: ctx.round, reason: `gate env-fail: ${g.failed.join(', ')}` })
           const env = node('orch-preflight.mjs', ['--env-only', '--run', RUN, '--probe-dir', wt, ...g.failed.flatMap((c) => ['--probe', c])])
           if (env.status !== 0) return park(`environment: ${(orchJson(env.out)?.problems ?? [lastLine(env.out)]).join('; ')}`)
           note(`environment failure (gate env-fail: ${g.failed.join(', ')}); the environment check passed, the gate runs once more without a fix round`, nnn)
           ensureIn(wt, { nnn })
-          g = await runGate({ folder: wt, commands: sel.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry })
+          g = await runGate({ folder: wt, commands: sel.checks, timeoutMin: GATE_TIMEOUT_MIN, onResult, onStart, builtins, beforeRetry, ...gateOrder })
           if (g.status === 'env') return park(`environment, again after one retry: gate env-fail: ${g.failed.join(', ')}`)
         }
-        writeCache(cacheFileOf(ROOT, RUN), { keys: sel.keys, passed: g.results.filter((x) => x.status === 'pass').map((x) => x.command), plan: nnn })
+        const passedNow = g.results.filter((x) => x.status === 'pass').map((x) => x.command)
+        writeCache(cacheFileOf(ROOT, RUN), { keys: sel.keys, passed: passedNow, plan: nnn })
+        recordTreePasses(join(runDir, TREE_PASSES_FILE), { tree: treeOf(wt, g.head), plan: nnn, passed: passedNow })
         for (const c of g.flaky) state('flake', { run: RUN, plan: nnn, command: c, round: ctx.round, via: 'rerun', where: 'gate', sha: g.head ?? undefined })
         receipt = g
         if (g.status === 'fail') {
-          const bad = g.results.filter((x) => x.status !== 'pass')
+          const bad = g.results.filter((x) => x.status !== 'pass' && x.status !== 'not-run')
           const why = `gate: ${bad.map((x) => x.command).join(', ') || 'no check ran'}`
-          failure = { why, fingerprint: `${why} :: ${lastLine(bad[0]?.tail)}`, check: bad[0]?.command, tail: bad[0]?.tail,
+          const left = g.notRun ?? []
+          for (const c of left) { const line = `GATE: not run — ${bad[0]?.command} failed first; runs after the fix: ${c}`; say(`  ${line}`); note(line, nnn) }
+          failure = { why, fingerprint: `${why} :: ${lastLine(bad[0]?.tail)}`, check: bad[0]?.command, tail: bad[0]?.tail, bounce: left.length > 0,
             findings: bad.map((x, i) => ({ id: `gate-${i + 1}`, file: x.command, line: 1, rule: 'check fails', reasoning: String(x.tail ?? '').split('\n').slice(-20).join('\n'), severity: 'blocker' })) }
         } else checkedHead = g.head
         }
@@ -1157,6 +1172,16 @@ async function main() {
         if (m.env) return park(`environment: ${m.why}`)
         failure = { why: m.why, findings: [{ id: 'merge-1', file: RUN_BRANCH, line: 1, rule: 'merge into the run branch', reasoning: `${m.why} — merge origin/${RUN_BRANCH} into your branch, resolve, rerun the checks`, severity: 'blocker' }] }
       }
+      // ---- a cheap check failed before the slow ones: back to the builder once, not counted as a fix round ----
+      if (failure.bounce && !ctx.bounced) {
+        ctx.bounced = true
+        // roundCauses keeps every reason the plan went back to a builder; `round` does not move (a bounce is not counted).
+        setPlan(nnn, { round: ctx.round, 'round-cause': `round ${ctx.round + 1}: ${String(failure.why).slice(0, 280)}` })
+        ctx.findings = failure.findings ?? []
+        ctx.mode = 'fix'
+        note(`${failure.check} failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check`, nnn)
+        continue
+      }
       // ---- a failure: a fix round, the judgment builder, or a park ----
       const why = String(failure.fingerprint ?? failure.why).trim().slice(0, 240)
       setPlan(nnn, { round: ctx.round, 'round-cause': `round ${ctx.round + 1}: ${String(failure.why).slice(0, 280)}` })
@@ -1166,6 +1191,7 @@ async function main() {
       ctx.lastWhy = why
       if (ctx.escalated || ctx.round + 1 > MAX_FIX_ROUNDS) return ask(`${failure.why} (fix rounds used: ${ctx.round} of ${MAX_FIX_ROUNDS}) — needs the Human`, { kind: 'technical', question: `Plan ${nnn} used its fix rounds (${ctx.round} of ${MAX_FIX_ROUNDS}) and still fails: ${String(failure.why).slice(0, 200)}. Leave it parked, or retry it?` }, evidence)
       ctx.round += 1
+      ctx.bounced = false
       ctx.findings = failure.findings ?? []
       if (failure.escalate || ctx.round >= 2) {
         const h = state('handoff', {
@@ -1417,6 +1443,13 @@ async function main() {
           say('FINAL: ci — the full set runs in CI on the pull request')
           note('FINAL: ci — the full set runs in CI on the pull request')
         }
+        // A command that passed in a plan's gate on exactly this tree (same content) is not run again; the rest run.
+        // ORCH_FINAL_SAME_TREE=off runs the whole list (the kit's own tests of final-gate-only failures use it).
+        const sameOff = String(process.env.ORCH_FINAL_SAME_TREE ?? '').toLowerCase() === 'off'
+        const same = sameOff ? { run: commands, line: '' } : sameTreeSplit(commands, treeOf(mergeFolder), readTreePasses(join(runDir, TREE_PASSES_FILE)))
+        if (same.line) { say(`  ${same.line}`); note(same.line) }
+        commands = same.run
+        if (!commands.length) return { ok: true }
         const g = await runGate({ folder: mergeFolder, commands, timeoutMin: GATE_TIMEOUT_MIN, receipt: false, onStart: (s) => live.gate('final', s), onResult: (row) => csvRow('final', `final gate: ${row.command}`, '-', row.seconds, 0, 0, row.exit), beforeRetry: (command, r) => { ensureIn(mergeFolder, { clean: true, out: r?.out }) } })
         if (sel) writeCache(cacheFileOf(ROOT, RUN), { keys: sel.keys, passed: g.results.filter((x) => x.status === 'pass').map((x) => x.command), plan: 'final' })
         const bad = g.results.find((x) => x.status !== 'pass')

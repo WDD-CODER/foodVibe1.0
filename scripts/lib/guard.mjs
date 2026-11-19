@@ -1105,7 +1105,23 @@ function delegate(mode, targetRoot, file) {
   return d.permission === 'deny' ? deny(d.agent_message || `${mode} guard of ${targetRoot} denied ${file}`) : allow(d.agent_message || '')
 }
 
-function kitOwned(root, file) {
+/** The paths the project keeps as its own: `overrides` of .kit/config.json, else kit.config.json (repo-relative, posix). */
+export function projectOverrides(root) {
+  for (const name of [join('.kit', 'config.json'), 'kit.config.json']) {
+    const p = join(root, name)
+    if (!existsSync(p)) continue
+    try {
+      const list = JSON.parse(readFileSync(p, 'utf8')).overrides
+      return new Set((Array.isArray(list) ? list : []).map((o) => (typeof o === 'string' ? o : o?.path)).filter((x) => typeof x === 'string' && x.trim()).map((x) => x.trim().replace(/\\/g, '/').replace(/^\.\//, '')))
+    } catch { return new Set() }
+  }
+  return new Set()
+}
+
+/** Kit-owned by the project's own checker (scripts/kit-owned.mjs, when it has one); an override is always the project's. */
+export function kitOwned(root, file) {
+  const rel = toPosix(relative(canon(root), canon(file)))
+  if (projectOverrides(root).has(rel)) return { owned: false, out: '' }
   const checker = join(root, 'scripts', 'kit-owned.mjs')
   if (!existsSync(checker)) return { owned: false, out: '' }
   const r = spawnSync(process.execPath, [checker, `--file=${file}`], { cwd: root, encoding: 'utf8' })

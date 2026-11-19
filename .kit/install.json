@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.5.0"
+    "version": "3.7.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.5.0",
-  "commit": "bf394cfb98598efc88426f54768e5a91978b853d",
+  "ref": "v3.7.0",
+  "commit": "41a315ae65bf5f5ce430b2c08dd176737d6d2431",
   "packs": [
     "angular",
     "node-express"
@@ -18,7 +18,7 @@
       "source": "core/.claude/agents/git-agent.md"
     },
     ".claude/agents/orch-builder.md": {
-      "sha256": "6c7b81171bb52fc4f78fc953279a8698df2bad9bb12474e8bddd56d8ac747a8f",
+      "sha256": "c8bf1faec9f382239488900d0af98b21f51a3ad8fa5890677d979eb179827058",
       "kind": "managed",
       "source": "core/.claude/agents/orch-builder.md"
     },
@@ -628,7 +628,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "384bc5e40164c91e53851978e6290d0c6d1927673f9ca49ca4336488baab2dcb",
+      "sha256": "a0f81d8683a3d2f03609df24828dcb2b6113968866bb7a666eb6027baebd1f63",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -1058,7 +1058,7 @@
       "source": "core/scripts/lib/gate-select.mjs"
     },
     "scripts/lib/guard.mjs": {
-      "sha256": "8352c3e7ad88a691f3d54c506e8e83488294afeeee4a103eeac7db87d5b178e2",
+      "sha256": "bcecf9ab256363e215016a86143c61f1df032443c0ca67fd911c869516cdc9ea",
       "kind": "managed",
       "source": "core/scripts/lib/guard.mjs"
     },
@@ -1072,13 +1072,18 @@
       "kind": "managed",
       "source": "core/scripts/lib/merge-guard.mjs"
     },
+    "scripts/lib/notify.mjs": {
+      "sha256": "7bd5976ce26824d4e5f7553f799aaa5c172d6945fc3681e3b3943c9f785ac424",
+      "kind": "managed",
+      "source": "core/scripts/lib/notify.mjs"
+    },
     "scripts/lib/orch-folders.mjs": {
       "sha256": "6a5fec9d01cacf1d6745838f4e307cdfb3415f46cf222c58771d099fd62d5f9d",
       "kind": "managed",
       "source": "core/scripts/lib/orch-folders.mjs"
     },
     "scripts/lib/orch-run.mjs": {
-      "sha256": "f8bbaf75d52bec8b4d73e75fe217bb75a10241cecf402b405256e7d810651ae5",
+      "sha256": "55a4a276167ad8c1f86bdf45e2172ba3f3b0e558c2eb7f2ddac9e755dd6194c0",
       "kind": "managed",
       "source": "core/scripts/lib/orch-run.mjs"
     },
@@ -1093,7 +1098,7 @@
       "source": "core/scripts/lib/plan-deps.mjs"
     },
     "scripts/lib/plan-gate.mjs": {
-      "sha256": "a160837de7f15f52cfe32464b707da54c0c9db29a8743c447eb3b5c64906a45a",
+      "sha256": "e718b350307f164b08f2947eeac459fb98c7481510370c010e5a7dc55b8a1aa8",
       "kind": "managed",
       "source": "core/scripts/lib/plan-gate.mjs"
     },
@@ -1208,7 +1213,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "426c19727b2dda9c54957087b7574c18deb59b57c8901c4131866a27cd8124a5",
+      "sha256": "5f99418700725e7b647f8ff9ecf9cffad50c7682a17f6414de65237eb8c6b2c3",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
@@ -1298,7 +1303,7 @@
       "source": "core/scripts/reuse-scan.mjs"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "d4c8d6c98251b22aef925e9faa6ecfbeb5266aed1ab9970ff725d8887bdbbc0b",
+      "sha256": "479534749fc9ea3d53f70008b656176a927a0da460b0d036fef8f34e7c51c3fc",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
@@ -1474,38 +1479,92 @@
     ]
   },
   "kitCopies": {
-    ".claude/commands/commands.md": "66ee79291af577a0a9170f7c6f79b2ef357a66d375b29bfd3eed60257d9ea125",
-    ".claude/commands/fix.md": "67c15c0c6922125b123e7760a9ff2240070312e8d5f10d15e93c6a4ecf3567bc",
-    ".claude/references/prd-template.md": "3c05f0d67b20695755a94a44ac074183a858e0fdef99b0a54a3dba5695409732",
-    ".claude/settings.json": "4b4d0e0e8f51f5165f36fff207ba6fbfd2337ce6b2a197444f32ab2681d84823",
-    ".claude/skills/angularComponentStructure/SKILL.md": "f581029357ac6529d751ddcf000d9739d5108eea49674f08d011ac9db30a110f",
-    ".claude/skills/angularComponentStructure/evals/evals.json": "89d99840e8f006aefbb5ccc54712092354c0d6700218db370696edb42e4e71dd",
-    ".claude/skills/preflight/SKILL.md": "29e633ff547f99772acb8d37704727dbc0fdb48e37d4afac0539a6dd5bc3e05b",
-    ".claude/skills/save-plan/SKILL.md": "fb04ab24496588ae1ae0a9a145cd12b48d8dc9de5638608b0fed8ab3354b18e0",
-    ".claude/skills/techdebt/SKILL.md": "059df6041f98205c531e8fbe04ca23a41191951cfb7b5c158af994cd01a77f52",
+    ".claude/commands/commands.md": {
+      "sha256": "66ee79291af577a0a9170f7c6f79b2ef357a66d375b29bfd3eed60257d9ea125",
+      "base": ".kit/base/.claude/commands/commands.md.base"
+    },
+    ".claude/commands/fix.md": {
+      "sha256": "67c15c0c6922125b123e7760a9ff2240070312e8d5f10d15e93c6a4ecf3567bc",
+      "base": ".kit/base/.claude/commands/fix.md.base"
+    },
+    ".claude/references/prd-template.md": {
+      "sha256": "3c05f0d67b20695755a94a44ac074183a858e0fdef99b0a54a3dba5695409732",
+      "base": ".kit/base/.claude/references/prd-template.md.base"
+    },
+    ".claude/settings.json": {
+      "sha256": "4b4d0e0e8f51f5165f36fff207ba6fbfd2337ce6b2a197444f32ab2681d84823",
+      "base": ".kit/base/.claude/settings.json.base"
+    },
+    ".claude/skills/angularComponentStructure/SKILL.md": {
+      "sha256": "f581029357ac6529d751ddcf000d9739d5108eea49674f08d011ac9db30a110f",
+      "base": ".kit/base/.claude/skills/angularComponentStructure/SKILL.md.base"
+    },
+    ".claude/skills/angularComponentStructure/evals/evals.json": {
+      "sha256": "89d99840e8f006aefbb5ccc54712092354c0d6700218db370696edb42e4e71dd",
+      "base": ".kit/base/.claude/skills/angularComponentStructure/evals/evals.json.base"
+    },
+    ".claude/skills/preflight/SKILL.md": {
+      "sha256": "29e633ff547f99772acb8d37704727dbc0fdb48e37d4afac0539a6dd5bc3e05b",
+      "base": ".kit/base/.claude/skills/preflight/SKILL.md.base"
+    },
+    ".claude/skills/save-plan/SKILL.md": {
+      "sha256": "fb04ab24496588ae1ae0a9a145cd12b48d8dc9de5638608b0fed8ab3354b18e0",
+      "base": ".kit/base/.claude/skills/save-plan/SKILL.md.base"
+    },
+    ".claude/skills/techdebt/SKILL.md": {
+      "sha256": "059df6041f98205c531e8fbe04ca23a41191951cfb7b5c158af994cd01a77f52",
+      "base": ".kit/base/.claude/skills/techdebt/SKILL.md.base"
+    },
     ".cursor/rules/auth-and-logging-must-use-skill.mdc": "ea769c78d32aff10153c4058042ee49b7f3e8d42099e6e233a4c20117c419cad",
     ".cursor/rules/security.mdc": "a6cae5ccae91d2e6edc94dd5d7f1bf60c2602de860a21e791cafaf4a25320ec1",
-    ".github/workflows/ci.yml": "b8c5df3fb2b8c8e3d04fee17c5bc9eac0fe3bc924183d5d25848614dd5eb188a",
+    ".github/workflows/ci.yml": {
+      "sha256": "b8c5df3fb2b8c8e3d04fee17c5bc9eac0fe3bc924183d5d25848614dd5eb188a",
+      "base": ".kit/base/.github/workflows/ci.yml.base"
+    },
     ".gitignore": "a8edab5e475edea8e103799b0a83e0e3c2fd29001756cdd4d2ef6402a8937e17",
     ".mcp.json": "e7c01fbc3d15b719bdbcbd1f4ae26ab38d65340e7e49c0bf53e9d209207eedd5",
     ".nvmrc": "55075b5ec4e8b31936cbbc282b8829116d1fd48f2f2f1856dee592a6650700ce",
-    "AGENTS.md": "63a938f5a2cf7eab3bfa694da38a3ac5838f9adfc88a47141ddc15dfdef8b150",
-    "CLAUDE.md": "3101840353f1d783a31cd138ec29e74dcefe920dae371769f5fffc159ee80e4f",
+    "AGENTS.md": {
+      "sha256": "63a938f5a2cf7eab3bfa694da38a3ac5838f9adfc88a47141ddc15dfdef8b150",
+      "base": ".kit/base/AGENTS.md.base"
+    },
+    "CLAUDE.md": {
+      "sha256": "3101840353f1d783a31cd138ec29e74dcefe920dae371769f5fffc159ee80e4f",
+      "base": ".kit/base/CLAUDE.md.base"
+    },
     "_shared/current-state.md": "29dc119a1fca2d9255056c15187dd23fb7990b54a3d3504a2c33196e8fc0674b",
     "_shared/debt-baseline.json": "5d00bc6f73b586e76af9475537226618dd5336daebe970e9269640b16fe54333",
     "_shared/product-defaults.md": "01186ea0b745c7d34721f55072b34d0b1f03938cc8e49f391d058c5c96d0aec9",
     "_shared/tech-stack.md": "166dbec742ad26d14b948b202f550790d7c9920d7f4e07ec4c82bb66e1820d10",
-    "docs/agent/conventions.md": "6e49d4006e1bbfabc1c0533055c65d58ebb4d0bbe905b3c7607ba4d0935f746e",
-    "docs/agent/standards-backend.md": "4e0cff35e9c1638c11b4a5e8ee06279bf3640bf7fef6afd87fd506d0dfa497eb",
-    "docs/agent/standards-git.md": "0bc6194dfd50b856ad12e20473555bacc0c4f56bf85b744fafe1593e53a48216",
-    "docs/agent/standards-security.md": "f6a30973cba89b40ab16e2542e2a0147a2f382223f9a84ebb13182dcfc33ffb2",
-    "docs/agent/workflow-map.md": "248efb29af105b46f185ecc171b4ccac18d5557d7376df256593d5a7957a5aa0",
+    "docs/agent/conventions.md": {
+      "sha256": "6e49d4006e1bbfabc1c0533055c65d58ebb4d0bbe905b3c7607ba4d0935f746e",
+      "base": ".kit/base/docs/agent/conventions.md.base"
+    },
+    "docs/agent/standards-backend.md": {
+      "sha256": "4e0cff35e9c1638c11b4a5e8ee06279bf3640bf7fef6afd87fd506d0dfa497eb",
+      "base": ".kit/base/docs/agent/standards-backend.md.base"
+    },
+    "docs/agent/standards-git.md": {
+      "sha256": "0bc6194dfd50b856ad12e20473555bacc0c4f56bf85b744fafe1593e53a48216",
+      "base": ".kit/base/docs/agent/standards-git.md.base"
+    },
+    "docs/agent/standards-security.md": {
+      "sha256": "f6a30973cba89b40ab16e2542e2a0147a2f382223f9a84ebb13182dcfc33ffb2",
+      "base": ".kit/base/docs/agent/standards-security.md.base"
+    },
+    "docs/agent/workflow-map.md": {
+      "sha256": "248efb29af105b46f185ecc171b4ccac18d5557d7376df256593d5a7957a5aa0",
+      "base": ".kit/base/docs/agent/workflow-map.md.base"
+    },
     "docs/brain/agent-lessons/builder.md": "73bcbe105778217c7322d8d6a50bf40dbe396f0b17822d6fad871309712424fa",
     "docs/brain/agent-lessons/check-plan.md": "4fdda319fde5a74a9dc084d239fa4e1fafffc435f2dfd5b4bea8fae28829794a",
     "docs/brain/agent-lessons/planner.md": "c030d7136b0ca64d4ad32ba1c01d917d7d9a67b3cb29e01748da7ecef8c9147a",
     "docs/brain/agent-lessons/readiness.md": "705eb6fe70775108f6d44807694b5c106963307af29921fb0e789274702465e7",
     "docs/brain/agent-rules.md": "eb3d2492962b23bb201ba97aa5900d001ce78e20bf2c0af88558772788e6c762",
-    "docs/brain/component-families.md": "9df7dd68a9c8ac5e1d09d035045d9a3ef57ab61b4805d17ec9a3f3219017c0e3",
+    "docs/brain/component-families.md": {
+      "sha256": "9df7dd68a9c8ac5e1d09d035045d9a3ef57ab61b4805d17ec9a3f3219017c0e3",
+      "base": ".kit/base/docs/brain/component-families.md.base"
+    },
     "docs/brain/decision-log.md": "f899bf422310edfdb1d53ef505c84f410e8888e23baf9156a659af3c763a528a",
     "docs/brain/decisions/0001-lean-native-workflow.md": "695a92713a6a5d6ea54eb11cefedc360233e29887d577f9b1cd8ea0394d24294",
     "docs/brain/decisions/0004-full-draft-brain-proposals.md": "432a748d8e68417fed133e4fc89a244c33aec9470c4fcca63d40fc2ccbbcfdb0",
@@ -1532,9 +1591,21 @@
     "docs/brain/run-log.md": "65067b3dc5e879fdf318360d39b7510c7cc202a7283b4667dfa8c23d26d3770b",
     "docs/qa/styleqa-pages.json": "9fac18e5130b589f12adb10304bd6301a94f6109a3c0b49b0b5b9ad60819c882",
     "docs/qa/styleqa-theme.md": "fbcf66ad61d3ab29a8b27dd8916a1e9a68ee806299601154898044d4ca3d21d2",
-    "scripts/kit-manifest-check.mjs": "5d47c9ffa7e856734565a42ed572c167764d6faa0796ea3485a99032bcd4a8ac",
-    "scripts/lib/registry-families.mjs": "48b4a51b771e92b2c978bfc2b6379c6210f8618aebf9480cc43923e42e2c6a5c",
-    "scripts/pre-commit-security-grep.mjs": "c36eb001a4facd1dadd336b963bdb9dd533e2f853f8904d119c5bd8d5365f2d1",
-    "scripts/preflight.mjs": "933b8f2b460cd590c34602d3ce788b6beff098482508455ec832daea9cb5d68d"
+    "scripts/kit-manifest-check.mjs": {
+      "sha256": "bc435a17e4030483a0fdabcc810ab5c66343e2458170cd319320d9d1d3144a4e",
+      "base": ".kit/base/scripts/kit-manifest-check.mjs.base"
+    },
+    "scripts/lib/registry-families.mjs": {
+      "sha256": "48b4a51b771e92b2c978bfc2b6379c6210f8618aebf9480cc43923e42e2c6a5c",
+      "base": ".kit/base/scripts/lib/registry-families.mjs.base"
+    },
+    "scripts/pre-commit-security-grep.mjs": {
+      "sha256": "c36eb001a4facd1dadd336b963bdb9dd533e2f853f8904d119c5bd8d5365f2d1",
+      "base": ".kit/base/scripts/pre-commit-security-grep.mjs.base"
+    },
+    "scripts/preflight.mjs": {
+      "sha256": "933b8f2b460cd590c34602d3ce788b6beff098482508455ec832daea9cb5d68d",
+      "base": ".kit/base/scripts/preflight.mjs.base"
+    }
   }
 }
