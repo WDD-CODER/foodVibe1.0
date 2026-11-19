@@ -53,6 +53,7 @@ public/assets/data/dictionary.json
 e2e/ui/647-1.spec.ts
 docs/brain/component-families.md
 docs/brain/inventory.md
+src/testing/test-lucide-icons.ts
 ```
 
 ## Read Scope
