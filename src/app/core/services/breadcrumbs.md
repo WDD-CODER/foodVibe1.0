@@ -110,6 +110,8 @@ Services live under `core/` and are injected into pages and shared UI. Data serv
 
 ## Development Notes
 
+- `notifications.service.ts`: the signed-in user's alerts (signals, polls every 60 s while the tab is visible, `markRead`, `markAllRead`); used by the header bell (plan 646).
+
 - New entity CRUD: model in `core/models/`, service here, resolver in `core/resolvers/`, routes in `app.routes.ts`.
 - Jasmine specs colocated as `*.spec.ts`.
 
