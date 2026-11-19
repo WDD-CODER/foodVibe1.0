@@ -43,6 +43,10 @@ export interface LearningWeekRow {
   week: string
   drafts: number
   confirmed: number
+  /** Plan 642: saved drafts, saved ÷ made (two decimals), pending older than 24 hours. */
+  confirmedCount?: number
+  confirmedRate?: number
+  abandoned?: number
   avgKeptRatio: number | null
 }
 

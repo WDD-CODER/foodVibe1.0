@@ -13,6 +13,24 @@ describe('weekStart', () => {
   })
 })
 
+describe('buildLearningStats (plan 642)', () => {
+  it('9 drafts with 1 confirmed: rate 0.11, average 1, one save', () => {
+    const rows = [d({ keptRatio: 1 }), ...Array.from({ length: 8 }, () => d({ status: 'pending', keptRatio: undefined }))]
+    const [row] = buildLearningStats(rows, { dayOf: jer, now: T })
+    expect(row).toMatchObject({ drafts: 9, confirmedRate: 0.11, avgKeptRatio: 1, confirmedCount: 1, abandoned: 0 })
+  })
+  it('a pending draft older than 24 hours is abandoned', () => {
+    const rows = [d({ status: 'pending', at: T - 25 * 3600000 }), d({ status: 'pending', at: T - 3600000 })]
+    const [row] = buildLearningStats(rows, { dayOf: jer, now: T })
+    expect(row.abandoned).toBe(1)
+    expect(row.weeks[0].abandoned).toBe(1)
+  })
+  it('no confirmed draft gives a null average', () => {
+    const [row] = buildLearningStats([d({ status: 'pending' })], { dayOf: jer, now: T })
+    expect(row).toMatchObject({ avgKeptRatio: null, confirmedCount: 0, confirmedRate: 0 })
+  })
+})
+
 describe('buildLearningStats', () => {
   it('averages confirmed scored drafts', () => {
     const [row] = buildLearningStats([d({ keptRatio: 0.5 }), d({ keptRatio: 1 })], { dayOf: jer })

@@ -1,6 +1,7 @@
 <section class="learning c-glass-panel" data-testid="platform-learning">
   <h2 class="learning__title">{{ 'platform_learning_title' | translatePipe }}</h2>
   <p class="learning__desc">{{ 'platform_learning_desc' | translatePipe }}</p>
+  <p class="learning__hint" data-testid="learning-kept-hint">{{ 'platform_learning_kept_hint' | translatePipe }}</p>
 
   @if (!isLoading_()) {
     @if (fileStore_() === false) {
@@ -37,8 +38,16 @@
                   }
                 </td>
                 <td dir="ltr" class="c-num">{{ flow.drafts }}</td>
-                <td dir="ltr" class="c-num">{{ flow.confirmed }}</td>
-                <td dir="ltr" class="c-num">{{ pct(flow.avgKeptRatio) }}</td>
+                <td dir="ltr" class="c-num" data-testid="learning-saved">{{ savedOf(flow) }}</td>
+                <td
+                  dir="ltr"
+                  class="c-num"
+                  data-testid="learning-accuracy"
+                  [class.learning__low]="isLowSample(flow)"
+                  [attr.title]="isLowSample(flow) ? ('platform_learning_low_sample' | translatePipe) : null"
+                >
+                  {{ accuracy(flow) }}
+                </td>
                 <td>
                   <button
                     type="button"
@@ -60,8 +69,15 @@
                       <span dir="ltr" class="c-num">{{ w.week | date: 'dd/MM/yy' }}</span>
                     </td>
                     <td dir="ltr" class="c-num">{{ w.drafts }}</td>
-                    <td dir="ltr" class="c-num">{{ w.confirmed }}</td>
-                    <td dir="ltr" class="c-num">{{ pct(w.avgKeptRatio) }}</td>
+                    <td dir="ltr" class="c-num">{{ savedOf(w) }}</td>
+                    <td
+                      dir="ltr"
+                      class="c-num"
+                      [class.learning__low]="isLowSample(w)"
+                      [attr.title]="isLowSample(w) ? ('platform_learning_low_sample' | translatePipe) : null"
+                    >
+                      {{ accuracy(w) }}
+                    </td>
                     <td></td>
                   </tr>
                 }
