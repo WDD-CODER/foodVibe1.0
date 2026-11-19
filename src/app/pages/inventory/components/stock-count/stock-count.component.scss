@@ -36,6 +36,10 @@
     font-weight: 600;
   }
 
+  .stock-count__ai-tag {
+    margin-inline-start: var(--space-2);
+  }
+
   .stock-count__error-icon {
     margin-inline-end: var(--space-1);
 

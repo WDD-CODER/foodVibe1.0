@@ -2607,6 +2607,19 @@
     "stk_col_on_hand": "במלאי",
     "stk_col_minimum": "מינימום",
     "stk_col_counted_on": "נספר בתאריך",
-    "stk_uncounted_note": "{n} מוצרים עם מינימום עוד לא נספרו"
+    "stk_uncounted_note": "{n} מוצרים עם מינימום עוד לא נספרו",
+    "stk_ai_open": "ספירה בקול או בטקסט",
+    "stk_ai_reading": "קוראים את הספירה...",
+    "stk_ai_tag": "הצעת AI",
+    "stk_ai_applied": "{n} שורות מולאו כהצעה. בדקו ותקנו לפני סיום הספירה",
+    "stk_ai_nothing_found": "לא זוהו מוצרים בטקסט",
+    "stk_ai_unmatched_title": "לא זוהו",
+    "stk_ai_conflict_title": "כבר נספר",
+    "stk_ai_on_sheet": "בדף",
+    "stk_ai_suggested": "הוצע",
+    "stk_ai_replace": "החלפה",
+    "stk_ai_keep": "השארה",
+    "stk_ai_failed": "קריאת הספירה נכשלה. אפשר לנסות שוב או לספור ידנית",
+    "stk_ai_too_many_products": "יש יותר מ-800 מוצרים, ולכן ספירה בקול לא זמינה כרגע"
   }
 }
