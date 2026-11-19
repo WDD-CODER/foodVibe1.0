@@ -625,6 +625,6 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 646
 - Use: `src/app/core/services/notifications.service.ts` (the signed-in user's alerts, polled every 60 s while the tab is visible) and `src/app/core/components/notification-bell/notification-bell.component.ts` (the header bell with the unread count and the list); the server side is `server/services/notifications.js` (`createPriceChangeAlerts`, called by the invoice apply) and `server/routes/notifications.js`; the shape is `shared/schemas/entities/notification.schema.ts`.
-- Pieces: NotificationsService, NotificationBellComponent, app-notification-bell, createPriceChangeAlerts.
+- Pieces: NotificationsService, NotificationBellComponent, app-notification-bell, createPriceChangeAlerts, .bell__btn, .bell__count, .bell__panel, .bell__head, .bell__all, .bell__empty, .bell__list, .bell__item, .bell__item--up, .bell__item--down, .bell__item--unread, .bell__meta.
 - When: a person must be told something at once (a price moved beyond the threshold); a new alert kind adds a `kind` to the schema and a writer next to `createPriceChangeAlerts`, never a second list or bell.
 - Known copies: none.

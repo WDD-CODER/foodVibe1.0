@@ -1,7 +1,6 @@
 <nav class="header-nav" dir="rtl">
   <div class="auth-section">
     @if (isLoggedIn()) {
-      <app-notification-bell />
       <div class="user-chip">
         <div class="avatar-wrapper">
           @if (showAvatarImg()) {
@@ -45,6 +44,7 @@
           }
         </div>
       </div>
+      <app-notification-bell />
     } @else {
       <button
         type="button"

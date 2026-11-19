@@ -126,6 +126,19 @@ append the path to the scope block above and retry.
   `c-chip` for the count and the empty-state family for "no alerts".
 - the diagnosis main-menu entry — family: module-gate — rung: 1 — why: the same `modules.has` pattern the events entry
   uses (`header.component.ts:70`).
+- new component notification-bell — family: none — rung: 4 — why: no header popover exists.
+- new class .bell__btn — family: none — rung: 4 — why: the bell button wrapper over `c-icon-btn`.
+- new class .bell__count — family: none — rung: 4 — why: positions the `c-chip__count` badge.
+- new class .bell__panel — family: none — rung: 4 — why: the popover box.
+- new class .bell__head — family: none — rung: 4 — why: the popover heading row.
+- new class .bell__all — family: none — rung: 4 — why: the mark-all link button.
+- new class .bell__empty — family: none — rung: 4 — why: the "no alerts" line.
+- new class .bell__list — family: none — rung: 4 — why: the popover list.
+- new class .bell__item — family: none — rung: 4 — why: one alert row button.
+- new class .bell__item--up — family: none — rung: 4 — why: price-rise accent.
+- new class .bell__item--down — family: none — rung: 4 — why: price-fall accent.
+- new class .bell__item--unread — family: none — rung: 4 — why: unread weight.
+- new class .bell__meta — family: none — rung: 4 — why: the time and business line.
 
 ## Defaults
 
