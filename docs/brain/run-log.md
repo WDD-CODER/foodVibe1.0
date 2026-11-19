@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (52 runs): plans 166 · merged 145 · parked 18 · fix rounds 61 · escalations 30 · gate fails 3 · ✗ 14 · checker misses 0 — per run: plans 3.19 · parked 0.35 · fix rounds 1.17 · ✗ per plan 0.08
+Earlier (53 runs): plans 169 · merged 148 · parked 18 · fix rounds 62 · escalations 30 · gate fails 4 · ✗ 14 · checker misses 0 — per run: plans 3.19 · parked 0.34 · fix rounds 1.17 · ✗ per plan 0.08
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-14 | run-597 | 597,598,599 | 3 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-14 | batch-6 | 582,595,596 | 3 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-611 | 611 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-14 | run-601 | 601,602,603,605,606 | 5 | 0 | - | 2 | 2 | 1 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (52 runs): plans 166 · merged 145 · parked 18 · fix rounds 61 · esca
 | 2026-11-18 | mod-access-ui | 632 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-history | 638,639 | 2 | 0 | - | 2 | 1 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-18 | mod-stock-srv | 635 | 1 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-19 | mod-diag | 633,634 | 2 | 0 | - | 2 | 0 | 2 | ok | - | - | - |
+| 2026-11-19 | mod-diag | 633,634 | 2 | 0 | - | 2 | 0 | 2 | ok | 0 | 0 | 0 |
+| 2026-11-19 | mod-stock | 636,637 | 2 | 0 | - | 1 | 0 | 1 | ok | - | - | - |
