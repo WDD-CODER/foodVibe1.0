@@ -48,8 +48,9 @@ describe('UserManagementComponent', () => {
     admin = jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsers', 'deleteUser'])
     admin.getUsers.and.returnValue(of([MINE, OWNER, STAFF]))
     admin.deleteUser.and.returnValue(of({ ok: true, deletedBusiness: true, usersDeleted: 2 }))
-    confirm = jasmine.createSpyObj<ConfirmModalService>('ConfirmModalService', ['open'])
+    confirm = jasmine.createSpyObj<ConfirmModalService>('ConfirmModalService', ['open', 'openTernary'])
     confirm.open.and.resolveTo(true)
+    confirm.openTernary.and.resolveTo('confirm')
     msg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
 
     await TestBed.configureTestingModule({
@@ -80,13 +81,32 @@ describe('UserManagementComponent', () => {
     expect(text).toContain('business_role_staff')
   })
 
-  it('deleting an owner asks twice and deletes only after both yes', async () => {
+  it('deleting an owner asks, then the learned-data question, then the final confirm; keep deletes with false', async () => {
     await component.onDeleteUser(OWNER)
     expect(confirm.open).toHaveBeenCalledTimes(2)
     expect(confirm.open.calls.argsFor(0)[0]).toContain('delete_business_confirm')
+    expect(confirm.openTernary).toHaveBeenCalledOnceWith('delete_business_learned_question', {
+      variant: 'danger',
+      saveLabel: 'delete_business_learned_keep',
+      saveButtonLabel: 'delete_business_learned_erase'
+    })
     expect(confirm.open.calls.argsFor(1)[0]).toBe('delete_business_confirm_final')
-    expect(admin.deleteUser).toHaveBeenCalledOnceWith('o1')
+    expect(admin.deleteUser).toHaveBeenCalledOnceWith('o1', false)
     expect(msg.onSetSuccessMsg).toHaveBeenCalledWith('business_deleted')
+  })
+
+  it('"erase it too" adds the note to the final confirm and deletes with true', async () => {
+    confirm.openTernary.and.resolveTo('save')
+    await component.onDeleteUser(OWNER)
+    expect(confirm.open.calls.argsFor(1)[0]).toBe('delete_business_confirm_final delete_business_learned_erase_note')
+    expect(admin.deleteUser).toHaveBeenCalledOnceWith('o1', true)
+  })
+
+  it('cancel at the learned-data question deletes nothing and skips the final confirm', async () => {
+    confirm.openTernary.and.resolveTo('cancel')
+    await component.onDeleteUser(OWNER)
+    expect(confirm.open).toHaveBeenCalledTimes(1)
+    expect(admin.deleteUser).not.toHaveBeenCalled()
   })
 
   it('the second question for an owner asks for the business name', async () => {
@@ -126,7 +146,8 @@ describe('UserManagementComponent', () => {
     admin.deleteUser.and.returnValue(of({ ok: true, deletedBusiness: false, usersDeleted: 1 }))
     await component.onDeleteUser(STAFF)
     expect(confirm.open).toHaveBeenCalledTimes(1)
-    expect(admin.deleteUser).toHaveBeenCalledOnceWith('s1')
+    expect(confirm.openTernary).not.toHaveBeenCalled()
+    expect(admin.deleteUser).toHaveBeenCalledOnceWith('s1', false)
     expect(msg.onSetSuccessMsg).toHaveBeenCalledWith('user_deleted')
   })
 

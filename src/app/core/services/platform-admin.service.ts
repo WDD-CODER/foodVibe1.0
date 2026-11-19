@@ -94,6 +94,16 @@ export interface AdminTermRow {
   createdAt: number | null
 }
 
+/** Plan 639: what the platform admin's erase of learned data removed, per kind. */
+export interface EraseCounts {
+  promoted: number
+  drafts: number
+  aliasesPulled: number
+  aliasesDeleted: number
+  profilesPulled: number
+  profilesDeleted: number
+}
+
 /** Plan 620: a row from an older server answer has no module or AI fields; give it the defaults. */
 function withPlatformFields(row: BusinessRow): BusinessRow {
   return {
@@ -239,5 +249,16 @@ export class PlatformAdminService {
       )
     )
     return res.rows
+  }
+
+  /** Plan 639: erases what the platform learned from one business; the reason is kept in its history. */
+  async eraseLearnedData(businessId: string, reason: string): Promise<EraseCounts> {
+    const res = await firstValueFrom(
+      this.http.post<{ ok: boolean; counts: EraseCounts }>(
+        `${environment.apiUrl}${API.admin(`businesses/${businessId}/erase-learned`)}`,
+        { reason }
+      )
+    )
+    return res.counts
   }
 }

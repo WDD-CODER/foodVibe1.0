@@ -20,7 +20,7 @@ const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 const { containsInjectionPattern, scanRecipeDraftForInjection, draftCloseness } = require('../services/ai-recipe-helpers')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
 const { mayLearnFrom } = require('../utils/ai-learning')
-const { setAiPrivate, deleteBusinessServerData } = require('../services/business')
+const { setAiPrivate, deleteBusinessServerData, eraseLearnedData } = require('../services/business')
 
 const router = Router()
 
@@ -65,12 +65,18 @@ router.delete('/users/:userId', verifyToken, requirePlatformAdmin, async (req, r
       return res.status(403).json({ error: 'Cannot delete your own business' })
     }
     const wholeBusiness = Boolean(target.businessId) && target.businessRole !== 'staff'
+    // Plan 639: only the exact string 'true' also erases what was learned from the business; staff deletes ignore it.
+    const eraseLearned = wholeBusiness && req.query.eraseLearned === 'true'
+    let eraseCounts
     let usersDeleted = 1
     if (wholeBusiness) {
       const { businessId } = target
       try {
         const business = await col('businesses').findOne({ _id: businessId })
-        if (business) await deleteBusinessServerData(mongoose.connection.db, business, req.log)
+        if (business) {
+          if (eraseLearned) eraseCounts = await eraseLearnedData(mongoose.connection.db, businessId)
+          await deleteBusinessServerData(mongoose.connection.db, business, req.log)
+        }
       } catch (err) {
         req.log.error({ err, event: 'admin.users_delete.extras_failed', businessId })
       }
@@ -82,6 +88,7 @@ router.delete('/users/:userId', verifyToken, requirePlatformAdmin, async (req, r
       if (!target.businessId) await Promise.all(ALL_USER_ENTITY_TYPES.map(t => col(t).deleteMany({ userId })))
       await User.deleteOne({ _id: userId })
     }
+    req.log.info({ event: 'admin.users_delete', deletedBusiness: wholeBusiness, eraseLearned, ...(eraseCounts && { counts: eraseCounts }) })
     res.json({ ok: true, deletedBusiness: wholeBusiness, usersDeleted })
   } catch (err) {
     req.log.error({ err, event: 'admin.users_delete.failed' })
@@ -313,12 +320,10 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
       else $set.aiMonthlyTokenCap = aiMonthlyTokenCap
       changed.push('aiMonthlyTokenCap')
     }
-    // Plan 618 (C-LEARN): aiPrivate is written only through setAiPrivate, which also removes the business's shared copies.
-    let removed
+    // Plan 639 (C-LEARN): private only stops learning from now on; erasing what was learned is POST .../erase-learned.
     if (aiPrivate !== undefined) {
       const priv = await setAiPrivate(req.params.id, aiPrivate)
       if (!priv.matchedCount) return res.status(404).json({ error: 'Business not found' })
-      removed = priv.removed
       changed.push('aiPrivate')
     }
     const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason, changed, changes: platformChangesOf(before, { modules, aiMonthlyTokenCap, aiPrivate }) }
@@ -329,7 +334,7 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
     if (!after) return res.status(404).json({ error: 'Business not found' })
     clearModuleCache(req.params.id)
     if (aiMonthlyTokenCap !== undefined) clearCapCache(req.params.id)
-    req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed, ...(removed !== undefined && { removed }) })
+    req.log.info({ event: 'admin.platform.updated', businessId: req.params.id, changed })
     res.json({
       ok: true,
       modules: modulesOf(after),
@@ -338,6 +343,29 @@ router.put('/businesses/:id/platform', verifyToken, requirePlatformAdmin, async 
     })
   } catch (err) {
     req.log.error({ err, event: 'admin.platform.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 639 (C-LEARN): the platform admin erases what was learned from one business, on its request; the reason is kept.
+router.post('/businesses/:id/erase-learned', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : ''
+  if (reason.length < 1 || reason.length > 300) return res.status(400).json({ error: 'Validation failed' })
+  const businessId = req.params.id
+  try {
+    const business = await col('businesses').findOne({ _id: businessId }, { projection: { _id: 1 } })
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    const counts = await eraseLearnedData(mongoose.connection.db, businessId)
+    const actor = actorOf(req)
+    const row = {
+      at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), reason,
+      changed: ['learnedData'], changes: [{ field: 'learnedData', from: '', to: 'erased' }]
+    }
+    await col('businesses').updateOne({ _id: businessId }, { $push: { platformHistory: { $each: [row], $slice: -50 } } })
+    req.log.info({ event: 'admin.learned_data.erased', businessId, counts })
+    res.json({ ok: true, counts })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.learned_data.erase_failed', businessId })
     res.status(500).json({ error: 'Server error' })
   }
 })

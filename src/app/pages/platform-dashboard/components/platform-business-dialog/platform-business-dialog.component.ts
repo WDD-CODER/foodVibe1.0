@@ -20,6 +20,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 import { PlatformAdminService, type PlatformUpdateBody } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -50,6 +51,7 @@ export function describePlatformChange(change: PlatformChange, translate: (key: 
       .replace('{from}', show(change.from))
       .replace('{to}', show(change.to))
   }
+  if (change.field === 'learnedData') return translate('platform_history_learned_erased')
   if (change.field === 'aiPrivate') {
     return translate(change.to === 'true' ? 'platform_history_private_on' : 'platform_history_private_off')
   }
@@ -80,6 +82,7 @@ export class PlatformBusinessDialogComponent {
   private readonly logging = inject(LoggingService)
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly confirmModal = inject(ConfirmModalService)
   private readonly host = inject(ElementRef<HTMLElement>)
   private readonly injector = inject(Injector)
 
@@ -99,6 +102,12 @@ export class PlatformBusinessDialogComponent {
   protected readonly history_ = signal<PlatformHistoryRow[] | null>(null)
   protected readonly historyFailed_ = signal(false)
   private historyToken_ = 0
+  protected readonly isEraseOpen_ = signal(false)
+  protected readonly eraseReason_ = signal('')
+  protected readonly isErasing_ = signal(false)
+  protected readonly eraseDone_ = signal<string | null>(null)
+  protected readonly eraseFailed_ = signal(false)
+  protected readonly eraseReasonMissing_ = computed(() => this.eraseReason_().trim().length < 1)
 
   /** The cap as typed: `null` when emptied, `NaN` when it is not a whole number of 0 or more. */
   private readonly capValue_ = computed<number | null>(() => {
@@ -193,6 +202,40 @@ export class PlatformBusinessDialogComponent {
   /** A row written before plan 638 has no values: its field labels only. */
   protected oldFieldLabels(row: PlatformHistoryRow): string {
     return row.changed.map((f) => this.translation.translate('platform_history_field_' + f)).join(', ')
+  }
+
+  /** Plan 639: shows the reason field for the explicit erase of what was learned from the business. */
+  protected toggleErase(): void {
+    this.isEraseOpen_.update((open) => !open)
+    this.eraseFailed_.set(false)
+  }
+
+  /** Plan 639: asks once more, then erases; the history panel, when open, is read again. */
+  protected async confirmErase(): Promise<void> {
+    const t = this.dialog.current_()
+    if (!t || this.isErasing_() || this.eraseReasonMissing_()) return
+    const message = this.translation.translate('platform_erase_confirm').replace('{name}', t.name)
+    if (!(await this.confirmModal.open(message, { variant: 'danger', saveLabel: 'remove' }))) return
+    this.isErasing_.set(true)
+    this.eraseFailed_.set(false)
+    this.eraseDone_.set(null)
+    try {
+      const counts = await this.admin.eraseLearnedData(t.businessId, this.eraseReason_().trim())
+      const total = Object.values(counts).reduce((sum, n) => sum + n, 0)
+      this.eraseDone_.set(this.translation.translate('platform_erase_done').replace('{count}', String(total)))
+      this.eraseReason_.set('')
+      this.isEraseOpen_.set(false)
+      if (this.isHistoryOpen_()) void this.loadHistory_()
+    } catch (err) {
+      this.eraseFailed_.set(true)
+      this.logging.error({
+        event: 'platform.erase_learned_failed',
+        message: 'Erasing what was learned from a business failed',
+        context: { businessId: t.businessId, err: String(err) }
+      })
+    } finally {
+      this.isErasing_.set(false)
+    }
   }
 
   protected cancel(): void {

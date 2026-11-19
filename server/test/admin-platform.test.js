@@ -64,7 +64,7 @@ describe('PUT /admin/businesses/:id/platform', () => {
     expect(doc.platformHistory[1].changed).toEqual(['aiMonthlyTokenCap', 'aiPrivate'])
   })
 
-  it('aiPrivate true stores the flag, appends one history row and removes the promoted copy (plan 618)', async () => {
+  it('aiPrivate true stores the flag, appends one history row and keeps what was learned (plan 639)', async () => {
     const shots = testDb().collection('GEMINI_SHOTS')
     await shots.deleteMany({})
     await shots.insertOne({ businessId: '__master__', prompt: 'soup', draft: {}, status: 'approved', promotedFrom: { businessId: 'bA', shotId: 'x1' }, createdAt: new Date() })
@@ -75,7 +75,19 @@ describe('PUT /admin/businesses/:id/platform', () => {
     expect(doc.aiPrivate).toBe(true)
     expect(doc.platformHistory).toHaveLength(1)
     expect(doc.platformHistory[0].changed).toEqual(['aiPrivate'])
-    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(0)
+    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(1)
+    const back = await put({ aiPrivate: false, reason: 'shared again' })
+    expect(back.status).toBe(200)
+    expect((await stored()).aiPrivate).toBe(false)
+    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(1)
+  })
+
+  it('aiPrivate true keeps the shared alias contributions of the business', async () => {
+    const aliases = testDb().collection('invoiceAliases')
+    await aliases.deleteMany({})
+    await aliases.insertOne({ _id: 'al1', businessId: '__master__', contributors: ['bA', 'bB'] })
+    expect((await put({ aiPrivate: true, reason: 'private now' })).status).toBe(200)
+    expect((await aliases.findOne({ _id: 'al1' })).contributors).toEqual(['bA', 'bB'])
   })
 
   it('keeps only the last 50 history rows', async () => {

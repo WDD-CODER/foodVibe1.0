@@ -14,9 +14,14 @@ export class UserAdminService {
     return this.http.get<AdminUser[]>(`${this.base}${API.admin('users')}`)
   }
 
-  deleteUser(userId: string): Observable<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }> {
+  /** Plan 639: `eraseLearned` also erases what the platform learned from the business (whole-business deletes only). */
+  deleteUser(
+    userId: string,
+    eraseLearned = false
+  ): Observable<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }> {
+    const suffix = eraseLearned ? '?eraseLearned=true' : ''
     return this.http.delete<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }>(
-      `${this.base}${API.admin(`users/${userId}`)}`
+      `${this.base}${API.admin(`users/${userId}`)}${suffix}`
     )
   }
 }

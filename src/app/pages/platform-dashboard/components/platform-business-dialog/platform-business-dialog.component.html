@@ -55,6 +55,47 @@
       </label>
     </div>
     <p class="fda-name">{{ 'platform_ai_private_hint' | translatePipe }}</p>
+    <button
+      type="button"
+      class="c-btn-ghost c-btn-ghost--sm pbd-erase"
+      data-testid="biz-erase-learned"
+      [attr.aria-expanded]="isEraseOpen_()"
+      [disabled]="isSaving_() || isErasing_()"
+      (click)="toggleErase()"
+    >
+      {{ 'platform_erase_learned' | translatePipe }}
+    </button>
+    @if (isEraseOpen_()) {
+      <div class="pbd-erase__box" data-testid="biz-erase-box">
+        <app-form-field label="platform_erase_reason" forId="biz-erase-reason">
+          <textarea
+            id="biz-erase-reason"
+            class="c-input"
+            rows="2"
+            maxlength="300"
+            data-testid="biz-erase-reason"
+            [value]="eraseReason_()"
+            (input)="eraseReason_.set($any($event.target).value)"
+          ></textarea>
+        </app-form-field>
+        <button
+          type="button"
+          class="c-btn-primary c-btn-primary--danger"
+          data-testid="biz-erase-confirm"
+          [disabled]="isErasing_() || eraseReasonMissing_()"
+          [attr.aria-busy]="isErasing_()"
+          (click)="confirmErase()"
+        >
+          {{ 'platform_erase_learned' | translatePipe }}
+        </button>
+      </div>
+    }
+    @if (eraseDone_()) {
+      <p class="fda-name" data-testid="biz-erase-done" role="status">{{ eraseDone_() }}</p>
+    }
+    @if (eraseFailed_()) {
+      <p class="fda-name" data-testid="biz-erase-failed" role="alert">{{ 'platform_erase_failed' | translatePipe }}</p>
+    }
     <app-form-field
       label="platform_fd_reason"
       forId="biz-reason"

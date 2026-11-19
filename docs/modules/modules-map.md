@@ -110,8 +110,8 @@ Confirm every grouping with `node scripts/plan-order.mjs` and the `/orchestrate`
   `render.yaml` and `docs/security-go-live.md`.
 - **G4:** the updated `docs/frontdesk/pilot-terms-draft.md` goes to Dandan's lawyer (sections 4.2, 7.1, 7.5, 7.6, 7.7).
   Ask the lawyer one more thing: the terms must say that what the platform learned from a business (supplier name
-  memory without prices, promoted recipe examples, accuracy numbers) stays after the business leaves, unless it was
-  in private mode.
+  memory without prices, promoted recipe examples, accuracy numbers) stays after the business leaves, unless the
+  business asked to erase it (Dandan, 2026-11-18; supersedes the 2026-11-17 rule).
 - **G1 was given on 2026-11-17** (`approve arch change INV-1`, in the Planner session). Critical Questions answered
   the same day: 624 a (scaling inputs return to the equipment form), 636 a (the old "low stock" number stays), 634 b
   (a VAT switch per diagnosis).
@@ -331,20 +331,23 @@ Numbers
 - `server/utils/ai-learning.js` → `mayLearnFrom(business) → business?.aiPrivate !== true`. The only test any code
   uses before it (a) copies something into a `'__master__'` pool, (b) lists a business's AI material for the
   platform admin. A private business keeps its own per-business memory and its own drafts.
-- `setAiPrivate(id, value)` in `server/services/business.js` replaces `setShareAiExamples`: turning private on
-  deletes the business's promoted `GEMINI_SHOTS` copies (`promotedFrom.businessId`) and calls
-  `forgetBusiness` (C-ALIAS; 618 leaves a one-line placeholder and 627 adds the real call).
+- `setAiPrivate(id, value)` in `server/services/business.js` replaces `setShareAiExamples`: it only writes the flag.
+  Private mode stops learning from that moment; what was already learned is kept and used (Dandan, 2026-11-18;
+  supersedes the 2026-11-17 rule that erased it). Old learned data is erased only on request: the platform admin
+  presses "erase what was learned" in the business dialog with a reason (`POST /api/v1/admin/businesses/:id/erase-learned`,
+  `eraseLearnedData` in `server/services/business.js`, one history row), or answers "erase it too" to the question the
+  delete of a business asks (`DELETE /api/v1/admin/users/:userId?eraseLearned=true`) (639).
 - Removed: `PUT /api/v1/business/share-ai-examples`, `shareAiExamplesInputSchema`,
   `BusinessService.updateShareAiExamples`. `business.shareAiExamples` stays in the schema as optional so stored
   documents validate; nothing reads it.
 - `GET /api/v1/admin/ai-shots` candidates and `POST …/promote`: every business with `mayLearnFrom` true.
-- Deleting a business keeps what the platform learned from it (Dandan, 2026-11-17). Always deleted, as the
+- Deleting a business keeps what the platform learned from it (Dandan, 2026-11-17; 2026-11-18: private or not alike). Always deleted, as the
   business's own records: `priceHistory`, its own `invoiceAliases`, its `storedFiles` and the provider files
-  (recordings, invoice files), its `businessAccess` rows. Kept when the business is not private at that moment: its
+  (recordings, invoice files), its `businessAccess` rows. Kept, whether the business is private or not: its
   contributions to the shared supplier brain, its promoted recipe examples, and its `aiDrafts` rows reduced to
   numbers (`feature`, `model`, `keptRatio`, `status`, `at`, `confirmedAt`, `businessId`; no input, draft, saved text
-  or user id). A private business leaves nothing. To erase everything of a business, the platform admin turns
-  private mode on, then deletes it (619).
+  or user id). To erase what was learned, the platform admin answers "erase it too" when deleting (639), or erases it
+  from the business dialog first.
 - The owner's card `ai-examples-share` shows one locked chip (shared / private) and a tooltip from a dictionary
   key saying private mode is arranged by contacting FoodVibe. It calls no route.
 
