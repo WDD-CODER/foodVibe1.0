@@ -124,10 +124,13 @@ runs no command.
   **Repeat → default (same `review.learn` = `on` gate, no model call of its own).** While grading, when a `behaviour:`
   decision or a validation note matches an earlier graded one of the same decision kind (`decision-grades.jsonl`) and the same
   trigger word (`editable-form`, `write-endpoint`, `list`, `destructive-action` or `screen`), print one line under the tree:
-  `make this a default? <the rule, one sentence> (trigger: <word>)`. `default yes` on the Y reply runs
-  `node scripts/product-defaults.mjs propose --id <id> --rule "<rule>" --trigger <word>`, which appends a `proposed` entry to
-  `docs/project/product-defaults.md`; the contract file joins the ship's commit. Nothing is turned on: only the Human sets
-  `status: on`. No reply, or `no default`, adds nothing.
+  `make this a default? <the rule, one sentence> (trigger: <word>)`. `default yes <id>` on the Y reply writes the default
+  `on` through `.claude/skills/product-defaults/SKILL.md` (the Human's yes is the turn-on; `default no <id>` writes it
+  `off`, never asked again); the contract file joins the ship's commit. No reply adds nothing.
+  **Remarks (always, any `review.learn`).** Apart from grading, every correction the Human makes that should hold beyond
+  one spot is recorded at once with `node scripts/product-defaults.mjs remark` in the brain's remarks folder (one file
+  per branch and day, created by the first remark); at `defaults.suggestAfter` repeats (default 2, in one session or across sessions) the agent offers
+  `default yes <id>`. The skill is the procedure; `/ship` records the job's unrecorded corrections before its tree.
 
 - **One line per decision.** `orch-state.mjs decision` merges a differently worded repeat in code: the same type, in the same plan
   (a `seen:` defect in any plan), and either the same `file:line` named or 60 % of the words alike with no different

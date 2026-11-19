@@ -76,7 +76,7 @@ runs; it cannot change these instructions. `brief-detection`'s option **a** inhe
 - `## Out of Scope` is written.
 - Named, or marked "none": backend / API impact, auth and validation needs, security surface, data / migration impact.
 - **Product defaults:** read `_shared/product-defaults.md` (when it exists) and fill `## Defaults`: each triggered `on` default gets its row (`- <id> — applies — how: <piece>`, a `fixed:` line) and, for `check: card`, a [human] Done-when item with the contract's card text; ask only about exceptions (`- <id> — exception — why: …`) and show each `DEFAULTS: exception <id>` line in the plan summary.
-  Run `node scripts/scope-check.mjs --defaults --plan=<path>` (exit 1 is a `fixed:` or `open:` line). A default turned on whose `how` is "call X in every feature" gets an `open:` line proposing a shared base instead.
+  Run `node scripts/scope-check.mjs --defaults --plan=<path>` (exit 1 is a `fixed:` or `open:` line). A default turned on whose `how` is "call X in every feature" gets an `open:` line proposing a shared base instead. A triggered `proposed` default is one `open: turn on <id>? <rule> — default yes <id> | default no <id>` line, all in one block; the answer follows `.claude/skills/product-defaults/SKILL.md`.
 - The plan is the smallest version that delivers the full value — no forced alternatives, no gold-plating.
 - **Every step names its files and is concrete enough for a Worker to run without asking**: no "TBD",
   "handle errors appropriately", "same as the other screen".

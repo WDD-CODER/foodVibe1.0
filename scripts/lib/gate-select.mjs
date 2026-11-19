@@ -63,17 +63,24 @@ export function runsInside(command, testScript) {
 /**
  * { run, skipped, lines, keys }: `run` = the commands to run (in order), `skipped` = those left out, `lines` = one `GATE:`
  * line per decision, `keys` = { command: cache key } of the commands that run (to record on a pass). `own` commands (the
- * plan's [auto] items) always run; `cache` = { key: plan } of earlier passes in this run.
+ * plan's [auto] items) always run; `cache` = { key: plan } of earlier passes in this run. `suites` are
+ * orchestrator.suiteTouches entries ({ command, touches }); `testCommand` is the gate's test script and `planOwn` the
+ * plan's own [auto] commands, the only commands a suite entry applies to.
  */
-export function selectGate({ commands = [], changed = [], ownCommands = [], testScript = '', cache = {}, root = null } = {}) {
+export function selectGate({ commands = [], changed = [], ownCommands = [], testScript = '', cache = {}, root = null, suites = [], testCommand = '', planOwn = [] } = {}) {
   const files = (Array.isArray(changed) ? changed : []).map(norm)
   const own = new Set((ownCommands ?? []).map((c) => String(c).trim()))
   const everything = files.some((f) => ALL_SELECT_FILES.includes(f))
+  // A test script that suiteTouches skips runs nothing: a suite it would have run (`once`) then runs on its own.
+  const testEntry = String(testCommand).trim() && !(planOwn ?? []).map((c) => String(c).trim()).includes(String(testCommand).trim())
+    ? (Array.isArray(suites) ? suites : []).map(entryOf).find((x) => x?.touches && x.command === String(testCommand).trim())
+    : null
+  const testSkipped = Boolean(testEntry) && !everything && !files.some((f) => picomatch(testEntry.touches, { dot: true })(f))
   const out = { run: [], skipped: [], lines: [], keys: {} }
   for (const e of (Array.isArray(commands) ? commands : []).map(entryOf).filter(Boolean)) {
     const { command, touches } = e
     if (own.has(command)) { out.run.push(command); continue }
-    if (runsInside(command, testScript)) {
+    if (!testSkipped && runsInside(command, testScript)) {
       out.skipped.push(command)
       out.lines.push(`GATE: once ${command} — runs inside npm run test`)
       continue
@@ -96,6 +103,29 @@ export function selectGate({ commands = [], changed = [], ownCommands = [], test
       out.keys[command] = key
     }
     out.run.push(command)
+  }
+  // orchestrator.suiteTouches: the test script and the plan's own [auto] commands with globs. They are in the gate list
+  // already, so a decision here only adds them to `skipped` (with its line) or records their cache key. The test script
+  // is skipped when no changed file matches; a plan-own command is never skipped by globs (its Done-when must pass once
+  // on this plan's code), only reused from a pass on the same files. A settings or dependency change runs both.
+  const owned = new Set((planOwn ?? []).map((c) => String(c).trim()))
+  for (const e of (Array.isArray(suites) ? suites : []).map(entryOf).filter((x) => x?.touches)) {
+    const { command, touches } = e
+    const isOwn = owned.has(command)
+    if ((!isOwn && command !== String(testCommand).trim()) || everything) continue
+    if (!isOwn && !files.some((f) => picomatch(touches, { dot: true })(f))) {
+      out.skipped.push(command)
+      out.lines.push(`GATE: skip ${command} — no change under ${touches.join(', ')}`)
+      continue
+    }
+    if (!root) continue
+    const key = cacheKey(command, touches, root)
+    if (cache?.[key]) {
+      out.skipped.push(command)
+      out.lines.push(`GATE: cached ${command} — passed on the same files in plan ${cache[key]}`)
+      continue
+    }
+    out.keys[command] = key
   }
   return out
 }
