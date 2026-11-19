@@ -66,16 +66,18 @@ describe('POST /ai/stock/extract', () => {
   it('returns only the caller products; an unknown name, no number and an empty name are not lines', async () => {
     fetchMock.mockResolvedValue(modelAnswer({ lines: [
       { spoken: 'קמח', quantity: 4, unit: null },
-      { spoken: 'בננות', quantity: 2, unit: null },
+      { spoken: 'banana', quantity: 2, unit: null },
       { spoken: 'חמוצים', quantity: 1, unit: 'kg' },
       { spoken: 'אורז', quantity: null, unit: null },
       { spoken: '', quantity: 3, unit: null },
     ] }))
-    const res = await post({ text: 'קמח 4 קילו, בננות 2, חמוצים 1, אורז' })
+    const res = await post({ text: 'קמח 4 קילו, banana 2, חמוצים 1, אורז' })
     expect(res.status).toBe(200)
     expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
     expect(res.body.unmatched).toEqual([
-      { spoken: 'בננות', quantity: 2 }, { spoken: 'חמוצים', quantity: 1, unit: 'kg' }, { spoken: 'אורז' },
+      { spoken: 'banana', status: 'unmatched', quantity: 2 },
+      { spoken: 'חמוצים', status: 'unmatched', quantity: 1, unit: 'kg' },
+      { spoken: 'אורז', status: 'unmatched', candidates: [{ productId: 'rice', nameHebrew: 'אורז' }] },
     ])
     const sent = sentBody()
     const user = sent.contents[0].parts[0].text
@@ -101,7 +103,25 @@ describe('POST /ai/stock/extract', () => {
     expect(sent).toContain('קמח 4 קילו')
   })
 
-  it('a spoken name matching two products is unmatched with both as candidates', async () => {
+  it('plan 650: a plural fills the singular product; onions are a choice, counted-before first; no other business', async () => {
+    await testDb().collection('products').updateOne({ _id: 'tomato' }, { $set: { nameHebrew: 'עגבניה' } })
+    await product('yellow', 'בצל צהוב')
+    await product('purple', 'בצל סגול')
+    await product('foreign', 'בצל אדום', 'b2')
+    await testDb().collection('stockCounts').insertOne({
+      _id: 'c1', businessId: 'b1', status: 'final', countedAt: 1, lines: [{ productId: 'purple', quantity: 1, unit: 'kg', baseQuantity: 1 }],
+    })
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [
+      { spoken: 'עגבניות', quantity: 3, unit: null }, { spoken: 'בצל', quantity: 2, unit: 'kg' },
+    ] }))
+    const res = await post({ text: 'שלושה עגבניות ושני קילו בצל' })
+    expect(res.body.lines).toEqual([{ productId: 'tomato', quantity: 3, unit: 'kg' }])
+    expect(res.body.unmatched).toHaveLength(1)
+    expect(res.body.unmatched[0]).toMatchObject({ spoken: 'בצל', status: 'choose', quantity: 2, unit: 'kg' })
+    expect(res.body.unmatched[0].candidates.map(c => c.productId)).toEqual(['purple', 'yellow'])
+  })
+
+  it('a spoken name matching two products is a choice with both as candidates', async () => {
     await product('whole', 'קמח מלא')
     await testDb().collection('products').updateOne({ _id: 'flour' }, { $set: { nameHebrew: 'קמח לבן' } })
     fetchMock.mockResolvedValue(modelAnswer({ lines: [{ spoken: 'קמח', quantity: 4, unit: 'kg' }] }))

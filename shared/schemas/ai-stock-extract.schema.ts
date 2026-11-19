@@ -32,10 +32,13 @@ export const stockExtractModelAnswerSchema = z.object({
 })
 
 export type StockExtractLine = { productId: string; quantity: number; unit: string }
-/** `candidates`: up to 5 products a spoken name could mean, when it matched more than one. */
+/** Plan 650: `choose` = several products fit (candidates best first); `unmatched` = none fit (candidates are the nearest). */
+export type StockExtractStatus = 'choose' | 'unmatched'
+/** `candidates`: up to 5 products a spoken name could mean. */
 export type StockExtractCandidate = { productId: string; nameHebrew: string }
 export type StockExtractUnmatched = {
   spoken: string
+  status?: StockExtractStatus
   quantity?: number
   unit?: string
   candidates?: StockExtractCandidate[]

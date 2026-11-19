@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { SearchComboboxComponent, type SearchPick } from 'src/app/shared/search-combobox/search-combobox.component'
 import { VoiceNoteComponent, type VoiceNoteSend } from 'src/app/shared/voice-note/voice-note.component'
 import { aiCapErrorKey } from 'src/app/core/utils/ai-error.util'
 import { GeminiService } from '@services/gemini.service'
@@ -19,10 +20,28 @@ export interface StockAiConflict {
   suggested: string
 }
 
-/** A part of the count the server could not place on a product: the words and the amount, as text. */
+/** A product the person can pick for a spoken line. */
+export interface StockAiProductOption {
+  productId: string
+  name: string
+}
+
+/**
+ * Plan 650: a spoken line the server did not place on one product: the words and the amount as text, whether several
+ * products fit (`choose`) or none did (`unmatched`, with the nearest), and whether it carries an amount to fill a row.
+ */
 export interface StockAiUnmatched {
   id: number
   text: string
+  status: 'choose' | 'unmatched'
+  candidates: StockAiProductOption[]
+  hasAmount: boolean
+}
+
+/** The person picked a product for a spoken line. */
+export interface StockAiPick {
+  id: number
+  productId: string
 }
 
 /** What the sheet gets when a count was read: the server's answer and where the words came from. */
@@ -39,7 +58,7 @@ export interface StockAiExtracted {
 @Component({
   selector: 'app-stock-ai-draft',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, LoaderComponent, VoiceNoteComponent],
+  imports: [LucideAngularModule, TranslatePipe, LoaderComponent, VoiceNoteComponent, SearchComboboxComponent],
   templateUrl: './stock-ai-draft.component.html',
   styleUrl: './stock-ai-draft.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -52,7 +71,12 @@ export class StockAiDraftComponent {
 
   readonly conflicts = input<StockAiConflict[]>([])
   readonly unmatched = input<StockAiUnmatched[]>([])
+  /** Every product of the business, for the search under a spoken line. */
+  readonly products = input<StockAiProductOption[]>([])
   readonly disabled = input(false)
+  readonly pick = output<StockAiPick>()
+  /** The person pressed «הוספת מוצר חדש» on a spoken line: the only way a line leads to a new item. */
+  readonly addNew = output<number>()
   readonly extracted = output<StockAiExtracted>()
   readonly busyChange = output<boolean>()
   readonly replace = output<string>()
@@ -63,6 +87,26 @@ export class StockAiDraftComponent {
   protected readonly busy_ = signal(false)
   protected readonly text_ = signal('')
   protected readonly switchLabel_ = signal('')
+
+  protected readonly queries_ = signal<Record<number, string>>({})
+  protected readonly labelOf_ = (option: StockAiProductOption): string => option.name
+  protected readonly keyOf_ = (option: StockAiProductOption): string => option.productId
+
+  protected query_(id: number): string {
+    return this.queries_()[id] ?? ''
+  }
+
+  protected setQuery_(id: number, value: string): void {
+    this.queries_.update((q) => ({ ...q, [id]: value }))
+  }
+
+  protected pickProduct_(id: number, productId: string): void {
+    this.pick.emit({ id, productId })
+  }
+
+  protected pickFromSearch_(id: number, picked: SearchPick<StockAiProductOption>): void {
+    this.pickProduct_(id, picked.option.productId)
+  }
 
   protected toggle_(): void {
     this.open_.update((v) => !v)

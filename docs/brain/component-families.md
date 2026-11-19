@@ -313,7 +313,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
 - Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
-- Plan 648: matching spoken names to products — `matchSpoken` in `server/utils/stock-extract.js`, on the server (normalized exact, then contains, then token overlap; more than one match = unmatched with up to 5 candidates), so the model never gets the catalog.
+- Plan 648: matching spoken names to products — `matchSpoken` in `server/utils/stock-extract.js`, on the server, so the model never gets the catalog. Plan 650: the Hebrew name folding (`foldWord`: ־ות / ־ים / ־ה endings dropped) and the score (exact > starts-with > contains > shared words; counted-before and minimum break ties) answer `matched`, `choose` (up to 5, best first) or `unmatched` (up to 5 nearest).
 - Plan 641: previousPriceOf(product, supplierId) in src/app/core/utils/price-change.util.ts is the one browser rule for the price an invoice line is compared with (the invoice supplier's own price, else the lowest other source's; null with none).
 - Plan 632: `APP_RELOAD` in `src/app/core/utils/app-reload.util.ts` is the one way to reload the whole application at a path (`UserService.switchBusiness` and a refresh that moves the business call it); specs replace the token, no page calls `window.location` itself.
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
@@ -610,7 +610,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### stock-ai-draft — `StockAiDraftComponent`
 
 - Status: stable — plan 637
-- Use: `src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.ts` — the "count by voice or text" section of the stock count sheet: the open button, the shared recorder (`app-voice-note`, purpose `stock`), the waiting state, the "not recognised" and "already counted" lists; it emits the server's answer and the sheet applies it.
+- Use: `src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.ts` — the "count by voice or text" section of the stock count sheet: the open button, the shared recorder (`app-voice-note`, purpose `stock`), the waiting state, the "not recognised" and "already counted" lists (plan 650: each spoken line shows its candidates as `c-chip--toggle` chips, an `app-search-combobox` of all products and «הוספת מוצר חדש»); it emits the server's answer and the sheet applies it.
 - Pieces: StockAiDraftComponent, app-stock-ai-draft.
 - When: a stock suggestion from voice or text is read and reviewed; never a second review UI for stock.
 - Known copies: none.

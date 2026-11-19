@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, OnInit, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
+import { Router } from '@angular/router'
 import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import type { Product } from '@models/product.model'
@@ -28,6 +29,8 @@ import { StockCountService } from '../../services/stock-count.service'
 import { StockBelowMinimumComponent } from './stock-below-minimum/stock-below-minimum.component'
 import {
   StockAiDraftComponent,
+  type StockAiPick,
+  type StockAiProductOption,
   type StockAiConflict,
   type StockAiExtracted,
   type StockAiUnmatched
@@ -126,6 +129,12 @@ export class StockCountComponent implements OnInit {
   private readonly source_ = signal<CountSource>('manual')
   private readonly draftIds_ = signal<string[]>([])
   private unmatchedSeq_ = 0
+  private readonly router_ = inject(Router)
+  /** The amount each spoken line carried, kept for when the person picks its product. */
+  private readonly amounts_ = new Map<number, { quantity?: number; unit?: string }>()
+  protected readonly productOptions_ = computed<StockAiProductOption[]>(() =>
+    this.products_().map((p) => ({ productId: p._id, name: p.nameHebrew }))
+  )
 
   protected readonly products_ = computed(() =>
     [...this.kitchen_.products_()].sort((a, b) => a.nameHebrew.localeCompare(b.nameHebrew, 'he'))
@@ -281,27 +290,20 @@ export class StockCountComponent implements OnInit {
     let applied = 0
     for (const line of lines) {
       const product = known.get(line.productId)
-      if (!product) continue
-      const state = this.rows_()[product._id]
-      if (!state?.counted) {
-        this.suggest_(product._id, line)
-        applied++
-      } else if (state.amount !== line.quantity || state.unit !== line.unit) {
-        const entry: PendingConflict = {
-          productId: product._id,
-          name: product.nameHebrew,
-          onSheet: `${state.amount} ${state.unit}`,
-          suggested: `${line.quantity} ${line.unit}`,
-          line
-        }
-        this.conflicts_.update((list) => [...list.filter((c) => c.productId !== product._id), entry])
-      }
+      if (product && this.place_(product, line)) applied++
     }
     if (unmatched.length) {
-      const added = unmatched.map((u) => ({
-        id: ++this.unmatchedSeq_,
-        text: [u.spoken, u.quantity, u.unit].filter((v) => v !== undefined && v !== '').join(' ')
-      }))
+      const added = unmatched.map((u): StockAiUnmatched => {
+        const id = ++this.unmatchedSeq_
+        this.amounts_.set(id, { quantity: u.quantity, unit: u.unit })
+        return {
+          id,
+          text: [u.spoken, u.quantity, u.unit].filter((v) => v !== undefined && v !== '').join(' '),
+          status: u.status === 'choose' ? 'choose' : 'unmatched',
+          candidates: (u.candidates ?? []).map((c) => ({ productId: c.productId, name: c.nameHebrew })),
+          hasAmount: u.quantity !== undefined
+        }
+      })
       this.unmatched_.update((list) => [...list, ...added])
     }
     if (draftId && !this.draftIds_().includes(draftId) && this.draftIds_().length < MAX_DRAFT_IDS) {
@@ -328,7 +330,48 @@ export class StockCountComponent implements OnInit {
   }
 
   protected dismissUnmatched(id: number): void {
+    this.amounts_.delete(id)
     this.unmatched_.update((list) => list.filter((u) => u.id !== id))
+  }
+
+  /** Plan 650: the person picked the product for a spoken line; its amount fills that product's row. */
+  protected pickForSpoken(pick: StockAiPick): void {
+    const amount = this.amounts_.get(pick.id)
+    const product = this.kitchen_.products_().find((p) => p._id === pick.productId)
+    if (!amount || amount.quantity === undefined || !product) return
+    const unit = amount.unit && unitOptionsFor(product).includes(amount.unit) ? amount.unit : product.baseUnit
+    if (this.place_(product, { productId: product._id, quantity: amount.quantity, unit })) {
+      this.userMsg_.onSetSuccessMsg(this.translation_.translate('stk_ai_applied').replace('{n}', '1'))
+    }
+    this.dismissUnmatched(pick.id)
+  }
+
+  /** Plan 650: «הוספת מוצר חדש» — the only way a spoken line leads to a new item; it opens the add-product page. */
+  protected addNewForSpoken(): void {
+    void this.router_.navigate(['/inventory/add'])
+  }
+
+  /**
+   * Fills the product's row with the suggestion, or lists a conflict when the person already counted it differently.
+   * Returns true when the row was filled.
+   */
+  private place_(product: Product, line: StockExtractLine): boolean {
+    const state = this.rows_()[product._id]
+    if (!state?.counted) {
+      this.suggest_(product._id, line)
+      return true
+    }
+    if (state.amount !== line.quantity || state.unit !== line.unit) {
+      const entry: PendingConflict = {
+        productId: product._id,
+        name: product.nameHebrew,
+        onSheet: `${state.amount} ${state.unit}`,
+        suggested: `${line.quantity} ${line.unit}`,
+        line
+      }
+      this.conflicts_.update((list) => [...list.filter((c) => c.productId !== product._id), entry])
+    }
+    return false
   }
 
   private suggest_(productId: string, line: StockExtractLine): void {
@@ -376,6 +419,7 @@ export class StockCountComponent implements OnInit {
     this.aiRows_.set(new Set())
     this.conflicts_.set([])
     this.unmatched_.set([])
+    this.amounts_.clear()
     this.source_.set(draft?.source ?? 'manual')
     this.draftIds_.set(draft?.draftIds ?? [])
     this.savedSnapshot_.set(this.snapshot_())

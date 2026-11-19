@@ -112,7 +112,10 @@
       <app-stock-ai-draft
         [conflicts]="conflicts_()"
         [unmatched]="unmatched_()"
+        [products]="productOptions_()"
         [disabled]="saving_()"
+        (pick)="pickForSpoken($event)"
+        (addNew)="addNewForSpoken()"
         (busyChange)="aiBusy_.set($event)"
         (extracted)="onExtracted($event)"
         (replace)="replaceWithSuggestion($event)"
