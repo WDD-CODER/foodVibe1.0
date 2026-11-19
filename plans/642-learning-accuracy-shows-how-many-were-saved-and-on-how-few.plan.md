@@ -74,6 +74,8 @@ append the path to the scope block above and retry.
 
 - the saved-of-made cell and the low-sample style — family: empty-state — rung: 1 — why: page-local cells in the
   existing learning table, as plan 630 declared its classes.
+- new class `.learning__low` (muted low-sample accuracy figure) — family: learning-stats — rung: 1 — why: page-local
+  modifier on the existing learning table cell; no shared family covers a low-sample state.
 
 ## Step 0 — Reality Check
 
