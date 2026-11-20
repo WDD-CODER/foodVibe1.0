@@ -302,6 +302,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`; the consultant's entry check `diagnosisGuard` in `src/app/pages/diagnosis/diagnosis.guard.ts` (plan 634: home modules while acting, `moduleGuard` at home).
 - When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
+- Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
 ### helpers — pure functions
 
@@ -321,6 +322,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `scalingRuleFrom(values, hadRule)` / `scalingRuleErrors(values)` in `src/app/core/utils/scaling-rule.util.ts`: the equipment loading rule (one per N guests, min, max) built and checked from form values; the full equipment form and the list's quick-edit popup both call it (plan 640).
 - `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key `ai_monthly_cap_reached` for the server's monthly-cap refusal, else null; every place that maps an AI 429 asks it first (plan 620).
 - Plan 636: `stock-count.util.ts` (`src/app/core/utils/stock-count.util.ts`) — `unitOptionsFor`, `belowMinimum` and `countedAtFromIso`, the pure rules of the stock count sheet; conversion itself stays the shared `toBase`.
+- Plan 651: `resolveUnit` in `server/utils/stock-extract.js` maps a spoken unit to a unit the product has (base, purchase units, known aliases such as «קילו»→kg); none fits → `unitNeedsFix` with `spokenUnit`. `matchSpoken` now answers `matched` only when no other product contains the spoken word.
 - Plan 649: the reference mapping — `supplierIdMap` / `resolveSourceSupplier` in `server/services/sync-master.js` (master supplier id → the business copy) is the one map; push (`toMasterSupplierId`) and the repair (`planProductRepair`) use the same rule; see the supplier-refs family.
 
 ### http — talking to the server

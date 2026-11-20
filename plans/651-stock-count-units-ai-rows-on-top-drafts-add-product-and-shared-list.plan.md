@@ -194,12 +194,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Ask whenever similar products fit and save the amount only in a unit the product has — the matcher rule, the unit mapping, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, shared/schemas/ai-stock-extract.schema.ts, server/test/stock-extract-util.test.js, server/test/ai-stock-extract.test.js
-- [ ] A2: Put the count on the shared list look — list shell, page header, one-line rows, the counter size — src/app/pages/inventory/components/stock-count/**, src/app/shared/counter/**, src/app/shared/page-header/**
-- [ ] A3: Show what the AI filled and the unit to fix — rows to the top, the move-counted button, the unit note, add-unit in the dropdown — src/app/pages/inventory/components/stock-count/**, src/app/core/services/unit-registry.service.ts, public/assets/data/dictionary.json
-- [ ] A4: Save the draft by itself and list past counts — autosave, the list, its specs — src/app/pages/inventory/components/stock-count/**, server/routes/stock.js, server/test/stock-counts.test.js
-- [ ] A5: Add a missing product and come back to the count — the return-to helper, the product form prefill and return, the specs — src/app/core/services/return-to.service.ts, src/app/pages/inventory/components/product-form/**
-- [ ] A6: Make the diagnosis menu entry visible and prove it all in the running app — the header check, the screen spec, then the Done-when commands in order — src/app/core/components/header/**, e2e/ui/651-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Ask whenever similar products fit and save the amount only in a unit the product has — the matcher rule, the unit mapping, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, shared/schemas/ai-stock-extract.schema.ts, server/test/stock-extract-util.test.js, server/test/ai-stock-extract.test.js
+- [x] A2: Put the count on the shared list look — list shell, page header, one-line rows, the counter size — src/app/pages/inventory/components/stock-count/**, src/app/shared/counter/**, src/app/shared/page-header/**
+- [x] A3: Show what the AI filled and the unit to fix — rows to the top, the move-counted button, the unit note, add-unit in the dropdown — src/app/pages/inventory/components/stock-count/**, src/app/core/services/unit-registry.service.ts, public/assets/data/dictionary.json
+- [x] A4: Save the draft by itself and list past counts — autosave, the list, its specs — src/app/pages/inventory/components/stock-count/**, server/routes/stock.js, server/test/stock-counts.test.js
+- [x] A5: Add a missing product and come back to the count — the return-to helper, the product form prefill and return, the specs — src/app/core/services/return-to.service.ts, src/app/pages/inventory/components/product-form/**
+- [x] A6: Make the diagnosis menu entry visible and prove it all in the running app — the header check, the screen spec, then the Done-when commands in order — src/app/core/components/header/**, e2e/ui/651-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 650 (statuses and the per-line choice).
@@ -215,3 +215,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the draft saves itself and the button goes — why: Dandan did not see what the button was for, and default
   `leave-and-return` already needs the work saved without asking.
 - decided: similar products always ask — why: Dandan, «עגבניות» → «עגבניה» is not the same item.
+- scope note: src/app/pages/inventory/services/stock-count.service.ts is outside the scope, so the past-counts list call lives in src/app/pages/inventory/components/stock-count/past-counts.service.ts (in scope) — reverse: move list() into StockCountService.
+- A6 finding: the phone bottom bar (≤620px) lists its links by hand and had no diagnosis entry; added it (header.component.html). The desktop pills already show it (spec exists); not checked in a running app (no app in this folder).
+- evidence: server vitest stock-extract-util / ai-stock-extract / stock-counts → 52 passed; ng test (stock-count, product-form, return-to, header, counter specs) → 108 passed; pnpm run build exit 0; pnpm run lint exit 0 (0 errors).
+- [ui] item 651-1 written (e2e/ui/651-1.spec.ts), not run.

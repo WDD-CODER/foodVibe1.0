@@ -65,10 +65,10 @@ describe('cleanStockLines', () => {
     expect(clean([entry('קמח', 1, null)], many).unmatched[0].candidates).toHaveLength(5)
   })
 
-  it('sends a unit the product cannot convert to unmatched', () => {
+  it('plan 651: a unit the product cannot convert to is a line with unitNeedsFix and the spoken unit', () => {
     expect(clean([entry('קמח', 2, 'liter')])).toEqual({
-      lines: [],
-      unmatched: [{ spoken: 'קמח', status: 'unmatched', quantity: 2, unit: 'liter', candidates: [{ productId: 'flour', nameHebrew: 'קמח' }] }],
+      lines: [{ productId: 'flour', quantity: 2, unit: null, unitNeedsFix: true, spokenUnit: 'liter' }],
+      unmatched: [],
     })
   })
 
@@ -80,7 +80,7 @@ describe('cleanStockLines', () => {
       { spoken: 'banana', status: 'unmatched', quantity: 1, unit: 'kg' },
       { spoken: 'חמוצים', status: 'unmatched', quantity: 2 },
       { spoken: 'קמח', status: 'unmatched', candidates: flourCandidate },
-      { spoken: 'banana', status: 'unmatched', quantity: 1 },
+      { spoken: 'banana', status: 'unmatched', quantity: 1, spokenUnit: 'bucket' },
     ])
   })
 
@@ -127,9 +127,37 @@ describe('cleanStockLines', () => {
       expect(out.lines).toEqual([{ productId: 'd', quantity: 2, unit: 'kg' }])
     })
 
-    it('an exact name beats longer names that start with it', () => {
+    it('plan 651: an exact name with longer names that start with it is still a choice, the exact one first', () => {
       const out = clean([entry('בצל', 1, null)], [p('d', 'בצל יבש'), p('o', 'בצל')])
-      expect(out.lines).toEqual([{ productId: 'o', quantity: 1, unit: 'kg' }])
+      expect(out.lines).toEqual([])
+      expect(out.unmatched[0].status).toBe('choose')
+      expect(out.unmatched[0].candidates.map(c => c.productId)).toEqual(['o', 'd'])
+    })
+
+    it('plan 651 (a) «עגבניות» with three tomato products asks, the closest first', () => {
+      const out = clean([entry('עגבניות', 3, null)], [p('s', 'עגבניות שרי'), p('t', 'עגבניה'), p('m', 'עגבניה תמר')])
+      expect(out.lines).toEqual([])
+      expect(out.unmatched[0].status).toBe('choose')
+      expect(out.unmatched[0].candidates.map(c => c.productId)).toEqual(['t', 's', 'm'])
+    })
+
+    it('plan 651 (b) one avocado product is matched', () => {
+      const out = clean([entry('אבוקדו', 2, null)], [p('a', 'אבוקדו'), p('t', 'עגבניה')])
+      expect(out.lines).toEqual([{ productId: 'a', quantity: 2, unit: 'kg' }])
+    })
+
+    it('plan 651 (c) the spoken unit maps to a unit the product has, else it is flagged', () => {
+      const crate = p('c', 'עגבניה', { baseUnit: 'gram', purchaseOptions: [{ unitSymbol: 'ארגז', conversionRate: 10000 }] })
+      expect(clean([entry('עגבניה', 3, 'ארגזים')], [crate]).lines).toEqual([{ productId: 'c', quantity: 3, unit: 'ארגז' }])
+      const plain = p('d', 'עגבניה', { baseUnit: 'gram' })
+      expect(clean([entry('עגבניה', 3, 'ארגזים')], [plain])).toEqual({
+        lines: [{ productId: 'd', quantity: 3, unit: null, unitNeedsFix: true, spokenUnit: 'ארגזים' }],
+        unmatched: [],
+      })
+    })
+
+    it('plan 651 (d) «קילו» on a product with kg is kg', () => {
+      expect(clean([entry('קמח', 2, 'קילו')]).lines).toEqual([{ productId: 'flour', quantity: 2, unit: 'kg' }])
     })
 
     it('(d) no reasonable match is unmatched with up to 5 nearest products', () => {

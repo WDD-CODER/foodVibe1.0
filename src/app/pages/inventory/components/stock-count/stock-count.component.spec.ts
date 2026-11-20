@@ -1,5 +1,5 @@
 import { signal } from '@angular/core'
-import { Router } from '@angular/router'
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ListChecks, LucideAngularModule } from 'lucide-angular'
@@ -16,6 +16,9 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { StockCountService } from '../../services/stock-count.service'
 import { StockCountComponent } from './stock-count.component'
+import { PastCountsService } from './past-counts.service'
+import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { ReturnToService } from '@services/return-to.service'
 
 const product = (id: string, name: string, min = 0): Product =>
   ({ _id: id, nameHebrew: name, baseUnit: 'kg', purchaseOptions: [], minStockLevel: min }) as unknown as Product
@@ -28,11 +31,19 @@ describe('StockCountComponent', () => {
   let onSetWarningMsg: jasmine.Spy
   let logError: jasmine.Spy
   let navigate: jasmine.Spy
+  let past: jasmine.SpyObj<PastCountsService>
+  let saveProduct: jasmine.Spy
+  let openUnitCreator: jasmine.Spy
+  let unitAdded: Promise<unknown>
+  let query: Record<string, string> = {}
+  let returnTo = new ReturnToService()
 
   async function setup(
     products: Product[] = [product('a', 'אורז'), product('b', 'קמח')],
     draft: unknown = null
   ): Promise<void> {
+    // Plan 651: the autosave waits 2 s; a mocked clock keeps it from firing while a test waits for the page to settle.
+    jasmine.clock().install()
     service = jasmine.createSpyObj<StockCountService>('StockCountService', [
       'loadOnHand',
       'loadOpenDraft',
@@ -48,16 +59,27 @@ describe('StockCountComponent', () => {
     onSetWarningMsg = jasmine.createSpy('onSetWarningMsg')
     logError = jasmine.createSpy('error')
     navigate = jasmine.createSpy('navigate').and.resolveTo(true)
+    past = jasmine.createSpyObj<PastCountsService>('PastCountsService', ['list'])
+    past.list.and.resolveTo([])
+    saveProduct = jasmine.createSpy('saveProduct').and.resolveTo(null)
+    openUnitCreator = jasmine.createSpy('openUnitCreator')
+    unitAdded = Promise.resolve(null)
     TestBed.configureTestingModule({
       imports: [StockCountComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ListChecks })],
       providers: [
-        { provide: KitchenStateService, useValue: { products_: signal(products) } },
+        { provide: KitchenStateService, useValue: { products_: signal(products), saveProduct } },
         { provide: StockCountService, useValue: service },
-        { provide: UnitRegistryService, useValue: { getConversion: () => 1 } },
+        {
+          provide: UnitRegistryService,
+          useValue: { getConversion: () => 1, openUnitCreator, awaitProductUnitAdded: () => unitAdded }
+        },
         { provide: UserMsgService, useValue: { onSetErrorMsg, onSetSuccessMsg, onSetWarningMsg } },
         { provide: GeminiService, useValue: jasmine.createSpyObj('GeminiService', ['extractStockCount']) },
         { provide: LoggingService, useValue: { error: logError } },
         { provide: Router, useValue: { navigate } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap(query) } } },
+        { provide: PastCountsService, useValue: past },
+        { provide: ReturnToService, useValue: returnTo },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     })
@@ -67,11 +89,18 @@ describe('StockCountComponent', () => {
     fixture.detectChanges()
   }
 
+  afterEach(() => {
+    jasmine.clock().uninstall()
+    returnTo = new ReturnToService()
+  })
+
   const el = () => fixture.nativeElement as HTMLElement
   const rows = () => Array.from(el().querySelectorAll<HTMLElement>('[data-testid="stk-row"]'))
   const btn = (id: string) => el().querySelector<HTMLButtonElement>(`[data-testid="${id}"]`)!
   const chipOf = (row: HTMLElement) => row.querySelector<HTMLInputElement>('input[type="checkbox"]')!
   const comp = () => fixture.componentInstance as unknown as { setAmount(p: Product, n: number): void }
+
+  const save = () => (fixture.componentInstance as unknown as { autosave_(): Promise<void> }).autosave_()
 
   async function settle(): Promise<void> {
     await fixture.whenStable()
@@ -86,27 +115,178 @@ describe('StockCountComponent', () => {
     expect(chipOf(rows()[0]).checked).toBeTrue()
   })
 
-  it('keeps the date, save draft and finish count in one actions wrapper (plan 648)', async () => {
+  it('plan 651 (h): sits on app-list-shell with app-page-header; the header has one action, no draft button', async () => {
     await setup()
-    const wrapper = el().querySelector<HTMLElement>('.stock-count__actions')!
-    expect(wrapper).not.toBeNull()
-    expect(wrapper.querySelector('app-date-field')).not.toBeNull()
-    expect(wrapper.contains(btn('stk-save-draft'))).toBeTrue()
-    expect(wrapper.contains(btn('stk-finalize'))).toBeTrue()
-    expect(el().querySelectorAll('.stock-count__actions').length).toBe(1)
+    expect(el().querySelector('app-list-shell app-page-header')).not.toBeNull()
+    const end = el().querySelector<HTMLElement>('app-page-header .ph-end')!
+    expect(end.querySelectorAll('button.c-btn-primary').length).toBe(1)
+    expect(end.contains(btn('stk-finalize'))).toBeTrue()
+    expect(end.querySelector('app-date-field')).toBeNull()
+    expect(el().querySelector('[data-testid="stk-save-draft"]')).toBeNull()
+  })
+
+  describe('plan 651', () => {
+    const comp2 = () =>
+      fixture.componentInstance as unknown as {
+        setUnit(p: Product, u: string): void
+        setAmount(p: Product, n: number): void
+      }
+    const child = () =>
+      fixture.debugElement.query(By.directive(StockAiDraftComponent)).componentInstance as StockAiDraftComponent
+    const names = () => rows().map((r) => r.querySelector('.stock-count__name')!.textContent!.trim())
+
+    it('(a) after an AI fill the filled rows are first', async () => {
+      await setup([product('a', 'אורז'), product('b', 'קמח'), product('c', 'תפוח')])
+      child().extracted.emit({
+        answer: { draftId: null, lines: [{ productId: 'c', quantity: 2, unit: 'kg' }], unmatched: [] },
+        source: 'text'
+      })
+      await settle()
+      expect(names()[0]).toContain('תפוח')
+    })
+
+    it('(b) «העברת המסומנים לראש הרשימה» moves the counted rows first', async () => {
+      await setup([product('a', 'אורז'), product('b', 'קמח'), product('c', 'תפוח')])
+      comp().setAmount(product('c', 'תפוח'), 1)
+      await settle()
+      btn('stk-move-counted').click()
+      await settle()
+      expect(names()[0]).toContain('תפוח')
+      expect(btn('stk-move-counted').textContent).toContain('stk_move_counted_top')
+    })
+
+    it('(c) a unitNeedsFix row shows the note and is not counted until a unit is picked', async () => {
+      await setup()
+      child().extracted.emit({
+        answer: {
+          draftId: null,
+          lines: [{ productId: 'b', quantity: 3, unit: null, unitNeedsFix: true, spokenUnit: 'ארגזים' }],
+          unmatched: []
+        },
+        source: 'text'
+      })
+      await settle()
+      const note = el().querySelector('[data-testid="stk-unit-note"]')!
+      expect(note.textContent).toContain('stk_unit_needs_fix')
+      expect(chipOf(rows()[0]).checked).toBeFalse()
+      await save()
+      expect(service.saveDraft).not.toHaveBeenCalled()
+      comp2().setUnit(product('b', 'קמח'), 'kg')
+      await settle()
+      expect(el().querySelector('[data-testid="stk-unit-note"]')).toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+    })
+
+    it('(d) the unit dropdown ends with the add-unit option, which opens the creator and selects the new unit', async () => {
+      await setup()
+      const options = (
+        fixture.componentInstance as unknown as { unitOptionsById_(): Record<string, { value: string }[]> }
+      ).unitOptionsById_()['a']
+      expect(options[options.length - 1].value).toBe('__add_unit__')
+      unitAdded = Promise.resolve({ key: 'crate', amount: 10, basis: 'kg' })
+      comp2().setUnit(product('a', 'אורז'), '__add_unit__')
+      jasmine.clock().tick(1)
+      await settle()
+      expect(openUnitCreator).toHaveBeenCalled()
+      expect(saveProduct).toHaveBeenCalled()
+      expect(saveProduct.calls.mostRecent().args[0].purchaseOptions[0].unitSymbol).toBe('crate')
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+    })
+
+    it('(e) no save-draft button; a change saves after 2 s and says «נשמר אוטומטית · HH:mm»', async () => {
+      await setup()
+      expect(el().querySelector('[data-testid="stk-save-draft"]')).toBeNull()
+      comp().setAmount(product('a', 'אורז'), 3)
+      fixture.detectChanges()
+      jasmine.clock().tick(1999)
+      expect(service.saveDraft).not.toHaveBeenCalled()
+      jasmine.clock().tick(2)
+      await settle()
+      expect(service.saveDraft).toHaveBeenCalledTimes(1)
+      expect(onSetSuccessMsg).not.toHaveBeenCalledWith('stk_draft_saved')
+      expect(el().querySelector('[data-testid="stk-draft-note"]')!.textContent).toContain('stk_autosaved')
+    })
+
+    it('(f) «ספירות קודמות» lists drafts and finished counts and opens a draft', async () => {
+      await setup()
+      past.list.and.resolveTo([
+        {
+          _id: 'p1',
+          status: 'draft',
+          countedAt: 1_700_000_000_000,
+          lines: [{ productId: 'b', quantity: 4, unit: 'kg' }]
+        },
+        { _id: 'p2', status: 'final', countedAt: 1_690_000_000_000, lines: [] }
+      ] as never)
+      btn('stk-tab-past').click()
+      await settle()
+      const listed = Array.from(el().querySelectorAll<HTMLButtonElement>('[data-testid="stk-past-row"]'))
+      expect(listed.length).toBe(2)
+      expect(listed[0].textContent).toContain('stk_count_status_draft')
+      expect(listed[1].textContent).toContain('stk_count_status_final')
+      expect(listed[1].disabled).toBeTrue()
+      listed[0].click()
+      await settle()
+      expect(btn('stk-tab-sheet').classList).toContain('active')
+      expect(chipOf(rows()[1]).checked).toBeTrue()
+    })
+
+    it('(g) «הוספת מוצר חדש» saves the draft and opens the form with the name, no confirm', async () => {
+      await setup()
+      comp().setAmount(product('a', 'אורז'), 1)
+      await settle()
+      child().extracted.emit({
+        answer: { draftId: null, lines: [], unmatched: [{ spoken: 'אבוקדו', status: 'unmatched', quantity: 2 }] },
+        source: 'text'
+      })
+      await settle()
+      btn('stk-ai-add-new').click()
+      await settle()
+      expect(service.saveDraft).toHaveBeenCalled()
+      expect(navigate).toHaveBeenCalledWith(['/inventory/add'], {
+        queryParams: { name: 'אבוקדו', returnUrl: '/inventory/count' }
+      })
+    })
+
+    it('comes back with ?addedProduct= and the new product fills the line it came from', async () => {
+      query = { addedProduct: 'b' }
+      returnTo = new ReturnToService()
+      returnTo.setPending({ spoken: 'קמח', quantity: 5, unit: 'kg' })
+      try {
+        await setup()
+      } finally {
+        query = {}
+      }
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+      expect(names()[0]).toContain('קמח')
+    })
+
+    it('(i) the counter is 2rem high whatever the width (no phone-only 44px rule)', async () => {
+      TestBed.configureTestingModule({
+        imports: [CounterComponent],
+        providers: [{ provide: TranslationService, useValue: { translate: (k: string) => k } }]
+      })
+      const counterFixture = TestBed.createComponent(CounterComponent)
+      counterFixture.componentRef.setInput('value', 1)
+      counterFixture.detectChanges()
+      const grid = (counterFixture.nativeElement as HTMLElement).querySelector<HTMLElement>('.counter-grid')!
+      const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize)
+      expect(grid.getBoundingClientRect().height).toBeCloseTo(2 * remPx, 0)
+      expect(getComputedStyle(grid).minHeight).not.toBe('44px')
+    })
   })
 
   it('saves only counted rows, then uses PUT (same id) for the second save', async () => {
     await setup()
     comp().setAmount(product('a', 'אורז'), 3)
     await settle()
-    btn('stk-save-draft').click()
+    await save()
     await settle()
     const [input, id] = service.saveDraft.calls.argsFor(0)
     expect(id).toBeUndefined()
     expect(input.lines).toEqual([{ productId: 'a', quantity: 3, unit: 'kg' }])
-    expect(onSetSuccessMsg).toHaveBeenCalledWith('stk_draft_saved')
-    btn('stk-save-draft').click()
+    expect(onSetSuccessMsg).not.toHaveBeenCalledWith('stk_draft_saved')
+    await save()
     await settle()
     expect(service.saveDraft.calls.argsFor(1)[1]).toBe('c1')
   })
@@ -119,7 +299,7 @@ describe('StockCountComponent', () => {
     service.saveDraft.and.rejectWith(
       new HttpErrorResponse({ status: 400, error: { error: 'UNIT_NOT_CONVERTIBLE', line: 1 } })
     )
-    btn('stk-save-draft').click()
+    await save()
     await settle()
     expect(rows()[1].classList).toContain('stock-count__row--error')
     expect(rows()[0].classList).not.toContain('stock-count__row--error')
@@ -160,7 +340,7 @@ describe('StockCountComponent', () => {
     expect(el().querySelector('[data-testid="stk-draft-note"]')).not.toBeNull()
     comp().setAmount(product('a', 'אורז'), 1)
     await settle()
-    btn('stk-save-draft').click()
+    await save()
     await settle()
     expect(service.saveDraft.calls.argsFor(0)[1]).toBe('d9')
   })
@@ -184,14 +364,14 @@ describe('StockCountComponent', () => {
         source: 'text'
       })
       await settle()
-      expect(chipOf(rows()[1]).checked).toBeTrue()
-      expect(tag(rows()[1])).not.toBeNull()
-      expect(tag(rows()[0])).toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+      expect(tag(rows()[0])).not.toBeNull()
+      expect(tag(rows()[1])).toBeNull()
       expect(onSetSuccessMsg).toHaveBeenCalledWith('stk_ai_applied')
-      expect(amountOf(rows()[1])).not.toBeNull()
+      expect(amountOf(rows()[0])).not.toBeNull()
       comp().setAmount(product('b', 'קמח'), 5)
       await settle()
-      expect(tag(rows()[1])).toBeNull()
+      expect(tag(rows()[0])).toBeNull()
     })
 
     it('leaves a counted row alone: the same figure is ignored, another goes to "already counted"', async () => {
@@ -217,7 +397,7 @@ describe('StockCountComponent', () => {
       await settle()
       expect(tag(rows()[1])).not.toBeNull()
       expect(el().querySelector('[data-testid="stk-ai-conflicts"]')).toBeNull()
-      btn('stk-save-draft').click()
+      await save()
       await settle()
       expect(service.saveDraft.calls.argsFor(0)[0].lines).toContain({ productId: 'b', quantity: 9, unit: 'kg' })
     })
@@ -264,13 +444,13 @@ describe('StockCountComponent', () => {
       })
       await settle()
       expect(rows().length).toBe(2)
-      expect(chipOf(rows()[1]).checked).toBeFalse()
+      expect(chipOf(rows()[0]).checked).toBeFalse()
       const chips = el().querySelectorAll<HTMLInputElement>('[data-testid="stk-ai-candidates"] .c-chip--toggle input')
       expect(chips.length).toBe(2)
       chips[0].click()
       await settle()
-      expect(chipOf(rows()[1]).checked).toBeTrue()
-      expect(tag(rows()[1])).not.toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+      expect(tag(rows()[0])).not.toBeNull()
       expect(rows().length).toBe(2)
       expect(el().querySelector('[data-testid="stk-ai-unmatched"]')).toBeNull()
       expect(onSetSuccessMsg).toHaveBeenCalledWith('stk_ai_applied')
@@ -288,7 +468,9 @@ describe('StockCountComponent', () => {
       expect(navigate).not.toHaveBeenCalled()
       expect(el().querySelector('[data-testid="stk-ai-search"]')).not.toBeNull()
       btn('stk-ai-add-new').click()
-      expect(navigate).toHaveBeenCalledWith(['/inventory/add'])
+      expect(navigate).toHaveBeenCalledWith(['/inventory/add'], {
+        queryParams: { name: 'בננות', returnUrl: '/inventory/count' }
+      })
     })
 
     it('says so when nothing was found', async () => {
@@ -301,7 +483,7 @@ describe('StockCountComponent', () => {
       await setup()
       comp().setAmount(product('a', 'אורז'), 1)
       await settle()
-      btn('stk-save-draft').click()
+      await save()
       await settle()
       const plain = service.saveDraft.calls.argsFor(0)[0]
       expect(plain.source).toBe('manual')
@@ -310,7 +492,7 @@ describe('StockCountComponent', () => {
       child().extracted.emit({ answer: answer({ draftId: 'dr2' }), source: 'text' })
       child().extracted.emit({ answer: answer({ draftId: 'dr2' }), source: 'text' })
       await settle()
-      btn('stk-save-draft').click()
+      await save()
       await settle()
       const second = service.saveDraft.calls.argsFor(1)[0]
       expect(second.source).toBe('voice')
@@ -327,7 +509,7 @@ describe('StockCountComponent', () => {
         lines: [{ productId: 'b', quantity: 4, unit: 'kg', baseQuantity: 4 }]
       })
       for (let i = 0; i < 25; i++) child().extracted.emit({ answer: answer({ draftId: `n${i}` }), source: 'text' })
-      btn('stk-save-draft').click()
+      await save()
       await settle()
       const sent = service.saveDraft.calls.argsFor(0)[0]
       expect(sent.source).toBe('voice')

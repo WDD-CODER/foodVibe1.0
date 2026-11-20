@@ -32,6 +32,7 @@ import { serverFieldErrors } from '@utils/server-refusal.util'
 
 import { ConversionService } from '@services/conversion.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { ReturnToService } from '@services/return-to.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { Product, PurchaseOption_ } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
@@ -138,6 +139,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly conversionService = inject(ConversionService)
   private readonly router = inject(Router)
   private readonly route = inject(ActivatedRoute)
+  private readonly returnTo_ = inject(ReturnToService)
+  /** Plan 651: the id of the product this form just saved, handed back to the page that asked for it. */
+  private savedId_: string | null = null
   private readonly kitchenStateService = inject(KitchenStateService)
   private readonly utilService = inject(UtilService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
@@ -350,7 +354,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         } else {
           this.isEditMode_.set(false)
           this.curProduct_.set(this.utilService.getEmptyProduct())
-          this.productForm_.patchValue({ baseUnit: 'kg' })
+          // Plan 651: `?name=` fills the name (the words the person spoke); it is not an unsaved change.
+          const name = this.route.snapshot?.queryParamMap?.get('name')?.trim()
+          this.productForm_.patchValue({ baseUnit: 'kg', ...(name && { productName: name.slice(0, 80) }) })
           this.unsaved_.markSaved()
         }
       })
@@ -903,8 +909,16 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   protected onSubmit(): void {
     this.saveAndWait().then((saved) => {
-      if (saved) this.router.navigate(['/inventory/list'])
+      if (!saved) return
+      const back = this.returnUrl_()
+      if (back) this.router.navigate([back], this.savedId_ ? { queryParams: { addedProduct: this.savedId_ } } : {})
+      else this.router.navigate(['/inventory/list'])
     })
+  }
+
+  /** Plan 651: where to go after save or back — the page that sent the person here, else the product list. */
+  private returnUrl_(): string | null {
+    return this.returnTo_.safeUrl(this.route.snapshot?.queryParamMap?.get('returnUrl'))
   }
 
   /** For pendingChangesGuard: save and resolve true on success, false on failure. */
@@ -960,6 +974,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     let saved: Product
     try {
       saved = await this.kitchenStateService.saveProduct(productToSave)
+      this.savedId_ = saved?._id ?? null
     } catch (err) {
       this.saving.setSaving(false)
       // Plan 540: mark the field the server refused; the toast already came from the interceptor.
@@ -976,7 +991,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected onCancel(): void {
-    this.router.navigate(['/inventory/list'])
+    this.router.navigate([this.returnUrl_() ?? '/inventory/list'])
   }
 
   //DELETE
