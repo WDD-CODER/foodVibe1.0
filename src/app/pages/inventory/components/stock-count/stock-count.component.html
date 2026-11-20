@@ -1,8 +1,9 @@
 <app-list-shell
+  appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="isPanelOpen_.set(!isPanelOpen_())"
   [gridTemplate]="gridTemplate_()"
-  [mobileGridTemplate]="view_() === 'sheet' ? 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto' : '1fr'"
+  [mobileGridTemplate]="view_() === 'sheet' ? 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto minmax(3.5rem, auto)' : '1fr'"
   [resultCount]="countedCount_()"
   [resultTotal]="products_().length"
 >
@@ -27,6 +28,15 @@
   </ng-container>
 
   <ng-container shell-actions>
+    <div class="stock-count__date" data-testid="stk-date">
+      <app-date-field
+        inputId="stock-count-date"
+        ariaLabelKey="stk_count_date"
+        variant="outline"
+        [value]="countedDate_()"
+        (valueChange)="setDate($event)"
+      />
+    </div>
     <button
       type="button"
       class="c-btn-primary"
@@ -41,13 +51,6 @@
 
   <ng-container shell-table-header>
     <div class="stock-count__tabs">
-      <app-date-field
-        inputId="stock-count-date"
-        ariaLabelKey="stk_count_date"
-        variant="outline"
-        [value]="countedDate_()"
-        (valueChange)="setDate($event)"
-      />
       <button
         type="button"
         class="c-chip c-chip--tab"
@@ -84,9 +87,11 @@
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
-      <div class="c-grid-header-cell stock-count__base-head" role="columnheader">
-        {{ 'stk_col_in_base' | translatePipe }}
-      </div>
+      <app-column-carousel-header>
+        <div class="c-grid-header-cell" appColumnSlide label="stk_col_in_base" role="presentation">
+          {{ 'stk_col_in_base' | translatePipe }}
+        </div>
+      </app-column-carousel-header>
     }
   </ng-container>
 
@@ -206,9 +211,16 @@
               <span>{{ 'stk_counted' | translatePipe }}</span>
             </label>
           </div>
-          <div class="c-list-body-cell stock-count__base" role="cell" dir="ltr">
-            {{ row.base }}
-          </div>
+          <app-column-carousel-cell>
+            <div
+              class="c-list-body-cell stock-count__base"
+              appColumnSlide
+              [label]="'stk_col_in_base' | translatePipe"
+              dir="ltr"
+            >
+              {{ row.base }}
+            </div>
+          </app-column-carousel-cell>
           @if (row.state.fix !== undefined) {
             <p class="stock-count__unit-note" data-testid="stk-unit-note">{{ unitNoteText_(row.state.fix) }}</p>
           }

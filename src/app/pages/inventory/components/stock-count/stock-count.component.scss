@@ -114,11 +114,9 @@
     font-size: var(--fs-sm);
   }
 
-  // Phone: name, amount, unit and the counted chip on one line; the base amount column is dropped.
-  @media (max-width: 768px) {
-    .stock-count__base,
-    .stock-count__base-head {
-      display: none;
-    }
+  // Plan 653: a compact date in the header's actions area.
+  .stock-count__date {
+    inline-size: 12rem;
+    max-inline-size: 12rem;
   }
 }
