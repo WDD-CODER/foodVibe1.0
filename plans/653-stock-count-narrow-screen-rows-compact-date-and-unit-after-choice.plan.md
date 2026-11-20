@@ -94,6 +94,8 @@ append the path to the scope block above and retry.
 - the narrow-screen columns — family: list-page — rung: 1 — why: `app-column-carousel-header` /
   `app-column-carousel-cell` as `inventory-product-list` uses them.
 - the compact date — family: form-field — rung: 2 — why: `app-date-field` with the size input other filters use.
+- new class `.stock-count__date` (a 12rem box around `app-date-field` in the shell actions) — family: form-field —
+  rung: 2 — why: the date field has no size input.
 - the unit mapping after a pick — family: helpers — rung: 3 — why: the existing spoken-unit mapper of plan 651, called
   on pick as well.
 
