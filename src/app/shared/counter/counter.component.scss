@@ -1,15 +1,5 @@
 @layer components.counter {
-  @media (max-width: 620px) {
-    .counter-grid {
-      height: auto;
-      min-height: 44px;
-    }
-
-    .ctrl-btn {
-      min-height: 44px;
-    }
-  }
-
+  // Plan 651: the counter is the same size on a phone and on a desktop (it was 44px high under 620px).
   .counter-grid {
     display: inline-grid;
     grid-template-columns: 2rem auto 2rem;

@@ -25,7 +25,7 @@ You receive two parts. UNITS is a list of unit names. COUNT is the cook's words.
 For each amount the cook reports, return one line:
 - "spoken": the product words as the cook said or wrote them, without the number and the unit, at most 80 characters.
 - "quantity": the number the cook gave, written as a number (for example "two and a half" or "שניים וחצי" is 2.5). null when the cook gave no number.
-- "unit": the unit the cook used, written exactly as it appears in UNITS, or null when no unit was said or the unit is not on the list.
+- "unit": the unit the cook used. When it matches a name in UNITS write it exactly as it appears in UNITS; when the cook said a unit that is not in UNITS, write the word as the cook said it. null only when the cook said no unit.
 
 Do not calculate. Never add, multiply, convert or round: "3 boxes of 10 kilo" is quantity 3 with the unit for a box, and a product counted twice is two lines. Skip words that are not part of the count.
 
@@ -78,9 +78,10 @@ const SCORE_EXACT = 100
 const SCORE_STARTS = 80
 const SCORE_CONTAINS = 60
 const SCORE_TOKENS = 40
-/** The best match wins automatically only when it leads the next one by at least this much. */
+/** Plan 651: the best match wins automatically only when no other product contains the spoken word (the next one
+ * scores below SCORE_CONTAINS) and it leads by at least this much. */
 const CLEAR_GAP = 15
-/** A candidate for a choice must be within this of the best. */
+/** A candidate for a choice must be within this of the best, or contain the spoken word (score >= SCORE_CONTAINS). */
 const CHOICE_WINDOW = 25
 const NEAREST_MIN = 0.3
 
@@ -145,9 +146,38 @@ function matchSpoken(spoken, index) {
     return { status: 'unmatched', products: nearest.map(s => s.entry.product) }
   }
   const [best, second] = scored
-  if (!second || best.score - second.score >= CLEAR_GAP) return { status: 'matched', products: [best.entry.product] }
-  const close = scored.filter(s => best.score - s.score < CHOICE_WINDOW).slice(0, MAX_CANDIDATES)
+  if (!second || (second.score < SCORE_CONTAINS && best.score - second.score >= CLEAR_GAP)) {
+    return { status: 'matched', products: [best.entry.product] }
+  }
+  const close = scored.filter(s => best.score - s.score < CHOICE_WINDOW || s.score >= SCORE_CONTAINS).slice(0, MAX_CANDIDATES)
   return { status: 'choose', products: close.map(s => s.entry.product) }
+}
+
+/** Spoken unit words (Hebrew, folded) → the unit key they mean. */
+const UNIT_WORDS = {
+  'קילו': 'kg', 'קילוגרם': 'kg', 'ק"ג': 'kg', 'קג': 'kg',
+  'גרם': 'gram', 'גר': 'gram', 'ליטר': 'liter', 'מיליליטר': 'ml', 'מל': 'ml',
+  'יחידה': 'unit', 'יחידות': 'unit',
+}
+const unitKey = raw => {
+  const t = String(raw ?? '').trim().toLowerCase()
+  return UNIT_WORDS[t] ?? UNIT_WORDS[foldWord(t)] ?? t
+}
+const sameUnit = (a, b) => unitKey(a) === unitKey(b) || foldWord(unitKey(a)) === foldWord(unitKey(b))
+
+/**
+ * Plan 651: the unit a product really has for what was said. Returns { unit } (the product's own unit, or a unit it
+ * converts to), or { unit: null, unitNeedsFix: true, spokenUnit } when none fits. No unit said → the base unit.
+ */
+function resolveUnit(rawUnit, product, rates) {
+  const base = product.baseUnit
+  if (rawUnit === null || rawUnit === undefined || rawUnit === '') return { unit: base }
+  const own = [base, ...(product.purchaseOptions ?? []).map(o => o?.unitSymbol)].filter(Boolean)
+  const hit = own.find(u => sameUnit(u, rawUnit))
+  if (hit) return { unit: hit }
+  const key = unitKey(rawUnit)
+  if (toBase(1, key, product, rates) !== null) return { unit: key }
+  return { unit: null, unitNeedsFix: true, spokenUnit: rawUnit }
 }
 
 const candidateOf = p => ({ productId: String(p._id), nameHebrew: p.nameHebrew })
@@ -169,7 +199,8 @@ function cleanStockLines(answer, products, units, rates, countedIds = new Set())
   for (const entry of parsed.data.lines.slice(0, MAX_ENTRIES)) {
     const spoken = entry.spoken.trim().slice(0, MAX_SPOKEN)
     const quantity = usableQuantity(entry.quantity) ? entry.quantity : undefined
-    const unit = entry.unit !== null && unitSet.has(entry.unit) ? entry.unit : undefined
+    const spokenUnit = entry.unit !== null ? entry.unit : undefined
+    const unit = spokenUnit !== undefined && unitSet.has(spokenUnit) ? spokenUnit : undefined
     const miss = (status, found, extra) => {
       if (!spoken) return
       unmatched.push({
@@ -180,15 +211,22 @@ function cleanStockLines(answer, products, units, rates, countedIds = new Set())
     const withAmount = () => ({
       ...(quantity !== undefined && { quantity }),
       ...(unit !== undefined && { unit }),
+      // Plan 651: a unit word that is not on the list is kept as said, so a later pick can flag it instead of guessing.
+      ...(spokenUnit !== undefined && unit === undefined && { spokenUnit }),
     })
 
     const { status, products: found } = matchSpoken(spoken, index)
     if (status !== 'matched') { miss(status, found, withAmount()); continue }
     const product = found[0]
     if (quantity === undefined) { miss('unmatched', found, {}); continue }
-    const useUnit = unit ?? product.baseUnit
-    if (toBase(quantity, useUnit, product, rates) === null) { miss('unmatched', found, { quantity, unit: useUnit }); continue }
     const productId = String(product._id)
+    const resolved = resolveUnit(spokenUnit, product, rates)
+    if (resolved.unitNeedsFix) {
+      lines.push({ productId, quantity, unit: null, unitNeedsFix: true, spokenUnit: resolved.spokenUnit })
+      continue
+    }
+    const useUnit = resolved.unit
+    if (toBase(quantity, useUnit, product, rates) === null) { miss('unmatched', found, { quantity, unit: useUnit }); continue }
     const existing = byProduct.get(productId)
     if (existing) {
       if (existing.unit === useUnit) existing.quantity = Math.round((existing.quantity + quantity) * 1e6) / 1e6

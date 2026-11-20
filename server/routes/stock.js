@@ -167,12 +167,13 @@ router.post('/counts/:id/finalize', verifyToken, async (req, res) => {
   }
 })
 
-// GET /api/v1/stock/counts?status=draft|final&limit=
+// GET /api/v1/stock/counts?status=draft|final|all&limit=
 router.get('/counts', verifyToken, async (req, res) => {
   try {
     if (!assertCan(req, res, 'create', { type: TYPE })) return
     const { status, limit } = req.query
-    if (status !== 'draft' && status !== 'final') return res.status(400).json({ error: 'BAD_STATUS' })
+    // Plan 651: `status=all` lists drafts and finished counts together (the past-counts list).
+    if (status !== 'draft' && status !== 'final' && status !== 'all') return res.status(400).json({ error: 'BAD_STATUS' })
     let n = 20
     if (limit !== undefined) {
       if (typeof limit !== 'string' || !/^\d+$/.test(limit)) return res.status(400).json({ error: 'BAD_LIMIT' })
@@ -180,7 +181,7 @@ router.get('/counts', verifyToken, async (req, res) => {
       if (n < 1 || n > 100) return res.status(400).json({ error: 'BAD_LIMIT' })
     }
     const counts = await db().collection(TYPE)
-      .find({ ...scopeFilter(req), ...LIVE, status })
+      .find({ ...scopeFilter(req), ...LIVE, ...(status !== 'all' && { status }) })
       .sort({ countedAt: -1, updatedAt: -1 })
       .limit(n)
       .toArray()

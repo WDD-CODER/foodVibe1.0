@@ -2,7 +2,7 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="isPanelOpen_.set(!isPanelOpen_())"
   [gridTemplate]="gridTemplate_()"
-  [mobileGridTemplate]="view_() === 'sheet' ? '1.6fr 1fr 1.2fr' : '1fr'"
+  [mobileGridTemplate]="view_() === 'sheet' ? 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto' : '1fr'"
   [resultCount]="countedCount_()"
   [resultTotal]="products_().length"
 >
@@ -27,7 +27,20 @@
   </ng-container>
 
   <ng-container shell-actions>
-    <div class="stock-count__actions">
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="stk-finalize"
+      [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
+      (click)="finalize()"
+    >
+      <lucide-icon name="check" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'stk_finalize' | translatePipe }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="stock-count__tabs">
       <app-date-field
         inputId="stock-count-date"
         ariaLabelKey="stk_count_date"
@@ -35,31 +48,6 @@
         [value]="countedDate_()"
         (valueChange)="setDate($event)"
       />
-      <button
-        type="button"
-        class="c-btn-ghost"
-        data-testid="stk-save-draft"
-        [disabled]="saving_() || aiBusy_() || !dateOk_() || (countedCount_() === 0 && !draftId_())"
-        (click)="saveDraft()"
-      >
-        <lucide-icon name="save" [size]="18"></lucide-icon>
-        <span class="btn-label">{{ (saving_() ? 'saving' : 'stk_save_draft') | translatePipe }}</span>
-      </button>
-      <button
-        type="button"
-        class="c-btn-primary"
-        data-testid="stk-finalize"
-        [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
-        (click)="finalize()"
-      >
-        <lucide-icon name="check" [size]="18"></lucide-icon>
-        <span class="btn-label">{{ 'stk_finalize' | translatePipe }}</span>
-      </button>
-    </div>
-  </ng-container>
-
-  <ng-container shell-table-header>
-    <div class="stock-count__tabs">
       <button
         type="button"
         class="c-chip c-chip--tab"
@@ -81,13 +69,24 @@
           below_().rows.length
         }}</span>
       </button>
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        data-testid="stk-tab-past"
+        [class.active]="view_() === 'past'"
+        (click)="openPast()"
+      >
+        {{ 'stk_past_counts' | translatePipe }}
+      </button>
     </div>
     @if (view_() === 'sheet') {
       <div class="c-grid-header-cell" role="columnheader">{{ 'product' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
-      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_in_base' | translatePipe }}</div>
+      <div class="c-grid-header-cell stock-count__base-head" role="columnheader">
+        {{ 'stk_col_in_base' | translatePipe }}
+      </div>
     }
   </ng-container>
 
@@ -98,6 +97,37 @@
       <div class="stock-count__state" data-testid="stk-load-failed">
         <app-empty-state messageKey="stk_load_failed" icon="alert-triangle" ctaLabelKey="retry" (ctaClick)="load()" />
       </div>
+    } @else if (view_() === 'past') {
+      @if (pastState_() === 'loading') {
+        <div class="stock-count__state"><app-loader /></div>
+      } @else if (pastState_() === 'failed') {
+        <div class="stock-count__state" data-testid="stk-past-failed">
+          <app-empty-state
+            messageKey="stk_load_failed"
+            icon="alert-triangle"
+            ctaLabelKey="retry"
+            (ctaClick)="openPast()"
+          />
+        </div>
+      } @else {
+        @for (c of pastCounts_(); track c._id) {
+          <button
+            type="button"
+            class="stock-count__past"
+            data-testid="stk-past-row"
+            [disabled]="c.status !== 'draft'"
+            (click)="openPastDraft(c)"
+          >
+            <span>{{ c.countedAt | date: 'dd/MM/yyyy' }}</span>
+            <span class="c-chip c-chip--tag">{{ countStatusKey_(c) | translatePipe }}</span>
+            <span>{{ c.lines.length }}</span>
+          </button>
+        } @empty {
+          <div class="stock-count__state" data-testid="stk-past-empty">
+            <app-empty-state messageKey="stk_past_counts" icon="list-checks" />
+          </div>
+        }
+      }
     } @else if (view_() === 'below') {
       <app-stock-below-minimum
         [rows]="below_().rows"
@@ -115,7 +145,7 @@
         [products]="productOptions_()"
         [disabled]="saving_()"
         (pick)="pickForSpoken($event)"
-        (addNew)="addNewForSpoken()"
+        (addNew)="addNewForSpoken($event)"
         (busyChange)="aiBusy_.set($event)"
         (extracted)="onExtracted($event)"
         (replace)="replaceWithSuggestion($event)"
@@ -123,8 +153,20 @@
         (dismiss)="dismissUnmatched($event)"
       />
       @if (draftId_() && draftSavedAt_() !== null) {
-        <p class="stock-count__draft-note" data-testid="stk-draft-note">{{ draftFromText_() }}</p>
+        <p class="stock-count__draft-note" data-testid="stk-draft-note">{{ autosavedText_() }}</p>
       }
+      <div class="stock-count__toolbar">
+        <button
+          type="button"
+          class="c-btn-ghost"
+          data-testid="stk-move-counted"
+          [disabled]="countedCount_() === 0"
+          (click)="moveCountedToTop()"
+        >
+          <lucide-icon name="chevron-up" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'stk_move_counted_top' | translatePipe }}</span>
+        </button>
+      </div>
       @for (row of shownRows_(); track row.product._id) {
         <div
           class="c-list-row"
@@ -155,13 +197,21 @@
           </div>
           <div class="c-list-body-cell stock-count__counted" role="cell">
             <label class="c-chip c-chip--toggle">
-              <input type="checkbox" [checked]="row.state.counted" (change)="toggleCounted(row.product)" />
+              <input
+                type="checkbox"
+                [checked]="row.state.counted"
+                [disabled]="!!row.state.fix"
+                (change)="toggleCounted(row.product)"
+              />
               <span>{{ 'stk_counted' | translatePipe }}</span>
             </label>
           </div>
           <div class="c-list-body-cell stock-count__base" role="cell" dir="ltr">
             {{ row.base }}
           </div>
+          @if (row.state.fix !== undefined) {
+            <p class="stock-count__unit-note" data-testid="stk-unit-note">{{ unitNoteText_(row.state.fix) }}</p>
+          }
         </div>
       } @empty {
         <div class="stock-count__state" data-testid="stk-no-match">
