@@ -549,6 +549,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: the dashboard shows recent price rises.
 - Known copies: none.
 
+### diagnosis-card — `app-diagnosis-card`
+
+- Status: stable — plan 652
+- Use: `src/app/pages/dashboard/components/diagnosis-card/` — the dashboard card of the consultant's diagnoses (count of open, three newest, create); shown with `consultant_diag`, hidden when the load fails.
+- When: the dashboard shows the consultant's diagnoses.
+- Known copies: none.
+
 ### acting-banner — `app-acting-banner`
 
 - Status: stable — plan 632

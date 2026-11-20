@@ -23,6 +23,7 @@ import { PriceRisesCardComponent } from '../price-rises-card/price-rises-card.co
 import { FrontDeskChecklistCardComponent } from '../front-desk-checklist-card/front-desk-checklist-card.component'
 import { BusinessPerformanceComponent } from '../business-performance/business-performance.component'
 import { FrontDeskStatusBannerComponent } from 'src/app/shared/front-desk-status-banner/front-desk-status-banner.component'
+import { DiagnosisCardComponent } from '../diagnosis-card/diagnosis-card.component'
 import { OpeningDetailsBannerComponent } from '../opening-details-banner/opening-details-banner.component'
 
 const ENTITY_ICONS: Record<ActivityEntityType, string> = {
@@ -52,6 +53,7 @@ interface ActivityDayGroup {
     BusinessPerformanceComponent,
     FrontDeskWeekCardComponent,
     PriceRisesCardComponent,
+    DiagnosisCardComponent,
     OpeningDetailsBannerComponent,
     FrontDeskStatusBannerComponent
   ],
