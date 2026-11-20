@@ -124,6 +124,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
   `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
 - When: any screen that lists entities.
+- Plan 651 page-local pieces of the stock count page: the move-counted button row (`.stock-count__toolbar`), the one-line name cut (`.stock-count__name`), the unit warning line (`.stock-count__unit-note`), the phone base-column head (`.stock-count__base-head`), the past-counts row (`.stock-count__past`).
+- Plan 651: the past-counts list on the stock count page reads `GET /api/v1/stock/counts?status=all` through `PastCountsService` (`src/app/pages/inventory/components/stock-count/past-counts.service.ts`).
 - Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`

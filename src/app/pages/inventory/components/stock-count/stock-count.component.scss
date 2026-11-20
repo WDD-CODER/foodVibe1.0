@@ -73,6 +73,10 @@
   // One line per row at every width: a long name is cut, never wrapped.
   .stock-count__name {
     overflow: hidden;
+    justify-content: flex-start;
+
+    max-inline-size: 100%;
+
     text-overflow: ellipsis;
     white-space: nowrap;
   }

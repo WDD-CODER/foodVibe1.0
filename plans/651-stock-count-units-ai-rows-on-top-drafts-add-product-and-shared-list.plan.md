@@ -138,6 +138,13 @@ append the path to the scope block above and retry.
 - the past counts list — family: list-page — rung: 1 — why: rows in the same shell's second tab.
 - the return-to helper — family: page-entry-loading — rung: 3 — why: one small service beside the auth guard's
   `returnUrl` pattern: a `returnUrl` query param and the page's draft saved before leaving.
+- past-counts (`past-counts.service.ts`, beside the count page) — family: list-page — rung: 3 — why: the one client of
+  `GET /api/v1/stock/counts?status=all`; `stock-count.service.ts` is outside this plan's scope.
+- the move-counted button row (`.stock-count__toolbar`) — family: list-page — rung: 3 — why: page-local layout; the button is the shared `c-btn-ghost`.
+- the past-counts row (`.stock-count__past`) — family: list-page — rung: 3 — why: page-local row layout.
+- the one-line name cut (`.stock-count__name`) — family: list-page — rung: 3 — why: page-local; keeps a row on one line.
+- the unit warning line (`.stock-count__unit-note`) — family: list-page — rung: 3 — why: page-local note under a row.
+- the phone base-column head (`.stock-count__base-head`) — family: list-page — rung: 3 — why: hides the head with `.stock-count__base`.
 
 ## Defaults
 
