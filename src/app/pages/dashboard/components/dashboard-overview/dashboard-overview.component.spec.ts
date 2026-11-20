@@ -10,6 +10,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing'
 
 import { DashboardOverviewComponent } from './dashboard-overview.component'
 import { LucideAngularModule } from 'lucide-angular'
+import { DiagnosisCardComponent } from '../diagnosis-card/diagnosis-card.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeDataService } from '@services/recipe-data.service'
@@ -115,7 +116,13 @@ describe('DashboardOverviewComponent', () => {
         {
           provide: UserService,
           // user_/isOwner_: the setup card (plan 431) reads them through PermissionService and BusinessService.
-          useValue: { isLoggedIn: mockIsLoggedIn, user_: signal(null), isOwner_: signal(false) }
+          useValue: {
+            isLoggedIn: mockIsLoggedIn,
+            user_: signal(null),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeModules_: signal([])
+          }
         },
         { provide: PermissionService, useValue: { isOwner_: mockIsOwner.asReadonly(), can: () => mockIsOwner() } },
         {
@@ -128,7 +135,12 @@ describe('DashboardOverviewComponent', () => {
         { provide: Router, useValue: mockRouter },
         { provide: TranslationService, useValue: mockTranslation }
       ]
-    }).compileComponents()
+    })
+      // The card's own links need a real router; this file mocks Router, so only its gate is kept (the card has its own spec).
+      .overrideComponent(DiagnosisCardComponent, {
+        set: { imports: [], template: '@if (visible()) { <section data-testid="diagnosis-card"></section> }' }
+      })
+      .compileComponents()
 
     fixture = TestBed.createComponent(DashboardOverviewComponent)
     component = fixture.componentInstance
@@ -380,6 +392,17 @@ describe('DashboardOverviewComponent', () => {
       expect(has('app-frontdesk-week-card')).toBeFalse()
       expect(has('app-front-desk-checklist-card')).toBeFalse()
       expect(has('app-business-performance')).toBeTrue()
+    })
+
+    it('hides the diagnosis card without consultant_diag', () => {
+      fixture.detectChanges()
+      expect(has('[data-testid="diagnosis-card"]')).toBeFalse()
+    })
+
+    it('renders the diagnosis card with consultant_diag', () => {
+      modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+      fixture.detectChanges()
+      expect(has('[data-testid="diagnosis-card"]')).toBeTrue()
     })
   })
 
