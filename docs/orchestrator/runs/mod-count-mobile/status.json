@@ -1,0 +1,185 @@
+{
+  "run": "mod-count-mobile",
+  "branch": "orch/mod-count-mobile",
+  "base": "main",
+  "startedAt": "2026-11-20T18:45:55.151Z",
+  "mainShaAtStart": "b780a5f263c6e5b0dc38ff8fee8eef8aa7d47d07",
+  "plans": {
+    "653": {
+      "nnn": "653",
+      "title": "Stock count: rows that stay whole under 760 px, a compact date, one header style, and the unit checked after a choice",
+      "branch": "feat/653-stock-count-narrow-screen",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-20T18:47:22.225Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-20T19:02:08.064Z"
+        }
+      },
+      "humanItems": [
+        "Dandan narrows the window below 760 px: rows stay whole, the date is a small control, the header looks like",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line",
+        "any screen with a unit dropdown · open the dropdown · an add-unit option is there and opens the add-unit popup; the new unit is selected after saving"
+      ],
+      "history": [
+        {
+          "at": "2026-11-20T18:47:22.052Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T18:47:22.226Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T18:58:46.618Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T19:02:00.680Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T19:02:08.066Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T19:02:25.302Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T19:03:39.957Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.3,
+      "sha": "946c70bf5f74d4b732b1f1f2724ba0ae81f36530",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 681.5,
+          "tokens": {
+            "input": 2110796,
+            "output": 22721
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.5,
+          "tokens": {
+            "input": 29439,
+            "output": 1650
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "74440912f0a5968b3093a7f9f2a5b7c0bbb86c33"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-20T18:47:21.876Z",
+      "plan": "653",
+      "text": "the folder foodVibe1.0-orch-mod-count-mobile-653 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T18:58:43.907Z",
+      "plan": "653",
+      "text": "builder left undone (round 0): [ui] e2e/ui/653-1.spec.ts (rows on one line at 375, 740 and 1280 px): written, not run; [human] items: not ticked"
+    },
+    {
+      "at": "2026-11-20T19:02:36.128Z",
+      "plan": "653",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-mobile was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T19:04:29.637Z",
+      "text": "FINAL: same tree as plan 653's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 14.3,
+  "updatedAt": "2026-11-20T19:04:31.971Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "653",
+      "type": "behaviour",
+      "text": "behaviour: the base-amount column is the carousel's only slide, so on phones it shows as one swipeable column with a single dot-less slot — reverse: move «נספר» into the carousel instead, or drop the column on phones",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "653",
+      "type": "behaviour",
+      "text": "behaviour: the date sits in the header actions area (a 12rem box) and the old test that expected no date there was updated — reverse: move the app-date-field into the shell-filters slot",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "653",
+      "type": "behaviour",
+      "text": "behaviour: the pick-mapping helper lives in stock-count/spoken-unit.ts rather than core/utils, because core/utils is outside the plan's scope — reverse: move it to src/app/core/utils and update the registry line",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "653",
+      "type": "seen",
+      "text": "seen: server/utils/stock-extract.js:202 — for choose/unmatched entries a spoken unit that is on the global unit list is sent as `unit`, so the browser cannot tell it from a product unit; a different pick-time check may be wanted",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-20T19:04:31.968Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-20T19:04:31.970Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
