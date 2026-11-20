@@ -74,17 +74,17 @@ append the path to the scope block above and retry.
 - the card's module gate — family: module-gate — rung: 1 — why: the same rule as the header's `showDiagnosis_`.
 - the empty text — family: empty-state — rung: 1 — why: `app-empty-state` with a new key.
 - .diagnosis-card — family: engine-classes — rung: 1 — why: layer name of the card, as price-rises-card.
-- .dc-card — family: engine-classes — rung: 1 — why: card shell of price-rises-card, restated (its styles are scoped).
-- .dc-card__head — family: engine-classes — rung: 1 — why: card header row, as price-rises-card.
-- .dc-card__icon — family: engine-classes — rung: 1 — why: card header icon, as price-rises-card.
-- .dc-card__title — family: engine-classes — rung: 1 — why: card title, as price-rises-card.
-- .dc-card__count — family: engine-classes — rung: 1 — why: the open-count text in the header.
-- .dc-card__date — family: engine-classes — rung: 1 — why: a row's date, as price-rises-card.
-- .dc-card__link — family: engine-classes — rung: 1 — why: the «לכל האבחונים» link, as price-rises-card.
-- .dc-card__list — family: engine-classes — rung: 1 — why: the list of diagnoses, as price-rises-card.
-- .dc-card__row — family: engine-classes — rung: 1 — why: one diagnosis row, as price-rises-card.
-- .dc-card__name — family: engine-classes — rung: 1 — why: a diagnosis name, as price-rises-card.
-- .dc-card__create — family: engine-classes — rung: 1 — why: places the create button under the list.
+- .diag-card — family: engine-classes — rung: 1 — why: card shell of price-rises-card, restated (its styles are scoped).
+- .diag-card__head — family: engine-classes — rung: 1 — why: card header row, as price-rises-card.
+- .diag-card__icon — family: engine-classes — rung: 1 — why: card header icon, as price-rises-card.
+- .diag-card__title — family: engine-classes — rung: 1 — why: card title, as price-rises-card.
+- .diag-card__count — family: engine-classes — rung: 1 — why: the open-count text in the header.
+- .diag-card__date — family: engine-classes — rung: 1 — why: a row's date, as price-rises-card.
+- .diag-card__link — family: engine-classes — rung: 1 — why: the «לכל האבחונים» link, as price-rises-card.
+- .diag-card__list — family: engine-classes — rung: 1 — why: the list of diagnoses, as price-rises-card.
+- .diag-card__row — family: engine-classes — rung: 1 — why: one diagnosis row, as price-rises-card.
+- .diag-card__name — family: engine-classes — rung: 1 — why: a diagnosis name, as price-rises-card.
+- .diag-card__create — family: engine-classes — rung: 1 — why: places the create button under the list.
 
 ## Defaults
 

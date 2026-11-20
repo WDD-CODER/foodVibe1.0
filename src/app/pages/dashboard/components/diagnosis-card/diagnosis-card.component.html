@@ -1,33 +1,33 @@
 @if (visible()) {
   <section
-    class="dc-card c-glass-panel"
+    class="diag-card c-glass-panel"
     data-testid="diagnosis-card"
     dir="rtl"
     [attr.aria-label]="'diag_card_title' | translatePipe"
   >
-    <header class="dc-card__head">
-      <span class="dc-card__icon"><lucide-icon name="stethoscope" [size]="16" /></span>
-      <h2 class="dc-card__title">{{ 'diag_card_title' | translatePipe }}</h2>
+    <header class="diag-card__head">
+      <span class="diag-card__icon"><lucide-icon name="stethoscope" [size]="16" /></span>
+      <h2 class="diag-card__title">{{ 'diag_card_title' | translatePipe }}</h2>
       @if (rows().length) {
-        <span class="dc-card__count" data-testid="diagnosis-card-count">{{ openText() }}</span>
+        <span class="diag-card__count" data-testid="diagnosis-card-count">{{ openText() }}</span>
       }
-      <a class="dc-card__link" data-testid="diagnosis-card-all" routerLink="/diagnosis">{{
+      <a class="diag-card__link" data-testid="diagnosis-card-all" routerLink="/diagnosis">{{
         'diag_card_all' | translatePipe
       }}</a>
     </header>
     @if (rows().length) {
-      <ul class="dc-card__list">
+      <ul class="diag-card__list">
         @for (row of rows(); track row._id) {
-          <li class="dc-card__row" data-testid="diagnosis-card-row">
-            <a class="dc-card__name" [routerLink]="['/diagnosis', row._id]" dir="auto">{{ row.name }}</a>
-            <span class="c-num dc-card__date" dir="ltr">{{ row.createdAt | date: 'dd/MM/yyyy' }}</span>
+          <li class="diag-card__row" data-testid="diagnosis-card-row">
+            <a class="diag-card__name" [routerLink]="['/diagnosis', row._id]" dir="auto">{{ row.name }}</a>
+            <span class="c-num diag-card__date" dir="ltr">{{ row.createdAt | date: 'dd/MM/yyyy' }}</span>
           </li>
         }
       </ul>
     } @else {
       <app-empty-state messageKey="diag_card_empty" icon="stethoscope" />
     }
-    <a class="c-btn-primary dc-card__create" data-testid="diagnosis-card-create" routerLink="/diagnosis">
+    <a class="c-btn-primary diag-card__create" data-testid="diagnosis-card-create" routerLink="/diagnosis">
       <lucide-icon name="plus" [size]="16" />
       {{ 'diag_create' | translatePipe }}
     </a>
