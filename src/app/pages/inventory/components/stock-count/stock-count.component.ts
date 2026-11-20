@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import type { Product } from '@models/product.model'
 import type { StockCountInput, OnHandRow } from '@schemas/stock/stock-count-input.schema'
 import type { StockCount } from '@schemas/entities/stock-count.schema'
@@ -38,6 +39,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ReturnToService } from '@services/return-to.service'
 import { PastCountsService } from './past-counts.service'
+import { unitForSpoken } from './spoken-unit'
 import { StockCountService } from '../../services/stock-count.service'
 import { StockBelowMinimumComponent } from './stock-below-minimum/stock-below-minimum.component'
 import {
@@ -108,6 +110,7 @@ function todayIso(): string {
     TranslatePipe,
     CounterComponent,
     CustomSelectComponent,
+    ...COLUMN_CAROUSEL,
     DateFieldComponent,
     EmptyStateComponent,
     InputClearComponent,
@@ -267,7 +270,7 @@ export class StockCountComponent implements OnInit {
     const product = this.kitchen_.products_().find((p) => p._id === id)
     if (!product || !pending || pending.quantity === undefined) return
     const said = pending.unit
-    const unit = !said ? product.baseUnit : unitOptionsFor(product).includes(said) ? said : null
+    const unit = unitForSpoken(said, product)
     const line: StockExtractLine =
       unit === null
         ? { productId: product._id, quantity: pending.quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
@@ -505,7 +508,7 @@ export class StockCountComponent implements OnInit {
     if (!amount || amount.quantity === undefined || !product) return
     // Plan 651: only a unit the product has is used; any other said unit is flagged for a fix, never guessed.
     const said = amount.unit ?? amount.spokenUnit
-    const unit = !said ? product.baseUnit : unitOptionsFor(product).includes(said) ? said : null
+    const unit = unitForSpoken(said, product)
     const line: StockExtractLine =
       unit === null
         ? { productId: product._id, quantity: amount.quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
