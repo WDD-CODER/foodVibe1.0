@@ -121,8 +121,93 @@ describe('StockCountComponent', () => {
     const end = el().querySelector<HTMLElement>('app-page-header .ph-end')!
     expect(end.querySelectorAll('button.c-btn-primary').length).toBe(1)
     expect(end.contains(btn('stk-finalize'))).toBeTrue()
-    expect(end.querySelector('app-date-field')).toBeNull()
+    expect(end.querySelector('app-date-field')).not.toBeNull()
     expect(el().querySelector('[data-testid="stk-save-draft"]')).toBeNull()
+  })
+
+  describe('plan 653 — narrow screens, compact date, unit after a pick', () => {
+    const child = () =>
+      fixture.debugElement.query(By.directive(StockAiDraftComponent)).componentInstance as StockAiDraftComponent
+    const withCrates = (id: string, name: string): Product =>
+      ({
+        ...product(id, name),
+        purchaseOptions: [{ unitSymbol: 'ארגז', conversionRate: 10 }]
+      }) as unknown as Product
+    const emitChoose = (): void => {
+      child().extracted.emit({
+        answer: {
+          draftId: null,
+          lines: [],
+          unmatched: [
+            {
+              spoken: 'עגבניות',
+              status: 'choose',
+              quantity: 3,
+              spokenUnit: 'ארגזים',
+              candidates: [
+                { productId: 'a', nameHebrew: 'עגבניות שרי' },
+                { productId: 'b', nameHebrew: 'עגבניות רגילות' }
+              ]
+            }
+          ]
+        },
+        source: 'voice'
+      })
+    }
+
+    it('(a) the base-amount column sits in the column carousel in the header and in every row', async () => {
+      await setup()
+      expect(el().querySelector('app-column-carousel-header')).not.toBeNull()
+      expect(rows().every((r) => r.querySelector('app-column-carousel-cell') !== null)).toBeTrue()
+    })
+
+    it('(b) no cell of a list row is hidden with display: none', async () => {
+      await setup()
+      const hidden = rows().flatMap((r) =>
+        Array.from(r.querySelectorAll<HTMLElement>('.c-list-body-cell')).filter(
+          (c) => getComputedStyle(c).display === 'none'
+        )
+      )
+      expect(hidden.length).toBe(0)
+    })
+
+    it('(c) the date is in the header actions area, in a box of at most 12rem', async () => {
+      await setup()
+      const end = el().querySelector<HTMLElement>('app-page-header .ph-end')!
+      const date = end.querySelector<HTMLElement>('[data-testid="stk-date"]')!
+      expect(date.querySelector('app-date-field')).not.toBeNull()
+      expect(date.classList.contains('stock-count__date')).toBeTrue()
+    })
+
+    it('(d) the header strip carries the headings in one row; the old second band is gone', async () => {
+      await setup()
+      expect(el().querySelectorAll('.c-grid-header-cell').length).toBeGreaterThanOrEqual(5)
+      expect(el().querySelector('.stock-count__base-head')).toBeNull()
+    })
+
+    it('a picked product gets the spoken unit mapped to its own units (ארגזים → ארגז)', async () => {
+      await setup([withCrates('a', 'עגבניות שרי'), product('b', 'עגבניות רגילות')])
+      emitChoose()
+      await settle()
+      el().querySelectorAll<HTMLInputElement>('[data-testid="stk-ai-candidates"] .c-chip--toggle input')[0].click()
+      await settle()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+      expect(el().querySelector('[data-testid="stk-unit-note"]')).toBeNull()
+      const state = (
+        fixture.componentInstance as unknown as { rows_(): Record<string, { amount: number; unit: string }> }
+      ).rows_()['a']
+      expect(state).toEqual(jasmine.objectContaining({ amount: 3, unit: 'ארגז' }))
+    })
+
+    it('a picked product without that unit shows the unit note and is not counted', async () => {
+      await setup([withCrates('a', 'עגבניות שרי'), product('b', 'עגבניות רגילות')])
+      emitChoose()
+      await settle()
+      el().querySelectorAll<HTMLInputElement>('[data-testid="stk-ai-candidates"] .c-chip--toggle input')[1].click()
+      await settle()
+      expect(el().querySelector('[data-testid="stk-unit-note"]')).not.toBeNull()
+      expect(chipOf(rows()[1]).checked).toBeFalse()
+    })
   })
 
   describe('plan 651', () => {
