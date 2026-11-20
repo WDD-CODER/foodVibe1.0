@@ -107,6 +107,7 @@ public/assets/data/dictionary.json
 e2e/ui/651-1.spec.ts
 docs/brain/component-families.md
 docs/brain/inventory.md
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
