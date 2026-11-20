@@ -85,3 +85,38 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-19
+
+### unit-dropdown-add
+
+- status: on
+- rule: Every unit-of-measure dropdown offers an 'add unit' option that opens the add-unit popup, so a missing unit is created on the spot.
+- applies when: custom
+- plan words: \b(unit|units|purchase ?unit|baseUnit|measure)\b|יחיד(ה|ות)|מידה
+- how: app-custom-select with the add-option row (docs/agent/standards-domain.md Add-option rule) calling UnitRegistryService.openUnitCreator (src/app/core/services/unit-registry.service.ts), as the product form does
+- check: card
+- card: any screen with a unit dropdown · open the dropdown · an add-unit option is there and opens the add-unit popup; the new unit is selected after saving
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-20
+
+### leave-and-return
+
+- status: on
+- rule: When a page sends the user to another page to act (e.g. add a product from the count), the current work is saved without asking, the other page opens prefilled with what the user already typed, and save or back returns the user to where they were with their work restored.
+- applies when: custom
+- plan words: \b(navigate|redirect|go to|open the .* page|add (a )?new product|returnUrl|come back)\b
+- how: a return-to-origin helper (to be added in src/app/core/services/, family page-entry-loading: returnUrl in the query string plus the page's own draft saved before leaving); the auth guard's returnUrl (src/app/core/guards/auth.guard.ts) is the existing pattern
+- check: card
+- card: the stock count · from a no-match line press add new product · the product form opens with the name filled in, no confirm popup; save or back returns to the count with its numbers kept
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-20
+
+### app-list-container
+
+- status: on
+- rule: Every list on a page uses the app's shared list container (app-list-shell with app-page-header), and each row is one c-list-row on a single line at every screen size.
+- applies when: list
+- how: app-list-shell (src/app/shared/list-shell/) with app-page-header (src/app/shared/page-header/), family list-page in docs/brain/component-families.md
+- check: card
+- card: any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-20
