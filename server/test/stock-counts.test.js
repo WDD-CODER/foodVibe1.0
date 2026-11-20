@@ -160,6 +160,9 @@ describe('GET /counts', () => {
     expect(drafts[0].lines).toHaveLength(1)
     expect((await list(STAFF, '?status=final')).body.map(c => c._id)).toEqual([f.body._id])
     expect((await list(STAFF, '?status=draft&limit=1')).body).toHaveLength(1)
+    // Plan 651: status=all lists drafts and finished counts together.
+    const all = (await list(STAFF, '?status=all')).body
+    expect(all.map(c => c.status).sort()).toEqual(['draft', 'draft', 'final'])
   })
 
   it('answers 400 BAD_STATUS and BAD_LIMIT', async () => {

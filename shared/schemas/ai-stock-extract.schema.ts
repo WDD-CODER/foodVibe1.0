@@ -31,7 +31,14 @@ export const stockExtractModelAnswerSchema = z.object({
   )
 })
 
-export type StockExtractLine = { productId: string; quantity: number; unit: string }
+/** Plan 651: `unit` is null with `unitNeedsFix` when the spoken unit is not one the product has (`spokenUnit` keeps the word). */
+export type StockExtractLine = {
+  productId: string
+  quantity: number
+  unit: string | null
+  unitNeedsFix?: boolean
+  spokenUnit?: string
+}
 /** Plan 650: `choose` = several products fit (candidates best first); `unmatched` = none fit (candidates are the nearest). */
 export type StockExtractStatus = 'choose' | 'unmatched'
 /** `candidates`: up to 5 products a spoken name could mean. */
@@ -41,6 +48,8 @@ export type StockExtractUnmatched = {
   status?: StockExtractStatus
   quantity?: number
   unit?: string
+  /** Plan 651: a unit word that is not on the unit list, kept as said. */
+  spokenUnit?: string
   candidates?: StockExtractCandidate[]
 }
 export type StockExtractResponse = {

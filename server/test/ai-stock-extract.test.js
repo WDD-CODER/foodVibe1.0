@@ -121,6 +121,26 @@ describe('POST /ai/stock/extract', () => {
     expect(res.body.unmatched[0].candidates.map(c => c.productId)).toEqual(['purple', 'yellow'])
   })
 
+  it('plan 651: similar tomato products ask; a crate unit the product has is kept, else the line is flagged', async () => {
+    await testDb().collection('products').updateOne({ _id: 'tomato' }, { $set: { nameHebrew: 'עגבניה' } })
+    await product('cherry', 'עגבניות שרי')
+    await product('tamar', 'עגבניה תמר')
+    await product('avocado', 'אבוקדו', 'b1', { baseUnit: 'gram', purchaseOptions: [{ unitSymbol: 'ארגז', conversionRate: 10000 }] })
+    await product('lemon', 'לימון', 'b1', { baseUnit: 'gram' })
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [
+      { spoken: 'עגבניות', quantity: 3, unit: 'ארגזים' }, { spoken: 'אבוקדו', quantity: 2, unit: 'ארגזים' },
+      { spoken: 'לימון', quantity: 1, unit: 'ארגזים' },
+    ] }))
+    const res = await post({ text: 'שלושה ארגזים עגבניות' })
+    expect(res.body.unmatched).toHaveLength(1)
+    expect(res.body.unmatched[0].status).toBe('choose')
+    expect(res.body.unmatched[0].candidates).toHaveLength(3)
+    expect(res.body.lines).toEqual([
+      { productId: 'avocado', quantity: 2, unit: 'ארגז' },
+      { productId: 'lemon', quantity: 1, unit: null, unitNeedsFix: true, spokenUnit: 'ארגזים' },
+    ])
+  })
+
   it('a spoken name matching two products is a choice with both as candidates', async () => {
     await product('whole', 'קמח מלא')
     await testDb().collection('products').updateOne({ _id: 'flour' }, { $set: { nameHebrew: 'קמח לבן' } })

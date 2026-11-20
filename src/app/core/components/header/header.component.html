@@ -216,4 +216,11 @@
       <span class="bottom-nav__label">{{ 'nav_short_frontdesk' | translatePipe }}</span>
     </a>
   }
+  <!-- Plan 651: the phone bottom bar lists its links by hand, so the diagnosis entry (plan 646) was missing here. -->
+  @if (showDiagnosis_()) {
+    <a routerLink="/diagnosis" routerLinkActive="active" (click)="closeMobileMenu()">
+      <lucide-icon name="stethoscope" [size]="22"></lucide-icon>
+      <span class="bottom-nav__label">{{ 'diagnosis' | translatePipe }}</span>
+    </a>
+  }
 </nav>

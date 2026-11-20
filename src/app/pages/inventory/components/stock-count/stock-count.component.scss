@@ -3,17 +3,11 @@
     display: block;
   }
 
-  // Plan 648: date, "save draft" and "finish count" are one child of the header's action cell, so none covers another.
-  .stock-count__actions {
+  // Plan 651: the date, then the tabs, on one row under the header (the header keeps one action: finish the count).
+  .stock-count__tabs {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--space-2);
-  }
-
-  .stock-count__tabs {
-    display: flex;
     grid-column: 1 / -1;
     gap: var(--space-2);
 
@@ -39,10 +33,52 @@
     font-size: var(--fs-sm);
   }
 
+  .stock-count__toolbar {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+  }
+
+  .stock-count__past {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: var(--space-4);
+
+    padding-block: var(--space-3);
+    padding-inline: var(--space-4);
+
+    border-block-end: 1px solid var(--border-row);
+    background: var(--bg-glass);
+    text-align: start;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    > :first-child {
+      flex: 1 1 auto;
+    }
+  }
+
   .stock-count__filter-title {
     margin-block-end: var(--space-2);
 
     font-weight: 600;
+  }
+
+  // One line per row at every width: a long name is cut, never wrapped.
+  .stock-count__name {
+    overflow: hidden;
+    justify-content: flex-start;
+
+    max-inline-size: 100%;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .stock-count__ai-tag {
@@ -65,10 +101,24 @@
     font-size: var(--fs-sm);
   }
 
-  // Phone: name, amount and unit on the first line; the counted chip and the base amount on the second.
-  @media (max-width: 40rem) {
-    .stock-count__counted {
-      grid-column: span 2;
+  // The unit note: a warning line under the row it belongs to.
+  .stock-count__unit-note {
+    grid-column: 1 / -1;
+
+    margin: 0;
+    padding-block: var(--space-1);
+    padding-inline: var(--space-4);
+
+    background: var(--bg-warning-soft);
+    color: var(--color-warning-text, var(--color-text-main));
+    font-size: var(--fs-sm);
+  }
+
+  // Phone: name, amount, unit and the counted chip on one line; the base amount column is dropped.
+  @media (max-width: 768px) {
+    .stock-count__base,
+    .stock-count__base-head {
+      display: none;
     }
   }
 }

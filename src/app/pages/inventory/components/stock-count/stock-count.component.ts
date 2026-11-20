@@ -1,7 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, OnInit, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  linkedSignal,
+  OnInit,
+  signal,
+  untracked
+} from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
-import { Router } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import type { Product } from '@models/product.model'
@@ -25,6 +36,8 @@ import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { ReturnToService } from '@services/return-to.service'
+import { PastCountsService } from './past-counts.service'
 import { StockCountService } from '../../services/stock-count.service'
 import { StockBelowMinimumComponent } from './stock-below-minimum/stock-below-minimum.component'
 import {
@@ -41,9 +54,16 @@ interface RowState {
   counted: boolean
   amount: number
   unit: string
+  /** Plan 651: the unit word the person said when the product has no such unit; the row is not counted until a unit is picked. */
+  fix?: string
 }
 
-type SheetView = 'sheet' | 'below'
+/** The value of the add-unit option in the unit dropdown. */
+const ADD_UNIT = '__add_unit__'
+/** A change saves the draft this long after the last edit (ms). */
+const AUTOSAVE_MS = 2000
+
+type SheetView = 'sheet' | 'below' | 'past'
 type ShowFilter = 'all' | 'counted' | 'uncounted'
 type LoadState = 'loading' | 'ready' | 'failed'
 type CountSource = 'manual' | 'voice' | 'text'
@@ -107,7 +127,16 @@ export class StockCountComponent implements OnInit {
   private readonly userMsg_ = inject(UserMsgService)
   private readonly translation_ = inject(TranslationService)
   private readonly logging_ = inject(LoggingService)
+  private readonly route_ = inject(ActivatedRoute)
+  private readonly returnTo_ = inject(ReturnToService)
+  private readonly past_ = inject(PastCountsService)
+  private readonly destroyRef_ = inject(DestroyRef)
+  private autosaveTimer_: ReturnType<typeof setTimeout> | null = null
 
+  /** Plan 651: products moved to the top of the list (AI-filled rows, or the counted rows by the button). */
+  protected readonly topIds_ = signal<string[]>([])
+  protected readonly pastCounts_ = signal<StockCount[]>([])
+  protected readonly pastState_ = signal<LoadState>('loading')
   protected readonly rows_ = signal<Record<string, RowState>>({})
   protected readonly draftId_ = signal<string | null>(null)
   protected readonly draftSavedAt_ = signal<number | null>(null)
@@ -131,7 +160,10 @@ export class StockCountComponent implements OnInit {
   private unmatchedSeq_ = 0
   private readonly router_ = inject(Router)
   /** The amount each spoken line carried, kept for when the person picks its product. */
-  private readonly amounts_ = new Map<number, { quantity?: number; unit?: string }>()
+  private readonly amounts_ = new Map<
+    number,
+    { quantity?: number; unit?: string; spokenUnit?: string; spoken: string }
+  >()
   protected readonly productOptions_ = computed<StockAiProductOption[]>(() =>
     this.products_().map((p) => ({ productId: p._id, name: p.nameHebrew }))
   )
@@ -151,7 +183,13 @@ export class StockCountComponent implements OnInit {
     () => new Map(this.products_().map((p) => [p._id, normalizeHebrew(p.nameHebrew)]))
   )
   protected readonly unitOptionsById_ = computed<Record<string, UnitOption[]>>(() =>
-    Object.fromEntries(this.products_().map((p) => [p._id, unitOptionsFor(p).map((u) => ({ value: u, label: u }))]))
+    Object.fromEntries(
+      this.products_().map((p) => [
+        p._id,
+        // Plan 651 (unit-dropdown-add): every dropdown ends with the add-unit option.
+        [...unitOptionsFor(p).map((u) => ({ value: u, label: u })), { value: ADD_UNIT, label: 'add_new_unit' }]
+      ])
+    )
   )
   /** The amount in the base unit, only for rows typed in another unit (every other row shows nothing). */
   protected readonly baseTextById_ = computed<Record<string, string>>(() => {
@@ -174,7 +212,8 @@ export class StockCountComponent implements OnInit {
     const names = this.searchNames_()
     const options = this.unitOptionsById_()
     const base = this.baseTextById_()
-    return this.products_()
+    const top = new Map(this.topIds_().map((id, n) => [id, n]))
+    const list = this.products_()
       .filter((p) => !query || (names.get(p._id) ?? '').includes(query))
       .map((product) => ({
         product,
@@ -183,6 +222,12 @@ export class StockCountComponent implements OnInit {
         base: base[product._id] ?? ''
       }))
       .filter(({ state }) => show === 'all' || (show === 'counted' ? state.counted : !state.counted))
+    if (top.size === 0) return list
+    // Plan 651: the moved rows first, in the order they were moved; the rest keep the name order.
+    const pinned = list
+      .filter((r) => top.has(r.product._id))
+      .sort((a, b) => top.get(a.product._id)! - top.get(b.product._id)!)
+    return [...pinned, ...list.filter((r) => !top.has(r.product._id))]
   })
 
   /** Plan 645: how many matching rows are drawn; a new search or filter starts again at one page. */
@@ -197,12 +242,58 @@ export class StockCountComponent implements OnInit {
     this.limit_.update((n) => n + PAGE_SIZE)
   }
 
+  /** What would be saved right now; a change to it starts the autosave clock. */
+  private readonly snapshotSig_ = computed(() => JSON.stringify([this.countedDate_(), this.countedLinesSig_()]))
+
   constructor() {
     warnBeforeUnload(() => this.hasRealChanges())
+    effect(() => {
+      const snap = this.snapshotSig_()
+      untracked(() => this.scheduleAutosave_(snap))
+    })
+    this.destroyRef_.onDestroy(() => this.clearAutosave_())
   }
 
   async ngOnInit(): Promise<void> {
     await this.load()
+    this.finishAddedProduct_()
+  }
+
+  /** Plan 651: back from «הוספת מוצר חדש» — the new product fills the line the person came from. */
+  private finishAddedProduct_(): void {
+    const id = this.route_.snapshot?.queryParamMap?.get('addedProduct')
+    const pending = this.returnTo_.takePending()
+    if (!id) return
+    const product = this.kitchen_.products_().find((p) => p._id === id)
+    if (!product || !pending || pending.quantity === undefined) return
+    const said = pending.unit
+    const unit = !said ? product.baseUnit : unitOptionsFor(product).includes(said) ? said : null
+    const line: StockExtractLine =
+      unit === null
+        ? { productId: product._id, quantity: pending.quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
+        : { productId: product._id, quantity: pending.quantity, unit }
+    if (this.place_(product, line)) this.moveToTop_([product._id])
+  }
+
+  private clearAutosave_(): void {
+    if (this.autosaveTimer_ !== null) clearTimeout(this.autosaveTimer_)
+    this.autosaveTimer_ = null
+  }
+
+  /** Plan 651: the draft saves itself 2 s after the last change (no button). */
+  private scheduleAutosave_(snap: string): void {
+    this.clearAutosave_()
+    if (this.loadState_() !== 'ready' || snap === this.savedSnapshot_()) return
+    this.autosaveTimer_ = setTimeout(() => {
+      this.autosaveTimer_ = null
+      void this.autosave_()
+    }, AUTOSAVE_MS)
+  }
+
+  private async autosave_(): Promise<void> {
+    if (this.saving_() || this.aiBusy_()) return
+    if (!this.dateOk_() || (this.countedCount_() === 0 && !this.draftId_())) return
+    await this.run(false, true)
   }
 
   /** `pendingChangesGuard`: unsaved typed rows since the last save. */
@@ -247,15 +338,91 @@ export class StockCountComponent implements OnInit {
   }
 
   protected setAmount(product: Product, amount: number): void {
-    this.patch_(product, { amount, counted: true })
+    this.patch_(product, { amount, counted: !this.rows_()[product._id]?.fix })
   }
 
   protected setUnit(product: Product, unit: string): void {
-    this.patch_(product, { unit, counted: true })
+    if (unit === ADD_UNIT) {
+      void this.addUnitFor_(product)
+      return
+    }
+    this.patch_(product, { unit, counted: true, fix: undefined })
+  }
+
+  /** Plan 651 (unit-dropdown-add): the add-unit window, as the product form opens it; the new unit is selected. */
+  private async addUnitFor_(product: Product): Promise<void> {
+    const forProduct = { name: product.nameHebrew, baseUnit: product.baseUnit }
+    const existingUnitSymbols = (product.purchaseOptions ?? []).map((o) => o.unitSymbol)
+    setTimeout(() => this.units_.openUnitCreator({ existingUnitSymbols, forProduct }), 0)
+    const added = await this.units_.awaitProductUnitAdded()
+    if (!added) return
+    const { key, amount, basis } = added
+    if (!product.purchaseOptions?.some((o) => o.unitSymbol === key)) {
+      const updated: Product = {
+        ...product,
+        purchaseOptions: [
+          ...(product.purchaseOptions ?? []),
+          { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
+        ]
+      }
+      await this.kitchen_.saveProduct(updated).catch(() => undefined)
+    }
+    this.setUnit(product, key)
+  }
+
+  /** Plan 651: the counted rows go to the top of the list. */
+  protected moveCountedToTop(): void {
+    const rows = this.rows_()
+    this.topIds_.set(
+      this.products_()
+        .filter((p) => rows[p._id]?.counted)
+        .map((p) => p._id)
+    )
+  }
+
+  private moveToTop_(ids: string[]): void {
+    this.topIds_.update((old) => [...ids, ...old.filter((id) => !ids.includes(id))])
+  }
+
+  /** Plan 651: the autosave line — «נשמר אוטומטית · HH:mm». */
+  protected autosavedText_(): string {
+    const at = this.draftSavedAt_()
+    if (at === null) return ''
+    const d = new Date(at)
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    return this.translation_.translate('stk_autosaved').replace('{time}', time)
+  }
+
+  protected unitNoteText_(fix: string): string {
+    return this.translation_.translate('stk_unit_needs_fix').replace('{unit}', fix)
+  }
+
+  protected countStatusKey_(c: StockCount): string {
+    return c.status === 'final' ? 'stk_count_status_final' : 'stk_count_status_draft'
+  }
+
+  protected async openPast(): Promise<void> {
+    this.view_.set('past')
+    this.pastState_.set('loading')
+    try {
+      this.pastCounts_.set(await this.past_.list())
+      this.pastState_.set('ready')
+    } catch {
+      this.pastState_.set('failed')
+    }
+  }
+
+  /** Plan 651: a past draft opens on the sheet (the count in hand is saved first). */
+  protected async openPastDraft(count: StockCount): Promise<void> {
+    if (count.status !== 'draft') return
+    if (this.hasRealChanges() && !(await this.run(false, true))) return
+    this.applyDraft_(count)
+    this.view_.set('sheet')
   }
 
   protected toggleCounted(product: Product): void {
     const current = this.rows_()[product._id]
+    if (current?.fix) return
     this.unmark_(product._id)
     if (current?.counted) {
       this.rows_.update((rows) => Object.fromEntries(Object.entries(rows).filter(([id]) => id !== product._id)))
@@ -269,16 +436,6 @@ export class StockCountComponent implements OnInit {
     this.countedDate_.set(clamped)
   }
 
-  protected draftFromText_(): string {
-    const at = this.draftSavedAt_()
-    const date = at === null ? '' : new Date(at).toLocaleDateString('en-GB')
-    return this.translation_.translate('stk_draft_from').replace('{date}', date)
-  }
-
-  protected saveDraft(): Promise<boolean> {
-    return this.run(false)
-  }
-
   protected finalize(): Promise<boolean> {
     return this.run(true)
   }
@@ -288,17 +445,23 @@ export class StockCountComponent implements OnInit {
     const known = new Map(this.kitchen_.products_().map((p) => [p._id, p]))
     const { lines, unmatched, draftId } = e.answer
     let applied = 0
+    const filled: string[] = []
     for (const line of lines) {
       const product = known.get(line.productId)
-      if (product && this.place_(product, line)) applied++
+      if (product && this.place_(product, line)) {
+        applied++
+        filled.push(product._id)
+      }
     }
+    // Plan 651: what the AI filled comes to the top, so it is seen at once.
+    if (filled.length) this.moveToTop_(filled)
     if (unmatched.length) {
       const added = unmatched.map((u): StockAiUnmatched => {
         const id = ++this.unmatchedSeq_
-        this.amounts_.set(id, { quantity: u.quantity, unit: u.unit })
+        this.amounts_.set(id, { quantity: u.quantity, unit: u.unit, spokenUnit: u.spokenUnit, spoken: u.spoken })
         return {
           id,
-          text: [u.spoken, u.quantity, u.unit].filter((v) => v !== undefined && v !== '').join(' '),
+          text: [u.spoken, u.quantity, u.unit ?? u.spokenUnit].filter((v) => v !== undefined && v !== '').join(' '),
           status: u.status === 'choose' ? 'choose' : 'unmatched',
           candidates: (u.candidates ?? []).map((c) => ({ productId: c.productId, name: c.nameHebrew })),
           hasAmount: u.quantity !== undefined
@@ -321,7 +484,8 @@ export class StockCountComponent implements OnInit {
   protected replaceWithSuggestion(productId: string): void {
     const entry = this.conflicts_().find((c) => c.productId === productId)
     if (!entry) return
-    this.suggest_(productId, entry.line)
+    if (entry.line.unit === null) return
+    this.suggest_(productId, { ...entry.line, unit: entry.line.unit })
     this.keepOnSheet(productId)
   }
 
@@ -339,16 +503,33 @@ export class StockCountComponent implements OnInit {
     const amount = this.amounts_.get(pick.id)
     const product = this.kitchen_.products_().find((p) => p._id === pick.productId)
     if (!amount || amount.quantity === undefined || !product) return
-    const unit = amount.unit && unitOptionsFor(product).includes(amount.unit) ? amount.unit : product.baseUnit
-    if (this.place_(product, { productId: product._id, quantity: amount.quantity, unit })) {
+    // Plan 651: only a unit the product has is used; any other said unit is flagged for a fix, never guessed.
+    const said = amount.unit ?? amount.spokenUnit
+    const unit = !said ? product.baseUnit : unitOptionsFor(product).includes(said) ? said : null
+    const line: StockExtractLine =
+      unit === null
+        ? { productId: product._id, quantity: amount.quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
+        : { productId: product._id, quantity: amount.quantity, unit }
+    if (this.place_(product, line)) {
+      this.moveToTop_([product._id])
       this.userMsg_.onSetSuccessMsg(this.translation_.translate('stk_ai_applied').replace('{n}', '1'))
     }
     this.dismissUnmatched(pick.id)
   }
 
   /** Plan 650: «הוספת מוצר חדש» — the only way a spoken line leads to a new item; it opens the add-product page. */
-  protected addNewForSpoken(): void {
-    void this.router_.navigate(['/inventory/add'])
+  protected async addNewForSpoken(id: number): Promise<void> {
+    const amount = this.amounts_.get(id)
+    // Plan 651 (leave-and-return): the count is saved first, with no confirm, so the numbers are there on return.
+    if (this.hasRealChanges() && !(await this.run(false, true))) return
+    const spoken = amount?.spoken ?? ''
+    const said = amount?.unit ?? amount?.spokenUnit
+    this.returnTo_.setPending({
+      spoken,
+      ...(amount?.quantity !== undefined && { quantity: amount.quantity }),
+      ...(said && { unit: said })
+    })
+    void this.router_.navigate(['/inventory/add'], { queryParams: { name: spoken, returnUrl: '/inventory/count' } })
   }
 
   /**
@@ -357,8 +538,19 @@ export class StockCountComponent implements OnInit {
    */
   private place_(product: Product, line: StockExtractLine): boolean {
     const state = this.rows_()[product._id]
+    if (line.unit === null) {
+      // Plan 651: the product has no such unit — the amount waits, uncounted, with a note to pick a unit.
+      if (state?.counted) return false
+      this.errorProductId_.update((id) => (id === product._id ? null : id))
+      this.rows_.update((rows) => ({
+        ...rows,
+        [product._id]: { counted: false, amount: line.quantity, unit: '', fix: line.spokenUnit ?? '' }
+      }))
+      this.aiRows_.update((set) => new Set(set).add(product._id))
+      return true
+    }
     if (!state?.counted) {
-      this.suggest_(product._id, line)
+      this.suggest_(product._id, { ...line, unit: line.unit })
       return true
     }
     if (state.amount !== line.quantity || state.unit !== line.unit) {
@@ -374,7 +566,7 @@ export class StockCountComponent implements OnInit {
     return false
   }
 
-  private suggest_(productId: string, line: StockExtractLine): void {
+  private suggest_(productId: string, line: StockExtractLine & { unit: string }): void {
     this.errorProductId_.update((id) => (id === productId ? null : id))
     this.rows_.update((rows) => ({ ...rows, [productId]: { counted: true, amount: line.quantity, unit: line.unit } }))
     this.aiRows_.update((set) => new Set(set).add(productId))
@@ -394,15 +586,19 @@ export class StockCountComponent implements OnInit {
     }))
   }
 
-  private countedLines_(): { productId: string; quantity: number; unit: string }[] {
+  private readonly countedLinesSig_ = computed(() => {
     const rows = this.rows_()
     return this.products_()
       .filter((p) => rows[p._id]?.counted)
       .map((p) => ({ productId: p._id, quantity: rows[p._id].amount, unit: rows[p._id].unit }))
+  })
+
+  private countedLines_(): { productId: string; quantity: number; unit: string }[] {
+    return this.countedLinesSig_()
   }
 
   private snapshot_(): string {
-    return JSON.stringify([this.countedDate_(), this.countedLines_()])
+    return this.snapshotSig_()
   }
 
   private applyDraft_(draft: StockCount | null): void {
@@ -416,6 +612,7 @@ export class StockCountComponent implements OnInit {
     this.draftSavedAt_.set(draft ? (draft.updatedAt ?? null) : null)
     this.countedDate_.set(draft ? isoFromCountedAt(draft.countedAt) : todayIso())
     this.errorProductId_.set(null)
+    this.topIds_.set([])
     this.aiRows_.set(new Set())
     this.conflicts_.set([])
     this.unmatched_.set([])
@@ -430,7 +627,7 @@ export class StockCountComponent implements OnInit {
   }
 
   /** Save the counted rows as a draft; with `closeIt`, then close the count. Returns true on success. */
-  private async run(closeIt: boolean): Promise<boolean> {
+  private async run(closeIt: boolean, silent = false): Promise<boolean> {
     if (this.saving_()) return false
     this.saving_.set(true)
     this.errorProductId_.set(null)
@@ -456,7 +653,7 @@ export class StockCountComponent implements OnInit {
           // The count is closed; the below-minimum view simply keeps the previous on-hand list.
         }
         this.view_.set('below')
-      } else {
+      } else if (!silent) {
         this.userMsg_.onSetSuccessMsg(this.translation_.translate('stk_draft_saved'))
       }
       return true

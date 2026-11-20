@@ -126,6 +126,15 @@ describe('HeaderComponent', () => {
       fixture.detectChanges()
       expect(diag().length).toBe(0)
     })
+
+    it('shows the diagnosis entry in the phone bottom bar too (plan 651)', () => {
+      const bar = () => Array.from<Element>(fixture.nativeElement.querySelectorAll('.bottom-nav a[href="/diagnosis"]'))
+      expect(bar().length).toBe(0)
+      modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+      fixture.detectChanges()
+      expect(bar().length).toBe(1)
+      expect(bar()[0].textContent).toContain('diagnosis')
+    })
   })
 })
 
