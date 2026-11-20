@@ -17,6 +17,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `invoice-data.service.ts` | Saved invoices, read-only list; `openFile(fileId)` opens the stored file in a new tab | InvoiceDataService |
 | `venue-data.service.ts` | Venue CRUD | VenueDataService |
 | `kitchen-state.service.ts` | Central state for kitchen flows; save/delete methods return Promises | KitchenStateService |
+| `return-to.service.ts` | Safe `returnUrl` reader and the pending line kept while the person adds something elsewhere | ReturnToService, ReturnToPending |
 | `metadata-registry.service.ts` | Categories, allergens, units registry | MetadataRegistryService |
 | `taxonomy-store.service.ts` | Single store for all taxonomy terms (categories, units, preparations…); the registry services are thin facades over it and load through `loadSafely` / `reloadSafely` | TaxonomyStore, TermInUseError, TermReadOnlyError, TaxonomyLoadLog |
 | `unit-registry.service.ts` | Units (mass, volume, dish); `awaitUnitCreated()` resolves the saved unit or null | UnitRegistryService, SYSTEM_UNITS |
