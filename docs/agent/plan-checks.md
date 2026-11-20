@@ -38,6 +38,10 @@ manages.
   preparation categories, flag the Hebrew canonical values guidance in `docs/agent/standards-domain.md`; the
   canonical resolution flow and the translation-key modal UX are required.
 - Lucide icons used in templates are registered in `src/app/app.config.ts` (`docs/agent/conventions.md`).
+- Folder maps: a plan that adds or moves a file under a folder with a `breadcrumbs.md` (`src/app/core/`,
+  `core/services`, `core/models`, `core/components`, `src/app/shared/`, `src/app/pages/`, `server/`) lists that
+  `breadcrumbs.md` in its Read-Write Scope, so the breadcrumbs check never stops a run for an `approved:` (Dandan,
+  2026-11-20: plans 646 and 651 each waited on this ask).
 
 ## Data and API
 - New persisted data uses the generic entity contract (`/api/v1/data/:type`, `docs/agent/standards-backend.md`
