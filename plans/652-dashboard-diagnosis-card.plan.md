@@ -73,6 +73,18 @@ append the path to the scope block above and retry.
   `price-rises-card`.
 - the card's module gate — family: module-gate — rung: 1 — why: the same rule as the header's `showDiagnosis_`.
 - the empty text — family: empty-state — rung: 1 — why: `app-empty-state` with a new key.
+- .diagnosis-card — family: engine-classes — rung: 1 — why: layer name of the card, as price-rises-card.
+- .diag-card — family: engine-classes — rung: 1 — why: card shell of price-rises-card, restated (its styles are scoped).
+- .diag-card__head — family: engine-classes — rung: 1 — why: card header row, as price-rises-card.
+- .diag-card__icon — family: engine-classes — rung: 1 — why: card header icon, as price-rises-card.
+- .diag-card__title — family: engine-classes — rung: 1 — why: card title, as price-rises-card.
+- .diag-card__count — family: engine-classes — rung: 1 — why: the open-count text in the header.
+- .diag-card__date — family: engine-classes — rung: 1 — why: a row's date, as price-rises-card.
+- .diag-card__link — family: engine-classes — rung: 1 — why: the «לכל האבחונים» link, as price-rises-card.
+- .diag-card__list — family: engine-classes — rung: 1 — why: the list of diagnoses, as price-rises-card.
+- .diag-card__row — family: engine-classes — rung: 1 — why: one diagnosis row, as price-rises-card.
+- .diag-card__name — family: engine-classes — rung: 1 — why: a diagnosis name, as price-rises-card.
+- .diag-card__create — family: engine-classes — rung: 1 — why: places the create button under the list.
 
 ## Defaults
 
@@ -91,10 +103,10 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `app-diagnosis-card` on the dashboard overview: title «אבחונים», the count of open diagnoses, the three newest
+- [x] `app-diagnosis-card` on the dashboard overview: title «אבחונים», the count of open diagnoses, the three newest
   (name, date) linking to `/diagnosis/<id>`, «יצירת אבחון», and «לכל האבחונים» to `/diagnosis`.
-- [ ] Shown with `consultant_diag` (home modules while acting), loaded only then.
-- [ ] Dictionary (append-only): `diag_card_title` — "אבחונים", `diag_card_open_count` — "{count} פתוחים",
+- [x] Shown with `consultant_diag` (home modules while acting), loaded only then.
+- [x] Dictionary (append-only): `diag_card_title` — "אבחונים", `diag_card_open_count` — "{count} פתוחים",
   `diag_card_empty` — "עוד אין אבחונים", `diag_card_all` — "לכל האבחונים".
 
 ### Should Have (P1)
@@ -107,8 +119,8 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show the consultant's diagnoses on the dashboard — the card, the module gate, the keys, the specs — src/app/pages/dashboard/components/diagnosis-card/**, src/app/pages/dashboard/components/dashboard-overview/**, public/assets/data/dictionary.json
-- [ ] A2: Run every check — the Done-when commands in order — docs/brain/inventory.md
+- [x] A1: Show the consultant's diagnoses on the dashboard — the card, the module gate, the keys, the specs — src/app/pages/dashboard/components/diagnosis-card/**, src/app/pages/dashboard/components/dashboard-overview/**, public/assets/data/dictionary.json
+- [x] A2: Run every check — the Done-when commands in order — docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 634 (diagnoses), 646 (the module rule in the header).
@@ -120,4 +132,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- gate: the card gates itself (header rule); the overview always mounts it, its spec stubs the card template (Router is mocked there).
+- evidence: build 0; lint 0 (0 errors); test:ci 0 (2676 pass; a flaky header overlay hit-test failed on 2 earlier runs, passed on rerun); manifest/override/icons/native-select/ledger/breadcrumbs/ci-scope/reuse/log-query 0.
 - decided: a card, not a second menu — why: the main-menu pill exists; the dashboard is where Dandan looked.

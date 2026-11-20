@@ -1,0 +1,65 @@
+@layer components.diagnosis-card {
+  :host {
+    display: block;
+  }
+
+  .diag-card {
+    display: grid;
+    gap: var(--space-3);
+
+    padding: var(--space-4);
+  }
+
+  .diag-card__head {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .diag-card__title {
+    margin: 0;
+
+    font-size: var(--fs-md);
+    font-weight: var(--fw-bold);
+  }
+
+  .diag-card__icon,
+  .diag-card__link {
+    color: var(--color-primary);
+  }
+
+  .diag-card__count,
+  .diag-card__date {
+    opacity: 0.75;
+  }
+
+  .diag-card__count,
+  .diag-card__link,
+  .diag-card__row {
+    font-size: var(--fs-sm);
+  }
+
+  .diag-card__list {
+    display: grid;
+    row-gap: var(--space-2);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .diag-card__row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .diag-card__name {
+    font-weight: var(--fw-bold);
+  }
+
+  .diag-card__create {
+    justify-self: start;
+  }
+}
