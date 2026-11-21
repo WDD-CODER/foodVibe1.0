@@ -87,7 +87,7 @@
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
-      @if (showBase_()) {
+      @if (baseColumn_()) {
         <app-column-carousel-header>
           <div class="c-grid-header-cell" appColumnSlide label="stk_col_in_base" role="presentation">
             {{ 'stk_col_in_base' | translatePipe }}
@@ -152,6 +152,7 @@
         [products]="productOptions_()"
         [disabled]="saving_()"
         (pick)="pickForSpoken($event)"
+        (amount)="answerAmount($event)"
         (addNew)="addNewForSpoken($event)"
         (busyChange)="aiBusy_.set($event)"
         (extracted)="onExtracted($event)"
@@ -227,20 +228,41 @@
                 [ngModel]="row.state.unit"
                 (valueChange)="setUnit(row.product, $event)"
               />
+              @if (narrow_() && row.base) {
+                <button
+                  type="button"
+                  class="c-icon-btn stock-count__base-btn"
+                  data-testid="stk-base-btn"
+                  [attr.title]="baseLabel_(row.base)"
+                  [attr.aria-label]="baseLabel_(row.base)"
+                  [attr.aria-expanded]="basePopover_()?.id === row.product._id"
+                  (click)="toggleBase_(row, $event)"
+                >
+                  <lucide-icon name="info" [size]="16"></lucide-icon>
+                </button>
+              }
             }
           </div>
           <div class="c-list-body-cell stock-count__counted" role="cell">
-            <label class="c-chip c-chip--toggle">
-              <input
-                type="checkbox"
+            @if (narrow_()) {
+              <app-list-row-checkbox
                 [checked]="row.state.counted"
                 [disabled]="!!row.state.fix || !!row.state.choose"
-                (change)="toggleCounted(row.product)"
+                (toggle)="toggleCounted(row.product)"
               />
-              <span>{{ 'stk_counted' | translatePipe }}</span>
-            </label>
+            } @else {
+              <label class="c-chip c-chip--toggle">
+                <input
+                  type="checkbox"
+                  [checked]="row.state.counted"
+                  [disabled]="!!row.state.fix || !!row.state.choose"
+                  (change)="toggleCounted(row.product)"
+                />
+                <span>{{ 'stk_counted' | translatePipe }}</span>
+              </label>
+            }
           </div>
-          @if (showBase_()) {
+          @if (baseColumn_()) {
             <app-column-carousel-cell>
               <div
                 class="c-list-body-cell stock-count__base"
@@ -268,6 +290,27 @@
         <div class="stock-count__state">
           <button type="button" class="c-btn-ghost" data-testid="stk-show-more" (click)="showMore()">
             {{ 'stk_show_more' | translatePipe }} ({{ hiddenCount_() }})
+          </button>
+        </div>
+      }
+      @if (basePopover_(); as pop) {
+        <div
+          class="stock-count__base-pop"
+          role="dialog"
+          data-testid="stk-base-pop"
+          [style.top.px]="pop.top"
+          [style.left.px]="pop.left"
+          [attr.aria-label]="pop.text"
+        >
+          <span dir="auto">{{ pop.text }}</span>
+          <button
+            type="button"
+            class="c-icon-btn"
+            [attr.aria-label]="'close' | translatePipe"
+            [attr.title]="'close' | translatePipe"
+            (click)="closeBase_()"
+          >
+            <lucide-icon name="x" [size]="16"></lucide-icon>
           </button>
         </div>
       }

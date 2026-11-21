@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule, Mic, Square } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { VoiceNoteComponent } from 'src/app/shared/voice-note/voice-note.component'
 import { GeminiService } from '@services/gemini.service'
 import { LoggingService } from '@services/logging.service'
@@ -119,7 +120,7 @@ describe('StockAiDraftComponent', () => {
   it('lists the conflicts and unmatched words and emits the button choices', () => {
     fixture.componentRef.setInput('conflicts', [{ productId: 'p1', name: 'קמח', onSheet: '4 kg', suggested: '9 kg' }])
     fixture.componentRef.setInput('unmatched', [
-      { id: 7, text: 'בננות 3', status: 'unmatched', candidates: [], hasAmount: false }
+      { id: 7, text: 'בננות 3', status: 'unmatched', candidates: [], hasAmount: false, missing: ['product', 'amount'] }
     ])
     fixture.detectChanges()
     const conflicts = el().querySelector('[data-testid="stk-ai-conflicts"]')!
@@ -158,7 +159,14 @@ describe('StockAiDraftComponent', () => {
 
     it('shows a choose line as toggle chips plus a search, and a chip emits the pick', () => {
       fixture.componentRef.setInput('unmatched', [
-        { id: 1, text: 'בצל 2 kg', status: 'choose', candidates: products.slice(0, 2), hasAmount: true }
+        {
+          id: 1,
+          text: 'בצל 2 kg',
+          status: 'choose',
+          candidates: products.slice(0, 2),
+          hasAmount: true,
+          missing: ['product']
+        }
       ])
       fixture.detectChanges()
       expect(el().textContent).toContain('stk_ai_choose')
@@ -171,7 +179,14 @@ describe('StockAiDraftComponent', () => {
 
     it('shows an unmatched line with the nearest, the search and add-new, which only emits when pressed', () => {
       fixture.componentRef.setInput('unmatched', [
-        { id: 2, text: 'בננות 3', status: 'unmatched', candidates: [products[2]], hasAmount: true }
+        {
+          id: 2,
+          text: 'בננות 3',
+          status: 'unmatched',
+          candidates: [products[2]],
+          hasAmount: true,
+          missing: ['product']
+        }
       ])
       fixture.detectChanges()
       expect(el().textContent).toContain('stk_ai_not_found')
@@ -181,10 +196,32 @@ describe('StockAiDraftComponent', () => {
       expect(added).toEqual([2])
     })
 
-    it('a pick from the search emits the product, and a line without an amount offers no pick', () => {
+    it('plan 655: one question per missing part — which product, how much, which unit — and the amount answer is emitted', () => {
+      const amounts: { id: number; quantity: number }[] = []
+      fixture.componentInstance.amount.subscribe((a) => amounts.push(a))
       fixture.componentRef.setInput('unmatched', [
-        { id: 3, text: 'x', status: 'unmatched', candidates: [], hasAmount: true },
-        { id: 4, text: 'y', status: 'choose', candidates: [products[0]], hasAmount: false }
+        {
+          id: 5,
+          text: 'x',
+          status: 'unmatched',
+          candidates: [],
+          hasAmount: false,
+          missing: ['product', 'amount', 'unit']
+        },
+        { id: 6, text: 'y', status: 'unmatched', candidates: [], hasAmount: true, missing: ['unit'] }
+      ])
+      fixture.detectChanges()
+      expect(el().querySelectorAll('[data-testid="stk-ai-q-product"]').length).toBe(1)
+      expect(el().querySelectorAll('[data-testid="stk-ai-q-amount"]').length).toBe(1)
+      expect(el().querySelectorAll('[data-testid="stk-ai-q-unit"]').length).toBe(2)
+      fixture.debugElement.query(By.directive(CounterComponent)).componentInstance.valueChange.emit(2.5)
+      expect(amounts).toEqual([{ id: 5, quantity: 2.5 }])
+    })
+
+    it('a pick from the search emits the product', () => {
+      fixture.componentRef.setInput('unmatched', [
+        { id: 3, text: 'x', status: 'unmatched', candidates: [], hasAmount: true, missing: ['product'] },
+        { id: 4, text: 'y', status: 'choose', candidates: [products[0]], hasAmount: true, missing: ['unit'] }
       ])
       fixture.detectChanges()
       expect(el().querySelectorAll('[data-testid="stk-ai-search"]').length).toBe(1)

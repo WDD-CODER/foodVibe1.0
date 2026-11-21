@@ -9,12 +9,12 @@ const { verifyToken } = require('../../middleware/auth');
 const { callGemini, responseText } = require('../../services/gemini-client');
 const { extractJsonPayload } = require('../../services/ai-recipe-helpers');
 const { saveAiDraft } = require('../../services/ai-drafts');
-const { scopeFilter, readScope } = require('../../utils/business-scope');
+const { scopeFilter } = require('../../utils/business-scope');
 const { assertCan } = require('../../utils/permissions');
 const { loadUnitRates } = require('../../utils/unit-rates');
 const { LIVE } = require('../../jobs/purge-deleted');
 const {
-  STOCK_EXTRACT_SYSTEM_PROMPT, unitList, userPart, cleanStockLines,
+  STOCK_EXTRACT_SYSTEM_PROMPT, unitVocabulary, userPart, cleanStockLines,
 } = require('../../utils/stock-extract');
 const {
   stockExtractRequestSchema,
@@ -52,10 +52,8 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
     const countedIds = new Set(countedRows.map(r => String(r._id)));
 
     const rates = await loadUnitRates(req);
-    const terms = await db.collection('taxonomyTerms')
-      .find({ ...readScope(req, 'taxonomyTerms'), kind: 'unit', ...LIVE }, { projection: { key: 1 } })
-      .toArray();
-    const units = unitList(products, terms.map(t => t.key));
+    // Plan 655: the units are read where the app saves them, per request, with the names people say for each.
+    const units = await unitVocabulary(db, req, products);
 
     const call = await callGemini({
       body: {

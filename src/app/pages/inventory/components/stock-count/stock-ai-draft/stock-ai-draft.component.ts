@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output, signal } fro
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { SearchComboboxComponent, type SearchPick } from 'src/app/shared/search-combobox/search-combobox.component'
 import { VoiceNoteComponent, type VoiceNoteSend } from 'src/app/shared/voice-note/voice-note.component'
@@ -10,7 +11,7 @@ import { GeminiService } from '@services/gemini.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
-import type { StockExtractResponse } from '@schemas/ai-stock-extract.schema'
+import type { StockExtractMissing, StockExtractResponse } from '@schemas/ai-stock-extract.schema'
 
 /** A suggestion for a row the person already counted differently: both amounts are shown as text. */
 export interface StockAiConflict {
@@ -36,12 +37,20 @@ export interface StockAiUnmatched {
   status: 'choose' | 'unmatched'
   candidates: StockAiProductOption[]
   hasAmount: boolean
+  /** Plan 655: the parts the server found missing — one question each (which product / how much / which unit). */
+  missing: StockExtractMissing[]
 }
 
 /** The person picked a product for a spoken line. */
 export interface StockAiPick {
   id: number
   productId: string
+}
+
+/** Plan 655: the person answered «כמה?» for a spoken line. */
+export interface StockAiAmount {
+  id: number
+  quantity: number
 }
 
 /** What the sheet gets when a count was read: the server's answer and where the words came from. */
@@ -58,7 +67,14 @@ export interface StockAiExtracted {
 @Component({
   selector: 'app-stock-ai-draft',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, LoaderComponent, VoiceNoteComponent, SearchComboboxComponent],
+  imports: [
+    LucideAngularModule,
+    TranslatePipe,
+    CounterComponent,
+    LoaderComponent,
+    VoiceNoteComponent,
+    SearchComboboxComponent
+  ],
   templateUrl: './stock-ai-draft.component.html',
   styleUrl: './stock-ai-draft.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -75,6 +91,8 @@ export class StockAiDraftComponent {
   readonly products = input<StockAiProductOption[]>([])
   readonly disabled = input(false)
   readonly pick = output<StockAiPick>()
+  /** Plan 655: the answer to «כמה?» on a line whose amount is missing. */
+  readonly amount = output<StockAiAmount>()
   /** The person pressed «הוספת מוצר חדש» on a spoken line: the only way a line leads to a new item. */
   readonly addNew = output<number>()
   readonly extracted = output<StockAiExtracted>()
