@@ -314,6 +314,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
+- reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
+  drops the unit, the word beside the product name in the cook's own text is kept as `spokenUnit`; none →
+  `unitMissing`, never the base unit. Browser side: `unitChoicesFor` in `stock-count/spoken-unit.ts`.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).

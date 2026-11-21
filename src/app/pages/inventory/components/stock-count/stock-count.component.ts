@@ -39,7 +39,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ReturnToService } from '@services/return-to.service'
 import { PastCountsService } from './past-counts.service'
-import { unitForSpoken } from './spoken-unit'
+import { unitChoicesFor, unitForSpoken } from './spoken-unit'
 import { StockCountService } from '../../services/stock-count.service'
 import { StockBelowMinimumComponent } from './stock-below-minimum/stock-below-minimum.component'
 import {
@@ -58,6 +58,8 @@ interface RowState {
   unit: string
   /** Plan 651: the unit word the person said when the product has no such unit; the row is not counted until a unit is picked. */
   fix?: string
+  /** Plan 654: no unit was said or read — the row waits, uncounted, and asks which unit; never the base unit. */
+  choose?: boolean
 }
 
 /** The value of the add-unit option in the unit dropdown. */
@@ -93,6 +95,8 @@ interface SheetRow {
   state: RowState
   options: UnitOption[]
   base: string
+  /** Plan 654: the product's own units (and the add-unit option) offered when the row has no unit. */
+  choices: UnitOption[]
 }
 
 function todayIso(): string {
@@ -179,7 +183,18 @@ export class StockCountComponent implements OnInit {
   protected readonly dateOk_ = computed(
     () => /^\d{4}-\d{2}-\d{2}$/.test(this.countedDate_()) && this.countedDate_() <= todayIso()
   )
-  protected readonly gridTemplate_ = computed(() => (this.view_() === 'sheet' ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '1fr'))
+  /** Plan 654: the base-amount column is drawn only when one of the drawn rows has something in it. */
+  protected readonly showBase_ = computed(() => this.shownRows_().some((r) => r.base !== ''))
+  protected readonly addUnitValue = ADD_UNIT
+  protected readonly gridTemplate_ = computed(() => {
+    if (this.view_() !== 'sheet') return '1fr'
+    return this.showBase_() ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '2fr 1.2fr 1.2fr 0.9fr'
+  })
+  protected readonly mobileGridTemplate_ = computed(() => {
+    if (this.view_() !== 'sheet') return '1fr'
+    const cols = 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto'
+    return this.showBase_() ? cols + ' minmax(3.5rem, auto)' : cols
+  })
 
   /** Plan 645: built once per product list, not per row per check. */
   private readonly searchNames_ = computed(
@@ -208,12 +223,22 @@ export class StockCountComponent implements OnInit {
   })
 
   /** Every product that matches the search and the filter; counted values live in `rows_`, not in the DOM. */
+  private readonly choicesById_ = computed<Record<string, UnitOption[]>>(() =>
+    Object.fromEntries(
+      this.products_().map((p) => [
+        p._id,
+        [...unitChoicesFor(p).map((u) => ({ value: u, label: u })), { value: ADD_UNIT, label: 'add_new_unit' }]
+      ])
+    )
+  )
+
   protected readonly visibleRows_ = computed<SheetRow[]>(() => {
     const query = normalizeHebrew(this.search_().trim())
     const show = this.show_()
     const rows = this.rows_()
     const names = this.searchNames_()
     const options = this.unitOptionsById_()
+    const choices = this.choicesById_()
     const base = this.baseTextById_()
     const top = new Map(this.topIds_().map((id, n) => [id, n]))
     const list = this.products_()
@@ -222,6 +247,7 @@ export class StockCountComponent implements OnInit {
         product,
         state: rows[product._id] ?? this.blank_(product),
         options: options[product._id] ?? [],
+        choices: choices[product._id] ?? [],
         base: base[product._id] ?? ''
       }))
       .filter(({ state }) => show === 'all' || (show === 'counted' ? state.counted : !state.counted))
@@ -269,12 +295,7 @@ export class StockCountComponent implements OnInit {
     if (!id) return
     const product = this.kitchen_.products_().find((p) => p._id === id)
     if (!product || !pending || pending.quantity === undefined) return
-    const said = pending.unit
-    const unit = unitForSpoken(said, product)
-    const line: StockExtractLine =
-      unit === null
-        ? { productId: product._id, quantity: pending.quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
-        : { productId: product._id, quantity: pending.quantity, unit }
+    const line = this.lineFor_(product, pending.quantity, pending.unit)
     if (this.place_(product, line)) this.moveToTop_([product._id])
   }
 
@@ -341,7 +362,8 @@ export class StockCountComponent implements OnInit {
   }
 
   protected setAmount(product: Product, amount: number): void {
-    this.patch_(product, { amount, counted: !this.rows_()[product._id]?.fix })
+    const row = this.rows_()[product._id]
+    this.patch_(product, { amount, counted: !row?.fix && !row?.choose })
   }
 
   protected setUnit(product: Product, unit: string): void {
@@ -349,7 +371,7 @@ export class StockCountComponent implements OnInit {
       void this.addUnitFor_(product)
       return
     }
-    this.patch_(product, { unit, counted: true, fix: undefined })
+    this.patch_(product, { unit, counted: true, fix: undefined, choose: undefined })
   }
 
   /** Plan 651 (unit-dropdown-add): the add-unit window, as the product form opens it; the new unit is selected. */
@@ -425,7 +447,7 @@ export class StockCountComponent implements OnInit {
 
   protected toggleCounted(product: Product): void {
     const current = this.rows_()[product._id]
-    if (current?.fix) return
+    if (current?.fix || current?.choose) return
     this.unmark_(product._id)
     if (current?.counted) {
       this.rows_.update((rows) => Object.fromEntries(Object.entries(rows).filter(([id]) => id !== product._id)))
@@ -507,17 +529,21 @@ export class StockCountComponent implements OnInit {
     const product = this.kitchen_.products_().find((p) => p._id === pick.productId)
     if (!amount || amount.quantity === undefined || !product) return
     // Plan 651: only a unit the product has is used; any other said unit is flagged for a fix, never guessed.
-    const said = amount.unit ?? amount.spokenUnit
-    const unit = unitForSpoken(said, product)
-    const line: StockExtractLine =
-      unit === null
-        ? { productId: product._id, quantity: amount.quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
-        : { productId: product._id, quantity: amount.quantity, unit }
+    const line = this.lineFor_(product, amount.quantity, amount.unit ?? amount.spokenUnit)
     if (this.place_(product, line)) {
       this.moveToTop_([product._id])
       this.userMsg_.onSetSuccessMsg(this.translation_.translate('stk_ai_applied').replace('{n}', '1'))
     }
     this.dismissUnmatched(pick.id)
+  }
+
+  /** Plan 654: the line for a picked product — the said unit the product has, the unit note, or the unit choice. */
+  private lineFor_(product: Product, quantity: number, said: string | undefined): StockExtractLine {
+    if (!said) return { productId: product._id, quantity, unit: null, unitMissing: true }
+    const unit = unitForSpoken(said, product)
+    return unit === null
+      ? { productId: product._id, quantity, unit: null, unitNeedsFix: true, spokenUnit: said }
+      : { productId: product._id, quantity, unit }
   }
 
   /** Plan 650: «הוספת מוצר חדש» — the only way a spoken line leads to a new item; it opens the add-product page. */
@@ -547,7 +573,9 @@ export class StockCountComponent implements OnInit {
       this.errorProductId_.update((id) => (id === product._id ? null : id))
       this.rows_.update((rows) => ({
         ...rows,
-        [product._id]: { counted: false, amount: line.quantity, unit: '', fix: line.spokenUnit ?? '' }
+        [product._id]: line.unitMissing
+          ? { counted: false, amount: line.quantity, unit: '', choose: true }
+          : { counted: false, amount: line.quantity, unit: '', fix: line.spokenUnit ?? '' }
       }))
       this.aiRows_.update((set) => new Set(set).add(product._id))
       return true

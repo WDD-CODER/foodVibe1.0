@@ -115,7 +115,7 @@ describe('POST /ai/stock/extract', () => {
       { spoken: 'עגבניות', quantity: 3, unit: null }, { spoken: 'בצל', quantity: 2, unit: 'kg' },
     ] }))
     const res = await post({ text: 'שלושה עגבניות ושני קילו בצל' })
-    expect(res.body.lines).toEqual([{ productId: 'tomato', quantity: 3, unit: 'kg' }])
+    expect(res.body.lines).toEqual([{ productId: 'tomato', quantity: 3, unit: null, unitMissing: true }])
     expect(res.body.unmatched).toHaveLength(1)
     expect(res.body.unmatched[0]).toMatchObject({ spoken: 'בצל', status: 'choose', quantity: 2, unit: 'kg' })
     expect(res.body.unmatched[0].candidates.map(c => c.productId)).toEqual(['purple', 'yellow'])
@@ -180,7 +180,9 @@ describe('POST /ai/stock/extract', () => {
     expect(drafts[0]).toMatchObject({
       _id: res.body.draftId, businessId: 'b1', feature: 'stock_extract', status: 'pending', subject: { type: 'stockCount' },
     })
-    expect(drafts[0].aiDraft.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
+    expect(drafts[0].aiDraft.lines).toEqual([{ productId: 'flour', quantity: 4, unit: null, unitMissing: true }])
+    // Plan 654 (d): the model's raw lines are kept next to the cleaned answer.
+    expect(drafts[0].aiDraft.modelLines).toEqual([{ spoken: 'קמח', quantity: 4, unit: null }])
     expect(await testDb().collection('aiUsage').countDocuments({ feature: 'stock_extract' })).toBe(1)
     const logged = JSON.stringify(logs.records)
     for (const word of ['קמח', 'אורז', 'עגבניות', 'סודי']) expect(logged).not.toContain(word)

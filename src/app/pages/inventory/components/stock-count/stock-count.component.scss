@@ -70,15 +70,19 @@
     font-weight: 600;
   }
 
-  // One line per row at every width: a long name is cut, never wrapped.
+  // Plan 654: the name is always visible — it wraps inside its cell, and the row grows taller when it must.
   .stock-count__name {
-    overflow: hidden;
     justify-content: flex-start;
 
+    min-inline-size: 0;
     max-inline-size: 100%;
 
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .stock-count__unit-choice {
+    flex-wrap: wrap;
   }
 
   .stock-count__ai-tag {
