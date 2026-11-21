@@ -1,4 +1,5 @@
 import { Component, DestroyRef, ElementRef, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core'
+import { PHONE_QUERY } from 'src/app/core/utils/breakpoints'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
@@ -1126,7 +1127,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   private isStackedLayout(): boolean {
-    return this.document.defaultView?.matchMedia('(max-width: 767px)').matches ?? false
+    return this.document.defaultView?.matchMedia(PHONE_QUERY).matches ?? false
   }
 
   /** Click outside the open row closes its expander. */

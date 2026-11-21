@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 // Angular hosts are inline by default — make this one a block so the container's
 // max-inline-size and auto margins resolve against the page, not a line box.
 :host {
@@ -31,8 +32,6 @@
 .menu-library-header {
   margin-block-end: 1.25rem;
 }
-
-$break-mobile: 768px; // mirrors src/styles.scss
 
 // Borderless — blends into the page background, matching the design's filter
 // row (no card chrome here; the event cards below carry the glass treatment).
@@ -169,7 +168,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $break-phone-max) {
     grid-template-columns: 1fr;
   }
 }
@@ -305,7 +304,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .sort-order-btn {
     min-block-size: 44px;
   }
@@ -316,7 +315,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
   }
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   :host {
     padding-inline: var(--space-3);
     padding-block: var(--space-3);
@@ -347,7 +346,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
 }
 
 // The FAB carries "פנייה חדשה" on phones; the header button would not fit next to the title.
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   .header-inquiry-btn {
     display: none;
   }

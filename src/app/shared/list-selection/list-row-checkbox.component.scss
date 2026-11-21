@@ -1,5 +1,5 @@
+@use '../../core/styles/breakpoints' as *;
 @layer components.list-selection {
-
   :host {
     display: block;
   }
@@ -24,7 +24,7 @@
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $break-phone-max) {
     .list-row-checkbox {
       padding: 0.25rem;
 

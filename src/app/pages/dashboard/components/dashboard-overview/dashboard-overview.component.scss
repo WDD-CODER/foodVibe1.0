@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 .dashboard-overview {
   max-width: 1200px;
   margin-inline: auto;
@@ -23,11 +24,11 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-4);
 
-  @media (max-width: 1023px) {
+  @media (max-width: $break-tablet-max) {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: $break-phone-max) {
     grid-template-columns: 1fr;
   }
 }
@@ -70,7 +71,7 @@
     color: var(--color-info);
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: $break-phone-max) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
@@ -193,7 +194,7 @@
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .link-btn {
     min-block-size: 44px;
     padding-block: 0.625rem;
@@ -313,7 +314,7 @@
   align-items: center;
   gap: var(--space-3);
 
-  @media (max-width: 480px) {
+  @media (max-width: $break-phone-max) {
     grid-template-columns: auto 1fr auto;
 
     .act-time {
@@ -461,7 +462,7 @@
 
   list-style: none;
 
-  @media (max-width: 767px) {
+  @media (max-width: $break-phone-max) {
     display: none;
     padding-inline-start: 0;
     grid-template-columns: 1fr 1fr;
@@ -471,7 +472,7 @@
     }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: $break-phone-max) {
     grid-template-columns: 1fr;
   }
 }
@@ -525,7 +526,7 @@
 }
 
 /* Mobile-only expand hint on entries that have change chips. */
-@media (max-width: 767px) {
+@media (max-width: $break-phone-max) {
   .activity-item.has-changes .act-time::after {
     content: '';
     display: inline-block;
@@ -564,7 +565,7 @@
 }
 
 // Phone density (2026-11-11): less air between the page title, the numbers and the lists.
-@media (max-width: 767px) {
+@media (max-width: $break-phone-max) {
   .dashboard-overview,
   .dashboard-main {
     gap: 0.75rem;

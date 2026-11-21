@@ -1,0 +1,7 @@
+// The one breakpoint set (default `one-breakpoint-set`, plan 656):
+// phone up to 767px, tablet 768–1023px, desktop from 1024px.
+// Every `@media` width uses these names. The browser copy is src/app/core/utils/breakpoints.ts.
+$break-phone-max: 767px;
+$break-tablet-min: 768px;
+$break-tablet-max: 1023px;
+$break-desktop-min: 1024px;

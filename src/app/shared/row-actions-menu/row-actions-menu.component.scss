@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 // Desktop: host acts as normal flex actions cell; projected buttons flow in directly
 :host {
   display: flex;
@@ -61,7 +62,7 @@
 }
 
 // ── Mobile ─────────────────────────────────────────────────────────────────
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   :host(:not(.is-anchored)) {
     padding-inline-end: 0; // override .c-col-actions padding on narrow column
 

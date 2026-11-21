@@ -1,4 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
+@use '../../../../core/styles/breakpoints' as *;
 
 :host {
   display: block;
@@ -117,7 +117,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
   gap: 0.5rem;
   margin-block-start: 0.25rem;
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
 

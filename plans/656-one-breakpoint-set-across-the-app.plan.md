@@ -149,9 +149,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Make one set of names — the four names, the browser constants file and its spec, the six browser copies — src/styles.scss, src/app/core/utils/breakpoints.ts, src/app/core/utils/breakpoints.spec.ts, src/app/core/utils/panel-preference.util.ts, src/app/core/utils/collapsible-categories.util.ts, src/app/core/utils/desktop-detection.util.ts, src/app/shared/column-carousel/column-carousel-swipe.ts, src/app/pages/cook-view/cook-view.page.ts, src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts
-- [ ] A2: Move the shared and core pieces to the names — every `@media` under src/app/shared and src/app/core and src/app/appRoot, their debt entries — src/**/*.scss, _shared/debt-baseline.json
-- [ ] A3: Move every page to the names — every `@media` under src/app/pages, their debt entries, the count's 1023 — src/**/*.scss, _shared/debt-baseline.json
+- [x] A1: Make one set of names — the four names, the browser constants file and its spec, the six browser copies — src/styles.scss, src/app/core/utils/breakpoints.ts, src/app/core/utils/breakpoints.spec.ts, src/app/core/utils/panel-preference.util.ts, src/app/core/utils/collapsible-categories.util.ts, src/app/core/utils/desktop-detection.util.ts, src/app/shared/column-carousel/column-carousel-swipe.ts, src/app/pages/cook-view/cook-view.page.ts, src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts
+- [x] A2: Move the shared and core pieces to the names — every `@media` under src/app/shared and src/app/core and src/app/appRoot, their debt entries — src/**/*.scss, _shared/debt-baseline.json
+- [x] A3: Move every page to the names — every `@media` under src/app/pages, their debt entries, the count's 1023 — src/**/*.scss, _shared/debt-baseline.json
 - [ ] A4: Remove the old names and prove it at three widths — the old names gone, the screen spec, then the Done-when commands in order — src/styles.scss, e2e/ui/656-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
@@ -170,3 +170,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   and the usual device split.
 - decided: run on its own run branch, served in its own slot, merged into staging only after Dandan's check — why:
   Dandan, "in a separate worktree cause this can get things messed up".
+- scope extended needed (ESCALATE, not applied): src/app/pages/inventory/components/stock-count/stock-count.component.ts (NARROW_QUERY 1199.98px must become TABLET_DOWN_QUERY — the 655 count rule lives in this .ts, not in scss), src/app/shared/partial-cost-badge/partial-cost-badge.component.ts (MOBILE_QUERY 768px must become PHONE_QUERY), src/app/core/components/header/header.component.spec.ts (test "above the route-loading overlay (plan 645)" fails: the top bar now hides at ≤767px and the Karma window is narrower than 768px).
+- evidence: pnpm run build -> exit 0; pnpm run lint -> 0 errors; lint:reuse ok; breadcrumbs clean; kit-checks --base origin/main -> ok (6 checks); kit-manifest-check ok; test:ci -> 2695 pass, 1 fail (the header spec above).
+- decided: the names live in src/app/core/styles/_breakpoints.scss (@use'd by styles.scss and every component sheet) because a component sheet cannot import src/styles.scss; styles.scss exposes them as --bp-* custom properties so breakpoints.spec.ts can read them in Karma.
+- not done: Done-when (b) "no .ts file holds a width text" has no Karma check (Karma cannot list or read sources); it needs a node test under scripts/test/ (out of scope).
+- behaviour: the wide-screen density cap (max-width: 1699px) in src/styles.scss stays a literal (a root font-size step, not a layout change) — reverse: drop the cap.
+- behaviour: the header brand-name-hiding block (621–767px) is removed — the top bar hides at ≤767px now, so it can never apply.

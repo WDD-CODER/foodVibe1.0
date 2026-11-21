@@ -1,7 +1,6 @@
+@use '../../core/styles/breakpoints' as *;
 @layer components.list-shell {
   $panel-width-expanded: 250px;
-  $panel-overlay-break: 1023px;
-  $phone-break: 768px;
 
   :host {
     display: block;
@@ -15,11 +14,11 @@
     // and only the table body (and the filter panel) scroll inside it.
     --list-shell-chrome-h: 7rem;
 
-    @media (max-width: #{$panel-overlay-break}) {
+    @media (max-width: $break-tablet-max) {
       --list-sticky-top: 3.875rem;
     }
 
-    @media (max-width: 620px) {
+    @media (max-width: $break-phone-max) {
       --list-sticky-top: env(safe-area-inset-top, 0px);
     }
   }
@@ -110,9 +109,9 @@
 
     // 44px tap-target floor at phone width only — same touch-ergonomics
     // rule the design source itself applies globally at ≤767px.
-    @media (max-width: $phone-break) {
-      min-block-size: 44px;
-      min-inline-size: 44px;
+    @media (max-width: $break-phone-max) {
+      min-block-size: var(--tap);
+      min-inline-size: var(--tap);
     }
   }
 
@@ -290,7 +289,7 @@
   // no fixed/absolute positioning — matches `.inv-aside{position:static;
   // width:100%}` (dc.html:62). Tablet keeps the desktop scroll model: the
   // container is a fixed height and only the table body scrolls inside it. ──
-  @media (max-width: #{$panel-overlay-break}) {
+  @media (max-width: $break-tablet-max) {
     .list-container {
       display: grid;
       grid-template-rows: auto auto auto minmax(0, 1fr);
@@ -346,7 +345,7 @@
   // ─── PHONE (≤768px) — the page scrolls (app header, list header, filters scroll
   // away). The table card is the last element and is exactly one screen tall, so once the
   // user reaches it, it fills the screen with rounded edges and the rows scroll inside it. ──
-  @media (max-width: #{$phone-break}) {
+  @media (max-width: $break-phone-max) {
     .list-container {
       grid-template-rows: auto auto auto auto;
 
@@ -395,7 +394,7 @@
 
   // ≤620px the fixed tab bar and the round-button lane above it cover the screen's lower edge;
   // the card ends above both, so no row is ever under the button once the card fills the screen.
-  @media (max-width: 620px) {
+  @media (max-width: $break-phone-max) {
     .table-area {
       block-size: calc(100dvh - 2 * var(--space-3) - var(--bottom-bar-h) - var(--fab-lane));
     }

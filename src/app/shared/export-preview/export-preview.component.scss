@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 @layer components.export-preview {
   /* Plan 404 — the preview is always light paper (also in Cook View's kitchen dark mode): a card with
      a header bar (title · export · print · close) and a scrolling body without a visible scrollbar.
@@ -237,7 +238,7 @@
   }
 
   // Portrait phones: tighter paper, tables scroll sideways inside their section.
-  @media (max-width: 600px) {
+  @media (max-width: $break-phone-max) {
     .export-preview-overlay {
       padding: var(--space-2);
     }
@@ -309,7 +310,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: $break-phone-max) {
   .ep-btn {
     padding-inline: var(--space-3);
   }

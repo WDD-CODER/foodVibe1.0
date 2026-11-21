@@ -1,6 +1,6 @@
+@use '../../core/styles/breakpoints' as *;
 @layer components.settings-page {
   // Matches the header cutoff (header.component.scss), where the bottom tab bar appears.
-  $settings-break-mobile: 620px;
 
   :host {
     display: block;
@@ -16,7 +16,7 @@
 
     padding: var(--space-4);
 
-    @media (max-width: $settings-break-mobile) {
+    @media (max-width: $break-phone-max) {
       padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
     }
   }

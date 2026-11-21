@@ -1,4 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.product-import {
   :host {
@@ -186,7 +186,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
     justify-content: flex-end;
   }
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     .product-import {
       padding-inline: var(--space-2);
     }

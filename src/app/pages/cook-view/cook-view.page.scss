@@ -1,15 +1,12 @@
+@use '../../core/styles/breakpoints' as *;
 /* Cook View — plan 404, from the Cook View handoff (.interface-design/handoffs/cook-view/README.md).
    Page header + meta chips (slim photo banner when the recipe has an image), two pane cards
    (stacked single scrolling page below 768), ingredient rows with an expander, done/active/
    pending step rows with opt-in step clocks, and a kitchen dark mode that retints the whole
    viewport through :root.theme-kitchen in src/styles.scss. */
 
-// Breakpoints (plan 404 — Cook View handoff): phone ≤620 · small tablet 621–767 ·
-// tablet 768–1023 · desktop ≥1024. Mirrors $break-phone-max / $break-tablet-max in src/styles.scss.
-$cv-phone-max: 620px;
-$cv-stack-max: 767px; // mirrors $break-phone-max
-$cv-tablet-min: 768px;
-$cv-desktop-min: 1024px; // $break-tablet-max + 1
+// Breakpoints (plan 404 — Cook View handoff): phone ≤767 ·
+// tablet 768–1023 · desktop ≥1024. Uses the shared names from core/styles/_breakpoints.scss.
 
 :host {
   display: block;
@@ -37,11 +34,11 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   padding-inline: var(--space-4);
   padding-block: var(--space-4) 8.125rem; // 130px — clears FAB + stamp
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     padding-block-end: 9.375rem; // 150px — also clears the tab bar
   }
 
-  @media (min-width: $cv-desktop-min) {
+  @media (min-width: $break-desktop-min) {
     padding-inline: var(--space-6);
   }
 }
@@ -114,7 +111,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 .cv-editbar {
   display: none;
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     display: flex;
     gap: 10px;
     position: fixed;
@@ -133,7 +130,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 }
 
 .cook-view-container.is-editing {
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     padding-block-end: 190px;
   }
 }
@@ -267,7 +264,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   backdrop-filter: var(--blur-nav);
   -webkit-backdrop-filter: var(--blur-nav);
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     display: flex;
   }
 }
@@ -295,7 +292,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
   padding-block-start: var(--space-3);
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     padding-block-start: var(--space-2);
   }
 }
@@ -321,7 +318,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     border-color: var(--color-primary);
   }
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     display: grid;
   }
 }
@@ -342,11 +339,11 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
   margin: 0 0 10px;
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     display: block;
   }
 
-  @media (min-width: $cv-desktop-min) {
+  @media (min-width: $break-desktop-min) {
     font-size: 2rem; // 32
   }
 }
@@ -409,11 +406,11 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   align-items: center;
   gap: 10px;
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     display: flex;
   }
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     .cv-ph-theme {
       display: none;
     }
@@ -453,7 +450,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     cursor: not-allowed;
   }
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     flex: 1;
     justify-content: center;
   }
@@ -586,7 +583,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   margin-block-start: var(--space-3);
   padding: var(--space-4);
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     min-block-size: 180px;
   }
 
@@ -702,7 +699,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
   margin: 0;
 
-  @media (max-width: $cv-stack-max) {
+  @media (max-width: $break-phone-max) {
     display: block;
   }
 }
@@ -743,11 +740,11 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
 
-  @media (max-width: $cv-stack-max) {
+  @media (max-width: $break-phone-max) {
     display: block;
   }
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     inset-block-start: 62px; // under the app header
   }
 }
@@ -812,13 +809,13 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
   margin-block-start: var(--space-4);
 
-  @media (min-width: $cv-tablet-min) {
+  @media (min-width: $break-tablet-min) {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
     align-items: start;
   }
 
-  @media (min-width: $cv-desktop-min) {
+  @media (min-width: $break-desktop-min) {
     gap: var(--space-6);
   }
 }
@@ -829,11 +826,11 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 [data-step-index] {
   scroll-margin-top: 140px; // phone: top bar 60 + switch bar ~80
 
-  @media (min-width: calc($cv-phone-max + 1px)) {
+  @media (min-width: $break-tablet-min) {
     scroll-margin-top: 146px; // small tablet: app header 62 + switch bar ~84
   }
 
-  @media (min-width: $cv-tablet-min) {
+  @media (min-width: $break-tablet-min) {
     scroll-margin-top: 80px; // tablet up: app header only
   }
 }
@@ -916,7 +913,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 .cv-pane-inner {
   padding: var(--space-4);
 
-  @media (min-width: $cv-tablet-min) {
+  @media (min-width: $break-tablet-min) {
     padding: 18px var(--space-5) var(--space-5);
   }
 }
@@ -981,7 +978,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     box-shadow: var(--shadow-focus);
   }
 
-  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+  @media (min-width: $break-tablet-min) and (max-width: $break-tablet-max) {
     gap: 10px;
     padding-inline: 12px;
   }
@@ -1024,7 +1021,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     opacity: 0.85;
   }
 
-  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+  @media (min-width: $break-tablet-min) and (max-width: $break-tablet-max) {
     min-inline-size: 96px;
   }
 }
@@ -1095,7 +1092,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     transform: rotate(180deg);
   }
 
-  @media (min-width: $cv-tablet-min) {
+  @media (min-width: $break-tablet-min) {
     display: inline-grid;
   }
 }
@@ -1399,7 +1396,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     border-color: var(--color-primary);
   }
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     inline-size: 28px;
     block-size: 28px;
   }
@@ -1487,7 +1484,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     color: var(--color-text-main);
   }
 
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     font-size: 1.875rem; // 30
   }
 }
@@ -1537,7 +1534,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 
   // Phone: 24px circles, 13px icons, with an invisible 10px tap extension.
-  @media (max-width: $cv-phone-max) {
+  @media (max-width: $break-phone-max) {
     position: relative;
 
     inline-size: 24px;
@@ -1815,7 +1812,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
 /* Phone density (2026-11-11): more ingredients per screen. The tabs above the pane already name it and
    show its count, so the pane's own heading is dropped; rows, the tick box and the scale chips are lower. */
-@media (max-width: $cv-phone-max) {
+@media (max-width: $break-phone-max) {
   .cv-pane-head {
     display: none;
   }

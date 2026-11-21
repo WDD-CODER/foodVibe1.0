@@ -1,17 +1,7 @@
-/* Global breakpoints (use in @media, not in :root) */
-$break-mobile: 768px;
-$break-tablet: 900px;
-$break-desktop: 1200px;
-
-/* Design-system tiers (plan 305 — `UI refactor/`: 479 / 767 / 1023).
- * Ported markup uses these; legacy markup keeps $break-mobile/$break-tablet/$break-desktop above.
- * KNOWN COLLISION: $break-mobile (768px) overlaps $break-phone-max (767px) by one pixel — an iPad in
- * portrait is exactly 768px. Today it gets the app's full mobile treatment. Narrowing $break-mobile to
- * 767px would drop it to desktop layout, because there is no tablet tier yet. Resolve in M3, when the
- * ported shell gains one. Do not "unify" these before then. */
-$break-xs-max: 479px;
-$break-phone-max: 767px;
-$break-tablet-max: 1023px;
+/* The one breakpoint set (default one-breakpoint-set, plan 656): phone up to 767px, tablet up to 1023px,
+ * desktop from 1024px. The names ($break-phone-max, $break-tablet-min, $break-tablet-max, $break-desktop-min)
+ * live in app/core/styles/_breakpoints.scss so component styles can use them too. Use them in @media, not in :root. */
+@use 'app/core/styles/breakpoints' as *;
 
 /* Designated global tokens (cssLayer): Liquid Glass design system
  * Theme: Liquid Glass — frosted surfaces (--bg-glass, --blur-glass), teal primary (--color-primary).
@@ -175,6 +165,11 @@ $break-tablet-max: 1023px;
   --topnav-h: 3.5rem;      /* 56 — top nav bar */
 
   /* ---- Breakpoints (CSS) ---- */
+  /* The one set's values, read by core/utils/breakpoints.spec.ts; layout uses the Sass names in @media. */
+  --bp-phone-max: #{$break-phone-max};
+  --bp-tablet-min: #{$break-tablet-min};
+  --bp-tablet-max: #{$break-tablet-max};
+  --bp-desktop-min: #{$break-desktop-min};
   --break-sm: 48rem;
   --break-md: 56.25rem;
 
@@ -300,7 +295,7 @@ $break-tablet-max: 1023px;
   opacity: 0.92;
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   :root {
     --blur-glass: blur(10px);
     --blur-nav: blur(12px);
@@ -367,7 +362,7 @@ body::before {
    otherwise the select input collapses to 0 width and shows nothing. */
 :root.cv-page-scroll .cv-step-pane .prep-flat-grid {
   // Phone keeps the editor's own stacked card layout; the wider columns apply from tablet up.
-  @media (min-width: $break-phone-max + 1) {
+  @media (min-width: $break-tablet-min) {
     .grid-header.prep-grid-header,
     .prep-grid-row {
       grid-template-columns: 1.25rem minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.5fr) 1rem;
@@ -804,7 +799,7 @@ textarea.c-input {
   }
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   .c-modal-card {
     max-width: none;
     width: calc(100% - 2rem);
@@ -962,7 +957,7 @@ textarea.c-input {
     }
   }
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     width: 2.75rem;
     height: 2.75rem;
     opacity: 1;
@@ -984,7 +979,7 @@ textarea.c-input {
   }
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   .c-btn-primary,
   .c-btn-ghost {
     min-height: 2.75rem;
@@ -1152,7 +1147,7 @@ textarea.c-input {
 
 /* Above the phone carousel the column-carousel host is display:contents, so its slides are
    grid cells one level down — not direct row children — and need the selected look too. */
-@media (min-width: $break-mobile + 1px) {
+@media (min-width: $break-tablet-min) {
   .c-list-row.is-selected > .column-carousel--cell > .c-list-body-cell {
     background: color-mix(in srgb, var(--color-primary) 14%, white);
     box-shadow:
@@ -2721,7 +2716,7 @@ input[type='number']::-webkit-outer-spin-button {
    16px for touch, and large monitors (1700px and wider) keep 16px too.
    Cook View sets `cv-page-scroll` on <html>: it keeps its 16px type and is scaled as a whole instead,
    because its spacing is in px and it is read from a distance. ---- */
-@media (pointer: fine) and (min-width: $break-tablet-max + 1) and (max-width: 1699px) {
+@media (pointer: fine) and (min-width: $break-desktop-min) and (max-width: 1699px) {
   html:not(.cv-page-scroll) {
     font-size: 87.5%; /* 14px */
   }

@@ -1,7 +1,8 @@
 import { DestroyRef, inject, signal } from '@angular/core'
+import { TABLET_DOWN_QUERY } from './breakpoints'
 
-/** Matches list-shell's `$panel-overlay-break` — below this the filter panel stacks full-width. */
-export const COLLAPSIBLE_MOBILE_QUERY = '(max-width: 1023px)'
+/** Below desktop (`$break-tablet-max`) the filter panel stacks full-width. */
+export const COLLAPSIBLE_MOBILE_QUERY = TABLET_DOWN_QUERY
 
 export interface CollapsibleCategoriesOptions {
   /** Category names that start collapsed on desktop (everything else starts expanded there). */

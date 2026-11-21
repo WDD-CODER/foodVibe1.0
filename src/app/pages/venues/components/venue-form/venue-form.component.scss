@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 /* Venue form — cssLayer: global tokens, Five-Group rhythm */
 
 :host {
@@ -153,7 +154,7 @@
 
   // Plan 371 — responsive form.
   // ≥768px: the basic fields sit in two columns; the container grows a little.
-  @media (min-width: 768px) {
+  @media (min-width: $break-tablet-min) {
     max-width: 44rem;
 
     .form-section--basic {
@@ -168,7 +169,7 @@
   }
 
   // ≤620px: tighter padding, everything stacks, actions full width.
-  @media (max-width: 620px) {
+  @media (max-width: $break-phone-max) {
     padding: var(--space-3);
 
     .c-form-actions {

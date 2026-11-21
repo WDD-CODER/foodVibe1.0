@@ -1,7 +1,8 @@
 import { signal, afterNextRender, WritableSignal } from '@angular/core'
+import { PHONE_QUERY } from './breakpoints'
 
 const STORAGE_PREFIX = 'list-panel:'
-const MOBILE_QUERY = '(max-width: 768px)'
+const MOBILE_QUERY = PHONE_QUERY
 
 /**
  * Reads the saved "panel open" state for a given context (e.g. 'inventory', 'venues').

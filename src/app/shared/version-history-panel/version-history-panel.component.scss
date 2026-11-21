@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 .version-history-panel {
   min-width: 17.5rem;
   max-width: 25rem;
@@ -123,7 +124,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .version-history-panel {
     width: 100%;
     min-width: 0;
