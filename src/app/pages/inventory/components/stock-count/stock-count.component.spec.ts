@@ -84,12 +84,17 @@ describe('StockCountComponent', () => {
       ]
     })
     fixture = TestBed.createComponent(StockCountComponent)
+    // Plan 655: the width is the test's choice, not the test browser's window: desktop unless a case asks for narrow.
+    ;(fixture.componentInstance as unknown as { narrow_: { set(v: boolean): void } }).narrow_.set(narrowMode)
     fixture.detectChanges()
     await fixture.whenStable()
     fixture.detectChanges()
   }
 
+  let narrowMode = false
+
   afterEach(() => {
+    narrowMode = false
     jasmine.clock().uninstall()
     returnTo = new ReturnToService()
   })
@@ -739,6 +744,97 @@ describe('StockCountComponent', () => {
       const map = c.unitOptionsById_()
       expect(Object.keys(map).length).toBe(3000)
       expect(c.unitOptionsById_()).toBe(map)
+    })
+  })
+
+  describe('plan 655 — a question per missing part, a compact row below desktop', () => {
+    const withCrates = (id: string, name: string): Product =>
+      ({
+        ...product(id, name),
+        baseUnit: 'gram',
+        purchaseOptions: [{ unitSymbol: 'ארגז', conversionRate: 10000 }]
+      }) as unknown as Product
+    const child = () =>
+      fixture.debugElement.query(By.directive(StockAiDraftComponent)).componentInstance as StockAiDraftComponent
+    const instance = () =>
+      fixture.componentInstance as unknown as {
+        setAmount(p: Product, n: number): void
+        setUnit(p: Product, u: string): void
+        basePopover_(): { text: string } | null
+      }
+    const emit = (unmatched: NonNullable<StockExtractResponse['unmatched']>): void => {
+      child().extracted.emit({ answer: { draftId: null, lines: [], unmatched }, source: 'text' })
+    }
+    const q = (id: string) => el().querySelector(`[data-testid="${id}"]`)
+
+    it('(a) a line with no product, amount or unit asks all three; a counted row waits for all of them', async () => {
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      emit([{ spoken: 'משהו', status: 'unmatched', missing: ['product', 'amount', 'unit'] }])
+      await settle()
+      expect(q('stk-ai-q-product')).not.toBeNull()
+      expect(q('stk-ai-q-amount')).not.toBeNull()
+      expect(q('stk-ai-q-unit')).not.toBeNull()
+      expect(rows().every((r) => !chipOf(r).checked)).toBeTrue()
+    })
+
+    it('(a) a known product with no amount and no unit asks only how much, then which unit; counts when all are set', async () => {
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      emit([{ spoken: 'ארגז עגבניות', status: 'unmatched', productId: 'a', missing: ['amount', 'unit'] }])
+      await settle()
+      expect(q('stk-ai-q-product')).toBeNull()
+      expect(q('stk-ai-q-amount')).not.toBeNull()
+      expect(q('stk-ai-q-unit')).not.toBeNull()
+      const counter = fixture.debugElement.query(By.css('[data-testid="stk-ai-q-amount"] app-counter'))
+      ;(counter.componentInstance as CounterComponent).valueChange.emit(3)
+      await settle()
+      // The amount is in; the row waits for the unit and is not counted.
+      expect(q('stk-ai-q-amount')).toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeFalse()
+      el().querySelector<HTMLInputElement>('[data-testid="stk-unit-choice"] input[value="ארגז"]')!.click()
+      await settle()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+    })
+
+    it('(b) below 1200px the counted cell is the compact row checkbox, and toggling it counts the row', async () => {
+      narrowMode = true
+      await setup()
+      expect(rows()[0].querySelector('app-list-row-checkbox')).not.toBeNull()
+      expect(rows()[0].querySelector('.c-chip--toggle')).toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeFalse()
+      chipOf(rows()[0]).click()
+      await settle()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+    })
+
+    it('(c) below 1200px the base amount is not printed; its control has the title and label, and a click opens a popover', async () => {
+      narrowMode = true
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      instance().setAmount(withCrates('a', 'עגבניות'), 2)
+      instance().setUnit(withCrates('a', 'עגבניות'), 'ארגז')
+      await settle()
+      expect(el().querySelector('app-column-carousel-cell')).toBeNull()
+      expect(rows()[0].querySelector('.stock-count__base')).toBeNull()
+      const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
+      expect(control.getAttribute('title')).toContain('stk_base_amount')
+      expect(control.getAttribute('title')).toContain('20')
+      expect(control.getAttribute('aria-label')).toBe(control.getAttribute('title'))
+      expect(q('stk-base-pop')).toBeNull()
+      control.click()
+      await settle()
+      expect(q('stk-base-pop')!.textContent).toContain('20')
+      const box = q('stk-base-pop')!.getBoundingClientRect()
+      expect(box.left).toBeGreaterThanOrEqual(0)
+      expect(box.right).toBeLessThanOrEqual(window.innerWidth)
+    })
+
+    it('(d) at 1200px and above the row is as today: the counted chip and the base column, no base control', async () => {
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      instance().setUnit(withCrates('a', 'עגבניות'), 'ארגז')
+      await settle()
+      expect(rows()[0].querySelector('app-list-row-checkbox')).toBeNull()
+      expect(rows()[0].querySelector('.c-chip--toggle')).not.toBeNull()
+      expect(rows()[0].querySelector('[data-testid="stk-base-btn"]')).toBeNull()
+      expect(rows()[0].querySelector('app-column-carousel-cell')).not.toBeNull()
     })
   })
 })

@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -26,7 +27,9 @@ import { DateFieldComponent } from 'src/app/shared/date-field/date-field.compone
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 import { formatQty } from 'src/app/core/engine/rounding'
 import { toBase } from 'src/app/core/engine/units'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
@@ -45,6 +48,7 @@ import { StockBelowMinimumComponent } from './stock-below-minimum/stock-below-mi
 import {
   StockAiDraftComponent,
   type StockAiPick,
+  type StockAiAmount,
   type StockAiProductOption,
   type StockAiConflict,
   type StockAiExtracted,
@@ -85,6 +89,21 @@ const LINE_ERRORS = ['UNIT_NOT_CONVERTIBLE', 'UNKNOWN_PRODUCT', 'DUPLICATE_PRODU
 /** Plan 645: rows drawn at first and added per "show more" — a business has thousands of products. */
 const PAGE_SIZE = 50
 
+/** Plan 655: below `$break-desktop` (1200px) the row is compact: a small counted mark, the base amount on demand. */
+const NARROW_QUERY = '(max-width: 1199.98px)'
+
+/** The base-amount popover: its text and where it sits (viewport coordinates, from `placeInViewport`). */
+interface BasePopover {
+  id: string
+  text: string
+  top: number
+  left: number
+}
+
+/** Width the popover asks for; it never exceeds the screen less the margins. */
+const BASE_POP_WIDTH = 224
+const BASE_POP_HEIGHT = 64
+
 interface UnitOption {
   value: string
   label: string
@@ -119,13 +138,15 @@ function todayIso(): string {
     EmptyStateComponent,
     InputClearComponent,
     ListShellComponent,
+    ListRowCheckboxComponent,
     LoaderComponent,
     StockBelowMinimumComponent,
     StockAiDraftComponent
   ],
   templateUrl: './stock-count.component.html',
   styleUrl: './stock-count.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:click)': 'closeBase_()', '(document:keydown.escape)': 'closeBase_()' }
 })
 export class StockCountComponent implements OnInit {
   private readonly kitchen_ = inject(KitchenStateService)
@@ -169,7 +190,7 @@ export class StockCountComponent implements OnInit {
   /** The amount each spoken line carried, kept for when the person picks its product. */
   private readonly amounts_ = new Map<
     number,
-    { quantity?: number; unit?: string; spokenUnit?: string; spoken: string }
+    { quantity?: number; unit?: string; spokenUnit?: string; spoken: string; productId?: string }
   >()
   protected readonly productOptions_ = computed<StockAiProductOption[]>(() =>
     this.products_().map((p) => ({ productId: p._id, name: p.nameHebrew }))
@@ -183,17 +204,22 @@ export class StockCountComponent implements OnInit {
   protected readonly dateOk_ = computed(
     () => /^\d{4}-\d{2}-\d{2}$/.test(this.countedDate_()) && this.countedDate_() <= todayIso()
   )
+  /** Plan 655: true below the desktop breakpoint; set from the media query and kept in step with it. */
+  protected readonly narrow_ = signal(typeof window !== 'undefined' && window.matchMedia(NARROW_QUERY).matches)
   /** Plan 654: the base-amount column is drawn only when one of the drawn rows has something in it. */
   protected readonly showBase_ = computed(() => this.shownRows_().some((r) => r.base !== ''))
+  /** Plan 655: below desktop the base amount is no column — a small control opens it instead. */
+  protected readonly baseColumn_ = computed(() => this.showBase_() && !this.narrow_())
+  protected readonly basePopover_ = signal<BasePopover | null>(null)
   protected readonly addUnitValue = ADD_UNIT
   protected readonly gridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
-    return this.showBase_() ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '2fr 1.2fr 1.2fr 0.9fr'
+    return this.baseColumn_() ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '2fr 1.2fr 1.2fr 0.9fr'
   })
   protected readonly mobileGridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
     const cols = 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto'
-    return this.showBase_() ? cols + ' minmax(3.5rem, auto)' : cols
+    return this.baseColumn_() ? cols + ' minmax(3.5rem, auto)' : cols
   })
 
   /** Plan 645: built once per product list, not per row per check. */
@@ -281,6 +307,48 @@ export class StockCountComponent implements OnInit {
       untracked(() => this.scheduleAutosave_(snap))
     })
     this.destroyRef_.onDestroy(() => this.clearAutosave_())
+  }
+
+  private readonly narrowWatch_ = afterNextRender(() => {
+    if (typeof window === 'undefined') return
+    const query = window.matchMedia(NARROW_QUERY)
+    const onChange = (e: MediaQueryListEvent): void => {
+      this.narrow_.set(e.matches)
+      if (!e.matches) this.basePopover_.set(null)
+    }
+    query.addEventListener('change', onChange)
+    this.destroyRef_.onDestroy(() => query.removeEventListener('change', onChange))
+  })
+
+  /** Plan 655: the base amount of a row, as the hover text and the popover show it. */
+  protected baseLabel_(base: string): string {
+    return `${this.translation_.translate('stk_base_amount')}: ${base}`
+  }
+
+  /** Plan 655: opens (or closes, when it is the same row) the small popover with a row's base amount. */
+  protected toggleBase_(row: SheetRow, event: Event): void {
+    event.stopPropagation()
+    if (this.basePopover_()?.id === row.product._id) {
+      this.basePopover_.set(null)
+      return
+    }
+    const target = event.currentTarget as HTMLElement | null
+    const rect = target?.getBoundingClientRect()
+    const viewport = { width: window.innerWidth, height: window.innerHeight }
+    const width = Math.min(BASE_POP_WIDTH, viewport.width - 16)
+    const placed = placeInViewport({
+      anchor: rect
+        ? { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width }
+        : { top: 0, bottom: 0, left: 0, width: 0 },
+      panel: { width, height: BASE_POP_HEIGHT },
+      viewport,
+      prefer: 'below'
+    })
+    this.basePopover_.set({ id: row.product._id, text: this.baseLabel_(row.base), top: placed.top, left: placed.left })
+  }
+
+  protected closeBase_(): void {
+    this.basePopover_.set(null)
   }
 
   async ngOnInit(): Promise<void> {
@@ -483,13 +551,25 @@ export class StockCountComponent implements OnInit {
     if (unmatched.length) {
       const added = unmatched.map((u): StockAiUnmatched => {
         const id = ++this.unmatchedSeq_
-        this.amounts_.set(id, { quantity: u.quantity, unit: u.unit, spokenUnit: u.spokenUnit, spoken: u.spoken })
+        this.amounts_.set(id, {
+          quantity: u.quantity,
+          unit: u.unit,
+          spokenUnit: u.spokenUnit,
+          spoken: u.spoken,
+          productId: u.productId
+        })
         return {
           id,
           text: [u.spoken, u.quantity, u.unit ?? u.spokenUnit].filter((v) => v !== undefined && v !== '').join(' '),
           status: u.status === 'choose' ? 'choose' : 'unmatched',
           candidates: (u.candidates ?? []).map((c) => ({ productId: c.productId, name: c.nameHebrew })),
-          hasAmount: u.quantity !== undefined
+          hasAmount: u.quantity !== undefined,
+          // Plan 655: the server's check is the authority; an older answer without it falls back to what is absent.
+          missing: u.missing ?? [
+            ...(u.productId === undefined ? (['product'] as const) : []),
+            ...(u.quantity === undefined ? (['amount'] as const) : []),
+            ...(u.unit === undefined ? (['unit'] as const) : [])
+          ]
         }
       })
       this.unmatched_.update((list) => [...list, ...added])
@@ -527,7 +607,17 @@ export class StockCountComponent implements OnInit {
   protected pickForSpoken(pick: StockAiPick): void {
     const amount = this.amounts_.get(pick.id)
     const product = this.kitchen_.products_().find((p) => p._id === pick.productId)
-    if (!amount || amount.quantity === undefined || !product) return
+    if (!amount || !product) return
+    if (amount.quantity === undefined) {
+      // Plan 655: the product is answered; the amount is still asked — the line stays, without the product question.
+      this.amounts_.set(pick.id, { ...amount, productId: product._id })
+      this.updateUnmatched_(pick.id, (u) => ({
+        ...u,
+        candidates: [],
+        missing: u.missing.filter((m) => m !== 'product')
+      }))
+      return
+    }
     // Plan 651: only a unit the product has is used; any other said unit is flagged for a fix, never guessed.
     const line = this.lineFor_(product, amount.quantity, amount.unit ?? amount.spokenUnit)
     if (this.place_(product, line)) {
@@ -535,6 +625,28 @@ export class StockCountComponent implements OnInit {
       this.userMsg_.onSetSuccessMsg(this.translation_.translate('stk_ai_applied').replace('{n}', '1'))
     }
     this.dismissUnmatched(pick.id)
+  }
+
+  private updateUnmatched_(id: number, change: (u: StockAiUnmatched) => StockAiUnmatched): void {
+    this.unmatched_.update((list) => list.map((u) => (u.id === id ? change(u) : u)))
+  }
+
+  /** Plan 655: the person answered «כמה?» for a spoken line; with its product known the row is filled now. */
+  protected answerAmount(answer: StockAiAmount): void {
+    const amount = this.amounts_.get(answer.id)
+    if (!amount || !Number.isFinite(answer.quantity) || answer.quantity < 0) return
+    this.amounts_.set(answer.id, { ...amount, quantity: answer.quantity })
+    const product = amount.productId ? this.kitchen_.products_().find((p) => p._id === amount.productId) : undefined
+    if (product) {
+      this.pickForSpoken({ id: answer.id, productId: product._id })
+      return
+    }
+    this.updateUnmatched_(answer.id, (u) => ({
+      ...u,
+      hasAmount: true,
+      text: [u.text, answer.quantity].join(' '),
+      missing: u.missing.filter((m) => m !== 'amount')
+    }))
   }
 
   /** Plan 654: the line for a picked product — the said unit the product has, the unit note, or the unit choice. */

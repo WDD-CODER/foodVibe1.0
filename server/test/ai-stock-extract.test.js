@@ -73,11 +73,14 @@ describe('POST /ai/stock/extract', () => {
     ] }))
     const res = await post({ text: 'קמח 4 קילו, banana 2, חמוצים 1, אורז' })
     expect(res.status).toBe(200)
-    expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
+    expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg', missing: [] }])
     expect(res.body.unmatched).toEqual([
-      { spoken: 'banana', status: 'unmatched', quantity: 2 },
-      { spoken: 'חמוצים', status: 'unmatched', quantity: 1, unit: 'kg' },
-      { spoken: 'אורז', status: 'unmatched', candidates: [{ productId: 'rice', nameHebrew: 'אורז' }] },
+      { spoken: 'banana', status: 'unmatched', quantity: 2, missing: ['product', 'unit'] },
+      { spoken: 'חמוצים', status: 'unmatched', quantity: 1, unit: 'kg', missing: ['product'] },
+      {
+        spoken: 'אורז', status: 'unmatched', productId: 'rice', missing: ['amount', 'unit'],
+        candidates: [{ productId: 'rice', nameHebrew: 'אורז' }],
+      },
     ])
     const sent = sentBody()
     const user = sent.contents[0].parts[0].text
@@ -95,7 +98,7 @@ describe('POST /ai/stock/extract', () => {
     fetchMock.mockResolvedValue(modelAnswer({ lines: [{ spoken: 'קמח', quantity: 4, unit: 'kg' }] }))
     const res = await post({ text: 'קמח 4 קילו' })
     expect(res.status).toBe(200)
-    expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
+    expect(res.body.lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg', missing: [] }])
     const sent = JSON.stringify(sentBody())
     expect(sent).not.toContain('מוצר 1')
     expect(sent).not.toContain('אורז')
@@ -115,7 +118,7 @@ describe('POST /ai/stock/extract', () => {
       { spoken: 'עגבניות', quantity: 3, unit: null }, { spoken: 'בצל', quantity: 2, unit: 'kg' },
     ] }))
     const res = await post({ text: 'שלושה עגבניות ושני קילו בצל' })
-    expect(res.body.lines).toEqual([{ productId: 'tomato', quantity: 3, unit: null, unitMissing: true }])
+    expect(res.body.lines).toEqual([{ productId: 'tomato', quantity: 3, unit: null, unitMissing: true, missing: ['unit'] }])
     expect(res.body.unmatched).toHaveLength(1)
     expect(res.body.unmatched[0]).toMatchObject({ spoken: 'בצל', status: 'choose', quantity: 2, unit: 'kg' })
     expect(res.body.unmatched[0].candidates.map(c => c.productId)).toEqual(['purple', 'yellow'])
@@ -136,9 +139,30 @@ describe('POST /ai/stock/extract', () => {
     expect(res.body.unmatched[0].status).toBe('choose')
     expect(res.body.unmatched[0].candidates).toHaveLength(3)
     expect(res.body.lines).toEqual([
-      { productId: 'avocado', quantity: 2, unit: 'ארגז' },
-      { productId: 'lemon', quantity: 1, unit: null, unitNeedsFix: true, spokenUnit: 'ארגזים' },
+      { productId: 'avocado', quantity: 2, unit: 'ארגז', missing: [] },
+      { productId: 'lemon', quantity: 1, unit: null, unitNeedsFix: true, spokenUnit: 'ארגזים', missing: ['unit'] },
     ])
+  })
+
+  it('plan 655: a unit added by the user is in the model prompt and read back; every line carries missing', async () => {
+    await testDb().collection('taxonomyTerms').insertOne({ _id: 'u-handful', businessId: 'b1', kind: 'unit', key: 'handful' })
+    await testDb().collection('DICTIONARY_OVERRIDES').updateOne(
+      { userId: 'own1' }, { $set: { items: { handful: 'חופן' } } }, { upsert: true })
+    await product('parsley', 'פטרוזיליה', 'b1', { baseUnit: 'gram', purchaseOptions: [{ unitSymbol: 'handful', conversionRate: 30 }] })
+    fetchMock.mockResolvedValue(modelAnswer({ lines: [
+      { spoken: 'פטרוזיליה', quantity: 2, unit: 'חופנים' }, { spoken: 'עגבניות', quantity: 3, unit: null },
+    ] }))
+    const res = await post({ text: '2 חופנים פטרוזיליה, 3 עגבניות' })
+    expect(sentBody().contents[0].parts[0].text).toContain('"handful" ("חופן")')
+    expect(res.body.lines).toHaveLength(2)
+    expect(res.body.lines).toEqual(expect.arrayContaining([
+      { productId: 'tomato', quantity: 3, unit: null, unitMissing: true, missing: ['unit'] },
+      { productId: 'parsley', quantity: 2, unit: 'handful', missing: [] },
+    ]))
+    // A line with a missing part is never a counted one: every such line says what to ask.
+    for (const line of res.body.lines) expect(Array.isArray(line.missing)).toBe(true)
+    for (const line of res.body.lines.filter(l => l.unit === null)) expect(line.missing).toContain('unit')
+    await testDb().collection('DICTIONARY_OVERRIDES').deleteMany({})
   })
 
   it('a spoken name matching two products is a choice with both as candidates', async () => {
@@ -180,7 +204,7 @@ describe('POST /ai/stock/extract', () => {
     expect(drafts[0]).toMatchObject({
       _id: res.body.draftId, businessId: 'b1', feature: 'stock_extract', status: 'pending', subject: { type: 'stockCount' },
     })
-    expect(drafts[0].aiDraft.lines).toEqual([{ productId: 'flour', quantity: 4, unit: null, unitMissing: true }])
+    expect(drafts[0].aiDraft.lines).toEqual([{ productId: 'flour', quantity: 4, unit: null, unitMissing: true, missing: ['unit'] }])
     // Plan 654 (d): the model's raw lines are kept next to the cleaned answer.
     expect(drafts[0].aiDraft.modelLines).toEqual([{ spoken: 'קמח', quantity: 4, unit: null }])
     expect(await testDb().collection('aiUsage').countDocuments({ feature: 'stock_extract' })).toBe(1)

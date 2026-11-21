@@ -73,6 +73,17 @@
     min-inline-size: 0;
   }
 
+  // Plan 655: one question per missing part of a line (which product / how much / which unit).
+  .stock-ai__question {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-inline-size: 0;
+    margin: 0;
+  }
+
   .stock-ai__muted {
     color: var(--color-text-muted);
     font-size: var(--fs-sm);
