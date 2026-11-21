@@ -96,6 +96,11 @@ append the path to the scope block above and retry.
   confirm.
 - the counted mark sizes — family: list-page — rung: 1 — why: `app-list-row-checkbox` sized by the 656 breakpoint
   names.
+- the light variant `.c-modal-overlay--light` — family: modal-shell — rung: 2 — why: the engine overlay's `light` variant, no new popup piece.
+- the light card `.stock-count__base-light` — family: modal-shell — rung: 2 — why: only the phone card's padding and size, on the shell's card.
+- the counted cell `.stock-count__counted` — family: list-page — rung: 1 — why: the existing counted cell, sized by tokens.
+- the chip box `.c-chip--toggle` — family: chip — rung: 1 — why: existing chip, only sized from the count page.
+- the row checkbox `.list-row-checkbox` — family: list-page — rung: 1 — why: existing, only its box sized from the count page.
 
 ## Defaults
 
