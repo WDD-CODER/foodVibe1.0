@@ -37,6 +37,8 @@ export type StockExtractLine = {
   quantity: number
   unit: string | null
   unitNeedsFix?: boolean
+  /** Plan 654: no unit was said or found in the text — the person picks one; never the base unit. */
+  unitMissing?: boolean
   spokenUnit?: string
 }
 /** Plan 650: `choose` = several products fit (candidates best first); `unmatched` = none fit (candidates are the nearest). */

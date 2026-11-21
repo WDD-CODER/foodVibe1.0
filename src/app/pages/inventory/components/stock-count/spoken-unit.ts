@@ -26,16 +26,27 @@ const unitKey = (raw: string): string => {
 const sameUnit = (a: string, b: string): boolean =>
   unitKey(a) === unitKey(b) || foldWord(unitKey(a)) === foldWord(unitKey(b))
 
+/** Plan 654: the base unit counts things one by one (יחידה) — the only base unit offered first when the person picks. */
+export const COUNT_UNIT = 'unit'
+
 /**
- * Plan 653: the unit a picked product really has for what was said — the same rule as an automatic match.
- * No unit said → the base unit; a said unit the product has (plural forms too) → that unit; otherwise `null`
- * (the row is flagged and not counted until fixed). Never a silent default.
+ * Plan 653/654: the unit a picked product really has for what was said — the same rule as an automatic match.
+ * A said unit the product has (plural forms too) → that unit; otherwise `null`. Plan 654: no unit said → `null`
+ * too, never the base unit: the caller tells «no unit said» (the row asks which unit) from «a unit the product
+ * lacks» (the row shows the unit note) by whether `said` is empty.
  */
 export function unitForSpoken(
   said: string | undefined,
   product: Pick<Product, 'baseUnit' | 'purchaseOptions'>
 ): string | null {
-  if (!said) return product.baseUnit
+  if (!said) return null
   const own = unitOptionsFor(product)
   return own.find((u) => sameUnit(u, said)) ?? null
+}
+
+/** Plan 654: the product's own units as the choice for a row with no unit: a count base unit first, the rest as listed. */
+export function unitChoicesFor(product: Pick<Product, 'baseUnit' | 'purchaseOptions'>): string[] {
+  const own = unitOptionsFor(product)
+  if (product.baseUnit === COUNT_UNIT) return own
+  return [...own.filter((u) => u !== product.baseUnit), product.baseUnit]
 }

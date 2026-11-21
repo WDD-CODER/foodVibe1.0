@@ -3,7 +3,7 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="isPanelOpen_.set(!isPanelOpen_())"
   [gridTemplate]="gridTemplate_()"
-  [mobileGridTemplate]="view_() === 'sheet' ? 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto minmax(3.5rem, auto)' : '1fr'"
+  [mobileGridTemplate]="mobileGridTemplate_()"
   [resultCount]="countedCount_()"
   [resultTotal]="products_().length"
 >
@@ -87,11 +87,13 @@
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
       <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
-      <app-column-carousel-header>
-        <div class="c-grid-header-cell" appColumnSlide label="stk_col_in_base" role="presentation">
-          {{ 'stk_col_in_base' | translatePipe }}
-        </div>
-      </app-column-carousel-header>
+      @if (showBase_()) {
+        <app-column-carousel-header>
+          <div class="c-grid-header-cell" appColumnSlide label="stk_col_in_base" role="presentation">
+            {{ 'stk_col_in_base' | translatePipe }}
+          </div>
+        </app-column-carousel-header>
+      }
     }
   </ng-container>
 
@@ -193,34 +195,66 @@
             <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
           </div>
           <div class="c-list-body-cell" role="cell">
-            <app-custom-select
-              [options]="row.options"
-              [compact]="true"
-              [ngModel]="row.state.unit"
-              (valueChange)="setUnit(row.product, $event)"
-            />
+            @if (row.state.choose) {
+              <div class="c-chip-group stock-count__unit-choice" role="radiogroup" data-testid="stk-unit-choice">
+                @for (choice of row.choices; track choice.value) {
+                  @if (choice.value === addUnitValue) {
+                    <button
+                      type="button"
+                      class="c-chip c-chip--tap"
+                      data-testid="stk-unit-add"
+                      (click)="setUnit(row.product, choice.value)"
+                    >
+                      {{ choice.label | translatePipe }}
+                    </button>
+                  } @else {
+                    <label class="c-chip c-chip--toggle">
+                      <input
+                        type="radio"
+                        [name]="'stk-unit-' + row.product._id"
+                        [value]="choice.value"
+                        (change)="setUnit(row.product, choice.value)"
+                      />
+                      <span>{{ choice.label }}</span>
+                    </label>
+                  }
+                }
+              </div>
+            } @else {
+              <app-custom-select
+                [options]="row.options"
+                [compact]="true"
+                [ngModel]="row.state.unit"
+                (valueChange)="setUnit(row.product, $event)"
+              />
+            }
           </div>
           <div class="c-list-body-cell stock-count__counted" role="cell">
             <label class="c-chip c-chip--toggle">
               <input
                 type="checkbox"
                 [checked]="row.state.counted"
-                [disabled]="!!row.state.fix"
+                [disabled]="!!row.state.fix || !!row.state.choose"
                 (change)="toggleCounted(row.product)"
               />
               <span>{{ 'stk_counted' | translatePipe }}</span>
             </label>
           </div>
-          <app-column-carousel-cell>
-            <div
-              class="c-list-body-cell stock-count__base"
-              appColumnSlide
-              [label]="'stk_col_in_base' | translatePipe"
-              dir="ltr"
-            >
-              {{ row.base }}
-            </div>
-          </app-column-carousel-cell>
+          @if (showBase_()) {
+            <app-column-carousel-cell>
+              <div
+                class="c-list-body-cell stock-count__base"
+                appColumnSlide
+                [label]="'stk_col_in_base' | translatePipe"
+                dir="ltr"
+              >
+                {{ row.base }}
+              </div>
+            </app-column-carousel-cell>
+          }
+          @if (row.state.choose) {
+            <p class="stock-count__unit-note" data-testid="stk-unit-choose">{{ 'stk_choose_unit' | translatePipe }}</p>
+          }
           @if (row.state.fix !== undefined) {
             <p class="stock-count__unit-note" data-testid="stk-unit-note">{{ unitNoteText_(row.state.fix) }}</p>
           }

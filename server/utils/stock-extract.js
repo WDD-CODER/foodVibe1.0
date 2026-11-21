@@ -159,6 +159,38 @@ const UNIT_WORDS = {
   'גרם': 'gram', 'גר': 'gram', 'ליטר': 'liter', 'מיליליטר': 'ml', 'מל': 'ml',
   'יחידה': 'unit', 'יחידות': 'unit',
 }
+/** Plan 654: unit words a cook says that are not system units (kept as said; the product decides if it has them). */
+const EXTRA_UNIT_WORDS = ['ארגז', 'ארגזים', 'קרטון', 'קרטונים', 'שק', 'שקים', 'חבילה', 'חבילות', 'מגש', 'מגשים']
+
+/**
+ * Plan 654: when the model dropped the unit, read it from the cook's own text beside the product words: the word
+ * just before the name (also past one number), else just after it. Returns the word as said, or undefined.
+ */
+function unitWordFromText(text, spoken, units) {
+  if (typeof text !== 'string' || !text || !spoken) return undefined
+  const known = new Set([...Object.keys(UNIT_WORDS), ...EXTRA_UNIT_WORDS, ...units].map(w => String(w).toLowerCase()))
+  const isUnit = w => w !== undefined && known.has(w.word.toLowerCase())
+  const isNum = w => w !== undefined && /^[\d.,/½¼¾]+$/.test(w.word)
+  const toks = []
+  for (const raw of text.split(/\s+/).filter(Boolean)) {
+    const word = raw.replace(/^[,.;:()]+|[,.;:()]+$/g, '')
+    if (word) toks.push({ word, end: /[,.;:]$/.test(raw) })
+  }
+  const spokenToks = spoken.split(/[\s,.;:/\\()\-–]+/).filter(Boolean).map(w => foldWord(normalizeProductName(w)))
+  if (spokenToks.length === 0) return undefined
+  const folded = toks.map(t => foldWord(normalizeProductName(t.word)))
+  let at = -1
+  for (let i = 0; i + spokenToks.length <= toks.length && at < 0; i++) {
+    if (spokenToks.every((w, k) => folded[i + k] === w)) at = i
+  }
+  if (at < 0) return undefined
+  const last = at + spokenToks.length - 1
+  if (isUnit(toks[at - 1]) && !toks[at - 1].end) return toks[at - 1].word
+  if (isNum(toks[at - 1]) && !toks[at - 1].end && isUnit(toks[at - 2]) && !toks[at - 2].end) return toks[at - 2].word
+  if (isUnit(toks[last + 1])) return toks[last + 1].word
+  if (isNum(toks[last + 1]) && isUnit(toks[last + 2]) && (toks[last + 2].end || last + 3 >= toks.length)) return toks[last + 2].word
+  return undefined
+}
 const unitKey = raw => {
   const t = String(raw ?? '').trim().toLowerCase()
   return UNIT_WORDS[t] ?? UNIT_WORDS[foldWord(t)] ?? t
@@ -167,11 +199,12 @@ const sameUnit = (a, b) => unitKey(a) === unitKey(b) || foldWord(unitKey(a)) ===
 
 /**
  * Plan 651: the unit a product really has for what was said. Returns { unit } (the product's own unit, or a unit it
- * converts to), or { unit: null, unitNeedsFix: true, spokenUnit } when none fits. No unit said → the base unit.
+ * converts to), or { unit: null, unitNeedsFix: true, spokenUnit } when none fits. Plan 654: no unit said →
+ * { unit: null, unitMissing: true } — the unit is never guessed; the person picks.
  */
 function resolveUnit(rawUnit, product, rates) {
   const base = product.baseUnit
-  if (rawUnit === null || rawUnit === undefined || rawUnit === '') return { unit: base }
+  if (rawUnit === null || rawUnit === undefined || rawUnit === '') return { unit: null, unitMissing: true }
   const own = [base, ...(product.purchaseOptions ?? []).map(o => o?.unitSymbol)].filter(Boolean)
   const hit = own.find(u => sameUnit(u, rawUnit))
   if (hit) return { unit: hit }
@@ -188,7 +221,7 @@ const candidateOf = p => ({ productId: String(p._id), nameHebrew: p.nameHebrew }
  * `candidates`); the sheet never adds a new item by itself. `countedIds` are product ids counted before (a tie-break).
  * Code adds a product counted twice in the same unit; the model never does.
  */
-function cleanStockLines(answer, products, units, rates, countedIds = new Set()) {
+function cleanStockLines(answer, products, units, rates, countedIds = new Set(), text = '') {
   const parsed = stockExtractModelAnswerSchema.safeParse(answer)
   if (!parsed.success) return null
   const index = nameIndex(products, countedIds)
@@ -199,7 +232,8 @@ function cleanStockLines(answer, products, units, rates, countedIds = new Set())
   for (const entry of parsed.data.lines.slice(0, MAX_ENTRIES)) {
     const spoken = entry.spoken.trim().slice(0, MAX_SPOKEN)
     const quantity = usableQuantity(entry.quantity) ? entry.quantity : undefined
-    const spokenUnit = entry.unit !== null ? entry.unit : undefined
+    const modelUnit = entry.unit !== null ? entry.unit : undefined
+    const spokenUnit = modelUnit ?? unitWordFromText(text, spoken, units)
     const unit = spokenUnit !== undefined && unitSet.has(spokenUnit) ? spokenUnit : undefined
     const miss = (status, found, extra) => {
       if (!spoken) return
@@ -221,6 +255,10 @@ function cleanStockLines(answer, products, units, rates, countedIds = new Set())
     if (quantity === undefined) { miss('unmatched', found, {}); continue }
     const productId = String(product._id)
     const resolved = resolveUnit(spokenUnit, product, rates)
+    if (resolved.unitMissing) {
+      lines.push({ productId, quantity, unit: null, unitMissing: true })
+      continue
+    }
     if (resolved.unitNeedsFix) {
       lines.push({ productId, quantity, unit: null, unitNeedsFix: true, spokenUnit: resolved.spokenUnit })
       continue

@@ -73,7 +73,7 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
 
     const raw = responseText(call.data);
     const payload = extractJsonPayload(raw);
-    const cleaned = payload.error ? null : cleanStockLines(payload.value, products, units, rates, countedIds);
+    const cleaned = payload.error ? null : cleanStockLines(payload.value, products, units, rates, countedIds, text);
     if (!cleaned) {
       // Length only: the raw answer repeats the product names and the count text.
       req.log.error({ event: 'ai.stock_extract.parse_failed', rawLength: raw.length });
@@ -85,7 +85,8 @@ router.post('/extract', verifyToken, limit, async (req, res) => {
       feature: 'stock_extract',
       subject: { type: 'stockCount' },
       input: { text, ...(fileId && { fileId }) },
-      aiDraft: { lines, unmatched },
+      // Plan 654: the model's raw lines stay next to the cleaned answer, for tracing.
+      aiDraft: { lines, unmatched, modelLines: payload.value.lines },
       model: call.model,
     });
 
