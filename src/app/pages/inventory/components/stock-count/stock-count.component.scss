@@ -117,8 +117,7 @@
     block-size: var(--stock-count-mark-size) !important;
   }
 
-  :host ::ng-deep .stock-count__counted .list-row-checkbox {
-    min-inline-size: var(--stock-count-mark-tap);
+  .stock-count__counted {
     min-block-size: var(--stock-count-mark-tap);
   }
 
