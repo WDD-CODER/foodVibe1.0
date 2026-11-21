@@ -1,0 +1,198 @@
+{
+  "run": "mod-count-units",
+  "branch": "orch/mod-count-units",
+  "base": "main",
+  "startedAt": "2026-11-21T07:40:57.516Z",
+  "mainShaAtStart": "3b57d034dcf5ecca233ef1da1ee2a9aeb71ea688",
+  "plans": {
+    "654": {
+      "nnn": "654",
+      "title": "Stock count: the unit is never guessed (the said word is kept, or the person picks), names always show, no empty columns",
+      "branch": "feat/654-stock-count-unit-never",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-21T07:43:29.934Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-21T08:12:27.302Z"
+        }
+      },
+      "humanItems": [
+        "Dandan types «3 ארגז עגבניות», picks a tomato product: the row shows 3 crates if the product has crates,",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line",
+        "any screen with a unit dropdown · open the dropdown · an add-unit option is there and opens the add-unit popup; the new unit is selected after saving"
+      ],
+      "history": [
+        {
+          "at": "2026-11-21T07:43:29.643Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T07:43:29.936Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:03:41.250Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:12:18.930Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:12:27.304Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:12:47.624Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:14:00.664Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.4,
+      "sha": "f1bf683f2f8e40fe081ec8e04295bfded28cf213",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1208.1,
+          "tokens": {
+            "input": 3559546,
+            "output": 42955
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.7,
+          "tokens": {
+            "input": 87952,
+            "output": 1793
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "de27dceb9a5d2174161ace5066f32a2823d433b7"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-21T07:43:29.328Z",
+      "plan": "654",
+      "text": "the folder foodVibe1.0-orch-mod-count-units-654 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-21T08:03:38.251Z",
+      "plan": "654",
+      "text": "builder left undone (round 0): [ui] 654-1 (names visible and no empty column at 375 px): written, not run; [human] items not ticked, as instructed"
+    },
+    {
+      "at": "2026-11-21T08:12:58.628Z",
+      "plan": "654",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-units was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-21T08:15:25.350Z",
+      "text": "FINAL: same tree as plan 654's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 12.4,
+  "updatedAt": "2026-11-21T08:15:27.750Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "654",
+      "type": "behaviour",
+      "text": "behaviour: the base unit is offered first among the unit chips only when it is the count unit (יחידה), and it is never pre-selected; this follows Done-when (c) over the [human] wording about filling יחידה — reverse: preselect the count unit in place_()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "654",
+      "type": "behaviour",
+      "text": "behaviour: the base-amount column is hidden when no drawn row has a value, on desktop as well as on a phone — reverse: remove the showBase_() guards in the template and the grid templates",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "654",
+      "type": "behaviour",
+      "text": "behaviour: a typed or unit-less line from the server is a `unitMissing` row, uncounted with the unit prompt «באיזו יחידה?» — reverse: restore resolveUnit's old base-unit default",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "654",
+      "type": "seen",
+      "text": "seen: the Human check 'every row stays on one line' on list pages conflicts with this plan's wrapping name cell (stock-count.component.scss .stock-count__name)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "654",
+      "type": "seen",
+      "text": "seen: docs/brain/component-families.md:315 and :586 — reuse-lint --check-registry reports missing-path entries that were already there before this change",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-21T08:15:27.747Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-21T08:15:27.749Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
