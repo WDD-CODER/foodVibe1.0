@@ -1,0 +1,288 @@
+{
+  "run": "mod-count-confirm",
+  "branch": "orch/mod-count-confirm",
+  "base": "main",
+  "startedAt": "2026-11-21T18:07:24.312Z",
+  "mainShaAtStart": "593a06ac308de06033a1d296abfc0e87898258df",
+  "plans": {
+    "657": {
+      "nnn": "657",
+      "title": "Stock count: an asked amount is confirmed before it counts, the counted mark sized per width, the base amount in a light popup on phones",
+      "branch": "feat/657-stock-count-amount-confirmed",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-21T18:08:48.514Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-21T18:22:15.652Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-21T18:30:10.718Z"
+        }
+      },
+      "humanItems": [
+        "Dandan types «ארגז עגבניות», taps the counter up to 3 and confirms: the row reads 3 crates. On a phone he",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line"
+      ],
+      "history": [
+        {
+          "at": "2026-11-21T18:08:48.351Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:08:48.515Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:22:05.703Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:22:15.212Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:22:15.500Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:22:15.654Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:27:05.079Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:30:03.204Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:30:10.720Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:30:26.349Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T18:31:31.549Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12,
+      "sha": "b2ae02de1e13d4ae0aa65a9d1c81628d75b7463b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 794,
+          "tokens": {
+            "input": 3825673,
+            "output": 33992
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 286.8,
+          "tokens": {
+            "input": 182320,
+            "output": 3531
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 14,
+          "tokens": {
+            "input": 75603,
+            "output": 1255
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md"
+      ],
+      "checkedHead": "606d59c52a846d5dbfcb55bc062c1ade472b985a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-21T18:08:48.184Z",
+      "plan": "657",
+      "text": "the folder foodVibe1.0-orch-mod-count-confirm-657 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-21T18:22:02.630Z",
+      "plan": "657",
+      "text": "builder left undone (round 0): [ui] 657-1: written, not run; [human] items left for Dandan"
+    },
+    {
+      "at": "2026-11-21T18:22:14.080Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-21T18:22:14.219Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-21T18:22:14.478Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-21T18:22:14.633Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-21T18:22:14.772Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-21T18:22:14.929Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-21T18:22:15.068Z",
+      "plan": "657",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed first; runs after the fix: pnpm run lint:reuse"
+    },
+    {
+      "at": "2026-11-21T18:22:15.356Z",
+      "plan": "657",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-count-confirm --plan plans/657-stock-count-amount-confirmed-counted-mark-sized-per-width-base-amount-light-popup.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-21T18:30:36.728Z",
+      "plan": "657",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-confirm was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-21T18:32:51.491Z",
+      "text": "FINAL: same tree as plan 657's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 12,
+  "updatedAt": "2026-11-21T18:32:53.925Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "657",
+      "type": "behaviour",
+      "text": "behaviour: the light popup ignores a pointer-down on its opener, so the opener's own click toggles it instead of closing and reopening — reverse: drop the opener check in `watchOutside_` (modal-shell.component.ts)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "657",
+      "type": "behaviour",
+      "text": "behaviour: the confirm button stays disabled while the held number is 0 — reverse: remove `[disabled]` on the confirm button in stock-ai-draft.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "657",
+      "type": "behaviour",
+      "text": "behaviour: the light popup stays a plain card with no close button, closed by an outside tap, a scroll or Escape — reverse: add a close button inside the `app-modal-shell` content in stock-count.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "657",
+      "type": "behaviour",
+      "text": "behaviour: the compact checkbox is sized by `::ng-deep` with `!important` in stock-count.component.scss because `list-row-checkbox` is out of scope and a global phone rule in styles.scss forces its size — reverse: size it inside list-row-checkbox.component.scss via a CSS variable",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "657",
+      "type": "seen",
+      "text": "seen: src/app/shared/list-selection/list-row-checkbox.component.scss:1 — `kit-checks` reports KIT_DEBT style-duplicate-class 177 -> 178 for this file, which this branch does not change",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "657",
+      "type": "behaviour",
+      "text": "behaviour: the counted-mark tap area is now set by min-block-size on the .stock-count__counted cell only. The inline min-size on the checkbox host is gone, so the tap area is slightly narrower — reverse: restore a min size rule on the checkbox host in a shared piece",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-21T18:32:53.922Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-21T18:32:53.925Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
