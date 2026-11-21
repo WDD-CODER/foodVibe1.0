@@ -5002,6 +5002,54 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.7.0): the Windows desktop notice when a run asks. Classified project/stay like the other kit-synced files."
     },
     {
+      "path": "docs/agent/local-ci.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): running the PR checks on this PC. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/local-ci.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): the local CI runner. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/local-ci.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): helpers of the local CI runner. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/plan-write-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): the plan write check behind plan-write-guard. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/readiness-asks.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): the run's readiness questions. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/session-manifest.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): the session manifest hook in one process. Classified project/stay like the other kit-synced files."
+    },
+    {
       "path": "scripts/lib/orch-folders.mjs",
       "tier": "project",
       "action": "stay",

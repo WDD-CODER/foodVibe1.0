@@ -6,11 +6,12 @@
  *   node scripts/ship-prep.mjs [--mode auto|regular] [--json]
  *   node scripts/ship-prep.mjs --gate [--lane FAST|ULTRA-TRIVIAL|REGULAR]
  *   node scripts/ship-prep.mjs --check-baseline [--json]
+ *   node scripts/ship-prep.mjs --score [--review-min <m>] [--transcript <session .jsonl>] [--base <ref>]
  *
  * Exit: 0 for the lane and the baseline (advisory — the calling command decides on the printed lane / status);
  * --gate exits 1 on the first failing command (a hard stop) and 0 when every command passed.
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'fs'
 import { execFileSync, spawnSync } from 'child_process'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -72,6 +73,7 @@ function parseArgs(argv) {
 const args = parseArgs(process.argv.slice(2))
 const asJson = Boolean(args.json)
 const checkBaseline = Boolean(args['check-baseline'])
+const scoreMode = Boolean(args.score)
 const mode = args.mode === 'regular' ? 'regular' : 'auto'
 
 function git(cmdArgs) {
@@ -283,6 +285,78 @@ export function runShipGate({ commands, run = spawnGateCommand, log = console.lo
   return { exit: 0, results }
 }
 
+// ---- Phase 2 end: the job's minutes line (--score) — written by code, never by the model ---------------------------
+const GATE_SECONDS_PATH = join(repoRoot, '.claude', 'sessions', '.ship-gate-seconds')
+
+/** Token total of a session transcript (.jsonl, one JSON entry per line): input + output of every usage entry. '?' when unreadable. */
+export function transcriptTokens(path) {
+  try {
+    if (!path || path === true) return '?'
+    let total = 0
+    let seen = false
+    for (const line of readFileSync(path, 'utf8').split(/\r?\n/)) {
+      if (!line.trim()) continue
+      let u
+      try { const e = JSON.parse(line); u = e?.message?.usage ?? e?.usage } catch { continue }
+      if (!u || typeof u !== 'object') continue
+      const n = (Number(u.input_tokens) || 0) + (Number(u.output_tokens) || 0)
+      if (n > 0) { total += n; seen = true }
+    }
+    return seen ? total : '?'
+  } catch {
+    return '?'
+  }
+}
+
+/** Unix seconds of the first commit on the branch (after `base`), or null. */
+export function firstBranchCommitSeconds(cwd, base) {
+  try {
+    const out = execFileSync('git', ['log', '--reverse', '--format=%ct', `${base}..HEAD`], { cwd, encoding: 'utf8' })
+    const first = out.split(/\r?\n/).find((l) => l.trim() !== '')
+    return first ? Number(first) : null
+  } catch {
+    return null
+  }
+}
+
+/** `- ship: minutes <wall> (first commit → ship) gate <s>s review <m>min tokens <n|?>` — same units as orch-run's scorecard. */
+export function shipScoreLine({ wallMinutes, gateSeconds, reviewMin, tokens }) {
+  return `- ship: minutes ${wallMinutes ?? '?'} (first commit → ship) gate ${gateSeconds ?? '?'}s review ${reviewMin ?? '?'}min tokens ${tokens ?? '?'}`
+}
+
+/** The plan file of branch feat|fix|chore/NNN-<slug>, or null (no plan: the line goes to the console only). */
+export function planFileForBranch(cwd, branch) {
+  const m = /^(?:feat|fix|chore)\/(\d+)-/.exec(branch || '')
+  if (!m) return null
+  const dir = join(cwd, 'plans')
+  if (!existsSync(dir)) return null
+  const hit = readdirSync(dir).find((f) => f.startsWith(`${m[1]}-`) && f.endsWith('.plan.md'))
+  return hit ? join(dir, hit) : null
+}
+
+/** Append `line` at the end of the `## Execution Notes` section (replacing an `- (empty)` placeholder). True when written. */
+export function appendExecutionNote(planPath, line) {
+  const lines = readFileSync(planPath, 'utf8').split('\n')
+  const at = lines.findIndex((l) => /^##\s+Execution Notes\s*$/.test(l.replace(/\r$/, '')))
+  if (at < 0) return false
+  let end = lines.findIndex((l, i) => i > at && /^##\s/.test(l))
+  if (end < 0) end = lines.length
+  let last = end - 1
+  while (last > at && lines[last].trim() === '') last--
+  if (lines[last].trim() === '- (empty)') lines.splice(last, 1, line)
+  else lines.splice(last + 1, 0, line)
+  writeFileSync(planPath, lines.join('\n'))
+  return true
+}
+
+/** The score line for the branch in `cwd`; `now` (ms) and the inputs are injectable for the tests. */
+export function shipScore({ cwd = repoRoot, base, now = Date.now(), gateSeconds = null, reviewMin = null, transcript = null, branch } = {}) {
+  const first = firstBranchCommitSeconds(cwd, base)
+  const wallMinutes = first === null ? null : Math.max(0, Math.round((now / 1000 - first) / 60))
+  const line = shipScoreLine({ wallMinutes, gateSeconds, reviewMin, tokens: transcriptTokens(transcript) })
+  return { line, planPath: planFileForBranch(cwd, branch) }
+}
+
 function classify({ write = true } = {}) {
   const branch = currentBranch()
   const head = currentHead()
@@ -426,7 +500,12 @@ if (!isMain) {
   }
   const lane = given ?? (mode === 'regular' ? 'REGULAR' : classify({ write: false }).lane)
   console.log(`GATE: lane ${lane}`)
+  const gateStart = Date.now()
   const gate = runShipGate({ commands: shipGateCommands({ lane }) })
+  try {
+    mkdirSync(dirname(GATE_SECONDS_PATH), { recursive: true })
+    writeFileSync(GATE_SECONDS_PATH, String(Math.round((Date.now() - gateStart) / 1000)))
+  } catch { /* the score line says "?" */ }
   // The receipt for the single reviewer (review.ship = reviewer): what the checks printed, in this checkout's git
   // folder, written atomically and bound to HEAD + the tree, so a stale or foreign receipt is never read as this one.
   const { writeShipGateReceipt } = await import('./lib/plan-review.mjs')
@@ -437,6 +516,20 @@ if (!isMain) {
     console.log(`GATE_RECEIPT: not written (${e.message})`)
   }
   process.exitCode = gate.exit
+} else if (scoreMode) {
+  let gateSeconds = null
+  try { gateSeconds = Number(readFileSync(GATE_SECONDS_PATH, 'utf8')) } catch { /* not measured */ }
+  const rm = args['review-min']
+  const { line, planPath } = shipScore({
+    base: typeof args.base === 'string' ? args.base : 'origin/main',
+    gateSeconds: Number.isFinite(gateSeconds) ? gateSeconds : null,
+    reviewMin: typeof rm === 'string' && rm !== '' ? rm : null,
+    transcript: args.transcript,
+    branch: currentBranch(),
+  })
+  console.log(line)
+  if (planPath && appendExecutionNote(planPath, line)) console.log(`SHIP_SCORE: appended to ${planPath.slice(repoRoot.length + 1).replace(/\\/g, '/')}`)
+  else console.log('SHIP_SCORE: no plan on this branch — console only')
 } else if (checkBaseline) {
   const report = checkBaselineReport()
   if (asJson) {

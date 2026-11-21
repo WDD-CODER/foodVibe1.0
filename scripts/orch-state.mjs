@@ -74,6 +74,7 @@ import { extractScopeGlobs, testFilesOutOfScope } from './lib/plan-scope.mjs'
 import { scopeTestsLint } from './lib/scope-tests-lint.mjs'
 import { planNumber, planTitle, mergeSubjectRe } from './lib/plan-deps.mjs'
 import { uiItems } from './lib/done-when.mjs'
+import { copyQaLogin } from './lib/readiness-asks.mjs'
 import { listSlots } from './lib/slot.mjs'
 import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit, isWorktree, branchHolder, samePath, removeFolder, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 import { removeMergedBuilder } from './worktree-clean.mjs'
@@ -1018,6 +1019,13 @@ const commands = {
       fail(`installing the packages in ${wt}: ${e.message}`, { envFailure: true })
     }
     lines.push(...deps.lines)
+    // A plan with [ui] items gets the QA login (ORCH_QA_USER / ORCH_QA_PASSWORD) from the main folder's .env; only key names are logged.
+    try {
+      if (uiItems(readFileSync(join(root, planFile), 'utf8')).length) {
+        const qa = copyQaLogin(root, wt)
+        lines.push(qa.ok ? `QA login copied to ${wt}/.env (${qa.keys.join(', ')})` : 'QA login is not in the main folder .env: nothing copied')
+      }
+    } catch { /* no plan text here: no [ui] items to serve */ }
     if (!deps.ok) fail(`${wt} has no scripts/node_modules (picomatch): the scope guard would refuse every edit — ${deps.lines.join('; ') || 'no package.json in scripts/?'}`, { envFailure: true })
     const st = readStatus(run)
     if (st?.plans?.[nnn]) {

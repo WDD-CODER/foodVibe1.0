@@ -1471,13 +1471,19 @@ if (isMain && process.argv[2] === 'merge') {
   await runMergeGuard()
   process.exit(0)
 }
-if (isMain) {
-  const mode = process.argv[2] === 'branch' ? 'branch' : 'scope'
-  const scriptsRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const SCRIPTS_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const hereOf = () => worktreeOf(SCRIPTS_ROOT) || { root: SCRIPTS_ROOT, gitDir: join(SCRIPTS_ROOT, '.git'), commonDir: join(SCRIPTS_ROOT, '.git') }
+const similarityOf = (rel) => {
+  const r = spawnSync(process.execPath, [join(SCRIPTS_ROOT, 'scripts', 'plan-name-similarity.mjs'), `--file=${rel}`], { cwd: SCRIPTS_ROOT, encoding: 'utf8', timeout: 8000 })
+  return `${r.stdout || ''}${r.stderr || ''}`
+}
+
+/**
+ * The branch or scope guard on one input. Nothing could be judged (empty or unparseable input, no file path, an error):
+ * refuse when this folder is guarded, allow only when it is not (fail closed).
+ */
+function judgeFile(mode, input, here) {
   const tag = mode === 'scope' ? 'SCOPE_GUARD' : 'BRANCH_GUARD'
-  const here = worktreeOf(scriptsRoot) || { root: scriptsRoot, gitDir: join(scriptsRoot, '.git'), commonDir: join(scriptsRoot, '.git') }
-  // Nothing could be judged (empty or unparseable input, no file path, an error): refuse when this folder is guarded,
-  // allow only when it is not (fail closed).
   const unjudged = (why) => {
     let guarded = true
     try {
@@ -1485,14 +1491,97 @@ if (isMain) {
     } catch {}
     return guarded ? deny(`${tag}: cannot check this write (${why}) and ${here.root} is guarded - write refused (fail closed).`) : allow()
   }
-  let result
   try {
-    const input = await readStdin(1000)
-    result = input.trim() ? decide(mode, input, here) : null
-    if (!result) result = unjudged(input.trim() ? 'unparseable tool input or no file path in it' : 'empty tool input')
+    const r = input.trim() ? decide(mode, input, here) : null
+    return r || unjudged(input.trim() ? 'unparseable tool input or no file path in it' : 'empty tool input')
   } catch (e) {
-    result = unjudged(`check failed: ${e && e.message}`)
+    return unjudged(`check failed: ${e && e.message}`)
   }
+}
+
+/** Run the steps in order; the first deny is the answer, every allow note is kept (one process instead of one per guard). */
+async function runSteps(steps) {
+  const notes = []
+  for (const step of steps) {
+    let r
+    try {
+      r = await step()
+    } catch {
+      r = allow()
+    }
+    if (!r) continue
+    if (r.decision === 'deny') return r
+    if (r.msg) notes.push(r.msg)
+  }
+  return allow(notes.join('\n'))
+}
+
+// Edit|Write|MultiEdit: branch, plan-write, scope, write — the four PreToolUse hooks of before, in their order.
+if (isMain && process.argv[2] === 'edit') {
+  const input = await readStdin(1000)
+  const here = hereOf()
+  const { editPlanDecision } = await import('./plan-write-check.mjs')
+  emit(
+    await runSteps([
+      () => judgeFile('branch', input, here),
+      () => editPlanDecision(input, SCRIPTS_ROOT, similarityOf),
+      () => judgeFile('scope', input, here),
+      () => writeGuardDecision(input, resolve(dirname(fileURLToPath(import.meta.url)), '..')),
+    ]),
+  )
+  if (process.env.KIT_GUARD_TRACE === '1') process.stderr.write(`GUARD_GIT_CALLS: ${gitCalls}\n`)
+  process.exit(0)
+}
+// Bash: branch, plan-write, scope, merge. The merge guard runs (as its own process) only for a command that names a PR merge.
+if (isMain && process.argv[2] === 'bash') {
+  const input = await readStdin(1000)
+  const here = hereOf()
+  const result = await runSteps([
+    () => judgeFile('branch', input, here),
+    () => planWriteDecision(input, SCRIPTS_ROOT, similarityOf),
+    () => judgeFile('scope', input, here),
+  ])
+  if (result.decision !== 'deny') {
+    let isMerge = false
+    try {
+      const { mergeTargets } = await import('./merge-guard.mjs')
+      isMerge = mergeTargets(JSON.parse(input)?.tool_input?.command).length > 0
+    } catch {}
+    if (isMerge) {
+      const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), 'merge'], { input, encoding: 'utf8', timeout: 40000 })
+      if ((r.stdout || '').trim()) {
+        process.stdout.write(r.stdout)
+        process.exit(0)
+      }
+    }
+  }
+  emit(result)
+  if (process.env.KIT_GUARD_TRACE === '1') process.stderr.write(`GUARD_GIT_CALLS: ${gitCalls}\n`)
+  process.exit(0)
+}
+// PostToolUse (Edit|Write): the edited file goes to the session manifest. Prints nothing.
+if (isMain && process.argv[2] === 'manifest') {
+  try {
+    const { recordManifest } = await import('./session-manifest.mjs')
+    const input = await readStdin(1000)
+    let cwd = process.cwd()
+    try {
+      const c = JSON.parse(input).cwd
+      if (typeof c === 'string' && c) cwd = nativePath(c)
+    } catch {}
+    recordManifest(input, cwd)
+  } catch {}
+  process.exit(0)
+}
+// Cursor's plan-write-guard.sh: the plan-name rule alone for an Edit/Write.
+if (isMain && process.argv[2] === 'planedit') {
+  const { editPlanDecision } = await import('./plan-write-check.mjs')
+  emit(await runSteps([async () => editPlanDecision(await readStdin(1000), SCRIPTS_ROOT, similarityOf)]))
+  process.exit(0)
+}
+if (isMain) {
+  const mode = process.argv[2] === 'branch' ? 'branch' : 'scope'
+  const result = judgeFile(mode, await readStdin(1000), hereOf())
   emit(result)
   if (process.env.KIT_GUARD_TRACE === '1') process.stderr.write(`GUARD_GIT_CALLS: ${gitCalls}\n`)
   process.exit(0)

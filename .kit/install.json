@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.7.0"
+    "version": "3.8.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.7.0",
-  "commit": "41a315ae65bf5f5ce430b2c08dd176737d6d2431",
+  "ref": "v3.8.0",
+  "commit": "476552f57d25b8cc09f80d645c9851d94d2f3fd5",
   "packs": [
     "angular",
     "node-express"
@@ -113,7 +113,7 @@
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "61b284920fbe61b065c3e07febf5c82c22d2bf715bcf384c318f019478f2694f",
+      "sha256": "c5a004a1fd224199ff13ab7fc00d38cca9327ea536eef5734a42576b6e642e0d",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
@@ -148,7 +148,7 @@
       "source": "core/.claude/commands/security.md"
     },
     ".claude/commands/ship.md": {
-      "sha256": "8dd3d234ec78243562785117e2caca2b776df7d8cb3f35e7be79689a0b292f96",
+      "sha256": "64c9b379cc8a8a54c8a84272f84e578c724af12e0472b6d42829232933cc1b5c",
       "kind": "managed",
       "source": "core/.claude/commands/ship.md"
     },
@@ -622,18 +622,23 @@
       "kind": "managed",
       "source": "core/docs/agent/kit-lessons/verify.md"
     },
+    "docs/agent/local-ci.md": {
+      "sha256": "d741041627e18d2648b669e35c283c83d560d5cf54c7c8f7164ec5c79dd4d658",
+      "kind": "managed",
+      "source": "core/docs/agent/local-ci.md"
+    },
     "docs/agent/model-routing.md": {
       "sha256": "409e4b4b5f8eba609d1fc8ccdaf83d8b4ede178ce5f54ab15f3120aa4751d87a",
       "kind": "managed",
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "a0f81d8683a3d2f03609df24828dcb2b6113968866bb7a666eb6027baebd1f63",
+      "sha256": "a1ea9f6b84dbca2a09d60c71ec687d0745168a2af9ece9cab4451860ac99f615",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
     "docs/agent/pr-check-fix-loop.md": {
-      "sha256": "6e5b7bc420aafb3f8169774baa0e88dc5a73c032ad42c05b39e6d32dccb6972e",
+      "sha256": "b751d2dab7e27b5b2c0448a46e1a82ca051f9d263ab7de30bab611bb3977fa8a",
       "kind": "managed",
       "source": "core/docs/agent/pr-check-fix-loop.md"
     },
@@ -1053,12 +1058,12 @@
       "source": "core/scripts/lib/fe-command.mjs"
     },
     "scripts/lib/gate-select.mjs": {
-      "sha256": "0402a5e10318bc33d440a917f1a1f90adc1fc3538d30e510e94a5d6d8db75d66",
+      "sha256": "a393146d1c568988621b7fae90bdabf5852a8d8508b453250a1953210da61f33",
       "kind": "managed",
       "source": "core/scripts/lib/gate-select.mjs"
     },
     "scripts/lib/guard.mjs": {
-      "sha256": "bcecf9ab256363e215016a86143c61f1df032443c0ca67fd911c869516cdc9ea",
+      "sha256": "5418652f7e11cded6e8e9724e986a7132f581e38730bb395a3c4db7601e5663c",
       "kind": "managed",
       "source": "core/scripts/lib/guard.mjs"
     },
@@ -1067,13 +1072,18 @@
       "kind": "managed",
       "source": "core/scripts/lib/invariants.mjs"
     },
+    "scripts/lib/local-ci.mjs": {
+      "sha256": "7caeb57f63944ffcd689361b678c10e2deca0a4516b1f2451266b8b49f17230d",
+      "kind": "managed",
+      "source": "core/scripts/lib/local-ci.mjs"
+    },
     "scripts/lib/merge-guard.mjs": {
-      "sha256": "789216b393576e20ef8e29d97e0efff5d54e49e265719ec18371ab9e63bc1b55",
+      "sha256": "bdfe26c9fadcfdf105fb78c417b3732d36abe1322fda3a490fb74e057f03c62d",
       "kind": "managed",
       "source": "core/scripts/lib/merge-guard.mjs"
     },
     "scripts/lib/notify.mjs": {
-      "sha256": "7bd5976ce26824d4e5f7553f799aaa5c172d6945fc3681e3b3943c9f785ac424",
+      "sha256": "4d5555792b6b320dc6bdf1bafd378f8bf86ef33bc3661c15809f6e85e48d44b0",
       "kind": "managed",
       "source": "core/scripts/lib/notify.mjs"
     },
@@ -1137,6 +1147,11 @@
       "kind": "managed",
       "source": "core/scripts/lib/plan-sections.mjs"
     },
+    "scripts/lib/plan-write-check.mjs": {
+      "sha256": "c3db74d692add8b26b875afc7b8edfddde394aa33be67213c9e1e6ebc1de2f01",
+      "kind": "managed",
+      "source": "core/scripts/lib/plan-write-check.mjs"
+    },
     "scripts/lib/proc.mjs": {
       "sha256": "9bdd7b785d86e2f1836e234d209f740d0f61f9114a4016bd013111bd8e8898a7",
       "kind": "managed",
@@ -1146,6 +1161,11 @@
       "sha256": "27cb45b44b855eaac8971c944613b48a1aadd94953a9bad1eb07b14afc8535b1",
       "kind": "managed",
       "source": "core/scripts/lib/product-defaults.mjs"
+    },
+    "scripts/lib/readiness-asks.mjs": {
+      "sha256": "3ae6999da4687eb0e384d3ec80213f3ad4255cf332649eeb7464b654adc9876e",
+      "kind": "managed",
+      "source": "core/scripts/lib/readiness-asks.mjs"
     },
     "scripts/lib/redact.mjs": {
       "sha256": "ebbde39de060ebf84644a5e0d6a95f27525d6b84774b37f22ecff6778b4dbc4b",
@@ -1177,6 +1197,11 @@
       "kind": "managed",
       "source": "core/scripts/lib/scope-tests-lint.mjs"
     },
+    "scripts/lib/session-manifest.mjs": {
+      "sha256": "3f8e3cfa97b35e62ea226f2b0f16ba7be0652f0d17e73c2bd7796cd7545163ca",
+      "kind": "managed",
+      "source": "core/scripts/lib/session-manifest.mjs"
+    },
     "scripts/lib/slot-procs.mjs": {
       "sha256": "6e1be1977eef1825496ecc0aca6c93855e269685c9cc0ee6c1b8a1dd63be0963",
       "kind": "managed",
@@ -1197,6 +1222,11 @@
       "kind": "managed",
       "source": "core/scripts/lib/todo-parse.mjs"
     },
+    "scripts/local-ci.mjs": {
+      "sha256": "b9570ab646d9428906c4388f2d2aaf457947357b7bab84c4cd5274ebd69537c3",
+      "kind": "managed",
+      "source": "core/scripts/local-ci.mjs"
+    },
     "scripts/local-excludes.mjs": {
       "sha256": "5673ee0e29cd7a0fab583e21e9577aed319cd726605cada9401ac76ef89ded22",
       "kind": "managed",
@@ -1213,7 +1243,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "5f99418700725e7b647f8ff9ecf9cffad50c7682a17f6414de65237eb8c6b2c3",
+      "sha256": "19e344895b4ee43f8dd3a0ed6406c21aea6dab2a1bee981925890e95a7a18669",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
@@ -1258,7 +1288,7 @@
       "source": "core/scripts/plan-park.mjs"
     },
     "scripts/plan-write-guard.sh": {
-      "sha256": "bbe9a9b23eccefcc7e94fb27a1b7f05d9deb79f17aee6f6d24875f928532a850",
+      "sha256": "e3afa2593181d74783a26a64f78c4d4ea5988162ebd6b43f58a08f1272de9c9c",
       "kind": "managed",
       "source": "core/scripts/plan-write-guard.sh"
     },
@@ -1303,7 +1333,7 @@
       "source": "core/scripts/reuse-scan.mjs"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "479534749fc9ea3d53f70008b656176a927a0da460b0d036fef8f34e7c51c3fc",
+      "sha256": "bc5b5588e3bb6acf7e19592ab0fe984cc5837a2d3f3b6e4ca8d971c1eff7d2c9",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
@@ -1348,7 +1378,7 @@
       "source": "core/scripts/session-lock.sh"
     },
     "scripts/session-manifest-hook.py": {
-      "sha256": "3ef6b27d8bc92cb8b7ac1cc0fbe38cbe7d4f450115b25665198560dd0cd8686f",
+      "sha256": "a7165d3eb4bc55dba5f74b564113632bf14898a1792731276941f00e0955ad4f",
       "kind": "managed",
       "source": "core/scripts/session-manifest-hook.py"
     },
@@ -1363,7 +1393,7 @@
       "source": "core/scripts/session-startup.sh"
     },
     "scripts/ship-prep.mjs": {
-      "sha256": "f3c429a91b7bee829a8277f7fcc867fa8b0bedf473101fdadcef54b1d38ef602",
+      "sha256": "09a2ce4c9b7676074b1d5ef5298c3821fa741585ac0b0ee81fa7f83f2542a88d",
       "kind": "managed",
       "source": "core/scripts/ship-prep.mjs"
     },
@@ -1492,7 +1522,7 @@
       "base": ".kit/base/.claude/references/prd-template.md.base"
     },
     ".claude/settings.json": {
-      "sha256": "4b4d0e0e8f51f5165f36fff207ba6fbfd2337ce6b2a197444f32ab2681d84823",
+      "sha256": "9ac9193a39882d54a66a39369a49264f2ff6d328f5dd0b41deca04246d43c8bd",
       "base": ".kit/base/.claude/settings.json.base"
     },
     ".claude/skills/angularComponentStructure/SKILL.md": {
@@ -1545,7 +1575,7 @@
       "base": ".kit/base/docs/agent/standards-backend.md.base"
     },
     "docs/agent/standards-git.md": {
-      "sha256": "0bc6194dfd50b856ad12e20473555bacc0c4f56bf85b744fafe1593e53a48216",
+      "sha256": "dc033f3df2e8fddc97dbee5343a7f27a6153f82a660e27e2150f8f0277787947",
       "base": ".kit/base/docs/agent/standards-git.md.base"
     },
     "docs/agent/standards-security.md": {

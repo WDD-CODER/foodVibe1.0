@@ -121,6 +121,13 @@ two marked **model**.
      in its folder, `node_modules` and `.git` left out (its work is kept on `park/<run>-<NNN>`, never reset), a refused
      review, a pin failure, an environment failure, a worktree that cannot be made. A park skips only what `onPark`
      names; the run goes on.
+   - **Questions up front.** The readiness lint (`lib/readiness-asks.mjs`, no model call) asks once, in the dry run, what
+     a mid-run ask would otherwise raise: the tests outside the sibling rule that import a scoped file, the manifest
+     (the manifest.json under docs/workflow-kit) when the plan adds a script, agent, doc or test file, and, for a `[ui]` plan, the
+     QA login (`ORCH_QA_USER` / `ORCH_QA_PASSWORD` in the main folder's `.env`; missing → `NOT READY`, and the plan's
+     worktree `.env` gets the two keys at install). `--approve-asks` is the Human's `approve`: the paths are written into
+     the plan's scope block on the run branch before the run starts. `node tools/replay-asks.mjs <project>` (kit repo)
+     measures it on the recorded asks.
    - **Asks.** Every question a run raises is one file, `.claude/orchestrator-runs/<run>/asks/<NNN>-<n>.json`:
      `{ id, plan, kind, question, options[], recommendation, humanOnly, context }` (the recommended option is stored
      first; `context` holds the stop's reason, the goal line, the files, the failing check's tail and the builder's
@@ -186,13 +193,17 @@ the plan's diff (against the run branch) matches a glob. A diff that touches `ki
 The test script and the plan's own `[auto]` commands get globs through the optional `orchestrator.suiteTouches`, a list of
 `{ "command", "touches": [globs] }` (unset: they always run). The test script named there is skipped like a `ciMirror`
 entry and reused from the cache; a plan's own command named there is never skipped by its globs (its Done-when must pass
-once on the plan's code), only reused when it passed on the same files. A glob list that is too narrow is the only way
+once on the plan's code), only reused when it passed on the same files. The project's build and lint commands (`npm run build`, `npm run lint`) work like a plan's own command: named there,
+they are never skipped by their globs but reused (`GATE: cached`) when they passed on the same files earlier in this
+run; a change to a settings or dependency file runs them. Unnamed, they run every gate. A glob list that is too narrow is the only way
 to miss a failure, and CI runs everything on the pull request. Example for a project with a browser and a server suite:
 
 ```json
 "suiteTouches": [
   { "command": "pnpm run test:ci", "touches": ["src/**", "public/**", "shared/**", "tsconfig*.json"] },
-  { "command": "pnpm run test:server", "touches": ["server/**", "shared/**"] }
+  { "command": "pnpm run test:server", "touches": ["server/**", "shared/**"] },
+  { "command": "pnpm run build", "touches": ["src/**", "public/**", "shared/**", "tsconfig*.json", "vite.config.*"] },
+  { "command": "pnpm run lint", "touches": ["src/**", "shared/**", "eslint.config.*"] }
 ]
 ```
 
@@ -214,7 +225,9 @@ bounce runs every check (cheap first, no stop), so a second failure is a normal 
 `FINAL: same tree as plan NNN's gate — <commands> skipped`; the rest run, and CI runs the full set on the pull request.
 
 **Alerts and the scorecard.** When a plan asks, a Windows desktop notice shows the run, the plan, the question and the
-reply line (`ORCH_NOTIFY=off` turns it off; never in CI or under `node --test`). The report's `## Scorecard` gives the
+reply line (`ORCH_NOTIFY=off` turns it off; never in CI or under `node --test`). With `ORCH_PUSH_URL` set in `.env` (an ntfy topic
+URL such as `https://ntfy.sh/<private-topic>`; a secret, never printed), the same text goes to the phone as one POST with
+a 5-second timeout; a failed push is ignored; unset, nothing is sent. The report's `## Scorecard` gives the
 wall minutes, minutes per state, gate passes, the checks left out with the seconds they saved, and the asks;
 `node scripts/orch-state.mjs scorecard --run <name> [--from <project>]` prints it for any run, read-only.
 

@@ -18,8 +18,8 @@ reviewer are model calls. This command starts no workflow and no agent; it runs 
   node scripts/run-plans.mjs --dry-run --run <run> --plans <NNN,NNN>
   ```
 
-- `WOULD START: no — …`: stop and show the reason (an open Critical Question, a lint problem, the preflight). Fix the
-  plan or the environment first; never edit around a refusal.
+- `WOULD START: no — …`: stop and show the reason (an open Critical Question, a lint problem, the preflight). Fix the plan or the environment first; never edit around a refusal.
+- A `PROBLEM readiness question` (tests, the manifest, a QA login): show it as one question with `approve` ⏎; on `approve` rerun the dry run and start with `--approve-asks` (a missing QA login is fixed in `.env` first; `docs/agent/orchestrator.md` → Questions up front).
 
 ## 2. Start the run at once
 
@@ -48,7 +48,7 @@ unless the Human asked to be asked.
 
 Read `.claude/orchestrator-runs/<run>/status.json` and print: merged, parked (each with its reason), skipped (each with
 its reason), `stopReason` when set, the report (`.claude/orchestrator-runs/<run>.md`) and `calls.csv` beside the status
-file; every stop is in `status.json` `stops[]`; each `make this a default?` line of the run notes with its `default yes <id>` ⏎ reply (`.claude/skills/product-defaults/SKILL.md`). **The merge is the Human's yes, the work is yours.** Never hand the Human commands to type: end with one line, `merge it` ⏎. Only on that reply (or merges pre-approved): `gh pr create --base main --head orch/<run> --body-file .claude/orchestrator-runs/<run>.md`, wait for its checks, fix a failing one per `docs/agent/pr-check-fix-loop.md` (2 rounds, on the run branch), then `gh pr merge <n> --merge` (the merge guard checks the yes and the checks; no dialog). Never merge without that yes, never push to `main`.
+file; every stop is in `status.json` `stops[]`; each `make this a default?` line of the run notes with its `default yes <id>` ⏎ reply (`.claude/skills/product-defaults/SKILL.md`). **The merge is the Human's yes, the work is yours.** Never hand the Human commands to type: end with one line, `merge it` ⏎. Only on that reply (or merges pre-approved): `gh pr create --base main --head orch/<run> --body-file .claude/orchestrator-runs/<run>.md`, wait for its checks (jobs that never started for lack of Actions budget, or CI switched here per `local-ci.mjs --which`: `node scripts/local-ci.mjs --pr <n>` in the run's merge folder, `docs/agent/local-ci.md`), fix a failing one per `docs/agent/pr-check-fix-loop.md` (2 rounds, on the run branch), then `gh pr merge <n> --merge` (the merge guard checks the yes and the checks; no dialog). Never merge without that yes, never push to `main`.
 
 ## 5. The cards — without being asked
 
