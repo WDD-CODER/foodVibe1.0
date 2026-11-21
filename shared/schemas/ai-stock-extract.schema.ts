@@ -31,11 +31,16 @@ export const stockExtractModelAnswerSchema = z.object({
   )
 })
 
+/** Plan 655: the parts of a count line the server found missing — the screen asks for exactly these. */
+export type StockExtractMissing = 'product' | 'amount' | 'unit'
+
 /** Plan 651: `unit` is null with `unitNeedsFix` when the spoken unit is not one the product has (`spokenUnit` keeps the word). */
 export type StockExtractLine = {
   productId: string
   quantity: number
   unit: string | null
+  /** Plan 655: empty for a full line; a line with any missing part is never counted. */
+  missing?: StockExtractMissing[]
   unitNeedsFix?: boolean
   /** Plan 654: no unit was said or found in the text — the person picks one; never the base unit. */
   unitMissing?: boolean
@@ -48,6 +53,10 @@ export type StockExtractCandidate = { productId: string; nameHebrew: string }
 export type StockExtractUnmatched = {
   spoken: string
   status?: StockExtractStatus
+  /** Plan 655: the parts still to ask for (product, amount, unit). */
+  missing?: StockExtractMissing[]
+  /** Plan 655: the product, when it is known and only the amount or the unit is missing. */
+  productId?: string
   quantity?: number
   unit?: string
   /** Plan 651: a unit word that is not on the unit list, kept as said. */

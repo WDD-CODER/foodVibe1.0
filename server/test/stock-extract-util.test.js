@@ -2,6 +2,7 @@
 /** Plans 637 and 648 - the pure rules of the stock extract: unit list, the server name match, the kept ratio. */
 const {
   STOCK_EXTRACT_SYSTEM_PROMPT, unitList, userPart, cleanStockLines, stockKeptRatio,
+  unitVocabulary, buildUnitVocabulary, unitKeyOf, checkLine,
 } = require('../utils/stock-extract')
 const { unitRatesFrom } = require('../generated/schemas/units/to-base')
 
@@ -10,7 +11,12 @@ const flour = { _id: 'flour', nameHebrew: 'קמח', baseUnit: 'kg', purchaseOpti
 const tomato = { _id: 'tomato', nameHebrew: 'עגבניות', baseUnit: 'kg', purchaseOptions: [{ unitSymbol: 'crate', conversionRate: 10 }] }
 const products = [flour, tomato]
 const units = ['kg', 'liter', 'crate']
-const clean = (lines, list = products) => cleanStockLines({ lines }, list, units, rates)
+/** The older cases compare the answer without `missing` (plan 655 tests it in its own block at the end). */
+const bare = out => out && {
+  lines: out.lines.map(({ missing, ...l }) => l),
+  unmatched: out.unmatched.map(({ missing, productId, ...u }) => u),
+}
+const clean = (lines, list = products) => bare(cleanStockLines({ lines }, list, units, rates))
 const entry = (spoken, quantity, unit) => ({ spoken, quantity, unit })
 
 describe('unitList and userPart', () => {
@@ -32,7 +38,7 @@ describe('unitList and userPart', () => {
 })
 
 describe('plan 654: the unit is read from the text, never guessed', () => {
-  const withText = (text, lines, list = products) => cleanStockLines({ lines }, list, units, rates, new Set(), text)
+  const withText = (text, lines, list = products) => bare(cleanStockLines({ lines }, list, units, rates, new Set(), text))
   const eggplant = { _id: 'eggplant', nameHebrew: 'חציל', baseUnit: 'gram', purchaseOptions: [] }
 
   it('(a) a unit the model dropped is read from the text and kept as said', () => {
@@ -110,7 +116,7 @@ describe('cleanStockLines', () => {
     expect(out.unmatched).toEqual([
       { spoken: 'banana', status: 'unmatched', quantity: 1, unit: 'kg' },
       { spoken: 'חמוצים', status: 'unmatched', quantity: 2 },
-      { spoken: 'קמח', status: 'unmatched', candidates: flourCandidate },
+      { spoken: 'קמח', status: 'unmatched', unit: 'kg', candidates: flourCandidate },
       { spoken: 'banana', status: 'unmatched', quantity: 1, spokenUnit: 'bucket' },
     ])
   })
@@ -234,5 +240,80 @@ describe('stockKeptRatio', () => {
     expect(stockKeptRatio(draft, { lines: [line('flour', 4), line('tomato', 3), line('rice', 1)] })).toBe(1)
     const third = { lines: [line('a', 1), line('b', 1), line('c', 1)] }
     expect(stockKeptRatio(third, { lines: [line('a', 1)] })).toBe(0.3333)
+  })
+})
+
+describe('plan 655: units learned from the app, every line checked for product + amount + unit', () => {
+  const dictionaryUnits = { kg: 'ק"ג', carbord: 'קרטון', handful: undefined }
+  /** A fake db: the unit terms and the override docs. */
+  const fakeDb = (terms, overrideDocs) => ({
+    collection: name => ({
+      find: () => ({ toArray: async () => (name === 'taxonomyTerms' ? terms : overrideDocs) }),
+    }),
+  })
+  const req = { user: { userId: 'u1', businessId: 'b1' } }
+  const parsley = { _id: 'parsley', nameHebrew: 'פטרוזיליה', baseUnit: 'gram', purchaseOptions: [{ unitSymbol: 'handful', conversionRate: 30 }] }
+
+  it('(a) one entry per unit: key, dictionary name, global and user override names, built-in spoken forms', async () => {
+    const db = fakeDb(
+      [{ key: 'carbord' }, { key: 'handful' }],
+      [{ userId: 'u1', items: { handful: 'חופן' } }, { userId: '__global__', items: { carbord: 'ארגז' } }],
+    )
+    const vocab = await unitVocabulary(db, req, [], dictionaryUnits)
+    const byKey = Object.fromEntries(vocab.map(e => [e.key, e.names]))
+    expect(byKey.kg).toEqual(expect.arrayContaining(['ק"ג', 'קילו']))
+    expect(byKey.gram).toEqual(expect.arrayContaining(['גרם', 'גרמים']))
+    expect(byKey.liter).toEqual(expect.arrayContaining(['ליטר', 'ליטרים']))
+    expect(byKey.unit).toEqual(expect.arrayContaining(['יחידה', 'יחידות']))
+    expect(byKey.carbord).toEqual(expect.arrayContaining(['קרטון', 'ארגז']))
+    expect(byKey.handful).toEqual(['חופן'])
+    // Spoken-only words no unit has a name for: known as unit words, never a key.
+    const spokenOnly = vocab.filter(e => e.spokenOnly).map(e => e.key)
+    expect(spokenOnly).toEqual(expect.arrayContaining(['שק', 'חבילה', 'מגש']))
+    expect(spokenOnly).not.toContain('ארגז')
+    expect(spokenOnly).not.toContain('קרטון')
+    for (const word of ['ארגזים', 'קרטונים', 'קילו', 'ק"ג', 'גרמים', 'ליטרים', 'יחידות', 'שקים', 'חבילות', 'מגשים']) {
+      expect(buildUnitVocabularyHas(vocab, word)).toBe(true)
+    }
+  })
+
+  const buildUnitVocabularyHas = (vocab, word) => unitKeyOf(vocab, word) !== undefined || vocab.some(e => e.spokenOnly && (e.key === word || `${e.key.slice(0, -1)}ות` === word || `${e.key}ים` === word))
+
+  it('(b) a unit added as «חופן» is read as «2 חופן» and «2 חופנים», and counts at once', async () => {
+    const vocab = await unitVocabulary(fakeDb([{ key: 'handful' }], [{ userId: 'u1', items: { handful: 'חופן' } }]), req, [], {})
+    expect(unitKeyOf(vocab, 'חופן')).toBe('handful')
+    expect(unitKeyOf(vocab, 'חופנים')).toBe('handful')
+    for (const text of ['2 חופן פטרוזיליה', '2 חופנים פטרוזיליה']) {
+      const out = cleanStockLines({ lines: [entry('פטרוזיליה', 2, null)] }, [parsley], vocab, rates, new Set(), text)
+      expect(out.lines).toEqual([{ productId: 'parsley', quantity: 2, unit: 'handful', missing: [] }])
+    }
+  })
+
+  it('(c) the model gets each unit as key with its Hebrew names, and its Hebrew answer maps back to the key', async () => {
+    const vocab = await unitVocabulary(fakeDb([{ key: 'handful' }], [{ userId: 'u1', items: { handful: 'חופן' } }]), req, [], {})
+    const text = userPart(vocab, '2 חופנים')
+    expect(text).toContain('"handful" ("חופן")')
+    expect(text).toMatch(/"kg" \(.*"קילו"/)
+    const out = cleanStockLines({ lines: [entry('פטרוזיליה', 2, 'חופנים')] }, [parsley], vocab, rates)
+    expect(out.lines[0]).toMatchObject({ unit: 'handful', missing: [] })
+  })
+
+  it('(d) checkLine marks each missing part; an unknown unit word keeps spokenUnit', () => {
+    expect(checkLine({ productId: 'p', quantity: 2, unit: 'kg' })).toEqual({ missing: [] })
+    expect(checkLine({ productId: 'p', quantity: 2, unit: null })).toEqual({ missing: ['unit'] })
+    expect(checkLine({ productId: 'p', quantity: undefined, unit: 'kg' })).toEqual({ missing: ['amount'] })
+    expect(checkLine({ productId: undefined, quantity: 2, unit: 'kg' })).toEqual({ missing: ['product'] })
+    expect(checkLine({ productId: undefined, quantity: undefined, unit: undefined }).missing).toEqual(['product', 'amount', 'unit'])
+    expect(checkLine({ productId: 'p', quantity: 1, unit: undefined, spokenUnit: 'bucket' })).toEqual({ missing: ['unit'], spokenUnit: 'bucket' })
+  })
+
+  it('every answered line and entry carries missing: «3 עגבניות» asks the unit, «ארגז עגבניות» the amount, an unknown name the product', () => {
+    const run = (text, line) => cleanStockLines({ lines: [line] }, products, ['kg', 'crate'], rates, new Set(), text)
+    expect(run('3 עגבניות', entry('עגבניות', 3, null)).lines).toEqual([{ productId: 'tomato', quantity: 3, unit: null, unitMissing: true, missing: ['unit'] }])
+    const noAmount = run('ארגז עגבניות', entry('עגבניות', null, null)).unmatched[0]
+    expect(noAmount).toMatchObject({ productId: 'tomato', missing: ['amount', 'unit'] })
+    expect(run('2 קילו משהו', entry('משהו', 2, 'קילו')).unmatched[0]).toMatchObject({ missing: ['product'] })
+    expect(run('banana', entry('banana', null, null)).unmatched[0].missing).toEqual(['product', 'amount', 'unit'])
+    expect(run('3 ארגז עגבניות', entry('עגבניות', 3, null)).lines[0]).toMatchObject({ missing: ['unit'], spokenUnit: 'ארגז' })
   })
 })
