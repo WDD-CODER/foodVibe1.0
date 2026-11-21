@@ -14,7 +14,9 @@ import picomatch from 'picomatch'
 
 /** A diff that touches one of these selects every suite: the settings and the dependencies every suite reads. */
 export const ALL_SELECT_FILES = ['kit.config.json', '.kit/config.json', 'package.json', 'package-lock.json', 'pnpm-lock.yaml', 'yarn.lock']
-const SKIP_DIRS = new Set(['.git', 'node_modules', '.claude'])
+const SKIP_DIRS = new Set(['.git', 'node_modules'])
+/** Run folders under .claude/: written while a run goes (the cache file itself), never a command's input. */
+const RUN_DIRS = new Set(['.claude/orchestrator-runs', '.claude/sessions', '.claude/worktrees'])
 const norm = (p) => String(p).replace(/\\/g, '/').replace(/^\.\//, '')
 
 /** { command, touches } of a ciMirror entry (touches null for a plain string), or null for a shape that is neither. */
@@ -36,7 +38,7 @@ export function matchedFiles(root, touches) {
     try { names = readdirSync(join(root, rel), { withFileTypes: true }) } catch { return }
     for (const d of names) {
       const p = rel ? `${rel}/${d.name}` : d.name
-      if (d.isDirectory()) { if (!SKIP_DIRS.has(d.name)) walk(p) } else if (m(p)) out.push(p)
+      if (d.isDirectory()) { if (!SKIP_DIRS.has(d.name) && !RUN_DIRS.has(p)) walk(p) } else if (m(p)) out.push(p)
     }
   }
   walk('')
@@ -67,7 +69,7 @@ export function runsInside(command, testScript) {
  * orchestrator.suiteTouches entries ({ command, touches }); `testCommand` is the gate's test script and `planOwn` the
  * plan's own [auto] commands, the only commands a suite entry applies to.
  */
-export function selectGate({ commands = [], changed = [], ownCommands = [], testScript = '', cache = {}, root = null, suites = [], testCommand = '', planOwn = [] } = {}) {
+export function selectGate({ commands = [], changed = [], ownCommands = [], testScript = '', cache = {}, root = null, suites = [], testCommand = '', planOwn = [], buildCommand = '', lintCommand = '' } = {}) {
   const files = (Array.isArray(changed) ? changed : []).map(norm)
   const own = new Set((ownCommands ?? []).map((c) => String(c).trim()))
   const everything = files.some((f) => ALL_SELECT_FILES.includes(f))
@@ -108,7 +110,8 @@ export function selectGate({ commands = [], changed = [], ownCommands = [], test
   // already, so a decision here only adds them to `skipped` (with its line) or records their cache key. The test script
   // is skipped when no changed file matches; a plan-own command is never skipped by globs (its Done-when must pass once
   // on this plan's code), only reused from a pass on the same files. A settings or dependency change runs both.
-  const owned = new Set((planOwn ?? []).map((c) => String(c).trim()))
+  // The build and lint commands are treated like a plan-own command: reused only from a pass on the same files.
+  const owned = new Set([...(planOwn ?? []), buildCommand, lintCommand].map((c) => String(c).trim()).filter(Boolean))
   for (const e of (Array.isArray(suites) ? suites : []).map(entryOf).filter((x) => x?.touches)) {
     const { command, touches } = e
     const isOwn = owned.has(command)

@@ -49,6 +49,7 @@ import { review, blocking, problemLine } from './lib/plan-review.mjs'
 import { mergePlan, orchState } from './lib/plan-merge.mjs'
 import { runOrder, unitsOf, afterPark, blockedBy } from './lib/run-order.mjs'
 import { planBranch, planBranchProblem, runNameProblem, startTier, humanOnlyAsk, ASK_KINDS, askCard, ASK_ID_RE, failingLines, NO_PLAN_FILE_NOTE } from './lib/orch-run.mjs'
+import { readinessAsks } from './lib/readiness-asks.mjs'
 import { ensureEnv, failingTree, depFolders, retryGit, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -411,6 +412,7 @@ function parseArgs(argv) {
     if (k === '--run') o.run = val()
     else if (k === '--plans') o.plans = String(val() ?? '').split(',').map((s) => s.trim()).filter(Boolean)
     else if (k === '--dry-run') o.dryRun = true
+    else if (k === '--approve-asks') o.approveAsks = true
     else if (k === '--concurrency') o.concurrency = Number(val())
     else if (k === '--db') o.db = val()
     else if (k === '--claude') o.claude = val()
@@ -511,7 +513,13 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const created = files.filter((f) => !existsSync(join(ROOT, f)) && !missing.includes(f))
   const onBranch = !stale && git(ROOT, 'rev-parse', '--verify', '--quiet', `refs/heads/${branch}`).status === 0 ? git(ROOT, 'diff', '--name-only', '--no-renames', `${base}...${branch}`).out.split('\n').filter(Boolean) : []
   const gateFiles = [...new Set([...created, ...onBranch, ...plannedTestPaths(text)])].filter((f) => f !== path && !f.startsWith('.claude/sessions/'))
-  const outOfScope = testsOutOfScope(text, gateFiles)
+  // Questions up front: the tests and the manifest the plan will need and the QA login of a [ui] plan, asked once here
+  // (docs/agent/orchestrator.md). `--approve-asks` is the Human's `approve`: the paths go into the plan's scope at the start.
+  const ra = readinessAsks({ root: ROOT, planText: text, envText: existsSync(join(ROOT, '.env')) ? readFileSync(join(ROOT, '.env'), 'utf8') : null })
+  lines.push(...ra.lines)
+  problems.push(...ra.problems)
+  if (ra.paths.length && !opts?.approveAsks) problems.push(`readiness question (${ra.question})`)
+  const outOfScope = testsOutOfScope(text, gateFiles).filter((x) => !(opts?.approveAsks && ra.paths.includes(x.file)))
   for (const r of outOfScope) problems.push(`test file gate: ${r.reason}; add this line to the scope block: ${r.file}`)
   // A scope line that is only a test's file name matches nothing the plan means (scope-check --tests says `bad`).
   for (const g of bareTestLines(extractScopeGlobs(text.replace(/\r\n/g, '\n')) ?? [])) problems.push(`scope line: ${bareLineReason(g)}`)
@@ -523,7 +531,7 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const checks = gateCommands({ ...gateOpts, ciMirror: mirror, extra: own })
   // `always` = what runs whatever the diff changed (the project checks and the plan's own [auto] commands); `mirror` = what the diff picks from.
   const always = [...gateCommands({ ...gateOpts, extra: own })]
-  return { nnn, path, mirror, always, own, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
+  return { nnn, path, askedPaths: opts?.approveAsks ? ra.paths : [], mirror, always, own, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
 }
 
 /**
@@ -822,6 +830,14 @@ async function main() {
     return 1
   }
   const mergeFolder = init.mergeFolder
+  // The Human's `approve` of the readiness question (--approve-asks): its paths go into each plan's scope block on the
+  // run branch (one commit per plan, like an answered scope ask) before any builder starts.
+  for (const nnn of all) {
+    const paths = lint[nnn].askedPaths ?? []
+    if (!paths.length) continue
+    const s = extendScope({ mergeFolder, runBranch: RUN_BRANCH, planPath: lint[nnn].path, paths, id: `${nnn}-readiness`, run: RUN, nnn })
+    say(s.ok ? `RUN_PLANS: plan ${nnn} — scope extended by the readiness question: ${s.added.join(', ') || 'already listed'}` : `RUN_PLANS: plan ${nnn} — the readiness scope lines could not be written: ${s.error}`)
+  }
   const runDir = join(ROOT, '.claude', 'orchestrator-runs', RUN)
   const guardSettings = builderSettings(runDir)
   const csv = join(runDir, 'calls.csv')
@@ -1569,6 +1585,11 @@ function testCommandOf() {
   const s = COMMANDS.testCi || COMMANDS.test
   return typeof s === 'string' && s ? `${PM} run ${s}` : ''
 }
+/** The gate's command for a project script (`<pm> run <script>`), as gateCommands writes it, or ''. */
+function scriptCommandOf(key) {
+  const s = COMMANDS[key]
+  return typeof s === 'string' && s ? `${PM} run ${s}` : ''
+}
 /**
  * A plan's gate list for the diff in `folder`: the project checks and the plan's own commands always, the ciMirror suites
  * its diff touches (a suite that npm run test already runs, or that passed on the same files earlier in this run, is
@@ -1578,7 +1599,7 @@ function selectedChecks(l, folder, run, runBranch) {
   const mirror = Array.isArray(l.mirror) ? l.mirror : []
   if (!mirror.length && !SUITES.length) return { checks: l.checks, lines: [], keys: {} }
   const changed = git(folder, 'diff', '--name-only', '--no-renames', `origin/${runBranch}...HEAD`).out.split('\n').map((f) => f.trim()).filter(Boolean)
-  const sel = selectGate({ commands: mirror, changed, ownCommands: l.always ?? [], testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, run)), root: folder, suites: SUITES, testCommand: testCommandOf(), planOwn: l.own ?? [] })
+  const sel = selectGate({ commands: mirror, changed, ownCommands: l.always ?? [], testScript: testScriptBody(), cache: readCache(cacheFileOf(ROOT, run)), root: folder, suites: SUITES, testCommand: testCommandOf(), planOwn: l.own ?? [], buildCommand: scriptCommandOf('build'), lintCommand: scriptCommandOf('lint') })
   const drop = new Set(sel.skipped)
   return { checks: l.checks.filter((c) => !drop.has(c)), lines: sel.lines, keys: sel.keys }
 }

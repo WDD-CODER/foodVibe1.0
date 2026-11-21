@@ -4,7 +4,11 @@
  * A `gh pr merge` runs only when both hold:
  *   1. the Human's own latest chat message says yes — `merge it`, `merge <n>` / `merge #<n>`, just `merge`, or
  *      `/ship … merge` — or any Human message of the session says "merges pre-approved";
- *   2. every check on the PR passed (`gh pr checks <pr> --json name,bucket`: each bucket pass or skipping).
+ *   2. every check on the PR passed (`gh pr checks <pr> --json name,bucket`: each bucket pass or skipping) — or every
+ *      failing one is a job GitHub never started for lack of Actions budget and the `local-ci` status passed on the
+ *      head commit with this PC's receipt for it (scripts/local-ci.mjs, docs/agent/local-ci.md). A passing `local-ci`
+ *      among green checks needs that receipt too; with CI switched to this PC (`local-ci.mjs --use local`) a PR with no
+ *      checks is refused with the command to run instead of the dialog.
  * Otherwise it is refused with one `MERGE_GUARD:` line and no dialog. What it cannot read (no transcript, a transcript
  * format it does not know, gh failing, a PR with no checks) falls back to the permission dialog (`ask`): a failure never
  * merges and never blocks forever. With the yes and green checks, a merge chained to another command (only a leading
@@ -19,6 +23,12 @@
  */
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { prHead, commitBudget, readReceipt, localCiCovers, repoWorkflows, ciMode, STATUS_CONTEXT } from './local-ci.mjs'
+
+/** The project folder this guard belongs to (scripts/lib/ → ..): where scripts/local-ci.mjs writes its receipts. */
+const KIT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
 const VALUE_FLAGS = new Set(['-R', '--repo', '-b', '--body', '-F', '--body-file', '-t', '--subject', '-A', '--author-email', '--match-head-commit'])
 
@@ -118,10 +128,22 @@ export function checksVerdict(rows) {
 const ask = (reason) => ({ decision: 'ask', reason: `MERGE_GUARD: ${reason} — asking instead` })
 
 /**
+ * The local-CI stand-in for failing rows: null when no job was stopped by the Actions budget (or GitHub cannot be read),
+ * else localCiCovers() — { ok, why }.
+ */
+function localCiVerdict({ gh, pr, repoArgs, rows, root }) {
+  const head = prHead(gh, pr, repoArgs)
+  if (!head) return null
+  const budget = commitBudget(gh, head.repo, head.sha, (n) => n !== STATUS_CONTEXT)
+  if (!budget?.blocked.length) return null
+  return localCiCovers({ rows, budget, receipt: readReceipt(root, head.sha), sha: head.sha })
+}
+
+/**
  * The decision for one hook input: { decision: 'allow' | 'deny' | 'ask', reason } or null (not a merge).
  * `gh(args)` returns { status, stdout, stderr }.
  */
-export function decide({ input, transcriptText, gh }) {
+export function decide({ input, transcriptText, gh, root = KIT_ROOT }) {
   if (input?.tool_name && input.tool_name !== 'Bash') return null
   const targets = mergeTargets(input?.tool_input?.command)
   if (!targets.length) return null
@@ -145,8 +167,26 @@ export function decide({ input, transcriptText, gh }) {
       return ask(`cannot read the checks of PR ${pr}${c.stderr ? ` (${String(c.stderr).trim().split('\n')[0]})` : ''}`)
     }
     const v = checksVerdict(parsed)
-    if (v.ok === null) return ask(`PR ${pr} reports no checks`)
-    if (!v.ok) return { decision: 'deny', reason: `MERGE_GUARD: PR ${pr} check ${v.name} is ${v.bucket} — merge after every check passed` }
+    if (v.ok === null) {
+      // CI switched to this PC (every workflow of the repo off): the local run is the check, so ask for it, no dialog.
+      if (ciMode(repoWorkflows(gh, root, repoArgs)) === 'local') return { decision: 'deny', reason: `MERGE_GUARD: PR ${pr} has no checks and CI is switched to this PC — run node scripts/local-ci.mjs --pr ${pr} first` }
+      return ask(`PR ${pr} reports no checks`)
+    }
+    if (v.ok && parsed.some((r) => r.name === STATUS_CONTEXT)) {
+      const head = prHead(gh, pr, repoArgs)
+      const local = head ? localCiCovers({ rows: parsed, receipt: readReceipt(root, head.sha), sha: head.sha }) : { ok: false, why: 'cannot read the head commit (gh pr view)' }
+      if (!local.ok) return { decision: 'deny', reason: `MERGE_GUARD: PR ${pr}: ${local.why}` }
+      first ??= { decision: 'allow', reason: `MERGE_GUARD: Human yes + ${v.count} checks passed on PR ${pr} (${local.why})` }
+      continue
+    }
+    if (!v.ok) {
+      // Jobs GitHub never started for lack of Actions budget count as passed only with a passing local run on this PC:
+      // the `local-ci` status on the head commit plus its receipt (scripts/local-ci.mjs, docs/agent/local-ci.md).
+      const local = localCiVerdict({ gh, pr, repoArgs, rows: parsed, root })
+      if (!local?.ok) return { decision: 'deny', reason: `MERGE_GUARD: PR ${pr} check ${v.name} is ${v.bucket} — ${local ? local.why : 'merge after every check passed'}` }
+      first ??= { decision: 'allow', reason: `MERGE_GUARD: Human yes + local CI on PR ${pr}: ${local.why}` }
+      continue
+    }
     first ??= { decision: 'allow', reason: `MERGE_GUARD: Human yes + ${v.count} checks passed on PR ${pr}` }
   }
   // An allow approves the whole Bash command: only one plain `gh pr merge` may get it (a leading `cd <plain path> &&`
