@@ -49,8 +49,6 @@ a line that is missing, and fits a phone row with a compact counted mark and an 
   the base amount, and a click opens a popover with it; (d) at 1200 px and above the row is as today.
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm --dir server run lint` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [ui] At 375 px and 1000 px on `/inventory/count` each row shows the name, the amount, the unit and a checkbox on
-  one line, and tapping the base-amount control shows the base amount inside the screen (`e2e/ui/655-1.spec.ts`).
 - [human] Dandan adds a unit «חופן» to a product, then types «2 חופנים פטרוזיליה» in the count: the row reads 2 חופן;
   «3 עגבניות» asks which unit; «ארגז עגבניות» asks how many. On a phone the counted mark is a small checkbox and the
   base amount opens on tap.
@@ -78,11 +76,11 @@ src/app/pages/inventory/components/stock-count/**
 src/app/pages/inventory/components/stock-count/stock-count.component.spec.ts
 src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.spec.ts
 public/assets/data/dictionary.json
-e2e/ui/655-1.spec.ts
 src/app/pages/breadcrumbs.md
 server/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -160,7 +158,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A1: Know every unit by the words people say — the vocabulary from the units and the dictionary names, the model's unit list, the mapping back to the key, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, server/test/stock-extract-util.test.js
 - [ ] A2: Check each line for product, amount and unit — `checkLine`, `missing` on the answer, the route test — server/utils/stock-extract.js, shared/schemas/ai-stock-extract.schema.ts, server/test/ai-stock-extract.test.js
 - [ ] A3: Ask only for the missing part on the draft line — the questions, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
-- [ ] A4: Fit the row below desktop — the counted checkbox, the base amount tooltip and popover, the screen check, then the Done-when commands in order — src/app/pages/inventory/components/stock-count/**, e2e/ui/655-1.spec.ts, docs/brain/inventory.md
+- [ ] A4: Fit the row below desktop — the counted checkbox, the base amount tooltip and popover, then the Done-when commands in order — src/app/pages/inventory/components/stock-count/**, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 654 (its text fallback and unit question are extended, not replaced).
@@ -178,3 +176,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   speech into product / amount / unit, but only a plain check against the business's own products and units can say
   for sure that a part is missing, and that check must never guess.
 - decided: below desktop = `$break-desktop` (1200 px) — why: Dandan said "below the desktop breakpoint".
+- decided: no `[ui]` screen script in this plan — why: kit v3.8.0 holds a `[ui]` plan until the QA login
+  (`ORCH_QA_USER` / `ORCH_QA_PASSWORD`) is in the main folder's `.env`, which only Dandan can add; the narrow-width
+  cases are in the component specs and in his phone check.
