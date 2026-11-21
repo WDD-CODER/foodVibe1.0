@@ -100,6 +100,7 @@ append the path to the scope block above and retry.
 
 - the unit choice on a row — family: chip — rung: 1 — why: `c-chip--toggle` per unit, as the product choice.
 - the add-unit option — family: search-combobox — rung: 2 — why: the add-option row → `UnitRegistryService.openUnitCreator`.
+- `.stock-count__unit-choice` — a wrap rule for the chip group above, in the page's own layer — family: chip — rung: 1
 - reading the unit word from the text — family: helpers — rung: 3 — why: extend `stock-extract.js` beside the existing
   unit-key aliases.
 
