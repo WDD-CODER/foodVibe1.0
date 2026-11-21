@@ -75,6 +75,10 @@ src/app/core/services/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+src/app/pages/inventory/components/stock-count/stock-count.component.ts
+src/app/shared/partial-cost-badge/partial-cost-badge.component.ts
+src/app/core/components/header/header.component.spec.ts
+scripts/test/breakpoints-no-literals.test.mjs
 ```
 
 `src/styles.scss` may be rewritten at its top (the breakpoint names) and in its `@media` lines: Dandan asked for the
