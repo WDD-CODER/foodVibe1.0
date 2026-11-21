@@ -106,6 +106,8 @@ append the path to the scope block above and retry.
   cut down to one set.
 - the browser breakpoint constants — family: helpers — rung: 3 — why: one new pure file `breakpoints.ts` replaces six
   copies; no service.
+- breakpoints (`src/app/core/utils/breakpoints.ts`) — family: helpers — rung: 3 — why: the new shared util above, by
+  its file name; the component styles get the same names from `src/app/core/styles/_breakpoints.scss`.
 
 ## Defaults
 
@@ -153,10 +155,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Make one set of names — the four names, the browser constants file and its spec, the six browser copies — src/styles.scss, src/app/core/utils/breakpoints.ts, src/app/core/utils/breakpoints.spec.ts, src/app/core/utils/panel-preference.util.ts, src/app/core/utils/collapsible-categories.util.ts, src/app/core/utils/desktop-detection.util.ts, src/app/shared/column-carousel/column-carousel-swipe.ts, src/app/pages/cook-view/cook-view.page.ts, src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts
-- [ ] A2: Move the shared and core pieces to the names — every `@media` under src/app/shared and src/app/core and src/app/appRoot, their debt entries — src/**/*.scss, _shared/debt-baseline.json
-- [ ] A3: Move every page to the names — every `@media` under src/app/pages, their debt entries, the count's 1023 — src/**/*.scss, _shared/debt-baseline.json
-- [ ] A4: Remove the old names and prove it at three widths — the old names gone, the screen spec, then the Done-when commands in order — src/styles.scss, e2e/ui/656-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Make one set of names — the four names, the browser constants file and its spec, the six browser copies — src/styles.scss, src/app/core/utils/breakpoints.ts, src/app/core/utils/breakpoints.spec.ts, src/app/core/utils/panel-preference.util.ts, src/app/core/utils/collapsible-categories.util.ts, src/app/core/utils/desktop-detection.util.ts, src/app/shared/column-carousel/column-carousel-swipe.ts, src/app/pages/cook-view/cook-view.page.ts, src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts
+- [x] A2: Move the shared and core pieces to the names — every `@media` under src/app/shared and src/app/core and src/app/appRoot, their debt entries — src/**/*.scss, _shared/debt-baseline.json
+- [x] A3: Move every page to the names — every `@media` under src/app/pages, their debt entries, the count's 1023 — src/**/*.scss, _shared/debt-baseline.json
+- [x] A4: Remove the old names and prove it at three widths — the old names gone, the screen spec, then the Done-when commands in order — src/styles.scss, e2e/ui/656-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 655 (the count page's narrow rules land first).
@@ -174,3 +176,30 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   and the usual device split.
 - decided: run on its own run branch, served in its own slot, merged into staging only after Dandan's check — why:
   Dandan, "in a separate worktree cause this can get things messed up".
+- round 2 (fresh judgment builder, from base 10d71ab): the review stop of round 1 was hand-typed `@media` widths left in
+  `src/styles.scss` (the default's check excludes that file). Every `@media` width in `src/**/*.scss`, styles.scss
+  included, now uses one of the four names; `scripts/test/breakpoints-no-literals.test.mjs` asserts it for
+  styles.scss too.
+- scope extended (ask 656-1, approved by the Human): stock-count.component.ts, partial-cost-badge.component.ts,
+  header.component.spec.ts, scripts/test/breakpoints-no-literals.test.mjs.
+- A1: `src/styles.scss` top holds only `$break-phone-max` 767 / `$break-tablet-min` 768 / `$break-tablet-max` 1023 /
+  `$break-desktop-min` 1024; the KNOWN COLLISION note is gone. Component styles cannot see global Sass names, so
+  `src/app/core/styles/_breakpoints.scss` holds the same four and each component sheet `@use`s it (the per-file
+  `$break-mobile: 768px // mirrors…` copies, `$cv-*`, `$cc-break`, `$phone-break`, `$panel-overlay-break`,
+  `$team-/settings-break-mobile`, `$break-tabbar`, `$above-mobile`, `$break-notes`, `$break-meter-full` are removed).
+  The unused `--break-sm`/`--break-md` CSS tokens became `--bp-*` from the four names (read by breakpoints.spec.ts).
+  `breakpoints.ts` holds PHONE_MAX, TABLET_MAX, PHONE_QUERY, TABLET_DOWN_QUERY, DESKTOP_QUERY; the six browser copies
+  plus the stock count's NARROW_QUERY and the badge's MOBILE_QUERY import it.
+- A2/A3: widths mapped per the plan: ≤900 max → `$break-phone-max`, 621/768/769/900 min → `$break-tablet-min`,
+  1023/1100/1200 max → `$break-tablet-max`, 1024/1200 min → `$break-desktop-min`. The header's 621–767 rule (brand
+  name hidden) became an empty range (that width is now phone: no top bar) and was removed. The stock count's 655
+  compact row switches at 1023 (TABLET_DOWN_QUERY). Three blocks whose only change was the media line were already
+  twins of blocks elsewhere; kit-checks flagged them as added copies, so they are written in an equal form
+  (`grid-area`, `var(--tap)`). Comments naming 620/621 updated.
+- A4: the 1699px cap of the desktop density rule is a wide-screen cap on the root font size, which no container
+  min-width can replace; it now applies from `$break-desktop-min` on every larger screen too (decision logged).
+  `e2e/ui/656-1.spec.ts`: 5 pages × 375/800/1280, no horizontal scroll, rows on one line, header chrome visible,
+  one screenshot each — written, not run (no app in the worktree). docs/brain/inventory.md regenerated: no change
+  (its line comes from `_shared/product-defaults.md`).
+- header.component.spec: the karma frame is below 768px, so the plan-645 avatar test now opens the bottom bar's
+  profile and hit-tests its sign-out on a phone width; the top-bar avatar from tablet up.

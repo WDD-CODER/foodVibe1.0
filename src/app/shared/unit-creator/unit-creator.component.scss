@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 /* When the unit dropdown is open, stack the form body above the actions so options are clickable. */
 :host .c-modal-body:has(.custom-select-wrap.open) {
   position: relative;
@@ -37,7 +38,7 @@
   text-align: center;
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .unit-creator-formula-grid {
     grid-template-columns: 1fr 1fr;
 

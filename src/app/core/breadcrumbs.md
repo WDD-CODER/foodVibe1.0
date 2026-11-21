@@ -20,6 +20,8 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 | `validators/item.validators.ts` | Duplicate-name checks for forms | duplicateNameValidator, duplicateEntityNameValidator |
 | `engine/` | Pure quantity and cost engine for event lists (plan 433): raw/prep lines, dish and event cost, rounding helpers; its shared 04.1 test fixture lives in the testing folder | computeEventPlan, EventPlanService, chooseSupplier, roundPortions, formatQty, formatMoney, computePortions |
 | `utils/returning-visitor.util.ts` | `fv_returning` device mark: has someone signed in here before (set on sign-in, cleared on logout) | markReturningVisitor, clearReturningVisitor, isReturningVisitor |
+| `utils/breakpoints.ts` | The one breakpoint set for the browser code (plan 656): phone ≤767, tablet ≤1023, desktop ≥1024 | PHONE_MAX, TABLET_MAX, PHONE_QUERY, TABLET_DOWN_QUERY, DESKTOP_QUERY |
+| `styles/` | Sass partials component styles `@use` (plan 656): `styles/_breakpoints.scss`, the same four names as the top of `src/styles.scss` | $break-phone-max, $break-tablet-min, $break-tablet-max, $break-desktop-min |
 | `utils/` | Pure helpers: auth, export, lists, quantities | require-auth.util, auth-crypto, export.util, list-state.util, panel-preference.util, quantity-step.util, filter-starts-with.util, saving-state.util, unsaved-changes, event-stage-ui.util, logistics-summary.util (plan 521: client summary text, open items), product-name-match.util (plan 463: plural/spelling-forgiving product lookup) |
 
 ## Architecture Context

@@ -55,6 +55,7 @@ import {
   type StockAiUnmatched
 } from './stock-ai-draft/stock-ai-draft.component'
 import type { StockExtractLine } from '@schemas/ai-stock-extract.schema'
+import { TABLET_DOWN_QUERY } from '@utils/breakpoints'
 
 interface RowState {
   counted: boolean
@@ -89,8 +90,8 @@ const LINE_ERRORS = ['UNIT_NOT_CONVERTIBLE', 'UNKNOWN_PRODUCT', 'DUPLICATE_PRODU
 /** Plan 645: rows drawn at first and added per "show more" — a business has thousands of products. */
 const PAGE_SIZE = 50
 
-/** Plan 655: below `$break-desktop` (1200px) the row is compact: a small counted mark, the base amount on demand. */
-const NARROW_QUERY = '(max-width: 1199.98px)'
+/** Plans 655/656: below desktop (≤ `$break-tablet-max`, 1023px) the row is compact: a small counted mark, the base amount on demand. */
+const NARROW_QUERY = TABLET_DOWN_QUERY
 
 /** The base-amount popover: its text and where it sits (viewport coordinates, from `placeInViewport`). */
 interface BasePopover {

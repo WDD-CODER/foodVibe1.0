@@ -4166,6 +4166,18 @@
       "notes": "Unit tests for the Style QA sign-in wrapper (bearer header on API requests only)."
     },
     {
+      "path": "scripts/test/breakpoints-no-literals.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "src/styles.scss",
+        "src/app/core/styles/_breakpoints.scss",
+        "src/app/core/utils/breakpoints.ts"
+      ],
+      "notes": "Plan 656 (default one-breakpoint-set): the three copies of the breakpoint names stay equal; no typed width in any @media or .ts file."
+    },
+    {
       "path": "scripts/test/plan-close.test.mjs",
       "tier": "project",
       "action": "stay",

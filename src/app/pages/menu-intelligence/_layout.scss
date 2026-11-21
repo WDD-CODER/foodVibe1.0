@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 /* ============================================================
    Layout — Shell, grid containers
    ============================================================ */
@@ -32,7 +33,7 @@
 }
 
 // Phone density (2026-11-11): the menu paper starts higher and uses the full width.
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .menu-editor-shell {
     padding: 0.5rem 0.625rem 6rem;
   }

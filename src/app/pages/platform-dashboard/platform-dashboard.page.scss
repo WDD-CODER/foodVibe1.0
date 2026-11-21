@@ -1,5 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
-$break-desktop: 1200px; // mirrors src/styles.scss
+@use '../../core/styles/breakpoints' as *;
 
 @layer components.platform-dashboard {
   :host {
@@ -16,7 +15,7 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     margin-inline: auto;
     padding: var(--space-3);
 
-    @media (min-width: $break-mobile) {
+    @media (min-width: $break-tablet-min) {
       gap: var(--space-5);
 
       padding: var(--space-6);
@@ -29,11 +28,11 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
 
-    @media (min-width: $break-mobile) {
+    @media (min-width: $break-tablet-min) {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    @media (min-width: $break-desktop) {
+    @media (min-width: $break-desktop-min) {
       grid-template-columns: repeat(8, minmax(0, 1fr));
     }
   }
@@ -98,7 +97,7 @@ $break-desktop: 1200px; // mirrors src/styles.scss
       repeat(5, minmax(4.5rem, 0.8fr)) minmax(6rem, 1fr) minmax(12rem, 1.6fr) repeat(3, minmax(5rem, 0.8fr))
       minmax(4rem, 0.6fr) minmax(10rem, 1.4fr) minmax(9rem, 1.2fr) minmax(5.5rem, auto);
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       --platform-grid: minmax(7rem, 1fr) minmax(0, 1.4fr) 2.75rem;
     }
   }
@@ -166,7 +165,7 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 
     padding: var(--space-4);
 
-    @media (min-width: $break-mobile) {
+    @media (min-width: $break-tablet-min) {
       padding: var(--space-6);
     }
   }

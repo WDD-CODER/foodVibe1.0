@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 // ========================================================
 // PRODUCT FORM - DESIGN SYSTEM DNA
 // ========================================================
@@ -496,7 +497,7 @@
 // ========================================================
 
 // Tablet: two columns; an expanded optional field keeps its cell width and grows downward; scaling rows in two lines.
-@media (max-width: 900px) {
+@media (max-width: $break-phone-max) {
   .form-container .form-section {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -549,7 +550,7 @@
 }
 
 // Phone: one column, tighter padding, stacked scaling rows, wrapping actions.
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   :host {
     padding: var(--space-3);
   }
@@ -636,7 +637,7 @@
 }
 
 // Phone density (2026-11-11): the price and the base unit share a row; the title block is shorter.
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .form-container .form-header {
     margin-block-end: var(--space-3);
     padding-block-end: var(--space-3);
@@ -655,7 +656,6 @@
 }
 
 // ---- Plan 604: even option tiles ----
-$break-mobile: 768px; // mirrors src/styles.scss
 
 .form-container .form-section.form-section--optional > .product-field.collapsible-field {
   display: flex;
@@ -666,7 +666,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   .form-container .form-section.form-section--optional {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 

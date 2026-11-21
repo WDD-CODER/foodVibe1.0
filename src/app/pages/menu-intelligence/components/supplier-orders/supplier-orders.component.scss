@@ -1,6 +1,5 @@
+@use '../../../../core/styles/breakpoints' as *;
 @layer components.supplier-orders {
-  $break-mobile: 768px; // mirrors src/styles.scss
-
   .so-sheet {
     display: flex;
     flex-direction: column;
@@ -36,7 +35,7 @@
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
 
-    @media (min-width: $break-mobile) {
+    @media (min-width: $break-tablet-min) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
