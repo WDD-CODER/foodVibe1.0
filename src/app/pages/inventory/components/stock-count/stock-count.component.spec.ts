@@ -156,7 +156,12 @@ describe('StockCountComponent', () => {
     }
 
     it('(a) the base-amount column sits in the column carousel in the header and in every row', async () => {
-      await setup()
+      await setup([{ ...product('a', 'אורז'), baseUnit: 'gram' } as Product, product('b', 'קמח')])
+      ;(fixture.componentInstance as unknown as { setUnit(p: Product, u: string): void }).setUnit(
+        product('a', 'אורז'),
+        'kg'
+      )
+      await settle()
       expect(el().querySelector('app-column-carousel-header')).not.toBeNull()
       expect(rows().every((r) => r.querySelector('app-column-carousel-cell') !== null)).toBeTrue()
     })
@@ -181,7 +186,7 @@ describe('StockCountComponent', () => {
 
     it('(d) the header strip carries the headings in one row; the old second band is gone', async () => {
       await setup()
-      expect(el().querySelectorAll('.c-grid-header-cell').length).toBeGreaterThanOrEqual(5)
+      expect(el().querySelectorAll('.c-grid-header-cell').length).toBeGreaterThanOrEqual(4)
       expect(el().querySelector('.stock-count__base-head')).toBeNull()
     })
 
@@ -207,6 +212,80 @@ describe('StockCountComponent', () => {
       await settle()
       expect(el().querySelector('[data-testid="stk-unit-note"]')).not.toBeNull()
       expect(chipOf(rows()[1]).checked).toBeFalse()
+    })
+
+    it('plan 654 (a,b): a line with no unit leaves the row uncounted, with the product units as chips and add-unit', async () => {
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      child().extracted.emit({
+        answer: {
+          draftId: null,
+          lines: [{ productId: 'a', quantity: 3, unit: null, unitMissing: true }],
+          unmatched: []
+        },
+        source: 'text'
+      })
+      await settle()
+      const choice = el().querySelector('[data-testid="stk-unit-choice"]')!
+      expect(choice).not.toBeNull()
+      expect(choice.querySelectorAll('.c-chip--toggle').length).toBeGreaterThanOrEqual(2)
+      expect(choice.querySelector('[data-testid="stk-unit-add"]')).not.toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeFalse()
+      expect(chipOf(rows()[0]).disabled).toBeTrue()
+      choice.querySelector<HTMLInputElement>('input[value="ארגז"]')!.click()
+      await settle()
+      expect(el().querySelector('[data-testid="stk-unit-choice"]')).toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeTrue()
+      const state = (
+        fixture.componentInstance as unknown as { rows_(): Record<string, { amount: number; unit: string }> }
+      ).rows_()['a']
+      expect(state).toEqual(jasmine.objectContaining({ amount: 3, unit: 'ארגז' }))
+    })
+
+    it('plan 654 (d): after a pick from choose, no unit shows the unit choice', async () => {
+      await setup([withCrates('a', 'עגבניות שרי'), product('b', 'עגבניות רגילות')])
+      child().extracted.emit({
+        answer: {
+          draftId: null,
+          lines: [],
+          unmatched: [
+            {
+              spoken: 'עגבניות',
+              status: 'choose',
+              quantity: 3,
+              candidates: [{ productId: 'a', nameHebrew: 'עגבניות שרי' }]
+            }
+          ]
+        },
+        source: 'voice'
+      })
+      await settle()
+      el().querySelectorAll<HTMLInputElement>('[data-testid="stk-ai-candidates"] .c-chip--toggle input')[0].click()
+      await settle()
+      expect(el().querySelector('[data-testid="stk-unit-choice"]')).not.toBeNull()
+      expect(el().querySelector('[data-testid="stk-unit-note"]')).toBeNull()
+      expect(chipOf(rows()[0]).checked).toBeFalse()
+    })
+
+    it('plan 654 (e): the base-amount column is not drawn while all its cells are empty, and is drawn once one has a value', async () => {
+      await setup()
+      expect(el().querySelector('app-column-carousel-header')).toBeNull()
+      expect(el().querySelector('app-column-carousel-cell')).toBeNull()
+      ;(fixture.componentInstance as unknown as { setUnit(p: Product, u: string): void }).setUnit(
+        product('a', 'אורז'),
+        'gram'
+      )
+      await settle()
+      expect(el().querySelector('app-column-carousel-header')).not.toBeNull()
+      expect(rows().every((r) => r.querySelector('app-column-carousel-cell') !== null)).toBeTrue()
+    })
+
+    it('plan 654 (f): the name cell wraps and stays visible', async () => {
+      await setup([product('a', 'שם מוצר ארוך מאוד מאוד מאוד מאוד מאוד מאוד מאוד מאוד מאוד')])
+      const name = rows()[0].querySelector<HTMLElement>('.stock-count__name')!
+      const style = getComputedStyle(name)
+      expect(style.whiteSpace).toBe('normal')
+      expect(style.textOverflow).not.toBe('ellipsis')
+      expect(name.textContent).toContain('שם מוצר ארוך')
     })
   })
 

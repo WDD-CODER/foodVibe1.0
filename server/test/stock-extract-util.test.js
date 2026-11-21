@@ -31,10 +31,41 @@ describe('unitList and userPart', () => {
   })
 })
 
+describe('plan 654: the unit is read from the text, never guessed', () => {
+  const withText = (text, lines, list = products) => cleanStockLines({ lines }, list, units, rates, new Set(), text)
+  const eggplant = { _id: 'eggplant', nameHebrew: 'חציל', baseUnit: 'gram', purchaseOptions: [] }
+
+  it('(a) a unit the model dropped is read from the text and kept as said', () => {
+    const out = withText('3 ארגז עגבניות', [entry('עגבניות', 3, null)])
+    expect(out.lines).toEqual([{ productId: 'tomato', quantity: 3, unit: null, unitNeedsFix: true, spokenUnit: 'ארגז' }])
+    const two = [eggplant, { ...eggplant, _id: 'e2', nameHebrew: 'חציל בלאדי' }]
+    expect(withText('4 קרטון חציל', [entry('חציל', 4, null)], two).unmatched[0]).toMatchObject({ status: 'choose', quantity: 4, spokenUnit: 'קרטון' })
+    expect(withText('3 ארגזים חציל', [entry('חציל', 3, null)], [eggplant]).lines[0]).toMatchObject({ spokenUnit: 'ארגזים' })
+    expect(withText('עגבניות 3 שקים', [entry('עגבניות', 3, null)]).lines[0]).toMatchObject({ spokenUnit: 'שקים' })
+    expect(withText('קמח 4 קילו', [entry('קמח', 4, null)]).lines).toEqual([{ productId: 'flour', quantity: 4, unit: 'kg' }])
+  })
+
+  it('a unit word that ends the line before is not read as this line unit', () => {
+    const out = withText('קמח 4 קילו, עגבניות 2', [entry('עגבניות', 2, null)])
+    expect(out.lines).toEqual([{ productId: 'tomato', quantity: 2, unit: null, unitMissing: true }])
+  })
+
+  it('(b) no unit word in the text → no spokenUnit and unitMissing', () => {
+    const avocado = { _id: 'a', nameHebrew: 'אבוקדו', baseUnit: 'gram', purchaseOptions: [] }
+    const out = withText('5 אבוקדו', [entry('אבוקדו', 5, null)], [avocado])
+    expect(out.lines).toEqual([{ productId: 'a', quantity: 5, unit: null, unitMissing: true }])
+    expect(out.lines[0]).not.toHaveProperty('spokenUnit')
+  })
+
+  it('(c) a model unit that is in UNITS is kept as today', () => {
+    expect(withText('3 crate עגבניות', [entry('עגבניות', 3, 'crate')]).lines).toEqual([{ productId: 'tomato', quantity: 3, unit: 'crate' }])
+  })
+})
+
 describe('cleanStockLines', () => {
-  it('matches the spoken name to a product and defaults the unit to the base unit', () => {
+  it('plan 654: a line with no unit said is never given the base unit', () => {
     expect(clean([entry('קמח', 4, 'kg'), entry('עגבניות', 3, null)])).toEqual({
-      lines: [{ productId: 'flour', quantity: 4, unit: 'kg' }, { productId: 'tomato', quantity: 3, unit: 'kg' }],
+      lines: [{ productId: 'flour', quantity: 4, unit: 'kg' }, { productId: 'tomato', quantity: 3, unit: null, unitMissing: true }],
       unmatched: [],
     })
   })
@@ -45,9 +76,9 @@ describe('cleanStockLines', () => {
       { _id: 'b', nameHebrew: 'שמן זית מעולה', baseUnit: 'liter', purchaseOptions: [] },
       { _id: 'c', nameHebrew: 'פלפל אדום חריף', baseUnit: 'kg', purchaseOptions: [] },
     ]
-    expect(clean([entry('  olive   OIL ', 1, null)], list).lines).toEqual([{ productId: 'a', quantity: 1, unit: 'liter' }])
-    expect(clean([entry('שמן זית', 2, null)], list).lines).toEqual([{ productId: 'b', quantity: 2, unit: 'liter' }])
-    expect(clean([entry('פלפל חריף', 3, null)], list).lines).toEqual([{ productId: 'c', quantity: 3, unit: 'kg' }])
+    expect(clean([entry('  olive   OIL ', 1, null)], list).lines).toEqual([{ productId: 'a', quantity: 1, unit: null, unitMissing: true }])
+    expect(clean([entry('שמן זית', 2, null)], list).lines).toEqual([{ productId: 'b', quantity: 2, unit: null, unitMissing: true }])
+    expect(clean([entry('פלפל חריף', 3, null)], list).lines).toEqual([{ productId: 'c', quantity: 3, unit: null, unitMissing: true }])
   })
 
   it('a name that matches two products is a choice with both as candidates (at most 5)', () => {
@@ -108,7 +139,7 @@ describe('cleanStockLines', () => {
 
     it('(a) a plural matches the singular product as the single best match', () => {
       const out = clean([entry('עגבניות', 3, null)], [p('t', 'עגבניה'), p('o', 'בצל')])
-      expect(out.lines).toEqual([{ productId: 't', quantity: 3, unit: 'kg' }])
+      expect(out.lines).toEqual([{ productId: 't', quantity: 3, unit: null, unitMissing: true }])
       expect(out.unmatched).toEqual([])
       expect(clean([entry('עגבניה', 1, null)], [p('t', 'עגבניות')]).lines).toHaveLength(1)
       expect(clean([entry('תפוחים', 1, null)], [p('a', 'תפוח')]).lines).toHaveLength(1)
@@ -143,7 +174,7 @@ describe('cleanStockLines', () => {
 
     it('plan 651 (b) one avocado product is matched', () => {
       const out = clean([entry('אבוקדו', 2, null)], [p('a', 'אבוקדו'), p('t', 'עגבניה')])
-      expect(out.lines).toEqual([{ productId: 'a', quantity: 2, unit: 'kg' }])
+      expect(out.lines).toEqual([{ productId: 'a', quantity: 2, unit: null, unitMissing: true }])
     })
 
     it('plan 651 (c) the spoken unit maps to a unit the product has, else it is flagged', () => {
