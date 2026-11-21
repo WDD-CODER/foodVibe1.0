@@ -120,3 +120,13 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-20
+
+### one-breakpoint-set
+
+- status: on
+- rule: Every screen changes layout at the same three widths: phone up to 767px, tablet up to 1023px, desktop from 1024px; no screen picks its own width.
+- applies when: screen
+- how: the shared breakpoint names at the top of src/styles.scss ($break-phone-max, $break-tablet-max), used in every @media; plan 656 makes them the only set
+- check: files: src/**/*.scss; trigger: @media[^{]*\(\s*m(?:in|ax)-width:\s*\d+(?:\.\d+)?(?:px|em|rem); evidence: (?!x)x; exclude: src/styles.scss
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-21
