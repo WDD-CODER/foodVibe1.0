@@ -1,3 +1,4 @@
+@use '../../styles/breakpoints' as *;
 :host {
   display: block;
 }
@@ -30,7 +31,7 @@
 }
 
 // On a phone the text wraps and the button stays on its own line.
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .acting-banner__back {
     flex-basis: 100%;
     justify-content: center;

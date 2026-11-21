@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 /* Supplier form page — mirrors venue-form.component.scss (cssLayer: global tokens, Five-Group rhythm) */
 
 @layer components.supplier-form {
@@ -59,7 +60,7 @@
   }
 
   /* Phone density (2026-11-11): contact and phone share a row, and so do minimum order and lead time. */
-  @media (max-width: 620px) {
+  @media (max-width: $break-phone-max) {
     .supplier-form-container {
       padding: 0.875rem;
 

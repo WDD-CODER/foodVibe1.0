@@ -28,9 +28,10 @@ import { isValidQuickPrice, withQuickPrice } from 'src/app/core/utils/quick-pric
 import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
-/** Below this width the popover is a full-width bottom sheet (mirrors `$break-mobile` in the scss). */
-const MOBILE_QUERY = '(max-width: 768px)'
+/** On a phone the popover is a full-width bottom sheet (`$break-phone-max` in the scss). */
+const MOBILE_QUERY = PHONE_QUERY
 
 /** The «add new» option of the link field; `addNewChosen` carries the typed name, the value itself is ignored. */
 const ADD_PRODUCT_VALUE = '__add_product__'

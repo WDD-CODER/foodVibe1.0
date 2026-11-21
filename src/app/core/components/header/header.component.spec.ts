@@ -15,6 +15,7 @@ import { AccessService } from '@services/access.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
 /** Plan 646: the header now holds the bell and the diagnosis entry. */
 const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope }
@@ -500,7 +501,14 @@ describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
     const header = fixture.debugElement.query(By.directive(HeaderComponent)).componentInstance as HeaderComponent
     const logout = spyOn(header as unknown as { logout: () => Promise<void> }, 'logout').and.resolveTo()
     fixture.detectChanges()
-    const avatar = host.querySelector<HTMLButtonElement>('.auth-username-btn')!
+    // Plan 656: on a phone (≤767px, which the test frame can be) the top bar is hidden and sign-out sits in the
+    // bottom bar's profile menu; from tablet up it is the avatar button in the top bar.
+    let avatar = host.querySelector<HTMLButtonElement>('.auth-username-btn')!
+    if (window.matchMedia(PHONE_QUERY).matches) {
+      host.querySelector<HTMLButtonElement>('.bottom-nav__profile .bottom-nav__item')!.click()
+      fixture.detectChanges()
+      avatar = host.querySelector<HTMLButtonElement>('.profile-menu__logout')!
+    }
     const box = avatar.getBoundingClientRect()
     expect(box.width).toBeGreaterThan(0)
     const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)

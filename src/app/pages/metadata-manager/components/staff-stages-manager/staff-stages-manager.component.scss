@@ -1,4 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.staff-stages-manager {
   :host {
@@ -10,7 +10,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
 
     padding: 1.5rem;
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       padding: 1rem;
     }
   }

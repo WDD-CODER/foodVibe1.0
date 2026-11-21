@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 @use 'layout';
 @use 'paper-ui';
 @use 'toolbar';
@@ -8,7 +9,6 @@
 }
 
 /* Plan 443: stage bar above the paper, notes log beside it (desktop) or below it (phone and tablet). */
-$break-notes: 1024px; // side column from this width; no global $break-* equals it
 
 app-event-stage-bar,
 app-event-notes-log {
@@ -23,7 +23,7 @@ app-event-notes-log {
   margin-block-start: 1.5rem;
 }
 
-@media (min-width: $break-notes) {
+@media (min-width: $break-desktop-min) {
   .menu-editor-shell.has-notes {
     display: grid;
     grid-template-columns: minmax(0, 720px) 20rem;
@@ -57,9 +57,8 @@ app-event-notes-log {
 
 /* Plan 494: the fixed pricing meter shows its full body above 768px and is up to 270px tall (targets open), so the last
    note or the add-note area sat under it. Plan 570: all wide screens, the logistics panel is last. Screen only, so the print rule in _toolbar.scss (padding: 0) still wins. */
-$break-meter-full: 769px; // pricing-meter.component.scss: full body above 768px
 
-@media screen and (min-width: $break-meter-full) {
+@media screen and (min-width: $break-tablet-min) {
   .menu-editor-shell {
     padding-block-end: calc(17rem + var(--space-6));
   }

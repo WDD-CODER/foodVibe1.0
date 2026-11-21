@@ -59,12 +59,13 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 import { PermissionService } from '@services/permission.service'
 import { SupplierPickerComponent } from 'src/app/shared/supplier-picker/supplier-picker.component'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
  * since plan 348, landscape too (touch device with a short viewport).
  */
-const MOBILE_QUICK_EDIT_QUERY = '(max-width: 767px), (hover: none) and (max-height: 500px)'
+const MOBILE_QUICK_EDIT_QUERY = `${PHONE_QUERY}, (hover: none) and (max-height: 500px)`
 
 /** Plan 490: most inventory suggestions shown for one unlinked row (mirrors PRODUCT_MATCH_MAX_OPTIONS). */
 const MAX_ROW_SUGGESTIONS = 5

@@ -1,5 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
-$break-desktop: 1200px; // mirrors src/styles.scss
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.business-performance {
   :host {
@@ -44,11 +43,11 @@ $break-desktop: 1200px; // mirrors src/styles.scss
       opacity: 0.6;
     }
 
-    @media (max-width: $break-desktop) {
+    @media (max-width: $break-tablet-max) {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -187,7 +186,7 @@ $break-desktop: 1200px; // mirrors src/styles.scss
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       grid-template-columns: minmax(0, 1fr);
     }
   }

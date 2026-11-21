@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 .header-dashboard-container {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -428,7 +429,7 @@
 
 // Desktop-only child placement — kept outside the base .center-controls block
 // so mobile's lower-specificity grid-area overrides are not beaten.
-@media (min-width: 40.626rem) {
+@media (min-width: $break-tablet-min) {
   .center-controls {
     .top-row {
       grid-column: 1;
@@ -453,7 +454,7 @@
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .recipe-name-input {
     min-block-size: 44px;
     inline-size: 100%;
@@ -471,7 +472,7 @@
   }
 }
 
-@media (max-width: 40.625rem) {
+@media (max-width: $break-phone-max) {
   .header-dashboard-container {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
@@ -579,7 +580,7 @@
 // Phone density (2026-11-11): the header card took a whole screen before the first ingredient.
 // The picture and the cost box become two low boxes side by side, the rating sits beside the labels,
 // and the course and station pickers share one row.
-@media (max-width: 40.625rem) {
+@media (max-width: $break-phone-max) {
   .header-dashboard-container {
     grid-template-areas:
       'title title'

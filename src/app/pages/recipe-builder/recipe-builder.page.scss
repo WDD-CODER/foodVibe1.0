@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 /* recipe-builder page: component-scoped tokens (three-tier rule) */
 :host {
   --rb-gap-tight: 0.5rem;
@@ -381,7 +382,7 @@
 }
 
 /* ---- Responsive ---- */
-@media (max-width: 48rem) {
+@media (max-width: $break-phone-max) {
   .recipe-builder-container {
     padding-block: 1rem;
     padding-inline: 0.75rem;

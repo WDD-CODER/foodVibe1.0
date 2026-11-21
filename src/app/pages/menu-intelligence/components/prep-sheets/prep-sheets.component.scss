@@ -1,6 +1,5 @@
+@use '../../../../core/styles/breakpoints' as *;
 @layer components.prep-sheets {
-  $break-mobile: 768px; // mirrors src/styles.scss
-
   :host {
     display: contents;
   }
@@ -21,7 +20,7 @@
 
     background: var(--bg-glass-strong);
 
-    @media (min-width: $break-mobile) {
+    @media (min-width: $break-tablet-min) {
       min-block-size: 0;
       max-block-size: calc(100dvh - var(--space-4) * 2);
       margin-block: var(--space-4);

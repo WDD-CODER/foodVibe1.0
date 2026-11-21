@@ -1,5 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
-$break-tabbar: 620px; // mirrors the bottom tab bar breakpoint in core/components/header/header.component.scss
+@use '../../core/styles/breakpoints' as *;
 
 @layer components.partial-cost-badge {
   .partial-cost {
@@ -50,7 +49,7 @@ $break-tabbar: 620px; // mirrors the bottom tab bar breakpoint in core/component
       inset-block: auto 100%;
     }
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       inset-block: auto var(--space-4);
       inset-inline: var(--space-4);
       inline-size: auto;
@@ -61,7 +60,7 @@ $break-tabbar: 620px; // mirrors the bottom tab bar breakpoint in core/component
     }
 
     // Plan 481: the bottom sheet sits above the shell's bottom tab bar, so its last line is never under it.
-    @media (max-width: $break-tabbar) {
+    @media (max-width: $break-phone-max) {
       inset-block-end: calc(var(--tabbar-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
     }
   }
