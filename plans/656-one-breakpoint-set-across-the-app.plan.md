@@ -203,3 +203,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   (its line comes from `_shared/product-defaults.md`).
 - header.component.spec: the karma frame is below 768px, so the plan-645 avatar test now opens the bottom bar's
   profile and hit-tests its sign-out on a phone width; the top-bar avatar from tablet up.
+- evidence (after commit b8766251): `pnpm run build` → exit 0 · `pnpm run lint` → exit 0 (0 errors) ·
+  `pnpm run test:ci` → exit 0, TOTAL: 2697 SUCCESS · `node --test scripts/test/breakpoints-no-literals.test.mjs` →
+  pass 5, fail 0 · `node scripts/kit-checks.mjs --base origin/main` → KIT_CHECKS: ok (6 checks), no
+  `default.one-breakpoint-set` entry left in `_shared/debt-baseline.json` · kit-checks with `--plan` → ok ·
+  kit-manifest-check → ok, 0 unclassified · `node scripts/scope-check.mjs --diff=origin/orch/mod-breakpoints` →
+  SCOPE: ok (the main checkout's copy resolves its repo root to the main checkout and lists that folder's untracked
+  `Claude outputs/` files, none of them on this branch) · lint:reuse → REUSE: ok · breadcrumbs → clean ·
+  override-check, plan-ledger-check, lint:icons, lint:no-native-select → ok · log-query → SKIP: no database configured.
