@@ -123,9 +123,11 @@ two marked **model**.
      names; the run goes on.
    - **Questions up front.** The readiness lint (`lib/readiness-asks.mjs`, no model call) asks once, in the dry run, what
      a mid-run ask would otherwise raise: the tests outside the sibling rule that import a scoped file, the manifest
-     (the manifest.json under docs/workflow-kit) when the plan adds a script, agent, doc or test file, and, for a `[ui]` plan, the
+     (the manifest.json under docs/workflow-kit) when the plan adds a script, agent, doc or test file, and, for a `[ui]` plan that signs in, the
      QA login (`ORCH_QA_USER` / `ORCH_QA_PASSWORD` in the main folder's `.env`; missing → `NOT READY`, and the plan's
-     worktree `.env` gets the two keys at install). `--approve-asks` is the Human's `approve`: the paths are written into
+     worktree `.env` gets the two keys at install). A card signs in when it says so ("log in", "signed in", "as the
+     admin user", "role: admin"), or every card does when `.env` sets `ORCH_UI_LOGIN_URL` (an app whose pages all need
+     a signed-in user); a card on a page anyone can open needs no login. `--approve-asks` is the Human's `approve`: the paths are written into
      the plan's scope block on the run branch before the run starts. `node tools/replay-asks.mjs <project>` (kit repo)
      measures it on the recorded asks.
    - **Asks.** Every question a run raises is one file, `.claude/orchestrator-runs/<run>/asks/<NNN>-<n>.json`:

@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.8.0"
+    "version": "3.8.1"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.8.0",
-  "commit": "476552f57d25b8cc09f80d645c9851d94d2f3fd5",
+  "ref": "v3.8.1",
+  "commit": "0fd474d79f2e6555810ecaba2adc69191c595348",
   "packs": [
     "angular",
     "node-express"
@@ -633,7 +633,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "a1ea9f6b84dbca2a09d60c71ec687d0745168a2af9ece9cab4451860ac99f615",
+      "sha256": "0cf2e8811e3553a134e85c08ed54cda429b3240241b98b7163312193c07f6b6c",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -1163,7 +1163,7 @@
       "source": "core/scripts/lib/product-defaults.mjs"
     },
     "scripts/lib/readiness-asks.mjs": {
-      "sha256": "3ae6999da4687eb0e384d3ec80213f3ad4255cf332649eeb7464b654adc9876e",
+      "sha256": "f3d293770c4d017a5923d9098f5bab307c11a4b2803af690e490e79669226b6e",
       "kind": "managed",
       "source": "core/scripts/lib/readiness-asks.mjs"
     },
