@@ -31,6 +31,10 @@ gh pr checks
 - Resolve the PR for the current branch if needed (`gh pr view --json number,url,headRefName`).
 - If every check is green → report all green and **stop**.
 - If any check is pending → wait with `gh pr checks --watch`, then re-evaluate.
+- If the failed checks are jobs GitHub never started because Actions has no budget, or CI is switched to this PC (no
+  checks at all; `node scripts/local-ci.mjs --which` says local) → run
+  `node scripts/local-ci.mjs --pr <n>` (it checks that itself; `docs/agent/local-ci.md`). It passes → the PR is green
+  through `local-ci`; it fails → Diagnose its failing command like a failed check. This is not a fix round.
 - If any check failed → continue to Diagnose.
 
 ---

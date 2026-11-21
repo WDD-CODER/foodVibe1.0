@@ -65,7 +65,7 @@ A ship is either **feature-complete** (push + propose a PR) or a **checkpoint** 
 * **No brief** (ad-hoc work): ask once — `Is this feature-complete (open a PR) or a checkpoint (push only)?` — and follow the answer.
 * **Hard rule:** never open a PR without the brief's Done-when fully met or an explicit instruction (override or answer).
 
-**After opening a PR:** run `gh pr checks --watch` once. A failing check → offer the fix loop now
+**After opening a PR:** run `gh pr checks --watch` once. Jobs that never started (no Actions budget), or CI switched here (`node scripts/local-ci.mjs --which` says local; the Human's `ci local` / `ci github` run `--use local|github`) → `node scripts/local-ci.mjs --pr <n>` at once, no question (`docs/agent/local-ci.md`). Any other failing check → offer the fix loop now
 (`docs/agent/pr-check-fix-loop.md`) or leaving it; never start it without asking. Then the Post-push Merge Gate below.
 
 ---
@@ -97,7 +97,7 @@ End the turn with the combined visual block below and **wait** for Human choice.
 
 | Reply | Action |
 | --- | --- |
-| `merge` | Write any proposed brain draft first (unless opted out), then: if no open PR, `gh pr create`. Then merge — outside a slot `gh pr merge --merge --delete-branch`; inside a `wt-N` slot see "Merging from a slot" below. Never force-merge. Never merge without this literal word — a `Y`, `--yes` or "ship fast y" is not a merge. A `merge` already in the `/ship` request (e.g. `/ship fast merge`) counts as this reply: don't stop to ask again. The merge guard refuses `gh pr merge` while a check fails or runs, or without this reply. |
+| `merge` | Write any proposed brain draft first (unless opted out), then: if no open PR, `gh pr create`. Then merge — outside a slot `gh pr merge --merge --delete-branch`; inside a `wt-N` slot see "Merging from a slot" below. Never force-merge. Never merge without this literal word — a `Y`, `--yes` or "ship fast y" is not a merge. A `merge` already in the `/ship` request (e.g. `/ship fast merge`) counts as this reply: don't stop to ask again. The merge guard refuses `gh pr merge` while a check fails or runs, or without this reply; jobs that never started for lack of Actions budget pass only with a passing `local-ci` run on this PC. |
 | `later` | Write any proposed brain draft first (unless opted out). Leave branch/PR open. Put the PR URL in session Next Steps. Stop. |
 | `open-pr-only` | Write any proposed brain draft first (unless opted out). Ensure a PR exists (`gh pr create` if needed). Do **not** merge. Re-show Merge Gate after PR URL is known, or stop if Human said later. |
 | `no brain` / `skip brain` (combined with any of the above) | Do not write the proposed draft this ship. Explicit no-op on the brain side only. |
@@ -122,7 +122,7 @@ The first line stops the slot's dev servers (servers are off unless a session ne
 
 ### Plan close after the merge (every repo, every lane)
 
-After every merge, check whether the merged work finished a plan: run `node scripts/plan-close.mjs --dry-run`. It lists each open plan whose Atomic Sub-tasks are all ticked (and no `[auto]` Done-when item is open). When it lists any, run `node scripts/plan-close.mjs` — it sets `Status: done` and files the plan under `plans/<range>/` — then commit only `plans/` with `plan(NNN): close — merged` and push (plans may be written on `main`). Never move a plan by hand. Skip it when `todo-sync` already closed the plan on origin (the script reports `already closed`). A plan that is not fully ticked stays open — never force it.
+After every merge, check whether the merged work finished a plan: run `node scripts/plan-close.mjs --dry-run`. It lists each open plan whose Atomic Sub-tasks are all ticked (and no `[auto]` Done-when item is open). When it lists any, run `node scripts/plan-close.mjs` — it sets `Status: done` and files the plan under `plans/<range>/` — then commit only `plans/` with `plan(NNN): close — merged` and push (plans may be written on `main`). Never move a plan by hand. Skip it when `todo-sync` already closed the plan on origin (the script reports `already closed`). A plan that is not fully ticked stays open — never force it. When the `todo-sync` workflow could not run (no Actions budget), `node scripts/local-ci.mjs --close-plans` runs its steps instead (`docs/agent/local-ci.md`).
 
 ### Brain capture — auto-write with opt-out
 

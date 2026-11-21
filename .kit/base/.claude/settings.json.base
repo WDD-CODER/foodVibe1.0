@@ -45,23 +45,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/branch-guard.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/plan-write-guard.sh\"",
-            "timeout": 15
-          },
-          {
-            "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/scope-guard.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/lib/guard.mjs\" write",
-            "timeout": 10
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/lib/guard.mjs\" edit",
+            "timeout": 30
           }
         ]
       },
@@ -70,23 +55,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/branch-guard.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/lib/guard.mjs\" plan",
-            "timeout": 15
-          },
-          {
-            "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/scope-guard.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/lib/guard.mjs\" merge",
-            "timeout": 30
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/lib/guard.mjs\" bash",
+            "timeout": 60
           }
         ]
       }
@@ -120,7 +90,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/run-python.sh\" \"${CLAUDE_PROJECT_DIR}/scripts/session-manifest-hook.py\"",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/lib/guard.mjs\" manifest",
             "timeout": 5
           }
         ]

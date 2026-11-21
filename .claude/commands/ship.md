@@ -22,7 +22,7 @@ Flags: `regular` forces REGULAR · `fast` makes one reply answer commit + push +
   - `reviewer` — `node scripts/lib/plan-review.mjs --branch <current> --base origin/main` → `Review: reviewer <PASS|STOP> — <n> problems`.
   - `light` — read `.claude/commands/review.md` and run it inline, never through the Skill tool (a vendored skill shadows the name) → `Review: light PASS` (`light (fast) PASS` when `fast` chose it).
 - A kept blocker/major, a STOP or `ISSUES FOUND` → fix, re-check **exactly once** (checkers: `orch-verify` on the fixed findings plus the checks, no second set of finders); still failing → stop, do not commit, show what is left.
-- Plan branch: append `- review: <mode> kept <n> dropped <m> rechecked <k> minutes <t> models <role=model,…>` to its `## Execution Notes` (no token counts).
+- Plan branch: append `- review: <mode> kept <n> dropped <m> rechecked <k> minutes <t> models <role=model,…>` to its `## Execution Notes` (no token counts). Then `node scripts/ship-prep.mjs --score --review-min <t> [--transcript <session .jsonl>]` appends `- ship: minutes <wall> gate <s>s review <m>min tokens <n|?>` (code writes it; stage the plan).
 
 ## Phase 3 — Manifest + rebase
 `node scripts/ship-prep.mjs --check-baseline`:
@@ -64,7 +64,7 @@ A mix shows VALIDATED BY HUMAN with the unanswered cards beneath it. Before the 
 4. PR: never without the brief's Done-when met or an explicit instruction — `docs/agent/standards-git.md` → "Commit-vs-PR judgment"; every `gh` call names `-R <owner>/<repo>` (same file, "`gh` in a fork").
 
 ## Phase 4.5 — Merge Gate (mandatory after a push)
-`docs/agent/standards-git.md` → "Post-push Merge Gate": its MERGE GATE (or CHECKPOINT) block and `merge` / `later` / `open-pr-only`; a slot merge runs `node scripts/branch-autodelete-check.mjs` first ("Merging from a slot"); after a merge, "Plan close after the merge". REGULAR without `fast` waits here; FAST / `fast` was answered at Phase 4. **Merge only on the literal word `merge`** in this `/ship` request or the reply to its gate: `Y`, `--yes`, "ship fast y" and a `merge` from an earlier turn never count (`Merge: deferred`).
+`docs/agent/standards-git.md` → "Post-push Merge Gate": its MERGE GATE (or CHECKPOINT) block and `merge` / `later` / `open-pr-only`; a slot merge runs `node scripts/branch-autodelete-check.mjs` first ("Merging from a slot"); after a merge, "Plan close after the merge"; checks that never started for lack of Actions budget, or CI switched here (`local-ci.mjs --which`) → `node scripts/local-ci.mjs --pr <n>` first (`docs/agent/local-ci.md`). REGULAR without `fast` waits here; FAST / `fast` was answered at Phase 4. **Merge only on the literal word `merge`** in this `/ship` request or the reply to its gate: `Y`, `--yes`, "ship fast y" and a `merge` from an earlier turn never count (`Merge: deferred`).
 
 ## Wrap-up (always)
 ~~~text
