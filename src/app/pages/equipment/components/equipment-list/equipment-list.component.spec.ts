@@ -1,3 +1,4 @@
+import type { Equipment } from '@models/equipment.model'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
 import { Router } from '@angular/router'
@@ -15,7 +16,8 @@ import {
   X,
   CircleX,
   Menu,
-  SlidersVertical
+  SlidersVertical,
+  MoreVertical
 } from 'lucide-angular'
 import { EquipmentListComponent } from './equipment-list.component'
 import { EquipmentDataService } from '@services/equipment-data.service'
@@ -52,7 +54,8 @@ describe('EquipmentListComponent', () => {
           X,
           CircleX,
           Menu,
-          SlidersVertical
+          SlidersVertical,
+          MoreVertical
         })
       ],
       providers: [
@@ -158,8 +161,110 @@ describe('EquipmentListComponent', () => {
     })
   })
 
-  it('titles the list with the equipment key and has no scaling column', () => {
+  it('titles the list with the equipment key and has a rule column', () => {
     expect(fixture.nativeElement.querySelector('app-page-header h1.ph-title').textContent.trim()).toBe('equipment')
-    expect(fixture.nativeElement.querySelector('.col-scaling')).toBeNull()
+    expect(fixture.nativeElement.querySelector('.col-scaling')).not.toBeNull()
+  })
+
+  describe('quick-edit loading rule (plan 640)', () => {
+    interface PanelState {
+      editingId_: { set(id: string | null): void }
+      editForm_: { patchValue(v: object): void }
+      scalingErrors_(): Record<string, string>
+      hydrateEditForm(e: object): void
+      onInlineSave(): Promise<void>
+    }
+    const panel = () => component as unknown as PanelState
+    const base = { _id: 'e1', nameHebrew: 'ארון חימום', category: 'tool', ownedQuantity: 1, isConsumable: false }
+    let update: jasmine.Spy
+    const open = (e: Partial<Equipment>) => {
+      const item = { ...base, createdAt: 1, updatedAt: 1, ...e } as Equipment
+      mockEquipment.set([item] as never)
+      update = jasmine.createSpy('updateEquipment').and.resolveTo(undefined)
+      ;(TestBed.inject(EquipmentDataService) as unknown as { updateEquipment: jasmine.Spy }).updateEquipment = update
+      panel().editingId_.set('e1')
+      panel().hydrateEditForm(item)
+      fixture.detectChanges()
+    }
+    const val = (id: string) => (fixture.nativeElement.querySelector(`#${id}`) as HTMLInputElement | null)?.value
+    afterEach(() => mockEquipment.set([]))
+
+    it('opens with the switch on and the three numbers filled for an item with a rule', () => {
+      open({ scalingRule: { perGuests: 20, minQuantity: 1, maxQuantity: 3 } })
+      expect(val('inline-per-guests')).toBe('20')
+      expect(val('inline-min-quantity')).toBe('1')
+      expect(val('inline-max-quantity')).toBe('3')
+    })
+
+    it('shows the three inputs only when the switch is on', () => {
+      open({})
+      expect(fixture.nativeElement.querySelector('#inline-per-guests')).toBeNull()
+      const sw = fixture.nativeElement.querySelector('input[formControlName="scalingEnabled"]') as HTMLInputElement
+      sw.click()
+      fixture.detectChanges()
+      expect(fixture.nativeElement.querySelector('#inline-per-guests')).not.toBeNull()
+      expect(fixture.nativeElement.querySelector('#inline-min-quantity')).not.toBeNull()
+      expect(fixture.nativeElement.querySelector('#inline-max-quantity')).not.toBeNull()
+    })
+
+    it('saves per guests 10, minimum 2, no maximum as the rule', async () => {
+      open({})
+      panel().editForm_.patchValue({ scalingEnabled: true, perGuests: 10, minQuantity: 2, maxQuantity: null })
+      await panel().onInlineSave()
+      expect(update.calls.mostRecent().args[0].scalingRule).toEqual({ perGuests: 10, minQuantity: 2 })
+      expect(
+        (component as unknown as { scalingSummary(e: Equipment): string }).scalingSummary(
+          update.calls.mostRecent().args[0]
+        )
+      ).toBe('scaling_summary'.replace('{n}', '10').replace('{range}', '2'))
+    })
+
+    it('turning it off on an item that had a rule stores the zero rule', async () => {
+      open({ scalingRule: { perGuests: 20, minQuantity: 1 } })
+      panel().editForm_.patchValue({ scalingEnabled: false })
+      await panel().onInlineSave()
+      expect(update.calls.mostRecent().args[0].scalingRule).toEqual({ perGuests: 0, minQuantity: 0 })
+    })
+
+    it('a maximum below the minimum shows the error and does not save', async () => {
+      open({})
+      panel().editForm_.patchValue({ scalingEnabled: true, perGuests: 10, minQuantity: 3, maxQuantity: 2 })
+      await panel().onInlineSave()
+      expect(update).not.toHaveBeenCalled()
+      expect(panel().scalingErrors_()['maxQuantity']).toBe('scaling_max_below_min')
+    })
+
+    it('an item that never had a rule and stays off is saved without one', async () => {
+      open({})
+      await panel().onInlineSave()
+      expect(update).toHaveBeenCalledTimes(1)
+      expect('scalingRule' in update.calls.mostRecent().args[0]).toBeFalse()
+    })
+  })
+
+  describe('rule column (plan 624)', () => {
+    const item = (scalingRule?: Equipment['scalingRule']) =>
+      ({
+        _id: 'x',
+        nameHebrew: 'סיר',
+        category: 'tool',
+        ownedQuantity: 1,
+        isConsumable: false,
+        scalingRule
+      }) as Equipment
+    const summary = (e: Equipment) =>
+      (component as unknown as { scalingSummary(e: Equipment): string }).scalingSummary(e)
+
+    it('an item with a rule shows the guests and the range', () => {
+      expect(summary(item({ perGuests: 50, minQuantity: 2, maxQuantity: 4 }))).toBe(
+        'scaling_summary'.replace('{n}', '50').replace('{range}', '2–4')
+      )
+    })
+
+    it('an open maximum shows only the minimum; none shows the dash key', () => {
+      expect(summary(item({ perGuests: 25, minQuantity: 1 }))).toBe('scaling_summary')
+      expect(summary(item())).toBe('no_scaling')
+      expect(summary(item({ perGuests: 0, minQuantity: 0 }))).toBe('no_scaling')
+    })
   })
 })

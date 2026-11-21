@@ -34,6 +34,9 @@ const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = [
   'editFrontDesk'
 ]
 
+/** A consultant may do everything the owner may except the team and the business settings (ADR 0032). */
+export const CONSULTANT_DENIED: readonly PermissionAction[] = ['manageTeam', 'editSettings']
+
 /**
  * Client mirror of the server permission checker (plan 427). It only decides what the UI shows or locks
  * the server stays the one that refuses a write. Owner: everything. Staff: create anything, edit/delete only
@@ -43,7 +46,11 @@ const OWNER_ONLY_ACTIONS: readonly PermissionAction[] = [
 export class PermissionService {
   private readonly userService = inject(UserService)
 
-  readonly isOwner_ = computed(() => this.userService.isOwner_())
+  /** True when the user has the owner's rights in the active business: the owner or a consultant. */
+  readonly isOwner_ = computed(() => {
+    const role = this.userService.user_()?.businessRole
+    return role === 'owner' || role === 'consultant'
+  })
   /** True only for a signed-in staff member: the screens lock for him and stay untouched for a signed-out visitor. */
   readonly isStaff_ = computed(() => this.userService.user_()?.businessRole === 'staff')
 
@@ -51,6 +58,7 @@ export class PermissionService {
     const user = this.userService.user_()
     if (!user) return false
     if (user.businessRole === 'owner') return true
+    if (user.businessRole === 'consultant') return !CONSULTANT_DENIED.includes(action)
     if (user.businessRole !== 'staff') return false
 
     if (OWNER_ONLY_ACTIONS.includes(action)) return false

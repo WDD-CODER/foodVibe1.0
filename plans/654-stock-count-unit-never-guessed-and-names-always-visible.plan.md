@@ -100,6 +100,7 @@ append the path to the scope block above and retry.
 
 - the unit choice on a row — family: chip — rung: 1 — why: `c-chip--toggle` per unit, as the product choice.
 - the add-unit option — family: search-combobox — rung: 2 — why: the add-option row → `UnitRegistryService.openUnitCreator`.
+- `.stock-count__unit-choice` — a wrap rule for the chip group above, in the page's own layer — family: chip — rung: 1
 - reading the unit word from the text — family: helpers — rung: 3 — why: extend `stock-extract.js` beside the existing
   unit-key aliases.
 
@@ -141,9 +142,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Keep the unit the cook said even when the model drops it — the text fallback, the missing flag, the raw lines in the draft, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, shared/schemas/ai-stock-extract.schema.ts, server/test/stock-extract-util.test.js
-- [ ] A2: Never guess a unit — the unit choice on the row, no base-unit default, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
-- [ ] A3: Show every name and no empty column on a phone — the wrap, the empty-column rule, the screen check, then the Done-when commands in order — src/app/pages/inventory/components/stock-count/**, e2e/ui/654-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Keep the unit the cook said even when the model drops it — the text fallback, the missing flag, the raw lines in the draft, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, shared/schemas/ai-stock-extract.schema.ts, server/test/stock-extract-util.test.js
+- [x] A2: Never guess a unit — the unit choice on the row, no base-unit default, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
+- [x] A3: Show every name and no empty column on a phone — the wrap, the empty-column rule, the screen check, then the Done-when commands in order — src/app/pages/inventory/components/stock-count/**, e2e/ui/654-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 653.
@@ -157,3 +158,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - decided: no unit → ask, never the base unit — why: Dandan, «3 ארגז» became 3 grams twice; a silent default corrupts
   stock.
+- evidence: stock-extract tests 39 pass (util + route); test:ci 2689 SUCCESS; build exit 0; lint exit 0 (warnings only).
+- behaviour: base unit offered first only when it is the count unit; never pre-chosen (Done-when (c) wins over the human item) — reverse: preselect it in place_.
+- behaviour: the base-amount column is hidden when no drawn row has a value, also on desktop — reverse: drop the showBase_ guards.
+- [ui] 654-1: written, not run (e2e/ui/654-1.spec.ts).

@@ -1,0 +1,155 @@
+<div class="diag-menu" dir="rtl">
+  @if (locked()) {
+    <p class="diag-menu__locked" role="status" data-testid="diag-locked">{{ 'diag_done_locked' | translatePipe }}</p>
+  }
+
+  <section class="diag-menu__vat c-glass-panel">
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="checkbox"
+        data-testid="diag-vat-switch"
+        [disabled]="locked()"
+        [checked]="pricesIncludeVat_()"
+        (change)="setVat($any($event.target).checked)"
+      />
+      <span>{{ 'diag_prices_include_vat' | translatePipe }}</span>
+    </label>
+    @if (pricesIncludeVat_()) {
+      <div class="diag-menu__vat-pct" data-testid="diag-vat-pct">
+        <span>{{ 'diag_vat_pct' | translatePipe }}</span>
+        <app-counter
+          [value]="vatPct_()"
+          [min]="0"
+          [max]="100"
+          [disabled]="locked()"
+          (valueChange)="setVatPct($event)"
+        />
+      </div>
+    }
+  </section>
+
+  @if (!locked()) {
+    <section class="diag-menu__paste c-glass-panel">
+      <label class="diag-menu__field" for="diag-menu-text">
+        <span>{{ 'diag_menu_paste_label' | translatePipe }}</span>
+        <textarea
+          id="diag-menu-text"
+          class="c-input"
+          dir="auto"
+          rows="5"
+          maxlength="20000"
+          data-testid="diag-menu-text"
+          [disabled]="isReading_()"
+          [ngModel]="text_()"
+          (ngModelChange)="text_.set($event)"
+        ></textarea>
+      </label>
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="diag-menu-read"
+        [disabled]="!text_().trim() || isReading_()"
+        (click)="read()"
+      >
+        @if (isReading_()) {
+          <app-loader size="small" [inline]="true" />
+        }
+        {{ 'diag_menu_read' | translatePipe }}
+      </button>
+      @if (errorKey_(); as errorKey) {
+        <p class="diag-menu__error" role="alert" data-testid="diag-menu-error">{{ errorKey | translatePipe }}</p>
+      }
+    </section>
+  }
+
+  <section class="diag-menu__rows c-glass-panel">
+    @for (row of rows_(); track row.id) {
+      <div class="diag-menu__row" data-testid="diag-menu-row">
+        <input
+          type="text"
+          class="c-input"
+          maxlength="200"
+          data-testid="diag-menu-name"
+          [disabled]="locked()"
+          [attr.aria-label]="'diag_col_dish' | translatePipe"
+          [ngModel]="row.name"
+          (ngModelChange)="updateRow(row.id, { name: $event })"
+        />
+        <!-- prettier-ignore -->
+        <div appNumberBox class="diag-menu__price"><input type="number"
+            class="c-input"
+            dir="ltr"
+            inputmode="decimal"
+            min="0"
+            step="any"
+            appSelectOnFocus
+            data-testid="diag-menu-price"
+            [disabled]="locked()"
+            [attr.aria-label]="'diag_col_sell_price' | translatePipe"
+            [ngModel]="row.sellPrice"
+            (ngModelChange)="setPrice(row.id, $event)"
+          />
+          @if (row.sellPrice === null) {
+            <span class="c-chip c-chip--tag c-chip--amber" data-testid="diag-menu-no-price">{{
+              'diag_menu_no_price' | translatePipe
+            }}</span>
+          }
+        </div>
+        <div class="diag-menu__dish">
+          @if (row.dishId) {
+            <span class="c-chip c-chip--tag" data-testid="diag-menu-linked" dir="auto">{{ dishName(row.dishId) }}</span>
+            @if (!locked()) {
+              <button
+                type="button"
+                class="c-icon-btn"
+                data-testid="diag-menu-unlink"
+                [attr.aria-label]="'cancel' | translatePipe"
+                (click)="updateRow(row.id, { dishId: undefined })"
+              >
+                <lucide-icon name="x" [size]="16" />
+              </button>
+            }
+          } @else if (!locked()) {
+            <app-search-combobox
+              [options]="dishOptions_()"
+              [labelOf]="labelOf"
+              [keyOf]="keyOf"
+              [minChars]="1"
+              placeholder="diag_menu_link_dish"
+              (picked)="updateRow(row.id, { dishId: $event.option.id })"
+            />
+          }
+        </div>
+        @if (!locked()) {
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="diag-menu-remove"
+            [attr.aria-label]="'remove' | translatePipe"
+            (click)="removeRow(row.id)"
+          >
+            <lucide-icon name="trash-2" [size]="16" />
+          </button>
+        }
+      </div>
+    }
+    @if (!locked()) {
+      <div class="diag-menu__actions">
+        <button type="button" class="c-btn-ghost" data-testid="diag-menu-add" (click)="addRow()">
+          <lucide-icon name="plus" [size]="16" />
+          {{ 'diag_menu_add_row' | translatePipe }}
+        </button>
+        <button
+          type="button"
+          class="c-btn-primary"
+          data-testid="diag-menu-save"
+          [disabled]="!canSave_()"
+          (click)="save()"
+        >
+          <lucide-icon name="check" [size]="16" />
+          {{ 'diag_menu_save' | translatePipe }}
+        </button>
+      </div>
+    }
+  </section>
+</div>

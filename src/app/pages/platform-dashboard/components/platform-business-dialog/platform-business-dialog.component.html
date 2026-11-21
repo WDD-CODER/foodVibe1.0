@@ -1,6 +1,19 @@
 <app-modal-shell size="sm" titleKey="platform_biz_dialog_title" [dismissible]="!isSaving_()" (dismissed)="cancel()">
   <div class="fda-body" data-testid="biz-dialog">
-    <p class="fda-name">{{ target()?.name }}</p>
+    <div class="pbd-top">
+      <p class="fda-name">{{ target()?.name }}</p>
+      <button
+        type="button"
+        class="c-icon-btn"
+        data-testid="biz-history-open"
+        [attr.title]="'platform_history_tip' | translatePipe"
+        [attr.aria-label]="'platform_history_tip' | translatePipe"
+        [attr.aria-expanded]="isHistoryOpen_()"
+        (click)="toggleHistory()"
+      >
+        <lucide-icon name="history" [size]="16" />
+      </button>
+    </div>
     <app-form-field label="platform_biz_modules">
       <div class="c-chip-group">
         @for (key of moduleKeys; track key) {
@@ -30,10 +43,15 @@
       {{ 'platform_ai_used_month' | translatePipe }} <span class="c-num">{{ target()?.aiTokensThisMonth ?? 0 }}</span>
     </p>
     <div class="c-chip-group">
-      <label class="c-chip c-chip--toggle">
+      <label
+        class="c-chip c-chip--toggle"
+        data-testid="biz-private-label"
+        [attr.title]="'platform_ai_private_hint' | translatePipe"
+      >
         <input
           type="checkbox"
           data-testid="biz-private"
+          aria-describedby="biz-private-tip"
           [checked]="private_()"
           [disabled]="isSaving_()"
           (change)="private_.set($any($event.target).checked)"
@@ -41,7 +59,51 @@
         <span>{{ 'platform_ai_private' | translatePipe }}</span>
       </label>
     </div>
-    <p class="fda-name">{{ 'platform_ai_private_hint' | translatePipe }}</p>
+    <span id="biz-private-tip" class="visually-hidden">{{ 'platform_ai_private_hint' | translatePipe }}</span>
+    <button
+      type="button"
+      class="c-btn-ghost c-btn-ghost--sm pbd-erase"
+      data-testid="biz-erase-learned"
+      [attr.title]="'platform_erase_learned_tip' | translatePipe"
+      aria-describedby="biz-erase-tip"
+      [attr.aria-expanded]="isEraseOpen_()"
+      [disabled]="isSaving_() || isErasing_()"
+      (click)="toggleErase()"
+    >
+      {{ 'platform_erase_learned' | translatePipe }}
+    </button>
+    <span id="biz-erase-tip" class="visually-hidden">{{ 'platform_erase_learned_tip' | translatePipe }}</span>
+    @if (isEraseOpen_()) {
+      <div class="pbd-erase__box" data-testid="biz-erase-box">
+        <app-form-field label="platform_erase_reason" forId="biz-erase-reason">
+          <textarea
+            id="biz-erase-reason"
+            class="c-input"
+            rows="2"
+            maxlength="300"
+            data-testid="biz-erase-reason"
+            [value]="eraseReason_()"
+            (input)="eraseReason_.set($any($event.target).value)"
+          ></textarea>
+        </app-form-field>
+        <button
+          type="button"
+          class="c-btn-primary c-btn-primary--danger"
+          data-testid="biz-erase-confirm"
+          [disabled]="isErasing_() || eraseReasonMissing_()"
+          [attr.aria-busy]="isErasing_()"
+          (click)="confirmErase()"
+        >
+          {{ 'platform_erase_learned' | translatePipe }}
+        </button>
+      </div>
+    }
+    @if (eraseDone_()) {
+      <p class="fda-name" data-testid="biz-erase-done" role="status">{{ eraseDone_() }}</p>
+    }
+    @if (eraseFailed_()) {
+      <p class="fda-name" data-testid="biz-erase-failed" role="alert">{{ 'platform_erase_failed' | translatePipe }}</p>
+    }
     <app-form-field
       label="platform_fd_reason"
       forId="biz-reason"
@@ -56,6 +118,49 @@
         (input)="reason_.set($any($event.target).value); reasonError_.set(null)"
       ></textarea>
     </app-form-field>
+    @if (isHistoryOpen_()) {
+      <section class="pbd-history" data-testid="biz-history" role="region" aria-labelledby="biz-history-title">
+        <div class="pbd-history__head">
+          <h3 id="biz-history-title">{{ 'platform_history_title' | translatePipe }}</h3>
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="biz-history-close"
+            [attr.aria-label]="'close' | translatePipe"
+            (click)="closeHistory()"
+          >
+            <lucide-icon name="x" [size]="16" />
+          </button>
+        </div>
+        <div class="pbd-history__body">
+          @if (historyFailed_()) {
+            <p data-testid="biz-history-failed">{{ 'platform_history_failed' | translatePipe }}</p>
+          } @else if (history_() === null) {
+            <app-loader size="small" [inline]="true" />
+          } @else if (history_()!.length === 0) {
+            <app-empty-state messageKey="platform_history_empty" />
+          } @else {
+            <ul class="pbd-history__list">
+              @for (row of history_(); track $index) {
+                <li class="pbd-history__row" data-testid="biz-history-row">
+                  <span class="pbd-history__meta">{{ row.at | date: 'dd/MM/yy HH:mm' }} · {{ row.byName }}</span>
+                  @if (row.changes) {
+                    @for (change of row.changes; track change.field) {
+                      <span class="pbd-history__change">{{ describeChange(change) }}</span>
+                    }
+                  } @else {
+                    <span class="pbd-history__change">{{ oldFieldLabels(row) }}</span>
+                  }
+                  <span data-testid="biz-history-reason"
+                    >{{ 'platform_history_reason' | translatePipe }} "{{ row.reason }}"</span
+                  >
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    }
   </div>
   <div class="c-modal-actions">
     <button type="button" class="c-btn-ghost" data-testid="biz-cancel" [disabled]="isSaving_()" (click)="cancel()">

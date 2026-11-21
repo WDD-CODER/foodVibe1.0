@@ -7,7 +7,6 @@ const User = require('../models/user.model')
 const { businessSchema, EVENT_STAGES } = require('../generated/schemas/entities')
 const { getMasterVersion } = require('./master-version')
 const { MASTER_BUSINESS_ID } = require('../utils/business-scope')
-const { mayLearnFrom } = require('../utils/ai-learning')
 const { deleteStoredFile } = require('./file-store')
 
 const col = () => mongoose.connection.db.collection('businesses')
@@ -81,27 +80,33 @@ async function setStaffVisibleStages(id, stages) {
 }
 
 /**
- * Plan 618 (C-LEARN): the platform admin marks a business private (or shared again). Turning private on deletes the
- * business's promoted copies in the shared examples pool; turning it off restores nothing.
+ * Plan 618/639 (C-LEARN): the platform admin marks a business private (or shared again). Private only stops learning
+ * from that moment (`mayLearnFrom`); nothing already learned is erased - `eraseLearnedData` does that, on request.
  */
 async function setAiPrivate(id, value) {
   const aiPrivate = value === true
   const result = await col().updateOne({ _id: String(id) }, { $set: { aiPrivate } })
-  let removed = 0
-  if (result.matchedCount && aiPrivate) {
-    const del = await mongoose.connection.db.collection('GEMINI_SHOTS')
-      .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': String(id) })
-    removed = del.deletedCount
-    await require('./invoice-memory').forgetBusiness(mongoose.connection.db, String(id))
-  }
-  return { matchedCount: result.matchedCount, aiPrivate, removed }
+  return { matchedCount: result.matchedCount, aiPrivate }
 }
 
 /**
- * Plan 619 (C-LEARN): removes the server-only records of a business that is being deleted. `business` is the
+ * Plan 639 (C-LEARN): erases what the platform learned from one business - its promoted examples, its drafts and its
+ * share of the shared name memory. Only the platform admin's explicit action calls it. Returns counts; never content.
+ */
+async function eraseLearnedData(db, businessId) {
+  const id = String(businessId)
+  const promoted = (await db.collection('GEMINI_SHOTS')
+    .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': id })).deletedCount
+  const drafts = (await db.collection('aiDrafts').deleteMany({ businessId: id })).deletedCount
+  const forgotten = await require('./invoice-memory').forgetBusiness(db, id)
+  return { promoted, drafts, ...forgotten }
+}
+
+/**
+ * Plan 619/639 (C-LEARN): removes the server-only records of a business that is being deleted. `business` is the
  * `businesses` document read before the delete. Always: its stored files, price history, own name memory and access
- * grants. Not private: the shared supplier brain and promoted examples stay, drafts are reduced to numbers.
- * Private: promoted copies and drafts go too. Returns counts; never logs content.
+ * grants. Every business alike: the shared supplier brain and promoted examples stay, drafts are reduced to numbers.
+ * To erase what was learned, call `eraseLearnedData` first. Returns counts; never logs content.
  */
 async function deleteBusinessServerData(db, business, log) {
   const businessId = String(business._id)
@@ -115,16 +120,9 @@ async function deleteBusinessServerData(db, business, log) {
     counts[name] = (await db.collection(name).deleteMany({ businessId })).deletedCount
   }
   if (filesLeft > 0) log?.warn?.({ event: 'business.delete.files_left', businessId, count: filesLeft })
-  if (mayLearnFrom(business)) {
-    const stripped = await db.collection('aiDrafts')
-      .updateMany({ businessId }, { $unset: { input: '', aiDraft: '', saved: '', userId: '', subject: '' } })
-    counts.draftsStripped = stripped.modifiedCount
-  } else {
-    counts.promoted = (await db.collection('GEMINI_SHOTS')
-      .deleteMany({ businessId: MASTER_BUSINESS_ID, 'promotedFrom.businessId': businessId })).deletedCount
-    counts.drafts = (await db.collection('aiDrafts').deleteMany({ businessId })).deletedCount
-    await require('./invoice-memory').forgetBusiness(db, businessId)
-  }
+  const stripped = await db.collection('aiDrafts')
+    .updateMany({ businessId }, { $unset: { input: '', aiDraft: '', saved: '', userId: '', subject: '' } })
+  counts.draftsStripped = stripped.modifiedCount
   return counts
 }
 
@@ -138,4 +136,4 @@ async function setHiddenLogisticsKeys(id, keys, now = Date.now()) {
   return { matchedCount: result.matchedCount, hiddenLogisticsKeys }
 }
 
-module.exports = { deleteBusinessServerData, setAiPrivate,setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+module.exports = { deleteBusinessServerData, eraseLearnedData, setAiPrivate,setHiddenLogisticsKeys, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

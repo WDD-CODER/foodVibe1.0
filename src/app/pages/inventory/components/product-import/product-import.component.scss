@@ -146,6 +146,10 @@ $break-mobile: 768px; // mirrors src/styles.scss
     font-size: var(--fs-sm);
   }
 
+  .import-change {
+    margin-block-start: var(--space-1);
+  }
+
   .import-hint--warning {
     color: var(--color-warning);
   }

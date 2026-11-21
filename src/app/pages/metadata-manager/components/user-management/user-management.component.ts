@@ -65,15 +65,33 @@ export class UserManagementComponent {
       { variant: 'danger', saveLabel: 'remove' }
     )
     if (!first) return
+    let eraseLearned = false
     if (isOwner) {
-      const second = await this.confirmModal.open(this.translation.translate('delete_business_confirm_final'), {
-        variant: 'danger',
-        saveLabel: 'remove',
-        typedConfirm: { expected: businessLabel, labelKey: 'delete_business_type_name' }
-      })
+      // Plan 639: keeping what the platform learned from the business is the rule; erasing it is the explicit answer.
+      const learned = await this.confirmModal.openTernary(
+        this.translation.translate('delete_business_learned_question'),
+        {
+          variant: 'danger',
+          saveLabel: 'delete_business_learned_keep',
+          saveButtonLabel: 'delete_business_learned_erase'
+        }
+      )
+      if (learned === 'cancel') return
+      eraseLearned = learned === 'save'
+      const finalMessage = this.translation.translate('delete_business_confirm_final')
+      const second = await this.confirmModal.open(
+        eraseLearned
+          ? `${finalMessage} ${this.translation.translate('delete_business_learned_erase_note')}`
+          : finalMessage,
+        {
+          variant: 'danger',
+          saveLabel: 'remove',
+          typedConfirm: { expected: businessLabel, labelKey: 'delete_business_type_name' }
+        }
+      )
       if (!second) return
     }
-    this.userAdmin.deleteUser(user._id).subscribe({
+    this.userAdmin.deleteUser(user._id, eraseLearned).subscribe({
       next: (res) => {
         this.userMsg.onSetSuccessMsg(
           this.translation.translate(res.deletedBusiness ? 'business_deleted' : 'user_deleted')

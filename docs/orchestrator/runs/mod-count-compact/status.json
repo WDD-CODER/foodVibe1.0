@@ -1,0 +1,237 @@
+{
+  "run": "mod-count-compact",
+  "branch": "orch/mod-count-compact",
+  "base": "main",
+  "startedAt": "2026-11-21T08:20:47.933Z",
+  "mainShaAtStart": "b4c1245fa3b487d75e6d9fa750fe623a9fc5f292",
+  "plans": {
+    "655": {
+      "nnn": "655",
+      "title": "Stock count: units learned from the app, every line checked for product + amount + unit, and a compact counted mark and base amount below desktop",
+      "branch": "feat/655-stock-count-units-from",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-21T08:22:30.378Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-21T09:07:47.041Z"
+        }
+      },
+      "humanItems": [
+        "Dandan adds a unit «חופן» to a product, then types «2 חופנים פטרוזיליה» in the count: the row reads 2 חופן;",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line",
+        "any screen with a unit dropdown · open the dropdown · an add-unit option is there and opens the add-unit popup; the new unit is selected after saving"
+      ],
+      "history": [
+        {
+          "at": "2026-11-21T08:22:30.224Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:22:30.380Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T08:58:49.704Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T09:07:35.976Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T09:07:47.043Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T09:08:48.617Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-21T09:10:14.914Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.4,
+      "sha": "130dea71682c352181a2ee7e79c2adabb280b0e6",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2174.8,
+          "tokens": {
+            "input": 8903430,
+            "output": 75356
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 59.4,
+          "tokens": {
+            "input": 172643,
+            "output": 3363
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "066659fda8ae3cb32a208984b53a1d0a0f40faa8"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-21T08:22:30.065Z",
+      "plan": "655",
+      "text": "the folder foodVibe1.0-orch-mod-count-compact-655 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-21T08:58:45.418Z",
+      "plan": "655",
+      "text": "builder left undone (round 0): [human] «2 חופנים פטרוזיליה» reads as 2 חופן, «3 עגבניות» asks which unit, «ארגז עגבניות» asks how many, and the phone counted mark and base popover work: Dandan to check; [human] any list page on a phone and on a desktop: header matches the other list pages and every row stays on one line: Dandan t"
+    },
+    {
+      "at": "2026-11-21T09:09:02.356Z",
+      "plan": "655",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-compact was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-21T09:11:33.221Z",
+      "text": "FINAL: same tree as plan 655's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 12.4,
+  "updatedAt": "2026-11-21T09:11:36.058Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "655",
+      "type": "behaviour",
+      "text": "behaviour: a matched product with no amount is an `unmatched` entry carrying `productId` and `missing: ['amount', …]`; the draft asks «כמה?» and then fills the row — reverse: send it back to the product question",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "655",
+      "type": "behaviour",
+      "text": "behaviour: the amount question uses the shared `app-counter`, because a typed number input was flagged as a copy by the reuse check — reverse: swap for a plain number field",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "655",
+      "type": "behaviour",
+      "text": "behaviour: `missing` is optional in the shared types, and the screen derives it from what is absent when the server did not send it — reverse: make it required",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "655",
+      "type": "behaviour",
+      "text": "behaviour: the base-amount popover closes on any outside click, on Escape and on its close button — reverse: drop the `host` listeners in stock-count.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "655",
+      "type": "behaviour",
+      "text": "behaviour: built-in spoken words with no unit of the app behind them (ארגז, קרטון, שק, חבילה, מגש) stay as said, never mapped to a key; the product decides whether it has them — reverse: map them to a unit key in BUILTIN_NAMES",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "655",
+      "type": "behaviour",
+      "text": "behaviour: a line that duplicates a product already counted in another unit goes to `unmatched` with missing ['product'], as before — reverse: give it its own `missing` value",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "655",
+      "type": "seen",
+      "text": "seen: server/routes/ai/stock.js (and the whole server folder) has many `Extra semicolon` eslint warnings (44 in the files I touched); not fixed, outside this plan's subject",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "655",
+      "type": "seen",
+      "text": "seen: the HeaderComponent spec 'avatar button is the element at its point and a click signs out' failed once in a full test:ci run and passed on rerun — flaky",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-21T09:11:36.054Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-21T09:11:36.057Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

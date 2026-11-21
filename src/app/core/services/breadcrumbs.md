@@ -14,8 +14,10 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `recipe-data.service.ts` | Recipe CRUD (on BaseEntityDataService) | RecipeDataService |
 | `supplier-data.service.ts` | Supplier CRUD | SupplierDataService |
 | `equipment-data.service.ts` | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
+| `invoice-data.service.ts` | Saved invoices, read-only list; `openFile(fileId)` opens the stored file in a new tab | InvoiceDataService |
 | `venue-data.service.ts` | Venue CRUD | VenueDataService |
 | `kitchen-state.service.ts` | Central state for kitchen flows; save/delete methods return Promises | KitchenStateService |
+| `return-to.service.ts` | Safe `returnUrl` reader and the pending line kept while the person adds something elsewhere | ReturnToService, ReturnToPending |
 | `metadata-registry.service.ts` | Categories, allergens, units registry | MetadataRegistryService |
 | `taxonomy-store.service.ts` | Single store for all taxonomy terms (categories, units, preparations…); the registry services are thin facades over it and load through `loadSafely` / `reloadSafely` | TaxonomyStore, TermInUseError, TermReadOnlyError, TaxonomyLoadLog |
 | `unit-registry.service.ts` | Units (mass, volume, dish); `awaitUnitCreated()` resolves the saved unit or null | UnitRegistryService, SYSTEM_UNITS |
@@ -26,6 +28,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `scaling.service.ts` | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
 | `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
+| `access.service.ts` | The businesses the user may enter, and the consultant grants of a business: load, create, remove (plan 632; `canSwitch_` drives the header switcher) | AccessService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
 | `knowledge-item-data.service.ts` | Knowledge items CRUD plus `importDrafts` (AI import) and `approve` (bulk), on BaseEntityDataService (plan 554) | KnowledgeItemDataService |
 | `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
@@ -107,6 +110,8 @@ Services live under `core/` and are injected into pages and shared UI. Data serv
 - **Used by**: All pages, shared components, resolvers, interceptors.
 
 ## Development Notes
+
+- `notifications.service.ts`: the signed-in user's alerts (signals, polls every 60 s while the tab is visible, `markRead`, `markAllRead`); used by the header bell (plan 646).
 
 - New entity CRUD: model in `core/models/`, service here, resolver in `core/resolvers/`, routes in `app.routes.ts`.
 - Jasmine specs colocated as `*.spec.ts`.

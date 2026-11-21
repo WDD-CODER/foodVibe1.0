@@ -1,0 +1,26 @@
+@layer components.stock-below-min {
+  :host {
+    display: block;
+  }
+
+  .stock-below-min__head,
+  .stock-below-min__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    align-items: center;
+  }
+
+  .stock-below-min__state {
+    padding: var(--space-6) var(--space-4);
+
+    text-align: center;
+  }
+
+  .stock-below-min__note {
+    margin-block: var(--space-3);
+    padding-inline: var(--space-4);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+}

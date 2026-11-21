@@ -76,7 +76,9 @@ export class TranslationService {
         // same as above
       }
 
-      const finalDict = { ...baseFlattened, ...existingCache, ...globalOverrides, ...personalOverrides }
+      // Plan 644: dictionary.json wins over the cache, so a corrected text reaches users who loaded the old one
+      // the cache only fills keys dictionary.json lacks.
+      const finalDict = { ...existingCache, ...baseFlattened, ...globalOverrides, ...personalOverrides }
 
       const sortedFinalDict = Object.keys(finalDict)
         .sort()

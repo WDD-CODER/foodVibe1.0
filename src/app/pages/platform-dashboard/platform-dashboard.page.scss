@@ -249,3 +249,88 @@ $break-desktop: 1200px; // mirrors src/styles.scss
 .platform-row.is-idle-14 > .col-name {
   background: linear-gradient(var(--bg-danger-subtle), var(--bg-danger-subtle)), var(--bg-card-solid);
 }
+
+// Plan 638: the history panel of the business dialog (the dialog has no stylesheet of its own and renders inside this page).
+@layer components.platform-business-dialog {
+  :host ::ng-deep {
+    // Plan 644: a fixed (not max) block size, so the modal card keeps the same height whether the history is open
+    // or not; the body scrolls instead. Scoped by its own .pbd-top child, so the front-desk dialog's .fda-body is untouched.
+    .fda-body:has(> .pbd-top) {
+      block-size: min(60dvh, 34rem);
+      min-inline-size: 0;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
+    }
+
+    .pbd-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      min-inline-size: 0;
+    }
+
+    .pbd-erase {
+      justify-self: start;
+      color: var(--color-danger);
+    }
+
+    .pbd-erase__box {
+      display: grid;
+      gap: var(--space-2);
+    }
+
+    .pbd-history {
+      display: grid;
+      gap: var(--space-2);
+      // Plan 645: the box sits right under the reason field; keep a gap so they do not touch.
+      margin-block-start: var(--space-3);
+      padding: var(--space-2);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      background: var(--bg-muted);
+    }
+
+    .pbd-history__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-1);
+    }
+
+    .pbd-history__body {
+      max-block-size: 40vh;
+      overflow-y: auto;
+    }
+
+    .pbd-history__list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin: 0;
+      min-inline-size: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pbd-history__row {
+      display: grid;
+      gap: var(--space-1);
+      padding-block-end: var(--space-2);
+      font-size: var(--fs-base);
+      border-block-end: 1px solid var(--border-default);
+    }
+
+    .pbd-history__meta {
+      font-size: var(--fs-sm);
+      font-variant-numeric: tabular-nums; // the dates line up from row to row
+      overflow-wrap: anywhere; // a long editor name wraps inside the box
+      color: var(--color-text-muted);
+    }
+
+    .pbd-history__change {
+      font-weight: var(--fw-semibold);
+    }
+  }
+}

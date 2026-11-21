@@ -109,6 +109,11 @@ append the path to the scope block above and retry.
 - the base amount on demand — family: supplier-picker — rung: 2 — why: a small fixed popover placed with
   `placeInViewport`, as `app-supplier-picker`; the hover text is the native `[attr.title]` + `aria-label`.
 
+- the page-local piece `.stock-ai__question` (a question row of the draft line) — family: list-page — rung: 3 — why:
+  page-local layout of the draft; the amount question reuses `app-counter`.
+- the page-local pieces `.stock-count__base-btn` and `.stock-count__base-pop` (the base-amount control and its popover)
+  — family: list-page — rung: 3 — why: page-local layout of the stock count page, beside `.stock-count__base`.
+
 ## Defaults
 
 - unit-dropdown-add — applies — how: the unit question of a line keeps the add-unit option (plan 654).
@@ -155,10 +160,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Know every unit by the words people say — the vocabulary from the units and the dictionary names, the model's unit list, the mapping back to the key, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, server/test/stock-extract-util.test.js
-- [ ] A2: Check each line for product, amount and unit — `checkLine`, `missing` on the answer, the route test — server/utils/stock-extract.js, shared/schemas/ai-stock-extract.schema.ts, server/test/ai-stock-extract.test.js
-- [ ] A3: Ask only for the missing part on the draft line — the questions, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
-- [ ] A4: Fit the row below desktop — the counted checkbox, the base amount tooltip and popover, then the Done-when commands in order — src/app/pages/inventory/components/stock-count/**, docs/brain/inventory.md
+- [x] A1: Know every unit by the words people say — the vocabulary from the units and the dictionary names, the model's unit list, the mapping back to the key, the cases — server/utils/stock-extract.js, server/routes/ai/stock.js, server/test/stock-extract-util.test.js
+- [x] A2: Check each line for product, amount and unit — `checkLine`, `missing` on the answer, the route test — server/utils/stock-extract.js, shared/schemas/ai-stock-extract.schema.ts, server/test/ai-stock-extract.test.js
+- [x] A3: Ask only for the missing part on the draft line — the questions, the specs — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
+- [x] A4: Fit the row below desktop — the counted checkbox, the base amount tooltip and popover, then the Done-when commands in order — src/app/pages/inventory/components/stock-count/**, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 654 (its text fallback and unit question are extended, not replaced).
@@ -172,6 +177,19 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- evidence: `pnpm run build` → exit 0; `pnpm run lint` → exit 0; `pnpm run test:ci` → exit 0, 2695 SUCCESS (one
+  unrelated HeaderComponent test failed once and passed on rerun); `pnpm run test:server` → exit 0, 1971 passed (before
+  the final edit; rerun below); kit-checks → ok (6 checks); kit-manifest-check → ok; breadcrumbs, override, plan-ledger,
+  lint:icons, lint:no-native-select → clean.
+- behaviour: a matched product with no amount is an `unmatched` entry carrying `productId` and `missing: ['amount', …]`
+  (the draft asks «כמה?» and then fills the row) — reverse: send it back to the product question.
+- behaviour: the amount question is an `app-counter` (a typed number input copy was flagged by the reuse check) —
+  reverse: swap for a plain number field.
+- behaviour: `missing` is optional in the shared types, so older answers still work; the screen derives it when absent —
+  reverse: make it required.
+- behaviour: the base-amount popover closes on any click elsewhere, on Escape, and on its close button — reverse: drop
+  the `host` listeners.
+- [ui]: none in this plan (see below); the narrow-width cases are in the component specs.
 - decided: the model reads, a script decides — why: Dandan asked AI or script; the model is good at splitting free
   speech into product / amount / unit, but only a plain check against the business's own products and units can say
   for sure that a part is missing, and that check must never guess.

@@ -2,7 +2,16 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { CalendarDays, ClipboardCheck, LucideAngularModule, Settings, Wrench } from 'lucide-angular'
+import {
+  CalendarDays,
+  ClipboardCheck,
+  FileText,
+  ListChecks,
+  LucideAngularModule,
+  Settings,
+  Stethoscope,
+  Wrench
+} from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -47,7 +56,16 @@ describe('TabChipsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TabChipsComponent,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench, ClipboardCheck, CalendarDays, Settings })
+        LucideAngularModule.pick({
+          ...TEST_LUCIDE_ICONS,
+          Wrench,
+          ClipboardCheck,
+          CalendarDays,
+          Settings,
+          FileText,
+          Stethoscope,
+          ListChecks
+        })
       ],
       providers: [
         moduleStub,
@@ -58,6 +76,9 @@ describe('TabChipsComponent', () => {
           { path: 'trash', component: BlankStubComponent },
           { path: 'inventory/list', component: BlankStubComponent },
           { path: 'inventory/equipment', component: BlankStubComponent },
+          { path: 'inventory/invoices', component: BlankStubComponent },
+          { path: 'inventory/count', component: BlankStubComponent },
+          { path: 'diagnosis', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
           { path: 'frontdesk/knowledge', component: BlankStubComponent }
@@ -86,14 +107,34 @@ describe('TabChipsComponent', () => {
     expect(paths).toEqual(jasmine.arrayContaining(['/venues', '/dashboard?tab=metadata', '/suppliers', '/trash']))
   })
 
-  it('should render products then equipment chips on both inventory screens', async () => {
-    for (const url of ['/inventory/list', '/inventory/equipment']) {
+  it('should render products, equipment, invoices then stock count chips on the inventory screens', async () => {
+    for (const url of ['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/inventory/count']) {
       await router.navigateByUrl(url)
       fixture.detectChanges()
       const links = fixture.debugElement.queryAll(By.directive(RouterLink))
       const paths = links.map((de) => de.injector.get(RouterLink).href)
-      expect(paths).toEqual(['/inventory/list', '/inventory/equipment'])
+      expect(paths).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/inventory/count'])
     }
+  })
+
+  it('adds the diagnosis chip last, on the inventory and diagnosis screens, only with the consultant_diag module (plan 634)', async () => {
+    modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+    for (const url of ['/inventory/list', '/diagnosis']) {
+      await router.navigateByUrl(url)
+      fixture.detectChanges()
+      const paths = fixture.debugElement
+        .queryAll(By.directive(RouterLink))
+        .map((de) => de.injector.get(RouterLink).href)
+      expect(paths)
+        .withContext(url)
+        .toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/diagnosis', '/inventory/count'])
+    }
+    modulesOn.set(ALL_MODULES)
+    await router.navigateByUrl('/diagnosis')
+    fixture.detectChanges()
+    expect(
+      fixture.debugElement.queryAll(By.directive(RouterLink)).map((de) => de.injector.get(RouterLink).href)
+    ).toEqual(['/inventory/list', '/inventory/equipment', '/inventory/invoices', '/inventory/count'])
   })
 
   const chipIds = (): string[] =>

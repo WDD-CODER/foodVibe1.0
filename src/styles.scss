@@ -2824,3 +2824,50 @@ input[type='number']::-webkit-outer-spin-button {
     --fab-lane: 4.75rem;
   }
 }
+
+/* Plan 624: while the loading list is open, print only it */
+@media print {
+  body.loading-list-open *:not(:has(app-loading-list)):not(app-loading-list):not(app-loading-list *) {
+    display: none !important;
+  }
+
+  body.loading-list-open *:has(app-loading-list) {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  body.loading-list-open app-loading-list .c-modal-overlay {
+    position: static;
+
+    display: block;
+    overflow: visible;
+
+    background: none;
+    backdrop-filter: none;
+  }
+
+  body.loading-list-open app-loading-list .c-modal-card {
+    inline-size: 100%;
+    max-inline-size: none;
+    max-block-size: none;
+    overflow: visible;
+
+    border: 0;
+    box-shadow: none;
+  }
+}
+
+/* Plan 634: the diagnosis report prints alone — the app header and chips stay out of the A4 page. */
+@media print {
+  body:has(app-diag-report) :is(app-header, app-tab-chips, app-acting-banner) {
+    display: none !important;
+  }
+}
+
+/* Plan 645: a confirm message that lists items (one per line, joined by a line break) keeps its lines. */
+.confirm-modal-message {
+  white-space: pre-line;
+}

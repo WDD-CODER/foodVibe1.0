@@ -94,6 +94,8 @@ append the path to the scope block above and retry.
 - the narrow-screen columns — family: list-page — rung: 1 — why: `app-column-carousel-header` /
   `app-column-carousel-cell` as `inventory-product-list` uses them.
 - the compact date — family: form-field — rung: 2 — why: `app-date-field` with the size input other filters use.
+- new class `.stock-count__date` (a 12rem box around `app-date-field` in the shell actions) — family: form-field —
+  rung: 2 — why: the date field has no size input.
 - the unit mapping after a pick — family: helpers — rung: 3 — why: the existing spoken-unit mapper of plan 651, called
   on pick as well.
 
@@ -134,9 +136,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Keep every row whole at every width the way the other lists do — the column carousel, the header band, the compact date, the specs — src/app/pages/inventory/components/stock-count/**
-- [ ] A2: Check the unit after the user picks a product — the mapping on pick, the flag, the cases — src/app/pages/inventory/components/stock-count/**, server/utils/stock-extract.js
-- [ ] A3: Prove it in the running app and run every check — the screen spec at three widths, then the Done-when commands in order — e2e/ui/653-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Keep every row whole at every width the way the other lists do — the column carousel, the header band, the compact date, the specs — src/app/pages/inventory/components/stock-count/**
+- [x] A2: Check the unit after the user picks a product — the mapping on pick, the flag, the cases — src/app/pages/inventory/components/stock-count/**, server/utils/stock-extract.js
+- [x] A3: Prove it in the running app and run every check — the screen spec at three widths, then the Done-when commands in order — e2e/ui/653-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 651.
@@ -150,3 +152,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - decided: follow `inventory-product-list`'s narrow-screen pattern exactly — why: Dandan asked why this list was not
   built like the others; default `app-list-container`.
+- decided: the base-amount column is the carousel's one slide (header + cells); mobile grid keeps a 5th auto column for it.
+- A2: pick and add-product mapped through new `stock-count/spoken-unit.ts` (same table as server `resolveUnit`, plural-folded); server helper unchanged.
+- A3: `e2e/ui/653-1.spec.ts` written, not run. `pnpm run test:ci` → exit 0, 2682 SUCCESS; build, lint, lint:icons, lint:no-native-select, lint:reuse, override/ledger/breadcrumbs checks → exit 0.

@@ -17,9 +17,23 @@ import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
-import type { ImportRow } from './product-import.service'
+import type { ImportRow, InvoiceReadResult } from './product-import.service'
 import type { ProductNameMatchRequest, ProductNameMatchResponse } from '@schemas/ai-product-match.schema'
-import { RECEIPT_IMAGE_MAX_BASE64, RECEIPT_IMAGE_MIME_TYPES } from '@schemas/ai-receipt-photo.schema'
+import type { StockExtractResponse } from '@schemas/ai-stock-extract.schema'
+import {
+  VOICE_AUDIO_MAX_BASE64,
+  type VoiceTranscribeRequest,
+  type VoiceTranscribeResponse
+} from '@schemas/ai-voice.schema'
+import type {
+  LogisticsConfirmRequest,
+  LogisticsExtractRequest,
+  LogisticsExtractResponse
+} from '@schemas/logistics/extract.schema'
+import { INVOICE_FILE_MAX_BASE64, INVOICE_FILE_MIME_TYPES } from '@schemas/ai-invoice-read.schema'
+
+export type VoicePurpose = VoiceTranscribeRequest['purpose']
+export type LogisticsConfirmLine = LogisticsConfirmRequest['saved'][number]
 
 /** One model in the admin's AI model chain (plan 395): today's status plus on/off. */
 export interface GeminiChainModel extends GeminiModelStatus {
@@ -148,19 +162,29 @@ export class GeminiService {
   }
 
   /**
-   * Owner only (plan 465): one AI call reads a photo of a supplier receipt into cleaned product rows. The photo is
-   * shrunk to fit the server's body limit (second, smaller attempt when still too big) and never kept. Rejects with
-   * an Error whose message is `IMAGE_TYPE_UNSUPPORTED` (not jpeg, png or webp) or `IMAGE_TOO_LARGE` before any
-   * request. The caller counts the usage (incrementGeminiUsage) on success.
+   * Plan 628 (C-INVREAD): one call reads a photo or a PDF of a supplier invoice into a header, cleaned rows and the
+   * printed lines. An image is shrunk to fit the server's body limit (a second, smaller attempt when still too big)
+   * a PDF is sent as it is. Rejects with `FILE_TYPE_UNSUPPORTED` or `FILE_TOO_LARGE` before any request. The caller
+   * counts the usage (incrementGeminiUsage) on success.
    */
-  async parseReceiptPhoto(file: File, knownCategories: string[]): Promise<{ rows: ImportRow[]; truncated: boolean }> {
-    if (!(RECEIPT_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) throw new Error('IMAGE_TYPE_UNSUPPORTED')
-    let image = await this.encodeImage_(file, 2000, 0.75)
-    if (image.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) image = await this.encodeImage_(file, 1400, 0.6)
-    if (image.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) throw new Error('IMAGE_TOO_LARGE')
+  async readInvoice(file: File, knownCategories: string[]): Promise<InvoiceReadResult> {
+    if (!(INVOICE_FILE_MIME_TYPES as readonly string[]).includes(file.type)) throw new Error('FILE_TYPE_UNSUPPORTED')
+    let fileBase64: string
+    let mimeType: string
+    if (file.type === 'application/pdf') {
+      fileBase64 = await this.blobToBase64_(file)
+      mimeType = file.type
+    } else {
+      let image = await this.encodeImage_(file, 2000, 0.75)
+      if (image.imageBase64.length > INVOICE_FILE_MAX_BASE64) image = await this.encodeImage_(file, 1400, 0.6)
+      fileBase64 = image.imageBase64
+      mimeType = image.mimeType
+    }
+    if (fileBase64.length > INVOICE_FILE_MAX_BASE64) throw new Error('FILE_TOO_LARGE')
     return firstValueFrom(
-      this.http_.post<{ rows: ImportRow[]; truncated: boolean }>(`${this.authBase_}${API.ai('parse-receipt-photo')}`, {
-        ...image,
+      this.http_.post<InvoiceReadResult>(`${this.authBase_}${API.ai('invoices/read')}`, {
+        fileBase64,
+        mimeType,
         knownCategories,
         ...this.modelParam_()
       })
@@ -184,6 +208,76 @@ export class GeminiService {
     )
     incrementGeminiUsage()
     return data.matches
+  }
+
+  /** Plan 623: one voice recording → text. Rejects with `AUDIO_TOO_LARGE` (no request) when the base64 is over the limit. */
+  async transcribeVoice(
+    recording: { blob: Blob; mimeType: string; durationSec: number },
+    purpose: VoicePurpose
+  ): Promise<VoiceTranscribeResponse> {
+    const audioBase64 = await this.blobToBase64_(recording.blob)
+    if (audioBase64.length > VOICE_AUDIO_MAX_BASE64) throw new Error('AUDIO_TOO_LARGE')
+    const data = await firstValueFrom(
+      this.http_.post<VoiceTranscribeResponse>(`${this.authBase_}${API.ai('voice/transcribe')}`, {
+        audioBase64,
+        mimeType: recording.mimeType,
+        purpose,
+        durationSec: recording.durationSec,
+        ...this.modelParam_()
+      })
+    )
+    incrementGeminiUsage()
+    return data
+  }
+
+  /** Plan 623: site-visit notes → a checklist draft (never written to the event by this call). */
+  async extractLogistics(
+    body: Pick<LogisticsExtractRequest, 'eventId' | 'phase' | 'text' | 'fileId'>
+  ): Promise<LogisticsExtractResponse> {
+    const data = await firstValueFrom(
+      this.http_.post<LogisticsExtractResponse>(`${this.authBase_}${API.ai('logistics/extract')}`, {
+        ...body,
+        ...this.modelParam_()
+      })
+    )
+    incrementGeminiUsage()
+    return data
+  }
+
+  /**
+   * Plan 637 (C-STOCK): a spoken or typed stock count → suggested count lines (never saved by this call).
+   * The answer holds positions already resolved by the server to product ids. Throws on an HTTP error; the caller
+   * offers the model switch (`offerModelSwitch`) for 'model_exhausted'.
+   */
+  async extractStockCount(text: string, fileId?: string): Promise<StockExtractResponse> {
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<StockExtractResponse>(`${this.authBase_}${API.ai('stock/extract')}`, {
+          text,
+          ...(fileId && { fileId }),
+          ...this.modelParam_()
+        })
+      )
+    )
+    incrementGeminiUsage()
+    return data
+  }
+
+  /** Plan 623: tells the server which draft lines the owner kept. */
+  async confirmLogisticsDraft(draftId: string, saved: LogisticsConfirmLine[]): Promise<void> {
+    await firstValueFrom(
+      this.http_.post<unknown>(`${this.authBase_}${API.ai(`logistics/extract/${draftId}/confirm`)}`, { saved })
+    )
+  }
+
+  private async blobToBase64_(blob: Blob): Promise<string> {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+    return dataUrl.split(',')[1] ?? ''
   }
 
   async generateFromImage(file: File): Promise<AiRecipeDraft> {

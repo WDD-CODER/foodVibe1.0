@@ -1,0 +1,52 @@
+<div class="diagnosis-page" dir="rtl">
+  <app-page-header titleKey="diagnosis" />
+
+  <section class="diagnosis-form c-glass-panel" data-testid="diagnosis-form">
+    <app-form-field [label]="'diag_name' | translatePipe" forId="diagnosis-name">
+      <input
+        id="diagnosis-name"
+        type="text"
+        class="c-input"
+        maxlength="200"
+        required
+        data-testid="diagnosis-name"
+        [ngModel]="name_()"
+        (ngModelChange)="name_.set($event)"
+      />
+    </app-form-field>
+    <div class="diagnosis-form__period">
+      <span class="diagnosis-form__label">{{ 'diag_period_days' | translatePipe }}</span>
+      <app-counter [value]="periodDays_()" [min]="30" [max]="365" (valueChange)="periodDays_.set($event)" />
+    </div>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="diagnosis-create"
+      [disabled]="!canCreate_()"
+      (click)="create()"
+    >
+      <lucide-icon name="plus" [size]="16" />
+      {{ 'diag_create' | translatePipe }}
+    </button>
+  </section>
+
+  @if (isLoading_()) {
+  <app-loader />
+  } @else if (items_().length === 0) {
+  <app-empty-state messageKey="diag_empty" icon="file-text" data-testid="diagnosis-empty" />
+  } @else {
+  <div class="diagnosis-list">
+    @for (item of items_(); track item._id) {
+    <a class="c-list-row diagnosis-list__row" data-testid="diagnosis-row" [routerLink]="['/diagnosis', item._id]">
+      <div class="c-list-body-cell diagnosis-list__name" dir="auto">{{ item.name }}</div>
+      <div class="c-list-body-cell" dir="ltr">{{ item.createdAt | date: 'dd/MM/yyyy' }}</div>
+      <div class="c-list-body-cell">
+        <span class="c-chip c-chip--tag" [class.c-chip--green]="item.status === 'done'">
+          {{ (item.status === 'done' ? 'diag_status_done' : 'diag_status_open') | translatePipe }}
+        </span>
+      </div>
+    </a>
+    }
+  </div>
+  }
+</div>

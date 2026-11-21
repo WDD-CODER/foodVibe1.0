@@ -2,7 +2,9 @@
 .header-nav {
   position: sticky;
   top: 0;
-  z-index: 100;
+  // Plan 645: above the route-loading overlay (the shared loader's overlay, z-index 150) so the avatar answers while
+  // a page loads; still below the modals (1000+).
+  z-index: 160;
   display: flex;
   align-items: center;
 
@@ -181,6 +183,10 @@
   flex-direction: column;
   gap: 0.125rem;
   min-width: 0;
+}
+
+.business-switcher {
+  max-inline-size: 10rem;
 }
 
 .business-name {

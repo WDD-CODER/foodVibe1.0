@@ -8,6 +8,7 @@ const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./help
 const { clearModuleCache } = require('../middleware/require-module')
 const { createBusinessFor } = require('../services/business')
 const { clearCapCache } = require('../services/ai-cap')
+const entities = require('../generated/schemas/entities')
 const { jerusalemDate } = require('../middleware/usage')
 
 let app
@@ -63,7 +64,7 @@ describe('PUT /admin/businesses/:id/platform', () => {
     expect(doc.platformHistory[1].changed).toEqual(['aiMonthlyTokenCap', 'aiPrivate'])
   })
 
-  it('aiPrivate true stores the flag, appends one history row and removes the promoted copy (plan 618)', async () => {
+  it('aiPrivate true stores the flag, appends one history row and keeps what was learned (plan 639)', async () => {
     const shots = testDb().collection('GEMINI_SHOTS')
     await shots.deleteMany({})
     await shots.insertOne({ businessId: '__master__', prompt: 'soup', draft: {}, status: 'approved', promotedFrom: { businessId: 'bA', shotId: 'x1' }, createdAt: new Date() })
@@ -74,7 +75,19 @@ describe('PUT /admin/businesses/:id/platform', () => {
     expect(doc.aiPrivate).toBe(true)
     expect(doc.platformHistory).toHaveLength(1)
     expect(doc.platformHistory[0].changed).toEqual(['aiPrivate'])
-    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(0)
+    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(1)
+    const back = await put({ aiPrivate: false, reason: 'shared again' })
+    expect(back.status).toBe(200)
+    expect((await stored()).aiPrivate).toBe(false)
+    expect(await shots.countDocuments({ 'promotedFrom.businessId': 'bA' })).toBe(1)
+  })
+
+  it('aiPrivate true keeps the shared alias contributions of the business', async () => {
+    const aliases = testDb().collection('invoiceAliases')
+    await aliases.deleteMany({})
+    await aliases.insertOne({ _id: 'al1', businessId: '__master__', contributors: ['bA', 'bB'] })
+    expect((await put({ aiPrivate: true, reason: 'private now' })).status).toBe(200)
+    expect((await aliases.findOne({ _id: 'al1' })).contributors).toEqual(['bA', 'bB'])
   })
 
   it('keeps only the last 50 history rows', async () => {
@@ -153,5 +166,51 @@ describe('what members see', () => {
   it('a signed-up business has no modules field', async () => {
     const doc = await createBusinessFor({ _id: 'newbie', name: 'New' })
     expect('modules' in (await testDb().collection('businesses').findOne({ _id: doc._id }))).toBe(false)
+  })
+})
+
+describe('platform history (plan 638)', () => {
+  const getHistory = (who = ADMIN, id = 'bA') => request(app).get(`/api/v1/admin/businesses/${id}/platform-history`).set(as(who))
+
+  it('stores the old and new value of what really changed', async () => {
+    const res = await put({ modules: ['events', 'ai_create'], aiMonthlyTokenCap: 5000, aiPrivate: true, reason: 'pilot scope' })
+    expect(res.status).toBe(200)
+    const rows = (await stored()).platformHistory
+    expect(rows[0].changes).toEqual([
+      { field: 'modules', from: 'events,event_logistics,frontdesk,ai_create', to: 'events,ai_create' },
+      { field: 'aiMonthlyTokenCap', from: '', to: '5000' },
+      { field: 'aiPrivate', from: 'false', to: 'true' },
+    ])
+  })
+
+  it('leaves a field sent with its stored value out of changes but keeps the row', async () => {
+    await put({ aiMonthlyTokenCap: 5000, reason: 'first cap' })
+    const res = await put({ aiMonthlyTokenCap: 5000, aiPrivate: false, reason: 'same again' })
+    expect(res.status).toBe(200)
+    const rows = (await stored()).platformHistory
+    expect(rows).toHaveLength(2)
+    expect(rows[1].changed).toEqual(['aiMonthlyTokenCap', 'aiPrivate'])
+    expect(rows[1].changes).toEqual([])
+    expect(rows[1].reason).toBe('same again')
+  })
+
+  it('returns rows newest first, and a row without changes as stored', async () => {
+    const old = { at: 1, by: 'boss', byName: 'The Boss', reason: 'old row', changed: ['modules'] }
+    await testDb().collection('businesses').updateOne({ _id: 'bA' }, { $set: { platformHistory: [old] } })
+    await put({ aiPrivate: true, reason: 'newer row' })
+    const res = await getHistory()
+    expect(res.status).toBe(200)
+    expect(res.body.rows.map(r => r.reason)).toEqual(['newer row', 'old row'])
+    expect(res.body.rows[1]).toEqual(old)
+    expect(entities.businessSchema.safeParse({ ...(await stored()), lastSyncedMasterVersion: 0, internal: false }).success).toBe(true)
+  })
+
+  it('answers { rows: [] } without history, 404 unknown, 403 owner, 401 no token', async () => {
+    const empty = await getHistory()
+    expect(empty.status).toBe(200)
+    expect(empty.body).toEqual({ rows: [] })
+    expect((await getHistory(ADMIN, 'nope')).status).toBe(404)
+    expect((await getHistory(OWNER)).status).toBe(403)
+    expect((await request(app).get('/api/v1/admin/businesses/bA/platform-history')).status).toBe(401)
   })
 })

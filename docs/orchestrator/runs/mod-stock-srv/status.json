@@ -1,0 +1,209 @@
+{
+  "run": "mod-stock-srv",
+  "branch": "orch/mod-stock-srv",
+  "base": "main",
+  "startedAt": "2026-11-18T19:49:03.358Z",
+  "mainShaAtStart": "b15c69822e19e8e0e93b243a47549675bbaec9e1",
+  "plans": {
+    "635": {
+      "nnn": "635",
+      "title": "Stock counts on the server: records, draft and final, on-hand and one unit rule",
+      "branch": "feat/635-stock-counts-on-the",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T19:50:35.149Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T20:14:27.161Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T20:26:36.458Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-18T19:50:35.016Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:50:35.150Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:14:26.332Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:14:26.603Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:14:26.920Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:14:27.163Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:18:58.968Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:26:28.974Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:26:36.460Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:26:50.129Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:28:16.102Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.1,
+      "sha": "83988564b4328b054f42288981c2ecc0888b5361",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1428.4,
+          "tokens": {
+            "input": 1832955,
+            "output": 27320
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 269.2,
+          "tokens": {
+            "input": 88462,
+            "output": 1361
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.9,
+          "tokens": {
+            "input": 108885,
+            "output": 796
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [auto] `pnpm run test:ci` passes; the six specs named in the Problem Statement are unchanged in the diff."
+      ],
+      "checkedHead": "07a80c68c9d723ddd1f3f32abf4c477a07ed224b"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T19:50:34.885Z",
+      "plan": "635",
+      "text": "the folder foodVibe1.0-orch-mod-stock-srv-635 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T20:14:23.703Z",
+      "plan": "635",
+      "text": "builder left undone (round 0): pnpm run test:ci is not green: one DataExportCardComponent spec (src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.spec.ts) fails each run, and it was a different test each time. It is unrelated to the unit files. Two runs, both exit 1."
+    },
+    {
+      "at": "2026-11-18T20:27:02.371Z",
+      "plan": "635",
+      "text": "the folder foodVibe1.0-orch-merge-mod-stock-srv was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 15.6,
+  "updatedAt": "2026-11-18T21:09:18.359Z",
+  "stops": [
+    {
+      "at": "2026-11-18T20:35:23.440Z",
+      "reason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2497 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "635",
+      "type": "behaviour",
+      "text": "behaviour: finalize confirms each draftId through confirmAiDraft with a simple kept-ratio (the share of saved products the AI draft listed); a failure is only logged — reverse: remove the draftIds loop in finalize",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "635",
+      "type": "seen",
+      "text": "seen: src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.spec.ts:105 and :114 — flaky 'Expected 0 to be 2', a different test fails on each test:ci run",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "635",
+      "type": "seen",
+      "text": "seen: src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.spec.ts — intermittently fails a different test on each run (plan 557); it passed on both of my reruns",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-18T21:09:18.354Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T21:09:18.358Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

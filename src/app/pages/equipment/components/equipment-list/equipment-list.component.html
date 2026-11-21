@@ -2,7 +2,7 @@
   appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
+  [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 1.2fr 0.8fr 80px auto'"
   [mobileGridTemplate]="'2fr 1fr 40px 28px'"
   [resultCount]="filteredEquipment_().length"
   [resultTotal]="equipmentData.allEquipment_().length"
@@ -89,6 +89,9 @@
       >
         {{ 'owned_quantity' | translatePipe }}
       </div>
+      <div class="col-scaling c-grid-header-cell" appColumnSlide label="scaling_rule" role="presentation">
+        {{ 'scaling_rule' | translatePipe }}
+      </div>
       <div class="col-consumable c-grid-header-cell" appColumnSlide label="is_consumable" role="presentation">
         {{ 'is_consumable' | translatePipe }}
       </div>
@@ -131,6 +134,9 @@
           </div>
           <div class="col-owned c-list-body-cell" appColumnSlide [label]="'owned_quantity' | translatePipe">
             {{ item.ownedQuantity }}
+          </div>
+          <div class="col-scaling c-list-body-cell" appColumnSlide [label]="'scaling_rule' | translatePipe">
+            {{ scalingSummary(item) }}
           </div>
           <div class="col-consumable c-list-body-cell" appColumnSlide [label]="'is_consumable' | translatePipe">
             <span class="c-chip c-chip--tag c-chip--soft" [class.c-chip--teal]="item.isConsumable">
@@ -225,7 +231,40 @@
             <input type="checkbox" formControlName="isConsumable" />
             <span>{{ 'is_consumable' | translatePipe }}</span>
           </label>
+          <label class="c-chip c-chip--toggle">
+            <input type="checkbox" formControlName="scalingEnabled" />
+            <span>{{ 'scaling_enabled' | translatePipe }}</span>
+          </label>
         </div>
+        @if (scalingEnabled_()) {
+          <p class="inline-edit-field">{{ 'scaling_rule_hint' | translatePipe }}</p>
+          <div class="inline-edit-grid">
+            <div class="inline-edit-field">
+              <label for="inline-per-guests">{{ 'per_guests' | translatePipe }}</label>
+              <!-- prettier-ignore -->
+              <div appNumberBox><input id="inline-per-guests" type="number" formControlName="perGuests" min="1" step="1" class="c-input" /></div>
+              @if (scalingErrors_()['perGuests']; as err) {
+                <span class="c-field-error">{{ err | translatePipe }}</span>
+              }
+            </div>
+            <div class="inline-edit-field">
+              <label for="inline-min-quantity">{{ 'min_quantity' | translatePipe }}</label>
+              <!-- prettier-ignore -->
+              <div appNumberBox><input id="inline-min-quantity" type="number" formControlName="minQuantity" min="0" step="1" class="c-input" /></div>
+              @if (scalingErrors_()['minQuantity']; as err) {
+                <span class="c-field-error">{{ err | translatePipe }}</span>
+              }
+            </div>
+            <div class="inline-edit-field">
+              <label for="inline-max-quantity">{{ 'max_quantity' | translatePipe }}</label>
+              <!-- prettier-ignore -->
+              <div appNumberBox><input id="inline-max-quantity" type="number" formControlName="maxQuantity" min="0" step="1" class="c-input" /></div>
+              @if (scalingErrors_()['maxQuantity']; as err) {
+                <span class="c-field-error">{{ err | translatePipe }}</span>
+              }
+            </div>
+          </div>
+        }
         <div class="inline-edit-field inline-edit-notes">
           <label for="inline-notes">{{ 'notes' | translatePipe }}</label>
           <textarea id="inline-notes" formControlName="notes" rows="2" class="c-input"></textarea>

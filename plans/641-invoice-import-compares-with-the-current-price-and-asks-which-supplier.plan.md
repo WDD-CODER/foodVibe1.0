@@ -85,6 +85,7 @@ public/assets/data/dictionary.json
 e2e/ui/641-1.spec.ts
 docs/brain/component-families.md
 docs/brain/inventory.md
+shared/schemas/entities/invoice.schema.ts
 ```
 
 ## Read Scope
@@ -164,11 +165,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Compare an invoice price with the product's current price even when another supplier set it — previousPriceOf and its cases — src/app/core/utils/price-change.util.ts, src/app/core/utils/price-change.util.spec.ts
-- [ ] A2: Let the server update an existing supplier's price on request instead of adding a supplier — targetSupplierId on the apply row, the check, the history and invoice line, the server cases — server/routes/product-import.js, server/test/product-import.test.js
-- [ ] A3: Show the change and ask which supplier to update in the import preview — view_, the row choice, the apply body, the dictionary keys, the spec cases — src/app/pages/inventory/components/product-import/**, src/app/core/services/product-import.service.ts, public/assets/data/dictionary.json
-- [ ] A4: Pick the existing supplier instead of creating a second one with the same name — the name check in the add-supplier flow and its spec — src/app/core/services/add-supplier-flow.service.ts, src/app/core/services/add-supplier-flow.service.spec.ts
-- [ ] A5: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/641-1.spec.ts
+- [x] A1: Compare an invoice price with the product's current price even when another supplier set it — previousPriceOf and its cases — src/app/core/utils/price-change.util.ts, src/app/core/utils/price-change.util.spec.ts
+- [x] A2: Let the server update an existing supplier's price on request instead of adding a supplier — targetSupplierId on the apply row, the check, the history and invoice line, the server cases — server/routes/product-import.js, server/test/product-import.test.js
+- [x] A3: Show the change and ask which supplier to update in the import preview — view_, the row choice, the apply body, the dictionary keys, the spec cases — src/app/pages/inventory/components/product-import/**, src/app/core/services/product-import.service.ts, public/assets/data/dictionary.json
+- [x] A4: Pick the existing supplier instead of creating a second one with the same name — the name check in the add-supplier flow and its spec — src/app/core/services/add-supplier-flow.service.ts, src/app/core/services/add-supplier-flow.service.spec.ts
+- [x] A5: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/641-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: 628 (preview, header strip, apply with invoice), 629 (rise alert, impact panel, dashboard card).
@@ -187,3 +188,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: compare with the invoice supplier's own price first, else the lowest other price — why: the lowest price is
   the one recipes cost with today, so the rise the owner sees is the real one.
 - decided: same-name suppliers default to «עדכון» — why: that is Dandan's case, a duplicate of the same supplier.
+- decided: the server test lives in the new `server/test/product-import-apply.test.js` (the plan's `product-import.test.js` does not exist).
+- decided: with no invoice supplier chosen the row is compared with the lowest price but shows no choice (apply behaves as today).
+- scope extended: shared/schemas/entities/invoice.schema.ts — optional `supplierId` on `invoiceLineSchema` so the invoice line records the supplier whose price changed (ask 641-1, approved by the Human).
+- round 2 (resume): restored the first attempt's files from 983099d and fixed review rev-1: each saved invoice line now carries `supplierId` (the target supplier on «עדכון», else the invoice supplier) — server/routes/product-import.js.
+- evidence: `pnpm run build:schemas` → 0; `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm --dir server run lint` → 0; `pnpm run lint:reuse` → 0; `lint:icons`, `lint:no-native-select` → 0; `pnpm run test:ci` → 0, TOTAL 2602 SUCCESS; `pnpm run test:server` → 0, 145 files, 1919 passed.
+- [ui] 641-1: written, not run.

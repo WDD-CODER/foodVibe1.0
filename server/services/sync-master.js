@@ -131,6 +131,45 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
     return supplierIdMap;
   }
 
+  // Plan 649: every source of a synced product points at a supplier of THIS business. A master supplier the
+  // business has no copy of gets one (as sync does for suppliers); a supplier that exists nowhere is cleared
+  // (the source keeps its price) and counted.
+  let unknownSupplierSources = 0;
+
+  async function resolveSourceSupplier(masterSupplierId) {
+    const supMap = await getSupplierIdMap();
+    const mapped = supMap.get(masterSupplierId);
+    if (mapped) return mapped;
+    const masterSupplier = typeof masterSupplierId === 'string'
+      ? await db.collection('suppliers').findOne({ _id: masterSupplierId, businessId: MASTER_BUSINESS_ID, ...LIVE })
+      : null;
+    if (!masterSupplier) {
+      unknownSupplierSources++;
+      return '';
+    }
+    const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, businessId: _b, createdBy: _cb, ...rest } = masterSupplier;
+    const newSupplierId = makeId();
+    await db.collection('suppliers').insertOne({
+      ...rest,
+      _id: newSupplierId,
+      userId: createdBy,
+      businessId,
+      createdBy,
+      _masterId: masterSupplierId,
+      _userModified: false,
+    });
+    supMap.set(masterSupplierId, newSupplierId);
+    return newSupplierId;
+  }
+
+  async function remapSources(sources) {
+    const out = [];
+    for (const s of sources) {
+      out.push(s && s.supplierId ? { ...s, supplierId: await resolveSourceSupplier(s.supplierId) } : s);
+    }
+    return out;
+  }
+
   // recipes and dishes share a global name namespace — a name that exists
   // in either collection counts as "taken" for collision purposes.
   // Build this cross-collection name set once, before the per-collection loop.
@@ -312,12 +351,7 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
 
         // Remap supplier IDs so cloned products reference user-scoped supplier IDs.
         if (entityType === 'products') {
-          const supMap = await getSupplierIdMap();
-          if (Array.isArray(clone.sources)) {
-            clone.sources = clone.sources.map(s =>
-              s.supplierId ? { ...s, supplierId: supMap.get(s.supplierId) ?? s.supplierId } : s
-            );
-          }
+          if (Array.isArray(clone.sources)) clone.sources = await remapSources(clone.sources);
         }
 
         toInsert.push(clone);
@@ -335,18 +369,18 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
 
         // For products: remap master supplier IDs to user-scoped IDs, then merge sources.
         if (entityType === 'products') {
-          const supMap = await getSupplierIdMap();
-          if (Array.isArray(masterRest.sources)) {
-            masterRest.sources = masterRest.sources.map(s =>
-              s.supplierId ? { ...s, supplierId: supMap.get(s.supplierId) ?? s.supplierId } : s
-            );
-          }
+          if (Array.isArray(masterRest.sources)) masterRest.sources = await remapSources(masterRest.sources);
           // Merge sources — deduplicate by (now remapped) supplierId
           const existingSources = existing.sources || [];
           const existingSupplierIds = new Set(existingSources.map(s => s.supplierId).filter(Boolean));
-          const newSources = (masterRest.sources || []).filter(
-            s => !s.supplierId || !existingSupplierIds.has(s.supplierId)
-          );
+          // Plan 649: a source with no supplier (cleared, or never set) is added once, not on every sync.
+          let hasNoSupplierSource = existingSources.some(s => !s.supplierId);
+          const newSources = (masterRest.sources || []).filter(s => {
+            if (s.supplierId) return !existingSupplierIds.has(s.supplierId);
+            if (hasNoSupplierSource) return false;
+            hasNoSupplierSource = true;
+            return true;
+          });
           masterRest.sources = [...existingSources, ...newSources];
           // Plan 485: a master rename never gives this clone a name another product of the business has.
           const nextName = normalizeProductName(masterRest.nameHebrew);
@@ -369,7 +403,22 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
       logger.info({ event: 'sync.master.clones_skipped', type: 'products', count: productNameCollisions, reason: 'name collision' });
     }
 
-    if (toInsert.length > 0) {
+    if (toInsert.length > 0 && entityType === 'products') {
+      // Plan 648: an upsert keyed by { businessId, _masterId } (unique partial index, server/db.js) — two syncs at
+      // once cannot both insert a copy. A duplicate-key error means "already there": ignored.
+      const ops = toInsert.map(({ businessId: b, _masterId: m, ...doc }) => ({
+        updateOne: { filter: { businessId: b, _masterId: m }, update: { $setOnInsert: doc }, upsert: true },
+      }));
+      try {
+        const res = await col.bulkWrite(ops, { ordered: false });
+        totalInserted += res.upsertedCount ?? 0;
+      } catch (err) {
+        const errors = err?.writeErrors ?? [];
+        const onlyDuplicates = errors.length > 0 && errors.every(e => (e.code ?? e.err?.code) === 11000);
+        if (!onlyDuplicates) throw err;
+        totalInserted += err.result?.upsertedCount ?? err.result?.nUpserted ?? 0;
+      }
+    } else if (toInsert.length > 0) {
       await col.insertMany(toInsert, { ordered: false });
       totalInserted += toInsert.length;
     }
@@ -381,6 +430,10 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
       );
     }
     totalUpdated += toUpdate.length;
+  }
+
+  if (unknownSupplierSources > 0) {
+    logger.info({ event: 'sync.supplier_unknown', count: unknownSupplierSources });
   }
 
   return { inserted: totalInserted, updated: totalUpdated };

@@ -167,12 +167,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Keep the stock count sheet fast with thousands of products — windowed rows, computed unit options and base text, the spec with 3,000 products — src/app/pages/inventory/components/stock-count/**
-- [ ] A2: Stop the counter from forcing a page layout on every check — measure on value change, its spec — src/app/shared/counter/**
-- [ ] A3: Let the header answer while a page loads — header above the loading overlay, the avatar spec — src/app/core/components/header/**, src/app/shared/loader/**, src/app/app.component.*
-- [ ] A4: Show the change in a chip, refuse a same-name new supplier and confirm a big change — the chip, the choice rule, the confirm, the keys, the specs — src/app/pages/inventory/components/product-import/**, public/assets/data/dictionary.json
-- [ ] A5: Put a gap between the history box and the reason field — the style — src/app/pages/platform-dashboard/platform-dashboard.page.scss
-- [ ] A6: Prove it in the running app and run every check — the screen spec, then the Done-when commands in order — e2e/ui/645-1.spec.ts, docs/brain/inventory.md
+- [x] A1: Keep the stock count sheet fast with thousands of products — windowed rows, computed unit options and base text, the spec with 3,000 products — src/app/pages/inventory/components/stock-count/**
+- [x] A2: Stop the counter from forcing a page layout on every check — measure on value change, its spec — src/app/shared/counter/**
+- [x] A3: Let the header answer while a page loads — header above the loading overlay, the avatar spec — src/app/core/components/header/**, src/app/shared/loader/**, src/app/app.component.*
+- [x] A4: Show the change in a chip, refuse a same-name new supplier and confirm a big change — the chip, the choice rule, the confirm, the keys, the specs — src/app/pages/inventory/components/product-import/**, public/assets/data/dictionary.json
+- [x] A5: Put a gap between the history box and the reason field — the style — src/app/pages/platform-dashboard/platform-dashboard.page.scss
+- [x] A6: Prove it in the running app and run every check — the screen spec, then the Done-when commands in order — e2e/ui/645-1.spec.ts, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 636, 637 (the sheet), 641 (the import choice), 644 (the dialog styles).
@@ -189,3 +189,26 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the confirm covers drops as well as rises — why: Dandan asked for "over the standard up or down".
 - decided: the threshold is the existing `priceRiseAlertPct` (default 5) for both directions — why: one number the owner
   already sets.
+- plan file: absent from `origin/orch/mod-fixes-2` (only on main, bfab383a); the builder took it into its branch with
+  `git checkout bfab383a -- <plan>` (the plan file is always in scope).
+- A1: `shownRows_` draws the first 50 matching rows; "show more" (`stk-show-more`, key `stk_show_more`) adds 50; a new
+  search or filter starts again at 50 (`linkedSignal`). Search runs over the whole list through a computed map of
+  normalised names; unit options (`unitOptionsById_`) and base text (`baseTextById_`, only rows in `rows_`) are computed
+  maps carried on the row, so the template calls no method per row. A refused row beyond the drawn page is drawn.
+- A2: `app-counter` measures in `afterNextRender` from an effect on the shown text; `ngAfterViewChecked` removed.
+- A3: the scope names `src/app/app.component.*` but the file lives in `src/app/appRoot/`; not needed — the header's
+  layer is raised to 160 (overlay 150, modals 1000+). The spec fails with 100 (checked) and passes with 160.
+- A4: the change sits in `c-chip c-chip--tag c-chip--sm` + `c-chip--red` (rise) / `c-chip--green` (drop). Same trimmed,
+  case-insensitive supplier name → only «עדכון»; an earlier "add" pick is ignored. `isBigPriceChange` in
+  `price-change.util.ts`; one `ConfirmModalService.open` (warning, header `import_confirm_big_change_title`, button
+  `import_confirm_big_change_ok`), one line per item; nothing is awaited when no row needs it. `src/styles.scss`
+  (append-only hotspot) gets `.confirm-modal-message { white-space: pre-line }` so the lines show; no dictionary value
+  holds a line break, so other confirms look the same.
+- A5: `.pbd-history` gets `margin-block-start: var(--space-3)`.
+- A6: `e2e/ui/645-1.spec.ts` written, not run (no app or QA login in the worktree). `node scripts/inventory.mjs` → exit 0,
+  inventory.md unchanged.
+- Evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm run test:ci` → 0, TOTAL: 2621 SUCCESS;
+  kit-manifest-check → 0; scope-check → SCOPE: ok; kit-checks → KIT_CHECKS: ok (after rewording a comment that named
+  the loader tag and reusing `.stock-count__state` for the show-more row); override-check, lint:icons,
+  lint:no-native-select, plan-ledger-check, breadcrumbs-check, ci-scope-check, lint:reuse → 0; log-query → 0 (SKIP: no
+  database configured).

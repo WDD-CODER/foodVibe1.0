@@ -1,0 +1,31 @@
+<section class="price-impact c-glass-panel" data-testid="price-impact" dir="rtl">
+  <h2 class="price-impact__title">{{ 'price_impact_title' | translatePipe }}</h2>
+  @if (rows().length === 0) {
+    <p class="price-impact__none" data-testid="price-impact-none">{{ 'price_impact_none' | translatePipe }}</p>
+  } @else {
+    <ul class="price-impact__list">
+      @for (row of shown_(); track row.id) {
+        <li class="price-impact__row" data-testid="price-impact-row">
+          <span class="price-impact__who">
+            <span class="price-impact__name">{{ row.name }}</span>
+            <span class="price-impact__tag">{{ (row.isDish ? 'dish' : 'preparation') | translatePipe }}</span>
+          </span>
+          <span class="price-impact__nums">
+            <span>
+              {{ 'price_impact_before' | translatePipe }}
+              <span class="c-num" dir="ltr">{{ formatMoney(row.before) }}</span>
+            </span>
+            <span>
+              {{ 'price_impact_after' | translatePipe }}
+              <span class="c-num" dir="ltr">{{ formatMoney(row.after) }}</span>
+            </span>
+            <span class="c-num price-impact__pct" dir="ltr">{{ pctText(row.changePct) }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+    @if (moreText_()) {
+      <p class="price-impact__more" data-testid="price-impact-more">{{ moreText_() }}</p>
+    }
+  }
+</section>

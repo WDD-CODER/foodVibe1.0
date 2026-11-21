@@ -1,0 +1,55 @@
+@layer components.diag-invoice-queue {
+  :host {
+    display: block;
+  }
+
+  .diag-queue {
+    display: grid;
+    gap: var(--space-4);
+    align-content: start;
+    min-inline-size: 0;
+  }
+
+  .diag-queue__pick {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+
+    padding: var(--space-4);
+  }
+
+  .diag-queue__hint,
+  .diag-queue__count,
+  .diag-queue__locked {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    line-height: var(--lh-snug);
+  }
+
+  .diag-queue__list {
+    display: grid;
+    gap: var(--space-2);
+
+    margin-block: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .diag-queue__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .diag-queue__name {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    unicode-bidi: plaintext;
+  }
+}

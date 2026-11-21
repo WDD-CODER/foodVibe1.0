@@ -1,0 +1,141 @@
+<div class="stock-ai">
+  <button
+    type="button"
+    class="c-chip c-chip--tap stock-ai__open"
+    data-testid="stk-ai-open"
+    [attr.aria-expanded]="open_()"
+    [disabled]="disabled() && !open_()"
+    (click)="toggle_()"
+  >
+    <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+    <span>{{ 'stk_ai_open' | translatePipe }}</span>
+  </button>
+
+  @if (open_()) {
+    <div class="stock-ai__recorder">
+      <app-voice-note
+        purpose="stock"
+        [(text)]="text_"
+        placeholderKey="stk_ai_open"
+        sendLabelKey="stk_ai_open"
+        busyLabelKey="stk_ai_reading"
+        [busy]="busy_()"
+        [disabled]="busy_()"
+        (send)="extract_($event)"
+      />
+      @if (busy_()) {
+        <div class="stock-ai__busy" data-testid="stk-ai-busy">
+          <app-loader size="small" [inline]="true" />
+          <span>{{ 'stk_ai_reading' | translatePipe }}</span>
+        </div>
+      }
+      @if (switchLabel_()) {
+        <button type="button" class="c-chip c-chip--tap" (click)="switchModel_()">{{ switchLabel_() }}</button>
+      }
+    </div>
+  }
+
+  @if (conflicts().length) {
+    <section
+      class="stock-ai__group"
+      data-testid="stk-ai-conflicts"
+      [attr.aria-label]="'stk_ai_conflict_title' | translatePipe"
+    >
+      <h4 class="stock-ai__title">{{ 'stk_ai_conflict_title' | translatePipe }}</h4>
+      @for (c of conflicts(); track c.productId) {
+        <div class="stock-ai__row">
+          <span class="stock-ai__name">{{ c.name }}</span>
+          <span class="stock-ai__muted"
+            >{{ 'stk_ai_on_sheet' | translatePipe }}: <bdi>{{ c.onSheet }}</bdi></span
+          >
+          <span class="stock-ai__muted"
+            >{{ 'stk_ai_suggested' | translatePipe }}: <bdi>{{ c.suggested }}</bdi></span
+          >
+          <button type="button" class="c-chip c-chip--tap" (click)="replace.emit(c.productId)">
+            {{ 'stk_ai_replace' | translatePipe }}
+          </button>
+          <button type="button" class="c-chip c-chip--tap" (click)="keep.emit(c.productId)">
+            {{ 'stk_ai_keep' | translatePipe }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+
+  @if (unmatched().length) {
+    <section
+      class="stock-ai__group"
+      data-testid="stk-ai-unmatched"
+      [attr.aria-label]="'stk_ai_unmatched_title' | translatePipe"
+    >
+      <h4 class="stock-ai__title">{{ 'stk_ai_unmatched_title' | translatePipe }}</h4>
+      @for (u of unmatched(); track u.id) {
+        <div class="stock-ai__row stock-ai__row--line" data-testid="stk-ai-line">
+          <span class="stock-ai__name">{{ u.text }}</span>
+          <span class="stock-ai__muted">{{
+            (u.status === 'choose' ? 'stk_ai_choose' : 'stk_ai_not_found') | translatePipe
+          }}</span>
+          <button
+            type="button"
+            class="c-icon-btn"
+            [attr.aria-label]="'remove' | translatePipe"
+            [attr.title]="'remove' | translatePipe"
+            (click)="dismiss.emit(u.id)"
+          >
+            <lucide-icon name="x" [size]="16"></lucide-icon>
+          </button>
+          @if (u.missing.includes('product')) {
+            <div class="stock-ai__question" data-testid="stk-ai-q-product">
+              <span class="stock-ai__muted">{{ 'stk_which_product' | translatePipe }}</span>
+              @if (u.candidates.length) {
+                <div class="c-chip-group stock-ai__choices" data-testid="stk-ai-candidates">
+                  @for (c of u.candidates; track c.productId) {
+                    <label class="c-chip c-chip--toggle">
+                      <input
+                        type="radio"
+                        [name]="'stk-ai-pick-' + u.id"
+                        [value]="c.productId"
+                        [checked]="false"
+                        (change)="pickProduct_(u.id, c.productId)"
+                      />
+                      <span>{{ c.name }}</span>
+                    </label>
+                  }
+                </div>
+              }
+              <div class="stock-ai__search" data-testid="stk-ai-search">
+                <app-search-combobox
+                  [options]="products()"
+                  [labelOf]="labelOf_"
+                  [keyOf]="keyOf_"
+                  [query]="query_(u.id)"
+                  (queryChange)="setQuery_(u.id, $event)"
+                  [open]="true"
+                  [minChars]="1"
+                  [maxResults]="5"
+                  listPosition="inline"
+                  placeholder="stk_ai_search"
+                  (picked)="pickFromSearch_(u.id, $event)"
+                />
+              </div>
+            </div>
+          }
+          @if (u.missing.includes('amount')) {
+            <div class="stock-ai__question" data-testid="stk-ai-q-amount" dir="ltr">
+              <span class="stock-ai__muted" dir="auto">{{ 'stk_how_much' | translatePipe }}</span>
+              <app-counter [value]="0" [min]="0" (valueChange)="amount.emit({ id: u.id, quantity: $event })" />
+            </div>
+          }
+          @if (u.missing.includes('unit')) {
+            <p class="stock-ai__question stock-ai__muted" data-testid="stk-ai-q-unit">
+              {{ 'stk_choose_unit' | translatePipe }}
+            </p>
+          }
+          <button type="button" class="c-chip c-chip--tap" data-testid="stk-ai-add-new" (click)="addNew.emit(u.id)">
+            {{ 'stk_ai_add_new' | translatePipe }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+</div>

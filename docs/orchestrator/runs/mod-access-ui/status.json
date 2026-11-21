@@ -1,0 +1,206 @@
+{
+  "run": "mod-access-ui",
+  "branch": "orch/mod-access-ui",
+  "base": "main",
+  "startedAt": "2026-11-18T19:13:02.714Z",
+  "mainShaAtStart": "b15c69822e19e8e0e93b243a47549675bbaec9e1",
+  "plans": {
+    "632": {
+      "nnn": "632",
+      "title": "Business switcher, the acting banner, entering a business from the platform table and the owner's access list",
+      "branch": "feat/632-business-switcher-acting-banner",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T19:14:28.443Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T19:38:38.813Z"
+        }
+      },
+      "humanItems": [
+        "Dandan, as the platform admin, taps \"כניסה לעסק\" on a test business in the platform table: the app reloads, the banner names that business, the lists show that business's products; \"חזרה לעסק שלי\" brings his own business back.",
+        "Dandan gives a test user access from the platform table, signs in as that user, switches into the business from the header, then as the owner removes the access in Settings: the consultant's next tap lands him in his own business with the notice.",
+        "The banner reads clearly on a phone and does not cover the page's own controls."
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T19:14:28.303Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:14:28.445Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:35:50.449Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:35:50.725Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:35:50.954Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:38:32.812Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:38:38.815Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:38:55.986Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:39:55.447Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.7,
+      "sha": "d026678f297bde71a3347de92d04713029215dd2",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1279.8,
+          "tokens": {
+            "input": 9630347,
+            "output": 78119
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.2,
+          "tokens": {
+            "input": 257203,
+            "output": 1452
+          },
+          "exit": 0
+        }
+      ],
+      "uiCards": [
+        {
+          "card": "On `/settings`, the QA owner taps the tab \"גישת יועצים\" and sees \"לאף יועץ אין כרגע גישה לעסק\" (`e2e/ui/632-1.spec.ts`).",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 0
+        },
+        {
+          "card": "On `/dashboard`, the QA owner (nothing to switch to) sees the business name in the header and no element `[data-testid=\"acting-banner\"]` and no `[data-testid=\"b",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 0
+        }
+      ],
+      "checkedHead": "4a4494734f2ad6154bd0b098aad3b38aef178e63"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T19:14:28.166Z",
+      "plan": "632",
+      "text": "the folder foodVibe1.0-orch-mod-access-ui-632 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T19:35:48.370Z",
+      "plan": "632",
+      "text": "builder left undone (round 0): [ui] 632-1: written, not run (e2e/ui/632-1.spec.ts); [ui] 632-2: written, not run (e2e/ui/632-2.spec.ts); [human] platform admin enters a business and returns; [human] grant, switch, then the owner removes the access; [human] banner reads clearly on a phone"
+    },
+    {
+      "at": "2026-11-18T19:35:50.614Z",
+      "plan": "632",
+      "text": "[ui] On `/settings`, the QA owner taps the tab \"גישת יועצים\" and sees \"לאף יועץ אין כרגע גישה לעסק\" (`e2e/ui/632-1.spec.ts`).: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T19:35:50.842Z",
+      "plan": "632",
+      "text": "[ui] On `/dashboard`, the QA owner (nothing to switch to) sees the business name in the header and no element `[data-testid=\"acting-banner\"]` and no `[data-test: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-18T19:39:04.133Z",
+      "plan": "632",
+      "text": "the folder foodVibe1.0-orch-merge-mod-access-ui was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 16.7,
+  "updatedAt": "2026-11-18T19:43:49.809Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "632",
+      "type": "behaviour",
+      "text": "behaviour: PermissionService.isOwner_ reads user_().businessRole (owner or consultant) rather than UserService.businessRole_ — many specs stub UserService with user_ only — reverse: read businessRole_ and update those stubs",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "632",
+      "type": "behaviour",
+      "text": "behaviour: scope extended: plan file Reuse Check rows now name file stems and classes, docs/brain/component-families.md gained an APP_RELOAD line and an acting-banner family, docs/brain/inventory.md was regenerated — the reuse check matches whole words, and the plan's rung 3 and 4 rows need registry lines — reverse: revert those doc edits (the reuse check then fails)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "632",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons.ts lacks UserCheck, UserPlus, ArrowLeftRight and Undo2; the new specs add them to their own pick(...) because the file is outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-18T19:43:49.808Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-18T19:43:49.809Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

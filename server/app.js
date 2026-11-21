@@ -23,6 +23,7 @@ const bookingsRouter = require('./routes/bookings');
 const productImportRouter = require('./routes/product-import');
 const filesRouter = require('./routes/files');
 const accessRouter = require('./routes/access');
+const notificationsRouter = require('./routes/notifications');
 const stockRouter = require('./routes/stock');
 const diagRouter = require('./routes/diag');
 const adminLearningRouter = require('./routes/admin-learning');
@@ -225,6 +226,7 @@ app.use('/api/v1/product-import', productImportRouter);
 // Plan 615 (C-REGISTRY): empty routers, filled by plans 619, 631, 635, 633.
 app.use('/api/v1/files', filesRouter);
 app.use('/api/v1/access', accessRouter);
+app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/stock', stockRouter);
 app.use('/api/v1/diag', diagRouter);
 // Plan 543 (ADR 0030): the public door for non-members — never behind verifyToken, so no usage is recorded.

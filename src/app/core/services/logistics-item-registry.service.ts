@@ -2,12 +2,12 @@ import { Injectable, Injector, Signal, computed, inject } from '@angular/core'
 import type { TaxonomyTermOf } from '@models/v2'
 import type { EnvironmentType } from '@models/venue.model'
 import { LOGISTICS_SECTIONS, type LogisticsPhase } from '@schemas/entities'
+import { visibleLogisticsItems } from '@schemas/logistics/visible-items'
 import { BusinessService } from './business.service'
 import { TaxonomyStore } from './taxonomy-store.service'
 
 export type LogisticsItemTerm = TaxonomyTermOf<'logisticsItem'>
 
-const MASTER = '__master__'
 const isBuiltInSection = (s: string): boolean => (LOGISTICS_SECTIONS as readonly string[]).includes(s)
 const isRemoved = (t: LogisticsItemTerm): boolean => !!t.removedAt && t.removedAt > 0
 
@@ -74,25 +74,13 @@ export class LogisticsItemRegistryService {
     phase: LogisticsPhase,
     environment: EnvironmentType | undefined
   ): LogisticsItemTerm[] {
-    const at = createdAt ?? Date.now()
-    const hidden = this.hiddenAt_()
-    const all = this.allItems_()
-    const byKey = new Map<string, LogisticsItemTerm[]>()
-    for (const t of all) byKey.set(t.key, [...(byKey.get(t.key) ?? []), t])
-    const rows: LogisticsItemTerm[] = []
-    for (const [key, terms] of byKey) {
-      const real = terms.filter((t) => !t.foldedAt)
-      const removed = real.filter(isRemoved).sort((a, b) => (b.removedAt ?? 0) - (a.removedAt ?? 0))
-      const row = real.find((t) => !isRemoved(t)) ?? removed[0]
-      if (!row) continue
-      const start = Math.min(...terms.map((t) => (t.createdBy === MASTER ? 0 : t.createdAt)))
-      const hideAt = hidden.get(key)
-      const ends = [...removed.map((t) => t.removedAt as number), ...(hideAt !== undefined ? [hideAt] : [])]
-      const end = ends.length ? Math.min(...ends) : undefined
-      if (start <= at && (end === undefined || at < end) && this.matches(row, phase, environment)) rows.push(row)
-    }
-    // keep the store's order (shared first, then own, by sortOrder)
-    return rows.sort((a, b) => all.indexOf(a) - all.indexOf(b))
+    return visibleLogisticsItems({
+      terms: this.allItems_(),
+      hiddenLogisticsKeys: this.injector.get(BusinessService).business_()?.hiddenLogisticsKeys ?? [],
+      eventCreatedAt: createdAt,
+      phase,
+      environment
+    })
   }
 
   loadSafely(options?: { track?: boolean }): Promise<void> {

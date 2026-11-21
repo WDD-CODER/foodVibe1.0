@@ -70,6 +70,13 @@ export class EventPipelineService {
     )
   }
 
+  /** Plan 624: ticks or unticks one row of the loading list (any member of the business). */
+  saveLoading(eventId: string, key: string, loaded: boolean): Promise<PipelineResult> {
+    return this.run('loading.save', 'server_error', () =>
+      this.http.put<MenuEvent>(`${EVENTS_URL}/${eventId}/loading`, { key, loaded })
+    )
+  }
+
   saveClosing(eventId: string, closing: EventClosing): Promise<PipelineResult> {
     return this.run('closing.save', 'server_error', () =>
       this.http.put<MenuEvent>(`${EVENTS_URL}/${eventId}/closing`, { closing })

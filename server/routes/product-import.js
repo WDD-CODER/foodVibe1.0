@@ -4,7 +4,9 @@
  * A dedicated router because one 200-row import must not eat the generic write limiter (300 writes / 15 min).
  *
  * POST /api/v1/product-import/apply  { supplierId: string | null, rows: ApplyRow[], invoice?: InvoiceApplyInput }
- *   ApplyRow = { name, baseUnit, price: number | null, category: string | null, purchaseUnit: string | null, purchaseQty: number | null }
+ *   ApplyRow = { name, baseUnit, price: number | null, category: string | null, purchaseUnit: string | null, purchaseQty: number | null,
+ *     targetSupplierId?: string }  (plan 641: update this supplier's existing source of the product instead of adding the
+ *     chosen supplier's; not a source of the product or not a supplier of the business -> 400 BAD_TARGET_SUPPLIER, nothing written)
  *   -> { created, updated, skipped, skippedRows: [{ name, reason: 'same_price' | 'no_price' | 'invalid' | 'duplicate' }], invoiceId? }
  * A matching product (same normalized name, same business) only gets its price/supplier updated; a new name is created.
  *
@@ -41,6 +43,8 @@ const { invoiceApplyInputSchema } = require('../generated/schemas/entities/invoi
 const { invoiceResolveRequestSchema } = require('../generated/schemas/entities/invoice-alias.schema')
 const { learnFromApply, resolveNames } = require('../services/invoice-memory')
 const { getBusiness } = require('../services/business')
+const { createPriceChangeAlerts } = require('../services/notifications')
+const { BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 
 const router = Router()
 
@@ -99,6 +103,22 @@ router.post('/apply', verifyToken, (req, res, next) => {
       if (!byName.has(nameKey)) byName.set(nameKey, product) // first one wins, same as the client preview
     }
 
+    // Plan 641: a row may name the supplier whose existing price it updates; checked for every row before any write.
+    const targetOf = row => (typeof row?.targetSupplierId === 'string' && row.targetSupplierId ? row.targetSupplierId : null)
+    const targetIds = [...new Set(rows.map(targetOf).filter(Boolean))]
+    if (targetIds.length) {
+      const found = await col('suppliers').find({ _id: { $in: targetIds }, ...scopeFilter(req), ...LIVE }, { projection: { _id: 1 } }).toArray()
+      const known = new Set(found.map(s => s._id))
+      for (const row of rows) {
+        const target = targetOf(row)
+        if (!target) continue
+        const name = typeof row.name === 'string' ? row.name.trim().replace(/\s+/g, ' ') : ''
+        const product = byName.get(normalizeProductName(name))
+        const isSource = Array.isArray(product?.sources) && product.sources.some(source => source.supplierId === target)
+        if (!known.has(target) || !isSource) return res.status(400).json({ error: 'BAD_TARGET_SUPPLIER' })
+      }
+    }
+
     const unitTerms = await col('taxonomyTerms').find({ ...readScope(req, 'taxonomyTerms'), kind: 'unit' }, { projection: { key: 1 } }).toArray()
     const knownUnits = new Set([...BASE_UNITS, ...unitTerms.map(term => term.key)])
 
@@ -110,6 +130,7 @@ router.post('/apply', verifyToken, (req, res, next) => {
     const seen = new Set()
     const outcomes = []
     const historyQueue = []
+    const alertQueue = []
 
     for (const [index, row] of rows.entries()) {
       const name = typeof row?.name === 'string' ? row.name.trim().replace(/\s+/g, ' ') : ''
@@ -123,21 +144,23 @@ router.post('/apply', verifyToken, (req, res, next) => {
       if (match) {
         if (price === null) { outcomes[index] = { result: 'no_price', productId: match._id, price }; skippedRows.push({ name, reason: 'no_price' }); continue }
         const sources = Array.isArray(match.sources) ? match.sources.map(source => ({ ...source })) : []
-        const current = sources.find(source => source.supplierId === sourceKey)
+        const rowSupplierKey = targetOf(row) ?? sourceKey
+        const current = sources.find(source => source.supplierId === rowSupplierKey)
         const oldPrice = current?.price
         if (current && current.price === price) { outcomes[index] = { result: 'same_price', productId: match._id, price }; skippedRows.push({ name, reason: 'same_price' }); continue }
         if (current) {
           current.price = price
         } else {
-          sources.push({ supplierId: sourceKey, price, addedBy: userId, addedAt: now })
+          sources.push({ supplierId: rowSupplierKey, price, addedBy: userId, addedAt: now })
         }
         const next = { ...match, sources, updatedAt: now, _userModified: true }
         if (!checkStoredDoc('products', next).ok) { outcomes[index] = { result: 'invalid', price }; skippedRows.push({ name, reason: 'invalid' }); continue }
         const prevPrice = typeof oldPrice === 'number' && oldPrice > 0 ? oldPrice : undefined
-        const entry = { productId: match._id, supplierId: sourceKey, price }
+        const entry = { productId: match._id, supplierId: rowSupplierKey, price }
         if (prevPrice !== undefined) { entry.prevPrice = prevPrice; entry.changePct = changePct(prevPrice, price) }
         historyQueue.push(entry)
-        outcomes[index] = { result: 'updated', productId: match._id, price }
+        if (entry.changePct !== undefined) alertQueue.push({ productId: match._id, productName: name, supplierId: rowSupplierKey, from: prevPrice, to: price, changePct: entry.changePct })
+        outcomes[index] = { result: 'updated', productId: match._id, price, ...(rowSupplierKey ? { supplierId: rowSupplierKey } : {}) }
         updates.push({ updateOne: { filter: { _id: match._id, ...scopeFilter(req), ...LIVE }, update: { $set: { sources, updatedAt: now, _userModified: true } } } })
         continue
       }
@@ -169,7 +192,7 @@ router.post('/apply', verifyToken, (req, res, next) => {
       })
       if (!checkStoredDoc('products', doc).ok) { outcomes[index] = { result: 'invalid', price }; skippedRows.push({ name, reason: 'invalid' }); continue }
       created.push(doc)
-      outcomes[index] = { result: 'created', productId: _id, price }
+      outcomes[index] = { result: 'created', productId: _id, price, ...(price !== null && sourceKey ? { supplierId: sourceKey } : {}) }
       if (price !== null) historyQueue.push({ productId: _id, supplierId: sourceKey, price })
     }
 
@@ -198,12 +221,29 @@ router.post('/apply', verifyToken, (req, res, next) => {
       trailFailed('history', err)
     }
 
+    // Plan 646: a big price change reaches the owner and the consultants; a failure is logged inside and never changes the answer.
+    if (alertQueue.length) {
+      try {
+        const business = await getBusiness(req.user.businessId)
+        const ids = [...new Set(alertQueue.map(a => a.supplierId).filter(Boolean))]
+        const found = ids.length ? await col('suppliers').find({ _id: { $in: ids }, ...scopeFilter(req) }, { projection: { nameHebrew: 1 } }).toArray() : []
+        const names = new Map(found.map(sup => [sup._id, sup.nameHebrew ?? '']))
+        await createPriceChangeAlerts(mongoose.connection.db, business, alertQueue.map(a => ({ ...a, supplierName: names.get(a.supplierId) ?? '' })), req.log)
+      } catch (err) {
+        req.log.error({ err, event: 'notifications.write_failed', rows: alertQueue.length })
+      }
+    }
+
     let invoiceOk = false
     let supplierTaxSet = false
     let aliasesOwn = 0
     let aliasesShared = 0
     if (invoice) {
-      const savedLines = buildInvoiceLines(invoice.lines, outcomes)
+      // Plan 641: each saved line records the supplier whose price it changed.
+      const savedLines = buildInvoiceLines(invoice.lines, outcomes).map((line, i) => {
+        const changedBy = outcomes[invoice.lines[i].row]?.supplierId
+        return changedBy ? { ...line, supplierId: changedBy } : line
+      })
       if (historyOk) {
         try {
           const doc = stampNew(req, {
@@ -299,6 +339,40 @@ router.post('/resolve', verifyToken, (req, res, next) => {
     res.json({ matches })
   } catch (err) {
     req.log.error({ err, event: 'product_import.resolve_failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+/**
+ * Plan 629: GET /api/v1/product-import/price-rises?days=60 -> [{ productId, supplierId, from, to, changePct, at }]
+ * The newest price-history row per product + supplier whose changePct is at or above the business's priceRiseAlertPct,
+ * within the last `days` (1-365). Owner or consultant (editMoney on products). No product name or price is logged.
+ */
+router.get('/price-rises', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'editMoney', { type: 'products' })) next()
+}, async (req, res) => {
+  try {
+    const raw = req.query.days
+    const days = raw === undefined ? 60 : (typeof raw === 'string' && /^\d+$/.test(raw) ? Number(raw) : NaN)
+    if (!Number.isInteger(days) || days < 1 || days > 365) return res.status(400).json({ error: 'BAD_DAYS' })
+    const business = await getBusiness(req.user.businessId)
+    if (!business) return res.status(404).json({ error: 'Business not found' })
+    const threshold = { ...BUSINESS_SETTINGS_DEFAULTS, ...(business.settings ?? {}) }.priceRiseAlertPct
+    const rows = await col('priceHistory')
+      .find({ ...scopeFilter(req), at: { $gte: Date.now() - days * 86400000 }, changePct: { $gte: threshold } })
+      .sort({ at: -1 }).limit(2000).toArray()
+    const seen = new Set()
+    const answer = []
+    for (const row of rows) {
+      const key = `${row.productId} ${row.supplierId}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      answer.push({ productId: row.productId, supplierId: row.supplierId, from: row.prevPrice, to: row.price, changePct: row.changePct, at: row.at })
+      if (answer.length >= 200) break
+    }
+    res.json(answer)
+  } catch (err) {
+    req.log.error({ err, event: 'product_import.price_rises.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

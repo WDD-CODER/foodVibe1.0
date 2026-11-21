@@ -7,6 +7,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `welcome/` | `/welcome` — the signed-out front door: the mark, the promise, sign-up and sign-in; `/` leads here for a first-time visitor (home-redirect.ts) |
 | `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
 | `report/` | `/report` — the business report: measured start vs latest, monthly trend, findings, one-page A4 print (plan 568); the platform admin opens it with `?businessId=` |
+| `diagnosis/` | `/diagnosis` — the consultant's diagnosis: invoice queue, menu with prices, printable margin report (plan 634) |
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
 | `dev-catalog/` | `/dev/catalog` — dev-only page that renders every shared UI family (route absent in production builds) |
@@ -24,8 +25,8 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `public-request/` | `/book/:slug` (the guest request form, three steps) and `/book/:slug/r/:token` (the guest's status page with cancel) — bare routes, no app header (plan 555); `PublicRequestService` is page-scoped |
 | `frontdesk/` | `/frontdesk/*` — Front Desk settings screen (`/frontdesk/settings`, plan 553): the owner's profile editor; knowledge base (`/frontdesk/knowledge`, plan 554); the printable onboarding intake form (`/frontdesk/onboarding`, plan 556); the owner's data export card (`frontdesk/frontdesk-settings/components/data-export-card`, plan 557: clients, requests, bookings as CSV). `platform-dashboard/` also holds the platform admin's front desk dialog (`platform-dashboard/components/front-desk-admin-dialog`, plan 557) |
 | `trash/` | `/trash` — soft-deleted items and restore |
-| `platform-dashboard/` | (plan 600: platform-ai-shots component, the admin's shared recipe AI example pool) `/platform` — platform-admin-only table of every business (activity, events, internal flag) + the logistics-items list (plan 532: each business's own logistics items grouped, promote to shared) |
-| `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |
+| `platform-dashboard/` | (plan 600: platform-ai-shots component, the admin's shared recipe AI example pool) `/platform` — platform-admin-only table of every business (activity, events, internal flag) + the logistics-items list (plan 532: each business's own logistics items grouped, promote to shared); each row can enter the business and give a consultant access (plan 632, `platform-dashboard/components/grant-access-dialog`) |
+| `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff; the Access tab (plan 632) lists the consultants who have access and removes it |
 
 ## Key exports
 `DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`, `PlatformDashboardPage`, `SettingsPage`, `WelcomePage`, `RequestsPage`, `BookingsPage`, `FrontdeskSettingsPage`
