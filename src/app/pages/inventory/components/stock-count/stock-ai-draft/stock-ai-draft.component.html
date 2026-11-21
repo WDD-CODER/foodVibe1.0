@@ -121,9 +121,18 @@
             </div>
           }
           @if (u.missing.includes('amount')) {
-            <div class="stock-ai__question" data-testid="stk-ai-q-amount" dir="ltr">
+            <div class="stock-ai__question" data-testid="stk-ai-q-amount" dir="ltr" (keydown.enter)="confirm_(u.id)">
               <span class="stock-ai__muted" dir="auto">{{ 'stk_how_much' | translatePipe }}</span>
-              <app-counter [value]="0" [min]="0" (valueChange)="amount.emit({ id: u.id, quantity: $event })" />
+              <app-counter [value]="held_(u.id)" [min]="0" (valueChange)="hold_(u.id, $event)" />
+              <button
+                type="button"
+                class="c-chip c-chip--tap"
+                data-testid="stk-ai-confirm-amount"
+                [disabled]="held_(u.id) <= 0"
+                (click)="confirm_(u.id)"
+              >
+                {{ 'stk_confirm_amount' | translatePipe }}
+              </button>
             </div>
           }
           @if (u.missing.includes('unit')) {

@@ -110,6 +110,22 @@ export class StockAiDraftComponent {
   protected readonly labelOf_ = (option: StockAiProductOption): string => option.name
   protected readonly keyOf_ = (option: StockAiProductOption): string => option.productId
 
+  /** Plan 657: the number set on a line's counter; the line counts only after the confirm. */
+  private readonly heldAmounts_ = signal<Record<number, number>>({})
+  protected held_(id: number): number {
+    return this.heldAmounts_()[id] ?? 0
+  }
+
+  protected hold_(id: number, value: number): void {
+    this.heldAmounts_.update((h) => ({ ...h, [id]: value }))
+  }
+
+  protected confirm_(id: number): void {
+    const quantity = this.held_(id)
+    if (!(quantity > 0)) return
+    this.amount.emit({ id, quantity })
+  }
+
   protected query_(id: number): string {
     return this.queries_()[id] ?? ''
   }

@@ -243,7 +243,12 @@
               }
             }
           </div>
-          <div class="c-list-body-cell stock-count__counted" role="cell">
+          <div
+            class="c-list-body-cell stock-count__counted"
+            role="cell"
+            [style.--stock-count-mark-size]="mark_().box"
+            [style.--stock-count-mark-tap]="mark_().tap"
+          >
             @if (narrow_()) {
               <app-list-row-checkbox
                 [checked]="row.state.counted"
@@ -294,25 +299,36 @@
         </div>
       }
       @if (basePopover_(); as pop) {
-        <div
-          class="stock-count__base-pop"
-          role="dialog"
-          data-testid="stk-base-pop"
-          [style.top.px]="pop.top"
-          [style.left.px]="pop.left"
-          [attr.aria-label]="pop.text"
-        >
-          <span dir="auto">{{ pop.text }}</span>
-          <button
-            type="button"
-            class="c-icon-btn"
-            [attr.aria-label]="'close' | translatePipe"
-            [attr.title]="'close' | translatePipe"
-            (click)="closeBase_()"
+        @if (phone_()) {
+          <app-modal-shell
+            [light]="true"
+            [labelKey]="'stk_base_amount'"
+            cardClass="stock-count__base-light"
+            (dismissed)="closeBase_()"
           >
-            <lucide-icon name="x" [size]="16"></lucide-icon>
-          </button>
-        </div>
+            <span data-testid="stk-base-light" dir="auto">{{ pop.text }}</span>
+          </app-modal-shell>
+        } @else {
+          <div
+            class="stock-count__base-pop"
+            role="dialog"
+            data-testid="stk-base-pop"
+            [style.top.px]="pop.top"
+            [style.left.px]="pop.left"
+            [attr.aria-label]="pop.text"
+          >
+            <span dir="auto">{{ pop.text }}</span>
+            <button
+              type="button"
+              class="c-icon-btn"
+              [attr.aria-label]="'close' | translatePipe"
+              [attr.title]="'close' | translatePipe"
+              (click)="closeBase_()"
+            >
+              <lucide-icon name="x" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        }
       }
     }
   </ng-container>

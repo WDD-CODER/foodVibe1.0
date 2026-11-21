@@ -682,6 +682,18 @@ textarea.c-input {
   backdrop-filter: blur(6px);
 }
 
+/* Plan 657: `app-modal-shell [light]` — no backdrop colour, no blur, the page behind stays sharp and reachable
+   (the shell closes on an outside pointer-down or a scroll); only the card takes pointer events. */
+.c-modal-overlay--light {
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+
+  > .c-modal-card {
+    pointer-events: auto;
+  }
+}
+
 /* ---- Engine: Glass Modal Card ---- */
 .c-modal-card {
   width: 90%;

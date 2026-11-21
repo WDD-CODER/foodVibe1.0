@@ -2,6 +2,7 @@
   #overlay
   class="c-modal-overlay"
   [class.m-sheet]="sheet()"
+  [class.c-modal-overlay--light]="light()"
   [style.z-index]="zIndex()"
   [attr.popover]="topLayer() ? 'manual' : null"
   (click)="onBackdropClick()"

@@ -110,6 +110,34 @@
     flex: 0 0 auto;
   }
 
+  // Plan 657: the counted mark per width — tokens set on the cell by the component (phone < tablet < desktop).
+  // The compact checkbox lives in a child component, so its box is sized through ::ng-deep (and beats the phone reset).
+  :host ::ng-deep .stock-count__counted input[type='checkbox']:not(.c-chip--toggle > input) {
+    inline-size: var(--stock-count-mark-size) !important;
+    block-size: var(--stock-count-mark-size) !important;
+  }
+
+  :host ::ng-deep .stock-count__counted .list-row-checkbox {
+    min-inline-size: var(--stock-count-mark-tap);
+    min-block-size: var(--stock-count-mark-tap);
+  }
+
+  .stock-count__counted .c-chip--toggle {
+    min-block-size: var(--stock-count-mark-tap);
+    font-size: var(--stock-count-mark-size);
+  }
+
+  // Plan 657: the phone's light popup card (the shell draws no backdrop for it).
+  :host ::ng-deep .stock-count__base-light {
+    inline-size: auto;
+    max-inline-size: calc(100vw - 2rem);
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
   .stock-count__base-pop {
     position: fixed;
     z-index: 1000;

@@ -137,10 +137,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the cook set the amount before it counts — the held value, the confirm, the cases — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
-- [ ] A2: Size the counted mark for each screen — the three sizes by the breakpoint names, the cases — src/app/pages/inventory/components/stock-count/**
-- [ ] A3: Peek at the base amount on a phone — the light popup input, its use on the count, the cases — src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html, src/app/shared/modal-shell/modal-shell.component.spec.ts, src/app/pages/inventory/components/stock-count/**
-- [ ] A4: Prove it in the running app — the screen spec at three widths, then the Done-when commands in order — e2e/ui/657-1.spec.ts, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A1: Let the cook set the amount before it counts — the held value, the confirm, the cases — src/app/pages/inventory/components/stock-count/**, public/assets/data/dictionary.json
+- [x] A2: Size the counted mark for each screen — the three sizes by the breakpoint names, the cases — src/app/pages/inventory/components/stock-count/**
+- [x] A3: Peek at the base amount on a phone — the light popup input, its use on the count, the cases — src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html, src/app/shared/modal-shell/modal-shell.component.spec.ts, src/app/pages/inventory/components/stock-count/**
+- [x] A4: Prove it in the running app — the screen spec at three widths, then the Done-when commands in order — e2e/ui/657-1.spec.ts, docs/brain/component-families.md, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 656 (the breakpoint names). Runs on `orch/mod-breakpoints`' line and is checked together with 656.
@@ -155,3 +155,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: confirm button for the asked amount — why: Dandan, "the first click I do on the counter saves it".
 - decided: the light look is an opt-in input on the shared popup, used only here — why: Dandan, "in this specific
   case".
+- evidence: `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0, TOTAL 2710 SUCCESS.
+- behaviour: the light popup ignores a pointer-down on its opener, so the opener's own click toggles it — reverse: drop the opener check in `watchOutside_` (modal-shell.component.ts).
+- behaviour: the confirm button is disabled while the held number is 0 — reverse: remove `[disabled]` in stock-ai-draft.component.html.
+- [ui] 657-1: written, not run (e2e/ui/657-1.spec.ts).
