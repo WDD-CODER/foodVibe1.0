@@ -215,7 +215,59 @@ describe('StockAiDraftComponent', () => {
       expect(el().querySelectorAll('[data-testid="stk-ai-q-amount"]').length).toBe(1)
       expect(el().querySelectorAll('[data-testid="stk-ai-q-unit"]').length).toBe(2)
       fixture.debugElement.query(By.directive(CounterComponent)).componentInstance.valueChange.emit(2.5)
+      fixture.detectChanges()
+      el().querySelector<HTMLButtonElement>('[data-testid="stk-ai-confirm-amount"]')!.click()
       expect(amounts).toEqual([{ id: 5, quantity: 2.5 }])
+    })
+
+    describe('plan 657 — the asked amount is confirmed before it counts', () => {
+      const amounts: { id: number; quantity: number }[] = []
+      const counter = () => fixture.debugElement.query(By.directive(CounterComponent))
+      const confirm = () => el().querySelector<HTMLButtonElement>('[data-testid="stk-ai-confirm-amount"]')!
+
+      beforeEach(() => {
+        amounts.length = 0
+        fixture.componentInstance.amount.subscribe((a) => amounts.push(a))
+        fixture.componentRef.setInput('unmatched', [
+          { id: 7, text: 'ארגז עגבניות', status: 'unmatched', candidates: [], hasAmount: false, missing: ['amount'] }
+        ])
+        fixture.detectChanges()
+      })
+
+      it('(a) three taps on the counter emit nothing; the line stays and shows 3', () => {
+        for (const n of [1, 2, 3]) {
+          counter().componentInstance.valueChange.emit(n)
+          fixture.detectChanges()
+        }
+        expect(amounts).toEqual([])
+        expect(el().querySelector('[data-testid="stk-ai-q-amount"]')).not.toBeNull()
+        expect(el().querySelector<HTMLInputElement>('[data-testid="stk-ai-q-amount"] input')!.value).toBe('3')
+      })
+
+      it('(b) the confirm button emits the amount once with 3', () => {
+        for (const n of [1, 2, 3]) counter().componentInstance.valueChange.emit(n)
+        fixture.detectChanges()
+        confirm().click()
+        expect(amounts).toEqual([{ id: 7, quantity: 3 }])
+      })
+
+      it('(b) Enter in the typed number emits the amount once with 3', () => {
+        counter().componentInstance.valueChange.emit(3)
+        fixture.detectChanges()
+        el()
+          .querySelector<HTMLInputElement>('[data-testid="stk-ai-q-amount"] input')!
+          .dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+        expect(amounts).toEqual([{ id: 7, quantity: 3 }])
+      })
+
+      it('(c) a confirm with 0 emits nothing', () => {
+        expect(confirm().disabled).toBeTrue()
+        confirm().click()
+        counter().componentInstance.valueChange.emit(0)
+        fixture.detectChanges()
+        confirm().click()
+        expect(amounts).toEqual([])
+      })
     })
 
     it('a pick from the search emits the product', () => {
