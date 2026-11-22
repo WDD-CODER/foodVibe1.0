@@ -1,6 +1,6 @@
 # Plan 697 — A duplicate logistics question shows a clear message instead of "server error"
 
-Status: active
+Status: done
 Depends-on: none
 Snapshot: 7c8fccd4421e7294d8b865d4750da34a5f9652c4
 
@@ -27,7 +27,7 @@ shared question shows the generic "server error" toast. The server refuses corre
   `messageKey` shows that message, not `server_error`).
 - [auto] `pnpm run build:schemas`, `pnpm run build`, `pnpm run lint` pass.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [human] As an owner on `/dashboard?tab=metadata` → logistics questions card: type the text of a shared question (e.g.
+- [x] [human] As an owner on `/dashboard?tab=metadata` → logistics questions card: type the text of a shared question (e.g.
   one with the lock tag) and press add. The field shows "השאלה הזאת כבר קיימת ברשימה המשותפת" under it, no toast, nothing
   is added. Switch the phase tab and try the same text: the same message.
 
@@ -153,3 +153,4 @@ only for `unit`; the card's check at `logistics-item-manager.component.ts` filte
 - Plan gates: `scope-check --arch` → `ARCH: ok INV-1, INV-2, INV-3, INV-5`; `--reuse` → `REUSE: ok none`;
   `--tags` → `DONE_WHEN_TAGS: ok`; `--deps` → `DEPENDS_ON: ok (none)`; `--tests` → `SCOPE_TESTS: ok`.
 - The `[human]` item is open: it waits on the Human.
+- Planner close-out 2026-11-22: Planner review of PR #636 APPROVE (finders: plan, bugs, rules; verifier kept only nits below the bar — a detached JSDoc above masterHasTerm in server/routes/generic.js, and a rare edit refusal when an own question shares its unchanged text with a later shared one, confidence 65). Merged #636 (30626b01). [human] card validated by Dandan "ok: 1" on slot wt-3: «יש מטבח במקום?» in the other stage shows «השאלה הזאת כבר קיימת ברשימה המשותפת» and adds nothing.
