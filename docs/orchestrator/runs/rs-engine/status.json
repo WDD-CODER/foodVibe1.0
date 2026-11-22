@@ -132,10 +132,16 @@
       "nnn": "664",
       "title": "Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal",
       "branch": "feat/664-floor-plan-on-the",
-      "state": "parked",
-      "round": 1,
+      "state": "building",
+      "round": 0,
       "tier": "build",
-      "models": {},
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T15:37:49.936Z"
+        }
+      },
       "humanItems": [],
       "history": [
         {
@@ -157,6 +163,21 @@
           "at": "2026-11-22T15:31:36.787Z",
           "state": "parked",
           "round": 1
+        },
+        {
+          "at": "2026-11-22T15:32:46.266Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:37:49.548Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:37:49.939Z",
+          "state": "building",
+          "round": 0
         }
       ],
       "earlier": [
@@ -178,33 +199,46 @@
             "build"
           ],
           "freeDiskGb": 17
-        }
-      ],
-      "roundCauses": [
-        "round 1: builder blocked: git status in the worktree folder -> fatal: not a git repository (no .git, no docs/, no AGENTS.md), so I cannot commit, push, or edit the registry docs the plan scopes."
-      ],
-      "calls": [
+        },
         {
-          "stage": "builder",
-          "model": "sonnet",
-          "seconds": 39.8,
-          "tokens": {
-            "input": 165995,
-            "output": 1802
+          "nnn": "664",
+          "title": "Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal",
+          "branch": "feat/664-floor-plan-on-the",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "roundCauses": [
+            "round 1: builder blocked: git status in the worktree folder -> fatal: not a git repository (no .git, no docs/, no AGENTS.md), so I cannot commit, push, or edit the registry docs the plan scopes."
+          ],
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 39.8,
+              "tokens": {
+                "input": 165995,
+                "output": 1802
+              },
+              "exit": 0
+            }
+          ],
+          "freeDiskGb": 17.1,
+          "tiers": [
+            "build"
+          ],
+          "reason": "worktree: git worktree add C:\\coding projects\\Cursor\\foodVibe1.0-orch-rs-engine-664: fatal: invalid reference: feat/664-floor-plan-on-the",
+          "park": {
+            "at": "2026-11-22T15:31:57.958Z",
+            "reason": "hand-off file: handoff --reset-base: no common base of feat/664-floor-plan-on-the and origin/orch/rs-engine in C:\\coding projects\\Cursor\\foodVibe1.0-orch-rs-engine-664"
           },
-          "exit": 0
+          "parkBranch": "park/rs-engine-664"
         }
       ],
-      "freeDiskGb": 17,
       "tiers": [
         "build"
       ],
-      "reason": "hand-off file: handoff --reset-base: no common base of feat/664-floor-plan-on-the and origin/orch/rs-engine in C:\\coding projects\\Cursor\\foodVibe1.0-orch-rs-engine-664",
-      "park": {
-        "at": "2026-11-22T15:31:57.958Z",
-        "reason": "hand-off file: handoff --reset-base: no common base of feat/664-floor-plan-on-the and origin/orch/rs-engine in C:\\coding projects\\Cursor\\foodVibe1.0-orch-rs-engine-664"
-      },
-      "parkBranch": "park/rs-engine-664"
+      "freeDiskGb": 16.9
     }
   },
   "notes": [
@@ -251,12 +285,17 @@
     {
       "at": "2026-11-22T15:32:13.675Z",
       "text": "FINAL: same tree as plan 663's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-22T15:37:49.080Z",
+      "plan": "664",
+      "text": "the folder foodVibe1.0-orch-rs-engine-664 was installed (root, scripts, server)"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 17,
-  "updatedAt": "2026-11-22T15:32:19.070Z",
+  "freeDiskGb": 16.9,
+  "updatedAt": "2026-11-22T15:43:19.599Z",
   "stops": [
     {
       "at": "2026-11-22T15:27:05.218Z",
@@ -336,11 +375,11 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-22T15:32:19.065Z",
+  "finishedAt": "2026-11-22T15:43:19.594Z",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-22T15:32:19.069Z",
+    "at": "2026-11-22T15:43:19.598Z",
     "attempt": 1,
     "blamed": []
   }

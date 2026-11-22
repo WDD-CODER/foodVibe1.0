@@ -1,7 +1,7 @@
 # Orchestrator run rs-engine
 
-Run branch: `orch/rs-engine` (from `origin/main` at cbed77e) · started 2026-11-22T13:32:13.418Z · finished 2026-11-22T15:32:19.065Z
-Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
+Run branch: `orch/rs-engine` (from `origin/main` at cbed77e) · started 2026-11-22T13:32:13.418Z · finished 2026-11-22T15:43:19.594Z
+Result: 1 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: NO — origin/main is 7c8fccd.
 
 ## Stops
@@ -16,12 +16,12 @@ Final gate: ok (attempt 1)
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 663 The table engine: slots, turn, candidates, assign and alternatives — pure, shared, tested | merged | 1 | build | e5ce3ef |  |
-| 664 Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal | parked | 1 | build |  | hand-off file: handoff --reset-base: no common base of feat/664-floor-plan-on-the and origin/orch/rs-engine in C:\coding projects\Cursor\foodVibe1.0-orch-rs-engine-664 |
+| 664 Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal | building | 0 | build |  |  |
 
 ## Scorecard
 
-- Wall: 119.4 min · gate passes: 1 · asks raised mid-run: 0
-- Minutes per state (summed over plans): building 40.9 · fixing 35.2 · gate 32.2 · merging 2.1 · checking 0.8 · queued 0.1 · parked 0
+- Wall: 125.6 min · gate passes: 1 · asks raised mid-run: 0
+- Minutes per state (summed over plans): building 40.9 · fixing 35.2 · gate 32.2 · parked 6.2 · merging 2.1 · checking 0.8 · queued 0.1
 - Checks left out (cached, skipped, not run, same tree): 0, about 0 min saved
 
 ## App errors since the run started
@@ -56,18 +56,19 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 664: the folder foodVibe1.0-orch-rs-engine-664 was installed (scripts, server)
 - 664: parked: no folder — nothing to save
 - FINAL: same tree as plan 663's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch
+- 664: the folder foodVibe1.0-orch-rs-engine-664 was installed (root, scripts, server)
 
 ## Models per agent
 
 - 663 builder: sonnet
 - 663 builder fix: sonnet
 - 663 reviewer: sonnet
+- 664 builder: sonnet
 
 ## What only the Human can do
 
 - nothing to validate
 
-- Decide on 664: hand-off file: handoff --reset-base: no common base of feat/664-floor-plan-on-the and origin/orch/rs-engine in C:\coding projects\Cursor\foodVibe1.0-orch-rs-engine-664
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -77,4 +78,4 @@ gh pr create --base main --head orch/rs-engine --title "Orchestrator run rs-engi
 
 Context added by learning: 3.8k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 1 · parked 0 → 0 → 1
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0.5 · parked 0 → 0 → 0
