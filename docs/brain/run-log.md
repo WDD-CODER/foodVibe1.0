@@ -25,4 +25,4 @@ Earlier (67 runs): plans 201 · merged 179 · parked 19 · fix rounds 82 · esca
 | 2026-11-21 | mod-breakpoints | 656 | 1 | 0 | - | 2 | 2 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-21 | mod-count-confirm | 657 | 1 | 0 | - | 0 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-22 | mod-count-popup | 658,659 | 2 | 0 | - | 0 | 1 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-22 | rs-0 | 662 | 0 | 1 | other | 0 | 0 | 0 | - | - | - | - |
+| 2026-11-22 | rs-0 | 662 | 1 | 0 | - | 0 | 1 | 0 | ok | - | - | - |
