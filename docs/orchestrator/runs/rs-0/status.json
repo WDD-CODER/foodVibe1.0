@@ -1,0 +1,108 @@
+{
+  "run": "rs-0",
+  "branch": "orch/rs-0",
+  "base": "main",
+  "startedAt": "2026-11-22T10:35:35.172Z",
+  "mainShaAtStart": "50433e0e3cb3aba9bc87fdfc9c4aa64ddb5fdbc2",
+  "plans": {
+    "662": {
+      "nnn": "662",
+      "title": "Register the Restaurant program once: module key tables, schemas, collections, indexes, permission, empty routers, ADR 0033 and INV-7",
+      "branch": "feat/662-register-restaurant-program-module",
+      "state": "parked",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-22T11:07:53.125Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads `docs/brain/decisions/0033-the-table-engine-decides.md` and INV-7 in"
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T10:37:47.878Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T10:37:48.136Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T10:37:52.969Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T11:07:53.126Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T11:07:56.594Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "judgment"
+      ],
+      "freeDiskGb": 22.5,
+      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 1:10pm (Asia/Jerusalem)",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 4.6,
+          "tokens": {
+            "input": 0,
+            "output": 0
+          },
+          "exit": 1,
+          "error": "claude exited 1: You've hit your 5-hour limit · resets 1:10pm (Asia/Jerusalem)"
+        },
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 3.2,
+          "tokens": {
+            "input": 0,
+            "output": 0
+          },
+          "exit": 1,
+          "error": "claude exited 1: You've hit your 5-hour limit · resets 1:10pm (Asia/Jerusalem)"
+        }
+      ]
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-22T10:37:37.063Z",
+      "plan": "662",
+      "text": "starts on the judgment tier: INV-7 changes"
+    },
+    {
+      "at": "2026-11-22T10:37:47.669Z",
+      "plan": "662",
+      "text": "the folder foodVibe1.0-orch-rs-0-662 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 22.5,
+  "updatedAt": "2026-11-22T11:07:59.179Z",
+  "stopReason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 1:10pm (Asia/Jerusalem)",
+  "stops": [
+    {
+      "at": "2026-11-22T11:07:56.997Z",
+      "reason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 1:10pm (Asia/Jerusalem)",
+      "attempt": 1
+    }
+  ],
+  "finishedAt": "2026-11-22T11:07:59.176Z"
+}
