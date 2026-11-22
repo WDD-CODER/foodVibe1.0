@@ -341,3 +341,38 @@ describe('INV-4 One schema package, server validates every write', () => {
     expect(res.body.error).toBe('Validation failed');
   });
 });
+
+describe('INV-7 The engine and the hold decide a table', () => {
+  const { clearModuleCache } = require('../middleware/require-module');
+  const { ROOM, profileWith, tableKeyOf } = require('../generated/schemas/testing/table-engine-fixtures');
+  const { wallOf } = require('../services/table-bookings');
+  const { claim } = require('../services/table-holds');
+  const OWNER = { userId: 'own7', name: 'Owner', businessId: 'b7', businessRole: 'owner' };
+  const DATE = wallOf(Date.now() + 2 * 86400000).date;
+
+  beforeEach(async () => {
+    const db = testDb();
+    for (const c of ['businesses', 'frontDeskProfiles', 'floorPlans', 'bookings', 'tableHolds', 'clients']) await db.collection(c).deleteMany({});
+    await db.collection('businesses').insertOne({ _id: 'b7', name: 'seven', ownerId: 'own7', createdAt: 1, modules: ['frontdesk', 'tables'] });
+    clearModuleCache();
+    await db.collection('frontDeskProfiles').insertOne({ ...profileWith(), _id: 'p7', businessId: 'b7' });
+    await db.collection('floorPlans').insertOne({ ...ROOM, _id: 'fp7', businessId: 'b7' });
+  });
+
+  it('INV-7 twenty concurrent creates for one table give one booking', async () => {
+    const send = () => request(app).post('/api/v1/bookings').set(as(OWNER))
+      .send({ guest: { name: 'Dana', phone: '0521234567' }, date: DATE, time: '20:00', partySize: 2, tableKeys: [tableKeyOf(1)] });
+    const results = await Promise.all(Array.from({ length: 20 }, send));
+    expect(results.filter(r => r.status === 201)).toHaveLength(1);
+    expect(results.filter(r => r.status === 409 && r.body.error === 'NO_TABLE')).toHaveLength(19);
+    expect(await testDb().collection('bookings').countDocuments({})).toBe(1);
+  });
+
+  it('INV-7 a direct second claim over an overlapping time returns ok: false', async () => {
+    const start = Date.UTC(2031, 0, 1, 20, 0);
+    const first = await claim(testDb(), { _id: 'k1', businessId: 'b7' }, [tableKeyOf(1)], start, start + 90 * 60000);
+    const second = await claim(testDb(), { _id: 'k2', businessId: 'b7' }, [tableKeyOf(1)], start + 75 * 60000, start + 135 * 60000);
+    expect([first, second]).toEqual([{ ok: true }, { ok: false }]);
+    expect(await testDb().collection('tableHolds').countDocuments({ bookingId: 'k2' })).toBe(0);
+  });
+});
