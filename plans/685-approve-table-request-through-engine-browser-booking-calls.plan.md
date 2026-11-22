@@ -275,3 +275,4 @@ line or file this plan names was removed, renamed or rewritten).
 ## Execution Notes
 - Step 0: drift commit c1f441a3 (export) touches no symbol of this plan: ok.
 - build, lint, test:ci (2864 pass), test:server (2164 pass), requests-approve-tables 5 pass: exit 0.
+- fix round 1: log-query in this worktree has no database (SKIP); ran the main folder's log-query (`--since=2026-11-22T17:51:39Z --level=error`) against its local database -> exit 0, "no entries".
