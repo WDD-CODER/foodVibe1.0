@@ -12,6 +12,7 @@ export const publicRequestSchema = z.strictObject({
   guestPhone: z.string().min(7).max(30),
   wanted: wantedSchema,
   answers: z.array(z.strictObject({ questionKey: z.string().max(60), value: z.string().max(500) })).max(30),
+  areaKey: z.string().regex(/^[a-z0-9]{6,12}$/).optional(),
   consentTerms: z.literal(true),
   website: z.string().max(200).optional()
 })

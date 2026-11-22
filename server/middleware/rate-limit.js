@@ -58,4 +58,14 @@ const publicLimiter = createRateLimiter({
   skip: (req) => req.method === 'GET' || req.method === 'HEAD',
 });
 
-module.exports = { createRateLimiter, userOrIpKey, ipAndSlugKey, publicLimiter };
+/**
+ * Plan 669 (C-PUBAVAIL): the public free-times read — 60 reads / 15 min per IP + slug. It counts reads (no `skip`).
+ */
+const publicReadLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: 'Too many requests',
+  keyGenerator: ipAndSlugKey,
+});
+
+module.exports = { createRateLimiter, userOrIpKey, ipAndSlugKey, publicLimiter, publicReadLimiter };

@@ -763,3 +763,11 @@ Each line is already written into the plan that owns it; where a line and a Cont
 - 668 · C-BOOK2 · `createWalkIn(db, ctx, { partySize, tableKeys, guest?, name? })` takes `ctx` = `loadTableContext`
   plus `{ businessId, actor, now? }`; a `NO_TABLE` answer carries `reason` and `alternatives`; `PUT /:id/tables` answers
   `alternatives: []` · plan 673 seats a party through the same function.
+- 669 · C-PUBAVAIL · (1) `GET /api/v1/public/:slug` gains `tableBooking: { areas: [{ key, name }] }` when the business has
+  `tables` and its plan has an active, online table: the areas that have one, in plan `order`. (2) `publicRequestSchema`
+  gains optional `areaKey` (`^[a-z0-9]{6,12}$`), used for `assign`; a waiting request stores it as the answer
+  `{ questionKey: 'seating', label: 'fd_q_seating', value: <area name> }`. (3) "The time is taken" means the engine
+  answered `full` (409 `NO_TABLE` + `alternatives`); any other `ok: false` reason creates the request as today with
+  `confirmed: false`. (4) A guest's cancel of a confirmed booking moves the booking and the request to `cancelled`
+  (409 `TOO_LATE` after the cutoff). (5) Guest answers gain `booking.guestConfirmed` and `booking.canCancel`;
+  `createRequest` takes `approvedBooking: { id, at }`.
