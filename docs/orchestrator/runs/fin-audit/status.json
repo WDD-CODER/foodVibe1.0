@@ -1,0 +1,730 @@
+{
+  "run": "fin-audit",
+  "branch": "orch/fin-audit",
+  "base": "main",
+  "startedAt": "2026-11-22T12:45:56.068Z",
+  "mainShaAtStart": "e98509490ffaeba941437c4581456508a5faad3b",
+  "plans": {
+    "660": {
+      "nnn": "660",
+      "title": "Dish analysis screen: feasibility audit against the current code (report only)",
+      "branch": "feat/660-dish-analysis-feasibility-audit",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T12:56:56.583Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-22T13:03:46.254Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads section 1 (Hebrew summary) and can say for each block of the screen whether it is ready to"
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T12:56:56.264Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T12:56:56.585Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:01:36.815Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:03:35.685Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:03:46.256Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:03:55.009Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:05:26.279Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "660",
+          "title": "Dish analysis screen: feasibility audit against the current code (report only)",
+          "branch": "feat/660-dish-analysis-feasibility-audit",
+          "state": "queued",
+          "round": 0,
+          "tier": "build",
+          "models": {}
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 20.4,
+      "sha": "67048d0ff76f9d0775e9fe5dcd8498f26d66f4ae",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 276.9,
+          "tokens": {
+            "input": 1501610,
+            "output": 21961
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.4,
+          "tokens": {
+            "input": 34063,
+            "output": 607
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "bec074fb1123fec76790f02d334e1963e042f079"
+    },
+    "661": {
+      "nnn": "661",
+      "title": "Monthly planning screen: feasibility audit against the current code (report only)",
+      "branch": "feat/661-monthly-planning-feasibility-audit",
+      "state": "parked",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T13:23:37.734Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T13:37:34.280Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads section 1 (Hebrew summary) and can say for each block of the screen whether it is ready to"
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T13:08:09.939Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:08:10.142Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:18:27.914Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:18:36.419Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:18:36.968Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:18:37.214Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:18:56.388Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:20:10.012Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:23:37.463Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:23:37.737Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:32:05.782Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:32:26.667Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:32:27.678Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:32:28.231Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:33:04.944Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:36:57.256Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T13:36:57.447Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:36:57.614Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:37:21.926Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:37:33.576Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:37:34.019Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:37:34.282Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:38:07.241Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:40:17.273Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:40:17.750Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:41:49.871Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T13:42:22.199Z",
+          "state": "parked",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "661",
+          "title": "Monthly planning screen: feasibility audit against the current code (report only)",
+          "branch": "feat/661-monthly-planning-feasibility-audit",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-22T13:08:10.140Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-22T13:18:37.212Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 20.5,
+          "sha": "d6a7534fd20ffdadf1afca23bcf211a249240b68",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 614.2,
+              "tokens": {
+                "input": 1944764,
+                "output": 34054
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 18.7,
+              "tokens": {
+                "input": 51326,
+                "output": 1363
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
+          ],
+          "reason": "asking 661-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/fin-audit; against the run branch (origin/orch/fin-audit) the scope is ok. This check should diff against the run branch, or the run branch should be merged to main first.",
+          "park": {
+            "at": "2026-11-22T13:19:57.800Z",
+            "reason": "ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/fin-audit; against the run branch (origin/orch/fin-audit) the scope is ok. This check should diff against the run branch, or the run branch should be merged to main first."
+          },
+          "parkBranch": "park/fin-audit-661"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 661-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 19.9,
+      "sha": "06f51961b60c8b64609b798f6822e206ba64d9a0",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 498.2,
+          "tokens": {
+            "input": 229306,
+            "output": 3579
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 31,
+          "tokens": {
+            "input": 51217,
+            "output": 1327
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 20.4,
+          "tokens": {
+            "input": 52874,
+            "output": 1250
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 29,
+          "tokens": {
+            "input": 87124,
+            "output": 2090
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md",
+        "round 2: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
+      ],
+      "reason": "same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md — ask 661-2 answered: park (by the human)",
+      "park": {
+        "at": "2026-11-22T13:41:33.534Z",
+        "reason": "same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
+      },
+      "parkBranch": "park/fin-audit-661"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-22T12:56:55.696Z",
+      "plan": "660",
+      "text": "the folder foodVibe1.0-orch-fin-audit-660 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T13:01:33.670Z",
+      "plan": "660",
+      "text": "builder left undone (round 0): The [human] item is not ticked: Dandan reads section 1.; pnpm run build, lint, test:ci, lint:icons, lint:no-native-select and the two scope-check variants beyond the one above were not run: only a Markdown file and a plan file changed."
+    },
+    {
+      "at": "2026-11-22T13:01:37.140Z",
+      "plan": "660",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T13:04:06.202Z",
+      "plan": "660",
+      "text": "the folder foodVibe1.0-orch-merge-fin-audit was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T13:08:09.761Z",
+      "plan": "661",
+      "text": "the folder foodVibe1.0-orch-fin-audit-661 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T13:18:24.583Z",
+      "plan": "661",
+      "text": "builder left undone (round 0): The [human] item (Dandan reads section 1) is not ticked; only the Human can confirm it."
+    },
+    {
+      "at": "2026-11-22T13:18:28.386Z",
+      "plan": "661",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T13:18:35.509Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-22T13:18:35.687Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-22T13:18:35.885Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-22T13:18:36.064Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-22T13:18:36.234Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-22T13:18:36.616Z",
+      "plan": "661",
+      "text": "node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-22T13:18:56.113Z",
+      "plan": "661",
+      "text": "builder left undone (round 0): Rerun of the scope-check against origin/main: it cannot pass without removing plan 660's files, which belong to another plan and are already merged into the run branch"
+    },
+    {
+      "at": "2026-11-22T13:20:09.791Z",
+      "plan": "661",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-22T13:20:10.280Z",
+      "plan": "661",
+      "text": "ask 661-1 (scope, the Human or the advisor answers): Should the origin/main scope-check be dropped or rebased to the run branch, since it flags plan 660's merged files?"
+    },
+    {
+      "at": "2026-11-22T13:21:11.418Z",
+      "plan": "661",
+      "text": "ask 661-1 answered by the human: Diff the scope-check against origin/orch/fin-audit (already ok)"
+    },
+    {
+      "at": "2026-11-22T13:21:26.441Z",
+      "plan": "661",
+      "text": "scope of plan 661 extended on orch/fin-audit by the answer to 661-1: origin/orch/fin-audit"
+    },
+    {
+      "at": "2026-11-22T13:23:25.984Z",
+      "plan": "661",
+      "text": "resumed from park/fin-audit-661: round 0, tier build, after: asking 661-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/fin-audit;"
+    },
+    {
+      "at": "2026-11-22T13:23:37.209Z",
+      "plan": "661",
+      "text": "the folder foodVibe1.0-orch-fin-audit-661 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T13:32:08.050Z",
+      "plan": "661",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T13:32:24.973Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-22T13:32:25.301Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-22T13:32:25.669Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-22T13:32:26.054Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-22T13:32:26.360Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-22T13:32:27.129Z",
+      "plan": "661",
+      "text": "node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-22T13:32:59.743Z",
+      "plan": "661",
+      "text": "builder left undone (round 0): The origin/main scope-check is still in CHECKS and still fails on plan 660's files. It has to be removed or rebased in the run config, which is outside this branch."
+    },
+    {
+      "at": "2026-11-22T13:33:05.506Z",
+      "plan": "661",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T13:37:22.309Z",
+      "plan": "661",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T13:37:32.509Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-22T13:37:32.773Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-22T13:37:32.984Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-22T13:37:33.170Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-22T13:37:33.379Z",
+      "plan": "661",
+      "text": "GATE: not run — node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-22T13:37:33.776Z",
+      "plan": "661",
+      "text": "node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-22T13:38:03.544Z",
+      "plan": "661",
+      "text": "builder left undone (round 1): pnpm run build, lint, test:ci, the kit-manifest, kit-checks and scope-check (kit copy) commands, lint:icons and lint:no-native-select were not rerun (no code change since the last passing gate)"
+    },
+    {
+      "at": "2026-11-22T13:38:07.610Z",
+      "plan": "661",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T13:41:49.457Z",
+      "plan": "661",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-22T13:41:50.419Z",
+      "plan": "661",
+      "text": "ask 661-2 (technical, the Human or the advisor answers): Plan 661 failed twice for the same reason (gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md). Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-22T13:42:21.750Z",
+      "plan": "661",
+      "text": "ask 661-2 answered by the human: park: leave the plan parked for the Human to replan"
+    },
+    {
+      "at": "2026-11-22T13:42:22.535Z",
+      "plan": "661",
+      "text": "ask 661-2 answered: park (by the human) — plan 661 parked; the question was: Plan 661 failed twice for the same reason (gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md). Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-22T13:51:11.845Z",
+      "text": "make this a default? section 7 lists 10 build slices and section 8 lists 7 decisions, more than the plan's minimum of four; the extra ones are revenue source, VAT treatment and purchases versus usage, which the evidence r (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 19.9,
+  "updatedAt": "2026-11-22T13:51:15.788Z",
+  "stops": [
+    {
+      "at": "2026-11-22T12:47:32.914Z",
+      "reason": "stopped by the Human for a computer restart",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "660",
+      "type": "behaviour",
+      "text": "behaviour: report names a new standing-menu entity as the recommended option (the plan asks for options with the recommended first) — reverse: change the first option in section 8",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "660",
+      "type": "behaviour",
+      "text": "behaviour: the Hebrew summary rates the new-dish calculator 'not feasible now' because it depends on plan 661 and has no sales data — reverse: edit that line in section 1",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "660",
+      "type": "seen",
+      "text": "seen: server/ and shared/ hold no recipe-cost function (only src/app/core/services/recipe-cost.service.ts and server/scripts/lib/demo-data.js seed maths), so any server-side report over many dishes needs the logic moved first",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "661",
+      "type": "behaviour",
+      "text": "behaviour: section 7 lists 10 build slices and section 8 lists 7 decisions, more than the plan's minimum of four; the extra ones are revenue source, VAT treatment and purchases versus usage, which the evidence raised — reverse: delete those entries from the report",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "661",
+      "type": "seen",
+      "text": "seen: Claude outputs/ is untracked in the worktree and makes scope-check report SCOPE: out; the run's scope gate may flag this plan for that reason, not because of its diff",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "661",
+      "type": "seen",
+      "text": "seen: the kit-copy scope-check (C:/coding projects/Cursor/foodvibe1.0/scripts/scope-check.mjs) lists files from the main checkout's 'Claude outputs/' folder as out of scope when run for this worktree. It seems to resolve its repo root from its own location instead of the current folder.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "661",
+      "type": "behaviour",
+      "text": "behaviour: did not run the origin/main scope-check, since ANSWER 661-1 says to diff against origin/orch/fin-audit instead. The gate list still carries that command; it should be dropped or rebased in the orchestrator config. Reverse: run it once plan 660 is merged into main.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "661",
+      "type": "seen",
+      "text": "seen: the CHECKS list still includes `scope-check --diff=origin/main`, which fails on plan 660's merged files; per ANSWER 661-1 it should be dropped from CHECKS — reverse: keep it, and it passes only once 660 is merged to main",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-22T13:51:15.784Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-22T13:51:15.787Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
