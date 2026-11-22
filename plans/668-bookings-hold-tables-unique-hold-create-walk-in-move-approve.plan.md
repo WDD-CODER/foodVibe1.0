@@ -367,15 +367,15 @@ at most 1000, `guest.name` 1–`NAME_MAX_LENGTH` characters, `guest.phone` 7–3
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Build the hold service so one unique index decides who has a table — cells of 15 minutes, claim with clean-up on a duplicate, move, release, holdsOf, rangesOf — server/services/table-holds.js
-- [ ] A2: Prove the hold service with tests before any route uses it — the claim, overlap, release-from, move and other-business cases of Goals — server/test/table-holds.test.js
-- [ ] A3: Add the one service that turns an ask into a held, written booking — loadTableContext, wallOf, checkTables, reserveTable with three tries, bookTable with release on a failed write, countBooking — server/services/table-bookings.js
-- [ ] A4: Let a member book a table by phone and seat a walk-in — POST / and POST /walk-in with both gates, input checks, client handling and the placeholder walk-in client — server/routes/bookings.js
-- [ ] A5: Let a member move a party and change a booking — PUT /:id/tables and PUT /:id/when through move, booking and holds unchanged on failure — server/routes/bookings.js
-- [ ] A6: Make the existing routes table-aware without changing them for other businesses — availability read, day read with holds, unassigned and now, status stamps and release — server/routes/bookings.js
-- [ ] A7: Test every route, the twenty-at-once race, the failed write and the logs — the route cases of Goals — server/test/bookings-tables.test.js
-- [ ] A8: Add the invariant tests that fail by name if a double booking becomes possible — the INV-7 describe block — server/test/invariants.test.js
-- [ ] A9: Record the new pieces where the next plan looks for them — folder map rows, two registry entries, the Contract extensions — server/breadcrumbs.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
+- [x] A1: Build the hold service so one unique index decides who has a table — cells of 15 minutes, claim with clean-up on a duplicate, move, release, holdsOf, rangesOf — server/services/table-holds.js
+- [x] A2: Prove the hold service with tests before any route uses it — the claim, overlap, release-from, move and other-business cases of Goals — server/test/table-holds.test.js
+- [x] A3: Add the one service that turns an ask into a held, written booking — loadTableContext, wallOf, checkTables, reserveTable with three tries, bookTable with release on a failed write, countBooking — server/services/table-bookings.js
+- [x] A4: Let a member book a table by phone and seat a walk-in — POST / and POST /walk-in with both gates, input checks, client handling and the placeholder walk-in client — server/routes/bookings.js
+- [x] A5: Let a member move a party and change a booking — PUT /:id/tables and PUT /:id/when through move, booking and holds unchanged on failure — server/routes/bookings.js
+- [x] A6: Make the existing routes table-aware without changing them for other businesses — availability read, day read with holds, unassigned and now, status stamps and release — server/routes/bookings.js
+- [x] A7: Test every route, the twenty-at-once race, the failed write and the logs — the route cases of Goals — server/test/bookings-tables.test.js
+- [x] A8: Add the invariant tests that fail by name if a double booking becomes possible — the INV-7 describe block — server/test/invariants.test.js
+- [x] A9: Record the new pieces where the next plan looks for them — folder map rows, two registry entries, the Contract extensions — server/breadcrumbs.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: `server/routes/bookings.js` (two routes changed in behaviour only for bookings with `tableKeys` or
@@ -409,3 +409,7 @@ at most 1000, `guest.name` 1–`NAME_MAX_LENGTH` characters, `guest.phone` 7–3
 - none
 
 ## Execution Notes
+- pnpm run build -> exit 0; pnpm run lint -> exit 0; pnpm run test:server -> exit 0 (155 files, 2158 tests pass); pnpm run test:ci -> exit 0; pnpm --dir server run lint -> exit 0.
+- kit-manifest-check -> ok (0 unclassified); override-check, plan-ledger-check, breadcrumbs-check, lint:icons, lint:no-native-select -> exit 0; log-query -> SKIP no database configured (no error entries).
+- kit-checks -> `inventory-stale docs/brain/inventory.md`: the two new registry entries make the generated `docs/brain/inventory.md` stale; running `node scripts/inventory.mjs` fixes it (2 lines) but the file is outside the scope. Not extended here (run-plans gate): ESCALATE with `approved: docs/brain/inventory.md`. Resolved: the Human approved it (668-1); regenerated and committed, kit-checks ok.
+- Rollback of a failed booking write in `/when` and `/tables` moves the holds back to the old cells.
