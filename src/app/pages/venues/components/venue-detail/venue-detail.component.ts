@@ -9,6 +9,7 @@ import { VenueProfile } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { formatVenueHours } from 'src/app/core/utils/venue-hours.util'
+import { videoSourceKey } from 'src/app/core/utils/video-link.util'
 
 @Component({
   selector: 'app-venue-detail',
@@ -102,20 +103,4 @@ export class VenueDetailComponent implements OnInit {
     const id = this.venue_()?._id
     if (id) this.router.navigate(['/venues/edit', id])
   }
-}
-
-/** Plan 373: the translation key naming where a video link points, from its hostname. */
-function videoSourceKey(url: string): string {
-  let host = ''
-  try {
-    host = new URL(url).hostname.toLowerCase()
-  } catch {
-    return 'video_source_link'
-  }
-  if (host === 'youtu.be' || host === 'youtube.com' || host.endsWith('.youtube.com')) return 'video_source_youtube'
-  if (host === 'drive.google.com' || host === 'docs.google.com') return 'video_source_drive'
-  if (host === 'wa.me' || host === 'whatsapp.com' || host.endsWith('.whatsapp.com') || host.endsWith('.whatsapp.net')) {
-    return 'video_source_whatsapp'
-  }
-  return 'video_source_link'
 }

@@ -37,6 +37,10 @@ src/app/pages/venues/**
 src/app/core/models/venue.model.ts
 shared/schemas/entities/venue.schema.ts
 server/test/**
+src/app/core/utils/**
+src/app/core/utils/date-input.util.spec.ts
+src/app/core/utils/video-link.util.spec.ts
+docs/brain/component-families.md
 ```
 
 ## Read Scope
@@ -116,7 +120,8 @@ touching any milestone.
 - `.video-row` — family: engine-classes — rung: 2 — why: the detail page's own `menus-list` / `menu-row` / `menu-row-name` / `menu-row-meta` rows reused; `.video-row` only adds a gap.
 - `.venue-nav` — family: engine-classes — rung: 2 — why: a flex row holding two `c-btn-ghost--sm` links under the address; no new `.c-*` class.
 - Location button, "נקה", "פתח סרטון" and the Waze / Google Maps links — family: engine-classes — rung: 1 — why: `c-btn-ghost` and `c-btn-ghost--sm`.
-- `videoSourceKey` and `isoToLocalEpoch` — family: helpers — rung: 1 — why: file-private functions in the two components (venue-only, one use each); `todayIso` from `date-input.util` is reused to turn a stored date back into `yyyy-mm-dd`.
+- `isoToLocalEpoch` — family: helpers — rung: 3 — why: added to `src/app/core/utils/date-input.util.ts` beside `todayIso` (its inverse), with a spec (review round 2, `approved: src/app/core/utils/**`).
+- `video-link.util` (`videoSourceKey`) — family: helpers — rung: 3 — why: a new pure helper in `src/app/core/utils/video-link.util.ts` with a spec; hostname to a translation key (review round 2).
 
 ## Defaults
 

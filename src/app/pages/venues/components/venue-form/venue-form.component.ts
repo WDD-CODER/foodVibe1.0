@@ -42,7 +42,7 @@ import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.uti
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { HoursEditorComponent } from 'src/app/shared/hours-editor/hours-editor.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
-import { todayIso } from 'src/app/core/utils/date-input.util'
+import { isoToLocalEpoch, todayIso } from 'src/app/core/utils/date-input.util'
 import {
   checkHoursRow,
   draftToHours,
@@ -493,11 +493,4 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       this.router.navigate(['/venues/list'])
     }
   }
-}
-
-/** Plan 373: `yyyy-mm-dd` to local midnight in epoch ms; an empty or malformed value gives undefined. */
-function isoToLocalEpoch(iso: string | null | undefined): number | undefined {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso ?? '')
-  if (!match) return undefined
-  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getTime()
 }

@@ -1,4 +1,4 @@
-import { formatDateDigits, isoToDmy, parseDmy, todayIso } from './date-input.util'
+import { formatDateDigits, isoToDmy, isoToLocalEpoch, parseDmy, todayIso } from './date-input.util'
 
 describe('date-input.util', () => {
   describe('formatDateDigits', () => {
@@ -53,6 +53,25 @@ describe('date-input.util', () => {
   describe('todayIso', () => {
     it('uses the local calendar day', () => {
       expect(todayIso(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05')
+    })
+  })
+
+  describe('isoToLocalEpoch (plan 373)', () => {
+    it('gives local midnight of the day', () => {
+      expect(isoToLocalEpoch('2026-11-03')).toBe(new Date(2026, 10, 3).getTime())
+    })
+
+    it('round-trips with todayIso', () => {
+      const ms = isoToLocalEpoch('2026-01-05')
+      expect(ms).toBeDefined()
+      expect(todayIso(new Date(ms as number))).toBe('2026-01-05')
+    })
+
+    it('gives undefined for nothing or garbage', () => {
+      expect(isoToLocalEpoch('')).toBeUndefined()
+      expect(isoToLocalEpoch(null)).toBeUndefined()
+      expect(isoToLocalEpoch(undefined)).toBeUndefined()
+      expect(isoToLocalEpoch('25/12/2026')).toBeUndefined()
     })
   })
 })
