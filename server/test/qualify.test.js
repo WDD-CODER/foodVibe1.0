@@ -3,8 +3,8 @@
 
 const fs = require('fs')
 const path = require('path')
-const { qualify, parseReason, hoursCheck } = require('../generated/schemas/front-desk/qualify')
-const { jerusalemEpoch, weekdayOf } = require('../generated/schemas/front-desk/local-time')
+const { qualify, parseReason, hoursCheck, openRangesOf } = require('../generated/schemas/front-desk/qualify')
+const { jerusalemEpoch, weekdayOf, jerusalemDateTime } = require('../generated/schemas/front-desk/local-time')
 const { templateFor } = require('../generated/schemas/front-desk-templates')
 const { frontDeskProfileSchema, BUSINESS_TYPES } = require('../generated/schemas/entities/front-desk-profile.schema')
 
@@ -186,6 +186,31 @@ describe('hoursCheck', () => {
     const late = [{ days: 'א', time: '18:00-02:00', dayIndexes: [1], open: '18:00', close: '02:00' }]
     expect(hoursCheck(late, '2026-06-01', '01:00')).toEqual({ ok: true })
     expect(hoursCheck(late, '2026-06-01', '10:00')).toEqual({ ok: false, reason: 'outside_hours', open: '18:00', close: '02:00' })
+  })
+})
+
+describe('openRangesOf', () => {
+  it('lists the checkable ranges of a day', () => {
+    expect(openRangesOf(ALL_WEEK, '2026-06-02')).toEqual([{ open: '12:00', close: '23:00', overnight: false }])
+    expect(openRangesOf(FREE_TEXT, '2026-06-02')).toEqual([])
+  })
+  it('marks a range that runs past midnight', () => {
+    const late = [{ days: 'ה', time: '18:00-02:00', dayIndexes: [4], open: '18:00', close: '02:00' }]
+    expect(openRangesOf(late, '2026-06-04')).toEqual([{ open: '18:00', close: '02:00', overnight: true }])
+  })
+  it('orders two rows of a day by open', () => {
+    const two = [
+      { days: 'ג', time: '18:00-23:00', dayIndexes: [2], open: '18:00', close: '23:00' },
+      { days: 'ג', time: '12:00-15:00', dayIndexes: [2], open: '12:00', close: '15:00' },
+    ]
+    expect(openRangesOf(two, '2026-06-02').map(r => r.open)).toEqual(['12:00', '18:00'])
+  })
+})
+
+describe('jerusalemDateTime', () => {
+  it('is the inverse of jerusalemEpoch', () => {
+    expect(jerusalemDateTime(jerusalemEpoch('2026-07-15', '12:30'))).toEqual({ date: '2026-07-15', time: '12:30' })
+    expect(jerusalemDateTime(jerusalemEpoch('2026-01-15', '00:00'))).toEqual({ date: '2026-01-15', time: '00:00' })
   })
 })
 

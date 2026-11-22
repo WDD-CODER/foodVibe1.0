@@ -308,6 +308,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies: none.
 - Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
+### table-engine — is there a table, which one, and what else
+
+- Status: stable
+- Use: `shared/schemas/front-desk/table-engine.ts` — `slotsFor`, `turnFor`, `candidates`, `assign`, `alternatives`, `dayAvailability` (and `windowsOf`), with `openRangesOf` in `qualify.ts` and `jerusalemDateTime` in `local-time.ts`; the server reads it from `server/generated/schemas`, the browser through the `@schemas` alias. Test data: `shared/schemas/testing/table-engine-fixtures.ts`.
+- When: any code that offers, confirms or moves a table — never a second calculation.
+- Known copies: none.
+
 ### helpers — pure functions
 
 - Status: stable
@@ -322,6 +329,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
   `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
+- Plan 663: openRangesOf in qualify.ts (`shared/schemas/front-desk/qualify.ts`) — the checkable opening ranges of a date (`hoursCheck` is built on it).
+- Plan 663: jerusalemDateTime in local-time.ts (`shared/schemas/front-desk/local-time.ts`) — the inverse of `jerusalemEpoch`.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
