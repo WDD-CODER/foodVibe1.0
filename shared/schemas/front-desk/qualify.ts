@@ -57,19 +57,35 @@ function within(time: string, open: string, close: string): boolean {
   return close > open ? time >= open && time <= close : time >= open || time <= close
 }
 
+/** One opening range of a day; `overnight` when the close is at or before the open (it runs past midnight). */
+export interface OpenRange {
+  open: string
+  close: string
+  overnight: boolean
+}
+
+/** The checkable opening ranges of `date`, ordered by open then close; free-text rows are skipped. Pure; ignores closed dates. */
+export function openRangesOf(hours: OperatingHoursRow[], date: string): OpenRange[] {
+  const day = weekdayOf(date)
+  return hours
+    .filter(checkable)
+    .filter(r => r.dayIndexes!.includes(day))
+    .map(r => ({ open: r.open!, close: r.close!, overnight: r.close! <= r.open! }))
+    .sort((a, b) => (a.open === b.open ? (a.close < b.close ? -1 : a.close > b.close ? 1 : 0) : a.open < b.open ? -1 : 1))
+}
+
 /** The opening-hours rule on its own (plan 559 reuses it for "after hours"). */
 export function hoursCheck(hours: OperatingHoursRow[], date: string, time?: string): HoursCheck {
   const rows = hours.filter(checkable)
   if (!rows.length) return { ok: true, unchecked: true }
-  const day = weekdayOf(date)
-  const todays = rows.filter(r => r.dayIndexes!.includes(day))
+  const todays = openRangesOf(hours, date)
   if (!todays.length) {
     const openDays = [...new Set(rows.flatMap(r => r.dayIndexes!))].sort((a, b) => a - b)
     return { ok: false, reason: 'closed_day', openDays }
   }
   if (!time) return { ok: true }
-  if (todays.some(r => within(time, r.open!, r.close!))) return { ok: true }
-  return { ok: false, reason: 'outside_hours', open: todays[0].open!, close: todays[0].close! }
+  if (todays.some(r => within(time, r.open, r.close))) return { ok: true }
+  return { ok: false, reason: 'outside_hours', open: todays[0].open, close: todays[0].close }
 }
 
 const isBlank = (v: unknown): boolean => v === undefined || v === null || v === '' || (typeof v === 'number' && Number.isNaN(v))

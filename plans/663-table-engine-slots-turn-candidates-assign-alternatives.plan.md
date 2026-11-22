@@ -297,12 +297,12 @@ Registry
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Give the hours rule a list form and the clock an inverse, so the engine can walk a day — openRangesOf beside hoursCheck (hoursCheck now calls it, answers unchanged) and jerusalemDateTime on wallAsUtc; new cases in the hours test — shared/schemas/front-desk/qualify.ts, shared/schemas/front-desk/local-time.ts, server/test/qualify.test.js
-- [ ] A2: Write the shared room and profile fixtures both test sides read — ROOM (14 tables, three areas, two joins), profileWith, the hours rows and the ladder, parsed by the real schemas in the test — shared/schemas/testing/table-engine-fixtures.ts
-- [ ] A3: Build the day's bookable start times and the turn length — windowsOf, slotsFor (lead rules, last seating, overnight tail, daylight-saving days), turnFor; tests "slots", "overnight", "daylight saving", "turn" — shared/schemas/front-desk/table-engine.ts, server/test/table-engine.test.js
-- [ ] A4: Decide which tables fit a party and whether one is free at a time — candidates with the fixed order, assign with its eight reasons and the buffer rule; tests "candidates", "assign", "buffer", "same answer" — shared/schemas/front-desk/table-engine.ts, server/test/table-engine.test.js
-- [ ] A5: Offer other times when the asked one is taken, and the whole day at a glance — alternatives (±90 minutes, then the next two open days) and dayAvailability; tests "alternatives", "day", "pure" — shared/schemas/front-desk/table-engine.ts, server/test/table-engine.test.js
-- [ ] A6: Prove the browser runs the same engine and register it as a family — one spec through the schemas alias, the table-engine family entry, inventory line, folder map, the map's extension line — src/app/core/utils/table-engine.spec.ts, docs/brain/component-families.md, docs/brain/inventory.md, src/app/core/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Give the hours rule a list form and the clock an inverse, so the engine can walk a day — openRangesOf beside hoursCheck (hoursCheck now calls it, answers unchanged) and jerusalemDateTime on wallAsUtc; new cases in the hours test — shared/schemas/front-desk/qualify.ts, shared/schemas/front-desk/local-time.ts, server/test/qualify.test.js
+- [x] A2: Write the shared room and profile fixtures both test sides read — ROOM (14 tables, three areas, two joins), profileWith, the hours rows and the ladder, parsed by the real schemas in the test — shared/schemas/testing/table-engine-fixtures.ts
+- [x] A3: Build the day's bookable start times and the turn length — windowsOf, slotsFor (lead rules, last seating, overnight tail, daylight-saving days), turnFor; tests "slots", "overnight", "daylight saving", "turn" — shared/schemas/front-desk/table-engine.ts, server/test/table-engine.test.js
+- [x] A4: Decide which tables fit a party and whether one is free at a time — candidates with the fixed order, assign with its eight reasons and the buffer rule; tests "candidates", "assign", "buffer", "same answer" — shared/schemas/front-desk/table-engine.ts, server/test/table-engine.test.js
+- [x] A5: Offer other times when the asked one is taken, and the whole day at a glance — alternatives (±90 minutes, then the next two open days) and dayAvailability; tests "alternatives", "day", "pure" — shared/schemas/front-desk/table-engine.ts, server/test/table-engine.test.js
+- [x] A6: Prove the browser runs the same engine and register it as a family — one spec through the schemas alias, the table-engine family entry, inventory line, folder map, the map's extension line — src/app/core/utils/table-engine.spec.ts, docs/brain/component-families.md, docs/brain/inventory.md, src/app/core/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: `shared/schemas/front-desk/qualify.ts` (`hoursCheck` is rewritten on `openRangesOf`; `qualify` is not
@@ -334,3 +334,5 @@ Registry
   `jerusalemEpoch(date, time)` true for every booking.
 - behaviour: the asked area is a preference, never a filter (C-ENGINE's order puts it second).
 - behaviour: `alternatives` looks at most 14 dates ahead for "the next two open days".
+- behaviour: when a party fits the room's seat range but no table or join matches (a gap), `assign` answers `full`; reverse: return `too_big` / `too_small` there.
+- Evidence: server vitest table-engine.test.js + qualify.test.js → 94 passed (build:schemas ok).

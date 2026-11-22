@@ -660,7 +660,8 @@ Each line is already written into the plan that owns it; where a line and a Cont
 - 662 · C-FLOOR · the key pattern `^[a-z0-9]{6,12}$` covers table, area and join keys, `areaKey` and `tableKeys`.
 - 662 · C-REGISTRY-R · the browser's API path map (`http-storage.adapter.ts`) is not a registry of this program:
   each plan appends its own entry (664 `floorPlan`, 673 `waitlist`, 675 `conversations` and `sim`).
-- 663 · C-ENGINE · adds exported `jerusalemDateTime(epoch)` to `local-time.ts`; `openRangesOf` returns
+- 663 · C-ENGINE · exports `windowsOf(profile, date)` (the service windows of a date, used by tests) and adds exported
+  `jerusalemDateTime(epoch)` to `local-time.ts`; `openRangesOf` returns
   `{ open, close, overnight }[]`; a slot belongs to the calendar date its start falls on, and a closed date closes
   its whole service day; the asked area is a preference, never a filter; `alternatives` looks at most 14 dates ahead.
 - 664 · C-FLOOR · cross-field checks live in the pure `shared/schemas/front-desk/floor-plan-check.ts`
