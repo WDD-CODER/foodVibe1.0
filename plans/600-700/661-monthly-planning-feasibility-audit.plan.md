@@ -1,6 +1,6 @@
 # Plan 661 — Monthly planning screen: feasibility audit against the current code (report only)
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: 5b82258e85b72c0fdf97a2af8b83c5a59150b88f
 
