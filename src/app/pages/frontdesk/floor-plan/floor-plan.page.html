@@ -1,0 +1,89 @@
+<section class="floor-plan" dir="rtl">
+  <app-page-header titleKey="fp_title">
+    @if (canEdit_() && draft_()) {
+    <button
+      header-actions
+      type="button"
+      class="c-btn-primary"
+      data-testid="fp-save"
+      [disabled]="!canSave_()"
+      [attr.aria-busy]="isSaving_()"
+      (click)="save()"
+    >
+      {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
+    </button>
+    }
+  </app-page-header>
+
+  @if (isLoading_()) {
+  <app-loader />
+  } @else if (loadFailed_()) {
+  <app-empty-state
+    class="floor-plan__state"
+    messageKey="fp_load_failed"
+    icon="alert-triangle"
+    ctaLabelKey="retry"
+    (ctaClick)="load()"
+    data-testid="fp-load-failed"
+  />
+  } @else if (draft_()) { @if (!canEdit_()) {
+  <p class="floor-plan__note" data-testid="fp-read-only-note">{{ 'fp_read_only_note' | translatePipe }}</p>
+  } @else {
+  <div class="floor-plan__presets" role="group" [attr.aria-label]="'fp_add_label' | translatePipe">
+    <span class="floor-plan__label">{{ 'fp_add_label' | translatePipe }}</span>
+    @for (preset of presets; track preset.id) {
+    <button
+      type="button"
+      class="c-chip c-chip--tap"
+      [attr.data-testid]="'fp-preset-' + preset.id"
+      [disabled]="atLimit_()"
+      (click)="addTable(preset)"
+    >
+      {{ preset.labelKey | translatePipe }}
+    </button>
+    }
+  </div>
+  }
+
+  <div class="floor-plan__areas" role="group">
+    <button
+      type="button"
+      class="c-chip c-chip--tab"
+      [class.active]="areaKey_() === null"
+      [attr.aria-pressed]="areaKey_() === null"
+      (click)="selectArea(null)"
+    >
+      {{ 'fp_area_all' | translatePipe }}
+    </button>
+    @for (area of areas_(); track area.key) {
+    <button
+      type="button"
+      class="c-chip c-chip--tab"
+      [class.active]="areaKey_() === area.key"
+      [attr.aria-pressed]="areaKey_() === area.key"
+      (click)="selectArea(area.key)"
+    >
+      {{ area.name }}
+    </button>
+    }
+  </div>
+
+  <app-floor-map
+    [plan]="draft_()!"
+    [selectedKeys]="selectedKeys_()"
+    [draggable]="canEdit_()"
+    [dimOtherThanArea]="areaKey_()"
+    (tableTapped)="onTableTapped($event)"
+    (tableMoved)="onTableMoved($event)"
+    (gridTapped)="clearSelection()"
+  />
+
+  @if (tableCount_() === 0) {
+  <app-empty-state
+    class="floor-plan__state"
+    [messageKey]="canEdit_() ? 'fp_empty' : 'fp_empty_readonly'"
+    icon="layout-grid"
+    data-testid="fp-empty"
+  />
+  } }
+</section>

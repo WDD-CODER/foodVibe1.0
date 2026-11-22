@@ -477,6 +477,22 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a server path stores, reads, links or deletes a private uploaded file.
 - Known copies: none.
 
+### floor-map — the drawing of the room
+
+- Status: stable — plan 665
+- Use: `src/app/shared/floor-map/` · `app-floor-map` (inputs `plan`, `states`, `selectedKeys`, `draggable`, `dimOtherThanArea`; outputs
+  `tableTapped`, `tableMoved`, `gridTapped`) with the pure grid arithmetic in `floor-geometry.util.ts` (`footprintFor`, `movedCell`,
+  `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
+- When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.
+- Known copies: none.
+
+### floor-drag — Dragging a table, free drag on the room grid
+
+- Status: stable — plan 665
+- Use: Dragging a table: `cdkDrag` inside `app-floor-map` (`src/app/shared/floor-map/`): the pixel distance is turned into whole cells by `movedCell`, then the drag transform is reset; `Directionality` gives the reading direction.
+- When: a table is moved on the room grid. Lists that sort by dragging keep using `cdkDropList`.
+- Known copies: none.
+
 ### learning-stats — `buildLearningStats`, `weekStart` in `server/utils/learning-stats.js`
 
 - Status: stable — plan 630
