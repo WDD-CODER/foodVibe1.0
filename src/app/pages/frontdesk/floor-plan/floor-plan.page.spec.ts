@@ -308,6 +308,65 @@ describe('FloorPlanPage (plan 665)', () => {
       expect(draft().joins.length).toBe(1)
     })
 
+    describe('joins and arrows (plan 666)', () => {
+      const THREE: FloorPlan = {
+        ...TWO,
+        joins: []
+      } as unknown as FloorPlan
+      const picked = () => (cmp() as unknown as { picked_: () => string[] }).picked_()
+
+      it('multi-select: a tap picks a table, a second removes it, no table panel opens', async () => {
+        await setup({ saved: THREE })
+        await click('fp-multi')
+        await click('floor-table-1')
+        expect(picked()).toEqual(['tab001'])
+        expect(el().querySelector('[data-testid="table-panel"]')).toBeNull()
+        await click('floor-table-1')
+        expect(picked()).toEqual([])
+        expect((el().querySelector('[data-testid="fp-preset-p4"]') as HTMLButtonElement).disabled).toBeTrue()
+      })
+
+      it('"חיבור השולחנות" adds one join and leaves multi-select', async () => {
+        await setup({ saved: THREE })
+        await click('fp-multi')
+        expect((el().querySelector('[data-testid="fp-join-action"]') as HTMLButtonElement).disabled).toBeTrue()
+        await click('floor-table-1')
+        await click('floor-table-2')
+        await click('fp-join-action')
+        expect(draft().joins.length).toBe(1)
+        expect(el().querySelector('[data-testid="fp-join-bar"]')).toBeNull()
+        expect(picked()).toEqual([])
+        expect(el().querySelector('[data-testid="join-label"]')?.textContent).toContain('1 + 2')
+      })
+
+      it('removing a join and pressing undo brings it back', async () => {
+        await setup({ saved: TWO })
+        await click('join-remove')
+        expect(draft().joins).toEqual([])
+        expect(userMsg.onSetSuccessMsgWithUndo).toHaveBeenCalledWith('fp_join_removed', jasmine.any(Function))
+        userMsg.onSetSuccessMsgWithUndo.calls.mostRecent().args[1]()
+        await settle()
+        expect(draft().joins.map((j) => j.key)).toEqual(['join01'])
+      })
+
+      it('the arrow that points down moves the selected table one cell', async () => {
+        await setup({ saved: THREE })
+        await click('floor-table-1')
+        expect(cmp().hasRealChanges()).toBeFalse()
+        await click('tp-move-down')
+        expect(el().querySelector('[data-testid="floor-table-1"]')?.getAttribute('data-y')).toBe('1')
+        expect(cmp().hasRealChanges()).toBeTrue()
+      })
+
+      it('opens the room panel from the button and the sheet close clears it', async () => {
+        await setup({ saved: THREE })
+        await click('fp-room-open')
+        expect(el().querySelector('[data-testid="fp-panel"]')?.classList).toContain('floor-plan__panel--open')
+        await click('fp-sheet-close')
+        expect(el().querySelector('[data-testid="fp-panel"]')?.classList).not.toContain('floor-plan__panel--open')
+      })
+    })
+
     it('shows no panel to staff', async () => {
       await setup({ saved: TWO, owner: false })
       await click('floor-table-1')

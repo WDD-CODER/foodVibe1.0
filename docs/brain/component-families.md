@@ -483,14 +483,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 665
 - Use: `src/app/shared/floor-map/` · `app-floor-map` (inputs `plan`, `states`, `selectedKeys`, `draggable`, `dimOtherThanArea`, `warnKeys` (plan 684: overlap mark); outputs
   `tableTapped`, `tableMoved`, `gridTapped`) with the pure grid arithmetic in `floor-geometry.util.ts` (`footprintFor`, `movedCell`,
-  `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
+  `stepCell`/`canStep` (plan 666: one cell in the arrow's direction, RTL-aware), `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
 - When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.
 - Known copies: none.
+
+### floor-plan-joins-sheet — joins of tables, one-cell arrows and the phone sheet of the room editor
+
+- Status: stable — plan 666
+- Use: floor-plan-joins.util (`src/app/pages/frontdesk/floor-plan/floor-plan-joins.util.ts`: joinProblem, newJoin, joinLabel, withJoin, withoutJoin, withJoinChange); stepCell and canStep in `src/app/shared/floor-map/floor-geometry.util.ts` (one cell in the arrow's direction, RTL-aware); `app-floor-joins-list` with .joins-list, .joins-list__row and the page's .floor-plan__multi, .floor-plan__join-bar; the phone sheet: .floor-plan__panel--open and .floor-plan--sheet, .floor-plan__sheet-head, .floor-plan__room-open (a non-modal panel under 768 px).
+- When: a screen of the room editor joins tables, moves one with arrows, or shows its panel as a bottom sheet — never a second copy.
 
 ### floor-plan-editor — the editing rules, the overlap mark and the scoped classes of the room editor
 
 - Status: stable — plan 684
-- Use: `src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts` (`withTable`, `numberError`, `duplicateTable`, `withoutTable`, `overlapping`, `minGrid`, `withArea`, `restoreDropped`) — pure draft rules; the overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`); the scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) in the page's and the two panels' own stylesheets; `app-floor-table-panel` and `app-floor-room-panel` (inputs in, events out).
+- Use: `src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts` (`withTable`, `numberError`, `duplicateTable`, `withoutTable`, `overlapping`, `minGrid`, `withArea`, `restoreDropped`) and `floor-plan-joins.util.ts` (plan 666: `joinProblem`, `newJoin`, `joinLabel`, `withJoin`, `withoutJoin`, `withJoinChange`) — pure draft rules; `app-floor-joins-list` (joins rows in the room panel); the arrows row of the table panel; the phone sheet (`.floor-plan__panel.floor-plan__panel--open`, non-modal, under 768 px); the overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`); the scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) in the page's and the two panels' own stylesheets; `app-floor-table-panel` and `app-floor-room-panel` (inputs in, events out).
 - When: a screen edits the room draft — rules belong in the util, never in a panel.
 - Known copies: none.
 

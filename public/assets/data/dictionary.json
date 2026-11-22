@@ -2754,6 +2754,25 @@
     "fp_in_use_title": "אי אפשר להסיר שולחנות שיש להם הזמנות",
     "fp_in_use_row": "שולחן {number} — {count} הזמנות",
     "fp_in_use_tip": "אפשר לסמן שולחן כלא פעיל במקום להסיר אותו",
-    "fp_in_use_restore": "החזרת השולחנות למפה"
+    "fp_in_use_restore": "החזרת השולחנות למפה",
+    "fp_multi_select": "בחירת כמה שולחנות",
+    "fp_join_action": "חיבור השולחנות",
+    "fp_join_pick": "בחרו 2 עד 4 שולחנות מאותו אזור",
+    "fp_join_err_count": "אפשר לחבר 2 עד 4 שולחנות",
+    "fp_join_err_area": "אפשר לחבר רק שולחנות מאותו אזור",
+    "fp_join_err_exists": "החיבור הזה כבר קיים",
+    "fp_join_err_limit": "הגעתם למספר החיבורים הגבוה ביותר",
+    "fp_joins_title": "חיבורי שולחנות",
+    "fp_joins_empty": "אין חיבורים. בחרו כמה שולחנות וחברו אותם",
+    "fp_join_online": "אורחים יכולים להזמין את החיבור באתר",
+    "fp_join_remove": "ביטול החיבור",
+    "fp_join_removed": "החיבור בוטל",
+    "fp_in_use_join": "חיבור {numbers} — {count} הזמנות",
+    "fp_move_label": "הזזת השולחן",
+    "fp_move_up": "הזזה למעלה",
+    "fp_move_down": "הזזה למטה",
+    "fp_move_right": "הזזה ימינה",
+    "fp_move_left": "הזזה שמאלה",
+    "fp_room_open": "אזורים וחיבורים"
   }
 }

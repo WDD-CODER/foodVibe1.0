@@ -1,4 +1,4 @@
-<section class="floor-plan" dir="rtl">
+<section class="floor-plan" dir="rtl" [class.floor-plan--sheet]="sheetOpen_()" [style.--fp-sheet-h.px]="sheetH_()">
   <app-page-header titleKey="fp_title">
     @if (canEdit_() && draft_()) {
     <button
@@ -36,14 +36,34 @@
       type="button"
       class="c-chip c-chip--tap"
       [attr.data-testid]="'fp-preset-' + preset.id"
-      [disabled]="atLimit_()"
+      [disabled]="atLimit_() || multi_()"
       (click)="addTable(preset)"
     >
       {{ preset.labelKey | translatePipe }}
     </button>
     }
+    <label class="c-chip c-chip--toggle floor-plan__multi">
+      <input type="checkbox" role="switch" data-testid="fp-multi" [checked]="multi_()" (change)="toggleMulti()" />
+      <span>{{ 'fp_multi_select' | translatePipe }}</span>
+    </label>
   </div>
-  }
+  @if (multi_()) {
+  <div class="floor-plan__join-bar" data-testid="fp-join-bar">
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="fp-join-action"
+      [disabled]="joinReason_() !== ''"
+      (click)="addJoin()"
+    >
+      <lucide-icon name="link" [size]="16"></lucide-icon>
+      {{ 'fp_join_action' | translatePipe }}
+    </button>
+    @if (joinReason_()) {
+    <span class="floor-plan__join-reason" data-testid="fp-join-reason">{{ joinReason_() | translatePipe }}</span>
+    }
+  </div>
+  } }
 
   <div class="floor-plan__areas" role="group">
     <button
@@ -68,12 +88,14 @@
     }
   </div>
 
-  @if (canEdit_() && inUse_(); as rows) {
+  @if (canEdit_() && (inUse_() || inUseJoins_().length)) {
   <div class="floor-plan__notice" role="alert" data-testid="fp-in-use">
     <p class="floor-plan__notice-title">{{ 'fp_in_use_title' | translatePipe }}</p>
     <ul class="floor-plan__notice-rows">
-      @for (row of rows; track row.table.key) {
+      @for (row of inUse_() ?? []; track row.table.key) {
       <li>{{ inUseText(row) }}</li>
+      } @for (row of inUseJoins_(); track row.join.key) {
+      <li>{{ inUseJoinText(row) }}</li>
       }
     </ul>
     <p class="floor-plan__notice-tip">{{ 'fp_in_use_tip' | translatePipe }}</p>
@@ -90,7 +112,7 @@
       class="floor-plan__map"
       [plan]="draft_()!"
       [selectedKeys]="selectedKeys_()"
-      [draggable]="canEdit_()"
+      [draggable]="canEdit_() && !multi_()"
       [dimOtherThanArea]="areaKey_()"
       [warnKeys]="canEdit_() ? warnKeys_() : []"
       (tableTapped)="onTableTapped($event)"
@@ -99,20 +121,37 @@
     />
 
     @if (canEdit_()) {
-    <aside class="floor-plan__panel">
+    <aside #panel class="floor-plan__panel" [class.floor-plan__panel--open]="sheetOpen_()" data-testid="fp-panel">
       @if (selectedTable_(); as table) {
       <app-floor-table-panel
         [table]="table"
         [plan]="draft_()!"
         [focusNumber]="focusNumber_()"
         (tableChange)="onTableChange($event)"
+        (move)="onMove($event)"
         (duplicate)="onDuplicate()"
         (remove)="onRemoveTable()"
         (closed)="clearSelection()"
       />
       } @else {
+      <div class="floor-plan__sheet-head">
+        <span class="floor-plan__sheet-title">{{ 'fp_room_open' | translatePipe }}</span>
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-testid="fp-sheet-close"
+          [attr.aria-label]="'close' | translatePipe"
+          (click)="closeSheet()"
+        >
+          <lucide-icon name="x" [size]="18"></lucide-icon>
+        </button>
+      </div>
       <app-floor-room-panel
         [plan]="draft_()!"
+        [markedJoinKey]="joinMarkKey_()"
+        (joinPressed)="onJoinPressed($event)"
+        (joinChange)="onJoinChange($event)"
+        (joinRemoved)="onJoinRemoved($event)"
         (areaAdded)="onAreaOp({ type: 'add', key: $event.key, name: $event.name })"
         (areaRenamed)="onAreaOp({ type: 'rename', key: $event.key, name: $event.name })"
         (areaMoved)="onAreaOp({ type: 'move', key: $event.key, dir: $event.dir })"
@@ -124,7 +163,16 @@
     }
   </div>
 
-  @if (tableCount_() === 0) {
+  @if (canEdit_() && !sheetOpen_()) {
+  <button
+    type="button"
+    class="c-btn-ghost floor-plan__room-open"
+    data-testid="fp-room-open"
+    (click)="roomOpen_.set(true)"
+  >
+    {{ 'fp_room_open' | translatePipe }}
+  </button>
+  } @if (tableCount_() === 0) {
   <app-empty-state
     class="floor-plan__state"
     [messageKey]="canEdit_() ? 'fp_empty' : 'fp_empty_readonly'"

@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { Directionality } from '@angular/cdk/bidi'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild
+} from '@angular/core'
+import { LucideAngularModule } from 'lucide-angular'
 import { FormGroup } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
@@ -7,6 +18,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { FloorMapComponent } from 'src/app/shared/floor-map/floor-map.component'
 import { TablePanelComponent } from './components/table-panel/table-panel.component'
 import { RoomPanelComponent } from './components/room-panel/room-panel.component'
+import { joinProblem, newJoin, withJoin, withJoinChange, withoutJoin } from './floor-plan-joins.util'
 import {
   duplicateTable,
   overlapping,
@@ -21,9 +33,12 @@ import {
   MAX_TABLES,
   TABLE_PRESETS,
   firstFreeCell,
+  footprintFor,
   newKey,
   nextTableNumber,
   sizeFor,
+  stepCell,
+  type StepArrow,
   type TablePreset
 } from 'src/app/shared/floor-map/floor-geometry.util'
 import { FloorPlanDataService } from '@services/floor-plan-data.service'
@@ -41,6 +56,8 @@ const DEFAULT_AREA_KEYS = ['fd_opt_inside', 'fd_opt_outside', 'fd_opt_bar']
 
 /** A table the server would not let go, with its joins and the bookings that hold it. */
 type InUseRow = { table: FloorTable; joins: FloorJoin[]; count: number }
+/** Plan 666: a join the server would not let go while all its tables stay in the draft. */
+type InUseJoin = { join: FloorJoin; count: number }
 
 /** Plan 665: the owner draws the room — adds tables from presets, drags them, saves the whole plan in one request. */
 @Component({
@@ -53,7 +70,8 @@ type InUseRow = { table: FloorTable; joins: FloorJoin[]; count: number }
     LoaderComponent,
     FloorMapComponent,
     TablePanelComponent,
-    RoomPanelComponent
+    RoomPanelComponent,
+    LucideAngularModule
   ],
   host: { '(document:keydown.escape)': 'clearSelection()' },
   templateUrl: './floor-plan.page.html',
@@ -67,6 +85,9 @@ export class FloorPlanPage {
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
   private readonly logging = inject(LoggingService)
+  private readonly directionality = inject(Directionality)
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef)
+  private readonly panelEl = viewChild<ElementRef<HTMLElement>>('panel')
 
   protected readonly presets = TABLE_PRESETS
   protected readonly maxTables = MAX_TABLES
@@ -80,14 +101,36 @@ export class FloorPlanPage {
   protected readonly areaKey_ = signal<string | null>(null)
   /** Plan 684: tables the last save was refused for (409 TABLE_IN_USE); null = no notice. */
   protected readonly inUse_ = signal<InUseRow[] | null>(null)
+  /** Plan 666: the joins the last save was refused for; shown with the rows of `inUse_`. */
+  protected readonly inUseJoins_ = signal<InUseJoin[]>([])
+  /** Plan 666: multi-select mode — a tap picks a table for a join and no table panel opens. */
+  protected readonly multi_ = signal(false)
+  protected readonly picked_ = signal<string[]>([])
+  /** The join whose row was pressed; its tables look selected on the map. */
+  protected readonly joinMarkKey_ = signal<string | null>(null)
+  /** Phone only: the room panel (areas, size, joins) is open in the sheet. */
+  protected readonly roomOpen_ = signal(false)
+  /** Height of the panel as rendered, for the page's bottom padding under the sheet. */
+  protected readonly sheetH_ = signal(0)
   /** True right after a duplicate: the copy's number field takes the focus. */
   protected readonly focusNumber_ = signal(false)
 
   protected readonly canEdit_ = computed(() => this.permission.can('editFrontDesk'))
   protected readonly selectedKeys_ = computed(() => {
+    if (this.multi_()) return this.picked_()
+    const mark = this.joinMarkKey_()
+    if (mark) return this.draft_()?.joins.find((j) => j.key === mark)?.tableKeys ?? []
     const key = this.selectedKey_()
     return key ? [key] : []
   })
+  /** Why the picked tables cannot be joined (a dictionary key); '' when they can. */
+  protected readonly joinReason_ = computed<string>(() => {
+    const draft = this.draft_()
+    const picked = this.picked_()
+    if (!draft || !picked.length) return 'fp_join_pick'
+    return joinProblem(draft, picked) ?? ''
+  })
+  protected readonly sheetOpen_ = computed(() => this.selectedTable_() !== null || this.roomOpen_())
   protected readonly selectedTable_ = computed(() => {
     const key = this.selectedKey_()
     return this.draft_()?.tables.find((t) => t.key === key) ?? null
@@ -122,6 +165,23 @@ export class FloorPlanPage {
 
   constructor() {
     void this.load()
+    // The page pads its bottom by the sheet's measured height (phone only, in the stylesheet).
+    effect((onCleanup) => {
+      const el = this.panelEl()?.nativeElement
+      if (!el || typeof ResizeObserver === 'undefined') return
+      const observer = new ResizeObserver(() => this.sheetH_.set(Math.ceil(el.getBoundingClientRect().height)))
+      observer.observe(el)
+      onCleanup(() => observer.disconnect())
+    })
+    // The selected table is kept in view above the sheet.
+    effect(() => {
+      const key = this.selectedKey_()
+      if (!key) return
+      queueMicrotask(() => {
+        const table = this.host.nativeElement.querySelector<HTMLElement>(`[data-key="${key}"]`)
+        table?.scrollIntoView?.({ block: 'nearest' })
+      })
+    })
   }
 
   /** Route guard (`pendingChangesGuard`): unsaved drawing asks before leaving. */
@@ -198,12 +258,84 @@ export class FloorPlanPage {
   }
 
   protected onTableTapped(key: string): void {
+    if (this.multi_()) {
+      this.picked_.update((p) => (p.includes(key) ? p.filter((k) => k !== key) : [...p, key]))
+      return
+    }
+    this.joinMarkKey_.set(null)
+    this.roomOpen_.set(false)
     this.selectedKey_.update((current) => (current === key ? null : key))
   }
 
   protected clearSelection(): void {
     this.selectedKey_.set(null)
+    this.picked_.set([])
+    this.joinMarkKey_.set(null)
     this.focusNumber_.set(false)
+  }
+
+  /** The sheet's X (phone): closes the table panel or the room panel. */
+  protected closeSheet(): void {
+    this.clearSelection()
+    this.roomOpen_.set(false)
+  }
+
+  protected toggleMulti(): void {
+    const on = !this.multi_()
+    this.multi_.set(on)
+    this.picked_.set([])
+    this.joinMarkKey_.set(null)
+    if (on) this.selectedKey_.set(null)
+  }
+
+  protected addJoin(): void {
+    const draft = this.draft_()
+    const picked = this.picked_()
+    if (!draft || !this.canEdit_() || joinProblem(draft, picked) !== null) return
+    this.draft_.set(withJoin(draft, newJoin(draft, picked, newKey())))
+    this.multi_.set(false)
+    this.picked_.set([])
+  }
+
+  protected onJoinPressed(key: string): void {
+    this.joinMarkKey_.update((current) => (current === key ? null : key))
+  }
+
+  protected onJoinChange(change: {
+    key: string
+    patch: Partial<Pick<FloorJoin, 'minSeats' | 'maxSeats' | 'online'>>
+  }): void {
+    const draft = this.draft_()
+    if (!draft || !this.canEdit_()) return
+    this.draft_.set(withJoinChange(draft, change.key, change.patch))
+  }
+
+  protected onJoinRemoved(key: string): void {
+    const draft = this.draft_()
+    if (!draft || !this.canEdit_()) return
+    const { plan, removed } = withoutJoin(draft, key)
+    if (!removed) return
+    this.draft_.set(plan)
+    if (this.joinMarkKey_() === key) this.joinMarkKey_.set(null)
+    this.userMsg.onSetSuccessMsgWithUndo(this.translation.translate('fp_join_removed'), () =>
+      this.draft_.update((d) => (d && !d.joins.some((j) => j.key === removed.key) ? withJoin(d, removed) : d))
+    )
+  }
+
+  /** One cell step of the selected table, in the direction the arrow points on the screen. */
+  protected onMove(arrow: StepArrow): void {
+    const draft = this.draft_()
+    const table = draft?.tables.find((t) => t.key === this.selectedKey_())
+    if (!draft || !table || !this.canEdit_()) return
+    const to = stepCell(
+      { x: table.x, y: table.y },
+      footprintFor(table),
+      arrow,
+      this.directionality.value === 'ltr' ? 'ltr' : 'rtl',
+      draft.grid
+    )
+    if (to.x === table.x && to.y === table.y) return
+    this.draft_.set({ ...draft, tables: draft.tables.map((t) => (t.key === table.key ? { ...t, ...to } : t)) })
   }
 
   /** One change of the selected table, applied to the draft at once. */
@@ -262,18 +394,47 @@ export class FloorPlanPage {
 
   /** Puts the tables the server kept (and their joins) back into the draft with their saved values. */
   protected restoreInUse(): void {
-    const rows = this.inUse_()
-    if (!rows) return
+    const rows = this.inUse_() ?? []
+    const joins = this.inUseJoins_()
+    if (!rows.length && !joins.length) return
     this.draft_.update((d) =>
       d
         ? restoreDropped(
             d,
             rows.map((r) => r.table),
-            rows.flatMap((r) => r.joins)
+            [...rows.flatMap((r) => r.joins), ...joins.map((j) => j.join)]
           )
         : d
     )
     this.inUse_.set(null)
+    this.inUseJoins_.set([])
+  }
+
+  protected inUseJoinText(row: InUseJoin): string {
+    const draft = this.draft_()
+    const numbers = (draft?.tables ?? [])
+      .filter((t) => row.join.tableKeys.includes(t.key))
+      .map((t) => t.number)
+      .join(' + ')
+    return this.translation
+      .translate('fp_in_use_join')
+      .replace('{numbers}', numbers)
+      .replace('{count}', String(row.count))
+  }
+
+  /** Saved joins the draft dropped while all their tables stay (the table rows cover the others). */
+  private inUseJoinRows(bookings: { tableKeys: string[] }[]): InUseJoin[] {
+    const saved = this.floorPlans.plan_()
+    const draft = this.draft_()
+    if (!saved || !draft) return []
+    const rows: InUseJoin[] = []
+    for (const join of saved.joins) {
+      if (draft.joins.some((j) => j.key === join.key)) continue
+      if (!join.tableKeys.every((k) => draft.tables.some((t) => t.key === k))) continue
+      const count = bookings.filter((b) => join.tableKeys.every((k) => b.tableKeys.includes(k))).length
+      if (count > 0) rows.push({ join, count })
+    }
+    return rows
   }
 
   protected inUseText(row: InUseRow): string {
@@ -317,8 +478,10 @@ export class FloorPlanPage {
       if (!result.ok) {
         if (result.code === 'TABLE_IN_USE') {
           const rows = this.inUseRows(result.bookings ?? [])
-          if (rows.length) {
+          const joinRows = this.inUseJoinRows(result.bookings ?? [])
+          if (rows.length || joinRows.length) {
             this.inUse_.set(rows)
+            this.inUseJoins_.set(joinRows)
             return false
           }
         }
@@ -331,6 +494,7 @@ export class FloorPlanPage {
         return false
       }
       this.inUse_.set(null)
+      this.inUseJoins_.set([])
       this.unsaved_.markSaved()
       this.userMsg.onSetSuccessMsg(this.translation.translate('fp_saved'))
       return true

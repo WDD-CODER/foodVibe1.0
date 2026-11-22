@@ -115,6 +115,17 @@ describe('TablePanelComponent (plan 684)', () => {
     expect((el().querySelector('[data-testid="tp-online"]') as HTMLInputElement).disabled).toBeTrue()
   })
 
+  it('shows four arrow buttons, disables the ones that would leave the room, and emits the arrow pressed', () => {
+    const moves: string[] = []
+    fixture.componentInstance.move.subscribe((a) => moves.push(a))
+    const btn = (a: string) => el().querySelector(`[data-testid="tp-move-${a}"]`) as HTMLButtonElement
+    expect(btn('up').disabled).toBeTrue()
+    expect(btn('down').disabled).toBeFalse()
+    btn('down').click()
+    expect(moves).toEqual(['down'])
+    expect(btn('up').getAttribute('aria-label')).toBe('fp_move_up')
+  })
+
   it('emits a shape change', () => {
     ;(el().querySelector('[data-testid="tp-shape-round"]') as HTMLInputElement).dispatchEvent(new Event('change'))
     expect(patches).toEqual([{ shape: 'round' }])

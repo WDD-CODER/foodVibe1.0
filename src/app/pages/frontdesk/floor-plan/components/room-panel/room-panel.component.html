@@ -70,6 +70,14 @@
     {{ 'fp_area_add' | translatePipe }}
   </button>
 
+  <app-floor-joins-list
+    [plan]="plan()"
+    [markedKey]="markedJoinKey()"
+    (joinPressed)="joinPressed.emit($event)"
+    (joinChange)="joinChange.emit($event)"
+    (joinRemoved)="joinRemoved.emit($event)"
+  />
+
   <div class="room-panel__size">
     <div class="room-panel__row">
       <span class="room-panel__label">{{ 'fp_room_cols' | translatePipe }}</span>
