@@ -169,6 +169,7 @@ docs/frontdesk/assistant-behaviour-rules.md
 docs/frontdesk/frontdesk-map.md
 docs/restaurant/restaurant-map.md
 docs/agent/standards-backend.md
+docs/brain/component-families.md
 ```
 
 ## Read Scope
