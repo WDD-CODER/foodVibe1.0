@@ -68,6 +68,15 @@ One line per new component, util, pipe, service or `.c-*` class this plan create
 - [new piece] — family: [family-id | none] — rung: [1-4] — why: [one line; required for rung 4]
 - none — [why this plan creates no new piece]
 
+## Adopt Check
+<!-- Only when the Reuse Check has a rung-4 row or the scope writes a package.json: one line per such capability,
+     facts from node scripts/adopt-facts.mjs --pkg=<name>; procedure in docs/agent/adopt-check.md.
+     verdict: adopt | wrap | build | skip (skip = domain logic, no search). At most 3 candidates (candidate + 2 considered).
+     A GPL / AGPL / unknown licence on adopt or wrap also needs "license-ok: Human YYYY-MM-DD".
+     Nothing triggers: one line "- none — why: <one line>". Checked by node scripts/scope-check.mjs --adopt --plan=<path>. -->
+- [capability] — candidate: [package] — considered: [package, package] — verdict: [adopt | wrap | build] — license: [spdx] — why: [one line]
+- [capability] — verdict: skip — why: [one line]
+
 ## Defaults
 
 One line per `on` product default the plan triggers (`_shared/product-defaults.md`); none triggered: leave empty.

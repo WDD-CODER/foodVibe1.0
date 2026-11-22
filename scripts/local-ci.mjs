@@ -4,6 +4,7 @@
  * finished plans the todo-sync workflow could not.
  *
  *   node scripts/local-ci.mjs --pr <n> [--force] [--dry-run] [--timeout-min <m>]
+ *   node scripts/local-ci.mjs --release [--dry-run] [--timeout-min <m>]   every check on origin/<main>, before a release
  *   node scripts/local-ci.mjs --close-plans [--sha <sha>] [--force] [--dry-run]
  *   node scripts/local-ci.mjs --use local|github|auto     the switch: move this repo's CI to this PC, or back
  *   node scripts/local-ci.mjs --which                     which one it is now
@@ -18,7 +19,10 @@
  * one-line step of the repo's pull-request workflows this runner can start (a step in a subfolder runs there), and the
  * secret scan of the PR's changed files. Every step it cannot run is printed as `LOCAL_CI: not run here — …`. One
  * failure posts `failure`; all passing posts `success` and writes `<git common dir>/kit-local-ci/<sha>.json`, which the merge guard
- * reads (scripts/lib/merge-guard.mjs).
+ * reads (scripts/lib/merge-guard.mjs). The commands listed in `ci.releaseOnly` are left to --release; a release-only
+ * `node --test <glob>` gives way to the tests the PR touches. A command that already passed here on exactly the PR's tree
+ * (the ship gate's record, an orchestrator run's plan or final gate) is not run again: `reused — …`.
+ * --release: the whole list (release-only included, nothing reused) on origin/<main>; one step may take 90 minutes.
  * --close-plans: when the todo-sync run of origin/<main>'s head never started for budget (`--force`: whatever it did),
  * runs the workflow's steps in a temporary worktree and pushes the result to <main> (a plans-only change, the Planner's
  * admin write); a refused push opens a PR instead.
@@ -30,26 +34,31 @@ import { join, resolve, dirname } from 'node:path'
 import { tmpdir, hostname } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from './lib/proc.mjs'
-import { gateCommands, commandArgv, runCommand } from './lib/plan-gate.mjs'
+import { gateCommands, commandArgv, runCommand, treeOf, sameTreeSplit } from './lib/plan-gate.mjs'
 import { runsInside } from './lib/gate-select.mjs'
 import { PATTERNS } from './pre-commit-secret-scan.mjs'
-import { workflowCommands, prTriggered, prHead, commitBudget, receiptPath, repoWorkflows, ciMode, STATUS_CONTEXT } from './lib/local-ci.mjs'
+import { workflowCommands, prTriggered, prHead, commitBudget, receiptPath, repoWorkflows, ciMode, STATUS_CONTEXT, treePassSources, globFiles, focusedTests, nodeTestGlobs } from './lib/local-ci.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const MAIN = 'main'
 const PM = "pnpm" === 'pnpm' ? 'pnpm' : 'npm'
 const COMMANDS = { build: "build", lint: "lint", test: "test:ci", testCi: "" }
 const CI_MIRROR = ["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]
+// ci.releaseOnly: checks a PR run leaves to the release run (--release). Empty (every project's default) = a PR runs all.
+const RELEASE_ONLY = []
 const SECRET_SCAN = 'secret scan (local) of the changed files'
+// One step's limit: a large test suite can take over 30 minutes on a busy PC.
+export const DEFAULT_TIMEOUT_MIN = 90
 const say = (l) => console.log(`LOCAL_CI: ${l}`)
 
 function args(argv) {
-  const o = { pr: null, closePlans: false, sha: null, force: false, dryRun: false, timeoutMin: 30, use: null, which: false }
+  const o = { pr: null, closePlans: false, release: false, sha: null, force: false, dryRun: false, timeoutMin: DEFAULT_TIMEOUT_MIN, use: null, which: false }
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     const val = () => { const v = argv[++i]; if (v === undefined || v.startsWith('--')) throw new Error(`${a} needs a value`); return v }
     if (a === '--pr') o.pr = val()
     else if (a === '--close-plans') o.closePlans = true
+    else if (a === '--release') o.release = true
     else if (a === '--sha') o.sha = val()
     else if (a === '--force') o.force = true
     else if (a === '--dry-run') o.dryRun = true
@@ -59,7 +68,7 @@ function args(argv) {
     else throw new Error(`unknown flag ${a}`)
   }
   if (o.use !== null && !['local', 'github', 'auto'].includes(o.use)) throw new Error('--use takes local, github or auto')
-  if (o.use === null && !o.which && !o.closePlans && !/^\d+$/.test(String(o.pr ?? ''))) throw new Error('--pr <number>, --close-plans, --use or --which')
+  if (o.use === null && !o.which && !o.closePlans && !o.release && !/^\d+$/.test(String(o.pr ?? ''))) throw new Error('--pr <number>, --release, --close-plans, --use or --which')
   if (!(o.timeoutMin > 0)) throw new Error('--timeout-min takes a positive number')
   return o
 }
@@ -92,8 +101,11 @@ function normalise(command, cwd) {
   return { command: c }
 }
 
-/** The run list: [{ job, command, cwd }] plus the skipped steps. */
-export function localCommands(root = ROOT) {
+/**
+ * The run list: [{ job, command, cwd }] plus the skipped steps. `tier: 'pr'` (default) leaves the `ci.releaseOnly`
+ * commands to the release run (releaseSplit); `tier: 'release'` runs everything.
+ */
+export function localCommands(root = ROOT, { tier = 'pr', releaseOnly = RELEASE_ONLY, changed = null } = {}) {
   const manifest = existsSync(join(root, 'scripts', 'kit-manifest-check.mjs')) && existsSync(join(root, 'docs', 'workflow-kit', 'manifest.json'))
   const list = gateCommands({ pm: PM, ...COMMANDS, manifest, ciMirror: CI_MIRROR }).map((command) => ({ job: 'kit', command, cwd: root }))
   if (existsSync(join(root, 'scripts', 'kit-checks.mjs'))) list.push({ job: 'kit-checks', command: `node scripts/kit-checks.mjs --base origin/${MAIN}`, cwd: root })
@@ -122,7 +134,36 @@ export function localCommands(root = ROOT) {
   try { scripts = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).scripts ?? {} } catch {}
   const bodies = list.map((c) => /^(?:npm|pnpm) run (\S+)$/.exec(c.command)?.[1]).filter(Boolean).map((s) => scripts[s] ?? '')
   const once = list.filter((c) => c.cwd === root && !/^(?:npm|pnpm) run /.test(c.command) && bodies.some((b) => runsInside(c.command, b)))
-  return { list: list.filter((c) => !once.includes(c)), skipped, once: once.map((c) => c.command) }
+  const all = list.filter((c) => !once.includes(c))
+  if (tier === 'release') return { list: all, skipped, once: once.map((c) => c.command), releaseOnly: [] }
+  const split = releaseSplit(all, { root, releaseOnly, changed: changed ?? changedFiles(root) })
+  return { list: split.list, skipped, once: once.map((c) => c.command), releaseOnly: split.releaseOnly }
+}
+
+/** The files this branch changed against origin/<main>. */
+function changedFiles(root) {
+  return git(root, 'diff', '--name-only', '--no-renames', `origin/${MAIN}...HEAD`).out.split('\n').map((f) => f.trim().replace(/\\/g, '/')).filter(Boolean)
+}
+
+/**
+ * A PR run's list without the `releaseOnly` commands (each named in `releaseOnly` of the result); a release-only
+ * `node --test <globs>` gives way to one `node --test` of only the tests the change touches (focusedTests), or to none.
+ */
+export function releaseSplit(list, { root = ROOT, releaseOnly = RELEASE_ONLY, changed = [] } = {}) {
+  const wanted = new Set((Array.isArray(releaseOnly) ? releaseOnly : []).map((c) => normalise(String(c), root).command).filter(Boolean))
+  if (!wanted.size) return { list, releaseOnly: [] }
+  const out = []
+  const left = []
+  for (const c of list) {
+    if (!wanted.has(c.command)) { out.push(c); continue }
+    left.push(c.command)
+    const globs = nodeTestGlobs(c.command)
+    if (!globs) continue
+    const files = [...new Set(globs.flatMap((g) => globFiles(c.cwd ?? root, g)))]
+    const picked = focusedTests({ changed, files, read: (p) => readFileSync(join(c.cwd ?? root, p), 'utf8') })
+    if (picked.length) out.push({ job: c.job, command: normalise(`node --test ${picked.join(' ')}`, root).command, cwd: c.cwd, focused: picked.length })
+  }
+  return { list: out, releaseOnly: left }
 }
 
 /** The secret scan of the files the PR changed against origin/<main> (the same patterns as the pre-commit hook). */
@@ -146,9 +187,20 @@ function postStatus(ghFn, repo, sha, state, description) {
  * Run `list` in order, write the receipt for `head.sha` under `root`, post the `local-ci` status. Returns the exit code
  * (0 pass, 1 a command failed, 2 the status could not be posted).
  */
-export async function runList({ root = ROOT, gh: ghFn = gh, head, pr, list, skipped = [], timeoutMin = 30 }) {
+export async function runList({ root = ROOT, gh: ghFn = gh, head, pr, list, skipped = [], timeoutMin = DEFAULT_TIMEOUT_MIN, tier = 'pr', reuse = tier !== 'release', releaseOnly = [] }) {
   const results = []
+  const reused = []
   const started = Date.now()
+  // A command that already passed on exactly this tree here (the ship gate, a run's plan or final gate) is not run again.
+  if (reuse) {
+    const same = sameTreeSplit(list.filter((c) => c.command !== SECRET_SCAN && (!c.cwd || c.cwd === root)).map((c) => c.command), treeOf(root), treePassSources(root))
+    if (same.skipped.length) {
+      const from = treePassSources(root)[treeOf(root)]?.plan ?? 'an earlier gate'
+      for (const c of same.skipped) { reused.push({ command: c, source: from }); say(`reused — passed on this tree (${from}): ${c}`) }
+      const skip = new Set(same.skipped)
+      list = list.filter((c) => !(skip.has(c.command) && (!c.cwd || c.cwd === root)))
+    }
+  }
   for (const c of list) {
     const r = c.command === SECRET_SCAN ? { ...secretScan(root), seconds: 0 } : await runCommand(c.command, c.cwd ?? root, timeoutMin * 60_000)
     results.push({ job: c.job, command: c.command, cwd: !c.cwd || c.cwd === root ? '.' : c.cwd, exit: r.exit, seconds: r.seconds })
@@ -157,11 +209,12 @@ export async function runList({ root = ROOT, gh: ghFn = gh, head, pr, list, skip
   }
   const failed = results.filter((r) => r.exit !== 0)
   const minutes = Math.round((Date.now() - started) / 6000) / 10
-  const receipt = { sha: head.sha, pr: Number(pr), repo: head.repo, host: hostname(), at: new Date().toISOString(), pass: failed.length === 0, minutes, results, skipped }
+  const receipt = { sha: head.sha, pr: pr == null ? null : Number(pr), repo: head.repo, host: hostname(), at: new Date().toISOString(), tier, pass: failed.length === 0, minutes, results, reused, releaseOnly, skipped }
   const file = receiptPath(root, head.sha)
   mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, `${JSON.stringify(receipt, null, 2)}\n`)
-  const desc = failed.length ? `failed: ${failed[0].command}` : `${results.length} commands passed on this PC in ${minutes} min (Actions had no budget)`
+  const extra = [reused.length ? `${reused.length} reused` : '', releaseOnly.length ? `${releaseOnly.length} left to the release run` : ''].filter(Boolean).join(', ')
+  const desc = failed.length ? `failed: ${failed[0].command}` : `${tier === 'release' ? 'release: ' : ''}${results.length} commands passed on this PC in ${minutes} min${extra ? ` (${extra})` : ''}`
   const p = postStatus(ghFn, head.repo, head.sha, failed.length ? 'failure' : 'success', desc)
   say(`${failed.length ? 'FAIL' : 'PASS'} — ${desc}; status ${p.status === 0 ? 'posted' : `not posted (${String(p.stderr).trim().split('\n')[0]})`}; receipt ${file}`)
   return failed.length ? 1 : p.status === 0 ? 0 : 2
@@ -180,11 +233,34 @@ export async function runPr(o, { root = ROOT, gh: ghFn = gh } = {}) {
   if (switchedHere) say('CI is switched to this PC (--use local): the checks run here')
   if (budget.real.length && !o.force && !switchedHere) { say(`a real failure: ${budget.real.join(', ')} — fix it (docs/agent/pr-check-fix-loop.md); the local run stands in only for jobs that never started`); return 2 }
   if (!budget.blocked.length && !o.force && !switchedHere) { say('no job was stopped by the Actions budget — GitHub runs the checks; nothing to do'); return 0 }
-  const { list, skipped, once } = localCommands(root)
+  const { list, skipped, once, releaseOnly } = localCommands(root)
+  for (const c of once) say(`once ${c} — an npm script in the list already runs it`)
+  for (const s of skipped) say(`not run here — ${s}`)
+  for (const c of releaseOnly) say(`release only — ${c} (node scripts/local-ci.mjs --release runs it before a release)`)
+  for (const c of list.filter((x) => x.focused)) say(`focused — ${c.focused} test file(s) this change touches, instead of the whole suite`)
+  if (o.dryRun) { for (const c of list) say(`would run ${c.command}${c.cwd !== root ? ` (in ${c.cwd})` : ''}`); return 0 }
+  return runList({ root, gh: ghFn, head, pr: o.pr, list, skipped, timeoutMin: o.timeoutMin, releaseOnly })
+}
+
+/**
+ * --release: every check, release-only ones included and nothing reused, on this folder's HEAD, which must be
+ * origin/<main> with no tracked change. Posts the `local-ci` status on that commit and writes a `tier: "release"` receipt.
+ */
+export async function runRelease(o, { root = ROOT, gh: ghFn = gh } = {}) {
+  git(root, 'fetch', 'origin', MAIN, '--quiet')
+  const here = git(root, 'rev-parse', 'HEAD').out
+  const main = git(root, 'rev-parse', `origin/${MAIN}`).out
+  if (!here || here !== main) { say(`this folder is at ${here.slice(0, 8)}, origin/${MAIN} is at ${main.slice(0, 8)} — a release run checks origin/${MAIN}: check it out and pull first`); return 2 }
+  if (git(root, 'status', '--porcelain', '--untracked-files=no').out) { say('this folder has uncommitted changes to tracked files — commit or stash them first'); return 2 }
+  const v = ghFn(['repo', 'view', '--json', 'nameWithOwner', '-q', '.nameWithOwner'], root)
+  const repo = String(v.stdout).trim()
+  if (v.status !== 0 || !repo) { say('cannot read the repository name (gh repo view)'); return 2 }
+  const { list, skipped, once } = localCommands(root, { tier: 'release' })
+  say(`release run on origin/${MAIN} @ ${here.slice(0, 8)}: ${list.length} command(s), nothing reused`)
   for (const c of once) say(`once ${c} — an npm script in the list already runs it`)
   for (const s of skipped) say(`not run here — ${s}`)
   if (o.dryRun) { for (const c of list) say(`would run ${c.command}${c.cwd !== root ? ` (in ${c.cwd})` : ''}`); return 0 }
-  return runList({ root, gh: ghFn, head, pr: o.pr, list, skipped, timeoutMin: o.timeoutMin })
+  return runList({ root, gh: ghFn, head: { sha: here, repo }, pr: null, list, skipped, timeoutMin: o.timeoutMin, tier: 'release' })
 }
 
 /** The todo-sync workflow's steps in a temporary worktree of `sha`, pushed to <main> (or a PR when the push is refused). */
@@ -265,12 +341,12 @@ export function useMode(mode, { root = ROOT, gh: ghFn = gh } = {}) {
 async function main() {
   let o
   try { o = args(process.argv.slice(2)) } catch (e) {
-    console.error(`usage: node scripts/local-ci.mjs --pr <n> [--force] [--dry-run] [--timeout-min <m>] | --close-plans [--sha <sha>] [--force] [--dry-run] | --use local|github|auto | --which — ${e.message}`)
+    console.error(`usage: node scripts/local-ci.mjs --pr <n> [--force] [--dry-run] [--timeout-min <m>] | --release [--dry-run] [--timeout-min <m>] | --close-plans [--sha <sha>] [--force] [--dry-run] | --use local|github|auto | --which — ${e.message}`)
     process.exit(2)
   }
   if (o.which) process.exit(which())
   if (o.use) process.exit(useMode(o.use))
-  process.exit(o.closePlans ? closePlans(o) : await runPr(o))
+  process.exit(o.closePlans ? closePlans(o) : o.release ? await runRelease(o) : await runPr(o))
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main()

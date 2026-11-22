@@ -123,9 +123,25 @@ export function kitKind(path, { root, repo }) {
 
 // Uncommitted files, server logs under .claude/ aside (runtime noise, not work): [] when clean, null when unreadable.
 function changes(path) {
-  const r = gitIn(path, 'status', '--porcelain')
+  const r = gitIn(path, 'status', '--porcelain', '--untracked-files=all')
   if (r.status !== 0) return null
-  return r.out.split(/\r?\n/).filter((l) => l.trim() && !/^\?\? \.claude\/[^/]+\.log$/.test(l.trim()))
+  return workChanges(r.out)
+}
+
+/**
+ * Untracked scratch a session or a run leaves in a folder: server logs under .claude/, probe specs (e2e/tmp/),
+ * screenshots, test and build output. Not work: a folder holding only these is clean. A changed or added tracked file,
+ * or any other untracked file, still counts.
+ */
+export const SCRATCH_PATHS = ['e2e/tmp/', 'e2e/screens/', 'e2e/.results/', 'screens/', 'test-results/', 'playwright-report/', 'dist/', 'node_modules/']
+/** The `git status --porcelain` lines that are work (scratch left out), trimmed. */
+export function workChanges(porcelain) {
+  return String(porcelain ?? '').split(/\r?\n/).filter((l) => {
+    if (!l.trim()) return false
+    if (!l.startsWith('?? ')) return true
+    const p = l.slice(3).replace(/^"|"$/g, '')
+    return !/^\.claude\/[^/]+\.log$/.test(p) && !SCRATCH_PATHS.some((s) => p === s || p.startsWith(s))
+  })
 }
 
 const refOk = (root, ref) => gitIn(root, 'rev-parse', '--verify', '--quiet', ref).status === 0

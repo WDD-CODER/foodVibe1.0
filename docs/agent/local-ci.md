@@ -43,12 +43,28 @@ orchestrator run, the run's merge folder `<repo>-orch-merge-<run>`).
    step with `working-directory` runs in that folder), and the secret scan of the changed files. A step it cannot run
    (a multi-line shell block, a third-party action such as Semgrep, a step with `${{ … }}`) is printed
    `LOCAL_CI: not run here — <workflow>/<job> · <step> — <why>`; nothing is left out silently. `node --test` runs with
-   `--test-concurrency=2` (`LOCAL_CI_TEST_CONCURRENCY`) so a full suite fits in this PC's memory.
-3. It writes the receipt `<git common dir>/kit-local-ci/<sha>.json` (each command, exit code, seconds; never committed)
-   and posts the `local-ci` commit status on the head commit: `success`, or `failure` naming the first failing command.
-   Statuses cost no Actions minutes.
+   `--test-concurrency=2` (`LOCAL_CI_TEST_CONCURRENCY`) so a full suite fits in this PC's memory. One step may take
+   90 minutes (`--timeout-min`).
+   - **Release-only checks.** A command listed in `ci.releaseOnly` (kit config; `[]` by default, so a project's PR runs
+     everything) is left out: `LOCAL_CI: release only — <command>`. A release-only `node --test <glob>` gives way to one
+     `node --test` of the tests the PR touches: the changed test files, plus each test whose text names a changed
+     file's base name (`LOCAL_CI: focused — <n> test file(s)`). A docs-only PR runs no test command. Use it where the
+     work goes live by release tag, not from `main` (the kit itself).
+   - **Reuse.** A command that already passed on this PC on exactly the PR's tree is not run again
+     (`LOCAL_CI: reused — passed on this tree (<source>)`): the ship gate records its passes in
+     `<git common dir>/kit-gate-trees.json`, an orchestrator run its plan and final gates in
+     `.claude/orchestrator-runs/<run>/gate-trees.json`. Any change to the code is a different tree, so it runs.
+3. It writes the receipt `<git common dir>/kit-local-ci/<sha>.json` (each command, exit code, seconds, what was reused
+   and what was left to the release; never committed) and posts the `local-ci` commit status on the head commit:
+   `success`, or `failure` naming the first failing command. Statuses cost no Actions minutes.
 
 Exit 0 = passed (or nothing to do), 1 = a command failed, 2 = refused (wrong folder, a real CI failure, gh error).
+
+## `node scripts/local-ci.mjs --release`
+
+Before a release (the kit: before the tag), on a folder at `origin/<main>` with no tracked change: every check,
+release-only ones included, nothing reused. It posts the `local-ci` status on that commit and writes a receipt with
+`tier: "release"`. A HEAD that is not `origin/<main>` is refused (exit 2). `--dry-run` prints the list.
 
 ## The merge guard
 

@@ -35,6 +35,14 @@ Every plan lists each new piece it creates, the family it searched and the rung:
 
 Rungs 1–3 name a registry family; rung 4 needs `why:`.
 
+## Plans — an adopted package (the `## Adopt Check` section)
+
+A rung-4 row or a new dependency gets an `## Adopt Check` row: is there a maintained package that already does it
+(`docs/agent/adopt-check.md`, checked by `node scripts/scope-check.mjs --adopt --plan=<path>`). An `adopt` or `wrap`
+verdict goes through one wrapper in the shared code: the plan adds a Reuse Check row for the wrapper (rung 4, a new
+family) and its family entry in the registry. Pages and features import the wrapper, never the package, so replacing
+the package later changes one place.
+
 ## Plans — the `## Defaults` section
 
 A behaviour the project decided once lives in `_shared/product-defaults.md`, never in each plan. Every `on` default a plan

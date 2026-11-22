@@ -6,8 +6,8 @@
  *
  *   import { workflowCommands, budgetBlocked, localCiCovers, receiptPath } from './lib/local-ci.mjs'
  */
-import { readFileSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { readFileSync, existsSync, readdirSync } from 'node:fs'
+import { join, dirname, basename } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
 /** The annotation GitHub puts on a job it never started for lack of budget or a billing problem. */
@@ -20,9 +20,122 @@ export const STATUS_CONTEXT = 'local-ci'
  * guard of the main folder. A folder that is not a git repository falls back to `<root>/.git`.
  */
 export function receiptPath(root, sha) {
+  return join(commonDir(root), 'kit-local-ci', `${sha}.json`)
+}
+/** The repository's shared git folder (the same for the main checkout and every worktree), else `<root>/.git`. */
+export function commonDir(root) {
   const r = spawnSync('git', ['rev-parse', '--path-format=absolute', '--git-common-dir'], { cwd: root, encoding: 'utf8', windowsHide: true })
-  const common = r.status === 0 && String(r.stdout).trim() ? String(r.stdout).trim() : join(root, '.git')
-  return join(common, 'kit-local-ci', `${sha}.json`)
+  return r.status === 0 && String(r.stdout).trim() ? String(r.stdout).trim() : join(root, '.git')
+}
+/** Where the ship gate records the commands that passed, by the tree its commit will have (gate-trees.json format). */
+export function shipTreePassesPath(root) {
+  return join(commonDir(root), 'kit-gate-trees.json')
+}
+
+/**
+ * Every record of commands that passed on a tree this PC already checked: the ship gate's
+ * (`<common dir>/kit-gate-trees.json`) and each orchestrator run's plan and final gates
+ * (`.claude/orchestrator-runs/<run>/gate-trees.json` of the main checkout). Returns
+ * { [tree]: { plan, commands, sources } } — the union over all records, in sameTreeSplit()'s shape.
+ */
+export function treePassSources(root) {
+  const common = commonDir(root)
+  const main = basename(common) === '.git' ? dirname(common) : root
+  const files = [{ file: join(common, 'kit-gate-trees.json'), source: 'the ship gate' }]
+  const runs = join(main, '.claude', 'orchestrator-runs')
+  let names = []
+  try { names = readdirSync(runs) } catch { /* no runs */ }
+  for (const n of names) files.push({ file: join(runs, n, 'gate-trees.json'), source: `run ${n}` })
+  const out = {}
+  for (const { file, source } of files) {
+    if (!existsSync(file)) continue
+    let all = {}
+    try { all = JSON.parse(readFileSync(file, 'utf8')) ?? {} } catch { continue }
+    for (const [tree, rec] of Object.entries(all)) {
+      if (!Array.isArray(rec?.commands)) continue
+      const o = (out[tree] ??= { plan: source, commands: [], sources: [] })
+      o.commands = [...new Set([...o.commands, ...rec.commands])]
+      if (!o.sources.includes(source)) o.sources.push(source)
+      o.plan = o.sources.join(', ')
+    }
+  }
+  return out
+}
+
+/** A glob (`*` within a folder, `**` across folders, `?`) as a RegExp over repo-root paths written with `/`. */
+function globRe(glob) {
+  let re = ''
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i]
+    if (c === '*' && glob[i + 1] === '*') {
+      re += '.*'
+      i++
+      if (glob[i + 1] === '/') i++
+    } else if (c === '*') re += '[^/]*'
+    else if (c === '?') re += '[^/]'
+    else re += c.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+  }
+  return new RegExp(`^${re}$`)
+}
+/** The files under `root` a glob matches (node_modules and .git left out), as sorted repo-root paths with `/`. */
+export function globFiles(root, glob) {
+  const parts = String(glob).replace(/\\/g, '/').split('/')
+  const fixed = []
+  for (const p of parts.slice(0, -1)) {
+    if (/[*?]/.test(p)) break
+    fixed.push(p)
+  }
+  const re = globRe(parts.join('/'))
+  const out = []
+  const walk = (rel) => {
+    let entries = []
+    try { entries = readdirSync(join(root, rel), { withFileTypes: true }) } catch { return }
+    for (const e of entries) {
+      if (e.name === 'node_modules' || e.name === '.git') continue
+      const p = rel ? `${rel}/${e.name}` : e.name
+      if (e.isDirectory()) walk(p)
+      else if (re.test(p)) out.push(p)
+    }
+  }
+  walk(fixed.join('/'))
+  return out.sort()
+}
+
+// A changed file's stem this short or this common matches too many tests: it is matched by its whole file name instead
+// (`tools/lib/kit.mjs` → a test that says `kit.mjs`).
+const GENERIC_NAMES = new Set(['index', 'main', 'config', 'package', 'readme', 'changelog', 'kit', 'install', 'lib', 'test', 'tests', 'utils', 'util', 'types'])
+/**
+ * The tests a PR touches, out of `files` (what a release-only `node --test` glob matches): the changed test files, plus
+ * every test whose text names a changed non-test, non-Markdown file — by its stem (`core/scripts/free-merged-slots.mjs`
+ * → `free-merged-slots`), or by its whole file name when the stem is short or common (`kit.mjs`). `read(path)` returns
+ * a file's text. A docs-only change selects none.
+ */
+export function focusedTests({ changed, files, read }) {
+  const all = new Set(files)
+  const picked = new Set(changed.filter((f) => all.has(f)))
+  const names = [...new Set(changed
+    .filter((f) => !all.has(f) && !/\.md$/i.test(f))
+    .map((f) => {
+      const stem = basename(f).replace(/\.[^.]+$/, '').replace(/\.test$/, '')
+      return stem.length >= 4 && !GENERIC_NAMES.has(stem.toLowerCase()) ? stem : basename(f)
+    }))]
+  if (names.length) {
+    for (const t of files) {
+      if (picked.has(t)) continue
+      let text = ''
+      try { text = read(t) } catch { continue }
+      if (names.some((n) => text.includes(n))) picked.add(t)
+    }
+  }
+  return [...picked].sort()
+}
+
+/** The globs of a `node --test [--flags] <globs…>` command (quotes dropped), or null when it is not one. */
+export function nodeTestGlobs(command) {
+  const m = /^node --test\b(.*)$/.exec(String(command ?? '').trim())
+  if (!m) return null
+  const globs = m[1].trim().split(/\s+/).filter(Boolean).map((a) => a.replace(/^["']|["']$/g, '')).filter((a) => !a.startsWith('--'))
+  return globs.length ? globs : null
 }
 
 const indentOf = (l) => l.length - l.trimStart().length
