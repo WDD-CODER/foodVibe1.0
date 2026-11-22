@@ -1,12 +1,28 @@
 import { z } from 'zod'
 import { baseDocShape, nameField } from '../base.schema'
+import { floorKeyField } from './floor-plan.schema'
 
 /** Plan 549 (C-REQUEST): a booking is the calendar record of an approved table, tasting or consultation. */
 export const BOOKING_KINDS = ['table', 'tasting', 'consultation'] as const
 export const BOOKING_STATUSES = ['confirmed', 'seated', 'finished', 'no_show', 'cancelled'] as const
 export const BOOKING_SOURCES = ['request', 'phone', 'walk_in', 'whatsapp', 'google', 'ai'] as const
-/** Fields only the server writes. */
-export const BOOKING_SERVER_FIELDS = ['status', 'statusHistory', 'source', 'startAt', 'endAt', 'publicToken'] as const
+/** Fields only the server writes. Plan 662 (C-BOOK2): the eight table-service fields after `publicToken`. */
+export const BOOKING_SERVER_FIELDS = [
+  'status',
+  'statusHistory',
+  'source',
+  'startAt',
+  'endAt',
+  'publicToken',
+  'tableKeys',
+  'areaKey',
+  'seatedAt',
+  'finishedAt',
+  'remindedAt',
+  'guestConfirmedAt',
+  'override',
+  'test'
+] as const
 
 export type BookingKind = (typeof BOOKING_KINDS)[number]
 export type BookingStatus = (typeof BOOKING_STATUSES)[number]
@@ -41,7 +57,16 @@ export const bookingSchema = z
         })
       )
       .min(1),
-    publicToken: z.string().min(16)
+    publicToken: z.string().min(16),
+    // Plan 662 (C-BOOK2): table service, all optional and server-written.
+    tableKeys: z.array(floorKeyField).min(1).max(4).optional(),
+    areaKey: floorKeyField.optional(),
+    seatedAt: z.number().optional(),
+    finishedAt: z.number().optional(),
+    remindedAt: z.number().optional(),
+    guestConfirmedAt: z.number().optional(),
+    override: z.literal(true).optional(),
+    test: z.literal(true).optional()
   })
   .refine((b) => b.endAt === b.startAt + b.durationMinutes * 60000, {
     message: 'endAt must be startAt + durationMinutes',

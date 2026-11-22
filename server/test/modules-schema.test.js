@@ -34,8 +34,8 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.hasModule({ modules: ['consultant_diag'] }, 'consultant_diag')).toBe(true)
   })
 
-  it('MODULE_OF_TYPE has exactly the seven types of the C-MODULES table', () => {
-    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'frontDeskProfiles', 'knowledgeItems', 'menuEvents', 'requests', 'venues'])
+  it('MODULE_OF_TYPE has exactly the nine types of the C-MODULES and C-REGISTRY-R tables', () => {
+    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'floorPlans', 'frontDeskProfiles', 'knowledgeItems', 'menuEvents', 'requests', 'venues', 'waitlistEntries'])
     expect(S.MODULE_OF_TYPE.clients).toEqual(['events', 'frontdesk'])
   })
 
@@ -58,7 +58,7 @@ describe('businessSchema new optional fields', () => {
   })
 
   it.each([
-    ['a sixth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'events'] }],
+    ['a repeated module beyond the six', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'tables', 'events'] }],
     ['a repeated module', { modules: ['events', 'events'] }],
     ['a 51st history row', { platformHistory: Array.from({ length: 51 }, (_, i) => row(i)) }],
     ['a cap of -1', { aiMonthlyTokenCap: -1 }],

@@ -191,6 +191,29 @@ async function connectDb() {
   await db.collection('stockCounts').createIndex({ businessId: 1, status: 1, countedAt: -1 }, { name: 'stock_counts_business_status_counted' })
   logger.debug({ event: 'mongo.index.ensured', index: 'modules' })
 
+  // Plan 662 (C-REGISTRY-R): the Restaurant program. None of these collections is cloneable, so each names its own
+  // businessId index. C-FLOOR: at most one floor plan per business. Partial on `grid` (every real floor plan has one,
+  // like frontdesk_business_unique above) so a raw fixture doc without it cannot break startup or the cleanup tests.
+  await db.collection('floorPlans').createIndex(
+    { businessId: 1 },
+    { unique: true, name: 'floor_plans_business_unique', partialFilterExpression: { grid: { $type: 'object' } } }
+  )
+  // C-HOLD (INV-7, ADR 0033): the only guard against two bookings on one table at one time.
+  await db.collection('tableHolds').createIndex({ businessId: 1, tableKey: 1, cell: 1 }, { unique: true, name: 'table_holds_cell_unique' })
+  await db.collection('tableHolds').createIndex({ businessId: 1, bookingId: 1 }, { name: 'table_holds_booking' })
+  // C-WAIT: a day's waiting list by status.
+  await db.collection('waitlistEntries').createIndex({ businessId: 1, date: 1, status: 1 }, { name: 'waitlist_business_date_status' })
+  // C-CONV: one open conversation per channel and guest; a closed one has no liveKey, so it never collides.
+  await db.collection('conversations').createIndex(
+    { businessId: 1, liveKey: 1 },
+    { unique: true, partialFilterExpression: { liveKey: { $exists: true } }, name: 'conversations_live_key_unique' }
+  )
+  await db.collection('conversations').createIndex({ businessId: 1, lastMessageAt: -1 }, { name: 'conversations_business_last' })
+  // C-CONV: a provider's retry of one message is stored once.
+  await db.collection('messages').createIndex({ businessId: 1, providerMessageId: 1 }, { unique: true, name: 'messages_provider_unique' })
+  await db.collection('messages').createIndex({ businessId: 1, conversationId: 1, at: 1 }, { name: 'messages_conversation_at' })
+  logger.debug({ event: 'mongo.index.ensured', index: 'restaurant' })
+
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
   await ensureLogIndexes(db)
   logger.debug({ event: 'mongo.index.ensured', index: 'app_logs' })

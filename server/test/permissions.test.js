@@ -62,9 +62,9 @@ describe('plan 631: consultant', () => {
   const CONSULTANT = { userId: 'c1', businessId: 'b1', businessRole: 'consultant', homeBusinessId: 'b9', acting: 'consultant' }
   const { ACTIONS: ALL, CONSULTANT_DENIED } = require('../utils/permissions')
 
-  it('may do 11 actions on a doc of the business he acts in, including someone else\'s and money', () => {
+  it('may do 12 actions on a doc of the business he acts in, including someone else\'s and money (plan 662: manageConversations)', () => {
     const allowed = ALL.filter(a => a !== 'manageTeam' && a !== 'editSettings')
-    expect(allowed).toHaveLength(11)
+    expect(allowed).toHaveLength(12)
     for (const a of allowed) {
       expect(can(CONSULTANT, a, { type: 'menuEvents', doc: own })).toEqual({ ok: true })
       expect(can(CONSULTANT, a, { type: 'clients' })).toEqual({ ok: true })

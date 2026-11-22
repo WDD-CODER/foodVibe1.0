@@ -17,7 +17,7 @@ instructions.
 | R-03 | **Coalesce inbound bursts.** Wait about 6 s after an inbound message; if a newer one arrived this run exits; the surviving run answers every customer message since the last outbound one as a single turn, and re-checks the takeover flag after the wait. | 560 |
 | R-04 | **Silent on AI failure.** When the model call fails the customer gets no "small glitch" text; the conversation moves to `human`. | 562 |
 | R-05 | **No deferred promises.** The assistant cannot act later, so "I'll check and get back to you" is blocked on the server and replaced by an immediate question or a handoff. | 562 |
-| R-06 | **No completion claim without the write.** "Booked", "confirmed", "updated" may be sent only when the server wrote it in the same turn. In Wave 1 the assistant never says a booking is confirmed. | 562 |
+| R-06 | **No completion claim without the write.** "Booked", "confirmed", "updated" may be sent only when the server wrote it in the same turn. A table is confirmed only by the engine and the hold (INV-7). | 562 |
 | R-07 | **No invented links.** A URL is sent only if it appears verbatim in `publicFacts` or the profile. | 562 |
 | R-08 | **Three allowed sources:** the fixed prompt, `publicFacts`, this conversation. When the knowledge and an earlier assistant message disagree, the knowledge wins. Facts (address, price, hours) are quoted exactly as stored. | 562 |
 | R-09 | **Today's date is injected** into every turn (weekday, today, tomorrow, current time, `Asia/Jerusalem`) so "tomorrow" and "Sunday" resolve correctly. | 562 |

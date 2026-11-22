@@ -437,16 +437,16 @@ Unique index `{ businessId, providerMessageId }`.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Write the approved rule down first so the code is built against it — ADR 0033 from section (a), INV-7 from section (b), the INV-1 Touches edit of section (c), each field on one line — docs/brain/decisions/0033-the-table-engine-decides.md, docs/brain/invariants.md
-- [ ] A2: Add the sixth module so table service can be switched on per business — the key, the frontdesk dependency in modulesOf, max 6, the two gated types, the dictionary name, the updated module tests — shared/schemas/modules-pure.ts, shared/schemas/modules.ts, public/assets/data/dictionary.json, server/test/modules-schema.test.js
-- [ ] A3: Give the profile, the booking and the request their new optional fields without breaking stored data — tableService, the eight booking fields and server-field names, the sim channel, the pure tableServiceOf helper — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/booking.schema.ts, shared/schemas/entities/request.schema.ts, shared/schemas/front-desk/table-service.ts
-- [ ] A4: Declare the five new document shapes in the one schema package — floor plan, table hold, waiting-list entry, conversation, message, exported and mapped by collection — shared/schemas/entities/floor-plan.schema.ts, shared/schemas/entities/table-hold.schema.ts, shared/schemas/entities/waitlist-entry.schema.ts, shared/schemas/entities/conversation.schema.ts, shared/schemas/entities/message.schema.ts, shared/schemas/entities/index.ts
-- [ ] A5: Register the five collections and their indexes so later plans only fill them — collection flags, eight named indexes, the backend standards list — server/constants/collections.js, server/db.js, docs/agent/standards-backend.md
-- [ ] A6: Let any member answer guests and keep the floor plan owner-only — the new action on the server and in the browser mirror, the owner-only type — server/utils/permissions.js, src/app/core/services/permission.service.ts, src/app/core/services/permission.service.spec.ts
-- [ ] A7: Mount four empty routers so later plans never touch the app file — router files with a header comment, one mount line each, the folder map — server/routes/floor-plan.js, server/routes/waitlist.js, server/routes/conversations.js, server/routes/sim.js, server/app.js, server/breadcrumbs.md
-- [ ] A8: Make deleting a business remove its restaurant data too — the three server-only names in the delete loop, the two readable types the way requests and bookings go — server/services/business.js
-- [ ] A9: Prove the registry with tests and keep every existing suite green — the two new test files, the updated collections, cross-business and modules tests — server/test/restaurant-schema.test.js, server/test/restaurant-registry.test.js, server/test/collections.test.js, server/test/cross-business.test.js
-- [ ] A10: Change the front desk rules that said no channel confirms a table — R-06, rule 6 and the channel value, and the map's extension line — docs/frontdesk/assistant-behaviour-rules.md, docs/frontdesk/frontdesk-map.md, docs/restaurant/restaurant-map.md
+- [x] A1: Write the approved rule down first so the code is built against it — ADR 0033 from section (a), INV-7 from section (b), the INV-1 Touches edit of section (c), each field on one line — docs/brain/decisions/0033-the-table-engine-decides.md, docs/brain/invariants.md
+- [x] A2: Add the sixth module so table service can be switched on per business — the key, the frontdesk dependency in modulesOf, max 6, the two gated types, the dictionary name, the updated module tests — shared/schemas/modules-pure.ts, shared/schemas/modules.ts, public/assets/data/dictionary.json, server/test/modules-schema.test.js
+- [x] A3: Give the profile, the booking and the request their new optional fields without breaking stored data — tableService, the eight booking fields and server-field names, the sim channel, the pure tableServiceOf helper — shared/schemas/entities/front-desk-profile.schema.ts, shared/schemas/entities/booking.schema.ts, shared/schemas/entities/request.schema.ts, shared/schemas/front-desk/table-service.ts
+- [x] A4: Declare the five new document shapes in the one schema package — floor plan, table hold, waiting-list entry, conversation, message, exported and mapped by collection — shared/schemas/entities/floor-plan.schema.ts, shared/schemas/entities/table-hold.schema.ts, shared/schemas/entities/waitlist-entry.schema.ts, shared/schemas/entities/conversation.schema.ts, shared/schemas/entities/message.schema.ts, shared/schemas/entities/index.ts
+- [x] A5: Register the five collections and their indexes so later plans only fill them — collection flags, eight named indexes, the backend standards list — server/constants/collections.js, server/db.js, docs/agent/standards-backend.md
+- [x] A6: Let any member answer guests and keep the floor plan owner-only — the new action on the server and in the browser mirror, the owner-only type — server/utils/permissions.js, src/app/core/services/permission.service.ts, src/app/core/services/permission.service.spec.ts
+- [x] A7: Mount four empty routers so later plans never touch the app file — router files with a header comment, one mount line each, the folder map — server/routes/floor-plan.js, server/routes/waitlist.js, server/routes/conversations.js, server/routes/sim.js, server/app.js, server/breadcrumbs.md
+- [x] A8: Make deleting a business remove its restaurant data too — the three server-only names in the delete loop, the two readable types the way requests and bookings go — server/services/business.js
+- [x] A9: Prove the registry with tests and keep every existing suite green — the two new test files, the updated collections, cross-business and modules tests — server/test/restaurant-schema.test.js, server/test/restaurant-registry.test.js, server/test/collections.test.js, server/test/cross-business.test.js
+- [x] A10: Change the front desk rules that said no channel confirms a table — R-06, rule 6 and the channel value, and the map's extension line — docs/frontdesk/assistant-behaviour-rules.md, docs/frontdesk/frontdesk-map.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: every reader of `MODULE_KEYS` (the platform dialog, `server/routes/admin.js`), `modulesOf`
@@ -475,3 +475,19 @@ Unique index `{ businessId, providerMessageId }`.
 - none
 
 ## Execution Notes
+
+Builder, run `rs-0`, branch `feat/662-register-restaurant-program-module` (2026-11-22).
+
+- Step 0: `scope-check.mjs --drift` → `REALITY: drift`, four commits. 58a63f68, 1e699264, 905580bf: ok (docs/restaurant/restaurant-map.md only).
+  31ae61ac: ok (frontdesk-map.md rule 6 and the C-CONV paragraph moved by 5 lines, 188 → 193 and 172 → 177; text unchanged).
+- A1: ADR 0033 copied from section (a); INV-7 appended from section (b); INV-1 `Touches` gains the five paths of section (c). Manifest entry added for the ADR.
+- A2: `MODULE_KEYS` gains `tables`; `modulesOf` drops `tables` without `frontdesk`; `.max(6)`; `MODULE_OF_TYPE` gains `floorPlans`, `waitlistEntries`; `module_tables` in the dictionary.
+- A3: `tableServiceSchema` (strict, refine ascending `turnMinutes`); every field optional (`tableServiceOf` fills a missing one). Booking: eight fields, all in `BOOKING_SERVER_FIELDS`. `REQUEST_CHANNELS` gains `sim`.
+- A4: five schema files; the key pattern is one exported `floorKeyField`, reused by booking, hold and waitlist.
+- A5: five collection rows; eight named indexes. `floor_plans_business_unique` is partial on `grid` being an object: without it `server/test/admin-business.test.js` (outside scope) failed with E11000 on its two raw rows per business; logged under the map's "Contract extensions (run)".
+- A6: `manageConversations` (any member) on the server and in the browser mirror; `OWNER_ONLY_TYPES` gains `floorPlans`. `server/test/permissions.test.js` consultant count 11 → 12 (in scope).
+- A7: four empty routers, mounted before `/api/v1/public`; four breadcrumb lines.
+- A8: delete loop gains `tableHolds`, `conversations`, `messages`.
+- A9: `server/test/restaurant-schema.test.js`, `server/test/restaurant-registry.test.js`; updated collections, cross-business, modules-schema tests.
+- A10: R-06, rule 6, the C-CONV bullet, two map extension lines.
+- Evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm --dir server run lint` → 0 (0 errors); `pnpm run test:ci` → 0, TOTAL: 2720 SUCCESS; `pnpm run test:server` → 0, 149 files, 2034 tests passed.
