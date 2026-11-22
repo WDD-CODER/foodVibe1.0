@@ -241,12 +241,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Send the approve of a table request through the booking service so it holds a real table — the table path with its six ordered steps, the optional table choice for the owner, release on every failure — server/routes/requests.js
-- [ ] A2: Prove approve with tests, with and without the module — held table, full hour with alternatives, owner's choice, two at once, failed insert, unchanged cases — server/test/requests-approve-tables.test.js
-- [ ] A3: Give the browser the types the table calls speak in — slot, alternative, hold range and the three input shapes — src/app/core/models/booking.model.ts
-- [ ] A4: Give the browser one call per table route of bookings — availability, create, walk-in, set tables, set when; the wider day answer; reason and alternatives on a refusal — src/app/core/services/booking-data.service.ts, src/app/core/services/booking-data.service.spec.ts
-- [ ] A5: Let the browser's approve send a chosen table and read the alternatives of a refusal — the fourth argument and the wider failure branch — src/app/core/services/request-data.service.ts, src/app/core/services/request-data.service.spec.ts
-- [ ] A6: Update the three folder maps so the next plan finds the new calls — one row each — server/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md
+- [x] A1: Send the approve of a table request through the booking service so it holds a real table — the table path with its six ordered steps, the optional table choice for the owner, release on every failure — server/routes/requests.js
+- [x] A2: Prove approve with tests, with and without the module — held table, full hour with alternatives, owner's choice, two at once, failed insert, unchanged cases — server/test/requests-approve-tables.test.js
+- [x] A3: Give the browser the types the table calls speak in — slot, alternative, hold range and the three input shapes — src/app/core/models/booking.model.ts
+- [x] A4: Give the browser one call per table route of bookings — availability, create, walk-in, set tables, set when; the wider day answer; reason and alternatives on a refusal — src/app/core/services/booking-data.service.ts, src/app/core/services/booking-data.service.spec.ts
+- [x] A5: Let the browser's approve send a chosen table and read the alternatives of a refusal — the fourth argument and the wider failure branch — src/app/core/services/request-data.service.ts, src/app/core/services/request-data.service.spec.ts
+- [x] A6: Update the three folder maps so the next plan finds the new calls — one row each — server/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: `server/routes/requests.js` approve; `BookingDataService`, `RequestDataService` (existing callers
@@ -273,3 +273,5 @@ line or file this plan names was removed, renamed or rewritten).
 - none
 
 ## Execution Notes
+- Step 0: drift commit c1f441a3 (export) touches no symbol of this plan: ok.
+- build, lint, test:ci (2864 pass), test:server (2164 pass), requests-approve-tables 5 pass: exit 0.
