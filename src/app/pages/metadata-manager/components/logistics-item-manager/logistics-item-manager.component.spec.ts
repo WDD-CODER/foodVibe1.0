@@ -186,11 +186,41 @@ describe('LogisticsItemManagerComponent', () => {
     expect(store.add).not.toHaveBeenCalled()
   })
 
-  it('refuses a duplicate of the shared key in the same phase', async () => {
+  it('plan 697: refuses a shared question text in the same phase with the shared message and no call', async () => {
     component.setText(` ${shared.key} `)
     await component.onAdd()
-    expect(component.error()).toBe('metadata_logistics_duplicate')
+    expect(component.error()).toBe('logistics_question_shared_taken')
     expect(store.add).not.toHaveBeenCalled()
+    expect(store.update).not.toHaveBeenCalled()
+    expect(userMsg.onSetErrorMsg).not.toHaveBeenCalled()
+  })
+
+  it('plan 697: refuses a shared question text from the other phase, hidden or not, with no call', async () => {
+    hiddenAt.set(new Map([[shared.key, 1]]))
+    component.selectPhase('site_visit')
+    component.setText(shared.key)
+    await component.onAdd()
+    expect(component.error()).toBe('logistics_question_shared_taken')
+    expect(store.add).not.toHaveBeenCalled()
+  })
+
+  it('plan 697: an own question text keeps the same-phase message and names the other phase', async () => {
+    component.setText(own.key)
+    await component.onAdd()
+    expect(component.error()).toBe('metadata_logistics_duplicate')
+    component.selectPhase('site_visit')
+    component.setText(own.key)
+    await component.onAdd()
+    expect(component.error()).toBe('logistics_question_own_taken')
+    expect(store.add).not.toHaveBeenCalled()
+  })
+
+  it('plan 697: a server clash the card could not see shows the server message, not server_error', async () => {
+    store.add.and.rejectWith(new Error('409'))
+    store.errorMessage.and.returnValue('logistics_question_shared_taken')
+    component.setText('הוסרה לכולם')
+    await component.onAdd()
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('logistics_question_shared_taken')
   })
 
   it('the admin sees the scope radios and "everyone" adds shared', async () => {

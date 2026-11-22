@@ -1783,6 +1783,8 @@
     "metadata_logistics_shared": "משותף לכולם",
     "metadata_logistics_added": "השאלה נוספה",
     "metadata_logistics_duplicate": "שאלה כזו כבר קיימת בשלב הזה",
+    "logistics_question_shared_taken": "השאלה הזאת כבר קיימת ברשימה המשותפת",
+    "logistics_question_own_taken": "השאלה הזאת כבר קיימת אצלך בשלב אחר",
     "metadata_logistics_remove_confirm": "למחוק את השאלה? תשובות שכבר ניתנו לאירועים יישמרו.",
     "metadata_logistics_in_use": "אי אפשר למחוק: השאלה כבר נענתה באירוע",
     "metadata_no_logistics_items": "אין שאלות בסעיף הזה",
