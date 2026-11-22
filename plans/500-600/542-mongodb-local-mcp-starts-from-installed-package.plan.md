@@ -1,6 +1,6 @@
 # Plan 542 — The local MongoDB MCP server starts from an installed package, with its last outside reach closed
 
-Status: draft
+Status: done
 Depends-on: 529
 Snapshot: aa354184967783f01cb06782f8acdda9a65a239a
 
@@ -117,7 +117,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [x] A5: Prove it starts fast, offers only local read tools, and never uses npx — source test plus initialize/tools-list start test — scripts/test/mcp-mongo-local.test.mjs
 - [x] A6: Record the two traps so the next setup does not repeat them — one gotcha entry — docs/brain/gotchas/agent-workflow.md
 - [x] A7: Run every auto check and paste the outputs, and list the three Human setup steps in the hand-off — this plan file (Execution Notes)
-- [ ] A8: After the merge, install the new package in the main folder and remove the timeout workaround — Planner only, not the builder: the two steps under After merge, then the [human] card — main folder, user environment
+- [x] A8: After the merge, install the new package in the main folder and remove the timeout workaround — Planner only, not the builder: the two steps under After merge, then the [human] card — main folder, user environment
 
 ## UI/UX Notes
 - No app UI. No dictionary keys.
@@ -146,3 +146,4 @@ line or file this plan names was removed, renamed or rewritten).
 - Builder: `mongodb-mcp-server` 3.2.2 exports map hides `./package.json`, so the launcher resolves the main file and walks up to the package root (plan said resolve package.json directly). Pnpm skipped build scripts of 7 packages; start test passes, so `onlyBuiltDependencies` unchanged.
 - Start test runs against no database (127.0.0.1:1): tools/list works without one; not skipped. 5 tests pass (`node --test scripts/test/mcp-mongo-local.test.mjs` exit 0); test:scripts exit 0; kit-manifest ok; ARCH ok; REUSE ok; build/lint run.
 - Human setup steps for hand-off: (1) Planner `pnpm install` in main; (2) clear `MCP_TIMEOUT`; (3) Human opens a NEW terminal window, runs `/mcp`.
+- Planner close-out 2026-11-22 (merged as #543): `node_modules/mongodb-mcp-server` present in the main folder; user `MCP_TIMEOUT` empty; `node --test scripts/test/mcp-mongo-local.test.mjs` on main → pass 5, fail 0; a direct start answered `initialize` in 5.2 s with only local read tools. [human] `/mcp` in a new terminal window: Dandan "all cards ok", 2026-11-22.
