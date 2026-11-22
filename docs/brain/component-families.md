@@ -487,6 +487,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.
 - Known copies: none.
 
+### floor-plan-editor — the editing rules, the overlap mark and the scoped classes of the room editor
+
+- Status: stable — plan 684
+- Use: `src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts` (`withTable`, `numberError`, `duplicateTable`, `withoutTable`, `overlapping`, `minGrid`, `withArea`, `restoreDropped`) — pure draft rules; the overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`); the scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) in the page's and the two panels' own stylesheets; `app-floor-table-panel` and `app-floor-room-panel` (inputs in, events out).
+- When: a screen edits the room draft — rules belong in the util, never in a panel.
+- Known copies: none.
+
 ### qr-code — a QR image of a link
 
 - Status: stable — plan 667

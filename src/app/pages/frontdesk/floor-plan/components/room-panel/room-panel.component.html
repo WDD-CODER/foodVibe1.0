@@ -54,7 +54,6 @@
             [attr.aria-disabled]="row.blockedKey ? 'true' : null"
             [attr.title]="reasonOf(row.blockedKey) || null"
             [attr.aria-describedby]="row.blockedKey ? 'rp-why-' + row.key : null"
-            [class.is-disabled]="!!row.blockedKey"
             (click)="remove(row)"
           >
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>

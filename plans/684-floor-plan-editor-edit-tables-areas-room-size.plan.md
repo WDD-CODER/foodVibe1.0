@@ -158,7 +158,7 @@ append the path to the scope block above and retry.
 - Duplicate, remove, close, area up / down / remove buttons — family: engine-classes — rung: 1 — why: `.c-btn-ghost` and `.c-icon-btn` from `src/styles.scss`, each with an `aria-label`.
 - Removed-table message with undo, and error messages — family: feedback — rung: 1 — why: `UserMsgService.onSetSuccessMsgWithUndo` / `onSetErrorMsg`.
 - Overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`) — family: none — rung: 4 — why: one more input of the `floor-map` family 665 registers (not on `main` yet, so it cannot be named as a family here); its registry entry is updated in this branch.
-- Scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) — family: none — rung: 4 — why: layout of this one screen in the components' own stylesheets; no `.c-*` engine is defined or restyled.
+- Scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.floor-plan__map`, `.floor-plan__notice-title`, `.floor-plan__notice-tip`, `.floor-plan__notice-rows`, `.table-panel`, `.table-panel__head`, `.table-panel__title`, `.table-panel__label`, `.table-panel__seats`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__title`, `.room-panel__subtitle`, `.room-panel__areas`, `.room-panel__name`, `.room-panel__btns`, `.room-panel__sr`, `.room-panel__label`, `.room-panel__row`, `.room-panel__area`, `.room-panel__size`) — family: none — rung: 4 — why: layout of this one screen in the components' own stylesheets; no `.c-*` engine is defined or restyled.
 
 ## Defaults
 
@@ -265,15 +265,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the editing rules of the room as pure tested functions — withTable (size follows seats, pull back inside, seats order, join dropped on area change), numberError, duplicateTable, withoutTable, overlapping, minGrid, withArea, restoreDropped — src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts, src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.spec.ts
-- [ ] A2: Build the panel where the owner changes the selected table — number with its two errors, shape chips, seat counters, turn, area picker, active and online switches, duplicate, remove and close buttons, events out only — src/app/pages/frontdesk/floor-plan/components/table-panel/table-panel.component.ts, .html, .scss, .spec.ts
-- [ ] A3: Build the panel for the areas and the room size — area rows with name, order and remove rules, add area, the two size counters bounded by the furthest table — src/app/pages/frontdesk/floor-plan/components/room-panel/room-panel.component.ts, .html, .scss, .spec.ts
-- [ ] A4: Put the panels beside the room and wire every change into the draft — two-column body, table or room panel by selection, Escape, undo messages for a removed table and a dropped join, no panel for staff — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
-- [ ] A5: Warn about overlapping tables without blocking the save — the warnKeys input and its mark on the shared map, the line above the map, the registry entry of the family updated — src/app/shared/floor-map/floor-map.component.ts, .html, .scss, .spec.ts, docs/brain/component-families.md
-- [ ] A6: Show which tables cannot be removed when the server refuses the save — the notice from the 409 answer, the restore button, closing on the next good save — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
-- [ ] A7: Add the panels' Hebrew texts — the thirty-five fp_ keys of the UI notes — public/assets/data/dictionary.json
-- [ ] A8: Record the new folders and pieces so later plans find them — the components folder in the pages map, the inventory row — src/app/pages/breadcrumbs.md, docs/brain/inventory.md
-- [ ] A9: Prove the five screen checks with short scripts — each spec signs in, answers the business read with tables on and the floor-plan calls itself, saves a screenshot — e2e/ui/684-1.spec.ts, e2e/ui/684-2.spec.ts, e2e/ui/684-3.spec.ts, e2e/ui/684-4.spec.ts, e2e/ui/684-5.spec.ts
+- [x] A1: Write the editing rules of the room as pure tested functions — withTable (size follows seats, pull back inside, seats order, join dropped on area change), numberError, duplicateTable, withoutTable, overlapping, minGrid, withArea, restoreDropped — src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts, src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.spec.ts
+- [x] A2: Build the panel where the owner changes the selected table — number with its two errors, shape chips, seat counters, turn, area picker, active and online switches, duplicate, remove and close buttons, events out only — src/app/pages/frontdesk/floor-plan/components/table-panel/table-panel.component.ts, .html, .scss, .spec.ts
+- [x] A3: Build the panel for the areas and the room size — area rows with name, order and remove rules, add area, the two size counters bounded by the furthest table — src/app/pages/frontdesk/floor-plan/components/room-panel/room-panel.component.ts, .html, .scss, .spec.ts
+- [x] A4: Put the panels beside the room and wire every change into the draft — two-column body, table or room panel by selection, Escape, undo messages for a removed table and a dropped join, no panel for staff — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
+- [x] A5: Warn about overlapping tables without blocking the save — the warnKeys input and its mark on the shared map, the line above the map, the registry entry of the family updated — src/app/shared/floor-map/floor-map.component.ts, .html, .scss, .spec.ts, docs/brain/component-families.md
+- [x] A6: Show which tables cannot be removed when the server refuses the save — the notice from the 409 answer, the restore button, closing on the next good save — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
+- [x] A7: Add the panels' Hebrew texts — the thirty-five fp_ keys of the UI notes — public/assets/data/dictionary.json
+- [x] A8: Record the new folders and pieces so later plans find them — the components folder in the pages map, the inventory row — src/app/pages/breadcrumbs.md, docs/brain/inventory.md
+- [x] A9: Prove the five screen checks with short scripts — each spec signs in, answers the business read with tables on and the floor-plan calls itself, saves a screenshot — e2e/ui/684-1.spec.ts, e2e/ui/684-2.spec.ts, e2e/ui/684-3.spec.ts, e2e/ui/684-4.spec.ts, e2e/ui/684-5.spec.ts
 
 ## Technical Considerations
 - Dependencies: `FloorPlanPage`, `app-floor-map` and its geometry helpers (665); `FloorPlanDataService` and the
@@ -311,3 +311,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: an area that still has tables cannot be removed; the owner moves or removes its tables first.
 - behaviour: moving a joined table to another area drops the join, with an undo — the server refuses a join across areas.
 - behaviour: a field with an error keeps the last valid value in the draft, so "שמור" never sends a plan the screen knows is wrong.
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm run test:ci` → 2834 SUCCESS; lint:icons, lint:reuse, lint:no-native-select → ok; breadcrumbs-check clean; kit-manifest-check ok.
+- note: the plan's util case "maxSeats 4→8 on a square table gives 4×4" does not match the shared `sizeFor` of 665 (square 8 → 5×5, 6 → 4×4); the spec asserts the real `sizeFor` values.
+- note: [ui] items written, not run: e2e/ui/684-1…5.spec.ts (screens/684-N.png).
+- note: kit-checks `style-duplicate-block` findings are small common flex blocks shared with other components (debt count only); `.c-chip-group` is used from the engine.

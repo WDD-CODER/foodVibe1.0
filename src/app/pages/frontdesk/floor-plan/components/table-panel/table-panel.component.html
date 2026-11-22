@@ -70,7 +70,7 @@
     </div>
   </div>
 
-  <div class="table-panel__chips c-chip-group">
+  <div class="c-chip-group">
     <label class="c-chip c-chip--toggle">
       <input type="checkbox" data-testid="tp-turned" [checked]="table().turned" (change)="setFlag('turned', $event)" />
       <span>{{ 'fp_turned' | translatePipe }}</span>
@@ -87,7 +87,7 @@
     />
   </app-form-field>
 
-  <div class="table-panel__chips c-chip-group">
+  <div class="c-chip-group">
     <label class="c-chip c-chip--toggle">
       <input
         type="checkbox"
