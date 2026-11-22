@@ -1,6 +1,6 @@
 # Plan 471 — Recipe and menu exports: a clean printed recipe and Hebrew, good-looking Excel files
 
-Status: draft
+Status: done
 Depends-on: none
 Track: code
 Snapshot: 7c8fccd4
