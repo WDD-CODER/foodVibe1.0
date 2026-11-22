@@ -5,6 +5,18 @@
       "total": 0,
       "files": {}
     },
+    "default.unsaved-changes-on-leave": {
+      "total": 7,
+      "files": {
+        "src/app/pages/inventory/components/product-price-lock/product-price-lock.component.ts": 1,
+        "src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts": 1,
+        "src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts": 1,
+        "src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts": 1,
+        "src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts": 1,
+        "src/app/shared/scaling-chip/scaling-chip.component.ts": 1,
+        "src/app/shared/venue-link-chip/venue-link-chip.component.ts": 1
+      }
+    },
     "reuse-copy.engine-classes": {
       "total": 23,
       "files": {
