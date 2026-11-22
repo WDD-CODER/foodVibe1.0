@@ -51,6 +51,8 @@ src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+plans/659-
+orch/mod-count-popup
 ```
 
 ## Read Scope
