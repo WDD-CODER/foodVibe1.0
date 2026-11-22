@@ -15,8 +15,8 @@
     cursor: pointer;
 
     input[type='checkbox'] {
-      width: 0.75rem;
-      height: 0.75rem;
+      width: var(--row-checkbox-size, 0.75rem);
+      height: var(--row-checkbox-size, 0.75rem);
       margin: 0;
 
       cursor: pointer;
@@ -29,8 +29,8 @@
       padding: 0.25rem;
 
       input[type='checkbox'] {
-        width: 0.875rem;
-        height: 0.875rem;
+        width: var(--row-checkbox-size, 0.875rem);
+        height: var(--row-checkbox-size, 0.875rem);
       }
     }
   }

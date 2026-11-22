@@ -28,6 +28,7 @@ export class StockBelowMinimumComponent {
 
   protected shown(qty: number, unit: string): string {
     const f = formatQty(qty, unit)
-    return `${f.qty} ${f.unit}`
+    // Plan 658: the unit as the cook named it, the key when it has no saved name.
+    return `${f.qty} ${this.translation_.translate(f.unit)}`
   }
 }

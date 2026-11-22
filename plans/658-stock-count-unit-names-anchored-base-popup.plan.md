@@ -149,10 +149,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show every unit on the count by the name the cook gave it, not its English key — one helper, the line text, conflicts, base amount, below-minimum, the cases — src/app/pages/inventory/components/stock-count/**
-- [ ] A2: Open the base amount right beside its row, as wide as its text, on every screen — measured placeInViewport popover, outside tap and scroll close it, phone stops using the centered card, the cases — src/app/pages/inventory/components/stock-count/**, src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html, src/app/shared/modal-shell/modal-shell.component.spec.ts
-- [ ] A3: Let the shared row checkbox take its size from the page instead of being forced from outside — --row-checkbox-size, the count sets it per breakpoint, ng-deep removed, the cases — src/app/shared/list-selection/list-row-checkbox.component.ts, src/app/shared/list-selection/list-row-checkbox.component.scss, src/app/shared/list-selection/list-row-checkbox.component.spec.ts, src/app/pages/inventory/components/stock-count/**
-- [ ] A4: Prove it — the Done-when commands in order, registry and breadcrumbs updated — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md
+- [x] A1: Show every unit on the count by the name the cook gave it, not its English key — one helper, the line text, conflicts, base amount, below-minimum, the cases — src/app/pages/inventory/components/stock-count/**
+- [x] A2: Open the base amount right beside its row, as wide as its text, on every screen — measured placeInViewport popover, outside tap and scroll close it, phone stops using the centered card, the cases — src/app/pages/inventory/components/stock-count/**, src/app/shared/modal-shell/modal-shell.component.ts, src/app/shared/modal-shell/modal-shell.component.html, src/app/shared/modal-shell/modal-shell.component.spec.ts
+- [x] A3: Let the shared row checkbox take its size from the page instead of being forced from outside — --row-checkbox-size, the count sets it per breakpoint, ng-deep removed, the cases — src/app/shared/list-selection/list-row-checkbox.component.ts, src/app/shared/list-selection/list-row-checkbox.component.scss, src/app/shared/list-selection/list-row-checkbox.component.spec.ts, src/app/pages/inventory/components/stock-count/**
+- [x] A4: Prove it — the Done-when commands in order, registry and breadcrumbs updated — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: 657 (on main since `ff0f7831`).
@@ -169,3 +169,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: one popover for all widths — why: Dandan, "placed according to the same behavior of the nutrition" box.
 - decided: the checkbox size moves into the shared checkbox now — why: Dandan approved it on 2026-11-22 and it is the
   same file as A2.
+- behaviour: the base box lost its close (x) button — an outside tap, a scroll or a second tap on its control closes it — reverse: add the button back in the template
+- behaviour: the base box is a `popover="manual"` (top layer) so no ancestor re-bases its fixed position (found by the above-the-control test) — reverse: drop the attribute and the showPopover call
+- removes: `app-modal-shell [light]` input, its CSS hook in the shell, and the shell's light spec (no template uses it now) — reverse: git revert this plan's commit
+- seen: src/styles.scss:687 — `.c-modal-overlay--light` is now unused; styles.scss is append-only for this plan, so it was left in place
