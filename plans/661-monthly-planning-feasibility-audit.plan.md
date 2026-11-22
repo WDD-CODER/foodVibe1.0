@@ -41,6 +41,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 
 ```scope
 docs/finance/monthly-planning-feasibility.md
+origin/orch/fin-audit
 ```
 
 ## Read Scope
