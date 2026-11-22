@@ -464,3 +464,12 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A7: Hold the new door to the ownership rule — the webhook file in the rule's file list, the two guest-door tests — docs/brain/invariants.md, server/test/invariants.test.js
 - [ ] A8: Write down how to switch it on safely — the go-live section with gate G-WA's list, the deployment variables comment, the folder map, the map's extension line — docs/security-go-live.md, render.yaml, server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 - [ ] A9: Run every check of this plan and hand Dandan the two phone checks — test:server, test:ci, build, server lint, the channel-name grep, the architecture gate, log-query; evidence into Execution Notes
+
+### Plan 471 — Recipe and menu exports: a clean printed recipe and Hebrew, good-looking Excel files (`plans/471-rework-recipe-and-menu-exports-print-and-excel-in-a-dedicated-session.plan.md`)
+- [ ] A1: Add the one house-style sheet helper and the shared sheet-name rule
+- [ ] A2: Make every recipe Excel file Hebrew and in the house style
+- [ ] A3: Make every menu Excel file Hebrew and in the house style
+- [ ] A4: Print the recipe from a clean preview instead of the editing screen
+- [ ] A5: Add the Hebrew words
+- [ ] A6: Prove it with unit tests on the built workbooks
+- [ ] A7: Record the helper so the next export reuses it, and run every `[auto]` check
