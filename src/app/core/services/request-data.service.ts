@@ -6,7 +6,7 @@ import { API } from './http-storage.adapter'
 import { BaseEntityDataService } from './base-entity-data.service'
 import { BookingDataService } from './booking-data.service'
 import { MenuEventDataService } from './menu-event-data.service'
-import type { Booking } from '@models/booking.model'
+import type { Booking, BookingAlternative } from '@models/booking.model'
 import type { MenuEvent } from '@models/menu-event.model'
 import type { DeclineReason, FrontDeskRequest, ManualRequestInput, RequestStatus } from '@models/request.model'
 
@@ -17,7 +17,8 @@ export type RequestResult = { ok: true; request: FrontDeskRequest } | { ok: fals
 
 /** An approved request with what it became: a `menuEvents` doc (kind event) or a booking (every other kind). */
 export type ApproveResult =
-  { ok: true; request: FrontDeskRequest; outcome: MenuEvent | Booking } | { ok: false; code: string | null }
+  | { ok: true; request: FrontDeskRequest; outcome: MenuEvent | Booking }
+  | { ok: false; code: string | null; reason?: string; alternatives?: BookingAlternative[] }
 
 /**
  * Plan 549: customer requests. Reads come through the generic API; every write goes to `API.requests`, which stamps
@@ -59,9 +60,14 @@ export class RequestDataService extends BaseEntityDataService<FrontDeskRequest> 
   }
 
   /** Plan 550: approves in one call. The request, and what it became, are written into their stores. */
-  async approve(id: string, wanted?: FrontDeskRequest['wanted'], note?: string): Promise<ApproveResult> {
+  async approve(
+    id: string,
+    wanted?: FrontDeskRequest['wanted'],
+    note?: string,
+    tableKeys?: string[]
+  ): Promise<ApproveResult> {
     try {
-      const body = { ...(wanted && { wanted }), ...(note && { note }) }
+      const body = { ...(wanted && { wanted }), ...(note && { note }), ...(tableKeys && { tableKeys }) }
       const done = await firstValueFrom(
         this.http.post<{ request: FrontDeskRequest; outcome: MenuEvent | Booking }>(
           `${REQUESTS_URL}/${id}/approve`,
@@ -100,15 +106,24 @@ export class RequestDataService extends BaseEntityDataService<FrontDeskRequest> 
     }
   }
 
-  private refused(name: string, err: unknown): { ok: false; code: string | null } {
+  private refused(
+    name: string,
+    err: unknown
+  ): { ok: false; code: string | null; reason?: string; alternatives?: BookingAlternative[] } {
     const status = (err as { status?: number }).status
-    const code = (err as { error?: { error?: string } }).error?.error ?? null
+    const body = (err as { error?: { error?: string; reason?: string; alternatives?: BookingAlternative[] } }).error
+    const code = body?.error ?? null
     const refused = status !== undefined && status >= 400 && status < 500
     this.logging[refused ? 'warn' : 'error']({
       event: `requests.${name}_${refused ? 'refused' : 'failed'}`,
       message: 'Request call failed',
       context: { status: String(status ?? ''), code: code ?? '' }
     })
-    return { ok: false, code }
+    return {
+      ok: false,
+      code,
+      ...(body?.reason !== undefined && { reason: body.reason }),
+      ...(body?.alternatives !== undefined && { alternatives: body.alternatives })
+    }
   }
 }
