@@ -153,6 +153,13 @@ server/test/restaurant-registry.test.js
 server/test/collections.test.js
 server/test/cross-business.test.js
 server/test/modules-schema.test.js
+server/test/admin-business-delete.test.js
+server/test/admin-platform.test.js
+server/test/helpers/app.js
+server/test/invoice-memory.test.js
+server/test/permissions.test.js
+src/app/core/services/unlinked-ingredient-link.service.spec.ts
+docs/workflow-kit/manifest.json
 src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts
 public/assets/data/dictionary.json
