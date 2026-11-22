@@ -686,6 +686,10 @@ Each line is already written into the plan that owns it; where a line and a Cont
   request `qualified`.
 - 673 · C-WAIT · `notify` only stamps `notifiedAt` until plan 675 exists; `POST /` takes `date` from the browser
   and checks it is today in Jerusalem.
+- 672 · RS-05 · a refused approve (409 `NO_TABLE`) on `/requests` opens a dialog with the alternatives and, for
+  the owner, a table choice (Dandan, 2026-11-22).
+- 676 · C-JOBS · gains a fourth job, `orphan-holds`: `tableHolds` rows older than 10 minutes whose `bookingId` has
+  no booking are removed (a crash between the claim and the booking write; Dandan, 2026-11-22).
 - every screen plan · the QA business has no `tables` module, so `[ui]` specs answer the business and the table
   routes themselves (the pattern of `e2e/ui/634-1.spec.ts`).
 
