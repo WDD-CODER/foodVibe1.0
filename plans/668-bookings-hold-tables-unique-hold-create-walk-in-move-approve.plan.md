@@ -411,5 +411,5 @@ at most 1000, `guest.name` 1–`NAME_MAX_LENGTH` characters, `guest.phone` 7–3
 ## Execution Notes
 - pnpm run build -> exit 0; pnpm run lint -> exit 0; pnpm run test:server -> exit 0 (155 files, 2158 tests pass); pnpm run test:ci -> exit 0; pnpm --dir server run lint -> exit 0.
 - kit-manifest-check -> ok (0 unclassified); override-check, plan-ledger-check, breadcrumbs-check, lint:icons, lint:no-native-select -> exit 0; log-query -> SKIP no database configured (no error entries).
-- kit-checks -> `inventory-stale docs/brain/inventory.md`: the two new registry entries make the generated `docs/brain/inventory.md` stale; running `node scripts/inventory.mjs` fixes it (2 lines) but the file is outside the scope. Not extended here (run-plans gate): ESCALATE with `approved: docs/brain/inventory.md`. The regenerated file was reverted, not committed.
+- kit-checks -> `inventory-stale docs/brain/inventory.md`: the two new registry entries make the generated `docs/brain/inventory.md` stale; running `node scripts/inventory.mjs` fixes it (2 lines) but the file is outside the scope. Not extended here (run-plans gate): ESCALATE with `approved: docs/brain/inventory.md`. Resolved: the Human approved it (668-1); regenerated and committed, kit-checks ok.
 - Rollback of a failed booking write in `/when` and `/tables` moves the holds back to the old cells.
