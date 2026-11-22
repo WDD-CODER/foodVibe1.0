@@ -1,0 +1,184 @@
+{
+  "run": "mod-count-popup",
+  "branch": "orch/mod-count-popup",
+  "base": "main",
+  "startedAt": "2026-11-22T07:06:07.549Z",
+  "mainShaAtStart": "050a0315ce34167c76289f3cfd7a94eefae9c853",
+  "plans": {
+    "658": {
+      "nnn": "658",
+      "title": "Stock count: unit names in Hebrew, the base amount opens beside its row on every screen",
+      "branch": "feat/658-stock-count-unit-names",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T07:08:14.687Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-22T07:32:52.451Z"
+        }
+      },
+      "humanItems": [
+        "On `/inventory/count` Dandan types «ארגז עגבניות»: the line reads «עגבניות 1 ארגז». On the phone and on the",
+        "The counted box is still bigger on the laptop than on the phone."
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T07:08:14.429Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:08:14.689Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:28:14.478Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:32:40.336Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:32:52.454Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:33:08.944Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:35:12.917Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.9,
+      "sha": "57334dc2e0ca8006d02120343bf9f3d8a6e70c8d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1196.4,
+          "tokens": {
+            "input": 4217821,
+            "output": 33915
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.1,
+          "tokens": {
+            "input": 82037,
+            "output": 491
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c2883e42543c6df8d1db176b2825f48152b39b24"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-22T07:08:14.194Z",
+      "plan": "658",
+      "text": "the folder foodVibe1.0-orch-mod-count-popup-658 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T07:28:11.299Z",
+      "plan": "658",
+      "text": "builder left undone (round 0): [human] items (the «ארגז עגבניות» line, the popup beside the row on phone and laptop, the counted box bigger on the laptop) are for the Human to check"
+    },
+    {
+      "at": "2026-11-22T07:33:29.300Z",
+      "plan": "658",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-popup was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T07:36:19.822Z",
+      "text": "FINAL: same tree as plan 658's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 17.9,
+  "updatedAt": "2026-11-22T07:36:22.895Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "658",
+      "type": "behaviour",
+      "text": "behaviour: the base box lost its close (x) button; an outside tap, a scroll or a second tap on its control closes it — reverse: add the button back in the template",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "658",
+      "type": "behaviour",
+      "text": "behaviour: the base box is a popover=\"manual\" (top layer) because a fixed box inside the count grid rendered about 156px off its computed position — reverse: drop the attribute and the showPopover call",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "658",
+      "type": "removes",
+      "text": "removes: app-modal-shell [light] input, its template hook and its spec (no template uses it now) — reverse: git revert this plan's commit",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "658",
+      "type": "seen",
+      "text": "seen: src/styles.scss:687 — .c-modal-overlay--light is now unused; styles.scss is append-only for this plan, so it was left in place",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-22T07:36:22.892Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-22T07:36:22.895Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
