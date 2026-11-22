@@ -369,13 +369,31 @@ export class StockCountComponent implements OnInit {
     return `${this.translation_.translate('stk_base_amount')}: ${base}`
   }
 
-  /** Plan 655: opens (or closes, when it is the same row) the small popover with a row's base amount. */
+  /** Plans 655/659: a tap (phone only) opens the base box, or closes it when it is the same row; above a phone a click does nothing extra. */
   protected toggleBase_(row: SheetRow, event: Event): void {
     event.stopPropagation()
+    if (!this.phone_()) return
     if (this.basePopover_()?.id === row.product._id) {
       this.basePopover_.set(null)
       return
     }
+    this.openBase_(row, event)
+  }
+
+  /** Plan 659: above a phone, mouseenter/focus on the control opens the base box. */
+  protected hoverBase_(row: SheetRow, event: Event): void {
+    if (this.phone_()) return
+    if (this.basePopover_()?.id === row.product._id) return
+    this.openBase_(row, event)
+  }
+
+  /** Plan 659: above a phone, mouseleave/blur closes the base box. */
+  protected leaveBase_(): void {
+    if (this.phone_()) return
+    this.basePopover_.set(null)
+  }
+
+  private openBase_(row: SheetRow, event: Event): void {
     const target = event.currentTarget as HTMLElement | null
     const rect = target?.getBoundingClientRect()
     this.basePopover_.set({

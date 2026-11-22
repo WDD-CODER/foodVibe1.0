@@ -804,7 +804,8 @@ describe('StockCountComponent', () => {
       await settle()
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
       if (rect) spyOn(control, 'getBoundingClientRect').and.returnValue({ width: 24, left: 100, ...rect } as DOMRect)
-      control.click()
+      if (width === 'phone') control.click()
+      else control.dispatchEvent(new MouseEvent('mouseenter'))
       await settle()
       await settle()
       return control
@@ -845,7 +846,7 @@ describe('StockCountComponent', () => {
     })
 
     for (const width of ['phone', 'tablet', 'desktop'] as const) {
-      it(`(c) at ${width} width a tap on the base amount opens the same popover, below its control, with no modal shell`, async () => {
+      it(`(c) at ${width} width the base amount opens the same popover (tap on phone, hover above), below its control, with no modal shell`, async () => {
         // Below desktop the control is the info button; at desktop the column is printed and the control is absent.
         if (width === 'desktop') {
           await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
@@ -864,6 +865,53 @@ describe('StockCountComponent', () => {
         expect(box.width).toBeLessThan(document.documentElement.clientWidth)
       })
     }
+
+    it('(659a) in an RTL page the box has right auto and its left is the placed value', async () => {
+      const host = document.documentElement
+      const before = host.getAttribute('dir')
+      host.setAttribute('dir', 'rtl')
+      try {
+        await openBase('tablet', { top: 100, bottom: 124 })
+        const pop = q('stk-base-pop')!
+        // A used `right` is never "auto" for a placed box, so prove the inset is cleared by where the box lands:
+        // its left edge is the placed left, not the right edge of the page.
+        const cs = getComputedStyle(pop)
+        expect(pop.style.left).toMatch(/px$/)
+        expect(cs.left).toBe(pop.style.left)
+        expect(parseFloat(cs.right)).toBeCloseTo(
+          document.documentElement.clientWidth - parseFloat(cs.left) - parseFloat(cs.width),
+          0
+        )
+      } finally {
+        if (before === null) host.removeAttribute('dir')
+        else host.setAttribute('dir', before)
+      }
+    })
+
+    it('(659b) at tablet and desktop width hover and focus open the box, leave and blur close it, a click does not toggle', async () => {
+      await openBase('tablet')
+      const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
+      expect(q('stk-base-pop')).not.toBeNull()
+      control.dispatchEvent(new MouseEvent('mouseleave'))
+      await settle()
+      expect(q('stk-base-pop')).toBeNull()
+      control.dispatchEvent(new FocusEvent('focus'))
+      await settle()
+      expect(q('stk-base-pop')).not.toBeNull()
+      control.dispatchEvent(new FocusEvent('blur'))
+      await settle()
+      expect(q('stk-base-pop')).toBeNull()
+      control.click()
+      await settle()
+      expect(q('stk-base-pop')).toBeNull()
+    })
+
+    it('(659d) the control has no title attribute, its aria-label stays', async () => {
+      await openBase('tablet')
+      const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
+      expect(control.hasAttribute('title')).toBeFalse()
+      expect(control.getAttribute('aria-label')).toContain('stk_base_amount')
+    })
 
     it('(c) it opens above the control when there is no room below', async () => {
       const bottomEdge = document.documentElement.clientHeight
@@ -970,7 +1018,7 @@ describe('StockCountComponent', () => {
       expect(chipOf(rows()[0]).checked).toBeTrue()
     })
 
-    it('(c) below 1200px the base amount is not printed; its control has the title and label, and a click opens a popover', async () => {
+    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and hover opens a popover', async () => {
       narrowMode = true
       await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
       instance().setAmount(withCrates('a', 'עגבניות'), 2)
@@ -979,11 +1027,11 @@ describe('StockCountComponent', () => {
       expect(el().querySelector('app-column-carousel-cell')).toBeNull()
       expect(rows()[0].querySelector('.stock-count__base')).toBeNull()
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
-      expect(control.getAttribute('title')).toContain('stk_base_amount')
-      expect(control.getAttribute('title')).toContain('20')
-      expect(control.getAttribute('aria-label')).toBe(control.getAttribute('title'))
+      expect(control.hasAttribute('title')).toBeFalse()
+      expect(control.getAttribute('aria-label')).toContain('stk_base_amount')
+      expect(control.getAttribute('aria-label')).toContain('20')
       expect(q('stk-base-pop')).toBeNull()
-      control.click()
+      control.dispatchEvent(new MouseEvent('mouseenter'))
       await settle()
       expect(q('stk-base-pop')!.textContent).toContain('20')
       const box = q('stk-base-pop')!.getBoundingClientRect()

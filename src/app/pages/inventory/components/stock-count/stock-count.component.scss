@@ -130,7 +130,7 @@
 
     // A popover box brings UA margin/inset/overflow; only the top and left set by the component place it.
     inset-block-end: auto;
-    inset-inline-end: auto;
+    inset-inline: auto;
     margin: 0;
     overflow: visible;
     inline-size: max-content;
