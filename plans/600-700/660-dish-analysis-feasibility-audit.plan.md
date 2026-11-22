@@ -221,3 +221,4 @@ line or file this plan names was removed, renamed or rewritten).
 - grep -c "TBD" docs/finance/dish-analysis-feasibility.md -> 0
 - Section 1 (Hebrew) is 16 non-empty lines (limit 30).
 - node scripts/scope-check.mjs --diff=origin/main --plan=... -> run below in the checks.
+- Planner close-out 2026-11-22: run fin-audit merged to main as #634 (8339f21f), all PR checks green. [human] section 1 reading: Dandan "done", 2026-11-22. Decisions D1–D3 of the run: "decisions: ok".
