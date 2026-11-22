@@ -5030,6 +5030,46 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.8.0): running the PR checks on this PC. Classified project/stay like the other kit-synced files."
     },
     {
+      "path": "docs/agent/adopt-check.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.9.0): the Adopt Check procedure (adopt, wrap, build or skip a package). Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "docs/agent/known-good-angular.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.9.0): known-good packages for the angular pack. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "docs/agent/known-good-node-express.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.9.0): known-good packages for the node-express pack. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/adopt-facts.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.9.0): package facts for the Adopt Check. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/adopt-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.9.0): the Adopt Check behind scope-check --adopt. Classified project/stay like the other kit-synced files."
+    },
+    {
       "path": "scripts/local-ci.mjs",
       "tier": "project",
       "action": "stay",

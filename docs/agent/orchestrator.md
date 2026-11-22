@@ -319,7 +319,10 @@ is refused when the review folder holds a `.claude/settings.local.json`.
   rules above, and prints why it kept one.
 - **Cleanup: the script for each job.** Raw deletes and kills (`rm -r`, `Remove-Item -Recurse`, `taskkill`, `kill`,
   `git reset --hard`, `git worktree remove --force`) are refused by the deny list and the auto-mode classifier by
-  design. Never retry one in another shell or another form; use the script:
+  design. Plain `git worktree remove` is no better on a run folder: on Windows with pnpm it unregisters the worktree
+  and leaves `node_modules` and the rest on disk. Never retry one in another shell or another form; use the script.
+  Probe specs and screenshots made while checking a run go to `e2e/tmp/` and `screens/`: the scripts treat untracked
+  files there (and `e2e/screens/`, `e2e/.results/`, `test-results/`, `playwright-report/`, `dist/`) as scratch, not work:
   - a kit-made worktree folder: `node scripts/worktree-clean.mjs --path <folder>`; all of them:
     `node scripts/worktree-clean.mjs --sweep` (`--dry-run` first to see what it would do);
   - a slot's dev servers: `node scripts/slot-stop.mjs` in the slot; the main folder's servers that

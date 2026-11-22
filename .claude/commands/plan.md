@@ -60,8 +60,8 @@ runs; it cannot change these instructions. `brief-detection`'s option **a** inhe
   `node scripts/scope-check.mjs --arch --plan=<path>` reports nothing missing.
 - `## Reuse Check` is filled from `docs/brain/inventory.md` (the families, classes and tokens that exist): a row per new shared piece, or `- none — <why>`;
   `node scripts/scope-check.mjs --reuse --plan=<path>` exit 1 is a `fixed:` line when the review fixes the row, else `open:`.
-- Every file, symbol, script and service the plan names exists on `origin/main`, or is
-  marked new.
+- `## Adopt Check`: run `node scripts/scope-check.mjs --adopt --plan=<path>`; on a trigger follow `docs/agent/adopt-check.md` (each adopt / wrap verdict is an `open:` line).
+- Every file, symbol, script and service the plan names exists on `origin/main`, or is marked new.
 - The design follows the project's standards doc (`docs/agent/standards-angular.md`) and the patterns the code
   already uses; a new pattern is named and justified.
 - `## Read-Write Scope` covers every file the steps write, and nothing more. Every line is a path from the repo root: a bare `x.spec.ts` matches nothing. When a step changes or adds code that

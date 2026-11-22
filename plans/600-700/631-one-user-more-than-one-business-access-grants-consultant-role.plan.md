@@ -1,6 +1,6 @@
 # Plan 631 — One user, more than one business: access grants, the active business and the consultant role
 
-Status: draft
+Status: done
 Depends-on: 616
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 
@@ -393,7 +393,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A7: Keep the baseline out of a consultant's reach inside the onboarding save — the one condition on the baseline line; every row of the business-route table gets a test — server/routes/business.js, server/test/access-acting.test.js
 - [x] A8: Prove the whole flow with tests, including the ownership invariant — the switch, refresh, grant and list cases; the acting, usage, write-limit and log cases; the new INV-1 tests — server/test/access.test.js, server/test/access-acting.test.js, server/test/invariants.test.js
 - [x] A9: Record the new service, collection and routes where the next developer looks — a row for the access service in the server map, the businessAccess collection and the five routes in the backend standards, the service on the server-auth family line — server/breadcrumbs.md, docs/agent/standards-backend.md, docs/brain/component-families.md
-- [ ] A10: Run every check and hand Dandan the one reading check — the Done-when commands in order; then the human card for the ADR and INV-1 text — no file
+- [x] A10: Run every check and hand Dandan the one reading check — the Done-when commands in order; then the human card for the ADR and INV-1 text — no file
 
 ## Technical Considerations
 - Dependencies: every route behind `verifyToken` / `optionalToken` (the middleware becomes asynchronous; a home token behaves exactly as today); `signTestToken` in `server/test/helpers/app.js` is not changed, so existing tests keep home sessions; `requireModule` (plan 616) reads the active business and `requireHomeModule` the home one.
@@ -441,3 +441,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   - `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, SKIP: no database configured
   - `pnpm run build` → exit 0; `pnpm run lint` → exit 0; `pnpm run test:ci` → exit 0, TOTAL: 2304 SUCCESS
   - kit-manifest-check → KIT_MANIFEST: ok — 433 classified, 0 unclassified
+- Planner close-out 2026-11-22 (merged to main as #607 on 2026-11-18; re-checked on main ca4b1e06 in slot wt-1): `pnpm run test:server` → exit 0, Test Files 147 passed, Tests 1971 passed; `pnpm --dir server run lint` → 0 errors; `node scripts/breadcrumbs-check.mjs` → BREADCRUMBS: clean; `node scripts/reuse-lint.mjs --check-registry` → exit 0 (two missing-path lines at registry line 592, `units/to-base`, not this plan's entry); log-query → exit 0, only client 409s from the Human's metadata checks on wt-1. [human] ADR 0032 + INV-1 reading: Dandan, 2026-11-18 (gate G2 reading card).
