@@ -391,7 +391,14 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       loc().clearLocation()
       expect(component.hasRealChanges()).toBeTrue()
       await component.saveAndWait()
-      expect((venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile).location).toBeUndefined()
+      expect((venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile).location).toBeNull()
+    })
+
+    it('sends no location key on add when none was saved', async () => {
+      await setup(null)
+      setName('אולם')
+      await component.saveAndWait()
+      expect((venueData.addVenue.calls.mostRecent().args[0] as VenueProfile).location).toBeUndefined()
     })
   })
 })

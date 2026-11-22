@@ -29,12 +29,13 @@ export const venueSchema = z.strictObject({
     visitDate: z.number().optional(),
     note: z.string().optional()
   })).optional(),
-  /** Plan 373: the spot saved with "use my current location"; accuracy in metres. */
+  /** Plan 373: the spot saved with "use my current location"; accuracy in metres. Null clears it: the PUT only
+   * $sets the keys it is sent, so the form sends `location: null` when the user removed the spot. */
   location: z.strictObject({
     lat: z.number(),
     lng: z.number(),
     accuracy: z.number().optional()
-  }).optional(),
+  }).nullable().optional(),
   _masterId: z.string().optional(),
   _userModified: z.boolean().optional()
 })

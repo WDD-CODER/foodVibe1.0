@@ -444,7 +444,9 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         note: row.note?.trim() || undefined
       })
     )
-    const location = this.location_() ?? undefined
+    // An update sends null for "no location": the server PUT only $sets the keys it gets, so a dropped key
+    // would keep the stored spot. A new venue just leaves the key out.
+    const location = this.location_()
 
     const now = Date.now()
 
@@ -479,7 +481,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         active: v.active,
         photoUrl: this.photoUrl_() ?? undefined,
         videos,
-        location
+        location: location ?? undefined
       })
     }
   }

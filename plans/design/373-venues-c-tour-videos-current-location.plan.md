@@ -180,7 +180,8 @@ Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22
 - behaviour: the videos card always shows on the detail page ("—" when empty, empty-state default) — reverse: wrap the section in `@if (videos_().length)`.
 - behaviour: the Waze / Google Maps links sit under the address in the hero, labelled "נווט:" — reverse: move them to their own card.
 - behaviour: P2 is done as a plain hint ("הוסף כתובת…") under the saved location when the address is empty; no reverse geocoding — reverse: drop the `location_address_hint` block.
-- behaviour: saving a venue whose videos were all removed sends `videos: []`; clearing the location sends no `location` key — reverse: send `undefined` for an empty list.
+- behaviour: saving a venue whose videos were all removed sends `videos: []` — reverse: send `undefined` for an empty list.
+- behaviour: a new venue with no location leaves the key out; only an update sends `location: null` (review fix 1) — reverse: send null on add too.
 
 ### A4 evidence (all run from the repo root)
 
@@ -193,3 +194,18 @@ Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22
 - Venue specs alone (`ng test --include='src/app/pages/venues/**/*.spec.ts'`) → exit 0 — `TOTAL: 30 SUCCESS`.
 - Extra checks → `lint:icons` `✓ All Lucide icons registered (113 icons in pick, 0 violations)`; `reuse-lint --diff=origin/main` `REUSE: ok`; `scope-check --diff=origin/main --plan=…` `SCOPE: ok`.
 - A4 stays unticked: its phone-over-HTTPS check and the `[human]` Success Criteria wait on the Human. The third `[human]` item (empty videos card) was added because `scope-check --defaults` requires the empty-state card; `--defaults`, `--reuse`, `--arch` and `kit-checks --plan` now report ok.
+
+### Review round 1 (PR #638, returned to Worker)
+
+- Fix 1 (major), clearing a saved location did not persist: the venue PUT (`server/routes/generic.js:819`) only `$set`s the keys it is sent, so dropping `location` kept the stored spot. Now `location` is `.nullable().optional()` in `venue.schema.ts`, `VenueProfile.location` is `VenueLocation | null`, and the form's update payload sends `location: null` after "נקה". The detail page's `navLinks_` and the form's hydrate already read null as "no location" (`!loc`, `?? null`); a detail spec now covers it. New server tests in `server/test/venue-videos-location-schema.test.js`: a PUT with `location: null`, then a GET, returns no location; a PUT without the key keeps the stored one. The form spec now expects `null` on update and no key on add.
+- Fix 2 (helpers into `src/app/core/utils/**`): the Human chose "leave them", so scope was not widened. `isoToLocalEpoch` (`venue-form.component.ts`) and `videoSourceKey` (`venue-detail.component.ts`) stay file-private, one use each. Move them if a second user appears.
+- Noted, not fixed (outside this plan): `photoUrl` has the same pattern. `photoUrl: this.photoUrl_() ?? undefined` means a removed photo would not clear on update, but the form has no remove-photo control today.
+
+### A4 evidence, review round 1 (re-run after the fix)
+
+- `pnpm install` → exit 0 — `Done in 5.3s using pnpm v10.34.6`.
+- `pnpm run build:schemas` → exit 0 — `> tsc -p shared/schemas/tsconfig.cjs.json` (no output).
+- `pnpm run build` → exit 0 — `Application bundle generation complete. [17.387 seconds]`; no warning names a venue file.
+- `pnpm run lint` → exit 0 — `✖ 69 problems (0 errors, 69 warnings)` (unchanged from main; none in venue files).
+- `pnpm run test:server` → exit 0 — `Test Files  148 passed (148)` / `Tests  1976 passed (1976)` (+2 route tests).
+- `pnpm run test:ci` → exit 0 — `TOTAL: 2732 SUCCESS` (+2 specs), with the same local `--no-sandbox` Chrome wrapper.

@@ -77,6 +77,11 @@ describe('VenueDetailComponent (plan 373: videos and navigation)', () => {
     expect(el.querySelector('.venue-nav')).toBeNull()
   })
 
+  it('treats a cleared (null) location as no location', async () => {
+    const el = await setup({ ...BASE, location: null })
+    expect(el.querySelector('.venue-nav')).toBeNull()
+  })
+
   it('shows Waze and Google Maps links for a saved location', async () => {
     const el = await setup({ ...BASE, location: { lat: 32.0853, lng: 34.7818, accuracy: 15 } })
     const hrefs = Array.from(el.querySelectorAll<HTMLAnchorElement>('.venue-nav a')).map((a) => a.href)

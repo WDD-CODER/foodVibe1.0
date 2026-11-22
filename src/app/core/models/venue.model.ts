@@ -59,6 +59,6 @@ export interface VenueProfile {
   photoUrl?: string
   /** Plan 373: tour video links with the visit date. */
   videos?: VenueVideo[]
-  /** Plan 373: saved with "use my current location". */
-  location?: VenueLocation
+  /** Plan 373: saved with "use my current location"; null (or absent) means no location — an update sends null to clear it. */
+  location?: VenueLocation | null
 }
