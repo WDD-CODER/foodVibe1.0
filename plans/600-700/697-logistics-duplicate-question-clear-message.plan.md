@@ -1,6 +1,6 @@
 # Plan 697 — A duplicate logistics question shows a clear message instead of "server error"
 
-Status: active
+Status: done
 Depends-on: none
 Snapshot: 7c8fccd4421e7294d8b865d4750da34a5f9652c4
 
