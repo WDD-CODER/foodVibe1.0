@@ -1,6 +1,10 @@
 {
   "version": 1,
   "counts": {
+    "default.one-breakpoint-set": {
+      "total": 0,
+      "files": {}
+    },
     "reuse-copy.engine-classes": {
       "total": 23,
       "files": {
