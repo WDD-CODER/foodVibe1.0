@@ -149,11 +149,11 @@ All money is before VAT unless stated. "Plan" = what the owner expects for the m
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Read the rules that bind a future build and write section 2 — read `AGENTS.md`,
+- [x] A1: Read the rules that bind a future build and write section 2 — read `AGENTS.md`,
   `docs/brain/invariants.md`, `docs/brain/index.md` and the decisions and `gotchas.md` it points to,
   `_shared/tech-stack.md`, `docs/modules/modules-map.md`; list only the rules that bear on money data, per-business
   data, AI calls, schemas and modules, each with its source file — `docs/finance/monthly-planning-feasibility.md`
-- [ ] A2: Inventory what the code holds today and write section 3 — read and record, with `path:line`, what each of
+- [x] A2: Inventory what the code holds today and write section 3 — read and record, with `path:line`, what each of
   these stores, computes or exposes: `shared/schemas/entities/business.schema.ts` (settings, baseline),
   `shared/schemas/entities/invoice.schema.ts`, `shared/schemas/entities/price-history.schema.ts`,
   `shared/schemas/entities/diagnosis.schema.ts`, `shared/schemas/entities/stock-count.schema.ts`,
@@ -163,29 +163,29 @@ All money is before VAT unless stated. "Plan" = what the owner expects for the m
   `server/utils/permissions.js`, `src/app/core/engine/event-pricing.ts`, `src/app/pages/dashboard/**`,
   `src/app/pages/settings/**`; then run `git grep -n -i -E "expense|salary|payroll|payslip|overhead|rent|revenue"
   -- shared server src` and record every hit that is real business-finance data — same file
-- [ ] A3: Fill the requirements matrix, section 4 — one row per M1–M15 using A2's evidence; for a `partial` row say
+- [x] A3: Fill the requirements matrix, section 4 — one row per M1–M15 using A2's evidence; for a `partial` row say
   exactly which part exists — same file
-- [ ] A4: Check whether actual monthly food cost (M4) can be computed from stored invoices, and write the finding
+- [x] A4: Check whether actual monthly food cost (M4) can be computed from stored invoices, and write the finding
   into section 5 — from `invoice.schema.ts` and the write path in `server/routes/product-import.js`: is a
   per-invoice total stored or only lines; is `invoiceDate` required; how `vatIncluded` is applied; are invoices
   with unread lines counted; purchases in a month are not what was used in a month, so say whether
   `stock-count.schema.ts` gives opening and closing stock that could correct it — same file
-- [ ] A5: Check what reading an expense bill and a payslip (M11, M15) would need, and add it to sections 4 and 5 —
+- [x] A5: Check what reading an expense bill and a payslip (M11, M15) would need, and add it to sections 4 and 5 —
   from `server/routes/ai/invoices.js`, `shared/schemas/ai-invoice-read.schema.ts`, `server/utils/invoice-read.js`
   and the stored-file path: what in the pipeline is specific to supplier product invoices, what is reusable, where
   the photo is stored and for how long, what `aiPrivate` covers today, and which payslip fields must never be
   stored (identity number, bank account, address) — same file
-- [ ] A6: Write section 6 — for a future build name each invariant INV-1…INV-6 it would touch and whether it can
+- [x] A6: Write section 6 — for a future build name each invariant INV-1…INV-6 it would touch and whether it can
   be preserved; state how the "C-PRICING" contract in `src/app/core/engine/event-pricing.ts` (the only place profit
   is computed) constrains a new monthly engine; compare with the consultant diagnosis
   (`shared/schemas/entities/diagnosis.schema.ts`, `server/routes/diag.js`, plans 633, 634, 646, 652 under `plans/600-700/`) and say what the monthly screen can share with it and what would be duplicated; propose where
   a new module key would sit in `shared/schemas/modules-pure.ts` — same file
-- [ ] A7: Write section 7 (build slices) and section 8 (decisions) — each decision as a choice with the options and
+- [x] A7: Write section 7 (build slices) and section 8 (decisions) — each decision as a choice with the options and
   the recommended one first, never an open question; include at least: who owns the screen (the business's own
   module with consultant access, or the consultant module), whether a payslip photo is kept or only its amounts,
   whether salary data is shared with the platform owner by default, and how overhead is spread over dishes (a
   percent of the dish price, an equal amount per dish sold, by preparation time) — same file
-- [ ] A8: Write section 1 last (Hebrew summary) from sections 3–8, then run the four `[auto]` checks and paste
+- [x] A8: Write section 1 last (Hebrew summary) from sections 3–8, then run the four `[auto]` checks and paste
   their output into this plan's Execution Notes — same file
 
 ## Technical Considerations
@@ -210,3 +210,10 @@ All money is before VAT unless stated. "Plan" = what the owner expects for the m
 - none
 
 ## Execution Notes
+
+- Report written: docs/finance/monthly-planning-feasibility.md (checked on commit 695dfda7; scope-check --drift → REALITY: clean, so Step 0 not needed).
+- grep -c "^## " docs/finance/monthly-planning-feasibility.md → 8
+- grep -c "^| M[0-9]" docs/finance/monthly-planning-feasibility.md → 15
+- grep -c "TBD" docs/finance/monthly-planning-feasibility.md → 0
+- Section 1 (Hebrew) is 14 lines (limit 30).
+- seen: the plan's scope block lists origin/orch/fin-audit, which is not a file path (harmless).
