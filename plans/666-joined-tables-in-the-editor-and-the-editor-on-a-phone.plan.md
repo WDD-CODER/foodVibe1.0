@@ -124,6 +124,7 @@ e2e/ui/666-1.spec.ts
 e2e/ui/666-2.spec.ts
 e2e/ui/666-3.spec.ts
 e2e/ui/666-4.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
