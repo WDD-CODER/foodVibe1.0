@@ -2879,3 +2879,16 @@ input[type='number']::-webkit-outer-spin-button {
 .confirm-modal-message {
   white-space: pre-line;
 }
+
+/* Plan 667: the booking page's QR sheet — only the name, the code and the link are printed. */
+@media print {
+  .fs-qr-print,
+  .fs-qr-print * {
+    visibility: visible;
+  }
+
+  .fs-qr-print img {
+    inline-size: 60mm;
+    block-size: auto;
+  }
+}

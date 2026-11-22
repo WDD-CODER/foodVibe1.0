@@ -124,6 +124,7 @@ e2e/ui/666-1.spec.ts
 e2e/ui/666-2.spec.ts
 e2e/ui/666-3.spec.ts
 e2e/ui/666-4.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -143,15 +144,15 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 
-- `floor-plan-joins.util.ts` (`joinProblem`, `newJoin`, `joinLabel`, `withJoin`, `withoutJoin`) — family: none — rung: 4 — why: pure draft rules for joins of this one screen, kept beside the page with a spec, next to 684's edit rules.
-- `stepCell`, `canStep` added to `src/app/shared/floor-map/floor-geometry.util.ts` — family: none — rung: 4 — why: one more pair of pure cell functions of the `floor-map` family 665 registers (not on `main` yet, so it cannot be named as a family here); the service screen's "move to another table" does not need them, the registry entry is updated in this branch.
+- `floor-plan-joins.util.ts` — family: none — rung: 4 — why: pure draft rules for joins of this one screen, kept beside the page with a spec, next to 684's edit rules.
+- stepCell and canStep — family: none — rung: 4 — why: one more pair of pure cell functions of the `floor-map` family 665 registers (not on `main` yet, so it cannot be named as a family here); the service screen's "move to another table" does not need them, the registry entry is updated in this branch.
 - `JoinsListComponent` (`app-floor-joins-list`, `src/app/pages/frontdesk/floor-plan/components/joins-list/`) — family: form-field — rung: 1 — why: a page-local group of rows inside the room panel; counters and a switch per row, no look of its own.
 - Join seat counters — family: stepper — rung: 1 — why: `app-counter` as it is.
 - "בחירת כמה שולחנות" switch and a join's online switch — family: chip — rung: 1 — why: `c-chip c-chip--toggle`.
 - "חיבור השולחנות" button, the remove-join button, the four arrow buttons, the sheet's close button and the "אזורים וחיבורים" button — family: engine-classes — rung: 1 — why: `.c-btn-primary`, `.c-btn-ghost` and `.c-icon-btn` from `src/styles.scss`, each with an `aria-label`.
 - Removed-join message with undo — family: feedback — rung: 1 — why: `UserMsgService.onSetSuccessMsgWithUndo`.
-- The bottom sheet under 768 px (`.floor-plan__panel.is-sheet`, `.floor-plan__sheet-head`) — family: none — rung: 4 — why: a non-modal panel fixed to the bottom of the screen; the room above it must stay visible and tappable while a table is moved, and `app-modal-shell [sheet]` covers the page and traps the focus. It is this page's own panel restyled at phone width, not a new shared piece.
-- Other scoped classes (`.floor-plan__multi`, `.floor-plan__join-bar`, `.table-panel__arrows`, `.joins-list`, `.joins-list__row`) — family: none — rung: 4 — why: layout of this one screen in the components' own stylesheets; no `.c-*` engine is defined or restyled.
+- The bottom sheet under 768 px (`.floor-plan__panel--open`, `.floor-plan--sheet`, `.floor-plan__sheet-head`, `.floor-plan__sheet-title`, `.floor-plan__room-open`) — family: none — rung: 4 — why: a non-modal panel fixed to the bottom of the screen; the room above it must stay visible and tappable while a table is moved, and `app-modal-shell [sheet]` covers the page and traps the focus. It is this page's own panel restyled at phone width, not a new shared piece.
+- Other scoped classes (`.floor-plan__multi`, `.floor-plan__join-bar`, `.floor-plan__join-reason`, `.table-panel__arrows`, `.table-panel__arrow-btns`, `.joins-list`, `.joins-list__row`, `.joins-list__title`, `.joins-list__empty`, `.joins-list__head`, `.joins-list__seats`, `.joins-list__label`) — family: none — rung: 4 — why: layout of this one screen in the components' own stylesheets; no `.c-*` engine is defined or restyled.
 
 ## Defaults
 
@@ -249,15 +250,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the rules of a join as pure tested functions — joinProblem with its four reasons, newJoin with the seat defaults, joinLabel, withJoin, withoutJoin — src/app/pages/frontdesk/floor-plan/floor-plan-joins.util.ts, src/app/pages/frontdesk/floor-plan/floor-plan-joins.util.spec.ts
-- [ ] A2: Let the owner pick several tables and join them — the multi-select switch, tap rules while it is on, the join bar with its reason line, the join added and the mode left — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
-- [ ] A3: List the joins in the room panel with their seats, online switch and remove — the joins list component, row press that marks the tables, counters, the empty line, remove with undo — src/app/pages/frontdesk/floor-plan/components/joins-list/joins-list.component.ts, .html, .scss, .spec.ts, src/app/pages/frontdesk/floor-plan/components/room-panel/room-panel.component.html
-- [ ] A4: Name a refused join in the table-in-use notice and bring it back with the restore button — the extra line and the joins in the restore — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts, .spec.ts
-- [ ] A5: Move a table one cell with arrow buttons in the direction the arrow points — stepCell and canStep with RTL and LTR cases, the arrows row in the table panel, the two new icons — src/app/shared/floor-map/floor-geometry.util.ts, .spec.ts, src/app/pages/frontdesk/floor-plan/components/table-panel/table-panel.component.ts, .html, .scss, .spec.ts, src/app/app.config.ts
-- [ ] A6: Turn the panel into a bottom sheet on phones with the room still in view — fixed non-modal sheet above the bottom bar, head with close, page padding, the selected table scrolled into view, the button that opens the room panel — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
-- [ ] A7: Add the Hebrew texts of joins, arrows and the sheet — the nineteen fp_ keys of the UI notes — public/assets/data/dictionary.json
-- [ ] A8: Record the new pieces so later plans find them — the joins-list folder in the pages map, the two new helpers in the floor-map entry, the inventory row — src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-- [ ] A9: Prove the four screen checks with short scripts — each spec signs in, answers the business read with tables on and the floor-plan calls itself, the two phone specs set a 375 px viewport, each saves a screenshot — e2e/ui/666-1.spec.ts, e2e/ui/666-2.spec.ts, e2e/ui/666-3.spec.ts, e2e/ui/666-4.spec.ts
+- [x] A1: Write the rules of a join as pure tested functions — joinProblem with its four reasons, newJoin with the seat defaults, joinLabel, withJoin, withoutJoin — src/app/pages/frontdesk/floor-plan/floor-plan-joins.util.ts, src/app/pages/frontdesk/floor-plan/floor-plan-joins.util.spec.ts
+- [x] A2: Let the owner pick several tables and join them — the multi-select switch, tap rules while it is on, the join bar with its reason line, the join added and the mode left — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
+- [x] A3: List the joins in the room panel with their seats, online switch and remove — the joins list component, row press that marks the tables, counters, the empty line, remove with undo — src/app/pages/frontdesk/floor-plan/components/joins-list/joins-list.component.ts, .html, .scss, .spec.ts, src/app/pages/frontdesk/floor-plan/components/room-panel/room-panel.component.html
+- [x] A4: Name a refused join in the table-in-use notice and bring it back with the restore button — the extra line and the joins in the restore — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts, .spec.ts
+- [x] A5: Move a table one cell with arrow buttons in the direction the arrow points — stepCell and canStep with RTL and LTR cases, the arrows row in the table panel, the two new icons — src/app/shared/floor-map/floor-geometry.util.ts, .spec.ts, src/app/pages/frontdesk/floor-plan/components/table-panel/table-panel.component.ts, .html, .scss, .spec.ts, src/app/app.config.ts
+- [x] A6: Turn the panel into a bottom sheet on phones with the room still in view — fixed non-modal sheet above the bottom bar, head with close, page padding, the selected table scrolled into view, the button that opens the room panel — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .scss, .spec.ts
+- [x] A7: Add the Hebrew texts of joins, arrows and the sheet — the nineteen fp_ keys of the UI notes — public/assets/data/dictionary.json
+- [x] A8: Record the new pieces so later plans find them — the joins-list folder in the pages map, the two new helpers in the floor-map entry, the inventory row — src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A9: Prove the four screen checks with short scripts — each spec signs in, answers the business read with tables on and the floor-plan calls itself, the two phone specs set a 375 px viewport, each saves a screenshot — e2e/ui/666-1.spec.ts, e2e/ui/666-2.spec.ts, e2e/ui/666-3.spec.ts, e2e/ui/666-4.spec.ts
 
 ## Technical Considerations
 - Dependencies: `FloorPlanPage`, the table and room panels, `floor-plan-edit.util.ts` (684); `app-floor-map` and
@@ -295,3 +296,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: a new join seats from one more than its largest single table up to the sum of its tables; the owner changes both numbers in the list.
 - behaviour: the arrow buttons are shown at every width, not only on a phone, because they are the only keyboard way to move a table.
 - behaviour: on a phone the room panel opens from a button under the map instead of sitting under it.
+- Step 0: drift commits (471 export, inventory refresh) touch no symbol of this plan → ok.
+- pnpm run build → exit 0; pnpm run lint → exit 0 (0 errors); pnpm run test:ci → exit 0, 2856 of 2856 SUCCESS.
+- behaviour: the sheet room-panel head reuses fp_room_open as its title; the table panel keeps its own head and X.
+- [ui] items 666-1 to 666-4: written, not run (e2e/ui/666-*.spec.ts).

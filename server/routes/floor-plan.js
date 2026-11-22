@@ -13,6 +13,8 @@ const { scopeFilter } = require('../utils/business-scope')
 const { assertCan } = require('../utils/permissions')
 const { actorOf } = require('../utils/actor')
 const { newId } = require('../utils/id')
+const { LIVE } = require('../jobs/purge-deleted')
+const { tableServiceOf } = require('../generated/schemas/front-desk/table-service')
 const { checkFloorPlan } = require('../generated/schemas/front-desk/floor-plan-check')
 
 const TYPE = 'floorPlans'
@@ -101,6 +103,29 @@ router.put('/', verifyToken, requireModule('tables'), async (req, res) => {
     res.json({ plan: doc })
   } catch (err) {
     fail(req, res, 'save', err)
+  }
+})
+
+// PUT /api/v1/floor-plan/confirm-mode  { confirmMode } -> { confirmMode }  (plan 667: the one-button switch of D3)
+router.put('/confirm-mode', verifyToken, requireModule('tables'), async (req, res) => {
+  try {
+    const confirmMode = req.body?.confirmMode
+    if (confirmMode !== 'auto' && confirmMode !== 'manual') return res.status(400).json({ error: 'BAD_REQUEST_INPUT' })
+    const profile = await db().collection('frontDeskProfiles').findOne({ ...scopeFilter(req), ...LIVE })
+    if (!profile) return res.status(404).json({ error: 'NO_PROFILE' })
+    if (!assertCan(req, res, 'editFrontDesk', { type: 'frontDeskProfiles', doc: profile })) return
+    const tableService = { ...tableServiceOf(profile), confirmMode }
+    const updatedAt = Date.now()
+    const check = checkStoredDoc('frontDeskProfiles', { ...profile, tableService, updatedAt })
+    if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues })
+    await db().collection('frontDeskProfiles').updateOne(
+      { _id: profile._id, businessId: profile.businessId },
+      { $set: { tableService, updatedAt } }
+    )
+    req.log.info({ event: 'floor_plan.confirm_mode.changed', to: confirmMode })
+    res.json({ confirmMode })
+  } catch (err) {
+    fail(req, res, 'confirm_mode', err)
   }
 })
 

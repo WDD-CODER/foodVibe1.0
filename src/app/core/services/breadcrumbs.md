@@ -31,7 +31,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `access.service.ts` | The businesses the user may enter, and the consultant grants of a business: load, create, remove (plan 632; `canSwitch_` drives the header switcher) | AccessService |
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
 | `knowledge-item-data.service.ts` | Knowledge items CRUD plus `importDrafts` (AI import) and `approve` (bulk), on BaseEntityDataService (plan 554) | KnowledgeItemDataService |
-| `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
+| `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate; setConfirmMode, the one-button confirm-mode switch, plan 667) | FrontDeskProfileDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
 | `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |

@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   FileText,
+  LayoutGrid,
   ListChecks,
   LucideAngularModule,
   Settings,
@@ -63,6 +64,7 @@ describe('TabChipsComponent', () => {
           CalendarDays,
           Settings,
           FileText,
+          LayoutGrid,
           Stethoscope,
           ListChecks
         })
@@ -184,6 +186,20 @@ describe('TabChipsComponent', () => {
     const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
     expect(active).not.toBeNull()
     expect(active.injector.get(RouterLink).href).toBe('/clients')
+  })
+
+  it('adds the floor plan chip to the frontdesk group when tables is on (plan 665)', async () => {
+    modulesOn.set([...ALL_MODULES, 'tables'])
+    await router.navigateByUrl('/frontdesk/knowledge')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual([
+      '/requests',
+      '/bookings',
+      '/clients',
+      '/frontdesk/knowledge',
+      '/frontdesk/settings',
+      '/frontdesk/floor-plan'
+    ])
   })
 
   it('maps /frontdesk/knowledge to the frontdesk group with the knowledge chip active (plan 554)', async () => {

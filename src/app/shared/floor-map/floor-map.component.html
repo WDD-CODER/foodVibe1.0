@@ -1,0 +1,57 @@
+<div class="floor-map">
+  <div
+    #grid
+    class="floor-map__grid"
+    data-testid="floor-grid"
+    [style.--fm-cols]="plan().grid.cols"
+    [style.--fm-rows]="plan().grid.rows"
+    [style.grid-template-columns]="'repeat(' + plan().grid.cols + ', 1fr)'"
+    [style.grid-template-rows]="'repeat(' + plan().grid.rows + ', 1fr)'"
+    (click)="onGridClick($event)"
+  >
+    @for (t of views_(); track t.table.key) {
+      <button
+        type="button"
+        cdkDrag
+        cdkDragBoundary=".floor-map__grid"
+        [cdkDragDisabled]="!draggable()"
+        class="floor-map__table"
+        [class.floor-map__table--round]="t.table.shape === 'round'"
+        [class.floor-map__table--square]="t.table.shape === 'square'"
+        [class.floor-map__table--rect]="t.table.shape === 'rect'"
+        [class.floor-map__table--selected]="t.selected"
+        [class.is-dimmed]="t.dimmed"
+        [class.is-inactive]="t.inactive"
+        [class.is-overlap]="t.warn"
+        [attr.data-testid]="'floor-table-' + t.table.number"
+        [attr.data-key]="t.table.key"
+        [attr.data-x]="t.table.x"
+        [attr.data-y]="t.table.y"
+        [attr.data-state]="t.state"
+        [attr.aria-pressed]="t.selected ? 'true' : 'false'"
+        [attr.aria-label]="t.label"
+        [style.grid-column]="t.table.x + 1 + ' / span ' + t.footprint.w"
+        [style.grid-row]="t.table.y + 1 + ' / span ' + t.footprint.h"
+        (click)="onTableClick($event, t.table.key)"
+        (cdkDragEnded)="onDragEnded($event, t.table)"
+      >
+        <span class="floor-map__number">{{ t.table.number }}</span>
+        @if (t.warn) {
+          <lucide-icon class="floor-map__warn" name="alert-triangle" [size]="14" aria-hidden="true"></lucide-icon>
+        }
+        @if (t.inactive) {
+          <span class="floor-map__state">{{ 'fp_state_inactive' | translatePipe }}</span>
+        }
+        @for (side of sides; track side) {
+          @if (t.chairs[side] > 0) {
+            <span class="floor-map__chairs" [class]="'floor-map__chairs--' + side" aria-hidden="true">
+              @for (c of chairIndexes(t.chairs[side]); track c) {
+                <span class="floor-map__chair"></span>
+              }
+            </span>
+          }
+        }
+      </button>
+    }
+  </div>
+</div>

@@ -1,0 +1,9 @@
+@if (src_()) {
+  <img
+    class="qr-img"
+    [src]="src_()"
+    [alt]="altKey() ? (altKey() | translatePipe) : ''"
+    [attr.width]="size()"
+    [attr.height]="size()"
+  />
+}

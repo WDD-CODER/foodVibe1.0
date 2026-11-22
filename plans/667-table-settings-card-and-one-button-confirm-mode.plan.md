@@ -137,6 +137,7 @@ screens/667-*.png
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -162,11 +163,13 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 
-- `app-table-service-card` (`TableServiceCardComponent`) — family: form-field — rung: 1 — why: a settings card built from `app-form-field`, `app-counter`, `app-custom-select`, `app-time-field`, `appNumberBox` and the `c-chip--toggle` checkbox, the way `app-request-kind-card` is; no new control
+- `table-service-card` (`app-table-service-card`, `TableServiceCardComponent`) — family: form-field — rung: 1 — why: a settings card built from `app-form-field`, `app-counter`, `app-custom-select`, `app-time-field`, `appNumberBox` and the `c-chip--toggle` checkbox, the way `app-request-kind-card` is; no new control
 - `tableServiceErrors` (pure function in the card's folder) — family: helpers — rung: 1 — why: a page-local validity check like `choiceNeedsOptions` of the request kind card
 - Confirm-mode switch (a checkbox in `label.c-chip.c-chip--toggle` with `role="switch"`) — family: chip — rung: 1 — why: the existing toggle chip; the label text names the mode that is on
 - `FrontDeskProfileDataService.setConfirmMode` — family: http — rung: 2 — why: one more call on the existing profile service through `API.floorPlan('confirm-mode')`; plan 671 reuses it from the service screen
-- `app-qr-code` (`QrCodeComponent`) — family: none — rung: 4 — why: nothing in the registry draws a QR code; built once in `src/app/shared/qr-code/` as the new family `qr-code` so the booking page link and later links (waiting list, brief Part 6) share it
+- `qr-code` (`app-qr-code`, `QrCodeComponent`) — family: none — rung: 4 — why: nothing in the registry draws a QR code; built once in `src/app/shared/qr-code/` as the new family `qr-code` so the booking page link and later links (waiting list, brief Part 6) share it
+- Page-local layout classes (`.ts-card`, `.ts-title`, `.ts-mode`, `.ts-note`, `.ts-body`, `.ts-grid`, `.ts-ladder`, `.ts-ladder-row`, `.ts-ladder-cell`, `.ts-ladder-label`, `.ts-number` in the card; `.fs-qr`, `.fs-qr-side`, `.fs-qr-print`, `.fs-qr-print-name`, `.fs-qr-print-link` on the page; `.qr-img` in `app-qr-code`) — family: engine-classes — rung: 1 — why: only layout (grid, gap, size) around the shared pieces; no `.c-*` class is defined
+- The number fields of the card use `app-counter` (family: stepper) — rung: 1 — why: it already clamps to a min and max, so no second number box is copied
 - Ladder add / remove buttons — family: engine-classes — rung: 1 — why: `c-btn-ghost` buttons with the registered `plus` and `trash-2` icons, as the request kind card's question rows
 
 ## Defaults
@@ -356,14 +359,14 @@ Texts, icons, registry
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Let the owner change only the confirm mode with one server call — the confirm-mode route after the two floor plan routes: input check, profile load, owner check, whole settings object over the defaults, stored-document check, one update; its test file — server/routes/floor-plan.js, server/test/floor-plan-confirm-mode.test.js, server/breadcrumbs.md
-- [ ] A2: Give the profile service the one call both the settings card and the service screen will use — setConfirmMode through the floor plan path, store patched on success, false on failure; spec cases — src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts, src/app/core/services/breadcrumbs.md
-- [ ] A3: Build the table settings card with the switch, the nine fields and the turn ladder — the component, its validity function, the ladder add and remove rules, phone layout; its spec — src/app/pages/frontdesk/frontdesk-settings/components/table-service-card/**, src/app/pages/breadcrumbs.md
-- [ ] A4: Put the card on the settings page for businesses that have table service — module check, draft field, save body, blocked rule, the switch saved by its own call with its toasts; page spec cases with and without the module — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.ts, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.scss, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
-- [ ] A5: Add the shared QR image piece and its one approved library — the dependency, the lazy import, the type declaration, the component and its spec, the registry family — package.json, pnpm-lock.yaml, angular.json, src/app/shared/qr-code/**, src/app/shared/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-- [ ] A6: Show the booking page's QR code beside the public link and make it printable — the QR block, the print button, the print-only block with name, code and link, the print rules — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.scss, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.ts
-- [ ] A7: Add the Hebrew texts and the icon, and record the route's answer in the map — the dictionary keys listed in the plan, the QrCode icon, the extension line — public/assets/data/dictionary.json, src/app/app.config.ts, docs/restaurant/restaurant-map.md
-- [ ] A8: Prove the switch and the QR code in the running app — two short screen checks with fixture routes for the module, the profile and the confirm-mode call, each saving a screenshot — e2e/ui/667-1.spec.ts, e2e/ui/667-2.spec.ts
+- [x] A1: Let the owner change only the confirm mode with one server call — the confirm-mode route after the two floor plan routes: input check, profile load, owner check, whole settings object over the defaults, stored-document check, one update; its test file — server/routes/floor-plan.js, server/test/floor-plan-confirm-mode.test.js, server/breadcrumbs.md
+- [x] A2: Give the profile service the one call both the settings card and the service screen will use — setConfirmMode through the floor plan path, store patched on success, false on failure; spec cases — src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts, src/app/core/services/breadcrumbs.md
+- [x] A3: Build the table settings card with the switch, the nine fields and the turn ladder — the component, its validity function, the ladder add and remove rules, phone layout; its spec — src/app/pages/frontdesk/frontdesk-settings/components/table-service-card/**, src/app/pages/breadcrumbs.md
+- [x] A4: Put the card on the settings page for businesses that have table service — module check, draft field, save body, blocked rule, the switch saved by its own call with its toasts; page spec cases with and without the module — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.ts, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.scss, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
+- [x] A5: Add the shared QR image piece and its one approved library — the dependency, the lazy import, the type declaration, the component and its spec, the registry family — package.json, pnpm-lock.yaml, angular.json, src/app/shared/qr-code/**, src/app/shared/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A6: Show the booking page's QR code beside the public link and make it printable — the QR block, the print button, the print-only block with name, code and link, the print rules — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.scss, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.ts
+- [x] A7: Add the Hebrew texts and the icon, and record the route's answer in the map — the dictionary keys listed in the plan, the QrCode icon, the extension line — public/assets/data/dictionary.json, src/app/app.config.ts, docs/restaurant/restaurant-map.md
+- [x] A8: Prove the switch and the QR code in the running app — two short screen checks with fixture routes for the module, the profile and the confirm-mode call, each saving a screenshot — e2e/ui/667-1.spec.ts, e2e/ui/667-2.spec.ts
 
 ## Technical Considerations
 - Dependencies: `FrontdeskSettingsPage`, `FrontDeskProfileDataService`, `ModuleService`, `tableServiceOf` /
@@ -412,3 +415,17 @@ Texts, icons, registry
 - behaviour: the confirm-mode route stores the whole settings object over the defaults the first time, so the stored
   profile is complete from then on.
 - behaviour: `autoMaxParty` is shown only while the mode is `auto`; its stored value is kept while hidden.
+- scope extended: none. Reuse Check rows renamed/extended in this plan file (bare stems `table-service-card`, `qr-code`,
+  the page-local layout classes, `app-counter`) so `kit-checks` finds them.
+- decision: every number field of the card (and the ladder's) is an `app-counter` (1–30, 0–180 …, ladder minutes step 15),
+  not a raw `input[type=number]`: it clamps to the range and avoids a copy of the number-box markup (kit-checks debt).
+  `data-testid="ts-<field>"` sits on the `app-counter` host.
+- decision: the print rules that make `.fs-qr-print` visible live in `src/styles.scss` (append-only hotspot) because
+  the global `body *` rule must be beaten for the child `app-qr-code` image, which the page's scoped SCSS cannot reach.
+- decision: a failed switch call shows `save_failed` always (the service swallows the error and returns `false`, so
+  `refusalShownToUser` cannot be asked there).
+- Evidence: `pnpm run build` → 0 (no new budget error; `allowedCommonJsDependencies` gained `qrcode`, `dijkstrajs`);
+  `pnpm run lint` → 0; `pnpm run test:ci` → 0, TOTAL 2801 SUCCESS; `pnpm run test:server` → 0 (floor-plan-confirm-mode:
+  7 passed); `kit-checks` → ok (6 checks); `kit-manifest-check` → ok; override / ledger / breadcrumbs / reuse-registry /
+  log-query / lint:icons / lint:no-native-select → 0.
+- `[ui]` items 667-1 and 667-2: written, not run (`e2e/ui/667-1.spec.ts`, `e2e/ui/667-2.spec.ts`).
