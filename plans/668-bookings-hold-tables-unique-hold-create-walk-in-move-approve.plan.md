@@ -184,6 +184,7 @@ server/test/invariants.test.js
 server/breadcrumbs.md
 docs/brain/component-families.md
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
