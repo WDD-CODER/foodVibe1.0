@@ -145,6 +145,47 @@
           min-inline-size: 4rem;
         }
       }
+
+      // Plan 373: the link takes the full first line on a phone; date and note share the next one.
+      .video-edit-row {
+        .video-url {
+          flex: 1 1 100%;
+        }
+
+        .video-date {
+          flex: 1 1 9rem;
+          min-inline-size: 9rem;
+        }
+
+        .video-note {
+          flex: 2 1 8rem;
+        }
+      }
+
+      .video-url-error,
+      .location-error {
+        flex: 1 1 100%;
+
+        color: var(--color-danger);
+        font-size: var(--fs-sm);
+
+        margin: 0;
+      }
+
+      .location-saved {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+
+        font-size: var(--fs-sm);
+
+        margin: 0;
+      }
+
+      .location-btn {
+        align-self: flex-start;
+      }
     }
   }
 

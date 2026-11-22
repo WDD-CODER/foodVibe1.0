@@ -67,6 +67,28 @@ export class VenueDetailComponent implements OnInit {
     }))
   )
 
+  /** Plan 373: tour videos, newest visit first (no date last), with the date (he-IL) and the source label key. */
+  protected readonly videos_ = computed(() =>
+    [...(this.venue_()?.videos ?? [])]
+      .sort((a, b) => (b.visitDate ?? -Infinity) - (a.visitDate ?? -Infinity))
+      .map((v) => ({
+        ...v,
+        dateLabel: v.visitDate != null ? new Date(v.visitDate).toLocaleDateString('he-IL') : '',
+        sourceKey: videoSourceKey(v.url)
+      }))
+  )
+
+  /** Plan 373: Google Maps and Waze links to the saved location, or null without one. */
+  protected readonly navLinks_ = computed(() => {
+    const loc = this.venue_()?.location
+    if (!loc) return null
+    const ll = `${loc.lat},${loc.lng}`
+    return {
+      google: `https://www.google.com/maps/search/?api=1&query=${ll}`,
+      waze: `https://waze.com/ul?ll=${ll}&navigate=yes`
+    }
+  })
+
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
     void this.equipmentData.ensureLoaded()
@@ -80,4 +102,20 @@ export class VenueDetailComponent implements OnInit {
     const id = this.venue_()?._id
     if (id) this.router.navigate(['/venues/edit', id])
   }
+}
+
+/** Plan 373: the translation key naming where a video link points, from its hostname. */
+function videoSourceKey(url: string): string {
+  let host = ''
+  try {
+    host = new URL(url).hostname.toLowerCase()
+  } catch {
+    return 'video_source_link'
+  }
+  if (host === 'youtu.be' || host === 'youtube.com' || host.endsWith('.youtube.com')) return 'video_source_youtube'
+  if (host === 'drive.google.com' || host === 'docs.google.com') return 'video_source_drive'
+  if (host === 'wa.me' || host === 'whatsapp.com' || host.endsWith('.whatsapp.com') || host.endsWith('.whatsapp.net')) {
+    return 'video_source_whatsapp'
+  }
+  return 'video_source_link'
 }

@@ -23,7 +23,15 @@ import { VenueDataService } from '@services/venue-data.service'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { CloudinaryService } from '@services/cloudinary.service'
-import { VenueProfile, VenueInfraItem, VenueOperatingHours, VenueContact, EnvironmentType } from '@models/venue.model'
+import {
+  VenueProfile,
+  VenueInfraItem,
+  VenueOperatingHours,
+  VenueContact,
+  VenueVideo,
+  VenueLocation,
+  EnvironmentType
+} from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -33,6 +41,8 @@ import type { PendingChangesComponent } from 'src/app/core/guards/pending-change
 import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { HoursEditorComponent } from 'src/app/shared/hours-editor/hours-editor.component'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { todayIso } from 'src/app/core/utils/date-input.util'
 import {
   checkHoursRow,
   draftToHours,
@@ -40,6 +50,13 @@ import {
   isBrokenHours,
   type HoursDraftRow
 } from 'src/app/core/utils/venue-hours.util'
+
+/** Plan 373 (Q1 = a): any https:// link is accepted as a tour video. */
+const HTTPS_URL = /^\s*https:\/\/\S+\s*$/i
+/** Plan 373: how long the phone may look for a position before giving up. */
+const LOCATE_TIMEOUT_MS = 10000
+/** GeolocationPositionError.PERMISSION_DENIED. */
+const GEO_PERMISSION_DENIED = 1
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 
@@ -55,7 +72,8 @@ const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', '
     LoaderComponent,
     CustomSelectComponent,
     FormFieldComponent,
-    HoursEditorComponent
+    HoursEditorComponent,
+    DateFieldComponent
   ],
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
@@ -90,6 +108,21 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl. */
   protected readonly photoUrl_ = signal<string | null>(null)
   protected readonly isUploadingPhoto_ = signal(false)
+  /** Plan 373: the spot saved with "use my current location". */
+  protected readonly location_ = signal<VenueLocation | null>(null)
+  protected readonly isLocating_ = signal(false)
+  /** Plan 373: translation key of the last geolocation failure, or null. */
+  protected readonly locationError_ = signal<string | null>(null)
+  /** Plan 373: the location button is hidden where the browser has no geolocation. */
+  protected readonly canLocate =
+    typeof navigator !== 'undefined' && typeof navigator.geolocation?.getCurrentPosition === 'function'
+  protected readonly locationLabel_ = computed(() => {
+    const loc = this.location_()
+    if (!loc) return ''
+    const saved = this.translation.translate('location_saved')
+    if (loc.accuracy == null) return saved
+    return `${saved} ${this.translation.translate('location_accuracy').replace('{meters}', String(loc.accuracy))}`
+  })
 
   /** pendingChangesGuard contract (plan 371): true once a save succeeded, so leaving doesn't prompt. */
   isSubmitted = false
@@ -97,7 +130,12 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   private readonly unsaved_ = useUnsavedChanges({
     form: () => this.venueForm_,
     snapshot: () =>
-      JSON.stringify({ form: this.venueForm_.getRawValue(), photoUrl: this.photoUrl_(), hours: this.hoursRows_() }),
+      JSON.stringify({
+        form: this.venueForm_.getRawValue(),
+        photoUrl: this.photoUrl_(),
+        hours: this.hoursRows_(),
+        location: this.location_()
+      }),
     isSubmitted: () => this.isSubmitted
   })
 
@@ -107,6 +145,10 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
 
   protected get contactsArray(): FormArray {
     return this.venueForm_?.get('contacts') as FormArray
+  }
+
+  protected get videosArray(): FormArray {
+    return this.venueForm_?.get('videos') as FormArray
   }
 
   protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
@@ -179,6 +221,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       address: [''],
       capacity: [null],
       contacts: this.fb.array([]),
+      videos: this.fb.array([]),
       active: [true]
     })
   }
@@ -189,6 +232,17 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       name: [contact?.name ?? '', Validators.required],
       phone: [contact?.phone ?? ''],
       role: [contact?.role ?? '']
+    })
+  }
+
+  /** Plan 373: one tour video row — https link required, visit date as `yyyy-mm-dd`, note. */
+  private videoRow_(video: VenueVideo | null): FormGroup {
+    return this.fb.group({
+      url: [video?.url ?? '', [Validators.required, Validators.pattern(HTTPS_URL)]],
+      visitDate: [video?.visitDate != null ? todayIso(new Date(video.visitDate)) : ''],
+      note: [video?.note ?? ''],
+      /** UI only — true while a half-typed date is in the field; never sent to the server. */
+      visitDateInvalid: [false]
     })
   }
 
@@ -209,6 +263,9 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     })
     this.contactsArray.clear()
     ;(v.contacts ?? []).forEach((c) => this.contactsArray.push(this.contactRow_(c)))
+    this.videosArray.clear()
+    ;(v.videos ?? []).forEach((video) => this.videosArray.push(this.videoRow_(video)))
+    this.location_.set(v.location ?? null)
     this.hoursRows_.set((v.operatingHours ?? []).map(hoursToDraft))
   }
 
@@ -261,6 +318,41 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     this.removeRowWithUndo_(this.contactsArray, index)
   }
 
+  protected addVideo(): void {
+    this.videosArray.push(this.videoRow_(null))
+  }
+
+  protected removeVideo(index: number): void {
+    this.removeRowWithUndo_(this.videosArray, index)
+  }
+
+  /** Plan 373: asks the browser for the current position; a refusal or a timeout shows a message, never throws. */
+  protected useCurrentLocation(): void {
+    if (!this.canLocate || this.isLocating_()) return
+    this.isLocating_.set(true)
+    this.locationError_.set(null)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.isLocating_.set(false)
+        this.location_.set({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: Number.isFinite(pos.coords.accuracy) ? Math.round(pos.coords.accuracy) : undefined
+        })
+      },
+      (err) => {
+        this.isLocating_.set(false)
+        this.locationError_.set(err.code === GEO_PERMISSION_DENIED ? 'location_denied' : 'location_unavailable')
+      },
+      { enableHighAccuracy: true, timeout: LOCATE_TIMEOUT_MS, maximumAge: 0 }
+    )
+  }
+
+  protected clearLocation(): void {
+    this.location_.set(null)
+    this.locationError_.set(null)
+  }
+
   private removeRowWithUndo_(array: FormArray, index: number): void {
     const removed = array.at(index)
     array.removeAt(index)
@@ -285,7 +377,14 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
     this.validationErrors_.set(errors)
     const hoursBroken = this.hoursRows_().some((row) => isBrokenHours(checkHoursRow(row)))
     if (hoursBroken) this.hoursSubmitAttempted_.set(true)
-    return Object.keys(errors).length === 0 && !hoursBroken && this.contactsArray.valid
+    const videoDateBroken = this.videosArray.controls.some((row) => row.get('visitDateInvalid')?.value === true)
+    return (
+      Object.keys(errors).length === 0 &&
+      !hoursBroken &&
+      this.contactsArray.valid &&
+      this.videosArray.valid &&
+      !videoDateBroken
+    )
   }
 
   async onSubmit(): Promise<void> {
@@ -338,6 +437,15 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       (c) => ({ name: c.name.trim(), phone: c.phone?.trim() || undefined, role: c.role?.trim() || undefined })
     )
 
+    const videos: VenueVideo[] = ((v.videos ?? []) as { url: string; visitDate: string; note: string }[]).map(
+      (row) => ({
+        url: row.url.trim(),
+        visitDate: isoToLocalEpoch(row.visitDate),
+        note: row.note?.trim() || undefined
+      })
+    )
+    const location = this.location_() ?? undefined
+
     const now = Date.now()
 
     if (this.isEditMode_()) {
@@ -353,7 +461,9 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         contacts,
         operatingHours: hours,
         active: v.active,
-        photoUrl: this.photoUrl_() ?? undefined
+        photoUrl: this.photoUrl_() ?? undefined,
+        videos,
+        location
       })
     } else {
       await this.venueData.addVenue({
@@ -367,7 +477,9 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         operatingHours: hours,
         createdAt: now,
         active: v.active,
-        photoUrl: this.photoUrl_() ?? undefined
+        photoUrl: this.photoUrl_() ?? undefined,
+        videos,
+        location
       })
     }
   }
@@ -379,4 +491,11 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       this.router.navigate(['/venues/list'])
     }
   }
+}
+
+/** Plan 373: `yyyy-mm-dd` to local midnight in epoch ms; an empty or malformed value gives undefined. */
+function isoToLocalEpoch(iso: string | null | undefined): number | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso ?? '')
+  if (!match) return undefined
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getTime()
 }
