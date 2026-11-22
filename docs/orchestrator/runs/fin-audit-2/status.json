@@ -1,0 +1,39 @@
+{
+  "run": "fin-audit-2",
+  "branch": "orch/fin-audit-2",
+  "base": "main",
+  "startedAt": "2026-11-22T15:15:58.802Z",
+  "mainShaAtStart": "7c8fccd4421e7294d8b865d4750da34a5f9652c4",
+  "plans": {
+    "661": {
+      "nnn": "661",
+      "title": "Monthly planning screen: feasibility audit against the current code (report only)",
+      "branch": "feat/661-monthly-planning-feasibility-audit",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {},
+      "humanItems": [
+        "Dandan reads section 1 (Hebrew summary) and can say for each block of the screen whether it is ready to"
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T15:16:07.848Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "reason": "worktree: plan branch feat/661-monthly-planning-feasibility-audit is checked out in C:/coding projects/Cursor/foodVibe1.0-orch-fin-audit-661 — run git switch --detach in that folder, or close the session using it",
+      "freeDiskGb": 16.2
+    }
+  },
+  "notes": [],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 16.2,
+  "updatedAt": "2026-11-22T15:16:12.272Z",
+  "finishedAt": "2026-11-22T15:16:12.269Z"
+}

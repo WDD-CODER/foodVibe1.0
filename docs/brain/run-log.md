@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (67 runs): plans 201 · merged 179 · parked 19 · fix rounds 82 · escalations 38 · gate fails 17 · ✗ 14 · checker misses 0 — per run: plans 3 · parked 0.28 · fix rounds 1.22 · ✗ per plan 0.07
+Earlier (68 runs): plans 204 · merged 182 · parked 19 · fix rounds 84 · escalations 39 · gate fails 18 · ✗ 14 · checker misses 0 — per run: plans 3 · parked 0.28 · fix rounds 1.24 · ✗ per plan 0.07
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-18 | mod-invoices-ui | 628,629,630 | 3 | 0 | - | 2 | 1 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-18 | mod-access-ui | 632 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-history | 638,639 | 2 | 0 | - | 2 | 1 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-18 | mod-stock-srv | 635 | 1 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (67 runs): plans 201 · merged 179 · parked 19 · fix rounds 82 · esca
 | 2026-11-21 | mod-breakpoints | 656 | 1 | 0 | - | 2 | 2 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-21 | mod-count-confirm | 657 | 1 | 0 | - | 0 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-22 | mod-count-popup | 658,659 | 2 | 0 | - | 0 | 1 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-22 | fin-audit | 660,661 | 1 | 1 | same-reason-twice | 1 | 1 | 2 | ok | - | - | - |
+| 2026-11-22 | fin-audit | 660,661 | 1 | 1 | same-reason-twice | 1 | 1 | 2 | ok | 0 | 0 | 0 |
+| 2026-11-22 | fin-audit-2 | 661 | 0 | 1 | environment | 0 | 0 | 0 | - | - | - | - |
