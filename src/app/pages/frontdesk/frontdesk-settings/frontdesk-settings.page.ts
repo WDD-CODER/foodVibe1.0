@@ -12,6 +12,7 @@ import { HoursEditorComponent } from 'src/app/shared/hours-editor/hours-editor.c
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { StorageService } from '@services/async-storage.service'
 import { TranslationService } from '@services/translation.service'
@@ -34,6 +35,13 @@ import {
   type RequestKindConfig
 } from '@models/front-desk-profile.model'
 import type { FrontDeskRequestKind } from '@schemas/entities/front-desk-profile.schema'
+import { tableServiceOf } from '@schemas/front-desk/table-service'
+import { QrCodeComponent } from 'src/app/shared/qr-code/qr-code.component'
+import {
+  TableServiceCardComponent,
+  tableServiceErrors,
+  type TableServiceDraft
+} from './components/table-service-card/table-service-card.component'
 import { DataExportCardComponent } from './components/data-export-card/data-export-card.component'
 import { FrontDeskStatusBannerComponent } from 'src/app/shared/front-desk-status-banner/front-desk-status-banner.component'
 import {
@@ -64,6 +72,7 @@ export interface SettingsDraft {
   hoursRows: HoursDraftRow[]
   closedDates: string[]
   kinds: Record<FrontDeskRequestKind, RequestKindConfig>
+  tableService: TableServiceDraft
   tone: (typeof ASSISTANT_TONES)[number]
   greeting: string
   handoffText: string
@@ -89,6 +98,8 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
     HoursEditorComponent,
     TextareaAutoGrowDirective,
     RequestKindCardComponent,
+    TableServiceCardComponent,
+    QrCodeComponent,
     DataExportCardComponent,
     FrontDeskStatusBannerComponent
   ],
@@ -103,6 +114,7 @@ export class FrontdeskSettingsPage {
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
   private readonly confirm = inject(ConfirmModalService)
+  private readonly modules = inject(ModuleService)
 
   protected readonly kinds = FRONT_DESK_REQUEST_KINDS
   protected readonly tones = ASSISTANT_TONES
@@ -114,6 +126,10 @@ export class FrontdeskSettingsPage {
   protected readonly profile_ = this.profiles.profile_
   protected readonly canEdit_ = computed(() => this.permission.can('editFrontDesk'))
   protected readonly draft_ = signal<SettingsDraft | null>(null)
+  /** Plan 667: the table settings card and the QR block exist only for a business with the `tables` module. */
+  protected readonly hasTables_ = computed(() => this.modules.has('tables'))
+  protected readonly switching_ = signal(false)
+  protected readonly confirmMode_ = computed(() => tableServiceOf(this.profile_()).confirmMode)
 
   // first visit
   protected readonly newType_ = signal<BusinessType | ''>('')
@@ -147,6 +163,7 @@ export class FrontdeskSettingsPage {
     const d = this.draft_()
     if (!d) return false
     if (this.slugInvalid_() || !d.displayName.trim()) return true
+    if (this.hasTables_() && Object.keys(tableServiceErrors(d.tableService)).length) return true
     if (d.hoursRows.some((r) => isBrokenHours(checkHoursRow(r)))) return true
     if (!d.activeSame && d.activeRows.some((r) => isBrokenHours(checkHoursRow(r)))) return true
     return this.kinds.some((k) => {
@@ -192,6 +209,7 @@ export class FrontdeskSettingsPage {
   private toDraft(p: FrontDeskProfile): SettingsDraft {
     const kinds = {} as Record<FrontDeskRequestKind, RequestKindConfig>
     for (const k of FRONT_DESK_REQUEST_KINDS) kinds[k] = clone(p.requestKinds[k] ?? emptyKindConfig())
+    const { confirmMode: _mode, ...tableService } = tableServiceOf(p)
     return {
       displayName: p.displayName,
       slug: p.slug,
@@ -202,6 +220,7 @@ export class FrontdeskSettingsPage {
       hoursRows: (p.hours ?? []).map((h) => hoursToDraft(h as never)),
       closedDates: [...(p.closedDates ?? [])],
       kinds,
+      tableService,
       tone: p.assistant.tone,
       greeting: p.assistant.greeting ?? '',
       handoffText: p.assistant.handoffText ?? '',
@@ -262,6 +281,25 @@ export class FrontdeskSettingsPage {
     }
   }
 
+  // --- confirm mode (saved by its own call, not part of the draft) ---
+  protected async setConfirmMode(mode: 'auto' | 'manual'): Promise<void> {
+    if (this.switching_() || !this.canEdit_()) return
+    this.switching_.set(true)
+    try {
+      if (await this.profiles.setConfirmMode(mode)) {
+        this.userMsg.onSetSuccessMsg(this.translation.translate('fd_ts_mode_saved'))
+      } else {
+        this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
+      }
+    } finally {
+      this.switching_.set(false)
+    }
+  }
+
+  protected printQr(): void {
+    window.print()
+  }
+
   // --- closed dates ---
   protected readonly newClosed_ = signal('')
 
@@ -313,7 +351,10 @@ export class FrontdeskSettingsPage {
       hours: rows(d.hoursRows) as never,
       closedDates: d.closedDates,
       requestKinds: kinds,
-      assistant
+      assistant,
+      ...(this.hasTables_() && {
+        tableService: { ...d.tableService, confirmMode: tableServiceOf(p).confirmMode }
+      })
     } as unknown as FrontDeskProfile
   }
 

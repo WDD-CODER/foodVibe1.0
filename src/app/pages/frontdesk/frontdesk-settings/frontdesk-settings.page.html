@@ -168,6 +168,31 @@
           <span class="btn-label">{{ 'fd_copy_link' | translatePipe }}</span>
         </button>
       </div>
+      @if (hasTables_()) {
+      <div class="fs-qr" data-testid="booking-qr">
+        @if (slugInvalid_()) {
+        <p class="fs-note">{{ 'fd_qr_after_save' | translatePipe }}</p>
+        } @else {
+        <app-qr-code [value]="publicLink_()" [size]="160" altKey="fd_qr_alt" />
+        <div class="fs-qr-side">
+          <p class="fs-note">
+            <lucide-icon name="qr-code" [size]="16"></lucide-icon>
+            {{ 'fd_qr_note' | translatePipe }}
+          </p>
+          <button type="button" class="c-btn-ghost" data-testid="print-qr" (click)="printQr()">
+            <lucide-icon name="printer" [size]="16"></lucide-icon>
+            <span class="btn-label">{{ 'fd_qr_print' | translatePipe }}</span>
+          </button>
+        </div>
+        }
+      </div>
+      @if (!slugInvalid_()) {
+      <div class="fs-qr-print" data-testid="qr-print-sheet">
+        <h1 class="fs-qr-print-name">{{ d.displayName }}</h1>
+        <app-qr-code [value]="publicLink_()" [size]="240" altKey="fd_qr_alt" />
+        <p class="fs-qr-print-link" dir="ltr">{{ publicLink_() }}</p>
+      </div>
+      } }
     </section>
 
     <!-- Card 2: opening hours -->
@@ -220,6 +245,16 @@
       [kind]="kind"
       [config]="d.kinds[kind]"
       (configChange)="setKind(kind, $event)"
+      [disabled]="!canEdit_()"
+      [showErrors]="showErrors_()"
+    />
+    } @if (hasTables_()) {
+    <app-table-service-card
+      [service]="d.tableService"
+      (serviceChange)="patch({ tableService: $event })"
+      [confirmMode]="confirmMode_()"
+      [switching]="switching_()"
+      (confirmModeChange)="setConfirmMode($event)"
       [disabled]="!canEdit_()"
       [showErrors]="showErrors_()"
     />

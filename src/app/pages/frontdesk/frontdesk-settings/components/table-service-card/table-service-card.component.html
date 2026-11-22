@@ -1,0 +1,122 @@
+@let s = service();
+<section class="ts-card c-glass-card" data-testid="table-service-card">
+  <h2 class="ts-title">{{ 'fd_ts_title' | translatePipe }}</h2>
+
+  <div class="ts-mode">
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="checkbox"
+        role="switch"
+        data-testid="confirm-mode-switch"
+        [checked]="isAuto_()"
+        [disabled]="disabled() || switching()"
+        [attr.aria-busy]="switching() ? 'true' : null"
+        (change)="toggleMode_($any($event.target).checked)"
+      />
+      <span>{{ (isAuto_() ? 'fd_ts_mode_auto' : 'fd_ts_mode_manual') | translatePipe }}</span>
+    </label>
+    <p class="ts-note">{{ (isAuto_() ? 'fd_ts_mode_auto_note' : 'fd_ts_mode_manual_note') | translatePipe }}</p>
+  </div>
+
+  <fieldset class="ts-body" [disabled]="disabled()">
+    <div class="ts-grid">
+      @if (isAuto_()) {
+        <app-form-field label="fd_ts_auto_max_party" [error]="errors_()['autoMaxParty'] ?? null">
+          <app-counter
+            data-testid="ts-autoMaxParty"
+            [value]="s.autoMaxParty"
+            [min]="1"
+            [max]="30"
+            [disabled]="disabled()"
+            (valueChange)="setAutoMaxParty_($event)"
+          />
+        </app-form-field>
+      }
+
+      <app-form-field label="fd_ts_slot" [error]="errors_()['slotMinutes'] ?? null">
+        <app-custom-select
+          [options]="slotOptions"
+          [ngModel]="'' + s.slotMinutes"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="setSlot_($event)"
+        />
+      </app-form-field>
+    </div>
+
+    <app-form-field label="fd_ts_ladder" hint="fd_ts_ladder_hint" [error]="errors_()['turnMinutes'] ?? null">
+      <div class="ts-ladder">
+        @for (step of s.turnMinutes; track $index; let i = $index) {
+          <div class="ts-ladder-row" data-testid="ts-ladder-row">
+            @for (f of ladderFields; track f.key) {
+              <span class="ts-ladder-cell">
+                <span class="ts-ladder-label">{{ f.label | translatePipe }}</span>
+                <app-counter
+                  [attr.data-testid]="'ts-ladder-' + f.key"
+                  [value]="step[f.key]"
+                  [min]="f.min"
+                  [max]="f.max"
+                  [stepOptions]="f.step"
+                  [disabled]="disabled()"
+                  (valueChange)="setStep_(i, f.key, $event)"
+                />
+              </span>
+            }
+            @if (s.turnMinutes.length > 1) {
+              <button
+                type="button"
+                class="c-btn-ghost"
+                data-testid="ts-ladder-remove"
+                [attr.aria-label]="'remove' | translatePipe"
+                (click)="removeStep_(i)"
+              >
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+              </button>
+            }
+          </div>
+        }
+        @if (s.turnMinutes.length < maxSteps) {
+          <button type="button" class="c-btn-ghost" data-testid="ts-ladder-add" (click)="addStep_()">
+            <lucide-icon name="plus" [size]="16"></lucide-icon>
+            <span class="btn-label">{{ 'fd_ts_ladder_add' | translatePipe }}</span>
+          </button>
+        }
+      </div>
+    </app-form-field>
+
+    <div class="ts-grid">
+      @for (f of numberFields; track f.key) {
+        <app-form-field [label]="f.label" [error]="errors_()[f.key] ?? null">
+          <app-counter
+            [attr.data-testid]="'ts-' + f.key"
+            [value]="s[f.key]"
+            [min]="f.min"
+            [max]="f.max"
+            [disabled]="disabled()"
+            (valueChange)="setNumber_(f.key, $event)"
+          />
+        </app-form-field>
+      }
+      <app-form-field label="fd_ts_reminder_hour" forId="ts-reminder" [error]="errors_()['reminderHour'] ?? null">
+        <app-time-field
+          inputId="ts-reminder"
+          data-testid="ts-reminderHour"
+          [value]="s.reminderHour"
+          [disabled]="disabled()"
+          (valueChange)="setReminder_($event)"
+        />
+      </app-form-field>
+    </div>
+
+    <app-form-field label="fd_ts_auto_no_show" hint="fd_ts_auto_no_show_hint">
+      <label class="c-chip c-chip--toggle">
+        <input
+          type="checkbox"
+          data-testid="ts-autoNoShow"
+          [checked]="s.autoNoShow"
+          (change)="setAutoNoShow_($any($event.target).checked)"
+        />
+        <span>{{ 'fd_ts_auto_no_show' | translatePipe }}</span>
+      </label>
+    </app-form-field>
+  </fieldset>
+</section>

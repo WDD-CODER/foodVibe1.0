@@ -1,0 +1,11 @@
+:host {
+  display: inline-block;
+  line-height: 0;
+}
+
+.qr-img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  image-rendering: pixelated;
+}
