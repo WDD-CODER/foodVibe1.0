@@ -108,20 +108,9 @@
       "title": "Monthly planning screen: feasibility audit against the current code (report only)",
       "branch": "feat/661-monthly-planning-feasibility-audit",
       "state": "parked",
-      "round": 1,
+      "round": 0,
       "tier": "build",
-      "models": {
-        "builder": {
-          "model": "sonnet",
-          "tier": "build",
-          "at": "2026-11-22T13:23:37.734Z"
-        },
-        "builder fix": {
-          "model": "sonnet",
-          "tier": "build",
-          "at": "2026-11-22T13:37:34.280Z"
-        }
-      },
+      "models": {},
       "humanItems": [
         "Dandan reads section 1 (Hebrew summary) and can say for each block of the screen whether it is ready to"
       ],
@@ -260,6 +249,11 @@
           "at": "2026-11-22T13:42:22.199Z",
           "state": "parked",
           "round": 1
+        },
+        {
+          "at": "2026-11-22T15:18:49.823Z",
+          "state": "parked",
+          "round": 0
         }
       ],
       "earlier": [
@@ -318,72 +312,97 @@
             "reason": "ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/fin-audit; against the run branch (origin/orch/fin-audit) the scope is ok. This check should diff against the run branch, or the run branch should be merged to main first."
           },
           "parkBranch": "park/fin-audit-661"
-        }
-      ],
-      "escalations": [
+        },
         {
-          "step": "resumed after: asking 661-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/",
-          "check": "(not given)"
+          "nnn": "661",
+          "title": "Monthly planning screen: feasibility audit against the current code (report only)",
+          "branch": "feat/661-monthly-planning-feasibility-audit",
+          "state": "parked",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-22T13:23:37.734Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-22T13:37:34.280Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 661-1: ESCALATE scope: ESCALATE: scope node scripts/scope-check.mjs --diff=origin/main fails only on plan 660's files already merged into orch/",
+              "check": "(not given)"
+            }
+          ],
+          "replan": "no — (not given)",
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 19.9,
+          "sha": "06f51961b60c8b64609b798f6822e206ba64d9a0",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 498.2,
+              "tokens": {
+                "input": 229306,
+                "output": 3579
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 31,
+              "tokens": {
+                "input": 51217,
+                "output": 1327
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 20.4,
+              "tokens": {
+                "input": 52874,
+                "output": 1250
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 29,
+              "tokens": {
+                "input": 87124,
+                "output": 2090
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md",
+            "round 2: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
+          ],
+          "reason": "same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md — ask 661-2 answered: park (by the human)",
+          "park": {
+            "at": "2026-11-22T13:41:33.534Z",
+            "reason": "same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
+          },
+          "parkBranch": "park/fin-audit-661"
         }
       ],
-      "replan": "no — (not given)",
       "tiers": [
         "build"
       ],
-      "freeDiskGb": 19.9,
-      "sha": "06f51961b60c8b64609b798f6822e206ba64d9a0",
-      "calls": [
-        {
-          "stage": "builder",
-          "model": "sonnet",
-          "seconds": 498.2,
-          "tokens": {
-            "input": 229306,
-            "output": 3579
-          },
-          "exit": 0
-        },
-        {
-          "stage": "builder fix",
-          "model": "sonnet",
-          "seconds": 31,
-          "tokens": {
-            "input": 51217,
-            "output": 1327
-          },
-          "exit": 0
-        },
-        {
-          "stage": "builder fix",
-          "model": "sonnet",
-          "seconds": 20.4,
-          "tokens": {
-            "input": 52874,
-            "output": 1250
-          },
-          "exit": 0
-        },
-        {
-          "stage": "builder fix",
-          "model": "sonnet",
-          "seconds": 29,
-          "tokens": {
-            "input": 87124,
-            "output": 2090
-          },
-          "exit": 0
-        }
-      ],
-      "roundCauses": [
-        "round 1: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md",
-        "round 2: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
-      ],
-      "reason": "same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md — ask 661-2 answered: park (by the human)",
-      "park": {
-        "at": "2026-11-22T13:41:33.534Z",
-        "reason": "same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md"
-      },
-      "parkBranch": "park/fin-audit-661"
+      "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-fin-audit-661 is on HEAD, not feat/661-monthly-planning-feasibility-audit",
+      "freeDiskGb": 16.3
     }
   },
   "notes": [
@@ -602,10 +621,10 @@
       "text": "make this a default? section 7 lists 10 build slices and section 8 lists 7 decisions, more than the plan's minimum of four; the extra ones are revenue source, VAT treatment and purchases versus usage, which the evidence r (trigger: list) — reply: default yes run-list"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 19.9,
-  "updatedAt": "2026-11-22T13:51:15.788Z",
+  "freeDiskGb": 16.3,
+  "updatedAt": "2026-11-22T15:18:54.688Z",
   "stops": [
     {
       "at": "2026-11-22T12:47:32.914Z",
@@ -719,12 +738,5 @@
       "why": ""
     }
   ],
-  "finishedAt": "2026-11-22T13:51:15.784Z",
-  "finalGate": {
-    "ok": true,
-    "command": null,
-    "at": "2026-11-22T13:51:15.787Z",
-    "attempt": 1,
-    "blamed": []
-  }
+  "finishedAt": "2026-11-22T15:18:54.686Z"
 }

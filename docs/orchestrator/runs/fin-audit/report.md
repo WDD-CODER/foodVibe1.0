@@ -1,26 +1,24 @@
 # Orchestrator run fin-audit
 
-Run branch: `orch/fin-audit` (from `origin/main` at e985094) · started 2026-11-22T12:45:56.068Z · finished 2026-11-22T13:51:15.784Z
+Run branch: `orch/fin-audit` (from `origin/main` at e985094) · started 2026-11-22T12:45:56.068Z · finished 2026-11-22T15:18:54.686Z
 Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
-`main` untouched: NO — origin/main is 790e5c4.
+`main` untouched: NO — origin/main is 7c8fccd.
 
 ## Stops
 
 - attempt 1 · 2026-11-22T12:47:32.914Z · stopped by the Human for a computer restart
-
-Final gate: ok (attempt 1)
 
 ## Plans
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 660 Dish analysis screen: feasibility audit against the current code (report only) | merged | 0 | build | 67048d0 |  |
-| 661 Monthly planning screen: feasibility audit against the current code (report only) | parked | 1 | build |  | same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md — ask 661-2 answered: park (by the human) |
+| 661 Monthly planning screen: feasibility audit against the current code (report only) | parked | 0 | build |  | worktree: C:\coding projects\Cursor\foodVibe1.0-orch-fin-audit-661 is on HEAD, not feat/661-monthly-planning-feasibility-audit |
 
 ## Scorecard
 
-- Wall: 56.4 min · gate passes: 6 · asks raised mid-run: 2
-- Minutes per state (summed over plans): building 24.4 · gate 8.7 · asking 4 · parked 2.8 · merging 1.5 · fixing 1 · checking 0.3
+- Wall: 152.9 min · gate passes: 6 · asks raised mid-run: 2
+- Minutes per state (summed over plans): parked 99.2 · building 24.4 · gate 8.7 · asking 4 · merging 1.5 · fixing 1 · checking 0.3
 - Checks left out (cached, skipped, not run, same tree): 21, about 40.8 min saved
   - 660: pnpm run test:ci — 335.2 s
   - 661: pnpm run test:ci — 335.2 s
@@ -118,8 +116,6 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 
 - 660 builder: sonnet
 - 660 reviewer: sonnet
-- 661 builder: sonnet
-- 661 builder fix: sonnet
 
 ## What only the Human can do
 
@@ -127,7 +123,7 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 
 1. 660 Dish analysis screen: feasibility audit against the current code (report only): Dandan reads section 1 (Hebrew summary) and can say for each block of the screen whether it is ready to
 
-- Decide on 661: same reason twice: gate: node scripts/scope-check.mjs --diff=origin/main --plan=plans/661-monthly-planning-feasibility-audit.plan.md — ask 661-2 answered: park (by the human)
+- Decide on 661: worktree: C:\coding projects\Cursor\foodVibe1.0-orch-fin-audit-661 is on HEAD, not feat/661-monthly-planning-feasibility-audit
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -137,4 +133,4 @@ gh pr create --base main --head orch/fin-audit --title "Orchestrator run fin-aud
 
 Context added by learning: 3.7k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0.5 · parked 0 → 0 → 1
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0 · parked 0 → 0 → 1
