@@ -94,10 +94,40 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Let a venue store tour video links and a saved location — Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
-- [ ] A2: Add tour videos with a visit date to the venue form and detail page — Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
-- [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
+- [x] A1: Let a venue store tour video links and a saved location — Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
+- [x] A2: Add tour videos with a visit date to the venue form and detail page — Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
+- [x] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
+
+## Architecture Impact
+
+- INV-4: preserves — the two new fields are defined once in `shared/schemas/entities/venue.schema.ts` and the server keeps validating every venue write against it (`server/middleware/validate.js` unchanged).
+- INV-1: preserves — no route, permission or business-scope code changes; venues still save through `VenueDataService`.
+- INV-6: preserves — no AI call is added or changed (the scope only matches `src/app/**/*ai*` through the `venue-detail` folder name).
+- INV-none: preserves — no CSP change (links only, no embedded player), no AI call, no taxonomy term.
+
+## Reuse Check
+
+- Tour videos rows in the venue form — family: form-field — rung: 2 — why: the same `infra-section` / `infra-row` layout, `c-input`, `c-btn-ghost` add button and `btn-icon` remove (with the undo toast) the contacts rows use.
+- `.video-edit-row`, `.video-url`, `.video-date`, `.video-note`, `.video-url-error` — family: form-field — rung: 2 — why: page-local flex sizes and the error line inside the existing `.infra-row`; no new look, no `.c-*`.
+- Visit date in a video row — family: form-field — rung: 1 — why: `app-date-field` (the plan 502 date rule), bound through `[value]` / `(valueChange)` / `(invalidChange)` to the row's controls; no native date input.
+- `.location-saved`, `.location-error`, `.location-btn` — family: feedback — rung: 2 — why: the saved / error line under the location button and its alignment; the waiting state is `app-loader`, as the photo upload.
+- Source label on a video card — family: chip — rung: 2 — why: `.c-chip c-chip--tag c-chip--sm`.
+- `.video-row` — family: engine-classes — rung: 2 — why: the detail page's own `menus-list` / `menu-row` / `menu-row-name` / `menu-row-meta` rows reused; `.video-row` only adds a gap.
+- `.venue-nav` — family: engine-classes — rung: 2 — why: a flex row holding two `c-btn-ghost--sm` links under the address; no new `.c-*` class.
+- Location button, "נקה", "פתח סרטון" and the Waze / Google Maps links — family: engine-classes — rung: 1 — why: `c-btn-ghost` and `c-btn-ghost--sm`.
+- `videoSourceKey` and `isoToLocalEpoch` — family: helpers — rung: 1 — why: file-private functions in the two components (venue-only, one use each); `todayIso` from `date-input.util` is reused to turn a stored date back into `yyyy-mm-dd`.
+
+## Defaults
+
+- unsaved-changes-on-leave — applies — how: the venue form's existing `useUnsavedChanges` snapshot now holds the videos (form array) and the saved location; the plan 371 `pendingChangesGuard` is unchanged.
+- confirm-destructive-action — exception — why: removing a video row uses the form's existing undo toast (`removeRowWithUndo_`), and "נקה" on the location only changes the unsaved form.
+- empty-state-on-list — applies — how: the detail page's videos card shows "—" with no videos, like its sibling cards (`detail-empty`).
+- loading-and-error-states — exception — why: no new server request; the venue pages load as before, and the one new wait (geolocation) shows `app-loader` and a message on refusal or timeout, checked by the phone item below.
+- hints-in-tooltips — exception — why: no dialog and no hint text is added.
+- leave-and-return — exception — why: nothing here sends the user to another page; the video links open in a new tab.
+- app-list-container — exception — why: the videos list is a card inside the venue detail page, not a page list.
+- one-breakpoint-set — applies — how: no new `@media`; the new rows wrap with flex inside the existing breakpoints.
 
 ## Technical Considerations
 
@@ -124,3 +154,42 @@ touching any milestone.
 - [auto] `npm run build` → exit 0.
 - [human] Edit a venue → add 2 video links with dates → save → the detail page shows them newest first; "פתח סרטון" opens each in a new tab.
 - [human] Phone, add venue on site → "השתמש במיקום הנוכחי" → allow → "נשמר מיקום (±15 מ׳)" → save → detail "נווט" opens Waze or Google Maps at that spot. Deny permission → a clear message, the form still works.
+- [human] the list's page with no items · open the page · a message says the list is empty — a venue with no videos → its detail page → the "סרטוני סיור" card shows "—".
+
+## Execution Notes
+
+Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22.
+
+### Drift from the snapshot (b776163, not in this clone's history; checked by symbol on main)
+
+- All named paths exist: `src/app/pages/venues/components/venue-form/`, `venue-detail/`, `venue.schema.ts`, `venue.model.ts`, `server/middleware/validate.js`, `cloudinary.service.ts`. `server/app.js` still has no `media-src` and keeps `upgradeInsecureRequests`.
+- Plans 371 and 372 landed: the form has `useUnsavedChanges` (snapshot = form + photo + hours), contacts and the `app-hours-editor`. The new fields join that snapshot (videos through the form array, the location as its own key).
+- The plan says `<input type="date">`; since plan 502 every date must be `app-date-field` (reuse-lint warns on a native one), so the visit date uses `app-date-field`. Its half-typed state blocks save, as in the hours editor.
+- The plan says `npm run build:schemas`; the repo runs pnpm (`pnpm run build:schemas`).
+- Server tests are vitest (`server/test/*.test.js`); the new test sits next to plan 372's `venue-contacts-hours-schema.test.js`.
+- The venue detail page had no spec; `venue-detail.component.spec.ts` is new (a test file, inside `venue-detail/**`). `src/testing/test-lucide-icons.ts` lacks `phone` and `play`, so that spec adds them locally rather than editing the shared file (outside scope).
+- The plan's Goals lines carry no `[auto]` / `[human]` tag (`scope-check --tags` reports it); left as written, the Planner's call.
+- Dictionary keys added beyond the plan's list: `video_url_invalid`, `video_source_youtube|drive|whatsapp|link`, `venue_location`, `location_accuracy` (`(±{meters} מ׳)`), `location_unavailable`, `location_address_hint` (P2), `nav_waze`, `nav_google_maps`.
+
+### Decisions the plan did not settle
+
+- behaviour: the visit date is optional and stored as local midnight of that day; a video without a date sorts last and shows "—" — reverse: make `visitDate` required in the row.
+- behaviour: a link with spaces around it is accepted and saved trimmed; the check is `https://` + no inner spaces (Q1 = a) — reverse: tighten `HTTPS_URL` in `venue-form.component.ts`.
+- behaviour: the location section sits right under the basic fields (above contacts) so it is one tap away on site — reverse: move the block in `venue-form.component.html`.
+- behaviour: accuracy is rounded to whole metres; a timeout and "position unavailable" share one message (`location_unavailable`) — reverse: split the key per error code.
+- behaviour: the videos card always shows on the detail page ("—" when empty, empty-state default) — reverse: wrap the section in `@if (videos_().length)`.
+- behaviour: the Waze / Google Maps links sit under the address in the hero, labelled "נווט:" — reverse: move them to their own card.
+- behaviour: P2 is done as a plain hint ("הוסף כתובת…") under the saved location when the address is empty; no reverse geocoding — reverse: drop the `location_address_hint` block.
+- behaviour: saving a venue whose videos were all removed sends `videos: []`; clearing the location sends no `location` key — reverse: send `undefined` for an empty list.
+
+### A4 evidence (all run from the repo root)
+
+- `pnpm install` → exit 0 — `Done in 1.4s using pnpm v10.34.6` (warning only: ignored build scripts of 6 optional native packages).
+- `pnpm run build:schemas` → exit 0 — `> tsc -p shared/schemas/tsconfig.cjs.json` (no output).
+- `pnpm run build` → exit 0 — `Application bundle generation complete. [20.040 seconds]` / `Output location: /home/user/foodVibe1.0/dist/food-vibe1.0`. No warning names a venue file.
+- `pnpm run lint` → exit 0 — `✖ 69 problems (0 errors, 69 warnings)`; the same 69 warnings on main without this change, none in venue files.
+- `pnpm run test:server` → exit 0 — `Test Files  148 passed (148)` / `Tests  1974 passed (1974)`.
+- `pnpm run test:ci` → exit 0 — `Executed 2730 of 2730 SUCCESS` / `TOTAL: 2730 SUCCESS`. Run with `CHROME_BIN` pointing at a local wrapper that adds `--no-sandbox` (the cloud container runs as root); no repo change.
+- Venue specs alone (`ng test --include='src/app/pages/venues/**/*.spec.ts'`) → exit 0 — `TOTAL: 30 SUCCESS`.
+- Extra checks → `lint:icons` `✓ All Lucide icons registered (113 icons in pick, 0 violations)`; `reuse-lint --diff=origin/main` `REUSE: ok`; `scope-check --diff=origin/main --plan=…` `SCOPE: ok`.
+- A4 stays unticked: its phone-over-HTTPS check and the `[human]` Success Criteria wait on the Human. The third `[human]` item (empty videos card) was added because `scope-check --defaults` requires the empty-state card; `--defaults`, `--reuse`, `--arch` and `kit-checks --plan` now report ok.
