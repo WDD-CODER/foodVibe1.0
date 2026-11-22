@@ -220,11 +220,9 @@ export class LogisticsItemManagerComponent {
               t.phase === draft.phase &&
               t.key.trim() === key
           )
-    const duplicate = this.registry
-      .items_()
-      .some((t) => t._id !== editing?._id && t.phase === draft.phase && t.key.trim() === key)
+    const duplicate = this.duplicateError(key, draft.phase, editing)
     if (duplicate) {
-      this.error_.set('metadata_logistics_duplicate')
+      this.error_.set(duplicate)
       return false
     }
     this.error_.set(null)
@@ -437,6 +435,17 @@ export class LogisticsItemManagerComponent {
       environments: envs.length ? envs : [...ENVIRONMENTS],
       scope: this.taxonomy.isShared(term) ? 'everyone' : 'mine'
     }
+  }
+
+  /**
+   * Plan 697: the server refuses a shared key in any phase and an own key in any phase, so the card checks every live
+   * question (hidden shared ones too) and names the clash. Null when the text is free.
+   */
+  private duplicateError(key: string, phase: LogisticsPhase, editing: LogisticsItemTerm | null): string | null {
+    const clashes = this.registry.items_().filter((t) => t._id !== editing?._id && t.key.trim() === key)
+    if (clashes.some((t) => this.taxonomy.isShared(t))) return 'logistics_question_shared_taken'
+    if (clashes.some((t) => t.phase === phase)) return 'metadata_logistics_duplicate'
+    return clashes.length ? 'logistics_question_own_taken' : null
   }
 
   private hide(key: string): Promise<void> {

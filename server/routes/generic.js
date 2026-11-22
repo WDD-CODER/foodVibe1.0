@@ -247,6 +247,10 @@ function termInUse(term, refs) {
 }
 
 /** A user may not add or re-key an own term onto a key master already has for that kind. */
+// Plans 475, 697: the messageKey a 409 "already exists for everyone" carries, so the client can name the clash.
+const MASTER_CLASH_MESSAGE = { unit: 'unit_name_taken', logisticsItem: 'logistics_question_shared_taken' };
+const masterClashKey = kind => (MASTER_CLASH_MESSAGE[kind] ? { messageKey: MASTER_CLASH_MESSAGE[kind] } : {});
+
 async function masterHasTerm(kind, key) {
   return Boolean(await col(TAXONOMY).findOne({ businessId: MASTER, kind, key }, { projection: { _id: 1 } }));
 }
@@ -630,7 +634,7 @@ router.post('/:type', verifyToken, async (req, res) => {
 
     // After validation, so kind/key are known plain strings before they reach a query.
     if (entityType === TAXONOMY && !shared && await masterHasTerm(doc.kind, doc.key)) {
-      return res.status(409).json({ error: 'This term already exists for everyone', kind: doc.kind, key: doc.key });
+      return res.status(409).json({ error: 'This term already exists for everyone', kind: doc.kind, key: doc.key, ...masterClashKey(doc.kind) });
     }
 
     // Plan 485: one live product per name in a business.
@@ -795,10 +799,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       }
       // After validation, so the new key is a known plain string before it reaches a query.
       if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
-        // Plan 475: units name the clash with a message the chef can read (other kinds keep their client checks).
+        // Plan 475: units name a same-business clash with a message the chef can read (plan 697: the master clash uses MASTER_CLASH_MESSAGE).
         const clashKey = current.kind === 'unit' ? { messageKey: 'unit_name_taken' } : {};
         if (current.businessId !== MASTER && await masterHasTerm(current.kind, updatable.key)) {
-          return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key, ...clashKey });
+          return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key, ...masterClashKey(current.kind) });
         }
         // Plan 475: a clash with another term of the same business is refused before anything is written.
         const sameScope = await col(TAXONOMY).findOne(

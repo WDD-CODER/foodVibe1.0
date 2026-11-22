@@ -1,14 +1,13 @@
 /**
  * Recipe/dish export domain service.
  * Handles all recipe-scoped Excel exports and preview payloads.
- * Plan: refactor/split-export-service
+ * Plan: refactor/split-export-service; plan 471 (house style, Hebrew, builders).
  */
 
 import { Injectable, inject } from '@angular/core'
-// No static exceljs import: the runtime module is loaded on demand via
-// `await import('exceljs')` at each point of use, so the ~1 MB library stays out of
-// the boot bundle for users who never click Export (plan 302 M4b). Nothing in this
-// file needs the Workbook type by name — every `wb` is inferred from the constructor.
+// Type-only (erased): the runtime module is loaded on demand via `await import('exceljs')`, so the
+// ~1 MB library stays out of the boot bundle for users who never click Export (plan 302 M4b).
+import type { Workbook } from 'exceljs'
 
 import { Recipe, RecipeStep } from '@models/recipe.model'
 import { Product } from '@models/product.model'
@@ -26,13 +25,22 @@ import {
   type ExportSection
 } from '../utils/export.util'
 import {
+  HOUSE_FIRST_DATA_ROW,
+  addRecipeInfoSheet,
+  addStyledTableSheet,
   buildRecipeSheetBlock,
   downloadWorkbook,
-  fillRecipeSheetWorksheet,
-  heCategoryLabel,
-  styleDataRow,
-  styleHeaderRow
+  heCategoryLabel
 } from './excel-workbook.util'
+
+/** One row of a recipe's shopping list: category already in Hebrew. */
+interface RecipeShoppingRow {
+  category: string
+  name: string
+  amount: number
+  unit: string
+  unitPrice: number
+}
 
 @Injectable({ providedIn: 'root' })
 export class RecipeExportService {
@@ -41,232 +49,117 @@ export class RecipeExportService {
   private readonly recipeCost_ = inject(RecipeCostService)
   private readonly translation_ = inject(TranslationService)
 
-  // ── Excel exports ────────────────────────────────────────────────────────────
+  // ── Workbook builders (plan 471: testable, no download) ──────────────────────
 
-  /**
-   * Export recipe/dish info to Excel: single sheet (header, yield, ingredients, instructions, prep time). Plan 108.
-   */
-  async exportRecipeInfo(recipe: Recipe, quantity: number): Promise<void> {
-    const ExcelJS = await import('exceljs')
-    const wb = new ExcelJS.Workbook()
-    const ws = wb.addWorksheet(heHeader('info'), { views: [{ rightToLeft: true }] })
-    fillRecipeSheetWorksheet(ws, recipe, quantity, { scaling: this.scaling_, recipeCost: this.recipeCost_ })
-    const fileName = buildExportFileName('recipe-info', recipe.nameHebrew ?? 'recipe')
-    await downloadWorkbook(wb, fileName)
+  /** Recipe/dish info: single sheet (header, yield, ingredients, instructions, prep time). Plan 108. */
+  async buildRecipeInfoWorkbook(recipe: Recipe, quantity: number): Promise<Workbook> {
+    const wb = await this.newWorkbook_()
+    this.addInfoSheet_(wb, recipe, quantity)
+    return wb
   }
 
-  /**
-   * Export cooking steps: order, instruction, time; item info + export date.
-   * Filename: cooking-steps{recipeName}_{date}.xlsx
-   */
-  async exportCookingSteps(recipe: Recipe, quantity: number): Promise<void> {
-    const steps = (recipe.steps ?? []) as RecipeStep[]
-    const ExcelJS = await import('exceljs')
-    const wb = new ExcelJS.Workbook()
-    const ws = wb.addWorksheet('Cooking steps', { views: [{ rightToLeft: true }] })
-    ws.addRow([
-      heHeader('exported_at'),
-      exportDateStr(),
-      '',
-      recipe.nameHebrew ?? '',
-      `${heHeader('yield')}: ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`
-    ])
-    styleHeaderRow(ws, 1)
-    ws.addRow([heHeader('order'), heHeader('instruction'), heHeader('labor_time_min'), heHeader('cooking_time_sec')])
-    styleHeaderRow(ws, 2)
-    let rowNum = 3
-    steps.forEach((s) => {
-      ws.addRow([
+  /** Cooking steps: order, instruction, labor time, cooking time. */
+  async buildCookingStepsWorkbook(recipe: Recipe, quantity: number): Promise<Workbook> {
+    const steps = this.sortedSteps_(recipe)
+    const wb = await this.newWorkbook_()
+    const sheetName = this.t_('export_sheet_cooking_steps')
+    addStyledTableSheet(wb, {
+      name: sheetName,
+      title: `${this.recipeName_(recipe)} — ${sheetName}`,
+      meta: this.recipeMeta_(recipe, quantity),
+      header: [
+        heHeader('order'),
+        heHeader('instruction'),
+        this.t_('export_labor_time_min'),
+        this.t_('export_cooking_time_sec')
+      ],
+      rows: steps.map((s) => [
         s.order,
         s.instruction ?? '',
         roundExportNumber(s.laborTimeMinutes ?? 0),
         roundExportNumber(s.cookingTimeSecs ?? 0)
-      ])
-      styleDataRow(ws, rowNum++)
+      ]),
+      widths: [8, 50, 12, 12]
     })
-    ws.getColumn(1).width = 8
-    ws.getColumn(2).width = 50
-    ws.getColumn(3).width = 12
-    ws.getColumn(4).width = 12
-    const fileName = buildExportFileName('cooking-steps', recipe.nameHebrew ?? 'recipe')
-    await downloadWorkbook(wb, fileName)
+    return wb
   }
 
-  /**
-   * Export checklist for a single dish (prep/mise items, grouped by category then name).
-   * Filename: check-list_by-category{dishName}_{date}.xlsx
-   */
-  async exportDishChecklist(recipe: Recipe, quantity: number): Promise<void> {
+  /** Checklist for a single dish (prep/mise items, sorted by category then name). */
+  async buildDishChecklistWorkbook(recipe: Recipe, quantity: number): Promise<Workbook> {
     const factor = this.scaling_.getScaleFactor(recipe, quantity)
-    const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
-    const sortedPrep = [...prepRows].sort((a, b) => {
+    const sortedPrep = [...this.scaling_.getScaledPrepItems(recipe, factor)].sort((a, b) => {
       const catA = a.categoryName ?? ''
       const catB = b.categoryName ?? ''
       return catA.localeCompare(catB) || a.name.localeCompare(b.name)
     })
-    const ExcelJS = await import('exceljs')
-    const wb = new ExcelJS.Workbook()
-    const ws = wb.addWorksheet('Checklist', { views: [{ rightToLeft: true }] })
-    ws.addRow([
-      recipe.nameHebrew ?? heHeader('dish'),
-      `${heHeader('portions')}: ${quantity}`,
-      `${heHeader('yield')}: ${recipe.yieldAmount ?? 1} ${heUnit(recipe.yieldUnit ?? 'unit')}`,
-      `${heHeader('scale')}: x${roundExportNumber(factor)}`
-    ])
-    styleHeaderRow(ws, 1)
-    ws.addRow([heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')])
-    styleHeaderRow(ws, 2)
-    let rowNum = 3
-    sortedPrep.forEach((pr) => {
-      ws.addRow([
+    const wb = await this.newWorkbook_()
+    const sheetName = this.t_('export_sheet_checklist')
+    addStyledTableSheet(wb, {
+      name: sheetName,
+      title: `${recipe.nameHebrew || heHeader('dish')} — ${sheetName}`,
+      meta: this.recipeMeta_(recipe, quantity),
+      header: [heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')],
+      rows: sortedPrep.map((pr) => [
         pr.name,
         heCategoryLabel(this.translation_, pr.categoryName),
         roundExportNumber(pr.amount),
         heUnit(pr.unit)
-      ])
-      styleDataRow(ws, rowNum++)
+      ]),
+      widths: [28, 16, 12, 10]
     })
-    ws.getColumn(1).width = 28
-    ws.getColumn(2).width = 14
-    ws.getColumn(3).width = 12
-    ws.getColumn(4).width = 10
-    const fileName = buildExportFileName('check-list', recipe.nameHebrew ?? 'dish', { variant: 'by-category' })
-    await downloadWorkbook(wb, fileName)
+    return wb
   }
 
-  /**
-   * Export shopping list: ingredients grouped by category; unit price and line total.
-   * Filename: shopping-list_{name}_{date}.xlsx
-   */
+  /** Shopping list: ingredients grouped by Hebrew category; unit price, line total and a bold SUM total. */
+  async buildShoppingListWorkbook(recipe: Recipe, quantity: number): Promise<Workbook> {
+    const items = this.recipeShoppingRows_(recipe, quantity)
+    const wb = await this.newWorkbook_()
+    this.addShoppingSheet_(wb, recipe, quantity, items)
+    return wb
+  }
+
+  /** Export all together (recipe/dish): sheet 1 = recipe info (Plan 108), sheet 2 = shopping list. */
+  async buildAllTogetherRecipeWorkbook(recipe: Recipe, quantity: number): Promise<Workbook> {
+    const items = this.recipeShoppingRows_(recipe, quantity)
+    const wb = await this.newWorkbook_()
+    this.addInfoSheet_(wb, recipe, quantity)
+    this.addShoppingSheet_(wb, recipe, quantity, items)
+    return wb
+  }
+
+  // ── Excel exports ────────────────────────────────────────────────────────────
+
+  /** Filename: recipe-info_{recipeName}_{date}.xlsx */
+  async exportRecipeInfo(recipe: Recipe, quantity: number): Promise<void> {
+    const wb = await this.buildRecipeInfoWorkbook(recipe, quantity)
+    await downloadWorkbook(wb, buildExportFileName('recipe-info', recipe.nameHebrew ?? 'recipe'))
+  }
+
+  /** Filename: cooking-steps_{recipeName}_{date}.xlsx */
+  async exportCookingSteps(recipe: Recipe, quantity: number): Promise<void> {
+    const wb = await this.buildCookingStepsWorkbook(recipe, quantity)
+    await downloadWorkbook(wb, buildExportFileName('cooking-steps', recipe.nameHebrew ?? 'recipe'))
+  }
+
+  /** Filename: check-list_by-category_{dishName}_{date}.xlsx */
+  async exportDishChecklist(recipe: Recipe, quantity: number): Promise<void> {
+    const wb = await this.buildDishChecklistWorkbook(recipe, quantity)
+    await downloadWorkbook(
+      wb,
+      buildExportFileName('check-list', recipe.nameHebrew ?? 'dish', { variant: 'by-category' })
+    )
+  }
+
+  /** Filename: shopping-list_{name}_{date}.xlsx */
   async exportShoppingList(recipe: Recipe, quantity: number): Promise<void> {
-    const factor = this.scaling_.getScaleFactor(recipe, quantity)
-    const scaledIngredients = this.scaling_.getScaledIngredients(recipe, factor)
-    const scaledRecipe: Recipe = {
-      ...recipe,
-      ingredients: (recipe.ingredients ?? []).map((ing) => ({
-        ...ing,
-        amount: (ing.amount ?? 0) * factor
-      }))
-    }
-    const products = this.kitchenState_.products_()
-
-    const categoryToRows = new Map<string, { name: string; amount: number; unit: string; unitPrice: number }[]>()
-    scaledIngredients.forEach((row, i) => {
-      const category =
-        row.type === 'product'
-          ? ((products.find((p) => p._id === row.referenceId) as Product | undefined)?.categories?.[0] ?? 'כללי')
-          : 'הכנות'
-      const ing = scaledRecipe.ingredients[i]
-      const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
-      const unitPrice = row.amount > 0 ? cost / row.amount : 0
-      const arr = categoryToRows.get(category) ?? []
-      arr.push({ name: row.name, amount: row.amount, unit: row.unit, unitPrice })
-      categoryToRows.set(category, arr)
-    })
-
-    const ExcelJS = await import('exceljs')
-    const wb = new ExcelJS.Workbook()
-    const ws = wb.addWorksheet('Shopping list', { views: [{ rightToLeft: true }] })
-    ws.addRow([
-      heHeader('category'),
-      heHeader('ingredient'),
-      heHeader('amount'),
-      heHeader('unit'),
-      heHeader('unit_price'),
-      heHeader('line_total')
-    ])
-    styleHeaderRow(ws, 1)
-    let rowNum = 2
-    const sortedCategories = Array.from(categoryToRows.keys()).sort()
-    for (const cat of sortedCategories) {
-      const items = categoryToRows.get(cat) ?? []
-      items.forEach((it) => {
-        const row = ws.getRow(rowNum)
-        row.getCell(1).value = cat
-        row.getCell(2).value = it.name
-        row.getCell(3).value = roundExportNumber(it.amount)
-        row.getCell(4).value = heUnit(it.unit)
-        row.getCell(5).value = roundExportNumber(it.unitPrice)
-        row.getCell(6).value = { formula: `C${rowNum}*E${rowNum}` }
-        styleDataRow(ws, rowNum++)
-      })
-    }
-    ws.getColumn(1).width = 18
-    ws.getColumn(2).width = 28
-    ws.getColumn(3).width = 12
-    ws.getColumn(4).width = 10
-    ws.getColumn(5).width = 12
-    ws.getColumn(6).width = 12
-
-    const fileName = buildExportFileName('shopping-list', recipe.nameHebrew ?? 'recipe')
-    await downloadWorkbook(wb, fileName)
+    const wb = await this.buildShoppingListWorkbook(recipe, quantity)
+    await downloadWorkbook(wb, buildExportFileName('shopping-list', recipe.nameHebrew ?? 'recipe'))
   }
 
-  /**
-   * Export all together (recipe/dish): sheet 1 = recipe sheet (Plan 108), sheet 2 = shopping list.
-   * Filename: all_{recipeName}_{date}.xlsx
-   */
+  /** Filename: all_{recipeName}_{date}.xlsx */
   async exportAllTogetherRecipe(recipe: Recipe, quantity: number): Promise<void> {
-    const factor = this.scaling_.getScaleFactor(recipe, quantity)
-    const scaledIngredients = this.scaling_.getScaledIngredients(recipe, factor)
-    const scaledRecipe: Recipe = {
-      ...recipe,
-      ingredients: (recipe.ingredients ?? []).map((ing) => ({ ...ing, amount: (ing.amount ?? 0) * factor }))
-    }
-
-    const ExcelJS = await import('exceljs')
-    const wb = new ExcelJS.Workbook()
-    const ws1 = wb.addWorksheet(heHeader('info'), { views: [{ rightToLeft: true }] })
-    fillRecipeSheetWorksheet(ws1, recipe, quantity, { scaling: this.scaling_, recipeCost: this.recipeCost_ })
-
-    const products = this.kitchenState_.products_()
-    const categoryToRows = new Map<string, { name: string; amount: number; unit: string; unitPrice: number }[]>()
-    scaledIngredients.forEach((row, i) => {
-      const category =
-        row.type === 'product'
-          ? ((products.find((p) => p._id === row.referenceId) as Product | undefined)?.categories?.[0] ?? 'כללי')
-          : 'הכנות'
-      const ing = scaledRecipe.ingredients[i]
-      const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
-      const unitPrice = row.amount > 0 ? cost / row.amount : 0
-      const arr = categoryToRows.get(category) ?? []
-      arr.push({ name: row.name, amount: row.amount, unit: row.unit, unitPrice })
-      categoryToRows.set(category, arr)
-    })
-
-    const ws2 = wb.addWorksheet('Shopping list', { views: [{ rightToLeft: true }] })
-    ws2.addRow([
-      heHeader('category'),
-      heHeader('ingredient'),
-      heHeader('amount'),
-      heHeader('unit'),
-      heHeader('unit_price'),
-      heHeader('line_total')
-    ])
-    styleHeaderRow(ws2, 1)
-    let rowNum2 = 2
-    const sortedCategories = Array.from(categoryToRows.keys()).sort()
-    for (const cat of sortedCategories) {
-      ;(categoryToRows.get(cat) ?? []).forEach((it) => {
-        const row = ws2.getRow(rowNum2)
-        row.getCell(1).value = cat
-        row.getCell(2).value = it.name
-        row.getCell(3).value = roundExportNumber(it.amount)
-        row.getCell(4).value = heUnit(it.unit)
-        row.getCell(5).value = roundExportNumber(it.unitPrice)
-        row.getCell(6).value = { formula: `C${rowNum2}*E${rowNum2}` }
-        styleDataRow(ws2, rowNum2++)
-      })
-    }
-    ws2.getColumn(1).width = 18
-    ws2.getColumn(2).width = 28
-    ws2.getColumn(3).width = 12
-    ws2.getColumn(4).width = 10
-    ws2.getColumn(5).width = 12
-    ws2.getColumn(6).width = 12
-
-    const fileName = buildExportFileName('all', recipe.nameHebrew ?? 'recipe')
-    await downloadWorkbook(wb, fileName)
+    const wb = await this.buildAllTogetherRecipeWorkbook(recipe, quantity)
+    await downloadWorkbook(wb, buildExportFileName('all', recipe.nameHebrew ?? 'recipe'))
   }
 
   // ── Preview payloads ─────────────────────────────────────────────────────────
@@ -275,14 +168,7 @@ export class RecipeExportService {
   getRecipeInfoPreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
     const factor = this.scaling_.getScaleFactor(recipe, quantity)
     const scaledIngredients = this.scaling_.getScaledIngredients(recipe, factor)
-    const scaledRecipe: Recipe = {
-      ...recipe,
-      ingredients: (recipe.ingredients ?? []).map((ing) => ({
-        ...ing,
-        amount: (ing.amount ?? 0) * factor
-      }))
-    }
-    const recipeSheet = buildRecipeSheetBlock(recipe, quantity)
+    const scaledRecipe = this.scaledRecipe_(recipe, factor)
     const ingredientRows: (string | number)[][] = scaledIngredients.map((row, i) => {
       const ing = scaledRecipe.ingredients[i]
       const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
@@ -291,19 +177,11 @@ export class RecipeExportService {
     })
 
     return {
-      title: `${recipe.nameHebrew ?? 'Recipe'} — ${heHeader('info')}`,
+      title: `${this.recipeName_(recipe)} — ${heHeader('info')}`,
       subtitle: `× ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`,
       exportedAt: new Date().toISOString(),
-      recipeSheet,
-      recipeSheetLabels: {
-        date: heHeader('date'),
-        recipeName: heHeader('recipe_name'),
-        amount: heHeader('amount'),
-        unit: heHeader('unit'),
-        preparationInstructions: heHeader('preparation_instructions'),
-        preparationTime: heHeader('preparation_time'),
-        ingredients: heHeader('ingredients_header')
-      },
+      recipeSheet: buildRecipeSheetBlock(recipe, quantity),
+      recipeSheetLabels: this.recipeSheetLabels_(),
       sections: [
         {
           title: heHeader('ingredients_header'),
@@ -314,16 +192,59 @@ export class RecipeExportService {
     }
   }
 
+  /**
+   * The whole recipe for the kitchen wall (plan 471): name, date, yield, ingredients without prices,
+   * numbered steps with their minutes, and the total preparation time. Printed from the export preview.
+   */
+  getFullRecipePreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
+    const factor = this.scaling_.getScaleFactor(recipe, quantity)
+    const ingredientRows: (string | number)[][] = this.scaling_
+      .getScaledIngredients(recipe, factor)
+      .map((row) => [row.name, roundExportNumber(row.amount), heUnit(row.unit)])
+    const steps = this.sortedSteps_(recipe).filter((s) => (s.instruction ?? '').trim())
+    const stepRows: (string | number)[][] = steps.map((s, i) => [
+      `${i + 1}.`,
+      (s.instruction ?? '').trim(),
+      s.laborTimeMinutes ? roundExportNumber(s.laborTimeMinutes) : ''
+    ])
+    const sheet = buildRecipeSheetBlock(recipe, quantity)
+
+    const sections: ExportSection[] = [
+      {
+        title: heHeader('ingredients_header'),
+        headerRow: [heHeader('ingredients_header'), heHeader('amount'), heHeader('unit')],
+        rows: ingredientRows
+      }
+    ]
+    if (stepRows.length) {
+      sections.push({
+        title: heHeader('preparation_instructions'),
+        headerRow: [heHeader('row_num'), heHeader('instruction'), heHeader('time_min')],
+        rows: stepRows
+      })
+    }
+
+    return {
+      title: `${this.recipeName_(recipe)} — ${this.t_('export_full_recipe')}`,
+      subtitle: `× ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`,
+      exportedAt: new Date().toISOString(),
+      recipeSheet: { ...sheet, preparationInstructions: [] },
+      recipeSheetLabels: this.recipeSheetLabels_(),
+      recipeSheetStepsAsSection: true,
+      sections,
+      summary: [{ label: this.t_('export_total_prep_time'), value: roundExportNumber(sheet.preparationTime) }]
+    }
+  }
+
   /** Build payload for cooking steps preview. */
   getCookingStepsPreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
-    const steps = (recipe.steps ?? []) as RecipeStep[]
-    const rows: (string | number)[][] = steps.map((s) => [
+    const rows: (string | number)[][] = this.sortedSteps_(recipe).map((s) => [
       s.order,
       s.instruction ?? '',
       roundExportNumber(s.laborTimeMinutes ?? 0)
     ])
     return {
-      title: `${recipe.nameHebrew ?? 'Recipe'} — ${heHeader('steps')}`,
+      title: `${this.recipeName_(recipe)} — ${heHeader('steps')}`,
       subtitle: `${heHeader('yield')}: ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`,
       exportedAt: new Date().toISOString(),
       sections: [{ headerRow: [heHeader('order'), heHeader('instruction'), heHeader('time_min')], rows }]
@@ -346,7 +267,7 @@ export class RecipeExportService {
       heUnit(pr.unit)
     ])
     return {
-      title: `${recipe.nameHebrew ?? heHeader('dish')} — ${heHeader('checklist')}`,
+      title: `${recipe.nameHebrew || heHeader('dish')} — ${heHeader('checklist')}`,
       subtitle: `${heHeader('portions')}: ${quantity}`,
       exportedAt: new Date().toISOString(),
       sections: [
@@ -355,43 +276,143 @@ export class RecipeExportService {
     }
   }
 
-  /** Build payload for shopping list preview. */
+  /** Build payload for shopping list preview (the same rows the Excel writes, without prices). */
   getShoppingListPreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
-    const factor = this.scaling_.getScaleFactor(recipe, quantity)
-    const scaledIngredients = this.scaling_.getScaledIngredients(recipe, factor)
-    const products = this.kitchenState_.products_()
-
-    const categoryToRows = new Map<string, { name: string; amount: number; unit: string }[]>()
-    scaledIngredients.forEach((row) => {
-      const category =
-        row.type === 'product'
-          ? ((products.find((p) => p._id === row.referenceId) as Product | undefined)?.categories?.[0] ?? 'כללי')
-          : 'הכנות'
-      const arr = categoryToRows.get(category) ?? []
-      arr.push({ name: row.name, amount: row.amount, unit: row.unit })
-      categoryToRows.set(category, arr)
-    })
-
-    const sortedCategories = Array.from(categoryToRows.keys()).sort()
-    const rows: (string | number)[][] = []
-    for (const cat of sortedCategories) {
-      const items = categoryToRows.get(cat) ?? []
-      const catLabel = this.translation_.translate(cat)
-      items.forEach((it) => rows.push([catLabel, it.name, roundExportNumber(it.amount), heUnit(it.unit)]))
-    }
-
-    const sections: ExportSection[] = [
-      {
-        headerRow: [heHeader('category'), heHeader('ingredient'), heHeader('amount'), heHeader('unit')],
-        rows
-      }
-    ]
-
+    const rows: (string | number)[][] = this.recipeShoppingRows_(recipe, quantity).map((it) => [
+      it.category,
+      it.name,
+      roundExportNumber(it.amount),
+      heUnit(it.unit)
+    ])
     return {
-      title: `${recipe.nameHebrew ?? 'Recipe'} — ${heHeader('shopping_list')}`,
+      title: `${this.recipeName_(recipe)} — ${heHeader('shopping_list')}`,
       subtitle: `× ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`,
       exportedAt: new Date().toISOString(),
-      sections
+      sections: [
+        { headerRow: [heHeader('category'), heHeader('ingredient'), heHeader('amount'), heHeader('unit')], rows }
+      ]
     }
+  }
+
+  // ── Private helpers ──────────────────────────────────────────────────────────
+
+  private async newWorkbook_(): Promise<Workbook> {
+    const ExcelJS = await import('exceljs')
+    return new ExcelJS.Workbook()
+  }
+
+  private t_(key: string): string {
+    return this.translation_.translate(key)
+  }
+
+  private recipeName_(recipe: Recipe): string {
+    return recipe.nameHebrew || this.t_('recipe')
+  }
+
+  /** Meta line of every recipe sheet: yield and date. */
+  private recipeMeta_(recipe: Recipe, quantity: number): string {
+    return [`${heHeader('yield')}: ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`, exportDateStr()].join(' · ')
+  }
+
+  private sortedSteps_(recipe: Recipe): RecipeStep[] {
+    return [...((recipe.steps ?? []) as RecipeStep[])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  }
+
+  private scaledRecipe_(recipe: Recipe, factor: number): Recipe {
+    return {
+      ...recipe,
+      ingredients: (recipe.ingredients ?? []).map((ing) => ({ ...ing, amount: (ing.amount ?? 0) * factor }))
+    }
+  }
+
+  private recipeSheetLabels_(): NonNullable<ExportPayload['recipeSheetLabels']> {
+    return {
+      date: heHeader('date'),
+      recipeName: heHeader('recipe_name'),
+      amount: heHeader('amount'),
+      unit: heHeader('unit'),
+      preparationInstructions: heHeader('preparation_instructions'),
+      preparationTime: heHeader('preparation_time'),
+      ingredients: heHeader('ingredients_header')
+    }
+  }
+
+  private addInfoSheet_(wb: Workbook, recipe: Recipe, quantity: number): void {
+    addRecipeInfoSheet(
+      wb,
+      recipe,
+      quantity,
+      { name: heHeader('info'), title: this.recipeName_(recipe), meta: this.recipeMeta_(recipe, quantity) },
+      { scaling: this.scaling_, recipeCost: this.recipeCost_ }
+    )
+  }
+
+  private addShoppingSheet_(wb: Workbook, recipe: Recipe, quantity: number, items: RecipeShoppingRow[]): void {
+    const lastDataRow = HOUSE_FIRST_DATA_ROW + items.length - 1
+    const sheetName = this.t_('export_shopping_list')
+    addStyledTableSheet(wb, {
+      name: sheetName,
+      title: `${this.recipeName_(recipe)} — ${sheetName}`,
+      meta: this.recipeMeta_(recipe, quantity),
+      header: [
+        heHeader('category'),
+        heHeader('ingredient'),
+        heHeader('amount'),
+        heHeader('unit'),
+        heHeader('unit_price'),
+        heHeader('line_total')
+      ],
+      rows: items.map((it, i) => {
+        const r = HOUSE_FIRST_DATA_ROW + i
+        return [
+          it.category,
+          it.name,
+          roundExportNumber(it.amount),
+          heUnit(it.unit),
+          roundExportNumber(it.unitPrice),
+          { formula: `C${r}*E${r}` }
+        ]
+      }),
+      // No rows → no total: a SUM over an empty range would point at the total cell itself.
+      totalRow: items.length
+        ? ['', this.t_('shopping_total'), '', '', '', { formula: `SUM(F${HOUSE_FIRST_DATA_ROW}:F${lastDataRow})` }]
+        : undefined,
+      widths: [18, 28, 12, 10, 12, 12]
+    })
+  }
+
+  /**
+   * The one shopping-list builder of a recipe (plan 471): ingredients grouped by Hebrew category
+   * (products by their first category, else "general"; preparations under "preps"), groups sorted by label.
+   */
+  private recipeShoppingRows_(recipe: Recipe, quantity: number): RecipeShoppingRow[] {
+    const factor = this.scaling_.getScaleFactor(recipe, quantity)
+    const scaledIngredients = this.scaling_.getScaledIngredients(recipe, factor)
+    const scaledRecipe = this.scaledRecipe_(recipe, factor)
+    const products = this.kitchenState_.products_()
+
+    const byCategory = new Map<string, RecipeShoppingRow[]>()
+    scaledIngredients.forEach((row, i) => {
+      const productCategory =
+        row.type === 'product'
+          ? (products.find((p) => p._id === row.referenceId) as Product | undefined)?.categories?.[0]
+          : undefined
+      const category =
+        row.type === 'product'
+          ? productCategory
+            ? heCategoryLabel(this.translation_, productCategory)
+            : this.t_('general_group')
+          : this.t_('export_category_preps')
+      const ing = scaledRecipe.ingredients[i]
+      const cost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
+      const unitPrice = row.amount > 0 ? cost / row.amount : 0
+      const list = byCategory.get(category) ?? []
+      list.push({ category, name: row.name, amount: row.amount, unit: row.unit, unitPrice })
+      byCategory.set(category, list)
+    })
+
+    return Array.from(byCategory.keys())
+      .sort((a, b) => a.localeCompare(b, 'he'))
+      .flatMap((cat) => byCategory.get(cat) ?? [])
   }
 }
