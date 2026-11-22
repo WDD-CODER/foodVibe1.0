@@ -1,0 +1,62 @@
+<div class="joins-list" data-testid="joins-list">
+  <h3 class="joins-list__title">{{ 'fp_joins_title' | translatePipe }}</h3>
+  @if (rows_().length === 0) {
+    <p class="joins-list__empty" data-testid="joins-empty">{{ 'fp_joins_empty' | translatePipe }}</p>
+  } @else {
+    @for (row of rows_(); track row.join.key) {
+      <div class="joins-list__row" data-testid="join-row">
+        <div class="joins-list__head">
+          <button
+            type="button"
+            class="c-chip c-chip--tap"
+            data-testid="join-label"
+            [class.active]="row.marked"
+            [attr.aria-pressed]="row.marked"
+            (click)="joinPressed.emit(row.join.key)"
+          >
+            {{ row.label }}
+          </button>
+          <button
+            type="button"
+            class="c-icon-btn"
+            data-testid="join-remove"
+            [attr.aria-label]="'fp_join_remove' | translatePipe"
+            (click)="joinRemoved.emit(row.join.key)"
+          >
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
+        <div class="joins-list__seats">
+          <span class="joins-list__label">{{ 'fp_field_seats_min' | translatePipe }}</span>
+          <app-counter
+            data-testid="join-min"
+            [value]="row.join.minSeats"
+            [min]="1"
+            [max]="row.join.maxSeats"
+            (valueChange)="joinChange.emit({ key: row.join.key, patch: { minSeats: $event } })"
+          />
+        </div>
+        <div class="joins-list__seats">
+          <span class="joins-list__label">{{ 'fp_field_seats_max' | translatePipe }}</span>
+          <app-counter
+            data-testid="join-max"
+            [value]="row.join.maxSeats"
+            [min]="row.join.minSeats"
+            [max]="maxSeats"
+            (valueChange)="joinChange.emit({ key: row.join.key, patch: { maxSeats: $event } })"
+          />
+        </div>
+        <label class="c-chip c-chip--toggle">
+          <input
+            type="checkbox"
+            role="switch"
+            data-testid="join-online"
+            [checked]="row.join.online"
+            (change)="setOnline(row.join.key, $event)"
+          />
+          <span>{{ 'fp_join_online' | translatePipe }}</span>
+        </label>
+      </div>
+    }
+  }
+</div>

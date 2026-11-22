@@ -114,3 +114,75 @@
     padding-inline: var(--space-2);
   }
 }
+
+.floor-plan__multi {
+  margin-inline-start: auto;
+}
+
+.floor-plan__join-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.floor-plan__join-reason {
+  color: var(--color-text-muted);
+  font-size: var(--fs-base);
+}
+
+.floor-plan__sheet-head,
+.floor-plan__room-open {
+  display: none;
+}
+
+.floor-plan__sheet-head {
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.floor-plan__sheet-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+}
+
+/* Plan 666: under 768 px the panel is a non-modal sheet at the bottom; the room above it stays in view. */
+@media (max-width: $break-phone-max) {
+  .floor-plan.floor-plan--sheet {
+    padding-block-end: calc(var(--fp-sheet-h, 0px) + var(--bottom-bar-h, 0px) + var(--space-4));
+  }
+
+  .floor-plan__panel {
+    display: none;
+  }
+
+  .floor-plan__panel.floor-plan__panel--open {
+    position: fixed;
+    inset-block-end: var(--bottom-bar-h, 0px);
+    inset-inline: 0;
+    z-index: var(--z-floating);
+
+    display: block;
+    inline-size: auto;
+    max-block-size: 45vh;
+    overflow-y: auto;
+
+    background: var(--bg-pure);
+
+    padding: var(--space-3) var(--space-4);
+    border-start-start-radius: var(--radius-lg);
+    border-start-end-radius: var(--radius-lg);
+    box-shadow: var(--shadow-modal);
+  }
+
+  .floor-plan__sheet-head {
+    display: flex;
+    padding-block-end: var(--space-2);
+  }
+
+  .floor-plan__room-open {
+    display: inline-flex;
+    align-self: flex-start;
+  }
+}

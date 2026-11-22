@@ -17,7 +17,8 @@ import { TranslationService } from '@services/translation.service'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
-import { MAX_TABLES } from 'src/app/shared/floor-map/floor-geometry.util'
+import { Directionality } from '@angular/cdk/bidi'
+import { canStep, footprintFor, MAX_TABLES, type StepArrow } from 'src/app/shared/floor-map/floor-geometry.util'
 import type { FloorPlanBody, FloorTable } from '@models/floor-plan.model'
 import { MAX_SEATS, NUMBER_MAX_LENGTH, numberError, type TablePatch } from '../../floor-plan-edit.util'
 
@@ -39,6 +40,7 @@ import { MAX_SEATS, NUMBER_MAX_LENGTH, numberError, type TablePatch } from '../.
 })
 export class TablePanelComponent {
   private readonly translation = inject(TranslationService)
+  private readonly directionality = inject(Directionality)
   private readonly numberInput = viewChild<ElementRef<HTMLInputElement>>('numberInput')
 
   readonly table = input.required<FloorTable>()
@@ -50,6 +52,15 @@ export class TablePanelComponent {
   readonly duplicate = output<void>()
   readonly remove = output<void>()
   readonly closed = output<void>()
+  /** Plan 666: one cell in the direction the arrow points on the screen. */
+  readonly move = output<StepArrow>()
+
+  protected readonly arrows = [
+    { arrow: 'up', icon: 'arrow-up', labelKey: 'fp_move_up' },
+    { arrow: 'down', icon: 'arrow-down', labelKey: 'fp_move_down' },
+    { arrow: 'right', icon: 'arrow-right', labelKey: 'fp_move_right' },
+    { arrow: 'left', icon: 'arrow-left', labelKey: 'fp_move_left' }
+  ] as const
 
   protected readonly maxSeatsLimit = MAX_SEATS
   protected readonly numberMax = NUMBER_MAX_LENGTH
@@ -82,6 +93,17 @@ export class TablePanelComponent {
         queueMicrotask(() => this.numberInput()?.nativeElement.focus())
       }
     })
+  }
+
+  protected canMove(arrow: StepArrow): boolean {
+    const table = this.table()
+    return canStep(
+      { x: table.x, y: table.y },
+      footprintFor(table),
+      arrow,
+      this.directionality.value === 'ltr' ? 'ltr' : 'rtl',
+      this.plan().grid
+    )
   }
 
   protected onNumberInput(event: Event): void {

@@ -17,6 +17,7 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { newKey } from 'src/app/shared/floor-map/floor-geometry.util'
 import type { FloorPlanBody } from '@models/floor-plan.model'
 import { areaNameError, MAX_AREAS, MAX_GRID, minGrid, MIN_GRID } from '../../floor-plan-edit.util'
+import { JoinsListComponent, type JoinPatch } from '../joins-list/joins-list.component'
 
 interface AreaRow {
   key: string
@@ -33,7 +34,7 @@ interface AreaRow {
 @Component({
   selector: 'app-floor-room-panel',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, FormFieldComponent, CounterComponent],
+  imports: [LucideAngularModule, TranslatePipe, FormFieldComponent, CounterComponent, JoinsListComponent],
   templateUrl: './room-panel.component.html',
   styleUrl: './room-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,7 +44,12 @@ export class RoomPanelComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef)
 
   readonly plan = input.required<FloorPlanBody>()
+  /** Plan 666: the join whose tables are marked on the map. */
+  readonly markedJoinKey = input<string | null>(null)
 
+  readonly joinPressed = output<string>()
+  readonly joinChange = output<{ key: string; patch: JoinPatch }>()
+  readonly joinRemoved = output<string>()
   readonly areaAdded = output<{ key: string; name: string }>()
   readonly areaRenamed = output<{ key: string; name: string }>()
   readonly areaMoved = output<{ key: string; dir: 'up' | 'down' }>()

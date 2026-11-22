@@ -65,6 +65,43 @@ export function movedCell(
   }
 }
 
+export type StepArrow = 'up' | 'down' | 'left' | 'right'
+
+/** The one-cell change of a table for an arrow, as it points on the screen: `left` is `x + 1` in RTL, `x − 1` in LTR. */
+function stepDelta(arrow: StepArrow, dir: Direction): { dx: number; dy: number } {
+  const sign = dir === 'rtl' ? -1 : 1
+  if (arrow === 'up') return { dx: 0, dy: -1 }
+  if (arrow === 'down') return { dx: 0, dy: 1 }
+  return { dx: (arrow === 'right' ? 1 : -1) * sign, dy: 0 }
+}
+
+/** The cell after one arrow step; the same cell when the step would leave the room. */
+export function stepCell(
+  from: CellBox,
+  footprint: { w: number; h: number },
+  arrow: StepArrow,
+  dir: Direction,
+  grid: GridSize
+): CellBox {
+  const { dx, dy } = stepDelta(arrow, dir)
+  const x = from.x + dx
+  const y = from.y + dy
+  if (x < 0 || y < 0 || x + footprint.w > grid.cols || y + footprint.h > grid.rows) return { ...from }
+  return { x, y }
+}
+
+/** False when an arrow step would leave the room. */
+export function canStep(
+  from: CellBox,
+  footprint: { w: number; h: number },
+  arrow: StepArrow,
+  dir: Direction,
+  grid: GridSize
+): boolean {
+  const to = stepCell(from, footprint, arrow, dir, grid)
+  return to.x !== from.x || to.y !== from.y
+}
+
 /** True when a drag is shorter than half a cell on both axes: the press was a tap. */
 export function isTinyDrag(deltaPx: { dx: number; dy: number }, cellPx: number): boolean {
   return Math.abs(deltaPx.dx) < cellPx / 2 && Math.abs(deltaPx.dy) < cellPx / 2

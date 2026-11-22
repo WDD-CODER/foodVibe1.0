@@ -6,7 +6,9 @@ import {
   isTinyDrag,
   movedCell,
   newKey,
-  nextTableNumber
+  nextTableNumber,
+  canStep,
+  stepCell
 } from './floor-geometry.util'
 
 const table = (over: Partial<FloorTable>): FloorTable => ({
@@ -102,5 +104,28 @@ describe('floor-geometry.util (plan 665)', () => {
     expect(chairsFor({ shape: 'rect', maxSeats: 6 })).toEqual({ top: 2, end: 1, bottom: 2, start: 1 })
     expect(chairsFor({ shape: 'rect', maxSeats: 4 })).toEqual({ top: 2, end: 0, bottom: 2, start: 0 })
     expect(sum(chairsFor({ shape: 'round', maxSeats: 30 }))).toBe(12)
+  })
+})
+
+describe('stepCell / canStep (plan 666)', () => {
+  const grid = { cols: 10, rows: 10 }
+  const fp = { w: 2, h: 2 }
+
+  it('moves the left arrow by +1 in RTL and −1 in LTR', () => {
+    expect(stepCell({ x: 3, y: 3 }, fp, 'left', 'rtl', grid)).toEqual({ x: 4, y: 3 })
+    expect(stepCell({ x: 3, y: 3 }, fp, 'left', 'ltr', grid)).toEqual({ x: 2, y: 3 })
+    expect(stepCell({ x: 3, y: 3 }, fp, 'right', 'rtl', grid)).toEqual({ x: 2, y: 3 })
+  })
+
+  it('moves up by −1 and down by +1 in both directions', () => {
+    expect(stepCell({ x: 3, y: 3 }, fp, 'up', 'rtl', grid)).toEqual({ x: 3, y: 2 })
+    expect(stepCell({ x: 3, y: 3 }, fp, 'down', 'ltr', grid)).toEqual({ x: 3, y: 4 })
+  })
+
+  it('returns the same cell when the step would leave the room, and canStep is false there', () => {
+    expect(stepCell({ x: 0, y: 0 }, fp, 'up', 'rtl', grid)).toEqual({ x: 0, y: 0 })
+    expect(canStep({ x: 0, y: 0 }, fp, 'up', 'rtl', grid)).toBeFalse()
+    expect(canStep({ x: 8, y: 0 }, fp, 'left', 'rtl', grid)).toBeFalse()
+    expect(canStep({ x: 8, y: 0 }, fp, 'left', 'ltr', grid)).toBeTrue()
   })
 })

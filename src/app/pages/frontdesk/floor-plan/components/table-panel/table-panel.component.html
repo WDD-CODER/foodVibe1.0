@@ -12,6 +12,24 @@
     </button>
   </div>
 
+  <div class="table-panel__row table-panel__arrows" role="group" [attr.aria-label]="'fp_move_label' | translatePipe">
+    <span class="table-panel__label">{{ 'fp_move_label' | translatePipe }}</span>
+    <div class="table-panel__arrow-btns">
+      @for (a of arrows; track a.arrow) {
+        <button
+          type="button"
+          class="c-icon-btn"
+          [attr.data-testid]="'tp-move-' + a.arrow"
+          [attr.aria-label]="a.labelKey | translatePipe"
+          [disabled]="!canMove(a.arrow)"
+          (click)="move.emit(a.arrow)"
+        >
+          <lucide-icon [name]="a.icon" [size]="18"></lucide-icon>
+        </button>
+      }
+    </div>
+  </div>
+
   <app-form-field label="fp_field_number" forId="tp-number" [error]="numberError_()">
     <input
       #numberInput
