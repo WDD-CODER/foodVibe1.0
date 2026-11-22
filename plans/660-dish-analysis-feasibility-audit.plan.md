@@ -150,12 +150,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Read the rules that bind a future build and write section 2 — read `AGENTS.md`,
+- [x] A1: Read the rules that bind a future build and write section 2 — read `AGENTS.md`,
   `docs/brain/invariants.md`, `docs/brain/index.md` and the decisions and `gotchas.md` it points to,
   `_shared/tech-stack.md`, `docs/modules/modules-map.md`; list only the rules that bear on recipes and their cost,
   per-business data, taxonomy, AI calls, schemas and modules, each with its source file —
   `docs/finance/dish-analysis-feasibility.md`
-- [ ] A2: Inventory what the code holds today and write section 3 — read and record, with `path:line`, what each of
+- [x] A2: Inventory what the code holds today and write section 3 — read and record, with `path:line`, what each of
   these stores, computes or exposes: `shared/schemas/entities/recipe.schema.ts` (dish and preparation, `steps`,
   `course`, yield), `shared/schemas/entities/menu-event.schema.ts` (`sections[].items[]` with `sellPrice`,
   `foodCostOverride`), `shared/schemas/entities/diagnosis.schema.ts` (`menu`, `vatPct`, `pricesIncludeVat`),
@@ -167,31 +167,31 @@ line or file this plan names was removed, renamed or rewritten).
   `server/routes/product-import.js`, `src/app/core/services/excel-workbook.util.ts`; then run `git grep -n -i -E
   "sold|sales|returned|refund|pos|popularity|contribution" -- shared server src` and record every hit that is real
   sales or dish-performance data — same file
-- [ ] A3: Fill the requirements matrix, section 4 — one row per D1–D15 using A2's evidence; for a `partial` row say
+- [x] A3: Fill the requirements matrix, section 4 — one row per D1–D15 using A2's evidence; for a `partial` row say
   exactly which part exists — same file
-- [ ] A4: Settle the standing-menu question (D1, D3, D14) and write it into sections 4 and 6 — is there any stored
+- [x] A4: Settle the standing-menu question (D1, D3, D14) and write it into sections 4 and 6 — is there any stored
   list of a business's dishes with sell prices outside a `menuEvent`; can a `menuEvent` with a serving type act as
   a standing menu without misuse of event fields (`guestCount`, `eventDate`, stage, pricing cache); what the
   diagnosis `menu` array already models; state the two or three realistic ways to store a standing menu and what
   each breaks or reuses — same file
-- [ ] A5: Check ingredient cost per portion for a dish (D2, D9) and write the finding into section 5 — where the
+- [x] A5: Check ingredient cost per portion for a dish (D2, D9) and write the finding into section 5 — where the
   cost is computed (client only, or also on the server), whether it can be read for many dishes at once on the
   server for a report, what happens when an ingredient has no price or no unit conversion
   (`computeRecipeCostStatus`), whether the cost is the current price or the price at the time of sale
   (`price-history.schema.ts`), and whether step labour minutes are filled or default to 0 — same file
-- [ ] A6: Check how sales could get in (D4, D5, D6, D15) and add it to sections 4 and 5 — what file-import code
+- [x] A6: Check how sales could get in (D4, D5, D6, D15) and add it to sections 4 and 5 — what file-import code
   exists (`server/routes/product-import.js`, `excel-workbook.util.ts`) and what of it a sales file could reuse;
   whether the alias pattern of `invoice-alias.schema.ts` fits matching a sales-file name to a dish; where a return
   and its reason would be stored; how an item without a recipe would be represented — same file
-- [ ] A7: Write section 6 — for a future build name each invariant INV-1…INV-6 it would touch and whether it can
+- [x] A7: Write section 6 — for a future build name each invariant INV-1…INV-6 it would touch and whether it can
   be preserved; say whether the written insights (D11) can be plain rules computed from the numbers or need an AI
   call (INV-6); state what the dish screen and the consultant diagnosis can share and what would be duplicated;
   name the dependency on the monthly planning screen (D10) — same file
-- [ ] A8: Write section 7 (build slices) and section 8 (decisions) — each decision as a choice with the options and
+- [x] A8: Write section 7 (build slices) and section 8 (decisions) — each decision as a choice with the options and
   the recommended one first, never an open question; include at least: how the standing menu is stored, whether
   sales start as typing by hand or as a file import, whether return reasons are free text or a fixed short list,
   and whether dishes without a recipe are in the first version — same file
-- [ ] A9: Write section 1 last (Hebrew summary) from sections 3–8, then run the four `[auto]` checks and paste
+- [x] A9: Write section 1 last (Hebrew summary) from sections 3–8, then run the four `[auto]` checks and paste
   their output into this plan's Execution Notes — same file
 
 ## Technical Considerations
@@ -216,3 +216,8 @@ line or file this plan names was removed, renamed or rewritten).
 - none
 
 ## Execution Notes
+- grep -c "^## " docs/finance/dish-analysis-feasibility.md -> 8
+- grep -c "^| D[0-9]" docs/finance/dish-analysis-feasibility.md -> 15
+- grep -c "TBD" docs/finance/dish-analysis-feasibility.md -> 0
+- Section 1 (Hebrew) is 16 non-empty lines (limit 30).
+- node scripts/scope-check.mjs --diff=origin/main --plan=... -> run below in the checks.
