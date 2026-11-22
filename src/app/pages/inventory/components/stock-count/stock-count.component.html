@@ -233,10 +233,13 @@
                   type="button"
                   class="c-icon-btn stock-count__base-btn"
                   data-testid="stk-base-btn"
-                  [attr.title]="baseLabel_(row.base)"
                   [attr.aria-label]="baseLabel_(row.base)"
                   [attr.aria-expanded]="basePopover_()?.id === row.product._id"
                   (click)="toggleBase_(row, $event)"
+                  (mouseenter)="hoverBase_(row, $event)"
+                  (focus)="hoverBase_(row, $event)"
+                  (mouseleave)="leaveBase_()"
+                  (blur)="leaveBase_()"
                 >
                   <lucide-icon name="info" [size]="16"></lucide-icon>
                 </button>
@@ -247,6 +250,7 @@
             class="c-list-body-cell stock-count__counted"
             role="cell"
             [style.--stock-count-mark-size]="mark_().box"
+            [style.--row-checkbox-size]="mark_().box"
             [style.--stock-count-mark-tap]="mark_().tap"
           >
             @if (narrow_()) {
@@ -299,36 +303,20 @@
         </div>
       }
       @if (basePopover_(); as pop) {
-        @if (phone_()) {
-          <app-modal-shell
-            [light]="true"
-            [labelKey]="'stk_base_amount'"
-            cardClass="stock-count__base-light"
-            (dismissed)="closeBase_()"
-          >
-            <span data-testid="stk-base-light" dir="auto">{{ pop.text }}</span>
-          </app-modal-shell>
-        } @else {
-          <div
-            class="stock-count__base-pop"
-            role="dialog"
-            data-testid="stk-base-pop"
-            [style.top.px]="pop.top"
-            [style.left.px]="pop.left"
-            [attr.aria-label]="pop.text"
-          >
-            <span dir="auto">{{ pop.text }}</span>
-            <button
-              type="button"
-              class="c-icon-btn"
-              [attr.aria-label]="'close' | translatePipe"
-              [attr.title]="'close' | translatePipe"
-              (click)="closeBase_()"
-            >
-              <lucide-icon name="x" [size]="16"></lucide-icon>
-            </button>
-          </div>
-        }
+        <div
+          #basePop
+          popover="manual"
+          class="stock-count__base-pop"
+          role="dialog"
+          data-testid="stk-base-pop"
+          [style.top.px]="pop.top ?? 0"
+          [style.left.px]="pop.left ?? 0"
+          [style.visibility]="pop.top === null ? 'hidden' : 'visible'"
+          [attr.aria-label]="pop.text"
+          (click)="$event.stopPropagation()"
+        >
+          <span dir="auto">{{ pop.text }}</span>
+        </div>
       }
     }
   </ng-container>

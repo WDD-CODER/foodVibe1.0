@@ -72,11 +72,6 @@ export class ModalShellComponent {
   /** Plan 487: on a phone the popup opens as a bottom sheet (the `.m-sheet` / `.m-sheet-card` helpers). */
   readonly sheet = input(false)
   /**
-   * Plan 657: a light popup — no backdrop colour, no blur, the page behind stays clear; a pointer-down outside the card
-   * (other than on the opener, whose own click toggles) and any scroll dismiss it. Escape and focus restore stay.
-   */
-  readonly light = input(false)
-  /**
    * Plan 498: true while the popup holds typed edits. Escape or a backdrop click then asks before `dismissed` is
    * emitted; the popup's own Cancel / X button does not go through the shell and so never asks.
    */
@@ -95,7 +90,6 @@ export class ModalShellComponent {
     afterNextRender(() => {
       this.showTopLayer_()
       this.moveFocusIn_()
-      this.watchOutside_()
     })
     this.destroyRef_.onDestroy(() => {
       popModalShell(this.shellId_)
@@ -163,35 +157,6 @@ export class ModalShellComponent {
       event.preventDefault()
       first.focus()
     }
-  }
-
-  /** Plan 657: for `light`, an outside pointer-down or a scroll (anywhere, captured) asks the owner to close. */
-  private watchOutside_(): void {
-    if (!this.light()) return
-    const card = this.card_().nativeElement
-    const onPointerDown = (event: Event): void => {
-      const target = event.target as Node | null
-      const opener = this.opener_
-      const openerIsPage = !opener || opener === this.document_.body || opener === this.document_.documentElement
-      if (target && (card.contains(target) || (!openerIsPage && opener.contains(target)))) return
-      this.onLightDismiss_()
-    }
-    const onScroll = (event: Event): void => {
-      const target = event.target as Node | null
-      if (target && card.contains(target)) return
-      this.onLightDismiss_()
-    }
-    this.document_.addEventListener('pointerdown', onPointerDown, true)
-    this.document_.addEventListener('scroll', onScroll, true)
-    this.destroyRef_.onDestroy(() => {
-      this.document_.removeEventListener('pointerdown', onPointerDown, true)
-      this.document_.removeEventListener('scroll', onScroll, true)
-    })
-  }
-
-  private onLightDismiss_(): void {
-    if (!this.dismissible() || !isTopModalShell(this.shellId_)) return
-    this.dismissed.emit()
   }
 
   private showTopLayer_(): void {

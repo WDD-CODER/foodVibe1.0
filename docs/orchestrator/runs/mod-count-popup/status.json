@@ -1,0 +1,425 @@
+{
+  "run": "mod-count-popup",
+  "branch": "orch/mod-count-popup",
+  "base": "main",
+  "startedAt": "2026-11-22T07:06:07.549Z",
+  "mainShaAtStart": "050a0315ce34167c76289f3cfd7a94eefae9c853",
+  "plans": {
+    "658": {
+      "nnn": "658",
+      "title": "Stock count: unit names in Hebrew, the base amount opens beside its row on every screen",
+      "branch": "feat/658-stock-count-unit-names",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T07:08:14.687Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-22T07:32:52.451Z"
+        }
+      },
+      "humanItems": [
+        "On `/inventory/count` Dandan types «ארגז עגבניות»: the line reads «עגבניות 1 ארגז». On the phone and on the",
+        "The counted box is still bigger on the laptop than on the phone."
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T07:08:14.429Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:08:14.689Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:28:14.478Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:32:40.336Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:32:52.454Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:33:08.944Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T07:35:12.917Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.9,
+      "sha": "57334dc2e0ca8006d02120343bf9f3d8a6e70c8d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1196.4,
+          "tokens": {
+            "input": 4217821,
+            "output": 33915
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.1,
+          "tokens": {
+            "input": 82037,
+            "output": 491
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c2883e42543c6df8d1db176b2825f48152b39b24"
+    },
+    "659": {
+      "nnn": "659",
+      "title": "Stock count: the base-amount box opens over its own icon, on hover above phone width",
+      "branch": "feat/659-stock-count-base-popup",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T08:16:08.920Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-22T08:35:31.922Z"
+        }
+      },
+      "humanItems": [
+        "On `/inventory/count` at full width Dandan rests the mouse on a row's ⓘ: the box opens right above or below"
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T08:11:44.235Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:11:44.422Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:12:02.929Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:13:01.588Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:16:08.712Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:16:08.922Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:31:41.079Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:35:23.536Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:35:31.923Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:35:43.246Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T08:36:44.379Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "659",
+          "title": "Stock count: the base-amount box opens over its own icon, on hover above phone width",
+          "branch": "feat/659-stock-count-base-popup",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-22T08:11:44.420Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 18.7,
+          "reason": "asking 659-1: ESCALATE scope: ESCALATE: scope — plans/659-stock-count-base-popup-side-and-hover.plan.md exists only in the main checkout (uncommitted or on another branch), not on orch/mod-count-popup. The plan-scope gate checks fail without it. Commit it to the run branch, then re-run.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 18,
+              "tokens": {
+                "input": 67167,
+                "output": 1342
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-22T08:12:55.287Z",
+            "reason": "ESCALATE scope: ESCALATE: scope — plans/659-stock-count-base-popup-side-and-hover.plan.md exists only in the main checkout (uncommitted or on another branch), not on orch/mod-count-popup. The plan-scope gate checks fail without it. Commit it to the run branch, then re-run."
+          },
+          "parkBranch": "park/mod-count-popup-659"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 659-1: ESCALATE scope: ESCALATE: scope — plans/659-stock-count-base-popup-side-and-hover.plan.md exists only in the main checkout (uncommitted ",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 22.6,
+      "sha": "592adfb57663a689c7216cca0640e29218c0377b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 929,
+          "tokens": {
+            "input": 996864,
+            "output": 14405
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.4,
+          "tokens": {
+            "input": 25426,
+            "output": 599
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "1094844530c23be493506bc9b0e4f4cc4f150e68"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-22T07:08:14.194Z",
+      "plan": "658",
+      "text": "the folder foodVibe1.0-orch-mod-count-popup-658 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T07:28:11.299Z",
+      "plan": "658",
+      "text": "builder left undone (round 0): [human] items (the «ארגז עגבניות» line, the popup beside the row on phone and laptop, the counted box bigger on the laptop) are for the Human to check"
+    },
+    {
+      "at": "2026-11-22T07:33:29.300Z",
+      "plan": "658",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-popup was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T07:36:19.822Z",
+      "text": "FINAL: same tree as plan 658's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-22T08:11:44.036Z",
+      "plan": "659",
+      "text": "the folder foodVibe1.0-orch-mod-count-popup-659 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T08:12:02.655Z",
+      "plan": "659",
+      "text": "builder left undone (round 0): All sub-tasks of plan 659: the plan file is not on the run branch, so I could not read it or its Read-Write Scope"
+    },
+    {
+      "at": "2026-11-22T08:13:01.366Z",
+      "plan": "659",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-22T08:13:01.995Z",
+      "plan": "659",
+      "text": "ask 659-1 (scope, the Human or the advisor answers): Plan 659 is missing from the run branch. Commit it to orch/mod-count-popup and re-run the builder?"
+    },
+    {
+      "at": "2026-11-22T08:14:02.588Z",
+      "plan": "659",
+      "text": "ask 659-1 answered by the human: Commit plans/659-... to orch/mod-count-popup, then retry the builder"
+    },
+    {
+      "at": "2026-11-22T08:14:13.179Z",
+      "plan": "659",
+      "text": "scope of plan 659 extended on orch/mod-count-popup by the answer to 659-1: plans/659-, orch/mod-count-popup"
+    },
+    {
+      "at": "2026-11-22T08:15:58.558Z",
+      "plan": "659",
+      "text": "resumed from park/mod-count-popup-659: round 0, tier build, after: asking 659-1: ESCALATE scope: ESCALATE: scope — plans/659-stock-count-base-popup-side-and-hover.plan.md exists only in the main checkout (uncommitted or on anot"
+    },
+    {
+      "at": "2026-11-22T08:16:08.511Z",
+      "plan": "659",
+      "text": "the folder foodVibe1.0-orch-mod-count-popup-659 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T08:31:38.100Z",
+      "plan": "659",
+      "text": "builder left undone (round 0): I did not run the kit-copy scope-check (the `scope-check (kit copy)` entry in CHECKS); I ran `node scripts/ci-scope-check.mjs --checkout-branch` instead.; [human] item: Dandan still has to check the hover and tap behaviour on /inventory/count."
+    },
+    {
+      "at": "2026-11-22T08:37:32.486Z",
+      "text": "FINAL: same tree as plan 659's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 22.6,
+  "updatedAt": "2026-11-22T08:37:34.778Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "658",
+      "type": "behaviour",
+      "text": "behaviour: the base box lost its close (x) button; an outside tap, a scroll or a second tap on its control closes it — reverse: add the button back in the template",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "658",
+      "type": "behaviour",
+      "text": "behaviour: the base box is a popover=\"manual\" (top layer) because a fixed box inside the count grid rendered about 156px off its computed position — reverse: drop the attribute and the showPopover call",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "658",
+      "type": "removes",
+      "text": "removes: app-modal-shell [light] input, its template hook and its spec (no template uses it now) — reverse: git revert this plan's commit",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "658",
+      "type": "seen",
+      "text": "seen: src/styles.scss:687 — .c-modal-overlay--light is now unused; styles.scss is append-only for this plan, so it was left in place",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "659",
+      "type": "behaviour",
+      "text": "behaviour: the ⓘ opens on hover or focus above phone width and closes on leave or blur; a click there does nothing, and on a phone a second tap closes it — reverse: restore the click toggle and the title attribute",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "659",
+      "type": "behaviour",
+      "text": "behaviour: the RTL test asserts computed left equals the placed left and right equals clientWidth minus left minus width, because Chrome returns a px value for a placed fixed box's right, not 'auto' — reverse: none needed, the assertion fails if the right inset is set again",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "659",
+      "type": "seen",
+      "text": "seen: src/app/pages/inventory/components/stock-count/stock-count.component.ts:406 — in an RTL page with a vertical scrollbar, `placeInViewport` uses clientWidth, but fixed `left` starts at the scrollbar's edge, so the box can sit about 15px right of its intended spot; this was seen in the test browser, not checked on a real device",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-22T08:37:34.775Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-22T08:37:34.778Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

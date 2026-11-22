@@ -51,6 +51,8 @@ src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+plans/659-
+orch/mod-count-popup
 ```
 
 ## Read Scope
@@ -114,9 +116,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Make the base-amount box open over its own icon instead of the far side — clear both inline insets, the RTL case — src/app/pages/inventory/components/stock-count/**
-- [ ] A2: Open the box on hover above phone width and on tap only on a phone — mouseenter/focus vs tap, drop the native title, the cases — src/app/pages/inventory/components/stock-count/**
-- [ ] A3: Prove it — the Done-when commands in order — docs/brain/inventory.md
+- [x] A1: Make the base-amount box open over its own icon instead of the far side — clear both inline insets, the RTL case — src/app/pages/inventory/components/stock-count/**
+- [x] A2: Open the box on hover above phone width and on tap only on a phone — mouseenter/focus vs tap, drop the native title, the cases — src/app/pages/inventory/components/stock-count/**
+- [x] A3: Prove it — the Done-when commands in order — docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 658 (runs on `orch/mod-count-popup`, the same run branch).
@@ -130,3 +132,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - decided: hover above phone width — why: Dandan, "the base unit was supposed to show the popup on hover and only in
   mobile by click".
+- evidence: test:ci exit 0 (2719 pass); build, lint, lint:reuse, lint:icons, lint:no-native-select exit 0
+- note: Chrome resolves a placed fixed box right to px, so the RTL test checks computed left = placed left and right = clientWidth - left - width, not literal auto.

@@ -16,13 +16,20 @@ describe('StockBelowMinimumComponent', () => {
   let fixture: ComponentFixture<StockBelowMinimumComponent>
   const el = () => fixture.nativeElement as HTMLElement
 
-  function setup(inputs: { rows: ReturnType<typeof row>[]; uncounted?: number; hasFinalCount?: boolean }): void {
+  function setup(inputs: {
+    rows: ReturnType<typeof row>[]
+    uncounted?: number
+    hasFinalCount?: boolean
+    names?: Record<string, string>
+  }): void {
     TestBed.configureTestingModule({
       imports: [StockBelowMinimumComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ListChecks })],
       providers: [
         {
           provide: TranslationService,
-          useValue: { translate: (k: string) => (k === 'stk_uncounted_note' ? '{n} ללא ספירה' : k) }
+          useValue: {
+            translate: (k: string) => (k === 'stk_uncounted_note' ? '{n} ללא ספירה' : (inputs.names?.[k] ?? k))
+          }
         }
       ]
     })
@@ -40,6 +47,13 @@ describe('StockBelowMinimumComponent', () => {
     expect(text).toContain('4 kg')
     expect(text).toContain('10 kg')
     expect(text).toContain('05/11/2026')
+  })
+
+  it('plan 658: the amounts show the unit name, not its key', () => {
+    setup({ rows: [row('a', 4)], names: { kg: 'קילו' } })
+    const text = el().querySelector('[data-testid="stk-below-row"]')?.textContent ?? ''
+    expect(text).toContain('4 קילו')
+    expect(text).not.toContain('4 kg')
   })
 
   it('shows the no-final-count state', () => {

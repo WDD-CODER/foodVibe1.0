@@ -5,11 +5,13 @@ import {
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
   linkedSignal,
   OnInit,
   signal,
-  untracked
+  untracked,
+  viewChild
 } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
@@ -56,7 +58,6 @@ import {
 } from './stock-ai-draft/stock-ai-draft.component'
 import type { StockExtractLine } from '@schemas/ai-stock-extract.schema'
 import { PHONE_QUERY, TABLET_DOWN_QUERY } from '@utils/breakpoints'
-import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 
 interface RowState {
   counted: boolean
@@ -109,13 +110,12 @@ const MARK_SIZES: Record<MarkSize, { box: string; tap: string }> = {
 interface BasePopover {
   id: string
   text: string
-  top: number
-  left: number
+  /** The tapped control, in viewport coordinates when it was tapped. */
+  anchor: { top: number; bottom: number; left: number; width: number }
+  /** Set once the rendered box is measured and placed; until then the box is drawn hidden. */
+  top: number | null
+  left: number | null
 }
-
-/** Width the popover asks for; it never exceeds the screen less the margins. */
-const BASE_POP_WIDTH = 224
-const BASE_POP_HEIGHT = 64
 
 interface UnitOption {
   value: string
@@ -153,7 +153,6 @@ function todayIso(): string {
     ListShellComponent,
     ListRowCheckboxComponent,
     LoaderComponent,
-    ModalShellComponent,
     StockBelowMinimumComponent,
     StockAiDraftComponent
   ],
@@ -220,7 +219,7 @@ export class StockCountComponent implements OnInit {
   )
   /** Plan 655: true below the desktop breakpoint; set from the media query and kept in step with it. */
   protected readonly narrow_ = signal(typeof window !== 'undefined' && window.matchMedia(NARROW_QUERY).matches)
-  /** Plan 657: true on a phone (≤ 767px); the base amount then opens in a light popup. */
+  /** Plan 657: true on a phone (≤ 767px); sizes the counted mark. */
   protected readonly phone_ = signal(typeof window !== 'undefined' && window.matchMedia(PHONE_QUERY).matches)
   /** Plan 657: the counted mark's size tokens for the current width. */
   protected readonly mark_ = computed(() => {
@@ -232,6 +231,7 @@ export class StockCountComponent implements OnInit {
   /** Plan 655: below desktop the base amount is no column — a small control opens it instead. */
   protected readonly baseColumn_ = computed(() => this.showBase_() && !this.narrow_())
   protected readonly basePopover_ = signal<BasePopover | null>(null)
+  private readonly basePopRef_ = viewChild<ElementRef<HTMLElement>>('basePop')
   protected readonly addUnitValue = ADD_UNIT
   protected readonly gridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
@@ -322,6 +322,23 @@ export class StockCountComponent implements OnInit {
   private readonly snapshotSig_ = computed(() => JSON.stringify([this.countedDate_(), this.countedLinesSig_()]))
 
   constructor() {
+    // Plan 658: place the base box from its measured size; a resize re-places it, a scroll closes it.
+    effect((onCleanup) => {
+      const el = this.basePopRef_()?.nativeElement
+      if (!el || !this.basePopover_()) return
+      untracked(() => this.placeBase_(el))
+      const onResize = (): void => this.placeBase_(el)
+      const onScroll = (event: Event): void => {
+        if (event.target instanceof Node && el.contains(event.target)) return
+        this.basePopover_.set(null)
+      }
+      window.addEventListener('resize', onResize)
+      window.addEventListener('scroll', onScroll, true)
+      onCleanup(() => {
+        window.removeEventListener('resize', onResize)
+        window.removeEventListener('scroll', onScroll, true)
+      })
+    })
     warnBeforeUnload(() => this.hasRealChanges())
     effect(() => {
       const snap = this.snapshotSig_()
@@ -352,26 +369,59 @@ export class StockCountComponent implements OnInit {
     return `${this.translation_.translate('stk_base_amount')}: ${base}`
   }
 
-  /** Plan 655: opens (or closes, when it is the same row) the small popover with a row's base amount. */
+  /** Plans 655/659: a tap (phone only) opens the base box, or closes it when it is the same row; above a phone a click does nothing extra. */
   protected toggleBase_(row: SheetRow, event: Event): void {
     event.stopPropagation()
+    if (!this.phone_()) return
     if (this.basePopover_()?.id === row.product._id) {
       this.basePopover_.set(null)
       return
     }
+    this.openBase_(row, event)
+  }
+
+  /** Plan 659: above a phone, mouseenter/focus on the control opens the base box. */
+  protected hoverBase_(row: SheetRow, event: Event): void {
+    if (this.phone_()) return
+    if (this.basePopover_()?.id === row.product._id) return
+    this.openBase_(row, event)
+  }
+
+  /** Plan 659: above a phone, mouseleave/blur closes the base box. */
+  protected leaveBase_(): void {
+    if (this.phone_()) return
+    this.basePopover_.set(null)
+  }
+
+  private openBase_(row: SheetRow, event: Event): void {
     const target = event.currentTarget as HTMLElement | null
     const rect = target?.getBoundingClientRect()
-    const viewport = { width: window.innerWidth, height: window.innerHeight }
-    const width = Math.min(BASE_POP_WIDTH, viewport.width - 16)
-    const placed = placeInViewport({
+    this.basePopover_.set({
+      id: row.product._id,
+      text: this.baseLabel_(row.base),
       anchor: rect
         ? { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width }
         : { top: 0, bottom: 0, left: 0, width: 0 },
-      panel: { width, height: BASE_POP_HEIGHT },
-      viewport,
+      top: null,
+      left: null
+    })
+  }
+
+  /** Plan 658: measures the rendered box (its real size) and places it by `placeInViewport`, below its control when there is room. */
+  private placeBase_(el: HTMLElement): void {
+    const pop = this.basePopover_()
+    if (!pop) return
+    // The top layer keeps the box out of any ancestor that would re-base `position: fixed`.
+    if (typeof el.showPopover === 'function' && !el.matches(':popover-open')) el.showPopover()
+    const { width, height } = el.getBoundingClientRect()
+    const placed = placeInViewport({
+      anchor: pop.anchor,
+      panel: { width, height },
+      viewport: { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight },
       prefer: 'below'
     })
-    this.basePopover_.set({ id: row.product._id, text: this.baseLabel_(row.base), top: placed.top, left: placed.left })
+    if (placed.top === pop.top && placed.left === pop.left) return
+    this.basePopover_.set({ ...pop, top: placed.top, left: placed.left })
   }
 
   protected closeBase_(): void {
@@ -453,7 +503,12 @@ export class StockCountComponent implements OnInit {
     const base = toBase(state.amount, state.unit, product, this.units_)
     if (base === null) return null
     const f = formatQty(base, product.baseUnit)
-    return `${f.qty} ${f.unit}`
+    return `${f.qty} ${this.unitName_(f.unit)}`
+  }
+
+  /** Plan 658: a unit key as the cook named it (the saved Hebrew name), the key itself when it has none. */
+  protected unitName_(key: string | undefined): string {
+    return key ? this.translation_.translate(key) : ''
   }
 
   protected setAmount(product: Product, amount: number): void {
@@ -587,7 +642,9 @@ export class StockCountComponent implements OnInit {
         })
         return {
           id,
-          text: [u.spoken, u.quantity, u.unit ?? u.spokenUnit].filter((v) => v !== undefined && v !== '').join(' '),
+          text: [u.spoken, u.quantity, this.unitName_(u.unit ?? u.spokenUnit)]
+            .filter((v) => v !== undefined && v !== '')
+            .join(' '),
           status: u.status === 'choose' ? 'choose' : 'unmatched',
           candidates: (u.candidates ?? []).map((c) => ({ productId: c.productId, name: c.nameHebrew })),
           hasAmount: u.quantity !== undefined,
@@ -727,8 +784,8 @@ export class StockCountComponent implements OnInit {
       const entry: PendingConflict = {
         productId: product._id,
         name: product.nameHebrew,
-        onSheet: `${state.amount} ${state.unit}`,
-        suggested: `${line.quantity} ${line.unit}`,
+        onSheet: `${state.amount} ${this.unitName_(state.unit)}`,
+        suggested: `${line.quantity} ${this.unitName_(line.unit)}`,
         line
       }
       this.conflicts_.update((list) => [...list.filter((c) => c.productId !== product._id), entry])
