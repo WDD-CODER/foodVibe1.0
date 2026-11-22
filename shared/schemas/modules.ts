@@ -5,7 +5,7 @@ export * from './modules-pure'
 
 export const modulesFieldSchema = z
   .array(z.enum(MODULE_KEYS))
-  .max(5)
+  .max(6)
   .refine(list => new Set(list).size === list.length, { message: 'modules must not repeat' })
 
 export const platformHistoryRowSchema = z.strictObject({

@@ -56,6 +56,9 @@ const BODY = {
   invoices: () => ({}),
   diagnoses: () => ({}),
   stockCounts: () => ({}),
+  // floorPlans / waitlistEntries: written only by their routers (plan 662, C-REGISTRY-R).
+  floorPlans: () => ({}),
+  waitlistEntries: () => ({}),
   VERSION_HISTORY: () => ({ entityType: 'recipes', entityId: 'entity-X', note: 'x' }),
   activity_log: () => ({ action: 'x', at: 1 }),
   DICTIONARY_OVERRIDES: () => ({ items: { a: 'b' } }),

@@ -106,6 +106,10 @@ describe('PermissionService.can', () => {
       expect(service.can('manageRequests', { type: 'bookings', doc: { createdBy: 'o1' } })).toBeTrue()
     })
 
+    it('may manage conversations (plan 662)', () => {
+      expect(service.can('manageConversations')).toBeTrue()
+    })
+
     it('changes the stage only of his own events, but notes and arrivals on any event', () => {
       expect(service.can('changeStage', { type: 'menuEvents', doc: { createdBy: 's1' } })).toBeTrue()
       expect(service.can('changeStage', { type: 'menuEvents', doc: { createdBy: 'o1' } })).toBeFalse()

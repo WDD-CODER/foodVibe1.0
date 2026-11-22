@@ -181,6 +181,7 @@ Deltas:
 - **Server awake (Q5 = a):** external uptime ping every 10 minutes; documented in 558, no code.
 - **Voice notes (Q11 = b):** transcribed through `gemini-client.js` with `feature: 'voice_transcribe'` (R-13).
 - Rules carried: R-02 … R-13, R-17 … R-20.
+- Replaced by `docs/restaurant/restaurant-map.md` C-CONV and C-AI: `conversations.channel` is `'sim' | 'whatsapp'`; `assistant.level` 2 stays reserved and unused.
 
 ## Wave 2 compatibility (from `reference-bookings-engine.md` — what Wave 1 adopts, what it overrides)
 
@@ -190,7 +191,7 @@ Overridden by the Front Desk brief (the reference text is wrong for Wave 1 on th
 - No `guests` collection — diners are `clients` with `kinds: ['diner']` (Part 2 rule 1). Reference §4.4, §5.6 `editGuests`, `STAFF_READ_FIELDS.guests` do not apply.
 - No `bookingProfiles` — the profile is `frontDeskProfiles`; Wave 2 capacity/turn/policy fields go under `requestKinds.table` (reserved, not drafted now).
 - No flat `guest {…}` object on bookings — snapshot fields `guestName`, `guestPhone` + `clientId` (same shape as `menuEvents`).
-- Public writes create a `request`, not a confirmed booking — no channel confirms a table in Wave 1 (rule 6). The reference INV-7 "the engine decides availability" is a Wave 2 ADR.
+- Public writes create a `request`, not a confirmed booking — no channel confirms a table in Wave 1 (rule 6), except through the table engine when the business has `tables` and confirm mode `auto` (Restaurant program). The reference INV-7 "the engine decides availability" is a Wave 2 ADR.
 - `createdBy: 'public:<channel>'`, not `'public:<slug>'`.
 - Migration 0011 is `0011-clients-crm.js`, not `0011-bookings.js`; booking indexes are created by 549 at startup (`server/db.js`), no migration needed for a new collection.
 - Event inquiries from the public page go through a request and approve (550), not straight into `menuEvents` (reference Q9 (a) is replaced by human-in-the-loop).

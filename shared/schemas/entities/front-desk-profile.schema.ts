@@ -46,6 +46,34 @@ export const requestKindConfigSchema = z.strictObject({
 export type RequestKindConfig = z.infer<typeof requestKindConfigSchema>
 export type FrontDeskQuestion = z.infer<typeof questionSchema>
 
+/** Plan 662 (C-TSERVICE): how the business takes table bookings. Read it only through `tableServiceOf`. */
+export const TABLE_CONFIRM_MODES = ['auto', 'manual'] as const
+export type TableConfirmMode = (typeof TABLE_CONFIRM_MODES)[number]
+
+/** Every field is optional: a missing one is the default of `TABLE_SERVICE_DEFAULTS`, applied by `tableServiceOf`. */
+export const tableServiceSchema = z
+  .strictObject({
+    confirmMode: z.enum(TABLE_CONFIRM_MODES).optional(),
+    autoMaxParty: z.number().int().min(1).max(30).optional(),
+    slotMinutes: z.union([z.literal(15), z.literal(30)]).optional(),
+    turnMinutes: z
+      .array(z.strictObject({ maxParty: z.number().int().min(1), minutes: z.number().int().min(30).max(360) }))
+      .min(1)
+      .max(6)
+      .optional(),
+    lastSeatingBeforeCloseMinutes: z.number().int().min(0).max(180).optional(),
+    bufferMinutes: z.number().int().min(0).max(30).optional(),
+    holdMinutes: z.number().int().min(5).max(60).optional(),
+    autoNoShow: z.boolean().optional(),
+    reminderHour: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+    cancellationCutoffHours: z.number().int().min(0).max(72).optional()
+  })
+  .refine((t) => (t.turnMinutes ?? []).every((step, i, all) => i === 0 || step.maxParty > all[i - 1].maxParty), {
+    message: 'turnMinutes must be ascending by maxParty',
+    path: ['turnMinutes']
+  })
+export type TableService = z.infer<typeof tableServiceSchema>
+
 /**
  * Plan 548 (C-PROFILE): one front desk profile per business. Owner-only to write; `status` and `whatsapp` are
  * server-owned (`PROFILE_SERVER_FIELDS`); `whatsapp.phoneNumberId` is never sent to the browser.
@@ -75,6 +103,8 @@ export const frontDeskProfileSchema = z.strictObject({
     ownerAlertPhone: z.string().max(30).optional(),
     ownerAlertOptIn: z.boolean()
   }).optional(),
+  /** Plan 662 (C-TSERVICE): owner-written; nothing fills defaults on read (`tableServiceOf`). */
+  tableService: tableServiceSchema.optional(),
   /** Plan 557: the platform admin's changes with their reasons; server-owned, newest last, at most 50. */
   adminHistory: z.array(z.strictObject({
     at: z.number(),

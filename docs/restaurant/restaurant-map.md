@@ -696,3 +696,9 @@ Each line is already written into the plan that owns it; where a line and a Cont
 ## Contract extensions (run)
 
 (A run that has to change a frozen Contract writes one line here: plan · Contract · what changed · why.)
+
+- 662 · C-FLOOR · `floor_plans_business_unique` is partial on `grid` being an object (as `frontdesk_business_unique`
+  is on `slug`) · the existing `server/test/admin-business.test.js` seeds raw rows without a grid in every
+  user-data collection, and every real floor plan has a grid, so the rule "one floor plan per business" is unchanged.
+- 662 · C-TSERVICE · every field of `tableService` is optional in the schema · `tableServiceOf` fills a missing
+  field from `TABLE_SERVICE_DEFAULTS`, so a profile may store only what the owner changed.

@@ -5,7 +5,8 @@ import { FRONT_DESK_REQUEST_KINDS } from './front-desk-profile.schema'
 /** Plan 549 (C-REQUEST): the kinds are the front desk profile's list, re-exported so the two cannot drift. */
 export const REQUEST_KINDS = FRONT_DESK_REQUEST_KINDS
 export const REQUEST_STATUSES = ['new', 'qualified', 'needs_info', 'approved', 'declined', 'cancelled', 'expired'] as const
-export const REQUEST_CHANNELS = ['manual', 'public_form', 'whatsapp'] as const
+/** Plan 662 (C-REGISTRY-R): `sim` is the Restaurant program's simulated chat channel. */
+export const REQUEST_CHANNELS = ['manual', 'public_form', 'whatsapp', 'sim'] as const
 export const DECLINE_REASONS = ['full', 'out_of_area', 'below_minimum', 'date_taken', 'other'] as const
 export const REQUEST_VIA = ['member', 'guest', 'ai', 'server'] as const
 /** Fields only the server writes (`decline` is written by plan 550's decline route). */
