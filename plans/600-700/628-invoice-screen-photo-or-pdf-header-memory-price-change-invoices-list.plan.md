@@ -1,6 +1,6 @@
 # Plan 628 — Invoice screen: scan a photo or a PDF, confirm the header, match from memory first, see the price change in percent, and an invoices list
 
-Status: draft
+Status: done
 Depends-on: 627
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

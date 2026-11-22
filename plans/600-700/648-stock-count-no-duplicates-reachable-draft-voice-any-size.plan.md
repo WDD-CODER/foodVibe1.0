@@ -1,6 +1,6 @@
 # Plan 648 — Stock count: no duplicate products, a reachable "save draft", and voice counting for any number of products
 
-Status: draft
+Status: done
 Depends-on: 636, 637, 645
 Snapshot: eb41b6c4
 

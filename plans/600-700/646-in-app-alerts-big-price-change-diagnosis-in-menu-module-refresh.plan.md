@@ -1,6 +1,6 @@
 # Plan 646 — In-app alerts: a big price change reaches the owner and the consultant; diagnosis in the main menu; module changes show at once
 
-Status: draft
+Status: done
 Depends-on: 631, 634, 641, 645
 Snapshot: 9354ab3d
 

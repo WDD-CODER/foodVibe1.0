@@ -1,6 +1,6 @@
 # Plan 636 — Stock count sheet screen and the below-minimum list
 
-Status: draft
+Status: done
 Depends-on: 635
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

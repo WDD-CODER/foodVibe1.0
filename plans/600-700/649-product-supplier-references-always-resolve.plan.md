@@ -1,6 +1,6 @@
 # Plan 649 — A product's supplier always resolves to a supplier of its own business: no ids on screen, no failed save
 
-Status: draft
+Status: done
 Depends-on: 648
 Snapshot: eb41b6c4
 

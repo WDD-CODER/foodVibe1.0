@@ -1,6 +1,6 @@
 # Plan 637 — Stock count by voice or text: a draft on the count sheet
 
-Status: draft
+Status: done
 Depends-on: 636, 621, 623
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

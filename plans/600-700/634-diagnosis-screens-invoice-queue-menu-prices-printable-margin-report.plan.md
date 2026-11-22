@@ -1,6 +1,6 @@
 # Plan 634 — Diagnosis screens: the invoice queue, the menu with prices and the printable margin report
 
-Status: draft
+Status: done
 Depends-on: 633, 628, 632
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

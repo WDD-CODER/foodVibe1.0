@@ -1,6 +1,6 @@
 # Plan 644 — The business dialog: hints as tooltips, a history panel that is a real box, and changed texts that reach the screen
 
-Status: draft
+Status: done
 Depends-on: 638, 639
 Snapshot: ef1b543f
 

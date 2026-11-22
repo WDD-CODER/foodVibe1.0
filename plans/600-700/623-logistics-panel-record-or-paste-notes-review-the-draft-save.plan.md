@@ -1,6 +1,6 @@
 # Plan 623 — Logistics panel: record or paste site-visit notes, review the draft line by line, save
 
-Status: draft
+Status: done
 Depends-on: 621, 622
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

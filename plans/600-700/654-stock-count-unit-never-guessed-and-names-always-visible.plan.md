@@ -1,6 +1,6 @@
 # Plan 654 — Stock count: the unit is never guessed (the said word is kept, or the person picks), names always show, no empty columns
 
-Status: draft
+Status: done
 Depends-on: 653
 Snapshot: 563fa335
 

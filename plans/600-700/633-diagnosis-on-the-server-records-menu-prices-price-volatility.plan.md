@@ -1,6 +1,6 @@
 # Plan 633 — Diagnosis on the server: the record, the menu-with-prices read and the price volatility data
 
-Status: draft
+Status: done
 Depends-on: 627, 631
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

@@ -1,6 +1,6 @@
 # Plan 656 — One breakpoint set across the app: phone ≤767, tablet ≤1023, desktop ≥1024
 
-Status: draft
+Status: done
 Depends-on: 655
 Snapshot: ffc8f1e0
 

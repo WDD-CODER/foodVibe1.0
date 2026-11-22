@@ -1,6 +1,6 @@
 # Plan 635 — Stock counts on the server: records, draft and final, on-hand and one unit rule
 
-Status: draft
+Status: done
 Depends-on: 615
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

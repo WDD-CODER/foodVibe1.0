@@ -1,6 +1,6 @@
 # Plan 629 — Price-rise alert: the business's own threshold, what a rise does to recipes and dishes, and a dashboard card of recent rises
 
-Status: draft
+Status: done
 Depends-on: 628
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

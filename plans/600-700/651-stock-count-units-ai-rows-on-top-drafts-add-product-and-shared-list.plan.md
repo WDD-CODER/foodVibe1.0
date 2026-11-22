@@ -1,6 +1,6 @@
 # Plan 651 — Stock count: the product's own units, AI rows on top, an automatic draft with its history, add a product and come back, and the shared list look
 
-Status: draft
+Status: done
 Depends-on: 650
 Snapshot: 6d151456
 

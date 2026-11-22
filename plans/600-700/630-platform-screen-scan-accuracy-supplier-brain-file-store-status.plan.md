@@ -1,6 +1,6 @@
 # Plan 630 — Platform screen: how accurate each AI scan flow is per model, how big the shared supplier brain is, and whether files are kept
 
-Status: draft
+Status: done
 Depends-on: 627, 620
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

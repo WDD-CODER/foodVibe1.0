@@ -1,6 +1,6 @@
 # Plan 655 — Stock count: units learned from the app, every line checked for product + amount + unit, and a compact counted mark and base amount below desktop
 
-Status: draft
+Status: done
 Depends-on: 654
 Snapshot: 563fa335
 
