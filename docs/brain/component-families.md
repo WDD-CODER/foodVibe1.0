@@ -87,6 +87,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `ConfirmModalService.open(msg, { typedConfirm })` — confirm waits for an exact typed text (plan 486).
 - When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
 - Stacking: `[zIndex]` takes a `--z-*` token (`src/styles.scss`, plan 538); `[topLayer]` puts a popup in the browser top layer (the confirm popup uses both, so a question is always in front).
+- Light popup: `[light]="true"` (plan 657) — transparent overlay (`.c-modal-overlay--light`), no blur, page behind stays clear; closes on an outside pointer-down (not on the opener) and on any scroll; Escape and focus restore stay. Used only by the stock count's phone base amount; other popups keep the backdrop.
 - Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
@@ -318,6 +319,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
   drops the unit, the word beside the product name in the cook's own text is kept as `spokenUnit`; none →
   `unitMissing`, never the base unit. Browser side: `unitChoicesFor` in `stock-count/spoken-unit.ts`.
+- the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
+  `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
+  only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).

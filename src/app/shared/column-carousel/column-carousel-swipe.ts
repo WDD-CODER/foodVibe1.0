@@ -1,3 +1,4 @@
+import { PHONE_QUERY } from '@utils/breakpoints'
 /** Horizontal-swipe detection shared by the carousel header and cells (plan 349). */
 export const SWIPE_THRESHOLD_PX = 40
 
@@ -24,8 +25,8 @@ export function isRtl(el: HTMLElement): boolean {
   return getComputedStyle(el).direction === 'rtl'
 }
 
-/** The carousel only exists at ≤768px; on desktop the slides are plain grid cells. */
-export const CAROUSEL_MEDIA_QUERY = '(max-width: 768px)'
+/** The carousel only exists on a phone (≤767px); from tablet up the slides are plain grid cells. */
+export const CAROUSEL_MEDIA_QUERY = PHONE_QUERY
 
 export function isCarouselActive(): boolean {
   return typeof window !== 'undefined' && window.matchMedia(CAROUSEL_MEDIA_QUERY).matches

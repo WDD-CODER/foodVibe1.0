@@ -1,3 +1,4 @@
+@use '../../styles/breakpoints' as *;
 // ─── BASE — Desktop (≥ 1024px) ─────────────────────────────────────────────
 .header-nav {
   position: sticky;
@@ -330,7 +331,7 @@
   }
 }
 
-// Bottom nav — hidden by default (shown only on mobile ≤ 620px)
+// Bottom nav — hidden by default (shown only on a phone, ≤ 767px)
 .bottom-nav {
   display: none;
 }
@@ -345,8 +346,8 @@
   pointer-events: none;
 }
 
-// ─── NARROW TABLET (621px – 1023px) — one row; pills scroll sideways ───────
-@media (min-width: 621px) and (max-width: 1023px) {
+// ─── TABLET (768px – 1023px) — one row; pills scroll sideways ───────
+@media (min-width: $break-tablet-min) and (max-width: $break-tablet-max) {
   .header-nav {
     height: 3.875rem;
     flex-wrap: nowrap;
@@ -374,14 +375,8 @@
   }
 }
 
-@media (min-width: 621px) and (max-width: 767px) {
-  .brand-mark__name {
-    display: none;
-  }
-}
-
 // ─── TABLET (768px – 1023px) — inline nav pills with tighter padding ───────
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: $break-tablet-min) and (max-width: $break-tablet-max) {
   .header-nav {
     padding-inline: 1rem;
   }
@@ -402,8 +397,8 @@
   }
 }
 
-// ─── MOBILE (≤ 620px) — no top header; bottom tab bar (avatar is its last item) ──
-@media (max-width: 620px) {
+// ─── PHONE (≤ 767px) — no top header; bottom tab bar (avatar is its last item) ──
+@media (max-width: $break-phone-max) {
   // Entire top bar hidden — the bottom nav replaces it
   .header-nav {
     display: none;

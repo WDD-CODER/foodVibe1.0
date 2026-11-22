@@ -18,6 +18,7 @@ import { StockCountService } from '../../services/stock-count.service'
 import { StockCountComponent } from './stock-count.component'
 import { PastCountsService } from './past-counts.service'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { ReturnToService } from '@services/return-to.service'
 
 const product = (id: string, name: string, min = 0): Product =>
@@ -86,6 +87,7 @@ describe('StockCountComponent', () => {
     fixture = TestBed.createComponent(StockCountComponent)
     // Plan 655: the width is the test's choice, not the test browser's window: desktop unless a case asks for narrow.
     ;(fixture.componentInstance as unknown as { narrow_: { set(v: boolean): void } }).narrow_.set(narrowMode)
+    ;(fixture.componentInstance as unknown as { phone_: { set(v: boolean): void } }).phone_.set(false)
     fixture.detectChanges()
     await fixture.whenStable()
     fixture.detectChanges()
@@ -747,6 +749,85 @@ describe('StockCountComponent', () => {
     })
   })
 
+  describe('plan 657 — counted mark per width, the base amount in a light popup on a phone', () => {
+    const withCrates = (id: string, name: string): Product =>
+      ({
+        ...product(id, name),
+        baseUnit: 'gram',
+        purchaseOptions: [{ unitSymbol: 'ארגז', conversionRate: 10000 }]
+      }) as unknown as Product
+    const instance = () =>
+      fixture.componentInstance as unknown as {
+        setAmount(p: Product, n: number): void
+        setUnit(p: Product, u: string): void
+        phone_: { set(v: boolean): void }
+      }
+    const q = (id: string) => el().querySelector(`[data-testid="${id}"]`)
+    const markSize = (): number => {
+      const cell = rows()[0].querySelector<HTMLElement>('.stock-count__counted')!
+      return parseFloat(cell.style.getPropertyValue('--stock-count-mark-size'))
+    }
+    const openOnPhone = async (): Promise<void> => {
+      narrowMode = true
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      instance().phone_.set(true)
+      instance().setAmount(withCrates('a', 'עגבניות'), 2)
+      instance().setUnit(withCrates('a', 'עגבניות'), 'ארגז')
+      await settle()
+      rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!.click()
+      await settle()
+    }
+
+    it('(a) the counted checkbox gets a different size per width, desktop the largest', async () => {
+      await setup()
+      const desktop = markSize()
+      instance().phone_.set(false)
+      ;(fixture.componentInstance as unknown as { narrow_: { set(v: boolean): void } }).narrow_.set(true)
+      await settle()
+      const tablet = markSize()
+      instance().phone_.set(true)
+      await settle()
+      const phone = markSize()
+      expect(new Set([phone, tablet, desktop]).size).toBe(3)
+      expect(desktop).toBeGreaterThan(tablet)
+      expect(tablet).toBeGreaterThan(phone)
+    })
+
+    it('(b) on a phone a tap on the base amount opens a light shell showing it', async () => {
+      await openOnPhone()
+      const shell = fixture.debugElement.query(By.directive(ModalShellComponent))
+      expect(shell).not.toBeNull()
+      expect((shell.componentInstance as ModalShellComponent).light()).toBeTrue()
+      expect(q('stk-base-light')!.textContent).toContain('20')
+      expect(q('stk-base-pop')).toBeNull()
+    })
+
+    it('(c) a pointer-down outside the card closes it; so does a scroll', async () => {
+      await openOnPhone()
+      document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      await settle()
+      expect(q('stk-base-light')).toBeNull()
+      rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!.click()
+      await settle()
+      expect(q('stk-base-light')).not.toBeNull()
+      document.dispatchEvent(new Event('scroll'))
+      await settle()
+      expect(q('stk-base-light')).toBeNull()
+    })
+
+    it('(d) at tablet width the plan 655 popover stays and no light shell opens', async () => {
+      narrowMode = true
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      instance().setAmount(withCrates('a', 'עגבניות'), 2)
+      instance().setUnit(withCrates('a', 'עגבניות'), 'ארגז')
+      await settle()
+      rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!.click()
+      await settle()
+      expect(q('stk-base-pop')!.textContent).toContain('20')
+      expect(fixture.debugElement.query(By.directive(ModalShellComponent))).toBeNull()
+    })
+  })
+
   describe('plan 655 — a question per missing part, a compact row below desktop', () => {
     const withCrates = (id: string, name: string): Product =>
       ({
@@ -786,6 +867,8 @@ describe('StockCountComponent', () => {
       expect(q('stk-ai-q-unit')).not.toBeNull()
       const counter = fixture.debugElement.query(By.css('[data-testid="stk-ai-q-amount"] app-counter'))
       ;(counter.componentInstance as CounterComponent).valueChange.emit(3)
+      await settle()
+      q('stk-ai-confirm-amount')!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
       await settle()
       // The amount is in; the row waits for the unit and is not counted.
       expect(q('stk-ai-q-amount')).toBeNull()

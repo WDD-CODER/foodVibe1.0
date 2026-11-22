@@ -1,3 +1,4 @@
+@use '../core/styles/breakpoints' as *;
 @layer components.app {
   .app-content {
     position: relative;
@@ -6,11 +7,11 @@
     box-sizing: border-box;
   }
 
-  // ≤620px: the header hides its top bar and shows only the fixed bottom tab bar
+  // Phone (≤ $break-phone-max): the header hides its top bar and shows only the fixed bottom tab bar
   // (which also holds the avatar). The bottom padding reserves the tab bar and the
-  // round-button lane above it. Same breakpoint as the bottom bar, so 621–767px
+  // round-button lane above it. Same breakpoint as the bottom bar, so a tablet
   // doesn't reserve space for a bar that isn't shown. Top: safe area only.
-  @media (max-width: 620px) {
+  @media (max-width: $break-phone-max) {
     .app-content {
       padding-block-start: env(safe-area-inset-top, 0px);
       padding-block-end: calc(var(--bottom-bar-h) + var(--fab-lane));

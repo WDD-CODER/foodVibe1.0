@@ -2650,6 +2650,7 @@
     "stk_unit_needs_fix": "יש לבדוק את היחידה: נאמר \"{unit}\"",
     "stk_choose_unit": "באיזו יחידה?",
     "stk_how_much": "כמה?",
+    "stk_confirm_amount": "אישור",
     "stk_which_product": "איזה מוצר?",
     "stk_base_amount": "כמות ביחידת בסיס",
     "stk_move_counted_top":"העברת המסומנים לראש הרשימה",

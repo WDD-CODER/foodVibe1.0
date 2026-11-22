@@ -1,17 +1,11 @@
-/* Global breakpoints (use in @media, not in :root) */
-$break-mobile: 768px;
-$break-tablet: 900px;
-$break-desktop: 1200px;
-
-/* Design-system tiers (plan 305 — `UI refactor/`: 479 / 767 / 1023).
- * Ported markup uses these; legacy markup keeps $break-mobile/$break-tablet/$break-desktop above.
- * KNOWN COLLISION: $break-mobile (768px) overlaps $break-phone-max (767px) by one pixel — an iPad in
- * portrait is exactly 768px. Today it gets the app's full mobile treatment. Narrowing $break-mobile to
- * 767px would drop it to desktop layout, because there is no tablet tier yet. Resolve in M3, when the
- * ported shell gains one. Do not "unify" these before then. */
-$break-xs-max: 479px;
+/* The one breakpoint set (default `one-breakpoint-set`, plan 656): phone up to 767px, tablet 768–1023px,
+ * desktop from 1024px. Every @media uses these four names; never a typed width. Component styles get the same
+ * names from src/app/core/styles/_breakpoints.scss, the browser code from src/app/core/utils/breakpoints.ts;
+ * scripts/test/breakpoints-no-literals.test.mjs keeps the three equal. */
 $break-phone-max: 767px;
+$break-tablet-min: 768px;
 $break-tablet-max: 1023px;
+$break-desktop-min: 1024px;
 
 /* Designated global tokens (cssLayer): Liquid Glass design system
  * Theme: Liquid Glass — frosted surfaces (--bg-glass, --blur-glass), teal primary (--color-primary).
@@ -174,9 +168,11 @@ $break-tablet-max: 1023px;
   --tabbar-h: 3.5rem;      /* 56 — bottom tab bar, introduced in M3 */
   --topnav-h: 3.5rem;      /* 56 — top nav bar */
 
-  /* ---- Breakpoints (CSS) ---- */
-  --break-sm: 48rem;
-  --break-md: 56.25rem;
+  /* ---- Breakpoints (CSS): the four names above, for scripts and specs that read them (plan 656) ---- */
+  --bp-phone-max: #{$break-phone-max};
+  --bp-tablet-min: #{$break-tablet-min};
+  --bp-tablet-max: #{$break-tablet-max};
+  --bp-desktop-min: #{$break-desktop-min};
 
   /* ---- Chrome + kitchen tokens (plan 404, Cook View handoff) ----
      Design name → token: --pri → --color-primary-strong, --on-pri → --color-on-primary-strong,
@@ -300,7 +296,7 @@ $break-tablet-max: 1023px;
   opacity: 0.92;
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   :root {
     --blur-glass: blur(10px);
     --blur-nav: blur(12px);
@@ -367,7 +363,7 @@ body::before {
    otherwise the select input collapses to 0 width and shows nothing. */
 :root.cv-page-scroll .cv-step-pane .prep-flat-grid {
   // Phone keeps the editor's own stacked card layout; the wider columns apply from tablet up.
-  @media (min-width: $break-phone-max + 1) {
+  @media (min-width: $break-tablet-min) {
     .grid-header.prep-grid-header,
     .prep-grid-row {
       grid-template-columns: 1.25rem minmax(0, 2fr) minmax(0, 1.5fr) minmax(0, 1.6fr) minmax(0, 1.5fr) 1rem;
@@ -408,9 +404,9 @@ body::before {
   }
 }
 
-/* Cook View edit mode on phones (≤620): the save bar sits above the tab bar, so the FAB hides and
+/* Cook View edit mode on phones (≤767): the save bar sits above the tab bar, so the FAB hides and
    the approve stamp lifts above the bar (plan 404). Set on <html> by CookViewPage. */
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   :root.cv-editing app-hero-fab {
     display: none;
   }
@@ -420,9 +416,9 @@ body::before {
   }
 }
 
-/* Cook View on phones (≤620) has its own top bar (back · title · theme · ⋮) and no sub-nav chips,
+/* Cook View on phones (≤767) has its own top bar (back · title · theme · ⋮) and no sub-nav chips,
    per the handoff; the chips row stays on every other page. */
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   :root.cv-page-scroll app-tab-chips {
     display: none;
   }
@@ -686,6 +682,18 @@ textarea.c-input {
   backdrop-filter: blur(6px);
 }
 
+/* Plan 657: `app-modal-shell [light]` — no backdrop colour, no blur, the page behind stays sharp and reachable
+   (the shell closes on an outside pointer-down or a scroll); only the card takes pointer events. */
+.c-modal-overlay--light {
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+
+  > .c-modal-card {
+    pointer-events: auto;
+  }
+}
+
 /* ---- Engine: Glass Modal Card ---- */
 .c-modal-card {
   width: 90%;
@@ -804,7 +812,7 @@ textarea.c-input {
   }
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   .c-modal-card {
     max-width: none;
     width: calc(100% - 2rem);
@@ -962,7 +970,7 @@ textarea.c-input {
     }
   }
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     width: 2.75rem;
     height: 2.75rem;
     opacity: 1;
@@ -984,7 +992,7 @@ textarea.c-input {
   }
 }
 
-@media (max-width: $break-mobile) {
+@media (max-width: $break-phone-max) {
   .c-btn-primary,
   .c-btn-ghost {
     min-height: 2.75rem;
@@ -1137,7 +1145,7 @@ textarea.c-input {
 }
 
 /* Touch phones hide the checkbox column, so the visible last cell closes the outline. */
-@media (max-width: 768px) and (hover: none) {
+@media (max-width: $break-phone-max) and (hover: none) {
   .col-select {
     display: none;
   }
@@ -1152,7 +1160,7 @@ textarea.c-input {
 
 /* Above the phone carousel the column-carousel host is display:contents, so its slides are
    grid cells one level down — not direct row children — and need the selected look too. */
-@media (min-width: $break-mobile + 1px) {
+@media (min-width: $break-tablet-min) {
   .c-list-row.is-selected > .column-carousel--cell > .c-list-body-cell {
     background: color-mix(in srgb, var(--color-primary) 14%, white);
     box-shadow:
@@ -1259,7 +1267,7 @@ textarea.c-input {
   }
 }
 
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .header-btn {
     padding-inline: 0.5rem;
     font-size: 0.8rem;
@@ -2718,10 +2726,10 @@ input[type='number']::-webkit-outer-spin-button {
 /* ---- Depth theme: density by screen (the Human, 2026-11-11: "items are really big for the viewport").
    Almost every size in the app is in rem, so the root size is the one lever. It steps down only where
    a mouse is used on a laptop-size screen (often at 125–150% Windows scaling); phones and tablets keep
-   16px for touch, and large monitors (1700px and wider) keep 16px too.
+   16px for touch. (Plan 656 dropped the 1700px cap: one breakpoint set, so large monitors step down too.)
    Cook View sets `cv-page-scroll` on <html>: it keeps its 16px type and is scaled as a whole instead,
    because its spacing is in px and it is read from a distance. ---- */
-@media (pointer: fine) and (min-width: $break-tablet-max + 1) and (max-width: 1699px) {
+@media (pointer: fine) and (min-width: $break-desktop-min) {
   html:not(.cv-page-scroll) {
     font-size: 87.5%; /* 14px */
   }
@@ -2816,9 +2824,9 @@ input[type='number']::-webkit-outer-spin-button {
   }
 }
 
-// Phone bottom chrome (≤620px): the fixed tab bar, and the lane above it where the round
+// Phone bottom chrome (≤767px): the fixed tab bar, and the lane above it where the round
 // button (hero-fab) and the approve stamp float (3.5rem button + 0.75rem gap + 0.5rem air).
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   :root {
     --bottom-bar-h: calc(3.5rem + env(safe-area-inset-bottom, 0px));
     --fab-lane: 4.75rem;

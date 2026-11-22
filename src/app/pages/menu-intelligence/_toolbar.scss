@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 /* ============================================================
    Toolbar — Pill row above paper, print styles
    ============================================================ */
@@ -93,7 +94,7 @@
 }
 
 // Phone density (2026-11-11): a lower button row above the paper.
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .pill-row {
     gap: 6px;
 

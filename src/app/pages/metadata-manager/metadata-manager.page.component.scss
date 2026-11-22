@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 .metadata-page {
   position: relative;
   min-height: 100vh;
@@ -15,7 +16,7 @@
     display: none;
   }
 
-  @media (max-width: 1023px) {
+  @media (max-width: $break-tablet-max) {
     // Plan 350: the row is the shared scroll rail - chips readable, arrows only where needed.
     .mm-jump-nav-row {
       position: sticky;
@@ -38,7 +39,7 @@
       --rail-arrow-offset: 2.25rem;
 
       // No room outside the bar on a small phone: the arrows sit inside it (no sideways scroll).
-      @media (max-width: 430px) {
+      @media (max-width: $break-phone-max) {
         --rail-arrow-offset: 0;
       }
     }
@@ -49,9 +50,9 @@
     }
   }
 
-  // Phones (<=620px): the header hides its top bar (bottom tab bar only), so the chip bar sticks
+  // Phones (<=767px): the header hides its top bar (bottom tab bar only), so the chip bar sticks
   // flush to the top (safe area only) and a jumped-to section stops just under it. Plan 480.
-  @media (max-width: 620px) {
+  @media (max-width: $break-phone-max) {
     .mm-jump-nav-row {
       inset-block-start: env(safe-area-inset-top, 0px);
     }
@@ -62,7 +63,7 @@
   }
 
   // The dashboard already pads its content 1.5rem; on small phones do not pad again (plan 468, G1).
-  @media (max-width: 430px) {
+  @media (max-width: $break-phone-max) {
     padding-inline: 0;
   }
 
@@ -73,7 +74,7 @@
     place-content: center;
     gap: 2rem;
 
-    @media (max-width: 900px) {
+    @media (max-width: $break-phone-max) {
       // minmax(0, ...): the track may shrink below its widest card content (plan 468, G1).
       grid-template-columns: minmax(0, 1fr);
       max-width: 28rem;
@@ -115,7 +116,7 @@
     color: var(--color-text-muted);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: $break-phone-max) {
     padding: 1rem;
   }
 }

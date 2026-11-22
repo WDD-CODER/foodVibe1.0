@@ -1,4 +1,4 @@
-$break-tablet: 900px; // mirrors src/styles.scss
+@use '../../core/styles/breakpoints' as *;
 
 @layer components.welcome {
   .welcome {
@@ -36,7 +36,7 @@ $break-tablet: 900px; // mirrors src/styles.scss
       text-wrap: balance;
     }
 
-    @media (min-width: $break-tablet) {
+    @media (min-width: $break-tablet-min) {
       font-size: var(--fs-3xl);
     }
   }
@@ -63,7 +63,7 @@ $break-tablet: 900px; // mirrors src/styles.scss
 
     list-style: none;
 
-    @media (min-width: $break-tablet) {
+    @media (min-width: $break-tablet-min) {
       grid-template-columns: repeat(3, 1fr);
     }
   }

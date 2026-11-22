@@ -80,16 +80,26 @@ export function envKeys(envText) {
 
 export const QA_PROBLEM = 'environment: QA login missing in .env (ORCH_QA_USER / ORCH_QA_PASSWORD)'
 
+/** A [ui] card that signs in: "log in", "sign in", "logged in", "as the admin user", "role: admin". */
+export const SIGNS_IN_RE = /\b(log(?:ged)?[\s-]?in|sign(?:ed)?[\s-]?in|as (?:the |an? )?[\w-]+ user|role:\s*\w+|authenticated)\b/i
+
+/** True when some [ui] card needs the QA login: the project's UI checks sign in (ORCH_UI_LOGIN_URL set), or a card does. */
+export function needsLogin(cards, envHave = {}) {
+  const list = (Array.isArray(cards) ? cards : []).map((c) => (typeof c === 'string' ? c : c?.text ?? JSON.stringify(c ?? '')))
+  if (!list.length) return false
+  return Boolean(envHave.ORCH_UI_LOGIN_URL) || list.some((t) => SIGNS_IN_RE.test(t))
+}
+
 /** One plan's readiness asks: { paths, tests, manifest, problems, lines, question }. `envText` is the main folder's .env (null: none). */
 export function readinessAsks({ root, planText, envText = null, files }) {
   const tests = importerTests(root, planText, files)
   const manifest = manifestNeeded(root, planText)
   const paths = [...tests, ...manifest]
   const problems = []
-  if (uiItems(planText).length) {
-    const have = envKeys(envText)
-    if (QA_KEYS.some((k) => !have[k])) problems.push(QA_PROBLEM)
-  }
+  const have = envKeys(envText)
+  // The QA login is needed only by a [ui] check that signs in: the project's UI checks sign in (ORCH_UI_LOGIN_URL in
+  // .env), or a card says so itself. A card on a page anyone can open runs without it, as before.
+  if (needsLogin(uiItems(planText), have) && QA_KEYS.some((k) => !have[k])) problems.push(QA_PROBLEM)
   return {
     paths, tests, manifest, problems,
     lines: [paths.length ? `readiness asks: scope — ${paths.join(', ')}` : 'readiness asks: none'],

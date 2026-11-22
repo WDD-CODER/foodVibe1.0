@@ -1,4 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.platform-logistics-items {
   :host {
@@ -62,7 +62,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
     align-self: stretch;
   }
 
-  @media (min-width: $break-mobile) {
+  @media (min-width: $break-tablet-min) {
     .logistics-group__promote {
       align-self: flex-end;
     }

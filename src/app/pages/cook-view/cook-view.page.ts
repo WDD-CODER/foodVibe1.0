@@ -40,6 +40,7 @@ import { CookViewExportService } from './services/cook-view-export.service'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -1126,7 +1127,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   private isStackedLayout(): boolean {
-    return this.document.defaultView?.matchMedia('(max-width: 767px)').matches ?? false
+    return this.document.defaultView?.matchMedia(PHONE_QUERY).matches ?? false
   }
 
   /** Click outside the open row closes its expander. */

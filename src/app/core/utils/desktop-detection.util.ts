@@ -1,7 +1,6 @@
 import { Signal, afterNextRender, signal } from '@angular/core'
-
-/** Row edit panel vs modal split (plan 305 decision 2) — matches $break-tablet-max in styles.scss. */
-const DESKTOP_QUERY = '(min-width: 1024px)'
+/** Row edit panel vs modal split (plan 305 decision 2): desktop from 1024px — `$break-desktop-min` in styles.scss. */
+import { DESKTOP_QUERY } from './breakpoints'
 
 /**
  * Tracks whether the viewport is at desktop width. Used to switch a screen's row-edit

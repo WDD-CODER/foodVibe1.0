@@ -55,6 +55,8 @@ import {
   type StockAiUnmatched
 } from './stock-ai-draft/stock-ai-draft.component'
 import type { StockExtractLine } from '@schemas/ai-stock-extract.schema'
+import { PHONE_QUERY, TABLET_DOWN_QUERY } from '@utils/breakpoints'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 
 interface RowState {
   counted: boolean
@@ -89,8 +91,19 @@ const LINE_ERRORS = ['UNIT_NOT_CONVERTIBLE', 'UNKNOWN_PRODUCT', 'DUPLICATE_PRODU
 /** Plan 645: rows drawn at first and added per "show more" — a business has thousands of products. */
 const PAGE_SIZE = 50
 
-/** Plan 655: below `$break-desktop` (1200px) the row is compact: a small counted mark, the base amount on demand. */
-const NARROW_QUERY = '(max-width: 1199.98px)'
+/** Plans 655/656: below desktop (≤ `$break-tablet-max`, 1023px) the row is compact: a small counted mark, the base amount on demand. */
+const NARROW_QUERY = TABLET_DOWN_QUERY
+
+/**
+ * Plan 657: the counted mark per screen size (box and tap area), by the plan 656 breakpoint names —
+ * phone ≤ `$break-phone-max`, tablet up to `$break-tablet-max`, desktop above. Desktop is the largest.
+ */
+type MarkSize = 'phone' | 'tablet' | 'desktop'
+const MARK_SIZES: Record<MarkSize, { box: string; tap: string }> = {
+  phone: { box: '0.875rem', tap: '2rem' },
+  tablet: { box: '1.125rem', tap: '2.5rem' },
+  desktop: { box: '1.5rem', tap: '3rem' }
+}
 
 /** The base-amount popover: its text and where it sits (viewport coordinates, from `placeInViewport`). */
 interface BasePopover {
@@ -140,6 +153,7 @@ function todayIso(): string {
     ListShellComponent,
     ListRowCheckboxComponent,
     LoaderComponent,
+    ModalShellComponent,
     StockBelowMinimumComponent,
     StockAiDraftComponent
   ],
@@ -206,6 +220,13 @@ export class StockCountComponent implements OnInit {
   )
   /** Plan 655: true below the desktop breakpoint; set from the media query and kept in step with it. */
   protected readonly narrow_ = signal(typeof window !== 'undefined' && window.matchMedia(NARROW_QUERY).matches)
+  /** Plan 657: true on a phone (≤ 767px); the base amount then opens in a light popup. */
+  protected readonly phone_ = signal(typeof window !== 'undefined' && window.matchMedia(PHONE_QUERY).matches)
+  /** Plan 657: the counted mark's size tokens for the current width. */
+  protected readonly mark_ = computed(() => {
+    const size: MarkSize = this.phone_() ? 'phone' : this.narrow_() ? 'tablet' : 'desktop'
+    return MARK_SIZES[size]
+  })
   /** Plan 654: the base-amount column is drawn only when one of the drawn rows has something in it. */
   protected readonly showBase_ = computed(() => this.shownRows_().some((r) => r.base !== ''))
   /** Plan 655: below desktop the base amount is no column — a small control opens it instead. */
@@ -317,7 +338,13 @@ export class StockCountComponent implements OnInit {
       if (!e.matches) this.basePopover_.set(null)
     }
     query.addEventListener('change', onChange)
-    this.destroyRef_.onDestroy(() => query.removeEventListener('change', onChange))
+    const phoneQuery = window.matchMedia(PHONE_QUERY)
+    const onPhoneChange = (e: MediaQueryListEvent): void => this.phone_.set(e.matches)
+    phoneQuery.addEventListener('change', onPhoneChange)
+    this.destroyRef_.onDestroy(() => {
+      query.removeEventListener('change', onChange)
+      phoneQuery.removeEventListener('change', onPhoneChange)
+    })
   })
 
   /** Plan 655: the base amount of a row, as the hover text and the popover show it. */
