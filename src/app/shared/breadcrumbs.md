@@ -27,6 +27,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `date-field/` | Day/month/year text field; on touch the native date input covers it (no button); `value` is an ISO date, `invalid` flags an impossible one (plan 467) | DateFieldComponent |
 | `time-field/` | HH:mm text field; a click or tap opens the native time picker; `value` is "HH:mm", `invalid` flags an impossible time (plan 537) | TimeFieldComponent |
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
+| `qr-code/` | A QR image of a link, drawn in the browser; the `qrcode` library loads lazily (plan 667) | QrCodeComponent |
 | `floor-map/` | The drawing of the room: tables at grid cells, optional drag (plan 665); grid arithmetic in the folder's geometry util | FloorMapComponent, footprintFor, movedCell, firstFreeCell, nextTableNumber, newKey, chairsFor, TABLE_PRESETS |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |

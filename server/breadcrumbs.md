@@ -31,7 +31,7 @@
 | `routes/ai/invoices.js` | Mounted at `/api/v1/ai/invoices` (plan 615, C-INVREAD): empty until plan 626 |
 | `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
-| `routes/floor-plan.js` | Mounted at `/api/v1/floor-plan` (plan 662, C-FLOOR, C-HOLD): GET / and PUT / of the one floor plan (plan 664); the hold routes come with plan 667 |
+| `routes/floor-plan.js` | Mounted at `/api/v1/floor-plan` (plan 662, C-FLOOR, C-HOLD): GET / and PUT / of the one floor plan (plan 664); the hold routes come with plan 667; PUT /confirm-mode (plan 667) changes only `tableService.confirmMode` of the owner's profile |
 | `routes/waitlist.js` | Mounted at `/api/v1/waitlist` (plan 662, C-WAIT): empty until plan 673 |
 | `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 662, C-CONV): empty until plan 675 |
 | `routes/sim.js` | Mounted at `/api/v1/sim` (plan 662, the simulated chat channel): empty until plan 675 |

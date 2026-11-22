@@ -372,6 +372,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 628: `GeminiService.readInvoice`, `ProductImportService.resolve`, the `invoice` argument of `apply`, `API.files` call the invoice read, memory, apply and file routes through the same `API` map (GeminiService.readInvoice, ProductImportService.resolve, the invoice argument of apply, API.files).
 - `PlatformAdminService.getLearningStats`, `PlatformAdminService.getLearningStatus` (`src/app/core/services/platform-admin.service.ts`) read the platform learning numbers through `API.admin(...)` (plan 630).
 - Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
+- Plan 667: `FrontDeskProfileDataService.setConfirmMode` (`src/app/core/services/front-desk-profile-data.service.ts`) — one PUT to `API.floorPlan('confirm-mode')`; patches the stored profile on success, returns `false` on a failure. The settings card and the service screen (plan 671) use it.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
@@ -484,6 +485,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `tableTapped`, `tableMoved`, `gridTapped`) with the pure grid arithmetic in `floor-geometry.util.ts` (`footprintFor`, `movedCell`,
   `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
 - When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.
+- Known copies: none.
+
+### qr-code — a QR image of a link
+
+- Status: stable — plan 667
+- Use: `app-qr-code` (`QrCodeComponent`, `src/app/shared/qr-code/`; inputs `value`, `size`, `altKey`): a PNG data URL drawn in the browser, the `qrcode` library loaded lazily on first use.
+- When: any link a person scans — never a second library call.
 - Known copies: none.
 
 ### floor-drag — Dragging a table, free drag on the room grid

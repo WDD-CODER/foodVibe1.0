@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { Component, signal, WritableSignal } from '@angular/core'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, Settings } from 'lucide-angular'
+import { LucideAngularModule, QrCode, Settings } from 'lucide-angular'
 import { FrontdeskSettingsPage } from './frontdesk-settings.page'
 import { DataExportCardComponent } from './components/data-export-card/data-export-card.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { StorageService } from '@services/async-storage.service'
 import { TranslationService } from '@services/translation.service'
@@ -29,7 +30,7 @@ const profile = (): FrontDeskProfile =>
 describe('FrontdeskSettingsPage (plan 553)', () => {
   let fixture: ComponentFixture<FrontdeskSettingsPage>
   let profile_: WritableSignal<FrontDeskProfile | null>
-  let data: { createFromTemplate: jasmine.Spy; save: jasmine.Spy }
+  let data: { createFromTemplate: jasmine.Spy; save: jasmine.Spy; setConfirmMode: jasmine.Spy }
   let userMsg: jasmine.SpyObj<UserMsgService>
 
   type Internals = {
@@ -52,15 +53,16 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
     fixture.detectChanges()
   }
 
-  async function setup(initial: FrontDeskProfile | null, owner = true): Promise<void> {
+  async function setup(initial: FrontDeskProfile | null, owner = true, tables = false): Promise<void> {
     profile_ = signal(initial)
     data = {
+      setConfirmMode: jasmine.createSpy('setConfirmMode').and.resolveTo(true),
       createFromTemplate: jasmine.createSpy('create').and.resolveTo(profile()),
       save: jasmine.createSpy('save').and.callFake(async (p: FrontDeskProfile) => p)
     }
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     TestBed.configureTestingModule({
-      imports: [FrontdeskSettingsPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings })],
+      imports: [FrontdeskSettingsPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, QrCode })],
       providers: [
         provideRouter([]),
         {
@@ -72,6 +74,7 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
             ...data
           }
         },
+        { provide: ModuleService, useValue: { has: (k: string) => tables || k !== 'tables' } },
         { provide: PermissionService, useValue: { can: () => owner } },
         { provide: StorageService, useValue: { query: () => Promise.resolve([]) } },
         { provide: TranslationService, useValue: { translate: (k: string | undefined) => k ?? '' } },
@@ -164,6 +167,70 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
     expect(el().querySelector('[data-testid="save"]')).toBeNull()
     expect(el().querySelector('[data-testid="owner-only"]')).not.toBeNull()
     expect(el().querySelector('fieldset.fs-fieldset')?.hasAttribute('disabled')).toBeTrue()
+  })
+
+  describe('table service (plan 667)', () => {
+    const withService = (): FrontDeskProfile =>
+      ({ ...profile(), tableService: { confirmMode: 'auto', holdMinutes: 20 } }) as unknown as FrontDeskProfile
+
+    it('without the tables module renders no card and no QR block, and saves no tableService', async () => {
+      await setup(profile())
+      expect(el().querySelector('[data-testid="table-service-card"]')).toBeNull()
+      expect(el().querySelector('[data-testid="booking-qr"]')).toBeNull()
+      cmp().patch({ displayName: 'שם חדש' })
+      await cmp().save()
+      expect('tableService' in data.save.calls.mostRecent().args[0]).toBeFalse()
+    })
+
+    it('with the tables module renders the card and the QR block', async () => {
+      await setup(profile(), true, true)
+      expect(el().querySelector('[data-testid="table-service-card"]')).not.toBeNull()
+      expect(el().querySelector('[data-testid="booking-qr"]')).not.toBeNull()
+      expect(el().querySelector('[data-testid="print-qr"]')).not.toBeNull()
+    })
+
+    it('saves the edited fields with the profile current confirmMode', async () => {
+      await setup(withService(), true, true)
+      const d = (cmp() as unknown as { draft_: () => { tableService: object } }).draft_()
+      cmp().patch({ tableService: { ...d.tableService, bufferMinutes: 10 } })
+      await cmp().save()
+      const body = data.save.calls.mostRecent().args[0]
+      expect(body.tableService.bufferMinutes).toBe(10)
+      expect(body.tableService.holdMinutes).toBe(20)
+      expect(body.tableService.confirmMode).toBe('auto')
+    })
+
+    it('blocks the save on an invalid table setting', async () => {
+      await setup(profile(), true, true)
+      const d = (cmp() as unknown as { draft_: () => { tableService: object } }).draft_()
+      cmp().patch({ tableService: { ...d.tableService, holdMinutes: 4 } })
+      await cmp().save()
+      expect(data.save).not.toHaveBeenCalled()
+    })
+
+    it('the switch is saved by its own call and is not an unsaved change', async () => {
+      await setup(profile(), true, true)
+      const sw = el().querySelector('[data-testid="confirm-mode-switch"]') as HTMLInputElement
+      sw.click()
+      await settle()
+      expect(data.setConfirmMode).toHaveBeenCalledOnceWith('auto')
+      expect(data.save).not.toHaveBeenCalled()
+      expect(cmp().hasRealChanges()).toBeFalse()
+      expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('fd_ts_mode_saved')
+    })
+
+    it('a failed switch shows the error toast', async () => {
+      await setup(profile(), true, true)
+      data.setConfirmMode.and.resolveTo(false)
+      ;(el().querySelector('[data-testid="confirm-mode-switch"]') as HTMLInputElement).click()
+      await settle()
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('save_failed')
+    })
+
+    it('staff see the switch disabled', async () => {
+      await setup(profile(), false, true)
+      expect((el().querySelector('[data-testid="confirm-mode-switch"]') as HTMLInputElement).disabled).toBeTrue()
+    })
   })
 
   it('a staff member without a profile sees the empty state', async () => {

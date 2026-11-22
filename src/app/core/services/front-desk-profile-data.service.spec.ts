@@ -1,4 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing'
+import { provideHttpClient } from '@angular/common/http'
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { FrontDeskProfileDataService } from './front-desk-profile-data.service'
 import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
@@ -21,6 +23,8 @@ describe('FrontDeskProfileDataService', () => {
     storageSpy.query.and.returnValue(Promise.resolve([]))
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         FrontDeskProfileDataService,
         { provide: StorageService, useValue: storageSpy },
         {
@@ -60,4 +64,38 @@ describe('FrontDeskProfileDataService', () => {
     expect(saved?._id).toBe('p1')
     expect(service.profile_()?._id).toBe('p1')
   }))
+
+  describe('setConfirmMode', () => {
+    let http: HttpTestingController
+    beforeEach(fakeAsync(() => {
+      http = TestBed.inject(HttpTestingController)
+      storageSpy.query.and.returnValue(Promise.resolve([stored]))
+      void service.ensureLoaded()
+      tick()
+    }))
+
+    it('sends one PUT and puts the mode into profile_', fakeAsync(() => {
+      let ok: boolean | undefined
+      void service.setConfirmMode('auto').then((r) => (ok = r))
+      const req = http.expectOne((r) => r.url.endsWith('/api/v1/floor-plan/confirm-mode'))
+      expect(req.request.method).toBe('PUT')
+      expect(req.request.body).toEqual({ confirmMode: 'auto' })
+      req.flush({ confirmMode: 'auto' })
+      tick()
+      expect(ok).toBeTrue()
+      expect(service.profile_()?.tableService?.confirmMode).toBe('auto')
+      http.verify()
+    }))
+
+    it('a failed call leaves profile_ unchanged and returns false', fakeAsync(() => {
+      let ok: boolean | undefined
+      void service.setConfirmMode('auto').then((r) => (ok = r))
+      http
+        .expectOne((r) => r.url.endsWith('/api/v1/floor-plan/confirm-mode'))
+        .flush({}, { status: 500, statusText: 'x' })
+      tick()
+      expect(ok).toBeFalse()
+      expect(service.profile_()).toEqual(stored)
+    }))
+  })
 })

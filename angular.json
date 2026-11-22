@@ -25,6 +25,10 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "allowedCommonJsDependencies": [
+              "qrcode",
+              "dijkstrajs"
+            ],
             "assets": [
               "src/favicon.ico",
               "src/assets",
