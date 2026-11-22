@@ -1,0 +1,197 @@
+import type { FloorArea, FloorJoin, FloorTable, FloorPlanBody } from '@models/floor-plan.model'
+import {
+  coveredBy,
+  firstFreeCell,
+  MAX_TABLES,
+  newKey,
+  nextTableNumber,
+  sizeFor
+} from 'src/app/shared/floor-map/floor-geometry.util'
+
+/** Plan 684: the editing rules of the room draft. Pure: every function returns a new plan and never changes its input. */
+
+export const MIN_GRID = 10
+export const MAX_GRID = 80
+export const MAX_AREAS = 10
+export const MAX_SEATS = 30
+export const NUMBER_MAX_LENGTH = 6
+const AREA_NAME_MAX = 200
+
+/** What a panel may change on a table. Size (`w`, `h`) and place follow from these, never typed. */
+export type TablePatch = Partial<
+  Pick<FloorTable, 'number' | 'shape' | 'minSeats' | 'maxSeats' | 'areaKey' | 'turned' | 'active' | 'online'>
+>
+
+export type AreaOp =
+  | { type: 'add'; key: string; name: string }
+  | { type: 'rename'; key: string; name: string }
+  | { type: 'move'; key: string; dir: 'up' | 'down' }
+  | { type: 'remove'; key: string }
+
+const clamp = (n: number, min: number, max: number): number => Math.min(Math.max(n, min), max)
+
+/** The table moved back inside the room when its covered cells stick out. */
+function pulledBack(table: FloorTable, grid: FloorPlanBody['grid']): FloorTable {
+  const { w, h } = coveredBy(table)
+  return {
+    ...table,
+    x: clamp(table.x, 0, Math.max(0, grid.cols - w)),
+    y: clamp(table.y, 0, Math.max(0, grid.rows - h))
+  }
+}
+
+/** One table changed. Size follows shape and seats; the seats stay in order; a join across areas is dropped. */
+export function withTable(
+  plan: FloorPlanBody,
+  key: string,
+  patch: TablePatch
+): { plan: FloorPlanBody; droppedJoins: FloorJoin[] } {
+  const current = plan.tables.find((t) => t.key === key)
+  if (!current) return { plan, droppedJoins: [] }
+  let next: FloorTable = { ...current, ...patch }
+  if (patch.maxSeats !== undefined) {
+    next.maxSeats = clamp(Math.round(patch.maxSeats), 1, MAX_SEATS)
+    if (next.maxSeats < next.minSeats) next.minSeats = next.maxSeats
+  }
+  if (patch.minSeats !== undefined) {
+    next.minSeats = clamp(Math.round(patch.minSeats), 1, next.maxSeats)
+  }
+  if (!next.active) next.online = false
+  if (patch.shape !== undefined || patch.maxSeats !== undefined) {
+    next = { ...next, ...sizeFor(next.shape, next.maxSeats) }
+  }
+  next = pulledBack(next, plan.grid)
+  const tables = plan.tables.map((t) => (t.key === key ? next : t))
+  let joins = plan.joins
+  let droppedJoins: FloorJoin[] = []
+  if (patch.areaKey !== undefined && patch.areaKey !== current.areaKey) {
+    droppedJoins = plan.joins.filter((j) => j.tableKeys.includes(key))
+    joins = plan.joins.filter((j) => !j.tableKeys.includes(key))
+  }
+  return { plan: { ...plan, tables, joins }, droppedJoins }
+}
+
+/** An error key when `text` cannot be the number of table `key`, else null. */
+export function numberError(plan: FloorPlanBody, key: string, text: string): string | null {
+  const value = text.trim()
+  if (!value) return 'fp_err_number_required'
+  if (plan.tables.some((t) => t.key !== key && t.number.trim() === value)) return 'fp_err_number_taken'
+  return null
+}
+
+/** A copy of the table: new key, next number, first free cell. Null at the table limit or for an unknown key. */
+export function duplicateTable(plan: FloorPlanBody, key: string): { plan: FloorPlanBody; key: string } | null {
+  const source = plan.tables.find((t) => t.key === key)
+  if (!source || plan.tables.length >= MAX_TABLES) return null
+  const { x, y } = firstFreeCell(plan, coveredBy(source))
+  const copy: FloorTable = { ...source, key: newKey(), number: nextTableNumber(plan), x, y }
+  return { plan: { ...plan, tables: [...plan.tables, copy] }, key: copy.key }
+}
+
+/** The table and every join that lists it are gone; `removed` is what an undo puts back. */
+export function withoutTable(
+  plan: FloorPlanBody,
+  key: string
+): { plan: FloorPlanBody; removed: { tables: FloorTable[]; joins: FloorJoin[] } } {
+  const table = plan.tables.find((t) => t.key === key)
+  if (!table) return { plan, removed: { tables: [], joins: [] } }
+  return {
+    plan: {
+      ...plan,
+      tables: plan.tables.filter((t) => t.key !== key),
+      joins: plan.joins.filter((j) => !j.tableKeys.includes(key))
+    },
+    removed: { tables: [table], joins: plan.joins.filter((j) => j.tableKeys.includes(key)) }
+  }
+}
+
+/**
+ * Puts tables and joins back (undo, or "restore" after a refused save) with their saved values. A table whose key is
+ * already there is skipped; a number taken meanwhile is replaced by the next free one; a gone area falls to the first.
+ */
+export function restoreDropped(plan: FloorPlanBody, tables: FloorTable[], joins: FloorJoin[]): FloorPlanBody {
+  let result: FloorPlanBody = plan
+  for (const table of tables) {
+    if (result.tables.some((t) => t.key === table.key)) continue
+    const areaKey = result.areas.some((a) => a.key === table.areaKey)
+      ? table.areaKey
+      : (result.areas[0]?.key ?? table.areaKey)
+    const number = result.tables.some((t) => t.number.trim() === table.number.trim())
+      ? nextTableNumber(result)
+      : table.number
+    result = { ...result, tables: [...result.tables, pulledBack({ ...table, areaKey, number }, result.grid)] }
+  }
+  const have = new Set(result.tables.map((t) => t.key))
+  const addable = joins.filter(
+    (j) => !result.joins.some((o) => o.key === j.key) && j.tableKeys.every((k) => have.has(k))
+  )
+  return addable.length ? { ...result, joins: [...result.joins, ...addable] } : result
+}
+
+/** Keys of the tables whose drawn cells share a cell with another table (tables that only touch do not count). */
+export function overlapping(plan: Pick<FloorPlanBody, 'tables'>): string[] {
+  const boxes = plan.tables.map((t) => ({ key: t.key, x: t.x, y: t.y, ...coveredBy(t) }))
+  const hit = new Set<string>()
+  for (let i = 0; i < boxes.length; i++) {
+    for (let j = i + 1; j < boxes.length; j++) {
+      const a = boxes[i]
+      const b = boxes[j]
+      if (a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h) {
+        hit.add(a.key)
+        hit.add(b.key)
+      }
+    }
+  }
+  return plan.tables.filter((t) => hit.has(t.key)).map((t) => t.key)
+}
+
+/** The smallest room that still holds every table (never under 10 × 10). */
+export function minGrid(plan: Pick<FloorPlanBody, 'tables'>): { cols: number; rows: number } {
+  let cols = MIN_GRID
+  let rows = MIN_GRID
+  for (const t of plan.tables) {
+    const { w, h } = coveredBy(t)
+    cols = Math.max(cols, t.x + w)
+    rows = Math.max(rows, t.y + h)
+  }
+  return { cols, rows }
+}
+
+/** An error key when `name` cannot be the name of area `key`, else null. */
+export function areaNameError(plan: Pick<FloorPlanBody, 'areas'>, key: string, name: string): string | null {
+  const value = name.trim()
+  if (!value || value.length > AREA_NAME_MAX) return 'fp_err_area_name'
+  if (plan.areas.some((a) => a.key !== key && a.name.trim() === value)) return 'fp_err_area_name'
+  return null
+}
+
+const inOrder = (areas: FloorArea[]): FloorArea[] => [...areas].sort((a, b) => a.order - b.order)
+
+/** One change of the areas, or null when it is refused (a bad name, ten areas, tables in the area, the last area). */
+export function withArea(plan: FloorPlanBody, op: AreaOp): FloorPlanBody | null {
+  switch (op.type) {
+    case 'add': {
+      if (plan.areas.length >= MAX_AREAS || areaNameError(plan, op.key, op.name)) return null
+      const order = plan.areas.reduce((m, a) => Math.max(m, a.order), -1) + 1
+      return { ...plan, areas: [...plan.areas, { key: op.key, name: op.name.trim(), order }] }
+    }
+    case 'rename': {
+      if (areaNameError(plan, op.key, op.name) || !plan.areas.some((a) => a.key === op.key)) return null
+      return { ...plan, areas: plan.areas.map((a) => (a.key === op.key ? { ...a, name: op.name.trim() } : a)) }
+    }
+    case 'move': {
+      const sorted = inOrder(plan.areas)
+      const i = sorted.findIndex((a) => a.key === op.key)
+      const j = op.dir === 'up' ? i - 1 : i + 1
+      if (i < 0 || j < 0 || j >= sorted.length) return null
+      const orders = new Map(sorted.map((a, idx) => [a.key, idx]))
+      orders.set(sorted[i].key, j)
+      orders.set(sorted[j].key, i)
+      return { ...plan, areas: plan.areas.map((a) => ({ ...a, order: orders.get(a.key) ?? a.order })) }
+    }
+    case 'remove': {
+      if (plan.areas.length <= 1 || plan.tables.some((t) => t.areaKey === op.key)) return null
+      return { ...plan, areas: plan.areas.filter((a) => a.key !== op.key) }
+    }
+  }
+}

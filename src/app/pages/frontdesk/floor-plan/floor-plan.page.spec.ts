@@ -2,7 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal, type WritableSignal } from '@angular/core'
 import { provideRouter } from '@angular/router'
 import { Directionality } from '@angular/cdk/bidi'
-import { AlertTriangle, LayoutGrid, LucideAngularModule } from 'lucide-angular'
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  LayoutGrid,
+  LucideAngularModule,
+  Plus,
+  Trash2,
+  X
+} from 'lucide-angular'
 import { FloorPlanPage } from './floor-plan.page'
 import { FloorPlanDataService } from '@services/floor-plan-data.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
@@ -59,7 +69,14 @@ describe('FloorPlanPage (plan 665)', () => {
   const preset4 = { id: 'p4', labelKey: 'fp_preset_4', shape: 'square' as const, minSeats: 2, maxSeats: 4 }
 
   async function setup(
-    opts: { saved?: FloorPlan | null; owner?: boolean; areas?: string[]; saveOk?: boolean; loadFails?: boolean } = {}
+    opts: {
+      saved?: FloorPlan | null
+      owner?: boolean
+      areas?: string[]
+      saveOk?: boolean
+      loadFails?: boolean
+      saveAnswer?: unknown
+    } = {}
   ) {
     plan_ = signal(opts.saved ?? null)
     failed_ = signal(opts.loadFails ?? false)
@@ -68,11 +85,30 @@ describe('FloorPlanPage (plan 665)', () => {
       load: jasmine.createSpy('load').and.resolveTo(undefined),
       save: jasmine
         .createSpy('save')
-        .and.callFake(async () => (opts.saveOk === false ? { ok: false, code: 'X' } : { ok: true, plan: SAVED }))
+        .and.callFake(
+          async () => opts.saveAnswer ?? (opts.saveOk === false ? { ok: false, code: 'X' } : { ok: true, plan: SAVED })
+        )
     }
-    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
+    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', [
+      'onSetSuccessMsg',
+      'onSetErrorMsg',
+      'onSetSuccessMsgWithUndo'
+    ])
     TestBed.configureTestingModule({
-      imports: [FloorPlanPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, LayoutGrid, AlertTriangle })],
+      imports: [
+        FloorPlanPage,
+        LucideAngularModule.pick({
+          ...TEST_LUCIDE_ICONS,
+          LayoutGrid,
+          AlertTriangle,
+          ChevronDown,
+          ChevronUp,
+          Copy,
+          Plus,
+          Trash2,
+          X
+        })
+      ],
       providers: [
         provideRouter([]),
         { provide: FloorPlanDataService, useValue: { ...service, plan_, loadFailed_: failed_ } },
@@ -153,6 +189,130 @@ describe('FloorPlanPage (plan 665)', () => {
     await setup({ loadFails: true })
     expect(el().querySelector('[data-testid="fp-load-failed"]')).not.toBeNull()
     expect(el().querySelector('[data-testid="floor-grid"]')).toBeNull()
+  })
+
+  describe('editing (plan 684)', () => {
+    const TWO: FloorPlan = {
+      ...SAVED,
+      tables: [
+        {
+          key: 'tab001',
+          number: '1',
+          areaKey: 'areaa1',
+          shape: 'square',
+          minSeats: 2,
+          maxSeats: 4,
+          x: 0,
+          y: 0,
+          w: 3,
+          h: 3,
+          turned: false,
+          active: true,
+          online: true
+        },
+        {
+          key: 'tab002',
+          number: '2',
+          areaKey: 'areaa1',
+          shape: 'square',
+          minSeats: 2,
+          maxSeats: 4,
+          x: 5,
+          y: 0,
+          w: 3,
+          h: 3,
+          turned: false,
+          active: true,
+          online: true
+        }
+      ],
+      joins: [{ key: 'join01', tableKeys: ['tab001', 'tab002'], minSeats: 2, maxSeats: 8, online: true }]
+    } as unknown as FloorPlan
+    const click = async (testId: string) => {
+      ;(el().querySelector(`[data-testid="${testId}"]`) as HTMLElement).click()
+      await settle()
+    }
+    type Full = { draft_: () => { tables: { key: string }[]; joins: { key: string }[] } }
+    const draft = () => (cmp() as unknown as Full).draft_()
+
+    it('shows the room panel with no selection and the table panel after a tap', async () => {
+      await setup({ saved: TWO })
+      expect(el().querySelector('[data-testid="room-panel"]')).not.toBeNull()
+      await click('floor-table-1')
+      expect(el().querySelector('[data-testid="table-panel"]')).not.toBeNull()
+      expect(el().querySelector('[data-testid="room-panel"]')).toBeNull()
+    })
+
+    it('removing a table and pressing the undo brings back the table and its joins', async () => {
+      await setup({ saved: TWO })
+      await click('floor-table-1')
+      await click('tp-remove')
+      expect(draft().tables.map((t) => t.key)).toEqual(['tab002'])
+      expect(draft().joins).toEqual([])
+      expect(userMsg.onSetSuccessMsgWithUndo).toHaveBeenCalledWith('fp_table_removed', jasmine.any(Function))
+      userMsg.onSetSuccessMsgWithUndo.calls.mostRecent().args[1]()
+      await settle()
+      expect(
+        draft()
+          .tables.map((t) => t.key)
+          .sort()
+      ).toEqual(['tab001', 'tab002'])
+      expect(draft().joins.map((j) => j.key)).toEqual(['join01'])
+    })
+
+    it('duplicates the selected table and selects the copy', async () => {
+      await setup({ saved: TWO })
+      await click('floor-table-1')
+      await click('tp-duplicate')
+      expect(draft().tables.length).toBe(3)
+      expect(el().querySelector('[data-testid="floor-table-3"]')).not.toBeNull()
+    })
+
+    it('Escape clears the selection', async () => {
+      await setup({ saved: TWO })
+      await click('floor-table-1')
+      expect(cmp().selectedKey_()).toBe('tab001')
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      await settle()
+      expect(cmp().selectedKey_()).toBeNull()
+    })
+
+    it('keeps the draft and shows the in-use notice on 409 TABLE_IN_USE, and restores the tables', async () => {
+      await setup({
+        saved: TWO,
+        saveAnswer: {
+          ok: false,
+          code: 'TABLE_IN_USE',
+          bookings: [
+            { _id: 'b1', date: '2026-12-01', time: '19:00', partySize: 2, tableKeys: ['tab001'] },
+            { _id: 'b2', date: '2026-12-02', time: '19:00', partySize: 2, tableKeys: ['tab001'] }
+          ]
+        }
+      })
+      await click('floor-table-1')
+      await click('tp-remove')
+      expect(await cmp().save()).toBeFalse()
+      await settle()
+      const notice = el().querySelector('[data-testid="fp-in-use"]') as HTMLElement
+      expect(notice.getAttribute('role')).toBe('alert')
+      expect(notice.textContent).toContain('fp_in_use_title')
+      expect(notice.textContent).toContain('fp_in_use_row')
+      expect(draft().tables.length).toBe(1)
+      await click('fp-in-use-restore')
+      expect(el().querySelector('[data-testid="fp-in-use"]')).toBeNull()
+      expect(
+        draft()
+          .tables.map((t) => t.key)
+          .sort()
+      ).toEqual(['tab001', 'tab002'])
+      expect(draft().joins.length).toBe(1)
+    })
+
+    it('shows no panel to staff', async () => {
+      await setup({ saved: TWO, owner: false })
+      await click('floor-table-1')
+      expect(el().querySelector('.floor-plan__panel')).toBeNull()
+    })
   })
 
   it('shows no preset row and no save button to a member without editFrontDesk', async () => {

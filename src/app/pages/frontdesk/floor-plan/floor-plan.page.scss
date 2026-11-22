@@ -22,6 +22,7 @@
 }
 
 .floor-plan__label {
+  line-height: var(--lh-tight, 1.3);
   color: var(--color-text-secondary);
   font-size: var(--fs-base);
   font-weight: var(--fw-semibold);
@@ -32,6 +33,76 @@
 
   color: var(--color-text-muted);
   font-size: var(--fs-base);
+}
+
+.floor-plan__body {
+  display: flex;
+  inline-size: 100%;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.floor-plan__map {
+  min-inline-size: 0;
+}
+
+.floor-plan__panel {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.floor-plan__notice {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+
+  background: var(--bg-warning-soft);
+  color: var(--text-warning);
+
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+}
+
+.floor-plan__notice-title,
+.floor-plan__notice-tip,
+.floor-plan__notice-rows {
+  margin: 0;
+}
+
+.floor-plan__notice-title {
+  font-weight: var(--fw-semibold);
+}
+
+.floor-plan__notice-rows {
+  padding-inline-start: var(--space-4);
+}
+
+.floor-plan__overlap {
+  margin: 0;
+  line-height: var(--lh-tight, 1.3);
+
+  color: var(--text-warning);
+  font-size: var(--fs-base);
+}
+
+@media (min-width: $break-tablet-min) {
+  .floor-plan__body {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .floor-plan__map {
+    flex: 1 1 auto;
+  }
+
+  .floor-plan__panel {
+    flex: none;
+
+    inline-size: 20rem;
+  }
 }
 
 .floor-plan__state {

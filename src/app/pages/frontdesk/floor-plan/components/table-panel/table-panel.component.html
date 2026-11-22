@@ -1,0 +1,130 @@
+<div class="table-panel" data-testid="table-panel">
+  <div class="table-panel__head">
+    <h2 class="table-panel__title">{{ title_() }}</h2>
+    <button
+      type="button"
+      class="c-icon-btn"
+      data-testid="table-panel-close"
+      [attr.aria-label]="'close' | translatePipe"
+      (click)="closed.emit()"
+    >
+      <lucide-icon name="x" [size]="18"></lucide-icon>
+    </button>
+  </div>
+
+  <app-form-field label="fp_field_number" forId="tp-number" [error]="numberError_()">
+    <input
+      #numberInput
+      id="tp-number"
+      class="c-input"
+      type="text"
+      data-testid="tp-number"
+      autocomplete="off"
+      [class.c-input--invalid]="!!numberError_()"
+      [attr.aria-invalid]="numberError_() ? 'true' : null"
+      [attr.maxlength]="numberMax"
+      [value]="table().number"
+      (input)="onNumberInput($event)"
+      (blur)="onNumberBlur($event)"
+    />
+  </app-form-field>
+
+  <div class="table-panel__row" role="radiogroup" [attr.aria-label]="'fp_field_shape' | translatePipe">
+    <span class="table-panel__label">{{ 'fp_field_shape' | translatePipe }}</span>
+    <div class="c-chip-group">
+      @for (shape of shapes; track shape.value) {
+        <label class="c-chip c-chip--toggle">
+          <input
+            type="radio"
+            name="tp-shape"
+            [attr.data-testid]="'tp-shape-' + shape.value"
+            [checked]="table().shape === shape.value"
+            (change)="setShape(shape.value)"
+          />
+          <span>{{ shape.labelKey | translatePipe }}</span>
+        </label>
+      }
+    </div>
+  </div>
+
+  <div class="table-panel__seats">
+    <div class="table-panel__row">
+      <span class="table-panel__label">{{ 'fp_field_seats_min' | translatePipe }}</span>
+      <app-counter
+        data-testid="tp-min"
+        [value]="table().minSeats"
+        [min]="1"
+        [max]="table().maxSeats"
+        (valueChange)="tableChange.emit({ minSeats: $event })"
+      />
+    </div>
+    <div class="table-panel__row">
+      <span class="table-panel__label">{{ 'fp_field_seats_max' | translatePipe }}</span>
+      <app-counter
+        data-testid="tp-max"
+        [value]="table().maxSeats"
+        [min]="table().minSeats"
+        [max]="maxSeatsLimit"
+        (valueChange)="tableChange.emit({ maxSeats: $event })"
+      />
+    </div>
+  </div>
+
+  <div class="c-chip-group">
+    <label class="c-chip c-chip--toggle">
+      <input type="checkbox" data-testid="tp-turned" [checked]="table().turned" (change)="setFlag('turned', $event)" />
+      <span>{{ 'fp_turned' | translatePipe }}</span>
+    </label>
+  </div>
+
+  <app-form-field label="fp_field_area" forId="tp-area">
+    <app-custom-select
+      triggerId="tp-area"
+      [options]="areaOptions_()"
+      [translateLabels]="false"
+      [ngModel]="table().areaKey"
+      (ngModelChange)="tableChange.emit({ areaKey: $event })"
+    />
+  </app-form-field>
+
+  <div class="c-chip-group">
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="checkbox"
+        role="switch"
+        data-testid="tp-active"
+        [checked]="table().active"
+        (change)="setFlag('active', $event)"
+      />
+      <span>{{ 'fp_active' | translatePipe }}</span>
+    </label>
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="checkbox"
+        role="switch"
+        data-testid="tp-online"
+        [checked]="table().online && table().active"
+        [disabled]="!table().active"
+        (change)="setFlag('online', $event)"
+      />
+      <span>{{ 'fp_online' | translatePipe }}</span>
+    </label>
+  </div>
+
+  <div class="table-panel__actions">
+    <button
+      type="button"
+      class="c-btn-ghost"
+      data-testid="tp-duplicate"
+      [disabled]="atLimit_()"
+      (click)="duplicate.emit()"
+    >
+      <lucide-icon name="copy" [size]="16"></lucide-icon>
+      {{ 'fp_duplicate' | translatePipe }}
+    </button>
+    <button type="button" class="c-btn-ghost" data-testid="tp-remove" (click)="remove.emit()">
+      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+      {{ 'fp_delete' | translatePipe }}
+    </button>
+  </div>
+</div>

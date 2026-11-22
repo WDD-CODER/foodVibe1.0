@@ -68,15 +68,61 @@
     }
   </div>
 
-  <app-floor-map
-    [plan]="draft_()!"
-    [selectedKeys]="selectedKeys_()"
-    [draggable]="canEdit_()"
-    [dimOtherThanArea]="areaKey_()"
-    (tableTapped)="onTableTapped($event)"
-    (tableMoved)="onTableMoved($event)"
-    (gridTapped)="clearSelection()"
-  />
+  @if (canEdit_() && inUse_(); as rows) {
+  <div class="floor-plan__notice" role="alert" data-testid="fp-in-use">
+    <p class="floor-plan__notice-title">{{ 'fp_in_use_title' | translatePipe }}</p>
+    <ul class="floor-plan__notice-rows">
+      @for (row of rows; track row.table.key) {
+      <li>{{ inUseText(row) }}</li>
+      }
+    </ul>
+    <p class="floor-plan__notice-tip">{{ 'fp_in_use_tip' | translatePipe }}</p>
+    <button type="button" class="c-btn-ghost" data-testid="fp-in-use-restore" (click)="restoreInUse()">
+      {{ 'fp_in_use_restore' | translatePipe }}
+    </button>
+  </div>
+  } @if (canEdit_() && overlapText_()) {
+  <p class="floor-plan__overlap" data-testid="fp-overlap">{{ overlapText_() }}</p>
+  }
+
+  <div class="floor-plan__body">
+    <app-floor-map
+      class="floor-plan__map"
+      [plan]="draft_()!"
+      [selectedKeys]="selectedKeys_()"
+      [draggable]="canEdit_()"
+      [dimOtherThanArea]="areaKey_()"
+      [warnKeys]="canEdit_() ? warnKeys_() : []"
+      (tableTapped)="onTableTapped($event)"
+      (tableMoved)="onTableMoved($event)"
+      (gridTapped)="clearSelection()"
+    />
+
+    @if (canEdit_()) {
+    <aside class="floor-plan__panel">
+      @if (selectedTable_(); as table) {
+      <app-floor-table-panel
+        [table]="table"
+        [plan]="draft_()!"
+        [focusNumber]="focusNumber_()"
+        (tableChange)="onTableChange($event)"
+        (duplicate)="onDuplicate()"
+        (remove)="onRemoveTable()"
+        (closed)="clearSelection()"
+      />
+      } @else {
+      <app-floor-room-panel
+        [plan]="draft_()!"
+        (areaAdded)="onAreaOp({ type: 'add', key: $event.key, name: $event.name })"
+        (areaRenamed)="onAreaOp({ type: 'rename', key: $event.key, name: $event.name })"
+        (areaMoved)="onAreaOp({ type: 'move', key: $event.key, dir: $event.dir })"
+        (areaRemoved)="onAreaOp({ type: 'remove', key: $event })"
+        (gridChange)="onGridChange($event)"
+      />
+      }
+    </aside>
+    }
+  </div>
 
   @if (tableCount_() === 0) {
   <app-empty-state
