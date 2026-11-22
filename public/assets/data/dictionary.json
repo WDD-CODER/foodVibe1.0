@@ -2673,6 +2673,23 @@
     "export_full_recipe": "המתכון המלא",
     "export_total_prep_time": "זמן הכנה כולל (דקות)",
     "export_labor_time_min": "זמן עבודה (דק')",
-    "export_cooking_time_sec": "זמן בישול (שנ')"
+    "export_cooking_time_sec": "זמן בישול (שנ')",
+    "fp_chip": "מפת המקום",
+    "fp_title": "מפת המקום",
+    "fp_add_label": "הוספת שולחן",
+    "fp_preset_2": "ל-2",
+    "fp_preset_4": "ל-4",
+    "fp_preset_6": "ל-6",
+    "fp_preset_8": "ל-8",
+    "fp_preset_bar": "מקום בבר",
+    "fp_area_all": "הכול",
+    "fp_table_label": "שולחן {number}, {min}–{max} מקומות",
+    "fp_state_inactive": "לא פעיל",
+    "fp_empty": "עדיין אין שולחנות. הוסיפו שולחן ראשון מהכפתורים למעלה",
+    "fp_empty_readonly": "בעל העסק עדיין לא שרטט את המקום",
+    "fp_read_only_note": "רק בעל העסק יכול לשנות את המפה",
+    "fp_saved": "המפה נשמרה",
+    "fp_save_failed": "לא הצלחנו לשמור את המפה",
+    "fp_load_failed": "לא הצלחנו לטעון את המפה"
   }
 }

@@ -107,6 +107,13 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
       icon: 'settings',
       path: '/frontdesk/settings',
       modules: ['frontdesk']
+    },
+    {
+      id: 'floor-plan',
+      labelKey: 'fp_chip',
+      icon: 'layout-grid',
+      path: '/frontdesk/floor-plan',
+      modules: ['tables']
     }
   ]
 }

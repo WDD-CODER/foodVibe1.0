@@ -20,7 +20,8 @@ describe('routes: unsaved-work guards', () => {
     'inventory/equipment/edit/:id',
     'suppliers/add',
     'suppliers/edit/:id',
-    'settings'
+    'settings',
+    'frontdesk/floor-plan'
   ]) {
     it(`${path} has the pending-changes guard`, () => {
       expect(all.get(path)?.canDeactivate).toContain(pendingChangesGuard)

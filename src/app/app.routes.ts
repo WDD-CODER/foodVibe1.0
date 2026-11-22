@@ -191,6 +191,12 @@ export const routes: Routes = [
     canDeactivate: [pendingChangesGuard],
   },
   {
+    path: 'frontdesk/floor-plan',
+    loadComponent: () => import('./pages/frontdesk/floor-plan/floor-plan.page').then(m => m.FloorPlanPage),
+    canActivate: [authGuard, moduleGuard(['tables'])],
+    canDeactivate: [pendingChangesGuard],
+  },
+  {
     path: 'frontdesk/onboarding',
     loadComponent: () => import('./pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding.page').then(m => m.FrontDeskOnboardingComponent),
     canActivate: [authGuard, moduleGuard(['frontdesk'])],
