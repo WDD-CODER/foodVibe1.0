@@ -31,6 +31,12 @@ export function jerusalemEpoch(date: string, time: string): number {
   return guess
 }
 
+/** The Jerusalem wall date (YYYY-MM-DD) and time (HH:mm) of an epoch; the inverse of `jerusalemEpoch`. Pure. */
+export function jerusalemDateTime(epoch: number): { date: string; time: string } {
+  const iso = new Date(wallAsUtc(epoch)).toISOString()
+  return { date: iso.slice(0, 10), time: iso.slice(11, 16) }
+}
+
 /** Day of the week of a calendar date: Sunday = 0 … Saturday = 6 (no time zone). */
 export function weekdayOf(date: string): number {
   const [y, m, d] = date.split('-').map(Number)
