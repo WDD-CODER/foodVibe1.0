@@ -206,6 +206,28 @@ describe('ExportService', () => {
     })
   })
 
+  describe('getFullRecipePreviewPayload (plan 471: the printed recipe)', () => {
+    it('hands back the full-recipe payload of RecipeExportService: steps as a section, no price column', () => {
+      const recipe: Recipe = {
+        _id: 'r1',
+        nameHebrew: 'Test',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+        steps: [{ order: 1, instruction: 'Mix', laborTimeMinutes: 5 }],
+        yieldAmount: 1,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
+      }
+      scalingSpy.getScaledIngredients.and.returnValue([
+        { name: 'Flour', amount: 100, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' }
+      ] as ScaledIngredientRow[])
+      const payload = service.getFullRecipePreviewPayload(recipe, 1)
+      expect(payload.recipeSheetStepsAsSection).toBeTrue()
+      expect(payload.sections[0].headerRow?.length).toBe(3)
+      expect(payload.sections[1].rows).toEqual([['1.', 'Mix', 5]])
+    })
+  })
+
   describe('getRecipeInfoPreviewPayload and exportRecipeInfo (Plan 108)', () => {
     it('should return payload with recipeSheet, recipeSheetLabels, and ingredients section', () => {
       const recipe: Recipe = {

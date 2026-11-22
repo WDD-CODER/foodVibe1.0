@@ -39,6 +39,9 @@ export class ExportService {
   getShoppingListPreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
     return this.recipeExport_.getShoppingListPreviewPayload(recipe, quantity)
   }
+  getFullRecipePreviewPayload(recipe: Recipe, quantity: number): ExportPayload {
+    return this.recipeExport_.getFullRecipePreviewPayload(recipe, quantity)
+  }
 
   exportMenuInfo(menu: MenuEvent, recipes: Recipe[]): Promise<void> {
     return this.menuExport_.exportMenuInfo(menu, recipes)
