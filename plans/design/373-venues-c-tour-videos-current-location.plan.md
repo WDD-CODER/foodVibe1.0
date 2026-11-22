@@ -37,6 +37,10 @@ src/app/pages/venues/**
 src/app/core/models/venue.model.ts
 shared/schemas/entities/venue.schema.ts
 server/test/**
+src/app/core/utils/**
+src/app/core/utils/date-input.util.spec.ts
+src/app/core/utils/video-link.util.spec.ts
+docs/brain/component-families.md
 ```
 
 ## Read Scope
