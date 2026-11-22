@@ -153,6 +153,8 @@ e2e/ui/665-1.spec.ts
 e2e/ui/665-2.spec.ts
 e2e/ui/665-3.spec.ts
 e2e/ui/665-4.spec.ts
+src/app/core/guards/pending-changes-routes.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
