@@ -4,6 +4,7 @@
  * Stage history, `closedAt` and notes are written only here, with the actor taken from the token, so a
  * client can never rewrite them (the generic data API strips them). Plan 446 adds closing / finish / reopen.
  * Plan 519: PUT /:id/logistics saves the owner's site-logistics answers (stamped by the server, `editLogistics`).
+ * Plan 624: PUT /:id/loading keeps the loading-list ticks (`siteLogistics.loaded`, any member, stamped by the server).
  */
 const { Router } = require('express')
 const mongoose = require('mongoose')
@@ -345,6 +346,44 @@ router.put('/:id/logistics', verifyToken, requireModule('event_logistics'), asyn
     await writeConditional(req, res, event, { $set: { siteLogistics, ...(logistics && { logistics }), updatedAt: now } }, 'events.logistics.saved')
   } catch (err) {
     fail(req, res, 'logistics', err)
+  }
+})
+
+// PUT /api/v1/events/:id/loading  { key, loaded }
+// Any member of the business (markArrival), module event_logistics, not on a finished event. Ticking twice keeps the first
+// stamp; one atomic pipeline update per key, so two people ticking at once do not overwrite each other.
+router.put('/:id/loading', verifyToken, requireModule('event_logistics'), async (req, res) => {
+  try {
+    const event = await loadEvent(req, res)
+    if (!event) return
+    if (event.stage === 'finished') return finishedLocked(res)
+    if (!assertCan(req, res, 'markArrival', { type: TYPE, doc: event })) return
+    const { key, loaded } = req.body ?? {}
+    if (typeof key !== 'string' || !key.trim() || typeof loaded !== 'boolean') return res.status(400).json({ error: 'BAD_LOADING' })
+    const current = event.siteLogistics?.loaded ?? []
+    const has = current.some(r => r.key === key)
+    if (loaded === has) return res.json(event)
+    const now = Date.now()
+    const { userId, name } = actorOf(req)
+    const row = { key, at: now, by: userId, byName: name }
+    const next = loaded ? [...current, row] : current.filter(r => r.key !== key)
+    const base = event.siteLogistics ?? { answers: [] }
+    if (!validMerged(res, { ...event, siteLogistics: { ...base, loaded: next } })) return
+    const update = [{
+      $set: {
+        'siteLogistics.answers': { $ifNull: ['$siteLogistics.answers', []] },
+        'siteLogistics.loaded': {
+          $concatArrays: [
+            { $filter: { input: { $ifNull: ['$siteLogistics.loaded', []] }, cond: { $ne: ['$$this.key', { $literal: key }] } } },
+            { $literal: loaded ? [row] : [] },
+          ],
+        },
+        updatedAt: now,
+      },
+    }]
+    await writeConditional(req, res, event, update, 'events.loading.saved')
+  } catch (err) {
+    fail(req, res, 'loading', err)
   }
 })
 

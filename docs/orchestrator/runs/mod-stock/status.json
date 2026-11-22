@@ -1,0 +1,435 @@
+{
+  "run": "mod-stock",
+  "branch": "orch/mod-stock",
+  "base": "main",
+  "startedAt": "2026-11-19T07:37:19.391Z",
+  "mainShaAtStart": "94a6be6460f2a7ae7eb51f942c99ae9c70cf2b65",
+  "plans": {
+    "636": {
+      "nnn": "636",
+      "title": "Stock count sheet screen and the below-minimum list",
+      "branch": "feat/636-stock-count-sheet-and",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T07:38:44.813Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T07:56:08.530Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T08:03:46.620Z"
+        }
+      },
+      "humanItems": [
+        "Dandan counts ten real products on a phone, in crates and in kilos, leaves the screen in the middle, comes back to the draft and closes it: the sheet is comfortable to use with one hand and the numbers in the below-minimum list are the ones he expects."
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T07:38:44.664Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T07:38:44.814Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T07:53:05.594Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T07:56:08.101Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T07:56:08.312Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:56:08.532Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T08:00:27.272Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T08:03:40.388Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T08:03:46.621Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T08:04:00.470Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T08:05:14.350Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 19.8,
+      "sha": "203b396ec02457bf94992a082ea118b746e87615",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 858.2,
+          "tokens": {
+            "input": 5312469,
+            "output": 54736
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 255.5,
+          "tokens": {
+            "input": 154572,
+            "output": 1784
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.1,
+          "tokens": {
+            "input": 117633,
+            "output": 739
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci"
+      ],
+      "checkedHead": "6cc95b968b9e1687bdf750c96fd3563a24812cd7"
+    },
+    "637": {
+      "nnn": "637",
+      "title": "Stock count by voice or text: a draft on the count sheet",
+      "branch": "feat/637-stock-count-by-voice",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T08:07:45.887Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T08:37:57.087Z"
+        }
+      },
+      "humanItems": [
+        "Dandan counts one real shelf by voice on his phone, in Hebrew, with crates and kilos: the suggested rows are the products he named, with the amounts he said; what he fixed by hand is saved as he fixed it."
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T08:07:45.698Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:07:45.889Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:31:43.520Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:37:50.434Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:37:57.088Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:38:10.099Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:38:49.008Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 19,
+      "sha": "ed8120ecc25c15e085c121b0cfca92bbacc5357f",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1435,
+          "tokens": {
+            "input": 8982667,
+            "output": 69739
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.9,
+          "tokens": {
+            "input": 194294,
+            "output": 927
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "b48c9a7a295c42466422bc7d298caefc4d215e7f"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T07:38:44.533Z",
+      "plan": "636",
+      "text": "the folder foodVibe1.0-orch-mod-stock-636 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T07:53:03.111Z",
+      "plan": "636",
+      "text": "builder left undone (round 0): [ui] 636-1..4: written, not run; [human] Dandan's ten-product phone count"
+    },
+    {
+      "at": "2026-11-19T08:04:11.946Z",
+      "plan": "636",
+      "text": "the folder foodVibe1.0-orch-merge-mod-stock was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T08:07:45.429Z",
+      "plan": "637",
+      "text": "the folder foodVibe1.0-orch-mod-stock-637 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T08:31:41.031Z",
+      "plan": "637",
+      "text": "builder left undone (round 0): [ui] 637-1: written, not run; [ui] 637-2: written, not run; [human] Dandan counts one real shelf by voice on his phone, in Hebrew (not ticked)"
+    },
+    {
+      "at": "2026-11-19T08:42:40.257Z",
+      "text": "make this a default? the row cells run name, amount, unit, counted chip, base amount (chip after the unit, not before the amount) so the phone grid can put the chip and base amount on a second line — reverse: reorder the  (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 19,
+  "updatedAt": "2026-11-19T08:42:41.964Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "636",
+      "type": "behaviour",
+      "text": "behaviour: the row cells run name, amount, unit, counted chip, base amount (chip after the unit, not before the amount) so the phone grid can put the chip and base amount on a second line — reverse: reorder the cells and header in stock-count.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "636",
+      "type": "behaviour",
+      "text": "behaviour: app-stock-below-minimum has a third input hasFinalCount so 'no final count yet' differs from 'nothing under minimum' — reverse: drop the input and always show stk_empty_below_min",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "636",
+      "type": "behaviour",
+      "text": "behaviour: a future count date is clamped to today, and both actions stay disabled while the date is empty or invalid — reverse: remove the clamp in setDate and dateOk_",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "636",
+      "type": "behaviour",
+      "text": "behaviour: 'save draft' is disabled when no row is counted and no draft exists yet — reverse: drop that part of the disabled condition",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "636",
+      "type": "behaviour",
+      "text": "behaviour: the chip is appended after the diagnosis chip, so the diagnosis-chip spec now expects '/diagnosis', '/inventory/count' — reverse: move the chip entry before diagnosis in tab-chips.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "636",
+      "type": "seen",
+      "text": "seen: docs/brain/component-families.md:562 — registry paths @schemas/units/to-base and server/generated/schemas/units/to-base are missing (reuse-lint --check-registry); from plan 635, not this plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "636",
+      "type": "seen",
+      "text": "seen: src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.spec.ts:114 — 'leaves test requests out of the requests file' fails intermittently (Expected 0 to be 2). The download seems to be read before it finishes, so it looks timing-dependent.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "637",
+      "type": "behaviour",
+      "text": "behaviour: the child component calls extractStockCount itself and tells the sheet it is busy through an extra output busyChange (not in the plan's output list) — reverse: move the call into the sheet",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "637",
+      "type": "behaviour",
+      "text": "behaviour: after a successful read the recorder closes and its text is cleared; after an error it stays open with the text so the person can send again — reverse: keep the recorder open after success",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "637",
+      "type": "behaviour",
+      "text": "behaviour: the stk_ai_applied message shows only when at least one row got a suggestion; an answer with only unmatched entries or conflicts shows the lists with no message — reverse: always show it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "637",
+      "type": "behaviour",
+      "text": "behaviour: docs/brain/inventory.md regenerated with node scripts/inventory.mjs because the kit check reported it stale — reverse: git restore the file",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "637",
+      "type": "seen",
+      "text": "seen: docs/brain/component-families.md:564-565 — the plan 635 unit-rates entry makes node scripts/reuse-lint.mjs --check-registry report missing-path for @schemas/units/to-base and server/generated/schemas/units/to-base; plain lint:reuse passes",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "637",
+      "type": "seen",
+      "text": "seen: the kit-copy scope-check --diff lists Claude outputs/* files that exist neither in this worktree nor on the run branch (read from the main checkout), so it reported SCOPE: out for files this branch did not change",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T08:42:41.962Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T08:42:41.963Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

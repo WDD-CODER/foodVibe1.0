@@ -132,11 +132,19 @@ append the path to the scope block above and retry.
 - empty text of the list — family: empty-state — rung: 1 — why: `app-empty-state` in its small form, as the platform
   tables use it.
 - loading line of the list — family: feedback — rung: 1 — why: `app-loader`, as the platform page uses it.
-- `describePlatformChange(change, translate)` in the dialog component — family: helpers — rung: 4 — why: turns one
+- `describePlatformChange(change, translate)` — family: helpers — rung: 4 — why: in the dialog component; turns one
   stored `{ field, from, to }` into the Hebrew line; nothing else formats these three fields, and it must be testable
   without the template.
-- `platformChangesOf(before, after)` in `server/routes/admin.js` — family: none — rung: 4 — why: a server-side pure
+- `platformChangesOf(before, after)` — family: none — rung: 4 — why: in `server/routes/admin.js`; a server-side pure
   function local to the one route that writes the row; it compares the stored business with the values being saved.
+
+- `.pbd-top` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__head` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__body` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__list` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__row` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
+- `.pbd-history__meta` — family: none — rung: 4 — why: layout rule of the history panel; the dialog has no stylesheet, no existing class fits (checked `.perf-card__top`, `.stage-history-row`, list-page).
 
 ## Step 0 — Reality Check
 
@@ -250,13 +258,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let a history row say what the value was and what it became — the optional changes field on the row shape — shared/schemas/modules.ts
-- [ ] A2: Store the old and new value with every platform save, only for what really changed — read the business first, platformChangesOf, the row with changes; the three new write cases — server/routes/admin.js, server/test/admin-platform.test.js
-- [ ] A3: Give the platform admin a way to read a business's history from the server — the GET route, newest first, with its five access and empty cases — server/routes/admin.js, server/test/admin-platform.test.js
-- [ ] A4: Fetch the history in the browser through the admin service — getPlatformHistory and its spec case — src/app/core/services/platform-admin.service.ts, src/app/core/services/platform-admin.service.spec.ts
-- [ ] A5: Show the history in the business dialog only when asked for: a small button with a tooltip opens a scrollable panel with a close button, with loading, empty and failed states — signals, openHistory, closeHistory, loadHistory_, describePlatformChange, the button, the panel and its styles, the History icon, the thirteen dictionary keys, the nine spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts, .html, .spec.ts, src/app/pages/platform-dashboard/platform-dashboard.page.scss, public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A6: Record the new route and the two new pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row — docs/brain/component-families.md, docs/brain/inventory.md, docs/agent/standards-backend.md, server/breadcrumbs.md
-- [ ] A7: Prove it in the running app and run every check — the one screen check (closed, opened, closed again) with a fixture row, then the Done-when commands in order — e2e/ui/638-1.spec.ts
+- [x] A1: Let a history row say what the value was and what it became — the optional changes field on the row shape — shared/schemas/modules.ts
+- [x] A2: Store the old and new value with every platform save, only for what really changed — read the business first, platformChangesOf, the row with changes; the three new write cases — server/routes/admin.js, server/test/admin-platform.test.js
+- [x] A3: Give the platform admin a way to read a business's history from the server — the GET route, newest first, with its five access and empty cases — server/routes/admin.js, server/test/admin-platform.test.js
+- [x] A4: Fetch the history in the browser through the admin service — getPlatformHistory and its spec case — src/app/core/services/platform-admin.service.ts, src/app/core/services/platform-admin.service.spec.ts
+- [x] A5: Show the history in the business dialog only when asked for: a small button with a tooltip opens a scrollable panel with a close button, with loading, empty and failed states — signals, openHistory, closeHistory, loadHistory_, describePlatformChange, the button, the panel and its styles, the History icon, the thirteen dictionary keys, the nine spec cases — src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts, .html, .spec.ts, src/app/pages/platform-dashboard/platform-dashboard.page.scss, public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A6: Record the new route and the two new pieces where the next developer looks — the family rows, the regenerated inventory, the backend route row and the server map row — docs/brain/component-families.md, docs/brain/inventory.md, docs/agent/standards-backend.md, server/breadcrumbs.md
+- [x] A7: Prove it in the running app and run every check — the one screen check (closed, opened, closed again) with a fixture row, then the Done-when commands in order — e2e/ui/638-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: `PlatformBusinessDialogComponent`, `PlatformAdminService`, the platform write route of plan 616.
@@ -298,3 +306,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   hold no values and nothing can rebuild them.
 - decided: a field sent with the value it already has is left out of `changes` but stays in `changed` — why: the
   dialog sends only what changed, but a direct API call may not; the list should show real changes.
+- scope note: the dialog has no stylesheet and renders inside the platform page, so the few list rules sit in `platform-dashboard.page.scss` under `:host ::ng-deep` (layer `components.platform-business-dialog`); inline component styles were tried and the pre-commit no-semi hook strips their semicolons.
+- evidence: `pnpm run build` -> exit 0; `pnpm run test:ci` -> 2505 SUCCESS; `server vitest run` -> 1827 passed; `pnpm run lint` / `server lint` -> 0 errors; `lint:icons` -> ok; `lint:reuse` -> ok; kit-manifest-check ok; breadcrumbs-check clean.
+- A7: `e2e/ui/638-1.spec.ts` written, not run (no running app).

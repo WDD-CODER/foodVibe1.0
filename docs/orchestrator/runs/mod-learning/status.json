@@ -1,0 +1,326 @@
+{
+  "run": "mod-learning",
+  "branch": "orch/mod-learning",
+  "base": "main",
+  "startedAt": "2026-11-19T18:11:58.689Z",
+  "mainShaAtStart": "355c6fb9caa1f417f8227d82ccbcbeb9383cb2bf",
+  "plans": {
+    "647": {
+      "nnn": "647",
+      "title": "The platform's learning section reads as cards that say what each number means",
+      "branch": "feat/647-platform-learning-section-readable",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T18:32:16.936Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T18:43:59.896Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T18:54:12.768Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens `/platform` → \"למידת המערכת\": with his business private he reads why it is empty; after turning",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T18:13:14.118Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:13:14.276Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:19:29.242Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:20:13.147Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:32:16.720Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:32:16.938Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:39:44.387Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:43:59.270Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T18:43:59.584Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T18:43:59.899Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T18:47:34.602Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T18:53:59.824Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T18:54:12.770Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T18:54:25.264Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T18:56:51.586Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "647",
+          "title": "The platform's learning section reads as cards that say what each number means",
+          "branch": "feat/647-platform-learning-section-readable",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-19T18:13:14.275Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 16.2,
+          "reason": "asking 647-1: replan needed: ESCALATE: scope src/testing/test-lucide-icons.ts — `pnpm run test:ci` exit 1: 3 AppComponent specs fail with 'The \"bell\" icon has not been provided' (plan 646's bell is missing from the test icon list)",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 374.7,
+              "tokens": {
+                "input": 1119914,
+                "output": 14661
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-19T18:20:04.647Z",
+            "reason": "replan needed: ESCALATE: scope src/testing/test-lucide-icons.ts — `pnpm run test:ci` exit 1: 3 AppComponent specs fail with 'The \"bell\" icon has not been provided' (plan 646's bell is missing from the test icon list)"
+          },
+          "parkBranch": "park/mod-learning-647"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 647-1: replan needed: ESCALATE: scope src/testing/test-lucide-icons.ts — `pnpm run test:ci` exit 1: 3 AppComponent specs fail with 'The \"bell\" ",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.8,
+      "sha": "d860aebf24eed2d0cf9bc3458ed0e9fe72245f4b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 439,
+          "tokens": {
+            "input": 108233,
+            "output": 1798
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 211.2,
+          "tokens": {
+            "input": 305547,
+            "output": 5196
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.2,
+          "tokens": {
+            "input": 31820,
+            "output": 808
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-learning --plan plans/647-platform-learning-section-readable-cards.plan.md"
+      ],
+      "checkedHead": "c8498db9d42866db5dbfe27e085fa57dd93750b9"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T18:13:13.975Z",
+      "plan": "647",
+      "text": "the folder foodVibe1.0-orch-mod-learning-647 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T18:19:29.056Z",
+      "plan": "647",
+      "text": "builder left undone (round 0): test:ci is not green because of the bell icon outside scope; kit-manifest-check, scope-check and kit-checks were not run (they need the main checkout's kit scripts); docs/brain/inventory.md not changed (no new engine piece); 647-1: written, not run"
+    },
+    {
+      "at": "2026-11-19T18:20:13.014Z",
+      "plan": "647",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-19T18:20:13.273Z",
+      "plan": "647",
+      "text": "ask 647-1 (scope, the Human or the advisor answers): May this plan add the Bell icon to src/testing/test-lucide-icons.ts so the 3 AppComponent specs stop failing?"
+    },
+    {
+      "at": "2026-11-19T18:29:43.903Z",
+      "plan": "647",
+      "text": "ask 647-1 answered by the human: approved: src/testing/test-lucide-icons.ts"
+    },
+    {
+      "at": "2026-11-19T18:30:12.189Z",
+      "plan": "647",
+      "text": "scope of plan 647 extended on orch/mod-learning by the answer to 647-1: src/testing/test-lucide-icons.ts"
+    },
+    {
+      "at": "2026-11-19T18:32:00.552Z",
+      "plan": "647",
+      "text": "resumed from park/mod-learning-647: round 0, tier build, after: asking 647-1: replan needed: ESCALATE: scope src/testing/test-lucide-icons.ts — `pnpm run test:ci` exit 1: 3 AppComponent specs fail with 'The \"bell\" icon has n"
+    },
+    {
+      "at": "2026-11-19T18:32:16.544Z",
+      "plan": "647",
+      "text": "the folder foodVibe1.0-orch-mod-learning-647 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T18:39:36.874Z",
+      "plan": "647",
+      "text": "builder left undone (round 0): Not run: build:schemas prepare, kit-manifest-check, scope-check, kit-checks, override-check, lint:icons, lint:no-native-select, breadcrumbs-check, ci-scope-check, lint:reuse, log-query. Only build, lint and test:ci were run.; Plan Done-when items at plans/647-platform-learning-section-readable-cards"
+    },
+    {
+      "at": "2026-11-19T18:54:48.335Z",
+      "plan": "647",
+      "text": "the folder foodVibe1.0-orch-merge-mod-learning was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 14.8,
+  "updatedAt": "2026-11-19T19:12:49.164Z",
+  "stops": [
+    {
+      "at": "2026-11-19T19:05:24.234Z",
+      "reason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2642 SUCCESS / ERROR: '[error] crud.metadata.hydrate_error: Failed to load metadata', Object{err: Error: NG0205: Injector has already been destroyed. / Error: NG0205: Injector has already been destroyed. / ERROR: '[error] crud.stations.load_error: Failed to load stations', Object{err: Error: NG0205: Injector has already been destroyed. — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "647",
+      "type": "behaviour",
+      "text": "behaviour: the private empty state is a plain paragraph with `data-testid=\"learning-empty-private\"`, because `app-empty-state` takes only a key and cannot fill in the {count} — reverse: add a params input to app-empty-state and use it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "647",
+      "type": "behaviour",
+      "text": "behaviour: each accuracy number's tooltip is the low-sample text when greyed, else the kept-meaning text, and the saved number's tooltip is its meaning — reverse: drop the title attributes",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "647",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons.ts — no Bell icon, so the 3 AppComponent specs fail on the run branch (plan 646)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "647",
+      "type": "behaviour",
+      "text": "behaviour: grid column minimum changed from 13rem to 12rem (plus small line-height, alignment and gap tweaks) to avoid duplicating existing style blocks — reverse: restore the old values and declare the duplicate-block debt instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T19:12:49.161Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T19:12:49.164Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

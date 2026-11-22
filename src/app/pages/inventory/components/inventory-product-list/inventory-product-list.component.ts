@@ -698,7 +698,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected getSupplierName(supplierId: string): string {
     if (!supplierId) return ''
     const supplier = this.kitchenStateService.suppliersById_().get(supplierId)
-    return supplier?.nameHebrew ?? supplierId
+    // Plan 649: a supplier that is not in this business's list never shows its id.
+    return supplier?.nameHebrew ?? this.translationService.translate('supplier_unknown')
   }
 
   protected getSupplierNames(ids: string[] | undefined): string {

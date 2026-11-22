@@ -1,5 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
-$above-mobile: $break-mobile + 1; // first width past the phone layout
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.event-logistics-panel {
   :host {
@@ -60,6 +59,11 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     align-items: end;
   }
 
+  .logistics-notes-open {
+    align-self: flex-start;
+    gap: var(--space-2);
+  }
+
   .logistics-field {
     display: flex;
     flex-direction: column;
@@ -99,7 +103,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
 
     border-block-end: 1px solid var(--border-row);
 
-    @media (min-width: $above-mobile) {
+    @media (min-width: $break-tablet-min) {
       display: grid;
       grid-template-columns: minmax(10rem, 1fr) auto;
       align-items: center;

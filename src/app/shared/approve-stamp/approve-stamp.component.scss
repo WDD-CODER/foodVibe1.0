@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 .approve-stamp {
   position: fixed;
   right: 0.75rem; // intentionally physical — stamp is always bottom-right chrome regardless of dir
@@ -50,7 +51,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .approve-stamp {
     right: 0.5rem;
     inset-block-end: 0.5rem;
@@ -64,7 +65,7 @@
 
 // [mobile] Clear the fixed bottom nav (56px = 3.5rem) so the stamp is never hidden
 // Both FAB and stamp use the same inset-block-end so they sit at the same vertical position.
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .approve-stamp {
     inset-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
     z-index: 210;

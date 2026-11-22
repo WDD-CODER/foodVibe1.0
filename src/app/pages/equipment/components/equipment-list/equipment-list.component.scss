@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 @layer components.equipment-list {
   :host {
     display: block;
@@ -47,7 +48,7 @@
     grid-column: 1 / -1;
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: $break-phone-max) {
     .inline-edit-grid {
       grid-template-columns: 1fr;
     }

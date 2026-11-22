@@ -1,0 +1,305 @@
+{
+  "run": "mod-dash-diag",
+  "branch": "orch/mod-dash-diag",
+  "base": "main",
+  "startedAt": "2026-11-20T08:41:39.930Z",
+  "mainShaAtStart": "917fbec3f926fc273a0703d6dcce086f7fa24e5a",
+  "plans": {
+    "652": {
+      "nnn": "652",
+      "title": "The dashboard shows a diagnosis card for a business with the consultant's module",
+      "branch": "feat/652-dashboard-diagnosis-card",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-20T08:43:10.288Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-20T08:57:53.415Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-20T09:06:13.088Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens `/dashboard` with «אבחון יועץ» on: the diagnosis card is there, its newest diagnosis opens, and"
+      ],
+      "history": [
+        {
+          "at": "2026-11-20T08:43:10.119Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:43:10.289Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:57:45.319Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:57:52.885Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:57:53.170Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:57:53.417Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T09:03:25.411Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T09:06:06.091Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T09:06:13.089Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T09:06:25.430Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T09:07:26.648Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.1,
+      "sha": "88dbb722e1c91cafa61d7b42ce0d4a6f7d8c8d10",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 872.1,
+          "tokens": {
+            "input": 2711649,
+            "output": 27764
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 329,
+          "tokens": {
+            "input": 358060,
+            "output": 4924
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.9,
+          "tokens": {
+            "input": 93080,
+            "output": 710
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md"
+      ],
+      "checkedHead": "619f5c9340b5e8057779e20f4c16be156e8f680a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-20T08:43:09.947Z",
+      "plan": "652",
+      "text": "the folder foodVibe1.0-orch-mod-dash-diag-652 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T08:57:42.548Z",
+      "plan": "652",
+      "text": "builder left undone (round 0): [human] item: Dandan opens /dashboard with the consultant module on and off and checks the card; [ui] none in this plan, so no e2e test written"
+    },
+    {
+      "at": "2026-11-20T08:57:51.951Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-20T08:57:52.083Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-20T08:57:52.214Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-20T08:57:52.353Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-20T08:57:52.483Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-20T08:57:52.614Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-20T08:57:52.748Z",
+      "plan": "652",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed first; runs after the fix: pnpm run lint:reuse"
+    },
+    {
+      "at": "2026-11-20T08:57:53.023Z",
+      "plan": "652",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-dash-diag --plan plans/652-dashboard-diagnosis-card.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-20T09:03:22.561Z",
+      "plan": "652",
+      "text": "builder left undone (round 0): scope-check kit copy and log-query --level=error: not run separately; ci-scope-check --checkout-branch: skipped by the script because this checkout's branch name was empty, not rerun"
+    },
+    {
+      "at": "2026-11-20T09:06:34.363Z",
+      "plan": "652",
+      "text": "the folder foodVibe1.0-orch-merge-mod-dash-diag was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T09:08:09.422Z",
+      "text": "FINAL: same tree as plan 652's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 8.1,
+  "updatedAt": "2026-11-20T09:08:11.587Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "652",
+      "type": "behaviour",
+      "text": "behaviour: «יצירת אבחון» is a plain link to /diagnosis, where the create form is always shown (simplest option, no query param) — reverse: add a query param and have the page read it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "652",
+      "type": "behaviour",
+      "text": "behaviour: the card gates itself (header rule); the overview always mounts it, so its spec stubs the card template — reverse: move the @if into the overview",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "652",
+      "type": "behaviour",
+      "text": "behaviour: the open count is the number of diagnoses with status 'open' across all of them (not only the three shown) — reverse: count only the rows shown",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "652",
+      "type": "behaviour",
+      "text": "behaviour: the plan's «button explanation as a title» default has no text to attach, so the create button has no title — reverse: add a title key",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "652",
+      "type": "seen",
+      "text": "seen: src/app/core/components/header/header.component.spec.ts:507 — the 'avatar button is the element at its point' test failed on 2 of 4 full runs (viewport hit-test) and passed on rerun; flaky",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "652",
+      "type": "seen",
+      "text": "seen: src/app/pages/dev-catalog/dev-catalog.page.scss — kit-checks reports style-duplicate-class 177 -> 178, new on the run branch and not from this plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "652",
+      "type": "seen",
+      "text": "seen: src/app/pages/dashboard/.../header component spec (plan 645, avatar click signs out) failed once in a full test:ci run and passed on rerun — flaky; reverse: n/a",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-20T09:08:11.584Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-20T09:08:11.587Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

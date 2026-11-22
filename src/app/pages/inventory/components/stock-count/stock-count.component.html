@@ -1,0 +1,355 @@
+<app-list-shell
+  appColumnCarouselGroup
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="isPanelOpen_.set(!isPanelOpen_())"
+  [gridTemplate]="gridTemplate_()"
+  [mobileGridTemplate]="mobileGridTemplate_()"
+  [resultCount]="countedCount_()"
+  [resultTotal]="products_().length"
+>
+  <ng-container shell-title>{{ 'stk_title' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="stock-count-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="stock-count-search"
+        type="text"
+        [ngModel]="search_()"
+        (ngModelChange)="search_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <app-input-clear [visible]="!!search_()" (clear)="search_.set('')" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    <div class="stock-count__date" data-testid="stk-date">
+      <app-date-field
+        inputId="stock-count-date"
+        ariaLabelKey="stk_count_date"
+        variant="outline"
+        [value]="countedDate_()"
+        (valueChange)="setDate($event)"
+      />
+    </div>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="stk-finalize"
+      [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
+      (click)="finalize()"
+    >
+      <lucide-icon name="check" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'stk_finalize' | translatePipe }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="stock-count__tabs">
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        data-testid="stk-tab-sheet"
+        [class.active]="view_() === 'sheet'"
+        (click)="view_.set('sheet')"
+      >
+        {{ 'stk_tab_sheet' | translatePipe }}
+      </button>
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        data-testid="stk-tab-below"
+        [class.active]="view_() === 'below'"
+        (click)="view_.set('below')"
+      >
+        {{ 'stk_tab_below_min' | translatePipe }}
+        <span class="c-chip__count" [class.c-chip__count--zero]="below_().rows.length === 0">{{
+          below_().rows.length
+        }}</span>
+      </button>
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        data-testid="stk-tab-past"
+        [class.active]="view_() === 'past'"
+        (click)="openPast()"
+      >
+        {{ 'stk_past_counts' | translatePipe }}
+      </button>
+    </div>
+    @if (view_() === 'sheet') {
+      <div class="c-grid-header-cell" role="columnheader">{{ 'product' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_amount' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_col_unit' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'stk_counted' | translatePipe }}</div>
+      @if (baseColumn_()) {
+        <app-column-carousel-header>
+          <div class="c-grid-header-cell" appColumnSlide label="stk_col_in_base" role="presentation">
+            {{ 'stk_col_in_base' | translatePipe }}
+          </div>
+        </app-column-carousel-header>
+      }
+    }
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (loadState_() === 'loading') {
+      <div class="stock-count__state"><app-loader /></div>
+    } @else if (loadState_() === 'failed') {
+      <div class="stock-count__state" data-testid="stk-load-failed">
+        <app-empty-state messageKey="stk_load_failed" icon="alert-triangle" ctaLabelKey="retry" (ctaClick)="load()" />
+      </div>
+    } @else if (view_() === 'past') {
+      @if (pastState_() === 'loading') {
+        <div class="stock-count__state"><app-loader /></div>
+      } @else if (pastState_() === 'failed') {
+        <div class="stock-count__state" data-testid="stk-past-failed">
+          <app-empty-state
+            messageKey="stk_load_failed"
+            icon="alert-triangle"
+            ctaLabelKey="retry"
+            (ctaClick)="openPast()"
+          />
+        </div>
+      } @else {
+        @for (c of pastCounts_(); track c._id) {
+          <button
+            type="button"
+            class="stock-count__past"
+            data-testid="stk-past-row"
+            [disabled]="c.status !== 'draft'"
+            (click)="openPastDraft(c)"
+          >
+            <span>{{ c.countedAt | date: 'dd/MM/yyyy' }}</span>
+            <span class="c-chip c-chip--tag">{{ countStatusKey_(c) | translatePipe }}</span>
+            <span>{{ c.lines.length }}</span>
+          </button>
+        } @empty {
+          <div class="stock-count__state" data-testid="stk-past-empty">
+            <app-empty-state messageKey="stk_past_counts" icon="list-checks" />
+          </div>
+        }
+      }
+    } @else if (view_() === 'below') {
+      <app-stock-below-minimum
+        [rows]="below_().rows"
+        [uncounted]="below_().uncounted"
+        [hasFinalCount]="onHand_().length > 0"
+      />
+    } @else if (products_().length === 0) {
+      <div class="stock-count__state" data-testid="stk-empty-products">
+        <app-empty-state messageKey="stk_empty_products" icon="list-checks" />
+      </div>
+    } @else {
+      <app-stock-ai-draft
+        [conflicts]="conflicts_()"
+        [unmatched]="unmatched_()"
+        [products]="productOptions_()"
+        [disabled]="saving_()"
+        (pick)="pickForSpoken($event)"
+        (amount)="answerAmount($event)"
+        (addNew)="addNewForSpoken($event)"
+        (busyChange)="aiBusy_.set($event)"
+        (extracted)="onExtracted($event)"
+        (replace)="replaceWithSuggestion($event)"
+        (keep)="keepOnSheet($event)"
+        (dismiss)="dismissUnmatched($event)"
+      />
+      @if (draftId_() && draftSavedAt_() !== null) {
+        <p class="stock-count__draft-note" data-testid="stk-draft-note">{{ autosavedText_() }}</p>
+      }
+      <div class="stock-count__toolbar">
+        <button
+          type="button"
+          class="c-btn-ghost"
+          data-testid="stk-move-counted"
+          [disabled]="countedCount_() === 0"
+          (click)="moveCountedToTop()"
+        >
+          <lucide-icon name="chevron-up" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'stk_move_counted_top' | translatePipe }}</span>
+        </button>
+      </div>
+      @for (row of shownRows_(); track row.product._id) {
+        <div
+          class="c-list-row"
+          data-testid="stk-row"
+          [class.stock-count__row--error]="errorProductId_() === row.product._id"
+        >
+          <div class="c-list-body-cell stock-count__name" role="cell">
+            @if (errorProductId_() === row.product._id) {
+              <lucide-icon name="alert-triangle" [size]="16" class="stock-count__error-icon"></lucide-icon>
+            }
+            {{ row.product.nameHebrew }}
+            @if (aiRows_().has(row.product._id)) {
+              <span class="c-chip c-chip--tag c-chip--amber stock-count__ai-tag" data-testid="stk-ai-tag">{{
+                'stk_ai_tag' | translatePipe
+              }}</span>
+            }
+          </div>
+          <div class="c-list-body-cell" role="cell" dir="ltr">
+            <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
+          </div>
+          <div class="c-list-body-cell" role="cell">
+            @if (row.state.choose) {
+              <div class="c-chip-group stock-count__unit-choice" role="radiogroup" data-testid="stk-unit-choice">
+                @for (choice of row.choices; track choice.value) {
+                  @if (choice.value === addUnitValue) {
+                    <button
+                      type="button"
+                      class="c-chip c-chip--tap"
+                      data-testid="stk-unit-add"
+                      (click)="setUnit(row.product, choice.value)"
+                    >
+                      {{ choice.label | translatePipe }}
+                    </button>
+                  } @else {
+                    <label class="c-chip c-chip--toggle">
+                      <input
+                        type="radio"
+                        [name]="'stk-unit-' + row.product._id"
+                        [value]="choice.value"
+                        (change)="setUnit(row.product, choice.value)"
+                      />
+                      <span>{{ choice.label }}</span>
+                    </label>
+                  }
+                }
+              </div>
+            } @else {
+              <app-custom-select
+                [options]="row.options"
+                [compact]="true"
+                [ngModel]="row.state.unit"
+                (valueChange)="setUnit(row.product, $event)"
+              />
+              @if (narrow_() && row.base) {
+                <button
+                  type="button"
+                  class="c-icon-btn stock-count__base-btn"
+                  data-testid="stk-base-btn"
+                  [attr.title]="baseLabel_(row.base)"
+                  [attr.aria-label]="baseLabel_(row.base)"
+                  [attr.aria-expanded]="basePopover_()?.id === row.product._id"
+                  (click)="toggleBase_(row, $event)"
+                >
+                  <lucide-icon name="info" [size]="16"></lucide-icon>
+                </button>
+              }
+            }
+          </div>
+          <div
+            class="c-list-body-cell stock-count__counted"
+            role="cell"
+            [style.--stock-count-mark-size]="mark_().box"
+            [style.--stock-count-mark-tap]="mark_().tap"
+          >
+            @if (narrow_()) {
+              <app-list-row-checkbox
+                [checked]="row.state.counted"
+                [disabled]="!!row.state.fix || !!row.state.choose"
+                (toggle)="toggleCounted(row.product)"
+              />
+            } @else {
+              <label class="c-chip c-chip--toggle">
+                <input
+                  type="checkbox"
+                  [checked]="row.state.counted"
+                  [disabled]="!!row.state.fix || !!row.state.choose"
+                  (change)="toggleCounted(row.product)"
+                />
+                <span>{{ 'stk_counted' | translatePipe }}</span>
+              </label>
+            }
+          </div>
+          @if (baseColumn_()) {
+            <app-column-carousel-cell>
+              <div
+                class="c-list-body-cell stock-count__base"
+                appColumnSlide
+                [label]="'stk_col_in_base' | translatePipe"
+                dir="ltr"
+              >
+                {{ row.base }}
+              </div>
+            </app-column-carousel-cell>
+          }
+          @if (row.state.choose) {
+            <p class="stock-count__unit-note" data-testid="stk-unit-choose">{{ 'stk_choose_unit' | translatePipe }}</p>
+          }
+          @if (row.state.fix !== undefined) {
+            <p class="stock-count__unit-note" data-testid="stk-unit-note">{{ unitNoteText_(row.state.fix) }}</p>
+          }
+        </div>
+      } @empty {
+        <div class="stock-count__state" data-testid="stk-no-match">
+          <app-empty-state messageKey="no_products_match" icon="search" />
+        </div>
+      }
+      @if (hiddenCount_() > 0) {
+        <div class="stock-count__state">
+          <button type="button" class="c-btn-ghost" data-testid="stk-show-more" (click)="showMore()">
+            {{ 'stk_show_more' | translatePipe }} ({{ hiddenCount_() }})
+          </button>
+        </div>
+      }
+      @if (basePopover_(); as pop) {
+        @if (phone_()) {
+          <app-modal-shell
+            [light]="true"
+            [labelKey]="'stk_base_amount'"
+            cardClass="stock-count__base-light"
+            (dismissed)="closeBase_()"
+          >
+            <span data-testid="stk-base-light" dir="auto">{{ pop.text }}</span>
+          </app-modal-shell>
+        } @else {
+          <div
+            class="stock-count__base-pop"
+            role="dialog"
+            data-testid="stk-base-pop"
+            [style.top.px]="pop.top"
+            [style.left.px]="pop.left"
+            [attr.aria-label]="pop.text"
+          >
+            <span dir="auto">{{ pop.text }}</span>
+            <button
+              type="button"
+              class="c-icon-btn"
+              [attr.aria-label]="'close' | translatePipe"
+              [attr.title]="'close' | translatePipe"
+              (click)="closeBase_()"
+            >
+              <lucide-icon name="x" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        }
+      }
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="c-filter-section">
+      <p class="stock-count__filter-title">{{ 'stk_show' | translatePipe }}</p>
+      <div class="c-chip-group">
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="stock-show" [checked]="show_() === 'all'" (change)="show_.set('all')" />
+          <span>{{ 'stk_show_all' | translatePipe }}</span>
+        </label>
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="stock-show" [checked]="show_() === 'counted'" (change)="show_.set('counted')" />
+          <span>{{ 'stk_show_counted' | translatePipe }}</span>
+        </label>
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="stock-show" [checked]="show_() === 'uncounted'" (change)="show_.set('uncounted')" />
+          <span>{{ 'stk_show_uncounted' | translatePipe }}</span>
+        </label>
+      </div>
+    </div>
+  </ng-container>
+</app-list-shell>

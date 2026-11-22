@@ -1,0 +1,407 @@
+{
+  "run": "mod-count-polish",
+  "branch": "orch/mod-count-polish",
+  "base": "main",
+  "startedAt": "2026-11-20T06:54:19.592Z",
+  "mainShaAtStart": "5b8f5aa39c53ae858747447868ba89a6bcda7b7f",
+  "plans": {
+    "651": {
+      "nnn": "651",
+      "title": "Stock count: the product's own units, AI rows on top, an automatic draft with its history, add a product and come back, and the shared list look",
+      "branch": "feat/651-stock-count-units-ai",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-20T08:14:12.756Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-20T08:24:41.008Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-20T08:36:06.093Z"
+        }
+      },
+      "humanItems": [
+        "Dandan says «שלושה ארגזים עגבניות»: he is asked which tomato product; the row gets crates only if the product",
+        "the stock count · from a no-match line press add new product · the product form opens with the name filled in, no confirm popup; save or back returns to the count with its numbers kept",
+        "any screen with a unit dropdown · open the dropdown · an add-unit option is there and opens the add-unit popup; the new unit is selected after saving",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line"
+      ],
+      "history": [
+        {
+          "at": "2026-11-20T06:56:46.626Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T06:56:46.954Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T07:34:20.102Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T07:35:15.501Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:14:12.572Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:14:12.758Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:24:40.379Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:24:40.615Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-20T08:24:40.801Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-20T08:24:41.010Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-20T08:29:30.393Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-20T08:35:58.977Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-20T08:36:06.095Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-20T08:36:27.789Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-20T08:37:31.011Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "651",
+          "title": "Stock count: the product's own units, AI rows on top, an automatic draft with its history, add a product and come back, and the shared list look",
+          "branch": "feat/651-stock-count-units-ai",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-20T06:56:46.951Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 10.5,
+          "reason": "asking 651-1: ESCALATE scope: ESCALATE: scope src/app/core/services/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` exits 1 with \"not mentioned: return-to.service.ts\"; the entry needs one table row there and the scope guard refuses the write.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2252.6,
+              "tokens": {
+                "input": 14464237,
+                "output": 91077
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-20T07:35:05.437Z",
+            "reason": "ESCALATE scope: ESCALATE: scope src/app/core/services/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` exits 1 with \"not mentioned: return-to.service.ts\"; the entry needs one table row there and the scope guard refuses the write."
+          },
+          "parkBranch": "park/mod-count-polish-651"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 651-1: ESCALATE scope: ESCALATE: scope src/app/core/services/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` exits 1 with \"not mentioned:",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 8.8,
+      "sha": "a7bd48d8469881e097ffe3c217697fb2592fc7e8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 624.2,
+          "tokens": {
+            "input": 165036,
+            "output": 2993
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 286.9,
+          "tokens": {
+            "input": 51995,
+            "output": 785
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 20.5,
+          "tokens": {
+            "input": 240002,
+            "output": 1876
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [auto] `pnpm run test:server` passes, including `server/test/stock-extract-util.test.js` and"
+      ],
+      "checkedHead": "24e8395401f888a1aa5c487ad3c47029bfd0753f"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-20T06:56:46.390Z",
+      "plan": "651",
+      "text": "the folder foodVibe1.0-orch-mod-count-polish-651 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T07:34:19.774Z",
+      "plan": "651",
+      "text": "builder left undone (round 0): breadcrumbs-check fails until src/app/core/services/breadcrumbs.md has a row for return-to.service.ts; [ui] item 651-1: written, not run; A6 'prove it in the running app' not done: there is no running app in this folder; the diagnosis entry was fixed by reading the header template"
+    },
+    {
+      "at": "2026-11-20T07:35:15.329Z",
+      "plan": "651",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-20T07:35:15.710Z",
+      "plan": "651",
+      "text": "ask 651-1 (scope, the Human or the advisor answers): May I add one row for return-to.service.ts to src/app/core/services/breadcrumbs.md? The plan's own new file needs it for the breadcrumbs check to pass."
+    },
+    {
+      "at": "2026-11-20T08:12:17.243Z",
+      "plan": "651",
+      "text": "ask 651-1 answered by the human: approved: src/app/core/services/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-20T08:12:30.387Z",
+      "plan": "651",
+      "text": "scope of plan 651 extended on orch/mod-count-polish by the answer to 651-1: src/app/core/services/breadcrumbs.md"
+    },
+    {
+      "at": "2026-11-20T08:14:04.776Z",
+      "plan": "651",
+      "text": "resumed from park/mod-count-polish-651: round 0, tier build, after: asking 651-1: ESCALATE scope: ESCALATE: scope src/app/core/services/breadcrumbs.md — `node scripts/breadcrumbs-check.mjs` exits 1 with \"not mentioned: return-to"
+    },
+    {
+      "at": "2026-11-20T08:14:12.396Z",
+      "plan": "651",
+      "text": "the folder foodVibe1.0-orch-mod-count-polish-651 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T08:24:37.150Z",
+      "plan": "651",
+      "text": "builder left undone (round 0): 651-1 [ui]: written, not run; scope-check --diff: not run separately; the kit-checks run was ok; ci-scope-check --checkout-branch: skipped, it reports the branch name as empty in this worktree; pnpm run test:server: I read only the tail of the output, which showed no pass or fail line; I did not cap"
+    },
+    {
+      "at": "2026-11-20T08:36:37.080Z",
+      "plan": "651",
+      "text": "the folder foodVibe1.0-orch-merge-mod-count-polish was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-20T08:38:12.595Z",
+      "text": "FINAL: same tree as plan 651's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-20T08:38:13.236Z",
+      "text": "make this a default? the past-counts list shows every count the server returns for the business, drafts and finished, with no per-user filter for staff — reverse: filter drafts by createdBy as loadOpenDraft does (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 8.8,
+  "updatedAt": "2026-11-20T08:38:14.725Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: the past-counts list shows every count the server returns for the business, drafts and finished, with no per-user filter for staff — reverse: filter drafts by createdBy as loadOpenDraft does",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: a finished count in the list is shown but not clickable; only a draft opens on the sheet — reverse: allow opening a finished count read-only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: a row whose unit needs a fix is not counted, is not saved in the draft and has its counted box disabled until a unit is picked — reverse: save such rows with an empty unit",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: the add-unit option uses the existing key add_new_unit («הוסף יחידה חדשה») instead of a new unit_add key, and opens the product-mode unit creator; the new unit is saved onto the product's purchase options — reverse: add unit_add and switch the label",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: the move-counted button uses the registered chevron-up icon because arrow-up and chevrons-up are not registered — reverse: register an icon in app.config.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: a pick of a product for a line whose unit the product lacks flags the row for a unit fix instead of using the base unit — reverse: fall back to the base unit",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: the draft autosaves silently, with no success toast; the line «נשמר אוטומטית · HH:mm» replaces the old «ממשיכים טיוטה…» note — reverse: restore the stk_draft_from note",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "651",
+      "type": "behaviour",
+      "text": "behaviour: the AI prompt now tells the model to return an unspoken-list unit word as said, so «ארגזים» reaches the server and is matched to the product's units instead of being dropped to null — reverse: restore the old prompt line",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "651",
+      "type": "seen",
+      "text": "seen: src/app/shared/page-header/page-header.component.scss:189 — the header's single action cell is grid-placed; I left it as is and gave the count page one action (finish) in it, the date moved to the tabs row",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "651",
+      "type": "seen",
+      "text": "seen: scope-check from the kit copy lists plans/652-dashboard-diagnosis-card.plan.md and 'Claude outputs/*' as out of scope, but git diff --name-only against the run branch has none of them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-20T08:38:14.722Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-20T08:38:14.724Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

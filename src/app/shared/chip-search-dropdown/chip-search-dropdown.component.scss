@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 :host {
   display: block;
   position: relative;
@@ -36,7 +37,7 @@
   }
 
   /* Plan 282 — category dropdown max-height on mobile */
-  @media (max-width: 620px) {
+  @media (max-width: $break-phone-max) {
     app-scrollable-dropdown {
       max-block-size: 40dvh;
       overflow-y: auto;

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing'
-import { provideHttpClient } from '@angular/common/http'
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { GeminiService } from './gemini.service'
 import { MetadataRegistryService } from './metadata-registry.service'
@@ -109,8 +109,8 @@ describe('GeminiService.matchProductNames', () => {
   })
 })
 
-describe('GeminiService.parseReceiptPhoto', () => {
-  const RECEIPT_URL = `${environment.authApiUrl}/api/v1/ai/parse-receipt-photo`
+describe('GeminiService.readInvoice', () => {
+  const RECEIPT_URL = `${environment.authApiUrl}/api/v1/ai/invoices/read`
   let service: GeminiService
   let http: HttpTestingController
 
@@ -139,29 +139,155 @@ describe('GeminiService.parseReceiptPhoto', () => {
     throw new Error(`no request to ${RECEIPT_URL}`)
   }
 
-  it('posts the photo with the known categories and returns { rows, truncated }', async () => {
+  const ANSWER = {
+    header: {},
+    supplier: { supplierKey: 'name:x' },
+    rows: [],
+    printed: [],
+    truncated: false,
+    draftId: null,
+    fileId: null
+  }
+
+  it('posts a photo with the known categories and no model when none was chosen', async () => {
     const file = new File(['hello'], 'receipt.jpg', { type: 'image/jpeg' })
-    const result = service.parseReceiptPhoto(file, ['dairy'])
+    const result = service.readInvoice(file, ['dairy'])
 
     const req = await nextRequest()
     expect(req.request.method).toBe('POST')
-    expect(req.request.body).toEqual({ imageBase64: btoa('hello'), mimeType: 'image/jpeg', knownCategories: ['dairy'] })
-
-    const answer = { rows: [{ name: 'חלב', baseUnit: 'liter', price: 5 }], truncated: false }
-    req.flush(answer)
-    expect(await result).toEqual(answer as never)
+    expect(req.request.body).toEqual({ fileBase64: btoa('hello'), mimeType: 'image/jpeg', knownCategories: ['dairy'] })
+    req.flush(ANSWER)
+    expect(await result).toEqual(ANSWER as never)
   })
 
-  it('rejects a PDF with IMAGE_TYPE_UNSUPPORTED and sends no request', async () => {
-    const file = new File(['%PDF'], 'receipt.pdf', { type: 'application/pdf' })
-    await expectAsync(service.parseReceiptPhoto(file, [])).toBeRejectedWithError('IMAGE_TYPE_UNSUPPORTED')
+  it('adds the model once one was chosen', async () => {
+    service.offerModelSwitch(
+      new HttpErrorResponse({ status: 429, error: { error: 'model_exhausted', model: 'a', nextModel: 'gemini-x' } })
+    )
+    service.acceptModelSwitch()
+    const file = new File(['hello'], 'receipt.jpg', { type: 'image/jpeg' })
+    const result = service.readInvoice(file, [])
+    const req = await nextRequest()
+    expect(req.request.body.model).toBe('gemini-x')
+    req.flush(ANSWER)
+    await result
+  })
+
+  it('sends a PDF unshrunk', async () => {
+    const file = new File(['%PDF'], 'invoice.pdf', { type: 'application/pdf' })
+    const result = service.readInvoice(file, [])
+    const req = await nextRequest()
+    expect(req.request.body).toEqual({ fileBase64: btoa('%PDF'), mimeType: 'application/pdf', knownCategories: [] })
+    req.flush(ANSWER)
+    await result
+  })
+
+  it('rejects a PDF over 1,800,000 base64 characters with FILE_TOO_LARGE and sends no request', async () => {
+    const file = new File([new Uint8Array(1_400_000)], 'invoice.pdf', { type: 'application/pdf' })
+    await expectAsync(service.readInvoice(file, [])).toBeRejectedWithError('FILE_TOO_LARGE')
     http.expectNone(RECEIPT_URL)
   })
 
-  it('rejects a photo that stays above 1,800,000 characters after both shrink attempts with IMAGE_TOO_LARGE', async () => {
-    // Not a decodable image, so the shrink step hands the file back unchanged: 1.4 MB -> about 1.87 million characters.
+  it('rejects text/plain with FILE_TYPE_UNSUPPORTED and sends no request', async () => {
+    const file = new File(['x'], 'a.txt', { type: 'text/plain' })
+    await expectAsync(service.readInvoice(file, [])).toBeRejectedWithError('FILE_TYPE_UNSUPPORTED')
+    http.expectNone(RECEIPT_URL)
+  })
+
+  it('rejects a photo that stays above 1,800,000 characters after both shrink attempts with FILE_TOO_LARGE', async () => {
+    // Not a decodable image, so the shrink step hands the file back unchanged.
     const file = new File([new Uint8Array(1_400_000)], 'receipt.jpg', { type: 'image/jpeg' })
-    await expectAsync(service.parseReceiptPhoto(file, [])).toBeRejectedWithError('IMAGE_TOO_LARGE')
+    await expectAsync(service.readInvoice(file, [])).toBeRejectedWithError('FILE_TOO_LARGE')
     http.expectNone(RECEIPT_URL)
+  })
+})
+
+describe('GeminiService voice and logistics notes (plan 623)', () => {
+  const BASE = `${environment.authApiUrl}/api/v1/ai`
+  let service: GeminiService
+  let http: HttpTestingController
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: MetadataRegistryService, useValue: { allCategories_: () => [], allAllergens_: () => [] } },
+        { provide: TranslationService, useValue: { translate: (key: string) => key } }
+      ]
+    })
+    service = TestBed.inject(GeminiService)
+    http = TestBed.inject(HttpTestingController)
+    localStorage.clear()
+  })
+
+  afterEach(() => http.verify())
+
+  async function waitFor(url: string) {
+    for (let i = 0; i < 50; i++) {
+      const pending = http.match(url)
+      if (pending.length) return pending[0]
+      await new Promise((r) => setTimeout(r, 10))
+    }
+    throw new Error(`no request to ${url}`)
+  }
+
+  it('transcribeVoice posts base64, mime, purpose and duration', async () => {
+    const result = service.transcribeVoice(
+      { blob: new Blob(['hello'], { type: 'audio/webm' }), mimeType: 'audio/webm', durationSec: 7 },
+      'logistics'
+    )
+    const req = await waitFor(`${BASE}/voice/transcribe`)
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({
+      audioBase64: btoa('hello'),
+      mimeType: 'audio/webm',
+      purpose: 'logistics',
+      durationSec: 7
+    })
+    req.flush({ transcript: 'שלום', fileId: 'f1' })
+    expect(await result).toEqual({ transcript: 'שלום', fileId: 'f1' })
+  })
+
+  it('transcribeVoice throws AUDIO_TOO_LARGE and sends nothing when the base64 is over the limit', async () => {
+    const big = new Blob([new Uint8Array(1_400_000)], { type: 'audio/webm' })
+    await expectAsync(
+      service.transcribeVoice({ blob: big, mimeType: 'audio/webm', durationSec: 10 }, 'stock')
+    ).toBeRejectedWithError('AUDIO_TOO_LARGE')
+    http.expectNone(`${BASE}/voice/transcribe`)
+  })
+
+  it('extractLogistics posts the body and returns the draft', async () => {
+    const draft = { draftId: 'd1', answers: [], conflicts: [], adhoc: [], unanswered: [] }
+    const result = service.extractLogistics({ eventId: 'e1', phase: 'site_visit', text: 'note' })
+    const req = http.expectOne(`${BASE}/logistics/extract`)
+    expect(req.request.body).toEqual({ eventId: 'e1', phase: 'site_visit', text: 'note' })
+    req.flush(draft)
+    expect(await result).toEqual(draft)
+  })
+
+  it('extractStockCount posts the text, adds the file id only when there is one, and returns the answer', async () => {
+    const answer = { draftId: 'd1', lines: [{ productId: 'p1', quantity: 4, unit: 'kg' }], unmatched: [] }
+    const first = service.extractStockCount('קמח 4 קילו', 'f1')
+    const req = http.expectOne(`${BASE}/stock/extract`)
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({ text: 'קמח 4 קילו', fileId: 'f1' })
+    req.flush(answer)
+    expect(await first).toEqual(answer)
+
+    const second = service.extractStockCount('אורז 2')
+    const req2 = http.expectOne(`${BASE}/stock/extract`)
+    expect(req2.request.body).toEqual({ text: 'אורז 2' })
+    req2.flush({ draftId: null, lines: [], unmatched: [] })
+    await second
+  })
+
+  it('confirmLogisticsDraft posts the kept lines to the draft url', async () => {
+    const saved = [{ itemKey: 'k', status: 'needed' as const }]
+    const result = service.confirmLogisticsDraft('d1', saved)
+    const req = http.expectOne(`${BASE}/logistics/extract/d1/confirm`)
+    expect(req.request.body).toEqual({ saved })
+    req.flush({})
+    await result
   })
 })

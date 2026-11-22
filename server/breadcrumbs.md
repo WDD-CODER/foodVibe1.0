@@ -16,6 +16,10 @@
 | `services/knowledge-import-prompt.js` | The English prompt and generation config of `POST /ai/knowledge-import` (plan 554) |
 | `utils/terms-version.js` | `currentTermsVersion()` — reads `version` from `public/assets/legal/terms.he.json`, the file the app shows (plan 584) |
 | `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests` |
+| `routes/notifications.js` | In-app alerts at `/api/v1/notifications` (plan 646): `GET ?limit` → `{ rows, unread }`, `POST /:id/read`, `POST /read-all`; scoped to the caller and to a live grant for other businesses |
+| `services/notifications.js` | `createPriceChangeAlerts(db, business, rows)` (plan 646): one alert per recipient (owner + live consultants) per row at or beyond `priceRiseAlertPct`; called by the invoice apply; a failure logs `notifications.write_failed` and never fails the apply; keeps 200 per user |
+| `routes/diag.js` | Diagnosis record at `/api/v1/diag` (plan 633); the only writer of `diagnoses`; gate reads the home business |
+| `routes/ai/diag.js` | `POST /api/v1/ai/diag/menu`: a pasted menu → names and prices (plan 633) |
 | `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
 | `routes/access.js` | Mounted at `/api/v1/access` (plan 615; filled by plan 631, C-ACCESS): `GET /businesses` (where the user may go), `POST` / `DELETE` / `GET /grants` (platform admin grants, owner lists and removes); no query of its own |
@@ -37,7 +41,10 @@
 | `services/file-store.js` | The private file store (plan 619, C-FILES): `putPrivateFile`, `keepStoredFile`, `signedFileUrl`, `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`; only writer of `storedFiles` |
 | `services/cloudinary-requests.js` | Pure request builders for the file store (plan 619): `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest` |
 | `routes/files.js` | `GET /api/v1/files/:id` → `{ url }`, 300-second link (plan 619) |
-| `routes/admin-learning.js` | `GET /api/v1/admin/learning/status` → `{ fileStore }` (plan 619; plan 630 adds more) |
+| `routes/admin-learning.js` | `GET /api/v1/admin/learning/status` → `{ fileStore }` (plan 619); `GET …/stats` → drafts per flow and model by week, brain counts, private count; counts only (plan 630) |
+| `routes/admin.js` (erase learned data) | `POST /api/v1/admin/businesses/:id/erase-learned` → `{ ok, counts }` via `eraseLearnedData` in `services/business.js` (plan 639); `DELETE /users/:userId?eraseLearned=true` does the same before deleting a business |
+| `routes/admin.js` (platform history) | `GET /api/v1/admin/businesses/:id/platform-history` → `{ rows }` newest first (plan 638); `PUT …/platform` stores `changes` (`platformChangesOf`) |
+| `utils/learning-stats.js` | `weekStart`, `buildLearningStats` (plan 630): pure grouping of AI drafts into flow x model x Sunday-week with the average closeness |
 | `services/ai-cap.js` | The monthly AI cap per business (plan 617, C-AICAP): `capState` (cap vs this Israel month's ledger tokens, 60 s cache), `monthTokensByBusiness`, `clearCapCache`; read by `callGemini` and the platform table |
 | `services/ai-drafts.js` | The draft trail (plan 618, C-AIDRAFT): `saveAiDraft` (stores what the model suggested, never throws, keeps the newest 500 per business and feature) and `confirmAiDraft` (what was saved and the closeness score); the only writer of `aiDrafts`, returns only ids |
 | `utils/ai-learning.js` | `mayLearnFrom(business)` (plan 618, C-LEARN): the one consent test before the platform copies or lists a business's AI material — true unless `aiPrivate` |
@@ -48,6 +55,7 @@
 | `constants/report.js` | `REPORT_METRICS`, `REPORT_MIN_EVENTS`, finding thresholds (plan 568) |
 | `jobs/retention.js` | `purgeRetained(db, businessId, now)` — lazy 24-month delete of final requests and bookings, stored files (voice recordings, abandoned invoice reads) past their `deleteAfter`, 12 months of messages; throttled to once a day per business; run from the generic GET (plan 558) |
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
+| `scripts/repair-supplier-refs.js` | Plan 649: lists (dry run) or repairs (`--write`) product sources whose supplier is foreign, unknown or empty — map by `_masterId`, by trimmed name, or clear; prices never change; `--target` other than `local` needs `--confirm-remote` |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
 | `middleware/require-module.js` | Plan 616: `requireModule`, `requireHomeModule`, `requireModuleForType` — 403 `MODULE_OFF` when the business lacks a module; 30 s cache, `clearModuleCache` |

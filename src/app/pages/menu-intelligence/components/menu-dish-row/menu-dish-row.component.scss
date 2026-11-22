@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 :host {
   display: contents;
 }
@@ -314,7 +315,7 @@
 
 /* Phones (plan 470): this block stays LAST so its overrides beat the base `.dish-remove` / `.dish-sell-price`
    (absolute) rules above — same specificity, later wins. Name, info icon, price and delete sit in one row. */
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .dish-name-meta-wrap {
     padding-inline-end: 0;
   }

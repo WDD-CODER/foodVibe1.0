@@ -104,7 +104,7 @@ append the path to the scope block above and retry.
 
 - matching spoken names to products — family: helpers — rung: 3 — why: extend the stock extract util with a
   normalized-name match (`normalizeProductName`) on the server instead of sending the list to the model.
-- the actions wrapper — family: engine-classes — rung: 1 — why: page-local flex with a gap.
+- the actions wrapper `.stock-count__actions` — family: stock-ai-draft — rung: 1 — why: page-local flex with a gap.
 
 ## Step 0 — Reality Check
 
@@ -144,11 +144,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Stop a business from getting a second copy of a master product — the upsert, the unique index, the race case — server/services/sync-master.js, server/db.js, server/test/sync-master.test.js
-- [ ] A2: Clean the copies a business already has — the dedupe script's references and its safety, its dry run on local — server/scripts/dedupe-business-products.js
-- [ ] A3: Count by voice or text with any number of products — the model asked for spoken lines only, the server match, the cases — server/routes/ai/stock.js, server/utils/stock-extract.js, shared/schemas/ai-stock-extract.schema.ts, server/test/ai-stock-extract.test.js, src/app/pages/inventory/components/stock-count/**
-- [ ] A4: Make "save draft" its own button — the wrapper, the spec, the screen check — src/app/pages/inventory/components/stock-count/**, e2e/ui/648-1.spec.ts
-- [ ] A5: Run every check — the Done-when commands in order — docs/brain/inventory.md
+- [x] A1: Stop a business from getting a second copy of a master product — the upsert, the unique index, the race case — server/services/sync-master.js, server/db.js, server/test/sync-master.test.js
+- [x] A2: Clean the copies a business already has — the dedupe script's references and its safety, its dry run on local — server/scripts/dedupe-business-products.js
+- [x] A3: Count by voice or text with any number of products — the model asked for spoken lines only, the server match, the cases — server/routes/ai/stock.js, server/utils/stock-extract.js, shared/schemas/ai-stock-extract.schema.ts, server/test/ai-stock-extract.test.js, src/app/pages/inventory/components/stock-count/**
+- [x] A4: Make "save draft" its own button — the wrapper, the spec, the screen check — src/app/pages/inventory/components/stock-count/**, e2e/ui/648-1.spec.ts
+- [x] A5: Run every check — the Done-when commands in order — docs/brain/inventory.md
 
 ## Technical Considerations
 - Production: the same race may have doubled products on Atlas. The Human checks it (a read-only count per business of
@@ -163,3 +163,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - decided: match names on the server, not by sending the catalog to the model — why: a catalog of 1,500–3,000 names is
   too big and costly per call, and the server already has the business's products.
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0 errors; `pnpm run test:ci` → 2644 SUCCESS; `pnpm --dir server run lint` → 0 errors.
+- evidence: server tests sync-master, dedupe-business-products, ai-stock-extract, stock-extract-util → pass (race case: two syncs → one product per `_masterId`; index `product_business_master_unique`).
+- evidence: `pnpm run test:server` → one failure in ai-logistics-extract.test.js (unrelated, timing under load); alone it passes 10/10.
+- decided: a duplicate-key failure creating the unique index at startup (a business that still has doubles) is logged as a warning, not fatal — the Human runs the dedupe, then restarts.
+- decided: the dedupe deletes a loser that is a copy of the same `_masterId` as the kept one (the unique index allows one per business); a same-name loser of another origin still goes to the Trash as in plan 485.
+- ui: 648-1 written, not run (`e2e/ui/648-1.spec.ts`).

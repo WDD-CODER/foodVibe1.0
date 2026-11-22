@@ -13,8 +13,13 @@ export const platformHistoryRowSchema = z.strictObject({
   by: z.string().min(1),
   byName: z.string().max(80),
   reason: z.string().min(3).max(200),
-  changed: z.array(z.string().max(40)).max(10)
+  changed: z.array(z.string().max(40)).max(10),
+  changes: z
+    .array(z.strictObject({ field: z.string().max(40), from: z.string().max(200), to: z.string().max(200) }))
+    .max(10)
+    .optional()
 })
+export type PlatformHistoryRow = z.infer<typeof platformHistoryRowSchema>
 
 /** Body of the platform admin's write (plan 616). */
 export const platformUpdateSchema = z

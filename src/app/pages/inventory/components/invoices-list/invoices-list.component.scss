@@ -1,0 +1,23 @@
+@layer components.invoices-list {
+  :host {
+    display: block;
+  }
+
+  .invoices-list__row {
+    display: contents;
+  }
+
+  .invoices-list__state {
+    grid-column: 1 / -1;
+
+    padding: var(--space-6) var(--space-4);
+
+    text-align: center;
+  }
+
+  .invoices-list__muted {
+    white-space: nowrap;
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+}

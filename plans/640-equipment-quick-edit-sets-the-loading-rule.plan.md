@@ -135,9 +135,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Move the loading-rule logic into one shared helper the form and the popup both use — scalingRuleFrom, scalingRuleErrors, the form calls them, the util spec — src/app/core/utils/scaling-rule.util.ts, src/app/core/utils/scaling-rule.util.spec.ts, src/app/pages/equipment/components/equipment-form/equipment-form.component.ts
-- [ ] A2: Let the owner set the rule in the list's quick-edit popup — the four controls, hydrate, save with the checks, the template block, the six spec cases — src/app/pages/equipment/components/equipment-list/equipment-list.component.ts, .html, .scss, .spec.ts
-- [ ] A3: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/640-1.spec.ts
+- [x] A1: Move the loading-rule logic into one shared helper the form and the popup both use — scalingRuleFrom, scalingRuleErrors, the form calls them, the util spec — src/app/core/utils/scaling-rule.util.ts, src/app/core/utils/scaling-rule.util.spec.ts, src/app/pages/equipment/components/equipment-form/equipment-form.component.ts
+- [x] A2: Let the owner set the rule in the list's quick-edit popup — the four controls, hydrate, save with the checks, the template block, the six spec cases — src/app/pages/equipment/components/equipment-list/equipment-list.component.ts, .html, .scss, .spec.ts
+- [x] A3: Record the helper and prove it in the running app — the registry row, the inventory, the screen check, then the Done-when commands in order — docs/brain/component-families.md, docs/brain/inventory.md, e2e/ui/640-1.spec.ts
 
 ## Technical Considerations
 - Dependencies: 624 (the rule, the form, the rule column, the loading list).
@@ -156,3 +156,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - decided: the rule goes into the popup, not a link to the full page — why: the popup is where items are edited, and a
   link would still hide the rule one screen away.
 - decided: built on `chore/modules-staging` (run seeded from it), beside `mod-invoices-ui` — why: no shared file.
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (warnings only); `pnpm run test:ci` → 0, 2377 SUCCESS (one earlier run flaked on DataExportCardComponent plan 557, unrelated, passed on rerun); lint:reuse, lint:icons, lint:no-native-select, override-check, breadcrumbs, plan-ledger, kit-manifest, kit-checks, log-query → ok.
+- note: the plan file was not on the run branch (only on main); copied it from main into this branch so the gate can read it.
+- note: `docs/brain/inventory.md` has no generator and lists no helpers per file, so it is unchanged; the registry row is in component-families.md.
+- note: [ui] 640-1 written, not run.

@@ -1,3 +1,4 @@
+@use '../../styles/breakpoints' as *;
 .hero-fab-container {
   position: fixed;
   inset-block-end: 0.75rem;
@@ -129,7 +130,7 @@
   display: inline;
 }
 
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .fab-action__label {
     display: none;
   }
@@ -141,7 +142,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .hero-fab-container {
     inset-block-end: 0.5rem;
     inset-inline-end: 0.5rem;
@@ -160,7 +161,7 @@
 }
 
 // [mobile] Clear the fixed bottom nav (56px = 3.5rem) so the FAB is never hidden
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .hero-fab-container:not(.above-bar) {
     inset-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px) + 0.75rem);
     z-index: 210;
@@ -174,7 +175,7 @@
 }
 
 // Add/edit forms: the create shortcut adds nothing and covers the action row on phones
-@media (max-width: 620px) {
+@media (max-width: $break-phone-max) {
   .hero-fab-container.hide-on-phone {
     display: none;
   }

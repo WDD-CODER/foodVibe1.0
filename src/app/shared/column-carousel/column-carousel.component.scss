@@ -1,7 +1,7 @@
+@use '../../core/styles/breakpoints' as *;
 // Plan 349 — shared mobile column carousel (header + cells). One stylesheet for both.
 // Desktop (>768px): the host is `display: contents`, so each projected [columnSlide] is a
 // normal grid cell and nothing carousel-specific shows.
-$cc-break: 768px;
 
 :host(.column-carousel) {
   display: contents;
@@ -40,7 +40,7 @@ $cc-break: 768px;
   }
 }
 
-@media (max-width: $cc-break) {
+@media (max-width: $break-phone-max) {
   // ── Shared ────────────────────────────────────────────────────────────────
   :host(.column-carousel) {
     position: relative;

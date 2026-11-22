@@ -1,4 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.setup-checklist-card {
   :host {
@@ -105,7 +105,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
     }
   }
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     .setup-step__link {
       min-block-size: 44px;
     }

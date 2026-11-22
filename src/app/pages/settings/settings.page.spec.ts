@@ -2,18 +2,22 @@ import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ActivatedRoute, Router } from '@angular/router'
 import { of } from 'rxjs'
-import { LucideAngularModule } from 'lucide-angular'
+import { LucideAngularModule, UserCheck } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { UserService } from '@services/user.service'
 import { TranslationService } from '@services/translation.service'
 import type { User } from '@models/user.model'
 import { SettingsPage } from './settings.page'
 import { TeamTabComponent } from './components/team-tab/team-tab.component'
+import { AccessTabComponent } from './components/access-tab/access-tab.component'
 import { BusinessSettingsTabComponent } from './components/business-settings-tab/business-settings-tab.component'
 import { BaselineTabComponent } from './components/baseline-tab/baseline-tab.component'
 
 @Component({ selector: 'app-team-tab', standalone: true, template: '<p data-testid="team-stub"></p>' })
 class TeamTabStub {}
+
+@Component({ selector: 'app-access-tab', standalone: true, template: '<p data-testid="access-stub"></p>' })
+class AccessTabStub {}
 
 @Component({ selector: 'app-business-settings-tab', standalone: true, template: '<p data-testid="business-stub"></p>' })
 class BusinessTabStub {}
@@ -22,6 +26,15 @@ class BusinessTabStub {}
 class BaselineTabStub {}
 
 const STAFF: User = { _id: 's1', name: 'cook', email: 's@x', businessId: 'b1', businessRole: 'staff' }
+const CONSULTANT: User = {
+  _id: 'c1',
+  name: 'consultant',
+  email: 'c@x',
+  businessId: 'b2',
+  homeBusinessId: 'b1',
+  businessRole: 'consultant',
+  acting: 'consultant'
+}
 const OWNER: User = { _id: 'o1', name: 'owner', email: 'o@x', businessId: 'b1', businessRole: 'owner' }
 
 describe('SettingsPage', () => {
@@ -34,7 +47,7 @@ describe('SettingsPage', () => {
     router = jasmine.createSpyObj('Router', ['navigate'])
     router.navigate.and.returnValue(Promise.resolve(true))
     TestBed.configureTestingModule({
-      imports: [SettingsPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [SettingsPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, UserCheck })],
       providers: [
         { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } },
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
@@ -42,8 +55,8 @@ describe('SettingsPage', () => {
         { provide: ActivatedRoute, useValue: { queryParams: of(query), snapshot: { queryParams: query } } }
       ]
     }).overrideComponent(SettingsPage, {
-      remove: { imports: [TeamTabComponent, BusinessSettingsTabComponent, BaselineTabComponent] },
-      add: { imports: [TeamTabStub, BusinessTabStub, BaselineTabStub] }
+      remove: { imports: [TeamTabComponent, AccessTabComponent, BusinessSettingsTabComponent, BaselineTabComponent] },
+      add: { imports: [TeamTabStub, AccessTabStub, BusinessTabStub, BaselineTabStub] }
     })
     fixture = TestBed.createComponent(SettingsPage)
     fixture.detectChanges()
@@ -74,6 +87,19 @@ describe('SettingsPage', () => {
     expect(el().querySelector('[data-testid="settings-owner-only"]')).not.toBeNull()
     expect(el().querySelectorAll('[role="tab"]').length).toBe(0)
     expect(el().querySelector('[data-testid="team-stub"]')).toBeNull()
+  })
+
+  it('consultant: no tab and the owner-only empty state (plan 632)', () => {
+    setup(CONSULTANT)
+    expect(el().querySelector('[data-testid="settings-owner-only"]')).not.toBeNull()
+    expect(el().querySelectorAll('[role="tab"]').length).toBe(0)
+  })
+
+  it('owner: the access tab sits after the team tab and opens the access list (plan 632)', () => {
+    setup(OWNER, { tab: 'access' })
+    const keys = Array.from(el().querySelectorAll('[role="tab"]')).map((t) => t.getAttribute('data-testid'))
+    expect(keys.slice(0, 2)).toEqual(['settings-tab-team', 'settings-tab-access'])
+    expect(el().querySelector('[data-testid="access-stub"]')).not.toBeNull()
   })
 
   it('owner: the Team tab is active by default', () => {

@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 .workflow-container {
   display: flex;
   flex-direction: column;
@@ -104,7 +105,7 @@
   white-space: nowrap;
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .timer-row .counter-btn {
     display: none;
   }
@@ -384,7 +385,7 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
 }
 
 /* Recipe builder unified tablet/mobile breakpoint */
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   // Preparation steps: row 1 = drag + number + instruction (full width);
   // row 2 = the step buttons only, compact, aligned to the inline end.
   .workflow-grid .grid-row {

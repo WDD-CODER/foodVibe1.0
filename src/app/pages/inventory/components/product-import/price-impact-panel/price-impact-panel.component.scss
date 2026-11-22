@@ -1,0 +1,62 @@
+@layer components.price-impact-panel {
+  :host {
+    display: block;
+  }
+
+  .price-impact {
+    display: grid;
+    gap: var(--space-2);
+
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .price-impact__title {
+    margin: 0;
+
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+  }
+
+  .price-impact__list {
+    display: grid;
+    gap: var(--space-2);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .price-impact__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-4);
+  }
+
+  .price-impact__who,
+  .price-impact__nums {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .price-impact__name {
+    font-weight: var(--fw-medium);
+  }
+
+  .price-impact__tag,
+  .price-impact__none,
+  .price-impact__more {
+    margin: 0;
+
+    font-size: var(--fs-sm);
+    opacity: 0.7;
+  }
+
+  .price-impact__pct {
+    color: var(--color-danger);
+  }
+}

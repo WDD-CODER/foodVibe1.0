@@ -1,5 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
-$break-tabbar: 620px; // mirrors header.component.scss (the phone bottom tab bar)
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.pricing-meter {
   :host {
@@ -233,7 +232,7 @@ $break-tabbar: 620px; // mirrors header.component.scss (the phone bottom tab bar
     }
   }
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     .pricing-meter {
       display: none;
     }
@@ -266,11 +265,11 @@ $break-tabbar: 620px; // mirrors header.component.scss (the phone bottom tab bar
   box-shadow: var(--shadow-glow), var(--shadow-card);
   cursor: pointer;
 
-  @media (max-width: $break-mobile) {
+  @media (max-width: $break-phone-max) {
     display: inline-flex;
   }
 
-  @media (max-width: $break-tabbar) {
+  @media (max-width: $break-phone-max) {
     inset-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
   }
 }

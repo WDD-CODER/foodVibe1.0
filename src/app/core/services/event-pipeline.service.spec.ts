@@ -159,6 +159,18 @@ describe('EventPipelineService', () => {
     })
   })
 
+  describe('loading (plan 624)', () => {
+    it('saveLoading PUTs key and loaded and keeps the returned event', async () => {
+      const done = service.saveLoading('ev1', 'eq:a', true)
+      const req = backend.expectOne(`${BASE}/api/v1/events/ev1/loading`)
+      expect(req.request.method).toBe('PUT')
+      expect(req.request.body).toEqual({ key: 'eq:a', loaded: true })
+      req.flush({ ...inquiry, _id: 'ev1', name: 'נטען' })
+      expect((await done).ok).toBeTrue()
+      expect(data.allMenuEvents_().find((e) => e._id === 'ev1')?.name).toBe('נטען')
+    })
+  })
+
   describe('closing (plan 446)', () => {
     const snapshot = { at: 1, suppliers: [], extraCosts: 0, plannedRevenue: 0, plannedProfit: 0, plannedProfitPct: 0 }
 

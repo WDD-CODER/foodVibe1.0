@@ -1,0 +1,79 @@
+@layer components.loading-list {
+  .loading-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-inline-size: 0;
+  }
+
+  .loading-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-block-end: var(--space-1);
+  }
+
+  .loading-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .loading-meta {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  .loading-group-title {
+    margin-block: 0 var(--space-2);
+  }
+
+  .loading-table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+
+    th,
+    td {
+      padding: var(--space-1) var(--space-2);
+      text-align: start;
+      border-block-end: 1px solid var(--border-subtle, currentColor);
+    }
+
+    .col-tick {
+      inline-size: 2.5rem;
+    }
+  }
+
+  .is-loaded .loading-label {
+    text-decoration: line-through;
+  }
+
+  @media print {
+    .loading-list {
+      color: CanvasText;
+      background: Canvas;
+      font-size: var(--fs-md);
+    }
+
+    .loading-table th,
+    .loading-table td {
+      border: 1px solid currentColor;
+    }
+
+    // An empty square for an unticked box, a filled one for a ticked box.
+    .col-tick input {
+      appearance: none;
+      inline-size: 1rem;
+      block-size: 1rem;
+      border: 1.5px solid currentColor;
+      background: Canvas;
+    }
+
+    .col-tick input:checked {
+      background: CanvasText;
+    }
+  }
+}

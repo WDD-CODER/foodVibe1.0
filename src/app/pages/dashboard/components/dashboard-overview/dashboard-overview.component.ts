@@ -19,9 +19,11 @@ import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.comp
 import type { DashboardTab } from '../../dashboard.page'
 import { SetupChecklistCardComponent } from '../setup-checklist-card/setup-checklist-card.component'
 import { FrontDeskWeekCardComponent } from '../frontdesk-week-card/frontdesk-week-card.component'
+import { PriceRisesCardComponent } from '../price-rises-card/price-rises-card.component'
 import { FrontDeskChecklistCardComponent } from '../front-desk-checklist-card/front-desk-checklist-card.component'
 import { BusinessPerformanceComponent } from '../business-performance/business-performance.component'
 import { FrontDeskStatusBannerComponent } from 'src/app/shared/front-desk-status-banner/front-desk-status-banner.component'
+import { DiagnosisCardComponent } from '../diagnosis-card/diagnosis-card.component'
 import { OpeningDetailsBannerComponent } from '../opening-details-banner/opening-details-banner.component'
 
 const ENTITY_ICONS: Record<ActivityEntityType, string> = {
@@ -50,6 +52,8 @@ interface ActivityDayGroup {
     FrontDeskChecklistCardComponent,
     BusinessPerformanceComponent,
     FrontDeskWeekCardComponent,
+    PriceRisesCardComponent,
+    DiagnosisCardComponent,
     OpeningDetailsBannerComponent,
     FrontDeskStatusBannerComponent
   ],
@@ -98,7 +102,7 @@ export class DashboardOverviewComponent {
   /** Owner whose opening details were never answered (`undefined`; `{}` = skipped): a banner stands where the performance area would be. */
   protected readonly needsOpeningDetails_ = computed(
     () =>
-      this.permission.isOwner_() &&
+      this.permission.can('editSettings') &&
       this.businessService.business_()?.baseline === undefined &&
       this.businessService.business_() !== null
   )

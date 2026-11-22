@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
-import { provideRouter } from '@angular/router'
+import { provideRouter, Router } from '@angular/router'
 import { UserService } from './user.service'
 import { environment } from '../../../environments/environment'
 import type { User } from '../models/user.model'
+import { APP_RELOAD } from '../utils/app-reload.util'
 
 const LOGIN_URL = `${environment.authApiUrl}/api/v1/auth/login`
 const SIGNUP_URL = `${environment.authApiUrl}/api/v1/auth/signup`
+const SWITCH_URL = `${environment.authApiUrl}/api/v1/auth/switch-business`
 const REFRESH_URL = `${environment.authApiUrl}/api/v1/auth/refresh`
 
 const fakeToken = (claims: Record<string, unknown>): string => {
@@ -18,11 +20,17 @@ const fakeToken = (claims: Record<string, unknown>): string => {
 describe('UserService (business model)', () => {
   let service: UserService
   let http: HttpTestingController
+  let reload: jasmine.Spy
 
   beforeEach(() => {
     sessionStorage.clear()
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])]
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: APP_RELOAD, useFactory: () => (reload = jasmine.createSpy('reload')) }
+      ]
     })
     service = TestBed.inject(UserService)
     http = TestBed.inject(HttpTestingController)
@@ -69,6 +77,103 @@ describe('UserService (business model)', () => {
         isPlatformAdmin: false
       })
     )
+  })
+
+  describe('acting and switching (plan 632)', () => {
+    const HOME: User = {
+      _id: 'u1',
+      name: 'u',
+      email: 'u@x',
+      businessId: 'b1',
+      homeBusinessId: 'b1',
+      businessRole: 'owner'
+    }
+    const ACTING: User = {
+      _id: 'u1',
+      name: 'u',
+      email: 'u@x',
+      businessId: 'b2',
+      homeBusinessId: 'b1',
+      businessRole: 'consultant',
+      acting: 'consultant',
+      homeModules: ['m1']
+    }
+
+    it('exposes homeBusinessId_, acting_ and homeModules_', () => {
+      service._saveUserLocal(ACTING)
+      expect(service.homeBusinessId_()).toBe('b1')
+      expect(service.acting_()).toBe('consultant')
+      expect(service.homeModules_()).toEqual(['m1'])
+      service._saveUserLocal({ _id: 'x', name: 'x', email: '', businessId: 'b7' })
+      expect(service.homeBusinessId_()).toBe('b7')
+      expect(service.acting_()).toBeNull()
+      expect(service.homeModules_()).toEqual([])
+    })
+
+    it('tokenBusinessId reads the business of a token', () => {
+      expect(service.tokenBusinessId(fakeToken({ userId: 'u1', businessId: 'b2' }))).toBe('b2')
+      expect(service.tokenBusinessId('garbage')).toBeNull()
+    })
+
+    it('switchBusiness stores the new token and user, then reloads once at /dashboard', async () => {
+      service._saveUserLocal(HOME)
+      const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true)
+      const done = service.switchBusiness('b2')
+      await new Promise((r) => setTimeout(r))
+      expect(navigate).toHaveBeenCalledWith(['/dashboard'])
+      const req = http.expectOne(SWITCH_URL)
+      expect(req.request.body).toEqual({ businessId: 'b2' })
+      req.flush({ token: 'newtok', user: ACTING })
+      expect(await done).toBeTrue()
+      expect(service.getToken()).toBe('newtok')
+      expect(service.user_()?.businessId).toBe('b2')
+      expect(reload).toHaveBeenCalledOnceWith('/dashboard')
+    })
+
+    it('a failed switch changes nothing and returns false', async () => {
+      service._saveUserLocal(HOME)
+      service.storeToken('oldtok')
+      spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true)
+      const done = service.switchBusiness(null)
+      await new Promise((r) => setTimeout(r))
+      http.expectOne(SWITCH_URL).flush({ error: 'NO_ACCESS' }, { status: 403, statusText: 'Forbidden' })
+      expect(await done).toBeFalse()
+      expect(service.getToken()).toBe('oldtok')
+      expect(service.user_()?.businessId).toBe('b1')
+      expect(reload).not.toHaveBeenCalled()
+    })
+
+    it('a page that refuses to be left (unsaved changes) stops the switch', async () => {
+      service._saveUserLocal(HOME)
+      spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(false)
+      expect(await service.switchBusiness('b2')).toBeFalse()
+      http.expectNone(SWITCH_URL)
+      expect(reload).not.toHaveBeenCalled()
+    })
+
+    it('a refresh that answers another business for the same user reloads', () => {
+      service._saveUserLocal(HOME)
+      service.refreshToken().subscribe()
+      http.expectOne(REFRESH_URL).flush({ token: fakeToken({ userId: 'u1', businessId: 'b2' }), user: ACTING })
+      expect(reload).toHaveBeenCalledOnceWith('/dashboard')
+      expect(service.consumeAccessEndedNotice()).toBeFalse()
+    })
+
+    it('a refresh that ends an acting session sets the notice once', () => {
+      service._saveUserLocal(ACTING)
+      service.refreshToken().subscribe()
+      http.expectOne(REFRESH_URL).flush({ token: fakeToken({ userId: 'u1', businessId: 'b1' }), user: HOME })
+      expect(reload).toHaveBeenCalledOnceWith('/dashboard')
+      expect(service.consumeAccessEndedNotice()).toBeTrue()
+      expect(service.consumeAccessEndedNotice()).toBeFalse()
+    })
+
+    it('a refresh in the same business does not reload', () => {
+      service._saveUserLocal(HOME)
+      service.refreshToken().subscribe()
+      http.expectOne(REFRESH_URL).flush({ token: fakeToken({ userId: 'u1', businessId: 'b1' }), user: HOME })
+      expect(reload).not.toHaveBeenCalled()
+    })
   })
 
   it('a refresh with no stored user and a response user sets user_() from it, terms version included', () => {

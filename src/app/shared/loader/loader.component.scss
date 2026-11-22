@@ -1,3 +1,4 @@
+@use '../../core/styles/breakpoints' as *;
 .loader-wrap {
   display: flex;
   flex-direction: column;
@@ -162,7 +163,8 @@
 }
 
 @keyframes steam-reduced {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
   }
   50% {
@@ -170,7 +172,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $break-phone-max) {
   .loader-wrap.size-large {
     .pot-wrap {
       width: 5.25rem;

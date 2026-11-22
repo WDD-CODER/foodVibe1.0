@@ -10,7 +10,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { UtilService } from '@services/util.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { ActivatedRoute, Router } from '@angular/router'
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router'
 import { firstValueFrom, of, Subject, take, takeUntil } from 'rxjs'
 import { signal, computed } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
@@ -214,6 +214,27 @@ describe('ProductFormComponent', () => {
     })
   })
 
+  // Plan 649 — a source whose supplier is not in the business's list never shows an id and never blocks a save.
+  describe('plan 649: unknown supplier', () => {
+    it('shows supplier_unknown, never the id', () => {
+      expect(component['supplierDisplayFn']('ghost-id-123')).toBe('supplier_unknown')
+    })
+
+    it('saves a product with such a source and keeps its price', async () => {
+      const kitchen = TestBed.inject(KitchenStateService)
+      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(Promise.resolve(null as unknown as Product))
+      component['productForm_'].patchValue({
+        productName: 'בצל',
+        baseUnit: 'kg',
+        supplierIds_: ['ghost-id-123'],
+        supplierPrices_: { 'ghost-id-123': 12.5 }
+      })
+      expect(await component.saveAndWait()).toBe(true)
+      const saved = saveSpy.calls.mostRecent().args[0] as Product
+      expect(saved.sources.map((s) => [s.supplierId, s.price])).toEqual([['ghost-id-123', 12.5]])
+    })
+  })
+
   describe('plan 540: server refusal', () => {
     it('a 400 too_big on nameHebrew marks the name field', async () => {
       const kitchen = TestBed.inject(KitchenStateService)
@@ -263,6 +284,41 @@ describe('ProductFormComponent', () => {
       expect(errors['baseUnit']).toBe('field_unit_required')
       expect(errors['buy_price_global_']).toBeUndefined()
       expect(errors['categories']).toBeUndefined()
+    })
+  })
+
+  // Plan 651 — «הוספת מוצר חדש» from the stock count: the name is filled in; save and back return to the count.
+  describe('plan 651: ?name= and returnUrl', () => {
+    const withQuery = (query: Record<string, string>): ProductFormComponent => {
+      const route = TestBed.inject(ActivatedRoute) as unknown as { snapshot?: unknown }
+      route.snapshot = { queryParamMap: convertToParamMap(query) }
+      const next = TestBed.createComponent(ProductFormComponent)
+      next.detectChanges()
+      return next.componentInstance
+    }
+
+    it('?name= fills the name', () => {
+      const next = withQuery({ name: 'אבוקדו' })
+      expect(next['productForm_'].getRawValue().productName).toBe('אבוקדו')
+    })
+
+    it('with returnUrl, save goes back with the new product id as ?addedProduct=', async () => {
+      const next = withQuery({ name: 'אבוקדו', returnUrl: '/inventory/count' })
+      const kitchen = TestBed.inject(KitchenStateService)
+      spyOn(kitchen, 'saveProduct').and.returnValue(Promise.resolve({ _id: 'new1' } as unknown as Product))
+      next['productForm_'].patchValue({ baseUnit: 'kg' })
+      next['onSubmit']()
+      await fixture.whenStable()
+      await Promise.resolve()
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/inventory/count'], { queryParams: { addedProduct: 'new1' } })
+    })
+
+    it('with returnUrl, back goes to it; an outside address is ignored', () => {
+      withQuery({ returnUrl: '/inventory/count' })['onCancel']()
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/inventory/count'])
+      mockRouter.navigate.calls.reset()
+      withQuery({ returnUrl: 'https://evil.example' })['onCancel']()
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/inventory/list'])
     })
   })
 

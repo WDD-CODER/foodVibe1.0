@@ -1,0 +1,35 @@
+<app-modal-shell size="sm" titleKey="platform_grant_access" [dismissible]="!isSaving_()" (dismissed)="cancel()">
+  <div class="ga-body" data-testid="grant-access-dialog">
+    <p class="ga-name">{{ target()?.name }}</p>
+    <app-form-field label="platform_grant_username" forId="ga-username" [error]="errorKey_()">
+      <input
+        #usernameInput
+        id="ga-username"
+        type="text"
+        class="c-input"
+        autocomplete="off"
+        data-testid="grant-username"
+        [class.c-input--invalid]="!!errorKey_()"
+        [attr.aria-invalid]="!!errorKey_()"
+        [value]="username_()"
+        (input)="onInput($any($event.target).value)"
+        (keydown.enter)="save()"
+      />
+    </app-form-field>
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" data-testid="grant-cancel" [disabled]="isSaving_()" (click)="cancel()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="grant-save"
+      [disabled]="!canSave_()"
+      [attr.aria-busy]="isSaving_()"
+      (click)="save()"
+    >
+      {{ 'platform_grant_access' | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>

@@ -132,6 +132,26 @@ describe('CounterComponent', () => {
     btn('first').dispatchEvent(ptr('pointerup'))
   }))
 
+  it('measures the value width once per value change, not on every view check (plan 645)', async () => {
+    const counter = fixture.debugElement.query((d) => d.name === 'app-counter').componentInstance as CounterComponent
+    const measure = spyOn(counter as unknown as { measureValueWidth: () => void }, 'measureValueWidth')
+    for (let i = 0; i < 5; i++) fixture.detectChanges()
+    await fixture.whenStable()
+    expect(measure).not.toHaveBeenCalled()
+
+    host.value = 1234
+    fixture.detectChanges()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(measure).toHaveBeenCalledTimes(1)
+
+    host.value = 7
+    fixture.detectChanges()
+    await fixture.whenStable()
+    for (let i = 0; i < 5; i++) fixture.detectChanges()
+    expect(measure).toHaveBeenCalledTimes(2)
+  })
+
   it('arrow up and down step the value', () => {
     const inputEl = fixture.nativeElement.querySelector('.value-input') as HTMLInputElement
     inputEl.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }))

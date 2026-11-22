@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 :host {
   display: block;
 }
@@ -15,7 +16,7 @@
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
 
-  @media (max-width: 768px) {
+  @media (max-width: $break-phone-max) {
     padding: 1rem;
   }
 }
@@ -105,7 +106,7 @@
   }
 
   // Phones: still one row — tighter gaps and a smaller toggle make room for the name.
-  @media (max-width: 768px) {
+  @media (max-width: $break-phone-max) {
     gap: 0.5rem;
 
     padding-inline: 0.5rem;

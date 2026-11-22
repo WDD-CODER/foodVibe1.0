@@ -1,0 +1,561 @@
+{
+  "run": "mod-history",
+  "branch": "orch/mod-history",
+  "base": "main",
+  "startedAt": "2026-11-18T19:47:13.561Z",
+  "mainShaAtStart": "b15c69822e19e8e0e93b243a47549675bbaec9e1",
+  "plans": {
+    "638": {
+      "nnn": "638",
+      "title": "Platform admin sees the history of module and AI changes of a business, with the reasons",
+      "branch": "feat/638-platform-admin-sees-the",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T19:49:26.400Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-18T20:39:01.898Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-18T20:49:07.279Z"
+        }
+      },
+      "humanItems": [
+        "Dandan changes a module for a test business with a reason, opens the dialog again, sees no history until the"
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T19:49:25.661Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T19:49:26.402Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:30:19.962Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:39:01.492Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:39:01.723Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:39:01.900Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:42:11.996Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:48:59.781Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:49:07.280Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:49:24.016Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-18T20:50:34.519Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.2,
+      "sha": "36ff692ce23a74ba818abbd301a4dfbfb1548c9c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2450.4,
+          "tokens": {
+            "input": 2813820,
+            "output": 30103
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 187.5,
+          "tokens": {
+            "input": 270436,
+            "output": 5846
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.3,
+          "tokens": {
+            "input": 153649,
+            "output": 1122
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-history --plan plans/638-platform-admin-sees-the-history-of-platform-changes-of-a-business.plan.md"
+      ],
+      "checkedHead": "0057771dcd8bd5b17ddd661f68f9a2523a0d61e9"
+    },
+    "639": {
+      "nnn": "639",
+      "title": "Private mode only stops learning; erasing what was learned is a separate, explicit action",
+      "branch": "feat/639-private-mode-stops-learning",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T05:32:43.278Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T05:45:11.896Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T05:52:08.894Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens the dialog of a test business, reads the new private-mode hint, turns private on with a reason"
+      ],
+      "history": [
+        {
+          "at": "2026-11-18T20:52:41.611Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T20:52:41.752Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T21:05:52.413Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-18T21:06:58.402Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T05:32:43.106Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T05:32:43.279Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T05:37:47.437Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T05:45:11.577Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T05:45:11.743Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T05:45:11.897Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T05:46:07.651Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T05:52:02.499Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T05:52:08.896Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T05:52:19.950Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T05:52:58.435Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "639",
+          "title": "Private mode only stops learning; erasing what was learned is a separate, explicit action",
+          "branch": "feat/639-private-mode-stops-learning",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-18T20:52:41.750Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.7,
+          "reason": "asking 639-1: replan needed: ESCALATE: scope server/test/ai-shots-shared.test.js — `pnpm run test:server` exits 1 with 1 failed of 1842. The plan-618 case at line 152 expects `aiPrivate: true` to delete promoted copies, which plan 639 changes. The file is not in the Read-Write Scope.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 790.3,
+              "tokens": {
+                "input": 3555201,
+                "output": 43660
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-18T21:06:46.585Z",
+            "reason": "replan needed: ESCALATE: scope server/test/ai-shots-shared.test.js — `pnpm run test:server` exits 1 with 1 failed of 1842. The plan-618 case at line 152 expects `aiPrivate: true` to delete promoted copies, which plan 639 changes. The file is not in the Read-Write Scope."
+          },
+          "parkBranch": "park/mod-history-639"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 639-1: replan needed: ESCALATE: scope server/test/ai-shots-shared.test.js — `pnpm run test:server` exits 1 with 1 failed of 1842. The plan-618 ",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.2,
+      "sha": "556ec24cf074c568fd51de55cddac9ff9e318264",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 301,
+          "tokens": {
+            "input": 144961,
+            "output": 2424
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 53.4,
+          "tokens": {
+            "input": 216338,
+            "output": 3359
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.9,
+          "tokens": {
+            "input": 124900,
+            "output": 599
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-history --plan plans/639-private-mode-stops-learning-and-erasing-is-an-explicit-action.plan.md"
+      ],
+      "checkedHead": "9062e9e290fb40a6207f1bff96ff4814cfaf002e"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-18T19:49:25.348Z",
+      "plan": "638",
+      "text": "the folder foodVibe1.0-orch-mod-history-638 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T20:30:17.001Z",
+      "plan": "638",
+      "text": "builder left undone (round 0): [ui] e2e/ui/638-1.spec.ts: written, not run; [human] Dandan's check of the closed, open and close flow"
+    },
+    {
+      "at": "2026-11-18T20:49:35.069Z",
+      "plan": "638",
+      "text": "the folder foodVibe1.0-orch-merge-mod-history was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T20:52:41.482Z",
+      "plan": "639",
+      "text": "the folder foodVibe1.0-orch-mod-history-639 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-18T21:05:52.236Z",
+      "plan": "639",
+      "text": "builder left undone (round 0): test:server is not fully green: server/test/ai-shots-shared.test.js:152 needs the out-of-scope update above; Not run after the last edits: kit-manifest-check, kit-checks, scope-check, override-check, plan-ledger-check, ci-scope-check, log-query; 639-1: written, not run; 639-2: written, not run; [hum"
+    },
+    {
+      "at": "2026-11-18T21:06:58.163Z",
+      "plan": "639",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-18T21:06:58.602Z",
+      "plan": "639",
+      "text": "ask 639-1 (scope, the Human or the advisor answers): Add server/test/ai-shots-shared.test.js to the scope so its plan-618 case can expect the promoted copy to be kept after aiPrivate true?"
+    },
+    {
+      "at": "2026-11-19T00:07:02.621Z",
+      "plan": "639",
+      "text": "ask 639-1 still open after 180 min — still waiting"
+    },
+    {
+      "at": "2026-11-19T01:07:03.653Z",
+      "plan": "639",
+      "text": "ask 639-1 still open after 240 min — still waiting"
+    },
+    {
+      "at": "2026-11-19T02:07:04.668Z",
+      "plan": "639",
+      "text": "ask 639-1 still open after 300 min — still waiting"
+    },
+    {
+      "at": "2026-11-19T03:07:05.751Z",
+      "plan": "639",
+      "text": "ask 639-1 still open after 360 min — still waiting"
+    },
+    {
+      "at": "2026-11-19T04:07:06.862Z",
+      "plan": "639",
+      "text": "ask 639-1 still open after 420 min — still waiting"
+    },
+    {
+      "at": "2026-11-19T05:07:07.950Z",
+      "plan": "639",
+      "text": "ask 639-1 still open after 480 min — still waiting"
+    },
+    {
+      "at": "2026-11-19T05:30:38.432Z",
+      "plan": "639",
+      "text": "ask 639-1 answered by the human: approved: server/test/ai-shots-shared.test.js"
+    },
+    {
+      "at": "2026-11-19T05:30:57.017Z",
+      "plan": "639",
+      "text": "scope of plan 639 extended on orch/mod-history by the answer to 639-1: server/test/ai-shots-shared.test.js"
+    },
+    {
+      "at": "2026-11-19T05:32:31.764Z",
+      "plan": "639",
+      "text": "resumed from park/mod-history-639: round 0, tier build, after: asking 639-1: replan needed: ESCALATE: scope server/test/ai-shots-shared.test.js — `pnpm run test:server` exits 1 with 1 failed of 1842. The plan-618 case at li"
+    },
+    {
+      "at": "2026-11-19T05:32:42.924Z",
+      "plan": "639",
+      "text": "the folder foodVibe1.0-orch-mod-history-639 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T05:37:44.448Z",
+      "plan": "639",
+      "text": "builder left undone (round 0): [ui] 639-1: written, not run; [ui] 639-2: written, not run"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 14.2,
+  "updatedAt": "2026-11-19T05:56:52.501Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "638",
+      "type": "behaviour",
+      "text": "behaviour: the history button sits in a row beside the business name at the top of the dialog body, not in the modal shell's own header. The shell has no slot for it — reverse: move the button when the shell gets one",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "638",
+      "type": "behaviour",
+      "text": "behaviour: pressing the history button while the panel is open closes it, as the plan says. Opening the dialog starts closed — reverse: make the button open-only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "638",
+      "type": "behaviour",
+      "text": "behaviour: the panel's list rules sit in platform-dashboard.page.scss under `:host ::ng-deep`, because the dialog has no stylesheet and renders inside that page. Inline component styles were tried first, and the pre-commit no-semi hook stripped the semicolons from their CSS — reverse: add a dialog stylesheet through `approved:`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "638",
+      "type": "behaviour",
+      "text": "behaviour: a plan-638 row with an empty `changes` array shows only the date, name and reason — reverse: show the `changed` field labels for it too",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "638",
+      "type": "seen",
+      "text": "seen: server/test/admin-platform.test.js:123 — the cap test uses `vi` as a global, and plain `npx jest` has no `vi`. The server tests run under vitest only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "638",
+      "type": "behaviour",
+      "text": "behaviour: shortened the two rung-4 Reuse Check rows to the bare symbol, with the file and component moved into the why text, because the registry check matches the full piece text — reverse: restore the 'in …' wording in the row",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "639",
+      "type": "behaviour",
+      "text": "behaviour: the erase reason is trimmed, 1–300 characters, as the plan's functional requirement says, not the platform write's 3–200 — reverse: change the check in the erase route",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "639",
+      "type": "behaviour",
+      "text": "behaviour: the erase box reuses the dialog's own layout and a danger ghost button, and its confirm button repeats the label platform_erase_learned — reverse: add a dedicated confirm key",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "639",
+      "type": "behaviour",
+      "text": "behaviour: the erase confirm popup uses the existing 'remove' key as its confirm label — reverse: add a dedicated key",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "639",
+      "type": "seen",
+      "text": "seen: server/test/ai-shots-shared.test.js:152 — the plan-618 test checks the old rule that private mode erases promoted copies",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T05:56:52.499Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T05:56:52.500Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

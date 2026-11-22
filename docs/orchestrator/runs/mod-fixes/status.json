@@ -1,0 +1,1044 @@
+{
+  "run": "mod-fixes",
+  "branch": "orch/mod-fixes",
+  "base": "main",
+  "startedAt": "2026-11-19T08:45:13.712Z",
+  "mainShaAtStart": "94a6be6460f2a7ae7eb51f942c99ae9c70cf2b65",
+  "plans": {
+    "641": {
+      "nnn": "641",
+      "title": "Invoice import compares with the product's current price and asks which supplier to update; no duplicate suppliers",
+      "branch": "feat/641-invoice-import-compares-with",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-19T10:24:13.651Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T10:42:32.459Z"
+        }
+      },
+      "humanItems": [
+        "Dandan imports the «ווילד בייקרי» invoice again: the row shows the rise against 100, he keeps «עדכון המחיר»,"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T08:46:36.147Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:46:36.282Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T08:59:37.796Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T09:05:39.804Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T09:05:39.990Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T09:05:40.244Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T09:06:42.446Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T09:07:39.459Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T09:07:45.776Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T09:08:00.682Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T09:08:07.297Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T09:08:07.421Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T09:09:18.451Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T09:10:05.678Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:24:13.408Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:24:13.653Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:35:13.052Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:42:23.732Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:42:32.461Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:42:48.640Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T10:44:09.818Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "641",
+          "title": "Invoice import compares with the product's current price and asks which supplier to update; no duplicate suppliers",
+          "branch": "feat/641-invoice-import-compares-with",
+          "state": "asking",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-19T08:46:36.281Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-19T09:05:40.242Z"
+            },
+            "reviewer": {
+              "model": "sonnet",
+              "at": "2026-11-19T09:07:45.774Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-19T09:08:07.420Z"
+            }
+          },
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 19.4,
+          "sha": "983099dc18a3e5fda399c9a0a3c894879fa743f6",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 779,
+              "tokens": {
+                "input": 3551199,
+                "output": 32442
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 59.7,
+              "tokens": {
+                "input": 272299,
+                "output": 3842
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 13.8,
+              "tokens": {
+                "input": 82788,
+                "output": 1246
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 70.7,
+              "tokens": {
+                "input": 201032,
+                "output": 4769
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-fixes --plan plans/641-invoice-import-compares-with-the-current-price-and-asks-which-supplier.plan.md",
+            "round 2: review STOP: major server/routes/product-import.js:157 done-when: the invoice line does not record the supplier whose price changed"
+          ],
+          "escalations": [
+            {
+              "step": "round 2",
+              "check": "review"
+            }
+          ],
+          "replan": "no — the builder gave no planChange",
+          "resetToBase": "11c43c6291d9e499261e0233c0f99e4176d18a09",
+          "resetFrom": "983099dc18a3e5fda399c9a0a3c894879fa743f6",
+          "reason": "asking 641-1: replan needed: ESCALATE: scope shared/schemas/entities/invoice.schema.ts. invoiceLineSchema (z.strictObject, lines 9-19) has no supplierId, so a saved invoice line cannot record the supplier whose price changed without editing this out-of-scope file. Review STOP from round 1: 'major server/routes/product-import.js",
+          "park": {
+            "at": "2026-11-19T09:09:55.943Z",
+            "reason": "replan needed: ESCALATE: scope shared/schemas/entities/invoice.schema.ts. invoiceLineSchema (z.strictObject, lines 9-19) has no supplierId, so a saved invoice line cannot record the supplier whose price changed without editing this out-of-scope file. Review STOP from round 1: 'major server/routes/product-import.js"
+          },
+          "parkBranch": "park/mod-fixes-641"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 18.4,
+      "sha": "52b64019055555e58b22d18ac8ca10bf679151c2",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 656.7,
+          "tokens": {
+            "input": 836323,
+            "output": 11206
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 14.4,
+          "tokens": {
+            "input": 141111,
+            "output": 1108
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "ab10f8c1c88780a978a42b982acecbe6ad6c1c92"
+    },
+    "642": {
+      "nnn": "642",
+      "title": "The platform's learning numbers say how many scans were saved and do not show a sure percent from one save",
+      "branch": "feat/642-learning-accuracy-shows-how",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T10:46:38.746Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T11:05:30.966Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T11:07:14.290Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens `/platform` → \"למידת המערכת\": the invoice row reads \"1 מתוך 9\" saved and a greyed \"100% (1)\","
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T09:10:06.323Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T10:46:38.546Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T10:46:38.748Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T10:57:56.854Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:05:30.536Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:05:30.782Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T11:05:30.968Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T11:06:03.213Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T11:07:08.122Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T11:07:14.291Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T11:07:23.335Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T11:08:02.235Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "642",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 641-1",
+          "freeDiskGb": 19.1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 18.3,
+      "sha": "23a5573dcb33c5310226acc0d0a8d81a9bbae403",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 675,
+          "tokens": {
+            "input": 361441,
+            "output": 12566
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 29.4,
+          "tokens": {
+            "input": 70666,
+            "output": 1242
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.8,
+          "tokens": {
+            "input": 52383,
+            "output": 305
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-fixes --plan plans/642-learning-accuracy-shows-how-many-were-saved-and-on-how-few.plan.md"
+      ],
+      "checkedHead": "7d556c0dace708b8da52d91755eeee634fd2cc28"
+    },
+    "643": {
+      "nnn": "643",
+      "title": "Small debts the Modules runs left: the settings type, the test icon list and the flaky export test",
+      "branch": "feat/643-small-debts-from-the",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T11:10:07.679Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T11:54:46.562Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-19T09:10:06.483Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:10:07.533Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:10:07.681Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:48:38.815Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:54:39.693Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:54:46.563Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:54:54.708Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:55:36.529Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "643",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 641-1",
+          "freeDiskGb": 19.1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 18.1,
+      "sha": "bcd1cf0763ececfe302f42ff5b5ede9425d42348",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2308.8,
+          "tokens": {
+            "input": 1091265,
+            "output": 14602
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7,
+          "tokens": {
+            "input": 27373,
+            "output": 549
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "d4e18fa860f584da338ff6ed7c8a73d5b77610fa"
+    },
+    "644": {
+      "nnn": "644",
+      "title": "The business dialog: hints as tooltips, a history panel that is a real box, and changed texts that reach the screen",
+      "branch": "feat/644-business-dialog-hints-as",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T11:57:41.273Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T12:06:00.662Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T12:28:53.365Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-19T12:12:13.393Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens a test business's dialog: hovering \"מצב פרטי\" shows the new hint and no hint text is on the"
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T09:10:06.656Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:57:41.138Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T11:57:41.274Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T12:03:19.428Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T12:06:00.393Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T12:06:00.529Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T12:06:00.664Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T12:09:11.639Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T12:11:40.596Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T12:11:47.130Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T12:12:07.137Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T12:12:13.270Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:12:13.394Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:26:13.756Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:26:14.057Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:28:47.063Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:28:53.366Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:29:02.771Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-19T12:29:43.838Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "644",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 641-1",
+          "freeDiskGb": 19.1
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 18.3,
+      "sha": "1659b95bedea390584abb4bad356db1d2f61311a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 335.6,
+          "tokens": {
+            "input": 678650,
+            "output": 13122
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 188.4,
+          "tokens": {
+            "input": 405160,
+            "output": 5986
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.8,
+          "tokens": {
+            "input": 60906,
+            "output": 1852
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 837.9,
+          "tokens": {
+            "input": 3116533,
+            "output": 28023
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.2,
+          "tokens": {
+            "input": 62356,
+            "output": 532
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-fixes --plan plans/644-business-dialog-hints-as-tooltips-history-panel-design-fresh-texts.plan.md",
+        "round 2: review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.scss:257 P0: the modal does not keep its size when the history opens"
+      ],
+      "escalations": [
+        {
+          "step": "round 2",
+          "check": "review"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "resetToBase": "bcd1cf0763ececfe302f42ff5b5ede9425d42348",
+      "resetFrom": "1d57d750032a83115b493b8d247ace6c4a5d767e",
+      "uiCards": [
+        {
+          "card": "On `/platform`, the business dialog's size (width and height of `.c-modal-card`) is the same before and after",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 2
+        }
+      ],
+      "checkedHead": "62b12442de28ad8ba843ad4cd9d8ab5664f9465d"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T08:46:36.020Z",
+      "plan": "641",
+      "text": "the folder foodVibe1.0-orch-mod-fixes-641 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T08:59:35.390Z",
+      "plan": "641",
+      "text": "builder left undone (round 0): [ui] 641-1: written, not run (no running app in the builder folder)"
+    },
+    {
+      "at": "2026-11-19T09:06:44.198Z",
+      "plan": "641",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 641"
+    },
+    {
+      "at": "2026-11-19T09:06:44.334Z",
+      "plan": "641",
+      "text": "GATE: cached pnpm run test:server — passed on the same files in plan 641"
+    },
+    {
+      "at": "2026-11-19T09:08:07.179Z",
+      "plan": "641",
+      "text": "escalated to a fresh judgment-tier builder (round 2): review STOP: major server/routes/product-import.js:157 done-when: the invoice line does not record the supplier whose price changed"
+    },
+    {
+      "at": "2026-11-19T09:09:18.274Z",
+      "plan": "641",
+      "text": "builder left undone (round 2): A1-A5: not started; the worktree is clean at base 11c43c62. The Done-when item 'the invoice line records the supplier whose price changed' needs shared/schemas/entities/invoice.schema.ts (invoiceLineSchema: add supplierId: z.string().optional()), which is outside the scope. Once approved, the route"
+    },
+    {
+      "at": "2026-11-19T09:10:05.541Z",
+      "plan": "641",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-19T09:10:05.816Z",
+      "plan": "641",
+      "text": "ask 641-1 (scope, the Human or the advisor answers): Plan 641 must record on each saved invoice line the supplier whose price changed, but the strict invoice line schema has no such field and its file is outside the plan's scope. May the builder add an optional supplierId to invoiceLineSchema?"
+    },
+    {
+      "at": "2026-11-19T10:22:38.380Z",
+      "plan": "641",
+      "text": "ask 641-1 answered by the human: approved: shared/schemas/entities/invoice.schema.ts"
+    },
+    {
+      "at": "2026-11-19T10:22:48.840Z",
+      "plan": "641",
+      "text": "scope of plan 641 extended on orch/mod-fixes by the answer to 641-1: shared/schemas/entities/invoice.schema.ts"
+    },
+    {
+      "at": "2026-11-19T10:24:07.248Z",
+      "plan": "641",
+      "text": "resumed from park/mod-fixes-641: round 2, tier judgment, after: asking 641-1: replan needed: ESCALATE: scope shared/schemas/entities/invoice.schema.ts. invoiceLineSchema (z.strictObject, lines 9-19) has no supplierId, so a s"
+    },
+    {
+      "at": "2026-11-19T10:24:07.381Z",
+      "plan": "641",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-19T10:24:13.261Z",
+      "plan": "641",
+      "text": "the folder foodVibe1.0-orch-mod-fixes-641 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T10:35:10.441Z",
+      "plan": "641",
+      "text": "builder left undone (round 2): [ui] 641-1 (preview shows the percent and the two choices): written, not run"
+    },
+    {
+      "at": "2026-11-19T10:43:00.458Z",
+      "plan": "641",
+      "text": "the folder foodVibe1.0-orch-merge-mod-fixes was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T10:46:38.345Z",
+      "plan": "642",
+      "text": "the folder foodVibe1.0-orch-mod-fixes-642 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T10:57:53.851Z",
+      "plan": "642",
+      "text": "builder left undone (round 0): [human] check on /platform by Dandan"
+    },
+    {
+      "at": "2026-11-19T11:06:05.744Z",
+      "plan": "642",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 642"
+    },
+    {
+      "at": "2026-11-19T11:06:05.877Z",
+      "plan": "642",
+      "text": "GATE: cached pnpm run test:server — passed on the same files in plan 642"
+    },
+    {
+      "at": "2026-11-19T11:10:07.288Z",
+      "plan": "643",
+      "text": "the folder foodVibe1.0-orch-mod-fixes-643 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T11:57:41.005Z",
+      "plan": "644",
+      "text": "the folder foodVibe1.0-orch-mod-fixes-644 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T12:03:17.012Z",
+      "plan": "644",
+      "text": "builder left undone (round 0): [ui] 644-1: written, not run; [human] check by Dandan: not ticked"
+    },
+    {
+      "at": "2026-11-19T12:12:13.147Z",
+      "plan": "644",
+      "text": "escalated to a fresh judgment-tier builder (round 2): review STOP: major src/app/pages/platform-dashboard/platform-dashboard.page.scss:257 P0: the modal does not keep its size when the history opens"
+    },
+    {
+      "at": "2026-11-19T12:26:11.387Z",
+      "plan": "644",
+      "text": "builder left undone (round 2): [ui] On /platform the dialog size stays the same after opening the history; the history panel has a border; the dialog content scrolls: written, not run"
+    },
+    {
+      "at": "2026-11-19T12:26:13.933Z",
+      "plan": "644",
+      "text": "[ui] On `/platform`, the business dialog's size (width and height of `.c-modal-card`) is the same before and after: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-19T12:33:36.726Z",
+      "text": "make this a default? the server test is the new file server/test/product-import-apply.test.js because the plan's server/test/product-import.test.js does not exist — reverse: move the cases into product-import-route.test.j (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-19T12:33:36.857Z",
+      "text": "make this a default? the erase button keeps its own visible name and gets title plus aria-describedby pointing at a visually-hidden span with the tip — reverse: remove the span and the attributes (trigger: destructive-action) — reply: default yes run-destructive-action"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 18.3,
+  "updatedAt": "2026-11-19T12:33:38.591Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "641",
+      "type": "behaviour",
+      "text": "behaviour: the invoice line record cannot carry the changed supplier because its schema (shared/schemas/entities/invoice.schema.ts) is outside the plan's scope, so priceHistory records the target supplier and the invoice keeps its own supplier id — reverse: add a supplierId field to the invoice line schema and buildInvoiceLines",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "641",
+      "type": "behaviour",
+      "text": "behaviour: when no invoice supplier is chosen, the row is compared with the lowest price and shows its percent, but offers no choice (the apply behaves as before) — reverse: show the choice and require a supplier",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "641",
+      "type": "behaviour",
+      "text": "behaviour: when the product's current price comes from another supplier, the row status is 'update' even when the invoice price equals it, since the invoice supplier would still be added — reverse: treat equal prices as 'same'",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "641",
+      "type": "behaviour",
+      "text": "behaviour: the server test is the new file server/test/product-import-apply.test.js because the plan's server/test/product-import.test.js does not exist — reverse: move the cases into product-import-route.test.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "641",
+      "type": "seen",
+      "text": "seen: scripts/reuse-lint.mjs --check-registry reports `registry missing-path @schemas/units/to-base` (docs/brain/component-families.md line 567). It is not in this plan's changes, and I did not touch it.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "641",
+      "type": "behaviour",
+      "text": "behaviour: when no invoice supplier is chosen, the row is compared with the lowest price but shows no update/add choice, and the apply behaves as before — reverse: show the choice in view_ when supplierKey is empty too",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "642",
+      "type": "behaviour",
+      "text": "behaviour: buildLearningStats takes an optional `now`, defaulting to Date.now(), and the route passes its own `now`, so the 24-hour abandoned line is testable — reverse: drop the `now` option and use Date.now() inside",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "643",
+      "type": "behaviour",
+      "text": "behaviour: the export flake's cause was the spec's own Blob.text() read, which can finish after the fixed 20 ms wait. It was not the requests load that the CI log's hydrate_error line suggested. I fixed the spec only and left the component alone. Reverse: revert the blobReads lines in the spec.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "644",
+      "type": "behaviour",
+      "text": "behaviour: the private-mode switch's label carries title and aria-label with the hint, and the hint has no visible text — reverse: switch the label to aria-describedby with a visually-hidden span",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "644",
+      "type": "behaviour",
+      "text": "behaviour: the erase button keeps its own visible name and gets title plus aria-describedby pointing at a visually-hidden span with the tip — reverse: remove the span and the attributes",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "644",
+      "type": "behaviour",
+      "text": "behaviour: .fda-body of the dialog is capped at 60vh with overflow-y: auto, so the content scrolls and the modal size stays fixed — reverse: remove the .fda-body rule in the platform-business-dialog layer",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "644",
+      "type": "seen",
+      "text": "seen: the kit copy of scope-check (C:/coding projects/Cursor/foodVibe1.0/scripts/scope-check.mjs), run from this worktree, reports SCOPE: out only for untracked 'Claude outputs/**' files in the main checkout. They are not in this branch's diff; the worktree copy reports SCOPE: ok.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "644",
+      "type": "behaviour",
+      "text": "behaviour: the business dialog body has a fixed height of min(60dvh, 34rem) even when its content is shorter, so the modal never changes size — reverse: change block-size back to max-block-size in the .fda-body:has(> .pbd-top) rule",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T12:33:38.588Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T12:33:38.590Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

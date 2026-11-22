@@ -21,6 +21,7 @@ import { storedFileSchema } from './stored-file.schema'
 import { businessAccessSchema } from './business-access.schema'
 import { diagnosisSchema } from './diagnosis.schema'
 import { stockCountSchema } from './stock-count.schema'
+import { notificationSchema } from './notification.schema'
 
 export * from './invoice.schema'
 export * from './price-history.schema'
@@ -31,6 +32,7 @@ export * from './stored-file.schema'
 export * from './business-access.schema'
 export * from './diagnosis.schema'
 export * from './stock-count.schema'
+export * from './notification.schema'
 export * from './booking.schema'
 export * from './business.schema'
 export * from './client.schema'
@@ -68,7 +70,8 @@ export const SCHEMA_BY_COLLECTION = {
   storedFiles: storedFileSchema,
   businessAccess: businessAccessSchema,
   diagnoses: diagnosisSchema,
-  stockCounts: stockCountSchema
+  stockCounts: stockCountSchema,
+  notifications: notificationSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION

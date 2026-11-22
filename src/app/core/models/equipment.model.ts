@@ -1,6 +1,6 @@
 export type EquipmentCategory = 'heat_source' | 'tool' | 'container' | 'packaging' | 'infrastructure' | 'consumable'
 
-/** @deprecated Plan 338 — no longer edited in the UI. Kept so stored docs still type-check and save. */
+/** Plan 624: one item per `perGuests` guests, between `minQuantity` and `maxQuantity`; `perGuests: 0` means no rule. */
 export interface ScalingRule {
   perGuests: number
   minQuantity: number
@@ -12,7 +12,7 @@ export interface Equipment {
   nameHebrew: string
   category: EquipmentCategory
   ownedQuantity: number
-  /** @deprecated Plan 338 — UI removed; preserved on edit via the original-doc spread. */
+  /** Plan 624: the loading list's quantity rule (see `ScalingRule`). */
   scalingRule?: ScalingRule
   isConsumable: boolean
   tags?: string[]

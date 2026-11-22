@@ -4,14 +4,21 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
 import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule } from 'lucide-angular'
+import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
-import { signal } from '@angular/core'
+import { Component, signal } from '@angular/core'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { of } from 'rxjs'
 import { UserService } from '@services/user.service'
 import { BusinessService } from '@services/business.service'
+import { AccessService } from '@services/access.service'
+import { UserMsgService } from '@services/user-msg.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
+import { PHONE_QUERY } from '@utils/breakpoints'
+
+/** Plan 646: the header now holds the bell and the diagnosis entry. */
+const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope }
 
 /** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
 const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
@@ -28,7 +35,7 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
@@ -46,6 +53,9 @@ describe('HeaderComponent', () => {
             user_: signal(null),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -104,6 +114,28 @@ describe('HeaderComponent', () => {
       fixture.detectChanges()
       expect(clients().length).toBeGreaterThan(0)
     })
+
+    it('shows the diagnosis entry (אבחון, stethoscope) only with consultant_diag (plan 646)', () => {
+      const diag = () => Array.from<Element>(fixture.nativeElement.querySelectorAll('.nav-pills a[href="/diagnosis"]'))
+      expect(diag().length).toBe(0)
+      modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+      fixture.detectChanges()
+      expect(diag().length).toBe(1)
+      expect(diag()[0].textContent).toContain('diagnosis')
+      expect(diag()[0].querySelector('svg')?.getAttribute('class')).toContain('stethoscope')
+      modulesOn.set(ALL_MODULES)
+      fixture.detectChanges()
+      expect(diag().length).toBe(0)
+    })
+
+    it('shows the diagnosis entry in the phone bottom bar too (plan 651)', () => {
+      const bar = () => Array.from<Element>(fixture.nativeElement.querySelectorAll('.bottom-nav a[href="/diagnosis"]'))
+      expect(bar().length).toBe(0)
+      modulesOn.set([...ALL_MODULES, 'consultant_diag'])
+      fixture.detectChanges()
+      expect(bar().length).toBe(1)
+      expect(bar()[0].textContent).toContain('diagnosis')
+    })
   })
 })
 
@@ -112,7 +144,7 @@ describe('HeaderComponent avatar fallback', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -123,6 +155,9 @@ describe('HeaderComponent avatar fallback', () => {
             user_: signal({ _id: 'u1', name: 'dana', imgUrl: 'https://x.invalid/a.png' }),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -157,7 +192,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
     isOwner.set(false)
     business.set(null)
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -168,6 +203,9 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
             user_: signal({ _id: 'u1', name: 'dana' }),
             isPlatformAdmin_: isPlatformAdmin,
             isOwner_: isOwner,
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         },
@@ -221,7 +259,7 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -232,6 +270,9 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
             user_: signal(null),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -260,7 +301,7 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
 describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
   it('renders no count in the bottom bar and still renders it in the top nav', async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
         provideRouter([]),
@@ -272,6 +313,9 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
             user_: signal(null),
             isPlatformAdmin_: signal(false),
             isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
             logout: () => of(null)
           }
         }
@@ -284,5 +328,193 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
     expect(host.querySelector('[data-testid="header-waiting-count"]')?.textContent?.trim()).toBe('3')
     const label = host.querySelector('.bottom-nav a[href="/clients"]')?.getAttribute('aria-label')
     expect(label).not.toContain('3')
+  })
+})
+
+describe('HeaderComponent business switcher (plan 632)', () => {
+  const canSwitch = signal(false)
+  const businesses = signal<{ businessId: string; name: string; role: string }[]>([])
+  const user = signal<{ _id: string; name: string; businessId: string }>({ _id: 'u1', name: 'dana', businessId: 'b1' })
+  const switchBusiness = jasmine.createSpy('switchBusiness')
+  const loadBusinesses = jasmine.createSpy('loadBusinesses')
+  const consume = jasmine.createSpy('consume')
+  let fixture: ComponentFixture<HeaderComponent>
+
+  const setup = async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        HeaderComponent,
+        HttpClientTestingModule,
+        LucideAngularModule.pick({ ...HEADER_ICONS, ArrowLeftRight })
+      ],
+      providers: [
+        moduleStub,
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: user,
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal('b1'),
+            consumeAccessEndedNotice: consume,
+            switchBusiness,
+            logout: () => of(null)
+          }
+        },
+        { provide: BusinessService, useValue: { business_: signal({ name: 'Mine' }) } },
+        { provide: AccessService, useValue: { canSwitch_: canSwitch, businesses_: businesses, loadBusinesses } }
+      ]
+    }).compileComponents()
+    fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+  }
+
+  beforeEach(() => {
+    canSwitch.set(false)
+    businesses.set([{ businessId: 'b1', name: 'Mine', role: 'owner' }])
+    switchBusiness.calls.reset()
+    loadBusinesses.calls.reset()
+    consume.calls.reset()
+    consume.and.returnValue(false)
+  })
+
+  it('shows the plain business name and no switcher when there is nothing to switch to', async () => {
+    await setup()
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('[data-testid="business-switcher"]')).toBeNull()
+    expect(host.querySelector('.business-name')?.textContent?.trim()).toBe('Mine')
+    expect(loadBusinesses).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows the switcher instead of the name when there is somewhere to switch to', async () => {
+    canSwitch.set(true)
+    businesses.set([
+      { businessId: 'b1', name: 'Mine', role: 'owner' },
+      { businessId: 'b2', name: 'Client', role: 'consultant' }
+    ])
+    await setup()
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('[data-testid="business-switcher"]')).not.toBeNull()
+    expect(host.querySelector('.business-name')).toBeNull()
+  })
+
+  it('switching to another business asks the user service; the home id is sent as null', async () => {
+    canSwitch.set(true)
+    businesses.set([
+      { businessId: 'b1', name: 'Mine', role: 'owner' },
+      { businessId: 'b2', name: 'Client', role: 'consultant' }
+    ])
+    switchBusiness.and.resolveTo(true)
+    await setup()
+    const cmp = fixture.componentInstance as unknown as { switchTo(id: string): Promise<void> }
+    await cmp.switchTo('b2')
+    expect(switchBusiness).toHaveBeenCalledWith('b2')
+    user.set({ _id: 'u1', name: 'dana', businessId: 'b2' })
+    await cmp.switchTo('b1')
+    expect(switchBusiness).toHaveBeenCalledWith(null)
+    user.set({ _id: 'u1', name: 'dana', businessId: 'b1' })
+  })
+
+  it('a failed switch shows the failure toast and keeps the active business', async () => {
+    canSwitch.set(true)
+    switchBusiness.and.resolveTo(false)
+    await setup()
+    const toast = spyOn(TestBed.inject(UserMsgService), 'onSetErrorMsg')
+    const cmp = fixture.componentInstance as unknown as {
+      switchTo(id: string): Promise<void>
+      selectedBusinessId_(): string
+    }
+    await cmp.switchTo('b2')
+    expect(toast).toHaveBeenCalled()
+    expect(cmp.selectedBusinessId_()).toBe('b1')
+  })
+
+  it('the phone profile menu lists the other businesses', async () => {
+    canSwitch.set(true)
+    businesses.set([
+      { businessId: 'b1', name: 'Mine', role: 'owner' },
+      { businessId: 'b2', name: 'Client', role: 'consultant' }
+    ])
+    await setup()
+    const host: HTMLElement = fixture.nativeElement
+    ;(host.querySelector('.bottom-nav__profile .bottom-nav__item') as HTMLButtonElement).click()
+    fixture.detectChanges()
+    const rows = Array.from(host.querySelectorAll('.profile-menu button.profile-menu__item')).map((e) =>
+      e.textContent?.trim()
+    )
+    expect(rows).toEqual(['Client'])
+  })
+
+  it('shows the access-ended toast once when the notice was set', async () => {
+    consume.and.returnValue(true)
+    await setup()
+    // the toast service is real here: the call is what matters
+    expect(consume).toHaveBeenCalledTimes(1)
+  })
+})
+
+@Component({
+  standalone: true,
+  imports: [HeaderComponent, LoaderComponent],
+  template: `<app-header />
+    <div class="app-content"><app-loader size="large" [overlay]="true" /></div>`
+})
+class ShellWithLoaderComponent {}
+
+describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
+  let fixture: ComponentFixture<ShellWithLoaderComponent>
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ShellWithLoaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
+      providers: [
+        moduleStub,
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: signal({ _id: 'u1', name: 'dana' }),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
+            logout: () => of(null)
+          }
+        }
+      ]
+    }).compileComponents()
+    fixture = TestBed.createComponent(ShellWithLoaderComponent)
+    document.body.appendChild(fixture.nativeElement)
+    fixture.detectChanges()
+  })
+
+  afterEach(() => (fixture.nativeElement as HTMLElement).remove())
+
+  it('the avatar button is the element at its point and a click signs out', () => {
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('.loader-wrap.overlay')).not.toBeNull()
+    const header = fixture.debugElement.query(By.directive(HeaderComponent)).componentInstance as HeaderComponent
+    const logout = spyOn(header as unknown as { logout: () => Promise<void> }, 'logout').and.resolveTo()
+    fixture.detectChanges()
+    // Plan 656: on a phone (≤767px, which the test frame can be) the top bar is hidden and sign-out sits in the
+    // bottom bar's profile menu; from tablet up it is the avatar button in the top bar.
+    let avatar = host.querySelector<HTMLButtonElement>('.auth-username-btn')!
+    if (window.matchMedia(PHONE_QUERY).matches) {
+      host.querySelector<HTMLButtonElement>('.bottom-nav__profile .bottom-nav__item')!.click()
+      fixture.detectChanges()
+      avatar = host.querySelector<HTMLButtonElement>('.profile-menu__logout')!
+    }
+    const box = avatar.getBoundingClientRect()
+    expect(box.width).toBeGreaterThan(0)
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+    expect(hit).not.toBeNull()
+    expect(hit === avatar || avatar.contains(hit)).toBeTrue()
+    ;(hit as HTMLElement).click()
+    expect(logout).toHaveBeenCalledTimes(1)
   })
 })

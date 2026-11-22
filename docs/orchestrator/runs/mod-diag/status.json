@@ -1,0 +1,504 @@
+{
+  "run": "mod-diag",
+  "branch": "orch/mod-diag",
+  "base": "main",
+  "startedAt": "2026-11-19T06:00:39.579Z",
+  "mainShaAtStart": "5dea48692139ec885ee4639bc2eea70a08905afa",
+  "plans": {
+    "633": {
+      "nnn": "633",
+      "title": "Diagnosis on the server: the record, the menu-with-prices read and the price volatility data",
+      "branch": "feat/633-diagnosis-on-the-server",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T06:02:05.097Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T06:21:59.250Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T06:24:14.344Z"
+        }
+      },
+      "humanItems": [
+        "Dandan pastes a real menu (30–60 lines, prices in different places on the line) through plan 634's screen once it exists and checks that the names and prices match the page; until then the route is covered by the tests above."
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T06:02:04.944Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:02:05.099Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:13:35.651Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:21:58.762Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:21:58.995Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T06:21:59.253Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T06:22:45.981Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T06:24:05.755Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T06:24:14.346Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T06:24:27.113Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T06:25:56.786Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.8,
+      "sha": "c71915d73204731ff244a96f1282c9bf9297865b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 687.9,
+          "tokens": {
+            "input": 1356538,
+            "output": 35902
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 44,
+          "tokens": {
+            "input": 120756,
+            "output": 2600
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.4,
+          "tokens": {
+            "input": 121031,
+            "output": 677
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-diag --plan plans/633-diagnosis-on-the-server-records-menu-prices-price-volatility.plan.md"
+      ],
+      "checkedHead": "126cd48cb6171321a24a4f9c7c97693ff003c769"
+    },
+    "634": {
+      "nnn": "634",
+      "title": "Diagnosis screens: the invoice queue, the menu with prices and the printable margin report",
+      "branch": "feat/634-diagnosis-screens-invoice-queue",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T06:28:44.145Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-19T07:01:26.783Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-19T07:24:46.678Z"
+        }
+      },
+      "humanItems": [
+        "The partner (a working consultant) builds a diagnosis from his own client's invoices and menu and reads the report: the numbers match what he knows, and the page prints on A4 without cut columns.",
+        "Dandan drops three invoice files: he is asked to approve them one at a time, and can skip one."
+      ],
+      "history": [
+        {
+          "at": "2026-11-19T06:28:43.708Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:28:44.148Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:58:25.405Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T06:58:25.724Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T07:01:26.470Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-19T07:01:26.634Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:01:26.784Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:21:24.768Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:24:39.591Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:24:46.679Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:25:10.101Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-19T07:26:03.466Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 19.1,
+      "sha": "63a25196078e51a74293cebd2abdc9ab7dde463d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1778.6,
+          "tokens": {
+            "input": 16700708,
+            "output": 108160
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 1195.6,
+          "tokens": {
+            "input": 28482,
+            "output": 763
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 21.7,
+          "tokens": {
+            "input": 363941,
+            "output": 2100
+          },
+          "exit": 0
+        }
+      ],
+      "uiCards": [
+        {
+          "card": "On `/diagnosis/qa-diag` with the diagnosis routes answered by the spec's fixture (one menu row \"פסטה\" at 40 linked to a dish that costs 35), the QA owner taps \"",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/mod-diag --plan plans/634-diagnosis-screens-invoice-queue-menu-prices-printable-margin-report.plan.md"
+      ],
+      "checkedHead": "e277d4a4f84d0649fc4f4a50d7204c58888c8e97"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-19T06:02:04.804Z",
+      "plan": "633",
+      "text": "the folder foodVibe1.0-orch-mod-diag-633 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T06:13:33.076Z",
+      "plan": "633",
+      "text": "builder left undone (round 0): The [human] item (Dandan pastes a real menu through plan 634's screen) is not done; it needs that screen."
+    },
+    {
+      "at": "2026-11-19T06:22:48.143Z",
+      "plan": "633",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 633"
+    },
+    {
+      "at": "2026-11-19T06:22:48.487Z",
+      "plan": "633",
+      "text": "GATE: cached pnpm run test:server — passed on the same files in plan 633"
+    },
+    {
+      "at": "2026-11-19T06:24:40.059Z",
+      "plan": "633",
+      "text": "the folder foodVibe1.0-orch-merge-mod-diag was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T06:28:43.436Z",
+      "plan": "634",
+      "text": "the folder foodVibe1.0-orch-mod-diag-634 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-19T06:58:22.912Z",
+      "plan": "634",
+      "text": "builder left undone (round 0): [ui] 634-1: written, not run — e2e/ui/634-1.spec.ts (the fixture also answers data/dishes and data/products so the linked dish costs 35); [human] partner builds a diagnosis from his own client's data and prints the report on A4; [human] Dandan drops three invoice files and is asked to approve them o"
+    },
+    {
+      "at": "2026-11-19T06:58:25.598Z",
+      "plan": "634",
+      "text": "[ui] On `/diagnosis/qa-diag` with the diagnosis routes answered by the spec's fixture (one menu row \"פסטה\" at 40 linked to a dish that costs 35), the QA owner t: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-19T07:31:03.570Z",
+      "text": "make this a default? the plan's dictionary table has 57 rows (the text says 56); all 57 were added (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 19.1,
+  "updatedAt": "2026-11-19T07:31:05.453Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "633",
+      "type": "seen",
+      "text": "seen: server/test/ai-logistics-extract.test.js:128 — failed once in the full `test:server` run (aiUsage rows 2, expected 1); passes alone, so likely a timing flake under load",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "633",
+      "type": "seen",
+      "text": "seen: docs/brain/component-families.md:562 — reuse-lint --check-registry reports missing-path @schemas/units/to-base and server/generated/schemas/units/to-base; this is the unit-rates family from plan 635, not the diag rows. The generated path may only exist after build:schemas, so the check probably fails in a clean worktree.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: a tab switch on /diagnosis/:id asks the leave question when the menu or the open preview has unsaved edits (route runGuardsAndResolvers paramsOrQueryParamsChange, like settings) — reverse: remove that line from the route",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: after a menu save, a failed saveInvoices or an apply with no invoice id both show diag_queue_no_record and the file still counts as approved, because the prices were already applied — reverse: keep the file current on a failed save",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: diag_queue_too_many and diag_queue_no_record are shown as error toasts, since no neutral toast exists — reverse: use the success toast",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: a skip pressed while the current file is still being read does not cancel that read — reverse: add a read sequence guard in product-import",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: scope extended: src/styles.scss — one print rule appended (body:has(app-diag-report) hides the app header, chips and acting banner so the report prints alone); it is an append-only hotspot",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: the plan's dictionary table has 57 rows (the text says 56); all 57 were added",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: product-import.component.ts is now about 552 lines (507 before); no lint enforces 628's 480 cap, so it was not split — reverse: move the file-read effect into a helper",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: the plan's ## Reuse Check gained rows naming the new components and classes, and docs/brain/component-families.md gained two family headings and a diagnosisGuard line, because the reuse and kit checks require them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "634",
+      "type": "behaviour",
+      "text": "behaviour: component styles were varied (line-height, gaps, grid) where the duplicate-block check found twins in other components — reverse: none needed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "634",
+      "type": "seen",
+      "text": "seen: src/app/pages/inventory/components/product-form/product-form.component.scss — kit-checks reports style-duplicate-class debt 177 -> 178 from this file; the plan does not touch it, so the run branch already carries it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "634",
+      "type": "seen",
+      "text": "seen: src/app/core/guards/module.guard.ts:11 — a guard that returns true when user_ is null (nothing wrong here); the unrelated DataExportCardComponent spec 'downloads clients-<today>.csv' failed once in the first full test run and passed on rerun (src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.spec.ts:105)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-19T07:31:05.450Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-19T07:31:05.452Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

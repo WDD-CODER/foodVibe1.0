@@ -1,0 +1,21 @@
+@if (acting_()) {
+  <div class="acting-banner" role="status" data-testid="acting-banner">
+    <span class="acting-banner__text">{{ text_() }}</span>
+    @if (hasDiagnosis_()) {
+      <a class="c-btn-ghost acting-banner__back" routerLink="/diagnosis" data-testid="acting-diagnosis">
+        <lucide-icon name="stethoscope" [size]="16"></lucide-icon>
+        {{ 'diagnosis' | translatePipe }}
+      </a>
+    }
+    <button
+      type="button"
+      class="c-btn-ghost acting-banner__back"
+      data-testid="acting-back-home"
+      [disabled]="isSwitching_()"
+      (click)="backHome()"
+    >
+      <lucide-icon name="undo-2" [size]="16"></lucide-icon>
+      {{ 'acting_back_home' | translatePipe }}
+    </button>
+  </div>
+}

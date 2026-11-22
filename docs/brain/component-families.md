@@ -20,7 +20,7 @@ How this file is checked:
   section) whose `## Reuse Check` is missing or incomplete.
 
 Each family: `Status` (`stable` = use it as is; `converging` = a refactor plan is removing the copies) · `Use` (base
-path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on the origin mvp-review branch
+path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on the mvp-review branch
 `1953dcb5`, 2026-10-21; the audit numbers were from `8ffda3d2`) and the plan that removes them.
 
 Optional field `Design changes`, written by `/design-port` Step 6 when a family's look changed:
@@ -87,6 +87,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `ConfirmModalService.open(msg, { typedConfirm })` — confirm waits for an exact typed text (plan 486).
 - When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
 - Stacking: `[zIndex]` takes a `--z-*` token (`src/styles.scss`, plan 538); `[topLayer]` puts a popup in the browser top layer (the confirm popup uses both, so a question is always in front).
+- Light popup: `[light]="true"` (plan 657) — transparent overlay (`.c-modal-overlay--light`), no blur, page behind stays clear; closes on an outside pointer-down (not on the opener) and on any scroll; Escape and focus restore stay. Used only by the stock count's phone base amount; other popups keep the backdrop.
 - Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
@@ -124,6 +125,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
   `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
 - When: any screen that lists entities.
+- Plan 651 page-local pieces of the stock count page: the move-counted button row (`.stock-count__toolbar`), the one-line name cut (`.stock-count__name`), the unit warning line (`.stock-count__unit-note`), the phone base-column head (`.stock-count__base-head`), the past-counts row (`.stock-count__past`).
+- Plan 655 page-local pieces of the stock count page: the draft line's question row (`.stock-ai__question`), the base-amount control (`.stock-count__base-btn`) and its popover (`.stock-count__base-pop`).
+- Plan 651: the past-counts list on the stock count page reads `GET /api/v1/stock/counts?status=all` through `PastCountsService` (`src/app/pages/inventory/components/stock-count/past-counts.service.ts`).
 - Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
@@ -161,7 +165,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
   clear button: `src/app/shared/input-clear/` (`app-input-clear`).
 - When: any form input with a label.
-- Server refusals (plan 540): `serverFieldErrors(err, map)` from `src/app/core/utils/server-refusal.util.ts` (import `@utils` alias) fills `validationErrors_`; templates read the key from the map.
+- Server refusals (plan 540): `serverFieldErrors(err, map)` from the server-refusal util (alias utils) fills `validationErrors_`; templates read the key from the map.
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
@@ -178,7 +182,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### stepper — the + / − buttons around a number
 
 - Status: stable — plan 500 built `appStepHold`; counter, menu guest count, cook-view amounts, recipe ingredient quantity and labor / cook time are on it
-- Use: `src/app/shared/counter/step-hold.directive.ts` · `appStepHold` on a minus or plus button: `(stepHold)="step($event)"` (`false` first press, `true` repeat), `[stepHoldStop]` at the minimum; pointer events (touch and mouse), stops on pointerup / pointerleave / pointercancel. Step rules: `src/app/core/utils/quantity-step.util.ts` (`quantityIncrement` / `quantityDecrement`). A whole counter (value box + both buttons): `app-counter` (`src/app/shared/counter/`).
+- Use: `src/app/shared/counter/step-hold.directive.ts` · `appStepHold` on a minus or plus button: `(stepHold)="step($event)"` (`false` first press, `true` repeat), `[stepHoldStop]` at the minimum; pointer events (touch and mouse), stops on pointerup / pointerleave / pointercancel. Step rules: `src/app/core/utils/quantity-step.util.ts` (`quantityIncrement` / `quantityDecrement`). A whole counter (value box + both buttons): `app-counter` (`src/app/shared/counter/`); it measures its value width once after the value changes (plan 645), never on every view check, so a long list of counters does not force a layout per check.
 - When: any +/− button that changes a number. The page keeps its own skin (cook-view ink set, menu paper pill).
 - Known copies: none. Kept on purpose: `scaling-chip` and `recipe-builder.page` use `app-counter` already.
 
@@ -194,7 +198,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### chip — chips, badges, pills
 
 - Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
-- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal`, `.amber`, `.red` or `--teal|--amber|--red`) plus variants
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones teal, amber, red or `--teal|--amber|--red`) plus variants
   `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
   `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
   `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
@@ -253,6 +257,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
+### voice-note — record or type a spoken note
+
+- Status: stable (plan 623)
+- Use: `src/app/shared/voice-note/` · `app-voice-note`.
+- When: a screen takes a spoken or typed note and needs it as text.
+- Inputs `purpose`, `placeholderKey`, `sendLabelKey`, `busyLabelKey`, `busy`, `disabled`, `[(text)]`; output `send` = `{ text, source: 'voice' | 'text', fileId: string | null }` (`'voice'` when the text is the transcript of a recording, with the id the transcribe route returned; `'text'` when pasted or typed). Stops at 180 seconds; typed fallback when the browser cannot record.
+- Known copies: none; first user `logistics-note-draft`.
+
 ## Logic families
 
 ### entity-data-service — load and save one entity type
@@ -285,14 +297,16 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users: `station-registry.service.ts`, `logistics-item-registry.service.ts` (plan 521, phase + environment filter).
 - Plan 579: kind `logisticsSection` (a business's own sections); `logisticsItem` gains `removedAt` (removed from that date, older events keep it) and `foldedAt` (server-written when promoted: the business's own copy is kept, not deleted, so it still dates the question). `LogisticsItemRegistryService` adds `allItems_`, `hiddenAt_`, `defaultItems_`, `sections_`, `sectionLabel()` and `forEvent()` (the date rule); `items_` is the live list.
 - Plan 622: `visibleLogisticsItems` in `shared/schemas/logistics/visible-items.ts` is the one date and environment rule for which logistics questions an event sees; the server's notes-to-checklist draft and the browser both call it.
+- Plan 623: LogisticsItemRegistryService.forEvent calling visibleLogisticsItems in `shared/schemas/logistics/visible-items.ts`, the one rule the server uses too.
 - Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
 
 - Status: stable
-- Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`.
-- When: a route needs its collection loaded first.
+- Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`; the consultant's entry check `diagnosisGuard` in `src/app/pages/diagnosis/diagnosis.guard.ts` (plan 634: home modules while acting, `moduleGuard` at home).
+- When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
+- Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
 ### helpers — pure functions
 
@@ -300,11 +314,29 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- the unit mapping after a pick (plan 653): `unitForSpoken` in `stock-count/spoken-unit.ts` — the spoken unit mapped to
+  the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
+- reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
+  drops the unit, the word beside the product name in the cook's own text is kept as `spokenUnit`; none →
+  `unitMissing`, never the base unit. Browser side: `unitChoicesFor` in `stock-count/spoken-unit.ts`.
+- the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
+  `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
+  only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+- `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
+- Plan 628: `priceChangePct` in `src/app/core/utils/price-change.util.ts` is the one browser rule for the percent a price moved (two decimals, null with no old price); `buildInvoiceLines` in `src/app/core/utils/invoice-lines.util.ts` maps kept preview rows to the `invoice.lines` of the apply body (the server has its own `buildInvoiceLines` in `invoice-trail`).
+- Plan 648: matching spoken names to products — `matchSpoken` in `server/utils/stock-extract.js`, on the server, so the model never gets the catalog. Plan 650: the Hebrew name folding (`foldWord`: ־ות / ־ים / ־ה endings dropped) and the score (exact > starts-with > contains > shared words; counted-before and minimum break ties) answer `matched`, `choose` (up to 5, best first) or `unmatched` (up to 5 nearest).
+- Plan 641: previousPriceOf(product, supplierId) in src/app/core/utils/price-change.util.ts is the one browser rule for the price an invoice line is compared with (the invoice supplier's own price, else the lowest other source's; null with none).
+- Plan 632: `APP_RELOAD` in `src/app/core/utils/app-reload.util.ts` is the one way to reload the whole application at a path (`UserService.switchBusiness` and a refresh that moves the business call it); specs replace the token, no page calls `window.location` itself.
 - `toCsv(columns, rows)` / `downloadCsv(text, fileName)` in `src/app/core/utils/csv.util.ts`: RFC 4180 CSV with a UTF-8 BOM and formula-injection guard, plus the Blob download (plan 557; the owner's front desk data export).
 - `waLink(phone, text?)` in `src/app/core/utils/wa-link.util.ts`: a WhatsApp link from a stored phone (plan 552; plan 555 reuses it).
+- `scalingRuleFrom(values, hadRule)` / `scalingRuleErrors(values)` in `src/app/core/utils/scaling-rule.util.ts`: the equipment loading rule (one per N guests, min, max) built and checked from form values; the full equipment form and the list's quick-edit popup both call it (plan 640).
 - `aiCapErrorKey(err)` in `src/app/core/utils/ai-error.util.ts`: the dictionary key `ai_monthly_cap_reached` for the server's monthly-cap refusal, else null; every place that maps an AI 429 asks it first (plan 620).
+- Plan 636: `stock-count.util.ts` (`src/app/core/utils/stock-count.util.ts`) — `unitOptionsFor`, `belowMinimum` and `countedAtFromIso`, the pure rules of the stock count sheet; conversion itself stays the shared `toBase`.
+- Plan 651: `resolveUnit` in `server/utils/stock-extract.js` maps a spoken unit to a unit the product has (base, purchase units, known aliases such as «קילו»→kg); none fits → `unitNeedsFix` with `spokenUnit`. `matchSpoken` now answers `matched` only when no other product contains the spoken word.
+- Plan 655: the three-part line check and the unit vocabulary — `unitVocabulary` / `buildUnitVocabulary` / `unitKeyOf` in `server/utils/stock-extract.js`: the live unit terms plus the Hebrew names from `dictionary.json` `units` and the `DICTIONARY_OVERRIDES` docs (global, then the user's), read per request, plus built-in spoken forms; the model gets each unit as key with its names and its Hebrew answer maps back to the key. `checkLine` (same file) is the three-part check: every line and entry carries `missing` (`product` / `amount` / `unit`), and `stock-ai-draft` asks one question per missing part. Below `$break-desktop` the count row uses `app-list-row-checkbox` for «נספר» and a small `.stock-count__base-btn` + `.stock-count__base-pop` (placed with `placeInViewport`) for the base amount.
+- Plan 649: the reference mapping — `supplierIdMap` / `resolveSourceSupplier` in `server/services/sync-master.js` (master supplier id → the business copy) is the one map; push (`toMasterSupplierId`) and the repair (`planProductRepair`) use the same rule; see the supplier-refs family.
 
 ### http — talking to the server
 
@@ -312,16 +344,34 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
-- `PublicRequestService` (`src/app/pages/public-request/services/public-request.service.ts`): page-scoped client of `API.public` for the public pages (plan 555).
+- `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
+- `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
+- Plan 637: `GeminiService.extractStockCount` (`src/app/core/services/gemini.service.ts`) — one POST of a spoken or typed stock count to `API.ai('stock/extract')`, same `withRetry` + `modelParam_` pattern as `matchProductNames`; returns suggested lines, never saves a count.
+- `StockCountService` (`src/app/pages/inventory/services/stock-count.service.ts`): page-scoped client of `API.stock` for the stock count screen — on-hand, the open draft, save draft (POST then PUT), finalize (plan 636).
+- `PublicRequestService` (in the public-request page services folder): page-scoped client of `API.public` for the public pages (plan 555).
+- Plan 624: `EventPipelineService.saveLoading` (`src/app/core/services/event-pipeline.service.ts`) — one PUT of a loading-list tick (`/events/:id/loading`), the same client as `saveLogistics`.
+- Plan 632: `AccessService` (`src/app/core/services/access.service.ts`) reads and writes the consultant access routes through `API.access(...)`; `UserService.switchBusiness` posts `API.auth('switch-business')`.
+- Plan 629: `ProductImportService.getPriceRises` (`src/app/core/services/product-import.service.ts`) reads `GET /product-import/price-rises` through `API.productImport`, the same client as `apply` and `resolve`.
+- Plan 628: `GeminiService.readInvoice`, `ProductImportService.resolve`, the `invoice` argument of `apply`, `API.files` call the invoice read, memory, apply and file routes through the same `API` map (GeminiService.readInvoice, ProductImportService.resolve, the invoice argument of apply, API.files).
+- `PlatformAdminService.getLearningStats`, `PlatformAdminService.getLearningStatus` (`src/app/core/services/platform-admin.service.ts`) read the platform learning numbers through `API.admin(...)` (plan 630).
+- Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
+
+### platform-history — the platform change history of a business (plan 638)
+
+- Status: stable
+- Use: `platformChangesOf(before, after)` in `server/routes/admin.js` compares the stored business with the values being saved and returns the `{ field, from, to }` rows written to `platformHistory`.
+- Use: `describePlatformChange(change, translate)` in `src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts` turns one row into the Hebrew line.
+- Use: the panel's layout classes `.pbd-top`, `.pbd-history`, `.pbd-history__head`, `.pbd-history__body`, `.pbd-history__list`, `.pbd-history__row`, `.pbd-history__meta` in `platform-dashboard.page.scss`.
+- When: any platform change line of the business history; never format `{ field, from, to }` elsewhere.
 
 ### event-plan — event costing and planning engine
 
 - Status: stable (MVP)
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
-  `src/app/core/engine/units.ts`; portions: `src/app/core/engine/portions.ts`.
+  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`.
 - When: anything that computes quantities, costs or prices for an event.
 - Known copies: none.
 
@@ -353,7 +403,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `ModuleService` (`src/app/core/services/module.service.ts`) — `has`, `hasType`, `ready`; `moduleGuard(keys)`
   (`src/app/core/guards/module.guard.ts`) sends a screen of a missing module to `/dashboard`; the module field on
   `HeroFabAction` (`module?: ModuleKey`) hides an action in the floating button; `HttpStorageAdapter` returns an empty
-  result without a request for a type whose module is off. Import the helpers from `shared/schemas/modules-pure.ts` (no zod in
+  result without a request for a type whose module is off. Import the helpers from the modules-pure schema alias (no zod in
   the first bundle).
 - When: a link, chip, screen, button or request belongs to a module. The server is the gate; the browser only hides.
 - Known copies: none.
@@ -380,8 +430,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 618
 - Use: `server/utils/ai-learning.js` — `mayLearnFrom(business)` (`aiPrivate !== true`); the private mark is written
-  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` deletes the promoted
-  `GEMINI_SHOTS` copies).
+  only through setAiPrivate in server/services/business.js (`setAiPrivate(id, value)` only writes the flag; plan 639).
 - When: code copies something into a `'__master__'` pool or lists a business's AI material for the platform admin.
 - Known copies: none.
 
@@ -402,6 +451,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a server path stores, reads, links or deletes a private uploaded file.
 - Known copies: none.
 
+### learning-stats — `buildLearningStats`, `weekStart` in `server/utils/learning-stats.js`
+
+- Status: stable — plan 630
+- Use: `server/utils/learning-stats.js` — `buildLearningStats` groups AI draft rows by flow, model and Sunday-start week; `weekStart` gives the week.
+- When: the platform admin needs accuracy numbers per flow over time (`GET /stats` in `server/routes/admin-learning.js`).
+- Known copies: none.
+
 ### cloudinary-requests — signed requests to the file provider
 
 - Status: stable — plan 619
@@ -410,10 +466,17 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: building a signed upload, expiring download link or delete request.
 - Known copies: none.
 
+### learning — erasing what the platform learned from one business (plan 639)
+
+- Status: stable
+- Use: `eraseLearnedData(db, businessId)` in `server/services/business.js` — deletes the promoted `GEMINI_SHOTS` copies, every `aiDrafts` row of the business and its share of the shared name memory (`forgetBusiness`); returns counts.
+- When: the platform admin explicitly erases what was learned (`POST /admin/businesses/:id/erase-learned`, `DELETE /admin/users/:userId?eraseLearned=true`); nothing else erases learned data.
+- Known copies: none.
+
 ### business-delete — `deleteBusinessServerData` removes a business's server data
 
 - Status: stable — plan 619
-- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files).
+- Use: deleteBusinessServerData in server/services/business.js (also deletes the business's stored files). Keeps what was learned for every business; `eraseLearnedData` erases it (plan 639).
 - When: a business is deleted and everything it owns on the server must go.
 - Known copies: none.
 
@@ -464,4 +527,144 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 622
 - Use: `shared/schemas/logistics/extract.schema.ts` — request, model answer, draft and confirm shapes of the notes-to-checklist draft; `server/utils/logistics-extract.js` — `buildQuestionList` (the questions sent to the model), `cleanLogisticsDraft` (drops what the model got wrong), `keptRatio` (share of the draft kept).
 - When: a route turns an event's free-text notes into a draft logistics checklist.
+- Known copies: none.
+
+### loading-list — `buildLoadingList`, `LoadingRow`
+
+- Status: stable — plan 624
+- Use: `shared/schemas/logistics/loading-list.ts` — `buildLoadingList({ equipment, guestCount, answers })` is the one pure function that builds an event's loading rows (equipment by scaling rule, logistics items needed and paid by us or the chef); the sheet is `app-loading-list` inside the event's logistics card.
+- When: any screen or test that needs "what goes on the truck" for an event.
+- Known copies: none.
+
+### invoice-screen — `priceChangePct`, `buildInvoiceLines` (browser), `app-invoice-header-strip`, `InvoiceDataService`
+
+- Status: stable — plan 628
+- Use: `src/app/core/utils/price-change.util.ts` — `priceChangePct(old, new)` is the one browser rule for "by how many percent did a price move" (two decimals, null when there is no old price); `src/app/core/utils/invoice-lines.util.ts` — `buildInvoiceLines(keptRows, printed)` maps kept preview rows to the `invoice.lines` of the apply body; `app-invoice-header-strip` (supplier, date, number above the import preview); `InvoiceDataService` reads the saved invoices and opens a stored file in a new tab.
+- Plan 629: `isPriceRiseAlert(changePct, thresholdPct)` is the one rule for "a rise worth marking" (at or above the business's `priceRiseAlertPct`); `recipesUsingProducts(recipes, productIds)` finds the recipes and dishes that use a product directly or through preparations; `ProductImportService.getPriceRises` reads `GET /product-import/price-rises`; `app-price-impact-panel` and `app-price-rises-card` are page-local.
+- Plan 641: `previousPriceOf(product, supplierId)` is the one rule for "the price to compare an invoice price with": the invoice supplier's own price, else the lowest other one (with its supplier); the import row sends `targetSupplierId` to update that supplier's price instead of adding a source.
+- Plan 645: `isBigPriceChange(changePct, thresholdPct)` is the one rule for "a change to confirm before saving" (at or beyond the threshold, up or down); the import asks once through `ConfirmModalService.open`, one line per item. A supplier with the same trimmed, case-insensitive name is the same supplier: the import offers only the update.
+- When: any browser screen that shows a price change, sends an invoice with the import save, or lists saved invoices.
+- Known copies: none.
+
+### price-impact-panel — `app-price-impact-panel`, `PriceImpactRow`
+
+- Status: stable — plan 629
+- Use: `src/app/pages/inventory/components/product-import/price-impact-panel/` — a read-only panel under the import save summary listing recipes and dishes with their cost before and after (30 rows, then "and N more").
+- When: a screen must show what a price change does to recipe cost, computed by `RecipeCostService` before and after.
+- Known copies: none.
+
+### price-rises-card — `app-price-rises-card`
+
+- Status: stable — plan 629
+- Use: `src/app/pages/dashboard/components/price-rises-card/` — the dashboard card of prices that rose in the last 60 days (`getPriceRises`); owner or consultant; hidden when empty.
+- When: the dashboard shows recent price rises.
+- Known copies: none.
+
+### diagnosis-card — `app-diagnosis-card`
+
+- Status: stable — plan 652
+- Use: `src/app/pages/dashboard/components/diagnosis-card/` — the dashboard card of the consultant's diagnoses (count of open, three newest, create); shown with `consultant_diag`, hidden when the load fails.
+- When: the dashboard shows the consultant's diagnoses.
+- Known copies: none.
+
+### acting-banner — `app-acting-banner`
+
+- Status: stable — plan 632
+- Use: `src/app/core/components/acting-banner/` (`app-acting-banner`, rendered by the app shell right after the header on every non-bare screen) — the persistent bar that names the business a consultant or the platform admin is acting in, with one button back to their own (`UserService.switchBusiness(null)`); hidden at home and in print.
+- When: a persistent notice with an action must stay on every screen; a toast disappears and `app-front-desk-status-banner` has no action.
+- Known copies: none.
+
+### learned-data-erase — `eraseLearnedData(db, businessId)` erases what the platform learned from one business
+
+- Status: stable (plan 639)
+- Use: eraseLearnedData(db, businessId) in server/services/business.js (called by the admin erase route and by the business delete when asked); client `PlatformAdminService.eraseLearnedData`.
+- When: learned data of a business must be removed; going private never erases (it only stops learning).
+- Known copies: none.
+
+### platform-erase-box — `.pbd-erase` and `.pbd-erase__box`
+
+- Status: stable (plan 639)
+- Use: `src/app/pages/platform-dashboard/platform-dashboard.page.scss` · `.pbd-erase` (danger ghost button), `.pbd-erase__box` (reason field stack) in the platform business dialog.
+- When: page-local layout of the erase action; no shared family fits.
+### unit-rates — `unitRatesFrom`, `loadUnitRates`, `toBase` (shared unit rule)
+
+- Status: stable — plan 635
+- Use: `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, `SYSTEM_UNITS`, the unit constants and `unitRatesFrom(terms)`; the browser reaches it through `@schemas/units/to-base` (`units.ts` and the other app files re-export it), the server through `server/generated/schemas/units/to-base`. `server/utils/unit-rates.js` — `loadUnitRates(req)` reads the master and the business's own `unit` terms and returns the rates the server converts with.
+- When: server code converts an amount into a product's base unit (a stock count); never write a second conversion.
+- Known copies: none.
+
+### diag-margin-report — `buildMarginReport`
+
+- Status: stable — plan 633
+- Use: `shared/schemas/diag/margin-report.ts` — `buildMarginReport`; the diagnosis route in `server/routes/diag.js` calls it.
+- When: the diagnosis needs the menu margin per dish from recorded prices; never write a second margin calculation.
+- Known copies: none.
+
+### diag-volatility — `priceVolatility`
+
+- Status: stable — plan 633
+- Use: `shared/schemas/diag/volatility.ts` — `priceVolatility`; the diagnosis route in `server/routes/diag.js` calls it.
+- When: the diagnosis scores how much a product's price moved over time.
+- Known copies: none.
+
+### diag-menu-draft — `shared/schemas/diag/diag-inputs.ts`, `shared/schemas/diag/menu-draft.ts`, `menuKeptRatio`
+
+- Status: stable — plan 633
+- Use: `shared/schemas/diag/diag-inputs.ts` (request schemas) and `shared/schemas/diag/menu-draft.ts` (model-reply schema, `menuKeptRatio`); `server/routes/ai/diag.js` uses them.
+- When: the diagnosis menu-reading route validates a request or a model reply and scores the draft closeness.
+- Known copies: none.
+
+### diag-invoice-queue — `app-diag-invoice-queue`
+
+- Status: stable — plan 634
+- Use: `src/app/pages/diagnosis/components/diag-invoice-queue/diag-invoice-queue.component.ts` — a batch of chosen invoice files held in memory and handed one at a time to the embedded import preview.
+- When: several invoice files are approved one after another; never read or apply several at once.
+- Known copies: none.
+
+### import-preview-embedded — `embedded`, `file` inputs and `applied` output on `app-product-import`
+
+- Status: stable — plan 634
+- Use: `src/app/pages/inventory/components/product-import/product-import.component.ts` — the `embedded`, `file` inputs and `applied` output on `app-product-import`: `embedded` hides the page header, the back link and the paste box; `file` starts the file read once per file object; `applied` reports the apply with its invoice id.
+- Pieces: embedded, file inputs and applied output on app-product-import.
+- When: a second screen hosts the import preview; never copy the preview.
+- Known copies: none.
+
+### stock-ai-draft — `StockAiDraftComponent`
+
+- Status: stable — plan 637
+- Use: `src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.ts` — the "count by voice or text" section of the stock count sheet: the open button, the shared recorder (`app-voice-note`, purpose `stock`), the waiting state, the "not recognised" and "already counted" lists (plan 650: each spoken line shows its candidates as `c-chip--toggle` chips, an `app-search-combobox` of all products and «הוספת מוצר חדש»); it emits the server's answer and the sheet applies it.
+- Pieces: StockAiDraftComponent, app-stock-ai-draft.
+- When: a stock suggestion from voice or text is read and reviewed; never a second review UI for stock.
+- Known copies: none.
+
+### stock-extract — `server/utils/stock-extract.js`
+
+- Status: stable — plan 637
+- Use: `server/utils/stock-extract.js` — `STOCK_EXTRACT_SYSTEM_PROMPT`, `unitList`, `userPart`, `cleanStockLines` (spoken lines in, name-matched and unit-checked lines out, plan 648), `matchSpoken` and `stockKeptRatio`; `server/routes/ai/stock.js` and `server/routes/stock.js` (finalise) use it; the request and answer schemas are `shared/schemas/ai-stock-extract.schema.ts`.
+- Pieces: server/utils/stock-extract.js, cleanStockLines, stockKeptRatio.
+- When: a stock count text is turned into lines or a stock draft is scored; the model only returns spoken words, a number and a unit, never ids or sums.
+- Known copies: none.
+
+### user-alerts — `NotificationsService`, `app-notification-bell`
+
+- Status: stable — plan 646
+- Use: `src/app/core/services/notifications.service.ts` (the signed-in user's alerts, polled every 60 s while the tab is visible) and `src/app/core/components/notification-bell/notification-bell.component.ts` (the header bell with the unread count and the list); the server side is `server/services/notifications.js` (`createPriceChangeAlerts`, called by the invoice apply) and `server/routes/notifications.js`; the shape is `shared/schemas/entities/notification.schema.ts`.
+- Pieces: NotificationsService, NotificationBellComponent, app-notification-bell, createPriceChangeAlerts, .bell__btn, .bell__count, .bell__panel, .bell__head, .bell__all, .bell__empty, .bell__list, .bell__item, .bell__item--up, .bell__item--down, .bell__item--unread, .bell__meta.
+- When: a person must be told something at once (a price moved beyond the threshold); a new alert kind adds a `kind` to the schema and a writer next to `createPriceChangeAlerts`, never a second list or bell.
+- Known copies: none.
+
+### supplier-refs — a product's source points at a supplier of its own business (plan 649)
+
+- Status: stable
+- Use: `resolveSourceSupplier` in `server/services/sync-master.js` (master supplier id → the business's copy, creating it; unknown → cleared and counted as `sync.supplier_unknown`), `toMasterSupplierId` in `server/routes/generic.js` (push to master: business supplier → master supplier, else 400 `BAD_SUPPLIER_REF`), and `planProductRepair` / `repairBusiness` in `server/scripts/repair-supplier-refs.js` (dry run, `--write`, `--confirm-remote`) for references already wrong; the browser shows `supplier_unknown` for a supplier outside the business list.
+- Pieces: resolveSourceSupplier, toMasterSupplierId, planProductRepair, repairBusiness, BAD_SUPPLIER_REF, supplier_unknown.
+- When: any code that copies or maps a product's `sources[].supplierId` between master and a business; never keep a master or foreign id.
+- Known copies: none.
+
+### repair-script — the repair script for wrong supplier references (plan 649)
+
+- Status: stable
+- Use: `server/scripts/repair-supplier-refs.js` — a one-off data repair beside `dedupe-business-products.js`, with the same dry-run default, `--write` and `--confirm-remote` rules; it never touches prices.
+- Pieces: repair-supplier-refs.js, planProductRepair, repairBusiness.
+- When: product sources already point at a foreign, unknown or empty supplier; the Human runs it (dry run first), never a build step.
 - Known copies: none.

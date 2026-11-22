@@ -1,5 +1,4 @@
-$break-mobile: 768px; // mirrors src/styles.scss
-$above-mobile: $break-mobile + 1; // first width past the phone layout
+@use '../../../../core/styles/breakpoints' as *;
 
 @layer components.event-closing-dialog {
   :host {
@@ -19,7 +18,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
 
     overflow: hidden;
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       block-size: 100dvh;
       max-block-size: 100dvh;
 
@@ -76,7 +75,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     align-items: center;
     gap: var(--space-3);
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       grid-template-columns: 1fr;
     }
   }
@@ -85,7 +84,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
   .no-money {
     .rows-head,
     .closing-row {
-      @media (min-width: $above-mobile) {
+      @media (min-width: $break-tablet-min) {
         grid-template-columns: 1.4fr 1.2fr 1.2fr;
       }
     }
@@ -98,7 +97,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     font-size: var(--fs-sm);
     font-weight: var(--fw-medium);
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       display: none;
     }
   }
@@ -110,7 +109,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     border-radius: var(--radius-md);
 
     /* Plan 488: phones — a little lighter than the modal so each supplier card stands out. Before is-over so red wins. */
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       background: var(--bg-glass-hover);
     }
 
@@ -132,7 +131,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     color: var(--color-text-muted);
     font-size: var(--fs-sm);
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       display: inline;
     }
   }
@@ -234,7 +233,7 @@ $above-mobile: $break-mobile + 1; // first width past the phone layout
     grid-template-columns: 1fr 1fr;
     gap: var(--space-3);
 
-    @media (max-width: $break-mobile) {
+    @media (max-width: $break-phone-max) {
       grid-template-columns: 1fr;
     }
   }

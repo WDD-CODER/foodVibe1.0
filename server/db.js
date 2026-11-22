@@ -84,6 +84,16 @@ async function connectDb() {
     )
   )
   await db.collection('products').createIndex({ businessId: 1, minStockLevel: 1 }, { background: true })
+  // Plan 648: one copy of each master product per business. Partial, so own products (no _masterId) are free.
+  // A business that already has doubles makes the build fail: logged, not fatal — run dedupe-business-products.js.
+  try {
+    await db.collection('products').createIndex(
+      { businessId: 1, _masterId: 1 },
+      { unique: true, name: 'product_business_master_unique', partialFilterExpression: { _masterId: { $type: 'string' } } }
+    )
+  } catch (err) {
+    logger.warn({ event: 'mongo.index.failed', index: 'product_business_master_unique', err: err.message })
+  }
   await Promise.all(
     ['recipes', 'dishes'].flatMap(type => [
       db.collection(type).createIndex({ businessId: 1, isApproved: 1 }, { background: true }),
@@ -175,6 +185,8 @@ async function connectDb() {
   // The three readable collections are not cloneable, so the generic businessId index loop does not cover them.
   await db.collection('invoices').createIndex({ businessId: 1, createdAt: -1 }, { name: 'invoices_business_created' })
   await db.collection('diagnoses').createIndex({ businessId: 1, createdAt: -1 }, { name: 'diagnoses_business_created' })
+  // Plan 646: a user's alerts, newest first.
+  await db.collection('notifications').createIndex({ userId: 1, createdAt: -1 }, { name: 'notifications_user_created' })
   // C-STOCK: the on-hand read.
   await db.collection('stockCounts').createIndex({ businessId: 1, status: 1, countedAt: -1 }, { name: 'stock_counts_business_status_counted' })
   logger.debug({ event: 'mongo.index.ensured', index: 'modules' })

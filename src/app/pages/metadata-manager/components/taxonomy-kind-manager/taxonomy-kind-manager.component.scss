@@ -1,3 +1,4 @@
+@use '../../../../core/styles/breakpoints' as *;
 :host {
   display: block;
 }
@@ -15,7 +16,7 @@
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
 
-  @media (max-width: 768px) {
+  @media (max-width: $break-phone-max) {
     padding: 1rem;
   }
 }

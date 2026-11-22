@@ -18,6 +18,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `column-carousel/` | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective |
 | `chip-search-dropdown/` | Searchable chip-select dropdown | ChipSearchDropdownComponent |
 | `confirm-modal/` | Confirm/cancel | ConfirmModalComponent |
+| `voice-note/` | Record (up to 3 min) or type a note; transcribes into a text box; `send` gives text, source and file id (plan 623) | VoiceNoteComponent, VoiceNoteSend |
 | `counter/` | Numeric counter control + the shared press-and-hold for any +/- button (plan 500) | CounterComponent, StepHoldDirective |
 | `custom-multi-select/` | Multi-select CVA | CustomMultiSelectComponent |
 | `custom-select/` | Select CVA | CustomSelectComponent |

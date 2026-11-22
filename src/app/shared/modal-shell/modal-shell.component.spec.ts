@@ -17,6 +17,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
         [titleKey]="'cancel'"
         [dismissible]="dismissible_()"
         [sheet]="sheet_()"
+        [light]="light_()"
         [hasChanges]="hasChanges_()"
         [zIndex]="zIndex_()"
         [topLayer]="topLayer_()"
@@ -39,6 +40,7 @@ class HostComponent {
   readonly size_ = signal<ModalShellSize>('sm')
   readonly dismissible_ = signal(true)
   readonly sheet_ = signal(false)
+  readonly light_ = signal(false)
   readonly hasChanges_ = signal(false)
   readonly zIndex_ = signal<number | string | null>(null)
   readonly topLayer_ = signal(false)
@@ -248,6 +250,59 @@ describe('ModalShellComponent', () => {
     host.zIndex_.set('var(--z-modal-nested)')
     fixture.detectChanges()
     expect(query<HTMLElement>('.c-modal-overlay')!.style.zIndex).toBe('var(--z-modal-nested)')
+  })
+
+  describe('light (plan 657)', () => {
+    const openLight = async (): Promise<void> => {
+      host.open_.set(false)
+      fixture.detectChanges()
+      host.light_.set(true)
+      host.open_.set(true)
+      fixture.detectChanges()
+      await fixture.whenStable()
+    }
+
+    it('renders the overlay with no backdrop colour and no blur', async () => {
+      await openLight()
+      const overlay = query<HTMLElement>('.c-modal-overlay')!
+      expect(overlay.classList.contains('c-modal-overlay--light')).toBeTrue()
+      const style = getComputedStyle(overlay)
+      expect(style.backdropFilter === 'none' || style.backdropFilter === '').toBeTrue()
+      expect(style.backgroundColor === 'rgba(0, 0, 0, 0)' || style.backgroundColor === 'transparent').toBeTrue()
+    })
+
+    it('without light the overlay has no light class', () => {
+      expect(query('.c-modal-overlay')!.classList.contains('c-modal-overlay--light')).toBeFalse()
+    })
+
+    it('closes on a pointer-down outside the card, not inside it', async () => {
+      await openLight()
+      query('.c-modal-card')!.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      expect(host.dismissed_()).toBe(0)
+      document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      expect(host.dismissed_()).toBe(1)
+    })
+
+    it('closes on a scroll', async () => {
+      await openLight()
+      document.dispatchEvent(new Event('scroll'))
+      expect(host.dismissed_()).toBe(1)
+    })
+
+    it('keeps Escape, and a non-light shell ignores an outside pointer-down and a scroll', async () => {
+      await openLight()
+      pressEscape()
+      expect(host.dismissed_()).toBe(1)
+      host.open_.set(false)
+      fixture.detectChanges()
+      host.light_.set(false)
+      host.open_.set(true)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      document.body.dispatchEvent(new Event('pointerdown', { bubbles: true }))
+      document.dispatchEvent(new Event('scroll'))
+      expect(host.dismissed_()).toBe(1)
+    })
   })
 
   it('has no popover attribute by default', () => {

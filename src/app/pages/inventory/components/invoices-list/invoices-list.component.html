@@ -1,0 +1,81 @@
+<app-list-shell
+  [isPanelOpen]="false"
+  [gridTemplate]="gridTemplate_()"
+  [mobileGridTemplate]="gridTemplate_()"
+  [resultCount]="invoices_().length"
+  [resultTotal]="invoices_().length"
+>
+  <ng-container shell-title>{{ 'invoices' | translatePipe }}</ng-container>
+
+  <ng-container shell-actions>
+    @if (isOwner_()) {
+      <button type="button" class="c-btn-primary" data-testid="invoices-scan" (click)="scanNew()">
+        <lucide-icon name="camera" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'invoices_scan_new' | translatePipe }}</span>
+      </button>
+    }
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="c-grid-header-cell" role="columnheader">{{ 'supplier' | translatePipe }}</div>
+    <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_date' | translatePipe }}</div>
+    <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_number' | translatePipe }}</div>
+    @if (isOwner_()) {
+      <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_lines_count' | translatePipe }}</div>
+    }
+    <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_saved_at' | translatePipe }}</div>
+    @if (isOwner_()) {
+      <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_file' | translatePipe }}</div>
+    }
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (isLoading_()) {
+      <div class="invoices-list__state"><app-loader /></div>
+    } @else if (invoices_().length === 0) {
+      <div class="invoices-list__state" data-testid="invoices-empty">
+        <app-empty-state
+          messageKey="invoices_empty"
+          icon="file-text"
+          [ctaLabelKey]="isOwner_() ? 'invoices_scan_new' : null"
+          (ctaClick)="scanNew()"
+        />
+      </div>
+    } @else {
+      @for (item of invoices_(); track item._id) {
+        <div class="invoices-list__row c-list-row" data-testid="invoice-row">
+          <div class="c-list-body-cell" role="cell">{{ item.supplierName }}</div>
+          <div class="c-list-body-cell" role="cell" dir="ltr">
+            {{ item.invoiceDate ? (item.invoiceDate | date: 'dd/MM/yy') : '—' }}
+          </div>
+          <div class="c-list-body-cell" role="cell" dir="auto">{{ item.invoiceNumber ?? '—' }}</div>
+          @if (isOwner_()) {
+            <div class="c-list-body-cell" role="cell" dir="ltr" data-testid="invoice-lines">
+              {{ item.lines.length }}
+            </div>
+          }
+          <div class="c-list-body-cell" role="cell" dir="ltr">{{ item.createdAt | date: 'dd/MM/yy' }}</div>
+          @if (isOwner_()) {
+            <div class="c-list-body-cell" role="cell">
+              @if (item.fileId) {
+                <button
+                  type="button"
+                  class="c-btn-ghost--sm"
+                  data-testid="invoice-open-file"
+                  (click)="openFile(item.fileId)"
+                >
+                  <lucide-icon name="eye" [size]="16"></lucide-icon>
+                  {{ 'invoice_open_file' | translatePipe }}
+                </button>
+              } @else {
+                <span class="invoices-list__muted" data-testid="invoice-no-file">
+                  {{ 'invoice_no_file' | translatePipe }}
+                </span>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  </ng-container>
+</app-list-shell>
