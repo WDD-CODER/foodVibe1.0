@@ -218,6 +218,12 @@ live together with a screen run); 373 lists `server/test/**` (new test files onl
    `src/app/pages/` lists that folder's `breadcrumbs.md` in its scope (`docs/agent/plan-checks.md`).
 9. **INV-6's glob `src/app/**/*ai*` also matches every file with "wait" in its name** (`waitlist-*`). R11 writes an
    `INV-6: preserves` line; it makes no model call.
+11. **`conversations` and `messages` are server-only**, not readable through the generic API (the draft had
+    `userData: true`): the conversations router already reads them, and a second read door for guest message text
+    is not wanted. Nothing is added to `MODULE_OF_TYPE`, `staff-fields.ts` or the cross-business `BODY` for them;
+    plan 675 writes their cross-business test on its own router. R0's own Done-when cannot be "GET
+    `/api/v1/floor-plan` → 200" either (its routers are empty): the module gate is proven through
+    `GET /api/v1/data/floorPlans`.
 10. **Numbers 560–565 are retired**, not reused (`scripts/next-plan-number.mjs` only counts upward). Their work is in
     675–683, except 565 (conversation numbers on the dashboard), which stays in brief Part 6 "Later".
 
@@ -240,12 +246,13 @@ the cross-business test body for each new type):
   |---|---|---|---|---|---|---|
   | `floorPlans` | true | false | true | false | false | true |
   | `waitlistEntries` | true | false | true | false | false | true |
-  | `conversations`, `messages` | true | false | false | false | false | true |
+  | `conversations`, `messages` | false | false | false | false | false | — |
   | `tableHolds` | false | false | false | false | false | — |
 
-- `server/utils/permissions.js`: action `manageConversations` (any member); `OWNER_ONLY_TYPES` gains `floorPlans`.
-  `shared/schemas/staff-fields.ts`: what staff read of a conversation and a message (all of it — they answer
-  guests) and of a waiting-list entry (all of it).
+- `server/utils/permissions.js`: action `manageConversations` (any member), mirrored in
+  `src/app/core/services/permission.service.ts`; `OWNER_ONLY_TYPES` gains `floorPlans`.
+  `shared/schemas/staff-fields.ts` is not edited: staff read all of a floor plan and of a waiting-list entry, and a
+  type that is not listed there is not trimmed.
 - `server/db.js` indexes: the ones named in the Contracts below.
 - Empty routers (each exports a `Router()` with no route) and their one-line mounts in `server/app.js`:
   `/api/v1/floor-plan` → `routes/floor-plan.js`, `/api/v1/waitlist` → `routes/waitlist.js`,
@@ -256,7 +263,7 @@ the cross-business test body for each new type):
 - Deleting a business removes its rows in the five new collections: they are added to the loop over collection
   names in `server/services/business.js` (delta 1).
 - `server/test/collections.test.js`: `ROUTER_WRITE_TYPES` equals the five of today plus `floorPlans`,
-  `waitlistEntries`, `conversations`, `messages` (delta 1).
+  `waitlistEntries` (delta 1).
 - `shared/schemas/front-desk/table-service.ts`: `TABLE_SERVICE_DEFAULTS` and `tableServiceOf(profile)` (C-TSERVICE,
   delta 4).
 
@@ -380,12 +387,17 @@ the cross-business test body for each new type):
 **C-CONV (R13; used by R14–R21)** — FD-06's collections, with these changes:
 - `conversations`: `{ ...baseDocShape, clientId, channel: 'sim' | 'whatsapp', waId, status: 'bot' | 'human' |
   'closed', assignedTo?, lastMessageAt, lastInboundAt, unread: int, requestId?, bookingId?, windowExpiresAt,
-  pending?: { kind: 'book' | 'change' | 'cancel', data, at }, test?: true }`. Unique index
-  `{ businessId, channel, waId }` for non-closed conversations (partial).
+  pending?: { kind: 'book' | 'change' | 'cancel', data, at }, suggestion?: string (≤ 4000), liveKey?: string,
+  test?: true }`. `liveKey` is `'<channel>:<waId>'` while the status is not `closed` and is removed on close;
+  unique index `{ businessId, liveKey }`, partial on `liveKey` existing (the pattern of `client_live_key_unique`;
+  a partial index cannot say "status is not closed"). Index `{ businessId, lastMessageAt }` for the inbox.
+- Both collections are server-only (delta 11): the generic API does not serve them, so guest message text has one
+  read path, the conversations router.
 - `messages`: `{ _id, businessId, conversationId, direction: 'in' | 'out', author: 'guest' | 'ai' | 'member' |
   'server', memberId?, kind: 'text' | 'template' | 'button', text (≤ 4000), template?: { name, params },
   buttons?: [{ id, title }] (≤ 3), buttonId?, at, providerMessageId, status: 'queued' | 'sent' | 'delivered' |
-  'read' | 'failed', test?: true }`. Unique index `{ businessId, providerMessageId }`. Kept 12 months
+  'read' | 'failed', test?: true }`. Unique index `{ businessId, providerMessageId }`; index
+  `{ businessId, conversationId, at }` for the thread. Kept 12 months
   (`server/jobs/retention.js`).
 - `server/routes/conversations.js` (`manageConversations`): `GET /`, `GET /:id/messages`, `POST /:id/messages`
   (member reply; outside the window only a template), `PUT /:id/takeover`, `PUT /:id/release`, `PUT /:id/close`.
