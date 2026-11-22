@@ -55,6 +55,7 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] R1: Fix e2e/ui/584-1.spec.ts — on a local/slot app the dev guest auto-login moves /welcome to /dashboard before the sign-up click; sign out first or open the auth modal another way
 - [ ] R2: Fix e2e/ui/584-2.spec.ts — waits only 5 s for app-header while the QA login shows "רגע, מכינים הכל..."; wait for the loading screen to end
 - [ ] R4: Fix e2e/ui/581-1…4 and 523-1…3 with R2 — all 7 stop on the QA sign-in loading screen before the logistics card (Planner 2026-11-22, plan 581 close-out)
+- [ ] R6: Check private mode on the invoice AI read — server/routes/ai/invoices.js:103-109 stores the invoice_read draft's extracted rows whatever business.aiPrivate says (run fin-audit-3 D2, plan 661 report sections 5 and 8); confirm against plan 639's rule "private mode only stops learning" and fix if learning data is kept (Human 2026-11-22: add todo)
 - [ ] R5: Adding a logistics question whose text already exists as a shared question shows "server error" — POST server/routes/generic.js:633 sends no messageKey and the card's duplicate check misses it; show a clear Hebrew message and catch it before sending (Human 2026-11-22, card 4 of the 581 close-out)
 - [ ] R3: After run-546 merges, add the note line to docs/frontdesk/pilot-terms-draft.md (the app shows public/assets/legal/terms.he.json; change both and bump version) — run-584 D1
 

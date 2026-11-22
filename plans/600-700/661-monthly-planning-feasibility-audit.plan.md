@@ -210,6 +210,7 @@ All money is before VAT unless stated. "Plan" = what the owner expects for the m
 - none
 
 ## Execution Notes
+- Planner close-out 2026-11-22: run fin-audit-3 merged to main as #637 (after fin-audit parked it on the origin/main scope check while 660 was not yet on main, and fin-audit-2 stopped on a leftover folder holding the plan branch). [human] section 1 reading: Dandan "done", 2026-11-22. Decisions D1–D2: "decisions: ok"; D2 (invoice AI draft stored whatever aiPrivate says) became todo R6.
 
 - Report written: docs/finance/monthly-planning-feasibility.md (checked on commit 695dfda7; scope-check --drift → REALITY: clean, so Step 0 not needed).
 - grep -c "^## " docs/finance/monthly-planning-feasibility.md → 8
