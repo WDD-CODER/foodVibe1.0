@@ -314,11 +314,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
-- the unit mapping after a pick (plan 653): `unitForSpoken` in `stock-count/spoken-unit.ts` — the spoken unit mapped to
+- the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
   drops the unit, the word beside the product name in the cook's own text is kept as `spokenUnit`; none →
-  `unitMissing`, never the base unit. Browser side: `unitChoicesFor` in `stock-count/spoken-unit.ts`.
+  `unitMissing`, never the base unit. Browser side: `unitChoicesFor` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts`.
 - the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
   `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
@@ -589,7 +589,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### unit-rates — `unitRatesFrom`, `loadUnitRates`, `toBase` (shared unit rule)
 
 - Status: stable — plan 635
-- Use: `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, `SYSTEM_UNITS`, the unit constants and `unitRatesFrom(terms)`; the browser reaches it through `@schemas/units/to-base` (`units.ts` and the other app files re-export it), the server through `server/generated/schemas/units/to-base`. `server/utils/unit-rates.js` — `loadUnitRates(req)` reads the master and the business's own `unit` terms and returns the rates the server converts with.
+- Use: `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, `SYSTEM_UNITS`, the unit constants and `unitRatesFrom(terms)`; the browser reaches it through the import @schemas/units/to-base (`units.ts` and the other app files re-export it), the server through the generated build output server/generated/schemas/units/to-base (`pnpm run build:schemas`). `server/utils/unit-rates.js` — `loadUnitRates(req)` reads the master and the business's own `unit` terms and returns the rates the server converts with.
 - When: server code converts an amount into a product's base unit (a stock count); never write a second conversion.
 - Known copies: none.
 
@@ -668,3 +668,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: repair-supplier-refs.js, planProductRepair, repairBusiness.
 - When: product sources already point at a foreign, unknown or empty supplier; the Human runs it (dry run first), never a build step.
 - Known copies: none.
+
+### excel-export — one house style for every Excel sheet
+
+- Status: stable — plan 471 moved every recipe and menu sheet onto it
+- Use: `src/app/core/services/excel-workbook.util.ts` · `addStyledTableSheet(wb, { name, title, meta, header, rows, totalRow?, widths? })` (RTL, teal title band, grey meta line, grey header, bordered rows, bold total row, frozen rows 1–3, A4 portrait one page wide) and `uniqueSheetName` (Excel-safe, ≤ 31 characters, unique, " 2" / " 3" on a repeat); a form-style sheet uses `addRecipeInfoSheet`. Each export has a public `build…Workbook` builder in `src/app/core/services/recipe-export.service.ts` / `src/app/core/services/menu-export.service.ts` that a spec reads in memory; the `export…` method only awaits it and calls `downloadWorkbook`.
+- Pieces: addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP, buildRecipeInfoWorkbook, buildShoppingListWorkbook, buildMenuInfoWorkbook, buildAllTogetherMenuWorkbook.
+- When: any new Excel sheet. Sheet names, headers and fallbacks come from `dictionary.json` through `TranslationService`, never an English literal.
+- Known copies: none (no other file in `src/app` calls `addWorksheet`, checked 2026-11-22).

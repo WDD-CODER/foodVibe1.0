@@ -42,13 +42,13 @@ Verified on `origin/main` 7c8fccd4:
 **Primary:** a chef can print a recipe and open any Excel export and hand it to staff or a client as is: clean,
 Hebrew, right-to-left, the same look in every file.
 
-- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
-- [auto] `pnpm run test:ci` exits 0, including the new specs `src/app/core/services/recipe-export.service.spec.ts`
+- [x] [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
+- [x] [auto] `pnpm run test:ci` exits 0, including the new specs `src/app/core/services/recipe-export.service.spec.ts`
   and `src/app/core/services/menu-export.service.spec.ts` (A6).
-- [auto] `git grep -n -E "addWorksheet\('[A-Za-z]" -- src/app` prints nothing (no English sheet name left).
-- [auto] `git grep -n -E "'(כללי|הכנות)'" -- src/app/core/services` prints nothing.
-- [auto] `node scripts/scope-check.mjs --arch --plan=plans/471-rework-recipe-and-menu-exports-print-and-excel-in-a-dedicated-session.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/471-rework-recipe-and-menu-exports-print-and-excel-in-a-dedicated-session.plan.md` exits 0.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+- [x] [auto] `git grep -n -E "addWorksheet\('[A-Za-z]" -- src/app` prints nothing (no English sheet name left).
+- [x] [auto] `git grep -n -E "'(כללי|הכנות)'" -- src/app/core/services` prints nothing.
+- [x] [auto] `node scripts/scope-check.mjs --arch --plan=plans/471-rework-recipe-and-menu-exports-print-and-excel-in-a-dedicated-session.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/471-rework-recipe-and-menu-exports-print-and-excel-in-a-dedicated-session.plan.md` exits 0.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 - [human] On a recipe, «הדפסת מתכון» opens the preview of the whole recipe (name, yield, ingredients, numbered steps, preparation time) and "הדפסה" prints only that sheet: no buttons, inputs or empty rows, on as few pages as the content needs.
 - [human] Open the recipe "Export all" file and the menu "Export all" file in Excel: every sheet name, header, category and event type is in Hebrew, every sheet reads right to left, and every sheet has the same look (title band, meta line, grey header, borders).
 
@@ -191,13 +191,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the one house-style sheet helper and the shared sheet-name rule — `addStyledTableSheet`, `uniqueSheetName` (moved from `MenuExportService`), page setup and frozen header — src/app/core/services/excel-workbook.util.ts
-- [ ] A2: Make every recipe Excel file Hebrew and in the house style — sheet names from the dictionary, translated categories, total row, one `recipeShoppingRows_`, `build…Workbook` builders; title band, RTL and A4 fit on the info sheet — src/app/core/services/recipe-export.service.ts, src/app/core/services/excel-workbook.util.ts
-- [ ] A3: Make every menu Excel file Hebrew and in the house style — Hebrew cover and event type, one `menuSectionSheet_`, prep sheets and shopping list through the helper, `build…Workbook` builders, Hebrew preview titles and fallbacks — src/app/core/services/menu-export.service.ts
-- [ ] A4: Print the recipe from a clean preview instead of the editing screen — `getFullRecipePreviewPayload`; `print()` opens the preview with it — src/app/core/services/recipe-export.service.ts, src/app/pages/recipe-builder/services/recipe-builder-export.service.ts, src/app/pages/recipe-builder/recipe-builder.page.html, src/app/pages/recipe-builder/recipe-builder.page.ts
-- [ ] A5: Add the Hebrew words — the keys of UI/UX Notes, appended — public/assets/data/dictionary.json
-- [ ] A6: Prove it with unit tests on the built workbooks — for each `build…Workbook`: every sheet name has no Latin letter, every sheet is right to left, rows 1–3 are title / meta / header; the recipe shopping list shows the Hebrew category for a product whose category key is English and ends with a `SUM` total; the menu cover shows the event type's Hebrew name; `getFullRecipePreviewPayload` numbers the steps and has no price column — src/app/core/services/recipe-export.service.spec.ts, src/app/core/services/menu-export.service.spec.ts, src/app/core/services/export.service.spec.ts
-- [ ] A7: Record the helper so the next export reuses it, and run every `[auto]` check — a new `### excel-export — one house style for every Excel sheet` heading with a `Use:` line naming `addStyledTableSheet`, `uniqueSheetName` and the `build…Workbook` builders (same shape as the other headings), the breadcrumbs line; paste outputs under Execution Notes; `node scripts/reuse-lint.mjs --check-registry` exits 0 — docs/brain/component-families.md, src/app/core/services/breadcrumbs.md
+- [x] A1: Add the one house-style sheet helper and the shared sheet-name rule — `addStyledTableSheet`, `uniqueSheetName` (moved from `MenuExportService`), page setup and frozen header — src/app/core/services/excel-workbook.util.ts
+- [x] A2: Make every recipe Excel file Hebrew and in the house style — sheet names from the dictionary, translated categories, total row, one `recipeShoppingRows_`, `build…Workbook` builders; title band, RTL and A4 fit on the info sheet — src/app/core/services/recipe-export.service.ts, src/app/core/services/excel-workbook.util.ts
+- [x] A3: Make every menu Excel file Hebrew and in the house style — Hebrew cover and event type, one `menuSectionSheet_`, prep sheets and shopping list through the helper, `build…Workbook` builders, Hebrew preview titles and fallbacks — src/app/core/services/menu-export.service.ts
+- [x] A4: Print the recipe from a clean preview instead of the editing screen — `getFullRecipePreviewPayload`; `print()` opens the preview with it — src/app/core/services/recipe-export.service.ts, src/app/pages/recipe-builder/services/recipe-builder-export.service.ts, src/app/pages/recipe-builder/recipe-builder.page.html, src/app/pages/recipe-builder/recipe-builder.page.ts
+- [x] A5: Add the Hebrew words — the keys of UI/UX Notes, appended — public/assets/data/dictionary.json
+- [x] A6: Prove it with unit tests on the built workbooks — for each `build…Workbook`: every sheet name has no Latin letter, every sheet is right to left, rows 1–3 are title / meta / header; the recipe shopping list shows the Hebrew category for a product whose category key is English and ends with a `SUM` total; the menu cover shows the event type's Hebrew name; `getFullRecipePreviewPayload` numbers the steps and has no price column — src/app/core/services/recipe-export.service.spec.ts, src/app/core/services/menu-export.service.spec.ts, src/app/core/services/export.service.spec.ts
+- [x] A7: Record the helper so the next export reuses it, and run every `[auto]` check — a new `### excel-export — one house style for every Excel sheet` heading with a `Use:` line naming `addStyledTableSheet`, `uniqueSheetName` and the `build…Workbook` builders (same shape as the other headings), the breadcrumbs line; paste outputs under Execution Notes; `node scripts/reuse-lint.mjs --check-registry` exits 0 — docs/brain/component-families.md, src/app/core/services/breadcrumbs.md
 
 ## What happens when
 - A recipe has no steps: the printed recipe shows the ingredients and no steps section; the cooking-steps sheet has
@@ -236,3 +236,94 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Planner 2026-11-22: rewritten from the parked "walk it with the Human" draft into a buildable plan at the Human's
   request ("it needs to be simple to understand what and how the outcome needs to be … executed correctly without
   me"). Evidence above checked on main 7c8fccd4.
+- Worker 2026-11-22 (cloud session, branch `feat/471-exports-house-style` from `origin/main` cfc3774): A1–A7 built
+  in order. `src/app/pages/recipe-builder/recipe-builder.page.ts` needed no change. Nothing written outside the
+  Read-Write Scope (`node scripts/scope-check.mjs --diff=origin/main` → `SCOPE: ok`).
+
+### Dictionary reuse (UI/UX Notes: "if a key with the same Hebrew value already exists, reuse it")
+- `export_sheet_shopping_list` → reused `export_shopping_list` ("רשימת קניות").
+- `export_sheet_recipe` and `export_recipe_fallback` → reused `recipe` ("מתכון").
+- `export_category_general` → reused `general_group` ("כללי"), the key the menu shopping list already uses.
+- `export_total` → reused `shopping_total` ("סה״כ"), the key the menu shopping total already uses.
+- Added (9 from the plan + 2): `export_sheet_cooking_steps`, `export_sheet_checklist`, `export_sheet_menu_info`,
+  `export_section_fallback`, `export_sheet_fallback`, `export_menu_fallback`, `export_category_preps`,
+  `export_full_recipe`, `export_total_prep_time`, `export_labor_time_min`, `export_cooking_time_sec`.
+
+### Behaviour decisions (for the Human to grade)
+- behaviour: `export_menu_fallback` and `export_category_preps` are new keys although "תפריט" / "הכנות" exist — the
+  existing keys (`toolbar_menu`, `knowledge_topic_menu`, `activity_field_prep_items`) are UI labels with another
+  meaning and could be renamed for their own screen — reverse: point the two call sites at the existing keys.
+- behaviour: the cooking-steps sheet header wrote the raw keys `labor_time_min` / `cooking_time_sec` (not in
+  `EXPORT_HEADER_HE`) — English in the file; two new dictionary keys replace them (`EXPORT_HEADER_HE` untouched) —
+  reverse: drop the keys and go back to `heHeader(...)`.
+- behaviour: the printed recipe keeps the steps in `sections` and the total time in `summary`; a new optional
+  `ExportPayload.recipeSheetStepsAsSection` (`export.util.ts`) makes the preview skip the recipe sheet's own
+  instructions / prep-time blocks, so nothing prints twice — reverse: remove the flag and put the numbered lines into
+  `recipeSheet.preparationInstructions`.
+- behaviour: in the full-recipe preview, "ייצוא לאקסל" downloads the recipe-info Excel (closest file: ingredients +
+  instructions) — reverse: map `'recipe-full'` to `exportAllTogetherRecipe` in `onExportFromPreview`.
+- behaviour: the preview's own print button now calls a new `RecipeBuilderExportService.printPreview()`
+  (`window.print()`), because `print()` now opens the preview (`recipe-builder.page.html:437`) — reverse: n/a.
+- behaviour: the printed recipe and the cooking-steps sheet list the steps sorted by `order`; the printed recipe
+  leaves out steps whose instruction is blank (no empty rows) and shows minutes only when set — reverse: drop the
+  sort / filter.
+- behaviour: the recipe-info sheet gets row 1 title band (recipe name) and row 2 meta (yield · date); the plan-108
+  block starts on row 3 and is not frozen (it is a form) — reverse: start the block at row 1 again.
+- behaviour: the dish-checklist meta line is the standard recipe meta (yield · date); the old first row's portions
+  and "יחס xN" are gone — reverse: add them to that sheet's meta.
+- behaviour: the menu cover is a field / value table through `addStyledTableSheet` and both "menu info" and
+  "export all" covers now end with the "יוצא בתאריך" row (before: only "export all") — reverse: drop the row from
+  `addCoverSheet_`.
+- behaviour: a menu with no prep groups gets one house-style sheet «דפי הכנה» whose header cell says «אין מה
+  להדפיס» — reverse: write the text as a data row under an empty header.
+- behaviour: a recipe shopping list with no rows has no total row (a SUM over an empty range would point at the
+  total cell itself) — reverse: always add it.
+- behaviour: recipe shopping-list groups are sorted by their Hebrew label (`localeCompare(…, 'he')`), not by the raw
+  key — reverse: sort by key before translating.
+- behaviour: the menu previews (info, all-view) also show the event type's Hebrew name in the cover row and
+  subtitle, through the same `eventTypeName_` as the Excel — reverse: `menu.eventType` raw in the previews.
+- behaviour: the shopping builders read the scaled rows before `await import('exceljs')` (an existing spec reads the
+  scaling call synchronously) — reverse: n/a.
+- behaviour: removed `styleHeaderRow` from `excel-workbook.util.ts`; nothing calls it any more — reverse: restore it.
+- behaviour: `node scripts/reuse-lint.mjs --check-registry` exited 1 on three paths already broken on `origin/main`
+  (`docs/brain/component-families.md:317`, `:321`, `:592`); A7 needs exit 0 and the file is in scope, so
+  `stock-count/spoken-unit.ts` became its full path `src/app/pages/inventory/components/stock-count/spoken-unit.ts`
+  and the two import specifiers (`@schemas/units/to-base`, `server/generated/schemas/units/to-base`) lost their
+  backticks (they are imports / build output, not repo files) — reverse: restore the three original strings.
+- seen: no category key without a dictionary entry was observed (no database in this session).
+
+### Evidence (after `pnpm install` → `Done in 7.4s`, exit 0, and `pnpm run build:schemas` → exit 0)
+Cloud-only note: Karma needed `CHROME_BIN` set to a wrapper that adds `--no-sandbox` (the container runs as root);
+`server/` needed `pnpm install` for `log-query.mjs` to load `mongoose`.
+
+```text
+$ pnpm run build                                   → exit 0
+Application bundle generation complete.
+Output location: /home/user/foodVibe1.0/dist/food-vibe1.0
+
+$ pnpm run lint                                    → exit 0
+✖ 69 problems (0 errors, 69 warnings)              (none in a file this plan changed)
+
+$ pnpm run test:ci                                 → exit 0
+TOTAL: 2742 SUCCESS
+(includes recipe-export.service.spec.ts, menu-export.service.spec.ts, export.service.spec.ts)
+
+$ git grep -n -E "addWorksheet\('[A-Za-z]" -- src/app          → exit 1, no output
+$ git grep -n -E "'(כללי|הכנות)'" -- src/app/core/services      → exit 1, no output
+
+$ node scripts/scope-check.mjs --arch --plan=plans/471-…plan.md   → exit 0
+ARCH: ok INV-none
+$ node scripts/scope-check.mjs --reuse --plan=plans/471-…plan.md  → exit 0
+REUSE: ok `addStyledTableSheet` and `uniqueSheetName` in `src/app/core/services/excel-workbook.util.ts` (rung 4)
+
+$ node scripts/log-query.mjs --since=plan-start --level=error     → exit 0
+plan-start: no marker, using 2026-11-22T17:45:19+02:00 (merge-base)
+SKIP: no database configured
+
+$ node scripts/reuse-lint.mjs --check-registry                    → exit 0 (after the path fix above; exit 1 before)
+REUSE: registry ok (65 families, 196 paths)
+
+$ node scripts/scope-check.mjs --diff=origin/main                 → SCOPE: ok
+```
+
+Open for the Human: the two `[human]` items under Goals (printed recipe; both "Export all" files in Excel).

@@ -5,7 +5,7 @@ import type { ExportPayload } from '../../../core/utils/export.util'
 
 export type RecipeBuilderExportView = 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'all'
 type RecipeBuilderExportPreviewType =
-  'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'recipe-all'
+  'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'recipe-all' | 'recipe-full'
 
 /** What the page hands over so this service never reads the recipe form itself. */
 export interface RecipeBuilderExportSource {
@@ -87,7 +87,7 @@ export class RecipeBuilderExportService {
     if (!this.exportPreviewPayload_() || !type || !this.source_) return
     const recipe = this.source_.recipe()
     const qty = this.source_.quantity()
-    if (type === 'recipe-info') this.exportService_.exportRecipeInfo(recipe, qty)
+    if (type === 'recipe-info' || type === 'recipe-full') this.exportService_.exportRecipeInfo(recipe, qty)
     else if (type === 'shopping-list') this.exportService_.exportShoppingList(recipe, qty)
     else if (type === 'cooking-steps') this.exportService_.exportCookingSteps(recipe, qty)
     else if (type === 'dish-checklist') this.exportService_.exportDishChecklist(recipe, qty)
@@ -115,7 +115,13 @@ export class RecipeBuilderExportService {
     this.runExport_((r, q) => this.exportService_.exportAllTogetherRecipe(r, q))
   }
 
+  /** «הדפסת מתכון»: open the clean full-recipe preview; its own print button prints that sheet only (plan 471). */
   print(): void {
+    this.openPreview_('recipe-full', (r, q) => this.exportService_.getFullRecipePreviewPayload(r, q))
+  }
+
+  /** The preview's print button: the open preview prints alone through the `export-preview-visible` rule. */
+  printPreview(): void {
     window.print()
   }
 

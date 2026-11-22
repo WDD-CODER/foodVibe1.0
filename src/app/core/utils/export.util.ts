@@ -184,4 +184,9 @@ export interface ExportPayload {
   recipeSheet?: RecipeSheetBlock
   /** When recipeSheet is set, optional labels for preview (Hebrew). */
   recipeSheetLabels?: RecipeSheetLabels
+  /**
+   * Plan 471 (printed full recipe): the steps are one of `sections` and the total time is in `summary`,
+   * so the preview leaves out the recipe sheet's own instructions and prep-time blocks.
+   */
+  recipeSheetStepsAsSection?: boolean
 }
