@@ -23,6 +23,7 @@ export const API = {
   events: `${API_ROOT}/events`,
   requests: `${API_ROOT}/requests`,
   bookings: `${API_ROOT}/bookings`,
+  floorPlan: (path?: string) => (path ? `${API_ROOT}/floor-plan/${path}` : `${API_ROOT}/floor-plan`),
   public: (path: string) => `${API_ROOT}/public/${path}`,
   log: `${API_ROOT}/log`,
   health: `${API_ROOT}/health`

@@ -148,7 +148,7 @@ append the path to the scope block above and retry.
 
 - `checkFloorPlan`, `emptyFloorPlan` in `floor-plan-check.ts` — family: helpers — rung: 4 — why: no shared piece checks a floor plan; one pure check is used by the server route and by the editor of plan 665, registered as the new logic family `floor-plan`
 - `API.floorPlan` in `http-storage.adapter.ts` — family: http — rung: 2 — why: one more entry in the existing path map
-- `FloorPlanDataService` — family: http — rung: 1 — why: a one-document client of its own router through `API.floorPlan` and `HttpClient`, the pattern of `BookingDataService.day`; the list base class does not fit one document that may be `null`
+- `floor-plan-data.service.ts` (`FloorPlanDataService`) — family: http — rung: 1 — why: a one-document client of its own router through `API.floorPlan` and `HttpClient`, the pattern of `BookingDataService.day`; the list base class does not fit one document that may be `null`
 - `floor-plan.model.ts` — family: entity-schemas — rung: 1 — why: re-exports the schema's types, as `booking.model.ts` does
 
 ## Defaults
@@ -284,12 +284,12 @@ Registry and maps
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Write the one check of a room that the server and the editor will share — checkFloorPlan with its nine issue codes (grid bounds honour a turned table) and emptyFloorPlan for a first visit; its own test file — shared/schemas/front-desk/floor-plan-check.ts, server/test/floor-plan-check.test.js
-- [ ] A2: Let every member read the room and get an empty answer before it is drawn — fill the empty router: the limiter, the tables gate, the read route that never inserts; tests "first read" and the read half of "who" — server/routes/floor-plan.js, server/test/floor-plan.test.js
-- [ ] A3: Let the owner replace the whole room, with the server writing the identity fields — the save route: body pick, built document, schema check, shared check, insert or replace, the two-first-saves answer, count-only logs; tests "save and read", "who", "refusals" — server/routes/floor-plan.js, server/test/floor-plan.test.js
-- [ ] A4: Refuse a save that drops a table or a join a coming booking sits on — the in-use read of confirmed and seated bookings, the join rule, the trimmed booking rows in the answer; test "in use" with seeded bookings — server/routes/floor-plan.js, server/test/floor-plan.test.js
-- [ ] A5: Give the browser one place that holds the room — the floor plan entry of the backend path map, the model file and the data service with load, ensureLoaded and save returning the refusal with its issues or bookings; its spec — src/app/core/services/http-storage.adapter.ts, src/app/core/models/floor-plan.model.ts, src/app/core/services/floor-plan-data.service.ts, src/app/core/services/floor-plan-data.service.spec.ts
-- [ ] A6: Register the new pieces so later plans reuse them — the floor-plan family entry and inventory line, the three folder maps, the map's extension line — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Write the one check of a room that the server and the editor will share — checkFloorPlan with its nine issue codes (grid bounds honour a turned table) and emptyFloorPlan for a first visit; its own test file — shared/schemas/front-desk/floor-plan-check.ts, server/test/floor-plan-check.test.js
+- [x] A2: Let every member read the room and get an empty answer before it is drawn — fill the empty router: the limiter, the tables gate, the read route that never inserts; tests "first read" and the read half of "who" — server/routes/floor-plan.js, server/test/floor-plan.test.js
+- [x] A3: Let the owner replace the whole room, with the server writing the identity fields — the save route: body pick, built document, schema check, shared check, insert or replace, the two-first-saves answer, count-only logs; tests "save and read", "who", "refusals" — server/routes/floor-plan.js, server/test/floor-plan.test.js
+- [x] A4: Refuse a save that drops a table or a join a coming booking sits on — the in-use read of confirmed and seated bookings, the join rule, the trimmed booking rows in the answer; test "in use" with seeded bookings — server/routes/floor-plan.js, server/test/floor-plan.test.js
+- [x] A5: Give the browser one place that holds the room — the floor plan entry of the backend path map, the model file and the data service with load, ensureLoaded and save returning the refusal with its issues or bookings; its spec — src/app/core/services/http-storage.adapter.ts, src/app/core/models/floor-plan.model.ts, src/app/core/services/floor-plan-data.service.ts, src/app/core/services/floor-plan-data.service.spec.ts
+- [x] A6: Register the new pieces so later plans reuse them — the floor-plan family entry and inventory line, the three folder maps, the map's extension line — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: everything plan 662 registers (listed under "Verified"); `server/middleware/auth.js`,
@@ -330,3 +330,5 @@ Registry and maps
 - behaviour: two saves one after the other — the last one wins; there is no version check (one owner edits the room).
 - behaviour: a booking marked `test: true` blocks dropping its table like any other (brief A6: test data does take tables).
 - behaviour: a first-visit plan uses a 24 × 16 grid (changed in plan 684); area names are stored as plain text the caller passes, never as dictionary keys (aligned with plan 665 by the Planner, 2026-11-22).
+- evidence: build:schemas + vitest floor-plan.test.js, floor-plan-check.test.js -> 43 pass; pnpm run build exit 0; pnpm run lint exit 0 (0 errors); pnpm run test:ci -> 2728 SUCCESS; kit-checks ok; kit-manifest ok.
+- seen: none. Reuse Check row renamed to floor-plan-data.service.ts so kit-checks reuse-new-items matches the new file.

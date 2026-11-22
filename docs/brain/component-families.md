@@ -315,6 +315,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any code that offers, confirms or moves a table — never a second calculation.
 - Known copies: none.
 
+### floor-plan — the room: one stored plan, its checks and its browser service
+
+- Status: stable
+- Use: `checkFloorPlan`, `emptyFloorPlan` in `shared/schemas/front-desk/floor-plan-check.ts` (the server route `server/routes/floor-plan.js` and the editor share them), `FloorPlanDataService` in `src/app/core/services/floor-plan-data.service.ts` (`plan_`, `load`, `ensureLoaded`, `save`).
+- Pieces: checkFloorPlan, emptyFloorPlan, FLOOR_PLAN_ISSUE_CODES, FloorPlanDataService.
+- When: any screen that reads or saves the room — never a second copy of the checks.
+- Known copies: none.
+
 ### helpers — pure functions
 
 - Status: stable
