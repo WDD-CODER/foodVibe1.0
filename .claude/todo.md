@@ -197,3 +197,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A2: Open the base amount right beside its row, as wide as its text, on every screen
 - [ ] A3: Let the shared row checkbox take its size from the page instead of being forced from outside
 - [ ] A4: Prove it — the Done-when commands in order, registry and breadcrumbs updated
+
+### Plan 659 — Stock count: the base-amount box opens over its own icon, on hover above phone width
+- [ ] A1: Make the base-amount box open over its own icon instead of the far side
+- [ ] A2: Open the box on hover above phone width and on tap only on a phone
+- [ ] A3: Prove it — the Done-when commands in order
