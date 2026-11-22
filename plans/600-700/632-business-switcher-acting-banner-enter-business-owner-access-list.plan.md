@@ -1,6 +1,6 @@
 # Plan 632 — Business switcher, the acting banner, entering a business from the platform table and the owner's access list
 
-Status: draft
+Status: done
 Depends-on: 631, 620
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

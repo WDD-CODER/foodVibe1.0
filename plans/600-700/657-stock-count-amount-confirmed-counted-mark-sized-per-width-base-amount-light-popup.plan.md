@@ -1,6 +1,6 @@
 # Plan 657 — Stock count: an asked amount is confirmed before it counts, the counted mark sized per width, the base amount in a light popup on phones
 
-Status: draft
+Status: done
 Depends-on: 656
 Snapshot: c1e5274f
 

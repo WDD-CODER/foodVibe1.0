@@ -1,6 +1,6 @@
 # Plan 643 — Small debts the Modules runs left: the settings type, the test icon list and the flaky export test
 
-Status: draft
+Status: done
 Depends-on: 629, 632
 Snapshot: 5d6cd7b8
 

@@ -1,6 +1,6 @@
 # Plan 650 — Voice or text count fills the existing product rows: the best match, a choice when several fit, never a silent new item
 
-Status: draft
+Status: done
 Depends-on: 648
 Snapshot: 9169f36e
 

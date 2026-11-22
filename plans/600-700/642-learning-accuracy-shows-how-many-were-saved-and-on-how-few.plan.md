@@ -1,6 +1,6 @@
 # Plan 642 — The platform's learning numbers say how many scans were saved and do not show a sure percent from one save
 
-Status: draft
+Status: done
 Depends-on: 630
 Snapshot: 5d6cd7b8
 

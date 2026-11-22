@@ -1,6 +1,6 @@
 # Plan 638 — Platform admin sees the history of module and AI changes of a business, with the reasons
 
-Status: draft
+Status: done
 Depends-on: 620
 Snapshot: 65e510e0e0b530e69e34ba74a905558768f24a89
 

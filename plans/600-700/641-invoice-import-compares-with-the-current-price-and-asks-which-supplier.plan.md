@@ -1,6 +1,6 @@
 # Plan 641 — Invoice import compares with the product's current price and asks which supplier to update; no duplicate suppliers
 
-Status: draft
+Status: done
 Depends-on: 628, 629
 Snapshot: 5d6cd7b8
 

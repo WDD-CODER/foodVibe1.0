@@ -1,6 +1,6 @@
 # Plan 624 — Loading list for an event: what to put on the truck, printable, ticked as it is loaded
 
-Status: draft
+Status: done
 Depends-on: 616
 Snapshot: e916e48e3943a650ba9767ebb4023d20e823ae8d
 

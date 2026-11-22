@@ -1,6 +1,6 @@
 # Plan 652 — The dashboard shows a diagnosis card for a business with the consultant's module
 
-Status: draft
+Status: done
 Depends-on: 634, 646
 Snapshot: 6d151456
 

@@ -1,6 +1,6 @@
 # Plan 647 — The platform's learning section reads as cards that say what each number means
 
-Status: draft
+Status: done
 Depends-on: 630, 642
 Snapshot: 9354ab3d
 

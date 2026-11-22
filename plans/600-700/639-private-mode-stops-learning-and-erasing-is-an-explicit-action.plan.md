@@ -1,6 +1,6 @@
 # Plan 639 — Private mode only stops learning; erasing what was learned is a separate, explicit action
 
-Status: draft
+Status: done
 Depends-on: 627, 638
 Snapshot: dede1a11
 

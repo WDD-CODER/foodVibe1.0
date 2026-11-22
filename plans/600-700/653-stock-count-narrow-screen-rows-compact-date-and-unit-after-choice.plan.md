@@ -1,6 +1,6 @@
 # Plan 653 — Stock count: rows that stay whole under 760 px, a compact date, one header style, and the unit checked after a choice
 
-Status: draft
+Status: done
 Depends-on: 651
 Snapshot: 25537342
 

@@ -1,6 +1,6 @@
 # Plan 640 — The equipment quick-edit popup sets the loading rule (per guests, minimum, maximum)
 
-Status: draft
+Status: done
 Depends-on: 624
 Snapshot: 43365ce0
 

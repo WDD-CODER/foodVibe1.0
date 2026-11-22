@@ -1,6 +1,6 @@
 # Plan 645 — Import shows the change in a chip and never adds a same-name supplier; the stock count sheet stays fast; the header always answers
 
-Status: draft
+Status: done
 Depends-on: 636, 637, 641, 644
 Snapshot: aacec375
 
