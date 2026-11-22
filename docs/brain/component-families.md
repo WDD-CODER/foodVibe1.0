@@ -481,7 +481,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### floor-map — the drawing of the room
 
 - Status: stable — plan 665
-- Use: `src/app/shared/floor-map/` · `app-floor-map` (inputs `plan`, `states`, `selectedKeys`, `draggable`, `dimOtherThanArea`; outputs
+- Use: `src/app/shared/floor-map/` · `app-floor-map` (inputs `plan`, `states`, `selectedKeys`, `draggable`, `dimOtherThanArea`, `warnKeys` (plan 684: overlap mark); outputs
   `tableTapped`, `tableMoved`, `gridTapped`) with the pure grid arithmetic in `floor-geometry.util.ts` (`footprintFor`, `movedCell`,
   `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
 - When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.

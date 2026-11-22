@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.room-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.room-panel__title,
+.room-panel__subtitle {
+  margin: 0;
+
+  font-weight: var(--fw-semibold);
+}
+
+.room-panel__title {
+  font-size: var(--fs-lg);
+}
+
+.room-panel__subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-base);
+}
+
+.room-panel__areas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.room-panel__area {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.room-panel__name {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.room-panel__btns {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.room-panel__btns .is-disabled {
+  cursor: not-allowed;
+
+  opacity: 0.35;
+}
+
+.room-panel__sr {
+  position: absolute;
+
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.room-panel__size {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block-start: var(--space-2);
+}
+
+.room-panel__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.room-panel__label {
+  color: var(--color-text-secondary);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+}

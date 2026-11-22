@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { By } from '@angular/platform-browser'
+import { AlertTriangle, LucideAngularModule } from 'lucide-angular'
 import { CdkDrag } from '@angular/cdk/drag-drop'
 import { Directionality } from '@angular/cdk/bidi'
 import { TranslationService } from '@services/translation.service'
@@ -59,7 +60,7 @@ describe('FloorMapComponent (plan 665)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FloorMapComponent],
+      imports: [FloorMapComponent, LucideAngularModule.pick({ AlertTriangle })],
       providers: [
         { provide: TranslationService, useValue: { translate: (k: string | undefined) => DICT[k ?? ''] ?? k ?? '' } },
         { provide: Directionality, useValue: { value: 'rtl', change: { subscribe: () => ({ unsubscribe() {} }) } } }
@@ -109,6 +110,15 @@ describe('FloorMapComponent (plan 665)', () => {
     fixture.componentRef.setInput('draggable', true)
     fixture.detectChanges()
     expect(drags()).toEqual([false, false, false])
+  })
+
+  it('marks a key in warnKeys with is-overlap and a warning mark', () => {
+    fixture.componentRef.setInput('warnKeys', ['tab002'])
+    fixture.detectChanges()
+    expect(tableEl('2').classList).toContain('is-overlap')
+    expect(tableEl('2').querySelector('.floor-map__warn')).not.toBeNull()
+    expect(tableEl('1').classList).not.toContain('is-overlap')
+    expect(tableEl('1').querySelector('.floor-map__warn')).toBeNull()
   })
 
   it('dims the tables of another area', () => {

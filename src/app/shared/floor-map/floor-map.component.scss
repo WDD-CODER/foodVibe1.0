@@ -61,6 +61,10 @@
     border-style: dashed;
   }
 
+  &.is-overlap {
+    border-color: var(--color-danger);
+  }
+
   &--selected {
     z-index: 2;
     border-color: var(--color-primary);
@@ -144,4 +148,12 @@
     inline-size: 0.3rem;
     block-size: 0.3rem;
   }
+}
+
+.floor-map__warn {
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
+
+  color: var(--color-danger);
 }

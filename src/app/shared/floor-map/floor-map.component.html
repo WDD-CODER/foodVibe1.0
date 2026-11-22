@@ -22,6 +22,7 @@
         [class.floor-map__table--selected]="t.selected"
         [class.is-dimmed]="t.dimmed"
         [class.is-inactive]="t.inactive"
+        [class.is-overlap]="t.warn"
         [attr.data-testid]="'floor-table-' + t.table.number"
         [attr.data-key]="t.table.key"
         [attr.data-x]="t.table.x"
@@ -35,6 +36,9 @@
         (cdkDragEnded)="onDragEnded($event, t.table)"
       >
         <span class="floor-map__number">{{ t.table.number }}</span>
+        @if (t.warn) {
+          <lucide-icon class="floor-map__warn" name="alert-triangle" [size]="14" aria-hidden="true"></lucide-icon>
+        }
         @if (t.inactive) {
           <span class="floor-map__state">{{ 'fp_state_inactive' | translatePipe }}</span>
         }

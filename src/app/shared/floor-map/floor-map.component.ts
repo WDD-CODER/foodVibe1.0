@@ -10,6 +10,7 @@ import {
   output,
   viewChild
 } from '@angular/core'
+import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TranslationService } from '@services/translation.service'
 import type { FloorPlan, FloorTable } from '@models/floor-plan.model'
@@ -34,6 +35,7 @@ interface TableView {
   selected: boolean
   dimmed: boolean
   inactive: boolean
+  warn: boolean
 }
 
 /**
@@ -43,7 +45,7 @@ interface TableView {
 @Component({
   selector: 'app-floor-map',
   standalone: true,
-  imports: [CdkDrag, TranslatePipe],
+  imports: [CdkDrag, LucideAngularModule, TranslatePipe],
   templateUrl: './floor-map.component.html',
   styleUrl: './floor-map.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -59,6 +61,8 @@ export class FloorMapComponent {
   readonly selectedKeys = input<readonly string[]>([])
   readonly draggable = input(false)
   readonly dimOtherThanArea = input<string | null>(null)
+  /** Plan 684: keys of tables to mark with a warning (overlap). */
+  readonly warnKeys = input<readonly string[]>([])
 
   readonly tableTapped = output<string>()
   readonly tableMoved = output<{ key: string; x: number; y: number }>()
@@ -72,6 +76,7 @@ export class FloorMapComponent {
     const states = this.states()
     const selected = this.selectedKeys()
     const dim = this.dimOtherThanArea()
+    const warn = this.warnKeys()
     const label = this.translation.translate('fp_table_label')
     return [...this.plan().tables]
       .sort((a, b) => a.y - b.y || a.x - b.x)
@@ -88,7 +93,8 @@ export class FloorMapComponent {
             .replace('{max}', String(table.maxSeats)),
           selected: selected.includes(table.key),
           dimmed: dim !== null && table.areaKey !== dim,
-          inactive: !table.active || state === 'not_active'
+          inactive: !table.active || state === 'not_active',
+          warn: warn.includes(table.key)
         }
       })
   })
