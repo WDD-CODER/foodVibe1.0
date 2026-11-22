@@ -345,3 +345,38 @@ describe('plan 475: a unit rename reaches every place that uses it', () => {
     expect(allergen.body.messageKey).toBeUndefined();
   });
 });
+
+describe('plan 697: a logistics question that already exists for everyone is named', () => {
+  const q = { phase: 'intake', section: 'space', answerType: 'status' };
+
+  it('POST of an own logisticsItem with a shared question key is a 409 with logistics_question_shared_taken', async () => {
+    await testDb().collection('taxonomyTerms').insertOne(term('__master__', 'logisticsItem', 'יש מטבח במקום?', q));
+    const res = await auth(request(app).post(URL)).send({ kind: 'logisticsItem', key: 'יש מטבח במקום?', sortOrder: 0, ...q, phase: 'site_visit' });
+    expect(res.status).toBe(409);
+    expect(res.body).toMatchObject({ error: 'This term already exists for everyone', kind: 'logisticsItem', key: 'יש מטבח במקום?', messageKey: 'logistics_question_shared_taken' });
+    expect(await testDb().collection('taxonomyTerms').countDocuments({ userId: 'userA' })).toBe(0);
+  });
+
+  it('PUT renaming an own logisticsItem onto a shared question key carries the same messageKey', async () => {
+    await testDb().collection('taxonomyTerms').insertMany([
+      term('__master__', 'logisticsItem', 'יש מטבח במקום?', q),
+      term('userA', 'logisticsItem', 'חניה', q),
+    ]);
+    const res = await auth(request(app).put(`${URL}/logisticsItem:userA:חניה`)).send({ key: 'יש מטבח במקום?' });
+    expect(res.status).toBe(409);
+    expect(res.body.messageKey).toBe('logistics_question_shared_taken');
+  });
+
+  it('the same lookup names a unit POST onto a master unit; other kinds still carry no messageKey', async () => {
+    await testDb().collection('taxonomyTerms').insertMany([
+      term('__master__', 'unit', 'liter', { gramRate: 1000 }),
+      term('__master__', 'allergen', 'nuts'),
+    ]);
+    const unit = await auth(request(app).post(URL)).send({ kind: 'unit', key: 'liter', gramRate: 1000, sortOrder: 0 });
+    expect(unit.status).toBe(409);
+    expect(unit.body.messageKey).toBe('unit_name_taken');
+    const allergen = await auth(request(app).post(URL)).send({ kind: 'allergen', key: 'nuts', sortOrder: 0 });
+    expect(allergen.status).toBe(409);
+    expect(allergen.body.messageKey).toBeUndefined();
+  });
+});
