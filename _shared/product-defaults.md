@@ -127,6 +127,18 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - rule: Every screen changes layout at the same three widths: phone up to 767px, tablet up to 1023px, desktop from 1024px; no screen picks its own width.
 - applies when: screen
 - how: the shared breakpoint names at the top of src/styles.scss ($break-phone-max, $break-tablet-max), used in every @media; plan 656 makes them the only set
-- check: files: src/**/*.scss; trigger: @media[^{]*\(\s*m(?:in|ax)-width:\s*\d+(?:\.\d+)?(?:px|em|rem); evidence: (?!x)x; exclude: src/styles.scss
+- check: files: src/**/*.scss; trigger: @media[^{]*\(\s*m(?:in|ax)-width:\s*\d+(?:\.\d+)?(?:px|em|rem); evidence: (?!x)x
 - exceptions: (say where it does not apply)
-- turned on: the Human, 2026-11-21
+- turned on: the Human, 2026-11-22
+
+### anchored-popup
+
+- status: on
+- rule: Every small floating box (popover, tooltip, peek) is as wide as its content and opens beside what was tapped, above or below, on the side with room, never cut off by the screen edge, the way the nutrition box does.
+- applies when: custom
+- plan words: \b(?:popover|tooltip|peek|popup|pop-up|floating box|floating panel)s?\b
+- how: placeInViewport in src/app/core/utils/viewport-placement.util.ts, measured and re-placed on scroll and resize as in src/app/shared/nutrition-badge/nutrition-badge.component.ts; the box takes its content's width (max-content, capped by the screen)
+- check: card
+- card: any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-22
