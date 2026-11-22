@@ -85,7 +85,9 @@ with no model call.
    list of the previous tick's candidates is kept in memory; a restart only delays the sweep by one tick.
 3. **The token of the reminder's buttons is the booking's `publicToken`.** A tap is accepted only when the booking
    belongs to the conversation's business and client.
-4. **Confirm** stamps `guestConfirmedAt` once (a conditional update) and sends nothing. **Cancel** inside the
+4. **Confirm** stamps `guestConfirmedAt` once (a conditional update) and, on that first tap only, answers with the
+   existing template `booking_confirmed(name, date, time, partySize)` — a tap that gets no answer looks broken
+   (Dandan, 2026-11-22); a second tap sends nothing. **Cancel** inside the
    cutoff (`now < startAt − cancellationCutoffHours`) moves the booking to `cancelled` with `via: 'guest'` and sends
    the template `booking_cancelled`; after the cutoff, or when the booking is no longer `confirmed`, nothing
    changes and the conversation moves to `human` so a person answers.
@@ -134,8 +136,8 @@ and a hold with no booking frees its table — each exactly once, however many t
 - [auto] `server/test/scheduler.test.js` ("logs"): after a full `runDue` no captured log line contains a guest's
   name or phone digits; the `jobs.ran` line carries counts only.
 - [auto] `server/test/booking-buttons.test.js`: through `handleInbound` on the simulator transport, a
-  `CONFIRM:<token>` tap stamps `guestConfirmedAt`, a second tap leaves the first stamp, and neither stores an
-  outbound message; a `CANCEL:<token>` tap five hours before `startAt` (cutoff 3) moves the booking to `cancelled`
+  `CONFIRM:<token>` tap stamps `guestConfirmedAt` and stores one `booking_confirmed` template message, a second tap
+  leaves the first stamp and stores no further message; a `CANCEL:<token>` tap five hours before `startAt` (cutoff 3) moves the booking to `cancelled`
   with `via: 'guest'`, removes its holds and stores one `booking_cancelled` template message; the same tap two
   hours before `startAt` changes nothing and the conversation is `human`; a token of another client's booking
   changes nothing and the conversation is `human`; no tap calls the turn handler.
@@ -365,7 +367,8 @@ line or file this plan names was removed, renamed or rewritten).
 ## Out of Scope
 - The assistant, the inbox, the simulator screen, real WhatsApp and the owner alert (plans 677–683).
 - A reminder to a guest who never wrote to the business (needs a real number, plan 683).
-- A reply after Confirm, reminders the day before, and a second reminder.
+- A new template for the reply after Confirm (the existing "booking confirmed" one is used), reminders the day
+  before, and a second reminder.
 - Moving the two lazy sweeps (`purge-deleted`, `retention`) onto the scheduler: they stay as they are.
 - The text of the waiting-list hint in the browser (plan 677).
 
@@ -373,7 +376,7 @@ line or file this plan names was removed, renamed or rewritten).
 - none
 
 ## Execution Notes
-- behaviour: a guest's Confirm tap gets no reply; a Cancel inside the cutoff gets the "booking cancelled" template.
+- decision (Dandan, 2026-11-22): a guest's first Confirm tap is answered with the "booking confirmed" template; a Cancel inside the cutoff gets the "booking cancelled" template.
 - behaviour: a Cancel after the cutoff changes nothing and hands the conversation to a person.
 - behaviour: a booking whose client has no conversation is marked reminded and not retried.
 - behaviour: the orphan sweep waits for two ticks in a row instead of ten minutes, because a hold row carries no time.

@@ -190,7 +190,8 @@ line or file this plan names was removed, renamed or rewritten).
 ### Must Have (P0)
 - [ ] **The view.** `BookingsView` gains `'floor'`. The tab is offered only when `ModuleService.has('tables')`; without
   the module `?view=floor` falls back to `day` (the page behaves exactly as today). The default view without a `view`
-  parameter stays `day`. In the floor view the existing date bar (previous, date, next, today) stays and steps one
+  parameter is `floor` for a business with `tables` and stays `day` for every other business (Dandan, 2026-11-22);
+  one spec case for each. In the floor view the existing date bar (previous, date, next, today) stays and steps one
   day; the week view is unchanged.
 - [ ] **Data.** `BookingDataService.dayBoard(date)` reads `GET /api/v1/bookings/day` and returns
   `{ bookings, holds, unassigned, now } | null` (the field names of 668's answer; `now` is added by this plan when 668
@@ -308,13 +309,13 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
   (plan 673).
 - Any change to the day and week views, to the floor plan editor or to the table settings card.
 - A websocket or server push; drag and drop of bookings between tables.
-- Making `floor` the default view (the default stays `day`).
+- Remembering the last view a member used (the default is fixed: the room with `tables`, `day` without).
 
 ## Critical Questions
 - none
 
 ## Execution Notes
-- behaviour: the default view stays `day` also for a business with `tables` (simplest; a link or bookmark with
-  `?view=floor` opens the room).
+- decision (Dandan, 2026-11-22): `/bookings` opens on the room for a business with `tables`; `?view=day` and
+  `?view=week` still open those views.
 - behaviour: "reserved soon" means a confirmed booking that starts within 90 minutes (the same window as 672's
   "arriving next").
