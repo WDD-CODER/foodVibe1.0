@@ -132,14 +132,23 @@
       "nnn": "664",
       "title": "Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal",
       "branch": "feat/664-floor-plan-on-the",
-      "state": "building",
-      "round": 0,
+      "state": "merged",
+      "round": 1,
       "tier": "build",
       "models": {
         "builder": {
           "model": "sonnet",
           "tier": "build",
           "at": "2026-11-22T15:37:49.936Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T16:23:11.535Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-22T16:52:03.637Z"
         }
       },
       "humanItems": [],
@@ -178,6 +187,51 @@
           "at": "2026-11-22T15:37:49.939Z",
           "state": "building",
           "round": 0
+        },
+        {
+          "at": "2026-11-22T16:05:00.660Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T16:23:10.492Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T16:23:10.899Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T16:23:11.539Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T16:41:39.269Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T16:51:53.653Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T16:52:03.639Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T16:52:15.162Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-22T16:53:29.183Z",
+          "state": "merged",
+          "round": 1
         }
       ],
       "earlier": [
@@ -238,7 +292,44 @@
       "tiers": [
         "build"
       ],
-      "freeDiskGb": 16.9
+      "freeDiskGb": 14.4,
+      "sha": "2e8dcdeffce783d438ced5dc37d259b5a2a6622a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1626.9,
+          "tokens": {
+            "input": 2242832,
+            "output": 31742
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 1104.4,
+          "tokens": {
+            "input": 135383,
+            "output": 1540
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.2,
+          "tokens": {
+            "input": 51759,
+            "output": 738
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:server"
+      ],
+      "checkedHead": "9d46e466fc7bb836c5cde973fdabc861a37fcf55"
     }
   },
   "notes": [
@@ -290,12 +381,22 @@
       "at": "2026-11-22T15:37:49.080Z",
       "plan": "664",
       "text": "the folder foodVibe1.0-orch-rs-engine-664 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T16:04:57.122Z",
+      "plan": "664",
+      "text": "builder left undone (round 0): ci-scope-check --checkout-branch: skipped by the script ('branch \"\" is not feat/NNN-*'). The branch name was empty in this checkout, so it did not run.; scope-check --diff=origin/orch/rs-engine: I did not run it. The kit copy of the script was not run by name; kit-checks passed."
+    },
+    {
+      "at": "2026-11-22T16:41:41.414Z",
+      "plan": "664",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 664"
     }
   ],
   "attempts": 3,
   "phase": "finished",
-  "freeDiskGb": 16.9,
-  "updatedAt": "2026-11-22T15:43:19.599Z",
+  "freeDiskGb": 14.4,
+  "updatedAt": "2026-11-22T16:59:52.100Z",
   "stops": [
     {
       "at": "2026-11-22T15:27:05.218Z",
@@ -373,9 +474,61 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "664",
+      "type": "behaviour",
+      "text": "behaviour: a PUT with a valid body but an unknown key inside a table or area is refused 400 'Validation failed', because the schema's strict objects reject it; unknown top-level keys are ignored — reverse: loosen the schema in plan 662's file",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "664",
+      "type": "behaviour",
+      "text": "behaviour: the service logs floor_plan.save_failed (warn for a 4xx, error otherwise, status only) on a refused save; the plan named only floor_plan.load_failed — reverse: delete that log call in floor-plan-data.service.ts",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "664",
+      "type": "behaviour",
+      "text": "behaviour: ensureLoaded shares one in-flight load and a failed load can be asked again — reverse: cache the failure",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "664",
+      "type": "seen",
+      "text": "seen: server/test/ai-logistics-extract.test.js:127 — the aiUsage row is sometimes not yet written when the test reads it under full-suite load (1 failure in 2 runs). Cause not confirmed, and the test and its route are outside plan 664.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-22T15:43:19.594Z",
+  "finishedAt": "2026-11-22T16:59:52.098Z",
   "finalGate": {
     "ok": true,
     "command": null,

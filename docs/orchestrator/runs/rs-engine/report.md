@@ -1,8 +1,8 @@
 # Orchestrator run rs-engine
 
-Run branch: `orch/rs-engine` (from `origin/main` at cbed77e) · started 2026-11-22T13:32:13.418Z · finished 2026-11-22T15:43:19.594Z
-Result: 1 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
-`main` untouched: NO — origin/main is 7c8fccd.
+Run branch: `orch/rs-engine` (from `origin/main` at cbed77e) · started 2026-11-22T13:32:13.418Z · finished 2026-11-22T16:59:52.098Z
+Result: 2 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
+`main` untouched: NO — origin/main is b6d0184.
 
 ## Stops
 
@@ -16,13 +16,14 @@ Final gate: ok (attempt 1)
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 663 The table engine: slots, turn, candidates, assign and alternatives — pure, shared, tested | merged | 1 | build | e5ce3ef |  |
-| 664 Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal | building | 0 | build |  |  |
+| 664 Floor plan on the server and in the browser's data layer: save with checks, the in-use refusal | merged | 1 | build | 2e8dcde |  |
 
 ## Scorecard
 
-- Wall: 125.6 min · gate passes: 1 · asks raised mid-run: 0
-- Minutes per state (summed over plans): building 40.9 · fixing 35.2 · gate 32.2 · parked 6.2 · merging 2.1 · checking 0.8 · queued 0.1
-- Checks left out (cached, skipped, not run, same tree): 0, about 0 min saved
+- Wall: 201.3 min · gate passes: 3 · asks raised mid-run: 0
+- Minutes per state (summed over plans): building 68.1 · gate 60.6 · fixing 53.6 · parked 6.2 · merging 3.3 · checking 1.2 · queued 0.1
+- Checks left out (cached, skipped, not run, same tree): 1, about 3.2 min saved
+  - 664: pnpm run test:ci — 193.8 s
 
 ## App errors since the run started
 
@@ -44,6 +45,10 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - D3 · 663 · none · seen: node scripts/reuse-lint.mjs --check-registry docs/brain/component-families.md:324 and :609 — registry paths `stock-count/spoken-unit.ts` and `units/to-base` are missing
 - D4 · 663 · none · seen: the full `pnpm run test:server` takes about 1388s on this machine because each of the 150 test files starts its own worker (vitest reports about 80s saved with isolate off); a run with a 590s limit will time out
 - D5 · 664 · none · seen: the worktree folder foodVibe1.0-orch-rs-engine-664 is a partial copy of the repo. It has no .git and no docs/ or AGENTS.md, and the main checkout's worktree list does not include it. Fix: recreate it with 'git worktree add' on feat/664-floor-plan-on-the from orch/rs-engine.
+- D6 · 664 · none · behaviour: a PUT with a valid body but an unknown key inside a table or area is refused 400 'Validation failed', because the schema's strict objects reject it; unknown top-level keys are ignored — reverse: loosen the schema in plan 662's file
+- D7 · 664 · none · behaviour: the service logs floor_plan.save_failed (warn for a 4xx, error otherwise, status only) on a refused save; the plan named only floor_plan.load_failed — reverse: delete that log call in floor-plan-data.service.ts
+- D8 · 664 · none · behaviour: ensureLoaded shares one in-flight load and a failed load can be asked again — reverse: cache the failure
+- D9 · 664 · none · seen: server/test/ai-logistics-extract.test.js:127 — the aiUsage row is sometimes not yet written when the test reads it under full-suite load (1 failure in 2 runs). Cause not confirmed, and the test and its route are outside plan 664.
 
 ## Run notes
 
@@ -57,6 +62,8 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 664: parked: no folder — nothing to save
 - FINAL: same tree as plan 663's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch
 - 664: the folder foodVibe1.0-orch-rs-engine-664 was installed (root, scripts, server)
+- 664: builder left undone (round 0): ci-scope-check --checkout-branch: skipped by the script ('branch "" is not feat/NNN-*'). The branch name was empty in this checkout, so it did not run.; scope-check --diff=origin/orch/rs-engine: I did not run it. The kit copy of the script was not run by name; kit-checks passed.
+- 664: GATE: cached pnpm run test:ci — passed on the same files in plan 664
 
 ## Models per agent
 
@@ -64,6 +71,8 @@ triage: shadow · agreement (last 50): 56% · collapsed: 0 · ask: 0 · follow-u
 - 663 builder fix: sonnet
 - 663 reviewer: sonnet
 - 664 builder: sonnet
+- 664 builder fix: sonnet
+- 664 reviewer: sonnet
 
 ## What only the Human can do
 
@@ -78,4 +87,4 @@ gh pr create --base main --head orch/rs-engine --title "Orchestrator run rs-engi
 
 Context added by learning: 3.8k chars across 6 roles
 
-Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 0.5 · parked 0 → 0 → 0
+Trend (last 3 runs): ✗ per plan 0 → 0 → - · fix rounds per plan 0 → 0 → 1 · parked 0 → 0 → 0
