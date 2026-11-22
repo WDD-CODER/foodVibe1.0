@@ -285,6 +285,23 @@ export function runShipGate({ commands, run = spawnGateCommand, log = console.lo
   return { exit: 0, results }
 }
 
+/**
+ * After a passing gate: its passing commands, recorded under the tree the commit will have (HEAD, the tracked changes,
+ * the `extra` new files — the session manifest) in `<git common dir>/kit-gate-trees.json`, which local CI reads. A
+ * failing gate records nothing. Returns { tree, passed } or null.
+ */
+export async function recordShipGatePasses({ root = repoRoot, gate, extra = [] }) {
+  if (!gate || gate.exit !== 0) return null
+  const { worktreeCommitTree, recordTreePasses } = await import('./lib/plan-gate.mjs')
+  const { shipTreePassesPath } = await import('./lib/local-ci.mjs')
+  const tree = worktreeCommitTree(root, extra)
+  if (!tree) return null
+  const passed = gate.results.filter((r) => r.status === 'pass').map((r) => r.command)
+  if (!passed.length) return null
+  recordTreePasses(shipTreePassesPath(root), { tree, plan: 'the ship gate', passed })
+  return { tree, passed }
+}
+
 // ---- Phase 2 end: the job's minutes line (--score) — written by code, never by the model ---------------------------
 const GATE_SECONDS_PATH = join(repoRoot, '.claude', 'sessions', '.ship-gate-seconds')
 
@@ -515,6 +532,12 @@ if (!isMain) {
   } catch (e) {
     console.log(`GATE_RECEIPT: not written (${e.message})`)
   }
+  // Local CI on the PR does not run these again when the pushed commit has exactly this tree.
+  let branchNow = ''
+  try { branchNow = execFileSync('git', ['branch', '--show-current'], { cwd: repoRoot, encoding: 'utf8' }).trim() } catch { /* detached */ }
+  let rec = null
+  try { rec = await recordShipGatePasses({ gate, extra: [...(getManifestFiles(branchNow) ?? [])] }) } catch { /* no record: local CI runs them */ }
+  if (rec) console.log(`GATE_TREE: ${rec.passed.length} passing command(s) recorded for tree ${rec.tree.slice(0, 12)} (local CI reuses them on that exact tree)`)
   process.exitCode = gate.exit
 } else if (scoreMode) {
   let gateSeconds = null

@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url'
 import { listSlots } from './lib/slot.mjs'
 import { samePath } from './lib/orch-folders.mjs'
 import { stopSlotServers } from './lib/slot-procs.mjs'
-import { sweep, removeWorktree } from './worktree-clean.mjs'
+import { sweep, removeWorktree, workChanges } from './worktree-clean.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
@@ -70,12 +70,22 @@ function isMergedIntoOriginMain(branch) {
   }
 }
 
-// Server logs under .claude/ are runtime noise, not work.
+function isCommitInOriginMain(commit) {
+  try {
+    execFileSync('git', ['merge-base', '--is-ancestor', commit, 'origin/main'], { cwd: repoRoot, stdio: 'ignore' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+// The uncommitted work in a folder (worktree-clean.mjs workChanges: server logs and untracked scratch such as e2e/tmp/
+// probe specs and screens/ left out), as paths.
+function workIn(path) {
+  return workChanges(git(['status', '--porcelain', '--untracked-files=all'], path)).map((l) => l.slice(3))
+}
 function isClean(path) {
-  return git(['status', '--porcelain'], path)
-    .split(/\r?\n/)
-    .filter((l) => l.trim() && !/^\?\? \.claude\/[^/]+\.log$/.test(l.trim()))
-    .length === 0
+  return workIn(path).length === 0
 }
 
 // The runs a live orchestrator run still works on (by run name): its merge folder is never removed.
@@ -106,6 +116,12 @@ function freeMergeFolders() {
     else if (cur && line.startsWith('locked')) cur.locked = true
   }
   if (cur) folders.push(cur)
+  // A detached folder (cleanup steps can leave one) is judged by its HEAD commit instead of a branch.
+  for (const f of folders) if (!f.branch) {
+    try {
+      f.head = git(['rev-parse', 'HEAD'], f.path)
+    } catch { /* unreadable: left alone below */ }
+  }
   const mine = folders.filter((f) => norm(f.path).split('/').pop().startsWith(prefix) && norm(f.path) !== norm(repoRoot))
   if (!mine.length) return
   const live = liveRunNames()
@@ -115,33 +131,37 @@ function freeMergeFolders() {
       console.log(`merge folder ${f.path}: left alone — run ${run} is live`)
       continue
     }
-    if (!f.branch) {
-      console.log(`merge folder ${f.path}: left alone — it is not on a run branch`)
+    if (!f.branch && !f.head) {
+      console.log(`merge folder ${f.path}: left alone — it is not on a run branch and its HEAD cannot be read`)
       continue
     }
     if (f.locked) {
       console.log(`merge folder ${f.path}: left alone — git has it locked`)
       continue
     }
-    let clean = false
+    let work = null
     try {
-      clean = isClean(f.path)
+      work = workIn(f.path)
     } catch (e) {
       console.log(`merge folder ${f.path}: left alone — cannot read its status (${String(e.message).split('\n')[0]})`)
       continue
     }
-    if (!clean) {
-      console.log(`merge folder ${f.path}: left alone — it has uncommitted files`)
+    if (work.length) {
+      console.log(`merge folder ${f.path}: left alone — it has uncommitted files: ${work.slice(0, 3).join(', ')}${work.length > 3 ? ` and ${work.length - 3} more` : ''}`)
       continue
     }
-    if (!isMergedIntoOriginMain(f.branch)) {
+    if (f.branch && !isMergedIntoOriginMain(f.branch)) {
       console.log(`merge folder ${f.path}: left alone — run branch ${f.branch} is not merged into origin/main`)
+      continue
+    }
+    if (!f.branch && !isCommitInOriginMain(f.head)) {
+      console.log(`merge folder ${f.path}: left alone — detached at ${f.head.slice(0, 8)}, which is not in origin/main`)
       continue
     }
     // git alone failed on Windows ("Directory not empty" on node_modules) and left 1-2 GB behind: retries, then a
     // scripted delete of the clean folder.
     const r = removeWorktree(repoRoot, f.path)
-    if (r.ok) console.log(`merge folder ${f.path}: removed (run branch ${f.branch} merged; local branch kept)${r.note}`)
+    if (r.ok) console.log(`merge folder ${f.path}: removed (${f.branch ? `run branch ${f.branch} merged; local branch kept` : `detached at ${f.head.slice(0, 8)}, in origin/main`})${r.note}`)
     else console.log(`merge folder ${f.path}: left alone — ${r.note}`)
   }
 }

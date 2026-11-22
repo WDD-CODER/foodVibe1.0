@@ -18,8 +18,9 @@
  * Commands are run without a shell: `node …` with this node, `npm|pnpm run <script>` with the package manager (through
  * the shell on Windows only, where it is a .cmd shim; a script name is letters, digits and `:_-`).
  */
-import { mkdirSync, writeFileSync, readFileSync, existsSync, appendFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync, readFileSync, existsSync, appendFileSync, rmSync } from 'node:fs'
 import { join, dirname, isAbsolute } from 'node:path'
+import { tmpdir } from 'node:os'
 import { spawn, spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { extractScopeGlobs, isSiblingTest } from './plan-scope.mjs'
@@ -178,6 +179,25 @@ export const TREE_PASSES_FILE = 'gate-trees.json'
 export function treeOf(folder, rev = 'HEAD') {
   const r = spawnSync('git', ['rev-parse', `${rev || 'HEAD'}^{tree}`], { cwd: folder, encoding: 'utf8' })
   return r.status === 0 ? String(r.stdout).trim() : null
+}
+/**
+ * The tree a commit of this folder's work will have, without touching its index: a temporary index read from HEAD,
+ * then the tracked changes (`git add -u`) and the untracked `extra` files that exist. null when git refuses.
+ */
+export function worktreeCommitTree(folder, extra = []) {
+  const idx = join(tmpdir(), `kit-tree-${process.pid}-${Date.now()}.idx`)
+  const env = { ...process.env, GIT_INDEX_FILE: idx }
+  const run = (...a) => spawnSync('git', a, { cwd: folder, env, encoding: 'utf8', windowsHide: true })
+  try {
+    if (run('read-tree', 'HEAD').status !== 0) return null
+    if (run('add', '-u').status !== 0) return null
+    const files = extra.filter((f) => f && existsSync(join(folder, f)))
+    if (files.length && run('add', '--', ...files).status !== 0) return null
+    const w = run('write-tree')
+    return w.status === 0 ? String(w.stdout).trim() || null : null
+  } finally {
+    try { rmSync(idx, { force: true }) } catch { /* a temp file left behind costs nothing */ }
+  }
 }
 export function readTreePasses(file) {
   try { return JSON.parse(readFileSync(file, 'utf8')) ?? {} } catch { return {} }

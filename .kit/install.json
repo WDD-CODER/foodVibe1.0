@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.8.1"
+    "version": "3.9.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.8.1",
-  "commit": "0fd474d79f2e6555810ecaba2adc69191c595348",
+  "ref": "v3.9.0",
+  "commit": "b104a9dfee3ddba9af286862889e8f0a61d30e0d",
   "packs": [
     "angular",
     "node-express"
@@ -118,7 +118,7 @@
       "source": "core/.claude/commands/orchestrate.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "a6b4e32c97595772cb055ee866f9a6b8d2204cfdc05d6017fe498c0205498256",
+      "sha256": "3e8e76b2be22fffbcad4273b3220ee321b03ab8a56542c8eb8ac11c7df15da0f",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
@@ -537,6 +537,11 @@
       "kind": "seed",
       "source": "templates/docs/project/tech-stack.md"
     },
+    "docs/agent/adopt-check.md": {
+      "sha256": "0c097d8bfcf29ed19718ebf54aa023b3e63e0188bab6cbaf627c9d559fcea0bd",
+      "kind": "managed",
+      "source": "core/docs/agent/adopt-check.md"
+    },
     "docs/agent/agent-evals.md": {
       "sha256": "0bc5cb3406f8a289e0930adeda09b78f4e8b7dd004d71c24523575a246e253a1",
       "kind": "managed",
@@ -622,8 +627,18 @@
       "kind": "managed",
       "source": "core/docs/agent/kit-lessons/verify.md"
     },
+    "docs/agent/known-good-angular.md": {
+      "sha256": "97b332fb7f80a9d189d473acc6f3a25d8b8bd4fab759bb2f986973f62d0578f0",
+      "kind": "managed",
+      "source": "packs/angular/docs/agent/known-good-angular.md"
+    },
+    "docs/agent/known-good-node-express.md": {
+      "sha256": "9453b384e2e5dbf1d2444055928123d899b31ca26759e68cd2d228d7d353de22",
+      "kind": "managed",
+      "source": "packs/node-express/docs/agent/known-good-node-express.md"
+    },
     "docs/agent/local-ci.md": {
-      "sha256": "d741041627e18d2648b669e35c283c83d560d5cf54c7c8f7164ec5c79dd4d658",
+      "sha256": "39dfd22ee041a0716e6c50890935da8e819187fcb141dda5e8e7b3df6f58c790",
       "kind": "managed",
       "source": "core/docs/agent/local-ci.md"
     },
@@ -633,7 +648,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "0cf2e8811e3553a134e85c08ed54cda429b3240241b98b7163312193c07f6b6c",
+      "sha256": "4f265ffa190e12f945635be9ca83543695009b0f6b544e2ff859df6ad559cd5b",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -658,7 +673,7 @@
       "source": "core/docs/agent/standards-git.md"
     },
     "docs/agent/standards-reuse.md": {
-      "sha256": "06c301e8a2f1f73fcf540b8310223991e71071d7eda60c0c4ba021fb97e505db",
+      "sha256": "b8e1fe5edfb830e8be5056685cf1c8816cbe9c210c2bbe6b14cf09e077ce05eb",
       "kind": "managed",
       "source": "core/docs/agent/standards-reuse.md"
     },
@@ -912,6 +927,11 @@
       "kind": "managed",
       "source": "packs/angular/knip.json"
     },
+    "scripts/adopt-facts.mjs": {
+      "sha256": "a3aca7b3c3c826f430731e95ca8159e40e81d79bb12fc3f3f0c9f1bfa40eedaa",
+      "kind": "managed",
+      "source": "core/scripts/adopt-facts.mjs"
+    },
     "scripts/brain-capture-comment.mjs": {
       "sha256": "f2fa5d887f9b7b2d7d58d64956d54c61fd4503d067a0661449fce7a3cf933dce",
       "kind": "managed",
@@ -953,7 +973,7 @@
       "source": "core/scripts/decision-log.mjs"
     },
     "scripts/free-merged-slots.mjs": {
-      "sha256": "12a312fff8ea6a665825db54b5240cee2b55cf79124cbc981280a7ddae5f2c42",
+      "sha256": "5d7ec0ed24b1de00d1fec43be609078994229c6fb8478141f4c5851189e26183",
       "kind": "managed",
       "source": "core/scripts/free-merged-slots.mjs"
     },
@@ -981,6 +1001,11 @@
       "sha256": "3bb816afc3c1d82a814dcaf55887741274f003b8a18a4e5abaf7950dad583cac",
       "kind": "managed",
       "source": "core/scripts/kit-feedback.mjs"
+    },
+    "scripts/lib/adopt-check.mjs": {
+      "sha256": "f1f0a9433ef109db4874287051cf195ca288e595aca95f44ad93aca3a532e0fb",
+      "kind": "managed",
+      "source": "core/scripts/lib/adopt-check.mjs"
     },
     "scripts/lib/brain-doc.mjs": {
       "sha256": "d4ff088976d0cfcec791497f3b0cca46a8acfd4e45f156fcb8fa5140f408fc8f",
@@ -1073,7 +1098,7 @@
       "source": "core/scripts/lib/invariants.mjs"
     },
     "scripts/lib/local-ci.mjs": {
-      "sha256": "7caeb57f63944ffcd689361b678c10e2deca0a4516b1f2451266b8b49f17230d",
+      "sha256": "27b23a9778fa8c036f9d6c25afb8feb35ed05284c68b5b5d4d660780c2373c23",
       "kind": "managed",
       "source": "core/scripts/lib/local-ci.mjs"
     },
@@ -1108,7 +1133,7 @@
       "source": "core/scripts/lib/plan-deps.mjs"
     },
     "scripts/lib/plan-gate.mjs": {
-      "sha256": "e718b350307f164b08f2947eeac459fb98c7481510370c010e5a7dc55b8a1aa8",
+      "sha256": "98196683d122250a0a8d32d70277caa69a3f7342e6653185565f5bec970cf837",
       "kind": "managed",
       "source": "core/scripts/lib/plan-gate.mjs"
     },
@@ -1223,7 +1248,7 @@
       "source": "core/scripts/lib/todo-parse.mjs"
     },
     "scripts/local-ci.mjs": {
-      "sha256": "b9570ab646d9428906c4388f2d2aaf457947357b7bab84c4cd5274ebd69537c3",
+      "sha256": "d749efd9bb466a1f23764b692e11b356b57a0f8bb118cf4e1c1216c42adf6d88",
       "kind": "managed",
       "source": "core/scripts/local-ci.mjs"
     },
@@ -1348,7 +1373,7 @@
       "source": "core/scripts/run-supervisor.mjs"
     },
     "scripts/scope-check.mjs": {
-      "sha256": "dae8da4096c59d425a4a99c8d23ca5a4fa1bb9cd58495e4413c2594ecd1ed046",
+      "sha256": "5672ee161fc9f71d2a6b17d7a1d5cfa27593a2bb5a92c8228bd64538214fdaec",
       "kind": "managed",
       "source": "core/scripts/scope-check.mjs"
     },
@@ -1393,7 +1418,7 @@
       "source": "core/scripts/session-startup.sh"
     },
     "scripts/ship-prep.mjs": {
-      "sha256": "09a2ce4c9b7676074b1d5ef5298c3821fa741585ac0b0ee81fa7f83f2542a88d",
+      "sha256": "664b85960ab99618bd9d1cc55da3e98e0e3fa471a284e46ead2998ab73e0eddf",
       "kind": "managed",
       "source": "core/scripts/ship-prep.mjs"
     },
@@ -1488,7 +1513,7 @@
       "source": "core/scripts/todo-query.mjs"
     },
     "scripts/worktree-clean.mjs": {
-      "sha256": "2862b270d7d80e0b4f76b0afe7a267f1bc6514958bb25fa04679b934888dc56f",
+      "sha256": "50373dc861838cc6e354a2dc3c4222b3201856124fae2d541dcbd10ebdb6328b",
       "kind": "managed",
       "source": "core/scripts/worktree-clean.mjs"
     }
@@ -1609,7 +1634,7 @@
     "docs/brain/gotchas/angular.md": "ef209d9559366858f53c613cbb627982f8c71f35191bba7aba8230104397ecab",
     "docs/brain/gotchas/backend.md": "62d1b6f44b6b01bab44f9191aa6d7c205c6613e2908825ff7754a6f1f0e64e33",
     "docs/brain/gotchas/ci.md": "80b56165158d3bfeac1f25b75f5b983001be9f2460270922f028330b6565603b",
-    "docs/brain/gotchas/git-workflow.md": "c4a6565a06cade626d809166b4560e93900bb3b120560ca23fef468f1c140f60",
+    "docs/brain/gotchas/git-workflow.md": "c2e7b86997828a4883066e60397b563c1c8bc24bfd04ca9c598e41678b573a28",
     "docs/brain/how-it-works.md": "4a4819e63c1a610a2ba9158bcd6d04f340bce2d32be7cda836958574d32f26c9",
     "docs/brain/index.md": "229004a1d421ad7266972026930f8ac1be18b855c4d112adea32119b7d2373a1",
     "docs/brain/invariants.md": "946a07c00eb8eb6e9113d8b1ec04fd4cd402d7175e4f483ea99b34054f383b0f",
