@@ -191,3 +191,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [x] A8: Prove the whole flow with tests, including the ownership invariant — the switch, refresh, grant and list cases; the acting, usage, write-limit and log cases; the new INV-1 tests
 - [x] A9: Record the new service, collection and routes where the next developer looks — a row for the access service in the server map, the businessAccess collection and the five routes in the backend standards, the service on the server-auth family line
 - [ ] A10: Run every check and hand Dandan the one reading check — the Done-when commands in order; then the human card for the ADR and INV-1 text
+
+### Plan 658 — Stock count: unit names in Hebrew, the base amount opens beside its row on every screen
+- [ ] A1: Show every unit on the count by the name the cook gave it, not its English key
+- [ ] A2: Open the base amount right beside its row, as wide as its text, on every screen
+- [ ] A3: Let the shared row checkbox take its size from the page instead of being forced from outside
+- [ ] A4: Prove it — the Done-when commands in order, registry and breadcrumbs updated
