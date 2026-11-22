@@ -36,7 +36,12 @@ Plan numbers 543–568 are assigned below (renumbered +2 on 2026-11-10: 541 and 
 | 16 | 558 | FD-12 | Privacy and go-live docs — `erase-client.js`, retention rules, `security-go-live.md` section, pilot terms draft (Hebrew), `render.yaml` env docs | wt-1 | 550 |
 | 17 | 559 | FD-09 | Front desk numbers for the owner and the platform admin (form + manual channels); adds its block to the 568 report | wt-3 | 550, 556, 568 |
 
-### Wave 1b — infra-gated (Q4–Q6 + Meta business verification). Mapped now, drafted after the gate answers.
+### Wave 1b — replaced by the Restaurant program (2026-11-22)
+
+Rows 18–23 (560–565) are **not drafted and their numbers are retired**. Their work is planned in
+`docs/restaurant/restaurant-map.md`: 560 → 675 and 683, 561 → 677, 562 → 679, 680 and 681, 563 → 681, 564 → 683;
+565 (conversation numbers on the dashboard) waits in that brief's Part 6 "Later". The table parts of Wave 2
+(`reference-bookings-engine.md`) are brought forward there as plans 662–674. The rows below are kept for history.
 
 | Map# | NNN | Spec | Title | Lane/slot | Depends on |
 |---|---|---|---|---|---|
