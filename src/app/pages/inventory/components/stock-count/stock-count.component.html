@@ -233,10 +233,13 @@
                   type="button"
                   class="c-icon-btn stock-count__base-btn"
                   data-testid="stk-base-btn"
-                  [attr.title]="baseLabel_(row.base)"
                   [attr.aria-label]="baseLabel_(row.base)"
                   [attr.aria-expanded]="basePopover_()?.id === row.product._id"
                   (click)="toggleBase_(row, $event)"
+                  (mouseenter)="hoverBase_(row, $event)"
+                  (focus)="hoverBase_(row, $event)"
+                  (mouseleave)="leaveBase_()"
+                  (blur)="leaveBase_()"
                 >
                   <lucide-icon name="info" [size]="16"></lucide-icon>
                 </button>
