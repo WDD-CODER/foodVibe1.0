@@ -23,6 +23,18 @@ export const venueSchema = z.strictObject({
   operatingHours: z.array(operatingHoursRowSchema).optional(),
   active: z.boolean().optional(),
   photoUrl: z.string().optional(),
+  /** Plan 373: links to tour videos (YouTube, Drive, WhatsApp, any URL) with the visit date (epoch ms) and a note. */
+  videos: z.array(z.strictObject({
+    url: z.string(),
+    visitDate: z.number().optional(),
+    note: z.string().optional()
+  })).optional(),
+  /** Plan 373: the spot saved with "use my current location"; accuracy in metres. */
+  location: z.strictObject({
+    lat: z.number(),
+    lng: z.number(),
+    accuracy: z.number().optional()
+  }).optional(),
   _masterId: z.string().optional(),
   _userModified: z.boolean().optional()
 })
