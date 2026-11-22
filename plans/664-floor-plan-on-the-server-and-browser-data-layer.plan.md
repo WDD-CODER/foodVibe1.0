@@ -120,6 +120,8 @@ src/app/core/services/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/restaurant/restaurant-map.md
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
