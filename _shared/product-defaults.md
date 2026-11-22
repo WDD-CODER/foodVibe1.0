@@ -56,23 +56,25 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 
 ### empty-state-on-list
 
-- status: proposed
+- status: on
 - rule: A list with no items shows a short message that says what is missing, never a blank area.
 - applies when: list
 - how: the shared empty-state piece
 - check: card
 - card: the list's page with no items · open the page · a message says the list is empty
 - exceptions: a list that is never empty; declare `exception — why: <one line>`
+- turned on: the Human, 2026-11-22
 
 ### loading-and-error-states
 
-- status: proposed
+- status: on
 - rule: A screen that loads data shows that it is loading, and shows a readable error with a retry when loading fails.
 - applies when: screen
 - how: the shared loading and error pieces
 - check: card
 - card: the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page
 - exceptions: a static screen with no data request; declare `exception — why: <one line>`
+- turned on: the Human, 2026-11-22
 
 ### hints-in-tooltips
 
