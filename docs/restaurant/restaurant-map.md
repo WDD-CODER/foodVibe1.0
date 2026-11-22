@@ -73,9 +73,15 @@ Size: S / M / L (one Worker session each; an L may be split at drafting). Tier: 
 
 ## Runs
 
-`rs-0` = R0 · `rs-engine` = R1, R2 · `rs-floor-ui` = R3, R4, R5 · `rs-book-srv` = R6, R7 ·
-`rs-book-ui` = R8, R9, R10, R11 · `rs-demo` = R12 · `rs-conv-srv` = R13, R14 · `rs-conv-ui` = R15, R16 ·
-`rs-ai` = R17, R18, R19, R20 · `rs-wa` = R21.
+By plan number, after the Step 2 splits (R3 = 665 + 684, R6 = 668 + 685, R9 = 671 + 686):
+`rs-0` = 662 · `rs-engine` = 663, 664 · `rs-floor-ui` = 665, 684, 666, 667 · `rs-book-srv` = 668, 685, 669 ·
+`rs-book-ui` = 670, 671, 686, 672, 673 · `rs-demo` = 674 · `rs-conv-srv` = 675, 676 · `rs-conv-ui` = 677, 678 ·
+`rs-ai` = 679, 680, 681, 682 · `rs-wa` = 683.
+
+Dependencies changed in Step 2: 667 also needs 664 (both edit `server/routes/floor-plan.js`); 671 also needs 667
+(the mode switch calls its route) and 685 (the browser booking calls); 673 also needs 672 and 686; 674 needs 673.
+667 and 670 both edit `package.json` and `pnpm-lock.yaml` (`qrcode`, `ics`): never in two live runs, and never
+beside open plan 542.
 
 Side by side: `rs-floor-ui` with `rs-book-srv` (screens against server); `rs-conv-srv` with `rs-book-ui`.
 One at a time: every screen run. Confirm every grouping with `node scripts/plan-order.mjs` and the `/orchestrate`
@@ -646,6 +652,42 @@ draft knowledge item. Done-when seeds: `[ui]` a suggestion is edited and sent.
 `docs/security-go-live.md`. Must cover: RS-12; HMAC accept and reject tests; nothing changes for a business on the
 simulator; the owner alert with R-17. Done-when seeds: `[auto]` a bad signature gets 401; `[human]` Dandan writes
 from his private phone to the test number, books a table and gets the confirmation.
+
+## Contract extensions (Step 2 — found while drafting plans 662–674, 2026-11-22)
+
+Each line is already written into the plan that owns it; where a line and a Contract above disagree, the line wins.
+
+- 662 · C-FLOOR · the key pattern `^[a-z0-9]{6,12}$` covers table, area and join keys, `areaKey` and `tableKeys`.
+- 662 · C-REGISTRY-R · the browser's API path map (`http-storage.adapter.ts`) is not a registry of this program:
+  each plan appends its own entry (664 `floorPlan`, 673 `waitlist`, 675 `conversations` and `sim`).
+- 663 · C-ENGINE · adds exported `jerusalemDateTime(epoch)` to `local-time.ts`; `openRangesOf` returns
+  `{ open, close, overnight }[]`; a slot belongs to the calendar date its start falls on, and a closed date closes
+  its whole service day; the asked area is a preference, never a filter; `alternatives` looks at most 14 dates ahead.
+- 664 · C-FLOOR · cross-field checks live in the pure `shared/schemas/front-desk/floor-plan-check.ts`
+  (`checkFloorPlan`, nine issue codes; `emptyFloorPlan(names)` → a 24 × 16 grid, area names are plain text passed by
+  the caller); 400 `BAD_FLOOR_PLAN { issues }`; 409 `TABLE_IN_USE` rows carry `_id, date, time, partySize,
+  tableKeys` only; 409 `PLAN_CHANGED` when two first saves collide; a booking on a join blocks the save when no
+  join with the same table set remains; two later saves: the last one wins.
+- 667 · C-TSERVICE · `PUT /floor-plan/confirm-mode` answers `{ confirmMode }`, stores the whole settings object
+  over the defaults, and answers 404 `NO_PROFILE`; the browser call is `FrontDeskProfileDataService.setConfirmMode`.
+- 668 · C-HOLD · a cell is always 15 minutes (never `slotMinutes`, so a later change of slot length cannot hide
+  old holds); `move()` beside `claim()`; `release` and `holdsOf` take `businessId`; one booking service,
+  `server/services/table-bookings.js` (`reserveTable`, `bookTable`, `countBooking`, `createWalkIn`), is the only
+  caller of `claim`.
+- 668 · C-BOOK2 · `GET /day` returns `holds`, `unassigned` and `now` (server epoch ms); `PUT /:id/when` only for a
+  `confirmed` booking, `PUT /:id/tables` for `confirmed` or `seated`; any member picks the table of a walk-in or a
+  move, only the owner on a phone booking, a change of time or an approve; `override` is set when the chosen set is
+  not an engine candidate.
+- 669 · C-PUBAVAIL · `GET /:slug` gains `tableBooking: { areas: [{ key, name }] }`; `publicRequestSchema` gains
+  optional `areaKey`; only the engine's `full` answers 409 `NO_TABLE`, any other refusal creates the request as
+  today; a guest's cancel moves the booking and the request to `cancelled`; the guest view's `booking` gains
+  `guestConfirmed` and `canCancel`; `next` is the first free slot in the following 14 days; an automatic
+  confirmation writes no `decisionLog` row; a booking write that fails after the request was stored leaves the
+  request `qualified`.
+- 673 · C-WAIT · `notify` only stamps `notifiedAt` until plan 675 exists; `POST /` takes `date` from the browser
+  and checks it is today in Jerusalem.
+- every screen plan · the QA business has no `tables` module, so `[ui]` specs answer the business and the table
+  routes themselves (the pattern of `e2e/ui/634-1.spec.ts`).
 
 ## Contract extensions (run)
 
