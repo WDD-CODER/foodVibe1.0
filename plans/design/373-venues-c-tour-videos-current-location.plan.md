@@ -214,3 +214,12 @@ Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22
 - `pnpm run lint` → exit 0 — `✖ 69 problems (0 errors, 69 warnings)` (unchanged from main; none in venue files).
 - `pnpm run test:server` → exit 0 — `Test Files  148 passed (148)` / `Tests  1976 passed (1976)` (+2 route tests).
 - `pnpm run test:ci` → exit 0 — `TOTAL: 2732 SUCCESS` (+2 specs), with the same local `--no-sandbox` Chrome wrapper.
+
+### Review round 2 (fix 2 done, branch merged with main)
+
+- Fix 2 now done on the Human's `approved: src/app/core/utils/**` (the round 1 "leave them" is superseded). `isoToLocalEpoch` moved to `src/app/core/utils/date-input.util.ts` beside `todayIso`, and `videoSourceKey` to a new `src/app/core/utils/video-link.util.ts` (typed `VideoSourceKey`). Each has a spec: `date-input.util.spec.ts` (+3 cases) and `video-link.util.spec.ts` (4 cases, including a look-alike host). Neither component keeps a local copy.
+- The Reuse Check rows are now rung 3 (helpers), so `kit-checks` needs the registry to name them. On the Human's `approved: docs/brain/component-families.md` I appended one line under `### helpers`. `kit-checks --plan` → `KIT_CHECKS: ok (6 checks)`.
+- `git fetch origin` + `git merge origin/main` (c452d70, 17 commits). One conflict, in `public/assets/data/dictionary.json`: both sides appended to the end of `general`. Resolved by keeping both, main's `export_*` keys first and this plan's keys after; the JSON parses and nothing else conflicted.
+- `pnpm run build` → exit 0 — `Application bundle generation complete. [15.106 seconds]`.
+- `pnpm run test:ci` → exit 0 — `TOTAL: 2765 SUCCESS` (main's new specs + this round's util specs).
+- **Open, needs the Planner on main:** `ci-scope-check` (the CI "rules" step "Plan scope") still fails with `SCOPE: test-out` for `src/app/core/utils/date-input.util.spec.ts` and `video-link.util.spec.ts`. By design it reads a plan's test lines from main's copy, so a Worker's own scope edit cannot approve its own tests. The fix is for the Planner to commit this plan's scope block to main with `src/app/core/utils/**`, the two spec paths and `docs/brain/component-families.md`. I did not try to get around the check.
