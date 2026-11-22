@@ -1,0 +1,162 @@
+{
+  "run": "fin-audit-3",
+  "branch": "orch/fin-audit-3",
+  "base": "main",
+  "startedAt": "2026-11-22T15:21:44.238Z",
+  "mainShaAtStart": "7c8fccd4421e7294d8b865d4750da34a5f9652c4",
+  "plans": {
+    "661": {
+      "nnn": "661",
+      "title": "Monthly planning screen: feasibility audit against the current code (report only)",
+      "branch": "feat/661-monthly-planning-feasibility-audit",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-22T15:24:34.061Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-22T15:45:20.730Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads section 1 (Hebrew summary) and can say for each block of the screen whether it is ready to"
+      ],
+      "history": [
+        {
+          "at": "2026-11-22T15:24:33.841Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:24:34.064Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:41:14.308Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:45:03.723Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:45:20.733Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:45:33.972Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-22T15:48:25.159Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.4,
+      "sha": "536d294337e828a7dcf809469fe65a6809138d57",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 992.6,
+          "tokens": {
+            "input": 2142640,
+            "output": 29700
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.1,
+          "tokens": {
+            "input": 40097,
+            "output": 432
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "85bbd856c292b75e8c73448fef3efee56ad0f5ac"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-22T15:24:33.622Z",
+      "plan": "661",
+      "text": "the folder foodVibe1.0-orch-fin-audit-3-661 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T15:41:07.331Z",
+      "plan": "661",
+      "text": "builder left undone (round 0): [human] item: Dandan reads section 1 and gives a verdict per block (not for the builder to mark)"
+    },
+    {
+      "at": "2026-11-22T15:41:17.087Z",
+      "plan": "661",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-22T15:46:01.552Z",
+      "plan": "661",
+      "text": "the folder foodVibe1.0-orch-merge-fin-audit-3 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-22T15:50:14.768Z",
+      "text": "FINAL: same tree as plan 661's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.4,
+  "updatedAt": "2026-11-22T15:55:12.756Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "661",
+      "type": "seen",
+      "text": "seen: plans/661-monthly-planning-feasibility-audit.plan.md scope block lists `origin/orch/fin-audit`, which is not a file path (harmless; the scope check passes)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "661",
+      "type": "seen",
+      "text": "seen: server/routes/ai/invoices.js:103-109 — the invoice_read AI draft stores the document's extracted rows whatever business.aiPrivate says; a payslip read must not reuse it as is (recorded in the report, sections 5 and 8)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-22T15:55:12.751Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-22T15:55:12.755Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

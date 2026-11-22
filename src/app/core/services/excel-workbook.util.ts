@@ -4,7 +4,7 @@
  * Plan: refactor/split-export-service
  */
 
-import type { Workbook, Worksheet } from 'exceljs'
+import type { CellValue, PageSetup, Workbook, Worksheet, WorksheetView } from 'exceljs'
 
 import type { ScalingService } from './scaling.service'
 import type { RecipeCostService } from './recipe-cost.service'
@@ -36,13 +36,6 @@ export async function downloadWorkbook(wb: Workbook, fileName: string): Promise<
 }
 
 // ── Row style helpers ──────────────────────────────────────────────────────────
-
-/** Apply header row style (bold, wrapText). */
-export function styleHeaderRow(ws: Worksheet, rowNumber: number): void {
-  const row = ws.getRow(rowNumber)
-  row.font = { bold: true }
-  row.alignment = { wrapText: true, vertical: 'top' }
-}
 
 /** Apply wrapText to a data row. */
 export function styleDataRow(ws: Worksheet, rowNumber: number): void {
@@ -150,6 +143,88 @@ export function styleExcelBlockBorder(ws: Worksheet, startRow: number, endRow: n
   }
 }
 
+// ── House style (plan 471) ─────────────────────────────────────────────────────
+
+/** A4, portrait, one page wide — every export sheet prints this way. */
+export const HOUSE_PAGE_SETUP: Partial<PageSetup> = {
+  paperSize: 9,
+  orientation: 'portrait',
+  fitToPage: true,
+  fitToWidth: 1,
+  fitToHeight: 0
+}
+
+/** Rows 1–3 (title, meta, header) stay in view while scrolling; the sheet reads right to left. */
+export const HOUSE_TABLE_VIEW: Partial<WorksheetView> = { rightToLeft: true, state: 'frozen', ySplit: 3 }
+
+/** First data row of every house-style table sheet (rows 1–3 are title, meta, header). */
+export const HOUSE_FIRST_DATA_ROW = 4
+
+/** An Excel-safe sheet name: no `\ / * ? : [ ]`, at most 31 characters, unique within `used` (which it extends). */
+export function uniqueSheetName(title: string, used: Set<string>, fallback: string): string {
+  const clean = (text: string): string =>
+    text
+      .replace(/[\\/*?:[\]]/g, ' ')
+      .trim()
+      .slice(0, 27)
+  const base = clean(title) || clean(fallback) || '-'
+  let name = base
+  for (let n = 2; used.has(name); n++) name = `${base} ${n}`
+  used.add(name)
+  return name
+}
+
+/** What one house-style table sheet shows. */
+export interface StyledTableSheetSpec {
+  /** Wanted sheet name; made Excel-safe and unique by `uniqueSheetName`. */
+  name: string
+  /** Used when `name` is empty after cleaning; defaults to `title`. */
+  fallbackName?: string
+  /** Row 1, the teal band. */
+  title: string
+  /** Row 2, the grey italic line. */
+  meta: string
+  /** Row 3, the grey column header. */
+  header: CellValue[]
+  /** Rows 4…, thin borders. */
+  rows: CellValue[][]
+  /** Last row, bold. */
+  totalRow?: CellValue[]
+  /** Column widths; default 28 for the first column and 14 for the others. */
+  widths?: number[]
+}
+
+/**
+ * The one house style for every Excel table sheet (plan 471): RTL, title band, meta line, grey header,
+ * bordered rows, optional bold total row, frozen header, A4 portrait fit to one page wide.
+ */
+export function addStyledTableSheet(wb: Workbook, spec: StyledTableSheetSpec): Worksheet {
+  const used = new Set(wb.worksheets.map((w) => w.name))
+  const ws = wb.addWorksheet(uniqueSheetName(spec.name, used, spec.fallbackName ?? spec.title), {
+    views: [{ ...HOUSE_TABLE_VIEW }],
+    pageSetup: { ...HOUSE_PAGE_SETUP }
+  })
+  const numCols = Math.max(spec.header.length, 1)
+  ws.addRow([spec.title])
+  styleExcelTitle(ws, 1, numCols)
+  ws.addRow([spec.meta])
+  styleExcelSubtitle(ws, 2, numCols)
+  ws.addRow(spec.header)
+  styleExcelColumnHeader(ws, 3, numCols)
+  let rowNum = HOUSE_FIRST_DATA_ROW
+  for (const row of spec.rows) {
+    ws.addRow(row)
+    styleExcelDataRowBorders(ws, rowNum++, numCols)
+  }
+  if (spec.totalRow) {
+    ws.addRow(spec.totalRow)
+    styleExcelDataRowBorders(ws, rowNum, numCols)
+    ws.getRow(rowNum).font = { bold: true }
+  }
+  for (let c = 1; c <= numCols; c++) ws.getColumn(c).width = spec.widths?.[c - 1] ?? (c === 1 ? 28 : 14)
+  return ws
+}
+
 // ── Category label ─────────────────────────────────────────────────────────────
 
 /** Translate a preparation category using TranslationService (Hebrew label when in dictionary). */
@@ -180,12 +255,37 @@ export function buildRecipeSheetBlock(recipe: Recipe, quantity: number): RecipeS
   }
 }
 
-/** Fill a worksheet with single-sheet recipe layout. Plan 108. */
+/**
+ * Add the recipe-info sheet: the single-sheet block layout of plan 108 (a form, not a table) under the house
+ * title band and meta line, right to left, A4 portrait fit to one page wide (plan 471).
+ */
+export function addRecipeInfoSheet(
+  wb: Workbook,
+  recipe: Recipe,
+  quantity: number,
+  heading: { name: string; title: string; meta: string },
+  deps: { scaling: ScalingService; recipeCost: RecipeCostService }
+): Worksheet {
+  const used = new Set(wb.worksheets.map((w) => w.name))
+  const ws = wb.addWorksheet(uniqueSheetName(heading.name, used, heading.title), {
+    views: [{ rightToLeft: true }],
+    pageSetup: { ...HOUSE_PAGE_SETUP }
+  })
+  ws.addRow([heading.title])
+  styleExcelTitle(ws, 1, 4)
+  ws.addRow([heading.meta])
+  styleExcelSubtitle(ws, 2, 4)
+  fillRecipeSheetWorksheet(ws, recipe, quantity, deps, 3)
+  return ws
+}
+
+/** Fill a worksheet with single-sheet recipe layout, starting at `firstRow`. Plan 108. */
 export function fillRecipeSheetWorksheet(
   ws: Worksheet,
   recipe: Recipe,
   quantity: number,
-  deps: { scaling: ScalingService; recipeCost: RecipeCostService }
+  deps: { scaling: ScalingService; recipeCost: RecipeCostService },
+  firstRow = 1
 ): void {
   const factor = deps.scaling.getScaleFactor(recipe, quantity)
   const scaledIngredients = deps.scaling.getScaledIngredients(recipe, factor)
@@ -195,7 +295,7 @@ export function fillRecipeSheetWorksheet(
   }
   const sheetBlock = buildRecipeSheetBlock(recipe, quantity)
   const numCols = 4
-  let rowNum = 1
+  let rowNum = firstRow
 
   ws.addRow([heHeader('date'), sheetBlock.date])
   styleExcelDataRowBorders(ws, rowNum++, 2)

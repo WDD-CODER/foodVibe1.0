@@ -75,8 +75,13 @@ Size: S / M / L (one Worker session each; an L may be split at drafting). Tier: 
 
 By plan number, after the Step 2 splits (R3 = 665 + 684, R6 = 668 + 685, R9 = 671 + 686):
 `rs-0` = 662 · `rs-engine` = 663, 664 · `rs-floor-ui` = 665, 684, 666, 667 · `rs-book-srv` = 668, 685, 669 ·
-`rs-book-ui` = 670, 671, 686, 672, 673 · `rs-demo` = 674 · `rs-conv-srv` = 675, 676 · `rs-conv-ui` = 677, 678 ·
-`rs-ai` = 679, 680, 681, 682 · `rs-wa` = 683.
+`rs-book-ui` = 670, 671, 686, 672, 673 · `rs-demo` = 674 · `rs-conv-srv` = 675, 687 · `rs-jobs` = 676 ·
+`rs-conv-ui` = 677, 678 · `rs-ai` = 679, 689, 680, 681, 682 · `rs-wa` = 683.
+
+Waves 3–5 were drafted on 2026-11-22 (R13 = 675 + 687, R17 = 679 + 689). 676 edits the waiting-list route, so it
+needs 673 and runs alone after `rs-book-ui` (`rs-jobs`); `rs-conv-srv` may still run beside `rs-book-ui`. 678 needs
+676 and 687 and edits the waiting-list drawer and the clients list, so `rs-conv-ui` runs after `rs-jobs`. `rs-ai`
+needs 685 (680) and 677 (682). 679, 689 and 680 edit the same turn files: sequential.
 
 Dependencies changed in Step 2: 667 also needs 664 (both edit `server/routes/floor-plan.js`); 671 also needs 667
 (the mode switch calls its route) and 685 (the browser booking calls); 673 also needs 672 and 686; 674 needs 673.
@@ -652,6 +657,50 @@ draft knowledge item. Done-when seeds: `[ui]` a suggestion is edited and sent.
 `docs/security-go-live.md`. Must cover: RS-12; HMAC accept and reject tests; nothing changes for a business on the
 simulator; the owner alert with R-17. Done-when seeds: `[auto]` a bad signature gets 401; `[human]` Dandan writes
 from his private phone to the test number, books a table and gets the confirmation.
+
+## Contract extensions (Step 2, waves 3–5 — found while drafting plans 675–683, 687, 689, 2026-11-22)
+
+Each line is already written into the plan that owns it; where a line and a Contract above disagree, the line wins.
+
+- 675 · C-CONV · `handleInbound` takes an optional `actor` and answers `{ ok, conversationId, messageId, duplicate?,
+  settled }`; `registerButton` and `setTurnHandler` in `inbound.js` are how 676, 679 and 680 plug in; a new
+  conversation starts `bot`; an inbound to a closed conversation opens a new one.
+- 675 · C-CHANNEL · `channelFor` returns `{ send, real, clientSource }` (a transport describes itself; nothing
+  branches on the channel name); `sendOut` answers `{ ok, message }` or `{ ok: false, reason }`; more than three
+  buttons become one numbered text; `POST /sim/inbound` answers 409 `REAL_CLIENT` for a real client's phone.
+- 675 · C-TEMPLATES · each template has a `bodyKey` (`tpl_*`); the server stores `template: { name, params }` and no
+  body; the ten Hebrew values are added by 677. `booking_cancelled(name, date, time)`,
+  `request_received / approved / declined(name)`.
+- 675 · C-TESTDATA · a simulator client has source `manual`, kind `lead` and tag `test` (no `test` field on
+  clients); the delete also removes clients tagged `test`; 678 hides them in the browser's lists and exports.
+- 687 · C-CONV · the six member routes, their answer shapes, `test=1` to list test conversations, `peek=1` to read
+  a thread without clearing `unread`; a member's reply takes the conversation over; closed conversations are
+  removed by retention.
+- 676 · C-JOBS · four jobs (reminders, no-show, waiting-list expiry, orphan holds — a hold whose booking is missing
+  on two ticks in a row); `moveBookingStatus` in `table-bookings.js` is the one status move; a booking with no
+  conversation, or a refused send, is stamped and not retried; test bookings are left out; `POST /sim/clock`
+  answers `{ job, done, reason? }` and is built here; the `waitlist_table_ready` send is built here (C-WAIT:
+  `notify` answers `sent`).
+- 679 · C-AI · `runTurn(db, conversation, { log, mode, now })`, `mode: 'turn' | 'suggest'`; the one model call is
+  `askTurnModel` in `server/routes/ai/frontdesk.js` (INV-6); `POST /api/v1/ai/frontdesk/suggest`; every failure is
+  silent (R-04 wins over FD-07); the daily cap counts today's `frontdesk_turn` rows (300), test turns carry
+  `usage.userId: 'sim'`; `fixedText(key, params)` in `server/utils/fixed-text.js` is the only source of fixed
+  sentences; at level 0 no request is written.
+- 689 · C-AI · the order of the guardrail checks; a removal request (R-02) is matched by fixed phrases before any
+  model call, answered once, and sets do-not-contact; `conversation.lowTurns`.
+- 680 · C-AI2 · a time in the model's reply passes only when the same `HH:mm` stands in a fact it used; `ALT:<n>`
+  books at once, `BK:<n>` picks one of several bookings; offers expire after 30 minutes; `changeWhen` and
+  `cancelByGuest` in `table-bookings.js`; more than three future bookings is a handoff.
+- 681 · G-DEPS · `promptfoo` is not used: the eval is a script in the pattern of `ai-eval-recipes.js` (the
+  dialogues are judged by what the server wrote, which needs the pipeline and a database in one process). The set
+  is 20 restaurant, 5 caterer, 5 private chef. `turnAnswerSchema` gains optional `suggested`.
+- 682 · C-AI · `POST /api/v1/ai/frontdesk/fix { conversationId, messageId, answer, issue }` → `{ item, drafted }`.
+- 683 · RS-12 · the webhook path is `/api/v1/webhooks/whatsapp`, mounted before the JSON parser with a raw body;
+  routing: the receiving `phone_number_id`, then the sender's open `whatsapp` conversation, else dropped; a ninth
+  template `owner_request_waiting(business, kind, reference)`; `ownerAlertedAt?` on a request and a conversation;
+  `profile.whatsapp` is set by the operator script `server/scripts/set-front-desk-whatsapp.js`; gate G-WA also
+  needs the nine templates created at the provider and the Graph API version confirmed (the payload shapes in the
+  plan are from memory, not checked against the provider's reference).
 
 ## Contract extensions (Step 2 — found while drafting plans 662–674, 2026-11-22)
 

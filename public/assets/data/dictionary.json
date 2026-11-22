@@ -2662,6 +2662,17 @@
     "diag_card_title": "אבחונים",
     "diag_card_open_count": "{count} פתוחים",
     "diag_card_empty": "עוד אין אבחונים",
-    "diag_card_all": "לכל האבחונים"
+    "diag_card_all": "לכל האבחונים",
+    "export_sheet_cooking_steps": "שלבי הכנה",
+    "export_sheet_checklist": "רשימת הכנות",
+    "export_sheet_menu_info": "פרטי התפריט",
+    "export_section_fallback": "מקטע",
+    "export_sheet_fallback": "גיליון",
+    "export_menu_fallback": "תפריט",
+    "export_category_preps": "הכנות",
+    "export_full_recipe": "המתכון המלא",
+    "export_total_prep_time": "זמן הכנה כולל (דקות)",
+    "export_labor_time_min": "זמן עבודה (דק')",
+    "export_cooking_time_sec": "זמן בישול (שנ')"
   }
 }

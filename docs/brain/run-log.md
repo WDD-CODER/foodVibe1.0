@@ -26,3 +26,5 @@ Earlier (68 runs): plans 204 · merged 182 · parked 19 · fix rounds 84 · esca
 | 2026-11-22 | mod-count-popup | 658,659 | 2 | 0 | - | 0 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-22 | rs-0 | 662 | 1 | 0 | - | 0 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-22 | rs-engine | 663,664 | 2 | 0 | - | 2 | 0 | 1 | ok | - | - | - |
+| 2026-11-22 | fin-audit | 660,661 | 1 | 1 | same-reason-twice | 1 | 1 | 2 | ok | 0 | 0 | 0 |
+| 2026-11-22 | fin-audit-3 | 661 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |

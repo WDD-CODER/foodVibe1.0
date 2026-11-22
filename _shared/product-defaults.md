@@ -25,14 +25,15 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 
 ### unsaved-changes-on-leave
 
-- status: proposed
+- status: on
 - rule: A form with changes asks before the user leaves it, and stays open when the user answers stay.
 - applies when: editable-form
-- how: the shared form base (its leave question), or the project's leave guard
+- how: src/app/core/guards/pending-changes.guard.ts (canDeactivate in app.routes.ts; the entity-form family)
 - check: card
 - card: the form's page · change one field, then follow a link out of the page · a question asks whether to leave or stay
 - check: files: **/*.component.ts; trigger: \b(?:FormGroup|FormBuilder|FormControl|NgForm|ngModel)\b; evidence: {stem}[\s\S]{0,300}canDeactivate\s*:; in: src/app/app.routes.ts
 - exceptions: a read-only form, a search box or a filter bar; declare `exception — why: <one line>`
+- turned on: the Human, 2026-11-22
 
 ### activity-log-on-write
 
@@ -46,13 +47,14 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 
 ### confirm-destructive-action
 
-- status: proposed
+- status: on
 - rule: An action that deletes or discards data asks the user to confirm first, and does nothing on cancel.
 - applies when: destructive-action
-- how: the shared confirm dialog
+- how: src/app/core/services/confirm-modal.service.ts (the shared confirm modal)
 - check: card
 - card: the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed
 - exceptions: an undo that restores the item at once; declare `exception — why: <one line>`
+- turned on: the Human, 2026-11-22
 
 ### empty-state-on-list
 

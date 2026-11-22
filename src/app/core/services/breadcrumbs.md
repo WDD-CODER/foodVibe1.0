@@ -66,7 +66,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `app-update.service.ts` | App update/reload prompt | AppUpdateService |
 | `cloudinary.service.ts` | Image upload to Cloudinary | CloudinaryService |
 | `equipment-category-registry.service.ts` | Equipment category registry | EquipmentCategoryRegistryService |
-| `excel-workbook.util.ts` | Excel export style constants | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM |
+| `excel-workbook.util.ts` | Excel export style constants and the one house-style sheet helper (plan 471) | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM, addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP |
 | `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
 | `product-name-matcher.service.ts` | Links a typed or pasted product name to an existing product: exact + plural/spelling variants in the browser, then one AI call for the rest (plan 463) | ProductNameMatcherService |
 | `gemini-shots.service.ts` | Gemini image/shot capture flow | GeminiShotsService |
@@ -75,9 +75,9 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
 | `event-pipeline.service.ts` | Client of the events API routes (`API` in `http-storage.adapter`): stage moves and notes; writes the returned event into the store (plan 443) | EventPipelineService |
 | `event-type-snapshot.service.ts` | Freezes an event's event-type and serving-type coefficients when picked (plan 441) | EventTypeSnapshotService |
-| `menu-export.service.ts` | Menu export orchestration | MenuExportService |
+| `menu-export.service.ts` | Menu export orchestration; every sheet through `addStyledTableSheet`, testable `build…Workbook` builders (plan 471) | MenuExportService |
 | `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
-| `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |
+| `recipe-export.service.ts` | Recipe export orchestration; every sheet through `addStyledTableSheet`, testable `build…Workbook` builders, the printed full recipe `getFullRecipePreviewPayload` (plan 471) | RecipeExportService |
 | `server-heartbeat.service.ts` | Server availability heartbeat | ServerHeartbeatService |
 | `logistics-item-registry.service.ts` | Event-logistics checklist items (taxonomy kind `logisticsItem`) by phase and environment (plan 521); plan 579: the date rule `forEvent`, removed / folded terms, the business hide list, own sections | LogisticsItemRegistryService |
 | `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
