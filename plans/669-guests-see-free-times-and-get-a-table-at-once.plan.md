@@ -146,6 +146,10 @@ shared/schemas/public/public-request.schema.ts
 server/test/public-availability.test.js
 server/breadcrumbs.md
 docs/restaurant/restaurant-map.md
+server/test/public-guard.test.js
+server/test/rate-limit-key.test.js
+server/test/shared-request-helpers.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
