@@ -39,12 +39,23 @@ describe('server/constants/collections.js', () => {
     expect(BACKUP_ENTITY_TYPES).toEqual(COLLECTIONS.filter(c => c.backup).map(c => c.name));
   });
 
-  it('routerWrites is a boolean when present and ROUTER_WRITE_TYPES matches it (requests, bookings, invoices, diagnoses, stockCounts)', () => {
+  it('routerWrites is a boolean when present and ROUTER_WRITE_TYPES matches it (requests, bookings, invoices, diagnoses, stockCounts, floorPlans, waitlistEntries)', () => {
     for (const entry of COLLECTIONS) {
       if ('routerWrites' in entry) expect(typeof entry.routerWrites).toBe('boolean');
     }
     expect(ROUTER_WRITE_TYPES).toEqual(COLLECTIONS.filter(c => c.routerWrites).map(c => c.name));
-    expect(ROUTER_WRITE_TYPES).toEqual(['requests', 'bookings', 'invoices', 'diagnoses', 'stockCounts']);
+    expect(ROUTER_WRITE_TYPES).toEqual(['requests', 'bookings', 'invoices', 'diagnoses', 'stockCounts', 'floorPlans', 'waitlistEntries']);
+  });
+
+  it('plan 662 (C-REGISTRY-R): the five Restaurant rows carry the flags of the contract table', () => {
+    const row = name => COLLECTIONS.find(c => c.name === name);
+    const readable = { userData: true, cloneable: false, backup: true, searchable: false, softDelete: false, routerWrites: true };
+    const serverOnly = { userData: false, cloneable: false, backup: false, searchable: false, softDelete: false };
+    expect(row('floorPlans')).toEqual({ name: 'floorPlans', ...readable });
+    expect(row('waitlistEntries')).toEqual({ name: 'waitlistEntries', ...readable });
+    for (const name of ['conversations', 'messages', 'tableHolds']) {
+      expect(row(name)).toEqual({ name, ...serverOnly });
+    }
   });
 
   it('suppliers precedes products in CLONEABLE_TYPES (supplierIdMap ordering)', () => {

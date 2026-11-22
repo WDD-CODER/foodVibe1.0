@@ -397,6 +397,15 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   same rule.
 - Known copies: none.
 
+### table-service — a front desk profile's table settings
+
+- Status: stable — plan 662
+- Use: `shared/schemas/front-desk/table-service.ts` (pure, no zod; the server and the browser import it) —
+  `tableServiceOf`, `TABLE_SERVICE_DEFAULTS`.
+- When: any code reads a profile's table settings (confirm mode, slots, turn minutes, holds). A stored field wins, a
+  missing one is the default; nothing fills defaults on read.
+- Known copies: none.
+
 ### module-gate — the browser hides and skips what a business's modules turn off
 
 - Status: stable — plan 620

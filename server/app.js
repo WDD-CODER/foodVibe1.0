@@ -27,6 +27,10 @@ const notificationsRouter = require('./routes/notifications');
 const stockRouter = require('./routes/stock');
 const diagRouter = require('./routes/diag');
 const adminLearningRouter = require('./routes/admin-learning');
+const floorPlanRouter = require('./routes/floor-plan');
+const waitlistRouter = require('./routes/waitlist');
+const conversationsRouter = require('./routes/conversations');
+const simRouter = require('./routes/sim');
 const logRouter = require('./routes/log');
 const { redactUrl } = require('./utils/redact-url')
 const publicRouter = require('./routes/public');
@@ -229,6 +233,11 @@ app.use('/api/v1/access', accessRouter);
 app.use('/api/v1/notifications', notificationsRouter);
 app.use('/api/v1/stock', stockRouter);
 app.use('/api/v1/diag', diagRouter);
+// Plan 662 (C-REGISTRY-R): empty routers of the Restaurant program, filled by plans 664 and 667, 673, 675, 675.
+app.use('/api/v1/floor-plan', floorPlanRouter);
+app.use('/api/v1/waitlist', waitlistRouter);
+app.use('/api/v1/conversations', conversationsRouter);
+app.use('/api/v1/sim', simRouter);
 // Plan 543 (ADR 0030): the public door for non-members — never behind verifyToken, so no usage is recorded.
 app.use('/api/v1/public', publicRouter);
 

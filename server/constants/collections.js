@@ -70,6 +70,14 @@ const COLLECTIONS = [
   { name: 'storedFiles',              userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-FILES, plan 619
   { name: 'businessAccess',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ACCESS, plan 631
   { name: 'notifications',             userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-NOTIFY, plan 646
+  // Plan 662 (C-REGISTRY-R): the Restaurant program. The two readable types are read through the generic API (gated by
+  // module `tables`); every write goes through their router.
+  { name: 'floorPlans',               userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-FLOOR, filled by plan 664
+  { name: 'waitlistEntries',          userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-WAIT, filled by plan 673
+  // Server-only (no generic API).
+  { name: 'conversations',            userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-CONV, plan 675
+  { name: 'messages',                 userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-CONV, plan 675
+  { name: 'tableHolds',               userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-HOLD, INV-7, plan 667
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

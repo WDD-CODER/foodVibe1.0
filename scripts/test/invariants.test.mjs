@@ -63,9 +63,9 @@ test('parseInvariants reads the header and every field', () => {
   assert.equal(r.invariants[1].test, 'none')
 })
 
-test('the real registry parses: 6 invariants, each with touches and a users-lose line', () => {
+test('the real registry parses: 7 invariants, each with touches and a users-lose line', () => {
   const r = parseInvariants(readFileSync(resolve(repoRoot, 'docs/brain/invariants.md'), 'utf8'))
-  assert.equal(r.invariants.length, 6)
+  assert.equal(r.invariants.length, 7)
   for (const inv of r.invariants) {
     assert.ok(inv.touches.length, `${inv.id} has Touches`)
     assert.ok(inv.usersLose, `${inv.id} has a users-lose line`)

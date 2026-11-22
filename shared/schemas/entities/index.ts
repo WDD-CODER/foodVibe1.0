@@ -22,6 +22,11 @@ import { businessAccessSchema } from './business-access.schema'
 import { diagnosisSchema } from './diagnosis.schema'
 import { stockCountSchema } from './stock-count.schema'
 import { notificationSchema } from './notification.schema'
+import { floorPlanSchema } from './floor-plan.schema'
+import { tableHoldSchema } from './table-hold.schema'
+import { waitlistEntrySchema } from './waitlist-entry.schema'
+import { conversationSchema } from './conversation.schema'
+import { messageSchema } from './message.schema'
 
 export * from './invoice.schema'
 export * from './price-history.schema'
@@ -44,6 +49,12 @@ export * from './front-desk-profile.schema'
 export * from './knowledge-item.schema'
 export * from './request.schema'
 export * from './taxonomy-term.schema'
+// Plan 662 (C-REGISTRY-R): the Restaurant program.
+export * from './floor-plan.schema'
+export * from './table-hold.schema'
+export * from './waitlist-entry.schema'
+export * from './conversation.schema'
+export * from './message.schema'
 export { clientSchema, equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
 
 /** v2 collection name -> schema (Plan 321 G2 names). Trash/logs follow in later phases. */
@@ -71,7 +82,13 @@ export const SCHEMA_BY_COLLECTION = {
   businessAccess: businessAccessSchema,
   diagnoses: diagnosisSchema,
   stockCounts: stockCountSchema,
-  notifications: notificationSchema
+  notifications: notificationSchema,
+  // Plan 662 (C-REGISTRY-R)
+  floorPlans: floorPlanSchema,
+  tableHolds: tableHoldSchema,
+  waitlistEntries: waitlistEntrySchema,
+  conversations: conversationSchema,
+  messages: messageSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION
