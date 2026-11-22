@@ -10,5 +10,7 @@ export default defineConfig({
     // Each test file mutates process.env (Mongo URI, JWT secrets) and requires
     // ../app as a singleton — isolate per file so files can't bleed state.
     pool: 'forks',
+    // Local runs (and orchestrator builders, several at once) cap the workers so the machine keeps memory free.
+    maxWorkers: process.env.CI ? undefined : Number(process.env.VITEST_WORKERS || 2),
   },
 })
