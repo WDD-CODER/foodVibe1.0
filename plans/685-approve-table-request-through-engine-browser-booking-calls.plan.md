@@ -113,6 +113,9 @@ src/app/core/services/request-data.service.spec.ts
 src/app/core/services/breadcrumbs.md
 src/app/core/models/booking.model.ts
 src/app/core/models/breadcrumbs.md
+src/app/core/services/client-data.service.spec.ts
+src/app/core/services/front-desk-badge.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
