@@ -1,6 +1,6 @@
 # Plan 659 — Stock count: the base-amount box opens over its own icon, on hover above phone width
 
-Status: draft
+Status: done
 Depends-on: 658
 Snapshot: 5b82258e
 

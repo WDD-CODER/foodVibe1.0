@@ -1,6 +1,6 @@
 # Plan 658 — Stock count: unit names in Hebrew, the base amount opens beside its row on every screen
 
-Status: draft
+Status: done
 Depends-on: 657
 Snapshot: 8aead5dffa9d84b9328d493f0f44ec6c35310ec5
 
