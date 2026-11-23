@@ -187,6 +187,7 @@ Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22
 - behaviour: P2 is done as a plain hint ("הוסף כתובת…") under the saved location when the address is empty; no reverse geocoding — reverse: drop the `location_address_hint` block.
 - behaviour: saving a venue whose videos were all removed sends `videos: []` — reverse: send `undefined` for an empty list.
 - behaviour: a new venue with no location leaves the key out; only an update sends `location: null` (review fix 1) — reverse: send null on add too.
+- Human 2026-11-23 grading: D1, D2, D3, D4, D6, D8, D9 ok. D5 ✗ → the empty videos card says «אין עדיין סרטונים» (`venue_videos_empty`) instead of "—". D7 ✗ → no address hint (`location_address_hint` left unused); the location pin is a button inside the address field (`.c-input-wrapper`), the separate «מיקום» section is gone; the «נווט» links use the saved location, else the typed address (Google Maps `?api=1&query=<address>`, Waze `?q=<address>&navigate=yes`). Filling the address from the location (reverse geocoding) is todo V2; phone video upload is todo V1. Built by the Planner in slot wt-3 (59087d11); venue specs 35/35 pass (`npx ng test --include=src/app/pages/venues/**`).
 
 ### A4 evidence (all run from the repo root)
 
