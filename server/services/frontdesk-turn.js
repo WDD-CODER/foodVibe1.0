@@ -13,6 +13,7 @@ const { buildTurnBody, HISTORY_WINDOW } = require('./frontdesk-prompt');
 const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
 const { sendOut } = require('./outbound');
 const { setTurnHandler } = require('./inbound');
+const { tablesFor, handleTableIntent, deliver } = require('./frontdesk-tables');
 const { createRequest, runQualify } = require('../utils/request-create');
 const { fixedText, reasonText } = require('../utils/fixed-text');
 const { jerusalemDate } = require('../middleware/usage');
@@ -23,6 +24,19 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 const PLACEHOLDER_CLIENTS = new Set(['__test__', '__walk_in__']);
 const NUMBER_KEYS = new Set(['partySize', 'budgetPerGuest']);
+
+const TABLE_INTENTS = new Set(['book', 'change', 'cancel']);
+
+/** Plan 680: without table service a `book` answer is a table `request` (the `collected.table` fields mapped to the question keys). */
+function bookAsRequest(answer) {
+  const { table, ...rest } = answer.collected ?? {};
+  const t = table ?? {};
+  const mapped = { ...rest };
+  if (t.date) mapped.date = String(t.date);
+  if (t.time) mapped.time = String(t.time);
+  if (t.partySize !== undefined) mapped.party_size = String(t.partySize);
+  return { ...answer, intent: 'request', kind: 'table', collected: mapped };
+}
 
 const askTurnModel = args => require('../routes/ai/frontdesk').askTurnModel(args);
 const colOf = (db, name) => db.collection(name);
@@ -162,7 +176,8 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
   }
 
   const facts = await publicFacts(db, businessId);
-  const body = buildTurnBody({ profile, facts, history, now });
+  const tables = await tablesFor(db, businessId);
+  const body = buildTurnBody({ profile, facts, history, now, tablesOn: !!tables, areas: tables ? tables.plan.areas : [] });
   const asked = await askTurnModel({
     body,
     usage: {
@@ -178,14 +193,16 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     return { ok: false, reason: asked.reason };
   }
 
+  const modelAnswer = !tables && asked.answer.intent === 'book' ? bookAsRequest(asked.answer) : asked.answer;
+  const tableTurn = !!tables && TABLE_INTENTS.has(modelAnswer.intent);
   const guardCtx = {
-    profile, factIds: facts.factIds, factsText: facts.text, history, aiTurns, now, mode,
+    tablesOn: !!tables, profile, factIds: facts.factIds, factsText: facts.text, history, aiTurns, now, mode,
     lastTurnLow: conversation.lowTurns === 1,
   };
   // The reply checks only matter when the model's own reply leaves the server: find out first (decide is pure).
-  let verdict = applyGuardrails(asked.answer, { ...guardCtx, replyWillBeSent: false });
-  if (verdict.ok && decide(verdict.answer, { profile, conversation, now }).text === verdict.answer.reply) {
-    verdict = applyGuardrails(asked.answer, { ...guardCtx, replyWillBeSent: true });
+  let verdict = applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: false });
+  if (verdict.ok && !tableTurn && decide(verdict.answer, { profile, conversation, now }).text === verdict.answer.reply) {
+    verdict = applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: true });
   }
   if (!verdict.ok && verdict.reason !== 'model') {
     return blockTurn(db, conversation, base, { reason: verdict.reason, stage: 'post' });
@@ -204,7 +221,31 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     return { ok: true, handoff: true };
   }
 
-  const decision = decide(verdict.answer, { profile, conversation, now });
+  // Plan 680: the model's reply is dropped for the three table intents; the server answers from the engine.
+  let answer = verdict.answer;
+  if (tableTurn) {
+    const level0 = levelOf(profile) === 0 || mode === 'suggest';
+    const res = await handleTableIntent(db, conversation, answer, { tables, now, write: !level0, log });
+    if (res.request) {
+      // No plan to assign from: the plan 679 request path, with a reply that is checked because it may be sent.
+      answer = bookAsRequest(answer);
+      const again = applyGuardrails(answer, { ...guardCtx, replyWillBeSent: true });
+      if (!again.ok) return blockTurn(db, conversation, base, { reason: again.reason, stage: 'post' });
+      answer = again.answer;
+    } else if (res.handoff) {
+      log.info({ event: 'frontdesk.turn.done', intent: answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });
+      if (mode === 'turn') await handOff(db, conversation, base);
+      else return finishSuggestion(db, conversation, answer.reply, now);
+      return { ok: true, handoff: true };
+    } else {
+      log.info({ event: 'frontdesk.turn.done', intent: answer.intent, level: levelOf(profile), mode, handoff: false, requestWritten: false });
+      if (level0) return finishSuggestion(db, conversation, res.outbound.text, now);
+      const sent = await deliver(db, conversation, res, { now, log, profile });
+      return { ok: true, sent: sent.ok };
+    }
+  }
+
+  const decision = decide(answer, { profile, conversation, now });
   if (decision.handoff) {
     log.info({ event: 'frontdesk.turn.done', intent: verdict.answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });
     if (mode === 'turn') await handOff(db, conversation, base);

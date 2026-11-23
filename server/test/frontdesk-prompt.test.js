@@ -1,6 +1,6 @@
 'use strict';
 /** Plan 679 (R-08, R-09, R-11, R-16, R-20): the text of the request to the model. */
-const { buildTurnBody, TURN_SYSTEM_PROMPT, todayBlock } = require('../services/frontdesk-prompt');
+const { buildTurnBody, TURN_SYSTEM_PROMPT, TABLE_SYSTEM_PROMPT, todayBlock } = require('../services/frontdesk-prompt');
 
 const NOW = Date.parse('2026-11-22T18:30:00+02:00');
 const profile = {
@@ -58,5 +58,26 @@ describe('buildTurnBody', () => {
     const rest = buildTurnBody({ profile, facts, history, now: NOW }).contents.slice(1);
     expect(rest[0].parts[0].text).toBe('CONFIRM:abc');
     expect(rest[1].parts[0].text).toBe('[template:reminder]');
+  });
+});
+
+describe('table section (plan 680)', () => {
+  const areas = [{ key: 'inside', name: 'Inside', order: 0 }, { key: 'bararea', name: 'Bar', order: 2 }];
+  it('with tables on: the areas in the data block and the table section in the instruction', () => {
+    const body = buildTurnBody({ profile, facts, history: [], now: NOW, tablesOn: true, areas });
+    const sys = body.systemInstruction.parts[0].text;
+    expect(sys).toContain(TABLE_SYSTEM_PROMPT);
+    expect(sys).toContain('collected.table');
+    expect(sys).not.toMatch(/[֐-׿]/);
+    const lead = body.contents[0].parts[0].text;
+    expect(lead).toContain('"key":"inside","name":"Inside"');
+    expect(lead).toContain('"key":"bararea","name":"Bar"');
+    expect(lead).not.toContain('"order"');
+  });
+  it('with tables off: neither is there', () => {
+    const body = buildTurnBody({ profile, facts, history: [], now: NOW, areas });
+    expect(body.systemInstruction.parts[0].text).not.toContain('collected.table');
+    expect(body.contents[0].parts[0].text).not.toContain('AREAS');
+    expect(body.contents[0].parts[0].text).not.toContain('Inside');
   });
 });

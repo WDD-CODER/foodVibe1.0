@@ -877,6 +877,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
 - Known copies: none.
 
+### assistant-table-dialogue — `handleTableIntent`, the OK/ALT/OTHER/BK handlers, `changeWhen`, `cancelByGuest` (plan 680)
+
+- Status: stable — server only
+- Use: the guest's table wish by chat (book, change, cancel). `runTurn` calls `handleTableIntent` (`server/services/frontdesk-tables.js`) when the business has `tables`; the offer comes only from the engine (`assign`), the confirm goes through the booking service; taps are no-model handlers registered with `registerButton` (OK, ALT, OTHER, BK). A guest's move or cancel calls `changeWhen` / `cancelByGuest` (`server/services/table-bookings.js`), the same bodies the member route uses.
+- Pieces: handleTableIntent, tablesFor, offer, confirm, changeWhen, cancelByGuest (server/services/table-bookings.js).
+- When: any table wish in the assistant; a second booking path or a table time written by the model is never added.
+- Known copies: none.
+
 ### assistant-guardrails — `preCheck`, `applyGuardrails`, `GUARD_WORDS` (plan 689)
 
 - Status: stable — server only
