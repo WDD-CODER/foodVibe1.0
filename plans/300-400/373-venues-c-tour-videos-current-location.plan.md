@@ -1,6 +1,6 @@
 # Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location"
 
-Status: draft
+Status: done
 Track: split — look in Claude Design; schema, geolocation, lat-lng here
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
@@ -107,7 +107,7 @@ touching any milestone.
 - [x] A1: Let a venue store tour video links and a saved location — Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [x] A2: Add tour videos with a visit date to the venue form and detail page — Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
 - [x] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
-- [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
+- [x] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine).
 
 ## Architecture Impact
 
@@ -163,9 +163,9 @@ touching any milestone.
 - [auto] `npm run build:schemas` → exit 0. Server tests → 0 failures.
 - [auto] `npx ng test --watch=false --include=src/app/pages/venues/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
-- [human] Edit a venue → add 2 video links with dates → save → the detail page shows them newest first; "פתח סרטון" opens each in a new tab.
-- [human] Phone, add venue on site → "השתמש במיקום הנוכחי" → allow → "נשמר מיקום (±15 מ׳)" → save → detail "נווט" opens Waze or Google Maps at that spot. Deny permission → a clear message, the form still works.
-- [human] the list's page with no items · open the page · a message says the list is empty — a venue with no videos → its detail page → the "סרטוני סיור" card shows "—".
+- [x] [human] Edit a venue → add 2 video links with dates → save → the detail page shows them newest first; "פתח סרטון" opens each in a new tab.
+- [x] [human] Phone, add venue on site → "השתמש במיקום הנוכחי" → allow → "נשמר מיקום (±15 מ׳)" → save → detail "נווט" opens Waze or Google Maps at that spot. Deny permission → a clear message, the form still works.
+- [x] [human] the list's page with no items · open the page · a message says the list is empty — a venue with no videos → its detail page → the "סרטוני סיור" card shows "—".
 
 ## Execution Notes
 
@@ -231,3 +231,4 @@ Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22
 - `pnpm run build` → exit 0 — `Application bundle generation complete. [15.106 seconds]`.
 - `pnpm run test:ci` → exit 0 — `TOTAL: 2765 SUCCESS` (main's new specs + this round's util specs).
 - **Open, needs the Planner on main:** `ci-scope-check` (the CI "rules" step "Plan scope") still fails with `SCOPE: test-out` for `src/app/core/utils/date-input.util.spec.ts` and `video-link.util.spec.ts`. By design it reads a plan's test lines from main's copy, so a Worker's own scope edit cannot approve its own tests. The fix is for the Planner to commit this plan's scope block to main with `src/app/core/utils/**`, the two spec paths and `docs/brain/component-families.md`. I did not try to get around the check.
+- Planner close-out 2026-11-23: the scope block was committed to main (379f8428, f7e32732) and CI went green. Planner review: APPROVE after round 2. The Human's grading of D1–D9 and the address fill from the pin are recorded above; merged as #638 (0df51a40) on the Human's `merge 638`. [human] validated by Dandan: "all good" on cards 1–5 (no-videos text, navigate from a typed address, two videos newest first, the pin in the address field, clear and refusal), then the merge. The address-fill card (6) got no separate `ok`; the merge stands as his acceptance. Still for later: todo V1 (uploading a video from the phone).
