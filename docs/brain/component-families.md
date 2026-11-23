@@ -900,3 +900,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: preCheck, applyGuardrails, GUARD_WORDS.
 - When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
 - Known copies: none.
+
+### gemini-fallback — `callGemini({ fallback, deadlineMs })`, `failureReason(kind, status)` in `server/services/frontdesk-turn.js`, `server/test/gemini-fallback.test.js` (plan 701)
+
+- Status: stable — server only
+- Use: an unattended caller (the front desk) passes `fallback: true` (and `deadlineMs`) to `callGemini` in `server/services/gemini-client.js`: on overload the same request tries the next free catalog model. `failureReason(kind, status)` in `server/services/frontdesk-turn.js` maps a failure to `busy`, `timeout`, `quota` or `other`; a failed guest turn stores it as `assistantFailed` on the conversation.
+- Pieces: callGemini({ fallback, deadlineMs }), failureReason(kind, status) in server/services/frontdesk-turn.js, assistantFailed, gemini-fallback.test.js.
+- When: any new unattended model call or failure reason; a second model-switching loop is never added.
+- Known copies: none.

@@ -272,3 +272,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - evidence: `pnpm --dir server exec vitest run ai-voice-transcribe` five times → exit codes 0, 0, 0, 0, 0.
 - evidence: `pnpm --dir server run lint` → exit 0.
 - `docs/brain/inventory.md` unchanged (it lists no gemini-client options).
+- scope extended: docs/brain/component-families.md, docs/brain/inventory.md (regenerated) — rung 4 Reuse Check rows need a family heading (approved, ask 701-1)
+- evidence: pnpm run test:ci -> exit 0, 3080 SUCCESS; pnpm run test:server -> exit 0, 177 files 2449 tests; kit-checks -> ok
