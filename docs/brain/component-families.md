@@ -876,3 +876,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, runTurn, decide, applyGuardrails, askTurnModel.
 - When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
 - Known copies: none.
+
+### assistant-guardrails — `preCheck`, `applyGuardrails`, `GUARD_WORDS` (plan 689)
+
+- Status: stable — server only
+- Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`).
+- Pieces: preCheck, applyGuardrails, GUARD_WORDS.
+- When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
+- Known copies: none.

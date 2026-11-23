@@ -240,12 +240,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Keep the word lists as data so a list can change without touching the checks — the five frozen lists with their Hebrew and English fragments — server/constants/frontdesk-guard-words.js
-- [ ] A2: Stop a conversation that needs a person before any model call is made — preCheck with the keyword, active hours and eight turns rules, and its tests — server/services/frontdesk-guardrails.js, server/test/frontdesk-guardrails.test.js
-- [ ] A6: Let a guest stop all messages with one sentence — the removal phrase list, the one fixed answer, the do-not-contact flag, the handoff, and their tests — server/constants/frontdesk-guard-words.js, server/services/frontdesk-guardrails.js, server/services/frontdesk-turn.js, public/assets/data/dictionary.json, server/test/frontdesk-guardrails.test.js
-- [ ] A3: Block every reply the rules forbid — the ordered checks for internals, invented links, deferred promises, completion claims, unsupported prices, the greeting rule and low content, each with its test — server/services/frontdesk-guardrails.js, server/test/frontdesk-guardrails.test.js
-- [ ] A4: Wire the checks into the turn and remember one empty turn — the two calls, the handoff with its sentence, the low-turn flag on the conversation, the suggest mode rules, the blocked log line — server/services/frontdesk-turn.js, shared/schemas/entities/conversation.schema.ts
-- [ ] A5: Prove the whole path with the model faked and record the Contract lines — the added turn and suggest cases, the folder map, the map's extension lines; run every check and paste the evidence — server/test/frontdesk-turn.test.js, server/test/ai-frontdesk-suggest.test.js, server/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Keep the word lists as data so a list can change without touching the checks — the five frozen lists with their Hebrew and English fragments — server/constants/frontdesk-guard-words.js
+- [x] A2: Stop a conversation that needs a person before any model call is made — preCheck with the keyword, active hours and eight turns rules, and its tests — server/services/frontdesk-guardrails.js, server/test/frontdesk-guardrails.test.js
+- [x] A6: Let a guest stop all messages with one sentence — the removal phrase list, the one fixed answer, the do-not-contact flag, the handoff, and their tests — server/constants/frontdesk-guard-words.js, server/services/frontdesk-guardrails.js, server/services/frontdesk-turn.js, public/assets/data/dictionary.json, server/test/frontdesk-guardrails.test.js
+- [x] A3: Block every reply the rules forbid — the ordered checks for internals, invented links, deferred promises, completion claims, unsupported prices, the greeting rule and low content, each with its test — server/services/frontdesk-guardrails.js, server/test/frontdesk-guardrails.test.js
+- [x] A4: Wire the checks into the turn and remember one empty turn — the two calls, the handoff with its sentence, the low-turn flag on the conversation, the suggest mode rules, the blocked log line — server/services/frontdesk-turn.js, shared/schemas/entities/conversation.schema.ts
+- [x] A5: Prove the whole path with the model faked and record the Contract lines — the added turn and suggest cases, the folder map, the map's extension lines; run every check and paste the evidence — server/test/frontdesk-turn.test.js, server/test/ai-frontdesk-suggest.test.js, server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: plan 679's `applyGuardrails` seam, `runTurn`, `handOff`; `hoursCheck` and the Jerusalem helpers.
@@ -272,3 +272,7 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: a completion word is blocked even when a fact contains it.
 - behaviour: a member's "suggest a reply" skips the pre-call rules and gets the handoff sentence as the draft when the reply is blocked.
 - behaviour: the keyword lists are fixed in code; a removal request is matched by fixed phrases before any model call, answered once, and sets do-not-contact.
+- evidence: build → 0; lint → 0; test:ci → 0 (3078 SUCCESS); vitest frontdesk-guardrails + frontdesk-turn + ai-frontdesk-suggest → 72 passed.
+- behaviour: a removal request answers through sendOut at every level (also level 0), as the plan words it — reverse: skip the send in removeGuest at level 0.
+- behaviour: a blocked turn at level 0 stores the handoff sentence as the suggestion and leaves the status bot (the Done-when line); at level 1 the status becomes human.
+- scope extended (approved 689-1): docs/brain/component-families.md — added assistant-guardrails family; reuse-lint --check-registry → ok; lint → 0; test:server → 0

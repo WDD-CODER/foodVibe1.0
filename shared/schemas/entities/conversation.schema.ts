@@ -33,6 +33,8 @@ export const conversationSchema = z.strictObject({
     })
     .optional(),
   suggestion: z.string().max(4000).optional(),
+  /** Plan 689: 1 when the last assistant turn had no content (a second one in a row hands over to a person). */
+  lowTurns: z.literal(1).optional(),
   liveKey: z.string().min(1).optional(),
   test: z.literal(true).optional()
 })

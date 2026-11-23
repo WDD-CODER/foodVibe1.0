@@ -78,4 +78,13 @@ describe('POST /ai/frontdesk/suggest', () => {
   it('rejects a body without a conversationId', async () => {
     expect((await post({})).status).toBe(400);
   });
+
+  it('plan 689: a blocked reply answers 200 with the handoff sentence and leaves the status', async () => {
+    await db('frontDeskProfiles').updateOne({ businessId: 'b1' }, { $set: { assistant: { level: 1, handoffText: 'נעביר לצוות' } } });
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'אבדוק ואחזור אליך', intent: 'smalltalk' }));
+    const res = await post({ conversationId });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ suggestion: 'נעביר לצוות' });
+    expect((await db('conversations').findOne({ _id: conversationId })).status).toBe('bot');
+  });
 });
