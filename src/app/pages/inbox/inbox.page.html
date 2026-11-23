@@ -35,7 +35,7 @@
         <li>
           <a
             class="ibx-row"
-            [class.is-selected]="row._id === id_()"
+            [class.ibx-row--current]="row._id === id_()"
             [routerLink]="['/inbox', row._id]"
             [attr.aria-current]="row._id === id_() ? 'true' : null"
             data-testid="inbox-row"
