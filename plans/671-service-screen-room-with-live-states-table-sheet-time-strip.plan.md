@@ -287,7 +287,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A7: Give the owner the one-tap confirm-mode switch and show staff the mode — the toggle chip, the call of plan 667, reload of the profile, the three messages, staff as text; spec cases — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
 - [x] A8: Record the new pieces where the next plan looks for them — the folder maps and the registry rows for the floor view and the table-state helper — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
 - [x] A9: Write the three screen checks that run in the real app — each spec signs in with signInQa, adds the tables module to the business answer and fulfils the floor-plan, profile and day calls itself; screenshots — e2e/ui/671-1.spec.ts, e2e/ui/671-2.spec.ts, e2e/ui/671-3.spec.ts
-- [ ] A10: Run every check of this plan and hand Dandan the two hand checks — test:ci, test:server, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
+- [x] A10: Run every check of this plan and hand Dandan the two hand checks — test:ci, test:server, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
 - Dependencies: `BookingDataService`, `FloorPlanDataService` (664), `FrontDeskProfileDataService`, `ModuleService`,
