@@ -79,7 +79,7 @@ append the path to the scope block above and retry.
   `res.cloudinary.com` for media); no AI call; no new collection.
 
 ## Reuse Check
-- none — no new component, util, pipe, service or `.c-*` class: `CloudinaryService` gains `uploadVideo(file)` beside `upload(file)` (same unsigned preset, `/video/upload`; no second upload path), `videoSourceKey` in `src/app/core/utils/video-link.util.ts` gains one host, and the venue page reuses `.c-btn-ghost` and `app-loader`.
+- new classes `.video-upload-btn` and `.video-progress` (page-local layout only, venue-detail.component.scss; no `.c-*` class) — no new component, util, pipe, service or `.c-*` class: `CloudinaryService` gains `uploadVideo(file)` beside `upload(file)` (same unsigned preset, `/video/upload`; no second upload path), `videoSourceKey` in `src/app/core/utils/video-link.util.ts` gains one host, and the venue page reuses `.c-btn-ghost` and `app-loader`.
 
 ## Defaults
 
