@@ -203,13 +203,7 @@ router.put('/:id/when', verifyToken, requireModule('frontdesk'), requireModule('
     if (current.kind !== 'table' || current.status !== 'confirmed') return res.status(409).json({ error: 'BAD_STATUS' })
     const ctx = await tablesCtx(req)
     if (tableKeys && !tb.checkTables(ctx.plan, tableKeys)) return res.status(400).json({ error: 'BAD_TABLES' })
-    const r = await tb.rebookTable(db(), {
-      current, ctx, date, time, partySize, tableKeys, now: Date.now(),
-      update: async change => {
-        const w = await db().collection(TYPE).updateOne({ ...scopeOf(req), status: 'confirmed' }, change)
-        if (!w.matchedCount) throw Object.assign(new Error('STATUS_CHANGED'), { code: 'STATUS_CHANGED' })
-      },
-    })
+    const r = await tb.changeWhen(db(), ctx, current, { date, time, partySize, tableKeys }, { now: Date.now(), via: 'member' })
     if (!r.ok) {
       req.log.info({ event: 'bookings.no_table', reason: r.reason, source: 'change' })
       return noTable(res, r)

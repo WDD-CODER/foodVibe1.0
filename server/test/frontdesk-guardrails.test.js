@@ -180,3 +180,23 @@ describe('the removal request (R-02)', () => {
     expect((await db().collection('clients').findOne({ _id: clientId })).doNotContact).toBeUndefined();
   });
 });
+
+describe('table replies (plan 680)', () => {
+  const FACT_TEXT = '[f1] שעות: 12:00–23:00\n[f2] שולחן קבוע ללא שעה';
+  const tables = (over = {}) => ({ tablesOn: true, factIds: ['f1', 'f2'], factsText: FACT_TEXT, ...over });
+
+  it('a time with no used fact containing it is unsupported_time', () => {
+    expect(reasonOf('נתראה ב-20:00', {}, tables())).toBe('unsupported_time');
+    expect(reasonOf('נתראה ב-20:00', { usedFacts: ['f2'] }, tables())).toBe('unsupported_time');
+  });
+  it('a time that stands in a used fact line passes', () => {
+    expect(applyGuardrails(answer('אנחנו פתוחים 12:00–23:00', { usedFacts: ['f1'] }), ctx(tables())).ok).toBe(true);
+  });
+  it('a table number is table_number, in both languages', () => {
+    expect(reasonOf('שולחן 12 מחכה לכם', {}, tables())).toBe('table_number');
+    expect(reasonOf('we kept table 7 for you', {}, tables())).toBe('table_number');
+  });
+  it('the two checks are off when tables are off', () => {
+    expect(applyGuardrails(answer('נתראה ב-20:00'), ctx()).ok).toBe(true);
+  });
+});

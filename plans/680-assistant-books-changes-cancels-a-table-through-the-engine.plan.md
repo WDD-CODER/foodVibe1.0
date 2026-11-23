@@ -333,14 +333,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Teach the model's answer and prompt the three table wishes without letting it speak about room — the book intent, the table fields, the table section and the area list only when table service is on; the prompt test — shared/schemas/front-desk/turn-answer.schema.ts, server/services/frontdesk-prompt.js, server/test/frontdesk-prompt.test.js
-- [ ] A2: Add the fixed sentences the server speaks about tables — the eighteen keys with their Hebrew values — public/assets/data/dictionary.json
-- [ ] A3: Collect what is missing and make an offer only after the engine answered — merge with what is pending, the three questions, the offer with its buttons, alternatives, the sentences for the other engine answers — server/services/frontdesk-tables.js
-- [ ] A4: Turn the guest's tap into a booking or a request by the owner's confirm mode — the four button handlers with no model call, confirm through the booking service, the lost race, the expired offer — server/services/frontdesk-tables.js
-- [ ] A5: Let a guest cancel or move a booking by chat inside the cutoff — find the bookings, the pick buttons, the two service functions and the member route calling the moved body — server/services/frontdesk-tables.js, server/services/table-bookings.js, server/routes/bookings.js
-- [ ] A6: Route the three intents in the turn and block a time or a table number the model made up — the branch in the turn, the level 0 rule, the two reply checks and their tests — server/services/frontdesk-turn.js, server/services/frontdesk-guardrails.js, server/routes/ai/frontdesk.js, server/test/frontdesk-guardrails.test.js, server/test/frontdesk-turn.test.js
-- [ ] A7: Prove every branch on the simulator transport with the model faked — book in both modes, missing fields, full, lost race, other, expired, reasons, cancel, change, level 0, no tables, test data, logs — server/test/frontdesk-tables.test.js
-- [ ] A8: Record the new piece and the Contract lines, then run every check — the folder map, the map's extension lines, the evidence in Execution Notes — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Teach the model's answer and prompt the three table wishes without letting it speak about room — the book intent, the table fields, the table section and the area list only when table service is on; the prompt test — shared/schemas/front-desk/turn-answer.schema.ts, server/services/frontdesk-prompt.js, server/test/frontdesk-prompt.test.js
+- [x] A2: Add the fixed sentences the server speaks about tables — the eighteen keys with their Hebrew values — public/assets/data/dictionary.json
+- [x] A3: Collect what is missing and make an offer only after the engine answered — merge with what is pending, the three questions, the offer with its buttons, alternatives, the sentences for the other engine answers — server/services/frontdesk-tables.js
+- [x] A4: Turn the guest's tap into a booking or a request by the owner's confirm mode — the four button handlers with no model call, confirm through the booking service, the lost race, the expired offer — server/services/frontdesk-tables.js
+- [x] A5: Let a guest cancel or move a booking by chat inside the cutoff — find the bookings, the pick buttons, the two service functions and the member route calling the moved body — server/services/frontdesk-tables.js, server/services/table-bookings.js, server/routes/bookings.js
+- [x] A6: Route the three intents in the turn and block a time or a table number the model made up — the branch in the turn, the level 0 rule, the two reply checks and their tests — server/services/frontdesk-turn.js, server/services/frontdesk-guardrails.js, server/routes/ai/frontdesk.js, server/test/frontdesk-guardrails.test.js, server/test/frontdesk-turn.test.js
+- [x] A7: Prove every branch on the simulator transport with the model faked — book in both modes, missing fields, full, lost race, other, expired, reasons, cancel, change, level 0, no tables, test data, logs — server/test/frontdesk-tables.test.js
+- [x] A8: Record the new piece and the Contract lines, then run every check — the folder map, the map's extension lines, the evidence in Execution Notes — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: the engine (663), the booking service and holds (668), the approve path's request shape (685),
@@ -374,3 +374,8 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: a party the rules do not fit (too big, too small) goes to a person; a closed day or a time too soon, too far or too late gets a fixed sentence asking for another time.
 - behaviour: at level 0 nothing is booked by chat; the server's sentence is the suggested reply.
 - behaviour: a guest with more than three future bookings is handed to a person.
+- behaviour: at level 0 / suggest mode a `change` or `cancel` by chat acts on nothing and hands off (the handoff sentence is the suggestion) — reverse: store the pick or ask sentence as the suggestion instead.
+- behaviour: an unfit manual request sends the rule sentences (`reasonText`) and clears `pending`.
+- `changeWhen(…, { now, via })` keeps the route unchanged: `via` only labels the caller, no history entry is written for a change, as before. `holdsByDate` is now exported from `table-bookings.js` (in scope) for the offer's alternatives.
+- Evidence: `pnpm run build` → 0; `pnpm run lint` → 0; `lint:icons` → 0; `lint:no-native-select` → 0; `pnpm --dir server run lint` → 0 errors; `vitest frontdesk-tables` → 26 pass; `frontdesk-prompt`, `frontdesk-guardrails` green; `grep "assign(\|claim("` frontdesk-tables.js → one `assign(` inside `offer`, no `claim(`.
+- `pnpm run test:server` → 2380 pass, 1 fail `ai-invoice-read.test.js` (log-leak test) under full-suite load; rerun alone → 18/18 pass (load, rerun once).

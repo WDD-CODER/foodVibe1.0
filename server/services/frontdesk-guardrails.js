@@ -19,6 +19,9 @@ const PRICE_RES = [
   /(\d+(?:[.,]\d+)?)\s*(?:₪|ש״ח|ש"ח|שח|שקל|nis)/gi,
 ];
 
+const TIME_IN_TEXT_RE = /\d{1,2}:\d{2}/g;
+const TABLE_NUMBER_RE = /(?:שולחן\s*\d+|table\s*\d+)/i;
+
 const norm = text => String(text ?? '').toLowerCase().replace(NIQQUD_RE, '');
 const hasAny = (text, list) => { const t = norm(text); return list.some(w => t.includes(w)); };
 const trimmed = text => norm(text).replace(PUNCT_RE, '').trim();
@@ -70,6 +73,13 @@ function priceBlocked(reply, ctx, usedFacts) {
   return false;
 }
 
+/** Plan 680: a time in the reply passes only when the same string stands in a fact line the answer used. */
+function timeBlocked(reply, ctx, usedFacts) {
+  const lines = String(ctx.factsText ?? '').split('\n');
+  const usedText = lines.filter(l => usedFacts.some(id => l.startsWith('[' + id + ']'))).join('\n');
+  return (String(reply).match(TIME_IN_TEXT_RE) ?? []).some(t => !usedText.includes(t));
+}
+
 function applyGuardrails(answer, ctx) {
   if (answer.handoff === true) return { ok: false, reason: 'model' };
   let out = { ...answer };
@@ -92,6 +102,10 @@ function applyGuardrails(answer, ctx) {
     if (linksBlocked(reply, ctx)) return { ok: false, reason: 'invented_link' };
     if (hasAny(reply, DEFERRED)) return { ok: false, reason: 'deferred' };
     if (hasAny(reply, COMPLETION)) return { ok: false, reason: 'completion_claim' };
+    if (ctx.tablesOn) {
+      if (timeBlocked(reply, ctx, usedFacts)) return { ok: false, reason: 'unsupported_time' };
+      if (TABLE_NUMBER_RE.test(reply)) return { ok: false, reason: 'table_number' };
+    }
     if (priceBlocked(reply, ctx, usedFacts)) return { ok: false, reason: 'unsupported_price' };
   }
   return { ok: true, answer: { ...out, usedFacts } };

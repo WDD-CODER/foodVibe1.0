@@ -263,6 +263,46 @@ async function moveBookingStatus(db, { businessId, id, status, by, byName, via, 
   return { ok: true, booking, from: current.status }
 }
 
+/**
+ * Plan 680: the body of `PUT /bookings/:id/when`, moved here unchanged so a conversation can call it too. `booking` is the
+ * stored `confirmed` booking; `via` ('member' from the route, 'guest' from the chat) only labels the caller and changes
+ * nothing written. `{ ok: true, set, override }` or the `NO_TABLE` answer; a booking that left `confirmed` meanwhile
+ * throws `STATUS_CHANGED`.
+ */
+async function changeWhen(db, ctx, booking, { date, time, partySize, tableKeys }, { now }) {
+  return rebookTable(db, {
+    current: booking, ctx, date, time, partySize, tableKeys, now,
+    update: async change => {
+      const w = await db.collection('bookings').updateOne(
+        { _id: booking._id, businessId: booking.businessId, ...LIVE, status: 'confirmed' }, change,
+      )
+      if (!w.matchedCount) throw Object.assign(new Error('STATUS_CHANGED'), { code: 'STATUS_CHANGED' })
+    },
+  })
+}
+
+/**
+ * Plan 680: a guest's cancel of a confirmed booking (the same move as plan 676's CANCEL tap): the booking becomes
+ * `cancelled` with a history entry `via: 'guest'`, its holds are released from `now`, and the request it came from
+ * is `cancelled` when it is `approved`. The cutoff is the caller's check. `{ ok: true, booking }` or the move's refusal.
+ */
+async function cancelByGuest(db, booking, { now }) {
+  const moved = await moveBookingStatus(db, {
+    businessId: booking.businessId, id: booking._id, status: 'cancelled', by: 'guest', byName: '', via: 'guest', now,
+  })
+  if (moved.ok && booking.requestId) {
+    await db.collection('requests').updateOne(
+      { _id: booking.requestId, businessId: booking.businessId, status: 'approved' },
+      {
+        $set: { status: 'cancelled', updatedAt: now },
+        $push: { statusHistory: { status: 'cancelled', at: now, by: 'guest', byName: '', via: 'guest' } },
+      },
+    )
+  }
+  return moved
+}
+
 module.exports = {
-  MOVES, moveBookingStatus, WALK_IN_CLIENT_ID, wallOf, loadTableContext, checkTables, overrideOf, reserveTable, bookTable, rebookTable, countBooking, createWalkIn,
+  MOVES, moveBookingStatus, WALK_IN_CLIENT_ID, wallOf, loadTableContext, checkTables, overrideOf, reserveTable, bookTable, rebookTable,
+  changeWhen, cancelByGuest, holdsByDate, countBooking, createWalkIn,
 }

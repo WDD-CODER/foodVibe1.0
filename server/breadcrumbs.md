@@ -42,6 +42,7 @@
 | `services/frontdesk-turn.js` | `runTurn`, `decide`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded |
 | `services/frontdesk-prompt.js` | `buildTurnBody`, `TURN_SYSTEM_PROMPT`, `todayBlock` (plan 679): the English rules and the request body of a turn |
 | `services/frontdesk-guardrails.js` | `preCheck(ctx)`, `applyGuardrails(answer, ctx)`, `isRemoval` (plan 679, filled by 689): the one place of the assistant's blocks |
+| `services/frontdesk-tables.js` | `tablesFor`, `handleTableIntent`, `deliver`, `registerTableButtons` (plan 680, C-AI2): the chat's book / change / cancel dialogue — the engine answers, the dictionary speaks; the buttons `OK`, `ALT`, `OTHER`, `BK` make no model call |
 | `routes/ai/frontdesk.js` | Mounted at `/api/v1/ai/frontdesk` (plan 679): `askTurnModel` (the assistant's one model call), `POST /suggest` and `POST /fix` (plan 682: a wrong assistant message + the right answer → one draft knowledge item, `source: correction`) |
 | `services/knowledge-correction-prompt.js` | `buildCorrectionBody` (plan 682): the English prompt that turns a staff correction into one knowledge item |
 | `utils/fixed-text.js` | `fixedText`, `reasonText` (plan 679): a dictionary sentence as server text |
