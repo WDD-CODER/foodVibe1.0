@@ -378,5 +378,6 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: at level 0 / suggest mode a `change` or `cancel` by chat acts on nothing and hands off (the handoff sentence is the suggestion) — reverse: store the pick or ask sentence as the suggestion instead.
 - behaviour: an unfit manual request sends the rule sentences (`reasonText`) and clears `pending`.
 - `changeWhen(…, { now, via })` keeps the route unchanged: `via` only labels the caller, no history entry is written for a change, as before. `holdsByDate` is now exported from `table-bookings.js` (in scope) for the offer's alternatives.
+- docs/brain/component-families.md: assistant-table-dialogue heading added (approved, ANSWER 680-1).
 - Evidence: `pnpm run build` → 0; `pnpm run lint` → 0; `lint:icons` → 0; `lint:no-native-select` → 0; `pnpm --dir server run lint` → 0 errors; `vitest frontdesk-tables` → 26 pass; `frontdesk-prompt`, `frontdesk-guardrails` green; `grep "assign(\|claim("` frontdesk-tables.js → one `assign(` inside `offer`, no `claim(`.
 - `pnpm run test:server` → 2380 pass, 1 fail `ai-invoice-read.test.js` (log-leak test) under full-suite load; rerun alone → 18/18 pass (load, rerun once).
