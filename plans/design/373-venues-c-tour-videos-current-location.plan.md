@@ -41,6 +41,12 @@ src/app/core/utils/**
 src/app/core/utils/date-input.util.spec.ts
 src/app/core/utils/video-link.util.spec.ts
 docs/brain/component-families.md
+server/routes/geocode.js
+server/app.js
+server/test/geocode.test.js
+server/breadcrumbs.md
+src/app/core/services/venue-data.service.ts
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
