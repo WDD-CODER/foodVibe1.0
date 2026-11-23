@@ -70,6 +70,24 @@ describe('FrontDeskChecklistCardComponent (plan 556)', () => {
     expect(el().querySelector('[data-testid="frontdesk-row-profile_basics"] a')).toBeNull()
   })
 
+  it('links the floor_plan row to the floor plan editor and leaves the hours row on the form (plan 674)', async () => {
+    await setup({
+      businessType: 'restaurant',
+      items: [
+        { key: 'hours', done: false },
+        { key: 'floor_plan', done: false }
+      ],
+      done: 0,
+      total: 2
+    })
+    expect(el().querySelector('[data-testid="frontdesk-row-floor_plan"] a')!.getAttribute('href')).toBe(
+      '/frontdesk/floor-plan'
+    )
+    expect(el().querySelector('[data-testid="frontdesk-row-hours"] a')!.getAttribute('href')).toBe(
+      '/frontdesk/onboarding'
+    )
+  })
+
   it('offers a start button when the business has no profile', async () => {
     await setup(NONE)
     expect(el().querySelector('[data-testid="frontdesk-setup-start"]')!.getAttribute('href')).toBe(

@@ -6,6 +6,11 @@ Earlier (77 runs): plans 219 · merged 197 · parked 19 · fix rounds 98 · esca
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+Earlier (76 runs): plans 218 · merged 196 · parked 19 · fix rounds 97 · escalations 42 · gate fails 26 · ✗ 14 · checker misses 0 — per run: plans 2.87 · parked 0.25 · fix rounds 1.28 · ✗ per plan 0.06
+
+| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-19 | mod-learning | 647 | 1 | 0 | - | 1 | 1 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-data-fix | 648,649 | 2 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-voice-match | 650 | 1 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-20 | mod-count-polish | 651 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
@@ -26,3 +31,7 @@ Earlier (77 runs): plans 219 · merged 197 · parked 19 · fix rounds 98 · esca
 | 2026-11-23 | rs-jobs | 676 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-book-ui-3 | 670 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-conv-ui | 677,678 | 2 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
+| 2026-11-23 | rs-book-ui-3 | 670 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-23 | rs-demo | 674 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
+| 2026-11-23 | rs-jobs | 676 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
+| 2026-11-23 | rs-book-ui-3 | 670 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
