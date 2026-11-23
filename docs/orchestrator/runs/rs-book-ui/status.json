@@ -1,0 +1,338 @@
+{
+  "run": "rs-book-ui",
+  "branch": "orch/rs-book-ui",
+  "base": "main",
+  "startedAt": "2026-11-23T06:04:30.141Z",
+  "mainShaAtStart": "379f8428560f58e207dced99fe7dd9bb6bdc9fd9",
+  "plans": {
+    "670": {
+      "nnn": "670",
+      "title": "The guest booking page: free times as chips, area, \"confirmed\" or \"waiting\", manage the booking",
+      "branch": "feat/670-guest-page-time-chips",
+      "state": "parked",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T06:08:08.477Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T06:37:59.577Z"
+        }
+      },
+      "humanItems": [
+        "Dandan books a table from his phone on the demo restaurant's page: the chips are easy to tap, a taken",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T06:08:08.252Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:08:08.479Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:32:39.094Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:37:59.008Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:37:59.308Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T06:37:59.579Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T06:43:54.639Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T06:49:35.015Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T06:49:35.438Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T06:52:16.580Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T06:55:51.366Z",
+          "state": "parked",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.5,
+      "sha": "148da7c97aa94a1002e3958f6e201ce152b86e66",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1467.3,
+          "tokens": {
+            "input": 3667767,
+            "output": 44362
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 349.8,
+          "tokens": {
+            "input": 113156,
+            "output": 1731
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci",
+        "round 2: gate: pnpm run test:ci"
+      ],
+      "reason": "same reason twice: gate: pnpm run test:ci — ask 670-1 answered: park (by the human)",
+      "park": {
+        "at": "2026-11-23T06:52:04.707Z",
+        "reason": "same reason twice: gate: pnpm run test:ci"
+      },
+      "parkBranch": "park/rs-book-ui-670"
+    },
+    "671": {
+      "nnn": "671",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "shares files with parked 670",
+      "freeDiskGb": 14.5,
+      "history": [
+        {
+          "at": "2026-11-23T06:52:17.920Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:55:53.153Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "672": {
+      "nnn": "672",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "shares files with parked 670",
+      "freeDiskGb": 14.5,
+      "history": [
+        {
+          "at": "2026-11-23T06:52:18.282Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:55:53.978Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "673": {
+      "nnn": "673",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "shares files with parked 670",
+      "freeDiskGb": 14.5,
+      "history": [
+        {
+          "at": "2026-11-23T06:52:18.669Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:55:54.662Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "686": {
+      "nnn": "686",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "shares files with parked 670",
+      "freeDiskGb": 14.5,
+      "history": [
+        {
+          "at": "2026-11-23T06:52:19.028Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:55:55.254Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T06:08:07.994Z",
+      "plan": "670",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-670 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T06:32:35.973Z",
+      "plan": "670",
+      "text": "builder left undone (round 0): [ui] 670-1: written, not run; [ui] 670-2: written, not run; [ui] 670-3: written, not run"
+    },
+    {
+      "at": "2026-11-23T06:32:44.339Z",
+      "plan": "670",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-670 was installed (root)"
+    },
+    {
+      "at": "2026-11-23T06:43:49.649Z",
+      "plan": "670",
+      "text": "builder left undone (round 1): Not rerun: schemas prepare, kit-manifest-check, scope-check, kit-checks, override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, ci-scope-check, log-query"
+    },
+    {
+      "at": "2026-11-23T06:52:16.385Z",
+      "plan": "670",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T06:52:16.909Z",
+      "plan": "670",
+      "text": "ask 670-1 (technical, the Human or the advisor answers): Plan 670 failed twice for the same reason (gate: pnpm run test:ci). Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-23T06:52:19.297Z",
+      "text": "plan 670 asks 670-1 — 672, 673, 686 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-23T06:55:50.641Z",
+      "plan": "670",
+      "text": "ask 670-1 answered by the human: park: leave the plan parked for the Human to replan"
+    },
+    {
+      "at": "2026-11-23T06:55:52.532Z",
+      "plan": "670",
+      "text": "ask 670-1 answered: park (by the human) — plan 670 parked; the question was: Plan 670 failed twice for the same reason (gate: pnpm run test:ci). Leave it parked, or retry it?"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 14.5,
+  "updatedAt": "2026-11-23T06:55:59.609Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: the status page shows the calendar button for every confirmed booking, with a fixed 120-minute length (the status page does not know the kind's length) — reverse: pass the length once the status read carries it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: a failed availability read clears nothing; the chosen hour stays until a successful read says it is taken — reverse: clear time_ in the failed branch of readSlots",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: tapping a next-free or alternative suggestion sets the hour only if the new read shows it free — reverse: set time_ straight away",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: the new classes .pb-group, .pb-time and .pb-time--taken are declared in the plan's Reuse Check and in component-families.md (the kit reuse check asked for it) — reverse: delete them and use bare chips",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "670",
+      "type": "seen",
+      "text": "seen: kit scope-check --diff=origin/orch/rs-book-ui reports SCOPE: out for files this branch never touched (.claude/todo.md, server/routes/generic.js, plans/600-700/697-*); `git diff --name-only origin/orch/rs-book-ui HEAD` lists none of them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "670",
+      "type": "seen",
+      "text": "seen: pnpm run test:ci failed 5 of 2878 in the gate run and passed 2878 of 2878 on a rerun with no code change, so a spec is probably flaky under load. I did not find which 5 specs failed, and the original log was not available to me. The rerun took about 1m12s, against 1m20s in the failed run.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T06:55:59.606Z"
+}
