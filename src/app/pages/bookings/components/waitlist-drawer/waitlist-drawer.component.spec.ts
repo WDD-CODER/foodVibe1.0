@@ -165,6 +165,27 @@ describe('WaitlistDrawerComponent (plan 673)', () => {
     flush()
   }))
 
+  it('"table is ready" says whether the message was sent, with the new hint', fakeAsync(() => {
+    setup([entry('a')])
+    expect(byId('wl-notify')?.getAttribute('title')).toBe('wl_notify_hint_sends')
+    notify.and.resolveTo({ ok: true, entry: entry('a', { status: 'notified' }), sent: true })
+    ;(byId('wl-notify') as HTMLButtonElement).click()
+    flushView()
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalledOnceWith('wl_notify_sent')
+    fixture.destroy()
+    flush()
+  }))
+
+  it('"table is ready" says it only marked when no message was sent', fakeAsync(() => {
+    setup([entry('a')])
+    notify.and.resolveTo({ ok: true, entry: entry('a', { status: 'notified' }), sent: false })
+    ;(byId('wl-notify') as HTMLButtonElement).click()
+    flushView()
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalledOnceWith('wl_notify_marked')
+    fixture.destroy()
+    flush()
+  }))
+
   it('"left" removes the row', fakeAsync(() => {
     setup([entry('a'), entry('b', { joinedAt: NOW - MIN })])
     ;(all('wl-left')[0] as HTMLButtonElement).click()

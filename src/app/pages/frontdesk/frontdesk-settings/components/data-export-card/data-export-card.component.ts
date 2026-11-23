@@ -149,7 +149,7 @@ export class DataExportCardComponent {
       let text: string
       if (kind === 'clients') {
         await this.clients.reloadFromStorage()
-        text = toCsv(this.clientColumns(), this.clients.allClients_())
+        text = toCsv(this.clientColumns(), this.clients.realClients_())
       } else if (kind === 'requests') {
         await this.requests.reloadFromStorage()
         text = toCsv(
@@ -158,7 +158,10 @@ export class DataExportCardComponent {
         )
       } else {
         await this.bookings.reloadFromStorage()
-        text = toCsv(this.bookingColumns(), this.bookings.all_())
+        text = toCsv(
+          this.bookingColumns(),
+          this.bookings.all_().filter((b) => !b.test)
+        )
       }
       downloadCsv(text, `${kind}-${jerusalemToday()}.csv`)
     } catch (err) {

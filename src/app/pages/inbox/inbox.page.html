@@ -1,5 +1,12 @@
 <section class="ibx" dir="rtl" [class.ibx--thread]="id_()" data-testid="inbox-page">
-  <app-page-header class="ibx-header" titleKey="ibx_title" />
+  <app-page-header class="ibx-header" titleKey="ibx_title">
+    @if (canSimulate_()) {
+    <a header-actions class="c-btn-ghost" routerLink="/frontdesk/simulator" data-testid="sim-link">
+      <lucide-icon name="smartphone" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'sim_link' | translatePipe }}</span>
+    </a>
+    }
+  </app-page-header>
 
   <div class="ibx-body">
     <aside class="ibx-list" data-testid="inbox-list">

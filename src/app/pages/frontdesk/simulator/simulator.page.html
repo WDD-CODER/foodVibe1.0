@@ -1,0 +1,200 @@
+<section class="sim" dir="rtl" data-testid="simulator-page">
+  <app-page-header titleKey="sim_title" />
+
+  @if (!allowed_()) {
+  <app-empty-state messageKey="sim_owner_only" icon="smartphone" />
+  } @else {
+  <p class="sim-banner" data-testid="sim-banner">
+    <lucide-icon name="flask-conical" [size]="18"></lucide-icon>
+    <span>{{ 'sim_banner' | translatePipe }}</span>
+  </p>
+
+  <div class="sim-body">
+    <aside class="sim-side" data-testid="sim-side">
+      @if (guest_() && !sideOpen_()) {
+      <div class="sim-collapsed">
+        <span data-testid="sim-guest-label">{{ guestLabel_() }}</span>
+        <button type="button" class="c-btn-ghost" data-testid="sim-change-guest" (click)="changeGuest()">
+          <span class="btn-label">{{ 'sim_change_guest' | translatePipe }}</span>
+        </button>
+      </div>
+      }
+      <div class="sim-side-content" [class.sim-side-content--hidden]="!!guest_() && !sideOpen_()">
+        <h2 class="sim-side-title">{{ 'sim_guests' | translatePipe }}</h2>
+        @if (!listLoaded_()) {
+        <app-loader size="medium" />
+        } @else if (listFailed_() && guests_().length === 0) {
+        <app-empty-state
+          messageKey="sim_load_failed"
+          icon="flask-conical"
+          ctaLabelKey="retry"
+          (ctaClick)="reloadList()"
+        />
+        } @else if (guests_().length === 0) {
+        <app-empty-state messageKey="sim_no_guests" icon="user-plus" />
+        } @else {
+        <ul class="sim-guests">
+          @for (row of guests_(); track row._id) {
+          <li>
+            <button
+              type="button"
+              class="c-list-row sim-guest"
+              data-testid="sim-guest"
+              [attr.aria-current]="guest_()?.conversationId === row._id ? 'true' : null"
+              (click)="choose(row)"
+            >
+              <span class="sim-guest-name">{{ row.client.name }}</span>
+              <span class="sim-guest-phone" dir="ltr">{{ row.client.phone }}</span>
+            </button>
+          </li>
+          }
+        </ul>
+        } @if (!newOpen_()) {
+        <button type="button" class="c-btn-ghost" data-testid="sim-new" (click)="openNew()">
+          <lucide-icon name="user-plus" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'sim_new_guest' | translatePipe }}</span>
+        </button>
+        } @else {
+        <div class="c-input-stack" data-testid="sim-new-fields">
+          <app-form-field label="sim_guest_name" forId="sim-name">
+            <input
+              id="sim-name"
+              class="c-input"
+              type="text"
+              data-testid="sim-name"
+              autocomplete="off"
+              [maxLength]="nameMax"
+              [ngModel]="newName_()"
+              (ngModelChange)="newName_.set($event)"
+            />
+          </app-form-field>
+          <app-form-field label="sim_guest_phone" forId="sim-phone">
+            <input
+              id="sim-phone"
+              class="c-input"
+              type="tel"
+              dir="ltr"
+              data-testid="sim-phone"
+              autocomplete="off"
+              [ngModel]="newPhone_()"
+              (ngModelChange)="newPhone_.set($event)"
+            />
+          </app-form-field>
+          <div class="sim-new-actions">
+            <button
+              type="button"
+              class="c-btn-primary"
+              data-testid="sim-start"
+              [disabled]="!canStart_()"
+              (click)="startNew()"
+            >
+              <span class="btn-label">{{ 'sim_start' | translatePipe }}</span>
+            </button>
+            <button type="button" class="c-btn-ghost" data-testid="sim-new-cancel" (click)="cancelNew()">
+              <span class="btn-label">{{ 'cancel' | translatePipe }}</span>
+            </button>
+          </div>
+        </div>
+        } @if (windowText_(); as w) {
+        <p class="sim-window" data-testid="sim-window">
+          <lucide-icon name="clock" [size]="16"></lucide-icon>
+          <span>{{ w }}</span>
+        </p>
+        } @if (guest_()?.conversationId) {
+        <div class="c-input-stack">
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="sim-job-reminder"
+            [disabled]="!bookingId_() || jobBusy_()"
+            (click)="runJob('reminder')"
+          >
+            <lucide-icon name="fast-forward" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'sim_job_reminder' | translatePipe }}</span>
+          </button>
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="sim-job-late"
+            [disabled]="!bookingId_() || jobBusy_()"
+            (click)="runJob('late')"
+          >
+            <lucide-icon name="fast-forward" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'sim_job_late' | translatePipe }}</span>
+          </button>
+          @if (!bookingId_()) {
+          <p class="sim-hint" data-testid="sim-clock-hint">{{ 'sim_clock_needs_booking' | translatePipe }}</p>
+          }
+        </div>
+        }
+
+        <button type="button" class="c-btn-ghost sim-clear" data-testid="sim-clear" (click)="clearTestData()">
+          <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'sim_clear' | translatePipe }}</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="sim-phone-col">
+      <div class="sim-phone" data-testid="sim-phone-frame">
+        @if (guest_(); as g) {
+        <header class="sim-phone-top">
+          <strong data-testid="sim-phone-name">{{ g.name }}</strong>
+          @if (g.conversationId) {
+          <a
+            class="sim-open-inbox"
+            [routerLink]="['/inbox', g.conversationId]"
+            [attr.aria-label]="'sim_open_inbox' | translatePipe"
+            data-testid="sim-open-inbox"
+          >
+            <lucide-icon name="message-circle" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'sim_open_inbox' | translatePipe }}</span>
+          </a>
+          }
+        </header>
+        <div class="sim-messages" data-testid="sim-thread">
+          @if (thread_(); as t) {
+          <app-chat-thread
+            [messages]="t.messages"
+            [now]="threadNow_()"
+            perspective="guest"
+            [buttonsEnabled]="!tapBusy_()"
+            (buttonTapped)="tap($event)"
+          />
+          } @else if (threadFailed_()) {
+          <app-empty-state messageKey="sim_load_failed" icon="flask-conical" />
+          } @else if (g.conversationId) {
+          <app-loader size="medium" />
+          }
+        </div>
+        <div class="sim-box">
+          <textarea
+            class="c-input sim-text"
+            data-testid="sim-text"
+            rows="2"
+            [maxLength]="textMax"
+            [disabled]="busy_()"
+            [ngModel]="text_()"
+            [placeholder]="'sim_placeholder' | translatePipe"
+            [attr.aria-label]="'sim_placeholder' | translatePipe"
+            (ngModelChange)="text_.set($event)"
+            (keydown)="onKeydown($event)"
+          ></textarea>
+          <button
+            type="button"
+            class="c-btn-primary"
+            data-testid="sim-send"
+            [disabled]="!canSend_()"
+            [attr.aria-label]="'sim_send' | translatePipe"
+            (click)="send()"
+          >
+            <lucide-icon name="send" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'sim_send' | translatePipe }}</span>
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</section>

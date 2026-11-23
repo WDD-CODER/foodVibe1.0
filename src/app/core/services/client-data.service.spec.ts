@@ -56,6 +56,16 @@ describe('ClientDataService', () => {
     expect(storageSpy.query).toHaveBeenCalledTimes(1)
   }))
 
+  it('realClients_ leaves out every client tagged test and keeps the rest', fakeAsync(() => {
+    storageSpy.query.and.returnValue(
+      Promise.resolve([...mockClients, { _id: 'c3', name: 'Sim', phone: '050-0000001', tags: ['test'] } as Client])
+    )
+    void service.reloadFromStorage()
+    tick()
+    expect(service.allClients_().length).toBe(3)
+    expect(service.realClients_().map((c) => c._id)).toEqual(['c1', 'c2'])
+  }))
+
   it('does not fetch in the constructor (deferred load)', () => {
     storageSpy.query.calls.reset()
     TestBed.runInInjectionContext(() => new ClientDataService())

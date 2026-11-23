@@ -56,17 +56,19 @@ export class ConversationDataService {
     }
   }
 
-  async open(id: string): Promise<void> {
+  /** `peek` reads the thread without clearing the business's unread number (the simulator reads as the guest). */
+  async open(id: string, opts: { peek?: boolean } = {}): Promise<void> {
     try {
       const res = await firstValueFrom(
         this.http.get<{ conversation: Conversation; messages: Message[]; now: number }>(
-          `${conversationsUrl()}/${encodeURIComponent(id)}/messages`
+          `${conversationsUrl()}/${encodeURIComponent(id)}/messages`,
+          opts.peek ? { params: { peek: '1' } } : {}
         )
       )
       this.threadSig.set({ conversation: res.conversation, messages: res.messages ?? [] })
       this.threadNowSig.set(res.now ?? Date.now())
       this.threadFailedSig.set(null)
-      this.patchRow(id, { unread: 0 })
+      if (!opts.peek) this.patchRow(id, { unread: 0 })
     } catch (err) {
       const status = (err as { status?: number }).status
       // A failed re-read of the thread that is already open keeps what is shown.

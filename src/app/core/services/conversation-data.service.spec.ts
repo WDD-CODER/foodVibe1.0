@@ -66,6 +66,17 @@ describe('ConversationDataService (plan 677)', () => {
     await p
   })
 
+  it('open(id, { peek: true }) sends peek=1 and leaves the row unread', async () => {
+    await loadList()
+    const p = service.open('a', { peek: true })
+    const req = http.expectOne((r) => r.url.endsWith('/api/v1/conversations/a/messages'))
+    expect(req.request.params.get('peek')).toBe('1')
+    req.flush({ conversation: conv('a'), messages: [msg('m1')], now: 6000 })
+    await p
+    expect(service.conversations_().find((r) => r._id === 'a')?.unread).toBe(2)
+    expect(service.thread_()?.messages.length).toBe(1)
+  })
+
   it('a failed list() keeps the last list and sets listFailed_', async () => {
     await loadList()
     const p = service.list()
