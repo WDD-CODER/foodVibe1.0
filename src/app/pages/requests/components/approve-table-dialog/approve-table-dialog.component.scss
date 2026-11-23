@@ -1,0 +1,30 @@
+.att-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.att-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.att-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.att-label {
+  font-weight: 600;
+}
+
+.att-line {
+  margin: 0;
+}
+
+.att-map {
+  max-block-size: 16rem;
+  overflow: auto;
+}

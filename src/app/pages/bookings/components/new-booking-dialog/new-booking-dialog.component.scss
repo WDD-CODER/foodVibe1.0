@@ -1,0 +1,43 @@
+.nb-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nb-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0.75rem;
+}
+
+.nb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.nb-label {
+  font-weight: 600;
+}
+
+.nb-line {
+  margin: 0;
+}
+
+.nb-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nb-map {
+  position: relative;
+  max-block-size: 14rem;
+  overflow: auto;
+}
+
+.nb-info {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+}

@@ -1,4 +1,4 @@
-import { nextOnTable, stripTimes, tableStatesAt } from './table-state.util'
+import { arrivingNext, freeTablesFor, nextOnTable, stripTimes, tableStatesAt } from './table-state.util'
 
 const MIN = 60000
 const NOW = 1_000_000_000_000
@@ -122,5 +122,55 @@ describe('nextOnTable (plan 686)', () => {
   it('ignores cancelled, no-show, finished and seated bookings', () => {
     const others = ['cancelled', 'no_show', 'finished', 'seated'].map((s) => b(s, NOW + 30 * MIN, ['t1']))
     expect(nextOnTable(others, 't1', NOW)).toBeNull()
+  })
+})
+
+describe('arrivingNext (plan 672)', () => {
+  it('lists confirmed table bookings that start within 90 minutes, earliest first', () => {
+    const later = b('confirmed', NOW + 80 * MIN, ['t1'])
+    const sooner = b('confirmed', NOW + 10 * MIN, ['t2'])
+    const tooFar = b('confirmed', NOW + 91 * MIN, ['t4'])
+    const rows = arrivingNext([later, tooFar, sooner], NOW, 90)
+    expect(rows.map((r) => r.booking)).toEqual([sooner, later])
+    expect(rows.every((r) => !r.late)).toBe(true)
+  })
+
+  it('keeps a booking whose time passed, and flags it late once the hold is over', () => {
+    const past = b('confirmed', NOW - 10 * MIN, ['t1'])
+    const wayPast = b('confirmed', NOW - 20 * MIN, ['t2'])
+    const rows = arrivingNext([past, wayPast], NOW, 90, 15)
+    expect(rows.map((r) => [r.booking, r.late])).toEqual([
+      [wayPast, true],
+      [past, false]
+    ])
+  })
+
+  it('leaves out seated, finished, cancelled and no-show bookings and other kinds', () => {
+    const others = ['seated', 'finished', 'cancelled', 'no_show'].map((s) => b(s, NOW + 10 * MIN, ['t1']))
+    const tasting = b('confirmed', NOW + 10 * MIN, [], { kind: 'tasting' })
+    expect(arrivingNext([...others, tasting], NOW, 90)).toEqual([])
+  })
+})
+
+describe('freeTablesFor (plan 672)', () => {
+  const seatPlan = {
+    tables: [
+      { key: 't1', active: true, minSeats: 2, maxSeats: 4 },
+      { key: 't2', active: true, minSeats: 2, maxSeats: 2 },
+      { key: 't3', active: false, minSeats: 2, maxSeats: 4 },
+      { key: 't4', active: true, minSeats: 1, maxSeats: 6 }
+    ]
+  } as unknown as Parameters<typeof freeTablesFor>[1]
+  const states = {
+    t1: { state: 'free' },
+    t2: { state: 'free' },
+    t3: { state: 'free' },
+    t4: { state: 'seated' }
+  } as Parameters<typeof freeTablesFor>[0]
+
+  it('keeps free, active tables whose seat range holds the party', () => {
+    expect(freeTablesFor(states, seatPlan, 2)).toEqual(['t1', 't2'])
+    expect(freeTablesFor(states, seatPlan, 4)).toEqual(['t1'])
+    expect(freeTablesFor(states, seatPlan, 7)).toEqual([])
   })
 })

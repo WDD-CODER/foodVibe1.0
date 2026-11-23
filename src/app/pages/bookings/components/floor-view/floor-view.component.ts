@@ -29,7 +29,17 @@ import { jerusalemDateTime, jerusalemEpoch } from '@schemas/front-desk/local-tim
 import { openRangesOf } from '@schemas/front-desk/qualify'
 import { tableServiceOf } from '@schemas/front-desk/table-service'
 import { TableSheetComponent } from '../table-sheet/table-sheet.component'
-import { stripTimes, tableStatesAt, type StripTime } from 'src/app/core/utils/table-state.util'
+import { NewBookingDialogComponent } from '../new-booking-dialog/new-booking-dialog.component'
+import { WalkInDialogComponent } from '../walk-in-dialog/walk-in-dialog.component'
+import { ArrivingListComponent, type ArrivingView } from '../service-lists/arriving-list.component'
+import { UnassignedListComponent, type UnassignedView } from '../service-lists/unassigned-list.component'
+import {
+  ARRIVING_WINDOW_MINUTES,
+  arrivingNext,
+  stripTimes,
+  tableStatesAt,
+  type StripTime
+} from 'src/app/core/utils/table-state.util'
 
 const DAY_MS = 86400000
 const POLL_MS = 45000
@@ -61,7 +71,11 @@ const LEGEND: readonly { state: FloorTableState; icon: string }[] = [
     LoaderComponent,
     ScrollRailComponent,
     FloorMapComponent,
-    TableSheetComponent
+    TableSheetComponent,
+    NewBookingDialogComponent,
+    WalkInDialogComponent,
+    ArrivingListComponent,
+    UnassignedListComponent
   ],
   templateUrl: './floor-view.component.html',
   styleUrl: './floor-view.component.scss',
@@ -89,6 +103,13 @@ export class FloorViewComponent {
   /** Plan 686: the booking being moved to another table (move mode), or null. */
   protected readonly movingBookingId_ = signal<string | null>(null)
   protected readonly moveBusy_ = signal(false)
+  /** Plan 672: move mode started from the "not assigned" list (the banner says whom to seat). */
+  private readonly assignMode_ = signal(false)
+  protected readonly newBookingOpen_ = signal(false)
+  /** Plan 672: the walk-in dialog is open; `walkInTable_` is the table of the sheet it came from (or null). */
+  protected readonly walkInOpen_ = signal(false)
+  protected readonly walkInTable_ = signal<string | null>(null)
+  protected readonly arrivedBusy_ = signal<string | null>(null)
   private moveSeq = 0
   protected readonly board_ = signal<DayBoard | null>(null)
   private readonly receivedAt_ = signal(0)
@@ -178,9 +199,32 @@ export class FloorViewComponent {
   protected readonly selectedKeys_ = computed(() => this.movingBooking_()?.tableKeys ?? [])
   protected readonly bannerText_ = computed(() =>
     this.translation
-      .translate('tsh_move_banner')
+      .translate(this.assignMode_() ? 'nb_assign_banner' : 'tsh_move_banner')
       .replace('{name}', this.movingBooking_()?.guestName || this.translation.translate('fv_walk_in'))
   )
+  protected readonly arriving_ = computed<ArrivingView[]>(() => {
+    const board = this.board_()
+    if (!board) return []
+    const moment = this.moment_()
+    const live = this.isLive_()
+    const plan = this.plan_()
+    return arrivingNext(board.bookings, moment, ARRIVING_WINDOW_MINUTES, this.service_().holdMinutes)
+      .filter((r) => live || r.booking.startAt >= moment)
+      .map((row) => ({
+        row,
+        name: row.booking.guestName || this.translation.translate('fv_walk_in'),
+        tables: (row.booking.tableKeys ?? []).map((k) => plan?.tables.find((t) => t.key === k)?.number ?? k).join(', ')
+      }))
+  })
+  protected readonly unassigned_ = computed<UnassignedView[]>(() => {
+    const board = this.board_()
+    if (!board) return []
+    const ids = new Set(board.unassigned)
+    return board.bookings
+      .filter((b) => ids.has(b._id) && b.kind === 'table' && b.status === 'confirmed' && !b.tableKeys?.length)
+      .sort((a, b) => a.startAt - b.startAt)
+      .map((booking) => ({ booking, name: booking.guestName || this.translation.translate('fv_walk_in') }))
+  })
   protected readonly pills_ = computed(() => {
     const own = (this.board_()?.bookings ?? []).filter((b) => b.kind === 'table')
     const sum = (list: typeof own) => list.reduce((total, b) => total + b.partySize, 0)
@@ -240,7 +284,57 @@ export class FloorViewComponent {
 
   protected startMove(bookingId: string): void {
     this.sheetTableKey_.set(null)
+    this.assignMode_.set(false)
     this.movingBookingId_.set(bookingId)
+  }
+
+  /** Plan 672: the "assign" action of a booking with no table starts the same pick-a-table mode as "move". */
+  protected startAssign(bookingId: string): void {
+    this.sheetTableKey_.set(null)
+    this.movingBookingId_.set(bookingId)
+    this.assignMode_.set(true)
+  }
+
+  protected openNewBooking(): void {
+    this.endMove()
+    this.newBookingOpen_.set(true)
+  }
+
+  protected openWalkIn(tableKey: string | null): void {
+    this.endMove()
+    this.walkInTable_.set(tableKey)
+    this.walkInOpen_.set(true)
+  }
+
+  protected closeWalkIn(): void {
+    this.walkInOpen_.set(false)
+    this.walkInTable_.set(null)
+  }
+
+  /** A walk-in was seated: the dialog closes itself, the sheet under it closes here and the board reloads. */
+  protected onWalkInSeated(): void {
+    this.sheetTableKey_.set(null)
+    void this.load(this.date(), false)
+  }
+
+  protected onBookingSaved(): void {
+    void this.load(this.date(), false)
+  }
+
+  /** "Arrived" on the arriving list: seats the booking, with the same answers as the table sheet. */
+  protected async markArrived(bookingId: string): Promise<void> {
+    if (this.arrivedBusy_()) return
+    this.arrivedBusy_.set(bookingId)
+    try {
+      const res = await this.bookingData.setStatus(bookingId, 'seated')
+      if (res.ok) void this.load(this.date(), false)
+      else if (res.code === 'BAD_STATUS' || res.code === 'STATUS_CHANGED') {
+        this.userMsg.onSetErrorMsg(this.translation.translate('bk_bad_status'))
+        void this.load(this.date(), false)
+      } else this.userMsg.onSetErrorMsg(this.translation.translate('rq_decision_failed'))
+    } finally {
+      this.arrivedBusy_.set(null)
+    }
   }
 
   /** Leaves move mode without a write (Escape, the banner's cancel, a changed date or time). */
@@ -248,6 +342,7 @@ export class FloorViewComponent {
   protected endMove(): void {
     this.moveSeq++
     this.movingBookingId_.set(null)
+    this.assignMode_.set(false)
   }
 
   protected onSheetChanged(): void {

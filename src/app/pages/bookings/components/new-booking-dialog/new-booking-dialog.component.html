@@ -1,0 +1,186 @@
+<app-modal-shell
+  size="md"
+  titleKey="nb_title"
+  [sheet]="true"
+  [dismissible]="!isSaving_()"
+  [hasChanges]="dirty_()"
+  (dismissed)="onClose()"
+>
+  <div class="c-modal-body nb-body" data-testid="new-booking-dialog">
+    <div class="c-input-stack">
+      <label for="nb-client">{{ 'client' | translatePipe }}</label>
+      <app-client-picker
+        inputId="nb-client"
+        [allowAdd]="false"
+        [selected]="client_()"
+        (picked)="client_.set($event)"
+        (cleared)="client_.set(null)"
+      />
+    </div>
+
+    @if (!client_()) {
+      <div class="nb-row" data-testid="nb-guest">
+        <app-form-field label="name" forId="nb-name">
+          <input
+            id="nb-name"
+            class="c-input"
+            type="text"
+            autocomplete="off"
+            [maxLength]="nameMax"
+            [ngModel]="name_()"
+            (ngModelChange)="name_.set($event)"
+          />
+        </app-form-field>
+        <app-form-field label="phone" forId="nb-phone">
+          <input
+            id="nb-phone"
+            class="c-input"
+            type="tel"
+            dir="ltr"
+            autocomplete="off"
+            [ngModel]="phone_()"
+            (ngModelChange)="phone_.set($event)"
+          />
+        </app-form-field>
+      </div>
+    }
+
+    <div class="nb-row">
+      <app-form-field label="date" forId="nb-date">
+        <app-date-field inputId="nb-date" [value]="date_()" (valueChange)="setDate($event)" />
+      </app-form-field>
+      <app-form-field label="fd_q_party_size" forId="nb-party">
+        <app-counter [value]="party_()" [min]="1" (valueChange)="setParty($event)" />
+      </app-form-field>
+    </div>
+
+    @if (areaOptions_().length > 2) {
+      <div class="c-input-stack">
+        <label for="nb-area">{{ 'nb_area' | translatePipe }}</label>
+        <app-custom-select
+          triggerId="nb-area"
+          [translateLabels]="false"
+          [options]="areaOptions_()"
+          [ngModel]="area_()"
+          (ngModelChange)="setArea($event)"
+        />
+      </div>
+    }
+
+    <div class="c-input-stack" data-testid="nb-times">
+      <span class="nb-label">{{ 'nb_time' | translatePipe }}</span>
+      @switch (slotsStatus_()) {
+        @case ('loading') {
+          <app-loader />
+        }
+        @case ('failed') {
+          <p class="nb-line" role="alert" data-testid="nb-times-failed">
+            {{ 'nb_times_failed' | translatePipe }}
+            <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="retry()">
+              {{ 'retry' | translatePipe }}
+            </button>
+          </p>
+        }
+        @default {
+          @if (slots_().length === 0) {
+            <p class="nb-line" data-testid="nb-no-times">{{ 'nb_no_times' | translatePipe }}</p>
+          } @else {
+            <div class="nb-chips" role="group" [attr.aria-label]="'nb_time' | translatePipe">
+              @for (s of slots_(); track s.time) {
+                <button
+                  type="button"
+                  class="c-chip c-chip--tab"
+                  dir="ltr"
+                  [attr.data-testid]="'nb-time-' + s.time"
+                  [class.active]="time_() === s.time"
+                  [attr.aria-pressed]="time_() === s.time"
+                  [disabled]="!s.available || isSaving_()"
+                  (click)="setTime(s.time)"
+                >
+                  {{ s.time }}
+                </button>
+              }
+            </div>
+          }
+        }
+      }
+    </div>
+
+    @if (time_() && plan_(); as plan) {
+      <div class="nb-offer" data-testid="nb-offer">
+        @if (hasOffer_() && !noTable_()) {
+          <p class="nb-line" data-testid="nb-offered">{{ offeredLine_() }}</p>
+        } @else if (showNoOffer_()) {
+          <p class="nb-line c-field-error" role="alert" data-testid="nb-no-table">
+            {{ 'nb_no_table' | translatePipe }}
+          </p>
+        }
+        <div class="nb-map">
+          <app-floor-map [plan]="plan" [selectedKeys]="selectedKeys_()" (tableTapped)="onMapTap($event)" />
+          @if (isOwner_()) {
+            <button
+              type="button"
+              class="c-btn-ghost c-btn-ghost--sm nb-info"
+              data-testid="nb-pick-other"
+              [attr.title]="'nb_pick_other' | translatePipe"
+              [attr.aria-label]="'nb_pick_other' | translatePipe"
+            >
+              <lucide-icon name="info" [size]="16" aria-hidden="true"></lucide-icon>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    @if (altChips_().length > 0) {
+      <div class="c-input-stack" data-testid="nb-alternatives">
+        <span class="nb-label">{{ 'nb_alternatives' | translatePipe }}</span>
+        <div class="nb-chips">
+          @for (a of altChips_(); track a.date + a.time) {
+            <button
+              type="button"
+              class="c-chip c-chip--tab"
+              dir="ltr"
+              [attr.data-testid]="'nb-alt-' + a.date + '-' + a.time"
+              [disabled]="isSaving_()"
+              (click)="pickAlternative(a)"
+            >
+              {{ a.label }}
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <app-form-field label="notes" forId="nb-notes">
+      <textarea
+        id="nb-notes"
+        class="c-input"
+        rows="2"
+        [maxLength]="notesMax"
+        [ngModel]="notes_()"
+        (ngModelChange)="notes_.set($event)"
+      ></textarea>
+    </app-form-field>
+
+    @if (saveFailed_()) {
+      <span class="c-field-error" role="alert" data-testid="nb-save-failed">{{
+        'nb_save_failed' | translatePipe
+      }}</span>
+    }
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" data-testid="nb-cancel" [disabled]="isSaving_()" (click)="onClose()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="nb-save"
+      [disabled]="!valid_() || isSaving_()"
+      (click)="onSave()"
+    >
+      {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>

@@ -108,3 +108,44 @@ export function stripTimes(
   }
   return out
 }
+
+/** Plan 672: how far ahead the "arriving next" list looks. */
+export const ARRIVING_WINDOW_MINUTES = 90
+/** The default minutes a table is kept for a guest who has not come (the C-BOOK2 hold). */
+const DEFAULT_HOLD_MINUTES = 15
+
+export interface ArrivingRow<T> {
+  booking: T
+  /** True when `moment` is past the start plus the hold. */
+  late: boolean
+}
+
+/**
+ * Plan 672: the `confirmed` table bookings that start within `windowMinutes` of `moment`, or started already and are
+ * not seated, cancelled or no-show — earliest first, each with a `late` flag (`moment > startAt + holdMinutes`).
+ */
+export function arrivingNext<T extends Pick<Booking, 'kind' | 'status' | 'startAt'>>(
+  bookings: readonly T[],
+  moment: number,
+  windowMinutes: number = ARRIVING_WINDOW_MINUTES,
+  holdMinutes: number = DEFAULT_HOLD_MINUTES
+): ArrivingRow<T>[] {
+  return bookings
+    .filter((b) => b.kind === 'table' && b.status === 'confirmed' && b.startAt <= moment + windowMinutes * MINUTE_MS)
+    .sort((a, b) => a.startAt - b.startAt)
+    .map((booking) => ({ booking, late: moment > booking.startAt + holdMinutes * MINUTE_MS }))
+}
+
+/**
+ * Plan 672: the keys of the tables that are `free` now and whose seat range holds the party — the choices of the
+ * walk-in dialog. Order follows the plan.
+ */
+export function freeTablesFor(
+  states: Record<string, { state: TableState }>,
+  plan: Pick<FloorMapPlan, 'tables'>,
+  partySize: number
+): string[] {
+  return plan.tables
+    .filter((t) => t.active && states[t.key]?.state === 'free' && t.minSeats <= partySize && partySize <= t.maxSeats)
+    .map((t) => t.key)
+}

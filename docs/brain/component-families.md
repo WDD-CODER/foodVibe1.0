@@ -493,9 +493,25 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 671
 - Use: `src/app/pages/bookings/components/floor-view/` · `app-floor-view` (inputs `date`, `at`; outputs `atChange`, `tableTapped`): the room in `app-floor-map` with one live state per table (the map's `details` input carries the state label, name and time), the 30-minute strip in `app-scroll-rail`, the summary pills, the legend and the owner's confirm-mode toggle; it reloads the day every 45 s on the server's clock. `BookingDataService.dayBoard(date)` reads the day.
 - Classes: `.fv`, `.fv__pills`, `.fv__strip`, `.fv__legend`, `.fv__draw`, `.fv__body`, `.fv__room`, `.fv__side` (scoped to the view's own stylesheet); the map's `.floor-map__name`, `.floor-map__time` put a booking's name and time on a table.
-- When: the host's service screen (`/bookings?view=floor`). Plans 672 and 673 add the lists and the waiting list inside it.
+- When: the host's service screen (`/bookings?view=floor`). Plan 672 adds the two lists (`service-lists`) and the phone-booking and walk-in buttons; plan 673 adds the waiting list.
 - Plan 686: a tap on a table opens `app-table-sheet` (`src/app/pages/bookings/components/table-sheet/`, a bottom sheet in `app-modal-shell [sheet]`: the table, what is on it now, the next booking, and seat / finish / no-show / cancel / move for the live moment). "Move" puts the view in move mode: the banner (`.fv__move`) and a tap on another table call `BookingDataService.setTables`; Escape or the banner's cancel leave it. `nextOnTable` in `table-state.util.ts` finds the next booking of a table.
 - Known copies: none.
+
+### booking-dialogs — the phone booking, walk-in and no-table dialogs of the service screen
+
+- Status: stable — plan 672
+- Use: `src/app/pages/bookings/components/new-booking-dialog/` · `app-new-booking-dialog` (input `date`; outputs `saved`, `closed`): the phone booking — client or new guest, date, party, area, time chips from the availability call, the engine's offered table on a small `app-floor-map` (the owner may tap another), the 409 alternatives as chips. `src/app/pages/bookings/components/walk-in-dialog/` · `app-walk-in-dialog` (inputs `tableKey`, `plan`, `states`; outputs `seated`, `closed`): seats a walk-in on the table of the sheet or one tapped free table. `src/app/pages/requests/components/approve-table-dialog/` · `app-approve-table-dialog` (inputs `request`, `alternatives`, `busy`; output `chosen`): shown when approving a table request answers `NO_TABLE`; the page makes the approve call. All three are `app-modal-shell [sheet]`.
+- Classes: `.nb-*`, `.wlk-*`, `.att-*` (scoped to each dialog's stylesheet); no new `.c-*` class.
+- When: a host creates, seats or rescues a table booking from the service screen or the requests page — never a second copy.
+- Known copies: none.
+
+### service-lists — "arriving next" and "not assigned" beside the room
+
+- Status: stable — plan 672
+- Use: `src/app/pages/bookings/components/service-lists/` · `app-arriving-list` (inputs `rows`, `live`, `busyId`; output `arrived`) and `app-unassigned-list` (inputs `rows`, `live`; output `assign`): single-line `.c-list-row` rows with `app-empty-state`; the rules are `arrivingNext` and `freeTablesFor` in `table-state.util.ts`.
+- Classes: `.sl`, `.sl__title`, `.sl__rows`, `.sl__row`, `.sl__name`, `.sl__party`, `.sl__act` (scoped to each list's stylesheet).
+- When: a short read-only side panel of the service screen — never a second list shell.
+- Known copies: the two lists repeat one small stylesheet so each component owns its styles.
 
 ### table-sheet — the sheet of one table on the service screen
 

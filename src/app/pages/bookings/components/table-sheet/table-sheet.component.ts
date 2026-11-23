@@ -48,6 +48,8 @@ export class TableSheetComponent {
   readonly closed = output<void>()
   readonly changed = output<void>()
   readonly moveRequested = output<string>()
+  /** Plan 672: the host wants to seat a walk-in on this (free) table. */
+  readonly walkInRequested = output<string>()
 
   protected readonly busy_ = signal(false)
 
@@ -111,6 +113,14 @@ export class TableSheetComponent {
     } finally {
       this.busy_.set(false)
     }
+  }
+
+  /** Plan 672: a free, active table can take a walk-in (offered at the live moment only). */
+  protected readonly canWalkIn_ = computed(() => !this.notActive_() && !this.now_())
+
+  protected walkIn(): void {
+    if (this.busy_() || !this.live()) return
+    this.walkInRequested.emit(this.table().key)
   }
 
   protected move(): void {
