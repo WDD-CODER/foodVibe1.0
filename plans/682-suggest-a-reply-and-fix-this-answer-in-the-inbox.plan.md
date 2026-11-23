@@ -158,6 +158,7 @@ append the path to the scope block above and retry.
 - `ConversationDataService.suggest` and `.fixAnswer` — family: http — rung: 2 — why: two methods on the existing client of plan 677
 - the "fix this answer" action under a message — family: none — rung: 4 — why: `app-chat-thread` (plan 677) gains one optional input and one output; no new component
 - `knowledge-correction-prompt.js` — family: none — rung: 4 — why: a prompt file in the pattern of `server/services/knowledge-import-prompt.js`
+- classes `.sg`, `.sg-head`, `.sg-text`, `.sg-actions`, `.sg-fail`, `.sg-error`, `.sg-dismiss` of the suggestion bar and `.fx`, `.fx-quote`, `.fx-counter`, `.fx-issue` of the fix dialog — family: modal-shell — rung: 1 — why: layout only inside the two components above; no `.c-*` class defined
 
 ## Defaults
 

@@ -861,6 +861,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any test of the conversation channel from inside the app; a second simulator screen is never added.
 - Known copies: none.
 
+### inbox-assistant-help — `SuggestionBarComponent`, the "fix this answer" action under a message, `knowledge-correction-prompt.js` (plan 682)
+
+- Status: stable
+- Use: `src/app/pages/inbox/components/suggestion-bar/` (`app-suggestion-bar`: a drafted reply with send / edit / dismiss, or the ask button); the "fix this answer" action is `fixable` / `fixRequested` on `app-chat-thread` plus `app-fix-answer-dialog` (`app-modal-shell`); the server side is `POST /api/v1/ai/frontdesk/fix` with the prompt of `server/services/knowledge-correction-prompt.js` (`buildCorrectionBody`).
+- Pieces: SuggestionBarComponent, FixAnswerDialogComponent, fixable, fixRequested, buildCorrectionBody.
+- When: a member asks the assistant for a reply, or turns a wrong assistant answer into a draft knowledge item.
+- Known copies: none.
+
 ### assistant-turn — `keyFor`, `fixedText`, `turnAnswerSchema`, `buildTurnBody`, `runTurn`, `applyGuardrails`, `askTurnModel` (plan 679)
 
 - Status: stable — server only
