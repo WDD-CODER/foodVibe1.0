@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (71 runs): plans 208 · merged 186 · parked 19 · fix rounds 87 · escalations 40 · gate fails 20 · ✗ 14 · checker misses 0 — per run: plans 2.93 · parked 0.27 · fix rounds 1.23 · ✗ per plan 0.07
+Earlier (72 runs): plans 210 · merged 188 · parked 19 · fix rounds 89 · escalations 40 · gate fails 22 · ✗ 14 · checker misses 0 — per run: plans 2.92 · parked 0.26 · fix rounds 1.24 · ✗ per plan 0.07
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-19 | mod-diag | 633,634 | 2 | 0 | - | 2 | 0 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-stock | 636,637 | 2 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-fixes | 641,642,643,644 | 4 | 0 | - | 5 | 1 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-fixes-2 | 645 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (71 runs): plans 208 · merged 186 · parked 19 · fix rounds 87 · esca
 | 2026-11-22 | rs-engine | 663,664 | 2 | 0 | - | 2 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-22 | fin-audit | 660,661 | 1 | 1 | same-reason-twice | 1 | 1 | 2 | ok | 0 | 0 | 0 |
 | 2026-11-22 | fin-audit-3 | 661 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-22 | rs-floor-ui | 665,666,667,684 | 4 | 0 | - | 0 | 0 | 1 | ok | - | - | - |
+| 2026-11-22 | rs-floor-ui | 665,666,667,684 | 4 | 0 | - | 0 | 0 | 1 | ok | 0 | 0 | 0 |
+| 2026-11-23 | rs-book-srv | 668,669,685 | 3 | 0 | - | 1 | 2 | 0 | ok | - | - | - |
