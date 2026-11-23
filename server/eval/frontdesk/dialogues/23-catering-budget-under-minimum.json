@@ -1,0 +1,29 @@
+{
+  "id": "23",
+  "title": "A budget a little under the minimum: a borderline request for the owner",
+  "businessType": "catering",
+  "tags": ["request"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00", "rules": { "event": { "minBudgetPerGuest": 200 } } },
+  "turns": [
+    {
+      "guest": "חתונה ל-200 איש ב-10 ביוני בגן אירועים בגדרה, התקציב שלנו 190 לאורח",
+      "script": {
+        "reply": "תודה",
+        "intent": "request",
+        "kind": "event",
+        "collected": { "date": "2030-06-10", "party_size": "200", "event_type": "wedding", "location": "גן אירועים בגדרה", "budget_per_guest": "190" },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "ask", "text": "התקציב מעט מתחת למינימום, כדאי לברר אם יש גמישות" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "request",
+    "collected": { "budget_per_guest": "190" },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

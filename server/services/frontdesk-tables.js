@@ -65,6 +65,18 @@ const dataOf = d => {
 };
 const bookPending = (data, now) => ({ kind: 'book', data, at: now });
 
+const SUGGESTED_ACTIONS = new Set(['approve', 'decline', 'ask']);
+/**
+ * Plan 681: the model's advice on a request as it may be stored (request.suggested), or undefined. An action that is
+ * not one of the three drops it all; the text is put on one line (breaks and tabs → one space), cut to 600, dropped empty.
+ */
+function cleanSuggested(raw, at) {
+  if (!raw || typeof raw !== 'object' || !SUGGESTED_ACTIONS.has(raw.action) || !Number.isFinite(at)) return undefined;
+  const line = typeof raw.text === 'string' ? raw.text.replace(/[\r\n\t]+/g, ' ').trim().slice(0, 600).trim() : '';
+  return { action: raw.action, ...(line && { text: line }), at };
+}
+const withSuggested = (data, suggested) => (suggested ? { ...data, suggested } : data);
+
 const templateOut = (name, values) => {
   const { buttons, ...t } = templateMessage(name, values);
   return { kind: 'template', template: t, ...(buttons && { buttons }) };
@@ -121,9 +133,12 @@ async function offer(db, conversation, data, tables, { now, log }) {
 }
 
 /** Book: merge what is pending with what the guest just said, ask for what is missing, else offer. */
-async function bookStep(db, conversation, answer, tables, { now, log }) {
-  const prior = fresh(conversation.pending, 'book', now) ? dataOf(conversation.pending.data) : {};
-  const data = { ...prior, ...cleanTable(answer.collected && answer.collected.table, tables.plan) };
+async function bookStep(db, conversation, answer, tables, { now, log, suggested }) {
+  const live = fresh(conversation.pending, 'book', now);
+  const prior = live ? dataOf(conversation.pending.data) : {};
+  const was = live ? conversation.pending.data.suggested : undefined;
+  const keep = suggested ?? (was ? cleanSuggested(was, was.at) : undefined);
+  const data = withSuggested({ ...prior, ...cleanTable(answer.collected && answer.collected.table, tables.plan) }, keep);
   const asks = [['date', 'fd_ai_ask_date'], ['partySize', 'fd_ai_ask_party'], ['time', 'fd_ai_ask_time']];
   const missing = asks.find(([field]) => data[field] === undefined);
   if (missing) return { outbound: text(missing[1]), pending: bookPending(data, now) };
@@ -200,8 +215,8 @@ async function manageStep(db, conversation, answer, tables, { now, log, write })
  * `ctx` is `{ tables, now, write, log }`; with `write: false` (level 0, suggest mode) nothing is changed here.
  */
 async function handleTableIntent(db, conversation, answer, ctx) {
-  const { tables, now, write, log = logger } = ctx;
-  if (answer.intent === 'book') return bookStep(db, conversation, answer, tables, { now, log });
+  const { tables, now, write, log = logger, suggested } = ctx;
+  if (answer.intent === 'book') return bookStep(db, conversation, answer, tables, { now, log, suggested });
   return manageStep(db, conversation, answer, tables, { now, log, write });
 }
 
@@ -232,7 +247,7 @@ async function confirm(db, conversation, data, tables, { now, log }) {
       log.info({ event: 'frontdesk.table.book_failed', code: err && err.code });
       return handoffRes();
     }
-    if (!r.ok) return offer(db, conversation, dataOf(data), tables, { now, log });
+    if (!r.ok) return offer(db, conversation, withSuggested(dataOf(data), data.suggested), tables, { now, log });
     if (!conversation.test) await tb.countBooking(db, businessId, conversation.clientId, now);
     log.info({ event: 'frontdesk.table.booked', partySize });
     return {
@@ -253,7 +268,9 @@ async function confirm(db, conversation, data, tables, { now, log }) {
   const { request } = await createRequest(db, businessId, tables.profile, {
     kind: 'table', clientId: conversation.clientId, wanted, answers, ...(conversation.test && { test: true }),
   }, { channel: conversation.channel, actor: 'public:' + conversation.channel, via: 'ai', source: 'whatsapp' });
-  log.info({ event: 'frontdesk.table.request', partySize });
+  const suggested = data.suggested ? cleanSuggested(data.suggested, data.suggested.at) : undefined;
+  if (suggested) await colOf(db, 'requests').updateOne({ _id: request._id, businessId }, { $set: { suggested } });
+  log.info({ event: 'frontdesk.table.request', partySize, suggested: !!suggested });
   return { outbound: text('fd_ai_will_confirm'), clear: true, set: { requestId: request._id } };
 }
 
@@ -292,7 +309,7 @@ const offerOf = (conv, token, at) => {
   const p = conv.pending;
   if (!fresh(p, 'book', at)) return null;
   const o = Array.isArray(p.data.offers) ? p.data.offers[Number(token) - 1] : null;
-  return o ? { ...dataOf(p.data), date: o.date, time: o.time } : null;
+  return o ? withSuggested({ ...dataOf(p.data), date: o.date, time: o.time }, p.data.suggested) : null;
 };
 
 const tapOk = (db, { conversation, token, at }) => onTap(db, conversation, at, async (conv, tables) => {
@@ -336,4 +353,4 @@ function registerTableButtons(register = registerButton) {
 }
 registerTableButtons();
 
-module.exports = { tablesFor, handleTableIntent, deliver, registerTableButtons, EXPIRE_MS };
+module.exports = { tablesFor, handleTableIntent, deliver, registerTableButtons, cleanSuggested, EXPIRE_MS };

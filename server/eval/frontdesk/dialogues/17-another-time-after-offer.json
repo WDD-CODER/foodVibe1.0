@@ -1,0 +1,21 @@
+{
+  "id": "17",
+  "title": "The guest taps another time after the offer and is asked for a time",
+  "businessType": "restaurant",
+  "tags": ["tables", "book"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 1, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "שולחן ל-3 מחר ב-19:00",
+      "script": { "reply": "רגע", "intent": "book", "collected": { "table": { "date": "2030-01-08", "time": "19:00", "partySize": 3 } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "button": "OTHER" }
+  ],
+  "expected": {
+    "intent": "book",
+    "collected": { "table": { "partySize": 3 } },
+    "serverAction": "none",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

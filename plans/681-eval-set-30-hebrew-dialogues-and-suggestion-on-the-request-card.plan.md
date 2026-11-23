@@ -312,13 +312,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Fix the shape of one test dialogue so thirty of them can be data, not code — the strict dialogue schema and the fixed fourteen-table room, reusing the engine fixture — server/eval/frontdesk/dialogue-schema.js, server/eval/frontdesk/room14.js
-- [ ] A2: Write the thirty Hebrew dialogues with what the server is expected to do in each — twenty restaurant, five caterer, five private chef, every tag covered, each with its scripted model answers — server/eval/frontdesk/dialogues/
-- [ ] A3: Build the runner that plays a dialogue through the real pipeline and scores the result — loadDialogues, runDialogue on the simulator channel with a test business, scoreDialogue from the stored rows, scripted and live modes, the command line with its exit codes — server/scripts/ai-eval-frontdesk.js
-- [ ] A4: Prove the runner and the set in the test suite with no key and no network — file counts and tags, all thirty passing on the scripted model, one call per model turn, test rows only — server/test/frontdesk-eval.test.js
-- [ ] A5: Let the assistant say what it would do with a request it created — the optional suggested field in the answer schema, the two prompt sentences, the server's cleaning and writing rule, the existing turn tests kept green — server/services/frontdesk-turn.js, server/services/frontdesk-prompt.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-suggested.test.js
-- [ ] A6: Show the suggestion on the request card and prove it reaches the decision record — the line under the verdict, three dictionary keys, the card spec, the decision-row test — src/app/pages/requests/components/request-card/request-card.component.html, src/app/pages/requests/components/request-card/request-card.component.spec.ts, public/assets/data/dictionary.json
-- [ ] A7: Check the card in the running app and record what changed — one screen check with the API answered by the spec, the folder map lines, the map's extension line — e2e/ui/681-1.spec.ts, server/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Fix the shape of one test dialogue so thirty of them can be data, not code — the strict dialogue schema and the fixed fourteen-table room, reusing the engine fixture — server/eval/frontdesk/dialogue-schema.js, server/eval/frontdesk/room14.js
+- [x] A2: Write the thirty Hebrew dialogues with what the server is expected to do in each — twenty restaurant, five caterer, five private chef, every tag covered, each with its scripted model answers — server/eval/frontdesk/dialogues/
+- [x] A3: Build the runner that plays a dialogue through the real pipeline and scores the result — loadDialogues, runDialogue on the simulator channel with a test business, scoreDialogue from the stored rows, scripted and live modes, the command line with its exit codes — server/scripts/ai-eval-frontdesk.js
+- [x] A4: Prove the runner and the set in the test suite with no key and no network — file counts and tags, all thirty passing on the scripted model, one call per model turn, test rows only — server/test/frontdesk-eval.test.js
+- [x] A5: Let the assistant say what it would do with a request it created — the optional suggested field in the answer schema, the two prompt sentences, the server's cleaning and writing rule, the existing turn tests kept green — server/services/frontdesk-turn.js, server/services/frontdesk-prompt.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-suggested.test.js
+- [x] A6: Show the suggestion on the request card and prove it reaches the decision record — the line under the verdict, three dictionary keys, the card spec, the decision-row test — src/app/pages/requests/components/request-card/request-card.component.html, src/app/pages/requests/components/request-card/request-card.component.spec.ts, public/assets/data/dictionary.json
+- [x] A7: Check the card in the running app and record what changed — one screen check with the API answered by the spec, the folder map lines, the map's extension line — e2e/ui/681-1.spec.ts, server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 - [ ] A8: Run every check of this plan and hand Dandan the live run — test:server, test:ci, build, both lints, log-query, the dry run; evidence into Execution Notes; then the one hand check
 
 ## Technical Considerations
@@ -352,3 +352,14 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: the set is 20 restaurant / 5 caterer / 5 private chef dialogues, not 10 / 10 / 10 — RS-11 needs at least 12 table dialogues and only a restaurant has tables.
 - behaviour: `promptfoo` is not used (D10 fallback): the dialogues are judged by what the server wrote, which needs the pipeline and a database in one process; a script in the pattern of `ai-eval-recipes.js` does that with no new dependency.
 - behaviour: the suggestion comes from the model in the same call as the turn; an invalid action stores no suggestion (no fallback to the verdict).
+- scope extended: server/services/frontdesk-tables.js — approved by the Human (ask 681-1): the table dialogue's `manual` / over-the-limit request is created on the `OK` tap with no model call, so the suggestion rides `pending.data.suggested` and `confirm()` writes it.
+- behaviour: the business type key is `catering` (the template key), not `caterer` — the plan says to use the real key.
+- behaviour: dialogue 19 (no floor plan) expects `request`, not `handoff`: plan 680 treats `no_plan` as plan 679's table request path, and the eval scores what the server does — reverse: make `no_plan` hand off in frontdesk-tables.js and flip the file's `serverAction`.
+- behaviour: dialogue 28 (a date inside the private chef's 72-hour lead time) expects `none` (the rule sentence, no request): an unfit request is never written (R-10) — reverse: change the dialogue to a borderline case.
+- behaviour: dialogue setup gains two optional fields beyond the plan's list, `closedDates` (dialogue 10) and `rules` (dialogue 23's minimum budget), and `expected` gains `suggestion: true` (dialogue 20, level 0) — reverse: drop them from dialogue-schema.js and those three files.
+- behaviour: buttons in a dialogue are the real ids of plan 680 (`OK`, `OTHER`, `ALT:n`, `BK:n`); a pre-existing booking holds at most four tables (C-BOOK), so dialogue 05 fills the evening with four bookings.
+- behaviour: the suggestion's `at` is the clock of the model turn that gave it (for a table request: the offer turn, not the OK tap) — reverse: set `at` in confirm().
+- behaviour: the eval's turn clock is injected through `setTurnHandler` and the button `at`; `createRequest` keeps its own `Date.now()` (out of scope), so the dialogues use 2030 dates as the existing table tests do.
+- evidence: `node server/scripts/ai-eval-frontdesk.js --dry` → exit 0, `30 dialogues ok`.
+- evidence: `npx vitest run test/frontdesk-eval.test.js` → exit 0, 39 passed (30 dialogues scripted + 9).
+- evidence: `npx vitest run test/frontdesk-suggested.test.js test/frontdesk-turn.test.js test/frontdesk-tables.test.js test/frontdesk-prompt.test.js` → exit 0, 73 passed.

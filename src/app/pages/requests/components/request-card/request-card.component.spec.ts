@@ -84,6 +84,23 @@ describe('RequestCardComponent (plan 552)', () => {
     expect(el().textContent).toContain('יום הולדת')
   })
 
+  it("shows the assistant's suggestion with its line under the verdict (plan 681)", () => {
+    setup(
+      request({
+        suggested: { action: 'approve', text: 'שולחן פנוי, קבוצה בגודל רגיל', at: 2000 }
+      } as Partial<FrontDeskRequest>)
+    )
+    const line = el().querySelector('[data-testid="request-suggested"]')
+    expect(line).toBeTruthy()
+    expect(line?.querySelector('.c-chip--tag')?.textContent).toContain('rq_suggested_approve')
+    expect(line?.textContent).toContain('שולחן פנוי, קבוצה בגודל רגיל')
+  })
+
+  it('shows no suggestion line for a request without one (plan 681)', () => {
+    setup(request())
+    expect(el().querySelector('[data-testid="request-suggested"]')).toBeNull()
+  })
+
   it('builds the call and WhatsApp links from the phone', () => {
     setup(request())
     const hrefs = Array.from(el().querySelectorAll('a')).map((a) => a.getAttribute('href'))

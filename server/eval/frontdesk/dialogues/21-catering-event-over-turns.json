@@ -1,0 +1,41 @@
+{
+  "id": "21",
+  "title": "A catering event request collected over two turns",
+  "businessType": "catering",
+  "tags": ["request"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "שלום, אנחנו מתכננים בר מצווה ל-120 איש",
+      "script": {
+        "reply": "מזל טוב! לאיזה תאריך, ואיפה האירוע יתקיים?",
+        "intent": "request",
+        "kind": "event",
+        "collected": { "party_size": "120", "event_type": "bar_mitzvah" },
+        "missing": ["date", "location"],
+        "handoff": false,
+        "usedFacts": []
+      }
+    },
+    {
+      "guest": "ב-15 במרץ, באולם בהרצליה",
+      "script": {
+        "reply": "תודה",
+        "intent": "request",
+        "kind": "event",
+        "collected": { "party_size": "120", "event_type": "bar_mitzvah", "date": "2030-03-15", "location": "אולם בהרצליה" },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "approve", "text": "אירוע גדול מספיק ומועד רחוק מספיק" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "request",
+    "collected": { "date": "2030-03-15", "party_size": "120", "location": "אולם בהרצליה" },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

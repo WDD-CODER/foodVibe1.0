@@ -1,0 +1,14 @@
+{
+  "id": "29",
+  "title": "A question with no fact: the assistant hands over",
+  "businessType": "private_chef",
+  "tags": ["question", "handoff"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "אתם מכינים גם עוגות לחתונה?",
+      "script": { "reply": "", "intent": "question", "collected": {}, "missing": [], "handoff": true, "handoffReason": "not in the facts", "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "question", "serverAction": "handoff", "handoff": true, "lastOut": { "kind": "text" } }
+}

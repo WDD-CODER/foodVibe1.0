@@ -1,0 +1,21 @@
+{
+  "id": "14",
+  "title": "Opening hours, answered from a fact",
+  "businessType": "restaurant",
+  "tags": ["question"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "floor": "room14",
+    "facts": [{ "topic": "hours", "question": "מה שעות הפתיחה?", "answer": "פתוח כל יום 12:00-23:00" }]
+  },
+  "turns": [
+    {
+      "guest": "עד מתי אתם פתוחים היום?",
+      "script": { "reply": "אנחנו פתוחים כל יום 12:00-23:00.", "intent": "question", "collected": {}, "missing": [], "handoff": false, "usedFacts": ["f1"] }
+    }
+  ],
+  "expected": { "intent": "question", "serverAction": "none", "handoff": false, "lastOut": { "kind": "text" } }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "10",
+  "title": "The guest asks for a date the restaurant is closed",
+  "businessType": "restaurant",
+  "tags": ["tables", "closed_day"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "floor": "room14",
+    "closedDates": ["2030-01-08"]
+  },
+  "turns": [
+    {
+      "guest": "שולחן לזוג מחר ב-19:00?",
+      "script": { "reply": "רגע", "intent": "book", "collected": { "table": { "date": "2030-01-08", "time": "19:00", "partySize": 2 } }, "missing": [], "handoff": false, "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "book", "serverAction": "none", "handoff": false, "lastOut": { "kind": "text" } }
+}

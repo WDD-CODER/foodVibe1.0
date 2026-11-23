@@ -1,0 +1,15 @@
+{
+  "id": "16",
+  "title": "A complaint keyword hands over before any model call",
+  "businessType": "restaurant",
+  "tags": ["handoff"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 1, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "היי",
+      "script": { "reply": "היי! במה אפשר לעזור?", "intent": "smalltalk", "collected": {}, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "guest": "אני רוצה להגיש תלונה על השירות שקיבלנו אתמול" }
+  ],
+  "expected": { "intent": "smalltalk", "serverAction": "handoff", "handoff": true, "lastOut": { "kind": "text" } }
+}
