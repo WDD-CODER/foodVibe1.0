@@ -19,7 +19,7 @@
     </div>
 
     @if (!client_()) {
-      <div class="nb-row" data-testid="nb-guest">
+      <div class="nb-fields" data-testid="nb-guest">
         <app-form-field label="name" forId="nb-name">
           <input
             id="nb-name"
@@ -45,7 +45,7 @@
       </div>
     }
 
-    <div class="nb-row">
+    <div class="nb-fields">
       <app-form-field label="date" forId="nb-date">
         <app-date-field inputId="nb-date" [value]="date_()" (valueChange)="setDate($event)" />
       </app-form-field>

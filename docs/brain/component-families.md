@@ -501,7 +501,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 672
 - Use: `src/app/pages/bookings/components/new-booking-dialog/` · `app-new-booking-dialog` (input `date`; outputs `saved`, `closed`): the phone booking — client or new guest, date, party, area, time chips from the availability call, the engine's offered table on a small `app-floor-map` (the owner may tap another), the 409 alternatives as chips. `src/app/pages/bookings/components/walk-in-dialog/` · `app-walk-in-dialog` (inputs `tableKey`, `plan`, `states`; outputs `seated`, `closed`): seats a walk-in on the table of the sheet or one tapped free table. `src/app/pages/requests/components/approve-table-dialog/` · `app-approve-table-dialog` (inputs `request`, `alternatives`, `busy`; output `chosen`): shown when approving a table request answers `NO_TABLE`; the page makes the approve call. All three are `app-modal-shell [sheet]`.
-- Classes: `.fv__actions` (the bar buttons), `.nb-row`, `.nb-chips`, `.nb-label`, `.nb-line`, `.nb-map`, `.nb-info`, `.wlk-row`, `.wlk-pick`, `.wlk-label`, `.wlk-line`, `.att-chips`, `.att-label`, `.att-line`, `.att-map` (scoped to each dialog's stylesheet; the stacks use the engine `.c-input-stack`); no new `.c-*` class.
+- Classes: `.fv__actions` (the bar buttons), `.nb-fields`, `.nb-chips`, `.nb-label`, `.nb-line`, `.nb-map`, `.nb-info`, `.wlk-row`, `.wlk-pick`, `.wlk-label`, `.wlk-line`, `.att-chips`, `.att-label`, `.att-line`, `.att-map` (scoped to each dialog's stylesheet; the stacks use the engine `.c-input-stack`); no new `.c-*` class.
 - When: a host creates, seats or rescues a table booking from the service screen or the requests page — never a second copy.
 - Known copies: none.
 
