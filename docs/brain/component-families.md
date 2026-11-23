@@ -763,3 +763,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP, buildRecipeInfoWorkbook, buildShoppingListWorkbook, buildMenuInfoWorkbook, buildAllTogetherMenuWorkbook.
 - When: any new Excel sheet. Sheet names, headers and fallbacks come from `dictionary.json` through `TranslationService`, never an English literal.
 - Known copies: none (no other file in `src/app` calls `addWorksheet`, checked 2026-11-22).
+
+### conversation-pipeline — `handleInbound`, `sendOut`, `templateMessage`, `findOrCreateConversation`, `channelFor` (plan 675)
+
+- Status: stable — server only; the simulator is the first transport, WhatsApp joins in plan 683
+- Use: every inbound message goes through `handleInbound` (`server/services/inbound.js`), every outbound message through `sendOut` (`server/services/outbound.js`); never call a transport's `send`. Template names and parameters live once in `shared/schemas/front-desk/message-templates.ts` (`templateMessage`). The live-conversation rule is `findOrCreateConversation` (`server/services/conversations.js`); only `server/services/channels/index.js` (`channelFor`) names a channel.
+- Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel.
+- When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
+- Known copies: none.
