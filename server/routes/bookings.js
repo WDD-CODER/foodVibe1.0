@@ -26,11 +26,6 @@ const tb = require('../services/table-bookings')
 const TYPE = 'bookings'
 const router = Router()
 const NOT_FOUND = { error: 'Booking not found' }
-/** Legal member moves (Wave 1); `no_show` is also refused before the booking's start. */
-const MOVES = {
-  confirmed: ['seated', 'no_show', 'cancelled'],
-  seated: ['finished', 'cancelled'],
-}
 
 router.use(dataWriteLimiter)
 
@@ -268,37 +263,17 @@ router.put('/:id/status', verifyToken, requireModule('frontdesk'), async (req, r
     const current = await db().collection(TYPE).findOne(scopeOf(req))
     if (!current) return res.status(404).json(NOT_FOUND)
     if (!assertCan(req, res, 'manageRequests', { type: TYPE, doc: current })) return
-    const now = Date.now()
-    if (!(MOVES[current.status] ?? []).includes(status) || (status === 'no_show' && now < current.startAt)) {
-      return res.status(409).json({ error: 'BAD_STATUS' })
-    }
     const actor = actorOf(req)
-    const entry = { status, at: now, by: actor.userId, byName: actor.name, via: 'member', ...(note && { note }) }
-    const stamp = current.tableKeys?.length
-      ? { ...(status === 'seated' && { seatedAt: now }), ...(status === 'finished' && { finishedAt: now }) }
-      : {}
-    const check = checkStoredDoc(TYPE, { ...current, ...stamp, status, updatedAt: now, statusHistory: [...current.statusHistory, entry] })
-    if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues })
-    // Conditional on the status that was read, so two concurrent moves cannot both write.
-    const result = await db().collection(TYPE).findOneAndUpdate(
-      { ...scopeOf(req), status: current.status },
-      { $set: { status, updatedAt: now, ...stamp }, $push: { statusHistory: entry } },
-      { returnDocument: 'after' },
-    )
-    if (!result) {
-      const still = await db().collection(TYPE).findOne(scopeOf(req), { projection: { _id: 1 } })
-      return still ? res.status(409).json({ error: 'STATUS_CHANGED' }) : res.status(404).json(NOT_FOUND)
+    const r = await tb.moveBookingStatus(db(), {
+      businessId: current.businessId, id: current._id, status, by: actor.userId, byName: actor.name, via: 'member', note, now: Date.now(),
+    })
+    if (!r.ok) {
+      if (r.code === 'INVALID') return res.status(400).json({ error: 'Validation failed', issues: r.issues })
+      if (r.code === 'NOT_FOUND') return res.status(404).json(NOT_FOUND)
+      return res.status(409).json({ error: r.code })
     }
-    if (current.tableKeys?.length && ['finished', 'cancelled', 'no_show'].includes(status)) {
-      await holds.release(db(), current.businessId, current._id, now)
-    }
-    if (status === 'no_show') {
-      await db().collection('clients').updateOne(
-        { _id: current.clientId, businessId: current.businessId },
-        { $inc: { 'counters.noShows': 1 }, $set: { updatedAt: now } },
-      )
-    }
-    req.log.info({ event: 'bookings.status.changed', from: current.status, to: status })
+    const result = r.booking
+    req.log.info({ event: 'bookings.status.changed', from: r.from, to: status })
     res.json(result)
   } catch (err) {
     fail(req, res, 'status', err)

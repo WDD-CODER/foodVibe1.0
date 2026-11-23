@@ -600,6 +600,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 668
 - Use: reserveTable, bookTable, rebookTable, createWalkIn in server/services/table-bookings.js (assign, claim, write, release on failure).
+- Use: moveBookingStatus in server/services/table-bookings.js (plan 676): the one status move of a booking, called by the route, the no-show job and a guest's Cancel tap.
 - When: any route or job that gives a booking its tables; none calls `claim` itself.
 - Known copies: none.
 
@@ -813,4 +814,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: every inbound message goes through `handleInbound` (`server/services/inbound.js`), every outbound message through `sendOut` (`server/services/outbound.js`); never call a transport's `send`. Template names and parameters live once in `shared/schemas/front-desk/message-templates.ts` (`templateMessage`). The live-conversation rule is `findOrCreateConversation` (`server/services/conversations.js`); only `server/services/channels/index.js` (`channelFor`) names a channel.
 - Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel.
 - When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
+- Known copies: none.
+
+### scheduled-jobs — `runDue`, `startScheduler`, `stopScheduler`, moveBookingStatus in server/services/table-bookings.js, `registerBookingButtons` (plan 676)
+
+- Status: stable — server only
+- Use: timed work is one job file in `server/jobs/` run by `runDue` in `server/jobs/scheduler.js` (`startScheduler` / `stopScheduler`, one unref'd 60 s tick; each job claims its rows with a conditional update). A booking's status moves only through `moveBookingStatus` in `server/services/table-bookings.js`. The guest's Confirm and Cancel taps are `registerBookingButtons` in `server/services/booking-buttons.js`.
+- Pieces: runDue, startScheduler, stopScheduler, remindOne, markOne, moveBookingStatus, registerBookingButtons.
+- When: anything that must happen by itself at an hour or after a delay; a second timer or a second writer of a booking's status is never added.
 - Known copies: none.

@@ -3,6 +3,8 @@ const app = require('./app');
 const { connectDb } = require('./db');
 const { seedMasterData } = require('./services/seed-master');
 const { logger } = require('./logger');
+const mongoose = require('mongoose');
+const { startScheduler, stopScheduler } = require('./jobs/scheduler');
 
 const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGIN || 'http://localhost:4200,http://localhost:4201,http://localhost:4300').split(',').map(s => s.trim())
@@ -18,6 +20,7 @@ connectDb()
     for (const signal of ['SIGTERM', 'SIGINT']) {
       process.once(signal, () => {
         logger.info({ event: 'server.shutdown.begin', signal });
+        stopScheduler()
         server.close(() => process.exit(0));
         setTimeout(() => process.exit(0), 5000).unref();
       });
@@ -25,6 +28,7 @@ connectDb()
     // Runs after listen() so cold-start latency isn't gated on it — idempotent
     // near-instant no-op on any already-seeded DB (see seed-master.js).
     seedMasterData().catch(err => logger.error({ err, event: 'seed.master.failed' }));
+    startScheduler(mongoose.connection.db);
   })
   .catch(err => {
     logger.fatal({ err, event: 'mongo.connection.failed' });

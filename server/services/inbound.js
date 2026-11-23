@@ -30,7 +30,10 @@ const buttons = new Map();
 function registerButton(prefix, handler) { buttons.set(prefix, handler); }
 function setTurnHandler(fn) { turnHandler = fn; }
 function setWaitForTest(fn) { wait = fn; }
-function resetInboundForTest() { wait = defaultWait; turnHandler = defaultTurn; buttons.clear(); }
+function resetInboundForTest() {
+  wait = defaultWait; turnHandler = defaultTurn; buttons.clear();
+  require('./booking-buttons').registerBookingButtons(registerButton);
+}
 
 async function afterStored(db, conversation, { buttonId, at }, log) {
   if (buttonId) {
@@ -102,3 +105,5 @@ async function handleInbound(db, input, { log = logger } = {}) {
 }
 
 module.exports = { handleInbound, registerButton, setTurnHandler, setWaitForTest, resetInboundForTest, COALESCE_MS };
+
+require('./booking-buttons').registerBookingButtons(registerButton);
