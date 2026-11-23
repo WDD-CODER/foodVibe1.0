@@ -98,6 +98,23 @@ server/test/ai-frontdesk-suggest.test.js
 server/test/ai-voice-transcribe.test.js
 server/breadcrumbs.md
 docs/brain/inventory.md
+server/test/ai-cap.test.js
+server/test/ai-diag-menu.test.js
+server/test/ai-invoice-read.test.js
+server/test/ai-logistics-extract.test.js
+server/test/ai-match-product-names.test.js
+server/test/ai-menu.test.js
+server/test/ai-receipt-photo.test.js
+server/test/ai-shots-saved.test.js
+server/test/ai-shots-shared.test.js
+server/test/ai-shots.test.js
+server/test/ai-stock-extract.test.js
+server/test/ai-usage.test.js
+server/test/generate-from-url.test.js
+server/test/knowledge-import.test.js
+server/test/price-list-prompt.test.js
+server/test/product-import-route.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
