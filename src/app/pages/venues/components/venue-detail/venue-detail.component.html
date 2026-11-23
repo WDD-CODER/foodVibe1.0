@@ -180,7 +180,24 @@
       <header class="detail-card-header">
         <lucide-icon name="play" [size]="18"></lucide-icon>
         <h2>{{ 'venue_videos' | translatePipe }}</h2>
+        <button
+          type="button"
+          class="c-btn-ghost video-upload-btn"
+          (click)="videoInput.click()"
+          [disabled]="!isLoggedIn() || uploading_() !== null"
+          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+        >
+          <lucide-icon name="upload" [size]="14"></lucide-icon>
+          {{ 'venue_upload_video' | translatePipe }}
+        </button>
+        <input #videoInput type="file" accept="video/*" hidden (change)="onVideoPicked($event)" />
       </header>
+      @if (uploading_() !== null) {
+        <div class="video-progress">
+          <progress max="100" [value]="uploading_()"></progress>
+          <span>{{ uploadingLabel_() }}</span>
+        </div>
+      }
       @if (videos_().length) {
         <ul class="menus-list">
           @for (video of videos_(); track $index) {
