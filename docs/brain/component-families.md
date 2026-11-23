@@ -343,6 +343,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 675: `sendOut` in `server/services/outbound.js` — every outbound message goes through `sendOut`; never call a transport.
 - Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler.
 - Plan 675: `templateMessage` in `shared/schemas/front-desk/message-templates.ts` — the closed list of outbound templates and their one-line parameters; never a template name typed elsewhere.
+- Plan 670: `bookingIcs` / `downloadIcs` in `src/app/pages/public-request/services/booking-calendar.util.ts` — a page-local helper (only the two guest pages use it): one booking as a calendar file, the `ics` package loaded lazily.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
