@@ -44,12 +44,14 @@ beforeEach(async () => {
     url: () => 'memory://x',
     destroy: async () => true,
   });
+  await _waitForUsageWritesForTests();
   await testDb().collection('aiUsage').deleteMany({});
   await testDb().collection('storedFiles').deleteMany({});
   logs.records.length = 0;
 });
 
-afterEach(() => {
+afterEach(async () => {
+  await _waitForUsageWritesForTests();
   vi.unstubAllGlobals();
 });
 
@@ -167,11 +169,12 @@ describe('POST /voice/transcribe', () => {
 
   it('writes one ledger row per call and answers 502 without storing on a model failure', async () => {
     fetchMock.mockResolvedValue(modelAnswer('hello'));
+    const ownBusiness = `b_voice${userSeq + 1}`;
     await post(BODY);
     await _waitForUsageWritesForTests();
-    const rows = await testDb().collection('aiUsage').find({ feature: 'voice_transcribe' }).toArray();
+    const rows = await testDb().collection('aiUsage').find({ feature: 'voice_transcribe', businessId: ownBusiness }).toArray();
     expect(rows).toHaveLength(1);
-    expect(rows[0].businessId).toMatch(/^b_voice/);
+    expect(rows[0].businessId).toBe(ownBusiness);
     expect(rows[0].audioSeconds).toBe(20);
 
     putCalls.length = 0;
