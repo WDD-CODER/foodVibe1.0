@@ -248,7 +248,7 @@ describe('FloorMapComponent (plan 665)', () => {
       fixture.detectChanges()
       expect(el().querySelectorAll('.floor-map__handle').length).toBe(4)
       expect(el().querySelector('.floor-map__handle--start-start')).not.toBeNull()
-      expect(zoneEl('areab2')?.classList).toContain('is-selected')
+      expect(zoneEl('areab2')?.classList).toContain('floor-map__zone--selected')
     })
   })
 })

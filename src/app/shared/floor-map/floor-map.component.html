@@ -22,7 +22,7 @@
           cdkDragBoundary=".floor-map__grid"
           [cdkDragDisabled]="!z.selected"
           class="floor-map__zone"
-          [class.is-selected]="z.selected"
+          [class.floor-map__zone--selected]="z.selected"
           [attr.data-testid]="'floor-zone-' + z.key"
           [attr.aria-label]="z.name"
           [attr.aria-pressed]="z.selected ? 'true' : 'false'"
