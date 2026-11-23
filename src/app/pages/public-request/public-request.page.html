@@ -109,7 +109,7 @@
         />
       </div>
       } @if (tableMode_()) { @if (date_()) {
-      <fieldset class="pb-times-box" data-testid="pb-times-box">
+      <fieldset class="pb-kinds" data-testid="pb-times-box">
         <legend>{{ 'fd_q_time' | translatePipe }}</legend>
         @switch (timesState_()) { @case ('loading') {
         <p class="pb-loading" aria-busy="true" data-testid="pb-times-loading">
@@ -167,7 +167,7 @@
         } }
       </fieldset>
       } @if (areas_().length >= 2) {
-      <fieldset class="pb-times-box" data-testid="pb-areas">
+      <fieldset class="pb-kinds" data-testid="pb-areas">
         <legend>{{ 'pb_area' | translatePipe }}</legend>
         <div class="c-chip-group">
           <label class="c-chip c-chip--toggle pb-time">
