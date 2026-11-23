@@ -35,6 +35,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `v2/` | v2 entity types inferred from the shared Zod schemas; `v2/conformance.ts` locks them to the client interfaces at compile time | V2ConformsToClient |
 | `request.model.ts` | Customer request type (plan 549) | FrontDeskRequest, ManualRequestInput, DECLINE_REASONS |
 | `waitlist-entry.model.ts` | Waiting-list entry, mirror of the shared schema (plan 673) | WaitlistEntry, WaitlistStatus, WAITLIST_STATUSES, NewWaitlistInput |
+| `conversation.model.ts` | A guest conversation and its message (mirror of the shared schemas), the list row with `client` and `last`, the linked card line (plan 677) | Conversation, ConversationRow, Message, MessageStatus, LinkedCard |
 | `booking.model.ts` | Booking type (plan 549); table-call types (plan 685) | Booking, BookingSlot, BookingAlternative, TableHoldRange, NewBookingInput, WalkInInput, BookingWhenChange |
 | `floor-plan.model.ts` | Floor plan types, body and issue codes (plan 664) | FloorPlan, FloorPlanBody, FloorPlanIssue |
 

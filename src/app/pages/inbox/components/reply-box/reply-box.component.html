@@ -1,0 +1,77 @@
+<div class="rb" dir="rtl" data-testid="reply-box">
+  @if (isBot_()) {
+    <div class="rb-bot">
+      <p class="rb-line" data-testid="bot-line">{{ 'ibx_bot_answers' | translatePipe }}</p>
+      <button type="button" class="c-btn-primary" data-testid="take-over" (click)="takeOver()">
+        <lucide-icon name="hand" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'ibx_take_over' | translatePipe }}</span>
+      </button>
+    </div>
+  }
+  @if (windowOpen_()) {
+    <div class="rb-row">
+      <textarea
+        #textBox
+        class="c-input rb-text"
+        data-testid="reply-text"
+        [rows]="rows_()"
+        [maxLength]="textMax"
+        [disabled]="busy_()"
+        [ngModel]="draft()"
+        [placeholder]="'ibx_reply_placeholder' | translatePipe"
+        [attr.aria-label]="'ibx_reply_placeholder' | translatePipe"
+        (ngModelChange)="onDraft($event)"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button
+        type="button"
+        class="c-btn-primary rb-send"
+        data-testid="reply-send"
+        [disabled]="!canSend_()"
+        [attr.aria-label]="'ibx_send' | translatePipe"
+        (click)="send()"
+      >
+        <lucide-icon name="send" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'ibx_send' | translatePipe }}</span>
+      </button>
+    </div>
+  } @else {
+    <div class="rb-template" data-testid="template-choice">
+      <p class="rb-line">{{ 'ibx_window_closed' | translatePipe }}</p>
+      <p class="rb-line">{{ 'ibx_template_hint' | translatePipe }}</p>
+      <app-custom-select
+        [options]="templateOptions"
+        [ngModel]="templateName"
+        [ngModelOptions]="{ standalone: true }"
+        [translateLabels]="true"
+      />
+      <app-form-field label="ibx_template_text" forId="rb-template-text">
+        <input
+          #templateBox
+          id="rb-template-text"
+          type="text"
+          class="c-input"
+          data-testid="template-text"
+          [maxLength]="templateMax"
+          [disabled]="busy_()"
+          [ngModel]="templateValue_()"
+          (ngModelChange)="onTemplateText($event)"
+          (keydown.enter)="sendTemplate()"
+        />
+      </app-form-field>
+      <button
+        type="button"
+        class="c-btn-primary rb-send"
+        data-testid="template-send"
+        [disabled]="!canSendTemplate_()"
+        (click)="sendTemplate()"
+      >
+        <lucide-icon name="send" [size]="18"></lucide-icon>
+        <span class="btn-label">{{ 'ibx_send' | translatePipe }}</span>
+      </button>
+    </div>
+  }
+  @if (errorKey_(); as key) {
+    <p class="c-field-error" role="alert" data-testid="reply-error">{{ key | translatePipe }}</p>
+  }
+</div>

@@ -1,4 +1,5 @@
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import { InboxBadgeService } from '@services/inbox-badge.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
@@ -18,6 +19,7 @@ import { ModuleService } from '@services/module.service'
 import { PHONE_QUERY } from '@utils/breakpoints'
 
 /** Plan 646: the header now holds the bell and the diagnosis entry. */
+const inboxStub = { provide: InboxBadgeService, useValue: { pendingCount_: signal(0) } }
 const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope }
 
 /** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
@@ -38,6 +40,7 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        inboxStub,
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
           { path: 'dashboard', redirectTo: '' },
@@ -147,6 +150,7 @@ describe('HeaderComponent avatar fallback', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        inboxStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -195,6 +199,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        inboxStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -262,6 +267,7 @@ describe('HeaderComponent phone bottom bar labels (plan 597, 607)', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        inboxStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -304,6 +310,7 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        inboxStub,
         provideRouter([]),
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(3) } },
         {
@@ -331,6 +338,37 @@ describe('HeaderComponent waiting badge only in the top nav (plan 607)', () => {
   })
 })
 
+describe('HeaderComponent front desk number (plan 677)', () => {
+  it('adds the pending conversations to the waiting requests', async () => {
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
+      providers: [
+        moduleStub,
+        provideRouter([]),
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(3) } },
+        { provide: InboxBadgeService, useValue: { pendingCount_: signal(2) } },
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => false,
+            user_: signal(null),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
+            logout: () => of(null)
+          }
+        }
+      ]
+    }).compileComponents()
+    const fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+    const count = (fixture.nativeElement as HTMLElement).querySelector('[data-testid="header-waiting-count"]')
+    expect(count?.textContent?.trim()).toBe('5')
+  })
+})
+
 describe('HeaderComponent business switcher (plan 632)', () => {
   const canSwitch = signal(false)
   const businesses = signal<{ businessId: string; name: string; role: string }[]>([])
@@ -349,6 +387,7 @@ describe('HeaderComponent business switcher (plan 632)', () => {
       ],
       providers: [
         moduleStub,
+        inboxStub,
         provideRouter([]),
         {
           provide: UserService,
@@ -472,6 +511,7 @@ describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
       imports: [ShellWithLoaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        inboxStub,
         provideRouter([]),
         {
           provide: UserService,

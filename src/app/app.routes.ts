@@ -185,6 +185,16 @@ export const routes: Routes = [
     canDeactivate: [pendingChangesGuard],
   },
   {
+    path: 'inbox',
+    loadComponent: () => import('./pages/inbox/inbox.page').then(m => m.InboxPage),
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
+  },
+  {
+    path: 'inbox/:id',
+    loadComponent: () => import('./pages/inbox/inbox.page').then(m => m.InboxPage),
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
+  },
+  {
     path: 'frontdesk/settings',
     loadComponent: () => import('./pages/frontdesk/frontdesk-settings/frontdesk-settings.page').then(m => m.FrontdeskSettingsPage),
     canActivate: [authGuard, moduleGuard(['frontdesk'])],

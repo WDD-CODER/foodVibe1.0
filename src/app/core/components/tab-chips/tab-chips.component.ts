@@ -9,6 +9,7 @@ import { PermissionService } from '@services/permission.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import { InboxBadgeService } from '@services/inbox-badge.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 
@@ -24,6 +25,8 @@ interface TabChip {
   home?: boolean
   /** Shows the waiting-requests count (plan 552). */
   badge?: boolean
+  /** Plan 677: shows the count of conversations waiting for a person. */
+  inboxBadge?: boolean
   /** Plan 620: shown only when the business has any one of these modules. */
   modules?: readonly ModuleKey[]
 }
@@ -45,6 +48,7 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/menu-intelligence', 'menus'],
   ['/requests', 'frontdesk'],
   ['/bookings', 'frontdesk'],
+  ['/inbox', 'frontdesk'],
   ['/clients', 'frontdesk'],
   ['/frontdesk', 'frontdesk']
 ]
@@ -93,6 +97,7 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
       modules: ['frontdesk']
     },
     { id: 'bookings', labelKey: 'fd_chip_bookings', icon: 'calendar-days', path: '/bookings', modules: ['frontdesk'] },
+    { id: 'inbox', labelKey: 'ibx_chip', icon: 'inbox', path: '/inbox', inboxBadge: true, modules: ['frontdesk'] },
     { id: 'clients', labelKey: 'clients', icon: 'users', path: '/clients', modules: ['events', 'frontdesk'] },
     {
       id: 'knowledge',
@@ -171,6 +176,11 @@ export class TabChipsComponent {
   protected readonly waitingCount_ = inject(FrontDeskBadgeService).waitingCount_
   protected readonly countLabel_ = computed(() =>
     this.translation.translate('rq_waiting_count_label').replace('{count}', String(this.waitingCount_()))
+  )
+
+  protected readonly pendingCount_ = inject(InboxBadgeService).pendingCount_
+  protected readonly pendingLabel_ = computed(() =>
+    this.translation.translate('ibx_pending_count_label').replace('{count}', String(this.pendingCount_()))
   )
 
   private readonly currentUrl_ = signal(this.router.url)

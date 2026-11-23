@@ -1,0 +1,44 @@
+@layer components.app {
+  :host {
+    display: block;
+  }
+
+  .rb {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-block-start: 1px solid var(--border-default);
+    background: var(--bg-pure);
+  }
+
+  .rb-bot,
+  .rb-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .rb-bot {
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .rb-line {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+
+  .rb-text {
+    flex: 1;
+    min-inline-size: 0;
+    resize: none;
+  }
+
+  .rb-template {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

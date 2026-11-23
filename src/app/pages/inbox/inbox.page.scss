@@ -1,0 +1,183 @@
+@use '../../core/styles/breakpoints' as *;
+
+@layer components.app {
+  :host {
+    display: block;
+  }
+
+  .ibx {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-inline-size: 72rem;
+    margin-inline: auto;
+    padding: 1rem;
+  }
+
+  .ibx-body {
+    display: grid;
+    grid-template-columns: 22rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    min-block-size: 30rem;
+  }
+
+  .ibx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-inline-size: 0;
+  }
+
+  .ibx-filters {
+    flex-wrap: wrap;
+  }
+
+  .ibx-rows {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ibx-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-inline-size: 0;
+    padding-block: 0.625rem;
+    padding-inline: 0.75rem;
+    border-block-end: 1px solid var(--border-row);
+    background: var(--bg-glass);
+    color: var(--color-text-main);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .ibx-row.is-selected {
+    background: var(--color-primary-soft);
+    box-shadow: inset 3px 0 0 var(--color-primary);
+  }
+
+  .ibx-name {
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+  }
+
+  .ibx-preview {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-muted);
+  }
+
+  .ibx-time {
+    flex: none;
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+  }
+
+  .ibx-thread {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 24rem;
+    max-block-size: calc(100dvh - 12rem);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--bg-glass);
+    overflow: hidden;
+  }
+
+  .ibx-thread-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
+    border-block-end: 1px solid var(--border-default);
+  }
+
+  .ibx-who {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .ibx-phone,
+  .ibx-window {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .ibx-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-inline-start: auto;
+  }
+
+  .ibx-back {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-text-main);
+    text-decoration: none;
+  }
+
+  .ibx-card {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-block-end: 1px solid var(--border-default);
+    background: var(--bg-muted);
+  }
+
+  .ibx-card-link {
+    margin-inline-start: auto;
+  }
+
+  .ibx-messages {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    overflow-y: auto;
+  }
+
+  @media (max-width: $break-tablet-max) {
+    .ibx-body {
+      grid-template-columns: 18rem minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: $break-phone-max) {
+    .ibx {
+      padding: 0.5rem;
+    }
+
+    .ibx-body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .ibx--thread .ibx-list,
+    .ibx:not(.ibx--thread) .ibx-thread,
+    .ibx--thread .ibx-header {
+      display: none;
+    }
+
+    .ibx-thread {
+      max-block-size: calc(100dvh - 9rem);
+    }
+
+    .ibx-back {
+      display: inline-flex;
+    }
+  }
+}

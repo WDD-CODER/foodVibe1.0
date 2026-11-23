@@ -1,0 +1,155 @@
+<section class="ibx" dir="rtl" [class.ibx--thread]="id_()" data-testid="inbox-page">
+  <app-page-header class="ibx-header" titleKey="ibx_title" />
+
+  <div class="ibx-body">
+    <aside class="ibx-list" data-testid="inbox-list">
+      <div class="c-chip-group ibx-filters" role="radiogroup">
+        @for (f of filters; track f) {
+        <label class="c-chip c-chip--toggle">
+          <input
+            type="radio"
+            name="inbox-filter"
+            [checked]="filter_() === f"
+            [attr.data-testid]="'filter-' + f"
+            (change)="setFilter(f)"
+          />
+          <span>{{ 'ibx_filter_' + f | translatePipe }}</span>
+        </label>
+        }
+      </div>
+
+      @if (!listLoaded_()) {
+      <app-loader size="medium" />
+      } @else if (listFailed_() && !hasRows_()) {
+      <app-empty-state
+        messageKey="ibx_load_failed"
+        icon="message-circle"
+        ctaLabelKey="retry"
+        (ctaClick)="reloadList()"
+      />
+      } @else if (rows_().length === 0) {
+      <app-empty-state [messageKey]="filter_() === 'all' ? 'ibx_empty' : 'ibx_empty_filter'" icon="message-circle" />
+      } @else {
+      <ul class="ibx-rows">
+        @for (row of rows_(); track row._id) {
+        <li>
+          <a
+            class="ibx-row"
+            [class.is-selected]="row._id === id_()"
+            [routerLink]="['/inbox', row._id]"
+            [attr.aria-current]="row._id === id_() ? 'true' : null"
+            data-testid="inbox-row"
+          >
+            <span class="ibx-name">{{ nameOf(row) }}</span>
+            <span class="c-chip--tag c-chip--sm" data-testid="holder-tag">{{ holderKey(row) | translatePipe }}</span>
+            @if (row.test) {
+            <span class="c-chip--tag c-chip--sm" data-testid="test-tag">{{ 'rq_test_tag' | translatePipe }}</span>
+            }
+            <span class="ibx-preview">{{ previewOf(row) }}</span>
+            <span class="ibx-time">{{ timeOf(row.lastMessageAt) }}</span>
+            @if (row.unread > 0) {
+            <span class="c-chip__count" data-testid="unread-count">{{ row.unread }}</span>
+            }
+          </a>
+        </li>
+        }
+      </ul>
+      }
+    </aside>
+
+    <div class="ibx-thread" data-testid="inbox-thread">
+      @if (current_(); as t) { @if (true) {
+      <header class="ibx-thread-head">
+        <a class="ibx-back" routerLink="/inbox" [attr.aria-label]="'back' | translatePipe" data-testid="inbox-back">
+          <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+          <span class="btn-label">{{ 'back' | translatePipe }}</span>
+        </a>
+        <div class="ibx-who">
+          <strong data-testid="thread-name">{{ nameOf({ client: row_()?.client, waId: t.conversation.waId }) }}</strong>
+          @if (row_()?.client?.phone) {
+          <span class="ibx-phone" dir="ltr">{{ row_()!.client.phone }}</span>
+          }
+          <span class="c-chip--tag c-chip--sm" data-testid="thread-holder"
+            >{{ holderKey(t.conversation) | translatePipe }}</span
+          >
+        </div>
+        <p class="ibx-window" data-testid="window-line">{{ windowText_() }}</p>
+        @if (t.conversation.status === 'human') {
+        <div class="ibx-actions">
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="hand-back"
+            [disabled]="actionBusy_()"
+            (click)="handBack()"
+          >
+            <lucide-icon name="bot" [size]="18"></lucide-icon>
+            <span class="btn-label">{{ 'ibx_hand_back' | translatePipe }}</span>
+          </button>
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="close-conversation"
+            [disabled]="actionBusy_()"
+            (click)="closeConversation()"
+          >
+            <span class="btn-label">{{ 'ibx_close' | translatePipe }}</span>
+          </button>
+        </div>
+        }
+      </header>
+
+      @if (card_(); as card) {
+      <div class="ibx-card" data-testid="linked-card">
+        <strong>{{ card.titleKey | translatePipe }}</strong>
+        @if (card.kindKey) {
+        <span>{{ card.kindKey | translatePipe }}</span>
+        } @if (card.date) {
+        <span data-testid="card-date">{{ card.date }}</span>
+        } @if (card.time) {
+        <span data-testid="card-time">{{ card.time }}</span>
+        } @if (card.partySize) {
+        <span data-testid="card-party">{{ card.partySize }}</span>
+        }
+        <span class="c-chip--tag c-chip--sm">{{ card.statusKey | translatePipe }}</span>
+        <a
+          class="ibx-card-link"
+          [routerLink]="card.link"
+          [queryParams]="card.queryParams ?? null"
+          data-testid="card-open"
+          >{{ 'ibx_open' | translatePipe }}</a
+        >
+      </div>
+      }
+
+      <div #scroller class="ibx-messages" data-testid="thread-scroll" (scroll)="onScroll()">
+        <app-chat-thread [messages]="t.messages" [now]="threadNow_()" perspective="business" [buttonsEnabled]="false" />
+      </div>
+
+      @if (t.conversation.status !== 'closed') {
+      <app-reply-box
+        [conversation]="t.conversation"
+        [now]="threadNow_()"
+        [draft]="draft_()"
+        (draftChange)="onDraft($event)"
+        (closedMeanwhile)="closedMeanwhile()"
+        (actionFailed)="actionFailed()"
+      />
+      } } } @else if (!id_()) {
+      <app-empty-state messageKey="ibx_pick" icon="message-circle" />
+      } @else if (threadFailed_() === 'not_found') {
+      <app-empty-state messageKey="ibx_not_found" icon="message-circle" />
+      <a class="ibx-back-link" routerLink="/inbox">{{ 'back' | translatePipe }}</a>
+      } @else if (threadFailed_() === 'failed') {
+      <app-empty-state
+        messageKey="ibx_load_failed"
+        icon="message-circle"
+        ctaLabelKey="retry"
+        (ctaClick)="reloadThread()"
+      />
+      } @else {
+      <app-loader size="medium" />
+      }
+    </div>
+  </div>
+</section>
