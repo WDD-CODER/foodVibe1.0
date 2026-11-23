@@ -201,6 +201,8 @@ server/test/modules-registry.test.js
 server/test/price-list-prompt.test.js
 server/test/product-import-route.test.js
 docs/workflow-kit/manifest.json
+docs/brain/component-families.md
+docs/brain/inventory.md
 ```
 
 ## Read Scope
