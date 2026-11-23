@@ -55,6 +55,8 @@ src/app/pages/venues/components/venue-detail/venue-detail.component.spec.ts
 src/app/core/services/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
+src/app/pages/dashboard/dashboard.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
