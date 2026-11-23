@@ -138,6 +138,8 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 e2e/ui/673-1.spec.ts
 screens/673-*.png
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
