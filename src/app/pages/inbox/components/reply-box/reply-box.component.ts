@@ -16,10 +16,10 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { ConversationDataService } from '@services/conversation-data.service'
 import type { Conversation } from '@models/conversation.model'
+import { PHONE_QUERY } from '@utils/breakpoints'
 
 const TEXT_MAX = 4000
 const TEMPLATE_MAX = 200
-const PHONE_QUERY = '(max-width: 767px)'
 const TEMPLATE_NAME = 'need_more_info'
 const oneLine = (v: string): string => v.replace(/[\r\n\t]+/g, ' ').replace(/ {2,}/g, ' ')
 

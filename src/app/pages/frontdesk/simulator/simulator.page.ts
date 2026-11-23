@@ -25,6 +25,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { UserService } from '@services/user.service'
 import type { ConversationRow } from '@models/conversation.model'
+import { PHONE_QUERY } from '@utils/breakpoints'
 import { SimulatorService, type SimJob } from './services/simulator.service'
 
 const TEXT_MAX = 4000
@@ -32,7 +33,6 @@ const NAME_MAX = 80
 const FAST_MS = 2_000
 const FAST_WINDOW_MS = 30_000
 const SLOW_EVERY = 5
-const PHONE_QUERY = '(max-width: 767px)'
 const PHONE_CHARS = /^[\d\s+-]+$/
 
 /** The test guest the owner plays: a phone and a name, and the conversation once the first message was sent. */
