@@ -497,6 +497,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 686: a tap on a table opens `app-table-sheet` (`src/app/pages/bookings/components/table-sheet/`, a bottom sheet in `app-modal-shell [sheet]`: the table, what is on it now, the next booking, and seat / finish / no-show / cancel / move for the live moment). "Move" puts the view in move mode: the banner (`.fv__move`) and a tap on another table call `BookingDataService.setTables`; Escape or the banner's cancel leave it. `nextOnTable` in `table-state.util.ts` finds the next booking of a table.
 - Known copies: none.
 
+### table-sheet — the sheet of one table on the service screen
+
+- Status: stable — plan 686
+- Use: `src/app/pages/bookings/components/table-sheet/` · `app-table-sheet` (inputs `table`, `board`, `plan`, `moment`, `live`, `look`; outputs `closed`, `changed`, `moveRequested`): `app-modal-shell [sheet]` with the table header, the "now" and "next" blocks and the actions that fit the booking's status (`BookingDataService.setStatus`, `ConfirmModalService` for a cancel).
+- Classes: `.tsh`, `.tsh__head`, `.tsh__headline`, `.tsh__title`, `.tsh__label`, `.tsh__line`, `.tsh__meta`, `.tsh__block`, `.tsh__notes`, `.tsh__actions` (scoped to the sheet's stylesheet); `.fv__move` is the floor view's move banner.
+- When: a screen shows one table of the room and acts on its booking — never a second copy.
+- Known copies: none.
+
 ### floor-plan-joins-sheet — joins of tables, one-cell arrows and the phone sheet of the room editor
 
 - Status: stable — plan 666

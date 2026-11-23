@@ -118,6 +118,7 @@ append the path to the scope block above and retry.
 - Cancel question — family: modal-controller — rung: 1 — why: `ConfirmModalService.open('bk_cancel_confirm')`, the question the day list already asks.
 - Move banner (text and a cancel button above the room) — family: chip — rung: 1 — why: a line of text with one `c-btn-ghost c-btn-ghost--sm` button, scoped SCSS only; no new shared piece.
 - `nextOnTable` in `table-state.util.ts` — family: helpers — rung: 2 — why: one more pure function in the helper file of plan 671, with spec cases.
+- `.tsh`, `.tsh__head`, `.tsh__headline`, `.tsh__title`, `.tsh__label`, `.tsh__line`, `.tsh__meta`, `.tsh__block`, `.tsh__notes`, `.tsh__actions`, `.fv__move` — family: none — rung: 4 — why: layout of the table sheet and the move banner only, scoped in their own stylesheets; every control inside is a chip, a ghost button or the modal shell.
 - Messages — family: feedback — rung: 1 — why: `UserMsgService` + `LoggingService`.
 
 ## Defaults
