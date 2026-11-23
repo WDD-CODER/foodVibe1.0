@@ -1,0 +1,176 @@
+<app-modal-shell [sheet]="true" [labelledBy]="'tsh-title'" (dismissed)="closed.emit()">
+  <div class="tsh" data-testid="table-sheet">
+    <header class="tsh__head">
+      <div class="tsh__headline">
+        <h3 id="tsh-title" class="tsh__title" data-testid="tsh-title">{{ title_() }}</h3>
+        <span class="c-chip--tag c-chip--sm" data-testid="tsh-state">{{ stateLabel_() }}</span>
+      </div>
+      <button
+        type="button"
+        class="c-btn-ghost c-btn-ghost--sm tsh__x"
+        data-testid="tsh-close"
+        [attr.aria-label]="'close' | translatePipe"
+        (click)="closed.emit()"
+      >
+        <lucide-icon name="x" [size]="16" aria-hidden="true"></lucide-icon>
+      </button>
+      <p class="tsh__meta">
+        <span dir="ltr">{{ seats_() }}</span> {{ 'tsh_seats' | translatePipe }}
+        @if (area_()) {
+          · {{ area_() }}
+        }
+      </p>
+    </header>
+
+    @if (!notActive_()) {
+      <section class="tsh__block" data-testid="tsh-now">
+        <h4 class="tsh__label">{{ 'tsh_now' | translatePipe }}</h4>
+        @if (now_(); as b) {
+          <p class="tsh__line">
+            <strong data-testid="tsh-now-name">{{ nowName_() }}</strong>
+            <span class="c-chip--tag c-chip--sm" data-testid="tsh-now-status">
+              {{ 'bk_status_' + b.status | translatePipe }}
+            </span>
+          </p>
+          <p class="tsh__line">
+            <span dir="ltr">{{ b.time }}</span> ·
+            <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
+            {{ b.partySize }}
+          </p>
+          @if (joinNumbers_()) {
+            <p class="tsh__line" data-testid="tsh-join">{{ 'tsh_tables' | translatePipe }}: {{ joinNumbers_() }}</p>
+          }
+          @if (b.notes) {
+            <p class="tsh__line tsh__notes" data-testid="tsh-notes">{{ b.notes }}</p>
+          }
+        } @else {
+          <p class="tsh__line" data-testid="tsh-free">{{ 'tsh_free_now' | translatePipe }}</p>
+        }
+      </section>
+
+      <section class="tsh__block" data-testid="tsh-next">
+        <h4 class="tsh__label">{{ 'tsh_next' | translatePipe }}</h4>
+        @if (next_(); as n) {
+          <p class="tsh__line">
+            <span dir="ltr">{{ n.time }}</span> · {{ nextName_() }} ·
+            <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
+            {{ n.partySize }}
+          </p>
+        } @else {
+          <p class="tsh__line" data-testid="tsh-no-next">{{ 'tsh_no_next' | translatePipe }}</p>
+        }
+      </section>
+
+      @if (now_() && !live()) {
+        <p class="tsh__line" data-testid="tsh-not-live">{{ 'tsh_not_live' | translatePipe }}</p>
+      }
+
+      @if (canWalkIn_()) {
+        <div class="tsh__actions">
+          <button
+            type="button"
+            class="c-chip c-chip--tap"
+            data-testid="tsh-walk-in"
+            [disabled]="busy_() || !live()"
+            [attr.title]="live() ? null : ('tsh_not_live' | translatePipe)"
+            (click)="walkIn()"
+          >
+            <lucide-icon name="user-plus" [size]="16" aria-hidden="true"></lucide-icon>
+            {{ 'wlk_from_table' | translatePipe }}
+          </button>
+        </div>
+      }
+
+      @if (canWalkIn_() && waitingFit_()) {
+        <p class="tsh__line" data-testid="tsh-fits">{{ fitsLine_() }}</p>
+        <div class="tsh__actions">
+          <button
+            type="button"
+            class="c-chip c-chip--tap"
+            data-testid="tsh-fit-seat"
+            [disabled]="busy_() || !live()"
+            [attr.title]="live() ? null : ('tsh_not_live' | translatePipe)"
+            (click)="seatWaiting()"
+          >
+            <lucide-icon name="user-check" [size]="16" aria-hidden="true"></lucide-icon>
+            {{ 'wl_seat' | translatePipe }}
+          </button>
+        </div>
+      }
+
+      @if (canAct_() || clientId_()) {
+        <div class="tsh__actions">
+          @if (canSeat_()) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="tsh-seat"
+              [disabled]="busy_()"
+              (click)="act('seated')"
+            >
+              <lucide-icon name="user-check" [size]="16" aria-hidden="true"></lucide-icon>
+              {{ 'bk_seated' | translatePipe }}
+            </button>
+          }
+          @if (canFinish_()) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="tsh-finish"
+              [disabled]="busy_()"
+              (click)="act('finished')"
+            >
+              <lucide-icon name="circle-check" [size]="16" aria-hidden="true"></lucide-icon>
+              {{ 'bk_finished' | translatePipe }}
+            </button>
+          }
+          @if (canNoShow_()) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="tsh-no-show"
+              [disabled]="busy_()"
+              (click)="act('no_show')"
+            >
+              <lucide-icon name="circle-slash" [size]="16" aria-hidden="true"></lucide-icon>
+              {{ 'bk_no_show' | translatePipe }}
+            </button>
+          }
+          @if (canCancel_()) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="tsh-cancel"
+              [disabled]="busy_()"
+              (click)="act('cancelled')"
+            >
+              <lucide-icon name="circle-x" [size]="16" aria-hidden="true"></lucide-icon>
+              {{ 'bk_cancel' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="tsh-move"
+              [disabled]="busy_()"
+              (click)="move()"
+            >
+              <lucide-icon name="arrow-left-right" [size]="16" aria-hidden="true"></lucide-icon>
+              {{ 'tsh_move' | translatePipe }}
+            </button>
+          }
+          @if (clientId_(); as id) {
+            <a
+              class="c-chip c-chip--tap"
+              data-testid="tsh-client"
+              [routerLink]="['/clients', id]"
+              [attr.aria-disabled]="busy_() ? 'true' : null"
+            >
+              <lucide-icon name="users" [size]="16" aria-hidden="true"></lucide-icon>
+              {{ 'tsh_open_client' | translatePipe }}
+            </a>
+          }
+        </div>
+      }
+    }
+  </div>
+</app-modal-shell>

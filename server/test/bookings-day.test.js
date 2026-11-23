@@ -3,6 +3,7 @@
 
 const request = require('supertest')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
+const { clearModuleCache } = require('../middleware/require-module')
 
 let app
 
@@ -57,5 +58,18 @@ describe('GET /day', () => {
 
   it('needs a signed-in member', async () => {
     expect((await request(app).get('/api/v1/bookings/day').query({ date: '2026-12-24' })).status).toBe(401)
+  })
+
+  it('with the tables module the answer carries the server clock as a number (plan 671)', async () => {
+    await testDb().collection('businesses').deleteMany({})
+    await testDb().collection('businesses').insertOne({ _id: 'b1', name: 'one', ownerId: 'own1', createdAt: 1, modules: ['frontdesk', 'tables'] })
+    clearModuleCache()
+    const before = Date.now()
+    const res = await day(STAFF, '2026-12-24')
+    expect(res.status).toBe(200)
+    expect(typeof res.body.now).toBe('number')
+    expect(Math.abs(res.body.now - before)).toBeLessThan(1000)
+    await testDb().collection('businesses').deleteMany({})
+    clearModuleCache()
   })
 })

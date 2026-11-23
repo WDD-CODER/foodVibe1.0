@@ -19,7 +19,9 @@ import {
 } from 'lucide-angular'
 import { RequestsPage } from './requests.page'
 import { BookingDataService } from '@services/booking-data.service'
+import { FloorPlanDataService } from '@services/floor-plan-data.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import { PermissionService } from '@services/permission.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
 import { RequestDataService } from '@services/request-data.service'
 import { TranslationService } from '@services/translation.service'
@@ -116,6 +118,8 @@ describe('RequestsPage (plan 552)', () => {
           provide: FrontDeskProfileDataService,
           useValue: { profile_: signal(null), ensureLoaded: () => Promise.resolve() }
         },
+        { provide: FloorPlanDataService, useValue: { plan_: signal(null), ensureLoaded: () => Promise.resolve() } },
+        { provide: PermissionService, useValue: { isOwner_: signal(false) } },
         { provide: TranslationService, useValue: translation },
         { provide: UserMsgService, useValue: userMsg }
       ]
@@ -171,6 +175,51 @@ describe('RequestsPage (plan 552)', () => {
     await cmp().onApprove(items_()[0], null)
     expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('rq_decision_failed')
     expect(badge.refresh).not.toHaveBeenCalled()
+  })
+
+  it('a 409 NO_TABLE opens the no-table dialog with the alternatives instead of the failure message (plan 672)', async () => {
+    await setup([req('a', 'qualified')])
+    ;(data['approve'] as jasmine.Spy).and.resolveTo({
+      ok: false,
+      code: 'NO_TABLE',
+      alternatives: [{ date: '2030-05-01', time: '21:00' }]
+    })
+    await cmp().onApprove(items_()[0], null)
+    fixture.detectChanges()
+    expect(userMsg.onSetErrorMsg).not.toHaveBeenCalled()
+    expect(el().querySelector('[data-testid="approve-table-dialog"]')).toBeTruthy()
+    ;(data['approve'] as jasmine.Spy).and.resolveTo({ ok: true, request: items_()[0], outcome: {} })
+    ;(el().querySelector('[data-testid="att-alt-21:00"]') as HTMLElement).click()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(data['approve']).toHaveBeenCalledWith(
+      'a',
+      { date: '2030-05-01', time: '21:00', partySize: 4 },
+      undefined,
+      undefined
+    )
+    expect(el().querySelector('[data-testid="approve-table-dialog"]')).toBeNull()
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('rq_approved')
+  })
+
+  it('a second NO_TABLE keeps the dialog open with the new alternatives (plan 672)', async () => {
+    await setup([req('a', 'qualified')])
+    ;(data['approve'] as jasmine.Spy).and.resolveTo({
+      ok: false,
+      code: 'NO_TABLE',
+      alternatives: [{ date: '2030-05-01', time: '21:00' }]
+    })
+    await cmp().onApprove(items_()[0], null)
+    fixture.detectChanges()
+    ;(data['approve'] as jasmine.Spy).and.resolveTo({
+      ok: false,
+      code: 'NO_TABLE',
+      alternatives: [{ date: '2030-05-01', time: '21:30' }]
+    })
+    ;(el().querySelector('[data-testid="att-alt-21:00"]') as HTMLElement).click()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(el().querySelector('[data-testid="att-alt-21:30"]')).toBeTruthy()
   })
 
   it('decline sends the chosen reason and text', async () => {

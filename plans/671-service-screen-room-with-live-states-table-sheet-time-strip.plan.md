@@ -132,6 +132,9 @@ e2e/ui/671-1.spec.ts
 e2e/ui/671-2.spec.ts
 e2e/ui/671-3.spec.ts
 screens/671-*.png
+src/app/core/services/client-data.service.spec.ts
+src/app/core/services/request-data.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -152,7 +155,9 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `FloorViewComponent` (`app-floor-view`, `src/app/pages/bookings/components/floor-view/`) — family: none — rung: 4 — why: a page-local view of one screen (the room, the strip, the pills); it composes shared pieces and is not a shared component.
-- The room drawing — family: none — rung: 4 — why: no new piece: `app-floor-map` of plan 665 is used as it is (its family `floor-map` is registered by 665 and is not on `main` yet, so it cannot be named here); if its state type lacks one of the six states or the two text lines of a table, that family is extended in place, never copied.
+- The room drawing — family: floor-map — rung: 1 — why: `app-floor-map` of plan 665 is used as it is; it lacked the two text lines of a table, so the family is extended in place with a `details` input, never copied.
+- `.floor-map__name`, `.floor-map__time` — family: none — rung: 4 — why: the two text lines of a table, scoped classes in the map's own stylesheet; no engine class fits.
+- `.fv`, `.fv__pills`, `.fv__strip`, `.fv__legend`, `.fv__draw`, `.fv__body`, `.fv__room`, `.fv__side` — family: none — rung: 4 — why: layout of this one screen only; every control inside is a chip, `app-scroll-rail` or `app-empty-state`.
 - `table-state.util.ts` (`tableStatesAt`, `TableState`, `stripTimes`) — family: helpers — rung: 3 — why: pure functions in `src/app/core/utils/` with a spec; 686, 672 and 673 read the same states.
 - The third view tab — family: chip — rung: 1 — why: one more `c-chip c-chip--tab` in the existing tab row.
 - Time strip — family: chip — rung: 1 — why: `c-chip c-chip--tab` buttons inside `app-scroll-rail` as it is (guide arrows, no scroll bar).
@@ -273,16 +278,16 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the day read tell the screen the server's time and the tables each booking holds — add the now field to the day answer when 668 did not send it, with its server test; dayBoard on the data service with the wider answer type and its spec — server/routes/bookings.js, server/test/bookings-day.test.js, src/app/core/services/booking-data.service.ts, src/app/core/services/booking-data.service.spec.ts
-- [ ] A2: Write the pure rule that turns a day of bookings into one state per table — tableStatesAt with the six states in their order, stripTimes; every spec case of the Done-when — src/app/core/utils/table-state.util.ts, src/app/core/utils/table-state.util.spec.ts
-- [ ] A3: Add the floor view to the bookings page for businesses that have table service — the third view value and tab behind the module check, the fallback to day, the date bar kept; the page spec — src/app/pages/bookings/bookings.page.ts, src/app/pages/bookings/bookings.page.html, src/app/pages/bookings/bookings.page.scss, src/app/pages/bookings/bookings.page.spec.ts
-- [ ] A4: Draw the room with its live states, legend and summary numbers — the floor view component, the map with a state per table, name and time on a table, accessible names, the pills, loader, failed-load and no-room states; all dictionary keys of this plan; extend the map family only if a state or text line is missing — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, .scss, src/app/shared/floor-map/**, public/assets/data/dictionary.json
-- [ ] A5: Keep the room fresh without a reload and on the server's clock — the server-based clock, the 45-second reload, focus and visibility reloads, no request while hidden, cleanup on leave; the timer cases of the spec — src/app/pages/bookings/components/floor-view/floor-view.component.ts, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
-- [ ] A6: Let the host look at the room at another hour — the strip of times in a scroll rail, the now chip, the query-string value, the non-live moment — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, .scss
-- [ ] A7: Give the owner the one-tap confirm-mode switch and show staff the mode — the toggle chip, the call of plan 667, reload of the profile, the three messages, staff as text; spec cases — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
-- [ ] A8: Record the new pieces where the next plan looks for them — the folder maps and the registry rows for the floor view and the table-state helper — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-- [ ] A9: Write the three screen checks that run in the real app — each spec signs in with signInQa, adds the tables module to the business answer and fulfils the floor-plan, profile and day calls itself; screenshots — e2e/ui/671-1.spec.ts, e2e/ui/671-2.spec.ts, e2e/ui/671-3.spec.ts
-- [ ] A10: Run every check of this plan and hand Dandan the two hand checks — test:ci, test:server, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
+- [x] A1: Let the day read tell the screen the server's time and the tables each booking holds — add the now field to the day answer when 668 did not send it, with its server test; dayBoard on the data service with the wider answer type and its spec — server/routes/bookings.js, server/test/bookings-day.test.js, src/app/core/services/booking-data.service.ts, src/app/core/services/booking-data.service.spec.ts
+- [x] A2: Write the pure rule that turns a day of bookings into one state per table — tableStatesAt with the six states in their order, stripTimes; every spec case of the Done-when — src/app/core/utils/table-state.util.ts, src/app/core/utils/table-state.util.spec.ts
+- [x] A3: Add the floor view to the bookings page for businesses that have table service — the third view value and tab behind the module check, the fallback to day, the date bar kept; the page spec — src/app/pages/bookings/bookings.page.ts, src/app/pages/bookings/bookings.page.html, src/app/pages/bookings/bookings.page.scss, src/app/pages/bookings/bookings.page.spec.ts
+- [x] A4: Draw the room with its live states, legend and summary numbers — the floor view component, the map with a state per table, name and time on a table, accessible names, the pills, loader, failed-load and no-room states; all dictionary keys of this plan; extend the map family only if a state or text line is missing — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, .scss, src/app/shared/floor-map/**, public/assets/data/dictionary.json
+- [x] A5: Keep the room fresh without a reload and on the server's clock — the server-based clock, the 45-second reload, focus and visibility reloads, no request while hidden, cleanup on leave; the timer cases of the spec — src/app/pages/bookings/components/floor-view/floor-view.component.ts, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
+- [x] A6: Let the host look at the room at another hour — the strip of times in a scroll rail, the now chip, the query-string value, the non-live moment — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, .scss
+- [x] A7: Give the owner the one-tap confirm-mode switch and show staff the mode — the toggle chip, the call of plan 667, reload of the profile, the three messages, staff as text; spec cases — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
+- [x] A8: Record the new pieces where the next plan looks for them — the folder maps and the registry rows for the floor view and the table-state helper — src/app/pages/breadcrumbs.md, src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A9: Write the three screen checks that run in the real app — each spec signs in with signInQa, adds the tables module to the business answer and fulfils the floor-plan, profile and day calls itself; screenshots — e2e/ui/671-1.spec.ts, e2e/ui/671-2.spec.ts, e2e/ui/671-3.spec.ts
+- [x] A10: Run every check of this plan and hand Dandan the two hand checks — test:ci, test:server, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
 - Dependencies: `BookingDataService`, `FloorPlanDataService` (664), `FrontDeskProfileDataService`, `ModuleService`,
@@ -319,3 +324,5 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
   `?view=week` still open those views.
 - behaviour: "reserved soon" means a confirmed booking that starts within 90 minutes (the same window as 672's
   "arriving next").
+- evidence: `pnpm run test:ci` → exit 0, 2886 SUCCESS (includes table-state.util.spec, floor-view spec, bookings.page spec); `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `lint:icons`, `lint:no-native-select`, `lint:reuse`, `override-check`, `plan-ledger-check`, `breadcrumbs-check` → exit 0.
+- note: `GET /day` already sent `now` (plan 685); added only the server test and `dayBoard`. The map got a `details` input (label, name, time) — the family extended in place. The three `[ui]` specs are written, not run.

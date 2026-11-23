@@ -27,6 +27,14 @@ export type DayLoad = {
   now?: number
 }
 
+/** Plan 671: the day read of a business with tables — every field is there (`now` is the server's clock in ms). */
+export type DayBoard = {
+  bookings: Booking[]
+  holds: TableHoldRange[]
+  unassigned: string[]
+  now: number
+}
+
 /** The stored booking (already in the store), or the server's error code (null when there was none). */
 export type BookingResult =
   | { ok: true; booking: Booking }
@@ -61,6 +69,13 @@ export class BookingDataService extends BaseEntityDataService<Booking> {
       })
       return null
     }
+  }
+
+  /** Plan 671: the same day read for the floor view; `null` when the call failed or the answer has no server clock. */
+  async dayBoard(date: string): Promise<DayBoard | null> {
+    const load = await this.day(date)
+    if (!load || typeof load.now !== 'number') return null
+    return { bookings: load.bookings, holds: load.holds ?? [], unassigned: load.unassigned ?? [], now: load.now }
   }
 
   /** Plan 550: puts a booking the server created (an approved request) into the store. */

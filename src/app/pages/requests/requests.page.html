@@ -51,6 +51,14 @@
   />
   } @if (declineFor_()) {
   <app-decline-dialog (declined)="onDecline($event)" (closed)="closeDialogs()" (dirtyChange)="setDialogDirty($event)" />
+  } @if (noTable_(); as nt) {
+  <app-approve-table-dialog
+    [request]="nt.request"
+    [alternatives]="nt.alternatives"
+    [busy]="busyId_() !== null"
+    (chosen)="onApproveAgain($event)"
+    (closed)="closeDialogs()"
+  />
   } @if (newOpen_()) {
   <app-new-request-dialog
     (created)="onCreated()"

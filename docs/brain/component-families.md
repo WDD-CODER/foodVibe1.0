@@ -329,6 +329,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- the state of a table at a moment (plan 671): `tableStatesAt`, `stripTimes` in `src/app/core/utils/table-state.util.ts` (`table-state.util.ts`) — free, reserved soon, seated, over time, late, not active; first match wins; any screen that shows a table's state reads this, never a second copy.
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
@@ -363,6 +364,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`): the five calls of the waiting list (`list`, `add`, `notify`, `seat`, `left`), each returning its result or the server's error code as a code (plan 673).
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
@@ -488,6 +490,47 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `tableTapped`, `tableMoved`, `gridTapped`) with the pure grid arithmetic in `floor-geometry.util.ts` (`footprintFor`, `movedCell`,
   `stepCell`/`canStep` (plan 666: one cell in the arrow's direction, RTL-aware), `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
 - When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.
+- Known copies: none.
+
+### floor-view — the service screen's room with live states
+
+- Status: stable — plan 671
+- Use: `src/app/pages/bookings/components/floor-view/` · `app-floor-view` (inputs `date`, `at`; outputs `atChange`, `tableTapped`): the room in `app-floor-map` with one live state per table (the map's `details` input carries the state label, name and time), the 30-minute strip in `app-scroll-rail`, the summary pills, the legend and the owner's confirm-mode toggle; it reloads the day every 45 s on the server's clock. `BookingDataService.dayBoard(date)` reads the day.
+- Classes: `.fv`, `.fv__pills`, `.fv__strip`, `.fv__legend`, `.fv__draw`, `.fv__body`, `.fv__room`, `.fv__side` (scoped to the view's own stylesheet); the map's `.floor-map__name`, `.floor-map__time` put a booking's name and time on a table.
+- When: the host's service screen (`/bookings?view=floor`). Plan 672 adds the two lists (`service-lists`) and the phone-booking and walk-in buttons; plan 673 adds the waiting list.
+- Plan 686: a tap on a table opens `app-table-sheet` (`src/app/pages/bookings/components/table-sheet/`, a bottom sheet in `app-modal-shell [sheet]`: the table, what is on it now, the next booking, and seat / finish / no-show / cancel / move for the live moment). "Move" puts the view in move mode: the banner (`.fv__move`) and a tap on another table call `BookingDataService.setTables`; Escape or the banner's cancel leave it. `nextOnTable` in `table-state.util.ts` finds the next booking of a table.
+- Known copies: none.
+
+### booking-dialogs — the phone booking, walk-in and no-table dialogs of the service screen
+
+- Status: stable — plan 672
+- Use: `src/app/pages/bookings/components/new-booking-dialog/` · `app-new-booking-dialog` (input `date`; outputs `saved`, `closed`): the phone booking — client or new guest, date, party, area, time chips from the availability call, the engine's offered table on a small `app-floor-map` (the owner may tap another), the 409 alternatives as chips. `src/app/pages/bookings/components/walk-in-dialog/` · `app-walk-in-dialog` (inputs `tableKey`, `plan`, `states`; outputs `seated`, `closed`): seats a walk-in on the table of the sheet or one tapped free table. `src/app/pages/requests/components/approve-table-dialog/` · `app-approve-table-dialog` (inputs `request`, `alternatives`, `busy`; output `chosen`): shown when approving a table request answers `NO_TABLE`; the page makes the approve call. All three are `app-modal-shell [sheet]`.
+- Classes: `.fv__actions` (the bar buttons), `.nb-fields`, `.nb-chips`, `.nb-label`, `.nb-line`, `.nb-map`, `.nb-info`, `.wlk-row`, `.wlk-pick`, `.wlk-label`, `.wlk-line`, `.att-chips`, `.att-label`, `.att-line`, `.att-map` (scoped to each dialog's stylesheet; the stacks use the engine `.c-input-stack`); no new `.c-*` class.
+- When: a host creates, seats or rescues a table booking from the service screen or the requests page — never a second copy.
+- Known copies: none.
+
+### service-lists — "arriving next" and "not assigned" beside the room
+
+- Status: stable — plan 672
+- Use: `src/app/pages/bookings/components/service-lists/` · `app-arriving-list` (inputs `rows`, `live`, `busyId`; output `arrived`) and `app-unassigned-list` (inputs `rows`, `live`; output `assign`): single-line `.c-list-row` rows with `app-empty-state`; the rules are `arrivingNext` and `freeTablesFor` in `table-state.util.ts`.
+- Classes: `.sl__title`, `.sl__rows`, `.sl__row`, `.sl__name`, `.sl__party`, `.sl__act` (one stylesheet, `arriving-list.component.scss`, shared by both lists; the stack is the engine `.c-input-stack`).
+- When: a short read-only side panel of the service screen — never a second list shell.
+- Known copies: none.
+
+### waitlist-drawer — the waiting list of the service screen
+
+- Status: stable — plan 673
+- Use: `src/app/pages/bookings/components/waitlist-drawer/` · `app-waitlist-drawer` (inputs `date`, `plan`; outputs `closed`, `seatRequested`, `changed`): the add form, the waiting rows in order with the minutes waited from the server's clock, "table is ready", "seated" and "left"; `app-modal-shell [sheet]`. The client is `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`, the five `/api/v1/waitlist` calls, codes returned as codes); `firstWaitingFit` in `table-state.util.ts` names the party that fits a table (the table sheet's line and the toast after "finished").
+- Classes: `.wl`, `.wl__head`, `.wl__form`, `.wl__list`, `.wl-row`, `.wl-row__*` (the drawer's own stylesheet; no `.c-*` class added).
+- When: any screen that shows or changes the day's waiting parties — never a second list or a second client of the waiting-list routes.
+- Known copies: none.
+
+### table-sheet — the sheet of one table on the service screen
+
+- Status: stable — plan 686
+- Use: `src/app/pages/bookings/components/table-sheet/` · `app-table-sheet` (inputs `table`, `board`, `plan`, `moment`, `live`, `look`; outputs `closed`, `changed`, `moveRequested`): `app-modal-shell [sheet]` with the table header, the "now" and "next" blocks and the actions that fit the booking's status (`BookingDataService.setStatus`, `ConfirmModalService` for a cancel).
+- Classes: `.tsh`, `.tsh__head`, `.tsh__headline`, `.tsh__title`, `.tsh__label`, `.tsh__line`, `.tsh__meta`, `.tsh__block`, `.tsh__notes`, `.tsh__actions` (scoped to the sheet's stylesheet); `.fv__move` is the floor view's move banner.
+- When: a screen shows one table of the room and acts on its booking — never a second copy.
 - Known copies: none.
 
 ### floor-plan-joins-sheet — joins of tables, one-cell arrows and the phone sheet of the room editor

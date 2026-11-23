@@ -92,6 +92,7 @@ docs/brain/inventory.md
 e2e/ui/686-1.spec.ts
 e2e/ui/686-2.spec.ts
 screens/686-*.png
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -117,6 +118,7 @@ append the path to the scope block above and retry.
 - Cancel question — family: modal-controller — rung: 1 — why: `ConfirmModalService.open('bk_cancel_confirm')`, the question the day list already asks.
 - Move banner (text and a cancel button above the room) — family: chip — rung: 1 — why: a line of text with one `c-btn-ghost c-btn-ghost--sm` button, scoped SCSS only; no new shared piece.
 - `nextOnTable` in `table-state.util.ts` — family: helpers — rung: 2 — why: one more pure function in the helper file of plan 671, with spec cases.
+- `.tsh`, `.tsh__head`, `.tsh__headline`, `.tsh__title`, `.tsh__label`, `.tsh__line`, `.tsh__meta`, `.tsh__block`, `.tsh__notes`, `.tsh__actions`, `.fv__move` — family: none — rung: 4 — why: layout of the table sheet and the move banner only, scoped in their own stylesheets; every control inside is a chip, a ghost button or the modal shell.
 - Messages — family: feedback — rung: 1 — why: `UserMsgService` + `LoggingService`.
 
 ## Defaults
@@ -208,14 +210,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the pure rule that finds the next booking of a table — nextOnTable with spec cases: none, one later, the now booking left out, cancelled ones ignored — src/app/core/utils/table-state.util.ts, src/app/core/utils/table-state.util.spec.ts
-- [ ] A2: Build the sheet that shows what is on a table now and what comes next — the shell as a bottom sheet, header, the two blocks, the not-live line; all dictionary keys of this plan — src/app/pages/bookings/components/table-sheet/table-sheet.component.ts, .html, .scss, public/assets/data/dictionary.json
-- [ ] A3: Let the host mark arrived, finished, no-show and cancel from the sheet — the actions per status, one call at a time, the cancel question, the three result paths; the sheet spec — src/app/pages/bookings/components/table-sheet/table-sheet.component.ts, .html, src/app/pages/bookings/components/table-sheet/table-sheet.component.spec.ts
-- [ ] A4: Open the sheet from a tap on the room and reload the room after an action — the floor view listens to the map's tap, owns the open table, reloads the board on changed — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html
-- [ ] A5: Let the host move a party to another table with two taps — move mode in the floor view, the banner, selected keys on the map, the tables write, the refused and failed paths, every way out; spec cases — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, .scss, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
-- [ ] A6: Record the sheet where the next plan looks for it — the folder map and the registry rows — src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-- [ ] A7: Write the two screen checks that run in the real app — signInQa, the tables module added to the business answer, stateful stubs of the floor-plan, profile, day, status and tables calls; screenshots — e2e/ui/686-1.spec.ts, e2e/ui/686-2.spec.ts
-- [ ] A8: Run every check of this plan and hand Dandan the hand check — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human card
+- [x] A1: Add the pure rule that finds the next booking of a table — nextOnTable with spec cases: none, one later, the now booking left out, cancelled ones ignored — src/app/core/utils/table-state.util.ts, src/app/core/utils/table-state.util.spec.ts
+- [x] A2: Build the sheet that shows what is on a table now and what comes next — the shell as a bottom sheet, header, the two blocks, the not-live line; all dictionary keys of this plan — src/app/pages/bookings/components/table-sheet/table-sheet.component.ts, .html, .scss, public/assets/data/dictionary.json
+- [x] A3: Let the host mark arrived, finished, no-show and cancel from the sheet — the actions per status, one call at a time, the cancel question, the three result paths; the sheet spec — src/app/pages/bookings/components/table-sheet/table-sheet.component.ts, .html, src/app/pages/bookings/components/table-sheet/table-sheet.component.spec.ts
+- [x] A4: Open the sheet from a tap on the room and reload the room after an action — the floor view listens to the map's tap, owns the open table, reloads the board on changed — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html
+- [x] A5: Let the host move a party to another table with two taps — move mode in the floor view, the banner, selected keys on the map, the tables write, the refused and failed paths, every way out; spec cases — src/app/pages/bookings/components/floor-view/floor-view.component.ts, .html, .scss, src/app/pages/bookings/components/floor-view/floor-view.component.spec.ts
+- [x] A6: Record the sheet where the next plan looks for it — the folder map and the registry rows — src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A7: Write the two screen checks that run in the real app — signInQa, the tables module added to the business answer, stateful stubs of the floor-plan, profile, day, status and tables calls; screenshots — e2e/ui/686-1.spec.ts, e2e/ui/686-2.spec.ts
+- [x] A8: Run every check of this plan and hand Dandan the hand check — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human card
 
 ## Technical Considerations
 - Dependencies: `FloorViewComponent`, `tableStatesAt`, `dayBoard` (671); `BookingDataService.setStatus` and the
@@ -245,6 +247,10 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 - none
 
 ## Execution Notes
+- evidence: pnpm run build -> 0; pnpm run lint -> 0 (0 errors); pnpm run test:ci -> 0, 2910 of 2910 SUCCESS; lint:icons, lint:reuse, kit-manifest-check, override-check, plan-ledger-check, breadcrumbs-check -> 0; log-query -> no entries.
+- the [ui] specs e2e/ui/686-1.spec.ts and 686-2.spec.ts are written, not run.
+- seen-free deviation: the sheet takes one more input, look (the table state of 671), so it need not recompute holdMinutes.
+- a 409 is read from the codes the server sends with it (NO_TABLE, BAD_STATUS, STATUS_CHANGED) because BookingResult carries no HTTP status.
 - behaviour: a move goes to one tapped table; when the party is larger than that table the server's answer decides
   (a refusal shows the "taken" message).
 - behaviour: actions are offered only at the live moment; at another hour of the strip the sheet is read-only.

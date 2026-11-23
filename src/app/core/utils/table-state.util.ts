@@ -1,0 +1,172 @@
+import type { Booking } from '@models/booking.model'
+import type { WaitlistEntry } from '@models/waitlist-entry.model'
+import type { FloorMapPlan } from 'src/app/shared/floor-map/floor-map.component'
+import type { FloorTableState } from 'src/app/shared/floor-map/floor-geometry.util'
+
+/** Plan 671: the live look of one table at one moment. */
+export type TableState = FloorTableState
+export interface TableLook {
+  state: TableState
+  name?: string
+  time?: string
+  bookingId?: string
+}
+
+const MINUTE_MS = 60000
+/** A confirmed booking that starts within this many minutes of the moment marks its table "reserved soon". */
+export const RESERVED_SOON_MINUTES = 90
+
+type Held = Pick<Booking, '_id' | 'kind' | 'status' | 'startAt' | 'endAt' | 'tableKeys' | 'guestName' | 'time'>
+
+/**
+ * Plan 671: one state per table of the plan, first match wins: not active, over time (live), seated, late (live),
+ * reserved soon, free. Only table bookings with `tableKeys` count; finished, cancelled and no-show hold nothing.
+ * `name` is the booking's guest name, or `walkInName` when it is empty.
+ */
+export function tableStatesAt(
+  plan: Pick<FloorMapPlan, 'tables'>,
+  bookings: readonly Held[],
+  moment: number,
+  opts: { live: boolean; holdMinutes: number; walkInName?: string }
+): Record<string, TableLook> {
+  const byTable = new Map<string, Held[]>()
+  for (const b of bookings) {
+    if (b.kind !== 'table' || !b.tableKeys?.length) continue
+    if (b.status !== 'confirmed' && b.status !== 'seated') continue
+    for (const key of b.tableKeys) byTable.set(key, [...(byTable.get(key) ?? []), b])
+  }
+  const result: Record<string, TableLook> = {}
+  for (const table of plan.tables) {
+    if (!table.active) {
+      result[table.key] = { state: 'not_active' }
+      continue
+    }
+    const mine = (byTable.get(table.key) ?? []).sort((a, b) => a.startAt - b.startAt)
+    const look = (state: TableState, b?: Held): TableLook =>
+      b ? { state, name: b.guestName || opts.walkInName, time: b.time, bookingId: b._id } : { state }
+    const seated = mine.filter((b) => b.status === 'seated')
+    const confirmed = mine.filter((b) => b.status === 'confirmed')
+    const over = opts.live ? seated.find((b) => moment > b.endAt) : undefined
+    const sitting = opts.live ? seated[0] : seated.find((b) => b.startAt <= moment && moment < b.endAt)
+    const late = opts.live ? confirmed.find((b) => moment > b.startAt + opts.holdMinutes * MINUTE_MS) : undefined
+    const soon = confirmed.find((b) => b.startAt - RESERVED_SOON_MINUTES * MINUTE_MS <= moment && moment < b.endAt)
+    if (over) result[table.key] = look('over_time', over)
+    else if (sitting) result[table.key] = look('seated', sitting)
+    else if (late) result[table.key] = look('late', late)
+    else if (soon) result[table.key] = look('reserved_soon', soon)
+    else result[table.key] = look('free')
+  }
+  return result
+}
+
+/**
+ * Plan 686: the `confirmed` table booking on `tableKey` that starts first after `moment`, other than `excludeId`
+ * (the booking that gives the table its state now); `null` when there is none.
+ */
+export function nextOnTable<T extends Held>(
+  bookings: readonly T[],
+  tableKey: string,
+  moment: number,
+  excludeId?: string
+): T | null {
+  let best: T | null = null
+  for (const b of bookings) {
+    if (b.kind !== 'table' || b.status !== 'confirmed' || b._id === excludeId) continue
+    if (!b.tableKeys?.includes(tableKey) || b.startAt <= moment) continue
+    if (!best || b.startAt < best.startAt) best = b
+  }
+  return best
+}
+
+export interface StripTime {
+  time: string
+  /** True for a time after midnight of a range that opens the evening before. */
+  nextDay: boolean
+}
+
+const toMinutes = (hhmm: string): number => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5))
+const toHhmm = (minutes: number): string => {
+  const m = minutes % 1440
+  return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
+}
+
+/** The times of a day's opening ranges in `stepMinutes` steps, from each opening up to (not including) its close. */
+export function stripTimes(
+  ranges: readonly { open: string; close: string; overnight: boolean }[],
+  stepMinutes: number
+): StripTime[] {
+  const seen = new Set<string>()
+  const out: StripTime[] = []
+  for (const r of ranges) {
+    const start = toMinutes(r.open)
+    const end = r.overnight ? toMinutes(r.close) + 1440 : toMinutes(r.close)
+    for (let t = start; t < end; t += stepMinutes) {
+      const time = toHhmm(t)
+      if (seen.has(time)) continue
+      seen.add(time)
+      out.push({ time, nextDay: t >= 1440 })
+    }
+  }
+  return out
+}
+
+/** Plan 672: how far ahead the "arriving next" list looks. */
+export const ARRIVING_WINDOW_MINUTES = 90
+/** The default minutes a table is kept for a guest who has not come (the C-BOOK2 hold). */
+const DEFAULT_HOLD_MINUTES = 15
+
+export interface ArrivingRow<T> {
+  booking: T
+  /** True when `moment` is past the start plus the hold. */
+  late: boolean
+}
+
+/**
+ * Plan 672: the `confirmed` table bookings that start within `windowMinutes` of `moment`, or started already and are
+ * not seated, cancelled or no-show — earliest first, each with a `late` flag (`moment > startAt + holdMinutes`).
+ */
+export function arrivingNext<T extends Pick<Booking, 'kind' | 'status' | 'startAt'>>(
+  bookings: readonly T[],
+  moment: number,
+  windowMinutes: number = ARRIVING_WINDOW_MINUTES,
+  holdMinutes: number = DEFAULT_HOLD_MINUTES
+): ArrivingRow<T>[] {
+  return bookings
+    .filter((b) => b.kind === 'table' && b.status === 'confirmed' && b.startAt <= moment + windowMinutes * MINUTE_MS)
+    .sort((a, b) => a.startAt - b.startAt)
+    .map((booking) => ({ booking, late: moment > booking.startAt + holdMinutes * MINUTE_MS }))
+}
+
+/**
+ * Plan 672: the keys of the tables that are `free` now and whose seat range holds the party — the choices of the
+ * walk-in dialog. Order follows the plan.
+ */
+export function freeTablesFor(
+  states: Record<string, { state: TableState }>,
+  plan: Pick<FloorMapPlan, 'tables'>,
+  partySize: number
+): string[] {
+  return plan.tables
+    .filter((t) => t.active && states[t.key]?.state === 'free' && t.minSeats <= partySize && partySize <= t.maxSeats)
+    .map((t) => t.key)
+}
+
+type WaitingFitEntry = Pick<WaitlistEntry, 'status' | 'partySize' | 'areaKey' | 'joinedAt'>
+
+/**
+ * Plan 673: the earliest `waiting` or `notified` entry whose party fits the table's seat range and whose area is unset
+ * or the table's area; `null` when none fits.
+ */
+export function firstWaitingFit<T extends WaitingFitEntry>(
+  entries: readonly T[],
+  table: Pick<FloorMapPlan['tables'][number], 'minSeats' | 'maxSeats' | 'areaKey'>
+): T | null {
+  let best: T | null = null
+  for (const e of entries) {
+    if (e.status !== 'waiting' && e.status !== 'notified') continue
+    if (e.partySize < table.minSeats || e.partySize > table.maxSeats) continue
+    if (e.areaKey && e.areaKey !== table.areaKey) continue
+    if (!best || e.joinedAt < best.joinedAt) best = e
+  }
+  return best
+}
