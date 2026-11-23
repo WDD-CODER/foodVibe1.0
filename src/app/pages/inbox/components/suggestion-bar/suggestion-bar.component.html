@@ -1,0 +1,52 @@
+<div class="sg" dir="rtl" data-testid="suggestion-bar">
+  @if (suggestion() && state() !== 'loading') {
+    <div class="sg-head">
+      <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+      <strong>{{ 'ibx_sg_title' | translatePipe }}</strong>
+    </div>
+    <p class="sg-text" data-testid="suggestion-text">{{ suggestion() }}</p>
+    <div class="sg-actions">
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="suggestion-send"
+        [disabled]="busy()"
+        (click)="send.emit()"
+      >
+        <span class="btn-label">{{ 'ibx_sg_send' | translatePipe }}</span>
+      </button>
+      <button type="button" class="c-btn-ghost" data-testid="suggestion-edit" [disabled]="busy()" (click)="edit.emit()">
+        <span class="btn-label">{{ 'ibx_sg_edit' | translatePipe }}</span>
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost sg-dismiss"
+        data-testid="suggestion-dismiss"
+        [attr.aria-label]="'ibx_sg_dismiss' | translatePipe"
+        [attr.title]="'ibx_sg_dismiss' | translatePipe"
+        (click)="dismiss.emit()"
+      >
+        <lucide-icon name="x" [size]="16"></lucide-icon>
+      </button>
+    </div>
+  } @else if (state() === 'loading') {
+    <button type="button" class="c-btn-ghost" data-testid="suggestion-ask" disabled>
+      <app-loader size="small" [inline]="true" />
+    </button>
+  } @else {
+    @if (state() === 'failed') {
+      <p class="sg-fail" role="alert" data-testid="suggestion-failed">{{ 'ibx_sg_failed' | translatePipe }}</p>
+    }
+    <button type="button" class="c-btn-ghost" data-testid="suggestion-ask" (click)="ask.emit()">
+      @if (state() === 'failed') {
+        <span class="btn-label">{{ 'retry' | translatePipe }}</span>
+      } @else {
+        <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+        <span class="btn-label">{{ 'ibx_sg_ask' | translatePipe }}</span>
+      }
+    </button>
+  }
+  @if (errorKey(); as key) {
+    <p class="c-field-error" role="alert" data-testid="suggestion-error">{{ key | translatePipe }}</p>
+  }
+</div>

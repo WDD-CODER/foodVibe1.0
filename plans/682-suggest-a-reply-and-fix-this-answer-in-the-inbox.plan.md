@@ -301,15 +301,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Let a member turn a wrong assistant answer into a draft fact for the owner — the fix route with its checks, the one model call, the fallback draft when the model is unavailable, the log line; the English prompt file — server/routes/ai/frontdesk.js, server/services/knowledge-correction-prompt.js
-- [ ] A2: Prove the fix route with the model faked — the draft item and its fields, the fallback, every refusal, the limiter, the log content, a simulator conversation — server/test/ai-frontdesk-fix.test.js
-- [ ] A3: Give the browser the two calls the inbox needs — suggest and fixAnswer on the conversation service, with their spec cases — src/app/core/services/conversation-data.service.ts, src/app/core/services/conversation-data.service.spec.ts
-- [ ] A4: Show the assistant's drafted reply above the reply box — the suggestion bar with send, edit, dismiss and ask, its loading and failure states, the phone layout; spec — src/app/pages/inbox/components/suggestion-bar/suggestion-bar.component.ts, .html, .scss, .spec.ts
-- [ ] A5: Wire the bar into the thread so a suggestion can be sent or moved into the reply box — when it shows, the used and dismissed rules, the refusal path; all dictionary keys of this plan — src/app/pages/inbox/inbox.page.ts, src/app/pages/inbox/inbox.page.html, src/app/pages/inbox/inbox.page.spec.ts, public/assets/data/dictionary.json
-- [ ] A6: Put a fix action under every answer the assistant wrote — the optional input and output on the shared thread, the flag icon; the simulator unchanged; spec — src/app/shared/chat-thread/chat-thread.component.ts, .html, .spec.ts, src/app/app.config.ts
-- [ ] A7: Build the dialog where the member types the right answer — the quoted message, the answer field, the issue choice with its tooltip, save, failure and leave rules; spec — src/app/pages/inbox/components/fix-answer-dialog/fix-answer-dialog.component.ts, .html, .scss, .spec.ts
-- [ ] A8: Record the new pieces where the next plan looks for them — the folder maps, the registry rows, the map's extension line — src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, server/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md, docs/restaurant/restaurant-map.md
-- [ ] A9: Write the three screen checks that run in the real app — signInQa, the conversations, messages, suggest, reply and fix calls answered by the spec; screenshots — e2e/ui/682-1.spec.ts, e2e/ui/682-2.spec.ts, e2e/ui/682-3.spec.ts
+- [x] A1: Let a member turn a wrong assistant answer into a draft fact for the owner — the fix route with its checks, the one model call, the fallback draft when the model is unavailable, the log line; the English prompt file — server/routes/ai/frontdesk.js, server/services/knowledge-correction-prompt.js
+- [x] A2: Prove the fix route with the model faked — the draft item and its fields, the fallback, every refusal, the limiter, the log content, a simulator conversation — server/test/ai-frontdesk-fix.test.js
+- [x] A3: Give the browser the two calls the inbox needs — suggest and fixAnswer on the conversation service, with their spec cases — src/app/core/services/conversation-data.service.ts, src/app/core/services/conversation-data.service.spec.ts
+- [x] A4: Show the assistant's drafted reply above the reply box — the suggestion bar with send, edit, dismiss and ask, its loading and failure states, the phone layout; spec — src/app/pages/inbox/components/suggestion-bar/suggestion-bar.component.ts, .html, .scss, .spec.ts
+- [x] A5: Wire the bar into the thread so a suggestion can be sent or moved into the reply box — when it shows, the used and dismissed rules, the refusal path; all dictionary keys of this plan — src/app/pages/inbox/inbox.page.ts, src/app/pages/inbox/inbox.page.html, src/app/pages/inbox/inbox.page.spec.ts, public/assets/data/dictionary.json
+- [x] A6: Put a fix action under every answer the assistant wrote — the optional input and output on the shared thread, the flag icon; the simulator unchanged; spec — src/app/shared/chat-thread/chat-thread.component.ts, .html, .spec.ts, src/app/app.config.ts
+- [x] A7: Build the dialog where the member types the right answer — the quoted message, the answer field, the issue choice with its tooltip, save, failure and leave rules; spec — src/app/pages/inbox/components/fix-answer-dialog/fix-answer-dialog.component.ts, .html, .scss, .spec.ts
+- [x] A8: Record the new pieces where the next plan looks for them — the folder maps, the registry rows, the map's extension line — src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, server/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md, docs/restaurant/restaurant-map.md
+- [x] A9: Write the three screen checks that run in the real app — signInQa, the conversations, messages, suggest, reply and fix calls answered by the spec; screenshots — e2e/ui/682-1.spec.ts, e2e/ui/682-2.spec.ts, e2e/ui/682-3.spec.ts
 - [ ] A10: Run every check of this plan and hand Dandan the hand checks — test:server, test:ci, build, lint, lint:icons, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
@@ -345,3 +345,8 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: when the model is unavailable the correction is still saved as a plain draft (topic `faq`), so a member's work is never lost.
 - behaviour: any member may mark a wrong answer; only the owner approves the draft (unchanged).
 - behaviour: the issue type is used in the prompt and the log; it is not stored on the knowledge item (the schema has no field for it).
+- Evidence: `vitest run test/ai-frontdesk-fix.test.js` → 9 passed. `pnpm run build` → 0. `pnpm run lint` → 0 (warnings only). `pnpm run test:ci` → 0. `lint:icons` → 0. override-check, plan-ledger-check, breadcrumbs-check → 0.
+- Extra dictionary key `ibx_fix_save` "שמירה" (the plan's `save` is "שמור"; the [ui] item presses "שמירה").
+- Small additions in scope: `ReplyBoxComponent` gained output `sent` and method `focus()` (the page needs them for "used" and "edit").
+- The refusal of a send from the bar shows under the bar (same dictionary keys as the reply box), not inside the reply box.
+- A [ui] item is written, not run: 682-1, 682-2, 682-3.

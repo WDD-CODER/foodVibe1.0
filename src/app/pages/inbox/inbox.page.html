@@ -130,17 +130,44 @@
       }
 
       <div #scroller class="ibx-messages" data-testid="thread-scroll" (scroll)="onScroll()">
-        <app-chat-thread [messages]="t.messages" [now]="threadNow_()" perspective="business" [buttonsEnabled]="false" />
+        <app-chat-thread
+          [messages]="t.messages"
+          [now]="threadNow_()"
+          perspective="business"
+          [buttonsEnabled]="false"
+          [fixable]="true"
+          (fixRequested)="openFix($event)"
+        />
       </div>
 
-      @if (t.conversation.status !== 'closed') {
+      @if (sgVisible_()) {
+      <app-suggestion-bar
+        [suggestion]="sgText_()"
+        [state]="sgState_()"
+        [errorKey]="sgError_()"
+        [busy]="sgBusy_()"
+        (send)="sendSuggestion()"
+        (edit)="editSuggestion()"
+        (dismiss)="dismissSuggestion()"
+        (ask)="askSuggestion()"
+      />
+      } @if (t.conversation.status !== 'closed') {
       <app-reply-box
+        (sent)="onReplySent()"
         [conversation]="t.conversation"
         [now]="threadNow_()"
         [draft]="draft_()"
         (draftChange)="onDraft($event)"
         (closedMeanwhile)="closedMeanwhile()"
         (actionFailed)="actionFailed()"
+      />
+      } @if (fixing_(); as fix) {
+      <app-fix-answer-dialog
+        [conversationId]="t.conversation._id"
+        [messageId]="fix.id"
+        [quote]="fix.text"
+        (closed)="closeFix()"
+        (saved)="fixSaved($event)"
       />
       } } } @else if (!id_()) {
       <app-empty-state messageKey="ibx_pick" icon="message-circle" />

@@ -17,6 +17,10 @@ const { scopeFilter } = require('../../utils/business-scope');
 const { assertCan } = require('../../utils/permissions');
 const { turnAnswerSchema } = require('../../generated/schemas/front-desk/turn-answer.schema');
 const { runTurn } = require('../../services/frontdesk-turn');
+const { knowledgeImportItemSchema } = require('../../generated/schemas/entities');
+const { checkStoredDoc, badRequest } = require('../../middleware/validate');
+const { newId } = require('../../utils/id');
+const { buildCorrectionBody } = require('../../services/knowledge-correction-prompt');
 
 const router = Router();
 
@@ -57,6 +61,77 @@ router.post('/suggest', verifyToken, requireModule('frontdesk'), suggestLimiter,
     return res.json({ suggestion: result.suggestion });
   } catch (err) {
     req.log.error({ err, event: 'frontdesk.suggest.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+const FIX_ISSUES = ['wrong_info', 'missing_info', 'outdated', 'misunderstood', 'other'];
+const FIX_ANSWER_MAX = 1200;
+const nonEmpty = v => typeof v === 'string' && v.length > 0;
+
+const fixLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  keyGenerator: req => `business:${req.user?.businessId}`,
+  message: 'Too many corrections, please try again later',
+});
+
+/** Plan 682 (R-14): a member's correction of a wrong assistant message becomes one draft knowledge item. */
+router.post('/fix', verifyToken, requireModule('frontdesk'), fixLimiter, async (req, res) => {
+  const { conversationId, messageId, issue } = req.body || {};
+  const answer = typeof req.body?.answer === 'string' ? req.body.answer.trim() : '';
+  if (!nonEmpty(conversationId) || !nonEmpty(messageId) || !FIX_ISSUES.includes(issue)
+    || answer.length < 1 || answer.length > FIX_ANSWER_MAX) {
+    return badRequest(res, 'Validation failed');
+  }
+  try {
+    if (!assertCan(req, res, 'manageConversations', { type: 'conversations' })) return;
+    const db = mongoose.connection.db;
+    const scope = scopeFilter(req);
+    const conversation = await db.collection('conversations').findOne({ _id: conversationId, ...scope });
+    if (!conversation) return res.status(404).json({ error: 'NOT_FOUND' });
+    const message = await db.collection('messages').findOne({ _id: messageId, conversationId, ...scope });
+    if (!message) return res.status(404).json({ error: 'NOT_FOUND' });
+    if (message.author !== 'ai') return res.status(400).json({ error: 'NOT_AI_MESSAGE' });
+
+    const guest = await db.collection('messages')
+      .find({ conversationId, ...scope, direction: 'in', at: { $lte: message.at } })
+      .sort({ at: -1 }).limit(1).toArray();
+    const guestText = guest[0] && typeof guest[0].text === 'string' ? guest[0].text : '';
+
+    let fields = null;
+    if (process.env.GEMINI_API_KEY) {
+      const body = buildCorrectionBody({ guestText, wrongText: message.text, answer, issue });
+      const call = await callGemini({
+        body, timeoutMs: 20000, log: req.log, eventPrefix: 'frontdesk.fix',
+        usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'knowledge_correction' },
+      });
+      if (call.kind === 'ok') {
+        const payload = extractJsonPayload(responseText(call.data));
+        const parsed = payload.error ? null : knowledgeImportItemSchema.safeParse(payload.value);
+        if (parsed && parsed.success) fields = parsed.data;
+      }
+    }
+    const drafted = !!fields;
+    if (!fields) fields = { topic: 'faq', question: (guestText || answer).slice(0, 200), answer };
+
+    const now = Date.now();
+    const item = {
+      _id: newId(), schemaVersion: 2, businessId: req.user.businessId, createdBy: req.user.userId,
+      createdAt: now, updatedAt: now,
+      topic: fields.topic, question: fields.question, answer: fields.answer,
+      ...(fields.variations && fields.variations.length ? { variations: fields.variations } : {}),
+      status: 'draft', source: 'correction', visibility: 'public',
+    };
+    if (!checkStoredDoc('knowledgeItems', item).ok) return badRequest(res, 'Validation failed');
+    await db.collection('knowledgeItems').insertOne(item);
+    req.log.info({
+      event: 'frontdesk.fix', issue, drafted, conversationId, messageId,
+      answerLength: answer.length, questionLength: item.question.length,
+    });
+    return res.json({ item, drafted });
+  } catch (err) {
+    req.log.error({ err, event: 'frontdesk.fix.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
