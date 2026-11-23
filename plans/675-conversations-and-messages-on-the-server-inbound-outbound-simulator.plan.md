@@ -219,6 +219,7 @@ server/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
