@@ -71,8 +71,20 @@ describe('POST /ai/frontdesk/suggest', () => {
     const before = await db('conversations').findOne({ _id: conversationId });
     const res = await post({ conversationId });
     expect(res.status).toBe(502);
-    expect(res.body).toEqual({ error: 'AI_FAILED' });
+    expect(res.body).toEqual({ error: 'AI_FAILED', reason: 'other' });
     expect(await db('conversations').findOne({ _id: conversationId })).toEqual(before);
+  });
+
+  it('plan 701: every model busy is 502 AI_FAILED with reason busy; the conversation is unchanged', async () => {
+    fetchMock.mockImplementation(async () => jsonResponse(503, { error: { message: 'high demand' } }));
+    const before = await db('conversations').findOne({ _id: conversationId });
+    const res = await post({ conversationId });
+    expect(res.status).toBe(502);
+    expect(res.body).toEqual({ error: 'AI_FAILED', reason: 'busy' });
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(1);
+    const after = await db('conversations').findOne({ _id: conversationId });
+    expect(after).toEqual(before);
+    expect(after.assistantFailed).toBeUndefined();
   });
 
   it('rejects a body without a conversationId', async () => {

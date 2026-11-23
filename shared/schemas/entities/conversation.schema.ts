@@ -11,6 +11,9 @@ export const CONVERSATION_PENDING_KINDS = ['book', 'change', 'cancel'] as const
 export type ConversationChannel = (typeof CONVERSATION_CHANNELS)[number]
 export type ConversationStatus = (typeof CONVERSATION_STATUSES)[number]
 export type ConversationPendingKind = (typeof CONVERSATION_PENDING_KINDS)[number]
+/** Plan 701: why the assistant handed a guest turn to a person (shown to the staff, never to the guest). */
+export const ASSISTANT_FAILURE_REASONS = ['busy', 'timeout', 'quota', 'other'] as const
+export type AssistantFailureReason = (typeof ASSISTANT_FAILURE_REASONS)[number]
 
 export const conversationSchema = z.strictObject({
   ...baseDocShape,
@@ -35,6 +38,8 @@ export const conversationSchema = z.strictObject({
   suggestion: z.string().max(4000).optional(),
   /** Plan 689: 1 when the last assistant turn had no content (a second one in a row hands over to a person). */
   lowTurns: z.literal(1).optional(),
+  /** Plan 701: set when a guest turn's model call failed; removed by the next turn that completes. */
+  assistantFailed: z.strictObject({ at: z.number(), reason: z.enum(ASSISTANT_FAILURE_REASONS) }).optional(),
   liveKey: z.string().min(1).optional(),
   test: z.literal(true).optional()
 })

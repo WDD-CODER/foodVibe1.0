@@ -44,12 +44,15 @@ beforeEach(async () => {
     url: () => 'memory://x',
     destroy: async () => true,
   });
+  // Plan 701: the ledger write of the previous test is fire-and-forget; wait for it before clearing, or it lands after.
+  await _waitForUsageWritesForTests();
   await testDb().collection('aiUsage').deleteMany({});
   await testDb().collection('storedFiles').deleteMany({});
   logs.records.length = 0;
 });
 
-afterEach(() => {
+afterEach(async () => {
+  await _waitForUsageWritesForTests();
   vi.unstubAllGlobals();
 });
 
@@ -169,9 +172,10 @@ describe('POST /voice/transcribe', () => {
     fetchMock.mockResolvedValue(modelAnswer('hello'));
     await post(BODY);
     await _waitForUsageWritesForTests();
-    const rows = await testDb().collection('aiUsage').find({ feature: 'voice_transcribe' }).toArray();
+    const businessId = `b_voice${userSeq}`;
+    const rows = await testDb().collection('aiUsage').find({ feature: 'voice_transcribe', businessId }).toArray();
     expect(rows).toHaveLength(1);
-    expect(rows[0].businessId).toMatch(/^b_voice/);
+    expect(rows[0].businessId).toBe(businessId);
     expect(rows[0].audioSeconds).toBe(20);
 
     putCalls.length = 0;

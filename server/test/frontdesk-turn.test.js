@@ -219,6 +219,75 @@ describe('R-04: a failure is silent', () => {
   }
 });
 
+describe('plan 701: a failed turn stores a reason for the staff', () => {
+  const { checkStoredDoc } = require('../middleware/validate');
+  const { failureReason } = require('../services/frontdesk-turn');
+  const busy = () => jsonResponse(503, { error: { message: 'high demand' } });
+
+  it('every model busy: nothing sent, human, assistantFailed busy, the document still validates', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockImplementation(async () => busy());
+    const result = await turn(conversation);
+    expect(result).toMatchObject({ ok: false, reason: 'gemini_error', group: 'busy' });
+    expect(fetchMock.mock.calls.length).toBe(4);
+    expect(await outbound()).toHaveLength(0);
+    const after = await conv(conversation._id);
+    expect(after).toMatchObject({ status: 'human', assistantFailed: { reason: 'busy' } });
+    expect(typeof after.assistantFailed.at).toBe('number');
+    expect(checkStoredDoc('conversations', after).ok).toBe(true);
+    expect(logs.byEvent('frontdesk.turn.failed')[0]).toMatchObject({ group: 'busy' });
+  });
+
+  it('a timeout on every model: reason timeout', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockRejectedValue(Object.assign(new Error('t'), { name: 'TimeoutError' }));
+    await turn(conversation);
+    expect((await conv(conversation._id)).assistantFailed).toMatchObject({ reason: 'timeout' });
+  });
+
+  it('the daily turn cap: reason quota, no call', async () => {
+    const { conversation } = await setup();
+    await db().collection('aiUsage').insertMany(Array.from({ length: FRONTDESK_DAILY_TURNS }, (_, i) => ({
+      businessId: 'b1', day: jerusalemDate(Date.now()), feature: 'frontdesk_turn', ok: true, at: Date.now(), i,
+    })));
+    await turn(conversation);
+    expect(fetchMock).not.toHaveBeenCalled();
+    const after = await conv(conversation._id);
+    expect(after).toMatchObject({ status: 'human', assistantFailed: { reason: 'quota' } });
+    expect(checkStoredDoc('conversations', after).ok).toBe(true);
+  });
+
+  it('an answer that is not JSON: reason other', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer('not json at all'));
+    await turn(conversation);
+    expect((await conv(conversation._id)).assistantFailed).toMatchObject({ reason: 'other' });
+  });
+
+  it('the next successful turn removes assistantFailed', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockImplementation(async () => busy());
+    await turn(conversation);
+    await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { status: 'bot' } });
+    fetchMock.mockReset();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(await conv(conversation._id));
+    const after = await conv(conversation._id);
+    expect(after.assistantFailed).toBeUndefined();
+    expect((await outbound())[0]).toMatchObject({ author: 'ai', text: 'שלום' });
+    expect(checkStoredDoc('conversations', after).ok).toBe(true);
+  });
+
+  it('failureReason maps every kind', () => {
+    expect(failureReason('network')).toBe('busy');
+    for (const s of [429, 500, 502, 503, 504]) expect(failureReason('gemini_error', s)).toBe('busy');
+    expect(failureReason('gemini_error', 400)).toBe('other');
+    expect(failureReason('timeout')).toBe('timeout');
+    for (const k of ['model_exhausted', 'all_exhausted', 'business_cap', 'cap']) expect(failureReason(k)).toBe('quota');
+    for (const k of ['bad_json', 'bad_shape', 'model_removed', 'skipped']) expect(failureReason(k)).toBe('other');
+  });
+});
+
 describe('the daily cap', () => {
   const fill = (n, extra = {}) => db().collection('aiUsage').insertMany(Array.from({ length: n }, (_, i) => ({
     businessId: 'b1', day: jerusalemDate(Date.now()), feature: 'frontdesk_turn', ok: true, at: Date.now(), i, ...extra,

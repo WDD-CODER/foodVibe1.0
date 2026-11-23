@@ -39,7 +39,8 @@
 | `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
 | `services/ai-key.js` | `keyFor(businessId)` (plan 679, C-AIKEY): the one place that resolves a model key; the environment key today |
-| `services/frontdesk-turn.js` | `runTurn`, `decide`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded |
+| `services/gemini-client.js` | `callGemini` (plan 395): the one Gemini call; one model per request by default; plan 701: opt-in `fallback: true` + `deadlineMs` (the front desk only) move an overloaded call to the next free chain model |
+| `services/frontdesk-turn.js` | `runTurn`, `decide`, `failureReason`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded; plan 701: a failed guest turn stores `assistantFailed: { at, reason }` |
 | `services/frontdesk-prompt.js` | `buildTurnBody`, `TURN_SYSTEM_PROMPT`, `todayBlock` (plan 679): the English rules and the request body of a turn |
 | `services/frontdesk-guardrails.js` | `preCheck(ctx)`, `applyGuardrails(answer, ctx)`, `isRemoval` (plan 679, filled by 689): the one place of the assistant's blocks |
 | `services/frontdesk-tables.js` | `tablesFor`, `handleTableIntent`, `deliver`, `registerTableButtons` (plan 680, C-AI2): the chat's book / change / cancel dialogue — the engine answers, the dictionary speaks; the buttons `OK`, `ALT`, `OTHER`, `BK` make no model call |

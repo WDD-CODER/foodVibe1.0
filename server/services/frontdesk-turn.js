@@ -93,12 +93,31 @@ function decide(answer, ctx) {
   return { text: fixedText('fd_ai_will_confirm'), request: { kind: answer.kind, wanted, answers } };
 }
 
-/** `keepStatus`: a blocked turn at level 0 only stores the handoff sentence as the suggestion; the status stays. */
-async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger, keepStatus = false }) {
+const BUSY_STATUSES = new Set([429, 500, 502, 503, 504]);
+const QUOTA_KINDS = new Set(['model_exhausted', 'all_exhausted', 'business_cap', 'cap']);
+
+/**
+ * Plan 701: the reason the staff read for a failed model call. `kind` is a failure kind of `callGemini`, `bad_json`,
+ * `bad_shape` or the turn cap `cap`. Pure.
+ */
+function failureReason(kind, status) {
+  if (kind === 'network' || (kind === 'gemini_error' && BUSY_STATUSES.has(status))) return 'busy';
+  if (kind === 'timeout') return 'timeout';
+  if (QUOTA_KINDS.has(kind)) return 'quota';
+  return 'other';
+}
+
+/**
+ * `keepStatus`: a blocked turn at level 0 only stores the handoff sentence as the suggestion; the status stays.
+ * `failed` (plan 701): the failure reason, stored in the same write as the status.
+ */
+async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger, keepStatus = false, failed }) {
   if (!(keepStatus && levelOf(profile) === 0)) {
+    const set = { status: 'human', updatedAt: now };
+    if (failed) set.assistantFailed = { at: now, reason: failed };
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId: conversation.businessId },
-      { $set: { status: 'human', updatedAt: now } }
+      { $set: set }
     );
   }
   if (silent || mode !== 'turn') return;
@@ -156,8 +175,8 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     });
     if (used >= FRONTDESK_DAILY_TURNS) {
       log.info({ event: 'frontdesk.turn.cap', conversationId: conversation._id });
-      await handOffSilently(db, conversation, base);
-      return { ok: false, reason: 'cap' };
+      await handOffSilently(db, conversation, { ...base, failed: 'quota' });
+      return { ok: false, reason: 'cap', group: 'quota' };
     }
   }
 
@@ -189,9 +208,14 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     log,
   });
   if (!asked.ok) {
-    log.info({ event: 'frontdesk.turn.failed', reason: asked.reason, mode, conversationId: conversation._id });
-    if (mode === 'turn') await handOffSilently(db, conversation, base);
-    return { ok: false, reason: asked.reason };
+    const group = failureReason(asked.reason, asked.status);
+    log.info({ event: 'frontdesk.turn.failed', reason: asked.reason, group, mode, conversationId: conversation._id });
+    if (mode === 'turn') await handOffSilently(db, conversation, { ...base, failed: group });
+    return { ok: false, reason: asked.reason, group };
+  }
+  // Plan 701: the model answered, so the last failure no longer explains this conversation.
+  if (mode === 'turn' && conversation.assistantFailed) {
+    await colOf(db, 'conversations').updateOne({ _id: conversation._id, businessId }, { $unset: { assistantFailed: '' } });
   }
 
   const modelAnswer = !tables && asked.answer.intent === 'book' ? bookAsRequest(asked.answer) : asked.answer;
@@ -293,4 +317,4 @@ async function finishSuggestion(db, conversation, text, now) {
 
 setTurnHandler(runTurn);
 
-module.exports = { runTurn, decide, FRONTDESK_DAILY_TURNS };
+module.exports = { runTurn, decide, failureReason, FRONTDESK_DAILY_TURNS };

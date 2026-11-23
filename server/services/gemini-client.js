@@ -7,7 +7,8 @@
  * user's chosen model or the chain's first. When that model is out of its daily quota
  * (until midnight America/Los_Angeles) the caller gets 'model_exhausted' plus the next
  * usable model, and the user decides whether to switch — the server never retries on
- * another model by itself (Human decision, 2026-10-09: no unattended spend).
+ * another model by itself (Human decision, 2026-10-09: no unattended spend), except for a
+ * caller that passes `fallback: true` (plan 701: the front desk, free-tier models only; see callGemini).
  * Default order and per-model budgets: MODEL_DAILY_BUDGETS below.
  *
  * Exhausted state lives in memory and is mirrored on today's quota doc in GEMINI_USAGE
@@ -409,8 +410,13 @@ function allExhausted(candidates) {
 
 /**
  * Every real HTTP call writes one ledger row (plan 566); `usage: { businessId, userId?, feature }`
- * is required (a call without it throws under vitest). Sends `body` to ONE model — never a second model per request (plan 395, Human
- * 2026-10-09: switching models is the user's decision, not the server's). Plan 614: the same model is tried
+ * is required (a call without it throws under vitest). By default it sends `body` to ONE model — never a second model per
+ * request (plan 395, Human 2026-10-09: switching models is the user's decision, not the server's). Plan 701: the one
+ * exception is a caller that passes `fallback: true` — the unattended front desk, which has no user to ask. There, an
+ * overloaded call (network, timeout, 429 not daily, 5xx) moves the next attempt to the next usable model of the chain,
+ * and a daily quota moves it to `nextModel` with no wait; only free-tier catalog models on the shared key, so no spend.
+ * `deadlineMs` caps the whole request: no call starts with less than MIN_CALL_MS left, each call's timeout is cut
+ * to the time left. Plan 614: the same model is tried
  * again, up to 4 calls in all, when a failure goes away by itself (network drop, 429 not daily, 5xx). The model is
  * `model` when the user picked one (it must be an enabled chain model), else the first in
  * the chain. If that model is out of its daily quota — known already, or learned from this
@@ -425,7 +431,7 @@ function allExhausted(candidates) {
  *   { kind: 'gemini_error', model, status, message }
  *   { kind: 'timeout' | 'network', model }
  */
-async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage }) {
+async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage, fallback = false, deadlineMs }) {
   let meter = true;
   if (!usage || !isAiFeature(usage.feature)) {
     if (process.env.VITEST) throw new Error('callGemini: usage.feature required');
@@ -451,7 +457,9 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     return allExhausted(candidates);
   }
 
-  const model = candidates.includes(requested) ? requested : candidates[0];
+  let model = candidates.includes(requested) ? requested : candidates[0];
+  // Plan 701: the front desk starts on a usable model instead of answering 'model_exhausted' to nobody.
+  if (fallback && exhaustedResetAt(model, now)) model = firstUsable(candidates, now);
   // Plan 617: a business over its monthly token cap gets no request (C-AICAP). A ledger problem never blocks AI.
   const capId = usage?.businessId;
   if (typeof capId === 'string' && capId && capId !== '__platform__' && capId !== '__master__' && mongoose.connection.readyState === 1) {
@@ -469,6 +477,10 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
   const knownReset = exhaustedResetAt(model, now);
   if (knownReset) {
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };
+  }
+
+  if (fallback) {
+    return callWithFallback({ model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
   }
 
   // Plan 614: a failure that goes away by itself (Google overloaded or unavailable, a dropped connection) is
@@ -493,6 +505,57 @@ const retryDelayMs = attempt => (process.env.VITEST ? 0 : 500 * 2 ** (attempt - 
 function isTransient(result) {
   if (result.kind === 'network') return true;
   return result.kind === 'gemini_error' && TRANSIENT_STATUSES.has(result.status);
+}
+
+/** Plan 701: no call starts with less than this left of `deadlineMs`. */
+const MIN_CALL_MS = 2000;
+
+/** With `fallback`: a failure another model may not have — isTransient plus a timeout (a second model has its own bucket). */
+function isOverloaded(result) {
+  return result.kind === 'timeout' || isTransient(result);
+}
+
+/** The next usable model after `current` in chain order, wrapping around; `current` itself when it is the only one. */
+function nextUsable(candidates, current, now) {
+  const at = candidates.indexOf(current);
+  for (let i = 1; i <= candidates.length; i++) {
+    const m = candidates[(at + i) % candidates.length];
+    if (exhaustedResetAt(m, now) === null) return m;
+  }
+  return current;
+}
+
+/**
+ * Plan 701: the front desk's attempts — up to MAX_ATTEMPTS calls, each overloaded call followed by the next usable
+ * model, a daily quota by `nextModel` with no wait, anything else returned at once. Returns the last result.
+ */
+async function callWithFallback({ model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now }) {
+  const startedAt = Date.now();
+  const left = () => (deadlineMs === undefined ? Infinity : deadlineMs - (Date.now() - startedAt));
+  let current = model;
+  let result;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const callTimeout = Math.max(1, Math.min(timeoutMs, left()));
+    result = await callOnce({ model: current, body, timeoutMs: callTimeout, log, eventPrefix, apiKey, usage, meter, candidates, now });
+    if (attempt === MAX_ATTEMPTS) break;
+    let next;
+    let wait = 0;
+    if (result.kind === 'model_exhausted' && result.nextModel) {
+      next = result.nextModel;
+    } else if (isOverloaded(result)) {
+      next = nextUsable(candidates, current, now);
+      wait = retryDelayMs(attempt);
+    } else {
+      break;
+    }
+    if (left() - wait < MIN_CALL_MS) break;
+    const event = next === current ? `${eventPrefix}.retry` : `${eventPrefix}.fallback`;
+    const fields = next === current ? { model: current } : { from: current, to: next };
+    log.warn({ event, ...fields, attempt, kind: result.kind, status: result.status });
+    if (wait) await sleep(wait);
+    current = next;
+  }
+  return result;
 }
 
 /** One real HTTP call: one usage count and one ledger row (plan 566), whatever the outcome. */
