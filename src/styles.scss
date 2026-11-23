@@ -2892,3 +2892,56 @@ input[type='number']::-webkit-outer-spin-button {
     block-size: auto;
   }
 }
+
+/* Plan 699: zone palette of the floor plan (an area's colour is an index 0–7) and the joined-table border.
+   Teal (--color-primary, the selection ring) and red (--color-danger, overlap) stay out of the palette.
+   White label text measures 4.6:1 or more on every one. */
+:root {
+  --color-zone-0: #2563eb;
+  --color-zone-1: #c2410c;
+  --color-zone-2: #15803d;
+  --color-zone-3: #be185d;
+  --color-zone-4: #a16207;
+  --color-zone-5: #64748b;
+  --color-zone-6: #92400e;
+  --color-zone-7: #0369a1;
+  --color-floor-joined: #7c3aed;
+}
+
+/* Plan 699: an icon button that must still take hover, focus and tap (so its tip shows) looks like :disabled.
+   Outside any @layer so it beats the hover rules of .c-icon-btn above. */
+.c-icon-btn[aria-disabled='true'] {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: saturate(0);
+
+  @media (hover: hover) {
+    &:hover,
+    &.danger:hover {
+      opacity: 0.3;
+      background: transparent;
+      color: var(--color-text-muted);
+      transform: none;
+    }
+  }
+}
+
+/* Plan 699: the bubble of [appTip] (src/app/shared/tip/tip.directive.ts). It lives in the popover top layer, so no
+   scroll box clips it; the directive sets top / left from placeInViewport. */
+.c-tip[popover] {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  inline-size: max-content;
+  max-inline-size: min(16rem, calc(100vw - 1rem));
+  padding: var(--space-1) var(--space-2);
+  overflow: visible;
+
+  background: var(--color-text-main);
+  color: var(--bg-pure);
+  font-size: var(--fs-xs);
+  line-height: var(--lh-tight);
+  border: 0;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
