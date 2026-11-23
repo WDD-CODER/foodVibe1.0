@@ -1,0 +1,330 @@
+{
+  "run": "rs-conv-srv",
+  "branch": "orch/rs-conv-srv",
+  "base": "main",
+  "startedAt": "2026-11-23T06:02:28.787Z",
+  "mainShaAtStart": "379f8428560f58e207dced99fe7dd9bb6bdc9fd9",
+  "plans": {
+    "675": {
+      "nnn": "675",
+      "title": "The conversation pipeline on the server: inbound handler, the one sender, the template catalogue and the simulator transport",
+      "branch": "feat/675-conversations-and-messages-on",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T06:05:45.337Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T06:51:50.778Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads the eight template names and their parameters in"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T06:05:45.070Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:05:45.339Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:32:54.378Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:51:37.361Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:51:50.779Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:52:08.834Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:53:26.074Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.8,
+      "sha": "cbb66cc4864768742164d681e692701993ee8ea0",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1624.4,
+          "tokens": {
+            "input": 2947884,
+            "output": 38131
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.8,
+          "tokens": {
+            "input": 125184,
+            "output": 1183
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "9c68692a2bffce7597cc2f1b0f710e74bf5a58af"
+    },
+    "687": {
+      "nnn": "687",
+      "title": "Conversations for members on the server: the list, the thread, reply, take over, hand back and close",
+      "branch": "feat/687-conversations-for-members-list",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T06:56:48.998Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T07:34:45.450Z"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-23T06:56:48.730Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T06:56:49.003Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T07:22:16.696Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T07:34:35.583Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T07:34:45.451Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T07:35:01.327Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T07:36:21.560Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.8,
+      "sha": "8695dd63c998a986015fedc9a6ea4b8ed12e61e3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1523.8,
+          "tokens": {
+            "input": 1644409,
+            "output": 24362
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.5,
+          "tokens": {
+            "input": 87772,
+            "output": 1014
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "49bf73c947092f8e74f2d826a6cf987e7133122d"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T06:05:44.639Z",
+      "plan": "675",
+      "text": "the folder foodVibe1.0-orch-rs-conv-srv-675 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T06:32:50.147Z",
+      "plan": "675",
+      "text": "builder left undone (round 0): [human] Dandan confirms the eight template names in shared/schemas/front-desk/message-templates.ts"
+    },
+    {
+      "at": "2026-11-23T06:52:23.598Z",
+      "plan": "675",
+      "text": "the folder foodVibe1.0-orch-merge-rs-conv-srv was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T06:56:48.488Z",
+      "plan": "687",
+      "text": "the folder foodVibe1.0-orch-rs-conv-srv-687 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T07:22:17.683Z",
+      "plan": "687",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-23T07:37:48.114Z",
+      "text": "FINAL: same tree as plan 687's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 12.8,
+  "updatedAt": "2026-11-23T07:41:57.995Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "675",
+      "type": "behaviour",
+      "text": "behaviour: the default actor of a client a real channel creates lives in channels/index.js (defaultActor), so inbound.js names no channel and the grep check holds — reverse: inline guestActor('whatsapp') in inbound.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "675",
+      "type": "behaviour",
+      "text": "behaviour: a transport that throws or answers failed keeps a failed message row and the answer carries that row as `message` next to reason SEND_FAILED — reverse: drop `message` from the SEND_FAILED answer",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "675",
+      "type": "behaviour",
+      "text": "behaviour: a turn handler that throws is logged at warn level, not error, so the run's log-query error check stays clean — reverse: change log.warn to log.error in inbound.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "675",
+      "type": "behaviour",
+      "text": "behaviour: DELETE /sim/test-data also removes tableHolds rows that belong to a test booking, even when the row itself has no test flag — reverse: delete only rows with test: true",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "675",
+      "type": "seen",
+      "text": "seen: server/services/frontdesk-stats.js:11 — the CHANNELS list names 'whatsapp' outside channels/; it existed before this plan and is stats vocabulary, not a branch on the channel",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "687",
+      "type": "behaviour",
+      "text": "behaviour: a reply whose template `values` is not an object of strings answers 400 BAD_INPUT; an unknown template name or a template with buttons answers 400 BAD_TEMPLATE — reverse: map the shape error to BAD_TEMPLATE in outboundOf()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "687",
+      "type": "behaviour",
+      "text": "behaviour: a list query with a malformed `status`, `limit` or `before` answers 400 BAD_INPUT instead of falling back to the default — reverse: ignore the bad value in the GET / handler",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "687",
+      "type": "behaviour",
+      "text": "behaviour: PUT /close is not one atomic conditional update. It reads the status, then calls closeConversation and unsets `suggestion` in a second write, so a race between two closes is not caught — reverse: fold the close into one conditional updateOne",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T07:41:57.992Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T07:41:57.995Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
