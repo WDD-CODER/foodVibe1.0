@@ -175,8 +175,15 @@
 
   // Plan 373, Human 2026-11-23 (D7): the location pin lives inside the address field; the saved-spot line and
   // its error sit right under it.
-  .venue-address-input .location-btn {
-    flex-shrink: 0;
+  .venue-address-input {
+    .location-btn {
+      flex-shrink: 0;
+    }
+
+    // Human 2026-11-23: the address the pin filled in reads lighter, so it feels filled in for you.
+    input.is-auto {
+      color: var(--color-text-muted);
+    }
   }
 
   .location-error {

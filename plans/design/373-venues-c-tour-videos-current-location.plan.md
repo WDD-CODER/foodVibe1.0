@@ -41,6 +41,12 @@ src/app/core/utils/**
 src/app/core/utils/date-input.util.spec.ts
 src/app/core/utils/video-link.util.spec.ts
 docs/brain/component-families.md
+server/routes/geocode.js
+server/app.js
+server/test/geocode.test.js
+server/breadcrumbs.md
+src/app/core/services/venue-data.service.ts
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -106,7 +112,7 @@ touching any milestone.
 ## Architecture Impact
 
 - INV-4: preserves — the two new fields are defined once in `shared/schemas/entities/venue.schema.ts` and the server keeps validating every venue write against it (`server/middleware/validate.js` unchanged).
-- INV-1: preserves — no route, permission or business-scope code changes; venues still save through `VenueDataService`.
+- INV-1: preserves — no permission or business-scope code changes; venues still save through `VenueDataService`. The one new route (`GET /api/v1/geocode/reverse`, Human 2026-11-23) is behind `verifyToken`, reads and writes no business data, and sends only the two coordinates to OpenStreetMap Nominatim.
 - INV-6: preserves — no AI call is added or changed (the scope only matches `src/app/**/*ai*` through the `venue-detail` folder name).
 - INV-none: preserves — no CSP change (links only, no embedded player), no AI call, no taxonomy term.
 
@@ -188,6 +194,7 @@ Built on `feat/373-venue-videos-location` from `origin/main` 7c8fccd, 2026-11-22
 - behaviour: saving a venue whose videos were all removed sends `videos: []` — reverse: send `undefined` for an empty list.
 - behaviour: a new venue with no location leaves the key out; only an update sends `location: null` (review fix 1) — reverse: send null on add too.
 - Human 2026-11-23 grading: D1, D2, D3, D4, D6, D8, D9 ok. D5 ✗ → the empty videos card says «אין עדיין סרטונים» (`venue_videos_empty`) instead of "—". D7 ✗ → no address hint (`location_address_hint` left unused); the location pin is a button inside the address field (`.c-input-wrapper`), the separate «מיקום» section is gone; the «נווט» links use the saved location, else the typed address (Google Maps `?api=1&query=<address>`, Waze `?q=<address>&navigate=yes`). Filling the address from the location (reverse geocoding) is todo V2; phone video upload is todo V1. Built by the Planner in slot wt-3 (59087d11); venue specs 35/35 pass (`npx ng test --include=src/app/pages/venues/**`).
+- Human 2026-11-23 (after the cards): the pin fills the address field with the spot's street address, shown lighter (`.is-auto`, `--color-text-muted`) until the user types; a typed address is never overwritten. This is todo V2, pulled into this PR. New server route `server/routes/geocode.js` (`GET /api/v1/geocode/reverse?lat&lng` → `{ address }`, OpenStreetMap Nominatim from the server, 1 call/s, 20/user/min, `{ address: null }` on any failure, no CSP change, no coordinates in logs) and `VenueDataService.reverseGeocode`. Scope extended on main and here for those files (the Human's request). Evidence: `npx vitest run test/geocode.test.js` → 4 passed; venue specs 37/37 pass.
 
 ### A4 evidence (all run from the repo root)
 

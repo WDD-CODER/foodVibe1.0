@@ -1,17 +1,34 @@
-import { Injectable, Signal } from '@angular/core'
-import { HttpErrorResponse } from '@angular/common/http'
+import { Injectable, Signal, inject } from '@angular/core'
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
+import { firstValueFrom } from 'rxjs'
 import { VenueProfile } from '../models/venue.model'
 import { BaseEntityDataService } from './base-entity-data.service'
+import { environment } from '../../../environments/environment'
 
 const ENTITY = 'venues'
+/** Plan 373 (Human 2026-11-23): the server turns a saved spot into a street address (OpenStreetMap). */
+const REVERSE_GEOCODE_URL = `${environment.apiUrl}/api/v1/geocode/reverse`
 
 @Injectable({ providedIn: 'root' })
 export class VenueDataService extends BaseEntityDataService<VenueProfile> {
   /** Domain alias for the base-class signal. */
   readonly allVenues_: Signal<VenueProfile[]> = this.all_
+  private readonly http_ = inject(HttpClient)
 
   constructor() {
     super(ENTITY, false)
+  }
+
+  /** Plan 373: the street address of a spot, or null when none is found or the lookup fails (never throws). */
+  async reverseGeocode(lat: number, lng: number): Promise<string | null> {
+    try {
+      const params = new HttpParams().set('lat', String(lat)).set('lng', String(lng))
+      const res = await firstValueFrom(this.http_.get<{ address: string | null }>(REVERSE_GEOCODE_URL, { params }))
+      return typeof res?.address === 'string' && res.address.trim() ? res.address.trim() : null
+    } catch (err) {
+      this.logging.warn({ event: 'venue.reverse_geocode_failed', message: 'Address lookup failed', context: { err } })
+      return null
+    }
   }
 
   async getVenueById(_id: string): Promise<VenueProfile> {

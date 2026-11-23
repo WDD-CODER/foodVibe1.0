@@ -24,7 +24,7 @@ const VENUE: VenueProfile = {
 }
 
 /** The protected form, reached the same way the template does. */
-type FormAccess = { venueForm_: { get: (k: string) => { setValue: (v: unknown) => void } } }
+type FormAccess = { venueForm_: { get: (k: string) => { setValue: (v: unknown) => void; value: unknown } } }
 
 describe('VenueFormComponent (pending-changes guard contract)', () => {
   let fixture: ComponentFixture<VenueFormComponent>
@@ -34,6 +34,7 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
     allVenues_: ReturnType<typeof signal>
     addVenue: jasmine.Spy
     updateVenue: jasmine.Spy
+    reverseGeocode: jasmine.Spy
   }
   let router: jasmine.SpyObj<Router>
 
@@ -47,7 +48,8 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       ensureLoaded: jasmine.createSpy('ensureLoaded').and.resolveTo(),
       allVenues_: signal<VenueProfile[]>([]),
       addVenue: jasmine.createSpy('addVenue').and.resolveTo(),
-      updateVenue: jasmine.createSpy('updateVenue').and.resolveTo()
+      updateVenue: jasmine.createSpy('updateVenue').and.resolveTo(),
+      reverseGeocode: jasmine.createSpy('reverseGeocode').and.resolveTo(null)
     }
     router = jasmine.createSpyObj<Router>('Router', ['navigate'])
     router.navigate.and.resolveTo(true)
@@ -404,6 +406,39 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       expect(el.querySelector('.venue-location')).toBeNull()
       expect(el.textContent).not.toContain('location_address_hint')
       expect(el.querySelector('.location-saved')).not.toBeNull()
+    })
+
+    it('fills an empty address from the pin, shown lighter until the user types (Human 2026-11-23)', async () => {
+      getPosition.and.callFake((ok: PositionCallback) =>
+        ok({ coords: { latitude: 32.0779, longitude: 34.7741, accuracy: 10 } } as GeolocationPosition)
+      )
+      await setup(null)
+      venueData.reverseGeocode.and.resolveTo('דיזנגוף 50, תל אביב-יפו')
+      loc().useCurrentLocation()
+      await new Promise((resolve) => setTimeout(resolve))
+      fixture.detectChanges()
+      const access = component as unknown as FormAccess
+      expect(venueData.reverseGeocode).toHaveBeenCalledWith(32.0779, 34.7741)
+      expect(access.venueForm_.get('address').value).toBe('דיזנגוף 50, תל אביב-יפו')
+      const input = (fixture.nativeElement as HTMLElement).querySelector('#address') as HTMLInputElement
+      expect(input.classList).toContain('is-auto')
+      access.venueForm_.get('address').setValue('דיזנגוף 52')
+      fixture.detectChanges()
+      expect(input.classList).not.toContain('is-auto')
+    })
+
+    it('never overwrites an address the user typed', async () => {
+      getPosition.and.callFake((ok: PositionCallback) =>
+        ok({ coords: { latitude: 1, longitude: 2, accuracy: 10 } } as GeolocationPosition)
+      )
+      await setup(null)
+      venueData.reverseGeocode.and.resolveTo('רחוב אחר 1')
+      const access = component as unknown as FormAccess
+      access.venueForm_.get('address').setValue('הרצל 1')
+      loc().useCurrentLocation()
+      await new Promise((resolve) => setTimeout(resolve))
+      expect(venueData.reverseGeocode).not.toHaveBeenCalled()
+      expect(access.venueForm_.get('address').value).toBe('הרצל 1')
     })
 
     it('sends no location key on add when none was saved', async () => {

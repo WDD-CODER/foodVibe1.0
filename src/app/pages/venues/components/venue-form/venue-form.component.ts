@@ -113,6 +113,8 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected readonly isLocating_ = signal(false)
   /** Plan 373: translation key of the last geolocation failure, or null. */
   protected readonly locationError_ = signal<string | null>(null)
+  /** Human 2026-11-23: true while the address field holds what the pin filled in (shown lighter). */
+  protected readonly addressAuto_ = signal(false)
   /** Plan 373: the location button is hidden where the browser has no geolocation. */
   protected readonly canLocate =
     typeof navigator !== 'undefined' && typeof navigator.geolocation?.getCurrentPosition === 'function'
@@ -224,6 +226,11 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       videos: this.fb.array([]),
       active: [true]
     })
+    // Human 2026-11-23: an address the pin filled in looks lighter until the user types in the field.
+    this.venueForm_
+      .get('address')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.addressAuto_.set(false))
   }
 
   /** Plan 372: one contact row; the name is required. */
@@ -339,6 +346,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
           lng: pos.coords.longitude,
           accuracy: Number.isFinite(pos.coords.accuracy) ? Math.round(pos.coords.accuracy) : undefined
         })
+        void this.fillAddressFromSpot_(pos.coords.latitude, pos.coords.longitude)
       },
       (err) => {
         this.isLocating_.set(false)
@@ -346,6 +354,21 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
       },
       { enableHighAccuracy: true, timeout: LOCATE_TIMEOUT_MS, maximumAge: 0 }
     )
+  }
+
+  /**
+   * Human 2026-11-23: put the spot's street address in the address field — only when the field is empty or still
+   * holds an earlier pin address, so a typed address is never overwritten. No address found: the field stays as it is.
+   */
+  private async fillAddressFromSpot_(lat: number, lng: number): Promise<void> {
+    const control = this.venueForm_.get('address')
+    const canFill = (): boolean => !String(control?.value ?? '').trim() || this.addressAuto_()
+    if (!control || !canFill()) return
+    const address = await this.venueData.reverseGeocode(lat, lng)
+    if (!address || !canFill()) return
+    control.setValue(address, { emitEvent: false })
+    control.markAsDirty()
+    this.addressAuto_.set(true)
   }
 
   protected clearLocation(): void {
