@@ -210,12 +210,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Stop the flaky voice test by waiting for the last test's ledger writes before clearing them — await the pending writes in beforeEach and afterEach, read only this request's rows — server/test/ai-voice-transcribe.test.js
-- [ ] A2: Let the front desk switch to the next free model when Google is overloaded — fallback and deadlineMs options, next-model order, quota skip, attempt cap, fallback log, comment updated; tests for every case and for the unchanged default — server/services/gemini-client.js, server/test/gemini-fallback.test.js, server/test/gemini-client.test.js
-- [ ] A3: Give every assistant failure a reason the staff can read — failureReason, assistantFailed on a failed guest turn and removed on the next good one, the schema field — server/services/frontdesk-turn.js, shared/schemas/entities/conversation.schema.ts, server/test/frontdesk-turn.test.js
-- [ ] A4: Use the fallback in the front-desk calls and send the reason with a failed suggestion — askTurnModel options and status, fix route options, 502 with reason — server/routes/ai/frontdesk.js, server/test/ai-frontdesk-suggest.test.js
-- [ ] A5: Note the opt-in fallback where the next plan looks — server/breadcrumbs.md, docs/brain/inventory.md (only if it lists gemini-client options)
-- [ ] A6: Run every check of this plan and hand Dandan the hand check — test:server, the voice test five times, server lint, log-query; evidence into Execution Notes
+- [x] A1: Stop the flaky voice test by waiting for the last test's ledger writes before clearing them — await the pending writes in beforeEach and afterEach, read only this request's rows — server/test/ai-voice-transcribe.test.js
+- [x] A2: Let the front desk switch to the next free model when Google is overloaded — fallback and deadlineMs options, next-model order, quota skip, attempt cap, fallback log, comment updated; tests for every case and for the unchanged default — server/services/gemini-client.js, server/test/gemini-fallback.test.js, server/test/gemini-client.test.js
+- [x] A3: Give every assistant failure a reason the staff can read — failureReason, assistantFailed on a failed guest turn and removed on the next good one, the schema field — server/services/frontdesk-turn.js, shared/schemas/entities/conversation.schema.ts, server/test/frontdesk-turn.test.js
+- [x] A4: Use the fallback in the front-desk calls and send the reason with a failed suggestion — askTurnModel options and status, fix route options, 502 with reason — server/routes/ai/frontdesk.js, server/test/ai-frontdesk-suggest.test.js
+- [x] A5: Note the opt-in fallback where the next plan looks — server/breadcrumbs.md, docs/brain/inventory.md (only if it lists gemini-client options)
+- [x] A6: Run every check of this plan and hand Dandan the hand check — test:server, the voice test five times, server lint, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: `callGemini` (plans 395, 412, 566, 614, 617), `runTurn` / `handOff` (679, 689), the suggest and fix
@@ -247,3 +247,17 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: per-call timeout 15 s and a 35 s budget per request, so one suggest answers within about 35 s instead of up to 80 s.
 - behaviour: a per-minute 429 and a timeout count as overload for the front desk, because a second model has its own bucket.
 - behaviour: the voice test fix is in the test only; `recordAiUsage` stays fire-and-forget.
+
+### Builder (run rs-fixes, round 1, fresh builder)
+- The plan file was not on `orch/rs-fixes` (the first builder blocked on it); it was taken from main's commit `7eb538ad` into this branch (the plan file itself is always in scope).
+- behaviour: with `fallback: true`, a request whose first chain model is already known exhausted starts on the first usable model instead of answering `model_exhausted` (nobody to ask). Reverse: drop the `if (fallback && exhaustedResetAt(...))` line in `callGemini`.
+- behaviour: `assistantFailed` is removed as soon as a turn-mode model call succeeds (covers every `frontdesk.turn.done` path and a post-guardrail block); only written when the conversation carries it. Reverse: move the `$unset` to the `done` paths.
+- behaviour: a same-model retry under `fallback` (a chain of one) logs `<prefix>.retry` as plan 614 does; a switch logs `<prefix>.fallback`.
+- The existing suggest case "a failed model call is 502 AI_FAILED…" now expects `{ error: 'AI_FAILED', reason: 'other' }` (the body gained `reason`, as the plan asks).
+- `docs/brain/inventory.md` lists no gemini-client options: left unchanged (A5).
+- A1-A4: `pnpm --dir server exec vitest run gemini-fallback gemini-client` → exit 0, 52 passed; `… frontdesk-turn ai-frontdesk-suggest ai-voice-transcribe` → exit 0, 63 passed.
+- A6: `pnpm --dir server exec vitest run ai-voice-transcribe` five times → exit 0, 0, 0, 0, 0 (17 passed each).
+- A6: `pnpm --dir server run lint` → exit 0 (0 errors, warnings only). `pnpm run test:server` → exit 0, 177 files, 2454 tests passed.
+- A6: `pnpm run build` → exit 0; `pnpm run lint` → exit 0; `pnpm run test:ci` → first run 1 failed (RecipeExportService "Export all" 5000 ms jasmine timeout, unrelated, browser code untouched), rerun once → exit 0, 3080 SUCCESS.
+- A6: `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, "SKIP: no database configured" (no entries read).
+- The `[human]` simulator check (three questions as `demo_host` on `/frontdesk/simulator`) is for Dandan.
