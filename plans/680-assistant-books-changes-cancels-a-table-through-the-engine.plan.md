@@ -166,6 +166,7 @@ public/assets/data/dictionary.json
 server/breadcrumbs.md
 docs/restaurant/restaurant-map.md
 docs/workflow-kit/manifest.json
+docs/brain/component-families.md
 ```
 
 ## Read Scope
