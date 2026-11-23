@@ -9,6 +9,10 @@ import { UserMsgService } from '@services/user-msg.service'
 import { waLink } from 'src/app/core/utils/wa-link.util'
 import { PublicRequestService, type PublicRequestStatus, type StatusResult } from '../services/public-request.service'
 import { PublicBrandComponent } from '../components/public-brand/public-brand.component'
+import { bookingIcs, downloadIcs } from '../services/booking-calendar.util'
+
+/** Minutes of the calendar entry; the status page does not know the kind's own length. */
+const DEFAULT_MINUTES = 120
 
 type PageState = 'loading' | 'ready' | 'not_found' | 'failed'
 
@@ -39,6 +43,23 @@ export class PublicRequestStatusPage {
   protected readonly state_ = signal<PageState>('loading')
   protected readonly status_ = signal<PublicRequestStatus | null>(null)
   protected readonly isCancelling_ = signal(false)
+  protected readonly isConfirming_ = signal(false)
+  protected readonly tooLate_ = signal(false)
+  private readonly arrivalDone_ = signal(false)
+
+  protected readonly confirmedBooking_ = computed(() => this.status_()?.booking?.status === 'confirmed')
+  protected readonly arrivalConfirmed_ = computed(
+    () => this.arrivalDone_() || this.status_()?.booking?.guestConfirmed === true
+  )
+  protected readonly canConfirmArrival_ = computed(
+    () => this.confirmedBooking_() && !this.arrivalConfirmed_() && this.status_()?.booking?.guestConfirmed === false
+  )
+  protected readonly canCancelBooking_ = computed(
+    () => this.confirmedBooking_() && this.status_()?.booking?.canCancel === true && !this.tooLate_()
+  )
+  protected readonly showTooLate_ = computed(
+    () => this.confirmedBooking_() && (this.tooLate_() || this.status_()?.booking?.canCancel === false)
+  )
 
   protected readonly waiting_ = computed(() => WAITING.includes(this.status_()?.status ?? ''))
   protected readonly wantedLine_ = computed(() => {
@@ -95,6 +116,53 @@ export class PublicRequestStatusPage {
     } else {
       this.userMsg.onSetErrorMsg(this.translation.translate('pb_send_failed'))
     }
+  }
+
+  protected async confirmArrival(): Promise<void> {
+    if (this.isConfirming_()) return
+    this.isConfirming_.set(true)
+    const res = await this.api.confirm(this.slug, this.token)
+    this.isConfirming_.set(false)
+    if (res.ok) {
+      this.arrivalDone_.set(true)
+      this.apply(res)
+    } else if (res.code === 'NOT_FOUND') {
+      this.state_.set('not_found')
+    } else {
+      this.userMsg.onSetErrorMsg(this.translation.translate('pb_send_failed'))
+    }
+  }
+
+  protected async cancelBooking(): Promise<void> {
+    if (this.isCancelling_() || !(await this.confirm.open('pb_cancel_booking_confirm'))) return
+    this.isCancelling_.set(true)
+    const res = await this.api.cancel(this.slug, this.token)
+    this.isCancelling_.set(false)
+    if (res.ok) {
+      this.apply(res)
+    } else if (res.code === 'TOO_LATE') {
+      this.tooLate_.set(true)
+    } else if (res.code === 'ALREADY_DECIDED') {
+      await this.load()
+    } else if (res.code === 'NOT_FOUND') {
+      this.state_.set('not_found')
+    } else {
+      this.userMsg.onSetErrorMsg(this.translation.translate('pb_send_failed'))
+    }
+  }
+
+  protected async addToCalendar(): Promise<void> {
+    const s = this.status_()
+    const b = s?.booking
+    if (!s || !b) return
+    const text = await bookingIcs({
+      title: this.translation.translate('pb_calendar_title').replace('{name}', s.displayName),
+      date: b.date,
+      time: b.time,
+      minutes: DEFAULT_MINUTES
+    })
+    if (text) downloadIcs(text)
+    else this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
   }
 
   private apply(res: StatusResult): void {

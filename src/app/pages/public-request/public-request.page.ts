@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, computed, inject, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  NgZone,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked
+} from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router, RouterLink } from '@angular/router'
@@ -18,7 +28,9 @@ import { WANTED_QUESTION_KEYS } from '@schemas/front-desk-templates'
 import type { PublicRequestInput } from '@schemas/public/public-request.schema'
 import { PublicRequestService, type PublicKindView, type PublicProfileView } from './services/public-request.service'
 import { PublicBrandComponent } from './components/public-brand/public-brand.component'
+import { bookingIcs, downloadIcs } from './services/booking-calendar.util'
 
+type TimesState = 'idle' | 'loading' | 'ready' | 'failed' | 'too_many'
 type PageState = 'loading' | 'ready' | 'not_found' | 'unavailable' | 'failed' | 'done'
 
 const TIME_BOUND: readonly string[] = ['table', 'tasting', 'consultation']
@@ -26,6 +38,10 @@ const TIME_BOUND: readonly string[] = ['table', 'tasting', 'consultation']
 const FIXED_KEYS: readonly string[] = ['date', 'time', 'party_size']
 const WAKING_AFTER_MS = 6000
 const LAST_KEY = 'fv_pb_last_'
+/** Minutes a table booking lasts when the kind names none. */
+const DEFAULT_MINUTES = 120
+
+const ddmm = (date: string): string => `${date.slice(8, 10)}/${date.slice(5, 7)}`
 
 /**
  * Plan 555 (C-PUBLIC): the public request form, `/book/:slug`. Hebrew only, no account, no app header.
@@ -88,6 +104,20 @@ export class PublicRequestPage {
   protected readonly token_ = signal('')
   protected readonly last_ = signal<{ token: string; reference: string } | null>(null)
 
+  // Plan 670: table mode — free hours as chips, the area, and the honest end of the page.
+  protected readonly area_ = signal('')
+  protected readonly slots_ = signal<{ time: string; available: boolean }[]>([])
+  protected readonly next_ = signal<{ date: string; time: string } | null>(null)
+  protected readonly timesState_ = signal<TimesState>('idle')
+  protected readonly takenNotice_ = signal(false)
+  protected readonly alternatives_ = signal<{ date: string; time: string }[]>([])
+  protected readonly doneTable_ = signal(false)
+  protected readonly doneConfirmed_ = signal(false)
+  protected readonly doneBooking_ = signal<{ date: string; time: string; partySize: number } | null>(null)
+  private readonly refresh_ = signal(0)
+  private pendingTime_ = ''
+  private readSeq = 0
+
   protected readonly phoneDigits_ = computed(() => this.phone_().replace(/\D/g, '').length)
   protected readonly step_ = computed(() => {
     const kinds = this.profile_()?.kinds ?? []
@@ -99,12 +129,16 @@ export class PublicRequestPage {
     () => this.profile_()?.kinds.find((k) => k.kind === this.kind_()) ?? null
   )
   protected readonly timeBound_ = computed(() => TIME_BOUND.includes(this.kind_()))
+  /** The profile has table service and the guest chose a table. Outside it the page is what it always was. */
+  protected readonly tableMode_ = computed(() => !!this.profile_()?.tableBooking && this.kind_() === 'table')
+  protected readonly areas_ = computed(() => this.profile_()?.tableBooking?.areas ?? [])
+  protected readonly anyAvailable_ = computed(() => this.slots_().some((s) => s.available))
   protected readonly hasParty_ = computed(() => !!this.kind_() && this.kind_() !== 'consultation')
   protected readonly partyMin_ = computed(() => Math.max(1, this.kindView_()?.rules.minPartySize ?? 1))
   protected readonly partyMax_ = computed(() => this.kindView_()?.rules.maxPartySize || undefined)
   protected readonly extraQuestions_ = computed(() =>
     (this.kindView_()?.questions ?? [])
-      .filter((q) => !FIXED_KEYS.includes(q.key))
+      .filter((q) => !FIXED_KEYS.includes(q.key) && !(this.tableMode_() && q.key === 'seating'))
       .map((q) => ({
         ...q,
         text: this.translation.translate(q.label),
@@ -170,6 +204,24 @@ export class PublicRequestPage {
   protected readonly referenceText_ = computed(() =>
     this.translation.translate('pb_reference').replace('{ref}', this.reference_())
   )
+  protected readonly nextFreeText_ = computed(() => {
+    const next = this.next_()
+    return next
+      ? this.translation.translate('pb_next_free').replace('{date}', ddmm(next.date)).replace('{time}', next.time)
+      : ''
+  })
+  protected readonly confirmedText_ = computed(() => {
+    const b = this.doneBooking_()
+    return this.translation
+      .translate('pb_done_confirmed_text')
+      .replace('{name}', this.profile_()?.displayName ?? '')
+      .replace('{date}', b ? ddmm(b.date) : '')
+      .replace('{time}', b?.time ?? '')
+      .replace('{party}', String(b?.partySize ?? ''))
+  })
+  protected readonly waitingText_ = computed(() =>
+    this.translation.translate('pb_done_waiting_text').replace('{name}', this.profile_()?.displayName ?? '')
+  )
 
   constructor() {
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((q) => {
@@ -179,7 +231,82 @@ export class PublicRequestPage {
     // Outside the zone: a pending 6 s timer must not hold the app unstable (tests wait for stability).
     const timer = this.zone.runOutsideAngular(() => setTimeout(() => this.waking_.set(true), WAKING_AFTER_MS))
     this.destroyRef.onDestroy(() => clearTimeout(timer))
+    // Plan 670: read the free hours again whenever the date, the party or the area changes.
+    effect(() => {
+      const on = this.tableMode_()
+      const date = this.date_()
+      const party = this.party_()
+      const area = this.area_()
+      this.refresh_()
+      untracked(() => {
+        if (on && date) void this.readSlots(date, party, area)
+        else this.resetSlots()
+      })
+    })
     void this.load()
+  }
+
+  private resetSlots(): void {
+    this.readSeq++
+    this.slots_.set([])
+    this.next_.set(null)
+    this.timesState_.set('idle')
+  }
+
+  /** The newest read wins: an older answer that arrives late is ignored. */
+  private async readSlots(date: string, party: number, area: string): Promise<void> {
+    const seq = ++this.readSeq
+    this.timesState_.set('loading')
+    const res = await this.api.availability(this.slug, date, party, area || undefined)
+    if (seq !== this.readSeq) return
+    if (!res.ok) {
+      this.slots_.set([])
+      this.next_.set(null)
+      this.timesState_.set(res.code === 'TOO_MANY' ? 'too_many' : 'failed')
+      return
+    }
+    this.slots_.set(res.slots)
+    this.next_.set(res.next ?? null)
+    this.timesState_.set('ready')
+    const free = (time: string): boolean => res.slots.some((s) => s.time === time && s.available)
+    if (this.pendingTime_) {
+      if (free(this.pendingTime_)) this.time_.set(this.pendingTime_)
+      this.pendingTime_ = ''
+    }
+    if (this.time_() && !free(this.time_())) this.time_.set('')
+  }
+
+  protected retryTimes(): void {
+    this.refresh_.update((n) => n + 1)
+  }
+
+  protected pickTime(time: string): void {
+    this.time_.set(time)
+  }
+
+  /** Sets a date and an hour offered by the server; the hour is chosen once the new read confirms it is free. */
+  protected pickSuggestion(s: { date: string; time: string }): void {
+    this.pendingTime_ = s.time
+    this.time_.set('')
+    this.date_.set(s.date)
+    this.takenNotice_.set(false)
+    this.refresh_.update((n) => n + 1)
+  }
+
+  protected async addToCalendar(): Promise<void> {
+    const b = this.doneBooking_()
+    const profile = this.profile_()
+    if (!b || !profile) return
+    const minutes = profile.kinds.find((k) => k.kind === 'table')?.durationMinutes ?? DEFAULT_MINUTES
+    const text = await bookingIcs({
+      title: this.translation.translate('pb_calendar_title').replace('{name}', profile.displayName),
+      date: b.date,
+      time: b.time,
+      minutes,
+      location: profile.address
+    })
+    if (text) downloadIcs(text)
+    else this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
   }
 
   protected async load(): Promise<void> {
@@ -223,6 +350,7 @@ export class PublicRequestPage {
 
   protected detailsValid(): boolean {
     if (!this.kind_()) return false
+    if (this.tableMode_() && (!this.date_() || !this.time_())) return false
     if (this.isRequired('date') && !this.date_()) return false
     if (this.timeBound_() && this.isRequired('time') && !this.time_()) return false
     return this.extraQuestions_().every((q) => !q.required || !!(this.answers_()[q.key] ?? '').trim())
@@ -266,6 +394,7 @@ export class PublicRequestPage {
       guestPhone: this.phone_().trim(),
       wanted,
       answers,
+      ...(this.tableMode_() && this.area_() && { areaKey: this.area_() }),
       consentTerms: true,
       ...(this.website_() && { website: this.website_() })
     }
@@ -276,7 +405,18 @@ export class PublicRequestPage {
       this.reference_.set(res.reference)
       this.token_.set(res.token)
       this.writeLast(res.token, res.reference)
+      this.doneTable_.set(this.tableMode_())
+      this.doneConfirmed_.set(res.confirmed === true)
+      this.doneBooking_.set(res.booking ?? null)
       this.state_.set('done')
+      return
+    }
+    if (res.code === 'NO_TABLE' && this.tableMode_()) {
+      this.time_.set('')
+      this.alternatives_.set(res.alternatives ?? [])
+      this.takenNotice_.set(true)
+      this.refresh_.update((n) => n + 1)
+      await this.router.navigate([], { relativeTo: this.route, queryParams: { step: 2 } })
       return
     }
     if (res.code === 'NOT_AVAILABLE') {

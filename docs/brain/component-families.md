@@ -197,6 +197,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 ### chip — chips, badges, pills
 
+- Plan 670: `.pb-group`, `.pb-time`, `.pb-time--taken` in `src/app/pages/public-request/public-request.page.scss` — page-local layout of the guest hour and area chips (reset fieldset, 44 px height, dimmed struck-through taken hour); the chip is still `.c-chip--toggle`.
 - Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
 - Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones teal, amber, red or `--teal|--amber|--red`) plus variants
   `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
@@ -339,6 +340,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
 - Plan 663: openRangesOf in qualify.ts (`shared/schemas/front-desk/qualify.ts`) — the checkable opening ranges of a date (`hoursCheck` is built on it).
 - Plan 663: jerusalemDateTime in local-time.ts (`shared/schemas/front-desk/local-time.ts`) — the inverse of `jerusalemEpoch`.
+- Plan 670: `bookingIcs` / `downloadIcs` in `src/app/pages/public-request/services/booking-calendar.util.ts` — a booking as a local-time calendar file (lazy `import('ics')`); page-local helper, used only by the two guest pages.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).

@@ -21,10 +21,24 @@
   <app-public-brand [name]="profile_()?.displayName ?? ''" [logoUrl]="profile_()?.logoUrl" />
   <section class="pb-card pb-done" data-testid="pb-done">
     <lucide-icon name="check-circle" [size]="40" class="pb-done-icon"></lucide-icon>
+    @if (doneTable_() && doneConfirmed_()) {
+    <h2 class="pb-title">{{ 'pb_done_confirmed_title' | translatePipe }}</h2>
+    <p>{{ confirmedText_() }}</p>
+    } @else if (doneTable_()) {
+    <h2 class="pb-title">{{ 'pb_done_waiting_title' | translatePipe }}</h2>
+    <p>{{ waitingText_() }}</p>
+    } @else {
     <h2 class="pb-title">{{ 'pb_done_title' | translatePipe }}</h2>
     <p>{{ doneText_() }}</p>
+    }
     <p class="pb-reference" data-testid="pb-reference">{{ referenceText_() }}</p>
     <div class="pb-actions">
+      @if (doneTable_() && doneConfirmed_() && doneBooking_()) {
+      <button type="button" class="c-btn-primary" data-testid="pb-calendar" (click)="addToCalendar()">
+        <lucide-icon name="calendar-plus" [size]="16"></lucide-icon>
+        {{ 'pb_add_to_calendar' | translatePipe }}
+      </button>
+      }
       <a class="c-btn-primary" data-testid="pb-status-link" [routerLink]="statusLink_()"
         >{{ 'pb_status_link' | translatePipe }}</a
       >
@@ -80,7 +94,7 @@
       <app-form-field label="fd_q_date" forId="pb-date" [error]="missing('date', date_()) ? 'rq_field_required' : null">
         <app-date-field inputId="pb-date" [value]="date_()" (valueChange)="date_.set($event)" />
       </app-form-field>
-      @if (timeBound_()) {
+      @if (timeBound_() && !tableMode_()) {
       <app-form-field label="fd_q_time" forId="pb-time" [error]="missing('time', time_()) ? 'rq_field_required' : null">
         <app-time-field inputId="pb-time" [value]="time_()" (valueChange)="time_.set($event)" />
       </app-form-field>
@@ -95,7 +109,77 @@
           (valueChange)="party_.set($event)"
         />
       </div>
-      } @for (q of extraQuestions_(); track q.key) {
+      } @if (tableMode_()) { @if (takenNotice_()) {
+      <div class="c-input-stack" data-testid="pb-taken">
+        <p class="c-field-error" role="alert">{{ 'pb_time_taken' | translatePipe }}</p>
+        @if (alternatives_().length) {
+        <div class="c-chip-group">
+          @for (alt of alternatives_(); track alt.date + alt.time) {
+          <button type="button" class="c-chip c-chip--tap" data-testid="pb-alt" (click)="pickSuggestion(alt)">
+            {{ alt.date.slice(8, 10) }}/{{ alt.date.slice(5, 7) }} {{ alt.time }}
+          </button>
+          }
+        </div>
+        }
+      </div>
+      }
+      <fieldset class="pb-group" data-testid="pb-times-group">
+        <legend>{{ 'fd_q_time' | translatePipe }}</legend>
+        @switch (timesState_()) { @case ('loading') {
+        <p class="pb-loading" aria-busy="true">{{ 'pb_times_loading' | translatePipe }}</p>
+        } @case ('failed') {
+        <p class="c-field-error" role="alert">{{ 'pb_times_failed' | translatePipe }}</p>
+        <button type="button" class="c-btn-ghost" data-testid="pb-times-retry" (click)="retryTimes()">
+          {{ 'pb_retry' | translatePipe }}
+        </button>
+        } @case ('too_many') {
+        <p class="c-field-error" role="alert">{{ 'pb_too_many' | translatePipe }}</p>
+        } @case ('ready') { @if (!slots_().length) {
+        <p data-testid="pb-times-none">{{ 'pb_times_none' | translatePipe }}</p>
+        } @else { @if (!anyAvailable_()) {
+        <p data-testid="pb-times-full">{{ 'pb_times_full' | translatePipe }}</p>
+        @if (next_()) {
+        <button type="button" class="c-btn-ghost" data-testid="pb-next-free" (click)="pickSuggestion(next_()!)">
+          {{ nextFreeText_() }}
+        </button>
+        } }
+        <div class="c-chip-group" data-testid="pb-times">
+          @for (slot of slots_(); track slot.time) {
+          <label class="c-chip c-chip--toggle pb-time" [class.pb-time--taken]="!slot.available">
+            <input
+              type="radio"
+              name="pb-time"
+              [attr.data-testid]="'pb-time-' + slot.time"
+              [value]="slot.time"
+              [checked]="time_() === slot.time"
+              [disabled]="!slot.available"
+              (change)="pickTime(slot.time)"
+            />
+            <span>{{ slot.time }}</span>
+          </label>
+          }
+        </div>
+        } } } @if (touched_() && !time_()) {
+        <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
+        }
+      </fieldset>
+      @if (areas_().length >= 2) {
+      <fieldset class="pb-group" data-testid="pb-areas">
+        <legend>{{ 'pb_area' | translatePipe }}</legend>
+        <div class="c-chip-group">
+          <label class="c-chip c-chip--toggle pb-time">
+            <input type="radio" name="pb-area" [checked]="!area_()" (change)="area_.set('')" />
+            <span>{{ 'pb_area_any' | translatePipe }}</span>
+          </label>
+          @for (area of areas_(); track area.key) {
+          <label class="c-chip c-chip--toggle pb-time">
+            <input type="radio" name="pb-area" [checked]="area_() === area.key" (change)="area_.set(area.key)" />
+            <span>{{ area.name }}</span>
+          </label>
+          }
+        </div>
+      </fieldset>
+      } } @for (q of extraQuestions_(); track q.key) {
       <div class="c-input-stack">
         <label [attr.for]="'pb-q-' + q.key"
           >{{ q.text }} @if (q.required) {

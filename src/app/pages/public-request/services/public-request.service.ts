@@ -24,6 +24,7 @@ export interface PublicProfileView {
   hours: OperatingHoursRow[]
   closedDates?: string[]
   kinds: PublicKindView[]
+  tableBooking?: { areas: { key: string; name: string }[] }
 }
 export type PublicProfileResult =
   | { state: 'ready'; profile: PublicProfileView }
@@ -40,14 +41,35 @@ export interface PublicRequestStatus {
   createdAt: number
   displayName: string
   phone?: string
-  booking?: { date: string; time: string; partySize: number; status: string }
+  booking?: {
+    date: string
+    time: string
+    partySize: number
+    status: string
+    guestConfirmed?: boolean
+    canCancel?: boolean
+  }
   eventOpened?: boolean
   declineReason?: 'full' | 'date_taken' | 'out_of_area' | 'below_minimum'
 }
 export type StatusResult = { ok: true; status: PublicRequestStatus } | { ok: false; code: string }
 export type SendResult =
-  | { ok: true; reference: string; token: string }
-  | { ok: false; code: string; issues: { path: string; code: string; message: string }[] }
+  | {
+      ok: true
+      reference: string
+      token: string
+      confirmed?: boolean
+      booking?: { date: string; time: string; partySize: number }
+    }
+  | {
+      ok: false
+      code: string
+      issues: { path: string; code: string; message: string }[]
+      alternatives?: { date: string; time: string }[]
+    }
+export type AvailabilityResult =
+  | { ok: true; slots: { time: string; available: boolean }[]; next?: { date: string; time: string } }
+  | { ok: false; code: 'TOO_MANY' | 'FAILED' }
 
 /**
  * Plan 555: the page-scoped client of `/api/v1/public`. No member token matters here: the server ignores it.
@@ -78,15 +100,61 @@ export class PublicRequestService {
   async send(slug: string, input: PublicRequestInput): Promise<SendResult> {
     try {
       const body = await firstValueFrom(
-        this.http.post<{ reference: string; token: string }>(this.url(`${encodeURIComponent(slug)}/requests`), input)
+        this.http.post<{
+          reference: string
+          token: string
+          confirmed?: boolean
+          booking?: { date: string; time: string; partySize: number }
+        }>(this.url(`${encodeURIComponent(slug)}/requests`), input)
       )
-      return { ok: true, reference: body.reference, token: body.token }
+      return {
+        ok: true,
+        reference: body.reference,
+        token: body.token,
+        ...(body.confirmed !== undefined && { confirmed: body.confirmed }),
+        ...(body.booking && { booking: body.booking })
+      }
     } catch (err) {
       const http = err instanceof HttpErrorResponse ? err : null
-      const body = (http?.error ?? {}) as { error?: string; issues?: { path: string; code: string; message: string }[] }
+      const body = (http?.error ?? {}) as {
+        error?: string
+        issues?: { path: string; code: string; message: string }[]
+        alternatives?: { date: string; time: string }[]
+      }
       const code = http?.status === 429 ? 'TOO_MANY' : (body.error ?? 'FAILED')
-      return { ok: false, code, issues: Array.isArray(body.issues) ? body.issues : [] }
+      return {
+        ok: false,
+        code,
+        issues: Array.isArray(body.issues) ? body.issues : [],
+        ...(code === 'NO_TABLE' && { alternatives: Array.isArray(body.alternatives) ? body.alternatives : [] })
+      }
     }
+  }
+
+  /** Plan 670: the free hours of a day (no token; its own limiter, 429 → TOO_MANY). */
+  async availability(slug: string, date: string, partySize: number, area?: string): Promise<AvailabilityResult> {
+    try {
+      const params: Record<string, string> = { date, partySize: String(partySize), ...(area && { area }) }
+      const body = await firstValueFrom(
+        this.http.get<{ slots: { time: string; available: boolean }[]; next?: { date: string; time: string } }>(
+          this.url(`${encodeURIComponent(slug)}/availability`),
+          { params }
+        )
+      )
+      return { ok: true, slots: Array.isArray(body.slots) ? body.slots : [], ...(body.next && { next: body.next }) }
+    } catch (err) {
+      return { ok: false, code: err instanceof HttpErrorResponse && err.status === 429 ? 'TOO_MANY' : 'FAILED' }
+    }
+  }
+
+  /** Plan 670: the guest says "we are coming". */
+  confirm(slug: string, token: string): Promise<StatusResult> {
+    return this.statusCall(() =>
+      this.http.post<PublicRequestStatus>(
+        this.url(`${encodeURIComponent(slug)}/requests/${encodeURIComponent(token)}/confirm`),
+        {}
+      )
+    )
   }
 
   getStatus(slug: string, token: string): Promise<StatusResult> {

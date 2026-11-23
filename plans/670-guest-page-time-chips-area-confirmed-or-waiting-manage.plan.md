@@ -163,6 +163,7 @@ append the path to the scope block above and retry.
 - Hour chips and area chips — family: chip — rung: 1 — why: `c-chip c-chip--toggle` radio labels in a `c-chip-group`, exactly as the kind step of this page writes them.
 - "Checking" line, failed read with retry, and the empty day line — family: feedback — rung: 1 — why: the page's own loading line pattern (`pb-loading`, `aria-busy`) and a `c-btn-ghost` retry, as its load state does.
 - `bookingIcs` in `booking-calendar.util.ts` — family: helpers — rung: 3 — why: a new pure helper with a spec beside it, in the shape of `wa-link.util.ts`; it lives in the page folder because only the two guest pages use it.
+- Page-local classes `.pb-group` (fieldset reset for a chip group), `.pb-time` (44 px chip height) and `.pb-time--taken` (dimmed, struck-through taken hour) — family: chip — rung: 3 — why: only this page's hour and area chips need them; the chip itself is the engine `c-chip--toggle`.
 - Cancel question on the status page — family: modal-controller — rung: 1 — why: `ConfirmModalService.open` as the page already calls it.
 
 ## Defaults
@@ -315,16 +316,16 @@ it does today.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Teach the page's service the new answers of the public door — table-booking block, availability read, confirm call, confirmed and alternatives on send — src/app/pages/public-request/services/public-request.service.ts
-- [ ] A2: Add the calendar helper and its one dependency so a guest can save the booking — bookingIcs with a lazy import, downloadIcs, the spec, pnpm add ics@3.12.1 — src/app/pages/public-request/services/booking-calendar.util.ts, src/app/pages/public-request/services/booking-calendar.util.spec.ts, package.json, pnpm-lock.yaml
-- [ ] A3: Show the day's hours as chips on the booking page of a restaurant with table service — table mode, the read on date, party or area change, taken hours disabled, loading, failed, empty and full states, the next free time — src/app/pages/public-request/public-request.page.ts, src/app/pages/public-request/public-request.page.html, src/app/pages/public-request/public-request.page.scss
-- [ ] A4: Ask where the guest wants to sit and send it with the request — the area chips, the hidden seating question, the area key in the body — src/app/pages/public-request/public-request.page.ts, src/app/pages/public-request/public-request.page.html
-- [ ] A5: Tell the guest the truth at the end: confirmed, waiting, or the hour was taken — the two done cards, the calendar button, the return to step two with alternatives — src/app/pages/public-request/public-request.page.ts, src/app/pages/public-request/public-request.page.html
-- [ ] A6: Let the guest manage a confirmed booking from the link — confirm arrival, add to calendar, cancel before the cutoff, the too-late line — src/app/pages/public-request/public-request-status/public-request-status.page.ts, src/app/pages/public-request/public-request-status/public-request-status.page.html
-- [ ] A7: Add the Hebrew texts and the new icon — nineteen dictionary keys appended, CalendarPlus registered — public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] A8: Cover the page with unit cases, including that a business without table service is untouched — the cases of Goals in the two page specs — src/app/pages/public-request/public-request.page.spec.ts, src/app/pages/public-request/public-request-status/public-request-status.page.spec.ts
-- [ ] A9: Write the three script checks of the page with the public door answered by the spec — confirmed booking, full day with the next free time, unchanged page — e2e/ui/670-1.spec.ts, e2e/ui/670-2.spec.ts, e2e/ui/670-3.spec.ts
-- [ ] A10: Record the new pieces in the folder map and the registry — one entry each — src/app/pages/breadcrumbs.md, docs/brain/component-families.md
+- [x] A1: Teach the page's service the new answers of the public door — table-booking block, availability read, confirm call, confirmed and alternatives on send — src/app/pages/public-request/services/public-request.service.ts
+- [x] A2: Add the calendar helper and its one dependency so a guest can save the booking — bookingIcs with a lazy import, downloadIcs, the spec, pnpm add ics@3.12.1 — src/app/pages/public-request/services/booking-calendar.util.ts, src/app/pages/public-request/services/booking-calendar.util.spec.ts, package.json, pnpm-lock.yaml
+- [x] A3: Show the day's hours as chips on the booking page of a restaurant with table service — table mode, the read on date, party or area change, taken hours disabled, loading, failed, empty and full states, the next free time — src/app/pages/public-request/public-request.page.ts, src/app/pages/public-request/public-request.page.html, src/app/pages/public-request/public-request.page.scss
+- [x] A4: Ask where the guest wants to sit and send it with the request — the area chips, the hidden seating question, the area key in the body — src/app/pages/public-request/public-request.page.ts, src/app/pages/public-request/public-request.page.html
+- [x] A5: Tell the guest the truth at the end: confirmed, waiting, or the hour was taken — the two done cards, the calendar button, the return to step two with alternatives — src/app/pages/public-request/public-request.page.ts, src/app/pages/public-request/public-request.page.html
+- [x] A6: Let the guest manage a confirmed booking from the link — confirm arrival, add to calendar, cancel before the cutoff, the too-late line — src/app/pages/public-request/public-request-status/public-request-status.page.ts, src/app/pages/public-request/public-request-status/public-request-status.page.html
+- [x] A7: Add the Hebrew texts and the new icon — nineteen dictionary keys appended, CalendarPlus registered — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A8: Cover the page with unit cases, including that a business without table service is untouched — the cases of Goals in the two page specs — src/app/pages/public-request/public-request.page.spec.ts, src/app/pages/public-request/public-request-status/public-request-status.page.spec.ts
+- [x] A9: Write the three script checks of the page with the public door answered by the spec — confirmed booking, full day with the next free time, unchanged page — e2e/ui/670-1.spec.ts, e2e/ui/670-2.spec.ts, e2e/ui/670-3.spec.ts
+- [x] A10: Record the new pieces in the folder map and the registry — one entry each — src/app/pages/breadcrumbs.md, docs/brain/component-families.md
 
 ## Technical Considerations
 - Dependencies: the two guest pages and their service; the public routes of plan 669. One new browser
@@ -354,3 +355,9 @@ it does today.
 - none
 
 ## Execution Notes
+- `pnpm add ics@3.12.1` → exit 0 (package.json, pnpm-lock.yaml).
+- `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0, 2878 SUCCESS.
+- kit-manifest-check → ok; override-check, lint:icons, lint:no-native-select, plan-ledger-check → exit 0; log-query → exit 0 (no database).
+- kit-checks first run flagged `.pb-group/.pb-time/.pb-time--taken` (declared in Reuse Check), a raw font-size and a `.pb-taken` duplicate of `.c-input-stack` (all fixed).
+- `[ui]` items 670-1..3: written, not run (e2e/ui/670-*.spec.ts).
+- The `ics` library writes the duration as `PT90M`; the util spec asserts that.

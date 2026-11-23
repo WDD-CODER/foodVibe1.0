@@ -60,6 +60,26 @@
   gap: 1rem;
 }
 
+.pb-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pb-time {
+  min-block-size: 2.75rem;
+}
+
+.pb-time--taken {
+  opacity: 0.45;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
 .pb-notes {
   margin: 0;
   padding-block: 0.5rem;
