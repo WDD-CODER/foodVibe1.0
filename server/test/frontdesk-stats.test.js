@@ -124,6 +124,13 @@ describe('GET /stats/frontdesk', () => {
     expect(res.body.bookings.noShowRatePct).toBeCloseTo(100 / 3)
   })
 
+  it('a test booking does not change the no-show numbers (plan 675)', async () => {
+    const b = (status, over = {}) => ({ _id: `bk${++n}`, businessId: 'b1', status, startAt: MON, ...over })
+    await db('bookings').insertMany([b('finished'), b('finished'), b('finished'), b('no_show', { test: true })])
+    const res = await get(RANGE)
+    expect(res.body.bookings).toEqual({ total: 3, noShowRatePct: 0, enough: true })
+  })
+
   it('events from requests: count approved, revenue of closed events', async () => {
     await db('requests').insertMany([
       req('b1', { status: 'approved', kind: 'event', outcome: { type: 'menuEvent', id: 'e1' } }),

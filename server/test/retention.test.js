@@ -21,12 +21,12 @@ const ids = async (name) => (await testDb().collection(name).find({}).toArray())
 
 beforeEach(async () => {
   resetRetentionThrottle();
-  for (const c of ['requests', 'bookings', 'decisionLog', 'messages']) await testDb().collection(c).deleteMany({});
+  for (const c of ['requests', 'bookings', 'decisionLog', 'messages', 'conversations']) await testDb().collection(c).deleteMany({});
 });
 
 describe('purgeRetained', () => {
   it('constants', () => {
-    expect(RETENTION).toEqual({ requestsDays: 730, bookingsDays: 730, messagesDays: 365, voiceFilesDays: 730 });
+    expect(RETENTION).toEqual({ requestsDays: 730, bookingsDays: 730, messagesDays: 365, conversationsDays: 365, voiceFilesDays: 730 });
   });
 
   it('deletes old final requests and old bookings; keeps 729-day ones, open requests and decisionLog', async () => {
@@ -44,7 +44,7 @@ describe('purgeRetained', () => {
     await db.collection('bookings').insertMany([booking('b_old', 'b1', 731), booking('b_729', 'b1', 729), booking('b_other', 'b2', 900)]);
     await db.collection('decisionLog').insertOne({ _id: 'd1', businessId: 'b1', at: NOW - 3000 * DAY });
     const counts = await purgeRetained(db, 'b1', NOW);
-    expect(counts).toEqual({ requests: 5, bookings: 1, messages: 0, files: 0 });
+    expect(counts).toEqual({ requests: 5, bookings: 1, messages: 0, conversations: 0, files: 0 });
     expect(await ids('requests')).toEqual(['r_729', 'r_old_new', 'r_other_biz']);
     expect(await ids('bookings')).toEqual(['b_729', 'b_other']);
     expect(await ids('decisionLog')).toEqual(['d1']);
@@ -58,6 +58,24 @@ describe('purgeRetained', () => {
     await db.collection('messages').insertMany([{ _id: 'm1', businessId: 'b1', at: NOW - 400 * DAY }, { _id: 'm2', businessId: 'b1', at: NOW - 100 * DAY }]);
     expect((await purgeRetained(db, 'b1', NOW)).messages).toBe(1);
     expect(await ids('messages')).toEqual(['m2']);
+  });
+
+  it('deletes closed conversations past 365 days with their messages; keeps younger, open and other-business ones (plan 687)', async () => {
+    const db = testDb();
+    const cv = (id, businessId, status, ageDays) => ({ _id: id, businessId, status, lastMessageAt: NOW - ageDays * DAY });
+    await db.collection('conversations').insertMany([
+      cv('c_old', 'b1', 'closed', 366), cv('c_364', 'b1', 'closed', 364), cv('c_open_old', 'b1', 'human', 900),
+      cv('c_bot_old', 'b1', 'bot', 900), cv('c_other', 'b2', 'closed', 900),
+    ]);
+    await db.collection('messages').insertMany([
+      { _id: 'm_old', businessId: 'b1', conversationId: 'c_old', at: NOW - 100 * DAY },
+      { _id: 'm_364', businessId: 'b1', conversationId: 'c_364', at: NOW - 364 * DAY },
+      { _id: 'm_other', businessId: 'b2', conversationId: 'c_other', at: NOW - 100 * DAY },
+    ]);
+    const counts = await purgeRetained(db, 'b1', NOW);
+    expect(counts.conversations).toBe(1);
+    expect(await ids('conversations')).toEqual(['c_364', 'c_bot_old', 'c_open_old', 'c_other']);
+    expect(await ids('messages')).toEqual(['m_364', 'm_other']);
   });
 
   it('runs at most once per business per 24 hours', async () => {

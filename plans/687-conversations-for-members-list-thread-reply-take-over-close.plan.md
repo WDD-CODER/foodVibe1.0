@@ -113,6 +113,8 @@ server/test/retention.test.js
 server/test/helpers/**
 server/breadcrumbs.md
 docs/restaurant/restaurant-map.md
+server/test/files-route.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -202,13 +204,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Read a business's conversations in three queries, however many there are — the list function with status, test, limit and paging, the client and newest-message joins — server/services/conversations.js
-- [ ] A2: Let a member see the list and one thread — the two reads with the server's time, the unread reset, access for members only — server/routes/conversations.js
-- [ ] A3: Let a member answer a guest through the one sender — text or a template, the input limits, the refusals as answers, the take-over that a reply implies — server/routes/conversations.js
-- [ ] A4: Let a member take a conversation over, hand it back and close it — the three moves, each conditional on the status that was read — server/routes/conversations.js
-- [ ] A5: Stop closed conversations from staying forever — the new retention number, the delete of old closed conversations with their messages, the updated test — server/jobs/retention.js, server/test/retention.test.js
-- [ ] A6: Prove that another business reaches nothing and that logs stay clean — the router's test file with the access, list, thread, reply, moves and logs blocks — server/test/conversations-router.test.js
-- [ ] A7: Record the router and run every check — the folder map, the map's extension line, test:server, build, lint, log-query; evidence into Execution Notes — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Read a business's conversations in three queries, however many there are — the list function with status, test, limit and paging, the client and newest-message joins — server/services/conversations.js
+- [x] A2: Let a member see the list and one thread — the two reads with the server's time, the unread reset, access for members only — server/routes/conversations.js
+- [x] A3: Let a member answer a guest through the one sender — text or a template, the input limits, the refusals as answers, the take-over that a reply implies — server/routes/conversations.js
+- [x] A4: Let a member take a conversation over, hand it back and close it — the three moves, each conditional on the status that was read — server/routes/conversations.js
+- [x] A5: Stop closed conversations from staying forever — the new retention number, the delete of old closed conversations with their messages, the updated test — server/jobs/retention.js, server/test/retention.test.js
+- [x] A6: Prove that another business reaches nothing and that logs stay clean — the router's test file with the access, list, thread, reply, moves and logs blocks — server/test/conversations-router.test.js
+- [x] A7: Record the router and run every check — the folder map, the map's extension line, test:server, build, lint, log-query; evidence into Execution Notes — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: `sendOut`, `templateMessage`, `loadConversation`, `closeConversation` (plan 675); the action and
@@ -236,3 +238,5 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: test conversations are left out of the list unless `test=1` is asked (the simulator screen asks).
 - behaviour: a template with buttons cannot be sent by hand.
 - behaviour: only closed conversations are deleted by age (12 months after their last message).
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0; `pnpm run test:server` → 0 (162 files, 2211 tests); `pnpm run test:ci` → 0 (2864 SUCCESS); kit-manifest-check, kit-checks, override-check, plan-ledger-check, breadcrumbs-check, lint:icons, lint:no-native-select → ok; log-query → SKIP (no database configured).
+- behaviour: input-shape errors of a reply (a template `values` that is not an object of strings) answer 400 `BAD_INPUT`; an unknown or button template answers 400 `BAD_TEMPLATE`.
