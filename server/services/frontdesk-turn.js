@@ -10,7 +10,7 @@
 const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
 const { buildTurnBody, HISTORY_WINDOW } = require('./frontdesk-prompt');
-const { applyGuardrails } = require('./frontdesk-guardrails');
+const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
 const { sendOut } = require('./outbound');
 const { setTurnHandler } = require('./inbound');
 const { createRequest, runQualify } = require('../utils/request-create');
@@ -21,6 +21,7 @@ const { WANTED_QUESTION_KEYS } = require('../generated/schemas/front-desk-templa
 const FRONTDESK_DAILY_TURNS = 300;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
+const PLACEHOLDER_CLIENTS = new Set(['__test__', '__walk_in__']);
 const NUMBER_KEYS = new Set(['partySize', 'budgetPerGuest']);
 
 const askTurnModel = args => require('../routes/ai/frontdesk').askTurnModel(args);
@@ -78,13 +79,16 @@ function decide(answer, ctx) {
   return { text: fixedText('fd_ai_will_confirm'), request: { kind: answer.kind, wanted, answers } };
 }
 
-async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger }) {
-  await colOf(db, 'conversations').updateOne(
-    { _id: conversation._id, businessId: conversation.businessId },
-    { $set: { status: 'human', updatedAt: now } }
-  );
+/** `keepStatus`: a blocked turn at level 0 only stores the handoff sentence as the suggestion; the status stays. */
+async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger, keepStatus = false }) {
+  if (!(keepStatus && levelOf(profile) === 0)) {
+    await colOf(db, 'conversations').updateOne(
+      { _id: conversation._id, businessId: conversation.businessId },
+      { $set: { status: 'human', updatedAt: now } }
+    );
+  }
   if (silent || mode !== 'turn') return;
-  const text = (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_handoff_default');
+  const text = handoffSentence(profile);
   if (levelOf(profile) === 0) {
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId: conversation.businessId }, { $set: { suggestion: text } }
@@ -93,6 +97,33 @@ async function handOff(db, conversation, { now, silent = false, profile, mode = 
   }
   const sent = await sendOut(db, conversation, { kind: 'text', text }, 'ai', { now });
   if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
+}
+
+const handoffSentence = profile => (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_handoff_default');
+
+/** R-02: the guest asked to be removed. One fixed sentence, the do-not-contact flag, then a person. */
+async function removeGuest(db, conversation, { now, log }) {
+  const businessId = conversation.businessId;
+  const sent = await sendOut(db, conversation, { kind: 'text', text: fixedText('fd_ai_removed') }, 'server', { now });
+  if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
+  if (conversation.clientId && !PLACEHOLDER_CLIENTS.has(conversation.clientId)) {
+    await colOf(db, 'clients').updateOne(
+      { _id: conversation.clientId, businessId },
+      { $set: { doNotContact: { at: now, reason: 'guest asked in chat', via: 'guest' }, updatedAt: now } }
+    );
+  }
+  await colOf(db, 'conversations').updateOne(
+    { _id: conversation._id, businessId }, { $set: { status: 'human', updatedAt: now } }
+  );
+  log.info({ event: 'frontdesk.turn.removal', conversationId: conversation._id });
+}
+
+/** A blocked turn: log the reason only, then a person (suggest mode: the sentence is the draft, status unchanged). */
+async function blockTurn(db, conversation, base, { reason, stage }) {
+  base.log.info({ event: 'frontdesk.turn.blocked', reason, stage, level: levelOf(base.profile) });
+  if (base.mode === 'suggest') return finishSuggestion(db, conversation, handoffSentence(base.profile), base.now);
+  await handOff(db, conversation, { ...base, keepStatus: true });
+  return { ok: true, handoff: true };
 }
 
 const handOffSilently = (db, conversation, opts) => handOff(db, conversation, { ...opts, silent: true });
@@ -115,10 +146,22 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     }
   }
 
-  const facts = await publicFacts(db, businessId);
   const recent = await colOf(db, 'messages')
     .find({ businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(HISTORY_WINDOW).toArray();
   const history = recent.reverse();
+  const aiTurns = await colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' });
+
+  if (mode === 'suggest' && isRemoval(history)) return { ok: true, handoff: 'removal' };
+  const pre = preCheck({ profile, history, aiTurns, now, mode });
+  if (!pre.ok) {
+    if (pre.reason === 'removal') {
+      await removeGuest(db, conversation, base);
+      return { ok: true, handoff: 'removal' };
+    }
+    return blockTurn(db, conversation, base, { reason: pre.reason, stage: 'pre' });
+  }
+
+  const facts = await publicFacts(db, businessId);
   const body = buildTurnBody({ profile, facts, history, now });
   const asked = await askTurnModel({
     body,
@@ -135,10 +178,24 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     return { ok: false, reason: asked.reason };
   }
 
-  const aiTurns = await colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' });
-  const verdict = applyGuardrails(asked.answer, {
+  const guardCtx = {
     profile, factIds: facts.factIds, factsText: facts.text, history, aiTurns, now, mode,
-  });
+    lastTurnLow: conversation.lowTurns === 1,
+  };
+  // The reply checks only matter when the model's own reply leaves the server: find out first (decide is pure).
+  let verdict = applyGuardrails(asked.answer, { ...guardCtx, replyWillBeSent: false });
+  if (verdict.ok && decide(verdict.answer, { profile, conversation, now }).text === verdict.answer.reply) {
+    verdict = applyGuardrails(asked.answer, { ...guardCtx, replyWillBeSent: true });
+  }
+  if (!verdict.ok && verdict.reason !== 'model') {
+    return blockTurn(db, conversation, base, { reason: verdict.reason, stage: 'post' });
+  }
+  if (verdict.ok && mode === 'turn' && (verdict.answer.low || conversation.lowTurns)) {
+    await colOf(db, 'conversations').updateOne(
+      { _id: conversation._id, businessId },
+      verdict.answer.low ? { $set: { lowTurns: 1 } } : { $unset: { lowTurns: '' } }
+    );
+  }
   if (!verdict.ok) {
     log.info({ event: 'frontdesk.turn.done', intent: asked.answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });
     if (mode === 'turn') await handOff(db, conversation, base);

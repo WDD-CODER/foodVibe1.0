@@ -271,3 +271,85 @@ describe('registration', () => {
     expect(typeof runTurn).toBe('function');
   });
 });
+
+describe('plan 689: guardrails in the turn', () => {
+  const HANDOFF_TEXT = 'נעביר אותך לצוות';
+  const guestSays = text => db().collection('messages').updateOne({ _id: 'g1' }, { $set: { text } });
+
+  it('a complaint: no model call, handed to a person, the profile handoff sentence sent', async () => {
+    const { conversation } = await setup({ assistant: { handoffText: HANDOFF_TEXT } });
+    await guestSays('יש לי תלונה');
+    await turn(conversation);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect((await conv(conversation._id)).status).toBe('human');
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0].text).toBe(HANDOFF_TEXT);
+  });
+
+  it('a deferred promise at level 1: not stored, the handoff sentence is, status human', async () => {
+    const { conversation } = await setup({ assistant: { handoffText: HANDOFF_TEXT } });
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'אבדוק ואחזור אליך', intent: 'smalltalk' }));
+    await turn(conversation);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const texts = (await db().collection('messages').find({}).toArray()).map(m => m.text);
+    expect(texts).not.toContain('אבדוק ואחזור אליך');
+    expect(texts).toContain(HANDOFF_TEXT);
+    expect((await conv(conversation._id)).status).toBe('human');
+  });
+
+  it('the same at level 0: the suggestion is the handoff sentence and the status stays bot', async () => {
+    const { conversation } = await setup({ level: 0, assistant: { handoffText: HANDOFF_TEXT } });
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'אבדוק ואחזור אליך', intent: 'smalltalk' }));
+    await turn(conversation);
+    expect(await conv(conversation._id)).toMatchObject({ suggestion: HANDOFF_TEXT, status: 'bot' });
+    expect(await outbound()).toHaveLength(0);
+  });
+
+  it('a complete request answer is not checked: the model reply is not sent, the dictionary sentence is', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, reply: 'ההזמנה אושרה' }));
+    await turn(conversation);
+    expect((await outbound())[0].text).toBe(fixedText('fd_ai_will_confirm'));
+  });
+
+  it('two empty turns in a row hand the conversation to a person', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'לא הבנתי', intent: 'other' }));
+    await turn(conversation);
+    expect((await conv(conversation._id))).toMatchObject({ status: 'bot', lowTurns: 1 });
+    await turn(await conv(conversation._id));
+    expect((await conv(conversation._id)).status).toBe('human');
+  });
+
+  it('a useful turn clears lowTurns', async () => {
+    const { conversation } = await setup();
+    await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { lowTurns: 1 } });
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(await conv(conversation._id));
+    expect((await conv(conversation._id)).lowTurns).toBeUndefined();
+  });
+
+  it('eight AI turns → handed to a person without a model call', async () => {
+    const { conversation } = await setup();
+    const rows = Array.from({ length: 8 }, (_v, i) => ({
+      _id: 'ai' + i, businessId: 'b1', conversationId: conversation._id, direction: 'out', author: 'ai', kind: 'text',
+      text: 'x', at: Date.now() - 1000 + i, status: 'sent', providerMessageId: 'ai-pm' + i,
+    }));
+    await db().collection('messages').insertMany(rows);
+    await turn(conversation);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect((await conv(conversation._id)).status).toBe('human');
+  });
+
+  it('a blocked turn logs the reason only, no text', async () => {
+    const { conversation } = await setup({ assistant: { handoffText: HANDOFF_TEXT } });
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'אבדוק ואחזור אליך', intent: 'smalltalk' }));
+    await turn(conversation);
+    const blocked = logs.byEvent('frontdesk.turn.blocked');
+    expect(blocked).toHaveLength(1);
+    expect(blocked[0]).toMatchObject({ reason: 'deferred', stage: 'post', level: 1 });
+    const text = JSON.stringify(logs.records);
+    for (const secret of ['אבדוק', 'GUEST-SECRET-TEXT', HANDOFF_TEXT]) expect(text).not.toContain(secret);
+  });
+});
