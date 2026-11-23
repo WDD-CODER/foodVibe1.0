@@ -1,0 +1,806 @@
+{
+  "run": "rs-book-ui-2",
+  "branch": "orch/rs-book-ui-2",
+  "base": "main",
+  "startedAt": "2026-11-23T07:37:32.059Z",
+  "mainShaAtStart": "379f8428560f58e207dced99fe7dd9bb6bdc9fd9",
+  "plans": {
+    "671": {
+      "nnn": "671",
+      "title": "The service screen: the room with live table states, the time strip, the summary and the mode switch",
+      "branch": "feat/671-service-screen-room-with",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T07:40:41.797Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T08:27:45.751Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens the floor view of a business with a drawn room on a tablet and on his phone: the room is",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (here: `/bookings?view=floor` with the day request failing)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T07:40:41.516Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T07:40:41.800Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:14:41.215Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:27:35.804Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:27:45.753Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:28:05.909Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:29:15.142Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.8,
+      "sha": "3a28e0b2f9b2840ccdb44309d60868b6f485e267",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2035.8,
+          "tokens": {
+            "input": 7348854,
+            "output": 61559
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.2,
+          "tokens": {
+            "input": 124590,
+            "output": 1579
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "90e6b661d1dfb6bca1dcb3ba70823468ce22dd9b"
+    },
+    "672": {
+      "nnn": "672",
+      "title": "Phone booking and walk-in dialogs, and the \"arriving next\" and \"not assigned\" lists on the service screen",
+      "branch": "feat/672-phone-booking-and-walk",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T08:47:44.017Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T09:16:45.585Z"
+        }
+      },
+      "humanItems": [
+        "Dandan takes two phone bookings and seats one walk-in on a tablet during a mock evening: the dialog asks",
+        "the list's page with no items · open the page · a message says the list is empty (here: \"מגיעים בקרוב\" on a day with no booking).",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal (here: the info icon beside the small map in \"הזמנה חדשה\", as the owner)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T08:47:43.873Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:47:44.019Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:13:09.847Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:16:37.381Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:16:45.587Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:17:04.799Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:17:52.842Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.1,
+      "sha": "089c308857c101b46eeeea84ccafe3861d930e91",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1523.3,
+          "tokens": {
+            "input": 21459892,
+            "output": 116791
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 17.2,
+          "tokens": {
+            "input": 263682,
+            "output": 1388
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "666546098c16539a9c37b9c12aa3f9697fbfc2d7"
+    },
+    "673": {
+      "nnn": "673",
+      "title": "The waiting list: its routes on the server and its drawer on the service screen",
+      "branch": "feat/673-waiting-list-on-the",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T09:20:18.298Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T10:11:46.808Z"
+        }
+      },
+      "humanItems": [
+        "Dandan runs a waiting list of four parties on a tablet during a mock evening: adding takes a few seconds,",
+        "the list's page with no items · open the page · a message says the list is empty (here: the drawer with no waiting party).",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (here: the drawer with the waiting-list request failing)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T09:20:18.077Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:20:18.300Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:59:03.168Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T09:59:03.561Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T10:11:39.927Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T10:11:46.809Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T10:12:14.812Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T10:13:10.171Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.9,
+      "sha": "fca005e30183fc82ab75e07a8aac8655e06c9888",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2321.8,
+          "tokens": {
+            "input": 15460649,
+            "output": 91193
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 26.2,
+          "tokens": {
+            "input": 267009,
+            "output": 1636
+          },
+          "exit": 0
+        }
+      ],
+      "uiCards": [
+        {
+          "card": "`/bookings?view=floor` (stubbed business with `tables`, free tables 11 and 12, stateful stubs of the waitlist",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 0
+        }
+      ],
+      "checkedHead": "7536c96ce01d17a5690786bc88d4b842f2f6a8be"
+    },
+    "686": {
+      "nnn": "686",
+      "title": "The table sheet: seat, finish, move and cancel a booking from its table on the room",
+      "branch": "feat/686-table-sheet-seat-finish",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T08:31:33.109Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T08:44:49.486Z"
+        }
+      },
+      "humanItems": [
+        "Dandan seats, moves and finishes three bookings from the room on a tablet: every action is where he"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T08:31:32.975Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:31:33.111Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:42:03.178Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:44:42.978Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:44:49.487Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:45:03.475Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T08:45:39.920Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.5,
+      "sha": "3cd396a943b26213f3f0fb0a9a86f62d54474b17",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 627.4,
+          "tokens": {
+            "input": 2998762,
+            "output": 41387
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.8,
+          "tokens": {
+            "input": 167354,
+            "output": 948
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "988a2cd7c2e989dd6d1d84377daf65cf880c3f5c"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T07:40:41.251Z",
+      "plan": "671",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-2-671 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T08:14:37.864Z",
+      "plan": "671",
+      "text": "builder left undone (round 0): [ui] 671-1: written, not run; [ui] 671-2: written, not run; [ui] 671-3: written, not run"
+    },
+    {
+      "at": "2026-11-23T08:28:17.491Z",
+      "plan": "671",
+      "text": "the folder foodVibe1.0-orch-merge-rs-book-ui-2 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T08:31:32.836Z",
+      "plan": "686",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-2-686 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T08:42:00.631Z",
+      "plan": "686",
+      "text": "builder left undone (round 0): [ui] 686-1: written, not run; [ui] 686-2: written, not run; [human] Dandan's tablet check of seating, moving and finishing three bookings"
+    },
+    {
+      "at": "2026-11-23T08:47:43.739Z",
+      "plan": "672",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-2-672 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T09:13:07.457Z",
+      "plan": "672",
+      "text": "builder left undone (round 0): [ui] 672-1: written, not run; [ui] 672-2: written, not run; [ui] 672-3: written, not run; [ui] 672-4: written, not run"
+    },
+    {
+      "at": "2026-11-23T09:20:17.902Z",
+      "plan": "673",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-2-673 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T09:59:00.236Z",
+      "plan": "673",
+      "text": "builder left undone (round 0): [ui] item /bookings?view=floor (add לוי, הושבה, tap table 11): written, not run (e2e/ui/673-1.spec.ts); [human] mock evening with four parties, the empty drawer message, and the failing-request error with a retry: Human to check"
+    },
+    {
+      "at": "2026-11-23T09:59:03.395Z",
+      "plan": "673",
+      "text": "[ui] `/bookings?view=floor` (stubbed business with `tables`, free tables 11 and 12, stateful stubs of the waitlist: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-23T10:13:57.078Z",
+      "text": "FINAL: same tree as plan 673's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-23T10:13:57.986Z",
+      "text": "make this a default? the live 'now' chip is shown only when the chosen date is today on the server's clock; on another date the first strip time is selected — reverse: change `chosen_` in floor-view.component.ts (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-23T10:13:58.159Z",
+      "text": "make this a default? stripTimes lists each range up to, not including, its close, and flags times after midnight with nextDay — reverse: change the loop bound in stripTimes (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.9,
+  "updatedAt": "2026-11-23T10:14:00.097Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "671",
+      "type": "behaviour",
+      "text": "behaviour: the live 'now' chip is shown only when the chosen date is today on the server's clock; on another date the first strip time is selected — reverse: change `chosen_` in floor-view.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "671",
+      "type": "behaviour",
+      "text": "behaviour: stripTimes lists each range up to, not including, its close, and flags times after midnight with nextDay — reverse: change the loop bound in stripTimes",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "671",
+      "type": "behaviour",
+      "text": "behaviour: the floor-map `details` input shows the state label, name and time as text on the table; the table's own name read 'number · label · name time' — reverse: stop passing `details` from the floor view",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "671",
+      "type": "behaviour",
+      "text": "behaviour: after a successful mode switch the profile store is updated by setConfirmMode of plan 667, not reloaded from the server — reverse: call profileData.reloadFromStorage() after the write",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "671",
+      "type": "behaviour",
+      "text": "behaviour: the plan's 'seated' rule was read as: a live seated booking counts even when over its end, with `over_time` winning first — reverse: change the order in tableStatesAt",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "671",
+      "type": "seen",
+      "text": "seen: server/routes/bookings.js:255 already sends `now` in /day (plan 685), so only the server test was added",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "671",
+      "type": "seen",
+      "text": "seen: plan 671's Reuse Check named no family for app-floor-map; I rewrote those rows in the plan file to name floor-map and declared the new scoped classes, which kit-checks required",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "686",
+      "type": "behaviour",
+      "text": "behaviour: a refused move is recognised by the server's 409 codes NO_TABLE, BAD_STATUS and STATUS_CHANGED, because BookingResult carries no HTTP status (the service is outside this plan's scope). Any other failure ends move mode with rq_decision_failed — reverse: expose the HTTP status in BookingDataService.run and test for 409.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "686",
+      "type": "behaviour",
+      "text": "behaviour: the sheet takes one extra input, look (the table state from tableStatesAt), instead of recomputing the hold minutes itself — reverse: compute it in the sheet from the profile.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "686",
+      "type": "behaviour",
+      "text": "behaviour: a tap on a not-active table in normal mode opens a sheet that shows only its label (the plan says this); in move mode the same tap does nothing.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: the walk-in dialog from the bar dims tables that do not fit the party and ignores a tap on them — reverse: show all tables as tappable and let the server refuse",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: the area select in the phone-booking dialog shows only when the plan has two or more areas — reverse: always show it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: the arrived and assign actions of the two lists are offered at the live moment only; at another hour the lists show without actions — reverse: always show the actions",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: a walk-in 409 is read as code NO_TABLE (the server's answer for a taken table) and shows wlk_table_taken — reverse: map another code in walk-in-dialog onSeat",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: with a client picked in the phone-booking dialog the new-guest fields are hidden — reverse: always show them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: the not-assigned panel is hidden when the day has no such booking, so its empty message never shows on the floor view — reverse: always show the panel",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: dialog bodies and list stacks use the engine .c-input-stack class instead of their own CSS, to pass the kit duplicate-style check — reverse: give each its own flex-column rule",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: the two lists share one stylesheet (arriving-list.component.scss) and the planned unassigned-list.component.scss was dropped — reverse: copy the file back",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "672",
+      "type": "behaviour",
+      "text": "behaviour: a staff e2e check (672-2) changes the role by editing loggedInUser in sessionStorage with an init script — reverse: stub the user another way",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "672",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons.ts has no Phone icon, so the floor-view specs add Phone to their own pick (that file is outside this plan's scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "673",
+      "type": "behaviour",
+      "text": "behaviour: a phone typed in the add form needs at least 7 digits, like the walk-in dialog, so seating cannot fail later on the client lookup — reverse: drop MIN_PHONE_DIGITS in waitlist-drawer.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "673",
+      "type": "behaviour",
+      "text": "behaviour: the waiting rows use a local .wl-row list, not .c-list-row (display: contents cannot lay out a single line); no new .c-* class — reverse: switch the rows to a list-shell grid",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "673",
+      "type": "behaviour",
+      "text": "behaviour: quoted minutes is a digits-only text field (0–240), because the reuse lint refuses a bare type=number input — reverse: wrap a type=number input in appNumberBox",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "673",
+      "type": "behaviour",
+      "text": "behaviour: a 409 BAD_STATUS or STATUS_CHANGED while seating ends the pick-a-table mode, shows bk_bad_status and reloads; NO_TABLE keeps the mode — reverse: keep the mode for all 409s",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "673",
+      "type": "behaviour",
+      "text": "behaviour: on a phone the row action text is hidden (icons with aria-labels only), as the plan's layout says — reverse: remove the display:none in the phone media query",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "673",
+      "type": "seen",
+      "text": "seen: kit copy of scope-check.mjs (foodVibe1.0/scripts/scope-check.mjs) run from this worktree lists files of the main checkout (.claude/todo.md, 'Claude outputs/…') and reports SCOPE: out; the repo's own scripts/scope-check.mjs reports SCOPE: ok for the same plan and diff",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "673",
+      "type": "seen",
+      "text": "seen: node scripts/ci-scope-check.mjs --checkout-branch skipped itself with branch \"\" (not feat/NNN-*) in this run; I did not investigate why the branch name came back empty",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T10:14:00.093Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T10:14:00.096Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
