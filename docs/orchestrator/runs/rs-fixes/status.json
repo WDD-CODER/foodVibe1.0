@@ -1,0 +1,257 @@
+{
+  "run": "rs-fixes",
+  "branch": "orch/rs-fixes",
+  "base": "main",
+  "startedAt": "2026-11-23T21:38:28.533Z",
+  "mainShaAtStart": "7eb538adc359b754039ba7f137fdb30219d3bede",
+  "plans": {
+    "701": {
+      "nnn": "701",
+      "title": "The assistant answers when Google is busy: a second model on overload, a reason the staff can read, and a steady voice test",
+      "branch": "feat/701-assistant-answers-when-google",
+      "state": "parked",
+      "round": 1,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T21:41:12.460Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-23T21:41:48.020Z"
+        }
+      },
+      "humanItems": [
+        "On the simulator (`/frontdesk/simulator`, as `demo_host`), the test guest writes three questions in a row"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T21:41:12.220Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T21:41:12.462Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T21:41:41.838Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T21:41:47.723Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T21:41:48.026Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T22:11:30.007Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T22:12:58.968Z",
+          "state": "asking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T22:21:02.607Z",
+          "state": "parked",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 10.4,
+      "roundCauses": [
+        "round 1: builder blocked: plans/701-assistant-answers-when-google-is-busy-and-a-steady-voice-test.plan.md is not on orch/rs-fixes (the base of this worktree); merge main's plans 699–702 into the run branch and re-run."
+      ],
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 28.7,
+          "tokens": {
+            "input": 77943,
+            "output": 1148
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 1781.6,
+          "tokens": {
+            "input": 4705827,
+            "output": 35185
+          },
+          "exit": 0
+        }
+      ],
+      "escalations": [
+        {
+          "step": "round 1",
+          "check": "builder blocked: plans/701-assistant-answers-when-google-is-busy-and-a-steady-voice-test.plan.md is not on orch/rs-fixes (the base of this worktree); merge main's plans 699–702 into the run branch and"
+        }
+      ],
+      "replan": "no — The plan itself is fine; it was not carried onto the run branch.",
+      "resetToBase": "d06302a34cca8c8fc09125c3a7737c34b4ed2ab3",
+      "resetFrom": "d06302a34cca8c8fc09125c3a7737c34b4ed2ab3",
+      "reason": "replan needed: The plan's Reuse Check declares three rung-4 pieces, and kit-checks requires a new family heading for them in docs/brain/component-families.md, but that file is not in the plan's Read-Write Scope. Adding it to the scope, which needs approva — ask 701-1 answered, but the scope could not be extended: plans/701-assistant-answers-when-google-is-busy-and-a-steady-voic",
+      "park": {
+        "at": "2026-11-23T22:12:49.832Z",
+        "reason": "replan needed: The plan's Reuse Check declares three rung-4 pieces, and kit-checks requires a new family heading for them in docs/brain/component-families.md, but that file is not in the plan's Read-Write Scope. Adding it to the scope, which needs approva"
+      },
+      "parkBranch": "park/rs-fixes-701"
+    },
+    "702": {
+      "nnn": "702",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "depends on parked 701",
+      "freeDiskGb": 10.4,
+      "history": [
+        {
+          "at": "2026-11-23T22:12:59.580Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T22:21:02.963Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T21:41:11.980Z",
+      "plan": "701",
+      "text": "the folder foodVibe1.0-orch-rs-fixes-701 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T21:41:41.536Z",
+      "plan": "701",
+      "text": "builder left undone (round 0): All sub-tasks: plan cannot be read from the run branch"
+    },
+    {
+      "at": "2026-11-23T21:41:46.978Z",
+      "plan": "701",
+      "text": "escalated to a fresh judgment-tier builder (round 1): builder blocked: plans/701-assistant-answers-when-google-is-busy-and-a-steady-voice-test.plan.md is not on orch/rs-fixes (the base of this worktree); merge main's plans 699–702 into the run branch and re-run."
+    },
+    {
+      "at": "2026-11-23T22:11:29.798Z",
+      "plan": "701",
+      "text": "builder left undone (round 1): kit-checks reuse-registry-missing-piece: a new family heading in docs/brain/component-families.md naming callGemini fallback/deadlineMs, failureReason and gemini-fallback.test.js — the file is outside the plan's Read-Write Scope; [human] simulator check (three questions as demo_host on /frontdesk/si"
+    },
+    {
+      "at": "2026-11-23T22:12:58.833Z",
+      "plan": "701",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T22:12:59.093Z",
+      "plan": "701",
+      "text": "ask 701-1 (scope, the Human or the advisor answers): kit-checks needs one new family heading in docs/brain/component-families.md (a 'model-fallback' family naming callGemini({ fallback, deadlineMs }), failureReason in server/services/frontdesk-turn.js and server/test/gemini-fallback.test.js), and that file is outside plan 701's scope — may the builder add it?"
+    },
+    {
+      "at": "2026-11-23T22:12:59.712Z",
+      "text": "plan 701 asks 701-1 — 702 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-23T22:21:00.437Z",
+      "plan": "701",
+      "text": "ask 701-1 answered by the human: approved: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T22:21:02.792Z",
+      "plan": "701",
+      "text": "ask 701-1 answered, but the scope could not be extended: plans/701-assistant-answers-when-google-is-busy-and-a-steady-voice-test.plan.md is not on orch/rs-fixes — plan 701 parked; the question was: kit-checks needs one new family heading in docs/brain/component-families.md (a 'model-fallback' family naming callGemini({ fallback, deadlineMs }), failureReason in server/services/frontdesk-turn.js and"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 10.4,
+  "updatedAt": "2026-11-23T22:21:05.514Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: with fallback: true, a request whose first chain model is already known exhausted starts on the first usable model instead of answering model_exhausted, because nobody is there to choose — reverse: drop the `if (fallback && exhaustedResetAt(model, now))` line in callGemini",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: assistantFailed is removed as soon as a turn-mode model call succeeds (this covers every frontdesk.turn.done path and a post-guardrail block), and only when the conversation has it — reverse: move the $unset onto the done paths only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: under fallback, a same-model retry (a chain of one) logs <prefix>.retry as plan 614 does; only a switch logs <prefix>.fallback — reverse: log fallback for both in callWithFallback",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "701",
+      "type": "seen",
+      "text": "seen: plans/701-assistant-answers-when-google-is-busy-and-a-steady-voice-test.plan.md — the Read-Write Scope leaves out docs/brain/component-families.md, which kit-checks needs for rung-4 Reuse Check rows",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "701",
+      "type": "seen",
+      "text": "seen: node scripts/log-query.mjs --since=plan-start --level=error -> exit 0 but prints 'SKIP: no database configured' in the worktree, so the log-query item read no entries",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T22:21:05.512Z"
+}
