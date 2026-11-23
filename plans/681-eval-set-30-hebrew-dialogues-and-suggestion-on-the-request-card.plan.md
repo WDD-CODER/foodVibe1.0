@@ -77,8 +77,9 @@ chain by hand, and every request the assistant creates carries its suggestion to
 - [auto] `server/test/frontdesk-suggested.test.js`: approving a non-test request that carries `suggested.action:
   'approve'` writes a `decisionLog` row with `suggestion: 'approve'` and `decidedAction: 'approve'`; declining it
   writes `suggestion: 'approve'`, `decidedAction: 'decline'`.
-- [auto] `node server/scripts/ai-eval-frontdesk.js --dry` → prints `30 dialogues ok` and exits 0 with no key set and
-  no network (it only loads and validates the files).
+- [auto] `server/test/frontdesk-eval.test.js`: running the script itself
+  (`child_process.spawnSync(process.execPath, ['scripts/ai-eval-frontdesk.js', '--dry'])` from `server/`, with no
+  model key in its environment) exits 0 and prints `30 dialogues ok` (it only loads and validates the files, no network).
 - [auto] `pnpm run test:ci` → exit 0, including the request card spec: a request with `suggested` shows the line
   with `data-testid="request-suggested"`; one without shows none.
 - [ui] `/requests` (the API answered by the spec with one open request that has `suggested: { action: 'approve',

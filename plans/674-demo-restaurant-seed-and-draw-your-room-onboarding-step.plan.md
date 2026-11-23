@@ -82,6 +82,8 @@ table service sees "draw your room" in its setup checklist until it has a table.
     `confirmed` or `seated` booking has its rows in `tableHolds`; a second run with `write: true` inserts 0 documents
     and adds 0 hold rows;
   - `parseArgs` refuses `--target=atlas`, `--confirm-host=x`, a missing `--target` and an unknown argument;
+  - running the script itself (`child_process.spawnSync(process.execPath, ['scripts/seed-demo-restaurant.js',
+    '--target=atlas'])` from `server/`) exits 1 and prints `[seed-demo-restaurant] failed: demo seed is local only`;
   - with the seeded business, `GET /api/v1/bookings/day?date=<today>` as its owner answers 200 with bookings that
     carry `tableKeys`, and `GET /api/v1/floor-plan` answers the 14 tables.
 - [auto] `server/test/front-desk-setup.test.js`: for a restaurant profile of a business with
@@ -91,8 +93,6 @@ table service sees "draw your room" in its setup checklist until it has a table.
 - [auto] `pnpm run test:ci` → exit 0, including
   `src/app/pages/dashboard/components/front-desk-checklist-card/front-desk-checklist-card.component.spec.ts`: the row of the key
   `floor_plan` links to `/frontdesk/floor-plan`; the row of `hours` still links to `/frontdesk/onboarding`.
-- [auto] `node server/scripts/seed-demo-restaurant.js --target=atlas` → exit 1 and the line
-  `[seed-demo-restaurant] failed: demo seed is local only`.
 - [auto] `pnpm run build` → exit 0. `pnpm run lint` → exit 0. `pnpm --dir server run lint` → exit 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [ui] `/dashboard` (the setup-status answer stubbed with a `frontDesk` checklist that holds `floor_plan`, not done) ·
