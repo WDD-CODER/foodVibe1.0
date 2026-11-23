@@ -131,6 +131,8 @@ docs/brain/component-families.md
 e2e/ui/702-1.spec.ts
 e2e/ui/702-2.spec.ts
 e2e/ui/702-3.spec.ts
+src/app/appRoot/app.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
