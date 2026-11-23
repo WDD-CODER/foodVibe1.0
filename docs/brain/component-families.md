@@ -340,6 +340,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
 - Plan 663: openRangesOf in qualify.ts (`shared/schemas/front-desk/qualify.ts`) — the checkable opening ranges of a date (`hoursCheck` is built on it).
 - Plan 663: jerusalemDateTime in local-time.ts (`shared/schemas/front-desk/local-time.ts`) — the inverse of `jerusalemEpoch`.
+- Plan 675: `sendOut` in `server/services/outbound.js` — every outbound message goes through `sendOut`; never call a transport.
+- Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler.
+- Plan 675: `templateMessage` in `shared/schemas/front-desk/message-templates.ts` — the closed list of outbound templates and their one-line parameters; never a template name typed elsewhere.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
@@ -803,3 +806,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP, buildRecipeInfoWorkbook, buildShoppingListWorkbook, buildMenuInfoWorkbook, buildAllTogetherMenuWorkbook.
 - When: any new Excel sheet. Sheet names, headers and fallbacks come from `dictionary.json` through `TranslationService`, never an English literal.
 - Known copies: none (no other file in `src/app` calls `addWorksheet`, checked 2026-11-22).
+
+### conversation-pipeline — `handleInbound`, `sendOut`, `templateMessage`, `findOrCreateConversation`, `channelFor` (plan 675)
+
+- Status: stable — server only; the simulator is the first transport, WhatsApp joins in plan 683
+- Use: every inbound message goes through `handleInbound` (`server/services/inbound.js`), every outbound message through `sendOut` (`server/services/outbound.js`); never call a transport's `send`. Template names and parameters live once in `shared/schemas/front-desk/message-templates.ts` (`templateMessage`). The live-conversation rule is `findOrCreateConversation` (`server/services/conversations.js`); only `server/services/channels/index.js` (`channelFor`) names a channel.
+- Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel.
+- When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
+- Known copies: none.

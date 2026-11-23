@@ -9,7 +9,7 @@ const { logger } = require('../logger');
 const { deleteStoredFile } = require('../services/file-store');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const RETENTION = Object.freeze({ requestsDays: 730, bookingsDays: 730, messagesDays: 365, voiceFilesDays: 730 });
+const RETENTION = Object.freeze({ requestsDays: 730, bookingsDays: 730, messagesDays: 365, conversationsDays: 365, voiceFilesDays: 730 });
 const FINAL_STATUSES = ['approved', 'declined', 'cancelled', 'expired'];
 
 const lastRun = new Map();
@@ -36,6 +36,14 @@ async function purgeRetained(db, businessId, now) {
     $expr: { $lt: [{ $ifNull: ['$updatedAt', '$createdAt'] }, now - RETENTION.requestsDays * DAY_MS] },
   });
   const bookings = await db.collection('bookings').deleteMany({ businessId, startAt: { $lt: now - RETENTION.bookingsDays * DAY_MS } });
+  // Plan 687: closed conversations 12 months past their last message go with their messages; an open one never goes by age.
+  const oldConversations = await db.collection('conversations')
+    .find({ businessId, status: 'closed', lastMessageAt: { $lt: now - RETENTION.conversationsDays * DAY_MS } }, { projection: { _id: 1 } }).toArray();
+  const conversationIds = oldConversations.map(c => c._id);
+  if (conversationIds.length) {
+    await db.collection('messages').deleteMany({ businessId, conversationId: { $in: conversationIds } });
+    await db.collection('conversations').deleteMany({ businessId, _id: { $in: conversationIds } });
+  }
   const messages = await db.collection('messages').deleteMany({ businessId, at: { $lt: now - RETENTION.messagesDays * DAY_MS } });
   // Plan 619: stored files whose `deleteAfter` has passed (voice recordings; an invoice file never saved). The provider asset goes first.
   let files = 0;
@@ -43,8 +51,8 @@ async function purgeRetained(db, businessId, now) {
   for (const file of dueFiles) {
     if (await deleteStoredFile(file)) files += 1;
   }
-  const counts = { requests: requests.deletedCount, bookings: bookings.deletedCount, messages: messages.deletedCount, files };
-  if (counts.requests > 0 || counts.bookings > 0 || counts.messages > 0 || counts.files > 0) logger.info({ event: 'retention.purged', ...counts });
+  const counts = { requests: requests.deletedCount, bookings: bookings.deletedCount, messages: messages.deletedCount, conversations: conversationIds.length, files };
+  if (counts.requests > 0 || counts.bookings > 0 || counts.messages > 0 || counts.conversations > 0 || counts.files > 0) logger.info({ event: 'retention.purged', ...counts });
   return counts;
 }
 
