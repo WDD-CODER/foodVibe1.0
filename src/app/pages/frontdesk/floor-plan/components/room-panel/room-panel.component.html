@@ -52,7 +52,7 @@
             data-testid="room-area-remove"
             [attr.aria-label]="'fp_area_delete' | translatePipe"
             [attr.aria-disabled]="row.blockedKey ? 'true' : null"
-            [attr.title]="reasonOf(row.blockedKey) || null"
+            [appTip]="reasonOf(row.blockedKey) || null"
             [attr.aria-describedby]="row.blockedKey ? 'rp-why-' + row.key : null"
             (click)="remove(row)"
           >

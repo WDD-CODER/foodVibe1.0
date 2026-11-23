@@ -26,6 +26,7 @@ import {
   withArea,
   withoutTable,
   withTable,
+  withTableDropped,
   type AreaOp,
   type TablePatch
 } from './floor-plan-edit.util'
@@ -97,7 +98,7 @@ export class FloorPlanPage {
   protected readonly isSaving_ = signal(false)
   protected readonly draft_ = signal<FloorPlanBody | null>(null)
   protected readonly selectedKey_ = signal<string | null>(null)
-  /** The area chosen in the area row; null = all. It only dims the others and sets the next table's area. */
+  /** The area chosen in the area row; null = all. It only sets the next table's area (plan 699: no more fading). */
   protected readonly areaKey_ = signal<string | null>(null)
   /** Plan 684: tables the last save was refused for (409 TABLE_IN_USE); null = no notice. */
   protected readonly inUse_ = signal<InUseRow[] | null>(null)
@@ -135,6 +136,10 @@ export class FloorPlanPage {
     const key = this.selectedKey_()
     return this.draft_()?.tables.find((t) => t.key === key) ?? null
   })
+  /** Plan 699: every table that is part of a join, marked on the map. */
+  protected readonly joinedKeys_ = computed(() => [
+    ...new Set((this.draft_()?.joins ?? []).flatMap((j) => j.tableKeys))
+  ])
   protected readonly warnKeys_ = computed(() => {
     const draft = this.draft_()
     return draft ? overlapping(draft) : []
@@ -346,13 +351,17 @@ export class FloorPlanPage {
     const { plan, droppedJoins } = withTable(draft, key, patch)
     this.draft_.set(plan)
     this.focusNumber_.set(false)
-    if (droppedJoins.length) {
-      this.userMsg.onSetSuccessMsgWithUndo(this.translation.translate('fp_join_dropped'), () =>
-        this.draft_.update((d) =>
-          d ? { ...d, joins: [...d.joins, ...droppedJoins.filter((j) => !d.joins.some((o) => o.key === j.key))] } : d
-        )
+    this.offerJoinsBack(droppedJoins)
+  }
+
+  /** Joins dropped by an area change: one message with an undo that puts them back. */
+  private offerJoinsBack(droppedJoins: FloorJoin[]): void {
+    if (!droppedJoins.length) return
+    this.userMsg.onSetSuccessMsgWithUndo(this.translation.translate('fp_join_dropped'), () =>
+      this.draft_.update((d) =>
+        d ? { ...d, joins: [...d.joins, ...droppedJoins.filter((j) => !d.joins.some((o) => o.key === j.key))] } : d
       )
-    }
+    )
   }
 
   protected onDuplicate(): void {
@@ -461,11 +470,11 @@ export class FloorPlanPage {
   protected onTableMoved(move: { key: string; x: number; y: number }): void {
     const draft = this.draft_()
     if (!draft || !this.canEdit_()) return
-    this.draft_.set({
-      ...draft,
-      tables: draft.tables.map((t) => (t.key === move.key ? { ...t, x: move.x, y: move.y } : t))
-    })
+    // Plan 699: a table dropped into another area's zone joins that area.
+    const { plan, droppedJoins } = withTableDropped(draft, move.key, move.x, move.y)
+    this.draft_.set(plan)
     this.selectedKey_.set(move.key)
+    this.offerJoinsBack(droppedJoins)
   }
 
   /** One request for the whole plan. On failure the draft stays as it is. */

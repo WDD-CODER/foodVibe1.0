@@ -13,7 +13,9 @@ import {
   Trash2,
   X
 } from 'lucide-angular'
+import { By } from '@angular/platform-browser'
 import { FloorPlanPage } from './floor-plan.page'
+import { FloorMapComponent } from 'src/app/shared/floor-map/floor-map.component'
 import { FloorPlanDataService } from '@services/floor-plan-data.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
 import { LoggingService } from '@services/logging.service'
@@ -234,6 +236,52 @@ describe('FloorPlanPage (plan 665)', () => {
     }
     type Full = { draft_: () => { tables: { key: string }[]; joins: { key: string }[] } }
     const draft = () => (cmp() as unknown as Full).draft_()
+
+    describe('zones and joined tables (plan 699)', () => {
+      const map = (): FloorMapComponent =>
+        fixture.debugElement.query(By.directive(FloorMapComponent)).componentInstance as FloorMapComponent
+      const ZONED = {
+        ...TWO,
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0, color: 0 },
+          { key: 'areab2', name: 'בחוץ', order: 1, color: 1, zone: { x: 12, y: 8, w: 8, h: 6 } }
+        ]
+      } as unknown as FloorPlan
+
+      it('gives the map every joined table key and coloured tables', async () => {
+        await setup({ saved: TWO })
+        expect([...map().joinedKeys()].sort()).toEqual(['tab001', 'tab002'])
+        expect(map().colorTables()).toBeTrue()
+        expect(el().querySelector('[data-testid="floor-table-1"]')?.classList).toContain('is-joined')
+      })
+
+      it('no longer passes dimOtherThanArea when an area chip is chosen', async () => {
+        await setup({ saved: ZONED })
+        ;(cmp() as unknown as { selectArea: (k: string | null) => void }).selectArea('areab2')
+        await settle()
+        expect(map().dimOtherThanArea()).toBeNull()
+        expect(el().querySelector('.is-dimmed')).toBeNull()
+      })
+
+      it('a table moved into another area zone takes that area and the join across areas drops with an undo', async () => {
+        await setup({ saved: ZONED })
+        map().tableMoved.emit({ key: 'tab002', x: 13, y: 9 })
+        await settle()
+        const moved = (cmp() as unknown as { draft_: () => FloorPlan }).draft_().tables.find((t) => t.key === 'tab002')
+        expect([moved?.x, moved?.y, moved?.areaKey]).toEqual([13, 9, 'areab2'])
+        expect(draft().joins).toEqual([])
+        expect(userMsg.onSetSuccessMsgWithUndo).toHaveBeenCalledWith('fp_join_dropped', jasmine.any(Function))
+      })
+
+      it('a table moved outside every zone keeps its area', async () => {
+        await setup({ saved: ZONED })
+        map().tableMoved.emit({ key: 'tab002', x: 6, y: 4 })
+        await settle()
+        const moved = (cmp() as unknown as { draft_: () => FloorPlan }).draft_().tables.find((t) => t.key === 'tab002')
+        expect([moved?.x, moved?.y, moved?.areaKey]).toEqual([6, 4, 'areaa1'])
+        expect(draft().joins.length).toBe(1)
+      })
+    })
 
     it('shows the room panel with no selection and the table panel after a tap', async () => {
       await setup({ saved: TWO })
