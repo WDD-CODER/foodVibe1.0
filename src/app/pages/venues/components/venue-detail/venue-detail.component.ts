@@ -79,14 +79,26 @@ export class VenueDetailComponent implements OnInit {
       }))
   )
 
-  /** Plan 373: Google Maps and Waze links to the saved location, or null without one. */
+  /**
+   * Plan 373: Google Maps and Waze links — to the saved location when there is one, else to the typed address
+   * (Human 2026-11-23, D7); null with neither.
+   */
   protected readonly navLinks_ = computed(() => {
-    const loc = this.venue_()?.location
-    if (!loc) return null
-    const ll = `${loc.lat},${loc.lng}`
+    const venue = this.venue_()
+    const loc = venue?.location
+    if (loc) {
+      const ll = `${loc.lat},${loc.lng}`
+      return {
+        google: `https://www.google.com/maps/search/?api=1&query=${ll}`,
+        waze: `https://waze.com/ul?ll=${ll}&navigate=yes`
+      }
+    }
+    const address = venue?.address?.trim()
+    if (!address) return null
+    const q = encodeURIComponent(address)
     return {
-      google: `https://www.google.com/maps/search/?api=1&query=${ll}`,
-      waze: `https://waze.com/ul?ll=${ll}&navigate=yes`
+      google: `https://www.google.com/maps/search/?api=1&query=${q}`,
+      waze: `https://waze.com/ul?q=${q}&navigate=yes`
     }
   })
 

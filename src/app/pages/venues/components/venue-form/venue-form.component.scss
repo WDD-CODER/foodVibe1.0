@@ -162,8 +162,7 @@
         }
       }
 
-      .video-url-error,
-      .location-error {
+      .video-url-error {
         flex: 1 1 100%;
 
         color: var(--color-danger);
@@ -171,22 +170,33 @@
 
         margin: 0;
       }
-
-      .location-saved {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: var(--space-2);
-
-        font-size: var(--fs-sm);
-
-        margin: 0;
-      }
-
-      .location-btn {
-        align-self: flex-start;
-      }
     }
+  }
+
+  // Plan 373, Human 2026-11-23 (D7): the location pin lives inside the address field; the saved-spot line and
+  // its error sit right under it.
+  .venue-address-input .location-btn {
+    flex-shrink: 0;
+  }
+
+  .location-error {
+    color: var(--color-danger);
+    font-size: var(--fs-sm);
+
+    margin: 0;
+    margin-block-start: var(--space-2);
+  }
+
+  .location-saved {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+
+    font-size: var(--fs-sm);
+
+    margin: 0;
+    margin-block-start: var(--space-2);
   }
 
   .c-form-actions {

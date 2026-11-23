@@ -74,7 +74,24 @@ describe('VenueDetailComponent (plan 373: videos and navigation)', () => {
   it('shows an empty videos card and no navigate links when the venue has neither', async () => {
     const el = await setup(BASE)
     expect(el.querySelector('.video-row')).toBeNull()
+    expect(el.textContent).toContain('venue_videos_empty')
     expect(el.querySelector('.venue-nav')).toBeNull()
+  })
+
+  it('builds the navigate links from a typed address when no location is saved', async () => {
+    const el = await setup({ ...BASE, address: 'הרצל 1, תל אביב' })
+    const q = encodeURIComponent('הרצל 1, תל אביב')
+    const hrefs = Array.from(el.querySelectorAll<HTMLAnchorElement>('.venue-nav a')).map((a) => a.href)
+    expect(hrefs).toEqual([
+      `https://waze.com/ul?q=${q}&navigate=yes`,
+      `https://www.google.com/maps/search/?api=1&query=${q}`
+    ])
+  })
+
+  it('prefers the saved location over the typed address', async () => {
+    const el = await setup({ ...BASE, address: 'הרצל 1', location: { lat: 32.0853, lng: 34.7818 } })
+    const first = el.querySelector<HTMLAnchorElement>('.venue-nav a')
+    expect(first?.href).toBe('https://waze.com/ul?ll=32.0853,34.7818&navigate=yes')
   })
 
   it('treats a cleared (null) location as no location', async () => {

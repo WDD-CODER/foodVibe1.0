@@ -394,6 +394,18 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       expect((venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile).location).toBeNull()
     })
 
+    it('puts the location pin inside the address field and shows no address hint (Human 2026-11-23, D7)', async () => {
+      await setup({ ...VENUE, address: '', location: { lat: 1, lng: 2 } })
+      fixture.detectChanges()
+      const el = fixture.nativeElement as HTMLElement
+      const wrapper = el.querySelector('.venue-address-input')
+      expect(wrapper?.querySelector('#address')).not.toBeNull()
+      expect(wrapper?.querySelector('.location-btn')).not.toBeNull()
+      expect(el.querySelector('.venue-location')).toBeNull()
+      expect(el.textContent).not.toContain('location_address_hint')
+      expect(el.querySelector('.location-saved')).not.toBeNull()
+    })
+
     it('sends no location key on add when none was saved', async () => {
       await setup(null)
       setName('אולם')

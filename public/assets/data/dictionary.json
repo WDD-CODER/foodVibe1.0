@@ -2694,6 +2694,7 @@
     "location_address_hint": "הוסף כתובת — המיקום לבדו לא מציג אותה",
     "navigate": "נווט",
     "nav_waze": "Waze",
-    "nav_google_maps": "Google Maps"
+    "nav_google_maps": "Google Maps",
+    "venue_videos_empty": "אין עדיין סרטונים"
   }
 }
