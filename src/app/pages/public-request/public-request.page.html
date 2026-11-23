@@ -157,7 +157,7 @@
         } @if (timeTaken_()) {
         <p class="c-field-error" role="alert" data-testid="pb-time-taken">{{ 'pb_time_taken' | translatePipe }}</p>
         @if (alternatives_().length) {
-        <div class="pb-alts">
+        <div class="c-chip-group">
           @for (alt of alternatives_(); track alt.date + alt.time) {
           <button type="button" class="c-btn-ghost" data-testid="pb-alt" (click)="pickDay(alt)">
             {{ dayMonth(alt.date) + ' ' + alt.time }}
