@@ -828,6 +828,6 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable
 - Use: `checklistFor` in `server/services/front-desk-setup.js` adds `{ key: 'floor_plan', done }` after `request_kinds` when the business has `tables`; the card (`front-desk-checklist-card.component.ts`) maps a key to its link and the label is `frontdesk_setup_<key>` in `dictionary.json`.
-- Pieces: checklistFor, frontDeskSetup, FrontDeskChecklistCardComponent.
+- Pieces: Checklist item floor_plan, checklistFor, frontDeskSetup, FrontDeskChecklistCardComponent.
 - When: any new front desk setup step.
 - Known copies: none.
