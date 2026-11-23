@@ -502,3 +502,118 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A6: Record the new util where the next plan looks — src/app/core/breadcrumbs.md, docs/brain/inventory.md (src/app/pages/breadcrumbs.md and docs/brain/component-families.md only if a line there names a changed piece)
 - [ ] A7: Prove the three screen checks with short scripts — each signs in with signInQa and answers the calls itself, saves a screenshot — e2e/ui/702-1.spec.ts, e2e/ui/702-2.spec.ts, e2e/ui/702-3.spec.ts
 - [ ] A8: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
+
+### Plan 703 — Shared style pieces: page widths, in-panel list, stat tile, card head, form page, table tokens and a style guard
+- [ ] A1: Write the style guard that later plans use as their check — styleFindings with the stylesheet and template rules and the allow list, and its fixture test — scripts/lib/style-guard.mjs, scripts/test/style-guard.test.mjs
+- [ ] A2: Add the shared frame, list, tile, card head, form page, table and compact empty engines at the end of the global stylesheet — src/styles.scss
+- [ ] A3: Give the empty state a compact size for cards and drawers — src/app/shared/empty-state/empty-state.component.ts, .html, .spec.ts
+- [ ] A4: Show every new piece on the catalog page and clear its literal values — src/app/pages/dev-catalog/dev-catalog.page.html, .scss, .ts, .spec.ts
+- [ ] A5: Prove the append-only rule and the clean catalog in one test — scripts/test/style-703.test.mjs
+- [ ] A6: Record the pieces, the page-width, icon-size and token-mapping rules in the registry and regenerate the inventory — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md
+
+### Plan 704 — Menu library and trash on the shared list page
+- [ ] A1: Put the event-menu list on the shared list page with one line per event and the filters in the side panel — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, .ts, .scss
+- [ ] A2: Prove the menu list keeps its rows, filters, search and row menu — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
+- [ ] A3: Turn the trash into one searchable list with type filters, shared buttons and a real popup for history — src/app/pages/trash/trash.page.html, .ts, .scss
+- [ ] A4: Prove the trash rows, empty state and history popup — src/app/pages/trash/trash.page.spec.ts
+- [ ] A5: Lock both pages on the shared pieces and tokens with the style guard — scripts/test/style-704.test.mjs
+
+### Plan 705 — Bookings agenda, waiting list and service lists as shared rows
+- [ ] A1: Draw the day and week agenda as one-line rows in the in-panel list, with a loader while it loads and a small empty state for an empty day — src/app/pages/bookings/bookings.page.html, .scss, .ts
+- [ ] A2: Prove the agenda rows, loader, empty day and seated action — src/app/pages/bookings/bookings.page.spec.ts
+- [ ] A3: Give the waiting list and the table sheet the shell's title and an icon close, and draw the waiting rows as shared rows — src/app/pages/bookings/components/waitlist-drawer/*, src/app/pages/bookings/components/table-sheet/*
+- [ ] A4: Give the arriving and not-assigned lists real list cells and a small empty state — src/app/pages/bookings/components/service-lists/*
+- [ ] A5: Lock the bookings screen on the shared pieces and tokens — scripts/test/style-705.test.mjs
+
+### Plan 706 — Requests and inbox on the shared frame, rows and fields
+- [ ] A1: Put the requests queue in the shared page frame and show the loader while it loads — src/app/pages/requests/requests.page.html, .scss, .ts, .spec.ts
+- [ ] A2: Give every field of the three request popups the shared field piece — src/app/pages/requests/components/new-request-dialog/*, src/app/pages/requests/components/ask-dialog/*, src/app/pages/requests/components/decline-dialog/*
+- [ ] A3: Move the request card and the approve-table popup stylesheets onto tokens — src/app/pages/requests/components/request-card/request-card.component.scss, src/app/pages/requests/components/approve-table-dialog/approve-table-dialog.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss
+- [ ] A4: Draw the inbox conversations as shared rows with the shared selected look, and the thread as a glass panel — src/app/pages/inbox/inbox.page.html, .scss, .ts, .spec.ts, src/app/pages/inbox/components/reply-box/reply-box.component.scss
+- [ ] A5: Lock both pages on the shared pieces and tokens — scripts/test/style-706.test.mjs
+
+### Plan 707 — Clients, settings and knowledge: shared rows, fields and empty states
+- [ ] A1: Show client names as row names and the no-match case as the shared empty state — src/app/pages/clients/components/client-list/*
+- [ ] A2: Draw the client timeline as shared rows and the reason field as a shared field — src/app/pages/clients/components/client-profile/*
+- [ ] A3: Put settings at the narrow page width and draw the team and access lists as shared rows, with the empty message only when there is no row — src/app/pages/settings/settings.page.scss, src/app/pages/settings/components/team-tab/*, src/app/pages/settings/components/access-tab/*
+- [ ] A4: Replace the local field wrappers of the baseline and business tabs with the shared field — src/app/pages/settings/components/baseline-tab/*, src/app/pages/settings/components/business-settings-tab/*
+- [ ] A5: Give the knowledge popups real input boxes and single-translated labels, the no-match empty state and the bulk actions in the selection bar — src/app/pages/frontdesk/knowledge/*
+- [ ] A6: Lock the three areas on the shared pieces and tokens — scripts/test/style-707.test.mjs
+
+### Plan 708 — Front desk settings, onboarding and the public booking page on shared states and cards
+- [ ] A1: Give the front-desk settings page the shared loader, card heads and a token save bar — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, .scss, .ts, .spec.ts
+- [ ] A2: Put the three settings cards on the shared card head and icon buttons — src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/*, table-service-card/*, data-export-card/*
+- [ ] A3: Fix the unstyled onboarding buttons and draw closed dates and the flag as shared chips — src/app/pages/frontdesk/frontdesk-onboarding/*
+- [ ] A4: Give the guest booking and status pages the shared loader, empty state, card and chips — src/app/pages/public-request/**
+- [ ] A5: Lock the three areas on the shared pieces and tokens — scripts/test/style-708.test.mjs
+
+### Plan 709 — Dashboard cards on one stat tile and one card head
+- [ ] A1: Draw the overview's number tiles, view links, status labels and activity feed with the shared tile, button, chip and list — src/app/pages/dashboard/components/dashboard-overview/*
+- [ ] A2: Draw the performance tiles, the dark lead tile and the funnel and upcoming rows with the shared tile and list — src/app/pages/dashboard/components/business-performance/*
+- [ ] A3: Give the five small cards one shared head and the shared small empty state — src/app/pages/dashboard/components/{front-desk-checklist-card,frontdesk-week-card,price-rises-card,setup-checklist-card,diagnosis-card}/*
+- [ ] A4: Put the opening banner button and the dashboard page spacing on shared buttons and tokens, and give the trash tab the list host — src/app/pages/dashboard/components/opening-details-banner/*, src/app/pages/dashboard/dashboard.page.html, src/app/pages/dashboard/dashboard.page.scss
+- [ ] A5: Lock the dashboard on the shared pieces and tokens — scripts/test/style-709.test.mjs
+
+### Plan 710 — Platform, diagnosis and report: shared tables, tiles, loaders and headers
+- [ ] A1: Put the platform business grid on the shared sort heads, the totals on the shared tile and the AI usage on the shared table — src/app/pages/platform-dashboard/platform-dashboard.page.html, .scss, .ts, .spec.ts
+- [ ] A2: Show a loader in the three platform panels and fix the chip without its base class — src/app/pages/platform-dashboard/components/{platform-ai-shots,platform-logistics-items,platform-learning}/*
+- [ ] A3: Give the diagnosis list header cells and row links, and put the workspace title in the shared header — src/app/pages/diagnosis/diagnosis.page.*, src/app/pages/diagnosis/components/diagnosis-workspace/*
+- [ ] A4: Draw the diagnosis report tables as shared tables and its fields as shared fields — src/app/pages/diagnosis/components/diag-report/*, src/app/pages/diagnosis/components/diag-menu/*
+- [ ] A5: Show the report's loader, shared tiles and shared trend table without breaking the A4 print — src/app/pages/report/*
+- [ ] A6: Lock the three areas on the shared pieces and tokens — scripts/test/style-710.test.mjs
+
+### Plan 711 — Inventory, equipment and supplier lists: drop engine copies, shared empty state and popup
+- [ ] A1: Remove the copied engine rules from the three model lists and show their no-match case as the shared empty state — src/app/pages/inventory/components/inventory-product-list/*, src/app/pages/equipment/components/equipment-list/*, src/app/pages/suppliers/components/supplier-list/*, src/app/pages/inventory/components/invoices-list/*
+- [ ] A2: Turn the inventory badges into shared chips — src/app/pages/inventory/components/inventory-product-list/*
+- [ ] A3: Open the equipment edit panel on phones in the shared popup sheet with shared fields — src/app/pages/equipment/components/equipment-list/*
+- [ ] A4: Draw past counts and the below-minimum list as shared rows so they stay on one line — src/app/pages/inventory/components/stock-count/stock-count.component.*, src/app/pages/inventory/components/stock-count/stock-below-minimum/*
+- [ ] A5: Lock the lists on the shared pieces and tokens — scripts/test/style-711.test.mjs
+
+### Plan 712 — Product, equipment and supplier forms on one frame
+- [ ] A1: Put the equipment and supplier forms on the shared form frame and header — src/app/pages/equipment/components/equipment-form/*, src/app/pages/suppliers/components/supplier-form/*
+- [ ] A2: Put the product form on the shared frame, header and action row with one main button, and size its icons one way — src/app/pages/inventory/components/product-form/**
+- [ ] A3: Draw the import preview as the shared table and its labels as shared fields — src/app/pages/inventory/components/product-import/product-import.component.*
+- [ ] A4: Draw the suppliers sub-navigation with the shared tab chips — src/app/pages/suppliers/suppliers.page.*
+- [ ] A5: Lock the forms on the shared pieces and tokens — scripts/test/style-712.test.mjs
+
+### Plan 713 — Menu and recipe popups on the shared popup frame
+- [ ] A1: Move the deposit-paid and not-closed popups onto the shared frame with the same outputs — src/app/pages/menu-intelligence/components/deposit-paid-dialog/**, src/app/pages/menu-intelligence/components/not-closed-dialog/**
+- [ ] A2: Move the event-closing popup onto the shared frame with an icon close — src/app/pages/menu-intelligence/components/event-closing-dialog/**
+- [ ] A3: Move supplier orders and prep sheets onto the shared frame, keep printing clean, and use the shared table and empty state — src/app/pages/menu-intelligence/components/supplier-orders/**, src/app/pages/menu-intelligence/components/prep-sheets/**
+- [ ] A4: Move the paste-ingredients popup onto the shared frame with the discard question — src/app/pages/recipe-builder/components/paste-ingredients-dialog/**
+- [ ] A5: Lock the six popups on the shared frame with the style guard — scripts/test/style-713.test.mjs
+
+### Plan 714 — Metadata manager: one panel, shared rows, empty states and loaders
+- [ ] A1: Give every metadata card the shared panel and head, and the menu types the shared rows — src/app/pages/metadata-manager/metadata-manager.page.component.*
+- [ ] A2: Draw the users list as shared rows with a loader, small empty state and tone chips — src/app/pages/metadata-manager/components/user-management/*
+- [ ] A3: Draw the logistics items and coefficients as shared rows — src/app/pages/metadata-manager/components/logistics-item-manager/*, src/app/pages/metadata-manager/components/coefficient-manager/*
+- [ ] A4: Draw the AI models as shared rows that can still be dragged, with a loader and small empty state — src/app/pages/metadata-manager/components/ai-model-manager/*
+- [ ] A5: Fix the bare taxonomy input and move the remaining cards' stylesheets onto tokens — src/app/pages/metadata-manager/components/{taxonomy-kind-manager,staff-stages-manager,ai-examples-share,station-manager,section-category-manager,preparation-category-manager,unit-edit-dialog}/*
+- [ ] A6: Lock the folder on the shared pieces and tokens — scripts/test/style-714.test.mjs
+
+### Plan 715 — Recipe book and recipe builder: empty state, panels, chips, buttons and tokens
+- [ ] A1: Show the recipe book's no-match case as the shared empty state and its buttons and badges as shared ones — src/app/pages/recipe-book/**
+- [ ] A2: Draw the builder's sections as shared panels with shared buttons — src/app/pages/recipe-builder/recipe-builder.page.html, .scss
+- [ ] A3: Turn the ingredient table's badges, buttons and inputs into shared chips, icon buttons and inputs without touching drag or steppers — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
+- [ ] A4: Do the same for the workflow steps and the recipe header — src/app/pages/recipe-builder/components/recipe-workflow/**, src/app/pages/recipe-builder/components/recipe-header/**
+- [ ] A5: Move the two search pickers' stylesheets onto tokens — src/app/pages/recipe-builder/components/ingredient-search/**, src/app/pages/recipe-builder/components/preparation-search/**
+- [ ] A6: Lock both pages on the shared pieces and tokens — scripts/test/style-715.test.mjs
+
+### Plan 716 — Cook view: keep the ink skin, move it onto tokens, shared empty states and four icon sizes
+- [ ] A1: Show the cook view's three empty cases with the shared empty state, keeping the recent recipes — src/app/pages/cook-view/cook-view.page.html, .ts, .spec.ts
+- [ ] A2: Move every value of the ink stylesheet onto the shared tokens and logical properties without changing the layout — src/app/pages/cook-view/cook-view.page.scss
+- [ ] A3: Bring the icons onto the four shared sizes — src/app/pages/cook-view/cook-view.page.html
+- [ ] A4: Lock the page with the style guard — scripts/test/style-716.test.mjs
+
+### Plan 717 — Event-menu editor: paper skin on tokens, shared empty states, panels and table
+- [ ] A1: Move the paper skin, toolbar and editor layout values onto tokens and logical properties without changing their look — src/app/pages/menu-intelligence/_paper-ui.scss, _toolbar.scss, _layout.scss, menu-intelligence.page.scss, menu-intelligence.page.html
+- [ ] A2: Draw the stage bar with shared tab chips, fix the client chip's base class and use the small empty state — src/app/pages/menu-intelligence/components/event-stage-bar/**
+- [ ] A3: Put the notes log and logistics panel on the shared panel with shared icon buttons and empty state — src/app/pages/menu-intelligence/components/event-notes-log/**, src/app/pages/menu-intelligence/components/event-logistics-panel/**
+- [ ] A4: Move the dish row and pricing meter onto tokens and the shared tap chip — src/app/pages/menu-intelligence/components/menu-dish-row/**, src/app/pages/menu-intelligence/components/pricing-meter/**
+- [ ] A5: Draw the loading list as the shared table — src/app/pages/menu-intelligence/components/loading-list/**
+- [ ] A6: Lock the editor on the shared pieces and tokens — scripts/test/style-717.test.mjs
+
+### Plan 718 — Style run close-out: registry, inventory and reuse-lint rules that keep pages unified
+- [ ] A1: Add the run-wide regression test and the lint-rule samples — scripts/test/style-718.test.mjs
+- [ ] A2: Add the three lint rules that stop new page-local empties, overlays and widths — scripts/lib/registry-families.mjs
+- [ ] A3: Record the converged families, users, exceptions and remaining copies in the registry and regenerate the inventory — docs/brain/component-families.md, docs/brain/inventory.md
