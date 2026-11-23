@@ -216,6 +216,53 @@ async function createWalkIn(db, ctx, { partySize, tableKeys, guest, name }) {
   return res
 }
 
+/** Legal moves of a booking's status (Wave 1); `no_show` is also refused before the booking's start. */
+const MOVES = {
+  confirmed: ['seated', 'no_show', 'cancelled'],
+  seated: ['finished', 'cancelled'],
+}
+
+/**
+ * Plan 676: the one function that moves a booking's status (the route, the jobs and a guest's tap call it).
+ * `{ ok: true, booking }` or `{ ok: false, code: 'NOT_FOUND' | 'BAD_STATUS' | 'STATUS_CHANGED' | 'INVALID', issues? }`.
+ */
+async function moveBookingStatus(db, { businessId, id, status, by, byName, via, note, now }) {
+  const col = db.collection('bookings')
+  const scope = { _id: id, businessId, ...LIVE }
+  const current = await col.findOne(scope)
+  if (!current) return { ok: false, code: 'NOT_FOUND' }
+  if (!(MOVES[current.status] ?? []).includes(status) || (status === 'no_show' && now < current.startAt)) {
+    return { ok: false, code: 'BAD_STATUS' }
+  }
+  const entry = { status, at: now, by, byName, via, ...(note && { note }) }
+  const stamp = current.tableKeys?.length
+    ? { ...(status === 'seated' && { seatedAt: now }), ...(status === 'finished' && { finishedAt: now }) }
+    : {}
+  const check = checkStoredDoc('bookings', { ...current, ...stamp, status, updatedAt: now, statusHistory: [...current.statusHistory, entry] })
+  if (!check.ok) return { ok: false, code: 'INVALID', issues: check.issues }
+  // Conditional on the status that was read, so two concurrent moves cannot both write.
+  const result = await col.findOneAndUpdate(
+    { ...scope, status: current.status },
+    { $set: { status, updatedAt: now, ...stamp }, $push: { statusHistory: entry } },
+    { returnDocument: 'after' },
+  )
+  const booking = result && Object.prototype.hasOwnProperty.call(result, 'value') ? result.value : result
+  if (!booking) {
+    const still = await col.findOne(scope, { projection: { _id: 1 } })
+    return { ok: false, code: still ? 'STATUS_CHANGED' : 'NOT_FOUND' }
+  }
+  if (current.tableKeys?.length && ['finished', 'cancelled', 'no_show'].includes(status)) {
+    await holds.release(db, current.businessId, current._id, now)
+  }
+  if (status === 'no_show') {
+    await db.collection('clients').updateOne(
+      { _id: current.clientId, businessId: current.businessId },
+      { $inc: { 'counters.noShows': 1 }, $set: { updatedAt: now } },
+    )
+  }
+  return { ok: true, booking, from: current.status }
+}
+
 module.exports = {
-  WALK_IN_CLIENT_ID, wallOf, loadTableContext, checkTables, overrideOf, reserveTable, bookTable, rebookTable, countBooking, createWalkIn,
+  MOVES, moveBookingStatus, WALK_IN_CLIENT_ID, wallOf, loadTableContext, checkTables, overrideOf, reserveTable, bookTable, rebookTable, countBooking, createWalkIn,
 }

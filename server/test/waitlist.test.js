@@ -211,3 +211,34 @@ describe('scope and logs', () => {
     expect(all).not.toContain(PHONE)
   })
 })
+
+describe('notify sends the table-ready message (plan 676)', () => {
+  const { seedConversation } = require('./helpers/conversation-fixtures')
+  const messages = () => dbc('messages').find({ 'template.name': 'waitlist_table_ready' }).toArray()
+
+  it('sends one template through the open conversation of the entry\'s client and answers sent: true', async () => {
+    await dbc('conversations').deleteMany({})
+    await dbc('messages').deleteMany({})
+    await seedConversation(testDb(), { waId: '972587654321', test: true })
+    const id = (await add()).body._id
+    const res = await put(id, 'notify')
+    expect(res.status).toBe(200)
+    expect(res.body).toMatchObject({ status: 'notified', sent: true })
+    expect(await messages()).toHaveLength(1)
+  })
+
+  it('answers sent: false and still stamps notifiedAt with no conversation, and with a do-not-contact client', async () => {
+    await dbc('conversations').deleteMany({})
+    await dbc('messages').deleteMany({})
+    const none = (await add()).body._id
+    const r1 = await put(none, 'notify')
+    expect([r1.status, r1.body.sent]).toEqual([200, false])
+    expect(typeof (await entryOf(none)).notifiedAt).toBe('number')
+    await seedConversation(testDb(), { waId: '972587654321', test: true, doNotContact: true })
+    const dnc = (await add()).body._id
+    const r2 = await put(dnc, 'notify')
+    expect([r2.status, r2.body.sent]).toEqual([200, false])
+    expect(typeof (await entryOf(dnc)).notifiedAt).toBe('number')
+    expect(await messages()).toHaveLength(0)
+  })
+})
