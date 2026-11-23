@@ -4,6 +4,8 @@
  * `GET /business/setup-status` and by the platform admin's business rows. Never lists a baseline item (D15).
  */
 const { LIVE } = require('../jobs/purge-deleted')
+const { getBusiness } = require('./business')
+const { modulesOf } = require('../generated/schemas/modules')
 
 /** Knowledge topics that must have an approved item, per business type (restaurant hours and location come from the profile). */
 const REQUIRED_TOPICS = {
@@ -43,10 +45,14 @@ async function checklistFor(db, businessId, profile) {
     hours: hasHours,
     location: filled(profile.address),
   }
+  // Plan 674: a business with table service draws its room first; done once the floor plan holds a table.
+  const hasTables = modulesOf(await getBusiness(businessId)).includes('tables')
+  const plan = hasTables ? await db.collection('floorPlans').findOne({ businessId, ...LIVE }, { projection: { tables: 1 } }) : null
   const items = [
     { key: 'profile_basics', done: basicsDone(profile) },
     { key: 'hours', done: hasHours },
     { key: 'request_kinds', done: kindsDone(profile) },
+    ...(hasTables ? [{ key: 'floor_plan', done: (plan?.tables ?? []).length > 0 }] : []),
     ...topics.map(t => ({
       key: `knowledge_${t}`,
       done: profile.businessType === 'restaurant' && t in fromProfile

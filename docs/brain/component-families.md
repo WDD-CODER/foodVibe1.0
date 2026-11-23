@@ -817,6 +817,22 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
 - Known copies: none.
 
+### demo-restaurant-seed — `seedDemoRestaurant`, `buildDemoRestaurant` (plan 674)
+
+- Status: stable — a local-only script; never run against a shared database
+- Use: `server/scripts/seed-demo-restaurant.js` (`seedDemoRestaurant(db, { write, now, passwordHash })`) fills a scratch database with one demo restaurant; its pure data builder is `buildDemoRestaurant({ now })` in `server/scripts/lib/demo-restaurant-data.js`, which places the 40 bookings with the shared table engine. `parseArgs` comes from `seed-demo-business.js`.
+- Pieces: seedDemoRestaurant, buildDemoRestaurant, parseArgs.
+- When: any demo or test data for a restaurant with table service; a new demo business is a sibling script, not a flag.
+- Known copies: the password hash formula is written again here because `seed-demo-business.js` does not export it.
+
+### setup-checklist-item — Checklist item `floor_plan` of the front desk setup checklist (plan 674)
+
+- Status: stable
+- Use: `checklistFor` in `server/services/front-desk-setup.js` adds `{ key: 'floor_plan', done }` after `request_kinds` when the business has `tables`; the card (`front-desk-checklist-card.component.ts`) maps a key to its link and the label is `frontdesk_setup_<key>` in `dictionary.json`.
+- Pieces: Checklist item floor_plan, checklistFor, frontDeskSetup, FrontDeskChecklistCardComponent.
+- When: any new front desk setup step.
+- Known copies: none.
+
 ### scheduled-jobs — `runDue`, `startScheduler`, `stopScheduler`, moveBookingStatus in server/services/table-bookings.js, `registerBookingButtons` (plan 676)
 
 - Status: stable — server only
