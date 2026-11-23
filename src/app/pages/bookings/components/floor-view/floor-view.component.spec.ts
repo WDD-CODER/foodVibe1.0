@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing'
 import { signal } from '@angular/core'
 import { provideRouter } from '@angular/router'
-import { Ban, LucideAngularModule } from 'lucide-angular'
+import { Ban, LucideAngularModule, Phone } from 'lucide-angular'
 import { FloorViewComponent } from './floor-view.component'
 import { BookingDataService, type DayBoard } from '@services/booking-data.service'
 import { FloorPlanDataService } from '@services/floor-plan-data.service'
@@ -62,7 +62,7 @@ describe('FloorViewComponent (plan 671)', () => {
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
     translation.translate.and.callFake((k: string | undefined) => k ?? '')
     TestBed.configureTestingModule({
-      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban })],
+      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban, Phone })],
       providers: [
         provideRouter([]),
         { provide: BookingDataService, useValue: { dayBoard, setTables, setStatus: jasmine.createSpy('setStatus') } },
@@ -229,7 +229,7 @@ describe('FloorViewComponent move mode (plan 686)', () => {
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
     translation.translate.and.callFake((k: string | undefined) => k ?? '')
     TestBed.configureTestingModule({
-      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban })],
+      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban, Phone })],
       providers: [
         provideRouter([]),
         { provide: BookingDataService, useValue: { dayBoard, setTables, setStatus: jasmine.createSpy('setStatus') } },
@@ -330,6 +330,132 @@ describe('FloorViewComponent move mode (plan 686)', () => {
     expect(setTables).not.toHaveBeenCalled()
     expect(byId('table-sheet')).toBeNull()
     expect(byId('fv-move-banner')).toBeTruthy()
+    fixture.destroy()
+    flush()
+  }))
+})
+
+describe('FloorViewComponent lists (plan 672)', () => {
+  let fixture: ComponentFixture<FloorViewComponent>
+  let setTables: jasmine.Spy
+  let setStatus: jasmine.Spy
+  const el = (): HTMLElement => fixture.nativeElement
+  const byId = (id: string): HTMLElement | null => el().querySelector(`[data-testid="${id}"]`)
+  const all = (id: string): NodeListOf<Element> => el().querySelectorAll(`[data-testid="${id}"]`)
+  const flushView = (): void => {
+    tick()
+    fixture.detectChanges()
+  }
+  const row = (id: string, over: object = {}) => ({
+    _id: id,
+    kind: 'table',
+    status: 'confirmed',
+    clientId: 'c1',
+    guestName: 'שם ' + id,
+    time: '19:00',
+    partySize: 2,
+    startAt: Date.now() + 20 * 60000,
+    endAt: Date.now() + 110 * 60000,
+    tableKeys: ['tab002'],
+    ...over
+  })
+
+  function setup(bookings: object[], unassigned: string[]): void {
+    const board = () => ({ bookings, holds: [], unassigned, now: Date.now() })
+    setTables = jasmine.createSpy('setTables').and.resolveTo({ ok: true, booking: {} })
+    setStatus = jasmine.createSpy('setStatus').and.resolveTo({ ok: true, booking: {} })
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    TestBed.configureTestingModule({
+      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban, Phone })],
+      providers: [
+        provideRouter([]),
+        {
+          provide: BookingDataService,
+          useValue: { dayBoard: () => Promise.resolve(board()), setTables, setStatus }
+        },
+        {
+          provide: FloorPlanDataService,
+          useValue: { plan_: signal<unknown>(PLAN), ensureLoaded: () => Promise.resolve(), loadFailed_: signal(false) }
+        },
+        {
+          provide: FrontDeskProfileDataService,
+          useValue: { profile_: signal<unknown>({ hours: [] }), ensureLoaded: () => Promise.resolve() }
+        },
+        { provide: PermissionService, useValue: { isOwner_: signal(true) } },
+        { provide: TranslationService, useValue: translation },
+        {
+          provide: UserMsgService,
+          useValue: jasmine.createSpyObj<UserMsgService>('UserMsgService', [
+            'onSetErrorMsg',
+            'onSetWarningMsg',
+            'onSetSuccessMsg'
+          ])
+        }
+      ]
+    })
+    fixture = TestBed.createComponent(FloorViewComponent)
+    fixture.componentRef.setInput('date', jerusalemDateTime(Date.now()).date)
+    fixture.detectChanges()
+    flushView()
+  }
+
+  it('shows the arriving rows (late flagged) and the not-assigned rows', fakeAsync(() => {
+    setup(
+      [
+        row('a', { startAt: Date.now() - 30 * 60000 }),
+        row('b'),
+        row('c', { tableKeys: [], startAt: Date.now() + 60 * 60000 }),
+        row('d', { status: 'seated' })
+      ],
+      ['c']
+    )
+    expect(all('arriving-row').length).toBe(3)
+    expect(all('arriving-late').length).toBe(1)
+    expect(all('unassigned-row').length).toBe(1)
+    expect(byId('arriving-empty')).toBeNull()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('an empty arriving list shows its message and the not-assigned panel is hidden', fakeAsync(() => {
+    setup([row('d', { status: 'seated' })], [])
+    expect(byId('arriving-empty')?.textContent).toContain('nb_arriving_empty')
+    expect(byId('unassigned-list')).toBeNull()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('"arrived" seats the booking', fakeAsync(() => {
+    setup([row('b')], [])
+    ;(byId('arriving-arrived') as HTMLElement).click()
+    flushView()
+    expect(setStatus).toHaveBeenCalledOnceWith('b', 'seated')
+    fixture.destroy()
+    flush()
+  }))
+
+  it('"assign" starts the pick-a-table mode and a tap on a table sends the tables write', fakeAsync(() => {
+    setup([row('c', { tableKeys: [] })], ['c'])
+    ;(byId('unassigned-assign') as HTMLElement).click()
+    fixture.detectChanges()
+    expect(byId('fv-move-banner')?.textContent).toContain('nb_assign_banner')
+    ;(byId('floor-table-11') as HTMLElement).click()
+    flushView()
+    expect(setTables).toHaveBeenCalledOnceWith('c', ['tab001'])
+    expect(byId('fv-move-banner')).toBeNull()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('the bar has the two buttons; the walk-in button opens its dialog', fakeAsync(() => {
+    setup([], [])
+    expect(byId('fv-new-booking')).toBeTruthy()
+    const walkIn = byId('fv-walk-in-open') as HTMLButtonElement
+    expect(walkIn.disabled).toBe(false)
+    walkIn.click()
+    fixture.detectChanges()
+    expect(byId('walk-in-dialog')).toBeTruthy()
     fixture.destroy()
     flush()
   }))

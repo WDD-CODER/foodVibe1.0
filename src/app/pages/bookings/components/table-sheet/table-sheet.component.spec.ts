@@ -121,10 +121,11 @@ describe('TableSheetComponent (plan 686)', () => {
     expect(byId('tsh-no-show')).toBeNull()
   })
 
-  it('a free table shows no action and the next booking', () => {
+  it('a free table shows no booking action (only the walk-in one) and the next booking', () => {
     setup({ bookings: [booking({ _id: 'b2', startAt: NOW + 60 * MIN, time: '20:30', guestName: 'לוי' })] })
     expect(byId('tsh-free')).toBeTruthy()
-    expect(el().querySelectorAll('button.c-chip--tap').length).toBe(0)
+    expect(el().querySelectorAll('button.c-chip--tap').length).toBe(1)
+    expect(byId('tsh-walk-in')).toBeTruthy()
     expect(byId('tsh-next')?.textContent).toContain('לוי')
     expect(byId('tsh-next')?.textContent).toContain('20:30')
   })
@@ -226,5 +227,25 @@ describe('TableSheetComponent (plan 686)', () => {
     const out = setup({ bookings: [booking()], look: confirmedLook })
     click('tsh-move')
     expect(out.moveRequested).toHaveBeenCalledOnceWith('b1')
+  })
+
+  it('a free table offers the walk-in button, which asks for its dialog with the table key (plan 672)', () => {
+    setup({ bookings: [] })
+    const walkIn = jasmine.createSpy('walkInRequested')
+    fixture.componentInstance.walkInRequested.subscribe(walkIn)
+    click('tsh-walk-in')
+    expect(walkIn).toHaveBeenCalledOnceWith('tab002')
+  })
+
+  it('the walk-in button is disabled with the not-live title when the view is not live (plan 672)', () => {
+    setup({ bookings: [], live: false })
+    const button = byId('tsh-walk-in') as HTMLButtonElement
+    expect(button.disabled).toBeTrue()
+    expect(button.getAttribute('title')).toBe('tsh_not_live')
+  })
+
+  it('a table with a booking has no walk-in button (plan 672)', () => {
+    setup({ bookings: [booking()], look: confirmedLook })
+    expect(byId('tsh-walk-in')).toBeNull()
   })
 })

@@ -1,0 +1,92 @@
+<app-modal-shell
+  size="md"
+  titleKey="wlk_title"
+  [sheet]="true"
+  [dismissible]="!isSaving_()"
+  [hasChanges]="dirty_()"
+  (dismissed)="onClose()"
+>
+  <div class="c-modal-body c-input-stack" data-testid="walk-in-dialog">
+    <app-form-field label="fd_q_party_size" forId="wlk-party">
+      <app-counter [value]="party_()" [min]="1" (valueChange)="setParty($event)" />
+    </app-form-field>
+
+    @if (fixedTable_()) {
+      <p class="wlk-line" data-testid="wlk-table">{{ tableLine_() }}</p>
+    } @else {
+      <div class="c-input-stack wlk-pick">
+        <span class="wlk-label">{{ 'wlk_pick_table' | translatePipe }}</span>
+        @if (noFree_()) {
+          <p class="wlk-line" role="status" data-testid="wlk-no-free">{{ 'wlk_no_free_table' | translatePipe }}</p>
+        } @else {
+          <app-floor-map
+            [plan]="plan()"
+            [states]="mapStates_()"
+            [selectedKeys]="selectedKeys_()"
+            (tableTapped)="onMapTap($event)"
+          />
+        }
+      </div>
+    }
+
+    <div>
+      <button
+        type="button"
+        class="c-chip c-chip--tap"
+        data-testid="wlk-details"
+        [attr.aria-expanded]="detailsOpen_()"
+        (click)="toggleDetails()"
+      >
+        <lucide-icon name="user-plus" [size]="16" aria-hidden="true"></lucide-icon>
+        {{ 'wlk_guest_details' | translatePipe }}
+      </button>
+    </div>
+    @if (detailsOpen_()) {
+      <div class="wlk-row" data-testid="wlk-guest">
+        <app-form-field label="name" forId="wlk-name">
+          <input
+            id="wlk-name"
+            class="c-input"
+            type="text"
+            autocomplete="off"
+            [maxLength]="nameMax"
+            [ngModel]="name_()"
+            (ngModelChange)="name_.set($event)"
+          />
+        </app-form-field>
+        <app-form-field label="phone" forId="wlk-phone">
+          <input
+            id="wlk-phone"
+            class="c-input"
+            type="tel"
+            dir="ltr"
+            autocomplete="off"
+            [ngModel]="phone_()"
+            (ngModelChange)="phone_.set($event)"
+          />
+        </app-form-field>
+      </div>
+    }
+
+    @if (taken_()) {
+      <span class="c-field-error" role="alert" data-testid="wlk-taken">{{ 'wlk_table_taken' | translatePipe }}</span>
+    }
+    @if (saveFailed_()) {
+      <span class="c-field-error" role="alert" data-testid="wlk-failed">{{ 'nb_save_failed' | translatePipe }}</span>
+    }
+  </div>
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" data-testid="wlk-cancel" [disabled]="isSaving_()" (click)="onClose()">
+      {{ 'cancel' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="wlk-seat"
+      [disabled]="!valid_() || isSaving_()"
+      (click)="onSeat()"
+    >
+      {{ 'wlk_seat' | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>

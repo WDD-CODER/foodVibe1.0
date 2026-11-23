@@ -12,7 +12,12 @@ import { RequestDataService } from '@services/request-data.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { warnBeforeUnload } from '@utils/leave-warning.util'
+import type { BookingAlternative } from '@models/booking.model'
 import type { DeclineReason, FrontDeskRequest } from '@models/request.model'
+import {
+  ApproveTableDialogComponent,
+  type ApproveChoice
+} from './components/approve-table-dialog/approve-table-dialog.component'
 import { RequestCardComponent, type ApproveEdit } from './components/request-card/request-card.component'
 import type { DayLoadState } from './components/day-load-strip/day-load-strip.component'
 import { AskDialogComponent } from './components/ask-dialog/ask-dialog.component'
@@ -41,7 +46,8 @@ const decidedAt = (r: FrontDeskRequest): number => r.statusHistory[r.statusHisto
     RequestCardComponent,
     AskDialogComponent,
     DeclineDialogComponent,
-    NewRequestDialogComponent
+    NewRequestDialogComponent,
+    ApproveTableDialogComponent
   ],
   templateUrl: './requests.page.html',
   styleUrl: './requests.page.scss',
@@ -69,6 +75,8 @@ export class RequestsPage {
   protected readonly askFor_ = signal<FrontDeskRequest | null>(null)
   protected readonly declineFor_ = signal<FrontDeskRequest | null>(null)
   protected readonly newOpen_ = signal(false)
+  /** Plan 672: a table request the server refused with NO_TABLE, and the alternatives it answered. */
+  protected readonly noTable_ = signal<{ request: FrontDeskRequest; alternatives: BookingAlternative[] } | null>(null)
   private readonly dialogDirty_ = signal(false)
   private readonly days_ = signal<Record<string, DayLoadState>>({})
   private readonly requestedDays_ = new Set<string>()
@@ -151,6 +159,7 @@ export class RequestsPage {
     this.newOpen_.set(false)
     this.askFor_.set(null)
     this.declineFor_.set(null)
+    this.noTable_.set(null)
     this.dialogDirty_.set(false)
   }
 
@@ -168,8 +177,38 @@ export class RequestsPage {
         if (!updated.ok) return this.onDecisionFailed(updated.code)
       }
       const res = await this.requestData.approve(r._id)
-      if (!res.ok) return this.onDecisionFailed(res.code)
+      if (!res.ok) {
+        if (res.code === 'NO_TABLE' && r.kind === 'table') {
+          this.noTable_.set({ request: r, alternatives: res.alternatives ?? [] })
+          return
+        }
+        return this.onDecisionFailed(res.code)
+      }
       this.userMsg.onSetSuccessMsg(this.translation.translate('rq_approved'))
+    } finally {
+      this.busyId_.set(null)
+    }
+  }
+
+  /** Plan 672: the host chose another hour or a table in the no-table dialog; approve again with it. */
+  protected async onApproveAgain(choice: ApproveChoice): Promise<void> {
+    const open = this.noTable_()
+    if (!open || this.busyId_()) return
+    const r = open.request
+    this.busyId_.set(r._id)
+    try {
+      const wanted = 'date' in choice ? { ...r.wanted, date: choice.date, time: choice.time } : undefined
+      const tableKeys = 'tableKeys' in choice ? choice.tableKeys : undefined
+      const res = await this.requestData.approve(r._id, wanted, undefined, tableKeys)
+      if (res.ok) {
+        this.noTable_.set(null)
+        this.userMsg.onSetSuccessMsg(this.translation.translate('rq_approved'))
+      } else if (res.code === 'NO_TABLE') {
+        this.noTable_.set({ request: r, alternatives: res.alternatives ?? [] })
+      } else {
+        this.noTable_.set(null)
+        this.onDecisionFailed(res.code)
+      }
     } finally {
       this.busyId_.set(null)
     }

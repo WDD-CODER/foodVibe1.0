@@ -1,0 +1,19 @@
+.att-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.att-label {
+  font-weight: 600;
+}
+
+.att-line {
+  margin: 0;
+}
+
+.att-map {
+  max-block-size: 18rem;
+  overflow: auto;
+}

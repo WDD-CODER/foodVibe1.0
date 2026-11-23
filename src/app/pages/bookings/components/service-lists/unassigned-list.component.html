@@ -1,0 +1,34 @@
+<section class="c-input-stack" data-testid="unassigned-list" [attr.aria-label]="'nb_unassigned_title' | translatePipe">
+  <h3 class="sl__title">
+    <lucide-icon name="alert-triangle" [size]="16" aria-hidden="true"></lucide-icon>
+    {{ 'nb_unassigned_title' | translatePipe }}
+  </h3>
+  @if (rows().length === 0) {
+    <div data-testid="unassigned-empty">
+      <app-empty-state messageKey="nb_unassigned_empty" icon="users" />
+    </div>
+  } @else {
+    <ul class="sl__rows">
+      @for (r of rows(); track r.booking._id) {
+        <li class="c-list-row sl__row" data-testid="unassigned-row">
+          <span class="sl__time" dir="ltr">{{ r.booking.time }}</span>
+          <span class="sl__name">{{ r.name }}</span>
+          <span class="sl__party">
+            <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
+            {{ r.booking.partySize }}
+          </span>
+          @if (live()) {
+            <button
+              type="button"
+              class="c-chip c-chip--tap sl__act"
+              data-testid="unassigned-assign"
+              (click)="assign.emit(r.booking._id)"
+            >
+              {{ 'nb_assign' | translatePipe }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

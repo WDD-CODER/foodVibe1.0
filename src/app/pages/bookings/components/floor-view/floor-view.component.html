@@ -44,6 +44,24 @@
           }
         </div>
 
+        <div class="fv__actions" data-testid="fv-actions">
+          <button type="button" class="c-btn-primary" data-testid="fv-new-booking" (click)="openNewBooking()">
+            <lucide-icon name="phone" [size]="18" aria-hidden="true"></lucide-icon>
+            {{ 'nb_open' | translatePipe }}
+          </button>
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="fv-walk-in-open"
+            [disabled]="!isLive_()"
+            [attr.title]="isLive_() ? null : ('tsh_not_live' | translatePipe)"
+            (click)="openWalkIn(null)"
+          >
+            <lucide-icon name="user-plus" [size]="18" aria-hidden="true"></lucide-icon>
+            {{ 'wlk_open' | translatePipe }}
+          </button>
+        </div>
+
         @if (strip_().length > 0) {
           <app-scroll-rail>
             <div class="fv__strip" role="tablist" [attr.aria-label]="'fv_strip_label' | translatePipe">
@@ -109,8 +127,31 @@
               }
             </ul>
           </div>
-          <aside class="fv__side" aria-hidden="true"></aside>
+          <aside class="fv__side" data-testid="fv-side">
+            <app-arriving-list
+              [rows]="arriving_()"
+              [live]="isLive_()"
+              [busyId]="arrivedBusy_()"
+              (arrived)="markArrived($event)"
+            />
+            @if (unassigned_().length > 0) {
+              <app-unassigned-list [rows]="unassigned_()" [live]="isLive_()" (assign)="startAssign($event)" />
+            }
+          </aside>
         </div>
+
+        @if (newBookingOpen_()) {
+          <app-new-booking-dialog [date]="date()" (saved)="onBookingSaved()" (closed)="newBookingOpen_.set(false)" />
+        }
+        @if (walkInOpen_()) {
+          <app-walk-in-dialog
+            [tableKey]="walkInTable_()"
+            [plan]="plan_()!"
+            [states]="states_()"
+            (seated)="onWalkInSeated()"
+            (closed)="closeWalkIn()"
+          />
+        }
 
         @if (sheetTable_(); as t) {
           @if (board_(); as board) {
@@ -124,6 +165,7 @@
               (closed)="sheetTableKey_.set(null)"
               (changed)="onSheetChanged()"
               (moveRequested)="startMove($event)"
+              (walkInRequested)="openWalkIn($event)"
             />
           }
         }

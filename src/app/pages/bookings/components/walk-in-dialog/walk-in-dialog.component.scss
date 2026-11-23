@@ -1,0 +1,18 @@
+.wlk-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.5rem 0.75rem;
+}
+
+.wlk-pick {
+  max-block-size: 16rem;
+  overflow: auto;
+}
+
+.wlk-label {
+  font-weight: 600;
+}
+
+.wlk-line {
+  margin: 0;
+}
