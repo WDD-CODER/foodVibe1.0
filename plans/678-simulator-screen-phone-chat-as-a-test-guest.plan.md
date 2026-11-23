@@ -170,6 +170,10 @@ e2e/ui/678-1.spec.ts
 e2e/ui/678-2.spec.ts
 e2e/ui/678-3.spec.ts
 screens/678-*.png
+src/app/core/services/async-storage.service.spec.ts
+src/app/core/services/trash.service.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
