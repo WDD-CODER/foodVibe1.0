@@ -681,6 +681,12 @@ Each line is already written into the plan that owns it; where a line and a Cont
   conversation, or a refused send, is stamped and not retried; test bookings are left out; `POST /sim/clock`
   answers `{ job, done, reason? }` and is built here; the `waitlist_table_ready` send is built here (C-WAIT:
   `notify` answers `sent`).
+- 676 · C-JOBS · the eight details in one line: (1) `moveBookingStatus(db, { businessId, id, status, by, byName, via,
+  note?, now })` answers `{ ok, booking }` or `{ ok: false, code }`; (2) the orphan sweep needs two ticks in a row;
+  (3) the reminder buttons carry the booking's `publicToken`; (4) Confirm answers once with `booking_confirmed`,
+  Cancel inside the cutoff cancels with `booking_cancelled`, otherwise the conversation goes `human`; (5) no
+  conversation or a refused send is stamped and counted; (6) test bookings are left out of every job; (7) `POST
+  /sim/clock` answers `{ job, done, reason? }`; (8) `PUT /waitlist/:id/notify` answers the entry plus `sent`.
 - 679 · C-AI · `runTurn(db, conversation, { log, mode, now })`, `mode: 'turn' | 'suggest'`; the one model call is
   `askTurnModel` in `server/routes/ai/frontdesk.js` (INV-6); `POST /api/v1/ai/frontdesk/suggest`; every failure is
   silent (R-04 wins over FD-07); the daily cap counts today's `frontdesk_turn` rows (300), test turns carry

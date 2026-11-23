@@ -600,6 +600,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 668
 - Use: reserveTable, bookTable, rebookTable, createWalkIn in server/services/table-bookings.js (assign, claim, write, release on failure).
+- Use: moveBookingStatus in server/services/table-bookings.js (plan 676): the one status move of a booking, called by the route, the no-show job and a guest's Cancel tap.
 - When: any route or job that gives a booking its tables; none calls `claim` itself.
 - Known copies: none.
 

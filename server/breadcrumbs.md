@@ -63,6 +63,9 @@
 | `services/business-report.js` | The business report (plan 568): `buildReport` — monthly series, first vs latest 30 days, baseline mapping, rule findings; read-only |
 | `services/frontdesk-stats.js` | Front desk numbers of one business (plan 559): `frontDeskStats`, `parseRange`, `isOutsideHours`; read-only, test requests never count |
 | `constants/report.js` | `REPORT_METRICS`, `REPORT_MIN_EVENTS`, finding thresholds (plan 568) |
+| `jobs/scheduler.js` | `runDue(db, now)`, `startScheduler`, `stopScheduler` (plan 676, C-JOBS): one unref'd 60 s tick running the four jobs, each in its own try; off under vitest |
+| `jobs/reminders.js`, `jobs/no-show.js`, `jobs/waitlist-expire.js`, `jobs/orphan-holds.js` | The four jobs (plan 676): reminder with Confirm / Cancel buttons (`remindOne`), automatic no-show (`markOne`), waiting-list expiry, two-tick orphan hold sweep |
+| `services/booking-buttons.js` | `registerBookingButtons` (plan 676): the `CONFIRM` and `CANCEL` taps of the reminder, bound to the conversation's own client; registered by `inbound.js` |
 | `jobs/retention.js` | `purgeRetained(db, businessId, now)` — lazy 24-month delete of final requests and bookings, stored files (voice recordings, abandoned invoice reads) past their `deleteAfter`, 12 months of messages; throttled to once a day per business; run from the generic GET (plan 558) |
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
 | `scripts/repair-supplier-refs.js` | Plan 649: lists (dry run) or repairs (`--write`) product sources whose supplier is foreign, unknown or empty — map by `_masterId`, by trimmed name, or clear; prices never change; `--target` other than `local` needs `--confirm-remote` |

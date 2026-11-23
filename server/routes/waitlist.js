@@ -18,6 +18,9 @@ const { newId } = require('../utils/id')
 const { LIVE } = require('../jobs/purge-deleted')
 const { jerusalemEpoch } = require('../generated/schemas/front-desk/local-time')
 const tb = require('../services/table-bookings')
+const { sendOut } = require('../services/outbound')
+const { findLiveClientByPhoneKey, phoneKey, normalizePhone } = require('../utils/client-upsert')
+const { templateMessage } = require('../generated/schemas/front-desk/message-templates')
 
 const TYPE = 'waitlistEntries'
 const HOUR_MS = 3600000
@@ -126,8 +129,22 @@ router.put('/:id/notify', ...gate, async (req, res) => {
     const now = Date.now()
     const next = await move(req, entry, { status: 'notified', notifiedAt: now, updatedAt: now })
     if (!next) return changed(req, res, entry)
-    req.log.info({ event: 'waitlist.notified', id: entry._id, partySize: entry.partySize })
-    res.json(next)
+    let sent = false
+    try {
+      const { businessId } = scopeFilter(req)
+      const clientId = entry.clientId ?? (entry.guestPhone
+        ? (await findLiveClientByPhoneKey(db(), businessId, phoneKey(normalizePhone(entry.guestPhone))))?._id : undefined)
+      const conversation = clientId
+        ? await db().collection('conversations').findOne({ businessId, clientId, liveKey: { $exists: true } }) : null
+      if (conversation) {
+        const { buttons, ...template } = templateMessage('waitlist_table_ready', { name: entry.guestName })
+        sent = (await sendOut(db(), conversation, { kind: 'template', template, ...(buttons && { buttons }) }, 'server', { now })).ok
+      }
+    } catch (err) {
+      req.log.warn({ event: 'waitlist.notify.send_failed', id: entry._id, errName: err && err.name })
+    }
+    req.log.info({ event: 'waitlist.notified', id: entry._id, partySize: entry.partySize, sent })
+    res.json({ ...next, sent })
   } catch (err) {
     fail(req, res, 'notify', err)
   }
