@@ -127,6 +127,7 @@ public/assets/data/dictionary.json
 docs/brain/component-families.md
 e2e/ui/674-1.spec.ts
 screens/674-*.png
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
