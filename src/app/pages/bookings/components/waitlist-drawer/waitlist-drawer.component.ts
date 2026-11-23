@@ -21,7 +21,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import type { FloorMapPlan } from 'src/app/shared/floor-map/floor-map.component'
-import { WaitlistDataService } from '@services/waitlist-data.service'
+import { WaitlistDataService, type WaitlistResult } from '@services/waitlist-data.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { WaitlistEntry } from '@models/waitlist-entry.model'
@@ -40,6 +40,8 @@ interface WaitRow {
   over: boolean
   areaName: string
 }
+
+type ActResult = WaitlistResult<{ entry: WaitlistEntry; sent?: boolean }>
 
 /**
  * Plan 673: the waiting list of table service. A host adds a party, sees the order and how long each one waited (from the
@@ -194,7 +196,10 @@ export class WaitlistDrawerComponent implements OnInit {
   }
 
   protected async notify(entry: WaitlistEntry): Promise<void> {
-    await this.act(entry, () => this.waitlist.notify(entry._id))
+    const res = await this.act(entry, () => this.waitlist.notify(entry._id))
+    if (res?.ok && res.sent !== undefined) {
+      this.userMsg.onSetSuccessMsg(this.translation.translate(res.sent ? 'wl_notify_sent' : 'wl_notify_marked'))
+    }
   }
 
   protected async left(entry: WaitlistEntry): Promise<void> {
@@ -211,8 +216,8 @@ export class WaitlistDrawerComponent implements OnInit {
     this.todayOpen_.update((open) => !open)
   }
 
-  private async act(entry: WaitlistEntry, call: () => ReturnType<WaitlistDataService['notify']>): Promise<void> {
-    if (this.busy_()) return
+  private async act(entry: WaitlistEntry, call: () => Promise<ActResult>): Promise<ActResult | undefined> {
+    if (this.busy_()) return undefined
     this.busy_.set(entry._id)
     try {
       const res = await call()
@@ -226,6 +231,7 @@ export class WaitlistDrawerComponent implements OnInit {
       } else {
         this.userMsg.onSetErrorMsg(this.translation.translate('wl_action_failed'))
       }
+      return res
     } finally {
       this.busy_.set(null)
     }

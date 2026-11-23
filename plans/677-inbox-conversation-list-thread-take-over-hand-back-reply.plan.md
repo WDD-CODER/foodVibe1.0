@@ -184,6 +184,9 @@ e2e/ui/677-1.spec.ts
 e2e/ui/677-2.spec.ts
 e2e/ui/677-3.spec.ts
 screens/677-*.png
+src/app/appRoot/app.component.spec.ts
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -207,6 +210,9 @@ append the path to the scope block above and retry.
 
 - `ChatThreadComponent` (`app-chat-thread`, `src/app/shared/chat-thread/`) — family: none — rung: 4 — why: no piece draws a message thread; the inbox and the simulator of plan 678 must draw the same messages the same way, so it is one shared, read-only component (inputs: messages, now, perspective, buttonsEnabled; output: buttonTapped), registered as the new family `chat-thread`.
 - `ConversationDataService` (`src/app/core/services/conversation-data.service.ts`) — family: http — rung: 3 — why: a client of the conversations routes through `HttpClient` and the `API` map; the list is a polled read with the server's time, not a stored collection, so it does not extend `BaseEntityDataService`.
+- `ReplyBoxComponent` (`app-reply-box`, `src/app/pages/inbox/components/reply-box/`) with its classes `.rb`, `.rb-bot`, `.rb-row`, `.rb-line`, `.rb-text` — family: form-field — rung: 2 — why: the reply box of one thread (free text, the one template after the window, take over); it uses `app-form-field`, `app-custom-select` and the engine `.c-input-stack`.
+- Inbox page layout classes `.ibx`, `.ibx-body`, `.ibx-header`, `.ibx-list`, `.ibx-filters`, `.ibx-rows`, `.ibx-row`, `.ibx-row--current`, `.ibx-name`, `.ibx-preview`, `.ibx-time`, `.ibx-thread`, `.ibx-thread-head`, `.ibx-who`, `.ibx-phone`, `.ibx-window`, `.ibx-actions`, `.ibx-back`, `.ibx-card`, `.ibx-card-link`, `.ibx-messages`, `.ibx--thread` — family: list-page — rung: 2 — why: layout only, no engine class; the page-local classes of the list-and-thread screen.
+- Thread layout classes `.ct`, `.ct-day`, `.ct-row`, `.ct-row--mine`, `.ct-bubble`, `.ct-bubble--mine`, `.ct-text`, `.ct-buttons`, `.ct-meta`, `.ct-status`, `.ct-status--read`, `.ct-status--failed` — family: chat-thread — rung: 2 — why: the layout of `app-chat-thread` only; no engine class.
 - `InboxBadgeService` (`src/app/core/services/inbox-badge.service.ts`) — family: http — rung: 3 — why: one root signal for the pending-conversations number, built like `FrontDeskBadgeService` (load when signed in, reload on focus with a 60 s gap).
 - `InboxPage` (`src/app/pages/inbox/`) — family: list-page — rung: 2 — why: `app-page-header` and single-line `.c-list-row` rows; the list sits beside a thread, has no search, selection or sort, so the rows are drawn by the page inside the list engine classes and not by a second `app-list-shell`.
 - Holder and test tags, the unread number — family: chip — rung: 1 — why: `c-chip--tag c-chip--sm` and `c-chip__count`.
@@ -395,16 +401,16 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give the browser one client for guest conversations — list, open a thread, reply, send a template, take over, hand back, close, with error codes returned as codes; the path entry and the model types; spec — src/app/core/services/conversation-data.service.ts, src/app/core/services/conversation-data.service.spec.ts, src/app/core/services/http-storage.adapter.ts, src/app/core/models/conversation.model.ts
-- [ ] A2: Build the one message thread the inbox and the simulator both draw — bubbles by side, template bodies, author tag, delivery state with icon and label, buttons, day lines; spec — src/app/shared/chat-thread/chat-thread.component.ts, .html, .scss, .spec.ts
-- [ ] A3: Open the inbox from the front desk chips and count what waits for a person — the two lazy routes, the group prefix, the chip with its number, the badge service, the header total, the four icons; specs — src/app/app.routes.ts, src/app/app.config.ts, src/app/core/components/tab-chips/tab-chips.component.ts, .html, .spec.ts, src/app/core/services/inbox-badge.service.ts, .spec.ts, src/app/core/components/header/header.component.ts, .html, .spec.ts
-- [ ] A4: Show who wrote and who holds each conversation — the page with its header, the filter chips, the ordered single-line rows with tags and unread numbers, loading, empty and failed states; all dictionary keys of this plan — src/app/pages/inbox/inbox.page.ts, .html, .scss, public/assets/data/dictionary.json
-- [ ] A5: Show one conversation with its window clock and the booking or request it is about — the thread column, the header line, the linked card with its link, not-found and failed states, list then thread on a phone — src/app/pages/inbox/inbox.page.ts, .html, .scss
-- [ ] A6: Let a member take a conversation, answer and hand it back — the three buttons, the reply box with its keys and failure paths, the per-conversation draft, the template choice once the window is closed — src/app/pages/inbox/components/reply-box/reply-box.component.ts, .html, .scss, .spec.ts, src/app/pages/inbox/inbox.page.ts
-- [ ] A7: Keep the screen fresh without a live connection — list and thread timers that stop when the page is hidden or left, reload on focus; the page spec — src/app/pages/inbox/inbox.page.ts, src/app/pages/inbox/inbox.page.spec.ts
-- [ ] A8: Record the new pieces where the next plan looks for them — the chat-thread family, the http lines, the inventory row, the four folder maps, the map's extension line — docs/brain/component-families.md, docs/brain/inventory.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/restaurant/restaurant-map.md
-- [ ] A9: Write the three screen checks that run in the real app — signInQa, stateful answers of the conversation calls, the 375 px case; screenshots — e2e/ui/677-1.spec.ts, e2e/ui/677-2.spec.ts, e2e/ui/677-3.spec.ts
-- [ ] A10: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, the arch gate, log-query; evidence into Execution Notes; then the human cards
+- [x] A1: Give the browser one client for guest conversations — list, open a thread, reply, send a template, take over, hand back, close, with error codes returned as codes; the path entry and the model types; spec — src/app/core/services/conversation-data.service.ts, src/app/core/services/conversation-data.service.spec.ts, src/app/core/services/http-storage.adapter.ts, src/app/core/models/conversation.model.ts
+- [x] A2: Build the one message thread the inbox and the simulator both draw — bubbles by side, template bodies, author tag, delivery state with icon and label, buttons, day lines; spec — src/app/shared/chat-thread/chat-thread.component.ts, .html, .scss, .spec.ts
+- [x] A3: Open the inbox from the front desk chips and count what waits for a person — the two lazy routes, the group prefix, the chip with its number, the badge service, the header total, the four icons; specs — src/app/app.routes.ts, src/app/app.config.ts, src/app/core/components/tab-chips/tab-chips.component.ts, .html, .spec.ts, src/app/core/services/inbox-badge.service.ts, .spec.ts, src/app/core/components/header/header.component.ts, .html, .spec.ts
+- [x] A4: Show who wrote and who holds each conversation — the page with its header, the filter chips, the ordered single-line rows with tags and unread numbers, loading, empty and failed states; all dictionary keys of this plan — src/app/pages/inbox/inbox.page.ts, .html, .scss, public/assets/data/dictionary.json
+- [x] A5: Show one conversation with its window clock and the booking or request it is about — the thread column, the header line, the linked card with its link, not-found and failed states, list then thread on a phone — src/app/pages/inbox/inbox.page.ts, .html, .scss
+- [x] A6: Let a member take a conversation, answer and hand it back — the three buttons, the reply box with its keys and failure paths, the per-conversation draft, the template choice once the window is closed — src/app/pages/inbox/components/reply-box/reply-box.component.ts, .html, .scss, .spec.ts, src/app/pages/inbox/inbox.page.ts
+- [x] A7: Keep the screen fresh without a live connection — list and thread timers that stop when the page is hidden or left, reload on focus; the page spec — src/app/pages/inbox/inbox.page.ts, src/app/pages/inbox/inbox.page.spec.ts
+- [x] A8: Record the new pieces where the next plan looks for them — the chat-thread family, the http lines, the inventory row, the four folder maps, the map's extension line — docs/brain/component-families.md, docs/brain/inventory.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A9: Write the three screen checks that run in the real app — signInQa, stateful answers of the conversation calls, the 375 px case; screenshots — e2e/ui/677-1.spec.ts, e2e/ui/677-2.spec.ts, e2e/ui/677-3.spec.ts
+- [x] A10: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, the arch gate, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
 - Dependencies: the conversations routes of plan 687 and the template catalogue of plan 675; `PermissionService`,
@@ -446,3 +452,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the pending number counts conversations a person holds that have an unread guest message; conversations the assistant holds are not counted.
 - behaviour: a typed reply is kept per conversation only while the page is open; leaving the page drops it without a question.
 - behaviour: on a phone Enter adds a line and only the button sends.
+- seen: a template message is stored with text '' (plan 675), so a list row's preview is empty for it; the row carries no template name to show the dictionary body — server/routes/conversations.js (the `last` field).
+- evidence: pnpm run build -> 0; pnpm run lint -> 0 (0 errors); pnpm run test:ci -> 0 (3027 SUCCESS); lint:icons, lint:no-native-select, lint:reuse, override-check, plan-ledger-check, breadcrumbs-check, scope-check --arch -> 0. The three [ui] specs (e2e/ui/677-*.spec.ts) are written, not run.

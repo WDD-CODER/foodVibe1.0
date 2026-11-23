@@ -29,6 +29,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `qr-code/` | A QR image of a link, drawn in the browser; the `qrcode` library loads lazily (plan 667) | QrCodeComponent |
 | `floor-map/` | The drawing of the room: tables at grid cells, optional drag (plan 665; plan 671: the `details` input puts a state label, a name and a time on a table); grid arithmetic in the folder's geometry util | FloorMapComponent, footprintFor, movedCell, firstFreeCell, nextTableNumber, newKey, chairsFor, TABLE_PRESETS |
+| `chat-thread/` | The read-only message thread the inbox and the simulator both draw: bubbles by side (`perspective`), template bodies from the dictionary, author tag, delivery state as icon + label, buttons on the last outbound message, day lines (plan 677) | ChatThreadComponent |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |
 | `input-clear/` | Clear (×) button shown inside a text input | InputClearComponent |

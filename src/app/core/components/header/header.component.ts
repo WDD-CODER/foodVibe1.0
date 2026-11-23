@@ -17,6 +17,7 @@ import { ModuleService } from '@services/module.service'
 import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import { InboxBadgeService } from '@services/inbox-badge.service'
 import { TranslationService } from '@services/translation.service'
 import { AccessService } from '@services/access.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -73,7 +74,12 @@ export class HeaderComponent {
   protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
   protected readonly isOwner_ = this.userService.isOwner_
   /** Plan 552: requests waiting for a decision, shown on the front desk entry. */
-  protected readonly waitingCount_ = inject(FrontDeskBadgeService).waitingCount_
+  private readonly frontDeskBadge = inject(FrontDeskBadgeService)
+  /** Plan 677: conversations a person must answer, added to the same number. */
+  private readonly inboxBadge = inject(InboxBadgeService)
+  protected readonly waitingCount_ = computed(
+    () => this.frontDeskBadge.waitingCount_() + this.inboxBadge.pendingCount_()
+  )
   protected readonly waitingLabel_ = computed(() =>
     this.translation.translate('rq_waiting_count_label').replace('{count}', String(this.waitingCount_()))
   )

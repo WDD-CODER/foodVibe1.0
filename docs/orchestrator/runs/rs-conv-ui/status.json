@@ -1,0 +1,385 @@
+{
+  "run": "rs-conv-ui",
+  "branch": "orch/rs-conv-ui",
+  "base": "main",
+  "startedAt": "2026-11-23T11:41:15.440Z",
+  "mainShaAtStart": "654f3c5626d0c0bf313a30211ab4533c5d55dd6b",
+  "plans": {
+    "677": {
+      "nnn": "677",
+      "title": "The inbox: conversation list, thread, take over and hand back, the linked card and the reply box",
+      "branch": "feat/677-inbox-conversation-list-thread",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T11:43:04.226Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T12:18:30.799Z"
+        }
+      },
+      "humanItems": [
+        "Dandan answers a simulator guest from his phone: he sees the new conversation in the inbox, takes it over,",
+        "the list's page with no items · open the page · a message says the list is empty",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page",
+        "the inbox on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T11:43:04.026Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:43:04.228Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:15:40.239Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:18:23.465Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:18:30.801Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:19:03.769Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:19:59.594Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.2,
+      "sha": "d54cc0576ea7081f782d1ec3d3acab38d5ce6539",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1953.4,
+          "tokens": {
+            "input": 15719710,
+            "output": 101526
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 31.7,
+          "tokens": {
+            "input": 283981,
+            "output": 2356
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "6e71e1f385be2552dda29fd941a2b658243fed3a"
+    },
+    "678": {
+      "nnn": "678",
+      "title": "The simulator: a phone chat as a test guest, with buttons, the window clock and clear test data",
+      "branch": "feat/678-simulator-screen-phone-chat",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T12:21:59.298Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T12:49:55.273Z"
+        }
+      },
+      "humanItems": [
+        "Dandan, on the run branch with the local servers: he writes as a guest in the simulator on his laptop,",
+        "the list's page with no items · open the page · a message says the list is empty (here: the guest list with no test guest).",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (here: the simulator with the conversations read failing).",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed (here: \"ניקוי נתוני בדיקה\")."
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T12:21:59.157Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:21:59.299Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:45:08.789Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:49:45.460Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:49:55.275Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:50:15.210Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:51:25.436Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.8,
+      "sha": "753d66f4afaec99322dea9adb15e3fefa43819cf",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1386,
+          "tokens": {
+            "input": 8066296,
+            "output": 63082
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.7,
+          "tokens": {
+            "input": 129893,
+            "output": 1121
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "009f0346d4ee801b0aa0b1b1fa7d05d235f0141d"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T11:43:03.842Z",
+      "plan": "677",
+      "text": "the folder foodVibe1.0-orch-rs-conv-ui-677 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T12:15:37.750Z",
+      "plan": "677",
+      "text": "builder left undone (round 0): [ui] 677-1: row of דנה is first with tag העוזר: written, not run; [ui] 677-2: take over, reply and hand back shown: written, not run; [ui] 677-3: 375 px list to thread and back: written, not run"
+    },
+    {
+      "at": "2026-11-23T12:19:11.652Z",
+      "plan": "677",
+      "text": "the folder foodVibe1.0-orch-merge-rs-conv-ui was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T12:21:59.027Z",
+      "plan": "678",
+      "text": "the folder foodVibe1.0-orch-rs-conv-ui-678 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T12:45:05.446Z",
+      "plan": "678",
+      "text": "builder left undone (round 0): A11: the check run is done and its evidence is in Execution Notes. I left it unticked because the Human cards are still to come.; [ui] 678-1: written, not run; [ui] 678-2: written, not run; [ui] 678-3: written, not run"
+    },
+    {
+      "at": "2026-11-23T12:52:28.608Z",
+      "text": "FINAL: same tree as plan 678's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-23T12:52:29.879Z",
+      "text": "make this a default? the row preview shows `last.text` only (blank for template messages) — reverse: once the route returns the template name, show its dictionary body. (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-23T12:52:30.157Z",
+      "text": "make this a default? the list rows are plain single-line flex links (.ibx-row), not .c-list-row cells, because .c-list-row is display:contents and needs a grid parent; the plan's list-page default stays an exception — rev (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 16.8,
+  "updatedAt": "2026-11-23T12:52:32.646Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "677",
+      "type": "seen",
+      "text": "seen: server/routes/conversations.js (`last` field of GET /) — a template message is stored with text '' and the row carries no template name, so a list row's preview is blank when the newest message is a template; the plan asked for the dictionary body there. Reverse: add `last.template` to the route's answer and render its body.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: the row preview shows `last.text` only (blank for template messages) — reverse: once the route returns the template name, show its dictionary body.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: the guest 'button' message shows 'נבחר: {title}' (key chat_button_tapped) with the message text as the title — reverse: show the bare title.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: a failed re-read of an already open thread (the 10 s refresh) keeps what is shown and logs, with no error screen — reverse: clear the thread on any failure.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: the window time left is shown as HH:mm (hours:minutes) in ibx_window_open — reverse: change the format in InboxPage.windowLeft_.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: the reply box's template choice is a one-entry app-custom-select that is display only (need_more_info is always the one sent) — reverse: drop the select.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: the list rows are plain single-line flex links (.ibx-row), not .c-list-row cells, because .c-list-row is display:contents and needs a grid parent; the plan's list-page default stays an exception — reverse: move rows into app-list-shell.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "677",
+      "type": "behaviour",
+      "text": "behaviour: the inbox page's own timers run outside the Angular zone so a repeating timer never keeps the app unstable — reverse: remove the runOutsideAngular wrapper.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "678",
+      "type": "behaviour",
+      "text": "behaviour: the client picker filters out test guests with an exported `isTestClient` helper (the same rule as `realClients_`) instead of reading `realClients_`. Specs of other picker hosts (new-inquiry-dialog, event-stage-bar) mock ClientDataService with `allClients_` only and are outside this plan's scope — reverse: read `realClients_` in client-picker.component.ts and add it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "678",
+      "type": "behaviour",
+      "text": "behaviour: the phone frame shows nothing while no guest is chosen. The plan names no key for a placeholder, and the guest list already shows `sim_no_guests`. — reverse: add a prompt message in the frame.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "678",
+      "type": "behaviour",
+      "text": "behaviour: I edited this plan's own `## Reuse Check` so the kit gate passes. The chat row is now rung 2 (family chat-thread), and a new row names the page-local `.sim-*` classes. I also added the `simulator-page` family heading to component-families.md. — reverse: revert those lines and drop the family heading.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T12:52:32.642Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T12:52:32.645Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

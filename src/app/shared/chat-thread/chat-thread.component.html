@@ -1,0 +1,47 @@
+<ol class="ct" dir="rtl" data-testid="chat-thread">
+  @for (item of items_(); track item.id) {
+    @if (item.dayLine) {
+      <li class="ct-day" data-testid="chat-day">{{ item.dayLine }}</li>
+    }
+    <li class="ct-row" [class.ct-row--mine]="item.mine" data-testid="chat-bubble" [attr.data-mine]="item.mine">
+      <div class="ct-bubble" [class.ct-bubble--mine]="item.mine">
+        <p class="ct-text">{{ item.body }}</p>
+        @if (item.buttons.length) {
+          <div class="ct-buttons">
+            @for (b of item.buttons; track b.id) {
+              <button
+                type="button"
+                class="c-chip c-chip--tap"
+                data-testid="chat-button"
+                [disabled]="!buttonsEnabled()"
+                (click)="tap(b.id)"
+              >
+                {{ b.title }}
+              </button>
+            }
+          </div>
+        }
+        <div class="ct-meta">
+          @if (item.author) {
+            <span class="ct-author" data-testid="chat-author">{{ item.author | translatePipe }}</span>
+          }
+          <span class="ct-time">{{ item.time }}</span>
+          @if (item.statusIcon && item.statusKey) {
+            <span
+              class="ct-status"
+              [class.ct-status--read]="item.status === 'read'"
+              [class.ct-status--failed]="item.status === 'failed'"
+              data-testid="chat-status"
+              [attr.data-status]="item.status"
+              [attr.aria-label]="item.statusKey | translatePipe"
+              [attr.title]="item.statusKey | translatePipe"
+            >
+              <lucide-icon [name]="item.statusIcon" [size]="14"></lucide-icon>
+              <span class="ct-status-label">{{ item.statusKey | translatePipe }}</span>
+            </span>
+          }
+        </div>
+      </div>
+    </li>
+  }
+</ol>

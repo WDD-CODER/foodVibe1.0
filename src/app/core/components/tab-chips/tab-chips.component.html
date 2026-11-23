@@ -18,6 +18,11 @@
               waitingCount_()
             }}</span>
           }
+          @if (chip.inboxBadge && pendingCount_() > 0) {
+            <span class="c-chip__count" data-testid="inbox-count" [attr.aria-label]="pendingLabel_()">{{
+              pendingCount_()
+            }}</span>
+          }
         </a>
       }
     </app-scroll-rail>

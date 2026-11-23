@@ -36,11 +36,11 @@ export class WaitlistDataService {
     )
   }
 
-  notify(id: string): Promise<WaitlistResult<{ entry: WaitlistEntry }>> {
+  notify(id: string): Promise<WaitlistResult<{ entry: WaitlistEntry; sent: boolean }>> {
     return this.run(
       'notify',
-      () => this.http.put<WaitlistEntry>(`${WAITLIST_URL}/${id}/notify`, {}),
-      (entry) => ({ entry })
+      () => this.http.put<WaitlistEntry & { sent?: boolean }>(`${WAITLIST_URL}/${id}/notify`, {}),
+      ({ sent, ...entry }) => ({ entry: entry as WaitlistEntry, sent: sent === true })
     )
   }
 

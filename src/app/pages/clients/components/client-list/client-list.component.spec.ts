@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { signal, WritableSignal } from '@angular/core'
+import { computed, signal, WritableSignal } from '@angular/core'
 import { provideRouter } from '@angular/router'
 import { LucideAngularModule, UserPlus } from 'lucide-angular'
 import { ClientListComponent } from './client-list.component'
@@ -57,7 +57,10 @@ describe('ClientListComponent (plan 547)', () => {
       imports: [ClientListComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, UserPlus })],
       providers: [
         provideRouter([]),
-        { provide: ClientDataService, useValue: { allClients_: clients_ } },
+        {
+          provide: ClientDataService,
+          useValue: { realClients_: computed(() => clients_().filter((c) => !(c.tags ?? []).includes('test'))) }
+        },
         { provide: PermissionService, useValue: { isOwner_: owner_ } },
         { provide: TranslationService, useValue: translation },
         { provide: UserMsgService, useValue: userMsg }
@@ -66,6 +69,12 @@ describe('ClientListComponent (plan 547)', () => {
     fixture = TestBed.createComponent(ClientListComponent)
     fixture.detectChanges()
   }
+
+  it('leaves out a client tagged test, and test is not among the tag filters', () => {
+    setup([client('1', 'דנה', { tags: ['vip'] }), client('2', 'אורח בדיקה', { tags: ['test'] })])
+    expect(names()).toEqual(['דנה'])
+    expect((cmp() as unknown as { allTags_: () => string[] }).allTags_()).not.toContain('test')
+  })
 
   it('shows every client when the search is empty, and hides merged ones', () => {
     setup([client('1', 'דנה'), client('2', 'יוסי'), client('3', 'רון', { mergedInto: '1' })])

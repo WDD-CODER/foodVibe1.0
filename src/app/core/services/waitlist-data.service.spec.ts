@@ -44,6 +44,18 @@ describe('WaitlistDataService', () => {
     expect(result).toEqual({ ok: true, entry })
   }))
 
+  it("notify returns the answer's sent flag", fakeAsync(() => {
+    let out: unknown
+    void service.notify('w1').then((r) => (out = r))
+    http.expectOne((r) => r.url.endsWith('/w1/notify')).flush({ ...entry, sent: true })
+    tick()
+    expect(out).toEqual({ ok: true, entry, sent: true })
+    void service.notify('w1').then((r) => (out = r))
+    http.expectOne((r) => r.url.endsWith('/w1/notify')).flush({ ...entry, sent: false })
+    tick()
+    expect(out).toEqual({ ok: true, entry, sent: false })
+  }))
+
   it('notify, seat and left put to their routes', fakeAsync(() => {
     void service.notify('w1')
     http.expectOne((r) => r.method === 'PUT' && r.url.endsWith('/api/v1/waitlist/w1/notify')).flush(entry)

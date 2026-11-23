@@ -170,6 +170,10 @@ e2e/ui/678-1.spec.ts
 e2e/ui/678-2.spec.ts
 e2e/ui/678-3.spec.ts
 screens/678-*.png
+src/app/core/services/async-storage.service.spec.ts
+src/app/core/services/trash.service.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -192,7 +196,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `SimulatorPage` (`src/app/pages/frontdesk/simulator/`) — family: none — rung: 4 — why: no screen plays a guest; it is a page of its own, built from shared pieces (`app-page-header`, `app-chat-thread`, `app-empty-state`, `app-form-field`), with no new shared component.
-- The chat — family: none — rung: 4 — why: `app-chat-thread` of plan 677 used as it is (`perspective: 'guest'`, `buttonsEnabled: true`), no new piece; its family `chat-thread` is registered by 677 and is not on `main` when this plan is saved, so the gate cannot name it yet.
+- The chat — family: chat-thread — rung: 2 — why: `app-chat-thread` of plan 677 used as it is (`perspective: 'guest'`, `buttonsEnabled: true`), no new piece; its family `chat-thread` is registered by 677.
 - `SimulatorService` (`src/app/pages/frontdesk/simulator/services/simulator.service.ts`) — family: http — rung: 3 — why: a page-scoped client of the three `sim` routes through `HttpClient` and the `API` map, like `StockCountService`; the thread and the guest list come from `ConversationDataService` of plan 677.
 - Guest list rows — family: list-page — rung: 2 — why: single-line `.c-list-row` buttons in a side column; no search, sort or selection.
 - New-guest fields and the message box — family: form-field — rung: 1 — why: `app-form-field` rows with the app's input engine.
@@ -203,6 +207,7 @@ append the path to the scope block above and retry.
 - Waiting-list tooltip — family: feedback — rung: 1 — why: the native `[attr.title]` plus `aria-label` the drawer of plan 673 already has on that button; only its key changes.
 - Empty guest list, owner-only message, failed read — family: empty-state — rung: 1 — why: `app-empty-state` with a message key (and the retry action).
 - Loading and messages — family: feedback — rung: 1 — why: `app-loader`, `UserMsgService`, `LoggingService`.
+- Page-local classes `.sim`, `.sim-banner`, `.sim-body`, `.sim-side`, `.sim-side-content`, `.sim-side-content--hidden`, `.sim-side-title`, `.sim-collapsed`, `.sim-guests`, `.sim-guest`, `.sim-guest-name`, `.sim-guest-phone`, `.sim-new-actions`, `.sim-window`, `.sim-hint`, `.sim-phone-col`, `.sim-phone`, `.sim-phone-top`, `.sim-open-inbox`, `.sim-messages`, `.sim-box`, `.sim-text` — family: engine-classes — rung: 1 — why: the page's own layout in `simulator.page.scss` (no `.c-*` class added); `.c-input-stack`, `.c-list-row`, `.c-input` are used as they are.
 - Route — family: module-gate — rung: 1 — why: `moduleGuard(['frontdesk'])` as the other `frontdesk/` pages.
 
 ## Defaults
@@ -353,18 +358,18 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give the browser one client for the three test routes — guest sends, guest taps a button, run a job now, clear test data, with error codes returned as codes; the path entry; spec — src/app/pages/frontdesk/simulator/services/simulator.service.ts, src/app/pages/frontdesk/simulator/services/simulator.service.spec.ts, src/app/core/services/http-storage.adapter.ts
-- [ ] A2: Let the simulator read a thread as the guest without clearing the business's unread number — the optional peek flag on the thread read and its spec case — src/app/core/services/conversation-data.service.ts, src/app/core/services/conversation-data.service.spec.ts
-- [ ] A3: Open the simulator page for the owner only and say clearly that nothing is sent — the lazy route, the owner check with its message, the banner, the two-column and one-column layout, the two icons; all dictionary keys of this plan — src/app/app.routes.ts, src/app/app.config.ts, src/app/pages/frontdesk/simulator/simulator.page.ts, .html, .scss, public/assets/data/dictionary.json
-- [ ] A4: Pick a test guest or make a new one — the guest list with its loading, empty and failed states, the new-guest fields with their checks — src/app/pages/frontdesk/simulator/simulator.page.ts, .html
-- [ ] A5: Write as the guest and see the business answer in a phone-shaped chat — the frame, the shared thread from the guest's side, the message box with its failure paths, button taps, the fast and slow refresh — src/app/pages/frontdesk/simulator/simulator.page.ts, .html, .scss
-- [ ] A6: Show the 24-hour window and make the reminder or the late mark happen now — the window line, the two clock buttons with their disabled rule and results — src/app/pages/frontdesk/simulator/simulator.page.ts, .html
-- [ ] A7: Remove everything the tests created with one confirmed press — the clear button, the shared confirmation, the results; the page spec — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.spec.ts
-- [ ] A12: Keep test guests out of the real clients list, the client picker and the downloads — the real-clients computed and its three readers, test bookings out of the bookings file; specs — src/app/core/services/client-data.service.ts, src/app/pages/clients/components/client-list/client-list.component.ts, src/app/shared/client-picker/client-picker.component.ts, src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.ts
-- [ ] A13: Make the waiting list say whether the table-is-ready message was really sent — the sent flag from the call, the new tooltip, the two result messages; specs — src/app/core/services/waitlist-data.service.ts, src/app/pages/bookings/components/waitlist-drawer/waitlist-drawer.component.ts, .html, .spec.ts
-- [ ] A8: Link the simulator and the inbox to each other — the owner-only header link on the inbox, the open-in-inbox link on the phone frame; the inbox spec case — src/app/pages/inbox/inbox.page.ts, src/app/pages/inbox/inbox.page.html, src/app/pages/inbox/inbox.page.spec.ts
-- [ ] A9: Record the new pieces where the next plan looks for them — the registry lines, the inventory row, the folder map, the map's extension line — docs/brain/component-families.md, docs/brain/inventory.md, src/app/pages/breadcrumbs.md, docs/restaurant/restaurant-map.md
-- [ ] A10: Write the three screen checks that run in the real app — signInQa, stateful answers of the sim and conversation calls; screenshots — e2e/ui/678-1.spec.ts, e2e/ui/678-2.spec.ts, e2e/ui/678-3.spec.ts
+- [x] A1: Give the browser one client for the three test routes — guest sends, guest taps a button, run a job now, clear test data, with error codes returned as codes; the path entry; spec — src/app/pages/frontdesk/simulator/services/simulator.service.ts, src/app/pages/frontdesk/simulator/services/simulator.service.spec.ts, src/app/core/services/http-storage.adapter.ts
+- [x] A2: Let the simulator read a thread as the guest without clearing the business's unread number — the optional peek flag on the thread read and its spec case — src/app/core/services/conversation-data.service.ts, src/app/core/services/conversation-data.service.spec.ts
+- [x] A3: Open the simulator page for the owner only and say clearly that nothing is sent — the lazy route, the owner check with its message, the banner, the two-column and one-column layout, the two icons; all dictionary keys of this plan — src/app/app.routes.ts, src/app/app.config.ts, src/app/pages/frontdesk/simulator/simulator.page.ts, .html, .scss, public/assets/data/dictionary.json
+- [x] A4: Pick a test guest or make a new one — the guest list with its loading, empty and failed states, the new-guest fields with their checks — src/app/pages/frontdesk/simulator/simulator.page.ts, .html
+- [x] A5: Write as the guest and see the business answer in a phone-shaped chat — the frame, the shared thread from the guest's side, the message box with its failure paths, button taps, the fast and slow refresh — src/app/pages/frontdesk/simulator/simulator.page.ts, .html, .scss
+- [x] A6: Show the 24-hour window and make the reminder or the late mark happen now — the window line, the two clock buttons with their disabled rule and results — src/app/pages/frontdesk/simulator/simulator.page.ts, .html
+- [x] A7: Remove everything the tests created with one confirmed press — the clear button, the shared confirmation, the results; the page spec — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.spec.ts
+- [x] A12: Keep test guests out of the real clients list, the client picker and the downloads — the real-clients computed and its three readers, test bookings out of the bookings file; specs — src/app/core/services/client-data.service.ts, src/app/pages/clients/components/client-list/client-list.component.ts, src/app/shared/client-picker/client-picker.component.ts, src/app/pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card.component.ts
+- [x] A13: Make the waiting list say whether the table-is-ready message was really sent — the sent flag from the call, the new tooltip, the two result messages; specs — src/app/core/services/waitlist-data.service.ts, src/app/pages/bookings/components/waitlist-drawer/waitlist-drawer.component.ts, .html, .spec.ts
+- [x] A8: Link the simulator and the inbox to each other — the owner-only header link on the inbox, the open-in-inbox link on the phone frame; the inbox spec case — src/app/pages/inbox/inbox.page.ts, src/app/pages/inbox/inbox.page.html, src/app/pages/inbox/inbox.page.spec.ts
+- [x] A9: Record the new pieces where the next plan looks for them — the registry lines, the inventory row, the folder map, the map's extension line — docs/brain/component-families.md, docs/brain/inventory.md, src/app/pages/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A10: Write the three screen checks that run in the real app — signInQa, stateful answers of the sim and conversation calls; screenshots — e2e/ui/678-1.spec.ts, e2e/ui/678-2.spec.ts, e2e/ui/678-3.spec.ts
 - [ ] A11: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, the arch gate, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
@@ -404,3 +409,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the clock buttons are disabled until the test guest has a booking, instead of answering with an error.
 - behaviour: the window clock is shown only; no control closes the window in this plan.
 - behaviour: the thread read of the simulator sends `peek=1` so the business's unread number stays; plan 687 must honour it.
+- Evidence (after the last edit): `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0; `node scripts/scope-check.mjs --diff=origin/orch/rs-conv-ui --plan=…` → SCOPE ok; kit-checks → ok (6 checks); `pnpm run lint:icons`, `lint:reuse`, `breadcrumbs-check`, `scope-check --arch` → ok. `log-query` → SKIP (no database configured).
+- The `[ui]` specs `e2e/ui/678-1..3.spec.ts` are written, not run (no app in the worktree).
+- The server already honours `peek=1` (server/routes/conversations.js:86), so no `approved:` for the server route was needed.
+- decision: the client picker filters with the exported `isTestClient` (same rule as `realClients_`) instead of reading `realClients_`, because the specs of other pickers' hosts mock `ClientDataService` with `allClients_` only and are outside this plan's scope — reverse: read `realClients_` in `client-picker.component.ts` and add it to those mocks.
+- Reuse Check of this plan edited: the chat row is now rung 2 (family `chat-thread`, registered by 677) and one row names the page-local `.sim-*` classes; family `simulator-page` added to `docs/brain/component-families.md`.

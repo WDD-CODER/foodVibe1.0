@@ -2,6 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
+Earlier (77 runs): plans 219 · merged 197 · parked 19 · fix rounds 98 · escalations 43 · gate fails 27 · ✗ 14 · checker misses 0 — per run: plans 2.84 · parked 0.25 · fix rounds 1.27 · ✗ per plan 0.06
+
+| Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 Earlier (76 runs): plans 218 · merged 196 · parked 19 · fix rounds 97 · escalations 42 · gate fails 26 · ✗ 14 · checker misses 0 — per run: plans 2.87 · parked 0.25 · fix rounds 1.28 · ✗ per plan 0.06
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
@@ -24,6 +28,9 @@ Earlier (76 runs): plans 218 · merged 196 · parked 19 · fix rounds 97 · esca
 | 2026-11-23 | rs-book-srv | 668,669,685 | 3 | 0 | - | 1 | 2 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-book-ui-2 | 671,672,673,686 | 4 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-conv-srv | 675,687 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-23 | rs-jobs | 676 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-23 | rs-book-ui-3 | 670 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-23 | rs-conv-ui | 677,678 | 2 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
 | 2026-11-23 | rs-book-ui-3 | 670 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-demo | 674 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
 | 2026-11-23 | rs-jobs | 676 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |

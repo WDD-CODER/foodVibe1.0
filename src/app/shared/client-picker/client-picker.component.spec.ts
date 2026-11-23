@@ -24,6 +24,7 @@ describe('ClientPickerComponent', () => {
   let clears: number
   let adding: boolean[]
   const dana = { _id: 'c1', name: 'דנה כהן', phone: '052-1111111' } as Client
+  const simGuest = { _id: 'c9', name: 'דנה בדיקה', phone: '050-0000001', tags: ['test'] } as Client
   const added = { _id: 'c2', name: 'לקוח חדש', phone: '050-1234567' } as Client
 
   const combobox = () =>
@@ -44,7 +45,7 @@ describe('ClientPickerComponent', () => {
 
   beforeEach(async () => {
     clientData = jasmine.createSpyObj<ClientDataService>('ClientDataService', ['addClient'], {
-      allClients_: signal<Client[]>([dana])
+      allClients_: signal<Client[]>([dana, simGuest])
     })
     clientData.addClient.and.resolveTo(added)
     isOwner_ = signal(true)
@@ -76,6 +77,14 @@ describe('ClientPickerComponent', () => {
     fixture.detectChanges()
     el.querySelector<HTMLElement>('[role="option"]')!.click()
     expect(picks).toEqual([dana])
+  })
+
+  it('does not offer a client tagged test', () => {
+    combobox().query.set('דנ')
+    fixture.detectChanges()
+    const options = Array.from(el.querySelectorAll('[role="option"]'))
+    expect(options.some((o) => o.textContent?.includes('דנה כהן'))).toBeTrue()
+    expect(options.some((o) => o.textContent?.includes('בדיקה'))).toBeFalse()
   })
 
   it('shows the selected client name only, inside the field, and the X clears it', () => {
