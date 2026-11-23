@@ -34,7 +34,7 @@
 | `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
 | `routes/floor-plan.js` | Mounted at `/api/v1/floor-plan` (plan 662, C-FLOOR, C-HOLD): GET / and PUT / of the one floor plan (plan 664); the hold routes come with plan 667; PUT /confirm-mode (plan 667) changes only `tableService.confirmMode` of the owner's profile |
-| `routes/waitlist.js` | Mounted at `/api/v1/waitlist` (plan 662, C-WAIT): empty until plan 673 |
+| `routes/waitlist.js` | Mounted at `/api/v1/waitlist` (plan 662, C-WAIT; plan 673): `GET /?date=` → `{ entries, now }`, `POST /`, `PUT /:id/notify` (stamps only), `PUT /:id/seat` (claims the entry, then `createWalkIn`, puts the entry back when refused), `PUT /:id/left`; both module checks; the only writer of `waitlistEntries`; logs hold no name or phone |
 | `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 662, C-CONV): empty until plan 675 |
 | `routes/sim.js` | Mounted at `/api/v1/sim` (plan 662, the simulated chat channel): empty until plan 675 |
 | `shared/schemas/modules.ts` | `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`, `platformUpdateSchema` (plan 615, C-MODULES); shared by the server gate and the browser |

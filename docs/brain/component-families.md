@@ -513,6 +513,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a short read-only side panel of the service screen — never a second list shell.
 - Known copies: none.
 
+### waitlist-drawer — the waiting list of the service screen
+
+- Status: stable — plan 673
+- Use: `src/app/pages/bookings/components/waitlist-drawer/` · `app-waitlist-drawer` (inputs `date`, `plan`; outputs `closed`, `seatRequested`, `changed`): the add form, the waiting rows in order with the minutes waited from the server's clock, "table is ready", "seated" and "left"; `app-modal-shell [sheet]`. The client is `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`, the five `/api/v1/waitlist` calls, codes returned as codes); `firstWaitingFit` in `table-state.util.ts` names the party that fits a table (the table sheet's line and the toast after "finished").
+- Classes: `.wl`, `.wl__head`, `.wl__form`, `.wl__list`, `.wl-row`, `.wl-row__*` (the drawer's own stylesheet; no `.c-*` class added).
+- When: any screen that shows or changes the day's waiting parties — never a second list or a second client of the waiting-list routes.
+- Known copies: none.
+
 ### table-sheet — the sheet of one table on the service screen
 
 - Status: stable — plan 686

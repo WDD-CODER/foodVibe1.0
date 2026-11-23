@@ -24,6 +24,7 @@ export const API = {
   requests: `${API_ROOT}/requests`,
   bookings: `${API_ROOT}/bookings`,
   floorPlan: (path?: string) => (path ? `${API_ROOT}/floor-plan/${path}` : `${API_ROOT}/floor-plan`),
+  waitlist: (path?: string) => (path ? `${API_ROOT}/waitlist/${path}` : `${API_ROOT}/waitlist`),
   public: (path: string) => `${API_ROOT}/public/${path}`,
   log: `${API_ROOT}/log`,
   health: `${API_ROOT}/health`

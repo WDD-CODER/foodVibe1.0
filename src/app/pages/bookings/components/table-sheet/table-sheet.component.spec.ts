@@ -248,4 +248,43 @@ describe('TableSheetComponent (plan 686)', () => {
     setup({ bookings: [booking()], look: confirmedLook })
     expect(byId('tsh-walk-in')).toBeNull()
   })
+
+  const waiting = (over: object = {}) => ({
+    _id: 'w1',
+    status: 'waiting',
+    guestName: 'לוי',
+    partySize: 3,
+    joinedAt: 1,
+    ...over
+  })
+
+  it('a free table shows the waiting party that fits, and its seat button asks to seat that entry (plan 673)', () => {
+    setup({ bookings: [] })
+    const seat = jasmine.createSpy('waitlistSeatRequested')
+    fixture.componentInstance.waitlistSeatRequested.subscribe(seat)
+    fixture.componentRef.setInput('waitlist', [waiting({ _id: 'big', partySize: 9, joinedAt: 0 }), waiting()])
+    fixture.detectChanges()
+    expect(byId('tsh-fits')?.textContent).toContain('wl_fits')
+    click('tsh-fit-seat')
+    expect(seat).toHaveBeenCalledOnceWith(jasmine.objectContaining({ _id: 'w1' }))
+  })
+
+  it('no line and no button when no waiting party fits (plan 673)', () => {
+    setup({ bookings: [] })
+    fixture.componentRef.setInput('waitlist', [waiting({ partySize: 9 })])
+    fixture.detectChanges()
+    expect(byId('tsh-fits')).toBeNull()
+    expect(byId('tsh-fit-seat')).toBeNull()
+  })
+
+  it('"finished" with a fitting waiting party shows the wl_fits_toast message (plan 673)', fakeAsync(() => {
+    setup({ bookings: [booking({ status: 'seated' })], look: { state: 'seated', bookingId: 'b1' } })
+    fixture.componentRef.setInput('waitlist', [waiting()])
+    fixture.detectChanges()
+    click('tsh-finish')
+    tick()
+    expect(setStatus).toHaveBeenCalledOnceWith('b1', 'finished')
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('wl_fits_toast')
+    flush()
+  }))
 })

@@ -25,6 +25,11 @@
           <span class="c-chip--tag" data-testid="fv-pill-no-show">
             {{ 'fv_pill_no_show' | translatePipe }} {{ pills_().noShow }}
           </span>
+          @if (isToday_()) {
+            <span class="c-chip--tag" data-testid="fv-pill-waiting">
+              {{ 'wl_pill' | translatePipe }} {{ waitingCount_() }}
+            </span>
+          }
           @if (isOwner_()) {
             <button
               type="button"
@@ -60,6 +65,19 @@
             <lucide-icon name="user-plus" [size]="18" aria-hidden="true"></lucide-icon>
             {{ 'wlk_open' | translatePipe }}
           </button>
+          @if (isToday_()) {
+            <button type="button" class="c-btn-ghost" data-testid="fv-waitlist-open" (click)="openWaitlist()">
+              <lucide-icon name="users" [size]="18" aria-hidden="true"></lucide-icon>
+              {{ 'wl_open' | translatePipe }}
+              <span
+                class="c-chip__count"
+                [class.c-chip__count--zero]="waitingCount_() === 0"
+                data-testid="fv-waitlist-count"
+              >
+                ({{ waitingCount_() }})
+              </span>
+            </button>
+          }
         </div>
 
         @if (strip_().length > 0) {
@@ -98,7 +116,7 @@
 
         <div class="fv__body">
           <div class="fv__room">
-            @if (movingBookingId_()) {
+            @if (pickMode_()) {
               <div class="fv__move" role="status" data-testid="fv-move-banner">
                 <span>{{ bannerText_() }}</span>
                 <button
@@ -153,6 +171,16 @@
           />
         }
 
+        @if (waitlistOpen_()) {
+          <app-waitlist-drawer
+            [date]="date()"
+            [plan]="plan_()!"
+            (closed)="waitlistOpen_.set(false)"
+            (seatRequested)="startSeating($event)"
+            (changed)="onWaitlistChanged()"
+          />
+        }
+
         @if (sheetTable_(); as t) {
           @if (board_(); as board) {
             <app-table-sheet
@@ -162,10 +190,12 @@
               [moment]="moment_()"
               [live]="isLive_()"
               [look]="sheetLook_()"
+              [waitlist]="waitlist_()"
               (closed)="sheetTableKey_.set(null)"
               (changed)="onSheetChanged()"
               (moveRequested)="startMove($event)"
               (walkInRequested)="openWalkIn($event)"
+              (waitlistSeatRequested)="seatEntry($event, t.key)"
             />
           }
         }

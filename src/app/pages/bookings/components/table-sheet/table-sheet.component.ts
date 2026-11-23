@@ -9,7 +9,8 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { Booking, BookingStatus } from '@models/booking.model'
-import { nextOnTable, type TableLook } from 'src/app/core/utils/table-state.util'
+import type { WaitlistEntry } from '@models/waitlist-entry.model'
+import { firstWaitingFit, nextOnTable, type TableLook } from 'src/app/core/utils/table-state.util'
 
 type PlanTable = FloorMapPlan['tables'][number]
 
@@ -45,8 +46,13 @@ export class TableSheetComponent {
   /** The table's look at the moment (its state and the booking that gives it). */
   readonly look = input.required<TableLook>()
 
+  /** Plan 673: today's waiting list (empty when it is not today or not loaded). */
+  readonly waitlist = input<readonly WaitlistEntry[]>([])
+
   readonly closed = output<void>()
   readonly changed = output<void>()
+  /** Plan 673: the host wants to seat this waiting party on this table. */
+  readonly waitlistSeatRequested = output<WaitlistEntry>()
   readonly moveRequested = output<string>()
   /** Plan 672: the host wants to seat a walk-in on this (free) table. */
   readonly walkInRequested = output<string>()
@@ -91,9 +97,25 @@ export class TableSheetComponent {
   protected readonly canFinish_ = computed(() => this.canAct_() && this.now_()?.status === 'seated')
   protected readonly canCancel_ = computed(() => this.canSeat_() || this.canFinish_())
 
+  /** Plan 673: the waiting party that fits this table (earliest first), or null. */
+  protected readonly waitingFit_ = computed(() => firstWaitingFit(this.waitlist(), this.table()))
+  protected readonly fitsLine_ = computed(() => {
+    const fit = this.waitingFit_()
+    return fit
+      ? this.translation.translate('wl_fits').replace('{name}', fit.guestName).replace('{n}', String(fit.partySize))
+      : ''
+  })
+
+  protected seatWaiting(): void {
+    const fit = this.waitingFit_()
+    if (!fit || this.busy_() || !this.live()) return
+    this.waitlistSeatRequested.emit(fit)
+  }
+
   protected async act(status: BookingStatus): Promise<void> {
     const booking = this.now_()
     if (!booking || this.busy_()) return
+    const fit = status === 'finished' ? this.waitingFit_() : null
     this.busy_.set(true)
     try {
       if (status === 'cancelled') {
@@ -102,6 +124,14 @@ export class TableSheetComponent {
       }
       const res = await this.bookingData.setStatus(booking._id, status)
       if (res.ok) {
+        if (fit) {
+          this.userMsg.onSetSuccessMsg(
+            this.translation
+              .translate('wl_fits_toast')
+              .replace('{t}', this.table().number)
+              .replace('{name}', fit.guestName)
+          )
+        }
         this.changed.emit()
         this.closed.emit()
       } else if (res.code === 'BAD_STATUS' || res.code === 'STATUS_CHANGED') {
