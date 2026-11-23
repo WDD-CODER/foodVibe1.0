@@ -3,12 +3,76 @@
     #grid
     class="floor-map__grid"
     data-testid="floor-grid"
+    [class.is-drawing]="drawing_()"
     [style.--fm-cols]="plan().grid.cols"
     [style.--fm-rows]="plan().grid.rows"
     [style.grid-template-columns]="'repeat(' + plan().grid.cols + ', 1fr)'"
     [style.grid-template-rows]="'repeat(' + plan().grid.rows + ', 1fr)'"
     (click)="onGridClick($event)"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="cancelDraw()"
   >
+    @for (z of zones_(); track z.key) {
+      @if (zoneEditable()) {
+        <button
+          type="button"
+          cdkDrag
+          cdkDragBoundary=".floor-map__grid"
+          [cdkDragDisabled]="!z.selected"
+          class="floor-map__zone"
+          [class.is-selected]="z.selected"
+          [attr.data-testid]="'floor-zone-' + z.key"
+          [attr.aria-label]="z.name"
+          [attr.aria-pressed]="z.selected ? 'true' : 'false'"
+          [style.--fm-zone]="z.color"
+          [style.grid-column]="z.rect.x + 1 + ' / span ' + z.rect.w"
+          [style.grid-row]="z.rect.y + 1 + ' / span ' + z.rect.h"
+          (click)="onZoneClick($event, z.key)"
+          (cdkDragEnded)="onZoneDragEnded($event, z)"
+        >
+          <span class="floor-map__zone-label">{{ z.name }}</span>
+        </button>
+        @if (z.selected) {
+          @for (corner of corners; track corner) {
+            <span
+              cdkDrag
+              cdkDragBoundary=".floor-map__grid"
+              class="floor-map__handle"
+              [class]="'floor-map__handle--' + corner"
+              [attr.data-corner]="corner"
+              aria-hidden="true"
+              [style.--fm-zone]="z.color"
+              [style.grid-column]="(corner.endsWith('end') ? z.rect.x + z.rect.w : z.rect.x + 1) + ''"
+              [style.grid-row]="(corner.startsWith('end') ? z.rect.y + z.rect.h : z.rect.y + 1) + ''"
+              (cdkDragEnded)="onHandleDragEnded($event, z, corner)"
+            ></span>
+          }
+        }
+      } @else {
+        <div
+          class="floor-map__zone"
+          aria-hidden="true"
+          [attr.data-testid]="'floor-zone-' + z.key"
+          [style.--fm-zone]="z.color"
+          [style.grid-column]="z.rect.x + 1 + ' / span ' + z.rect.w"
+          [style.grid-row]="z.rect.y + 1 + ' / span ' + z.rect.h"
+        >
+          <span class="floor-map__zone-label">{{ z.name }}</span>
+        </div>
+      }
+    }
+    @if (draft_(); as d) {
+      <div
+        class="floor-map__zone floor-map__zone--draft"
+        data-testid="floor-zone-draft"
+        aria-hidden="true"
+        [style.--fm-zone]="d.color"
+        [style.grid-column]="d.rect.x + 1 + ' / span ' + d.rect.w"
+        [style.grid-row]="d.rect.y + 1 + ' / span ' + d.rect.h"
+      ></div>
+    }
     @for (t of views_(); track t.table.key) {
       <button
         type="button"
@@ -23,6 +87,9 @@
         [class.is-dimmed]="t.dimmed"
         [class.is-inactive]="t.inactive"
         [class.is-overlap]="t.warn"
+        [class.is-joined]="t.joined"
+        [class.is-zoned]="t.zoneColor !== null"
+        [style.--fm-zone]="t.zoneColor"
         [attr.data-testid]="'floor-table-' + t.table.number"
         [attr.data-key]="t.table.key"
         [attr.data-x]="t.table.x"
@@ -36,6 +103,9 @@
         (cdkDragEnded)="onDragEnded($event, t.table)"
       >
         <span class="floor-map__number">{{ t.table.number }}</span>
+        @if (t.joined) {
+          <lucide-icon class="floor-map__link" name="link" [size]="12" aria-hidden="true"></lucide-icon>
+        }
         @if (t.warn) {
           <lucide-icon class="floor-map__warn" name="alert-triangle" [size]="14" aria-hidden="true"></lucide-icon>
         }
