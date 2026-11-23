@@ -128,6 +128,7 @@ e2e/ui/682-2.spec.ts
 e2e/ui/682-3.spec.ts
 screens/682-*.png
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
