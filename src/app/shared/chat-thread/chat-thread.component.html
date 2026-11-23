@@ -40,6 +40,17 @@
               <span class="ct-status-label">{{ item.statusKey | translatePipe }}</span>
             </span>
           }
+          @if (fixable() && item.byAi) {
+            <button
+              type="button"
+              class="c-btn-ghost ct-fix"
+              data-testid="chat-fix"
+              (click)="fixRequested.emit(item.id)"
+            >
+              <lucide-icon name="flag" [size]="14"></lucide-icon>
+              <span class="btn-label">{{ 'chat_fix_answer' | translatePipe }}</span>
+            </button>
+          }
         </div>
       </div>
     </li>

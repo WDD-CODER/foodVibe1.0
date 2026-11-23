@@ -33,6 +33,8 @@ import { API } from '@services/http-storage.adapter'
 import type { Booking } from '@models/booking.model'
 import type { ConversationRow, LinkedCard } from '@models/conversation.model'
 import { ReplyBoxComponent } from './components/reply-box/reply-box.component'
+import { SuggestionBarComponent, type SuggestionState } from './components/suggestion-bar/suggestion-bar.component'
+import { FixAnswerDialogComponent } from './components/fix-answer-dialog/fix-answer-dialog.component'
 
 export type InboxFilter = 'all' | 'mine' | 'bot' | 'test'
 const FILTERS: readonly InboxFilter[] = ['all', 'mine', 'bot', 'test']
@@ -62,7 +64,9 @@ const WAITING: readonly string[] = ['new', 'qualified', 'needs_info']
     EmptyStateComponent,
     LoaderComponent,
     ChatThreadComponent,
-    ReplyBoxComponent
+    ReplyBoxComponent,
+    SuggestionBarComponent,
+    FixAnswerDialogComponent
   ],
   templateUrl: './inbox.page.html',
   styleUrl: './inbox.page.scss',
@@ -98,6 +102,7 @@ export class InboxPage {
   private readonly drafts_ = signal<Record<string, string>>({})
   private readonly booking_ = signal<Booking | null>(null)
   private readonly scroller = viewChild<ElementRef<HTMLElement>>('scroller')
+  private readonly replyBox = viewChild(ReplyBoxComponent)
   private stickToBottom = true
 
   private readonly meId_ = computed(() => this.user.user_()?._id ?? '')
@@ -172,6 +177,24 @@ export class InboxPage {
 
   protected readonly draft_ = computed(() => this.drafts_()[this.id_() ?? ''] ?? '')
 
+  /** Plan 682: per conversation, the suggestion text a member dismissed or sent; a different text shows again. */
+  private readonly hiddenSuggestion_ = signal<Record<string, string>>({})
+  protected readonly sgState_ = signal<SuggestionState>('idle')
+  protected readonly sgError_ = signal<string | null>(null)
+  protected readonly sgBusy_ = signal(false)
+  /** The bar belongs to a conversation a member holds, while the 24-hour window is open. */
+  protected readonly sgVisible_ = computed(() => {
+    const c = this.current_()?.conversation
+    return !!c && c.status === 'human' && this.threadNow_() < c.windowExpiresAt
+  })
+  protected readonly sgText_ = computed(() => {
+    const c = this.current_()?.conversation
+    if (!c?.suggestion) return ''
+    return this.hiddenSuggestion_()[c._id] === c.suggestion ? '' : c.suggestion
+  })
+  /** The assistant message a member is correcting. */
+  protected readonly fixing_ = signal<{ id: string; text: string } | null>(null)
+
   constructor() {
     void this.badge.refresh(true)
     void this.requests.ensureLoaded()
@@ -181,6 +204,9 @@ export class InboxPage {
       untracked(() => {
         this.stickToBottom = true
         this.booking_.set(null)
+        this.sgState_.set('idle')
+        this.sgError_.set(null)
+        this.fixing_.set(null)
         if (id) void this.openThread(id)
         else this.data.closeThread()
       })
@@ -238,6 +264,77 @@ export class InboxPage {
   protected onDraft(value: string): void {
     const id = this.id_()
     if (id) this.drafts_.update((d) => ({ ...d, [id]: value }))
+  }
+
+  protected async askSuggestion(): Promise<void> {
+    const id = this.id_()
+    if (!id) return
+    this.sgState_.set('loading')
+    this.sgError_.set(null)
+    const res = await this.data.suggest(id)
+    if (this.id_() !== id) return
+    if (res.ok) {
+      this.hiddenSuggestion_.update((h) => {
+        const { [id]: _gone, ...rest } = h
+        return rest
+      })
+      this.sgState_.set('idle')
+    } else this.sgState_.set('failed')
+  }
+
+  protected dismissSuggestion(): void {
+    this.hideSuggestion()
+  }
+
+  protected async sendSuggestion(): Promise<void> {
+    const id = this.id_()
+    const text = this.sgText_()
+    if (!id || !text) return
+    this.sgBusy_.set(true)
+    this.sgError_.set(null)
+    const res = await this.data.reply(id, text)
+    this.sgBusy_.set(false)
+    if (res.ok) {
+      this.hideSuggestion(id, text)
+      return
+    }
+    if (res.code === 'WINDOW_CLOSED') this.sgError_.set('ibx_window_closed_now')
+    else if (res.code === 'DO_NOT_CONTACT') this.sgError_.set('ibx_do_not_contact')
+    else if (res.code === 'BAD_STATUS') this.closedMeanwhile()
+    else this.sgError_.set('ibx_send_failed')
+  }
+
+  /** Puts the suggestion into the reply box: replaces an empty box, else goes after a line break. */
+  protected editSuggestion(): void {
+    const text = this.sgText_()
+    if (!text) return
+    const current = this.draft_()
+    this.onDraft(current.trim() ? current + '\n' + text : text)
+    this.replyBox()?.focus()
+  }
+
+  /** A reply went out from the reply box: the suggestion that was shown counts as used. */
+  protected onReplySent(): void {
+    this.hideSuggestion()
+  }
+
+  protected openFix(messageId: string): void {
+    const m = this.current_()?.messages.find((x) => x._id === messageId)
+    if (m) this.fixing_.set({ id: m._id, text: m.text })
+  }
+
+  protected closeFix(): void {
+    this.fixing_.set(null)
+  }
+
+  protected fixSaved(drafted: boolean): void {
+    this.fixing_.set(null)
+    this.userMsg.onSetSuccessMsg(this.translation.translate(drafted ? 'ibx_fix_saved' : 'ibx_fix_saved_plain'))
+  }
+
+  private hideSuggestion(id = this.id_(), text = this.sgText_()): void {
+    if (!id || !text) return
+    this.hiddenSuggestion_.update((h) => ({ ...h, [id]: text }))
   }
 
   protected onScroll(): void {

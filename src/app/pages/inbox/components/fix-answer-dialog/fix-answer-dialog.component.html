@@ -1,0 +1,48 @@
+<app-modal-shell
+  size="md"
+  titleKey="ibx_fix_title"
+  [sheet]="true"
+  [hasChanges]="hasChanges_()"
+  (dismissed)="closed.emit()"
+>
+  <div class="fx" dir="rtl" data-testid="fix-dialog">
+    <blockquote class="fx-quote" data-testid="fix-quote">{{ quote() }}</blockquote>
+    <app-form-field [label]="'ibx_fix_answer_label' | translatePipe" forId="fx-answer">
+      <textarea
+        id="fx-answer"
+        class="c-input"
+        rows="4"
+        data-testid="fix-answer"
+        [maxLength]="answerMax"
+        [disabled]="busy_()"
+        [ngModel]="answer_()"
+        (ngModelChange)="answer_.set($event)"
+      ></textarea>
+      @if (counter_(); as counter) {
+        <span class="fx-counter" data-testid="fix-counter">{{ counter }}</span>
+      }
+    </app-form-field>
+    <app-form-field [label]="'ibx_fix_issue_label' | translatePipe">
+      <div class="fx-issue" role="group" [attr.title]="hint_()" [attr.aria-description]="hint_()">
+        <app-custom-select
+          [options]="issueOptions"
+          [ngModel]="issue_()"
+          (ngModelChange)="issue_.set($event)"
+          [translateLabels]="true"
+          placeholder="ibx_fix_issue_label"
+        />
+      </div>
+    </app-form-field>
+    @if (failed_()) {
+      <p class="c-field-error" role="alert" data-testid="fix-failed">{{ 'ibx_fix_failed' | translatePipe }}</p>
+    }
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" data-testid="fix-cancel" [disabled]="busy_()" (click)="closed.emit()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button type="button" class="c-btn-primary" data-testid="fix-save" [disabled]="!canSave_()" (click)="save()">
+        {{ 'ibx_fix_save' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</app-modal-shell>
