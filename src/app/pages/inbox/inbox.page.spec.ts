@@ -14,6 +14,7 @@ import {
   LucideAngularModule,
   MessageCircle,
   Send,
+  Smartphone,
   X
 } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -21,6 +22,7 @@ import { ConversationDataService } from '@services/conversation-data.service'
 import { InboxBadgeService } from '@services/inbox-badge.service'
 import { RequestDataService } from '@services/request-data.service'
 import { TranslationService } from '@services/translation.service'
+import { PermissionService } from '@services/permission.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { UserService } from '@services/user.service'
 import type { Conversation, ConversationRow, Message } from '@models/conversation.model'
@@ -78,6 +80,8 @@ describe('InboxPage (plan 677)', () => {
   let params: BehaviorSubject<ParamMap>
   let data: Record<string, unknown>
   let http: HttpTestingController
+  let owner: WritableSignal<boolean>
+  let admin: WritableSignal<boolean>
 
   async function create(id: string | null = null) {
     params = new BehaviorSubject(convertToParamMap(id ? { id } : {}))
@@ -94,6 +98,7 @@ describe('InboxPage (plan 677)', () => {
           Hand,
           MessageCircle,
           Send,
+          Smartphone,
           X
         })
       ],
@@ -106,7 +111,8 @@ describe('InboxPage (plan 677)', () => {
         { provide: InboxBadgeService, useValue: { refresh: jasmine.createSpy('refresh').and.resolveTo() } },
         { provide: RequestDataService, useValue: { all_: signal([]), ensureLoaded: () => Promise.resolve() } },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } },
-        { provide: UserService, useValue: { user_: signal({ _id: 'me' }) } },
+        { provide: UserService, useValue: { user_: signal({ _id: 'me' }), isPlatformAdmin_: admin } },
+        { provide: PermissionService, useValue: { isOwner_: owner } },
         { provide: UserMsgService, useValue: { onSetErrorMsg: jasmine.createSpy('err') } }
       ]
     }).compileComponents()
@@ -118,6 +124,8 @@ describe('InboxPage (plan 677)', () => {
   }
 
   beforeEach(() => {
+    owner = signal(false)
+    admin = signal(false)
     conversations = signal<ConversationRow[]>([])
     thread = signal(null)
     listFailed = signal(false)
@@ -147,6 +155,16 @@ describe('InboxPage (plan 677)', () => {
   const el = () => fixture.nativeElement as HTMLElement
   const rowEls = () => Array.from(el().querySelectorAll<HTMLElement>('[data-testid="inbox-row"]'))
   const text = (e: Element | null) => e?.textContent?.replace(/\s+/g, ' ').trim() ?? ''
+
+  it('shows the simulator link to an owner and hides it from staff', async () => {
+    await create()
+    expect(el().querySelector('[data-testid="sim-link"]')).toBeNull()
+    owner.set(true)
+    fixture.detectChanges()
+    const link = el().querySelector('[data-testid="sim-link"]')
+    expect(link?.getAttribute('href')).toBe('/frontdesk/simulator')
+    expect(text(link)).toBe('sim_link')
+  })
 
   it('orders rows unread first, then newest first, with the holder tag of each', async () => {
     conversations.set([

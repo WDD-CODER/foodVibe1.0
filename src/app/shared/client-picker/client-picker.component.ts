@@ -18,7 +18,7 @@ import {
   SearchComboboxComponent,
   SearchPick
 } from 'src/app/shared/search-combobox/search-combobox.component'
-import { ClientDataService } from '@services/client-data.service'
+import { ClientDataService, isTestClient } from '@services/client-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
@@ -82,7 +82,9 @@ export class ClientPickerComponent {
   protected readonly emptyKey_ = computed(() => (this.canCreate_() || !this.allowAdd() ? null : 'client_ask_owner'))
   /** Clients matching the typed text; the combobox gets them already filtered (its own filter is off). */
   protected readonly options_ = computed(() =>
-    this.clientData.allClients_().filter((c) => !this.exclude().includes(c._id) && matchesClientQuery(c, this.query_()))
+    this.clientData
+      .allClients_()
+      .filter((c) => !isTestClient(c) && !this.exclude().includes(c._id) && matchesClientQuery(c, this.query_()))
   )
 
   // 6. METHODS

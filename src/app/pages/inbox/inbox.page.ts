@@ -23,6 +23,7 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ChatThreadComponent } from 'src/app/shared/chat-thread/chat-thread.component'
 import { ConversationDataService } from '@services/conversation-data.service'
+import { PermissionService } from '@services/permission.service'
 import { InboxBadgeService } from '@services/inbox-badge.service'
 import { RequestDataService } from '@services/request-data.service'
 import { TranslationService } from '@services/translation.service'
@@ -72,6 +73,9 @@ export class InboxPage {
   private readonly badge = inject(InboxBadgeService)
   private readonly requests = inject(RequestDataService)
   private readonly user = inject(UserService)
+  private readonly permission = inject(PermissionService)
+  /** Plan 678: the simulator link is for the owner and a platform admin only. */
+  protected readonly canSimulate_ = computed(() => this.permission.isOwner_() || this.user.isPlatformAdmin_())
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
   private readonly http = inject(HttpClient)

@@ -1,4 +1,4 @@
-import { Injectable, Injector, Signal, inject } from '@angular/core'
+import { Injectable, Injector, Signal, computed, inject } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
@@ -13,6 +13,9 @@ import { Client } from '@models/client.model'
 const ENTITY = 'clients'
 const CLIENTS_URL = `${environment.apiUrl}/api/v1/clients`
 
+/** Plan 678: the simulator's test guests carry the tag `test`. */
+export const isTestClient = (c: { tags?: string[] }): boolean => (c.tags ?? []).includes('test')
+
 /**
  * Plan 514: the business's clients. Read through the storage adapter; the server decides what
  * staff see (name + phone only) and that only the owner may write.
@@ -26,6 +29,8 @@ export class ClientDataService extends BaseEntityDataService<Client> {
 
   /** Domain alias for the base-class signal. */
   readonly allClients_: Signal<Client[]> = this.all_
+  /** Plan 678: the clients without the simulator's test guests (tag `test`) — what lists, pickers and exports show. */
+  readonly realClients_: Signal<Client[]> = computed(() => this.all_().filter((c) => !isTestClient(c)))
 
   constructor() {
     // Deferred: load on ensureLoaded() via the menu-library / menu-intelligence routes.

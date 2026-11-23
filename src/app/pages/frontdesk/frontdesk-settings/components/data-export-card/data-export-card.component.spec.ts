@@ -1,6 +1,7 @@
 import { signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { LucideAngularModule, Download } from 'lucide-angular'
+import type { Booking } from '@models/booking.model'
 import { ClientDataService } from '@services/client-data.service'
 import { RequestDataService } from '@services/request-data.service'
 import { BookingDataService } from '@services/booking-data.service'
@@ -14,6 +15,8 @@ describe('DataExportCardComponent (plan 557)', () => {
   const isOwner_ = signal(true)
   let clientRows: unknown[]
   let requestRows: unknown[]
+  let bookingRows: unknown[] = []
+  let bookingsLoad = false
   let errors: string[]
   let downloads: { name: string; text: string }[]
   let blobReads: Promise<void>[]
@@ -37,7 +40,7 @@ describe('DataExportCardComponent (plan 557)', () => {
         { provide: PermissionService, useValue: { isOwner_ } },
         {
           provide: ClientDataService,
-          useValue: { reloadFromStorage: () => Promise.resolve(), allClients_: () => clientRows }
+          useValue: { reloadFromStorage: () => Promise.resolve(), realClients_: () => clientRows }
         },
         {
           provide: RequestDataService,
@@ -45,7 +48,10 @@ describe('DataExportCardComponent (plan 557)', () => {
         },
         {
           provide: BookingDataService,
-          useValue: { reloadFromStorage: () => Promise.reject(new Error('down')), all_: () => [] }
+          useValue: {
+            reloadFromStorage: () => (bookingsLoad ? Promise.resolve() : Promise.reject(new Error('down'))),
+            all_: () => bookingRows
+          }
         },
         { provide: TranslationService, useValue: { translate: (k: string | undefined) => k ?? '' } },
         { provide: UserMsgService, useValue: { onSetErrorMsg: (m: string) => errors.push(m) } },
@@ -109,6 +115,40 @@ describe('DataExportCardComponent (plan 557)', () => {
     const lines = downloads[0].text.split('\r\n').filter(Boolean)
     expect(lines.length).toBe(2)
     expect(lines[1]).toContain('דנה')
+  })
+
+  afterEach(() => {
+    bookingRows = []
+    bookingsLoad = false
+  })
+
+  it('the bookings file has no booking with test: true', async () => {
+    bookingRows = [
+      {
+        _id: 'b1',
+        date: '2026-11-23',
+        time: '19:00',
+        kind: 'table',
+        status: 'confirmed',
+        source: 'phone',
+        guestName: 'REALGUEST'
+      },
+      {
+        _id: 'b2',
+        date: '2026-11-23',
+        time: '20:00',
+        kind: 'table',
+        status: 'confirmed',
+        source: 'phone',
+        guestName: 'SIMGUEST',
+        test: true
+      }
+    ] as unknown as Booking[]
+    bookingsLoad = true
+    const el = await setup()
+    await click(el, 'export-bookings')
+    expect(downloads[0].text).toContain('REALGUEST')
+    expect(downloads[0].text).not.toContain('SIMGUEST')
   })
 
   it('leaves test requests out of the requests file', async () => {

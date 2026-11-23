@@ -91,7 +91,7 @@ export class ClientListComponent {
   }
 
   /** Every client that was not merged into another one. */
-  protected readonly baseClients_ = computed(() => this.clientData.allClients_().filter((c) => !c.mergedInto))
+  protected readonly baseClients_ = computed(() => this.clientData.realClients_().filter((c) => !c.mergedInto))
 
   protected readonly isEmptyList_ = computed(() => this.baseClients_().length === 0)
 
