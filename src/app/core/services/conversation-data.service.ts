@@ -7,6 +7,7 @@ import { LoggingService } from './logging.service'
 import type { Conversation, ConversationRow, Message } from '@models/conversation.model'
 
 const conversationsUrl = () => `${environment.apiUrl}${API.conversations}`
+const aiFrontdeskUrl = () => `${environment.apiUrl}${API.ai('frontdesk')}`
 
 export type ConversationResult = { ok: true } | { ok: false; code: string | null }
 export type Thread = { conversation: Conversation; messages: Message[] }
@@ -91,6 +92,43 @@ export class ConversationDataService {
 
   sendTemplate(id: string, name: string, values: Record<string, string>): Promise<ConversationResult> {
     return this.send(id, { template: { name, values } })
+  }
+
+  /** Plan 682: asks the assistant for a fresh draft reply; the held conversation gets the new `suggestion`. */
+  async suggest(id: string): Promise<{ ok: true; suggestion: string } | { ok: false }> {
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ suggestion: string }>(`${aiFrontdeskUrl()}/suggest`, { conversationId: id })
+      )
+      const suggestion = res.suggestion ?? ''
+      this.threadSig.update((t) =>
+        t && t.conversation._id === id ? { ...t, conversation: { ...t.conversation, suggestion } } : t
+      )
+      this.patchRow(id, { suggestion })
+      return { ok: true, suggestion }
+    } catch (err) {
+      this.logFailure('suggest', err)
+      return { ok: false }
+    }
+  }
+
+  /** Plan 682: turns a wrong assistant message and the right answer into a draft knowledge item. */
+  async fixAnswer(
+    conversationId: string,
+    messageId: string,
+    answer: string,
+    issue: string
+  ): Promise<{ ok: true; drafted: boolean } | { ok: false; code?: string }> {
+    try {
+      const res = await firstValueFrom(
+        this.http.post<{ drafted: boolean }>(`${aiFrontdeskUrl()}/fix`, { conversationId, messageId, answer, issue })
+      )
+      return { ok: true, drafted: res.drafted === true }
+    } catch (err) {
+      this.logFailure('fix', err)
+      const code = (err as { error?: { error?: string } }).error?.error
+      return code ? { ok: false, code } : { ok: false }
+    }
   }
 
   takeOver(id: string): Promise<ConversationResult> {

@@ -1,0 +1,14 @@
+{
+  "id": "20",
+  "title": "Level 0: nothing is sent, the offer is stored as a suggestion",
+  "businessType": "restaurant",
+  "tags": ["tables", "book", "level0"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 0, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "שולחן לזוג מחר ב-19:00?",
+      "script": { "reply": "רגע", "intent": "book", "collected": { "table": { "date": "2030-01-08", "time": "19:00", "partySize": 2 } }, "missing": [], "handoff": false, "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "book", "serverAction": "none", "handoff": false, "suggestion": true }
+}

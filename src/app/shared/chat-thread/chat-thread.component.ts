@@ -30,6 +30,8 @@ export interface ChatItem {
   mine: boolean
   body: string
   author: string | null
+  /** True for a message the assistant wrote. */
+  byAi: boolean
   time: string
   statusIcon: string | null
   statusKey: string | null
@@ -59,6 +61,9 @@ export class ChatThreadComponent {
   readonly perspective = input<'business' | 'guest'>('business')
   readonly buttonsEnabled = input(false)
   readonly buttonTapped = output<string>()
+  /** Plan 682: shows "fix this answer" under every message the assistant wrote. */
+  readonly fixable = input(false)
+  readonly fixRequested = output<string>()
 
   protected readonly items_ = computed<ChatItem[]>(() => {
     const list = this.messages()
@@ -75,6 +80,7 @@ export class ChatThreadComponent {
         mine: this.perspective() === 'business' ? out : !out,
         body: this.bodyOf(m),
         author: out ? (AUTHOR_KEY[m.author] ?? null) : null,
+        byAi: out && m.author === 'ai',
         time: timeFmt.format(new Date(m.at)),
         statusIcon: out ? STATUS_ICON[m.status] : null,
         statusKey: out ? 'chat_st_' + m.status : null,

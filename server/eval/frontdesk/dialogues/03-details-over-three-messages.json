@@ -1,0 +1,30 @@
+{
+  "id": "03",
+  "title": "The guest gives party, day and time over three messages, then taps OK",
+  "businessType": "restaurant",
+  "tags": ["tables", "book"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 1, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "אנחנו 4, רוצים לבוא לאכול",
+      "script": { "reply": "כן", "intent": "book", "collected": { "table": { "partySize": 4 } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    {
+      "guest": "לשישי הקרוב",
+      "script": { "reply": "כן", "intent": "book", "collected": { "table": { "date": "2030-01-11" } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    {
+      "guest": "בשבע וחצי בערב",
+      "script": { "reply": "כן", "intent": "book", "collected": { "table": { "time": "19:30" } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "button": "OK" }
+  ],
+  "expected": {
+    "intent": "book",
+    "collected": { "table": { "date": "2030-01-11", "time": "19:30", "partySize": 4 } },
+    "serverAction": "booking",
+    "handoff": false,
+    "booking": { "date": "2030-01-11", "time": "19:30", "partySize": 4 },
+    "lastOut": { "kind": "template", "template": "booking_confirmed" }
+  }
+}

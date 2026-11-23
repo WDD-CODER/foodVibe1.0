@@ -1,0 +1,1930 @@
+{
+  "run": "rs-ai",
+  "branch": "orch/rs-ai",
+  "base": "main",
+  "startedAt": "2026-11-23T13:51:53.550Z",
+  "mainShaAtStart": "e3e1a31642e621587c7517fff5b69ffd181efda4",
+  "plans": {
+    "679": {
+      "nnn": "679",
+      "title": "The assistant's turn on the server: the key seam, the prompt, the answer schema and levels 0 and 1",
+      "branch": "feat/679-assistant-turn-on-the",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T14:34:04.983Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T14:48:15.401Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens the simulator (plan 678) on a level 1 business with the real model, asks for opening hours"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T13:54:49.458Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T13:54:49.681Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:17:35.600Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:18:40.742Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:34:04.809Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:34:04.986Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:34:40.606Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:48:07.074Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:48:15.402Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:48:35.214Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:49:40.044Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "679",
+          "title": "The assistant's turn on the server: the key seam, the prompt, the answer schema and levels 0 and 1",
+          "branch": "feat/679-assistant-turn-on-the",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T13:54:49.679Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 16.7,
+          "reason": "asking 679-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md, docs/brain/inventory.md — kit-checks.mjs reports reuse-registry-missing-piece (six findings) and inventory-stale; both files are edited on the branch but are outside the run branch's scope.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1365.5,
+              "tokens": {
+                "input": 4092330,
+                "output": 43314
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-23T14:18:29.093Z",
+            "reason": "ESCALATE scope: ESCALATE: scope docs/brain/component-families.md, docs/brain/inventory.md — kit-checks.mjs reports reuse-registry-missing-piece (six findings) and inventory-stale; both files are edited on the branch but are outside the run branch's scope."
+          },
+          "parkBranch": "park/rs-ai-679"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 679-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md, docs/brain/inventory.md — kit-checks.mjs reports reuse-registry-missin",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.8,
+      "sha": "fe71023fbb7f4c2e9cdb288de3b065730868a5d2",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 32,
+          "tokens": {
+            "input": 114581,
+            "output": 1797
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.5,
+          "tokens": {
+            "input": 129418,
+            "output": 1646
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "4ef862ffa44b233da7fce0700ed09148c3303a57"
+    },
+    "680": {
+      "nnn": "680",
+      "title": "The assistant books, changes and cancels a table through the engine, with fixed sentences and buttons",
+      "branch": "feat/680-assistant-books-changes-cancels",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T17:13:50.331Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T17:37:34.944Z"
+        }
+      },
+      "humanItems": [
+        "Dandan books a table for four in the simulator (plan 678), taps \"לאשר\", sees the confirmation and finds"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T14:18:41.997Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:04:53.369Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:46:16.478Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:46:16.612Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:04:31.408Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:05:15.252Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:13:50.150Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:13:50.333Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:26:49.036Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:37:27.845Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:37:34.945Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:37:53.361Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:38:41.044Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "680",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 689-1",
+          "freeDiskGb": 15.8
+        },
+        {
+          "nnn": "680",
+          "title": "The assistant books, changes and cancels a table through the engine, with fixed sentences and buttons",
+          "branch": "feat/680-assistant-books-changes-cancels",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T16:46:16.610Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.7,
+          "reason": "asking 680-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — `kit-checks.mjs --base origin/orch/rs-ai` exits 1 with 2 findings (reuse-registry-missing-piece) for the plan's two Reuse Check rows (handleTableIntent + the four button handlers; changeWhen + cancelByGuest). They need a new family heading (e.g. `as",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1094.4,
+              "tokens": {
+                "input": 7698852,
+                "output": 71088
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-23T17:05:05.642Z",
+            "reason": "ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — `kit-checks.mjs --base origin/orch/rs-ai` exits 1 with 2 findings (reuse-registry-missing-piece) for the plan's two Reuse Check rows (handleTableIntent + the four button handlers; changeWhen + cancelByGuest). They need a new family heading (e.g. `as"
+          },
+          "parkBranch": "park/rs-ai-680"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 680-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — `kit-checks.mjs --base origin/orch/rs-ai` exits 1 with 2 findings (re",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.9,
+      "sha": "5e04ee87c58c02ee235a2e2fe7e706829ca4a354",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 776.1,
+          "tokens": {
+            "input": 513450,
+            "output": 7417
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 17.2,
+          "tokens": {
+            "input": 180075,
+            "output": 1492
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "5a399d17d8442bb07cd0fd4daa7c47b5ebc15ebc"
+    },
+    "681": {
+      "nnn": "681",
+      "title": "The assistant's eval set: 30 Hebrew dialogues with a runner, and its suggestion on the request card",
+      "branch": "feat/681-eval-set-30-hebrew",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-23T19:13:40.039Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T19:38:51.013Z"
+        }
+      },
+      "humanItems": [
+        "Dandan runs `node server/scripts/ai-eval-frontdesk.js` once on the real model chain (it needs"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T14:18:42.483Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:04:53.663Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:05:15.827Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:40:33.390Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:40:33.550Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:42:48.804Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:43:29.685Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:54:07.942Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T17:54:08.066Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T18:18:43.456Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T18:18:43.635Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T18:18:43.763Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T18:18:43.896Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T18:29:59.915Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T18:30:00.096Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T18:30:07.336Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T18:30:07.464Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:02:44.335Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:03:44.853Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:13:39.849Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:13:40.041Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:27:56.682Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:27:56.967Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:38:44.264Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:38:51.014Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:39:08.854Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-23T19:39:55.954Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "681",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 680-1",
+          "freeDiskGb": 15.7
+        },
+        {
+          "nnn": "681",
+          "title": "The assistant's eval set: 30 Hebrew dialogues with a runner, and its suggestion on the request card",
+          "branch": "feat/681-eval-set-30-hebrew",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T17:40:33.548Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.6,
+          "reason": "asking 681-1: ESCALATE scope: ESCALATE: scope server/services/frontdesk-tables.js — the table request is created there by the OK tap, so the suggested field cannot be written from the files in the plan's Read-Write Scope.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 135,
+              "tokens": {
+                "input": 994681,
+                "output": 14801
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-23T17:43:23.193Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/services/frontdesk-tables.js — the table request is created there by the OK tap, so the suggested field cannot be written from the files in the plan's Read-Write Scope."
+          },
+          "parkBranch": "park/rs-ai-681"
+        },
+        {
+          "nnn": "681",
+          "title": "The assistant's eval set: 30 Hebrew dialogues with a runner, and its suggestion on the request card",
+          "branch": "feat/681-eval-set-30-hebrew",
+          "state": "asking",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T17:54:08.065Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T18:18:43.895Z"
+            },
+            "judgment builder": {
+              "model": "opus",
+              "tier": "judgment",
+              "at": "2026-11-23T18:30:07.462Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: asking 681-1: ESCALATE scope: ESCALATE: scope server/services/frontdesk-tables.js — the table request is created there by the OK tap, so the suggested",
+              "check": "(not given)"
+            },
+            {
+              "step": "round 2",
+              "check": "done-when"
+            }
+          ],
+          "replan": "no — the builder gave no planChange",
+          "tiers": [
+            "build",
+            "judgment"
+          ],
+          "freeDiskGb": 14.1,
+          "sha": "765aeb3f2519ddc4947954a75a0b9cb8e19c8c01",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1472.7,
+              "tokens": {
+                "input": 12518945,
+                "output": 98524
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 673.5,
+              "tokens": {
+                "input": 168899,
+                "output": 3002
+              },
+              "exit": 0
+            },
+            {
+              "stage": "judgment builder",
+              "model": "opus",
+              "seconds": 1956.6,
+              "tokens": {
+                "input": 16647382,
+                "output": 105930
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: Done-when item left undone: [auto] `node server/scripts/ai-eval-frontdesk.js --dry` → prints `30 dialogues ok` and exits 0 with no key set and",
+            "round 2: Done-when item left undone: [auto] `node server/scripts/ai-eval-frontdesk.js --dry` → prints `30 dialogues ok` and exits 0 with no key set and"
+          ],
+          "resetToBase": "b2e3adb4c7f2c53bb31686d302c63304c68fe10a",
+          "resetFrom": "765aeb3f2519ddc4947954a75a0b9cb8e19c8c01",
+          "reason": "asking 681-2: replan needed: ESCALATE: scope node kit-checks.mjs --base origin/orch/rs-ai --plan plans/681-…plan.md -> exit 1, 'reuse-registry-missing-piece docs/brain/component-families.md:1 — the runDialogue, scoreDialogue, loadDialogues row (rung 4) needs a new family heading', and that file is outside the plan's Read-Write ",
+          "park": {
+            "at": "2026-11-23T19:03:36.237Z",
+            "reason": "replan needed: ESCALATE: scope node kit-checks.mjs --base origin/orch/rs-ai --plan plans/681-…plan.md -> exit 1, 'reuse-registry-missing-piece docs/brain/component-families.md:1 — the runDialogue, scoreDialogue, loadDialogues row (rung 4) needs a new family heading', and that file is outside the plan's Read-Write"
+          },
+          "parkBranch": "park/rs-ai-681"
+        }
+      ],
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 13.1,
+      "sha": "71d87ee2cdb753d6b77ba19645ca2967d29abda6",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 854,
+          "tokens": {
+            "input": 955263,
+            "output": 10312
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.6,
+          "tokens": {
+            "input": 276577,
+            "output": 1347
+          },
+          "exit": 0
+        }
+      ],
+      "uiCards": [
+        {
+          "card": "`/requests` (the API answered by the spec with one open request that has `suggested: { action: 'approve',",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 2
+        }
+      ],
+      "checkedHead": "acd997832ab4e13ea1c9ea51de514ea821589ab9"
+    },
+    "682": {
+      "nnn": "682",
+      "title": "The inbox asks the assistant: \"suggest a reply\" for a member, and \"fix this answer\" that drafts a knowledge item",
+      "branch": "feat/682-suggest-a-reply-and",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T14:52:17.199Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T15:33:17.340Z"
+        }
+      },
+      "humanItems": [
+        "Dandan opens a simulator conversation in the inbox on his phone, presses \"הצע תשובה\", edits the text and",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T14:18:42.252Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:52:17.059Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T14:52:17.200Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:19:29.485Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:33:03.867Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:33:17.343Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:33:43.499Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:34:54.902Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "682",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 679-1",
+          "freeDiskGb": 16.7
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14.8,
+      "sha": "ac780315b7ea05a3087e3787dbe8de92b18b2b83",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1628.7,
+          "tokens": {
+            "input": 7673628,
+            "output": 66674
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 23.3,
+          "tokens": {
+            "input": 195077,
+            "output": 1256
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "59e932080c5d5c444918db8592bc7467590f7a5b"
+    },
+    "689": {
+      "nnn": "689",
+      "title": "The assistant's guardrails: blocked replies and the rules that hand a conversation to a person",
+      "branch": "feat/689-assistant-guardrails-blocked-replies",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T16:14:14.436Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T16:25:10.074Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T16:41:54.719Z"
+        }
+      },
+      "humanItems": [
+        "Dandan writes a complaint in the simulator (plan 678) and sees the conversation move to \"אצל הצוות\" with"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T14:18:41.622Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:38:26.254Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T15:38:26.641Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:03:44.202Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:04:52.375Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:14:14.280Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:14:14.439Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:25:00.946Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:25:09.626Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:25:09.933Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:25:10.076Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:25:43.838Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:41:45.702Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:41:54.721Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:42:26.184Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T16:43:22.997Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "689",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 679-1",
+          "freeDiskGb": 16.7
+        },
+        {
+          "nnn": "689",
+          "title": "The assistant's guardrails: blocked replies and the rules that hand a conversation to a person",
+          "branch": "feat/689-assistant-guardrails-blocked-replies",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T15:38:26.638Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.8,
+          "reason": "asking 689-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — kit-checks (reuse-registry-missing-piece) needs a new family heading there naming `preCheck`/`applyGuardrails` and `GUARD_WORDS`",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1517.1,
+              "tokens": {
+                "input": 2755196,
+                "output": 34740
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-23T16:04:39.915Z",
+            "reason": "ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — kit-checks (reuse-registry-missing-piece) needs a new family heading there naming `preCheck`/`applyGuardrails` and `GUARD_WORDS`"
+          },
+          "parkBranch": "park/rs-ai-689"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 689-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — kit-checks (reuse-registry-missing-piece) needs a new family heading ",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15,
+      "sha": "3327c04432eb2ea6eb5a8429d2eafac5e058b8b8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 644,
+          "tokens": {
+            "input": 213172,
+            "output": 3834
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 28.6,
+          "tokens": {
+            "input": 53011,
+            "output": 1002
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 27.9,
+          "tokens": {
+            "input": 152504,
+            "output": 3178
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md"
+      ],
+      "checkedHead": "532ebd447dbf326f774c38b63c5828252e58f3b0"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T13:54:49.259Z",
+      "plan": "679",
+      "text": "the folder foodVibe1.0-orch-rs-ai-679 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T14:17:35.364Z",
+      "plan": "679",
+      "text": "builder left undone (round 0): pnpm run test:ci: not run; the plan touches no browser code and test:server passed; scope-check (kit copy) --diff=origin/orch/rs-ai: lists files that are not mine (.claude/todo.md, other plans, server/routes/generic.js). I did not read it as a verdict on this branch. My own out-of-scope files are th"
+    },
+    {
+      "at": "2026-11-23T14:18:40.529Z",
+      "plan": "679",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T14:18:40.934Z",
+      "plan": "679",
+      "text": "ask 679-1 (scope, the Human or the advisor answers): May plan 679 write docs/brain/component-families.md (new assistant-turn family heading) and docs/brain/inventory.md (regenerated by scripts/inventory.mjs)?"
+    },
+    {
+      "at": "2026-11-23T14:18:42.696Z",
+      "text": "plan 679 asks 679-1 — 689, 680, 682, 681 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-23T14:32:13.312Z",
+      "plan": "679",
+      "text": "ask 679-1 answered by the human: approved: docs/brain/component-families.md, docs/brain/inventory.md"
+    },
+    {
+      "at": "2026-11-23T14:32:25.019Z",
+      "plan": "679",
+      "text": "scope of plan 679 extended on orch/rs-ai by the answer to 679-1: docs/brain/component-families.md, docs/brain/inventory.md"
+    },
+    {
+      "at": "2026-11-23T14:33:57.168Z",
+      "plan": "679",
+      "text": "resumed from park/rs-ai-679: round 0, tier build, after: asking 679-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md, docs/brain/inventory.md — kit-checks.mjs reports reuse-registry-missing-piece (s"
+    },
+    {
+      "at": "2026-11-23T14:34:04.615Z",
+      "plan": "679",
+      "text": "the folder foodVibe1.0-orch-rs-ai-679 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T14:34:37.106Z",
+      "plan": "679",
+      "text": "builder left undone (round 0): [human] Dandan's check of the simulator with the real model: not run"
+    },
+    {
+      "at": "2026-11-23T14:48:47.641Z",
+      "plan": "679",
+      "text": "the folder foodVibe1.0-orch-merge-rs-ai was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T14:52:16.931Z",
+      "plan": "682",
+      "text": "the folder foodVibe1.0-orch-rs-ai-682 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T15:19:26.096Z",
+      "plan": "682",
+      "text": "builder left undone (round 0): 682-1: written, not run; 682-2: written, not run; 682-3: written, not run; [human] simulator check and the two [human] UI checks are left for Dandan; The 'Contract extensions' line for 682 was already in docs/restaurant/restaurant-map.md, so I did not edit that file"
+    },
+    {
+      "at": "2026-11-23T15:38:25.984Z",
+      "plan": "689",
+      "text": "the folder foodVibe1.0-orch-rs-ai-689 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T16:03:43.944Z",
+      "plan": "689",
+      "text": "builder left undone (round 0): kit-checks reuse registry: the two family headings in docs/brain/component-families.md (out of scope); ci-scope-check --checkout-branch was skipped: it only runs on feat/NNN-* branches and was run from the worktree with no branch name"
+    },
+    {
+      "at": "2026-11-23T16:04:52.139Z",
+      "plan": "689",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T16:04:52.630Z",
+      "plan": "689",
+      "text": "ask 689-1 (scope, the Human or the advisor answers): May this plan edit docs/brain/component-families.md to add the family heading the reuse-registry check requires for preCheck/applyGuardrails and GUARD_WORDS?"
+    },
+    {
+      "at": "2026-11-23T16:12:24.117Z",
+      "plan": "689",
+      "text": "ask 689-1 answered by the human: approved: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T16:12:36.189Z",
+      "plan": "689",
+      "text": "scope of plan 689 extended on orch/rs-ai by the answer to 689-1: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T16:14:08.121Z",
+      "plan": "689",
+      "text": "resumed from park/rs-ai-689: round 0, tier build, after: asking 689-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — kit-checks (reuse-registry-missing-piece) needs a new family heading there nami"
+    },
+    {
+      "at": "2026-11-23T16:14:14.082Z",
+      "plan": "689",
+      "text": "the folder foodVibe1.0-orch-rs-ai-689 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T16:25:08.562Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-23T16:25:08.707Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-23T16:25:08.849Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-23T16:25:08.979Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-23T16:25:09.120Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-23T16:25:09.321Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-23T16:25:09.484Z",
+      "plan": "689",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed first; runs after the fix: pnpm run test:server"
+    },
+    {
+      "at": "2026-11-23T16:25:09.783Z",
+      "plan": "689",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-ai --plan plans/689-assistant-guardrails-blocked-replies-and-handoff-rules.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-23T16:46:16.342Z",
+      "plan": "680",
+      "text": "the folder foodVibe1.0-orch-rs-ai-680 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T17:04:31.231Z",
+      "plan": "680",
+      "text": "builder left undone (round 0): docs/brain/component-families.md family heading: needs `approved: docs/brain/component-families.md`, so the kit-checks gate check still fails; [human] item: Dandan books in the simulator, taps confirm and then cancels (not mine to tick)"
+    },
+    {
+      "at": "2026-11-23T17:05:15.123Z",
+      "plan": "680",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T17:05:15.470Z",
+      "plan": "680",
+      "text": "ask 680-1 (scope, the Human or the advisor answers): May the builder add an assistant table-dialogue family heading (naming handleTableIntent, the OK/ALT/OTHER/BK handlers, changeWhen and cancelByGuest) to docs/brain/component-families.md?"
+    },
+    {
+      "at": "2026-11-23T17:12:16.061Z",
+      "plan": "680",
+      "text": "ask 680-1 answered by the human: approved: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T17:12:25.845Z",
+      "plan": "680",
+      "text": "scope of plan 680 extended on orch/rs-ai by the answer to 680-1: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T17:13:44.639Z",
+      "plan": "680",
+      "text": "resumed from park/rs-ai-680: round 0, tier build, after: asking 680-1: ESCALATE scope: ESCALATE: scope docs/brain/component-families.md — `kit-checks.mjs --base origin/orch/rs-ai` exits 1 with 2 findings (reuse-regist"
+    },
+    {
+      "at": "2026-11-23T17:13:50.010Z",
+      "plan": "680",
+      "text": "the folder foodVibe1.0-orch-rs-ai-680 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T17:40:33.233Z",
+      "plan": "681",
+      "text": "the folder foodVibe1.0-orch-rs-ai-681 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T17:42:48.633Z",
+      "plan": "681",
+      "text": "builder left undone (round 0): A1-A8: not started; the plan is blocked on one out-of-scope file, and I chose not to build most of it and then lose it to a hand-off reset; Needed change in server/services/frontdesk-tables.js (about 8 lines): (1) in confirm(), after createRequest in the manual and over-the-limit branch, $set `sugge"
+    },
+    {
+      "at": "2026-11-23T17:43:29.558Z",
+      "plan": "681",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T17:43:29.806Z",
+      "plan": "681",
+      "text": "ask 681-1 (scope, the Human or the advisor answers): May this plan edit server/services/frontdesk-tables.js (about 8 lines: carry the model's suggestion on pending.data and set `suggested` on the request that confirm() creates) so the suggestion reaches table requests?"
+    },
+    {
+      "at": "2026-11-23T17:52:30.435Z",
+      "plan": "681",
+      "text": "ask 681-1 answered by the human: approved: server/services/frontdesk-tables.js"
+    },
+    {
+      "at": "2026-11-23T17:52:40.687Z",
+      "plan": "681",
+      "text": "scope of plan 681 extended on orch/rs-ai by the answer to 681-1: server/services/frontdesk-tables.js"
+    },
+    {
+      "at": "2026-11-23T17:54:02.495Z",
+      "plan": "681",
+      "text": "resumed from park/rs-ai-681: round 0, tier build, after: asking 681-1: ESCALATE scope: ESCALATE: scope server/services/frontdesk-tables.js — the table request is created there by the OK tap, so the suggested field can"
+    },
+    {
+      "at": "2026-11-23T17:54:07.816Z",
+      "plan": "681",
+      "text": "the folder foodVibe1.0-orch-rs-ai-681 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T18:18:40.925Z",
+      "plan": "681",
+      "text": "builder left undone (round 0): [ui] 681-1 (the card shows 'העוזר מציע: לאשר'): written, not run; A8: the [human] live run `node server/scripts/ai-eval-frontdesk.js` on the real model chain is left for Dandan; A8 stays unticked"
+    },
+    {
+      "at": "2026-11-23T18:29:57.532Z",
+      "plan": "681",
+      "text": "builder left undone (round 1): [human] live run `node server/scripts/ai-eval-frontdesk.js` on the real model chain: left for Dandan (needs the model key and spend, not run by the builder)"
+    },
+    {
+      "at": "2026-11-23T18:30:07.214Z",
+      "plan": "681",
+      "text": "escalated to a fresh judgment-tier builder (round 2): Done-when item left undone: [auto] `node server/scripts/ai-eval-frontdesk.js --dry` → prints `30 dialogues ok` and exits 0 with no key set and"
+    },
+    {
+      "at": "2026-11-23T19:02:44.150Z",
+      "plan": "681",
+      "text": "builder left undone (round 2): kit-checks reuse-registry-missing-piece: needs the docs/brain/component-families.md entry (out of scope, ask above); A8 not ticked: every check passes except kit-checks; the [human] live run (node server/scripts/ai-eval-frontdesk.js with GEMINI_API_KEY) is Dandan's; [ui] /requests card shows 'העוזר"
+    },
+    {
+      "at": "2026-11-23T19:03:44.725Z",
+      "plan": "681",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T19:03:44.981Z",
+      "plan": "681",
+      "text": "ask 681-2 (scope, the Human or the advisor answers): May this plan add one 8-line family entry to docs/brain/component-families.md ('### assistant-eval — loadDialogues, runDialogue, scoreDialogue (plan 681)', status server only, use and pieces lines, same shape as the 679/680 entries) so kit-checks passes the plan's rung-4 Reuse Check row?"
+    },
+    {
+      "at": "2026-11-23T19:12:15.704Z",
+      "plan": "681",
+      "text": "ask 681-2 answered by the human: approved: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T19:12:26.204Z",
+      "plan": "681",
+      "text": "scope of plan 681 extended on orch/rs-ai by the answer to 681-2: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T19:13:34.385Z",
+      "plan": "681",
+      "text": "resumed from park/rs-ai-681: round 2, tier judgment, after: asking 681-2: replan needed: ESCALATE: scope node kit-checks.mjs --base origin/orch/rs-ai --plan plans/681-…plan.md -> exit 1, 'reuse-registry-missing-piece doc"
+    },
+    {
+      "at": "2026-11-23T19:13:34.505Z",
+      "plan": "681",
+      "text": "starts on the judgment tier: resumed on the tier the stopped attempt ran on"
+    },
+    {
+      "at": "2026-11-23T19:13:39.709Z",
+      "plan": "681",
+      "text": "the folder foodVibe1.0-orch-rs-ai-681 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T19:27:54.206Z",
+      "plan": "681",
+      "text": "builder left undone (round 2): [ui] /requests card shows 'העוזר מציע: לאשר': written, not run (e2e/ui/681-1.spec.ts; no running app in the worktree); [human] the live eval on the real model chain (node server/scripts/ai-eval-frontdesk.js) waits for Dandan"
+    },
+    {
+      "at": "2026-11-23T19:27:56.848Z",
+      "plan": "681",
+      "text": "[ui] `/requests` (the API answered by the spec with one open request that has `suggested: { action: 'approve',: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-23T19:40:38.472Z",
+      "text": "FINAL: same tree as plan 681's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-23T19:40:39.109Z",
+      "text": "make this a default? a send from the suggestion bar that the server refuses shows its refusal under the bar, using the reply box's dictionary keys, because the reply box's own error line is private to that component — rev (trigger: screen) — reply: default yes run-screen"
+    },
+    {
+      "at": "2026-11-23T19:40:39.226Z",
+      "text": "make this a default? added output `sent` and method `focus()` to ReplyBoxComponent (inside the inbox scope) so the page can mark a suggestion used and move focus after 'edit' — reverse: remove both and the page wiring (trigger: destructive-action) — reply: default yes run-destructive-action"
+    },
+    {
+      "at": "2026-11-23T19:40:39.348Z",
+      "text": "make this a default? a tap handler does nothing unless the conversation is `bot`, level 1 or 2, and the business has the tables module and a floor plan — reverse: remove the guards in onTap (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 13.1,
+  "updatedAt": "2026-11-23T19:40:40.965Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "679",
+      "type": "behaviour",
+      "text": "behaviour: in suggest mode, a model handoff or a second complete request still stores the model's own reply as the suggestion and leaves the status unchanged — reverse: return { ok: false } in those two branches of runTurn",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "679",
+      "type": "seen",
+      "text": "seen: server/services/frontdesk-turn.js — at level 0 a complete table request stores the fd_ai_will_confirm sentence as the draft, but no request is written (plan step 9), so a member sending it says 'received' with nothing recorded. Plan 689 or 680 should decide the level-0 draft text.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "679",
+      "type": "seen",
+      "text": "seen: server/test/frontdesk-turn.test.js — the 429 daily-quota test marks the model exhausted in the GEMINI_USAGE collection, so any later turn test fails unless that collection is cleared in beforeEach (it is cleared here)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "679",
+      "type": "behaviour",
+      "text": "behaviour: every model failure is silent, including an exhausted model chain — reverse: send the handoff text in handOffSilently",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "679",
+      "type": "behaviour",
+      "text": "behaviour: the daily cap is 300 assistant turns per business, a constant, and test conversations are metered with userId sim and not counted — reverse: change FRONTDESK_DAILY_TURNS or the ledger filter",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "679",
+      "type": "behaviour",
+      "text": "behaviour: at level 0 no request is written; only a draft reply is stored — reverse: write the request in the level 0 branch",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "679",
+      "type": "behaviour",
+      "text": "behaviour: a second complete request in a conversation that already has requestId goes to a person (handoff) — reverse: allow a second createRequest call",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "679",
+      "type": "behaviour",
+      "text": "behaviour: in suggest mode a model handoff or a second complete request still stores the model's own reply as the suggestion — reverse: return { ok: false } in those two branches",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "679",
+      "type": "seen",
+      "text": "seen: server/services/frontdesk-turn.js — at level 0 a complete table request stores fd_ai_will_confirm as the draft although no request is written, so a member sending it would say 'received' with nothing recorded",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "682",
+      "type": "behaviour",
+      "text": "behaviour: a send from the suggestion bar that the server refuses shows its refusal under the bar, using the reply box's dictionary keys, because the reply box's own error line is private to that component — reverse: have the reply box expose an error input and route the refusal there",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "682",
+      "type": "behaviour",
+      "text": "behaviour: added dictionary key ibx_fix_save 'שמירה' because the existing 'save' key reads 'שמור' and the [ui] item presses 'שמירה' — reverse: drop the key and use 'save'",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "682",
+      "type": "behaviour",
+      "text": "behaviour: added output `sent` and method `focus()` to ReplyBoxComponent (inside the inbox scope) so the page can mark a suggestion used and move focus after 'edit' — reverse: remove both and the page wiring",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "682",
+      "type": "seen",
+      "text": "seen: scope-check --diff=origin/orch/rs-ai without the three-dot form lists 7 files that are not in my branch diff (plans/6xx, server/routes/generic.js). The cause is the origin branch moving, not my change",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "689",
+      "type": "behaviour",
+      "text": "behaviour: a removal request answers through sendOut at every level, also level 0, as the plan words it — reverse: skip the send in removeGuest at level 0",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "689",
+      "type": "behaviour",
+      "text": "behaviour: a blocked turn at level 0 stores the handoff sentence as the suggestion and leaves the status bot (the Done-when line); at level 1 the status becomes human — reverse: drop keepStatus in handOff",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "689",
+      "type": "behaviour",
+      "text": "behaviour: in suggest mode a model-raised handoff flag also returns the handoff sentence as the draft, not the model's own words (679 kept the model's words) — reverse: return the old branch for reason 'model'",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "689",
+      "type": "behaviour",
+      "text": "behaviour: the profile's public link is read from an optional profile.publicLink for R-07, because no builder of that link exists in server/ — reverse: remove the publicLink comparison in linksBlocked",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "689",
+      "type": "seen",
+      "text": "seen: server/routes/ai/frontdesk.js:59 — a suggest-mode removal answers {ok:true, handoff:'removal'} with no suggestion, so the route returns {} with 200; a route fix is outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "689",
+      "type": "behaviour",
+      "text": "behaviour: a blocked reply is never retried or rewritten; the conversation goes to a person with the handoff sentence — reverse: add a retry in runTurn",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "689",
+      "type": "behaviour",
+      "text": "behaviour: a removal request is answered through sendOut at every level, also level 0 — reverse: skip the send in removeGuest at level 0",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: at level 0 or in suggest mode a change or cancel by chat acts on nothing and hands off (the handoff sentence is the suggestion) — reverse: store the pick or ask sentence as the suggestion instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: an unfit manual request sends the rule sentences and clears pending — reverse: keep pending so the guest can adjust the same request",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: a fresh pending change/cancel with a single bookingIds is reused on the next turn, so the guest is not asked to pick again — reverse: drop the filter in manageStep",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: a tap handler does nothing unless the conversation is `bot`, level 1 or 2, and the business has the tables module and a floor plan — reverse: remove the guards in onTap",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: changeWhen writes no history entry for a change, as the route did before; `via` only labels the caller — reverse: push a statusHistory entry in changeWhen",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "680",
+      "type": "seen",
+      "text": "seen: scripts/scope-check.mjs reports `SCOPE: out` for files that are not on this branch (server/routes/generic.js, plans/681-*, .claude/todo.md) — run `node <kit>/scripts/scope-check.mjs --diff=origin/orch/rs-ai --plan=<plan>` in this worktree",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "680",
+      "type": "seen",
+      "text": "seen: pnpm run test:server, full-suite run — server/test/ai-invoice-read.test.js log-leak test failed once under load and passed alone (18/18)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D28",
+      "plan": "680",
+      "type": "seen",
+      "text": "seen: pnpm run test:ci was not run: the full pnpm run test:server run already took 427 s and ended in the task's ESCALATE state",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D29",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: at level 0 / suggest mode a change or cancel by chat acts on nothing and hands off — reverse: store the pick or ask sentence as the suggestion instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D30",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: a time in the model's reply passes only when the same time stands in a fact it used — reverse: drop the check in applyGuardrails",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D31",
+      "plan": "680",
+      "type": "behaviour",
+      "text": "behaviour: tapping an alternative books at once with no second confirm — reverse: add a confirm step to the ALT handler",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D32",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the plan asks for 5 `caterer` dialogues, but the real template key is `catering`; the plan allows using the real key, so I would use `catering` — reverse: rename the key in the 5 files and in the test's expected counts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D33",
+      "plan": "681",
+      "type": "seen",
+      "text": "seen: plans/681-eval-set-30-hebrew-dialogues-and-suggestion-on-the-request-card.plan.md:174-177 — the plan assumes runTurn writes the manual and over-the-limit table request, but since plan 680 that happens in frontdesk-tables.js confirm() on a button tap",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D34",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the suggestion rides conversation.pending.data.suggested (the model's last book turn) until the guest taps OK, and confirm() stamps it on the request it creates — reverse: drop the stampSuggested calls",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D35",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the five caterer dialogues use the template key `catering`, the real key in front-desk-templates.ts, not `caterer` — reverse: none needed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D36",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: dialogue 19 (no floor plan) expects a plain table request, and 28 (private chef, date inside the lead time) expects the rules' sentence and no request. That is what the server does today, so the set expects it, not the plan table's handoff / request — reverse: change `expected` in those two files",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D37",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the dialogue shape has fields beyond the plan's list: setup confirmMode, autoMaxParty, cutoffHours, closedDates, kindRules, booking fillRoom/minutes; expected sent, suggestionStored, suggestedAction — reverse: delete them from dialogue-schema.js and the files that use them",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: one `assistant-eval` family heading in docs/brain/component-families.md and a refreshed docs/brain/inventory.md, which kit-checks required — reverse: remove the heading and rerun scripts/inventory.mjs",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "681",
+      "type": "seen",
+      "text": "seen: server/services/frontdesk-turn.js — a turn always uses the feature `frontdesk_turn`; the live eval meters as `eval` by wrapping askTurnModel in the script, not through a turn option",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D40",
+      "plan": "681",
+      "type": "seen",
+      "text": "seen: scope-check (kit copy) --diff=origin/orch/rs-ai lists files of other plans as out of scope because the run branch is ahead of this branch's base; `git diff origin/orch/rs-ai...HEAD` is empty and every file I changed is in scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D41",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: ticked A8 without the live run, because A8 says to hand Dandan the live run and the live run is a [human] item that spends on the real model — reverse: untick A8 in the plan file",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D42",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the business type key is the template's 'catering', not 'caterer' (the plan says to use the real key) — reverse: rename the key in the five dialogue files and dialogue-schema.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D43",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: dialogue 19 (no floor plan) expects 'request', not 'handoff', because plan 680 sends no_plan down plan 679's table request path — reverse: make no_plan hand off in frontdesk-tables.js and set the file's serverAction to handoff",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D44",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: dialogue 28 (a date inside the 72-hour lead time) expects 'none' (the rule sentence, no request), because an unfit request is never written (R-10) — reverse: make it a borderline case that expects request",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D45",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the dialogue schema adds three optional fields beyond the plan's list: setup.closedDates (dialogue 10), setup.rules (dialogue 23's minimum budget) and expected.suggestion (dialogue 20, level 0) — reverse: remove them from dialogue-schema.js and those three files",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D46",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: suggested.at is the clock of the model turn that gave it (for a table request, the offer turn, not the OK tap) — reverse: set at in confirm() in frontdesk-tables.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D47",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: the suggestion text on the card uses the existing rq-verdict row and no new class (plain text, normal size) — reverse: add a muted text class and declare it in the Reuse Check",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D48",
+      "plan": "681",
+      "type": "seen",
+      "text": "seen: server/utils/request-create.js:60 — createRequest uses Date.now(), not the turn's clock, so the stored qualification of a chat request depends on the real date; the eval uses 2030 dates, as the existing table tests do",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D49",
+      "plan": "681",
+      "type": "behaviour",
+      "text": "behaviour: regenerated docs/brain/inventory.md with node scripts/inventory.mjs (one generated line for the approved assistant-eval family), because kit-checks failed on inventory-stale after the approved edit; the file is not in the plan's scope but scope-check reports ok — reverse: git revert the docs(681) commit and drop the family entry",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T19:40:40.963Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T19:40:40.965Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

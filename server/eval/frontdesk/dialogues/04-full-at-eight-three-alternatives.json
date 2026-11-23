@@ -1,0 +1,37 @@
+{
+  "id": "04",
+  "title": "20:00 is full, three alternatives on the day, the guest taps the second",
+  "businessType": "restaurant",
+  "tags": ["tables", "full_evening"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "floor": "room14",
+    "bookings": [
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [2] },
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [3] },
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [4] },
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [7] },
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [9] },
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [10] },
+      { "date": "2030-01-08", "time": "19:00", "partySize": 4, "tableNumbers": [14] }
+    ]
+  },
+  "turns": [
+    {
+      "guest": "שולחן ל-4 מחר ב-20:00 בבקשה",
+      "script": { "reply": "רגע", "intent": "book", "collected": { "table": { "date": "2030-01-08", "time": "20:00", "partySize": 4 } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "button": "ALT:2" }
+  ],
+  "expected": {
+    "intent": "book",
+    "collected": { "table": { "date": "2030-01-08", "time": "20:00", "partySize": 4 } },
+    "serverAction": "booking",
+    "handoff": false,
+    "booking": { "date": "2030-01-08", "time": "21:15", "partySize": 4 },
+    "lastOut": { "kind": "template", "template": "booking_confirmed" }
+  }
+}

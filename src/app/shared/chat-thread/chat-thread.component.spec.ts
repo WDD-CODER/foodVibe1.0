@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { Component, signal } from '@angular/core'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule, Check, CheckCheck, Clock, X } from 'lucide-angular'
+import { LucideAngularModule, Check, CheckCheck, Clock, X, Flag } from 'lucide-angular'
 import { TranslationService } from '@services/translation.service'
 import { ChatThreadComponent } from './chat-thread.component'
 import type { Message } from '@models/conversation.model'
@@ -43,10 +43,14 @@ const m = (id: string, over: Partial<Message> = {}): Message =>
     [now]="0"
     [perspective]="perspective()"
     [buttonsEnabled]="enabled()"
+    [fixable]="fixable()"
     (buttonTapped)="tapped.push($event)"
+    (fixRequested)="fixed.push($event)"
   />`
 })
 class HostComponent {
+  fixable = signal(false)
+  fixed: string[] = []
   messages = signal<Message[]>([])
   perspective = signal<'business' | 'guest'>('business')
   enabled = signal(false)
@@ -59,7 +63,7 @@ describe('ChatThreadComponent (plan 677)', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HostComponent, LucideAngularModule.pick({ Check, CheckCheck, Clock, X })],
+      imports: [HostComponent, LucideAngularModule.pick({ Check, CheckCheck, Clock, X, Flag })],
       providers: [{ provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }]
     }).compileComponents()
     fixture = TestBed.createComponent(HostComponent)
@@ -130,6 +134,22 @@ describe('ChatThreadComponent (plan 677)', () => {
     ])
     fixture.detectChanges()
     expect(el().querySelectorAll('[data-testid="chat-day"]').length).toBe(2)
+  })
+
+  it('shows "fix this answer" only under assistant messages, only when fixable (plan 682)', () => {
+    host.messages.set([
+      m('1', { author: 'ai' }),
+      m('2', { author: 'member' }),
+      m('3', { direction: 'in', author: 'guest' })
+    ])
+    fixture.detectChanges()
+    const fixes = () => Array.from(el().querySelectorAll<HTMLButtonElement>('[data-testid="chat-fix"]'))
+    expect(fixes().length).toBe(0)
+    host.fixable.set(true)
+    fixture.detectChanges()
+    expect(fixes().length).toBe(1)
+    fixes()[0].click()
+    expect(host.fixed).toEqual(['1'])
   })
 
   it('tags the author of an outbound message', () => {

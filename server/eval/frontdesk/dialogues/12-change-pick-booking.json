@@ -1,0 +1,32 @@
+{
+  "id": "12",
+  "title": "Two bookings, the guest picks which one to move by button",
+  "businessType": "restaurant",
+  "tags": ["tables", "change"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "floor": "room14",
+    "bookings": [
+      { "date": "2030-01-08", "time": "20:00", "partySize": 2, "tableNumbers": [2], "ofGuest": true },
+      { "date": "2030-01-10", "time": "20:00", "partySize": 2, "tableNumbers": [3], "ofGuest": true }
+    ]
+  },
+  "turns": [
+    {
+      "guest": "אני רוצה להזיז את ההזמנה ל-21:00",
+      "script": { "reply": "רגע", "intent": "change", "collected": { "table": { "time": "21:00" } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "button": "BK:2" }
+  ],
+  "expected": {
+    "intent": "change",
+    "collected": { "table": { "time": "21:00" } },
+    "serverAction": "changed",
+    "handoff": false,
+    "booking": { "date": "2030-01-10", "time": "21:00", "partySize": 2 },
+    "lastOut": { "kind": "text" }
+  }
+}

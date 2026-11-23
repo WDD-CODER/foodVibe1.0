@@ -1,0 +1,19 @@
+{
+  "id": "30",
+  "title": "Eight assistant turns reached: the ninth message goes to a person",
+  "businessType": "private_chef",
+  "tags": ["request", "handoff"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    { "guest": "רוצים שף פרטי לאירוע", "script": { "reply": "בשמחה! לאיזה תאריך?", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "עוד לא סגרנו תאריך", "script": { "reply": "אין בעיה. כמה אורחים בערך?", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "בין 10 ל-20", "script": { "reply": "ואיפה האירוע יתקיים?", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "אולי אצלנו, אולי אצל ההורים", "script": { "reply": "באיזו עיר?", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "עדיין לא יודעים", "script": { "reply": "כשתדעו את המקום, ספרו לי.", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "ואיזה סוג אוכל אתם מכינים?", "script": { "reply": "מה הייתם רוצים לאכול?", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "משהו איטלקי אולי", "script": { "reply": "נשמע טוב. יש הגבלות תזונתיות?", "intent": "request", "kind": "event", "collected": { "dietary": "איטלקי" }, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "אין", "script": { "reply": "ומה התאריך המשוער?", "intent": "request", "kind": "event", "collected": {}, "missing": ["date", "party_size", "location"], "handoff": false, "usedFacts": [] } },
+    { "guest": "נחשוב על זה ונחזור אליכם" }
+  ],
+  "expected": { "intent": "request", "serverAction": "handoff", "handoff": true, "lastOut": { "kind": "text" } }
+}

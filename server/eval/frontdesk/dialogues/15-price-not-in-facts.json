@@ -1,0 +1,14 @@
+{
+  "id": "15",
+  "title": "A price that is in no fact: the assistant hands over",
+  "businessType": "restaurant",
+  "tags": ["question"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 1, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "כמה עולה ארוחת הטעימות שלכם לזוג?",
+      "script": { "reply": "", "intent": "question", "collected": {}, "missing": [], "handoff": true, "handoffReason": "price not in the facts", "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "question", "serverAction": "handoff", "handoff": true, "lastOut": { "kind": "text" } }
+}

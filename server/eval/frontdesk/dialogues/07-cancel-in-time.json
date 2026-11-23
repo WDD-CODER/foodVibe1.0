@@ -1,0 +1,21 @@
+{
+  "id": "07",
+  "title": "One booking cancelled inside the cutoff",
+  "businessType": "restaurant",
+  "tags": ["tables", "cancel"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "floor": "room14",
+    "bookings": [{ "date": "2030-01-08", "time": "20:00", "partySize": 2, "tableNumbers": [3], "ofGuest": true }]
+  },
+  "turns": [
+    {
+      "guest": "לבטל בבקשה את השולחן של מחר, משהו השתבש לנו",
+      "script": { "reply": "רגע", "intent": "cancel", "collected": {}, "missing": [], "handoff": false, "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "cancel", "serverAction": "cancelled", "handoff": false, "lastOut": { "kind": "text" } }
+}

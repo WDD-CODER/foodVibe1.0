@@ -48,6 +48,8 @@ export class ReplyBoxComponent {
   readonly closedMeanwhile = output<void>()
   /** A take-over that the server refused with BAD_STATUS. */
   readonly actionFailed = output<void>()
+  /** Plan 682: a free-text reply went out. */
+  readonly sent = output<void>()
 
   protected readonly textMax = TEXT_MAX
   protected readonly templateMax = TEMPLATE_MAX
@@ -68,6 +70,11 @@ export class ReplyBoxComponent {
   protected readonly canSend_ = computed(() => !this.busy_() && this.draft().trim().length > 0)
   protected readonly templateValue_ = computed(() => this.templateText_())
   protected readonly canSendTemplate_ = computed(() => !this.busy_() && this.templateText_().trim().length > 0)
+
+  /** Plan 682: the page moves the focus here after "edit" put a suggestion into the box. */
+  focus(): void {
+    setTimeout(() => this.textBox()?.nativeElement.focus(), 0)
+  }
 
   protected onDraft(value: string): void {
     this.errorKey_.set(null)
@@ -105,6 +112,7 @@ export class ReplyBoxComponent {
     this.busy_.set(false)
     if (res.ok) {
       this.draftChange.emit('')
+      this.sent.emit()
       setTimeout(() => this.textBox()?.nativeElement.focus(), 0)
       return
     }

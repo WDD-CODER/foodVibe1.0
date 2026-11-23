@@ -38,6 +38,14 @@
 | `routes/ai/invoices.js` | Mounted at `/api/v1/ai/invoices` (plan 615, C-INVREAD): empty until plan 626 |
 | `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
+| `services/ai-key.js` | `keyFor(businessId)` (plan 679, C-AIKEY): the one place that resolves a model key; the environment key today |
+| `services/frontdesk-turn.js` | `runTurn`, `decide`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded |
+| `services/frontdesk-prompt.js` | `buildTurnBody`, `TURN_SYSTEM_PROMPT`, `todayBlock` (plan 679): the English rules and the request body of a turn |
+| `services/frontdesk-guardrails.js` | `preCheck(ctx)`, `applyGuardrails(answer, ctx)`, `isRemoval` (plan 679, filled by 689): the one place of the assistant's blocks |
+| `services/frontdesk-tables.js` | `tablesFor`, `handleTableIntent`, `deliver`, `registerTableButtons` (plan 680, C-AI2): the chat's book / change / cancel dialogue — the engine answers, the dictionary speaks; the buttons `OK`, `ALT`, `OTHER`, `BK` make no model call |
+| `routes/ai/frontdesk.js` | Mounted at `/api/v1/ai/frontdesk` (plan 679): `askTurnModel` (the assistant's one model call), `POST /suggest` and `POST /fix` (plan 682: a wrong assistant message + the right answer → one draft knowledge item, `source: correction`) |
+| `services/knowledge-correction-prompt.js` | `buildCorrectionBody` (plan 682): the English prompt that turns a staff correction into one knowledge item |
+| `utils/fixed-text.js` | `fixedText`, `reasonText` (plan 679): a dictionary sentence as server text |
 | `routes/floor-plan.js` | Mounted at `/api/v1/floor-plan` (plan 662, C-FLOOR, C-HOLD): GET / and PUT / of the one floor plan (plan 664); the hold routes come with plan 667; PUT /confirm-mode (plan 667) changes only `tableService.confirmMode` of the owner's profile |
 | `routes/waitlist.js` | Mounted at `/api/v1/waitlist` (plan 662, C-WAIT; plan 673): `GET /?date=` → `{ entries, now }`, `POST /`, `PUT /:id/notify` (stamps only), `PUT /:id/seat` (claims the entry, then `createWalkIn`, puts the entry back when refused), `PUT /:id/left`; both module checks; the only writer of `waitlistEntries`; logs hold no name or phone |
 | `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 687, C-CONV): list, thread, member reply, take over, hand back, close; members only, server-only collections |
@@ -59,6 +67,7 @@
 | `services/ai-drafts.js` | The draft trail (plan 618, C-AIDRAFT): `saveAiDraft` (stores what the model suggested, never throws, keeps the newest 500 per business and feature) and `confirmAiDraft` (what was saved and the closeness score); the only writer of `aiDrafts`, returns only ids |
 | `utils/ai-learning.js` | `mayLearnFrom(business)` (plan 618, C-LEARN): the one consent test before the platform copies or lists a business's AI material — true unless `aiPrivate` |
 | `constants/ai-features.js` | `AI_FEATURES` closed list of AI feature keys, `isAiFeature` (plan 566) |
+| `constants/frontdesk-guard-words.js` | `GUARD_WORDS` (HANDOFF, DEFERRED, COMPLETION, INTERNALS, GREETINGS, REMOVAL_WORDS): the word lists of the assistant's guardrails (plan 689) |
 | `constants/ai-prices.js` | `AI_PRICES` USD per 1M tokens per model, `PRICES_AS_OF`, `PRICES_SOURCE` (plan 566) |
 | `services/business-report.js` | The business report (plan 568): `buildReport` — monthly series, first vs latest 30 days, baseline mapping, rule findings; read-only |
 | `services/frontdesk-stats.js` | Front desk numbers of one business (plan 559): `frontDeskStats`, `parseRange`, `isOutsideHours`; read-only, test requests never count |
@@ -70,6 +79,8 @@
 | `scripts/erase-client.js` | Operator script: erase one customer of one business by phone (`planErase`, `runErase`); dry run by default, `--target` required (plan 558) |
 | `scripts/repair-supplier-refs.js` | Plan 649: lists (dry run) or repairs (`--write`) product sources whose supplier is foreign, unknown or empty — map by `_masterId`, by trimmed name, or clear; prices never change; `--target` other than `local` needs `--confirm-remote` |
 | `scripts/seed-demo-business.js` | Fills a local database with one demo catering business (dry run by default; `--write`; local only) |
+| `scripts/ai-eval-frontdesk.js` | Plan 681: the assistant's eval — plays the 30 dialogues of `eval/frontdesk/dialogues/` through `handleInbound` on the `sim` channel and scores what the server wrote; `--dry` validates the files; without it a live run on the real model chain against an in-memory database (`GEMINI_API_KEY`, exit 0 at 26/30, 1 below, 2 no key, 3 daily quota); never in CI |
+| `eval/frontdesk/` | Plan 681: the eval set's data — `dialogue-schema.js` (strict zod shape of one dialogue), `room14.js` (plan 663's 14-table room and the table settings), `dialogues/NN-<slug>.json` (20 restaurant, 5 catering, 5 private chef) |
 | `scripts/seed-demo-restaurant.js` | Fills a local database with one demo restaurant (plan 674): a 14-table room, a profile, 6 clients, 40 bookings placed by the table engine with their holds, 4 waiting parties; dry run by default; `--write`; local only; `lib/demo-restaurant-data.js` is its pure builder |
 | `middleware/auth.js` | `verifyToken` — JWT Bearer verification, attaches `req.user` |
 | `middleware/require-module.js` | Plan 616: `requireModule`, `requireHomeModule`, `requireModuleForType` — 403 `MODULE_OFF` when the business lacks a module; 30 s cache, `clearModuleCache` |

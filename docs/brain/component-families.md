@@ -366,7 +366,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`): the five calls of the waiting list (`list`, `add`, `notify`, `seat`, `left`), each returning its result or the server's error code as a code (plan 673).
-- `ConversationDataService` (`src/app/core/services/conversation-data.service.ts`) and `InboxBadgeService` (`src/app/core/services/inbox-badge.service.ts`): the conversations routes (list, open a thread, reply, template, take over, hand back, close; codes returned as codes) and the one pending-conversations number (plan 677).
+- `ConversationDataService` (`src/app/core/services/conversation-data.service.ts`) and `InboxBadgeService` (`src/app/core/services/inbox-badge.service.ts`): the conversations routes (list, open a thread, reply, template, take over, hand back, close; codes returned as codes) and the one pending-conversations number (plan 677); `suggest` and `fixAnswer` call `/api/v1/ai/frontdesk/suggest` and `/fix` (plan 682).
 - `SimulatorService` (`src/app/pages/frontdesk/simulator/services/simulator.service.ts`) and `API.sim`: the simulator's guest sends, button taps, run-a-job-now and clear-test-data calls, codes returned as codes, no phone, name or text in a log (plan 678).
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
@@ -531,10 +531,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### chat-thread — the message thread of a guest conversation
 
 - Status: stable — plan 677
-- Use: `src/app/shared/chat-thread/` · `app-chat-thread` (inputs `messages`, `now`, `perspective` `'business' | 'guest'`, `buttonsEnabled`; output `buttonTapped`): read-only bubbles, a template message shown as its dictionary body with its values, the author tag, the delivery state as an icon with a label, buttons on the newest outbound message, a day line between Jerusalem dates. No service inside: the page gives it the messages.
+- Use: `src/app/shared/chat-thread/` · `app-chat-thread` (inputs `messages`, `now`, `perspective` `'business' | 'guest'`, `buttonsEnabled`, `fixable` (plan 682: a "fix this answer" button under assistant messages); outputs `buttonTapped`, `fixRequested`): read-only bubbles, a template message shown as its dictionary body with its values, the author tag, the delivery state as an icon with a label, buttons on the newest outbound message, a day line between Jerusalem dates. No service inside: the page gives it the messages.
 - Classes: `.ct`, `.ct-row`, `.ct-bubble`, `.ct-meta`, `.ct-status` (the component's own stylesheet; no `.c-*` class added).
 - When: any screen that draws a guest conversation (the inbox, the simulator of plan 678) — never a second bubble list.
 - Second user: the simulator (`src/app/pages/frontdesk/simulator/`, plan 678) draws it with `perspective` `'guest'` and `buttonsEnabled` true.
+- Inbox pieces (plan 682, page-local, `src/app/pages/inbox/components/`): `app-suggestion-bar` (a drafted reply with send / edit / dismiss, or the ask button) and `app-fix-answer-dialog` (`app-modal-shell`; the right answer and the issue type of a wrong assistant message).
 - Known copies: none.
 
 ### table-sheet — the sheet of one table on the service screen
@@ -858,4 +859,44 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data.
 - Pieces: SimulatorPage, SimulatorService.
 - When: any test of the conversation channel from inside the app; a second simulator screen is never added.
+- Known copies: none.
+
+### inbox-assistant-help — `SuggestionBarComponent`, the "fix this answer" action under a message, `knowledge-correction-prompt.js` (plan 682)
+
+- Status: stable
+- Use: `src/app/pages/inbox/components/suggestion-bar/` (`app-suggestion-bar`: a drafted reply with send / edit / dismiss, or the ask button); the "fix this answer" action is `fixable` / `fixRequested` on `app-chat-thread` plus `app-fix-answer-dialog` (`app-modal-shell`); the server side is `POST /api/v1/ai/frontdesk/fix` with the prompt of `server/services/knowledge-correction-prompt.js` (`buildCorrectionBody`).
+- Pieces: SuggestionBarComponent, FixAnswerDialogComponent, fixable, fixRequested, buildCorrectionBody.
+- When: a member asks the assistant for a reply, or turns a wrong assistant answer into a draft knowledge item.
+- Known copies: none.
+
+### assistant-turn — `keyFor`, `fixedText`, `turnAnswerSchema`, `buildTurnBody`, `runTurn`, `applyGuardrails`, `askTurnModel` (plan 679)
+
+- Status: stable — server only
+- Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`.
+- Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, runTurn, decide, applyGuardrails, askTurnModel.
+- When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
+- Known copies: none.
+
+### assistant-table-dialogue — `handleTableIntent`, the OK/ALT/OTHER/BK handlers, `changeWhen`, `cancelByGuest` (plan 680)
+
+- Status: stable — server only
+- Use: the guest's table wish by chat (book, change, cancel). `runTurn` calls `handleTableIntent` (`server/services/frontdesk-tables.js`) when the business has `tables`; the offer comes only from the engine (`assign`), the confirm goes through the booking service; taps are no-model handlers registered with `registerButton` (OK, ALT, OTHER, BK). A guest's move or cancel calls `changeWhen` / `cancelByGuest` (`server/services/table-bookings.js`), the same bodies the member route uses.
+- Pieces: handleTableIntent, tablesFor, offer, confirm, changeWhen, cancelByGuest (server/services/table-bookings.js).
+- When: any table wish in the assistant; a second booking path or a table time written by the model is never added.
+- Known copies: none.
+
+### assistant-eval — `loadDialogues`, `runDialogue`, `scoreDialogue` (plan 681)
+
+- Status: stable — server only
+- Use: the assistant's eval set. The 30 Hebrew dialogues are data files in `server/eval/frontdesk/dialogues/`, checked by `evalDialogueSchema` (`server/eval/frontdesk/dialogue-schema.js`); the restaurant room is `room14For` (`server/eval/frontdesk/room14.js`). `server/scripts/ai-eval-frontdesk.js` loads them (`loadDialogues`), plays each through `handleInbound` on the `sim` channel with a test business (`runDialogue`) and scores it from the stored rows (`scoreDialogue`) — scripted in the test suite, the real model chain only by hand.
+- Pieces: loadDialogues, runDialogue, scoreDialogue, evalDialogueSchema, room14For.
+- When: any new test dialogue or eval of the assistant; a second dialogue runner or an eval dependency is never added.
+- Known copies: none.
+
+### assistant-guardrails — `preCheck`, `applyGuardrails`, `GUARD_WORDS` (plan 689)
+
+- Status: stable — server only
+- Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`).
+- Pieces: preCheck, applyGuardrails, GUARD_WORDS.
+- When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
 - Known copies: none.

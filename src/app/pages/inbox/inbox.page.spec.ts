@@ -10,6 +10,7 @@ import {
   Check,
   CheckCheck,
   Clock,
+  Flag,
   Hand,
   LucideAngularModule,
   MessageCircle,
@@ -82,6 +83,7 @@ describe('InboxPage (plan 677)', () => {
   let http: HttpTestingController
   let owner: WritableSignal<boolean>
   let admin: WritableSignal<boolean>
+  let userMsg: { onSetErrorMsg: jasmine.Spy; onSetSuccessMsg: jasmine.Spy }
 
   async function create(id: string | null = null) {
     params = new BehaviorSubject(convertToParamMap(id ? { id } : {}))
@@ -95,6 +97,7 @@ describe('InboxPage (plan 677)', () => {
           Check,
           CheckCheck,
           Clock,
+          Flag,
           Hand,
           MessageCircle,
           Send,
@@ -113,7 +116,7 @@ describe('InboxPage (plan 677)', () => {
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } },
         { provide: UserService, useValue: { user_: signal({ _id: 'me' }), isPlatformAdmin_: admin } },
         { provide: PermissionService, useValue: { isOwner_: owner } },
-        { provide: UserMsgService, useValue: { onSetErrorMsg: jasmine.createSpy('err') } }
+        { provide: UserMsgService, useValue: userMsg }
       ]
     }).compileComponents()
     http = TestBed.inject(HttpTestingController)
@@ -126,6 +129,7 @@ describe('InboxPage (plan 677)', () => {
   beforeEach(() => {
     owner = signal(false)
     admin = signal(false)
+    userMsg = { onSetErrorMsg: jasmine.createSpy('err'), onSetSuccessMsg: jasmine.createSpy('ok') }
     conversations = signal<ConversationRow[]>([])
     thread = signal(null)
     listFailed = signal(false)
@@ -148,6 +152,8 @@ describe('InboxPage (plan 677)', () => {
       handBack: jasmine.createSpy('handBack').and.resolveTo({ ok: true }),
       close: jasmine.createSpy('close').and.resolveTo({ ok: true }),
       reply: jasmine.createSpy('reply').and.resolveTo({ ok: true }),
+      suggest: jasmine.createSpy('suggest').and.resolveTo({ ok: true, suggestion: 'נשמח לראותכם' }),
+      fixAnswer: jasmine.createSpy('fixAnswer').and.resolveTo({ ok: true, drafted: true }),
       sendTemplate: jasmine.createSpy('sendTemplate').and.resolveTo({ ok: true })
     }
   })
@@ -253,6 +259,121 @@ describe('InboxPage (plan 677)', () => {
     expect(text(card?.querySelector('[data-testid="card-time"]') ?? null)).toBe('20:00')
     expect(text(card?.querySelector('[data-testid="card-party"]') ?? null)).toBe('4')
     expect(text(card?.querySelector('[data-testid="card-open"]') ?? null)).toBe('פתיחה')
+  })
+
+  describe('suggestion bar and fix (plan 682)', () => {
+    const bar = () => el().querySelector('[data-testid="suggestion-bar"]')
+    const click = (id: string) => {
+      ;(el().querySelector(`[data-testid="${id}"]`) as HTMLElement).click()
+      fixture.detectChanges()
+    }
+    const humanWith = (over: Partial<Conversation> = {}) =>
+      conversations.set([row('1', 'דנה', { status: 'human', assignedTo: 'me', ...over })])
+
+    it('is not rendered for a bot conversation or a closed window', async () => {
+      conversations.set([row('1', 'דנה', { suggestion: 'x' })])
+      await create('1')
+      expect(bar()).toBeNull()
+      fixture.destroy()
+      TestBed.resetTestingModule()
+      humanWith({ windowExpiresAt: NOW - 1 })
+      await create('1')
+      expect(bar()).toBeNull()
+    })
+
+    it('shows the stored suggestion and sends it as it is, then hides the bar', async () => {
+      humanWith({ suggestion: 'שלום, אנחנו פתוחים' })
+      await create('1')
+      expect(text(el().querySelector('[data-testid="suggestion-text"]'))).toBe('שלום, אנחנו פתוחים')
+      click('suggestion-send')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(data['reply']).toHaveBeenCalledWith('1', 'שלום, אנחנו פתוחים')
+      expect(el().querySelector('[data-testid="suggestion-text"]')).toBeNull()
+    })
+
+    it('edit puts the text in the reply box and appends after a line break to typed text', async () => {
+      humanWith({ suggestion: 'הצעה' })
+      await create('1')
+      click('suggestion-edit')
+      const box = () => el().querySelector('[data-testid="reply-text"]') as HTMLTextAreaElement
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(box().value).toBe('הצעה')
+      box().value = 'א'
+      box().dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      click('suggestion-edit')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(box().value).toBe('א\nהצעה')
+    })
+
+    it('dismiss hides the bar text and offers the ask button', async () => {
+      humanWith({ suggestion: 'הצעה' })
+      await create('1')
+      click('suggestion-dismiss')
+      expect(el().querySelector('[data-testid="suggestion-text"]')).toBeNull()
+      expect(el().querySelector('[data-testid="suggestion-ask"]')).not.toBeNull()
+    })
+
+    it('a refused send keeps the bar and shows the refusal', async () => {
+      humanWith({ suggestion: 'הצעה' })
+      ;(data['reply'] as jasmine.Spy).and.resolveTo({ ok: false, code: 'DO_NOT_CONTACT' })
+      await create('1')
+      click('suggestion-send')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(el().querySelector('[data-testid="suggestion-text"]')).not.toBeNull()
+      expect(text(el().querySelector('[data-testid="suggestion-error"]'))).toBe('הלקוח ביקש שלא נפנה אליו')
+    })
+
+    it('ask calls suggest; a failure shows the failure line with retry', async () => {
+      humanWith()
+      ;(data['suggest'] as jasmine.Spy).and.resolveTo({ ok: false })
+      await create('1')
+      click('suggestion-ask')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(data['suggest']).toHaveBeenCalledWith('1')
+      expect(el().querySelector('[data-testid="suggestion-failed"]')).not.toBeNull()
+    })
+
+    it('fix opens the dialog under an assistant message, saves and shows the saved message', async () => {
+      humanWith()
+      await create('1')
+      thread.set({
+        conversation: conversations()[0],
+        messages: [
+          {
+            _id: 'a1',
+            conversationId: '1',
+            direction: 'out',
+            author: 'ai',
+            kind: 'text',
+            text: 'יש חניה',
+            at: NOW - 5000,
+            status: 'sent'
+          } as unknown as Message
+        ]
+      })
+      fixture.detectChanges()
+      click('chat-fix')
+      expect(el().querySelector('[data-testid="fix-dialog"]')).not.toBeNull()
+      const dlg = fixture.debugElement.query((d) => d.name === 'app-fix-answer-dialog').componentInstance as {
+        answer_: { set: (v: string) => void }
+        issue_: { set: (v: string) => void }
+      }
+      dlg.answer_.set('אין חניה')
+      dlg.issue_.set('wrong_info')
+      fixture.detectChanges()
+      click('fix-save')
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(data['fixAnswer']).toHaveBeenCalledWith('1', 'a1', 'אין חניה', 'wrong_info')
+      expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('ibx_fix_saved')
+      expect(el().querySelector('[data-testid="fix-dialog"]')).toBeNull()
+    })
   })
 
   it('shows the empty message for an empty list', async () => {

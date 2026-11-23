@@ -115,6 +115,7 @@ router.use('/logistics', require('./ai/logistics'));
 router.use('/invoices', require('./ai/invoices'));
 router.use('/diag', require('./ai/diag'));
 router.use('/stock', require('./ai/stock'));
+router.use('/frontdesk', require('./ai/frontdesk'));
 
 /** Plan 580: usage context for callGemini; `ids` lets the outcome tracker mark refused answers. */
 function usageOf(req) {

@@ -1,0 +1,29 @@
+{
+  "id": "22",
+  "title": "A tasting for two on Thursday",
+  "businessType": "catering",
+  "tags": ["request"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "אפשר לקבוע טעימה לשנינו ביום חמישי ב-17:00?",
+      "script": {
+        "reply": "תודה",
+        "intent": "request",
+        "kind": "tasting",
+        "collected": { "date": "2030-01-10", "time": "17:00", "party_size": "2" },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "approve", "text": "טעימה לזוג, מועד בתוך הכללים" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "request",
+    "collected": { "date": "2030-01-10", "time": "17:00", "party_size": "2" },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

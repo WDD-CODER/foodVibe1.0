@@ -171,4 +171,50 @@ describe('ConversationDataService (plan 677)', () => {
       expect(logging.warn).toHaveBeenCalled()
     })
   }
+
+  describe('plan 682', () => {
+    it('suggest posts the id and stores the suggestion on the held conversation', async () => {
+      await loadList()
+      const open = service.open('a')
+      http
+        .expectOne((r) => r.url.endsWith('/conversations/a/messages'))
+        .flush({ conversation: conv('a', { status: 'human' }), messages: [], now: 5000 })
+      await open
+      const p = service.suggest('a')
+      const req = http.expectOne((r) => r.url.endsWith('/api/v1/ai/frontdesk/suggest'))
+      expect(req.request.body).toEqual({ conversationId: 'a' })
+      req.flush({ suggestion: 'שלום' })
+      expect(await p).toEqual({ ok: true, suggestion: 'שלום' })
+      expect(service.thread_()?.conversation.suggestion).toBe('שלום')
+    })
+
+    it('suggest answers { ok: false } when the call fails', async () => {
+      const p = service.suggest('a')
+      http
+        .expectOne((r) => r.url.endsWith('/frontdesk/suggest'))
+        .flush({ error: 'AI_FAILED' }, { status: 502, statusText: 'x' })
+      expect(await p).toEqual({ ok: false })
+    })
+
+    it('fixAnswer posts the correction and returns drafted', async () => {
+      const p = service.fixAnswer('a', 'm1', 'אין חניה', 'wrong_info')
+      const req = http.expectOne((r) => r.url.endsWith('/api/v1/ai/frontdesk/fix'))
+      expect(req.request.body).toEqual({
+        conversationId: 'a',
+        messageId: 'm1',
+        answer: 'אין חניה',
+        issue: 'wrong_info'
+      })
+      req.flush({ item: {}, drafted: false })
+      expect(await p).toEqual({ ok: true, drafted: false })
+    })
+
+    it('fixAnswer returns the code of a refusal', async () => {
+      const p = service.fixAnswer('a', 'm1', 'x', 'other')
+      http
+        .expectOne((r) => r.url.endsWith('/frontdesk/fix'))
+        .flush({ error: 'NOT_AI_MESSAGE' }, { status: 400, statusText: 'x' })
+      expect(await p).toEqual({ ok: false, code: 'NOT_AI_MESSAGE' })
+    })
+  })
 })
