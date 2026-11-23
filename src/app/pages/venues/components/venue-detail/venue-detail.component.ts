@@ -9,6 +9,7 @@ import { VenueProfile } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { formatVenueHours } from 'src/app/core/utils/venue-hours.util'
+import { videoSourceKey } from 'src/app/core/utils/video-link.util'
 
 @Component({
   selector: 'app-venue-detail',
@@ -66,6 +67,40 @@ export class VenueDetailComponent implements OnInit {
         .join('')
     }))
   )
+
+  /** Plan 373: tour videos, newest visit first (no date last), with the date (he-IL) and the source label key. */
+  protected readonly videos_ = computed(() =>
+    [...(this.venue_()?.videos ?? [])]
+      .sort((a, b) => (b.visitDate ?? -Infinity) - (a.visitDate ?? -Infinity))
+      .map((v) => ({
+        ...v,
+        dateLabel: v.visitDate != null ? new Date(v.visitDate).toLocaleDateString('he-IL') : '',
+        sourceKey: videoSourceKey(v.url)
+      }))
+  )
+
+  /**
+   * Plan 373: Google Maps and Waze links — to the saved location when there is one, else to the typed address
+   * (Human 2026-11-23, D7); null with neither.
+   */
+  protected readonly navLinks_ = computed(() => {
+    const venue = this.venue_()
+    const loc = venue?.location
+    if (loc) {
+      const ll = `${loc.lat},${loc.lng}`
+      return {
+        google: `https://www.google.com/maps/search/?api=1&query=${ll}`,
+        waze: `https://waze.com/ul?ll=${ll}&navigate=yes`
+      }
+    }
+    const address = venue?.address?.trim()
+    if (!address) return null
+    const q = encodeURIComponent(address)
+    return {
+      google: `https://www.google.com/maps/search/?api=1&query=${q}`,
+      waze: `https://waze.com/ul?q=${q}&navigate=yes`
+    }
+  })
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()

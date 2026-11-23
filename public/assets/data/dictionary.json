@@ -2674,6 +2674,27 @@
     "export_full_recipe": "המתכון המלא",
     "export_total_prep_time": "זמן הכנה כולל (דקות)",
     "export_labor_time_min": "זמן עבודה (דק')",
-    "export_cooking_time_sec": "זמן בישול (שנ')"
+    "export_cooking_time_sec": "זמן בישול (שנ')",
+    "venue_videos": "סרטוני סיור",
+    "venue_add_video": "הוסף סרטון",
+    "video_url": "קישור לסרטון",
+    "video_url_invalid": "הקישור צריך להתחיל ב-https://",
+    "visit_date": "תאריך סיור",
+    "open_video": "פתח סרטון",
+    "video_source_youtube": "YouTube",
+    "video_source_drive": "Drive",
+    "video_source_whatsapp": "WhatsApp",
+    "video_source_link": "קישור",
+    "venue_location": "מיקום",
+    "use_current_location": "השתמש במיקום הנוכחי",
+    "location_saved": "נשמר מיקום",
+    "location_accuracy": "(±{meters} מ׳)",
+    "location_denied": "אין הרשאת מיקום",
+    "location_unavailable": "לא הצלחנו לקבל מיקום. נסו שוב",
+    "location_address_hint": "הוסף כתובת — המיקום לבדו לא מציג אותה",
+    "navigate": "נווט",
+    "nav_waze": "Waze",
+    "nav_google_maps": "Google Maps",
+    "venue_videos_empty": "אין עדיין סרטונים"
   }
 }

@@ -24,6 +24,20 @@ export interface VenueContact {
   role?: string
 }
 
+/** Plan 373: a link to a tour video; `visitDate` is epoch ms (local midnight of the visit day). */
+export interface VenueVideo {
+  url: string
+  visitDate?: number
+  note?: string
+}
+
+/** Plan 373: the saved spot of the venue; `accuracy` is in metres. */
+export interface VenueLocation {
+  lat: number
+  lng: number
+  accuracy?: number
+}
+
 export interface VenueProfile {
   _id: string
   nameHebrew: string
@@ -43,4 +57,8 @@ export interface VenueProfile {
   active?: boolean
   /** design-port session 6 — Cloudinary-hosted URL, same pattern as recipe.model.ts's imageUrl. */
   photoUrl?: string
+  /** Plan 373: tour video links with the visit date. */
+  videos?: VenueVideo[]
+  /** Plan 373: saved with "use my current location"; null (or absent) means no location — an update sends null to clear it. */
+  location?: VenueLocation | null
 }

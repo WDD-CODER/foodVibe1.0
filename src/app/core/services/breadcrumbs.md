@@ -15,7 +15,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `supplier-data.service.ts` | Supplier CRUD | SupplierDataService |
 | `equipment-data.service.ts` | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
 | `invoice-data.service.ts` | Saved invoices, read-only list; `openFile(fileId)` opens the stored file in a new tab | InvoiceDataService |
-| `venue-data.service.ts` | Venue CRUD | VenueDataService |
+| `venue-data.service.ts` | Venue CRUD; `reverseGeocode(lat, lng)` → street address or null (plan 373) | VenueDataService |
 | `kitchen-state.service.ts` | Central state for kitchen flows; save/delete methods return Promises | KitchenStateService |
 | `return-to.service.ts` | Safe `returnUrl` reader and the pending line kept while the person adds something elsewhere | ReturnToService, ReturnToPending |
 | `metadata-registry.service.ts` | Categories, allergens, units registry | MetadataRegistryService |

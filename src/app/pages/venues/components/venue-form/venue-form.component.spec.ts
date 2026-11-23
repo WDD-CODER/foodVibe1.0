@@ -24,7 +24,7 @@ const VENUE: VenueProfile = {
 }
 
 /** The protected form, reached the same way the template does. */
-type FormAccess = { venueForm_: { get: (k: string) => { setValue: (v: unknown) => void } } }
+type FormAccess = { venueForm_: { get: (k: string) => { setValue: (v: unknown) => void; value: unknown } } }
 
 describe('VenueFormComponent (pending-changes guard contract)', () => {
   let fixture: ComponentFixture<VenueFormComponent>
@@ -34,6 +34,7 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
     allVenues_: ReturnType<typeof signal>
     addVenue: jasmine.Spy
     updateVenue: jasmine.Spy
+    reverseGeocode: jasmine.Spy
   }
   let router: jasmine.SpyObj<Router>
 
@@ -47,7 +48,8 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       ensureLoaded: jasmine.createSpy('ensureLoaded').and.resolveTo(),
       allVenues_: signal<VenueProfile[]>([]),
       addVenue: jasmine.createSpy('addVenue').and.resolveTo(),
-      updateVenue: jasmine.createSpy('updateVenue').and.resolveTo()
+      updateVenue: jasmine.createSpy('updateVenue').and.resolveTo(),
+      reverseGeocode: jasmine.createSpy('reverseGeocode').and.resolveTo(null)
     }
     router = jasmine.createSpyObj<Router>('Router', ['navigate'])
     router.navigate.and.resolveTo(true)
@@ -281,6 +283,169 @@ describe('VenueFormComponent (pending-changes guard contract)', () => {
       expect((venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile).contacts).toEqual([
         { name: 'דנה', phone: undefined, role: 'מנהלת' }
       ])
+    })
+  })
+
+  describe('tour videos (plan 373)', () => {
+    type Videos = {
+      addVideo: () => void
+      videosArray: { at: (i: number) => { patchValue: (v: unknown) => void }; length: number }
+    }
+    const videos = () => component as unknown as Videos
+    const visit = new Date(2026, 10, 3).getTime()
+
+    it('saves a video with its visit date as local midnight and a trimmed note', async () => {
+      await setup(null)
+      setName('אולם')
+      videos().addVideo()
+      videos().videosArray.at(0).patchValue({ url: ' https://youtu.be/abc ', visitDate: '2026-11-03', note: ' סיור ' })
+      expect(await component.saveAndWait()).toBeTrue()
+      expect((venueData.addVenue.calls.mostRecent().args[0] as VenueProfile).videos).toEqual([
+        { url: 'https://youtu.be/abc', visitDate: visit, note: 'סיור' }
+      ])
+    })
+
+    it('blocks a link that is not https', async () => {
+      await setup(null)
+      setName('אולם')
+      videos().addVideo()
+      videos().videosArray.at(0).patchValue({ url: 'http://example.com/v' })
+      expect(await component.saveAndWait()).toBeFalse()
+      expect(venueData.addVenue).not.toHaveBeenCalled()
+    })
+
+    it('hydrates videos on edit without marking changes, and keeps them on save', async () => {
+      await setup({ ...VENUE, videos: [{ url: 'https://drive.google.com/x', visitDate: visit }] })
+      expect(videos().videosArray.length).toBe(1)
+      expect(component.hasRealChanges()).toBeFalse()
+      setName('אולם חדש')
+      await component.saveAndWait()
+      expect((venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile).videos).toEqual([
+        { url: 'https://drive.google.com/x', visitDate: visit, note: undefined }
+      ])
+    })
+
+    it('counts an added video as an unsaved change', async () => {
+      await setup(VENUE)
+      videos().addVideo()
+      expect(component.hasRealChanges()).toBeTrue()
+    })
+  })
+
+  describe('current location (plan 373)', () => {
+    type Loc = {
+      useCurrentLocation: () => void
+      clearLocation: () => void
+      location_: () => unknown
+      locationError_: () => string | null
+      locationLabel_: () => string
+    }
+    const loc = () => component as unknown as Loc
+    let getPosition: jasmine.Spy
+
+    beforeEach(() => {
+      getPosition = spyOn(navigator.geolocation, 'getCurrentPosition')
+    })
+
+    it('stores lat/lng with rounded accuracy and sends it on save', async () => {
+      getPosition.and.callFake((ok: PositionCallback) =>
+        ok({ coords: { latitude: 32.1, longitude: 34.8, accuracy: 14.6 } } as GeolocationPosition)
+      )
+      await setup(null)
+      setName('אולם')
+      loc().useCurrentLocation()
+      expect(loc().location_()).toEqual({ lat: 32.1, lng: 34.8, accuracy: 15 })
+      expect(loc().locationLabel_()).toBe('location_saved location_accuracy')
+      expect(component.hasRealChanges()).toBeTrue()
+      expect(await component.saveAndWait()).toBeTrue()
+      expect((venueData.addVenue.calls.mostRecent().args[0] as VenueProfile).location).toEqual({
+        lat: 32.1,
+        lng: 34.8,
+        accuracy: 15
+      })
+    })
+
+    it('shows the denied message and keeps the form usable', async () => {
+      getPosition.and.callFake((_ok: PositionCallback, fail: PositionErrorCallback) =>
+        fail({ code: 1 } as GeolocationPositionError)
+      )
+      await setup(null)
+      loc().useCurrentLocation()
+      expect(loc().location_()).toBeNull()
+      expect(loc().locationError_()).toBe('location_denied')
+      setName('אולם')
+      expect(await component.saveAndWait()).toBeTrue()
+    })
+
+    it('shows the unavailable message on a timeout', async () => {
+      getPosition.and.callFake((_ok: PositionCallback, fail: PositionErrorCallback) =>
+        fail({ code: 3 } as GeolocationPositionError)
+      )
+      await setup(null)
+      loc().useCurrentLocation()
+      expect(loc().locationError_()).toBe('location_unavailable')
+    })
+
+    it('hydrates a saved location and clears it', async () => {
+      await setup({ ...VENUE, location: { lat: 1, lng: 2 } })
+      expect(loc().location_()).toEqual({ lat: 1, lng: 2 })
+      expect(component.hasRealChanges()).toBeFalse()
+      loc().clearLocation()
+      expect(component.hasRealChanges()).toBeTrue()
+      await component.saveAndWait()
+      expect((venueData.updateVenue.calls.mostRecent().args[0] as VenueProfile).location).toBeNull()
+    })
+
+    it('puts the location pin inside the address field and shows no address hint (Human 2026-11-23, D7)', async () => {
+      await setup({ ...VENUE, address: '', location: { lat: 1, lng: 2 } })
+      fixture.detectChanges()
+      const el = fixture.nativeElement as HTMLElement
+      const wrapper = el.querySelector('.venue-address-input')
+      expect(wrapper?.querySelector('#address')).not.toBeNull()
+      expect(wrapper?.querySelector('.location-btn')).not.toBeNull()
+      expect(el.querySelector('.venue-location')).toBeNull()
+      expect(el.textContent).not.toContain('location_address_hint')
+      expect(el.querySelector('.location-saved')).not.toBeNull()
+    })
+
+    it('fills an empty address from the pin, shown lighter until the user types (Human 2026-11-23)', async () => {
+      getPosition.and.callFake((ok: PositionCallback) =>
+        ok({ coords: { latitude: 32.0779, longitude: 34.7741, accuracy: 10 } } as GeolocationPosition)
+      )
+      await setup(null)
+      venueData.reverseGeocode.and.resolveTo('דיזנגוף 50, תל אביב-יפו')
+      loc().useCurrentLocation()
+      await new Promise((resolve) => setTimeout(resolve))
+      fixture.detectChanges()
+      const access = component as unknown as FormAccess
+      expect(venueData.reverseGeocode).toHaveBeenCalledWith(32.0779, 34.7741)
+      expect(access.venueForm_.get('address').value).toBe('דיזנגוף 50, תל אביב-יפו')
+      const input = (fixture.nativeElement as HTMLElement).querySelector('#address') as HTMLInputElement
+      expect(input.classList).toContain('is-auto')
+      access.venueForm_.get('address').setValue('דיזנגוף 52')
+      fixture.detectChanges()
+      expect(input.classList).not.toContain('is-auto')
+    })
+
+    it('never overwrites an address the user typed', async () => {
+      getPosition.and.callFake((ok: PositionCallback) =>
+        ok({ coords: { latitude: 1, longitude: 2, accuracy: 10 } } as GeolocationPosition)
+      )
+      await setup(null)
+      venueData.reverseGeocode.and.resolveTo('רחוב אחר 1')
+      const access = component as unknown as FormAccess
+      access.venueForm_.get('address').setValue('הרצל 1')
+      loc().useCurrentLocation()
+      await new Promise((resolve) => setTimeout(resolve))
+      expect(venueData.reverseGeocode).not.toHaveBeenCalled()
+      expect(access.venueForm_.get('address').value).toBe('הרצל 1')
+    })
+
+    it('sends no location key on add when none was saved', async () => {
+      await setup(null)
+      setName('אולם')
+      await component.saveAndWait()
+      expect((venueData.addVenue.calls.mostRecent().args[0] as VenueProfile).location).toBeUndefined()
     })
   })
 })

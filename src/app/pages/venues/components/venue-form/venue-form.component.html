@@ -57,7 +57,39 @@
         <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
       </app-form-field>
       <app-form-field label="address" forId="address">
-        <input id="address" type="text" formControlName="address" class="c-input" />
+        <!-- Human 2026-11-23 (D7): type the address, or tap the pin to save where you stand. -->
+        <div class="c-input-wrapper venue-address-input">
+          <input id="address" type="text" formControlName="address" [class.is-auto]="addressAuto_()" />
+          @if (canLocate) {
+            <button
+              type="button"
+              class="c-icon-btn location-btn"
+              (click)="useCurrentLocation()"
+              [disabled]="isLocating_()"
+              [attr.aria-busy]="isLocating_() ? true : null"
+              [attr.aria-label]="'use_current_location' | translatePipe"
+              [title]="'use_current_location' | translatePipe"
+            >
+              @if (isLocating_()) {
+                <app-loader size="small" [inline]="true" />
+              } @else {
+                <lucide-icon name="map-pin" [size]="18"></lucide-icon>
+              }
+            </button>
+          }
+        </div>
+        @if (location_()) {
+          <p class="location-saved">
+            <lucide-icon name="map-pin" [size]="16"></lucide-icon>
+            <span>{{ locationLabel_() }}</span>
+            <button type="button" class="c-btn-ghost--sm" (click)="clearLocation()">
+              {{ 'clear' | translatePipe }}
+            </button>
+          </p>
+        }
+        @if (locationError_(); as errKey) {
+          <p class="location-error" role="alert">{{ errKey | translatePipe }}</p>
+        }
       </app-form-field>
       <app-form-field label="capacity" forId="capacity">
         <input id="capacity" type="number" formControlName="capacity" min="0" class="c-input" />
@@ -109,6 +141,52 @@
     </div>
 
     <app-hours-editor [(rows)]="hoursRows_" [showMarks]="hoursSubmitAttempted_()" />
+
+    <div class="form-section infra-section" formArrayName="videos">
+      <div class="infra-header">
+        <h3>{{ 'venue_videos' | translatePipe }}</h3>
+        <button type="button" class="c-btn-ghost" (click)="addVideo()">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+          {{ 'venue_add_video' | translatePipe }}
+        </button>
+      </div>
+      @for (ctrl of videosArray.controls; track ctrl; let i = $index) {
+        <div class="infra-row video-edit-row" [formGroupName]="i">
+          <input
+            type="url"
+            inputmode="url"
+            dir="ltr"
+            formControlName="url"
+            class="c-input video-url"
+            [placeholder]="'video_url' | translatePipe"
+            [attr.aria-label]="'video_url' | translatePipe"
+            [class.c-input--invalid]="ctrl.get('url')?.invalid && ctrl.get('url')?.touched"
+            [attr.aria-invalid]="ctrl.get('url')?.invalid && ctrl.get('url')?.touched ? true : null"
+          />
+          <app-date-field
+            class="video-date"
+            [inputId]="'video-date-' + i"
+            ariaLabelKey="visit_date"
+            [value]="ctrl.get('visitDate')?.value ?? ''"
+            (valueChange)="ctrl.get('visitDate')?.setValue($event)"
+            (invalidChange)="ctrl.get('visitDateInvalid')?.setValue($event)"
+          />
+          <input
+            type="text"
+            formControlName="note"
+            class="c-input video-note"
+            [placeholder]="'notes' | translatePipe"
+            [attr.aria-label]="'notes' | translatePipe"
+          />
+          <button type="button" class="btn-icon" (click)="removeVideo(i)" [attr.aria-label]="'remove' | translatePipe">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+          @if (ctrl.get('url')?.invalid && ctrl.get('url')?.touched) {
+            <p class="video-url-error">{{ 'video_url_invalid' | translatePipe }}</p>
+          }
+        </div>
+      }
+    </div>
 
     <div class="form-section infra-section" formArrayName="availableInfrastructure">
       <div class="infra-header">

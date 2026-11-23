@@ -145,7 +145,65 @@
           min-inline-size: 4rem;
         }
       }
+
+      // Plan 373: the link takes the full first line on a phone; date and note share the next one.
+      .video-edit-row {
+        .video-url {
+          flex: 1 1 100%;
+        }
+
+        .video-date {
+          flex: 1 1 9rem;
+          min-inline-size: 9rem;
+        }
+
+        .video-note {
+          flex: 2 1 8rem;
+        }
+      }
+
+      .video-url-error {
+        flex: 1 1 100%;
+
+        color: var(--color-danger);
+        font-size: var(--fs-sm);
+
+        margin: 0;
+      }
     }
+  }
+
+  // Plan 373, Human 2026-11-23 (D7): the location pin lives inside the address field; the saved-spot line and
+  // its error sit right under it.
+  .venue-address-input {
+    .location-btn {
+      flex-shrink: 0;
+    }
+
+    // Human 2026-11-23: the address the pin filled in reads lighter, so it feels filled in for you.
+    input.is-auto {
+      color: var(--color-text-muted);
+    }
+  }
+
+  .location-error {
+    color: var(--color-danger);
+    font-size: var(--fs-sm);
+
+    margin: 0;
+    margin-block-start: var(--space-2);
+  }
+
+  .location-saved {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+
+    font-size: var(--fs-sm);
+
+    margin: 0;
+    margin-block-start: var(--space-2);
   }
 
   .c-form-actions {

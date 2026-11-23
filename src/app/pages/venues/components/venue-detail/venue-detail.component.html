@@ -39,6 +39,17 @@
             {{ venue.address }}
           </p>
         }
+        @if (navLinks_(); as nav) {
+          <div class="venue-nav" role="group" [attr.aria-label]="'navigate' | translatePipe">
+            <span>{{ 'navigate' | translatePipe }}:</span>
+            <a class="c-btn-ghost--sm" [href]="nav.waze" target="_blank" rel="noopener">{{
+              'nav_waze' | translatePipe
+            }}</a>
+            <a class="c-btn-ghost--sm" [href]="nav.google" target="_blank" rel="noopener">{{
+              'nav_google_maps' | translatePipe
+            }}</a>
+          </div>
+        }
         <div class="detail-stats">
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'infrastructure_items' | translatePipe }}</span>
@@ -162,6 +173,36 @@
         </ul>
       } @else {
         <p class="detail-empty">{{ 'no_associated_menus' | translatePipe }}</p>
+      }
+    </section>
+
+    <section class="detail-card c-glass-panel">
+      <header class="detail-card-header">
+        <lucide-icon name="play" [size]="18"></lucide-icon>
+        <h2>{{ 'venue_videos' | translatePipe }}</h2>
+      </header>
+      @if (videos_().length) {
+        <ul class="menus-list">
+          @for (video of videos_(); track $index) {
+            <li class="menu-row video-row">
+              <div>
+                <span class="menu-row-name">
+                  {{ video.dateLabel || '—' }}
+                  <span class="c-chip c-chip--tag c-chip--sm">{{ video.sourceKey | translatePipe }}</span>
+                </span>
+                @if (video.note) {
+                  <span class="menu-row-meta">{{ video.note }}</span>
+                }
+              </div>
+              <a class="c-btn-ghost--sm" [href]="video.url" target="_blank" rel="noopener">
+                <lucide-icon name="play" [size]="14"></lucide-icon>
+                {{ 'open_video' | translatePipe }}
+              </a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="detail-empty">{{ 'venue_videos_empty' | translatePipe }}</p>
       }
     </section>
 
