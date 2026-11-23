@@ -38,7 +38,7 @@
     <div class="floor-plan__tools" role="group" [attr.aria-label]="'fp_tools_label' | translatePipe">
       <button
         type="button"
-        class="c-chip c-chip--tab"
+        class="c-chip c-chip--tab floor-plan__tool"
         data-testid="fp-tool-select"
         [class.active]="tool_() === 'select'"
         [attr.aria-pressed]="tool_() === 'select'"
@@ -51,7 +51,7 @@
       </button>
       <button
         type="button"
-        class="c-chip c-chip--tab"
+        class="c-chip c-chip--tab floor-plan__tool"
         data-testid="fp-tool-zone"
         [class.active]="tool_() === 'zone'"
         [attr.aria-pressed]="tool_() === 'zone'"
@@ -64,7 +64,7 @@
       </button>
       <button
         type="button"
-        class="c-chip c-chip--tab"
+        class="c-chip c-chip--tab floor-plan__tool"
         data-testid="fp-tool-join"
         [class.active]="tool_() === 'join'"
         [attr.aria-pressed]="tool_() === 'join'"
@@ -125,7 +125,7 @@
         @for (item of legend_(); track item.area.key) {
         <button
           type="button"
-          class="c-chip c-chip--tab"
+          class="c-chip c-chip--tab floor-plan__legend-chip"
           [attr.data-testid]="'fp-legend-' + item.area.key"
           [class.active]="canEdit_() && zoneKey_() === item.area.key"
           [attr.aria-pressed]="canEdit_() && zoneKey_() === item.area.key"
@@ -139,7 +139,7 @@
         } @if (canEdit_()) {
         <button
           type="button"
-          class="c-chip c-chip--tap"
+          class="c-chip c-chip--tap floor-plan__legend-chip"
           data-testid="fp-area-add"
           [disabled]="areas_().length >= maxAreas"
           (click)="onAreaAdd()"

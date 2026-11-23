@@ -10,7 +10,7 @@
             type="button"
             class="joins-list__toggle"
             data-testid="join-label"
-            [class.active]="row.marked"
+            [class.joins-list__toggle--marked]="row.marked"
             [attr.aria-expanded]="row.open"
             (click)="press(row.join.key)"
           >
@@ -55,7 +55,7 @@
                 (valueChange)="joinChange.emit({ key: row.join.key, patch: { maxSeats: $event } })"
               />
             </div>
-            <label class="c-chip c-chip--toggle">
+            <label class="c-chip c-chip--toggle joins-list__online">
               <input
                 type="checkbox"
                 role="switch"

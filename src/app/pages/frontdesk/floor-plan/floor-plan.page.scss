@@ -200,10 +200,13 @@
   gap: var(--space-2);
 }
 
-.floor-plan__tools .c-chip {
+.floor-plan__tool,
+.floor-plan__legend-chip {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+
+  white-space: nowrap;
 }
 
 .floor-plan__presets {
@@ -250,6 +253,7 @@
 }
 
 .floor-plan__canvas {
+  box-sizing: border-box;
   display: flex;
   min-inline-size: 0;
   flex-direction: column;
@@ -262,20 +266,16 @@
   align-items: center;
 }
 
-.floor-plan__legend .c-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
 .floor-plan__status {
   margin: 0;
+  line-height: var(--lh-tight, 1.3);
 
   color: var(--color-text-muted);
   font-size: var(--fs-sm);
 }
 
 .floor-plan__inspector {
+  box-sizing: border-box;
   padding: var(--space-4);
 }
 

@@ -157,7 +157,7 @@
       {{ 'fp_area_delete' | translatePipe }}
     </button>
     @if (blockedKey_()) {
-      <span class="zone-panel__sr" id="zp-why">{{ reason_() }}</span>
+      <span class="visually-hidden" id="zp-why">{{ reason_() }}</span>
     }
   </div>
 }

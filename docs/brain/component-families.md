@@ -567,8 +567,16 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 684
 - Use: `src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts` (`withTable`, `numberError`, `duplicateTable`, `withoutTable`, `overlapping`, `minGrid` (plan 699: tables and zones), `withArea` (plan 699: a new area gets the first free palette colour), `restoreDropped`, and plan 699's `withZone` (set or clear an area's zone; refusals `fp_zone_overlap`, `fp_zone_small`, `fp_zone_outside`; tables whose centre is inside join the area) and `withTableDropped` (a dropped table joins the zone it lands in)) and `floor-plan-joins.util.ts` (plan 666: `joinProblem`, `newJoin`, `joinLabel`, `withJoin`, `withoutJoin`, `withJoinChange`) — pure draft rules; `app-floor-joins-list` (joins rows in the room panel); the arrows row of the table panel; the phone sheet (`.floor-plan__panel.floor-plan__panel--open`, non-modal, under 768 px); the overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`); the scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) in the page's and the two panels' own stylesheets; `app-floor-table-panel`, `app-floor-room-panel` and plan 700's `app-floor-zone-panel` (`components/zone-panel/`: name, eight colour swatches, draw / redraw / clear, four position and size counters, order, remove with its `[appTip]` reason; inputs in, events out).
 - Zones (plan 699): withZone, withTableDropped and the zone-aware minGrid in floor-plan-edit.util.ts — an area's zone is set or cleared only through `withZone`, a drop goes through `withTableDropped`; the page wires the map's `colorTables` and `joinedKeys`.
+- Compact joins rows (plan 700, `app-floor-joins-list`: one summary line per join, one open row at a time) and newAreaName and the color AreaOp in floor-plan-edit.util.ts (the next free "אזור חדש" name; `withArea` op `color`).
 - Editor layout (plan 700): a toolbar card (tools select / zone / join as `c-chip--tab`, the add-table presets with shape glyphs), a canvas card (zone legend of `c-chip--tab` with `.c-chip__dot`, the map, a status line) and an inspector card choosing table / zone / room; `withArea` op `color` and `newAreaName` in the util; the compact joins list (one open row at a time).
 - When: a screen edits the room draft — rules belong in the util, never in a panel.
+- Known copies: none.
+
+### floor-plan-editor-layout — the editor layout classes of the room editor
+
+- Status: stable — plan 700
+- Use: scoped classes in the floor-plan page and panel stylesheets: `.floor-plan__toolbar`, `.floor-plan__tools`, `.floor-plan__tool`, `.floor-plan__glyph`, `.floor-plan__canvas`, `.floor-plan__legend`, `.floor-plan__legend-chip`, `.floor-plan__status`, `.floor-plan__inspector`, `.zone-panel`, `.zone-panel__swatches`, `.zone-panel__rect`, `.room-panel__section`, `.room-panel__zone-row`, `.joins-list__summary` — built on `.c-glass-card`, `.c-chip--tab` and `.c-chip--toggle`; they only lay out this one screen.
+- When: the room editor page or its panels change layout — never a copy on another screen.
 - Known copies: none.
 
 ### qr-code — a QR image of a link

@@ -111,6 +111,6 @@ describe('JoinsListComponent (plan 666, 700)', () => {
   it('marks the pressed join', () => {
     fixture.componentRef.setInput('markedKey', 'join01')
     fixture.detectChanges()
-    expect(q('[data-testid="join-label"]')[0].classList).toContain('active')
+    expect(q('[data-testid="join-label"]')[0].classList).toContain('joins-list__toggle--marked')
   })
 })
