@@ -369,3 +369,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: joined tables have a violet border and a link mark in every screen that passes `joinedKeys`; only the editor passes it in this plan.
 - behaviour: tooltips show at once on hover and keyboard focus and for 3 s after a tap, below the control unless there is no room; the native `title` is not used, so no second, late tooltip appears.
 - behaviour: the default `hints-in-tooltips` keeps its rule; its `how` line (native title, "no new tooltip piece") is now out of date — the Human updates `_shared/product-defaults.md` to name `[appTip]` (`default` skill), the builder does not.
+
+### Builder evidence (run rs-zones, round 1, handoff builder)
+- plan file: not on `orch/rs-zones` (ANSWER 699-1 not applied yet); taken from main commit 7eb538ad into this branch as the first commit, so the run branch receives it with the merge.
+- A1: `pnpm run build:schemas` → exit 0; `npx jest test/floor-plan-check.test.js test/floor-plan.test.js` (server) → exit 0, 49 passed.
+- A2/A3b: `ng test --include floor-zones.util.spec.ts --include tip.directive.spec.ts` → 17 of 17 SUCCESS.
+- A4/A5: `ng test --include floor-map.component.spec.ts` → 15 of 15 SUCCESS.
+- A6–A8: `ng test --include src/app/pages/frontdesk/floor-plan/**/*.spec.ts …` → TOTAL 117 SUCCESS.
+- A10: `node scripts/inventory.mjs` → wrote docs/brain/inventory.md; `node scripts/reuse-lint.mjs --check-registry` → exit 0.
+- kit-checks first run → 13 findings (undeclared `.is-zoned`/`.is-selected`/`.is-drawing` and tokens 1–6, registry lines, raw radius, a duplicate class name `.is-selected`); fixed: Reuse Check rows list every class and token, registry lines under floor-plan-editor and engine-classes, `--radius-xs`, zone modifier renamed `.floor-map__zone--selected` → `KIT_CHECKS: ok (6 checks)`.
+- behaviour: `emptyFloorPlan` gives `color: order % 8` (0, 1, 2 … as the plan says) so a 9th or 10th starting area stays inside the schema's 0–7 — reverse: `color: order` and widen the schema.
+- behaviour: `withArea` add counts an area with no stored colour as using `order % 8` when it looks for a free colour.
