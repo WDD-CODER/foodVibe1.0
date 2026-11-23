@@ -815,3 +815,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel.
 - When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
 - Known copies: none.
+
+### scheduled-jobs — `runDue`, `startScheduler`, `stopScheduler`, moveBookingStatus in server/services/table-bookings.js, `registerBookingButtons` (plan 676)
+
+- Status: stable — server only
+- Use: timed work is one job file in `server/jobs/` run by `runDue` in `server/jobs/scheduler.js` (`startScheduler` / `stopScheduler`, one unref'd 60 s tick; each job claims its rows with a conditional update). A booking's status moves only through `moveBookingStatus` in `server/services/table-bookings.js`. The guest's Confirm and Cancel taps are `registerBookingButtons` in `server/services/booking-buttons.js`.
+- Pieces: runDue, startScheduler, stopScheduler, remindOne, markOne, moveBookingStatus, registerBookingButtons.
+- When: anything that must happen by itself at an hour or after a delay; a second timer or a second writer of a booking's status is never added.
+- Known copies: none.
