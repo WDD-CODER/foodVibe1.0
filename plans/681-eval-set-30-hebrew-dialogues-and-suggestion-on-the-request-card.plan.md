@@ -119,6 +119,7 @@ screens/681-*.png
 docs/restaurant/restaurant-map.md
 docs/workflow-kit/manifest.json
 server/services/frontdesk-tables.js
+docs/brain/component-families.md
 ```
 
 ## Read Scope
