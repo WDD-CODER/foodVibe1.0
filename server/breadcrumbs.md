@@ -25,7 +25,7 @@
 | `services/table-bookings.js` | The one booking service (plan 668): `reserveTable` (assign then claim), `bookTable` (reserve, write, release on failure), `rebookTable`, `createWalkIn`, `countBooking`, `loadTableContext`, `wallOf`, `checkTables`; the only caller of `claim` |
 | `services/inbound.js` | The one way in (plan 675, C-CONV): `handleInbound`, `registerButton`, `setTurnHandler`; idempotent, one client per phone, the wait of R-03 |
 | `services/outbound.js` | The one sender (plan 675): `sendOut` checks do-not-contact, the test rule, the live profile, the 24-hour window; the only caller of a transport's `send` |
-| `services/conversations.js` | One live conversation per guest and channel (plan 675): `findOrCreateConversation`, `loadConversation`, `closeConversation` |
+| `services/conversations.js` | One live conversation per guest and channel (plan 675): `findOrCreateConversation`, `loadConversation`, `closeConversation`, `listConversations` (plan 687) |
 | `services/channels/` | The only place that names a channel (plan 675): `index.js` `channelFor`, `sim-channel.js`; WhatsApp joins in plan 683 |
 | `routes/sim.js` | The simulator routes (plan 675): `POST /inbound`, `DELETE /test-data`; owner or platform admin |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
@@ -40,7 +40,7 @@
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
 | `routes/floor-plan.js` | Mounted at `/api/v1/floor-plan` (plan 662, C-FLOOR, C-HOLD): GET / and PUT / of the one floor plan (plan 664); the hold routes come with plan 667; PUT /confirm-mode (plan 667) changes only `tableService.confirmMode` of the owner's profile |
 | `routes/waitlist.js` | Mounted at `/api/v1/waitlist` (plan 662, C-WAIT): empty until plan 673 |
-| `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 662, C-CONV): empty until plan 675 |
+| `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 687, C-CONV): list, thread, member reply, take over, hand back, close; members only, server-only collections |
 | `routes/sim.js` | Mounted at `/api/v1/sim` (plan 662, the simulated chat channel): empty until plan 675 |
 | `shared/schemas/modules.ts` | `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`, `platformUpdateSchema` (plan 615, C-MODULES); shared by the server gate and the browser |
 | `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token; plan 555: profile view, send, read by token, cancel by token; plan 669: `GET /:slug/availability` (free times, own read limiter), `POST …/:token/confirm`, automatic confirmation of a table request, the guest's cancel of a confirmed booking |

@@ -51,4 +51,38 @@ async function closeConversation(db, businessId, id, now = Date.now()) {
   return loadConversation(db, businessId, id);
 }
 
-module.exports = { findOrCreateConversation, loadConversation, closeConversation };
+const LAST_TEXT_MAX = 120;
+const STATUS_FILTERS = { open: ['bot', 'human'], bot: ['bot'], human: ['human'], closed: ['closed'] };
+
+/**
+ * Plan 687: the page of conversations the inbox shows, in three queries whatever the page size: the conversations,
+ * their clients (name, phone, tags) and the newest message of each. `before` pages from a `lastMessageAt`.
+ */
+async function listConversations(db, businessId, { status = 'open', test = false, limit = 50, before } = {}) {
+  const statuses = STATUS_FILTERS[status] || STATUS_FILTERS.open;
+  const filter = { businessId, status: { $in: statuses }, test: test ? true : { $ne: true } };
+  if (typeof before === 'number') filter.lastMessageAt = { $lt: before };
+  const rows = await db.collection('conversations').find(filter).sort({ lastMessageAt: -1 }).limit(limit).toArray();
+  if (!rows.length) return [];
+  const clientIds = [...new Set(rows.map(r => r.clientId))];
+  const clients = await db.collection('clients')
+    .find({ businessId, _id: { $in: clientIds } }, { projection: { name: 1, phone: 1, tags: 1 } }).toArray();
+  const byClient = new Map(clients.map(c => [c._id, c]));
+  const newest = await db.collection('messages').aggregate([
+    { $match: { businessId, conversationId: { $in: rows.map(r => r._id) } } },
+    { $sort: { at: -1 } },
+    { $group: { _id: '$conversationId', text: { $first: '$text' }, direction: { $first: '$direction' }, kind: { $first: '$kind' }, at: { $first: '$at' } } },
+  ]).toArray();
+  const lastBy = new Map(newest.map(m => [m._id, m]));
+  return rows.map(r => {
+    const c = byClient.get(r.clientId);
+    const m = lastBy.get(r._id);
+    return {
+      ...r,
+      client: { _id: r.clientId, name: c ? c.name : '', phone: c ? c.phone : '', tags: (c && c.tags) || [] },
+      last: m ? { text: String(m.text || '').slice(0, LAST_TEXT_MAX), direction: m.direction, kind: m.kind, at: m.at } : null,
+    };
+  });
+}
+
+module.exports = { findOrCreateConversation, loadConversation, closeConversation, listConversations };
