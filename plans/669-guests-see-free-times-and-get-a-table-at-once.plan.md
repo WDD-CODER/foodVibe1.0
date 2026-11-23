@@ -150,6 +150,7 @@ server/test/public-guard.test.js
 server/test/rate-limit-key.test.js
 server/test/shared-request-helpers.test.js
 docs/workflow-kit/manifest.json
+docs/brain/component-families.md
 ```
 
 ## Read Scope
