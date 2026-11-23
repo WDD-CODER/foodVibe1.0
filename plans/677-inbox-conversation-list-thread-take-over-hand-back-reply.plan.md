@@ -184,6 +184,9 @@ e2e/ui/677-1.spec.ts
 e2e/ui/677-2.spec.ts
 e2e/ui/677-3.spec.ts
 screens/677-*.png
+src/app/appRoot/app.component.spec.ts
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
