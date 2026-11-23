@@ -113,6 +113,8 @@ server/test/retention.test.js
 server/test/helpers/**
 server/breadcrumbs.md
 docs/restaurant/restaurant-map.md
+server/test/files-route.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
