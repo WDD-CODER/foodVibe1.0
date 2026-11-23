@@ -165,6 +165,7 @@ server/test/frontdesk-turn.test.js
 public/assets/data/dictionary.json
 server/breadcrumbs.md
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
