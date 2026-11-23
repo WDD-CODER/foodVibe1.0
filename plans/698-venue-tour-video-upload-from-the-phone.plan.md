@@ -79,8 +79,8 @@ append the path to the scope block above and retry.
   `res.cloudinary.com` for media); no AI call; no new collection.
 
 ## Reuse Check
-- `.video-upload-btn`, `.video-progress` (page-local layout in venue-detail.component.scss) — family: none — rung: 3 — why: page-local spacing only on top of `.c-btn-ghost`; no `.c-*` class
-- `CloudinaryService.uploadVideo(file)` — family: none — rung: 3 — why: beside `upload(file)`, same unsigned preset, `/video/upload`; no second upload path; `videoSourceKey` gains one host
+- `.video-upload-btn`, `.video-progress` (page-local layout in venue-detail.component.scss) — family: engine-classes — rung: 3 — why: page-local spacing only on top of `.c-btn-ghost`; no `.c-*` class
+- `CloudinaryService.uploadVideo(file)` — family: http — rung: 3 — why: beside `upload(file)`, same unsigned preset, `/video/upload`; no second upload path; `videoSourceKey` gains one host
 
 ## Defaults
 
