@@ -246,7 +246,7 @@ append the path to the scope block above and retry.
 - server/services/outbound.js (`sendOut`) — family: none — rung: 4 — why: the one sender; do-not-contact, the window and the test rule must be checked in one place or one caller will skip them
 - server/services/inbound.js (`handleInbound`, `registerButton`, `setTurnHandler`) — family: none — rung: 4 — why: the one handler both transports call, so the simulator is never a second code path
 - server/services/conversations.js (`findOrCreateConversation`, `loadConversation`, `closeConversation`) — family: none — rung: 4 — why: the live-key rule of a conversation is written once and used by the inbound handler here and by the member router of plan 687
-- server/services/channels (`channelFor`, `sim-channel.js`) — family: none — rung: 4 — why: the only place that knows a channel's name
+- server/services/channels/index.js (`channelFor`, `sim-channel.js`) — family: none — rung: 4 — why: the only place that knows a channel's name
 
 ## Defaults
 
@@ -396,15 +396,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Fix the closed list of messages the business may send outside a live conversation — the eight templates with their parameters, one-line values, button ids from a token, the bad-template error; its test — shared/schemas/front-desk/message-templates.ts, server/test/message-templates.test.js
-- [ ] A2: Add the simulator transport and the one place that knows a channel by name — sim transport, channelFor with the descriptor, the stand-in for a channel not built yet, the test hooks — server/services/channels/index.js, server/services/channels/sim-channel.js
-- [ ] A3: Keep one live conversation per guest and channel — find or create by live key, the race of two first messages, load and close, the client counter — server/services/conversations.js, server/test/helpers/conversation-fixtures.js
-- [ ] A4: Send every outbound message through one function that can refuse — do-not-contact, the test rule, a profile that is not live, the window, the button limit, a failed send; its test file — server/services/outbound.js, server/test/outbound.test.js
-- [ ] A5: Handle every inbound message in one place, once — the duplicate check, the client by phone, the stored message, the window, the button registry, the wait that joins a burst, the turn hook; its test file with the log check — server/services/inbound.js, server/test/inbound.test.js
-- [ ] A6: Let the owner write as a test guest and wipe what the test left — the inbound route with its refusals, the test-data delete, both owner or platform admin only; the router test — server/routes/sim.js, server/test/sim-router.test.js
-- [ ] A7: Keep test bookings out of the front desk numbers — the one filter and its test case — server/services/frontdesk-stats.js, server/test/frontdesk-stats.test.js
-- [ ] A8: Record the new pieces where the next plans look for them — the folder map, the registry rows, the map's extension lines — server/breadcrumbs.md, docs/brain/inventory.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
-- [ ] A9: Run every check of this plan and hand Dandan the template list to confirm — test:server, build, both lints, the two greps, log-query; evidence into Execution Notes
+- [x] A1: Fix the closed list of messages the business may send outside a live conversation — the eight templates with their parameters, one-line values, button ids from a token, the bad-template error; its test — shared/schemas/front-desk/message-templates.ts, server/test/message-templates.test.js
+- [x] A2: Add the simulator transport and the one place that knows a channel by name — sim transport, channelFor with the descriptor, the stand-in for a channel not built yet, the test hooks — server/services/channels/index.js, server/services/channels/sim-channel.js
+- [x] A3: Keep one live conversation per guest and channel — find or create by live key, the race of two first messages, load and close, the client counter — server/services/conversations.js, server/test/helpers/conversation-fixtures.js
+- [x] A4: Send every outbound message through one function that can refuse — do-not-contact, the test rule, a profile that is not live, the window, the button limit, a failed send; its test file — server/services/outbound.js, server/test/outbound.test.js
+- [x] A5: Handle every inbound message in one place, once — the duplicate check, the client by phone, the stored message, the window, the button registry, the wait that joins a burst, the turn hook; its test file with the log check — server/services/inbound.js, server/test/inbound.test.js
+- [x] A6: Let the owner write as a test guest and wipe what the test left — the inbound route with its refusals, the test-data delete, both owner or platform admin only; the router test — server/routes/sim.js, server/test/sim-router.test.js
+- [x] A7: Keep test bookings out of the front desk numbers — the one filter and its test case — server/services/frontdesk-stats.js, server/test/frontdesk-stats.test.js
+- [x] A8: Record the new pieces where the next plans look for them — the folder map, the registry rows, the map's extension lines — server/breadcrumbs.md, docs/brain/inventory.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
+- [x] A9: Run every check of this plan and hand Dandan the template list to confirm — test:server, build, both lints, the two greps, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: `upsertClientByPhone` (unchanged), `checkStoredDoc`, `newId`, `requireModule`, `isPlatformAdmin`,
@@ -440,3 +440,7 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: outside the 24-hour window a button message is refused like free text; only a template passes.
 - behaviour: the simulator refuses a phone that belongs to a real client (409 `REAL_CLIENT`).
 - behaviour: the Hebrew bodies of the templates are added by plan 677, so this server plan edits no browser file.
+- evidence: pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0 (2864 SUCCESS); pnpm run test:server -> exit 0 (161 files, 2201 tests passed); kit-manifest-check, kit-checks, override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, ci-scope-check, log-query -> exit 0.
+- evidence: grep "'whatsapp'" server/services server/routes server/jobs outside channels/ -> only frontdesk-stats.js:11 (existing line).
+- behaviour: the default actor of a real-channel client lives in channels/index.js (`defaultActor`) so inbound.js names no channel.
+- [human] the eight template names are in shared/schemas/front-desk/message-templates.ts — waiting for Dandan's confirmation.

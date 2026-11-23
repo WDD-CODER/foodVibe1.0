@@ -23,6 +23,11 @@
 | `routes/bookings.js` | Booking status moves and table bookings at `/api/v1/bookings` (plan 549; plan 668: phone booking, walk-in, move, change, availability, the day with holds); the only writer of `bookings` |
 | `services/table-holds.js` | The table holds (plan 668, C-HOLD): `claim`, `move`, `release`, `holdsOf`, `rangesOf` over `tableHolds`, one row per table per 15-minute cell; the unique index is the only guard against a double booking |
 | `services/table-bookings.js` | The one booking service (plan 668): `reserveTable` (assign then claim), `bookTable` (reserve, write, release on failure), `rebookTable`, `createWalkIn`, `countBooking`, `loadTableContext`, `wallOf`, `checkTables`; the only caller of `claim` |
+| `services/inbound.js` | The one way in (plan 675, C-CONV): `handleInbound`, `registerButton`, `setTurnHandler`; idempotent, one client per phone, the wait of R-03 |
+| `services/outbound.js` | The one sender (plan 675): `sendOut` checks do-not-contact, the test rule, the live profile, the 24-hour window; the only caller of a transport's `send` |
+| `services/conversations.js` | One live conversation per guest and channel (plan 675): `findOrCreateConversation`, `loadConversation`, `closeConversation` |
+| `services/channels/` | The only place that names a channel (plan 675): `index.js` `channelFor`, `sim-channel.js`; WhatsApp joins in plan 683 |
+| `routes/sim.js` | The simulator routes (plan 675): `POST /inbound`, `DELETE /test-data`; owner or platform admin |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
 | `routes/access.js` | Mounted at `/api/v1/access` (plan 615; filled by plan 631, C-ACCESS): `GET /businesses` (where the user may go), `POST` / `DELETE` / `GET /grants` (platform admin grants, owner lists and removes); no query of its own |
 | `services/access.js` | Which business a session is in (plan 631, ADR 0032): `resolveSession`, `canEnter`, `stillActing` (the per-request re-check of an acting token), `liveGrant`, `listEnterable` and the grant helpers; the only reader and writer of `businessAccess` |
