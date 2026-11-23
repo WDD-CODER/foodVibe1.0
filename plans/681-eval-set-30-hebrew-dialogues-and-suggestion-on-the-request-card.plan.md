@@ -117,6 +117,7 @@ public/assets/data/dictionary.json
 e2e/ui/681-1.spec.ts
 screens/681-*.png
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
