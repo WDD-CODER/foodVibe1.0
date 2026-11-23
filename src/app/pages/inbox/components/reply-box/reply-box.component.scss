@@ -28,17 +28,12 @@
   .rb-line {
     margin: 0;
     color: var(--color-text-muted);
+    font-size: var(--fs-base);
   }
 
   .rb-text {
     flex: 1;
     min-inline-size: 0;
     resize: none;
-  }
-
-  .rb-template {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 }
