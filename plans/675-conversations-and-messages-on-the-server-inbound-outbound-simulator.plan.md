@@ -396,14 +396,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Fix the closed list of messages the business may send outside a live conversation — the eight templates with their parameters, one-line values, button ids from a token, the bad-template error; its test — shared/schemas/front-desk/message-templates.ts, server/test/message-templates.test.js
-- [ ] A2: Add the simulator transport and the one place that knows a channel by name — sim transport, channelFor with the descriptor, the stand-in for a channel not built yet, the test hooks — server/services/channels/index.js, server/services/channels/sim-channel.js
-- [ ] A3: Keep one live conversation per guest and channel — find or create by live key, the race of two first messages, load and close, the client counter — server/services/conversations.js, server/test/helpers/conversation-fixtures.js
-- [ ] A4: Send every outbound message through one function that can refuse — do-not-contact, the test rule, a profile that is not live, the window, the button limit, a failed send; its test file — server/services/outbound.js, server/test/outbound.test.js
-- [ ] A5: Handle every inbound message in one place, once — the duplicate check, the client by phone, the stored message, the window, the button registry, the wait that joins a burst, the turn hook; its test file with the log check — server/services/inbound.js, server/test/inbound.test.js
-- [ ] A6: Let the owner write as a test guest and wipe what the test left — the inbound route with its refusals, the test-data delete, both owner or platform admin only; the router test — server/routes/sim.js, server/test/sim-router.test.js
-- [ ] A7: Keep test bookings out of the front desk numbers — the one filter and its test case — server/services/frontdesk-stats.js, server/test/frontdesk-stats.test.js
-- [ ] A8: Record the new pieces where the next plans look for them — the folder map, the registry rows, the map's extension lines — server/breadcrumbs.md, docs/brain/inventory.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
+- [x] A1: Fix the closed list of messages the business may send outside a live conversation — the eight templates with their parameters, one-line values, button ids from a token, the bad-template error; its test — shared/schemas/front-desk/message-templates.ts, server/test/message-templates.test.js
+- [x] A2: Add the simulator transport and the one place that knows a channel by name — sim transport, channelFor with the descriptor, the stand-in for a channel not built yet, the test hooks — server/services/channels/index.js, server/services/channels/sim-channel.js
+- [x] A3: Keep one live conversation per guest and channel — find or create by live key, the race of two first messages, load and close, the client counter — server/services/conversations.js, server/test/helpers/conversation-fixtures.js
+- [x] A4: Send every outbound message through one function that can refuse — do-not-contact, the test rule, a profile that is not live, the window, the button limit, a failed send; its test file — server/services/outbound.js, server/test/outbound.test.js
+- [x] A5: Handle every inbound message in one place, once — the duplicate check, the client by phone, the stored message, the window, the button registry, the wait that joins a burst, the turn hook; its test file with the log check — server/services/inbound.js, server/test/inbound.test.js
+- [x] A6: Let the owner write as a test guest and wipe what the test left — the inbound route with its refusals, the test-data delete, both owner or platform admin only; the router test — server/routes/sim.js, server/test/sim-router.test.js
+- [x] A7: Keep test bookings out of the front desk numbers — the one filter and its test case — server/services/frontdesk-stats.js, server/test/frontdesk-stats.test.js
+- [x] A8: Record the new pieces where the next plans look for them — the folder map, the registry rows, the map's extension lines — server/breadcrumbs.md, docs/brain/inventory.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
 - [ ] A9: Run every check of this plan and hand Dandan the template list to confirm — test:server, build, both lints, the two greps, log-query; evidence into Execution Notes
 
 ## Technical Considerations

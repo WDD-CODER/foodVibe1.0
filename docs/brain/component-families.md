@@ -339,6 +339,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
 - Plan 663: openRangesOf in qualify.ts (`shared/schemas/front-desk/qualify.ts`) — the checkable opening ranges of a date (`hoursCheck` is built on it).
 - Plan 663: jerusalemDateTime in local-time.ts (`shared/schemas/front-desk/local-time.ts`) — the inverse of `jerusalemEpoch`.
+- Plan 675: `sendOut` in `server/services/outbound.js` — every outbound message goes through `sendOut`; never call a transport.
+- Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler.
+- Plan 675: `templateMessage` in `shared/schemas/front-desk/message-templates.ts` — the closed list of outbound templates and their one-line parameters; never a template name typed elsewhere.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).

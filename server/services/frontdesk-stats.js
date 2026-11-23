@@ -97,7 +97,7 @@ async function frontDeskStats(db, businessId, { fromMs, toMs, days, nowMs = Date
       .project({ kind: 1, status: 1, channel: 1, createdAt: 1, decline: 1, outcome: 1 }).toArray(),
     db.collection('frontDeskProfiles').findOne({ businessId, ...LIVE }, { projection: { hours: 1 } }),
     db.collection('requests').find({ ...live, test: true }).project({ _id: 1 }).toArray(),
-    db.collection('bookings').find({ ...live, startAt: { $gte: fromMs, $lte: Math.min(toMs, nowMs - 1) } }).project({ status: 1 }).toArray(),
+    db.collection('bookings').find({ ...live, test: { $ne: true }, startAt: { $gte: fromMs, $lte: Math.min(toMs, nowMs - 1) } }).project({ status: 1 }).toArray(),
   ])
   const decisions = await db.collection('decisionLog')
     .find({ ...live, at: inRange, decidedAction: { $in: ['approve', 'decline'] }, requestId: { $nin: testIds.map(r => r._id) } })
