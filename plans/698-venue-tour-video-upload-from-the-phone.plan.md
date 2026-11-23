@@ -129,12 +129,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the app upload a video to Cloudinary with progress — `uploadVideo` with progress events, the size and type checks as a pure exported `checkVideoFile(file)`; spec with `HttpTestingController` (endpoint, preset, progress percent, done url, refusals without a request) — src/app/core/services/cloudinary.service.ts, src/app/core/services/cloudinary.service.spec.ts
-- [ ] A2: Label an uploaded video as uploaded — `res.cloudinary.com` → `video_source_upload`, with a spec case — src/app/core/utils/video-link.util.ts, src/app/core/utils/video-link.util.spec.ts
-- [ ] A3: Add the one-tap upload button and progress to the venue page — button + hidden file input in the videos card header, `uploading_` progress bar, save on done, the three messages — src/app/pages/venues/components/venue-detail/**
-- [ ] A4: Prove the venue page flow with unit tests — a picked video uploads, then `updateVenue` gets it first with today's date; too big and not-a-video never call the service; an upload error leaves the venue unchanged; the button is disabled while signed out — src/app/pages/venues/components/venue-detail/venue-detail.component.spec.ts
-- [ ] A5: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A6: Record the upload in the maps and run every `[auto]` check — paste outputs under Execution Notes — src/app/core/services/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [x] A1: Let the app upload a video to Cloudinary with progress — `uploadVideo` with progress events, the size and type checks as a pure exported `checkVideoFile(file)`; spec with `HttpTestingController` (endpoint, preset, progress percent, done url, refusals without a request) — src/app/core/services/cloudinary.service.ts, src/app/core/services/cloudinary.service.spec.ts
+- [x] A2: Label an uploaded video as uploaded — `res.cloudinary.com` → `video_source_upload`, with a spec case — src/app/core/utils/video-link.util.ts, src/app/core/utils/video-link.util.spec.ts
+- [x] A3: Add the one-tap upload button and progress to the venue page — button + hidden file input in the videos card header, `uploading_` progress bar, save on done, the three messages — src/app/pages/venues/components/venue-detail/**
+- [x] A4: Prove the venue page flow with unit tests — a picked video uploads, then `updateVenue` gets it first with today's date; too big and not-a-video never call the service; an upload error leaves the venue unchanged; the button is disabled while signed out — src/app/pages/venues/components/venue-detail/venue-detail.component.spec.ts
+- [x] A5: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A6: Record the upload in the maps and run every `[auto]` check — paste outputs under Execution Notes — src/app/core/services/breadcrumbs.md, src/app/pages/breadcrumbs.md
 
 ## What happens when
 - The Cloudinary preset refuses videos (a 400 naming the preset or the resource type): the upload shows
@@ -165,3 +165,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - Planner 2026-11-23: written from todo V1 (PR #638 grading). Checked on main e40c4787: CSP already allows
   Cloudinary connect and media; the image upload path and the plan 373 videos card are in place.
+- Builder: build exit 0; lint exit 0 (0 errors); lint:icons 0; test:ci 2778 SUCCESS (exit 0).
+- behaviour: a save error shows venue_video_upload_failed (updateVenue throws no message of its own) — reverse: show the thrown message instead
+- behaviour: progress bar is a native progress element (no new family); app-loader not used — reverse: swap in app-loader

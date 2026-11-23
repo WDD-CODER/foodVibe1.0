@@ -2695,6 +2695,13 @@
     "navigate": "נווט",
     "nav_waze": "Waze",
     "nav_google_maps": "Google Maps",
-    "venue_videos_empty": "אין עדיין סרטונים"
+    "venue_videos_empty": "אין עדיין סרטונים",
+    "venue_upload_video": "העלה סרטון סיור",
+    "venue_video_uploading": "מעלה… {percent}%",
+    "venue_video_added": "הסרטון נוסף",
+    "venue_video_upload_failed": "העלאת הסרטון נכשלה. נסו שוב.",
+    "video_too_big": "הסרטון גדול מדי (עד 100MB)",
+    "video_not_video": "הקובץ שנבחר אינו סרטון",
+    "video_source_upload": "הועלה"
   }
 }

@@ -11,7 +11,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
 | `dev-catalog/` | `/dev/catalog` — dev-only page that renders every shared UI family (route absent in production builds) |
-| `venues/` | `/venues` — venue list, detail and form |
+| `venues/` | `/venues` — venue list, detail (tour-video upload button) and form |
 | `suppliers/` | `/suppliers` — supplier list and form |
 | `recipe-book/` | `/recipe-book` — recipe list and filters |
 | `recipe-builder/` | `/recipe-builder/:id` — single-recipe editor with local `services/` and `utils/` |

@@ -64,7 +64,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `base-entity-data.service.ts` | Shared load/reload base for every entity data service | BaseEntityDataService\<T\>, EntityLoadOptions |
 | `ai-recipe-draft.service.ts` | AI-drafted recipe staging | AiRecipeDraftService |
 | `app-update.service.ts` | App update/reload prompt | AppUpdateService |
-| `cloudinary.service.ts` | Image upload to Cloudinary | CloudinaryService |
+| `cloudinary.service.ts` | Image upload and `uploadVideo` (progress, 100MB cap) to Cloudinary | CloudinaryService |
 | `equipment-category-registry.service.ts` | Equipment category registry | EquipmentCategoryRegistryService |
 | `excel-workbook.util.ts` | Excel export style constants and the one house-style sheet helper (plan 471) | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM, addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP |
 | `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
