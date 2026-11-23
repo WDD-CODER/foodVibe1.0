@@ -155,7 +155,9 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `FloorViewComponent` (`app-floor-view`, `src/app/pages/bookings/components/floor-view/`) — family: none — rung: 4 — why: a page-local view of one screen (the room, the strip, the pills); it composes shared pieces and is not a shared component.
-- The room drawing — family: none — rung: 4 — why: no new piece: `app-floor-map` of plan 665 is used as it is (its family `floor-map` is registered by 665 and is not on `main` yet, so it cannot be named here); if its state type lacks one of the six states or the two text lines of a table, that family is extended in place, never copied.
+- The room drawing — family: floor-map — rung: 1 — why: `app-floor-map` of plan 665 is used as it is; it lacked the two text lines of a table, so the family is extended in place with a `details` input, never copied.
+- `.floor-map__name`, `.floor-map__time` — family: none — rung: 4 — why: the two text lines of a table, scoped classes in the map's own stylesheet; no engine class fits.
+- `.fv`, `.fv__pills`, `.fv__strip`, `.fv__legend`, `.fv__draw`, `.fv__body`, `.fv__room`, `.fv__side` — family: none — rung: 4 — why: layout of this one screen only; every control inside is a chip, `app-scroll-rail` or `app-empty-state`.
 - `table-state.util.ts` (`tableStatesAt`, `TableState`, `stripTimes`) — family: helpers — rung: 3 — why: pure functions in `src/app/core/utils/` with a spec; 686, 672 and 673 read the same states.
 - The third view tab — family: chip — rung: 1 — why: one more `c-chip c-chip--tab` in the existing tab row.
 - Time strip — family: chip — rung: 1 — why: `c-chip c-chip--tab` buttons inside `app-scroll-rail` as it is (guide arrows, no scroll bar).

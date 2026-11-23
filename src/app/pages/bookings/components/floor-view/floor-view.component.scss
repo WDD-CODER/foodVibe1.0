@@ -5,8 +5,7 @@
 }
 
 .fv {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 1rem;
 }
 
@@ -15,11 +14,12 @@
 .fv__legend {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  column-gap: 0.5rem;
 }
 
 .fv__pills {
   flex-wrap: wrap;
+  row-gap: 0.375rem;
 }
 
 .fv__strip {

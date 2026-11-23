@@ -329,6 +329,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- the state of a table at a moment (plan 671): `tableStatesAt`, `stripTimes` in `src/app/core/utils/table-state.util.ts` (`table-state.util.ts`) — free, reserved soon, seated, over time, late, not active; first match wins; any screen that shows a table's state reads this, never a second copy.
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
@@ -491,14 +492,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 671
 - Use: `src/app/pages/bookings/components/floor-view/` · `app-floor-view` (inputs `date`, `at`; outputs `atChange`, `tableTapped`): the room in `app-floor-map` with one live state per table (the map's `details` input carries the state label, name and time), the 30-minute strip in `app-scroll-rail`, the summary pills, the legend and the owner's confirm-mode toggle; it reloads the day every 45 s on the server's clock. `BookingDataService.dayBoard(date)` reads the day.
+- Classes: `.fv`, `.fv__pills`, `.fv__strip`, `.fv__legend`, `.fv__draw`, `.fv__body`, `.fv__room`, `.fv__side` (scoped to the view's own stylesheet); the map's `.floor-map__name`, `.floor-map__time` put a booking's name and time on a table.
 - When: the host's service screen (`/bookings?view=floor`). Plans 686, 672 and 673 add the table sheet, the lists and the waiting list inside it.
-- Known copies: none.
-
-### table-state — one state per table at one moment
-
-- Status: stable — plan 671
-- Use: `src/app/core/utils/table-state.util.ts` · `tableStatesAt` (free, reserved soon, seated, over time, late, not active — first match wins; live-only rules for late and over time), `stripTimes`, `RESERVED_SOON_MINUTES`.
-- When: any screen that shows which table is free, held or late at a moment — never a second copy of the rules.
 - Known copies: none.
 
 ### floor-plan-joins-sheet — joins of tables, one-cell arrows and the phone sheet of the room editor
