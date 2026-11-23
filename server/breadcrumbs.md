@@ -38,6 +38,12 @@
 | `routes/ai/invoices.js` | Mounted at `/api/v1/ai/invoices` (plan 615, C-INVREAD): empty until plan 626 |
 | `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
+| `services/ai-key.js` | `keyFor(businessId)` (plan 679, C-AIKEY): the one place that resolves a model key; the environment key today |
+| `services/frontdesk-turn.js` | `runTurn`, `decide`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded |
+| `services/frontdesk-prompt.js` | `buildTurnBody`, `TURN_SYSTEM_PROMPT`, `todayBlock` (plan 679): the English rules and the request body of a turn |
+| `services/frontdesk-guardrails.js` | `applyGuardrails(answer, ctx)` (plan 679, filled by 689): the one place of the assistant's blocks |
+| `routes/ai/frontdesk.js` | Mounted at `/api/v1/ai/frontdesk` (plan 679): `askTurnModel` (the assistant's one model call) and `POST /suggest` |
+| `utils/fixed-text.js` | `fixedText`, `reasonText` (plan 679): a dictionary sentence as server text |
 | `routes/floor-plan.js` | Mounted at `/api/v1/floor-plan` (plan 662, C-FLOOR, C-HOLD): GET / and PUT / of the one floor plan (plan 664); the hold routes come with plan 667; PUT /confirm-mode (plan 667) changes only `tableService.confirmMode` of the owner's profile |
 | `routes/waitlist.js` | Mounted at `/api/v1/waitlist` (plan 662, C-WAIT; plan 673): `GET /?date=` → `{ entries, now }`, `POST /`, `PUT /:id/notify` (stamps only), `PUT /:id/seat` (claims the entry, then `createWalkIn`, puts the entry back when refused), `PUT /:id/left`; both module checks; the only writer of `waitlistEntries`; logs hold no name or phone |
 | `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 687, C-CONV): list, thread, member reply, take over, hand back, close; members only, server-only collections |
