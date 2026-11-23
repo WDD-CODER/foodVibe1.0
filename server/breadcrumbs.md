@@ -38,7 +38,7 @@
 | `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 662, C-CONV): empty until plan 675 |
 | `routes/sim.js` | Mounted at `/api/v1/sim` (plan 662, the simulated chat channel): empty until plan 675 |
 | `shared/schemas/modules.ts` | `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`, `platformUpdateSchema` (plan 615, C-MODULES); shared by the server gate and the browser |
-| `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token; plan 555: profile view, send, read by token, cancel by token |
+| `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token; plan 555: profile view, send, read by token, cancel by token; plan 669: `GET /:slug/availability` (free times, own read limiter), `POST …/:token/confirm`, automatic confirmation of a table request, the guest's cancel of a confirmed booking |
 | `utils/public-profile.js` | `loadPublicProfile`, `isPublic`, `publicView` (plan 555): the one place that decides which profile fields a stranger sees |
 | `utils/request-create.js` | `createRequest`, `runQualify` (plan 555): the one request-creation path of the manual route and the public route |
 | `utils/redact-url.js` | `redactUrl` (plan 555): masks a guest's token in a logged URL; used by the pino-http `req` serializer |

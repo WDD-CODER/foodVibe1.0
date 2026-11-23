@@ -557,6 +557,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any route or job that gives a booking its tables; none calls `claim` itself.
 - Known copies: none.
 
+### public-read-limiter — `publicReadLimiter`, the rate limit of public read routes
+
+- Status: stable — plan 669
+- Use: `publicReadLimiter` in server/middleware/rate-limit.js, applied to the public availability read in server/routes/public.js.
+- When: any public, unauthenticated read route that must be capped per caller.
+- Known copies: none.
+
 ### model-media — `needsMedia` in `callGemini` for audio and PDF input
 
 - Status: stable — plan 619
