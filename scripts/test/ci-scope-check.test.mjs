@@ -154,3 +154,41 @@ test('--checkout-branch names a detached checkout after the branch', () => {
     rmSync(root, { recursive: true, force: true })
   }
 })
+
+/** GitHub's PR merge commit, detached: main moved on after BASE_SHA, then the PR head was merged onto the new tip. */
+function mergeRefAfterBaseMoved(root, prFile) {
+  const oldBase = git(root, ['rev-parse', 'main'])
+  commitFile(root, prFile)
+  git(root, ['checkout', '-q', 'main'])
+  commitFile(root, 'src/elsewhere/new-on-main.ts') // the base branch gains a file the plan does not cover
+  git(root, ['checkout', '-q', '--detach', 'main'])
+  git(root, ['merge', '-q', '--no-ff', '-m', 'merge pr', 'feat/900-demo'])
+  return oldBase
+}
+
+test('a merge commit built on a newer base tip checks only the PR head (no base-branch files leak in)', () => {
+  const root = repo()
+  try {
+    const oldBase = mergeRefAfterBaseMoved(root, 'src/in-scope/a.ts')
+    const r = run(root, ['--checkout-branch'], { HEAD_REF: 'feat/900-demo', BASE_SHA: oldBase })
+    assert.equal(r.status, 0, r.stdout + r.stderr)
+    assert.match(r.stdout, /merge commit — checking the PR head/)
+    assert.doesNotMatch(r.stdout, /new-on-main/)
+    assert.equal(git(root, ['branch', '--show-current']), 'feat/900-demo')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('a merge commit still refuses the PR head\'s own out-of-scope file', () => {
+  const root = repo()
+  try {
+    const oldBase = mergeRefAfterBaseMoved(root, 'src/elsewhere/b.ts')
+    const r = run(root, ['--checkout-branch'], { HEAD_REF: 'feat/900-demo', BASE_SHA: oldBase })
+    assert.equal(r.status, 1, r.stdout + r.stderr)
+    assert.match(r.stdout, /src\/elsewhere\/b\.ts/)
+    assert.doesNotMatch(r.stdout, /new-on-main/)
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
