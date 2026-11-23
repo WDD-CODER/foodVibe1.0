@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ClipboardCheck,
   FileText,
+  Inbox,
   LayoutGrid,
   ListChecks,
   LucideAngularModule,
@@ -20,6 +21,7 @@ import { TranslationService } from '@services/translation.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserService } from '@services/user.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
+import { InboxBadgeService } from '@services/inbox-badge.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 import type { Recipe } from '@models/recipe.model'
@@ -35,7 +37,11 @@ const moduleStub = {
   provide: ModuleService,
   useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
 }
-beforeEach(() => modulesOn.set(ALL_MODULES))
+const pending = signal(0)
+beforeEach(() => {
+  modulesOn.set(ALL_MODULES)
+  pending.set(0)
+})
 
 describe('TabChipsComponent', () => {
   let fixture: ComponentFixture<TabChipsComponent>
@@ -62,6 +68,7 @@ describe('TabChipsComponent', () => {
           Wrench,
           ClipboardCheck,
           CalendarDays,
+          Inbox,
           Settings,
           FileText,
           LayoutGrid,
@@ -83,10 +90,12 @@ describe('TabChipsComponent', () => {
           { path: 'diagnosis', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
+          { path: 'inbox', component: BlankStubComponent },
           { path: 'frontdesk/knowledge', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation },
-        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
+        { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
+        { provide: InboxBadgeService, useValue: { pendingCount_: pending } }
       ]
     }).compileComponents()
 
@@ -180,12 +189,30 @@ describe('TabChipsComponent', () => {
   it('maps /clients to the frontdesk group with the clients chip active (plan 547)', async () => {
     await router.navigateByUrl('/clients')
     fixture.detectChanges()
-    expect(chipIds()).toEqual(['/requests', '/bookings', '/clients', '/frontdesk/knowledge', '/frontdesk/settings'])
+    expect(chipIds()).toEqual([
+      '/requests',
+      '/bookings',
+      '/inbox',
+      '/clients',
+      '/frontdesk/knowledge',
+      '/frontdesk/settings'
+    ])
     await fixture.whenStable()
     fixture.detectChanges()
     const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
     expect(active).not.toBeNull()
     expect(active.injector.get(RouterLink).href).toBe('/clients')
+  })
+
+  it('maps /inbox to the frontdesk group and shows the pending number only above 0 (plan 677)', async () => {
+    await router.navigateByUrl('/inbox')
+    fixture.detectChanges()
+    expect(chipIds()).toContain('/inbox')
+    expect(fixture.debugElement.query(By.css('[data-testid="inbox-count"]'))).toBeNull()
+    pending.set(3)
+    fixture.detectChanges()
+    const count = fixture.debugElement.query(By.css('[data-testid="inbox-count"]'))
+    expect(count.nativeElement.textContent.trim()).toBe('3')
   })
 
   it('adds the floor plan chip to the frontdesk group when tables is on (plan 665)', async () => {
@@ -195,6 +222,7 @@ describe('TabChipsComponent', () => {
     expect(chipIds()).toEqual([
       '/requests',
       '/bookings',
+      '/inbox',
       '/clients',
       '/frontdesk/knowledge',
       '/frontdesk/settings',
@@ -260,7 +288,7 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
   beforeEach(async () => {
     user_.set(null)
     await TestBed.configureTestingModule({
-      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings })],
+      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, Inbox })],
       providers: [
         moduleStub,
         provideRouter([
@@ -269,6 +297,7 @@ describe('TabChipsComponent builder chip for staff (plan 476)', () => {
         ]),
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } },
+        { provide: InboxBadgeService, useValue: { pendingCount_: pending } },
         {
           provide: KitchenStateService,
           useValue: { recipesById_: computed(() => new Map(recipes.map((r) => [r._id, r]))) }

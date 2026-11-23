@@ -366,6 +366,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`): the five calls of the waiting list (`list`, `add`, `notify`, `seat`, `left`), each returning its result or the server's error code as a code (plan 673).
+- `ConversationDataService` (`src/app/core/services/conversation-data.service.ts`) and `InboxBadgeService` (`src/app/core/services/inbox-badge.service.ts`): the conversations routes (list, open a thread, reply, template, take over, hand back, close; codes returned as codes) and the one pending-conversations number (plan 677).
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
@@ -524,6 +525,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/pages/bookings/components/waitlist-drawer/` · `app-waitlist-drawer` (inputs `date`, `plan`; outputs `closed`, `seatRequested`, `changed`): the add form, the waiting rows in order with the minutes waited from the server's clock, "table is ready", "seated" and "left"; `app-modal-shell [sheet]`. The client is `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`, the five `/api/v1/waitlist` calls, codes returned as codes); `firstWaitingFit` in `table-state.util.ts` names the party that fits a table (the table sheet's line and the toast after "finished").
 - Classes: `.wl`, `.wl__head`, `.wl__form`, `.wl__list`, `.wl-row`, `.wl-row__*` (the drawer's own stylesheet; no `.c-*` class added).
 - When: any screen that shows or changes the day's waiting parties — never a second list or a second client of the waiting-list routes.
+- Known copies: none.
+
+### chat-thread — the message thread of a guest conversation
+
+- Status: stable — plan 677
+- Use: `src/app/shared/chat-thread/` · `app-chat-thread` (inputs `messages`, `now`, `perspective` `'business' | 'guest'`, `buttonsEnabled`; output `buttonTapped`): read-only bubbles, a template message shown as its dictionary body with its values, the author tag, the delivery state as an icon with a label, buttons on the newest outbound message, a day line between Jerusalem dates. No service inside: the page gives it the messages.
+- Classes: `.ct`, `.ct-row`, `.ct-bubble`, `.ct-meta`, `.ct-status` (the component's own stylesheet; no `.c-*` class added).
+- When: any screen that draws a guest conversation (the inbox, the simulator of plan 678) — never a second bubble list.
 - Known copies: none.
 
 ### table-sheet — the sheet of one table on the service screen
