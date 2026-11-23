@@ -67,6 +67,20 @@ describe('BookingDataService', () => {
     expect(service.all_()).toEqual([])
   }))
 
+  it('dayBoard fills the table fields and needs the server clock (plan 671)', fakeAsync(() => {
+    let result: unknown = 'unset'
+    void service.dayBoard('2026-12-24').then((r) => (result = r))
+    http
+      .expectOne((r) => r.url.endsWith('/api/v1/bookings/day'))
+      .flush({ bookings: [stored], coversByHour: {}, now: 5 })
+    tick()
+    expect(result).toEqual({ bookings: [stored], holds: [], unassigned: [], now: 5 })
+    void service.dayBoard('2026-12-24').then((r) => (result = r))
+    http.expectOne((r) => r.url.endsWith('/api/v1/bookings/day')).flush({ bookings: [], coversByHour: {} })
+    tick()
+    expect(result).toBeNull()
+  }))
+
   it('availability reads the slots of the day and keeps the store alone', fakeAsync(() => {
     let result: unknown
     void service.availability('2026-12-24', 4, 'inside').then((r) => (result = r))

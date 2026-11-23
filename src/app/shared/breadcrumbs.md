@@ -28,7 +28,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `time-field/` | HH:mm text field; a click or tap opens the native time picker; `value` is "HH:mm", `invalid` flags an impossible time (plan 537) | TimeFieldComponent |
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `qr-code/` | A QR image of a link, drawn in the browser; the `qrcode` library loads lazily (plan 667) | QrCodeComponent |
-| `floor-map/` | The drawing of the room: tables at grid cells, optional drag (plan 665); grid arithmetic in the folder's geometry util | FloorMapComponent, footprintFor, movedCell, firstFreeCell, nextTableNumber, newKey, chairsFor, TABLE_PRESETS |
+| `floor-map/` | The drawing of the room: tables at grid cells, optional drag (plan 665; plan 671: the `details` input puts a state label, a name and a time on a table); grid arithmetic in the folder's geometry util | FloorMapComponent, footprintFor, movedCell, firstFreeCell, nextTableNumber, newKey, chairsFor, TABLE_PRESETS |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |
 | `input-clear/` | Clear (×) button shown inside a text input | InputClearComponent |

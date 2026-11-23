@@ -33,7 +33,7 @@
       </button>
     </div>
     <div class="bk-views" role="tablist">
-      @for (v of views; track v) {
+      @for (v of views_(); track v) {
       <button
         type="button"
         role="tab"
@@ -48,7 +48,9 @@
     </div>
   </div>
 
-  @if (!isLoading_()) { @if (isEmpty_() && view_() === 'day') {
+  @if (view_() === 'floor') {
+  <app-floor-view [date]="date_()" [at]="at_()" (atChange)="setAt($event)" />
+  } @else if (!isLoading_()) { @if (isEmpty_() && view_() === 'day') {
   <app-empty-state messageKey="bk_empty_day" icon="clipboard-check" />
   } @else { @for (section of sections_(); track section.date) {
   <section class="bk-day" [attr.data-date]="section.date">

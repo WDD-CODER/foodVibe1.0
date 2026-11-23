@@ -1,0 +1,77 @@
+@use '../../../../core/styles/breakpoints' as *;
+
+:host {
+  display: block;
+}
+
+.fv {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.fv__pills,
+.fv__strip,
+.fv__legend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fv__pills {
+  flex-wrap: wrap;
+}
+
+.fv__strip {
+  inline-size: max-content;
+}
+
+.fv__legend {
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fv__draw {
+  align-self: center;
+}
+
+.fv__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.fv__room {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-inline-size: 0;
+}
+
+.fv__side {
+  display: none;
+}
+
+@media (min-width: $break-desktop-min) {
+  .fv__body {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .fv__side {
+    display: block;
+  }
+}
+
+@media (max-width: $break-tablet-max) {
+  .fv__pills {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: $break-phone-max) {
+  .fv__pills {
+    flex-wrap: wrap;
+  }
+}
