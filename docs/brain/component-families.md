@@ -361,6 +361,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`): the five calls of the waiting list (`list`, `add`, `notify`, `seat`, `left`), each returning its result or the server's error code as a code (plan 673).
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
@@ -511,6 +512,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/pages/bookings/components/service-lists/` · `app-arriving-list` (inputs `rows`, `live`, `busyId`; output `arrived`) and `app-unassigned-list` (inputs `rows`, `live`; output `assign`): single-line `.c-list-row` rows with `app-empty-state`; the rules are `arrivingNext` and `freeTablesFor` in `table-state.util.ts`.
 - Classes: `.sl__title`, `.sl__rows`, `.sl__row`, `.sl__name`, `.sl__party`, `.sl__act` (one stylesheet, `arriving-list.component.scss`, shared by both lists; the stack is the engine `.c-input-stack`).
 - When: a short read-only side panel of the service screen — never a second list shell.
+- Known copies: none.
+
+### waitlist-drawer — the waiting list of the service screen
+
+- Status: stable — plan 673
+- Use: `src/app/pages/bookings/components/waitlist-drawer/` · `app-waitlist-drawer` (inputs `date`, `plan`; outputs `closed`, `seatRequested`, `changed`): the add form, the waiting rows in order with the minutes waited from the server's clock, "table is ready", "seated" and "left"; `app-modal-shell [sheet]`. The client is `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`, the five `/api/v1/waitlist` calls, codes returned as codes); `firstWaitingFit` in `table-state.util.ts` names the party that fits a table (the table sheet's line and the toast after "finished").
+- Classes: `.wl`, `.wl__head`, `.wl__form`, `.wl__list`, `.wl-row`, `.wl-row__*` (the drawer's own stylesheet; no `.c-*` class added).
+- When: any screen that shows or changes the day's waiting parties — never a second list or a second client of the waiting-list routes.
 - Known copies: none.
 
 ### table-sheet — the sheet of one table on the service screen

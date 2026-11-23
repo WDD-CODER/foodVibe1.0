@@ -1,4 +1,5 @@
 import type { Booking } from '@models/booking.model'
+import type { WaitlistEntry } from '@models/waitlist-entry.model'
 import type { FloorMapPlan } from 'src/app/shared/floor-map/floor-map.component'
 import type { FloorTableState } from 'src/app/shared/floor-map/floor-geometry.util'
 
@@ -148,4 +149,24 @@ export function freeTablesFor(
   return plan.tables
     .filter((t) => t.active && states[t.key]?.state === 'free' && t.minSeats <= partySize && partySize <= t.maxSeats)
     .map((t) => t.key)
+}
+
+type WaitingFitEntry = Pick<WaitlistEntry, 'status' | 'partySize' | 'areaKey' | 'joinedAt'>
+
+/**
+ * Plan 673: the earliest `waiting` or `notified` entry whose party fits the table's seat range and whose area is unset
+ * or the table's area; `null` when none fits.
+ */
+export function firstWaitingFit<T extends WaitingFitEntry>(
+  entries: readonly T[],
+  table: Pick<FloorMapPlan['tables'][number], 'minSeats' | 'maxSeats' | 'areaKey'>
+): T | null {
+  let best: T | null = null
+  for (const e of entries) {
+    if (e.status !== 'waiting' && e.status !== 'notified') continue
+    if (e.partySize < table.minSeats || e.partySize > table.maxSeats) continue
+    if (e.areaKey && e.areaKey !== table.areaKey) continue
+    if (!best || e.joinedAt < best.joinedAt) best = e
+  }
+  return best
 }

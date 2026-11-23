@@ -9,6 +9,7 @@ import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.s
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { WaitlistDataService } from '@services/waitlist-data.service'
 import { jerusalemDateTime } from '@schemas/front-desk/local-time'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
@@ -31,6 +32,24 @@ const PLAN = {
   grid: { cols: 24, rows: 16 },
   areas: [{ key: 'areaa1', name: 'בפנים', order: 0 }],
   tables: [table('tab001', '11', 0), table('tab002', '12', 5), table('tab003', '13', 10)]
+}
+
+/** Plan 673: a waiting-list client with an empty list; a spec that needs entries passes its own `entries`. */
+const waitlistStub = (entries: unknown[] = [], seat?: jasmine.Spy) => ({
+  list: jasmine.createSpy('list').and.callFake(() => Promise.resolve({ ok: true, entries, now: Date.now() })),
+  add: jasmine.createSpy('add'),
+  notify: jasmine.createSpy('notify'),
+  left: jasmine.createSpy('left'),
+  seat: seat ?? jasmine.createSpy('seat').and.resolveTo({ ok: true, entry: {} })
+})
+const WAITING = {
+  _id: 'w1',
+  status: 'waiting',
+  guestName: 'לוי',
+  guestPhone: '',
+  partySize: 2,
+  joinedAt: Date.now() - 5 * 60000,
+  date: '2026-11-23'
 }
 
 describe('FloorViewComponent (plan 671)', () => {
@@ -76,7 +95,8 @@ describe('FloorViewComponent (plan 671)', () => {
         },
         { provide: PermissionService, useValue: { isOwner_: owner_ } },
         { provide: TranslationService, useValue: translation },
-        { provide: UserMsgService, useValue: userMsg }
+        { provide: UserMsgService, useValue: userMsg },
+        { provide: WaitlistDataService, useValue: waitlistStub() }
       ]
     })
     fixture = TestBed.createComponent(FloorViewComponent)
@@ -243,7 +263,8 @@ describe('FloorViewComponent move mode (plan 686)', () => {
         },
         { provide: PermissionService, useValue: { isOwner_: signal(true) } },
         { provide: TranslationService, useValue: translation },
-        { provide: UserMsgService, useValue: userMsg }
+        { provide: UserMsgService, useValue: userMsg },
+        { provide: WaitlistDataService, useValue: waitlistStub() }
       ]
     })
     fixture = TestBed.createComponent(FloorViewComponent)
@@ -391,7 +412,8 @@ describe('FloorViewComponent lists (plan 672)', () => {
             'onSetWarningMsg',
             'onSetSuccessMsg'
           ])
-        }
+        },
+        { provide: WaitlistDataService, useValue: waitlistStub() }
       ]
     })
     fixture = TestBed.createComponent(FloorViewComponent)
@@ -456,6 +478,120 @@ describe('FloorViewComponent lists (plan 672)', () => {
     walkIn.click()
     fixture.detectChanges()
     expect(byId('walk-in-dialog')).toBeTruthy()
+    fixture.destroy()
+    flush()
+  }))
+})
+
+describe('FloorViewComponent waiting list (plan 673)', () => {
+  let fixture: ComponentFixture<FloorViewComponent>
+  let waitlist: ReturnType<typeof waitlistStub>
+  let seat: jasmine.Spy
+  let userMsg: jasmine.SpyObj<UserMsgService>
+  const el = (): HTMLElement => fixture.nativeElement
+  const byId = (id: string): HTMLElement | null => el().querySelector(`[data-testid="${id}"]`)
+  const flushView = (): void => {
+    tick()
+    fixture.detectChanges()
+  }
+
+  function setup(entries: unknown[], date = jerusalemDateTime(Date.now()).date): void {
+    seat = jasmine.createSpy('seat').and.resolveTo({ ok: true, entry: {} })
+    waitlist = waitlistStub(entries, seat)
+    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', [
+      'onSetErrorMsg',
+      'onSetWarningMsg',
+      'onSetSuccessMsg'
+    ])
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    TestBed.configureTestingModule({
+      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban, Phone })],
+      providers: [
+        provideRouter([]),
+        {
+          provide: BookingDataService,
+          useValue: {
+            dayBoard: () => Promise.resolve({ bookings: [], holds: [], unassigned: [], now: Date.now() }),
+            setTables: jasmine.createSpy('setTables'),
+            setStatus: jasmine.createSpy('setStatus')
+          }
+        },
+        {
+          provide: FloorPlanDataService,
+          useValue: { plan_: signal<unknown>(PLAN), ensureLoaded: () => Promise.resolve(), loadFailed_: signal(false) }
+        },
+        {
+          provide: FrontDeskProfileDataService,
+          useValue: { profile_: signal<unknown>({ hours: [] }), ensureLoaded: () => Promise.resolve() }
+        },
+        { provide: PermissionService, useValue: { isOwner_: signal(true) } },
+        { provide: TranslationService, useValue: translation },
+        { provide: UserMsgService, useValue: userMsg },
+        { provide: WaitlistDataService, useValue: waitlist }
+      ]
+    })
+    fixture = TestBed.createComponent(FloorViewComponent)
+    fixture.componentRef.setInput('date', date)
+    fixture.detectChanges()
+    flushView()
+  }
+
+  it('the button and the pill show the number of waiting and told parties', fakeAsync(() => {
+    setup([WAITING, { ...WAITING, _id: 'w2', status: 'notified' }, { ...WAITING, _id: 'w3', status: 'left' }])
+    expect(byId('fv-waitlist-count')?.textContent).toContain('2')
+    expect(byId('fv-pill-waiting')?.textContent).toContain('2')
+    fixture.destroy()
+    flush()
+  }))
+
+  it('the count is zero with no entry and the button and pill are hidden on another day', fakeAsync(() => {
+    setup([])
+    expect(byId('fv-waitlist-count')?.textContent).toContain('0')
+    fixture.destroy()
+    flush()
+    TestBed.resetTestingModule()
+    setup([WAITING], '2030-01-01')
+    expect(byId('fv-waitlist-open')).toBeNull()
+    expect(byId('fv-pill-waiting')).toBeNull()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('"seated" on a row closes the drawer, starts the pick-a-table mode and a tap seats the entry', fakeAsync(() => {
+    setup([WAITING])
+    ;(byId('fv-waitlist-open') as HTMLElement).click()
+    flushView()
+    flushView()
+    ;(byId('wl-seat') as HTMLElement).click()
+    fixture.detectChanges()
+    expect(byId('waitlist-drawer')).toBeNull()
+    expect(byId('fv-move-banner')?.textContent).toContain('wl_seat_banner')
+    ;(byId('floor-table-11') as HTMLElement).click()
+    flushView()
+    expect(seat).toHaveBeenCalledOnceWith('w1', ['tab001'])
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalled()
+    expect(byId('fv-move-banner')).toBeNull()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('a table taken in between shows wlk_table_taken and the mode stays; Escape ends it with no write', fakeAsync(() => {
+    setup([WAITING])
+    ;(byId('fv-waitlist-open') as HTMLElement).click()
+    flushView()
+    flushView()
+    ;(byId('wl-seat') as HTMLElement).click()
+    fixture.detectChanges()
+    seat.and.resolveTo({ ok: false, code: 'NO_TABLE' })
+    ;(byId('floor-table-11') as HTMLElement).click()
+    flushView()
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('wlk_table_taken')
+    expect(byId('fv-move-banner')).toBeTruthy()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    fixture.detectChanges()
+    expect(byId('fv-move-banner')).toBeNull()
+    expect(seat).toHaveBeenCalledTimes(1)
     fixture.destroy()
     flush()
   }))

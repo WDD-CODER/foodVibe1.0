@@ -92,6 +92,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
 | `terms.service.ts` | Loads the terms file, posts the acceptance (plan 584) | TermsService |
 | `booking-data.service.ts` | Booking status moves through the server routes (plan 549); table calls `availability`, `create`, `walkIn`, `setTables`, `setWhen` (plan 685) | BookingDataService |
+| `waitlist-data.service.ts` | The waiting list's five calls `list`, `add`, `notify`, `seat`, `left` through `/api/v1/waitlist`; each returns its result or the server's code (plan 673) | WaitlistDataService |
 | `floor-plan-data.service.ts` | The business's one floor plan: load, ensureLoaded, save with the server's refusals (plan 664) | FloorPlanDataService |
 | `front-desk-badge.service.ts` | Waiting-requests count for the header and tab chips; reloads on focus (plan 552) | FrontDeskBadgeService |
 

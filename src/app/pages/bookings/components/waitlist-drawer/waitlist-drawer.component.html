@@ -1,0 +1,193 @@
+<app-modal-shell [sheet]="true" [labelledBy]="'wl-title'" (dismissed)="closed.emit()">
+  <div class="wl" data-testid="waitlist-drawer">
+    <header class="wl__head">
+      <h3 id="wl-title" class="wl__title">{{ 'wl_title' | translatePipe }}</h3>
+      <button
+        type="button"
+        class="c-btn-ghost c-btn-ghost--sm"
+        data-testid="wl-close"
+        [attr.aria-label]="'close' | translatePipe"
+        (click)="closed.emit()"
+      >
+        <lucide-icon name="x" [size]="16" aria-hidden="true"></lucide-icon>
+      </button>
+    </header>
+
+    @switch (status_()) {
+      @case ('loading') {
+        <app-loader />
+      }
+      @case ('error') {
+        <app-empty-state messageKey="wl_load_failed" icon="alert-triangle" ctaLabelKey="retry" (ctaClick)="retry()" />
+      }
+      @default {
+        <div class="wl__form" data-testid="wl-form">
+          <app-form-field label="name" forId="wl-name">
+            <input
+              #nameInput
+              id="wl-name"
+              class="c-input"
+              type="text"
+              autocomplete="off"
+              data-testid="wl-name"
+              [maxLength]="nameMax"
+              [ngModel]="name_()"
+              (ngModelChange)="name_.set($event)"
+            />
+          </app-form-field>
+          <app-form-field label="phone" forId="wl-phone">
+            <input
+              id="wl-phone"
+              class="c-input"
+              type="tel"
+              dir="ltr"
+              autocomplete="off"
+              data-testid="wl-phone"
+              [ngModel]="phone_()"
+              (ngModelChange)="phone_.set($event)"
+            />
+          </app-form-field>
+          <app-form-field label="fd_q_party_size" forId="wl-party">
+            <app-counter [value]="party_()" [min]="1" [max]="30" (valueChange)="setParty($event)" />
+          </app-form-field>
+          @if (plan().areas.length > 0) {
+            <app-form-field label="wl_area" forId="wl-area">
+              <app-custom-select
+                triggerId="wl-area"
+                [options]="areaOptions_()"
+                [translateLabels]="false"
+                [ngModel]="area_()"
+                (ngModelChange)="area_.set($event)"
+              />
+            </app-form-field>
+          }
+          <app-form-field label="wl_quoted" forId="wl-quoted">
+            <input
+              id="wl-quoted"
+              class="c-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              dir="ltr"
+              maxlength="3"
+              data-testid="wl-quoted"
+              [ngModel]="quoted_()"
+              (ngModelChange)="setQuoted($event)"
+            />
+          </app-form-field>
+          <button
+            type="button"
+            class="c-btn-primary wl__add"
+            data-testid="wl-add"
+            [disabled]="!canAdd_()"
+            (click)="add()"
+          >
+            <lucide-icon name="plus" [size]="18" aria-hidden="true"></lucide-icon>
+            {{ 'wl_add' | translatePipe }}
+          </button>
+        </div>
+
+        @if (rows_().length === 0) {
+          <app-empty-state messageKey="wl_empty" icon="users" />
+        } @else {
+          <ol class="wl__list" data-testid="wl-list">
+            @for (r of rows_(); track r.entry._id) {
+              <li class="wl-row" data-testid="wl-row" [attr.data-minutes]="r.minutes">
+                <span class="wl-row__pos" data-testid="wl-pos">{{ r.position }}</span>
+                <span class="wl-row__who">
+                  <strong class="wl-row__name">{{ r.entry.guestName }}</strong>
+                  <span class="wl-row__meta">
+                    <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
+                    {{ r.entry.partySize }}
+                    @if (r.areaName) {
+                      · {{ r.areaName }}
+                    }
+                  </span>
+                </span>
+                <span class="wl-row__wait" data-testid="wl-waited" [class.wl-row__wait--over]="r.over">
+                  @if (r.over) {
+                    <lucide-icon name="alert-triangle" [size]="14" aria-hidden="true"></lucide-icon>
+                    <span class="wl-row__over" data-testid="wl-over">{{ 'wl_over_quote' | translatePipe }}</span>
+                  } @else {
+                    <lucide-icon name="clock" [size]="14" aria-hidden="true"></lucide-icon>
+                  }
+                  {{ waitedText(r.minutes) }}
+                </span>
+                @if (r.entry.status === 'notified') {
+                  <span class="c-chip--tag c-chip--sm" data-testid="wl-told">{{ 'wl_notified' | translatePipe }}</span>
+                }
+                <span class="wl-row__actions">
+                  @if (r.entry.status === 'waiting') {
+                    <button
+                      type="button"
+                      class="c-chip c-chip--tap"
+                      data-testid="wl-notify"
+                      [disabled]="busy_() !== null"
+                      [attr.title]="'wl_notify_hint' | translatePipe"
+                      [attr.aria-label]="'wl_notify' | translatePipe"
+                      (click)="notify(r.entry)"
+                    >
+                      <lucide-icon name="bell" [size]="16" aria-hidden="true"></lucide-icon>
+                      <span class="wl-row__text">{{ 'wl_notify' | translatePipe }}</span>
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="c-chip c-chip--tap"
+                    data-testid="wl-seat"
+                    [disabled]="busy_() !== null"
+                    [attr.aria-label]="'wl_seat' | translatePipe"
+                    (click)="seat(r.entry)"
+                  >
+                    <lucide-icon name="user-check" [size]="16" aria-hidden="true"></lucide-icon>
+                    <span class="wl-row__text">{{ 'wl_seat' | translatePipe }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="c-chip c-chip--tap"
+                    data-testid="wl-left"
+                    [disabled]="busy_() !== null"
+                    [attr.aria-label]="'wl_left' | translatePipe"
+                    (click)="left(r.entry)"
+                  >
+                    <lucide-icon name="log-out" [size]="16" aria-hidden="true"></lucide-icon>
+                    <span class="wl-row__text">{{ 'wl_left' | translatePipe }}</span>
+                  </button>
+                </span>
+              </li>
+            }
+          </ol>
+        }
+
+        @if (ended_().length > 0) {
+          <div>
+            <button
+              type="button"
+              class="c-chip c-chip--tap"
+              data-testid="wl-today"
+              [attr.aria-expanded]="todayOpen_()"
+              (click)="toggleToday()"
+            >
+              {{ 'wl_today_done' | translatePipe }} ({{ ended_().length }})
+            </button>
+          </div>
+          @if (todayOpen_()) {
+            <ul class="wl__ended" data-testid="wl-ended">
+              @for (e of ended_(); track e._id) {
+                <li class="wl-row__meta">
+                  <lucide-icon
+                    [name]="e.status === 'seated' ? 'user-check' : 'log-out'"
+                    [size]="14"
+                    aria-hidden="true"
+                  ></lucide-icon>
+                  {{ e.guestName }} · {{ e.partySize }} ·
+                  {{ (e.status === 'seated' ? 'wl_seat' : 'wl_left') | translatePipe }}
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    }
+  </div>
+</app-modal-shell>

@@ -24,6 +24,8 @@ import { FloorPlanDataService } from '@services/floor-plan-data.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
+import { WaitlistDataService } from '@services/waitlist-data.service'
+import type { WaitlistEntry } from '@models/waitlist-entry.model'
 import { UserMsgService } from '@services/user-msg.service'
 import { jerusalemDateTime, jerusalemEpoch } from '@schemas/front-desk/local-time'
 import { openRangesOf } from '@schemas/front-desk/qualify'
@@ -31,11 +33,13 @@ import { tableServiceOf } from '@schemas/front-desk/table-service'
 import { TableSheetComponent } from '../table-sheet/table-sheet.component'
 import { NewBookingDialogComponent } from '../new-booking-dialog/new-booking-dialog.component'
 import { WalkInDialogComponent } from '../walk-in-dialog/walk-in-dialog.component'
+import { WaitlistDrawerComponent } from '../waitlist-drawer/waitlist-drawer.component'
 import { ArrivingListComponent, type ArrivingView } from '../service-lists/arriving-list.component'
 import { UnassignedListComponent, type UnassignedView } from '../service-lists/unassigned-list.component'
 import {
   ARRIVING_WINDOW_MINUTES,
   arrivingNext,
+  freeTablesFor,
   stripTimes,
   tableStatesAt,
   type StripTime
@@ -74,6 +78,7 @@ const LEGEND: readonly { state: FloorTableState; icon: string }[] = [
     TableSheetComponent,
     NewBookingDialogComponent,
     WalkInDialogComponent,
+    WaitlistDrawerComponent,
     ArrivingListComponent,
     UnassignedListComponent
   ],
@@ -88,6 +93,7 @@ export class FloorViewComponent {
   private readonly permission = inject(PermissionService)
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly waitlistData = inject(WaitlistDataService)
 
   readonly date = input.required<string>()
   /** The strip time kept in the query string (`HH:mm`); null = now. */
@@ -103,6 +109,7 @@ export class FloorViewComponent {
   /** Plan 686: the booking being moved to another table (move mode), or null. */
   protected readonly movingBookingId_ = signal<string | null>(null)
   protected readonly moveBusy_ = signal(false)
+  protected readonly seatBusy_ = signal(false)
   /** Plan 672: move mode started from the "not assigned" list (the banner says whom to seat). */
   private readonly assignMode_ = signal(false)
   protected readonly newBookingOpen_ = signal(false)
@@ -110,6 +117,12 @@ export class FloorViewComponent {
   protected readonly walkInOpen_ = signal(false)
   protected readonly walkInTable_ = signal<string | null>(null)
   protected readonly arrivedBusy_ = signal<string | null>(null)
+  /** Plan 673: the waiting list's own copy for the button and the pill, and the drawer's open flag. */
+  protected readonly waitlist_ = signal<WaitlistEntry[]>([])
+  protected readonly waitlistOpen_ = signal(false)
+  /** Plan 673: the waiting entry being seated (the pick-a-table mode is on while it is set). */
+  protected readonly seating_ = signal<WaitlistEntry | null>(null)
+  private waitlistSeq = 0
   private moveSeq = 0
   protected readonly board_ = signal<DayBoard | null>(null)
   private readonly receivedAt_ = signal(0)
@@ -197,11 +210,18 @@ export class FloorViewComponent {
     return id ? (this.board_()?.bookings.find((b) => b._id === id) ?? null) : null
   })
   protected readonly selectedKeys_ = computed(() => this.movingBooking_()?.tableKeys ?? [])
-  protected readonly bannerText_ = computed(() =>
-    this.translation
+  /** Plan 673: a table is being picked, to move a booking or to seat a waiting party. */
+  protected readonly pickMode_ = computed(() => !!this.movingBookingId_() || !!this.seating_())
+  protected readonly waitingCount_ = computed(
+    () => this.waitlist_().filter((e) => e.status === 'waiting' || e.status === 'notified').length
+  )
+  protected readonly bannerText_ = computed(() => {
+    const seating = this.seating_()
+    if (seating) return this.translation.translate('wl_seat_banner').replace('{name}', seating.guestName)
+    return this.translation
       .translate(this.assignMode_() ? 'nb_assign_banner' : 'tsh_move_banner')
       .replace('{name}', this.movingBooking_()?.guestName || this.translation.translate('fv_walk_in'))
-  )
+  })
   protected readonly arriving_ = computed<ArrivingView[]>(() => {
     const board = this.board_()
     if (!board) return []
@@ -275,6 +295,13 @@ export class FloorViewComponent {
   /** A tap on a table: in move mode it picks the target; otherwise it opens the table's sheet. */
   protected onTableTap(key: string): void {
     this.tableTapped.emit(key)
+    const seating = this.seating_()
+    if (seating) {
+      if (freeTablesFor(this.states_(), this.plan_() ?? { tables: [] }, seating.partySize).includes(key)) {
+        void this.seatEntry(seating, key)
+      }
+      return
+    }
     if (this.movingBookingId_()) {
       void this.moveTo(key)
       return
@@ -293,6 +320,54 @@ export class FloorViewComponent {
     this.sheetTableKey_.set(null)
     this.movingBookingId_.set(bookingId)
     this.assignMode_.set(true)
+  }
+
+  protected openWaitlist(): void {
+    this.endMove()
+    this.waitlistOpen_.set(true)
+  }
+
+  /** "Seated" on a drawer row: the pick-a-table mode starts for that entry (the drawer has closed itself). */
+  protected startSeating(entry: WaitlistEntry): void {
+    this.sheetTableKey_.set(null)
+    this.endMove()
+    this.seating_.set(entry)
+  }
+
+  /** Seats a waiting entry on a table: from the pick-a-table mode or from a free table's sheet. */
+  protected async seatEntry(entry: WaitlistEntry, key: string): Promise<void> {
+    if (this.seatBusy_()) return
+    const table = this.plan_()?.tables.find((t) => t.key === key)
+    this.seatBusy_.set(true)
+    try {
+      const res = await this.waitlistData.seat(entry._id, [key])
+      if (res.ok) {
+        this.endMove()
+        this.sheetTableKey_.set(null)
+        this.userMsg.onSetSuccessMsg(
+          this.translation
+            .translate('wl_seated')
+            .replace('{name}', entry.guestName)
+            .replace('{n}', table?.number ?? key)
+        )
+        void this.load(this.date(), false)
+      } else if (res.code === 'NO_TABLE') {
+        this.userMsg.onSetErrorMsg(this.translation.translate('wlk_table_taken'))
+      } else if (res.code === 'BAD_STATUS' || res.code === 'STATUS_CHANGED') {
+        this.endMove()
+        this.userMsg.onSetErrorMsg(this.translation.translate('bk_bad_status'))
+        void this.load(this.date(), false)
+      } else {
+        this.endMove()
+        this.userMsg.onSetErrorMsg(this.translation.translate('wl_action_failed'))
+      }
+    } finally {
+      this.seatBusy_.set(false)
+    }
+  }
+
+  protected onWaitlistChanged(): void {
+    void this.loadWaitlist(this.date())
   }
 
   protected openNewBooking(): void {
@@ -341,6 +416,7 @@ export class FloorViewComponent {
   @HostListener('document:keydown.escape')
   protected endMove(): void {
     this.moveSeq++
+    this.seating_.set(null)
     this.movingBookingId_.set(null)
     this.assignMode_.set(false)
   }
@@ -400,6 +476,17 @@ export class FloorViewComponent {
     await this.load(this.date(), false)
   }
 
+  /** Plan 673: reads the waiting list (today only); a failed read keeps the last list. */
+  private async loadWaitlist(date: string): Promise<void> {
+    if (!this.isToday_()) {
+      this.waitlist_.set([])
+      return
+    }
+    const seq = ++this.waitlistSeq
+    const res = await this.waitlistData.list(date)
+    if (seq === this.waitlistSeq && res.ok) this.waitlist_.set(res.entries)
+  }
+
   private async load(date: string, first: boolean): Promise<void> {
     const seq = ++this.loadSeq
     this.inFlight = true
@@ -419,6 +506,7 @@ export class FloorViewComponent {
       this.board_.set(board)
       this.status_.set('ready')
       this.failStreak = false
+      void this.loadWaitlist(date)
     } catch {
       if (seq !== this.loadSeq) return
       if (first || this.board_() === null) this.status_.set('error')

@@ -1,4 +1,11 @@
-import { arrivingNext, freeTablesFor, nextOnTable, stripTimes, tableStatesAt } from './table-state.util'
+import {
+  arrivingNext,
+  firstWaitingFit,
+  freeTablesFor,
+  nextOnTable,
+  stripTimes,
+  tableStatesAt
+} from './table-state.util'
 
 const MIN = 60000
 const NOW = 1_000_000_000_000
@@ -172,5 +179,46 @@ describe('freeTablesFor (plan 672)', () => {
     expect(freeTablesFor(states, seatPlan, 2)).toEqual(['t1', 't2'])
     expect(freeTablesFor(states, seatPlan, 4)).toEqual(['t1'])
     expect(freeTablesFor(states, seatPlan, 7)).toEqual([])
+  })
+})
+
+describe('firstWaitingFit (plan 673)', () => {
+  const table = { minSeats: 2, maxSeats: 4, areaKey: 'in' }
+  const entry = (over: Record<string, unknown>) => ({
+    status: 'waiting' as const,
+    partySize: 3,
+    areaKey: undefined as string | undefined,
+    joinedAt: 100,
+    ...over
+  })
+
+  it('returns the earliest waiting or notified entry that fits the seat range', () => {
+    const early = entry({ joinedAt: 10, status: 'notified' })
+    const late = entry({ joinedAt: 20 })
+    expect(firstWaitingFit([late, early], table)).toBe(early)
+  })
+
+  it('skips a party that is too big or too small and an entry that already left or sat', () => {
+    const list = [
+      entry({ joinedAt: 1, partySize: 6 }),
+      entry({ joinedAt: 2, partySize: 1 }),
+      entry({ joinedAt: 3, status: 'seated' }),
+      entry({ joinedAt: 4, status: 'left' }),
+      entry({ joinedAt: 5, status: 'expired' })
+    ]
+    expect(firstWaitingFit(list, table)).toBeNull()
+  })
+
+  it('an entry with an area fits only a table of that area; an entry with no area fits any', () => {
+    const outside = entry({ joinedAt: 1, areaKey: 'out' })
+    const anywhere = entry({ joinedAt: 2 })
+    const inside = entry({ joinedAt: 3, areaKey: 'in' })
+    expect(firstWaitingFit([outside, anywhere, inside], table)).toBe(anywhere)
+    expect(firstWaitingFit([outside, inside], table)).toBe(inside)
+    expect(firstWaitingFit([outside], table)).toBeNull()
+  })
+
+  it('returns null for an empty list', () => {
+    expect(firstWaitingFit([], table)).toBeNull()
   })
 })

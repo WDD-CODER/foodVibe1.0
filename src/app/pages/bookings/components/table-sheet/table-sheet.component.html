@@ -81,6 +81,23 @@
         </div>
       }
 
+      @if (canWalkIn_() && waitingFit_()) {
+        <p class="tsh__line" data-testid="tsh-fits">{{ fitsLine_() }}</p>
+        <div class="tsh__actions">
+          <button
+            type="button"
+            class="c-chip c-chip--tap"
+            data-testid="tsh-fit-seat"
+            [disabled]="busy_() || !live()"
+            [attr.title]="live() ? null : ('tsh_not_live' | translatePipe)"
+            (click)="seatWaiting()"
+          >
+            <lucide-icon name="user-check" [size]="16" aria-hidden="true"></lucide-icon>
+            {{ 'wl_seat' | translatePipe }}
+          </button>
+        </div>
+      }
+
       @if (canAct_() || clientId_()) {
         <div class="tsh__actions">
           @if (canSeat_()) {
