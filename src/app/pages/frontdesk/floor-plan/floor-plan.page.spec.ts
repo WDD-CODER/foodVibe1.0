@@ -8,8 +8,12 @@ import {
   ChevronUp,
   Copy,
   LayoutGrid,
+  Link,
   LucideAngularModule,
+  MousePointer2,
+  Pencil,
   Plus,
+  SquareDashed,
   Trash2,
   X
 } from 'lucide-angular'
@@ -29,7 +33,9 @@ const DICT: Record<string, string> = {
   fd_opt_inside: 'בפנים',
   fd_opt_outside: 'בחוץ',
   fd_opt_bar: 'בר',
-  fp_table_label: 'שולחן {number}, {min}–{max} מקומות'
+  fp_table_label: 'שולחן {number}, {min}–{max} מקומות',
+  fp_status: '{tables} שולחנות · {areas} אזורים · {joins} חיבורים · {cols}×{rows} משבצות',
+  fp_area_new: 'אזור חדש'
 }
 
 type Internals = {
@@ -106,7 +112,11 @@ describe('FloorPlanPage (plan 665)', () => {
           ChevronDown,
           ChevronUp,
           Copy,
+          Link,
+          MousePointer2,
+          Pencil,
           Plus,
+          SquareDashed,
           Trash2,
           X
         })
@@ -255,9 +265,9 @@ describe('FloorPlanPage (plan 665)', () => {
         expect(el().querySelector('[data-testid="floor-table-1"]')?.classList).toContain('is-joined')
       })
 
-      it('no longer passes dimOtherThanArea when an area chip is chosen', async () => {
+      it('no longer passes dimOtherThanArea when a legend chip is chosen', async () => {
         await setup({ saved: ZONED })
-        ;(cmp() as unknown as { selectArea: (k: string | null) => void }).selectArea('areab2')
+        ;(cmp() as unknown as { selectZone: (k: string) => void }).selectZone('areab2')
         await settle()
         expect(map().dimOtherThanArea()).toBeNull()
         expect(el().querySelector('.is-dimmed')).toBeNull()
@@ -280,6 +290,171 @@ describe('FloorPlanPage (plan 665)', () => {
         const moved = (cmp() as unknown as { draft_: () => FloorPlan }).draft_().tables.find((t) => t.key === 'tab002')
         expect([moved?.x, moved?.y, moved?.areaKey]).toEqual([6, 4, 'areaa1'])
         expect(draft().joins.length).toBe(1)
+      })
+    })
+
+    describe('tools and zone editing (plan 700)', () => {
+      const map = (): FloorMapComponent =>
+        fixture.debugElement.query(By.directive(FloorMapComponent)).componentInstance as FloorMapComponent
+      const ZONED = {
+        ...TWO,
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0, color: 0 },
+          { key: 'areab2', name: 'בחוץ', order: 1, color: 1, zone: { x: 12, y: 8, w: 8, h: 6 } }
+        ]
+      } as unknown as FloorPlan
+      const NOZONE = {
+        ...TWO,
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0, color: 0 },
+          { key: 'areab2', name: 'בחוץ', order: 1, color: 1 }
+        ]
+      } as unknown as FloorPlan
+      type Areas = { draft_: () => { areas: { key: string; name: string; color?: number; zone?: unknown }[] } }
+      const areas = () => (cmp() as unknown as Areas).draft_().areas
+      const pressed = (id: string) => el().querySelector(`[data-testid="${id}"]`)?.getAttribute('aria-pressed')
+
+      it('has three tools with "בחירה" pressed at start', async () => {
+        await setup({ saved: TWO })
+        expect(el().querySelectorAll('.floor-plan__tools button').length).toBe(3)
+        expect(pressed('fp-tool-select')).toBe('true')
+        expect(pressed('fp-tool-zone')).toBe('false')
+      })
+
+      it('the zone tool passes the selected zone key to the map', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-legend-areab2')
+        await click('fp-tool-zone')
+        expect(map().drawZoneKey()).toBe('areab2')
+        expect(pressed('fp-tool-zone')).toBe('true')
+        await click('fp-tool-zone')
+        expect(pressed('fp-tool-select')).toBe('true')
+        expect(map().drawZoneKey()).toBeNull()
+      })
+
+      it('the zone tool with nothing selected draws the first area without a zone', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-tool-zone')
+        expect(map().drawZoneKey()).toBe('areaa1')
+      })
+
+      it('a drawn zone is set in the draft, returns to select and selects that zone', async () => {
+        await setup({ saved: NOZONE })
+        await click('fp-legend-areab2')
+        await click('fp-tool-zone')
+        map().zoneDrawn.emit({ areaKey: 'areab2', rect: { x: 12, y: 8, w: 6, h: 4 } })
+        await settle()
+        expect(areas().find((a) => a.key === 'areab2')?.zone).toEqual({ x: 12, y: 8, w: 6, h: 4 })
+        expect(pressed('fp-tool-select')).toBe('true')
+        expect(el().querySelector('app-floor-zone-panel')).not.toBeNull()
+        expect(map().selectedZoneKey()).toBe('areab2')
+      })
+
+      it('a refused draw (overlap) keeps the draft and shows fp_zone_overlap as an error', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-tool-zone')
+        const before = JSON.stringify(areas())
+        map().zoneDrawn.emit({ areaKey: 'areaa1', rect: { x: 14, y: 9, w: 4, h: 4 } })
+        await settle()
+        expect(JSON.stringify(areas())).toBe(before)
+        expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('fp_zone_overlap')
+        expect(pressed('fp-tool-zone')).toBe('true')
+      })
+
+      it('a legend chip selects the zone and the inspector shows the zone panel; a table shows the table panel', async () => {
+        await setup({ saved: ZONED })
+        expect(el().querySelector('app-floor-room-panel')).not.toBeNull()
+        await click('fp-legend-areab2')
+        expect(el().querySelector('app-floor-zone-panel')).not.toBeNull()
+        expect(el().querySelector('app-floor-room-panel')).toBeNull()
+        await click('floor-table-1')
+        expect(el().querySelector('app-floor-table-panel')).not.toBeNull()
+        expect(el().querySelector('app-floor-zone-panel')).toBeNull()
+      })
+
+      it('Escape in the zone tool returns to "בחירה"', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-tool-zone')
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+        await settle()
+        expect(pressed('fp-tool-select')).toBe('true')
+      })
+
+      it('the letter keys switch tools but not while typing', async () => {
+        await setup({ saved: ZONED })
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'z' }))
+        await settle()
+        expect(pressed('fp-tool-zone')).toBe('true')
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'j', ctrlKey: true }))
+        await settle()
+        expect(pressed('fp-tool-zone')).toBe('true')
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'v' }))
+        await settle()
+        expect(pressed('fp-tool-select')).toBe('true')
+      })
+
+      it('the status line counts tables, areas and joins', async () => {
+        const three = {
+          ...ZONED,
+          tables: [
+            ...(TWO as unknown as { tables: unknown[] }).tables,
+            { ...(TWO as unknown as { tables: object[] }).tables[0], key: 'tab003', number: '3', x: 10 }
+          ]
+        } as unknown as FloorPlan
+        await setup({ saved: three })
+        expect(el().querySelector('[data-testid="fp-status"]')?.textContent).toContain(
+          '3 שולחנות · 2 אזורים · 1 חיבורים'
+        )
+      })
+
+      it('"הסרת הסימון" removes the zone and its undo brings it back', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-legend-areab2')
+        await click('zone-clear')
+        expect(areas().find((a) => a.key === 'areab2')?.zone).toBeUndefined()
+        expect(userMsg.onSetSuccessMsgWithUndo).toHaveBeenCalledWith('fp_zone_cleared', jasmine.any(Function))
+        userMsg.onSetSuccessMsgWithUndo.calls.mostRecent().args[1]()
+        await settle()
+        expect(areas().find((a) => a.key === 'areab2')?.zone).toEqual({ x: 12, y: 8, w: 8, h: 6 })
+      })
+
+      it('a zone drawn around a table of another area moves it with an undo message', async () => {
+        await setup({ saved: NOZONE })
+        map().zoneDrawn.emit({ areaKey: 'areab2', rect: { x: 4, y: 0, w: 6, h: 4 } })
+        await settle()
+        expect(userMsg.onSetSuccessMsgWithUndo).toHaveBeenCalledWith('fp_zone_tables_moved', jasmine.any(Function))
+        userMsg.onSetSuccessMsgWithUndo.calls.mostRecent().args[1]()
+        await settle()
+        expect(areas().find((a) => a.key === 'areab2')?.zone).toBeUndefined()
+        expect(draft().joins.length).toBe(1)
+      })
+
+      it('"הוספת אזור" adds "אזור חדש" with the next free colour, selects it and focuses its name', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-area-add')
+        await settle()
+        const added = areas().find((a) => a.name === 'אזור חדש')
+        expect(added?.color).toBe(2)
+        expect(el().querySelector('app-floor-zone-panel')).not.toBeNull()
+        expect(document.activeElement?.getAttribute('data-testid')).toBe('zone-name')
+      })
+
+      it('recolouring through the zone card changes the area colour', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-legend-areab2')
+        await click('zone-color-3')
+        expect(areas().find((a) => a.key === 'areab2')?.color).toBe(3)
+      })
+
+      it('removing an empty area shows an undo that restores it with its zone', async () => {
+        await setup({ saved: ZONED })
+        await click('fp-legend-areab2')
+        await click('zone-remove')
+        expect(areas().map((a) => a.key)).toEqual(['areaa1'])
+        expect(userMsg.onSetSuccessMsgWithUndo).toHaveBeenCalledWith('fp_area_removed', jasmine.any(Function))
+        userMsg.onSetSuccessMsgWithUndo.calls.mostRecent().args[1]()
+        await settle()
+        expect(areas().find((a) => a.key === 'areab2')?.zone).toEqual({ x: 12, y: 8, w: 8, h: 6 })
       })
     })
 
@@ -365,18 +540,19 @@ describe('FloorPlanPage (plan 665)', () => {
 
       it('multi-select: a tap picks a table, a second removes it, no table panel opens', async () => {
         await setup({ saved: THREE })
-        await click('fp-multi')
+        await click('fp-tool-join')
         await click('floor-table-1')
         expect(picked()).toEqual(['tab001'])
         expect(el().querySelector('[data-testid="table-panel"]')).toBeNull()
         await click('floor-table-1')
         expect(picked()).toEqual([])
-        expect((el().querySelector('[data-testid="fp-preset-p4"]') as HTMLButtonElement).disabled).toBeTrue()
+        expect(el().querySelector('[data-testid="fp-preset-p4"]')).toBeNull()
+        expect(el().querySelector('[data-testid="fp-join-bar"]')).not.toBeNull()
       })
 
       it('"חיבור השולחנות" adds one join and leaves multi-select', async () => {
         await setup({ saved: THREE })
-        await click('fp-multi')
+        await click('fp-tool-join')
         expect((el().querySelector('[data-testid="fp-join-action"]') as HTMLButtonElement).disabled).toBeTrue()
         await click('floor-table-1')
         await click('floor-table-2')

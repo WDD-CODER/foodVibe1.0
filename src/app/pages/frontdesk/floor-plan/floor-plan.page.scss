@@ -115,10 +115,6 @@
   }
 }
 
-.floor-plan__multi {
-  margin-inline-start: auto;
-}
-
 .floor-plan__join-bar {
   display: flex;
   flex-wrap: wrap;
@@ -179,6 +175,158 @@
   .floor-plan__sheet-head {
     display: flex;
     padding-block-end: var(--space-2);
+  }
+
+  .floor-plan__room-open {
+    display: inline-flex;
+    align-self: flex-start;
+  }
+}
+
+/* Plan 700: the editor layout — toolbar card, canvas card with legend and status line, inspector card. */
+.floor-plan__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+
+  padding: var(--space-3);
+}
+
+.floor-plan__tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.floor-plan__tools .c-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.floor-plan__presets {
+  padding-inline-start: var(--space-3);
+  border-inline-start: 1px solid var(--border-row);
+}
+
+.floor-plan__glyph {
+  display: inline-block;
+  flex: none;
+
+  border: 2px solid currentcolor;
+  vertical-align: middle;
+}
+
+.floor-plan__glyph--round {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+
+  border-radius: var(--radius-full);
+}
+
+.floor-plan__glyph--square {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+}
+
+.floor-plan__glyph--rect {
+  inline-size: 1.25rem;
+  block-size: 0.75rem;
+}
+
+.floor-plan__unsaved {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.floor-plan__unsaved-dot {
+  background: var(--color-warning);
+}
+
+.floor-plan__canvas {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  padding: var(--space-3);
+}
+
+.floor-plan__legend {
+  align-items: center;
+}
+
+.floor-plan__legend .c-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.floor-plan__status {
+  margin: 0;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.floor-plan__inspector {
+  padding: var(--space-4);
+}
+
+.floor-plan__toolbar:hover,
+.floor-plan__canvas:hover,
+.floor-plan__inspector:hover {
+  transform: none;
+}
+
+.floor-plan__sheet-head {
+  display: flex;
+  padding-block-end: var(--space-3);
+}
+
+.floor-plan__sheet-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.floor-plan__room-open {
+  display: none;
+}
+
+@media (min-width: $break-tablet-min) {
+  .floor-plan__canvas {
+    flex: 1 1 auto;
+  }
+
+  .floor-plan__inspector {
+    position: sticky;
+    inset-block-start: var(--space-4);
+    flex: none;
+
+    inline-size: 22rem;
+  }
+}
+
+@media (max-width: $break-phone-max) {
+  .floor-plan__toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .floor-plan__presets {
+    flex-wrap: nowrap;
+    flex: none;
+  }
+
+  .floor-plan__tool-text {
+    display: none;
   }
 
   .floor-plan__room-open {

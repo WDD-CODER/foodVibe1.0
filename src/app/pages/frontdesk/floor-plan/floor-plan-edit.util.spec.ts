@@ -3,6 +3,7 @@ import {
   areaNameError,
   duplicateTable,
   minGrid,
+  newAreaName,
   numberError,
   overlapping,
   restoreDropped,
@@ -247,6 +248,20 @@ describe('floor-plan-edit.util (plan 684)', () => {
         ['areab2', 0]
       ])
       expect(withArea(plan(), { type: 'move', key: 'areaa1', dir: 'up' })).toBeNull()
+    })
+
+    it('sets the colour of an area (0–7) and refuses another value (plan 700)', () => {
+      const next = withArea(plan(), { type: 'color', key: 'areab2', color: 5 })!
+      expect(next.areas.find((a) => a.key === 'areab2')?.color).toBe(5)
+      expect(withArea(plan(), { type: 'color', key: 'areab2', color: 8 })).toBeNull()
+      expect(withArea(plan(), { type: 'color', key: 'areab2', color: -1 })).toBeNull()
+      expect(withArea(plan(), { type: 'color', key: 'nope000', color: 1 })).toBeNull()
+    })
+
+    it('names a new area אזור חדש, then אזור חדש 2 when taken (plan 700)', () => {
+      expect(newAreaName(plan())).toBe('אזור חדש')
+      const one = withArea(plan(), { type: 'add', key: 'areac3', name: 'אזור חדש' })!
+      expect(newAreaName(one)).toBe('אזור חדש 2')
     })
   })
 })

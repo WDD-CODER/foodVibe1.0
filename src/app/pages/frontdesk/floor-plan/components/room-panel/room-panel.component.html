@@ -1,37 +1,26 @@
 <div class="room-panel" data-testid="room-panel">
-  <h2 class="room-panel__title">{{ 'fp_room_title' | translatePipe }}</h2>
-
-  <h3 class="room-panel__subtitle">{{ 'fp_areas_title' | translatePipe }}</h3>
-  <div class="room-panel__areas">
-    @for (row of rows_(); track row.key) {
-      <div class="room-panel__area" data-testid="room-area-row">
-        <app-form-field
-          class="room-panel__name"
-          label="fp_area_name"
-          [forId]="'rp-area-' + row.key"
-          [error]="errors_()[row.key] ?? null"
-        >
-          <input
-            class="c-input"
-            type="text"
-            autocomplete="off"
-            data-testid="room-area-name"
-            [id]="'rp-area-' + row.key"
-            [attr.data-area-key]="row.key"
-            [class.c-input--invalid]="!!errors_()[row.key]"
-            [attr.aria-invalid]="errors_()[row.key] ? 'true' : null"
-            [value]="row.name"
-            (input)="onNameInput(row, $event)"
-            (blur)="onNameBlur(row, $event)"
-          />
-        </app-form-field>
-        <div class="room-panel__btns">
+  <section class="room-panel__section">
+    <h3 class="room-panel__subtitle">{{ 'fp_areas_title' | translatePipe }}</h3>
+    <div class="room-panel__areas">
+      @for (row of rows_(); track row.key) {
+        <div class="room-panel__zone-row-wrap" data-testid="room-area-row">
+          <button
+            type="button"
+            class="room-panel__zone-row"
+            data-testid="room-zone-row"
+            (click)="areaSelected.emit(row.key)"
+          >
+            <span class="c-chip__dot" [style.background]="'var(--color-zone-' + row.color + ')'"></span>
+            <span class="room-panel__zone-name">{{ row.name }}</span>
+            <span class="c-chip__count">{{ row.count }}</span>
+            <lucide-icon name="pencil" [size]="14"></lucide-icon>
+          </button>
           <button
             type="button"
             class="c-icon-btn"
             data-testid="room-area-up"
             [attr.aria-label]="'fp_area_up' | translatePipe"
-            [disabled]="row.index === 0 || !row.inDraft"
+            [disabled]="row.index === 0"
             (click)="areaMoved.emit({ key: row.key, dir: 'up' })"
           >
             <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
@@ -41,63 +30,59 @@
             class="c-icon-btn"
             data-testid="room-area-down"
             [attr.aria-label]="'fp_area_down' | translatePipe"
-            [disabled]="row.isLast || !row.inDraft"
+            [disabled]="row.isLast"
             (click)="areaMoved.emit({ key: row.key, dir: 'down' })"
           >
             <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
           </button>
-          <button
-            type="button"
-            class="c-icon-btn"
-            data-testid="room-area-remove"
-            [attr.aria-label]="'fp_area_delete' | translatePipe"
-            [attr.aria-disabled]="row.blockedKey ? 'true' : null"
-            [appTip]="reasonOf(row.blockedKey) || null"
-            [attr.aria-describedby]="row.blockedKey ? 'rp-why-' + row.key : null"
-            (click)="remove(row)"
-          >
-            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-          </button>
-          @if (row.blockedKey) {
-            <span class="room-panel__sr" [id]="'rp-why-' + row.key">{{ row.blockedKey | translatePipe }}</span>
-          }
         </div>
+      }
+    </div>
+    <button
+      type="button"
+      class="c-btn-ghost room-panel__add"
+      data-testid="room-area-add"
+      [disabled]="!canAdd_()"
+      (click)="areaAddRequested.emit()"
+    >
+      <lucide-icon name="plus" [size]="16"></lucide-icon>
+      {{ 'fp_area_add' | translatePipe }}
+    </button>
+  </section>
+
+  <section class="room-panel__section">
+    <app-floor-joins-list
+      [plan]="plan()"
+      [markedKey]="markedJoinKey()"
+      (joinPressed)="joinPressed.emit($event)"
+      (joinChange)="joinChange.emit($event)"
+      (joinRemoved)="joinRemoved.emit($event)"
+    />
+  </section>
+
+  <section class="room-panel__section">
+    <h3 class="room-panel__subtitle">{{ 'fp_room_size' | translatePipe }}</h3>
+    <div class="room-panel__size">
+      <div class="room-panel__row">
+        <span class="room-panel__label">{{ 'fp_room_cols' | translatePipe }}</span>
+        <app-counter
+          data-testid="room-cols"
+          [value]="grid_().cols"
+          [min]="grid_().minCols"
+          [max]="maxGrid"
+          (valueChange)="gridChange.emit({ cols: $event })"
+        />
       </div>
-    }
-  </div>
-  <button type="button" class="c-btn-ghost" data-testid="room-area-add" [disabled]="!canAdd_()" (click)="addRow()">
-    <lucide-icon name="plus" [size]="16"></lucide-icon>
-    {{ 'fp_area_add' | translatePipe }}
-  </button>
-
-  <app-floor-joins-list
-    [plan]="plan()"
-    [markedKey]="markedJoinKey()"
-    (joinPressed)="joinPressed.emit($event)"
-    (joinChange)="joinChange.emit($event)"
-    (joinRemoved)="joinRemoved.emit($event)"
-  />
-
-  <div class="room-panel__size">
-    <div class="room-panel__row">
-      <span class="room-panel__label">{{ 'fp_room_cols' | translatePipe }}</span>
-      <app-counter
-        data-testid="room-cols"
-        [value]="grid_().cols"
-        [min]="grid_().minCols"
-        [max]="maxGrid"
-        (valueChange)="gridChange.emit({ cols: $event })"
-      />
+      <div class="room-panel__row">
+        <span class="room-panel__label">{{ 'fp_room_rows' | translatePipe }}</span>
+        <app-counter
+          data-testid="room-rows"
+          [value]="grid_().rows"
+          [min]="grid_().minRows"
+          [max]="maxGrid"
+          (valueChange)="gridChange.emit({ rows: $event })"
+        />
+      </div>
     </div>
-    <div class="room-panel__row">
-      <span class="room-panel__label">{{ 'fp_room_rows' | translatePipe }}</span>
-      <app-counter
-        data-testid="room-rows"
-        [value]="grid_().rows"
-        [min]="grid_().minRows"
-        [max]="maxGrid"
-        (valueChange)="gridChange.emit({ rows: $event })"
-      />
-    </div>
-  </div>
+  </section>
 </div>
