@@ -2869,6 +2869,25 @@
     "wl_empty": "אף אחד לא מחכה כרגע",
     "wl_fits": "מתאים ל{name} ({n})",
     "wl_fits_toast": "שולחן {t} התפנה – מתאים ל{name}",
-    "wl_today_done": "היום"
+    "wl_today_done": "היום",
+    "pb_times_loading": "בודקים שעות פנויות…",
+    "pb_times_failed": "לא הצלחנו לבדוק שעות פנויות",
+    "pb_times_none": "אין שעות להזמנה ביום הזה",
+    "pb_times_full": "אין מקום פנוי ביום הזה",
+    "pb_next_free": "המועד הפנוי הקרוב: {date} בשעה {time}",
+    "pb_time_taken": "השעה שבחרתם נתפסה בינתיים. אפשר לבחור שעה אחרת:",
+    "pb_area": "איפה תרצו לשבת?",
+    "pb_area_any": "לא משנה",
+    "pb_done_confirmed_title": "השולחן שלכם מאושר",
+    "pb_done_confirmed_text": "{name} מחכים לכם ב-{date} בשעה {time}, {party} סועדים",
+    "pb_done_waiting_title": "הבקשה התקבלה",
+    "pb_done_waiting_text": "{name} יאשרו את ההזמנה בהקדם",
+    "pb_add_to_calendar": "הוספה ליומן",
+    "pb_calendar_title": "שולחן ב{name}",
+    "pb_confirm_arrival": "מאשרים הגעה",
+    "pb_arrival_confirmed": "אישרתם הגעה — נתראה!",
+    "pb_cancel_booking": "ביטול ההזמנה",
+    "pb_cancel_booking_confirm": "לבטל את ההזמנה?",
+    "pb_cancel_too_late": "כבר אי אפשר לבטל כאן — התקשרו למסעדה"
   }
 }
