@@ -885,6 +885,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any table wish in the assistant; a second booking path or a table time written by the model is never added.
 - Known copies: none.
 
+### assistant-eval — `loadDialogues`, `runDialogue`, `scoreDialogue` (plan 681)
+
+- Status: stable — server only
+- Use: the assistant's eval set. The 30 Hebrew dialogues are data files in `server/eval/frontdesk/dialogues/`, checked by `evalDialogueSchema` (`server/eval/frontdesk/dialogue-schema.js`); the restaurant room is `room14For` (`server/eval/frontdesk/room14.js`). `server/scripts/ai-eval-frontdesk.js` loads them (`loadDialogues`), plays each through `handleInbound` on the `sim` channel with a test business (`runDialogue`) and scores it from the stored rows (`scoreDialogue`) — scripted in the test suite, the real model chain only by hand.
+- Pieces: loadDialogues, runDialogue, scoreDialogue, evalDialogueSchema, room14For.
+- When: any new test dialogue or eval of the assistant; a second dialogue runner or an eval dependency is never added.
+- Known copies: none.
+
 ### assistant-guardrails — `preCheck`, `applyGuardrails`, `GUARD_WORDS` (plan 689)
 
 - Status: stable — server only
