@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, computed, inject, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  NgZone,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked
+} from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router, RouterLink } from '@angular/router'
@@ -17,7 +27,10 @@ import { parseReason, qualify, type Wanted } from '@schemas/front-desk/qualify'
 import { WANTED_QUESTION_KEYS } from '@schemas/front-desk-templates'
 import type { PublicRequestInput } from '@schemas/public/public-request.schema'
 import { PublicRequestService, type PublicKindView, type PublicProfileView } from './services/public-request.service'
+import { bookingIcs, downloadIcs } from './services/booking-calendar.util'
 import { PublicBrandComponent } from './components/public-brand/public-brand.component'
+
+type TimesState = 'idle' | 'loading' | 'ready' | 'failed' | 'too_many'
 
 type PageState = 'loading' | 'ready' | 'not_found' | 'unavailable' | 'failed' | 'done'
 
@@ -26,6 +39,9 @@ const TIME_BOUND: readonly string[] = ['table', 'tasting', 'consultation']
 const FIXED_KEYS: readonly string[] = ['date', 'time', 'party_size']
 const WAKING_AFTER_MS = 6000
 const LAST_KEY = 'fv_pb_last_'
+const DEFAULT_MINUTES = 120
+/** `YYYY-MM-DD` shown as `DD/MM`. */
+const dayMonth = (date: string): string => date.slice(8, 10) + '/' + date.slice(5, 7)
 
 /**
  * Plan 555 (C-PUBLIC): the public request form, `/book/:slug`. Hebrew only, no account, no app header.
@@ -88,6 +104,19 @@ export class PublicRequestPage {
   protected readonly token_ = signal('')
   protected readonly last_ = signal<{ token: string; reference: string } | null>(null)
 
+  // Plan 670: table mode (hours as chips, area, confirmed or waiting).
+  protected readonly area_ = signal('')
+  protected readonly slots_ = signal<{ time: string; available: boolean }[]>([])
+  protected readonly next_ = signal<{ date: string; time: string } | null>(null)
+  protected readonly timesState_ = signal<TimesState>('idle')
+  protected readonly alternatives_ = signal<{ date: string; time: string }[]>([])
+  protected readonly timeTaken_ = signal(false)
+  protected readonly confirmed_ = signal(false)
+  protected readonly booking_ = signal<{ date: string; time: string; partySize: number } | null>(null)
+  private readonly retry_ = signal(0)
+  private readonly pendingTime_ = signal('')
+  private readSeq = 0
+
   protected readonly phoneDigits_ = computed(() => this.phone_().replace(/\D/g, '').length)
   protected readonly step_ = computed(() => {
     const kinds = this.profile_()?.kinds ?? []
@@ -99,12 +128,21 @@ export class PublicRequestPage {
     () => this.profile_()?.kinds.find((k) => k.kind === this.kind_()) ?? null
   )
   protected readonly timeBound_ = computed(() => TIME_BOUND.includes(this.kind_()))
+  protected readonly tableMode_ = computed(() => !!this.profile_()?.tableBooking && this.kind_() === 'table')
+  protected readonly areas_ = computed(() => this.profile_()?.tableBooking?.areas ?? [])
+  protected readonly anyFree_ = computed(() => this.slots_().some((s) => s.available))
+  protected readonly nextFreeText_ = computed(() => {
+    const n = this.next_()
+    return n
+      ? this.translation.translate('pb_next_free').replace('{date}', dayMonth(n.date)).replace('{time}', n.time)
+      : ''
+  })
   protected readonly hasParty_ = computed(() => !!this.kind_() && this.kind_() !== 'consultation')
   protected readonly partyMin_ = computed(() => Math.max(1, this.kindView_()?.rules.minPartySize ?? 1))
   protected readonly partyMax_ = computed(() => this.kindView_()?.rules.maxPartySize || undefined)
   protected readonly extraQuestions_ = computed(() =>
     (this.kindView_()?.questions ?? [])
-      .filter((q) => !FIXED_KEYS.includes(q.key))
+      .filter((q) => !FIXED_KEYS.includes(q.key) && !(this.tableMode_() && q.key === 'seating'))
       .map((q) => ({
         ...q,
         text: this.translation.translate(q.label),
@@ -164,6 +202,18 @@ export class PublicRequestPage {
   protected readonly consentText_ = computed(() =>
     this.translation.translate('pb_consent').replace('{name}', this.profile_()?.displayName ?? '')
   )
+  protected readonly doneConfirmedText_ = computed(() => {
+    const b = this.booking_()
+    return this.translation
+      .translate('pb_done_confirmed_text')
+      .replace('{name}', this.profile_()?.displayName ?? '')
+      .replace('{date}', b ? dayMonth(b.date) : '')
+      .replace('{time}', b?.time ?? '')
+      .replace('{party}', String(b?.partySize ?? ''))
+  })
+  protected readonly doneWaitingText_ = computed(() =>
+    this.translation.translate('pb_done_waiting_text').replace('{name}', this.profile_()?.displayName ?? '')
+  )
   protected readonly doneText_ = computed(() =>
     this.translation.translate('pb_done_text').replace('{name}', this.profile_()?.displayName ?? '')
   )
@@ -179,7 +229,88 @@ export class PublicRequestPage {
     // Outside the zone: a pending 6 s timer must not hold the app unstable (tests wait for stability).
     const timer = this.zone.runOutsideAngular(() => setTimeout(() => this.waking_.set(true), WAKING_AFTER_MS))
     this.destroyRef.onDestroy(() => clearTimeout(timer))
+    effect(() => {
+      const on = this.tableMode_()
+      const date = this.date_()
+      const party = this.party_()
+      const area = this.area_()
+      this.retry_()
+      if (!on || !date) {
+        untracked(() => this.clearTimes())
+        return
+      }
+      untracked(() => void this.readTimes(date, party, area))
+    })
     void this.load()
+  }
+
+  private clearTimes(): void {
+    this.readSeq++
+    this.slots_.set([])
+    this.next_.set(null)
+    this.timesState_.set('idle')
+  }
+
+  /** The newest read wins: an older answer that arrives late is ignored. */
+  private async readTimes(date: string, party: number, area: string): Promise<void> {
+    const seq = ++this.readSeq
+    this.timesState_.set('loading')
+    const res = await this.api.availability(this.slug, date, party, area || undefined)
+    if (seq !== this.readSeq) return
+    if (!res.ok) {
+      this.slots_.set([])
+      this.next_.set(null)
+      this.timesState_.set(res.code === 'TOO_MANY' ? 'too_many' : 'failed')
+      return
+    }
+    this.slots_.set(res.slots)
+    this.next_.set(res.next ?? null)
+    const free = (t: string) => res.slots.some((s) => s.time === t && s.available)
+    const pending = this.pendingTime_()
+    if (pending) {
+      this.pendingTime_.set('')
+      if (free(pending)) this.time_.set(pending)
+    }
+    if (this.time_() && !free(this.time_())) this.time_.set('')
+    this.timesState_.set('ready')
+  }
+
+  protected reloadTimes(): void {
+    this.retry_.update((n) => n + 1)
+  }
+
+  protected pickTime(time: string): void {
+    this.time_.set(time)
+    this.timeTaken_.set(false)
+    this.alternatives_.set([])
+  }
+
+  /** The nearest free time (or an alternative): set its date, choose its hour after the next read. */
+  protected pickDay(day: { date: string; time: string }): void {
+    this.pendingTime_.set(day.time)
+    this.timeTaken_.set(false)
+    this.alternatives_.set([])
+    this.date_.set(day.date)
+    this.reloadTimes()
+  }
+
+  protected dayMonth(date: string): string {
+    return dayMonth(date)
+  }
+
+  protected async addToCalendar(): Promise<void> {
+    const b = this.booking_()
+    if (!b) return
+    const name = this.profile_()?.displayName ?? ''
+    const text = await bookingIcs({
+      title: this.translation.translate('pb_calendar_title').replace('{name}', name),
+      date: b.date,
+      time: b.time,
+      minutes: this.kindView_()?.durationMinutes ?? DEFAULT_MINUTES,
+      location: this.profile_()?.address
+    })
+    if (text) downloadIcs(text)
+    else this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
   }
 
   protected async load(): Promise<void> {
@@ -224,7 +355,9 @@ export class PublicRequestPage {
   protected detailsValid(): boolean {
     if (!this.kind_()) return false
     if (this.isRequired('date') && !this.date_()) return false
-    if (this.timeBound_() && this.isRequired('time') && !this.time_()) return false
+    if (this.tableMode_()) {
+      if (!this.date_() || !this.time_()) return false
+    } else if (this.timeBound_() && this.isRequired('time') && !this.time_()) return false
     return this.extraQuestions_().every((q) => !q.required || !!(this.answers_()[q.key] ?? '').trim())
   }
 
@@ -266,6 +399,7 @@ export class PublicRequestPage {
       guestPhone: this.phone_().trim(),
       wanted,
       answers,
+      ...(this.tableMode_() && this.area_() && { areaKey: this.area_() }),
       consentTerms: true,
       ...(this.website_() && { website: this.website_() })
     }
@@ -276,7 +410,17 @@ export class PublicRequestPage {
       this.reference_.set(res.reference)
       this.token_.set(res.token)
       this.writeLast(res.token, res.reference)
+      this.confirmed_.set(!!res.confirmed)
+      this.booking_.set(res.booking ?? null)
       this.state_.set('done')
+      return
+    }
+    if (res.code === 'NO_TABLE' && this.tableMode_()) {
+      this.time_.set('')
+      this.alternatives_.set(res.alternatives ?? [])
+      this.timeTaken_.set(true)
+      this.reloadTimes()
+      void this.router.navigate([], { relativeTo: this.route, queryParams: { step: 2 } })
       return
     }
     if (res.code === 'NOT_AVAILABLE') {

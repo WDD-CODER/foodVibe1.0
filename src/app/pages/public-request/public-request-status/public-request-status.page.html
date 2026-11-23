@@ -19,6 +19,38 @@
     <p>{{ eventText_() }}</p>
     }
     <p>{{ 'pb_change_contact' | translatePipe }}</p>
+    @if (canConfirmArrival_()) {
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="pb-confirm"
+      [disabled]="isConfirming_()"
+      [attr.aria-busy]="isConfirming_()"
+      (click)="confirmArrival()"
+    >
+      {{ 'pb_confirm_arrival' | translatePipe }}
+    </button>
+    } @if (showArrivalConfirmed_()) {
+    <p data-testid="pb-arrival-confirmed">{{ 'pb_arrival_confirmed' | translatePipe }}</p>
+    } @if (isBookingConfirmed_()) {
+    <button type="button" class="c-btn-ghost" data-testid="pb-calendar" (click)="addToCalendar()">
+      <lucide-icon name="calendar-plus" [size]="16"></lucide-icon>
+      {{ 'pb_add_to_calendar' | translatePipe }}
+    </button>
+    } @if (canCancelBooking_()) {
+    <button
+      type="button"
+      class="c-btn-ghost"
+      data-testid="pb-cancel-booking"
+      [disabled]="isCancelling_()"
+      [attr.aria-busy]="isCancelling_()"
+      (click)="cancelBooking()"
+    >
+      {{ 'pb_cancel_booking' | translatePipe }}
+    </button>
+    } @if (showTooLate_()) {
+    <p data-testid="pb-cancel-too-late">{{ 'pb_cancel_too_late' | translatePipe }}</p>
+    }
     <div class="pb-actions">
       @if (telLink_(); as tel) {
       <a class="c-btn-ghost" [href]="tel">

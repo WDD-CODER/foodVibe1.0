@@ -1,0 +1,175 @@
+{
+  "run": "rs-book-ui-3",
+  "branch": "orch/rs-book-ui-3",
+  "base": "main",
+  "startedAt": "2026-11-23T10:39:22.526Z",
+  "mainShaAtStart": "379f8428560f58e207dced99fe7dd9bb6bdc9fd9",
+  "plans": {
+    "670": {
+      "nnn": "670",
+      "title": "The guest booking page: free times as chips, area, \"confirmed\" or \"waiting\", manage the booking",
+      "branch": "feat/670-guest-page-time-chips",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T10:42:06.400Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T11:08:41.816Z"
+        }
+      },
+      "humanItems": [
+        "Dandan books a table from his phone on the demo restaurant's page: the chips are easy to tap, a taken",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T10:42:06.046Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T10:42:06.403Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:04:45.636Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:08:31.394Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:08:41.818Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:08:57.462Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:10:32.270Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 16.1,
+      "sha": "d80712e6a58d88cdd1b84f0e33ca90593cadb1d5",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1355.8,
+          "tokens": {
+            "input": 3788029,
+            "output": 44085
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.3,
+          "tokens": {
+            "input": 113839,
+            "output": 955
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "b8c9453a46820e8406fa4fe70ecf9b619bd7ac22"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T10:42:05.467Z",
+      "plan": "670",
+      "text": "the folder foodVibe1.0-orch-rs-book-ui-3-670 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T11:04:42.360Z",
+      "plan": "670",
+      "text": "builder left undone (round 0): e2e/ui/670-1: written, not run; e2e/ui/670-2: written, not run; e2e/ui/670-3: written, not run; [human] phone check of the chips and the Hebrew done page; [human] failed free-hours request shows an error and a retry where the chips would be"
+    },
+    {
+      "at": "2026-11-23T11:09:12.345Z",
+      "plan": "670",
+      "text": "the folder foodVibe1.0-orch-merge-rs-book-ui-3 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T11:13:02.632Z",
+      "text": "FINAL: same tree as plan 670's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-23T11:13:03.811Z",
+      "text": "make this a default? after a 409 NO_TABLE the page goes back to step 2 and shows the taken-hour line with the alternatives, and picking an alternative clears that line — reverse: keep the line visible until the next send (trigger: screen) — reply: default yes run-screen"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 16.1,
+  "updatedAt": "2026-11-23T11:13:05.914Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: after a 409 NO_TABLE the page goes back to step 2 and shows the taken-hour line with the alternatives, and picking an alternative clears that line — reverse: keep the line visible until the next send",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: the status page's add-to-calendar uses a 120-minute event with no location, because the status read carries no duration or address — reverse: add those fields to the status answer",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "670",
+      "type": "behaviour",
+      "text": "behaviour: the hour and area boxes reuse the existing .pb-kinds fieldset class, and I declared .pb-time and .pb-time--taken in the plan's Reuse Check so the kit check passes — reverse: give the boxes their own class and declare it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T11:13:05.912Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T11:13:05.914Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
