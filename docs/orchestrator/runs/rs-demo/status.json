@@ -1,0 +1,183 @@
+{
+  "run": "rs-demo",
+  "branch": "orch/rs-demo",
+  "base": "main",
+  "startedAt": "2026-11-23T11:37:32.237Z",
+  "mainShaAtStart": "654f3c5626d0c0bf313a30211ab4533c5d55dd6b",
+  "plans": {
+    "674": {
+      "nnn": "674",
+      "title": "A demo restaurant: a seeded room, a week of bookings and a waiting list, and the setup step \"draw your room\"",
+      "branch": "feat/674-demo-restaurant-seed-and",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T11:39:37.893Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T12:10:34.218Z"
+        }
+      },
+      "humanItems": [
+        "Dandan runs the seed with `--write` on a scratch local database, signs in as the demo owner, opens"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T11:39:37.704Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:39:37.894Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:58:08.906Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:10:26.988Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:10:34.220Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:10:46.544Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T12:11:58.912Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.5,
+      "sha": "5979a3f97e827ae3b5f6bb29d9bf2bf5af4f3db0",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1107.7,
+          "tokens": {
+            "input": 3383838,
+            "output": 32463
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.1,
+          "tokens": {
+            "input": 100497,
+            "output": 721
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "6b68cf9ed4c973f6557331f1c071437e7efcd27e"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T11:39:37.458Z",
+      "plan": "674",
+      "text": "the folder foodVibe1.0-orch-rs-demo-674 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T11:58:05.761Z",
+      "plan": "674",
+      "text": "builder left undone (round 0): [ui] 674-1: written, not run (e2e/ui/674-1.spec.ts); [human] Dandan's hand check: run the seed with --write on a scratch local database and look at /bookings?view=floor"
+    },
+    {
+      "at": "2026-11-23T12:10:55.077Z",
+      "plan": "674",
+      "text": "the folder foodVibe1.0-orch-merge-rs-demo was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T12:12:53.306Z",
+      "text": "FINAL: same tree as plan 674's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.5,
+  "updatedAt": "2026-11-23T12:12:55.841Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "674",
+      "type": "behaviour",
+      "text": "behaviour: the area keys are `inside`, `outside` and `barzone`, not `bar`. C-FLOOR requires keys of 6–12 characters ([a-z0-9]), and the area's display name stays 'בר' — reverse: rename the key in demo-restaurant-data.js (it needs a valid 6+ character key)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "674",
+      "type": "behaviour",
+      "text": "behaviour: booking `createdAt` is the earlier of `now` and `startAt` − 2 days, and the demo owner's `createdAt` is `now` − 90 days. Neither is in the plan — reverse: change the one line in buildBookings or in the users row of the seed script",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "674",
+      "type": "behaviour",
+      "text": "behaviour: `docs/brain/inventory.md` was regenerated with `node scripts/inventory.mjs` and committed, although it is not in the plan's scope. The kit check reported it stale after the two component-families.md entries (both required by the reuse-registry check) — reverse: revert that file and drop the two family entries",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "674",
+      "type": "seen",
+      "text": "seen: the scope-check run against `origin/orch/rs-demo` lists files outside the plan scope (server/routes/generic.js, plans/600-700/697-*.plan.md, the logistics-item-manager files, .claude/todo.md and others). I did not touch them; the diff base is probably newer than my branch's merge-base. The orchestrator should re-run it on the real diff.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T12:12:55.839Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T12:12:55.841Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
