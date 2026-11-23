@@ -58,6 +58,25 @@ export function tableStatesAt(
   return result
 }
 
+/**
+ * Plan 686: the `confirmed` table booking on `tableKey` that starts first after `moment`, other than `excludeId`
+ * (the booking that gives the table its state now); `null` when there is none.
+ */
+export function nextOnTable<T extends Held>(
+  bookings: readonly T[],
+  tableKey: string,
+  moment: number,
+  excludeId?: string
+): T | null {
+  let best: T | null = null
+  for (const b of bookings) {
+    if (b.kind !== 'table' || b.status !== 'confirmed' || b._id === excludeId) continue
+    if (!b.tableKeys?.includes(tableKey) || b.startAt <= moment) continue
+    if (!best || b.startAt < best.startAt) best = b
+  }
+  return best
+}
+
 export interface StripTime {
   time: string
   /** True for a time after midnight of a range that opens the evening before. */
