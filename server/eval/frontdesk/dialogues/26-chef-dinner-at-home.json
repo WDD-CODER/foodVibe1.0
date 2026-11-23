@@ -1,0 +1,29 @@
+{
+  "id": "26",
+  "title": "A chef dinner at home for eight",
+  "businessType": "private_chef",
+  "tags": ["request"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "רוצים ארוחת שף בבית ל-8 אנשים ב-1 בפברואר, אנחנו בתל אביב",
+      "script": {
+        "reply": "תודה",
+        "intent": "request",
+        "kind": "event",
+        "collected": { "date": "2030-02-01", "party_size": "8", "location": "תל אביב" },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "approve", "text": "קבוצה קטנה, מועד בעוד כשלושה שבועות" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "request",
+    "collected": { "date": "2030-02-01", "party_size": "8", "location": "תל אביב" },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

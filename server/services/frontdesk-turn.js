@@ -13,7 +13,7 @@ const { buildTurnBody, HISTORY_WINDOW } = require('./frontdesk-prompt');
 const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
 const { sendOut } = require('./outbound');
 const { setTurnHandler } = require('./inbound');
-const { tablesFor, handleTableIntent, deliver } = require('./frontdesk-tables');
+const { tablesFor, handleTableIntent, deliver, cleanSuggested } = require('./frontdesk-tables');
 const { createRequest, runQualify } = require('../utils/request-create');
 const { fixedText, reasonText } = require('../utils/fixed-text');
 const { jerusalemDate } = require('../middleware/usage');
@@ -142,7 +142,8 @@ async function blockTurn(db, conversation, base, { reason, stage }) {
 
 const handOffSilently = (db, conversation, opts) => handOff(db, conversation, { ...opts, silent: true });
 
-async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Date.now() } = {}) {
+/** `feature` (plan 681) is only for the hand-run eval: its live turns are metered as `eval`, never as a business's turn. */
+async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature } = {}) {
   const businessId = conversation.businessId;
   if (mode === 'turn' && conversation.status !== 'bot') return { skipped: 'not_bot' };
   const profile = await colOf(db, 'frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } });
@@ -182,7 +183,7 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     body,
     usage: {
       businessId,
-      feature: mode === 'suggest' ? 'frontdesk_suggest' : 'frontdesk_turn',
+      feature: feature === 'eval' ? 'eval' : mode === 'suggest' ? 'frontdesk_suggest' : 'frontdesk_turn',
       ...(conversation.test && { userId: 'sim' }),
     },
     log,
@@ -223,9 +224,11 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
 
   // Plan 680: the model's reply is dropped for the three table intents; the server answers from the engine.
   let answer = verdict.answer;
+  // Plan 681: the model's advice for the owner, cleaned once; it changes nothing the guest sees.
+  const suggested = cleanSuggested(asked.answer.suggested, now);
   if (tableTurn) {
     const level0 = levelOf(profile) === 0 || mode === 'suggest';
-    const res = await handleTableIntent(db, conversation, answer, { tables, now, write: !level0, log });
+    const res = await handleTableIntent(db, conversation, answer, { tables, now, write: !level0, log, suggested });
     if (res.request) {
       // No plan to assign from: the plan 679 request path, with a reply that is checked because it may be sent.
       answer = bookAsRequest(answer);
@@ -268,6 +271,7 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     }, {
       channel: conversation.channel, actor: 'public:' + conversation.channel, via: 'ai', source: 'whatsapp',
     });
+    if (suggested) await colOf(db, 'requests').updateOne({ _id: request._id, businessId }, { $set: { suggested } });
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId }, { $set: { requestId: request._id, updatedAt: now } }
     );

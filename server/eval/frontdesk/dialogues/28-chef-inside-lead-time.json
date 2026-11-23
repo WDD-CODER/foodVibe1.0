@@ -1,0 +1,29 @@
+{
+  "id": "28",
+  "title": "A date inside the 72-hour lead time: the rule sentence, no request",
+  "businessType": "private_chef",
+  "tags": ["request"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "אפשר שף לערב מחר? אנחנו 6, בחיפה",
+      "script": {
+        "reply": "תודה",
+        "intent": "request",
+        "kind": "event",
+        "collected": { "date": "2030-01-08", "party_size": "6", "location": "חיפה" },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "decline", "text": "המועד קרוב מדי" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "request",
+    "collected": { "date": "2030-01-08" },
+    "serverAction": "none",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

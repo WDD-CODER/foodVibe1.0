@@ -1,0 +1,21 @@
+{
+  "id": "08",
+  "title": "Cancel one hour before, the cutoff is three hours: a person takes over",
+  "businessType": "restaurant",
+  "tags": ["tables", "cancel", "late_cutoff"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-08T19:00",
+    "floor": "room14",
+    "bookings": [{ "date": "2030-01-08", "time": "20:00", "partySize": 2, "tableNumbers": [3], "ofGuest": true }]
+  },
+  "turns": [
+    {
+      "guest": "סליחה, לא נגיע הערב, אפשר לבטל?",
+      "script": { "reply": "רגע", "intent": "cancel", "collected": {}, "missing": [], "handoff": false, "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "cancel", "serverAction": "handoff", "handoff": true, "lastOut": { "kind": "text" } }
+}

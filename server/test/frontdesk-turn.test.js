@@ -127,6 +127,26 @@ describe('request', () => {
     expect(out[0].text).not.toContain('MODEL-REPLY');
   });
 
+  it('plan 681: a malformed suggestion never fails the turn; the request is written without it', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, suggested: { action: 'approve', text: 'x'.repeat(2500) } }));
+    await turn(conversation);
+    const requests = await db().collection('requests').find({}).toArray();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].status).toBe('qualified');
+    expect(requests[0].suggested).toBeUndefined();
+    expect((await outbound())[0].text).toBe(fixedText('fd_ai_will_confirm'));
+  });
+
+  it('plan 681: a suggestion changes nothing the guest sees', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, suggested: { action: 'decline', text: 'קבוצה גדולה' } }));
+    await turn(conversation);
+    const requests = await db().collection('requests').find({}).toArray();
+    expect(requests[0]).toMatchObject({ status: 'qualified', suggested: { action: 'decline', text: 'קבוצה גדולה' } });
+    expect((await outbound())[0].text).toBe(fixedText('fd_ai_will_confirm'));
+  });
+
   it('a missing required answer writes nothing and sends the model reply', async () => {
     const { conversation } = await setup();
     fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, collected: { date: DATE, time: '19:00' } }));

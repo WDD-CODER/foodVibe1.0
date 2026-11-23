@@ -1,0 +1,14 @@
+{
+  "id": "18",
+  "title": "Thanks and goodbye",
+  "businessType": "restaurant",
+  "tags": ["smalltalk"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 1, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "תודה רבה על הכל, להתראות!",
+      "script": { "reply": "תודה לך, להתראות!", "intent": "smalltalk", "collected": {}, "missing": [], "handoff": false, "usedFacts": [] }
+    }
+  ],
+  "expected": { "intent": "smalltalk", "serverAction": "none", "handoff": false, "lastOut": { "kind": "text" } }
+}

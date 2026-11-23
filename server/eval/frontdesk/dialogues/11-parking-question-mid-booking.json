@@ -1,0 +1,37 @@
+{
+  "id": "11",
+  "title": "The guest asks about parking in the middle, then finishes the booking",
+  "businessType": "restaurant",
+  "tags": ["tables", "question_mid_booking"],
+  "setup": {
+    "modules": ["frontdesk", "tables"],
+    "confirmMode": "auto",
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "floor": "room14",
+    "facts": [{ "topic": "location", "question": "יש חניה?", "answer": "יש חניון ציבורי ברחוב הסמוך, חינם בערב." }]
+  },
+  "turns": [
+    {
+      "guest": "אפשר שולחן ל-4 מחר?",
+      "script": { "reply": "כן", "intent": "book", "collected": { "table": { "date": "2030-01-08", "partySize": 4 } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    {
+      "guest": "רגע, יש לכם חניה ליד?",
+      "script": { "reply": "יש חניון ציבורי ברחוב הסמוך, חינם בערב.", "intent": "question", "collected": {}, "missing": [], "handoff": false, "usedFacts": ["f1"] }
+    },
+    {
+      "guest": "מעולה. אז ב-20:30",
+      "script": { "reply": "כן", "intent": "book", "collected": { "table": { "time": "20:30" } }, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "button": "OK" }
+  ],
+  "expected": {
+    "intent": "book",
+    "collected": { "table": { "date": "2030-01-08", "time": "20:30", "partySize": 4 } },
+    "serverAction": "booking",
+    "handoff": false,
+    "booking": { "date": "2030-01-08", "time": "20:30", "partySize": 4 },
+    "lastOut": { "kind": "template", "template": "booking_confirmed" }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "19",
+  "title": "No floor plan drawn: the booking wish becomes a request for the owner",
+  "businessType": "restaurant",
+  "tags": ["tables", "book"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 1, "now": "2030-01-07T10:00", "floor": "none" },
+  "turns": [
+    {
+      "guest": "אפשר להזמין לזוג מחר ב-19:00?",
+      "script": {
+        "reply": "רגע",
+        "intent": "book",
+        "collected": { "table": { "date": "2030-01-08", "time": "19:00", "partySize": 2 } },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "approve", "text": "זוג ביום חול, בתוך שעות הפתיחה" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "book",
+    "collected": { "table": { "date": "2030-01-08", "time": "19:00", "partySize": 2 } },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

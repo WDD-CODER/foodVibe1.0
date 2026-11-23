@@ -1,0 +1,19 @@
+{
+  "id": "24",
+  "title": "A menu question answered from a fact",
+  "businessType": "catering",
+  "tags": ["question"],
+  "setup": {
+    "modules": ["frontdesk"],
+    "level": 1,
+    "now": "2030-01-07T10:00",
+    "facts": [{ "topic": "menu", "question": "יש תפריט צמחוני?", "answer": "כן, יש לנו תפריט צמחוני מלא ותפריט טבעוני לבחירה." }]
+  },
+  "turns": [
+    {
+      "guest": "יש לכם גם אופציה צמחונית?",
+      "script": { "reply": "כן, יש לנו תפריט צמחוני מלא ותפריט טבעוני לבחירה.", "intent": "question", "collected": {}, "missing": [], "handoff": false, "usedFacts": ["f1"] }
+    }
+  ],
+  "expected": { "intent": "question", "serverAction": "none", "handoff": false, "lastOut": { "kind": "text" } }
+}

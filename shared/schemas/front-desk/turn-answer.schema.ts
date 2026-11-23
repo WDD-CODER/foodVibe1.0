@@ -26,6 +26,14 @@ export const turnAnswerSchema = z.object({
   missing: z.array(z.string()).max(20).default([]),
   handoff: z.boolean().default(false),
   handoffReason: z.string().max(200).optional(),
-  usedFacts: z.array(z.string()).max(60).default([])
+  usedFacts: z.array(z.string()).max(60).default([]),
+  /**
+   * Plan 681: what the model would have the business do with a complete request. Loose on purpose (a wrong value is
+   * dropped, never fails the turn); the server decides what is stored on the request.
+   */
+  suggested: z
+    .object({ action: z.string().max(20), text: z.string().max(2000).optional() })
+    .optional()
+    .catch(undefined)
 })
 export type TurnAnswer = z.infer<typeof turnAnswerSchema>

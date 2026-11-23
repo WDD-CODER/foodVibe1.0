@@ -1,0 +1,29 @@
+{
+  "id": "09",
+  "title": "Party of 9 with autoMaxParty 6 in mode auto goes to the owner as a request",
+  "businessType": "restaurant",
+  "tags": ["tables", "over_limit"],
+  "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "autoMaxParty": 6, "level": 1, "now": "2030-01-07T10:00", "floor": "room14" },
+  "turns": [
+    {
+      "guest": "אנחנו 9 חברים, מחר ב-20:00, יש לכם מקום?",
+      "script": {
+        "reply": "רגע",
+        "intent": "book",
+        "collected": { "table": { "date": "2030-01-08", "time": "20:00", "partySize": 9 } },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "approve", "text": "קבוצה גדולה ביום חול, נראה מתאים" }
+      }
+    },
+    { "button": "OK" }
+  ],
+  "expected": {
+    "intent": "book",
+    "collected": { "table": { "partySize": 9 } },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "25",
+  "title": "An allergy-emergency keyword hands over before any model call",
+  "businessType": "catering",
+  "tags": ["handoff"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "שלום",
+      "script": { "reply": "שלום! במה אפשר לעזור?", "intent": "smalltalk", "collected": {}, "missing": [], "handoff": false, "usedFacts": [] }
+    },
+    { "guest": "הבן שלי אכל מהמגש שלכם ויש לו תגובה אלרגית" }
+  ],
+  "expected": { "intent": "smalltalk", "serverAction": "handoff", "handoff": true, "lastOut": { "kind": "text" } }
+}

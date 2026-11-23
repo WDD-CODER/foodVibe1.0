@@ -1,0 +1,29 @@
+{
+  "id": "27",
+  "title": "A consultation call tomorrow afternoon",
+  "businessType": "private_chef",
+  "tags": ["request"],
+  "setup": { "modules": ["frontdesk"], "level": 1, "now": "2030-01-07T10:00" },
+  "turns": [
+    {
+      "guest": "אפשר לקבוע שיחת ייעוץ מחר ב-14:00? רוצים לתכנן ארוחה ליום הולדת",
+      "script": {
+        "reply": "תודה",
+        "intent": "request",
+        "kind": "consultation",
+        "collected": { "date": "2030-01-08", "time": "14:00", "topic": "ארוחת יום הולדת" },
+        "missing": [],
+        "handoff": false,
+        "usedFacts": [],
+        "suggested": { "action": "approve", "text": "שיחת ייעוץ בשעות הפעילות" }
+      }
+    }
+  ],
+  "expected": {
+    "intent": "request",
+    "collected": { "date": "2030-01-08", "time": "14:00" },
+    "serverAction": "request",
+    "handoff": false,
+    "lastOut": { "kind": "text" }
+  }
+}
