@@ -501,7 +501,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 672
 - Use: `src/app/pages/bookings/components/new-booking-dialog/` · `app-new-booking-dialog` (input `date`; outputs `saved`, `closed`): the phone booking — client or new guest, date, party, area, time chips from the availability call, the engine's offered table on a small `app-floor-map` (the owner may tap another), the 409 alternatives as chips. `src/app/pages/bookings/components/walk-in-dialog/` · `app-walk-in-dialog` (inputs `tableKey`, `plan`, `states`; outputs `seated`, `closed`): seats a walk-in on the table of the sheet or one tapped free table. `src/app/pages/requests/components/approve-table-dialog/` · `app-approve-table-dialog` (inputs `request`, `alternatives`, `busy`; output `chosen`): shown when approving a table request answers `NO_TABLE`; the page makes the approve call. All three are `app-modal-shell [sheet]`.
-- Classes: `.nb-*`, `.wlk-*`, `.att-*` (scoped to each dialog's stylesheet); no new `.c-*` class.
+- Classes: `.fv__actions` (the bar buttons), `.nb-row`, `.nb-chips`, `.nb-label`, `.nb-line`, `.nb-map`, `.nb-info`, `.wlk-row`, `.wlk-pick`, `.wlk-label`, `.wlk-line`, `.att-chips`, `.att-label`, `.att-line`, `.att-map` (scoped to each dialog's stylesheet; the stacks use the engine `.c-input-stack`); no new `.c-*` class.
 - When: a host creates, seats or rescues a table booking from the service screen or the requests page — never a second copy.
 - Known copies: none.
 
@@ -509,9 +509,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 672
 - Use: `src/app/pages/bookings/components/service-lists/` · `app-arriving-list` (inputs `rows`, `live`, `busyId`; output `arrived`) and `app-unassigned-list` (inputs `rows`, `live`; output `assign`): single-line `.c-list-row` rows with `app-empty-state`; the rules are `arrivingNext` and `freeTablesFor` in `table-state.util.ts`.
-- Classes: `.sl`, `.sl__title`, `.sl__rows`, `.sl__row`, `.sl__name`, `.sl__party`, `.sl__act` (scoped to each list's stylesheet).
+- Classes: `.sl__title`, `.sl__rows`, `.sl__row`, `.sl__name`, `.sl__party`, `.sl__act` (one stylesheet, `arriving-list.component.scss`, shared by both lists; the stack is the engine `.c-input-stack`).
 - When: a short read-only side panel of the service screen — never a second list shell.
-- Known copies: the two lists repeat one small stylesheet so each component owns its styles.
+- Known copies: none.
 
 ### table-sheet — the sheet of one table on the service screen
 
