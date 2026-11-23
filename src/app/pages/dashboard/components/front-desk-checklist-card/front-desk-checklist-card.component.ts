@@ -29,7 +29,12 @@ export class FrontDeskChecklistCardComponent {
     (this.setup_()?.items ?? []).map((item) => ({
       ...item,
       labelKey: 'frontdesk_setup_' + item.key,
-      path: item.key === 'test_request' ? '/requests' : '/frontdesk/onboarding'
+      path:
+        item.key === 'test_request'
+          ? '/requests'
+          : item.key === 'floor_plan'
+            ? '/frontdesk/floor-plan'
+            : '/frontdesk/onboarding'
     }))
   )
   protected readonly hasProfile_ = computed(() => (this.setup_()?.businessType ?? null) !== null)

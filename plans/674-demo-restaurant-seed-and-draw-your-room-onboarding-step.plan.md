@@ -262,14 +262,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Describe the demo restaurant as plain data that never collides with itself — the business, owner, profile with table settings, the 14-table room with its two joins, six clients, the fixed asks placed by the engine into 40 bookings with statuses from the clock, four waiting parties; pure and deterministic — server/scripts/lib/demo-restaurant-data.js
-- [ ] A2: Write the seed command with the same safety rules as the catering demo — local only, dry run by default, schema check before any write, missing ids only, password from the environment — server/scripts/seed-demo-restaurant.js
-- [ ] A3: Give every live demo booking its tables through the hold claim — claim before insert, stop on a taken table, release on a failed insert, skip claims for bookings that exist, the dry-run line — server/scripts/seed-demo-restaurant.js
-- [ ] A4: Prove the seed with tests — counts and schemas, no shared table at one time, the three clocks, dry run writes nothing, second run inserts nothing, local only, the day and floor-plan reads of the seeded business — server/test/seed-demo-restaurant.test.js, server/breadcrumbs.md
-- [ ] A5: Tell a restaurant with table service to draw its room first — the floor-plan item behind the module check with its done rule; test cases for with and without the module and the unchanged totals — server/services/front-desk-setup.js, server/test/front-desk-setup.test.js
-- [ ] A6: Send the new checklist row to the floor plan editor — the path rule of the card, the dictionary key, the card spec — src/app/pages/dashboard/components/front-desk-checklist-card/front-desk-checklist-card.component.ts, src/app/pages/dashboard/components/front-desk-checklist-card/front-desk-checklist-card.component.spec.ts, public/assets/data/dictionary.json
-- [ ] A7: Write the screen check that runs in the real app — signInQa, the setup-status answer stubbed with the floor-plan item, the tap and the address; screenshot — e2e/ui/674-1.spec.ts
-- [ ] A8: Run every check of this plan and hand Dandan the hand check — test:server, test:ci, the refused atlas run, build, both lints, log-query; evidence into Execution Notes; then the human card with the exact seed command
+- [x] A1: Describe the demo restaurant as plain data that never collides with itself — the business, owner, profile with table settings, the 14-table room with its two joins, six clients, the fixed asks placed by the engine into 40 bookings with statuses from the clock, four waiting parties; pure and deterministic — server/scripts/lib/demo-restaurant-data.js
+- [x] A2: Write the seed command with the same safety rules as the catering demo — local only, dry run by default, schema check before any write, missing ids only, password from the environment — server/scripts/seed-demo-restaurant.js
+- [x] A3: Give every live demo booking its tables through the hold claim — claim before insert, stop on a taken table, release on a failed insert, skip claims for bookings that exist, the dry-run line — server/scripts/seed-demo-restaurant.js
+- [x] A4: Prove the seed with tests — counts and schemas, no shared table at one time, the three clocks, dry run writes nothing, second run inserts nothing, local only, the day and floor-plan reads of the seeded business — server/test/seed-demo-restaurant.test.js, server/breadcrumbs.md
+- [x] A5: Tell a restaurant with table service to draw its room first — the floor-plan item behind the module check with its done rule; test cases for with and without the module and the unchanged totals — server/services/front-desk-setup.js, server/test/front-desk-setup.test.js
+- [x] A6: Send the new checklist row to the floor plan editor — the path rule of the card, the dictionary key, the card spec — src/app/pages/dashboard/components/front-desk-checklist-card/front-desk-checklist-card.component.ts, src/app/pages/dashboard/components/front-desk-checklist-card/front-desk-checklist-card.component.spec.ts, public/assets/data/dictionary.json
+- [x] A7: Write the screen check that runs in the real app — signInQa, the setup-status answer stubbed with the floor-plan item, the tap and the address; screenshot — e2e/ui/674-1.spec.ts
+- [x] A8: Run every check of this plan and hand Dandan the hand check — test:server, test:ci, the refused atlas run, build, both lints, log-query; evidence into Execution Notes; then the human card with the exact seed command
 
 ## Technical Considerations
 - Dependencies: `parseArgs` of `seed-demo-business.js`; `parseV2` (`server/utils/schema-check.js`); `businessSchema`;
@@ -307,5 +307,7 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 ## Execution Notes
 - behaviour: booking statuses are set from the clock of the seed run (past → finished, running → seated, later →
   confirmed); seed a fresh scratch database shortly before a demo for a lively room.
+- evidence: build, lint, test:ci (2991 SUCCESS), test:server, lint:icons, lint:no-native-select, override-check, plan-ledger, breadcrumbs, kit-manifest-check → exit 0; `node server/scripts/seed-demo-restaurant.js --target=atlas` → exit 1, `[seed-demo-restaurant] failed: demo seed is local only`; log-query → SKIP (no database).
+- scope extended: docs/brain/component-families.md was already in scope; two family entries added (kit reuse-registry check).
 - behaviour: the "draw your room" step is an item of the dashboard's setup checklist (where every other setup step
   is), linking to the editor; no separate onboarding page step is built.

@@ -101,6 +101,42 @@ describe('checklist per business type', () => {
   })
 })
 
+describe('the floor_plan item (plan 674)', () => {
+  const planWith = tables => ({
+    _id: 'fp1', schemaVersion: 2, businessId: 'b1', createdBy: 'own1', createdAt: 1, updatedAt: 1,
+    grid: { cols: 20, rows: 12 }, areas: [{ key: 'areaaa01', name: 'בפנים', order: 0 }], joins: [], tables,
+  })
+  const oneTable = {
+    key: 'tableaa01', number: '1', areaKey: 'areaaa01', shape: 'square', minSeats: 2, maxSeats: 4,
+    x: 0, y: 0, w: 2, h: 2, turned: false, active: true, online: true,
+  }
+  const withTables = () => db('businesses').updateOne({ _id: 'b1' }, { $set: { modules: ['frontdesk', 'tables'] } })
+
+  beforeEach(() => db('floorPlans').deleteMany({}))
+
+  it('comes right after request_kinds, not done without a plan or with zero tables, done with one table', async () => {
+    await withTables()
+    await db('frontDeskProfiles').insertOne(profile('restaurant'))
+    let out = await frontDeskSetup(testDb(), 'b1')
+    expect(keys(out.items).slice(0, 4)).toEqual(['profile_basics', 'hours', 'request_kinds', 'floor_plan'])
+    expect(doneKeys(out.items)).not.toContain('floor_plan')
+    expect(out.total).toBe(10)
+    await db('floorPlans').insertOne(planWith([]))
+    expect(doneKeys((await frontDeskSetup(testDb(), 'b1')).items)).not.toContain('floor_plan')
+    await db('floorPlans').updateOne({ _id: 'fp1' }, { $set: { tables: [oneTable] } })
+    out = await frontDeskSetup(testDb(), 'b1')
+    expect(doneKeys(out.items)).toContain('floor_plan')
+  })
+
+  it('is not listed for a business without the tables module', async () => {
+    await db('businesses').updateOne({ _id: 'b1' }, { $set: { modules: ['frontdesk'] } })
+    await db('frontDeskProfiles').insertOne(profile('restaurant'))
+    const out = await frontDeskSetup(testDb(), 'b1')
+    expect(keys(out.items)).not.toContain('floor_plan')
+    expect(out.total).toBe(9)
+  })
+})
+
 describe('GET /setup-status', () => {
   it('has an empty frontDesk block without a profile and keeps the five counts', async () => {
     const res = await status()
