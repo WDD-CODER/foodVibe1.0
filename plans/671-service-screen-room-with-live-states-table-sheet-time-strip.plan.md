@@ -132,6 +132,9 @@ e2e/ui/671-1.spec.ts
 e2e/ui/671-2.spec.ts
 e2e/ui/671-3.spec.ts
 screens/671-*.png
+src/app/core/services/client-data.service.spec.ts
+src/app/core/services/request-data.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
