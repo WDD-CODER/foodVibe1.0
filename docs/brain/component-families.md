@@ -859,3 +859,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: SimulatorPage, SimulatorService.
 - When: any test of the conversation channel from inside the app; a second simulator screen is never added.
 - Known copies: none.
+
+### assistant-turn — `keyFor`, `fixedText`, `turnAnswerSchema`, `buildTurnBody`, `runTurn`, `applyGuardrails`, `askTurnModel` (plan 679)
+
+- Status: stable — server only
+- Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`.
+- Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, runTurn, decide, applyGuardrails, askTurnModel.
+- When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
+- Known copies: none.

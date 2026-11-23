@@ -19,6 +19,7 @@ const mongoose = require('mongoose');
 const { isAiFeature } = require('../constants/ai-features');
 const { recordAiUsage } = require('./ai-usage');
 const { capState } = require('./ai-cap');
+const { keyFor } = require('./ai-key');
 
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -442,7 +443,7 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     log.warn({ event: `${eventPrefix}.model_removed`, model: requested });
     return { kind: 'model_removed', model: requested };
   }
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = keyFor(usage?.businessId);
   const candidates = modelChain().filter(m => !medium || modelTakes(m, medium));
   const now = new Date();
   if (!firstUsable(candidates, now)) {

@@ -382,15 +382,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Put the model key behind one function so a business can get its own key later — keyFor returning the environment key, the one line in the model client, its test — server/services/ai-key.js, server/services/gemini-client.js, server/test/ai-key.test.js
-- [ ] A2: Let the server say a fixed Hebrew sentence without writing Hebrew in code — fixedText and reasonText over the shipped dictionary, the two new keys, the test — server/utils/fixed-text.js, public/assets/data/dictionary.json, server/test/fixed-text.test.js
-- [ ] A3: Define what the model must answer and write the assistant's rules in English — the answer schema, the system prompt, the today block, the request body with facts, kinds and the last twelve messages; the prompt test — shared/schemas/front-desk/turn-answer.schema.ts, server/services/frontdesk-prompt.js, server/test/frontdesk-prompt.test.js
-- [ ] A4: Make the one model call of the assistant where model calls are allowed — askTurnModel with parsing and schema check, the sub-router file and its mount line — server/routes/ai/frontdesk.js, server/routes/ai.js
-- [ ] A5: Build the turn so the server decides and the model only proposes — runTurn steps one to ten, decide, the two handoffs, the cap from the ledger, the registration with the inbound handler, the guardrails seam with its two checks — server/services/frontdesk-turn.js, server/services/frontdesk-guardrails.js
-- [ ] A6: Write a complete request from a conversation the way a form request is written — the createRequest call with the conversation's client and channel, the optional test flag — server/utils/request-create.js, server/services/frontdesk-turn.js
-- [ ] A7: Give the inbox a way to ask for a draft reply — the suggest route with its limiter, permission and scoping, and its test — server/routes/ai/frontdesk.js, server/test/ai-frontdesk-suggest.test.js
-- [ ] A8: Prove every branch with the model faked — level 0, level 1, request, closed day, every failure, the cap, test data, logs — server/test/frontdesk-turn.test.js
-- [ ] A9: Record what was built where the next plans look — the folder map and the map's extension lines; run every check and paste the evidence — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Put the model key behind one function so a business can get its own key later — keyFor returning the environment key, the one line in the model client, its test — server/services/ai-key.js, server/services/gemini-client.js, server/test/ai-key.test.js
+- [x] A2: Let the server say a fixed Hebrew sentence without writing Hebrew in code — fixedText and reasonText over the shipped dictionary, the two new keys, the test — server/utils/fixed-text.js, public/assets/data/dictionary.json, server/test/fixed-text.test.js
+- [x] A3: Define what the model must answer and write the assistant's rules in English — the answer schema, the system prompt, the today block, the request body with facts, kinds and the last twelve messages; the prompt test — shared/schemas/front-desk/turn-answer.schema.ts, server/services/frontdesk-prompt.js, server/test/frontdesk-prompt.test.js
+- [x] A4: Make the one model call of the assistant where model calls are allowed — askTurnModel with parsing and schema check, the sub-router file and its mount line — server/routes/ai/frontdesk.js, server/routes/ai.js
+- [x] A5: Build the turn so the server decides and the model only proposes — runTurn steps one to ten, decide, the two handoffs, the cap from the ledger, the registration with the inbound handler, the guardrails seam with its two checks — server/services/frontdesk-turn.js, server/services/frontdesk-guardrails.js
+- [x] A6: Write a complete request from a conversation the way a form request is written — the createRequest call with the conversation's client and channel, the optional test flag — server/utils/request-create.js, server/services/frontdesk-turn.js
+- [x] A7: Give the inbox a way to ask for a draft reply — the suggest route with its limiter, permission and scoping, and its test — server/routes/ai/frontdesk.js, server/test/ai-frontdesk-suggest.test.js
+- [x] A8: Prove every branch with the model faked — level 0, level 1, request, closed day, every failure, the cap, test data, logs — server/test/frontdesk-turn.test.js
+- [x] A9: Record what was built where the next plans look — the folder map and the map's extension lines; run every check and paste the evidence — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: `callGemini` and the ledger (unchanged behaviour), `publicFacts`, `runQualify` / `createRequest`,
@@ -424,3 +424,8 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: at level 0 no request is written; the draft reply is all the assistant produces.
 - behaviour: a conversation that already has a request hands a second complete request to a person.
 - behaviour: an answer that fails the rules is answered with the rule sentences of the dictionary, and no request is written.
+- scope extended: docs/brain/component-families.md — the kit check `reuse-registry-missing-piece` needs a family heading for the six rung-4 pieces (added `assistant-turn`)
+- scope extended: docs/brain/inventory.md — the kit check `inventory-stale` needs it regenerated (`node scripts/inventory.mjs`)
+- seen: server/services/frontdesk-turn.js — at level 0 a complete table request stores `fd_ai_will_confirm` as the draft although no request is written (as the plan's step 9 says); a member sending it would say "received" with nothing recorded. Reverse/fix: plan 689 or 680 decides the level-0 draft text.
+- behaviour: in `mode: 'suggest'` a model handoff or a second complete request still stores the model's own reply as the suggestion and leaves the status unchanged — reverse: return `{ ok: false }` in those two branches.
+- Evidence: `pnpm run build` → exit 0; `pnpm run lint` → 0 errors; `pnpm run test:server` → exit 0, 171 files, 2296 tests passed (five new files, 40 tests); kit-manifest-check → ok; override-check, plan-ledger-check, breadcrumbs-check, lint:icons, lint:no-native-select → ok; log-query → SKIP (no database); `grep "callGemini(" frontdesk-turn.js frontdesk-guardrails.js` → nothing; kit-checks → only the component-families and inventory findings, fixed by the scope extension.

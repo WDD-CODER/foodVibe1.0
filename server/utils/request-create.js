@@ -30,7 +30,7 @@ function runQualify(profile, kind, wanted, answers, now) {
 const fail = (code, issues) => Object.assign(new Error(code), { code, ...(issues && { issues }) })
 
 /**
- * @param {object} input `{ kind, clientId?, guestName?, guestPhone?, wanted, answers }`
+ * @param {object} input `{ kind, clientId?, guestName?, guestPhone?, wanted, answers, test? }`
  * @param {object} opts `{ channel, actor, via, source = 'manual', consentTerms?, approvedBooking? }`; plan 669: `approvedBooking`
  *   `{ id, at }` stores the request already approved by the server (outcome = that booking, second history entry)
  * @returns {Promise<{ request: object, client: object }>}
@@ -82,10 +82,13 @@ async function createRequest(db, businessId, profile, input, { channel, actor, v
     ],
     ...(approvedBooking && { outcome: { type: 'booking', id: approvedBooking.id } }),
     publicToken: newPublicToken(),
+    ...(input.test === true && { test: true }),
   }
   const check = checkStoredDoc('requests', doc)
   if (!check.ok) throw fail('INVALID_DOC', check.issues)
   await db.collection('requests').insertOne(doc)
+  // Plan 679: a test request (the simulator) leaves the client's counters alone.
+  if (input.test === true) return { request: doc, client }
 
   const clients = db.collection('clients')
   await clients.updateOne(
