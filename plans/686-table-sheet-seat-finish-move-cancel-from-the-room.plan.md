@@ -92,6 +92,7 @@ docs/brain/inventory.md
 e2e/ui/686-1.spec.ts
 e2e/ui/686-2.spec.ts
 screens/686-*.png
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
