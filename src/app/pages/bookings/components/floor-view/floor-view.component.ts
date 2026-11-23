@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  HostListener,
   computed,
   effect,
   inject,
@@ -27,6 +28,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { jerusalemDateTime, jerusalemEpoch } from '@schemas/front-desk/local-time'
 import { openRangesOf } from '@schemas/front-desk/qualify'
 import { tableServiceOf } from '@schemas/front-desk/table-service'
+import { TableSheetComponent } from '../table-sheet/table-sheet.component'
 import { stripTimes, tableStatesAt, type StripTime } from 'src/app/core/utils/table-state.util'
 
 const DAY_MS = 86400000
@@ -58,7 +60,8 @@ const LEGEND: readonly { state: FloorTableState; icon: string }[] = [
     EmptyStateComponent,
     LoaderComponent,
     ScrollRailComponent,
-    FloorMapComponent
+    FloorMapComponent,
+    TableSheetComponent
   ],
   templateUrl: './floor-view.component.html',
   styleUrl: './floor-view.component.scss',
@@ -81,7 +84,13 @@ export class FloorViewComponent {
   protected readonly legend = LEGEND
   protected readonly status_ = signal<'loading' | 'error' | 'ready'>('loading')
   protected readonly modeBusy_ = signal(false)
-  private readonly board_ = signal<DayBoard | null>(null)
+  /** Plan 686: the table whose sheet is open. */
+  protected readonly sheetTableKey_ = signal<string | null>(null)
+  /** Plan 686: the booking being moved to another table (move mode), or null. */
+  protected readonly movingBookingId_ = signal<string | null>(null)
+  protected readonly moveBusy_ = signal(false)
+  private moveSeq = 0
+  protected readonly board_ = signal<DayBoard | null>(null)
   private readonly receivedAt_ = signal(0)
   private readonly clockTick_ = signal(0)
   private loadSeq = 0
@@ -120,7 +129,7 @@ export class FloorViewComponent {
     return strip[0]?.time ?? null
   })
   protected readonly isLive_ = computed(() => this.isToday_() && this.chosen_() === null)
-  private readonly moment_ = computed(() => {
+  protected readonly moment_ = computed(() => {
     if (this.isLive_()) return this.serverNow_()
     const time = this.chosen_()
     if (time === null) return jerusalemEpoch(this.date(), '12:00')
@@ -129,7 +138,7 @@ export class FloorViewComponent {
     return jerusalemEpoch(date, time)
   })
 
-  private readonly states_ = computed(() => {
+  protected readonly states_ = computed(() => {
     const plan = this.plan_()
     const board = this.board_()
     if (!plan || !board) return {}
@@ -154,6 +163,24 @@ export class FloorViewComponent {
       ])
     )
   )
+  protected readonly sheetTable_ = computed(() => {
+    const key = this.sheetTableKey_()
+    return key ? (this.plan_()?.tables.find((t) => t.key === key) ?? null) : null
+  })
+  protected readonly sheetLook_ = computed(() => {
+    const key = this.sheetTableKey_()
+    return (key && this.states_()[key]) || { state: 'free' as const }
+  })
+  private readonly movingBooking_ = computed(() => {
+    const id = this.movingBookingId_()
+    return id ? (this.board_()?.bookings.find((b) => b._id === id) ?? null) : null
+  })
+  protected readonly selectedKeys_ = computed(() => this.movingBooking_()?.tableKeys ?? [])
+  protected readonly bannerText_ = computed(() =>
+    this.translation
+      .translate('tsh_move_banner')
+      .replace('{name}', this.movingBooking_()?.guestName || this.translation.translate('fv_walk_in'))
+  )
   protected readonly pills_ = computed(() => {
     const own = (this.board_()?.bookings ?? []).filter((b) => b.kind === 'table')
     const sum = (list: typeof own) => list.reduce((total, b) => total + b.partySize, 0)
@@ -168,7 +195,18 @@ export class FloorViewComponent {
     const destroyRef = inject(DestroyRef)
     effect(() => {
       const date = this.date()
-      untracked(() => void this.load(date, true))
+      untracked(() => {
+        this.endMove()
+        this.sheetTableKey_.set(null)
+        void this.load(date, true)
+      })
+    })
+    effect(() => {
+      this.chosen_()
+      untracked(() => {
+        this.endMove()
+        this.sheetTableKey_.set(null)
+      })
     })
     const poll = setInterval(() => void this.refresh(), POLL_MS)
     const clock = setInterval(() => this.clockTick_.update((n) => n + 1), CLOCK_MS)
@@ -188,6 +226,57 @@ export class FloorViewComponent {
 
   protected retry(): void {
     void this.load(this.date(), true)
+  }
+
+  /** A tap on a table: in move mode it picks the target; otherwise it opens the table's sheet. */
+  protected onTableTap(key: string): void {
+    this.tableTapped.emit(key)
+    if (this.movingBookingId_()) {
+      void this.moveTo(key)
+      return
+    }
+    if (this.plan_()?.tables.some((t) => t.key === key)) this.sheetTableKey_.set(key)
+  }
+
+  protected startMove(bookingId: string): void {
+    this.sheetTableKey_.set(null)
+    this.movingBookingId_.set(bookingId)
+  }
+
+  /** Leaves move mode without a write (Escape, the banner's cancel, a changed date or time). */
+  @HostListener('document:keydown.escape')
+  protected endMove(): void {
+    this.moveSeq++
+    this.movingBookingId_.set(null)
+  }
+
+  protected onSheetChanged(): void {
+    void this.load(this.date(), false)
+  }
+
+  private async moveTo(key: string): Promise<void> {
+    const booking = this.movingBooking_()
+    const table = this.plan_()?.tables.find((t) => t.key === key)
+    if (!booking || !table || !table.active || booking.tableKeys?.includes(key) || this.moveBusy_()) return
+    const seq = ++this.moveSeq
+    this.moveBusy_.set(true)
+    try {
+      const res = await this.bookingData.setTables(booking._id, [key])
+      if (seq !== this.moveSeq) return
+      if (res.ok) {
+        this.endMove()
+        this.userMsg.onSetSuccessMsg(this.translation.translate('tsh_moved'))
+        void this.load(this.date(), false)
+      } else if (res.code === 'NO_TABLE' || res.code === 'BAD_STATUS' || res.code === 'STATUS_CHANGED') {
+        // The server's 409 answers: the table is taken for that time (or the booking changed).
+        this.userMsg.onSetErrorMsg(this.translation.translate('tsh_move_refused'))
+      } else {
+        this.endMove()
+        this.userMsg.onSetErrorMsg(this.translation.translate('rq_decision_failed'))
+      }
+    } finally {
+      this.moveBusy_.set(false)
+    }
   }
 
   protected choose(time: string | null): void {

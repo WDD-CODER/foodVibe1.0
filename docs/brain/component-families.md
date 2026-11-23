@@ -493,7 +493,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 671
 - Use: `src/app/pages/bookings/components/floor-view/` · `app-floor-view` (inputs `date`, `at`; outputs `atChange`, `tableTapped`): the room in `app-floor-map` with one live state per table (the map's `details` input carries the state label, name and time), the 30-minute strip in `app-scroll-rail`, the summary pills, the legend and the owner's confirm-mode toggle; it reloads the day every 45 s on the server's clock. `BookingDataService.dayBoard(date)` reads the day.
 - Classes: `.fv`, `.fv__pills`, `.fv__strip`, `.fv__legend`, `.fv__draw`, `.fv__body`, `.fv__room`, `.fv__side` (scoped to the view's own stylesheet); the map's `.floor-map__name`, `.floor-map__time` put a booking's name and time on a table.
-- When: the host's service screen (`/bookings?view=floor`). Plans 686, 672 and 673 add the table sheet, the lists and the waiting list inside it.
+- When: the host's service screen (`/bookings?view=floor`). Plans 672 and 673 add the lists and the waiting list inside it.
+- Plan 686: a tap on a table opens `app-table-sheet` (`src/app/pages/bookings/components/table-sheet/`, a bottom sheet in `app-modal-shell [sheet]`: the table, what is on it now, the next booking, and seat / finish / no-show / cancel / move for the live moment). "Move" puts the view in move mode: the banner (`.fv__move`) and a tap on another table call `BookingDataService.setTables`; Escape or the banner's cancel leave it. `nextOnTable` in `table-state.util.ts` finds the next booking of a table.
 - Known copies: none.
 
 ### floor-plan-joins-sheet — joins of tables, one-cell arrows and the phone sheet of the room editor

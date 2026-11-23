@@ -80,11 +80,25 @@
 
         <div class="fv__body">
           <div class="fv__room">
+            @if (movingBookingId_()) {
+              <div class="fv__move" role="status" data-testid="fv-move-banner">
+                <span>{{ bannerText_() }}</span>
+                <button
+                  type="button"
+                  class="c-btn-ghost c-btn-ghost--sm"
+                  data-testid="fv-move-cancel"
+                  (click)="endMove()"
+                >
+                  {{ 'bk_cancel' | translatePipe }}
+                </button>
+              </div>
+            }
             <app-floor-map
               [plan]="plan_()!"
               [states]="mapStates_()"
               [details]="details_()"
-              (tableTapped)="tableTapped.emit($event)"
+              [selectedKeys]="selectedKeys_()"
+              (tableTapped)="onTableTap($event)"
             />
             <ul class="fv__legend" [attr.aria-label]="'fv_legend_label' | translatePipe" data-testid="fv-legend">
               @for (l of legend; track l.state) {
@@ -97,6 +111,22 @@
           </div>
           <aside class="fv__side" aria-hidden="true"></aside>
         </div>
+
+        @if (sheetTable_(); as t) {
+          @if (board_(); as board) {
+            <app-table-sheet
+              [table]="t"
+              [board]="board"
+              [plan]="plan_()!"
+              [moment]="moment_()"
+              [live]="isLive_()"
+              [look]="sheetLook_()"
+              (closed)="sheetTableKey_.set(null)"
+              (changed)="onSheetChanged()"
+              (moveRequested)="startMove($event)"
+            />
+          }
+        }
       }
     }
   }

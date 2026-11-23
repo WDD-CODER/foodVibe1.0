@@ -42,11 +42,14 @@ describe('FloorViewComponent (plan 671)', () => {
   let setConfirmMode: jasmine.Spy
   let userMsg: jasmine.SpyObj<UserMsgService>
   const el = (): HTMLElement => fixture.nativeElement
-  const board = (): DayBoard => ({ bookings: [], holds: [], unassigned: [], now: Date.now() })
+  let dayBookings: unknown[] = []
+  let setTables: jasmine.Spy
+  const board = (): DayBoard => ({ bookings: dayBookings as never, holds: [], unassigned: [], now: Date.now() })
   const today = (): string => jerusalemDateTime(Date.now()).date
 
   function setup(): void {
     dayBoard = jasmine.createSpy('dayBoard').and.callFake(() => Promise.resolve(board()))
+    setTables = jasmine.createSpy('setTables').and.resolveTo({ ok: true, booking: {} })
     plan_ = signal<unknown>(PLAN)
     owner_ = signal(true)
     profile_ = signal<unknown>({ hours: [] })
@@ -62,7 +65,7 @@ describe('FloorViewComponent (plan 671)', () => {
       imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban })],
       providers: [
         provideRouter([]),
-        { provide: BookingDataService, useValue: { dayBoard } },
+        { provide: BookingDataService, useValue: { dayBoard, setTables, setStatus: jasmine.createSpy('setStatus') } },
         {
           provide: FloorPlanDataService,
           useValue: { plan_, ensureLoaded: () => Promise.resolve(), loadFailed_: signal(false) }
@@ -179,6 +182,154 @@ describe('FloorViewComponent (plan 671)', () => {
     fixture.detectChanges()
     expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('fv_mode_failed')
     expect(el().querySelector('[data-testid="fv-mode"]')?.textContent).toContain('fv_mode_manual')
+    fixture.destroy()
+    flush()
+  }))
+})
+
+describe('FloorViewComponent move mode (plan 686)', () => {
+  // The shared setup lives in the describe above; this block repeats the small part it needs.
+  let fixture: ComponentFixture<FloorViewComponent>
+  let dayBoard: jasmine.Spy
+  let setTables: jasmine.Spy
+  let userMsg: jasmine.SpyObj<UserMsgService>
+  const el = (): HTMLElement => fixture.nativeElement
+  const byId = (id: string): HTMLElement | null => el().querySelector(`[data-testid="${id}"]`)
+  const tap = (number: string): void => {
+    ;(byId('floor-table-' + number) as HTMLElement).click()
+    fixture.detectChanges()
+  }
+  const flushView = (): void => {
+    tick()
+    fixture.detectChanges()
+  }
+
+  function setup(): void {
+    const booking = {
+      _id: 'b1',
+      kind: 'table',
+      status: 'confirmed',
+      clientId: 'c1',
+      guestName: 'כהן',
+      time: '19:00',
+      partySize: 2,
+      startAt: Date.now() - 5 * 60000,
+      endAt: Date.now() + 85 * 60000,
+      tableKeys: ['tab002']
+    }
+    dayBoard = jasmine
+      .createSpy('dayBoard')
+      .and.callFake(() => Promise.resolve({ bookings: [booking], holds: [], unassigned: [], now: Date.now() }))
+    setTables = jasmine.createSpy('setTables').and.resolveTo({ ok: true, booking })
+    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', [
+      'onSetErrorMsg',
+      'onSetWarningMsg',
+      'onSetSuccessMsg'
+    ])
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    TestBed.configureTestingModule({
+      imports: [FloorViewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Ban })],
+      providers: [
+        provideRouter([]),
+        { provide: BookingDataService, useValue: { dayBoard, setTables, setStatus: jasmine.createSpy('setStatus') } },
+        {
+          provide: FloorPlanDataService,
+          useValue: { plan_: signal<unknown>(PLAN), ensureLoaded: () => Promise.resolve(), loadFailed_: signal(false) }
+        },
+        {
+          provide: FrontDeskProfileDataService,
+          useValue: { profile_: signal<unknown>({ hours: [] }), ensureLoaded: () => Promise.resolve() }
+        },
+        { provide: PermissionService, useValue: { isOwner_: signal(true) } },
+        { provide: TranslationService, useValue: translation },
+        { provide: UserMsgService, useValue: userMsg }
+      ]
+    })
+    fixture = TestBed.createComponent(FloorViewComponent)
+    fixture.componentRef.setInput('date', jerusalemDateTime(Date.now()).date)
+    fixture.detectChanges()
+    flushView()
+  }
+
+  /** Taps table 12, then "move": the sheet closes and the banner shows. */
+  function startMove(): void {
+    tap('12')
+    expect(byId('table-sheet')).toBeTruthy()
+    ;(byId('tsh-move') as HTMLElement).click()
+    fixture.detectChanges()
+  }
+
+  it('a tap opens the sheet; "move" closes it and shows the banner with the party name', fakeAsync(() => {
+    setup()
+    startMove()
+    expect(byId('table-sheet')).toBeNull()
+    expect(byId('fv-move-banner')?.textContent).toContain('tsh_move_banner')
+    fixture.destroy()
+    flush()
+  }))
+
+  it('a tap on another table writes that one key, leaves move mode and reloads', fakeAsync(() => {
+    setup()
+    startMove()
+    const loads = dayBoard.calls.count()
+    tap('11')
+    flushView()
+    expect(setTables).toHaveBeenCalledOnceWith('b1', ['tab001'])
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('tsh_moved')
+    expect(byId('fv-move-banner')).toBeNull()
+    expect(dayBoard.calls.count()).toBe(loads + 1)
+    fixture.destroy()
+    flush()
+  }))
+
+  it('a refused write (409) shows tsh_move_refused and stays in move mode', fakeAsync(() => {
+    setup()
+    startMove()
+    setTables.and.resolveTo({ ok: false, code: 'NO_TABLE' })
+    tap('11')
+    flushView()
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('tsh_move_refused')
+    expect(byId('fv-move-banner')).toBeTruthy()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('any other failure shows rq_decision_failed and ends move mode', fakeAsync(() => {
+    setup()
+    startMove()
+    setTables.and.resolveTo({ ok: false, code: null })
+    tap('11')
+    flushView()
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('rq_decision_failed')
+    expect(byId('fv-move-banner')).toBeNull()
+    fixture.destroy()
+    flush()
+  }))
+
+  it('Escape and the banner cancel leave move mode and write nothing', fakeAsync(() => {
+    setup()
+    startMove()
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    fixture.detectChanges()
+    expect(byId('fv-move-banner')).toBeNull()
+    startMove()
+    ;(byId('fv-move-cancel') as HTMLElement).click()
+    fixture.detectChanges()
+    expect(byId('fv-move-banner')).toBeNull()
+    expect(setTables).not.toHaveBeenCalled()
+    fixture.destroy()
+    flush()
+  }))
+
+  it("a tap on the booking's own table writes nothing and opens no sheet in move mode", fakeAsync(() => {
+    setup()
+    startMove()
+    tap('12')
+    flushView()
+    expect(setTables).not.toHaveBeenCalled()
+    expect(byId('table-sheet')).toBeNull()
+    expect(byId('fv-move-banner')).toBeTruthy()
     fixture.destroy()
     flush()
   }))

@@ -2796,6 +2796,19 @@
     "fv_no_room": "עוד לא ציירתם את החדר",
     "fv_draw_room": "ציור החדר",
     "fv_strip_label": "שעה להצגה",
-    "fv_legend_label": "מקרא"
+    "fv_legend_label": "מקרא",
+    "tsh_title": "שולחן {n}",
+    "tsh_now": "עכשיו",
+    "tsh_next": "הבא בתור",
+    "tsh_free_now": "השולחן פנוי",
+    "tsh_no_next": "אין הזמנה נוספת היום",
+    "tsh_not_live": "מוצגת שעה אחרת. חזרו ל״עכשיו״ כדי לפעול",
+    "tsh_seats": "מקומות",
+    "tsh_tables": "שולחנות",
+    "tsh_move": "העברה לשולחן אחר",
+    "tsh_move_banner": "בחרו שולחן אחר עבור {name}",
+    "tsh_moved": "ההזמנה הועברה",
+    "tsh_move_refused": "השולחן תפוס בשעה הזאת",
+    "tsh_open_client": "לקוח"
   }
 }

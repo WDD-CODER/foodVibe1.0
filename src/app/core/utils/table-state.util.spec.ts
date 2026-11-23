@@ -1,4 +1,4 @@
-import { stripTimes, tableStatesAt } from './table-state.util'
+import { nextOnTable, stripTimes, tableStatesAt } from './table-state.util'
 
 const MIN = 60000
 const NOW = 1_000_000_000_000
@@ -98,5 +98,29 @@ describe('stripTimes', () => {
       ['00:00', true],
       ['00:30', true]
     ])
+  })
+})
+
+describe('nextOnTable (plan 686)', () => {
+  it('none when the table has no later booking', () => {
+    expect(nextOnTable([], 't1', NOW)).toBeNull()
+    expect(nextOnTable([b('confirmed', NOW - MIN, ['t1'])], 't1', NOW)).toBeNull()
+  })
+
+  it('the earliest later confirmed booking on that table', () => {
+    const late = b('confirmed', NOW + 120 * MIN, ['t1'])
+    const soon = b('confirmed', NOW + 30 * MIN, ['t1'])
+    expect(nextOnTable([late, soon, b('confirmed', NOW + 10 * MIN, ['t2'])], 't1', NOW)).toBe(soon)
+  })
+
+  it('leaves the now booking out', () => {
+    const now = b('confirmed', NOW + 10 * MIN, ['t1'])
+    const next = b('confirmed', NOW + 200 * MIN, ['t1'])
+    expect(nextOnTable([now, next], 't1', NOW, now._id)).toBe(next)
+  })
+
+  it('ignores cancelled, no-show, finished and seated bookings', () => {
+    const others = ['cancelled', 'no_show', 'finished', 'seated'].map((s) => b(s, NOW + 30 * MIN, ['t1']))
+    expect(nextOnTable(others, 't1', NOW)).toBeNull()
   })
 })
