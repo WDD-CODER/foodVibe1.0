@@ -28,7 +28,8 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `time-field/` | HH:mm text field; a click or tap opens the native time picker; `value` is "HH:mm", `invalid` flags an impossible time (plan 537) | TimeFieldComponent |
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `qr-code/` | A QR image of a link, drawn in the browser; the `qrcode` library loads lazily (plan 667) | QrCodeComponent |
-| `floor-map/` | The drawing of the room: tables at grid cells, optional drag (plan 665; plan 671: the `details` input puts a state label, a name and a time on a table); grid arithmetic in the folder's geometry util | FloorMapComponent, footprintFor, movedCell, firstFreeCell, nextTableNumber, newKey, chairsFor, TABLE_PRESETS |
+| `floor-map/` | The drawing of the room: tables at grid cells, optional drag (plan 665; plan 671: the `details` input puts a state label, a name and a time on a table; plan 699: area zones under the tables, area-coloured and joined tables, zone draw / move / resize); grid arithmetic in the folder's geometry util, zone arithmetic in its zones util | FloorMapComponent, footprintFor, movedCell, firstFreeCell, nextTableNumber, newKey, chairsFor, TABLE_PRESETS, colorOf, rectFromCells, cellAtPoint, resizedRect, movedRect, rectsOverlap, tableCentreIn |
+| `tip/` | `[appTip]`: a tooltip shown at once on hover, focus and tap, in the popover top layer, placed by placeInViewport (plan 699) | TipDirective |
 | `chat-thread/` | The read-only message thread the inbox and the simulator both draw: bubbles by side (`perspective`), template bodies from the dictionary, author tag, delivery state as icon + label, buttons on the last outbound message, day lines (plan 677) | ChatThreadComponent |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |

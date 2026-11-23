@@ -255,6 +255,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
 - Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
+- Blocked but explained (plan 699): .c-icon-btn[aria-disabled='true'] in src/styles.scss looks like a disabled .c-icon-btn (faded, no hover spin) yet still takes hover, focus and tap, so its `[appTip]` reason shows (family tooltip).
+- Floor plan colours (plan 699): Zone and joined colour tokens --color-zone-0, --color-zone-1, --color-zone-2, --color-zone-3, --color-zone-4, --color-zone-5, --color-zone-6, --color-zone-7, --color-floor-joined — an area's palette index n is `var(--color-zone-n)` (family floor-map); the joined-table border is never in the palette.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note
@@ -492,8 +494,16 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/shared/floor-map/` · `app-floor-map` (inputs `plan`, `states`, `selectedKeys`, `draggable`, `dimOtherThanArea`, `warnKeys` (plan 684: overlap mark); outputs
   `tableTapped`, `tableMoved`, `gridTapped`) with the pure grid arithmetic in `floor-geometry.util.ts` (`footprintFor`, `movedCell`,
   `stepCell`/`canStep` (plan 666: one cell in the arrow's direction, RTL-aware), `firstFreeCell`, `nextTableNumber`, `newKey`, `chairsFor`, `TABLE_PRESETS`). Cells only; `x` counts from the inline start.
+- Zones (plan 699): every area with a `zone` is drawn under the tables (`.floor-map__zone`, `.floor-map__zone-label`, `data-testid="floor-zone-<key>"`, colour `var(--color-zone-<colorOf>)` in `--fm-zone`). More inputs: `showZones` (default true), `colorTables` (table border in its area's colour; the editor), `joinedKeys` (`.is-joined`, violet `--color-floor-joined` border, `.floor-map__link` mark, "מחובר" in the name), `zoneEditable`, `selectedZoneKey` (four `.floor-map__handle--<corner>` handles), `drawZoneKey` (press-drag-release on the grid, `.floor-map__zone--draft` preview, Escape cancels); outputs `zoneDrawn`, `zoneChanged`, `zoneTapped`. A selected table has an outline ring, not a border change. The zone cell arithmetic is `floor-zones.util.ts` (`ZONE_COLOR_COUNT`, `colorOf`, `rectFromCells`, `cellAtPoint` (RTL), `deltaCells`, `resizedRect`, `movedRect`, `rectsOverlap`, `rectInGrid`, `tableCentreIn`).
 - When: a screen draws the room — the floor plan editor (`src/app/pages/frontdesk/floor-plan/`), the service screen, the booking dialog.
 - Known copies: none.
+
+### tooltip — a short explanation beside a control
+
+- Status: stable — plan 699
+- Use: `src/app/shared/tip/tip.directive.ts` · `[appTip]="text"` (`TipDirective`): shows at once on hover and keyboard focus and for 3 s after a tap, in a `popover="manual"` bubble (`.c-tip` in `src/styles.scss`) placed by `placeInViewport` (below, flips above when there is no room, never cut off); sets the host's `aria-describedby` while shown; empty or null text shows nothing. A control that is blocked but must still explain why wears `aria-disabled="true"` (the `.c-icon-btn[aria-disabled='true']` look) instead of `disabled`.
+- When: a control needs a hint or the reason it does nothing (default `hints-in-tooltips`) — never a native `title`, never a page-local bubble.
+- Known copies: the native `title` on other controls (moved over when their screens are next touched).
 
 ### floor-view — the service screen's room with live states
 
@@ -555,7 +565,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### floor-plan-editor — the editing rules, the overlap mark and the scoped classes of the room editor
 
 - Status: stable — plan 684
-- Use: `src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts` (`withTable`, `numberError`, `duplicateTable`, `withoutTable`, `overlapping`, `minGrid`, `withArea`, `restoreDropped`) and `floor-plan-joins.util.ts` (plan 666: `joinProblem`, `newJoin`, `joinLabel`, `withJoin`, `withoutJoin`, `withJoinChange`) — pure draft rules; `app-floor-joins-list` (joins rows in the room panel); the arrows row of the table panel; the phone sheet (`.floor-plan__panel.floor-plan__panel--open`, non-modal, under 768 px); the overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`); the scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) in the page's and the two panels' own stylesheets; `app-floor-table-panel` and `app-floor-room-panel` (inputs in, events out).
+- Use: `src/app/pages/frontdesk/floor-plan/floor-plan-edit.util.ts` (`withTable`, `numberError`, `duplicateTable`, `withoutTable`, `overlapping`, `minGrid` (plan 699: tables and zones), `withArea` (plan 699: a new area gets the first free palette colour), `restoreDropped`, and plan 699's `withZone` (set or clear an area's zone; refusals `fp_zone_overlap`, `fp_zone_small`, `fp_zone_outside`; tables whose centre is inside join the area) and `withTableDropped` (a dropped table joins the zone it lands in)) and `floor-plan-joins.util.ts` (plan 666: `joinProblem`, `newJoin`, `joinLabel`, `withJoin`, `withoutJoin`, `withJoinChange`) — pure draft rules; `app-floor-joins-list` (joins rows in the room panel); the arrows row of the table panel; the phone sheet (`.floor-plan__panel.floor-plan__panel--open`, non-modal, under 768 px); the overlap mark on the map (`warnKeys` input, `.is-overlap`, `.floor-map__warn`); the scoped classes of the page and panels (`.floor-plan__body`, `.floor-plan__panel`, `.floor-plan__notice`, `.floor-plan__overlap`, `.table-panel`, `.table-panel__row`, `.table-panel__actions`, `.room-panel`, `.room-panel__area`, `.room-panel__size`) in the page's and the two panels' own stylesheets; `app-floor-table-panel` and `app-floor-room-panel` (inputs in, events out).
+- Zones (plan 699): withZone, withTableDropped and the zone-aware minGrid in floor-plan-edit.util.ts — an area's zone is set or cleared only through `withZone`, a drop goes through `withTableDropped`; the page wires the map's `colorTables` and `joinedKeys`.
 - When: a screen edits the room draft — rules belong in the util, never in a panel.
 - Known copies: none.
 

@@ -36,15 +36,48 @@ describe('checkFloorPlan', () => {
     expect(checkFloorPlan(p)).toEqual([{ code, key }])
   })
 
-  it('covers all nine codes and honours a turned table', () => {
-    expect(FLOOR_PLAN_ISSUE_CODES).toHaveLength(9)
+  it('covers all eleven codes and honours a turned table', () => {
+    expect(FLOOR_PLAN_ISSUE_CODES).toHaveLength(11)
     expect(checkFloorPlan(t(table('tblaaa01', { number: '1', x: 8, y: 0, w: 1, h: 3, turned: true })))).toEqual([{ code: 'outside_grid', key: 'tblaaa01' }])
     expect(checkFloorPlan(t(table('tblaaa01', { number: '1', x: 7, y: 0, w: 1, h: 3, turned: true })))).toEqual([])
     expect(checkFloorPlan(t(table('tblaaa01', { number: '1', x: -1 })))).toHaveLength(1)
   })
 })
 
+describe('checkFloorPlan zones (plan 699)', () => {
+  const zoned = (zones, grid = { cols: 24, rows: 16 }) => ({
+    grid,
+    areas: zones.map((zone, i) => ({ key: 'areaaa0' + (i + 1), name: 'A' + i, order: i, color: i, ...(zone ? { zone } : {}) })),
+    tables: [],
+    joins: [],
+  })
+  it('reports a zone that sticks out of the grid', () => {
+    expect(checkFloorPlan(zoned([{ x: 20, y: 0, w: 6, h: 4 }]))).toEqual([{ code: 'zone_outside_grid', key: 'areaaa01' }])
+    expect(checkFloorPlan(zoned([{ x: 18, y: 12, w: 6, h: 4 }]))).toEqual([])
+  })
+  it('reports two zones that share a cell, with the later area key', () => {
+    expect(checkFloorPlan(zoned([{ x: 0, y: 0, w: 4, h: 4 }, { x: 3, y: 3, w: 4, h: 4 }]))).toEqual([{ code: 'zone_overlap', key: 'areaaa02' }])
+  })
+  it('accepts zones that only touch', () => {
+    expect(checkFloorPlan(zoned([{ x: 0, y: 0, w: 4, h: 4 }, { x: 4, y: 0, w: 4, h: 4 }, { x: 0, y: 4, w: 4, h: 2 }]))).toEqual([])
+  })
+  it('accepts a plan saved before zones (no color, no zone)', () => {
+    expect(checkFloorPlan(plan())).toEqual([])
+    expect(checkFloorPlan(zoned([null, null]))).toEqual([])
+  })
+  it('does not cross-check a table against its area zone', () => {
+    const p = zoned([{ x: 10, y: 10, w: 2, h: 2 }])
+    p.tables = [table('tblaaa01', { number: '1', areaKey: 'areaaa01', x: 0, y: 0 })]
+    expect(checkFloorPlan(p)).toEqual([])
+  })
+})
+
 describe('emptyFloorPlan', () => {
+  it('gives the starting areas colours 0, 1, 2 and no zone', () => {
+    const p = emptyFloorPlan(['a', 'b', 'c'])
+    expect(p.areas.map(a => a.color)).toEqual([0, 1, 2])
+    for (const a of p.areas) expect(a.zone).toBeUndefined()
+  })
   it('makes one area per name', () => {
     const p = emptyFloorPlan(['בפנים', 'בחוץ'])
     expect(p.areas.map(a => a.name)).toEqual(['בפנים', 'בחוץ'])

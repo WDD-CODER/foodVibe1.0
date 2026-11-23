@@ -6,6 +6,7 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import type { FloorPlanBody, FloorTable } from '@models/floor-plan.model'
 import { RoomPanelComponent } from './room-panel.component'
+import { TipDirective } from 'src/app/shared/tip/tip.directive'
 
 const DICT: Record<string, string> = {
   fp_area_has_tables: 'יש שולחנות באזור הזה',
@@ -64,17 +65,26 @@ describe('RoomPanelComponent (plan 684)', () => {
     expect((q('[data-testid="room-area-down"]')[1] as HTMLButtonElement).disabled).toBeTrue()
   })
 
-  it('explains in a title why an area with tables cannot be removed, and emits nothing', () => {
+  it('explains with appTip (no title) why an area with tables cannot be removed, and emits nothing (plan 699)', () => {
     const removed: string[] = []
     fixture.componentInstance.areaRemoved.subscribe((k) => removed.push(k))
-    const btn = q<HTMLButtonElement>('[data-testid="room-area-remove"]')[0]
-    expect(btn.getAttribute('title')).toBe('יש שולחנות באזור הזה')
+    const btns = fixture.debugElement.queryAll(By.css('[data-testid="room-area-remove"]'))
+    const btn = btns[0].nativeElement as HTMLButtonElement
+    expect(btns[0].injector.get(TipDirective).appTip()).toBe('יש שולחנות באזור הזה')
+    expect(btn.getAttribute('title')).toBeNull()
+    expect(btn.getAttribute('aria-disabled')).toBe('true')
     btn.click()
     expect(removed).toEqual([])
-    const free = q<HTMLButtonElement>('[data-testid="room-area-remove"]')[1]
+    const tip = document.querySelector<HTMLElement>('.c-tip[popover]')
+    expect(tip?.matches(':popover-open')).toBeTrue()
+    expect(tip?.textContent).toBe('יש שולחנות באזור הזה')
+    const free = btns[1].nativeElement as HTMLButtonElement
+    expect(btns[1].injector.get(TipDirective).appTip()).toBeNull()
     expect(free.getAttribute('title')).toBeNull()
     free.click()
     expect(removed).toEqual(['areab2'])
+    fixture.destroy()
+    expect(document.querySelector('.c-tip[popover]')).toBeNull()
   })
 
   it('adds a row with an empty name and joins the draft only once the name is valid', () => {

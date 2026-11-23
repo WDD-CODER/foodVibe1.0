@@ -18,6 +18,7 @@ import { newKey } from 'src/app/shared/floor-map/floor-geometry.util'
 import type { FloorPlanBody } from '@models/floor-plan.model'
 import { areaNameError, MAX_AREAS, MAX_GRID, minGrid, MIN_GRID } from '../../floor-plan-edit.util'
 import { JoinsListComponent, type JoinPatch } from '../joins-list/joins-list.component'
+import { TipDirective } from 'src/app/shared/tip/tip.directive'
 
 interface AreaRow {
   key: string
@@ -34,7 +35,7 @@ interface AreaRow {
 @Component({
   selector: 'app-floor-room-panel',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, FormFieldComponent, CounterComponent, JoinsListComponent],
+  imports: [LucideAngularModule, TranslatePipe, FormFieldComponent, CounterComponent, JoinsListComponent, TipDirective],
   templateUrl: './room-panel.component.html',
   styleUrl: './room-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
