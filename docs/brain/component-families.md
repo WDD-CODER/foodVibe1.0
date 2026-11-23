@@ -543,6 +543,27 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a business is deleted and everything it owns on the server must go.
 - Known copies: none.
 
+### table-holds — one unique index decides who has a table
+
+- Status: stable — plan 668
+- Use: claim, move, release, holdsOf in server/services/table-holds.js (one `tableHolds` row per table per 15-minute cell).
+- When: a booking must hold a table for a time span; never read the holds and then trust the read (INV-7).
+- Known copies: none.
+
+### table-bookings — the one service that turns an ask into a held table
+
+- Status: stable — plan 668
+- Use: reserveTable, bookTable, rebookTable, createWalkIn in server/services/table-bookings.js (assign, claim, write, release on failure).
+- When: any route or job that gives a booking its tables; none calls `claim` itself.
+- Known copies: none.
+
+### public-read-limiter — `publicReadLimiter`, the rate limit of public read routes
+
+- Status: stable — plan 669
+- Use: `publicReadLimiter` in server/middleware/rate-limit.js, applied to the public availability read in server/routes/public.js.
+- When: any public, unauthenticated read route that must be capped per caller.
+- Known copies: none.
+
 ### model-media — `needsMedia` in `callGemini` for audio and PDF input
 
 - Status: stable — plan 619

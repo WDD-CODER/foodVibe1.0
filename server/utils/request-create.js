@@ -31,10 +31,11 @@ const fail = (code, issues) => Object.assign(new Error(code), { code, ...(issues
 
 /**
  * @param {object} input `{ kind, clientId?, guestName?, guestPhone?, wanted, answers }`
- * @param {object} opts `{ channel, actor, via, source = 'manual', consentTerms? }`
+ * @param {object} opts `{ channel, actor, via, source = 'manual', consentTerms?, approvedBooking? }`; plan 669: `approvedBooking`
+ *   `{ id, at }` stores the request already approved by the server (outcome = that booking, second history entry)
  * @returns {Promise<{ request: object, client: object }>}
  */
-async function createRequest(db, businessId, profile, input, { channel, actor, via, source = 'manual', consentTerms }) {
+async function createRequest(db, businessId, profile, input, { channel, actor, via, source = 'manual', consentTerms, approvedBooking }) {
   const member = actor && typeof actor === 'object'
   const actorId = member ? actor.userId : actor
   const actorName = member ? actor.name : ''
@@ -67,7 +68,7 @@ async function createRequest(db, businessId, profile, input, { channel, actor, v
     createdAt: now,
     updatedAt: now,
     kind: input.kind,
-    status,
+    status: approvedBooking ? 'approved' : status,
     channel,
     clientId: client._id,
     guestName: client.name,
@@ -75,7 +76,11 @@ async function createRequest(db, businessId, profile, input, { channel, actor, v
     wanted: input.wanted,
     answers: input.answers,
     qualification,
-    statusHistory: [{ status, at: now, by: actorId, byName: actorName, via }],
+    statusHistory: [
+      { status, at: now, by: actorId, byName: actorName, via },
+      ...(approvedBooking ? [{ status: 'approved', at: approvedBooking.at, by: 'server', byName: '', via: 'server' }] : []),
+    ],
+    ...(approvedBooking && { outcome: { type: 'booking', id: approvedBooking.id } }),
     publicToken: newPublicToken(),
   }
   const check = checkStoredDoc('requests', doc)

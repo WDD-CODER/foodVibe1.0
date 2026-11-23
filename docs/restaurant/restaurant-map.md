@@ -754,3 +754,20 @@ Each line is already written into the plan that owns it; where a line and a Cont
   field from `TABLE_SERVICE_DEFAULTS`, so a profile may store only what the owner changed.
 - 664 · C-FLOOR · issue codes are duplicate_area, duplicate_key, duplicate_number, area_missing, outside_grid, duplicate_join, join_table_missing, join_repeated_table, join_mixed_areas (`checkFloorPlan`); a booking holding several tables blocks a save unless a join of the new plan has exactly that set of tables; a first save lost to a concurrent one answers 409 `PLAN_CHANGED`; `emptyFloorPlan(names)` starts a 24 x 16 grid with one area per name.
 - 667 · C-TSERVICE · `PUT /api/v1/floor-plan/confirm-mode` answers `{ confirmMode }`, writes the whole `tableService` over the defaults (`{ ...tableServiceOf(profile), confirmMode }`), and answers 404 `NO_PROFILE` when the business has no live profile.
+- 668 · C-HOLD · `release(db, businessId, bookingId, fromEpoch?)` and `holdsOf(db, businessId, from, to, exceptBookingId?)`
+  take `businessId` so every query is scoped; cells are always 15 minutes (`CELL_MS`); `holdsOf` returns one `Hold` per
+  row; `move(db, booking, tableKeys, startAt, endAtWithBuffer)` inserts only the cells the booking does not hold and
+  then deletes the rest; `rangesOf(rows)` merges touching cells for `GET /day`; `server/services/table-bookings.js`
+  (`reserveTable`, `bookTable`, `rebookTable`, `countBooking`, `createWalkIn`) is the only code that turns an ask into
+  a held table, and `GET /day` gains `now` beside `holds` and `unassigned` · one hold rule, scoped by business.
+- 668 · C-BOOK2 · `createWalkIn(db, ctx, { partySize, tableKeys, guest?, name? })` takes `ctx` = `loadTableContext`
+  plus `{ businessId, actor, now? }`; a `NO_TABLE` answer carries `reason` and `alternatives`; `PUT /:id/tables` answers
+  `alternatives: []` · plan 673 seats a party through the same function.
+- 669 · C-PUBAVAIL · (1) `GET /api/v1/public/:slug` gains `tableBooking: { areas: [{ key, name }] }` when the business has
+  `tables` and its plan has an active, online table: the areas that have one, in plan `order`. (2) `publicRequestSchema`
+  gains optional `areaKey` (`^[a-z0-9]{6,12}$`), used for `assign`; a waiting request stores it as the answer
+  `{ questionKey: 'seating', label: 'fd_q_seating', value: <area name> }`. (3) "The time is taken" means the engine
+  answered `full` (409 `NO_TABLE` + `alternatives`); any other `ok: false` reason creates the request as today with
+  `confirmed: false`. (4) A guest's cancel of a confirmed booking moves the booking and the request to `cancelled`
+  (409 `TOO_LATE` after the cutoff). (5) Guest answers gain `booking.guestConfirmed` and `booking.canCancel`;
+  `createRequest` takes `approvedBooking: { id, at }`.

@@ -15,12 +15,14 @@
 | `services/front-desk-setup.js` | `frontDeskSetup(db, businessId)` (plan 556): the front desk checklist per business type (`REQUIRED_TOPICS`, `MIN_APPROVED_PER_TOPIC`); used by `GET /business/setup-status` and the admin business rows; never a baseline item |
 | `services/knowledge-import-prompt.js` | The English prompt and generation config of `POST /ai/knowledge-import` (plan 554) |
 | `utils/terms-version.js` | `currentTermsVersion()` — reads `version` from `public/assets/legal/terms.he.json`, the file the app shows (plan 584) |
-| `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests` |
+| `routes/requests.js` | Customer requests at `/api/v1/requests` (plan 549): manual request, status moves, wanted edits; the only writer of `requests`; a table request of a business with `tables` is approved through the table booking service (plan 685) |
 | `routes/notifications.js` | In-app alerts at `/api/v1/notifications` (plan 646): `GET ?limit` → `{ rows, unread }`, `POST /:id/read`, `POST /read-all`; scoped to the caller and to a live grant for other businesses |
 | `services/notifications.js` | `createPriceChangeAlerts(db, business, rows)` (plan 646): one alert per recipient (owner + live consultants) per row at or beyond `priceRiseAlertPct`; called by the invoice apply; a failure logs `notifications.write_failed` and never fails the apply; keeps 200 per user |
 | `routes/diag.js` | Diagnosis record at `/api/v1/diag` (plan 633); the only writer of `diagnoses`; gate reads the home business |
 | `routes/ai/diag.js` | `POST /api/v1/ai/diag/menu`: a pasted menu → names and prices (plan 633) |
-| `routes/bookings.js` | Booking status moves at `/api/v1/bookings` (plan 549); the only writer of `bookings` |
+| `routes/bookings.js` | Booking status moves and table bookings at `/api/v1/bookings` (plan 549; plan 668: phone booking, walk-in, move, change, availability, the day with holds); the only writer of `bookings` |
+| `services/table-holds.js` | The table holds (plan 668, C-HOLD): `claim`, `move`, `release`, `holdsOf`, `rangesOf` over `tableHolds`, one row per table per 15-minute cell; the unique index is the only guard against a double booking |
+| `services/table-bookings.js` | The one booking service (plan 668): `reserveTable` (assign then claim), `bookTable` (reserve, write, release on failure), `rebookTable`, `createWalkIn`, `countBooking`, `loadTableContext`, `wallOf`, `checkTables`; the only caller of `claim` |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
 | `routes/access.js` | Mounted at `/api/v1/access` (plan 615; filled by plan 631, C-ACCESS): `GET /businesses` (where the user may go), `POST` / `DELETE` / `GET /grants` (platform admin grants, owner lists and removes); no query of its own |
 | `services/access.js` | Which business a session is in (plan 631, ADR 0032): `resolveSession`, `canEnter`, `stillActing` (the per-request re-check of an acting token), `liveGrant`, `listEnterable` and the grant helpers; the only reader and writer of `businessAccess` |
@@ -36,7 +38,7 @@
 | `routes/conversations.js` | Mounted at `/api/v1/conversations` (plan 662, C-CONV): empty until plan 675 |
 | `routes/sim.js` | Mounted at `/api/v1/sim` (plan 662, the simulated chat channel): empty until plan 675 |
 | `shared/schemas/modules.ts` | `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`, `platformUpdateSchema` (plan 615, C-MODULES); shared by the server gate and the browser |
-| `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token; plan 555: profile view, send, read by token, cancel by token |
+| `routes/public.js` | Public door for non-members at `/api/v1/public` (plan 543, ADR 0030) — no member token; plan 555: profile view, send, read by token, cancel by token; plan 669: `GET /:slug/availability` (free times, own read limiter), `POST …/:token/confirm`, automatic confirmation of a table request, the guest's cancel of a confirmed booking |
 | `utils/public-profile.js` | `loadPublicProfile`, `isPublic`, `publicView` (plan 555): the one place that decides which profile fields a stranger sees |
 | `utils/request-create.js` | `createRequest`, `runQualify` (plan 555): the one request-creation path of the manual route and the public route |
 | `utils/redact-url.js` | `redactUrl` (plan 555): masks a guest's token in a logged URL; used by the pino-http `req` serializer |

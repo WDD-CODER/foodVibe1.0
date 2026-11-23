@@ -7,7 +7,7 @@
 const { Router } = require('express')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
-const { requireModule } = require('../middleware/require-module')
+const { requireModule, businessModules } = require('../middleware/require-module')
 const { checkStoredDoc } = require('../middleware/validate')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
@@ -20,6 +20,8 @@ const { LIVE } = require('../jobs/purge-deleted')
 const { expireDue } = require('../utils/request-expiry')
 const { buildNewEventDoc } = require('../utils/event-create')
 const { newNote } = require('../utils/event-stage')
+const tb = require('../services/table-bookings')
+const holds = require('../services/table-holds')
 const { jerusalemEpoch } = require('../generated/schemas/front-desk/local-time')
 const {
   REQUEST_STATUSES, DECLINE_REASONS, manualRequestInputSchema, wantedSchema, requestAnswersSchema,
@@ -39,6 +41,7 @@ const MOVES = {
 const NOTE_MAX = 2000
 const DEFAULT_DURATION_MINUTES = 60
 const NEEDS_PARTY = ['table', 'tasting']
+const isKey = v => typeof v === 'string' && /^[a-z0-9]{6,12}$/.test(v)
 const NEW_KIND = { event: 'event_client', tasting: 'event_client', consultation: 'event_client', table: 'diner' }
 
 router.use(dataWriteLimiter)
@@ -197,9 +200,12 @@ async function createTestRequest(businessId, profile, input, actor) {
 // POST /api/v1/requests/:id/approve  { wanted?, note? }  - one call: claim, create the event or booking, update the client, log
 router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
-    const { note } = req.body ?? {}
+    const { note, tableKeys } = req.body ?? {}
     const overrides = wantedSchema.safeParse(req.body?.wanted ?? {})
     if (!overrides.success || (note !== undefined && (typeof note !== 'string' || note.length > 500))) {
+      return res.status(400).json({ error: 'BAD_REQUEST_INPUT' })
+    }
+    if (tableKeys !== undefined && !(Array.isArray(tableKeys) && tableKeys.length >= 1 && tableKeys.length <= 4 && tableKeys.every(isKey))) {
       return res.status(400).json({ error: 'BAD_REQUEST_INPUT' })
     }
     if (!assertCan(req, res, 'manageRequests', { type: TYPE })) return
@@ -210,6 +216,12 @@ router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req,
     if (!current) return
     if (!assertCan(req, res, 'manageRequests', { type: TYPE, doc: current })) return
     if (!OPEN.includes(current.status)) return res.status(409).json({ error: 'ALREADY_DECIDED' })
+
+    // Plan 685 (C-BOOK2): a table request of a business with `tables` takes a held table; every other case is as before.
+    const tablePath = current.kind === 'table' && current.test !== true
+      && (await businessModules(current.businessId)).includes('tables')
+    if (tableKeys !== undefined && !tablePath) return res.status(400).json({ error: 'BAD_REQUEST_INPUT' })
+    if (tableKeys !== undefined && !assertCan(req, res, 'editFrontDesk', { type: TYPE })) return
 
     if (current.test === true) {
       // Plan 556 (R-19): a test request is only marked approved; no event, booking, client change or decision row.
@@ -241,13 +253,39 @@ router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req,
       if (built.missing) return res.status(400).json({ error: 'MISSING_BOOKING_FIELDS', fields: built.missing })
       outcome = built.doc
     }
+    let tableCount
+    if (tablePath) {
+      const tctx = await tb.loadTableContext(db(), current.businessId)
+      if (tableKeys !== undefined && !tb.checkTables(tctx.plan, tableKeys)) return res.status(400).json({ error: 'BAD_TABLES' })
+      const r = await tb.reserveTable(db(), {
+        booking: { _id: outcomeId, businessId: current.businessId }, ctx: tctx, date: wanted.date, time: wanted.time,
+        partySize: outcome.partySize, onlineOnly: false, tableKeys, now,
+      })
+      if (!r.ok) {
+        req.log.info({ event: 'requests.approve.no_table', reason: r.reason })
+        return res.status(409).json({ error: 'NO_TABLE', reason: r.reason, alternatives: r.alternatives })
+      }
+      outcome = {
+        ...outcome, startAt: r.startAt, endAt: r.endAt, durationMinutes: r.durationMinutes, tableKeys: r.tableKeys,
+        ...(r.areaKey && { areaKey: r.areaKey }), ...(r.override && { override: true }),
+      }
+      tableCount = r.tableKeys.length
+    }
+    const releaseHold = () => (tablePath ? holds.release(db(), current.businessId, outcomeId) : undefined)
+
     const check = checkStoredDoc(outcomeCollection, outcome)
-    if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues })
+    if (!check.ok) {
+      await releaseHold()
+      return res.status(400).json({ error: 'Validation failed', issues: check.issues })
+    }
 
     const entry = { status: 'approved', at: now, by: actor.userId, byName: actor.name, via: 'member', ...(note && { note }) }
     const requestOutcome = { type: outcomeType, id: outcomeId }
     const after = { ...current, status: 'approved', wanted, updatedAt: now, outcome: requestOutcome, statusHistory: [...current.statusHistory, entry] }
-    if (!validMerged(res, after)) return
+    if (!validMerged(res, after)) {
+      await releaseHold()
+      return
+    }
 
     // Claim: only one concurrent approve (or decline) can move the request out of the status that was read.
     const claimed = await db().collection(TYPE).findOneAndUpdate(
@@ -255,7 +293,10 @@ router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req,
       { $set: { status: 'approved', wanted, updatedAt: now, outcome: requestOutcome }, $push: { statusHistory: entry } },
       { returnDocument: 'after' },
     )
-    if (!claimed) return res.status(409).json({ error: 'ALREADY_DECIDED' })
+    if (!claimed) {
+      await releaseHold()
+      return res.status(409).json({ error: 'ALREADY_DECIDED' })
+    }
 
     try {
       await db().collection(outcomeCollection).insertOne(outcome)
@@ -265,6 +306,7 @@ router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req,
         { ...scopeOf(req), status: 'approved', 'outcome.id': outcomeId },
         { $set: { status: current.status, wanted: current.wanted, updatedAt: current.updatedAt }, $unset: { outcome: '' }, $pop: { statusHistory: 1 } },
       )
+      await releaseHold()
       return fail(req, res, 'approve', err)
     }
 
@@ -278,7 +320,7 @@ router.post('/:id/approve', verifyToken, requireModule('frontdesk'), async (req,
       )
     }
     await writeDecision(req, current, 'approve', editedFields, now)
-    req.log.info({ event: 'requests.approved', kind: current.kind, outcomeType })
+    req.log.info({ event: 'requests.approved', kind: current.kind, outcomeType, ...(tablePath && { tables: tableCount }) })
     res.json({ request: claimed, outcome })
   } catch (err) {
     fail(req, res, 'approve', err)

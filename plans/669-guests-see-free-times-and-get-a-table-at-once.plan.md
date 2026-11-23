@@ -146,6 +146,11 @@ shared/schemas/public/public-request.schema.ts
 server/test/public-availability.test.js
 server/breadcrumbs.md
 docs/restaurant/restaurant-map.md
+server/test/public-guard.test.js
+server/test/rate-limit-key.test.js
+server/test/shared-request-helpers.test.js
+docs/workflow-kit/manifest.json
+docs/brain/component-families.md
 ```
 
 ## Read Scope
@@ -292,14 +297,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Add a read limiter for the public door so the free-times read cannot be scraped — 60 reads per 15 minutes per visitor and business, built with the existing helper — server/middleware/rate-limit.js
-- [ ] A2: Let the guest's form carry an area preference — one optional field on the public input schema — shared/schemas/public/public-request.schema.ts
-- [ ] A3: Let the one request-creation path store a request that was confirmed by the server — the approvedBooking option, second history entry, outcome link — server/utils/request-create.js
-- [ ] A4: Show guests the free times of a day without showing a table — the availability route with its limiter, input checks, 404 rules, next free time, and the table-booking block on the profile read — server/routes/public.js
-- [ ] A5: Confirm a guest's table in the same call when the owner allows it — the dry run, the 409 on a full time, reserve then request then booking, the fallback to a waiting request — server/routes/public.js
-- [ ] A6: Let the guest cancel before the cutoff and confirm arrival from the link — the wider cancel, the confirm route, the two booleans on the guest view — server/routes/public.js
-- [ ] A7: Test the whole public table flow, the limiter, the race, the leaks and the unchanged door — the cases of Goals — server/test/public-availability.test.js
-- [ ] A8: Record the new routes and the Contract details where the next plans look — one folder-map row, five extension lines — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
+- [x] A1: Add a read limiter for the public door so the free-times read cannot be scraped — 60 reads per 15 minutes per visitor and business, built with the existing helper — server/middleware/rate-limit.js
+- [x] A2: Let the guest's form carry an area preference — one optional field on the public input schema — shared/schemas/public/public-request.schema.ts
+- [x] A3: Let the one request-creation path store a request that was confirmed by the server — the approvedBooking option, second history entry, outcome link — server/utils/request-create.js
+- [x] A4: Show guests the free times of a day without showing a table — the availability route with its limiter, input checks, 404 rules, next free time, and the table-booking block on the profile read — server/routes/public.js
+- [x] A5: Confirm a guest's table in the same call when the owner allows it — the dry run, the 409 on a full time, reserve then request then booking, the fallback to a waiting request — server/routes/public.js
+- [x] A6: Let the guest cancel before the cutoff and confirm arrival from the link — the wider cancel, the confirm route, the two booleans on the guest view — server/routes/public.js
+- [x] A7: Test the whole public table flow, the limiter, the race, the leaks and the unchanged door — the cases of Goals — server/test/public-availability.test.js
+- [x] A8: Record the new routes and the Contract details where the next plans look — one folder-map row, five extension lines — server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 
 ## Technical Considerations
 - Dependencies: `server/routes/public.js`, `createRequest` (the manual route of `requests.js` calls it without
@@ -331,3 +336,5 @@ line or file this plan names was removed, renamed or rewritten).
 - none
 
 ## Execution Notes
+- pnpm run build -> exit 0; pnpm run lint -> exit 0; pnpm run test:server -> exit 0 (157 files, 2177 tests); pnpm run test:ci -> exit 0 (2864 SUCCESS)
+- server/test/public-availability.test.js -> 13 tests pass (availability, auto/manual, taken time, race, guest manage, leaks, logs, 61 reads)

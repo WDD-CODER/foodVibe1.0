@@ -116,6 +116,28 @@ describe('RequestDataService', () => {
     expect(service.all_()).toEqual([stored])
   }))
 
+  it('approve posts the chosen tableKeys', fakeAsync(() => {
+    service['updateItems'](() => [stored])
+    void service.approve('r1', undefined, undefined, ['table02'])
+    const req = http.expectOne((r) => r.method === 'POST' && r.url.endsWith('/api/v1/requests/r1/approve'))
+    expect(req.request.body).toEqual({ tableKeys: ['table02'] })
+    req.flush({ error: 'BAD_TABLES' }, { status: 400, statusText: 'Bad Request' })
+    tick()
+  }))
+
+  it('a 409 NO_TABLE returns the reason and the alternatives and leaves the store alone', fakeAsync(() => {
+    service['updateItems'](() => [stored])
+    let result: unknown
+    void service.approve('r1').then((r) => (result = r))
+    const alternatives = [{ date: '2026-12-24', time: '21:00' }]
+    http
+      .expectOne((r) => r.url.endsWith('/api/v1/requests/r1/approve'))
+      .flush({ error: 'NO_TABLE', reason: 'full', alternatives }, { status: 409, statusText: 'Conflict' })
+    tick()
+    expect(result).toEqual({ ok: false, code: 'NO_TABLE', reason: 'full', alternatives })
+    expect(service.all_()).toEqual([stored])
+  }))
+
   it('decline posts the reason and text and replaces the request in the store', fakeAsync(() => {
     service['updateItems'](() => [stored])
     let result: unknown
