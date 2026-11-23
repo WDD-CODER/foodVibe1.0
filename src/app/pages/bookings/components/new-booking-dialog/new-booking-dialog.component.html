@@ -6,7 +6,7 @@
   [hasChanges]="dirty_()"
   (dismissed)="onClose()"
 >
-  <div class="c-modal-body nb-body" data-testid="new-booking-dialog">
+  <div class="c-modal-body c-input-stack" data-testid="new-booking-dialog">
     <div class="c-input-stack">
       <label for="nb-client">{{ 'client' | translatePipe }}</label>
       <app-client-picker
@@ -107,7 +107,7 @@
     </div>
 
     @if (time_() && plan_(); as plan) {
-      <div class="nb-offer" data-testid="nb-offer">
+      <div class="c-input-stack" data-testid="nb-offer">
         @if (hasOffer_() && !noTable_()) {
           <p class="nb-line" data-testid="nb-offered">{{ offeredLine_() }}</p>
         } @else if (showNoOffer_()) {

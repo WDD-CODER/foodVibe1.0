@@ -1,9 +1,9 @@
 <app-modal-shell size="md" titleKey="rq_no_table" [sheet]="true" [dismissible]="!busy()" (dismissed)="closed.emit()">
-  <div class="c-modal-body att-body" data-testid="approve-table-dialog">
+  <div class="c-modal-body c-input-stack" data-testid="approve-table-dialog">
     <p class="att-line" dir="ltr" data-testid="att-asked">{{ askedLine_() }}</p>
 
     @if (altChips_().length > 0) {
-      <div class="att-block" data-testid="att-alternatives">
+      <div class="c-input-stack" data-testid="att-alternatives">
         <span class="att-label">{{ 'rq_no_table_pick_time' | translatePipe }}</span>
         <div class="att-chips">
           @for (a of altChips_(); track a.date + a.time) {
@@ -23,7 +23,7 @@
     }
 
     @if (showMap_()) {
-      <div class="att-block" data-testid="att-tables">
+      <div class="c-input-stack" data-testid="att-tables">
         <span class="att-label">{{ 'rq_no_table_pick_table' | translatePipe }}</span>
         <div class="att-map">
           <app-floor-map [plan]="plan_()!" [states]="mapStates_()" (tableTapped)="onMapTap($event)" />

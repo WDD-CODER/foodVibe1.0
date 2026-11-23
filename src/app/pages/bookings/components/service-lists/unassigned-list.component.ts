@@ -15,7 +15,7 @@ export interface UnassignedView {
   standalone: true,
   imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent],
   templateUrl: './unassigned-list.component.html',
-  styleUrl: './unassigned-list.component.scss',
+  styleUrl: './arriving-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UnassignedListComponent {

@@ -6,7 +6,7 @@
   [hasChanges]="dirty_()"
   (dismissed)="onClose()"
 >
-  <div class="c-modal-body wlk-body" data-testid="walk-in-dialog">
+  <div class="c-modal-body c-input-stack" data-testid="walk-in-dialog">
     <app-form-field label="fd_q_party_size" forId="wlk-party">
       <app-counter [value]="party_()" [min]="1" (valueChange)="setParty($event)" />
     </app-form-field>
@@ -14,7 +14,7 @@
     @if (fixedTable_()) {
       <p class="wlk-line" data-testid="wlk-table">{{ tableLine_() }}</p>
     } @else {
-      <div class="wlk-pick">
+      <div class="c-input-stack wlk-pick">
         <span class="wlk-label">{{ 'wlk_pick_table' | translatePipe }}</span>
         @if (noFree_()) {
           <p class="wlk-line" role="status" data-testid="wlk-no-free">{{ 'wlk_no_free_table' | translatePipe }}</p>

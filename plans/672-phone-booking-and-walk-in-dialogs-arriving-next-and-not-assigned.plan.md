@@ -156,8 +156,11 @@ append the path to the scope block above and retry.
 - Area preference — family: search-combobox — rung: 1 — why: `app-custom-select`, the family's piece for one value of a short fixed list; no add option.
 - Time chips and alternative chips — family: chip — rung: 1 — why: `c-chip c-chip--tab` buttons (a taken time is `disabled`).
 - "Guest details" opener in the walk-in dialog — family: chip — rung: 1 — why: a `c-chip c-chip--tap` button with `aria-expanded`.
-- Small map in both dialogs — family: none — rung: 4 — why: no new piece: `app-floor-map` of plan 665 with the selected keys (its family `floor-map` is registered by 665 and is not on `main` yet, so it cannot be named here).
-- The two lists (`app-arriving-list`, `app-unassigned-list`, in `src/app/pages/bookings/components/service-lists/`) — family: list-page — rung: 2 — why: short read-only side panels drawn with the existing `.c-list-row` engine, one line per row; they have no search, selection or filter, so they do not take a second `app-list-shell`.
+- Small map in both dialogs — family: floor-map — rung: 1 — why: `app-floor-map` of plan 665 used as it is, with the selected keys.
+- `ArrivingListComponent` (`app-arriving-list`, `src/app/pages/bookings/components/service-lists/`) — family: list-page — rung: 2 — why: a short read-only side panel drawn with the existing `.c-list-row` engine, one line per row; no search, selection or filter, so no second `app-list-shell`.
+- `UnassignedListComponent` (`app-unassigned-list`, `src/app/pages/bookings/components/service-lists/`) — family: list-page — rung: 2 — why: the same kind of side panel; it shares the stylesheet of the arriving list.
+- `.sl__title`, `.sl__rows`, `.sl__row`, `.sl__name`, `.sl__party`, `.sl__act` — family: none — rung: 4 — why: layout of the two one-line lists only, scoped in one stylesheet; the stack is the engine `.c-input-stack` and the action is a `c-chip c-chip--tap`.
+- `.fv__actions`, `.nb-row`, `.nb-chips`, `.nb-label`, `.nb-line`, `.nb-map`, `.nb-info`, `.wlk-row`, `.wlk-pick`, `.wlk-label`, `.wlk-line`, `.att-chips`, `.att-label`, `.att-line`, `.att-map` — family: none — rung: 4 — why: layout of the bar buttons and of the three dialogs only, scoped in their own stylesheets; every control inside is an existing piece (chip, form field, counter, floor map) and the stacks use the engine `.c-input-stack`.
 - Empty lists — family: empty-state — rung: 1 — why: `app-empty-state` with a message key.
 - `arrivingNext`, `freeTablesFor` in `table-state.util.ts` — family: helpers — rung: 2 — why: two more pure functions in the helper file of 671, with spec cases.
 - Messages — family: feedback — rung: 1 — why: `UserMsgService` + `LoggingService`.

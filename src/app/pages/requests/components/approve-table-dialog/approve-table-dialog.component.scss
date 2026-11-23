@@ -1,18 +1,7 @@
-.att-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.att-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 .att-chips {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 0.5rem;
 }
 
