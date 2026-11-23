@@ -1,0 +1,103 @@
+<div class="fv" data-testid="floor-view">
+  @switch (status_()) {
+    @case ('loading') {
+      <app-loader />
+    }
+    @case ('error') {
+      <app-empty-state messageKey="fv_load_failed" icon="alert-triangle" ctaLabelKey="retry" (ctaClick)="retry()" />
+    }
+    @default {
+      @if (!hasRoom_()) {
+        <app-empty-state messageKey="fv_no_room" icon="users" />
+        @if (isOwner_()) {
+          <a class="c-btn-primary fv__draw" routerLink="/frontdesk/floor-plan" data-testid="fv-draw-room">
+            {{ 'fv_draw_room' | translatePipe }}
+          </a>
+        }
+      } @else {
+        <div class="fv__pills" data-testid="fv-pills">
+          <span class="c-chip--tag" data-testid="fv-pill-booked">
+            {{ 'fv_pill_booked' | translatePipe }} {{ pills_().booked }}
+          </span>
+          <span class="c-chip--tag" data-testid="fv-pill-seated">
+            {{ 'fv_pill_seated' | translatePipe }} {{ pills_().seated }}
+          </span>
+          <span class="c-chip--tag" data-testid="fv-pill-no-show">
+            {{ 'fv_pill_no_show' | translatePipe }} {{ pills_().noShow }}
+          </span>
+          @if (isOwner_()) {
+            <button
+              type="button"
+              class="c-chip c-chip--toggle"
+              data-testid="fv-mode"
+              [class.active]="mode_() === 'auto'"
+              [attr.aria-pressed]="mode_() === 'auto'"
+              [disabled]="modeBusy_()"
+              (click)="toggleMode()"
+            >
+              {{ (mode_() === 'auto' ? 'fv_mode_auto' : 'fv_mode_manual') | translatePipe }}
+            </button>
+          } @else {
+            <span class="c-chip--tag" data-testid="fv-mode">
+              {{ (mode_() === 'auto' ? 'fv_mode_auto' : 'fv_mode_manual') | translatePipe }}
+            </span>
+          }
+        </div>
+
+        @if (strip_().length > 0) {
+          <app-scroll-rail>
+            <div class="fv__strip" role="tablist" [attr.aria-label]="'fv_strip_label' | translatePipe">
+              @if (isToday_()) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="c-chip c-chip--tab"
+                  data-testid="fv-strip-now"
+                  [class.active]="chosen_() === null"
+                  [attr.aria-selected]="chosen_() === null"
+                  (click)="choose(null)"
+                >
+                  {{ 'fv_now' | translatePipe }}
+                </button>
+              }
+              @for (s of strip_(); track s.time) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="c-chip c-chip--tab"
+                  dir="ltr"
+                  [attr.data-testid]="'fv-strip-' + s.time"
+                  [class.active]="chosen_() === s.time"
+                  [attr.aria-selected]="chosen_() === s.time"
+                  (click)="choose(s.time)"
+                >
+                  {{ s.time }}
+                </button>
+              }
+            </div>
+          </app-scroll-rail>
+        }
+
+        <div class="fv__body">
+          <div class="fv__room">
+            <app-floor-map
+              [plan]="plan_()!"
+              [states]="mapStates_()"
+              [details]="details_()"
+              (tableTapped)="tableTapped.emit($event)"
+            />
+            <ul class="fv__legend" [attr.aria-label]="'fv_legend_label' | translatePipe" data-testid="fv-legend">
+              @for (l of legend; track l.state) {
+                <li class="c-chip--tag c-chip--sm">
+                  <lucide-icon [name]="l.icon" [size]="14" aria-hidden="true"></lucide-icon>
+                  {{ 'fv_state_' + l.state | translatePipe }}
+                </li>
+              }
+            </ul>
+          </div>
+          <aside class="fv__side" aria-hidden="true"></aside>
+        </div>
+      }
+    }
+  }
+</div>

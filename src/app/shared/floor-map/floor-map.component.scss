@@ -98,6 +98,16 @@
   line-height: var(--lh-tight);
 }
 
+.floor-map__name,
+.floor-map__time {
+  max-inline-size: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-xs);
+  line-height: var(--lh-tight);
+}
+
 .floor-map__chairs {
   position: absolute;
   display: flex;

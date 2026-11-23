@@ -39,7 +39,19 @@
         @if (t.warn) {
           <lucide-icon class="floor-map__warn" name="alert-triangle" [size]="14" aria-hidden="true"></lucide-icon>
         }
-        @if (t.inactive) {
+        @if (t.detail?.label) {
+          <span class="floor-map__state" [attr.data-testid]="'floor-state-' + t.table.number">{{
+            t.detail?.label
+          }}</span>
+          @if (t.detail?.name) {
+            <span class="floor-map__name" [attr.data-testid]="'floor-name-' + t.table.number">{{
+              t.detail?.name
+            }}</span>
+          }
+          @if (t.detail?.time) {
+            <span class="floor-map__time" dir="ltr">{{ t.detail?.time }}</span>
+          }
+        } @else if (t.inactive) {
           <span class="floor-map__state">{{ 'fp_state_inactive' | translatePipe }}</span>
         }
         @for (side of sides; track side) {

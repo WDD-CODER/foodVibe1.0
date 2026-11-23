@@ -5,15 +5,19 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { FloorViewComponent } from './components/floor-view/floor-view.component'
 import { BookingDataService } from '@services/booking-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { ModuleService } from '@services/module.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { isoToDmy, todayIso } from 'src/app/core/utils/date-input.util'
 import type { Booking, BookingStatus } from '@models/booking.model'
 
-export type BookingsView = 'day' | 'week'
+export type BookingsView = 'day' | 'week' | 'floor'
 const VIEWS: readonly BookingsView[] = ['day', 'week']
+const TABLE_VIEWS: readonly BookingsView[] = ['floor', 'day', 'week']
+const AT_TIME = /^([01]\d|2[0-3]):[0-5]\d$/
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/
 
 interface TimeGroup {
@@ -41,7 +45,14 @@ export function weekStartIso(iso: string): string {
 @Component({
   selector: 'app-bookings-page',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, TranslatePipe, PageHeaderComponent, EmptyStateComponent],
+  imports: [
+    RouterLink,
+    LucideAngularModule,
+    TranslatePipe,
+    PageHeaderComponent,
+    EmptyStateComponent,
+    FloorViewComponent
+  ],
   templateUrl: './bookings.page.html',
   styleUrl: './bookings.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -54,7 +65,10 @@ export class BookingsPage {
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
 
-  protected readonly views = VIEWS
+  private readonly modules = inject(ModuleService)
+  /** Plan 671: the room view is offered (and the default) only to a business with table service. */
+  private readonly hasTables_ = computed(() => this.modules.has('tables'))
+  protected readonly views_ = computed(() => (this.hasTables_() ? TABLE_VIEWS : VIEWS))
   private readonly query_ = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap })
   protected readonly date_ = computed(() => {
     const date = this.query_().get('date')
@@ -62,7 +76,12 @@ export class BookingsPage {
   })
   protected readonly view_ = computed<BookingsView>(() => {
     const view = this.query_().get('view') as BookingsView | null
-    return view && VIEWS.includes(view) ? view : 'day'
+    if (view && this.views_().includes(view)) return view
+    return this.hasTables_() && !view ? 'floor' : 'day'
+  })
+  protected readonly at_ = computed(() => {
+    const at = this.query_().get('at')
+    return at && AT_TIME.test(at) ? at : null
   })
   protected readonly isLoading_ = signal(true)
   protected readonly busyId_ = signal<string | null>(null)
@@ -113,6 +132,14 @@ export class BookingsPage {
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { date: params.date ?? this.date_(), view: params.view ?? this.view_() }
+    })
+  }
+
+  /** Plan 671: keeps the room's strip time in the query string (null = now). */
+  protected setAt(at: string | null): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { date: this.date_(), view: 'floor', ...(at && { at }) }
     })
   }
 

@@ -26,6 +26,9 @@ import {
 /** What the map draws: the parts of a floor plan it needs (a saved plan or an editor's draft). */
 export type FloorMapPlan = Pick<FloorPlan, 'grid' | 'areas' | 'tables'>
 
+/** Plan 671: the text a screen puts on one table: its state label and the booking's name and time. */
+export type FloorTableDetail = { label?: string; name?: string; time?: string }
+
 interface TableView {
   table: FloorTable
   footprint: { w: number; h: number }
@@ -36,6 +39,7 @@ interface TableView {
   dimmed: boolean
   inactive: boolean
   warn: boolean
+  detail: FloorTableDetail | null
 }
 
 /**
@@ -58,6 +62,8 @@ export class FloorMapComponent {
 
   readonly plan = input.required<FloorMapPlan>()
   readonly states = input<Record<string, FloorTableState>>({})
+  /** Plan 671: text per table (state label, name, time); it becomes part of the table's accessible name. */
+  readonly details = input<Record<string, FloorTableDetail>>({})
   readonly selectedKeys = input<readonly string[]>([])
   readonly draggable = input(false)
   readonly dimOtherThanArea = input<string | null>(null)
@@ -78,23 +84,30 @@ export class FloorMapComponent {
     const dim = this.dimOtherThanArea()
     const warn = this.warnKeys()
     const label = this.translation.translate('fp_table_label')
+    const details = this.details()
     return [...this.plan().tables]
       .sort((a, b) => a.y - b.y || a.x - b.x)
       .map((table) => {
         const state = states[table.key] ?? 'none'
+        const detail = details[table.key] ?? null
         return {
           table,
           footprint: footprintFor(table),
           chairs: chairsFor(table),
           state,
-          label: label
-            .replace('{number}', table.number)
-            .replace('{min}', String(table.minSeats))
-            .replace('{max}', String(table.maxSeats)),
+          label: detail?.label
+            ? [table.number, detail.label, [detail.name, detail.time].filter(Boolean).join(' ')]
+                .filter(Boolean)
+                .join(' · ')
+            : label
+                .replace('{number}', table.number)
+                .replace('{min}', String(table.minSeats))
+                .replace('{max}', String(table.maxSeats)),
           selected: selected.includes(table.key),
           dimmed: dim !== null && table.areaKey !== dim,
           inactive: !table.active || state === 'not_active',
-          warn: warn.includes(table.key)
+          warn: warn.includes(table.key),
+          detail
         }
       })
   })
