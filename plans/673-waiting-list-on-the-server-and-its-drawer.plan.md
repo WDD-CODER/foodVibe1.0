@@ -163,7 +163,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `server/routes/waitlist.js` routes — family: server-auth — rung: 1 — why: `verifyToken`, `requireModule`, `assertCan`, `scopeFilter`, `actorOf` as the bookings router uses them.
-- `createWalkIn` in `server/services/table-bookings.js` — family: none — rung: 4 — why: the walk-in body of plan 668 must be called from two routers (bookings and waitlist); one function instead of a copy. When 668 already exports it, it is used as it is and this file is not created.
+- `createWalkIn` in `server/services/table-bookings.js` — family: table-bookings — rung: 1 — why: plan 668 already exports it; the waitlist seat route calls it as it is and no function is moved or copied.
 - `WaitlistDataService` (`src/app/core/services/waitlist-data.service.ts`) — family: http — rung: 3 — why: a client of the five waitlist routes through `HttpClient` and the `API` map, returning error codes as codes like `BookingDataService.run`; the list is a per-day read with the server's time, not a stored collection, so it does not extend `BaseEntityDataService`.
 - `WaitlistDrawerComponent` (`app-waitlist-drawer`, `src/app/pages/bookings/components/waitlist-drawer/`) — family: modal-shell — rung: 1 — why: its frame is `app-modal-shell` with `[sheet]="true"`; page-local content.
 - Add-a-party fields — family: form-field — rung: 1 — why: `app-form-field` rows (name, phone, quoted minutes) with the app's input engine.
@@ -174,6 +174,7 @@ append the path to the scope block above and retry.
 - Waiting-list button with its number, and the "waiting" pill — family: chip — rung: 1 — why: a `c-btn-ghost` button with a `c-chip__count`, and one more `c-chip--tag` in the pills row of 671.
 - Empty drawer — family: empty-state — rung: 1 — why: `app-empty-state` with a message key.
 - `firstWaitingFit` in `table-state.util.ts` — family: helpers — rung: 2 — why: one more pure function in the helper file of 671, with spec cases.
+- Drawer layout classes `.wl`, `.wl__head`, `.wl__title`, `.wl__form`, `.wl__add`, `.wl__list`, `.wl__ended`, `.wl-row`, `.wl-row__pos`, `.wl-row__who`, `.wl-row__name`, `.wl-row__meta`, `.wl-row__wait`, `.wl-row__wait--over`, `.wl-row__actions`, `.wl-row__text` — family: none — rung: 4 — why: layout of this one drawer only (a single-line row with an order number and actions); no `.c-*` class; the shared pieces carry every control.
 - Messages — family: feedback — rung: 1 — why: `UserMsgService` + `LoggingService`.
 
 ## Defaults
