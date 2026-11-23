@@ -102,6 +102,9 @@ The free Render tier sleeps after idle time, and a sleeping server misses webhoo
 1. In Render, set `PUBLIC_BASE_URL` on the live service to its public `https://…onrender.com` address and save.
 2. In a free uptime service, create an HTTP monitor for `GET <PUBLIC_BASE_URL>/api/v1/health`, interval 10 minutes.
 3. Check that it reports "up" (the answer is `{ ok: true, ts }`).
+4. The scheduler (plan 676) sends the booking reminders, marks automatic no-shows, clears the old waiting list and frees orphan table holds once a minute.
+5. It runs only while the server is awake: a restaurant needs this ping (or a paid instance) before it relies on reminders.
+6. A missed tick is caught by the next one: a reminder is late, never double.
 
 ---
 

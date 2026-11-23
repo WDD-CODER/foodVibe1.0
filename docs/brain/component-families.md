@@ -601,6 +601,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 668
 - Use: reserveTable, bookTable, rebookTable, createWalkIn in server/services/table-bookings.js (assign, claim, write, release on failure).
+- Use: moveBookingStatus in server/services/table-bookings.js (plan 676): the one status move of a booking, called by the route, the no-show job and a guest's Cancel tap.
 - When: any route or job that gives a booking its tables; none calls `claim` itself.
 - Known copies: none.
 
@@ -830,4 +831,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `checklistFor` in `server/services/front-desk-setup.js` adds `{ key: 'floor_plan', done }` after `request_kinds` when the business has `tables`; the card (`front-desk-checklist-card.component.ts`) maps a key to its link and the label is `frontdesk_setup_<key>` in `dictionary.json`.
 - Pieces: Checklist item floor_plan, checklistFor, frontDeskSetup, FrontDeskChecklistCardComponent.
 - When: any new front desk setup step.
+- Known copies: none.
+
+### scheduled-jobs — `runDue`, `startScheduler`, `stopScheduler`, moveBookingStatus in server/services/table-bookings.js, `registerBookingButtons` (plan 676)
+
+- Status: stable — server only
+- Use: timed work is one job file in `server/jobs/` run by `runDue` in `server/jobs/scheduler.js` (`startScheduler` / `stopScheduler`, one unref'd 60 s tick; each job claims its rows with a conditional update). A booking's status moves only through `moveBookingStatus` in `server/services/table-bookings.js`. The guest's Confirm and Cancel taps are `registerBookingButtons` in `server/services/booking-buttons.js`.
+- Pieces: runDue, startScheduler, stopScheduler, remindOne, markOne, moveBookingStatus, registerBookingButtons.
+- When: anything that must happen by itself at an hour or after a delay; a second timer or a second writer of a booking's status is never added.
 - Known copies: none.

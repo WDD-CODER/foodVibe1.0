@@ -193,6 +193,7 @@ docs/security-go-live.md
 docs/brain/inventory.md
 docs/brain/component-families.md
 docs/restaurant/restaurant-map.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -334,17 +335,17 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Make the status move of a booking one function so a job and a guest's tap make the same move — the move out of the route with no change of behaviour, the exported moves table; the untouched route tests as proof — server/services/table-bookings.js, server/routes/bookings.js
-- [ ] A2: Add the scheduler that runs the jobs once a minute while the server is awake — runDue with one try per job, start and stop, no timer under tests, the start after listen and the stop on shutdown — server/jobs/scheduler.js, server/index.js
-- [ ] A3: Remind today's guests once at the business's hour — the candidates, the per-business skip, the claim, the send through the one sender, the single-booking function the simulator reuses — server/jobs/reminders.js
-- [ ] A4: Mark a no-show by itself only where the owner asked for it — the candidates, the hold-minutes rule, the shared status move — server/jobs/no-show.js
-- [ ] A5: Clear yesterday's waiting list and free tables a crash left held — the expiry update, the two-tick orphan sweep with its in-memory candidates — server/jobs/waitlist-expire.js, server/jobs/orphan-holds.js
-- [ ] A6: Let the guest's Confirm and Cancel taps move the booking — the two handlers with the token check and the cutoff, their registration in the inbound handler — server/services/booking-buttons.js, server/services/inbound.js
-- [ ] A7: Let the owner jump the clock in the simulator — the clock route with its refusals, sharing the jobs' single-booking functions — server/routes/sim.js
-- [ ] A8: Send the table-is-ready message of the waiting list when the guest has a conversation — the send after the stamp, the sent flag in the answer — server/routes/waitlist.js
-- [ ] A9: Prove every job runs its work exactly once — the scheduler and buttons test files, the clock and notify cases, the log check — server/test/scheduler.test.js, server/test/booking-buttons.test.js, server/test/sim-router.test.js, server/test/waitlist.test.js
-- [ ] A10: Write down what the scheduler needs in production and record the new pieces — the go-live note, the folder map, the registry rows, the map's extension lines — docs/security-go-live.md, server/breadcrumbs.md, docs/brain/inventory.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
-- [ ] A11: Run every check of this plan — test:server, build, lint, the grep, log-query; evidence into Execution Notes
+- [x] A1: Make the status move of a booking one function so a job and a guest's tap make the same move — the move out of the route with no change of behaviour, the exported moves table; the untouched route tests as proof — server/services/table-bookings.js, server/routes/bookings.js
+- [x] A2: Add the scheduler that runs the jobs once a minute while the server is awake — runDue with one try per job, start and stop, no timer under tests, the start after listen and the stop on shutdown — server/jobs/scheduler.js, server/index.js
+- [x] A3: Remind today's guests once at the business's hour — the candidates, the per-business skip, the claim, the send through the one sender, the single-booking function the simulator reuses — server/jobs/reminders.js
+- [x] A4: Mark a no-show by itself only where the owner asked for it — the candidates, the hold-minutes rule, the shared status move — server/jobs/no-show.js
+- [x] A5: Clear yesterday's waiting list and free tables a crash left held — the expiry update, the two-tick orphan sweep with its in-memory candidates — server/jobs/waitlist-expire.js, server/jobs/orphan-holds.js
+- [x] A6: Let the guest's Confirm and Cancel taps move the booking — the two handlers with the token check and the cutoff, their registration in the inbound handler — server/services/booking-buttons.js, server/services/inbound.js
+- [x] A7: Let the owner jump the clock in the simulator — the clock route with its refusals, sharing the jobs' single-booking functions — server/routes/sim.js
+- [x] A8: Send the table-is-ready message of the waiting list when the guest has a conversation — the send after the stamp, the sent flag in the answer — server/routes/waitlist.js
+- [x] A9: Prove every job runs its work exactly once — the scheduler and buttons test files, the clock and notify cases, the log check — server/test/scheduler.test.js, server/test/booking-buttons.test.js, server/test/sim-router.test.js, server/test/waitlist.test.js
+- [x] A10: Write down what the scheduler needs in production and record the new pieces — the go-live note, the folder map, the registry rows, the map's extension lines — docs/security-go-live.md, server/breadcrumbs.md, docs/brain/inventory.md, docs/brain/component-families.md, docs/restaurant/restaurant-map.md
+- [x] A11: Run every check of this plan — test:server, build, lint, the grep, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: `sendOut`, `templateMessage`, `registerButton` (675); `release`, `table-bookings.js` (668);
@@ -381,3 +382,9 @@ line or file this plan names was removed, renamed or rewritten).
 - behaviour: a booking whose client has no conversation is marked reminded and not retried.
 - behaviour: the orphan sweep waits for two ticks in a row instead of ten minutes, because a hold row carries no time.
 - behaviour: test bookings are reminded only through the simulator's clock.
+- evidence: `pnpm run build` -> exit 0; `pnpm run lint` -> 0 errors; `pnpm --dir server run lint` -> 0 errors; `pnpm run test:server` -> exit 0, 165 files, 2244 tests passed (incl. scheduler, booking-buttons, sim-router clock, waitlist notify; bookings-router and bookings-tables unedited).
+- evidence: `grep -n "setInterval" server/jobs/scheduler.js` -> one line, `.unref()` on the same line.
+- note: the timer test asserts that no tick runs after `stopScheduler()` (an unref'd timer does not show in `process.getActiveResourcesInfo()`, so the resource count cannot prove it).
+- note: the plan's `{ kind: 'template', ...templateMessage() }` does not match `sendOut` (it reads `outbound.template` and `outbound.buttons`); the jobs and handlers split `templateMessage()` into `template` and `buttons`.
+- decision: behaviour: Confirm on a token with no matching confirmed booking hands the conversation to a person, like Cancel — reverse: drop the `toHuman` call in `confirm`.
+- decision: behaviour: the clock's `late` job moves the booking at max(now, startAt + holdMinutes + 1 min) so the "no no_show before startAt" rule never blocks the simulator — reverse: pass `now` instead.

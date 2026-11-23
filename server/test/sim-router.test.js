@@ -93,3 +93,53 @@ describe('DELETE /sim/test-data', () => {
     expect((await db('clients').find({}).toArray()).map(d => d._id).sort()).toEqual(['k2', 'k3'])
   })
 })
+
+describe('POST /sim/clock (plan 676)', () => {
+  const { seedConversation } = require('./helpers/conversation-fixtures')
+  const { jerusalemEpoch } = require('../generated/schemas/front-desk/local-time')
+  const clock = (body, who = OWNER) => request(app).post('/api/v1/sim/clock').set(as(who)).send(body)
+
+  async function setup({ autoNoShow = true, test = true } = {}) {
+    await db('frontDeskProfiles').updateOne({ businessId: 'b1' }, { $set: { tableService: { autoNoShow, holdMinutes: 15 } } })
+    const { clientId, conversation } = await seedConversation(testDb(), { waId: '972521234567', test })
+    const startAt = jerusalemEpoch('2026-03-02', '20:00')
+    await db('bookings').insertOne({
+      _id: 'bkT', schemaVersion: 2, businessId: 'b1', createdBy: 'own1', createdAt: 1, updatedAt: 1, kind: 'table', status: 'confirmed',
+      source: 'phone', date: '2026-03-02', time: '20:00', startAt, endAt: startAt + 5400000, durationMinutes: 90, partySize: 2,
+      tableKeys: ['table01'], clientId, guestName: 'Dana', guestPhone: '0521234567', test: true,
+      statusHistory: [{ status: 'confirmed', at: 1, by: 'own1', byName: 'O', via: 'member' }], publicToken: 'bkT'.padEnd(32, 'T'),
+    })
+    return conversation
+  }
+
+  it('reminder stores the reminder message once; the second call answers ALREADY', async () => {
+    const c = await setup()
+    const first = await clock({ conversationId: c._id, job: 'reminder' })
+    expect([first.status, first.body]).toEqual([200, { job: 'reminder', done: true }])
+    expect(await db('messages').countDocuments({ 'template.name': 'booking_reminder' })).toBe(1)
+    const again = await clock({ conversationId: c._id, job: 'reminder' })
+    expect(again.body).toEqual({ job: 'reminder', done: false, reason: 'ALREADY' })
+  })
+
+  it('late moves the test booking to no_show when autoNoShow is on, and answers AUTO_NO_SHOW_OFF when off', async () => {
+    const c = await setup()
+    expect((await clock({ conversationId: c._id, job: 'late' })).body).toEqual({ job: 'late', done: true })
+    expect((await db('bookings').findOne({ _id: 'bkT' })).status).toBe('no_show')
+    await db('bookings').deleteMany({})
+    await db('conversations').deleteMany({})
+    await db('clients').deleteMany({})
+    const off = await setup({ autoNoShow: false })
+    expect((await clock({ conversationId: off._id, job: 'late' })).body).toEqual({ job: 'late', done: false, reason: 'AUTO_NO_SHOW_OFF' })
+    expect((await db('bookings').findOne({ _id: 'bkT' })).status).toBe('confirmed')
+  })
+
+  it('refuses a bad body, a real conversation, another business, and staff', async () => {
+    const real = await setup({ test: false })
+    expect((await clock({ conversationId: real._id, job: 'reminder' })).body).toEqual({ error: 'NOT_TEST' })
+    expect((await clock({ conversationId: real._id, job: 'reminder' })).status).toBe(409)
+    expect((await clock({ job: 'reminder' })).body).toEqual({ error: 'BAD_INPUT' })
+    expect((await clock({ conversationId: real._id, job: 'jump' })).status).toBe(400)
+    expect((await clock({ conversationId: 'nope', job: 'late' })).status).toBe(404)
+    expect((await clock({ conversationId: real._id, job: 'late' }, STAFF)).status).toBe(403)
+  })
+})

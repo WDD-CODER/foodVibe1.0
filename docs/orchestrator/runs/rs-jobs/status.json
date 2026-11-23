@@ -1,0 +1,201 @@
+{
+  "run": "rs-jobs",
+  "branch": "orch/rs-jobs",
+  "base": "main",
+  "startedAt": "2026-11-23T10:40:58.807Z",
+  "mainShaAtStart": "379f8428560f58e207dced99fe7dd9bb6bdc9fd9",
+  "plans": {
+    "676": {
+      "nnn": "676",
+      "title": "Things that happen by themselves: the scheduler, the reminder with Confirm and Cancel, automatic no-show, waiting-list expiry and the orphan-hold sweep",
+      "branch": "feat/676-scheduler-and-jobs-reminder",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T10:43:27.610Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T11:17:12.355Z"
+        }
+      },
+      "humanItems": [
+        "Dandan reads the note this plan adds to `docs/security-go-live.md`: reminders go out only while the"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T10:43:27.323Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T10:43:27.612Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:07:21.829Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:17:05.112Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:17:12.356Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:17:31.997Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T11:18:30.925Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 17.2,
+      "sha": "5fa47f6ae79d0b56e3fd93ea66756113846a42b6",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1429,
+          "tokens": {
+            "input": 5228026,
+            "output": 48116
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 18.3,
+          "tokens": {
+            "input": 115717,
+            "output": 1107
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "77521224edf86d69fd609100defb4fcfff8817ca"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T10:43:27.128Z",
+      "plan": "676",
+      "text": "the folder foodVibe1.0-orch-rs-jobs-676 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T11:07:16.869Z",
+      "plan": "676",
+      "text": "builder left undone (round 0): [human] Dandan reads the uptime-ping note added to docs/security-go-live.md (items 4–6 under D6)"
+    },
+    {
+      "at": "2026-11-23T11:07:23.218Z",
+      "plan": "676",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-23T11:17:40.274Z",
+      "plan": "676",
+      "text": "the folder foodVibe1.0-orch-merge-rs-jobs was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T11:19:11.165Z",
+      "text": "FINAL: same tree as plan 676's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 17.2,
+  "updatedAt": "2026-11-23T11:21:39.189Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "676",
+      "type": "behaviour",
+      "text": "behaviour: a Confirm tap on a token with no matching confirmed booking of that client hands the conversation to a person, like Cancel — reverse: drop the toHuman call in confirm()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "676",
+      "type": "behaviour",
+      "text": "behaviour: the simulator's 'late' job moves the booking at max(now, startAt + holdMinutes + 1 min), so the no-show-before-start rule never blocks the simulator — reverse: pass now instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "676",
+      "type": "behaviour",
+      "text": "behaviour: the timer test checks that no tick runs after stopScheduler(). An unref'd timer does not show in process.getActiveResourcesInfo(), so counting active timeouts cannot prove it — reverse: none needed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "676",
+      "type": "behaviour",
+      "text": "behaviour: the plan's `{ kind: 'template', ...templateMessage() }` does not match sendOut, which reads outbound.template and outbound.buttons; the jobs and handlers split the result of templateMessage() into template and buttons — reverse: none needed",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "676",
+      "type": "behaviour",
+      "text": "behaviour: added a new family `scheduled-jobs` in docs/brain/component-families.md (the registry check requires a heading for each new piece) and regenerated docs/brain/inventory.md — reverse: delete that section",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-23T11:21:39.187Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-23T11:21:39.189Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

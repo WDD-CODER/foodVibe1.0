@@ -15,6 +15,10 @@ const { newId } = require('../utils/id');
 const { logger } = require('../logger');
 const { handleInbound } = require('../services/inbound');
 const { normalizePhone, phoneKey, findLiveClientByPhoneKey } = require('../utils/client-upsert');
+const { LIVE } = require('../jobs/purge-deleted');
+const { remindOne } = require('../jobs/reminders');
+const { markOne } = require('../jobs/no-show');
+const { loadTableContext } = require('../services/table-bookings');
 
 const router = Router();
 const db = () => mongoose.connection.db;
@@ -55,6 +59,37 @@ router.post('/inbound', async (req, res) => {
     return res.json({ conversationId: result.conversationId, messageId: result.messageId });
   } catch (err) {
     (req.log || logger).error({ err, event: 'sim.inbound.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.post('/clock', async (req, res) => {
+  try {
+    const { conversationId, job } = req.body || {};
+    if (!isString(conversationId) || !conversationId || !['reminder', 'late'].includes(job)) return badInput(res);
+    const businessId = businessOf(req);
+    const conversation = await db().collection('conversations').findOne({ _id: conversationId, businessId });
+    if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
+    if (conversation.test !== true) return res.status(409).json({ error: 'NOT_TEST' });
+    const now = Date.now();
+    const booking = await db().collection('bookings').findOne(
+      { businessId, clientId: conversation.clientId, test: true, kind: 'table', status: 'confirmed', ...LIVE },
+      { sort: { startAt: 1 } }
+    );
+    if (!booking) return res.json({ job, done: false, reason: 'NO_BOOKING' });
+    if (job === 'reminder') {
+      const r = await remindOne(db(), booking, now, { conversation });
+      (req.log || logger).info({ event: 'sim.clock', job, result: r });
+      return res.json(r === 'ALREADY' ? { job, done: false, reason: 'ALREADY' } : { job, done: true });
+    }
+    const { service } = await loadTableContext(db(), businessId);
+    if (!service.autoNoShow) return res.json({ job, done: false, reason: 'AUTO_NO_SHOW_OFF' });
+    const at = Math.max(now, booking.startAt + service.holdMinutes * 60000 + 60000);
+    const done = await markOne(db(), booking, at);
+    (req.log || logger).info({ event: 'sim.clock', job, done });
+    return res.json(done ? { job, done: true } : { job, done: false, reason: 'BAD_STATUS' });
+  } catch (err) {
+    (req.log || logger).error({ err, event: 'sim.clock.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
