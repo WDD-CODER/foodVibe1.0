@@ -325,8 +325,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A7: Wire the editor to the new map — area colours on tables, joined tables marked, no more fading, a dropped table joins the zone it lands in — src/app/pages/frontdesk/floor-plan/floor-plan.page.ts, .html, .spec.ts
 - [x] A8: Make the reason a blocked area cannot be removed visible at once — appTip on the bin, title removed — src/app/pages/frontdesk/floor-plan/components/room-panel/room-panel.component.ts, .html, .spec.ts
 - [x] A9: Add the Hebrew texts — the four keys of the UI notes — public/assets/data/dictionary.json
-- [ ] A10: Record the new pieces so later plans find them — the floor-map family entry (new inputs, outputs, the zones util), the new `tooltip` family, the shared folder map, the inventory — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, docs/brain/inventory.md (regenerated with `node scripts/inventory.mjs`)
-- [ ] A11: Prove the three screen checks with short scripts — each spec signs in with `signInQa`, answers `GET /api/v1/business` with the `tables` module and `GET /api/v1/floor-plan` with its own plan (same shape as plan 684's add-area screen spec), saves a screenshot — e2e/ui/699-1.spec.ts, e2e/ui/699-2.spec.ts, e2e/ui/699-3.spec.ts
+- [x] A10: Record the new pieces so later plans find them — the floor-map family entry (new inputs, outputs, the zones util), the new `tooltip` family, the shared folder map, the inventory — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, docs/brain/inventory.md (regenerated with `node scripts/inventory.mjs`)
+- [x] A11: Prove the three screen checks with short scripts — each spec signs in with `signInQa`, answers `GET /api/v1/business` with the `tables` module and `GET /api/v1/floor-plan` with its own plan (same shape as plan 684's add-area screen spec), saves a screenshot — e2e/ui/699-1.spec.ts, e2e/ui/699-2.spec.ts, e2e/ui/699-3.spec.ts
 
 ## Technical Considerations
 - Dependencies: plans 665, 684, 666 (merged on `chore/restaurant-staging`).
