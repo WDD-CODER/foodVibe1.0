@@ -275,3 +275,4 @@ line or file this plan names was removed, renamed or rewritten).
 - evidence: build → 0; lint → 0; test:ci → 0 (3078 SUCCESS); vitest frontdesk-guardrails + frontdesk-turn + ai-frontdesk-suggest → 72 passed.
 - behaviour: a removal request answers through sendOut at every level (also level 0), as the plan words it — reverse: skip the send in removeGuest at level 0.
 - behaviour: a blocked turn at level 0 stores the handoff sentence as the suggestion and leaves the status bot (the Done-when line); at level 1 the status becomes human.
+- scope extended (approved 689-1): docs/brain/component-families.md — added assistant-guardrails family; reuse-lint --check-registry → ok; lint → 0; test:server → 0
