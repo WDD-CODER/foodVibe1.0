@@ -557,7 +557,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any route or job that gives a booking its tables; none calls `claim` itself.
 - Known copies: none.
 
-### publicReadLimiter — rate limit for public read routes
+### public-read-limiter — `publicReadLimiter`, the rate limit of public read routes
 
 - Status: stable — plan 669
 - Use: `publicReadLimiter` in server/middleware/rate-limit.js, applied to the public availability read in server/routes/public.js.
