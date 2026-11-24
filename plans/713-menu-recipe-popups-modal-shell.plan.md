@@ -90,6 +90,7 @@ append the path to the scope block above and retry.
 - Prep empty texts — family: empty-state — rung: 1 — why: `app-empty-state [compact]`.
 - Prep table — family: engine-classes — rung: 1 — why: `.c-table.c-table--compact` (print keeps its own `@media print` rules).
 - `.so-card` surface — family: engine-classes — rung: 1 — why: `.c-glass-panel`.
+- .c-modal-overlay — family: modal-shell — rung: 1 — why: the existing engine class, reset for prep sheets inside `@media print` only (no new class).
 - none new.
 
 ## Defaults

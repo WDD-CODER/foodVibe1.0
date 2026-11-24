@@ -1,6 +1,6 @@
-/* Uses engine: .c-modal-body, .c-modal-actions, .c-input, .c-btn-ghost, .c-btn-primary (frame: app-modal-shell) */
+/* Uses engine: .c-modal-body, .c-modal-actions, .c-input, .c-btn-ghost, .c-btn-primary (frame: the shared popup) */
 
-/* The card lives in app-modal-shell (its own view), so reach it through :host. Outside the layer: the engine
+/* The card lives in the shared popup frame (its own view), so reach it through :host. Outside the layer: the engine
    `.c-modal-card` is unlayered and would beat a layered rule. */
 :host ::ng-deep .paste-ingredients-card {
   inline-size: min(32rem, 92vw);

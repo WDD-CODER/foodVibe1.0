@@ -1,6 +1,6 @@
 @use '../../../../core/styles/breakpoints' as *;
 
-// The card lives in app-modal-shell (its own view), so it is reached through :host. These rules sit outside the
+// The card lives in the shared popup frame (its own view), so it is reached through :host. These rules sit outside the
 // layer: the engine `.c-modal-card` / `.c-modal-overlay` (styles.scss) are unlayered and would beat a layered rule.
 :host ::ng-deep .prep-sheets {
   display: flex;
@@ -65,7 +65,7 @@
     display: block;
     overflow: visible;
 
-    background: none;
+    background: transparent;
     backdrop-filter: none;
   }
 
