@@ -77,6 +77,7 @@ server/test/gemini-client.test.js
 server/test/gemini-fallback.test.js
 server/test/ai-usage.test.js
 server/breadcrumbs.md
+docs/brain/component-families.md
 server/test/ai-cap.test.js
 server/test/ai-diag-menu.test.js
 server/test/ai-invoice-read.test.js
@@ -114,8 +115,12 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 
-- `isGone(result)` and the `goneUntil` map in `server/services/gemini-client.js` — family: none — rung: 4 — why: one predicate and one in-memory map beside plan 701's `isOverloaded` and the existing `exhaustedUntil`, inside the one Gemini client; `docs/brain/inventory.md` `gemini-fallback` says a second model-switching loop is never added, and none is.
-- New cases in `server/test/gemini-fallback.test.js` — family: none — rung: 4 — why: cases in the existing plan-701 test file, same stub pattern.
+- `isGone(result)` and the `goneUntil` map in `server/services/gemini-client.js` — family: gemini-fallback — rung: 2 — why: one predicate and one in-memory map beside plan 701's `isOverloaded` and the existing `exhaustedUntil`, inside the one Gemini client; `docs/brain/inventory.md` `gemini-fallback` says a second model-switching loop is never added, and none is.
+- New cases in `server/test/gemini-fallback.test.js` — family: gemini-fallback — rung: 2 — why: cases in the existing plan-701 test file, same stub pattern.
+
+## Execution Notes (fix round)
+
+scope extended: docs/brain/component-families.md — the gemini-fallback family row names isGone, goneUntil and the new test cases.
 
 ## Defaults
 
