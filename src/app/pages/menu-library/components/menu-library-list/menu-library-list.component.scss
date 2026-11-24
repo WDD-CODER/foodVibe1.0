@@ -19,13 +19,6 @@
     display: block;
   }
 
-  .chip-cell {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-1);
-    align-items: center;
-  }
-
   .filter-label {
     color: var(--color-text-muted);
     font-size: var(--fs-sm);

@@ -69,7 +69,7 @@
           }}</a>
           <span class="event-date">{{ event.eventDate || ('menu_no_date' | translatePipe) }}</span>
         </div>
-        <div class="c-list-body-cell chip-cell" role="cell">
+        <div class="c-list-body-cell c-chip-group c-chip-group--tight" role="cell">
           <span
             class="c-chip c-chip--tag c-chip--sm"
             [class.c-chip--teal]="isActiveStage(event.stage)"
