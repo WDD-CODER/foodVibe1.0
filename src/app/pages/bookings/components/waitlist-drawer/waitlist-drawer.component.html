@@ -1,17 +1,14 @@
-<app-modal-shell [sheet]="true" [labelledBy]="'wl-title'" (dismissed)="closed.emit()">
+<app-modal-shell [sheet]="true" titleKey="wl_title" (dismissed)="closed.emit()">
   <div class="wl" data-testid="waitlist-drawer">
-    <header class="wl__head">
-      <h3 id="wl-title" class="wl__title">{{ 'wl_title' | translatePipe }}</h3>
-      <button
-        type="button"
-        class="c-btn-ghost c-btn-ghost--sm"
-        data-testid="wl-close"
-        [attr.aria-label]="'close' | translatePipe"
-        (click)="closed.emit()"
-      >
-        <lucide-icon name="x" [size]="16" aria-hidden="true"></lucide-icon>
-      </button>
-    </header>
+    <button
+      type="button"
+      class="c-icon-btn wl__close"
+      data-testid="wl-close"
+      [attr.aria-label]="'close' | translatePipe"
+      (click)="closed.emit()"
+    >
+      <lucide-icon name="x" [size]="16" aria-hidden="true"></lucide-icon>
+    </button>
 
     @switch (status_()) {
       @case ('loading') {
@@ -88,35 +85,37 @@
         </div>
 
         @if (rows_().length === 0) {
-          <app-empty-state messageKey="wl_empty" icon="users" />
+          <app-empty-state [compact]="true" messageKey="wl_empty" icon="users" />
         } @else {
-          <ol class="wl__list" data-testid="wl-list">
+          <ul class="c-list c-list--plain wl__list" role="list" data-testid="wl-list">
             @for (r of rows_(); track r.entry._id) {
-              <li class="wl-row" data-testid="wl-row" [attr.data-minutes]="r.minutes">
-                <span class="wl-row__pos" data-testid="wl-pos">{{ r.position }}</span>
-                <span class="wl-row__who">
-                  <strong class="wl-row__name">{{ r.entry.guestName }}</strong>
-                  <span class="wl-row__meta">
-                    <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
-                    {{ r.entry.partySize }}
-                    @if (r.areaName) {
-                      · {{ r.areaName }}
-                    }
-                  </span>
+              <li class="c-list-row" role="listitem" data-testid="wl-row" [attr.data-minutes]="r.minutes">
+                <span class="c-list-body-cell wl-who">
+                  <span class="wl-pos" data-testid="wl-pos">{{ r.position }}</span>
+                  <strong class="wl-name">{{ r.entry.guestName }}</strong>
                 </span>
-                <span class="wl-row__wait" data-testid="wl-waited" [class.wl-row__wait--over]="r.over">
+                <span class="c-list-body-cell wl-meta">
+                  <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
+                  {{ r.entry.partySize }}
+                  @if (r.areaName) {
+                    · {{ r.areaName }}
+                  }
+                </span>
+                <span class="c-list-body-cell wl-meta" data-testid="wl-waited" [class.wl-over]="r.over">
                   @if (r.over) {
                     <lucide-icon name="alert-triangle" [size]="14" aria-hidden="true"></lucide-icon>
-                    <span class="wl-row__over" data-testid="wl-over">{{ 'wl_over_quote' | translatePipe }}</span>
+                    <span data-testid="wl-over">{{ 'wl_over_quote' | translatePipe }}</span>
                   } @else {
                     <lucide-icon name="clock" [size]="14" aria-hidden="true"></lucide-icon>
                   }
                   {{ waitedText(r.minutes) }}
+                  @if (r.entry.status === 'notified') {
+                    <span class="c-chip--tag c-chip--sm" data-testid="wl-told">{{
+                      'wl_notified' | translatePipe
+                    }}</span>
+                  }
                 </span>
-                @if (r.entry.status === 'notified') {
-                  <span class="c-chip--tag c-chip--sm" data-testid="wl-told">{{ 'wl_notified' | translatePipe }}</span>
-                }
-                <span class="wl-row__actions">
+                <span class="c-list-body-cell c-col-actions wl-actions">
                   @if (r.entry.status === 'waiting') {
                     <button
                       type="button"
@@ -128,7 +127,7 @@
                       (click)="notify(r.entry)"
                     >
                       <lucide-icon name="bell" [size]="16" aria-hidden="true"></lucide-icon>
-                      <span class="wl-row__text">{{ 'wl_notify' | translatePipe }}</span>
+                      <span class="wl-text">{{ 'wl_notify' | translatePipe }}</span>
                     </button>
                   }
                   <button
@@ -140,7 +139,7 @@
                     (click)="seat(r.entry)"
                   >
                     <lucide-icon name="user-check" [size]="16" aria-hidden="true"></lucide-icon>
-                    <span class="wl-row__text">{{ 'wl_seat' | translatePipe }}</span>
+                    <span class="wl-text">{{ 'wl_seat' | translatePipe }}</span>
                   </button>
                   <button
                     type="button"
@@ -151,12 +150,12 @@
                     (click)="left(r.entry)"
                   >
                     <lucide-icon name="log-out" [size]="16" aria-hidden="true"></lucide-icon>
-                    <span class="wl-row__text">{{ 'wl_left' | translatePipe }}</span>
+                    <span class="wl-text">{{ 'wl_left' | translatePipe }}</span>
                   </button>
                 </span>
               </li>
             }
-          </ol>
+          </ul>
         }
 
         @if (ended_().length > 0) {
@@ -172,16 +171,22 @@
             </button>
           </div>
           @if (todayOpen_()) {
-            <ul class="wl__ended" data-testid="wl-ended">
+            <ul class="c-list c-list--plain wl__ended" role="list" data-testid="wl-ended">
               @for (e of ended_(); track e._id) {
-                <li class="wl-row__meta">
-                  <lucide-icon
-                    [name]="e.status === 'seated' ? 'user-check' : 'log-out'"
-                    [size]="14"
-                    aria-hidden="true"
-                  ></lucide-icon>
-                  {{ e.guestName }} · {{ e.partySize }} ·
-                  {{ (e.status === 'seated' ? 'wl_seat' : 'wl_left') | translatePipe }}
+                <li class="c-list-row" role="listitem">
+                  <span class="c-list-body-cell">{{ e.guestName }}</span>
+                  <span class="c-list-body-cell wl-meta">
+                    <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
+                    {{ e.partySize }}
+                  </span>
+                  <span class="c-list-body-cell wl-meta">
+                    <lucide-icon
+                      [name]="e.status === 'seated' ? 'user-check' : 'log-out'"
+                      [size]="14"
+                      aria-hidden="true"
+                    ></lucide-icon>
+                    {{ (e.status === 'seated' ? 'wl_seat' : 'wl_left') | translatePipe }}
+                  </span>
                 </li>
               }
             </ul>

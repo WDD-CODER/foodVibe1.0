@@ -5,34 +5,38 @@
   </h3>
   @if (rows().length === 0) {
     <div data-testid="arriving-empty">
-      <app-empty-state messageKey="nb_arriving_empty" icon="clock" />
+      <app-empty-state [compact]="true" messageKey="nb_arriving_empty" icon="clock" />
     </div>
   } @else {
-    <ul class="sl__rows">
+    <ul class="c-list c-list--plain sl__rows" role="list">
       @for (r of rows(); track r.row.booking._id) {
-        <li class="c-list-row sl__row" data-testid="arriving-row">
-          <span class="sl__time" dir="ltr">{{ r.row.booking.time }}</span>
-          <span class="sl__name">{{ r.name }}</span>
-          <span class="sl__party">
+        <li class="c-list-row" role="listitem" data-testid="arriving-row">
+          <span class="c-list-body-cell sl__time" dir="ltr">{{ r.row.booking.time }}</span>
+          <span class="c-list-body-cell sl__name">{{ r.name }}</span>
+          <span class="c-list-body-cell sl__party">
             <lucide-icon name="users" [size]="14" aria-hidden="true"></lucide-icon>
             {{ r.row.booking.partySize }}
           </span>
-          <span class="sl__tables" dir="ltr">{{ r.tables || ('nb_no_table_short' | translatePipe) }}</span>
-          @if (r.row.late) {
-            <span class="c-chip--tag c-chip--sm" data-testid="arriving-late">{{ 'nb_late' | translatePipe }}</span>
-          }
-          @if (live()) {
-            <button
-              type="button"
-              class="c-chip c-chip--tap sl__act"
-              data-testid="arriving-arrived"
-              [disabled]="busyId() !== null"
-              (click)="arrived.emit(r.row.booking._id)"
-            >
-              <lucide-icon name="user-check" [size]="15" aria-hidden="true"></lucide-icon>
-              {{ 'bk_seated' | translatePipe }}
-            </button>
-          }
+          <span class="c-list-body-cell sl__tables" dir="ltr">{{
+            r.tables || ('nb_no_table_short' | translatePipe)
+          }}</span>
+          <span class="c-list-body-cell c-col-actions">
+            @if (r.row.late) {
+              <span class="c-chip--tag c-chip--sm" data-testid="arriving-late">{{ 'nb_late' | translatePipe }}</span>
+            }
+            @if (live()) {
+              <button
+                type="button"
+                class="c-chip c-chip--tap"
+                data-testid="arriving-arrived"
+                [disabled]="busyId() !== null"
+                (click)="arrived.emit(r.row.booking._id)"
+              >
+                <lucide-icon name="user-check" [size]="16" aria-hidden="true"></lucide-icon>
+                {{ 'bk_seated' | translatePipe }}
+              </button>
+            }
+          </span>
         </li>
       }
     </ul>
