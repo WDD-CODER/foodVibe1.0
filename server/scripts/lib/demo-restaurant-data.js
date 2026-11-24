@@ -84,7 +84,7 @@ function buildProfile(base, now) {
     phone: '03-5550100', address: 'רחוב הרצל 10, תל אביב',
     hours: [{ days: 'כל יום', time: '12:00–23:00', dayIndexes: [0, 1, 2, 3, 4, 5, 6], open: '12:00', close: '23:00' }],
     requestKinds: { ...template.requestKinds, table },
-    assistant: { level: 0, tone: template.assistant.tone },
+    assistant: { level: 1, tone: template.assistant.tone },
     status: 'pilot',
     tableService: {
       confirmMode: 'auto', autoMaxParty: 6, slotMinutes: 15,

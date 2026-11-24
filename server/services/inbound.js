@@ -14,6 +14,7 @@ const { findOrCreateConversation, loadConversation } = require('./conversations'
 
 const COALESCE_MS = 6000;
 const DAY_MS = 86400000;
+const HUMAN_IDLE_MS = 2 * 60 * 60 * 1000;
 
 const defaultWait = ms => new Promise(resolve => { setTimeout(resolve, ms).unref(); });
 const defaultTurn = async (db, conversation) => {
@@ -35,6 +36,40 @@ function resetInboundForTest() {
   require('./booking-buttons').registerBookingButtons(registerButton);
 }
 
+/** Why a `human` conversation may go back to the assistant on a guest message (plan 719), or null. */
+async function backReason(db, conversation, now) {
+  let why;
+  if (conversation.assistantFailed && !conversation.assignedTo) why = 'failed';
+  else if (conversation.assignedTo && typeof conversation.heldAt === 'number' && conversation.heldAt < now - HUMAN_IDLE_MS) why = 'idle';
+  else return null;
+  const client = await db.collection('clients').findOne(
+    { _id: conversation.clientId, businessId: conversation.businessId }, { projection: { doNotContact: 1 } }
+  );
+  return client && client.doNotContact ? null : why;
+}
+
+/** Plan 719: one conditional move human -> bot, written before the R-03 wait. True when it moved. */
+async function backToBot(db, conversation, { now, log }) {
+  const why = await backReason(db, conversation, now);
+  if (!why) return false;
+  const done = await db.collection('conversations').updateOne(
+    { _id: conversation._id, businessId: conversation.businessId, status: 'human' },
+    { $set: { status: 'bot', updatedAt: now }, $unset: { assignedTo: '', heldAt: '', suggestion: '' } }
+  );
+  if (!done.matchedCount) return false;
+  log.info({ event: 'inbound.back_to_bot', conversationId: conversation._id, why });
+  return true;
+}
+
+/** Plan 719: runs the turn for a guest message that waits for an answer (hand back); no R-03 wait. */
+async function answerWaiting(db, conversation, { log = logger } = {}) {
+  const [newest] = await db.collection('messages')
+    .find({ businessId: conversation.businessId, conversationId: conversation._id })
+    .sort({ at: -1, _id: -1 }).limit(1).toArray();
+  if (!newest || newest.direction !== 'in' || newest.author !== 'guest') return undefined;
+  return turnHandler(db, conversation, { log });
+}
+
 async function afterStored(db, conversation, { buttonId, at }, log) {
   if (buttonId) {
     const i = buttonId.indexOf(':');
@@ -44,6 +79,9 @@ async function afterStored(db, conversation, { buttonId, at }, log) {
       await handler(db, { conversation, token: i < 0 ? '' : buttonId.slice(i + 1), at });
       return;
     }
+  }
+  if (conversation.status === 'human' && await backToBot(db, conversation, { now: Date.now(), log })) {
+    conversation = { ...conversation, status: 'bot' };
   }
   if (conversation.status !== 'bot') return;
   await wait(COALESCE_MS);
@@ -104,6 +142,6 @@ async function handleInbound(db, input, { log = logger } = {}) {
   return { ok: true, conversationId: conversation._id, messageId: row._id, settled };
 }
 
-module.exports = { handleInbound, registerButton, setTurnHandler, setWaitForTest, resetInboundForTest, COALESCE_MS };
+module.exports = { handleInbound, registerButton, setTurnHandler, setWaitForTest, resetInboundForTest, COALESCE_MS, HUMAN_IDLE_MS, answerWaiting };
 
 require('./booking-buttons').registerBookingButtons(registerButton);

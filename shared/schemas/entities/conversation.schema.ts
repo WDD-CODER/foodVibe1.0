@@ -22,6 +22,7 @@ export const conversationSchema = z.strictObject({
   waId: z.string().min(1).max(40),
   status: z.enum(CONVERSATION_STATUSES),
   assignedTo: z.string().min(1).optional(),
+  heldAt: z.number().optional(), // when a member last took over or replied (plan 719)
   lastMessageAt: z.number(),
   lastInboundAt: z.number(),
   unread: z.number().int().min(0),

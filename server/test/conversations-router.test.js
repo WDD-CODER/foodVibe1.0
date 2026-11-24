@@ -6,6 +6,7 @@ const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./help
 const { captureLogs } = require('./helpers/log-capture')
 const { seedBusiness, seedConversation } = require('./helpers/conversation-fixtures')
 const { clearModuleCache } = require('../middleware/require-module')
+const { setTurnHandler, resetInboundForTest } = require('../services/inbound')
 
 let app
 let logs
@@ -203,6 +204,53 @@ describe('take over, release, close', () => {
     expect(after.suggestion).toBeUndefined()
     expect((await put(`/${id}/close`)).body).toEqual({ error: 'BAD_STATUS' })
     expect((await put(`/${id}/takeover`)).body).toEqual({ error: 'BAD_STATUS' })
+  })
+})
+
+describe('heldAt and hand back (plan 719)', () => {
+  it('a member reply and take over store heldAt; a second reply updates it', async () => {
+    const { conversation } = await seed()
+    const id = conversation._id
+    const t0 = Date.now()
+    await post(`/${id}/messages`, { text: 'one' })
+    expect((await db('conversations').findOne({ _id: id })).heldAt).toBeGreaterThanOrEqual(t0)
+    await db('conversations').updateOne({ _id: id }, { $set: { heldAt: 1 } })
+    await post(`/${id}/messages`, { text: 'two' })
+    expect((await db('conversations').findOne({ _id: id })).heldAt).toBeGreaterThanOrEqual(t0)
+    await db('conversations').updateOne({ _id: id }, { $set: { status: 'bot' }, $unset: { heldAt: '', assignedTo: '' } })
+    const t1 = Date.now()
+    const res = await put(`/${id}/takeover`)
+    expect(res.body.conversation.heldAt).toBeGreaterThanOrEqual(t1)
+    expect(res.body.conversation.assignedTo).toBe('own1')
+  })
+
+  it('release removes heldAt and runs one turn when the newest message is the guest\'s', async () => {
+    const { conversation } = await seed()
+    const id = conversation._id
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    await db('messages').insertOne(msg('g1', id, Date.now()))
+    await put(`/${id}/takeover`)
+    const res = await put(`/${id}/release`)
+    expect(res.status).toBe(200)
+    await vi.waitFor(() => expect(turn).toHaveBeenCalledTimes(1))
+    expect(turn.mock.calls[0][1]._id).toBe(id)
+    expect((await db('conversations').findOne({ _id: id })).heldAt).toBeUndefined()
+    resetInboundForTest()
+  })
+
+  it('release runs no turn when the newest message is ours', async () => {
+    const { conversation } = await seed()
+    const id = conversation._id
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    await db('messages').insertOne(msg('g1', id, Date.now() - 5000))
+    await db('messages').insertOne(msg('o1', id, Date.now(), { direction: 'out', author: 'member' }))
+    await put(`/${id}/takeover`)
+    await put(`/${id}/release`)
+    await new Promise(r => setTimeout(r, 50))
+    expect(turn).not.toHaveBeenCalled()
+    resetInboundForTest()
   })
 })
 

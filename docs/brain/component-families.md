@@ -356,7 +356,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 663: openRangesOf in qualify.ts (`shared/schemas/front-desk/qualify.ts`) — the checkable opening ranges of a date (`hoursCheck` is built on it).
 - Plan 663: jerusalemDateTime in local-time.ts (`shared/schemas/front-desk/local-time.ts`) — the inverse of `jerusalemEpoch`.
 - Plan 675: `sendOut` in `server/services/outbound.js` — every outbound message goes through `sendOut`; never call a transport.
-- Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler.
+- Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler. A `human` conversation goes back to `bot` on the guest's next message after a failed turn or 2 h member idle (plan 719) — never a second handler.
 - Plan 675: `templateMessage` in `shared/schemas/front-desk/message-templates.ts` — the closed list of outbound templates and their one-line parameters; never a template name typed elsewhere.
 - Plan 670: `bookingIcs` / `downloadIcs` in `src/app/pages/public-request/services/booking-calendar.util.ts` — a page-local helper (only the two guest pages use it): one booking as a calendar file, the `ics` package loaded lazily.
 - When: any pure helper (time, number, text). Never page-local.
@@ -889,7 +889,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### simulator-page — the owner plays a test guest (plan 678)
 
 - Status: stable — plan 678
-- Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data.
+- Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data; plan 719 adds the assistant level line, the held-by-staff line with hand back, and the level-0 draft.
 - Pieces: SimulatorPage, SimulatorService.
 - When: any test of the conversation channel from inside the app; a second simulator screen is never added.
 - Known copies: none.
@@ -961,4 +961,25 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `scripts/test/style-718.test.mjs` runs `styleFindings` over every file plans 704–717 converged (each of their tests exports `FILES` and `ALLOW`) and checks the reuse-lint rules `page-local-empty-state`, `own-dialog-role` and `page-local-width`.
 - When: a later plan converges more pages — export `FILES` and `ALLOW` from its style test and add it to the list in that file.
+- Known copies: none.
+
+### guest-turn-back-to-bot — backToBot(db, conversation, { now, log }) in server/services/inbound.js (plan 719)
+
+- Status: stable
+- Use: `server/services/inbound.js` · `backToBot` is a private step of `handleInbound`; it hands a held or stale chat back to the assistant when the guest writes.
+- When: a rule for returning a conversation to the assistant — add it there, never a second handler.
+- Known copies: none.
+
+### guest-turn-answer-waiting — answerWaiting(db, conversation, { log }) exported from server/services/inbound.js (plan 719)
+
+- Status: stable
+- Use: `server/services/inbound.js` · `answerWaiting` runs the turn for the newest guest message; the release route and `handleInbound` both use it.
+- When: anything that must start a guest turn outside a new inbound message.
+- Known copies: none.
+
+### simulator-level-held-draft — the simulator's level line, held line and draft block (plan 719)
+
+- Status: stable
+- Use: `src/app/pages/frontdesk/simulator/simulator.page.html` and `.scss` · `.sim-level`, `.sim-held`, `.sim-draft` beside `ai-failed-note`.
+- When: another note about the assistant's state in the simulator — extend these blocks.
 - Known copies: none.
