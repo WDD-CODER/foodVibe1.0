@@ -31,7 +31,7 @@ test('src/styles.scss above the marker is the base file (append-only)', (t) => {
   // so a merge-base with origin/main would count staging's own changes as edits. origin/main is the fallback.
   let base
   let lastError = 'no base ref'
-  for (const ref of ['origin/orch/rs-style', 'origin/main']) {
+  for (const ref of ['origin/orch/rs-modals', 'origin/orch/rs-style', 'origin/main']) {
     try {
       const mb = execFileSync('git', ['merge-base', 'HEAD', ref], { encoding: 'utf8' }).trim()
       base = execFileSync('git', ['show', `${mb}:src/styles.scss`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })

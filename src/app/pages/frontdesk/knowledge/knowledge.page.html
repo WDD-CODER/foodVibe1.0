@@ -151,12 +151,7 @@
 
   <ng-container shell-modal>
     @if (isFormOpen_()) {
-    <app-modal-shell
-      size="md"
-      [titleKey]="editing_() ? 'knowledge_edit' : 'knowledge_add'"
-      [sheet]="true"
-      (dismissed)="closeForm()"
-    >
+    <app-modal-shell size="md" [titleKey]="editing_() ? 'knowledge_edit' : 'knowledge_add'" (dismissed)="closeForm()">
       <div class="c-modal-body knowledge-form">
         <app-form-field label="knowledge_topic">
           <app-custom-select
@@ -235,7 +230,7 @@
       </div>
     </app-modal-shell>
     } @if (isImportOpen_()) {
-    <app-modal-shell size="md" titleKey="knowledge_import" [sheet]="true" (dismissed)="closeImport()">
+    <app-modal-shell size="md" titleKey="knowledge_import" (dismissed)="closeImport()">
       <div class="c-modal-body knowledge-form">
         <div class="import-tabs">
           <button

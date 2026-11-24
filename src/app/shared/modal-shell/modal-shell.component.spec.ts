@@ -16,14 +16,32 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
         [size]="size_()"
         [titleKey]="'cancel'"
         [dismissible]="dismissible_()"
-        [sheet]="sheet_()"
         [hasChanges]="hasChanges_()"
         [zIndex]="zIndex_()"
         [topLayer]="topLayer_()"
         (dismissed)="onDismissed()"
       >
-        <input id="first" type="text" />
-        <button id="last" type="button">ok</button>
+        @switch (content_()) {
+          @case ('body') {
+            <div class="c-modal-body" id="tall-body">
+              @for (n of lines; track n) {
+                <p>line {{ n }}</p>
+              }
+            </div>
+            <div class="c-modal-actions" id="tall-actions"><button type="button">save</button></div>
+          }
+          @case ('plain') {
+            <div id="tall-plain">
+              @for (n of lines; track n) {
+                <p>line {{ n }}</p>
+              }
+            </div>
+          }
+          @default {
+            <input id="first" type="text" />
+            <button id="last" type="button">ok</button>
+          }
+        }
       </app-modal-shell>
     }
     @if (secondOpen_()) {
@@ -34,11 +52,12 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
   `
 })
 class HostComponent {
+  readonly lines = Array.from({ length: 60 }, (_, i) => i + 1)
+  readonly content_ = signal<'default' | 'body' | 'plain'>('default')
   readonly open_ = signal(true)
   readonly secondOpen_ = signal(false)
   readonly size_ = signal<ModalShellSize>('sm')
   readonly dismissible_ = signal(true)
-  readonly sheet_ = signal(false)
   readonly hasChanges_ = signal(false)
   readonly zIndex_ = signal<number | string | null>(null)
   readonly topLayer_ = signal(false)
@@ -105,14 +124,40 @@ describe('ModalShellComponent', () => {
     expect(query('.c-modal-card')!.classList.contains('c-modal-card--fluid')).toBeTrue()
   })
 
-  it('sheet=true adds the phone bottom-sheet helpers, the default adds neither (plan 487)', () => {
+  it('is never a bottom sheet (plan 720): no sheet classes, the overlay centres the card', () => {
     expect(query('.c-modal-overlay')!.classList.contains('m-sheet')).toBeFalse()
     expect(query('.c-modal-card')!.classList.contains('m-sheet-card')).toBeFalse()
-    host.sheet_.set(true)
-    fixture.detectChanges()
-    expect(query('.c-modal-overlay')!.classList.contains('m-sheet')).toBeTrue()
-    expect(query('.c-modal-card')!.classList.contains('m-sheet-card')).toBeTrue()
-    expect(query('.c-modal-card')!.classList.contains('c-modal-card')).toBeTrue()
+    expect(getComputedStyle(query('.c-modal-overlay')!).alignItems).toBe('center')
+  })
+
+  describe('a tall popup fits the window (plan 720)', () => {
+    const show = async (content: 'body' | 'plain') => {
+      host.size_.set('md')
+      host.content_.set(content)
+      fixture.detectChanges()
+      await fixture.whenStable()
+    }
+
+    it('keeps the heading and the actions in view and scrolls the .c-modal-body', async () => {
+      await show('body')
+      const card = query('.c-modal-card')!.getBoundingClientRect()
+      expect(card.top).toBeGreaterThanOrEqual(0)
+      expect(card.bottom).toBeLessThanOrEqual(window.innerHeight)
+      expect(query('.c-modal-card h3')!.getBoundingClientRect().top).toBeGreaterThanOrEqual(0)
+      expect(query('#tall-actions')!.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+      const body = query('#tall-body')!
+      expect(getComputedStyle(body).overflowY).toBe('auto')
+      expect(body.scrollHeight).toBeGreaterThan(body.clientHeight)
+    })
+
+    it('scrolls the whole card when the content has no .c-modal-body', async () => {
+      await show('plain')
+      const cardEl = query('.c-modal-card')!
+      const card = cardEl.getBoundingClientRect()
+      expect(card.top).toBeGreaterThanOrEqual(0)
+      expect(card.bottom).toBeLessThanOrEqual(window.innerHeight)
+      expect(cardEl.scrollHeight).toBeGreaterThan(cardEl.clientHeight)
+    })
   })
 
   it('Escape emits dismissed once', () => {

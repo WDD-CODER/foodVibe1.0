@@ -277,10 +277,10 @@ describe('PricingMeterComponent', () => {
     })
   })
 
-  describe('phone sheet (plan 487)', () => {
-    const sheetCard = (): HTMLElement | null => root().querySelector('app-modal-shell .c-modal-card.m-sheet-card')
+  describe('pricing popup on a phone (plan 487, centred since 720)', () => {
+    const sheetCard = (): HTMLElement | null => root().querySelector('app-modal-shell .c-modal-card')
 
-    it('the coins button opens the pricing in a bottom sheet', () => {
+    it('the coins button opens the pricing in a centred popup', () => {
       create(event({ pricePerGuest: 200 }))
       expect(root().querySelector('app-modal-shell')).toBeNull()
       click(root().querySelector('.pricing-fab') as HTMLButtonElement)

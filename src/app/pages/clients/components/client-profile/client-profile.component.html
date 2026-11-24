@@ -231,7 +231,7 @@
 }
 
 @if (isEditOpen_()) {
-  <app-modal-shell size="md" titleKey="client_edit" [sheet]="true" (dismissed)="isEditOpen_.set(false)">
+  <app-modal-shell size="md" titleKey="client_edit" (dismissed)="isEditOpen_.set(false)">
     <app-client-form [client]="client_()" (saved)="onEdited()" (cancelled)="isEditOpen_.set(false)" />
   </app-modal-shell>
 }
@@ -245,7 +245,7 @@
 }
 
 @if (isMergeOpen_()) {
-  <app-modal-shell size="md" titleKey="client_merge_pick" [sheet]="true" (dismissed)="isMergeOpen_.set(false)">
+  <app-modal-shell size="md" titleKey="client_merge_pick" (dismissed)="isMergeOpen_.set(false)">
     <div class="c-modal-body">
       <app-client-picker
         inputId="client-merge-pick"
@@ -258,7 +258,7 @@
 }
 
 @if (isReasonOpen_()) {
-  <app-modal-shell size="sm" titleKey="client_do_not_contact" [sheet]="true" (dismissed)="isReasonOpen_.set(false)">
+  <app-modal-shell size="sm" titleKey="client_do_not_contact" (dismissed)="isReasonOpen_.set(false)">
     <div class="c-modal-body">
       <app-form-field label="client_do_not_contact_reason" forId="client-dnc-reason">
         <input

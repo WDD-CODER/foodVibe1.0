@@ -69,8 +69,6 @@ export class ModalShellComponent {
   readonly zIndex = input<number | string | null>(null)
   /** Plan 538: puts the popup in the browser top layer (popover), so nothing can cover it. */
   readonly topLayer = input(false)
-  /** Plan 487: on a phone the popup opens as a bottom sheet (the `.m-sheet` / `.m-sheet-card` helpers). */
-  readonly sheet = input(false)
   /**
    * Plan 498: true while the popup holds typed edits. Escape or a backdrop click then asks before `dismissed` is
    * emitted; the popup's own Cancel / X button does not go through the shell and so never asks.

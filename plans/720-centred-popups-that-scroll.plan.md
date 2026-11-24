@@ -282,12 +282,12 @@ Statement. Nothing else in those templates changes.
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the guard that finds bottom sheets, top sheets, sheet bindings and popup cards that stop scrolling, with its fixture test — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs
-- [ ] A2: Append the centred, height-limited, scrolling popup rules under their own marker — src/styles.scss
-- [ ] A3: Take the bottom-sheet switch out of the shared popup frame and prove a tall popup fits the window — src/app/shared/modal-shell/modal-shell.component.ts, .html, .spec.ts
-- [ ] A4: Remove the switch from the 19 popups that asked for it and update the pricing spec — the 17 templates in the scope, src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
-- [ ] A5: Lock it with the repo scan, the engine values and the append-only check — scripts/test/style-720.test.mjs
-- [ ] A6: Record the rule in the registry and the folder maps, regenerate the inventory, register the new scripts — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/inventory.md, docs/workflow-kit/manifest.json
+- [x] A1: Write the guard that finds bottom sheets, top sheets, sheet bindings and popup cards that stop scrolling, with its fixture test — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs
+- [x] A2: Append the centred, height-limited, scrolling popup rules under their own marker — src/styles.scss
+- [x] A3: Take the bottom-sheet switch out of the shared popup frame and prove a tall popup fits the window — src/app/shared/modal-shell/modal-shell.component.ts, .html, .spec.ts
+- [x] A4: Remove the switch from the 19 popups that asked for it and update the pricing spec — the 17 templates in the scope, src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
+- [x] A5: Lock it with the repo scan, the engine values and the append-only check — scripts/test/style-720.test.mjs
+- [x] A6: Record the rule in the registry and the folder maps, regenerate the inventory, register the new scripts — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/inventory.md, docs/workflow-kit/manifest.json
 
 ## Technical Considerations
 - Dependencies: none.
@@ -323,3 +323,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the `sheet` input is removed, not kept as a no-op, so a new `[sheet]` binding fails the build as well as the guard.
 - behaviour: the guard lives in its own file (`modal-guard.mjs`), not in `style-guard.mjs`, so the 704–718 tests keep their results.
 - proposed default (for the Human; this plan does not write `_shared/product-defaults.md`): `centred-scrolling-popup` — "Every popup opens in the middle of the screen at every size, never taller than the screen, and its content scrolls; no popup slides up from the bottom" — how: `app-modal-shell` (family `modal-shell`); check: `scripts/test/style-720.test.mjs`. Turn on with `default yes centred-scrolling-popup`.
+- Evidence (builder): pnpm run build → 0; pnpm run lint → 0 (0 errors); pnpm run test:ci → 0 (3216 SUCCESS); modal-guard, style-720, style-703 node tests → pass 18; reuse-lint --check-registry → 0 after prepare; breadcrumbs-check, lint:reuse, lint:icons, plan-ledger-check, kit-manifest-check → 0.
+- scope: style-703/style-720 base ref list now starts with `origin/orch/rs-modals` (the run branch), because `origin/orch/rs-style` does not exist and `origin/main` differs from staging.
+- test:scripts fails on `scripts/test/style-711.test.mjs:51` ("the equipment phone panel is the shared popup sheet" expects `<app-modal-shell [sheet]="true"`): that file is outside the scope and needs `[sheet]` dropped from its regex. Also "the launcher starts the installed server…" fails (MCP launcher, environment, unrelated).
