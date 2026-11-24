@@ -81,6 +81,7 @@ src/app/pages/report/**
 src/app/pages/report/report.page.spec.ts
 scripts/test/style-710.test.mjs
 src/app/pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
