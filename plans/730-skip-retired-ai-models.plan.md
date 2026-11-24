@@ -185,11 +185,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Stop calling the two Gemini models Google has retired, so they show as removed — drop gemini-2.5-flash-lite and gemini-2.5-flash from the catalog, budgets, media and price maps, update comments, rewrite the media and removed-model cases — server/services/gemini-client.js, server/constants/ai-prices.js, server/test/gemini-client.test.js
-- [ ] A2: Let the front desk move to the next model when one is gone, and skip it for the rest of the day — isGone, goneUntil, fallback start and loop, gone log; new cases plus the unchanged default path — server/services/gemini-client.js, server/test/gemini-fallback.test.js
-- [ ] A3: Note the gone-model rule where the next plan looks — server/breadcrumbs.md
-- [ ] A4: Confirm every model left in the list still has a price, so cost estimates stay right — run only, no edit expected — server/test/ai-usage.test.js
-- [ ] A5: Run every check of this plan and hand Dandan the hand check — test:server, server lint, log-query; evidence into Execution Notes
+- [x] A1: Stop calling the two Gemini models Google has retired, so they show as removed — drop gemini-2.5-flash-lite and gemini-2.5-flash from the catalog, budgets, media and price maps, update comments, rewrite the media and removed-model cases — server/services/gemini-client.js, server/constants/ai-prices.js, server/test/gemini-client.test.js
+- [x] A2: Let the front desk move to the next model when one is gone, and skip it for the rest of the day — isGone, goneUntil, fallback start and loop, gone log; new cases plus the unchanged default path — server/services/gemini-client.js, server/test/gemini-fallback.test.js
+- [x] A3: Note the gone-model rule where the next plan looks — server/breadcrumbs.md
+- [x] A4: Confirm every model left in the list still has a price, so cost estimates stay right — run only, no edit expected — server/test/ai-usage.test.js
+- [x] A5: Run every check of this plan and hand Dandan the hand check — test:server, server lint, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: `callGemini` / `callWithFallback` (plans 395, 412, 614, 701), `MODEL_MEDIA` (619), `AI_PRICES` (566).
@@ -219,3 +219,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the gone mark lasts until Google's quota day resets (midnight America/Los_Angeles, `nextResetAt`), lives in memory only, and is used only by `fallback: true` callers; the default path keeps its one-model, user-decides behaviour (Human 2026-10-09).
 - behaviour: a gone answer moves on with no wait, like a daily-quota 429, since waiting cannot bring the model back.
 - behaviour: prices of the dropped models leave `AI_PRICES` (plan 412 pattern); ledger rows already written keep their stored cost.
+- evidence: pnpm run test:server -> exit 0, 177 files / 2471 tests pass; pnpm run lint -> 0 errors; build, test:ci (3224), lint:icons, lint:no-native-select, override/ledger/breadcrumbs/kit-manifest checks -> exit 0; log-query -> SKIP no database.
+- The `ai.media.no_model` case was dropped (no catalog model lacks a medium after this plan); the plan-619 pdf/audio cases became 'every catalog model takes pdf, audio, image'.
+- Gone fallback log carries kind 'gone' (as the plan says); the `ai.model.gone` warn is logged beside it.
