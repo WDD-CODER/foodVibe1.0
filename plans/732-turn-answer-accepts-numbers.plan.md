@@ -110,9 +110,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the assistant's collected answers hold a number or a yes/no the way the model writes them — catch-all accepts string, number, boolean and keeps them as text — shared/schemas/front-desk/turn-answer.schema.ts, server/generated/schemas/front-desk/turn-answer.schema.js (rebuilt by build:schemas)
-- [ ] A2: Prove a table question with a numeric party size is answered, and that bad values are still refused — the cases of Goals in server/test/frontdesk-turn.test.js — server/test/frontdesk-turn.test.js
-- [ ] A3: Run every check of this plan and record the evidence — test:server, build, log-query; evidence into Execution Notes
+- [x] A1: Let the assistant's collected answers hold a number or a yes/no the way the model writes them — catch-all accepts string, number, boolean and keeps them as text — shared/schemas/front-desk/turn-answer.schema.ts, server/generated/schemas/front-desk/turn-answer.schema.js (rebuilt by build:schemas)
+- [x] A2: Prove a table question with a numeric party size is answered, and that bad values are still refused — the cases of Goals in server/test/frontdesk-turn.test.js — server/test/frontdesk-turn.test.js
+- [x] A3: Run every check of this plan and record the evidence — test:server, build, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - `server/generated/schemas/**` is produced by `pnpm run build:schemas`; commit the rebuilt file only if the repo
@@ -128,3 +128,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - behaviour: numbers and booleans are kept as their string form (`4` → `"4"`), so everything after the parse sees the same type as before.
+- pnpm run test:server -> exit 0, 177 files, 2491 tests pass (incl. 3 new plan-732 cases)
+- pnpm run build -> exit 0; pnpm run lint -> exit 0; log-query error -> exit 0
+- server/generated/schemas is not tracked by git; rebuilt by build:schemas, not committed

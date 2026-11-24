@@ -21,7 +21,8 @@ export const turnAnswerSchema = z.object({
         })
         .optional()
     })
-    .catchall(z.string().max(300))
+    /** Plan 732: the model writes a count as a JSON number; every catch-all value is still a string downstream. */
+    .catchall(z.union([z.string().max(300), z.number().finite(), z.boolean()]).transform(String))
     .default({}),
   missing: z.array(z.string()).max(20).default([]),
   handoff: z.boolean().default(false),
