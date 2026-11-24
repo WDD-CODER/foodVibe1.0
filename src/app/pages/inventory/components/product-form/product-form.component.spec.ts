@@ -135,6 +135,25 @@ describe('ProductFormComponent', () => {
     })
   })
 
+  describe('plan 712: shared frame and action row', () => {
+    it('renders the title in the page header on the shared frame', () => {
+      const el = fixture.nativeElement as HTMLElement
+      expect(el.querySelector('.c-form-page')).not.toBeNull()
+      expect(el.querySelector('app-page-header h1.ph-title')?.textContent).toContain('add_product_inventory_title')
+    })
+
+    it('Cancel is a light button and still calls the cancel handler', () => {
+      const cancel = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+        '.c-form-actions button[type="button"]'
+      )
+      expect(cancel?.classList).toContain('c-btn-ghost')
+      expect(cancel?.classList).not.toContain('c-btn-primary')
+      const spy = spyOn(component as unknown as { onCancel(): void }, 'onCancel')
+      cancel!.click()
+      expect(spy).toHaveBeenCalled()
+    })
+  })
+
   describe('Form Logic: Waste & Yield Sync', () => {
     it('should update yield_factor when waste_percent changes', () => {
       mockConversionService.handleWasteChange.and.returnValue({ yieldFactor: 0.8 })

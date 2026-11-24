@@ -5,10 +5,12 @@
     dir="rtl"
     [attr.aria-label]="'price_rises_card_title' | translatePipe"
   >
-    <header class="pr-card__head">
-      <span class="pr-card__icon"><lucide-icon name="trending-up" [size]="16" /></span>
-      <h2 class="pr-card__title">{{ 'price_rises_card_title' | translatePipe }}</h2>
-      <a class="pr-card__link" routerLink="/inventory/invoices">{{ 'price_rises_card_all' | translatePipe }}</a>
+    <header class="c-card-head">
+      <span class="c-card-head__icon"><lucide-icon name="trending-up" [size]="18" /></span>
+      <h3 class="c-card-head__title">{{ 'price_rises_card_title' | translatePipe }}</h3>
+      <a class="c-btn-ghost--sm c-card-head__end" routerLink="/inventory/invoices">{{
+        'price_rises_card_all' | translatePipe
+      }}</a>
     </header>
     <ul class="pr-card__list">
       @for (row of rows(); track row.key) {

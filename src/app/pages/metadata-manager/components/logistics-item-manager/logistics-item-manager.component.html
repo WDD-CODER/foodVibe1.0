@@ -1,9 +1,9 @@
-<section class="manager-card c-glass-panel">
-  <div class="card-title">
-    <lucide-icon name="list-checks" class="icon-primary"></lucide-icon>
-    <h2>{{ 'metadata_logistics_title' | translatePipe }}</h2>
-  </div>
-  <p class="card-desc">{{ 'metadata_logistics_desc_v2' | translatePipe }}</p>
+<section class="c-glass-panel mm-card">
+  <header class="c-card-head">
+    <lucide-icon name="list-checks" class="c-card-head__icon" [size]="18"></lucide-icon>
+    <h2 class="c-card-head__title">{{ 'metadata_logistics_title' | translatePipe }}</h2>
+  </header>
+  <p class="mm-card-desc">{{ 'metadata_logistics_desc_v2' | translatePipe }}</p>
 
   <div class="c-chip-group logistics-tabs" role="tablist">
     @for (p of phases; track p) {
@@ -25,23 +25,30 @@
       <div class="logistics-section" [attr.data-section]="group.section">
         <h3 class="list-title">{{ group.labelKey | translatePipe }}</h3>
         @if (group.rows.length > 0) {
-          <ul class="logistics-items">
+          <ul class="c-list c-list--plain mm-logistics-list" role="list">
             @for (row of group.rows; track row.term._id) {
-              <li class="logistics-item" [class.is-hidden]="row.hidden" [attr.data-shared]="row.shared">
-                <span
-                  class="c-chip c-chip--tag"
-                  [attr.title]="row.shared ? ('taxonomy_shared_admin_only' | translatePipe) : null"
-                >
-                  {{ row.term.key | translatePipe }}
-                  @if (row.shared) {
-                    <lucide-icon
-                      name="lock"
-                      [size]="14"
-                      [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-                    ></lucide-icon>
-                  }
+              <li
+                class="c-list-row logistics-item"
+                role="listitem"
+                [class.is-hidden]="row.hidden"
+                [attr.data-shared]="row.shared"
+              >
+                <span class="c-list-body-cell">
+                  <span
+                    class="c-chip c-chip--tag"
+                    [attr.title]="row.shared ? ('taxonomy_shared_admin_only' | translatePipe) : null"
+                  >
+                    {{ row.term.key | translatePipe }}
+                    @if (row.shared) {
+                      <lucide-icon
+                        name="lock"
+                        [size]="14"
+                        [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+                      ></lucide-icon>
+                    }
+                  </span>
                 </span>
-                <span class="logistics-item-meta">
+                <span class="c-list-body-cell logistics-item-meta">
                   {{ row.typeKey | translatePipe }}
                   @for (env of row.environmentKeys; track env) {
                     · {{ env | translatePipe }}
@@ -50,8 +57,8 @@
                     · {{ 'metadata_logistics_hidden' | translatePipe }}
                   }
                 </span>
-                @if (isLoggedIn()) {
-                  <span class="logistics-item-actions">
+                <span class="c-list-body-cell c-col-actions logistics-item-actions">
+                  @if (isLoggedIn()) {
                     @if (row.canEdit) {
                       <button
                         type="button"
@@ -80,13 +87,13 @@
                         <span>{{ 'metadata_logistics_restore' | translatePipe }}</span>
                       </button>
                     }
-                  </span>
-                }
+                  }
+                </span>
               </li>
             }
           </ul>
         } @else {
-          <p class="logistics-empty">{{ 'metadata_no_logistics_items' | translatePipe }}</p>
+          <app-empty-state [compact]="true" messageKey="metadata_no_logistics_items" />
         }
       </div>
     }
@@ -103,18 +110,20 @@
         {{ removedLabel() }}
       </button>
       @if (removedOpen()) {
-        <ul class="logistics-items logistics-removed-list">
+        <ul class="c-list c-list--plain mm-removed-list logistics-removed-list" role="list">
           @for (term of removedRows(); track term._id) {
-            <li class="logistics-item is-hidden">
-              <span class="c-chip c-chip--tag">{{ term.key | translatePipe }}</span>
-              @if (isLoggedIn()) {
-                <span class="logistics-item-actions">
+            <li class="c-list-row logistics-item is-hidden" role="listitem">
+              <span class="c-list-body-cell">
+                <span class="c-chip c-chip--tag">{{ term.key | translatePipe }}</span>
+              </span>
+              <span class="c-list-body-cell c-col-actions logistics-item-actions">
+                @if (isLoggedIn()) {
                   <button type="button" class="c-icon-btn" (click)="onRestore(term)">
                     <lucide-icon name="undo-2" [size]="16"></lucide-icon>
                     <span>{{ 'metadata_logistics_restore' | translatePipe }}</span>
                   </button>
-                </span>
-              }
+                }
+              </span>
             </li>
           }
         </ul>

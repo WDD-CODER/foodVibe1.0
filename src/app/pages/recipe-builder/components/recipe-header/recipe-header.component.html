@@ -21,8 +21,8 @@
       <button
         type="button"
         (click)="toggleTypeWrapper()"
-        class="type-toggle-btn"
-        [class.dish-mode]="yield.currentRecipeTypeDisplay_() === 'dish'"
+        class="c-chip c-chip--toggle"
+        [class.is-on]="yield.currentRecipeTypeDisplay_() === 'dish'"
       >
         {{ yield.currentRecipeTypeDisplay_() | translatePipe }}
       </button>
@@ -34,9 +34,11 @@
             ((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder')
               | translatePipe) + '...'
           "
-          class="recipe-name-input"
-          [class.has-error]="form().get('nameHebrew')?.invalid && form().get('nameHebrew')?.touched"
-          [class.c-input--invalid]="validationErrors_()['nameHebrew']"
+          class="c-input recipe-name-input"
+          [class.c-input--invalid]="
+            validationErrors_()['nameHebrew'] ||
+            (form().get('nameHebrew')?.invalid && form().get('nameHebrew')?.touched)
+          "
           [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
           autocomplete="off"
           autocorrect="off"
@@ -92,7 +94,7 @@
         @if (yield.currentRecipeTypeDisplay_() !== 'dish' && yield.yieldDiffersFromComputed_()) {
           <button
             type="button"
-            class="yield-sync-badge"
+            class="c-chip c-chip--tag c-chip--sm c-chip--amber yield-sync"
             (click)="yield.resetManualOverride(); $event.stopPropagation()"
             [title]="'yield_sync_to_total' | translatePipe"
           >
@@ -102,7 +104,7 @@
         @if (yield.currentRecipeTypeDisplay_() === 'dish' && yield.isManualOverride_() && savedPortions() !== null) {
           <button
             type="button"
-            class="yield-sync-badge"
+            class="c-chip c-chip--tag c-chip--sm c-chip--amber yield-sync"
             (click)="onResetDishToSaved(); $event.stopPropagation()"
             [title]="'dish_reset_to_saved' | translatePipe"
           >
@@ -118,7 +120,7 @@
       </div>
 
       <div class="add-unit-wrapper">
-        <button type="button" class="add-custom-chip" (click)="yield.addSecondaryChipWithDefault()">
+        <button type="button" class="c-chip c-chip--tap rb-add-chip" (click)="yield.addSecondaryChipWithDefault()">
           <lucide-icon name="plus" [size]="16"></lucide-icon>
         </button>
       </div>

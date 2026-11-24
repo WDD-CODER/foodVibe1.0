@@ -22,10 +22,12 @@ interface FieldDef {
   suffix: string
 }
 
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 @Component({
   selector: 'app-baseline-tab',
   standalone: true,
   imports: [
+    FormFieldComponent,
     LucideAngularModule,
     NumberBoxDirective,
     ReactiveFormsModule,

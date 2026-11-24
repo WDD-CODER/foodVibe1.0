@@ -92,7 +92,7 @@ describe('ReportPage', () => {
   let query$: BehaviorSubject<ReturnType<typeof convertToParamMap>>
 
   async function setup(
-    result: BusinessReport | HttpErrorResponse,
+    result: BusinessReport | HttpErrorResponse | Promise<BusinessReport>,
     query: Record<string, string> = {},
     fd: FrontDeskStats = frontDesk()
   ): Promise<void> {
@@ -123,6 +123,12 @@ describe('ReportPage', () => {
   const el = () => fixture.nativeElement as HTMLElement
   const byId = (id: string) => el().querySelector(`[data-testid="${id}"]`) as HTMLElement | null
   const text = (id: string) => (byId(id)?.textContent ?? '').replace(/\s+/g, ' ').trim()
+
+  it('shows one loader while the report is loading', async () => {
+    await setup(new Promise<BusinessReport>(() => undefined))
+    expect(el().querySelectorAll('app-loader').length).toBe(1)
+    expect(byId('report-since')).toBeNull()
+  })
 
   it('asks for 6 months by default and 12 when the query says so, passing businessId along', async () => {
     await setup(report(), { months: '12', businessId: 'bX' })

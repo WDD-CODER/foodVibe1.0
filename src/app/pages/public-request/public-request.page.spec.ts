@@ -56,10 +56,12 @@ describe('PublicRequestPage (plan 555)', () => {
     fixture.detectChanges()
   }
 
-  async function setup(result: PublicProfileResult): Promise<void> {
+  async function setup(result: PublicProfileResult | Promise<never>): Promise<void> {
     api = {
       availability: jasmine.createSpy('availability').and.resolveTo({ ok: true, slots: [] }),
-      loadProfile: jasmine.createSpy('loadProfile').and.resolveTo(result),
+      loadProfile: jasmine
+        .createSpy('loadProfile')
+        .and.returnValue(result instanceof Promise ? result : Promise.resolve(result)),
       send: jasmine.createSpy('send').and.resolveTo({ ok: true, reference: 'ABCD1234', token: 'T'.repeat(32) })
     }
     query = new BehaviorSubject(convertToParamMap({}))
@@ -87,6 +89,15 @@ describe('PublicRequestPage (plan 555)', () => {
     fixture = TestBed.createComponent(PublicRequestPage)
     await settle()
   }
+
+  it('shows one app-loader while loading and an app-empty-state for an unknown slug (plan 708)', async () => {
+    await setup(new Promise<never>(() => undefined))
+    expect(el().querySelectorAll('app-loader').length).toBe(1)
+    TestBed.resetTestingModule()
+    await setup({ state: 'not_found' })
+    expect(el().querySelectorAll('app-empty-state').length).toBe(1)
+    expect(el().querySelector('app-loader')).toBeNull()
+  })
 
   it('shows the business name, the kind picker with one toggle per kind, and the footer', async () => {
     await setup(PROFILE)
@@ -237,7 +248,6 @@ describe('PublicRequestPage (plan 555)', () => {
       await settle()
       expect(api.availability).toHaveBeenCalledWith('my-place', '2030-01-01', 2, undefined)
       expect(chip('19:00').disabled).toBeTrue()
-      expect(el().querySelector('[data-testid="pb-time-19:00"]')?.classList).toContain('pb-time--taken')
       expect(chip('20:00').disabled).toBeFalse()
       expect(el().querySelector('#pb-time')).toBeNull()
       expect(el().querySelector('#pb-q-seating')).toBeNull()

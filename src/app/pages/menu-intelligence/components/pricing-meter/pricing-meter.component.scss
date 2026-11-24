@@ -48,7 +48,7 @@
     }
 
     /* The chip engine is unlayered and would win over this layer, so these two are marked important. */
-    .targets-toggle {
+    .targets-chip {
       color: var(--color-on-bar) !important;
 
       border-color: var(--border-bar) !important;
@@ -83,7 +83,7 @@
 
     padding-block-end: var(--meter-error-h);
 
-    .c-input-wrapper {
+    .meter-input {
       padding-block: var(--space-1);
       inline-size: 8rem;
 
@@ -107,13 +107,13 @@
 
   .fin-label {
     color: var(--color-text-muted);
-    font-size: 0.7rem;
+    font-size: var(--fs-xs);
   }
 
   .fin-value {
     color: var(--color-text-main);
-    font-size: 0.9rem;
-    font-weight: 600;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
   }
 
   .fin-value--bad {
@@ -126,7 +126,7 @@
     background: var(--bg-warning-soft);
     border-radius: var(--radius-full);
     color: var(--text-warning);
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
   }
 
   .partial-reasons {
@@ -135,11 +135,11 @@
     gap: var(--space-1);
     flex: 1 1 100%;
     color: var(--text-warning);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
   }
 
   .partial-reasons-title {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
   }
 
   .verdict {
@@ -147,7 +147,7 @@
     align-items: center;
     gap: var(--space-1);
 
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 
     &.ok {
       color: var(--color-success-emphasis);
@@ -166,7 +166,7 @@
     max-block-size: var(--meter-error-h);
 
     color: var(--color-danger);
-    font-size: 0.7rem;
+    font-size: var(--fs-xs);
     line-height: 1.2;
 
     overflow: hidden;
@@ -174,11 +174,7 @@
 
   .margin-hint {
     color: var(--color-text-secondary);
-    font-size: 0.8rem;
-  }
-
-  .targets-toggle {
-    cursor: pointer;
+    font-size: var(--fs-sm);
   }
 
   /* The phone bottom sheet (plan 487): one column of full-width boxes. */
@@ -200,7 +196,7 @@
     gap: var(--space-3);
 
     color: var(--color-text-main);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 
     padding-block: var(--space-3);
   }
@@ -223,7 +219,7 @@
       flex: 1 1 100%;
     }
 
-    .meter-field .c-input-wrapper {
+    .meter-field .meter-input {
       inline-size: 100%;
     }
 
@@ -248,8 +244,8 @@
   align-items: center;
   justify-content: center;
   position: fixed;
-  inset-inline-start: 0.75rem;
-  inset-block-end: 0.75rem;
+  inset-inline-start: var(--space-3);
+  inset-block-end: var(--space-3);
   z-index: 210;
 
   inline-size: 3.5rem;
@@ -262,7 +258,7 @@
   border: none;
   border-radius: var(--radius-full);
 
-  box-shadow: var(--shadow-glow), var(--shadow-card);
+  box-shadow: var(--shadow-glow);
   cursor: pointer;
 
   @media (max-width: $break-phone-max) {
@@ -270,6 +266,6 @@
   }
 
   @media (max-width: $break-phone-max) {
-    inset-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+    inset-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + var(--space-4));
   }
 }

@@ -11,7 +11,13 @@ import { BusinessService } from '@services/business.service'
 import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType } from '@services/activity-log.service'
+import {
+  ActivityLogService,
+  ActivityEntry,
+  ActivityChange,
+  ActivityEntityType,
+  ActivityAction
+} from '@services/activity-log.service'
 import { TranslationService } from '@services/translation.service'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
@@ -24,12 +30,19 @@ import { FrontDeskChecklistCardComponent } from '../front-desk-checklist-card/fr
 import { BusinessPerformanceComponent } from '../business-performance/business-performance.component'
 import { FrontDeskStatusBannerComponent } from 'src/app/shared/front-desk-status-banner/front-desk-status-banner.component'
 import { DiagnosisCardComponent } from '../diagnosis-card/diagnosis-card.component'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { OpeningDetailsBannerComponent } from '../opening-details-banner/opening-details-banner.component'
 
-const ENTITY_ICONS: Record<ActivityEntityType, string> = {
-  product: 'package',
-  recipe: 'chef-hat',
-  dish: 'utensils'
+const ENTITY_TONES: Record<ActivityEntityType, string> = {
+  product: 'c-chip--teal',
+  recipe: 'c-chip--amber',
+  dish: 'c-chip--green'
+}
+
+const ACTION_TONES: Record<ActivityAction, string> = {
+  created: 'c-chip--green',
+  updated: 'c-chip--amber',
+  deleted: 'c-chip--red'
 }
 
 interface ActivityDayGroup {
@@ -48,6 +61,7 @@ interface ActivityDayGroup {
     ActivityValuePipe,
     ScrollIndicatorsDirective,
     PageHeaderComponent,
+    EmptyStateComponent,
     SetupChecklistCardComponent,
     FrontDeskChecklistCardComponent,
     BusinessPerformanceComponent,
@@ -128,8 +142,12 @@ export class DashboardOverviewComponent {
     return groups
   }
 
-  protected entityIcon(type: ActivityEntityType): string {
-    return ENTITY_ICONS[type] ?? 'package'
+  protected entityTone(type: ActivityEntityType): string {
+    return ENTITY_TONES[type] ?? 'c-chip--teal'
+  }
+
+  protected actionTone(action: ActivityAction): string {
+    return ACTION_TONES[action] ?? 'c-chip--glass'
   }
 
   /** Changes worth showing — drops entries recorded with identical before/after (no real change). */

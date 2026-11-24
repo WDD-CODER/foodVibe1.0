@@ -170,13 +170,16 @@ describe('ClientListComponent (plan 547)', () => {
     setup([client('1', 'א')])
     cmp().searchQuery_.set('zzz')
     fixture.detectChanges()
-    expect(el().querySelector('app-empty-state')).toBeNull()
+    const empty = el().querySelector('app-empty-state')
+    expect(empty).not.toBeNull()
     expect(el().textContent).toContain('clients_no_results')
+    expect(el().querySelector('.no-results')).toBeNull()
   })
 
   it('a client name links to the profile (plan 551)', () => {
     setup([client('1', 'דנה')])
     expect(el().querySelector('a.client-name')?.getAttribute('href')).toBe('/clients/1')
+    expect(el().querySelectorAll('a.c-row-link').length).toBe(1)
   })
 
   it('puts the non-name columns in the column carousel header (owner: six slides)', () => {

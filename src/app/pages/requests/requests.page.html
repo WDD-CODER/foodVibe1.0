@@ -1,4 +1,4 @@
-<section class="rq-page" dir="rtl">
+<section class="c-page rq-page" dir="rtl">
   <app-page-header titleKey="fd_chip_requests">
     <ng-container header-actions>
       <button type="button" class="c-btn-primary" data-testid="new-request" (click)="openNew()">
@@ -26,7 +26,9 @@
     }
   </div>
 
-  @if (!isLoading_()) { @if (shown_().length === 0) {
+  @if (isLoading_()) {
+  <app-loader size="medium" />
+  } @else { @if (shown_().length === 0) {
   <app-empty-state [messageKey]="'rq_empty_' + tab_()" icon="clipboard-check" />
   } @else {
   <div class="rq-list">

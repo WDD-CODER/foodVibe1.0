@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PlatformAdminService, type AdminTermRow } from '@services/platform-admin.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -27,7 +28,7 @@ export interface LogisticsItemGroup {
 @Component({
   selector: 'app-platform-logistics-items',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent, LoaderComponent],
   templateUrl: './platform-logistics-items.component.html',
   styleUrl: './platform-logistics-items.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,6 +44,7 @@ export class PlatformLogisticsItemsComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoading_ = signal(true)
+  protected readonly loadFailed_ = signal(false)
 
   // 5. COMPUTED
   protected readonly groups_ = computed<LogisticsItemGroup[]>(() => {
@@ -110,10 +112,18 @@ export class PlatformLogisticsItemsComponent implements OnInit {
     }
   }
 
+  protected async retry(): Promise<void> {
+    this.isLoading_.set(true)
+    await this.reload()
+    this.isLoading_.set(false)
+  }
+
   private async reload(): Promise<void> {
+    this.loadFailed_.set(false)
     try {
       await this.platformAdmin.loadTerms('logisticsItem')
     } catch (err) {
+      this.loadFailed_.set(true)
       this.logging.error({
         event: 'platform.logistics_load_failed',
         message: 'Loading the logistics items failed',

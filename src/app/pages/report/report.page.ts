@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { map } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import type { FrontDeskStats } from '@models/frontdesk-stats.model'
 import { BusinessStatsService } from '@services/business-stats.service'
@@ -74,7 +75,7 @@ interface TrendRow {
 @Component({
   selector: 'app-report-page',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, LoaderComponent],
   templateUrl: './report.page.html',
   styleUrl: './report.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,7 +1,7 @@
 import { signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter } from '@angular/router'
-import { Circle, CircleCheck, ClipboardCheck, LucideAngularModule } from 'lucide-angular'
+import { Circle, CircleCheck, ClipboardCheck, Inbox, LucideAngularModule } from 'lucide-angular'
 import { BusinessService, type FrontDeskSetup } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { PermissionService } from '@services/permission.service'
@@ -34,7 +34,10 @@ describe('FrontDeskChecklistCardComponent (plan 556)', () => {
 
   async function setup(frontDesk: FrontDeskSetup | undefined, owner = true): Promise<void> {
     TestBed.configureTestingModule({
-      imports: [FrontDeskChecklistCardComponent, LucideAngularModule.pick({ ClipboardCheck, Circle, CircleCheck })],
+      imports: [
+        FrontDeskChecklistCardComponent,
+        LucideAngularModule.pick({ ClipboardCheck, Circle, CircleCheck, Inbox })
+      ],
       providers: [
         {
           provide: BusinessService,

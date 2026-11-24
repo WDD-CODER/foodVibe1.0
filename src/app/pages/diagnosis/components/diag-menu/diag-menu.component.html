@@ -30,8 +30,7 @@
 
   @if (!locked()) {
     <section class="diag-menu__paste c-glass-panel">
-      <label class="diag-menu__field" for="diag-menu-text">
-        <span>{{ 'diag_menu_paste_label' | translatePipe }}</span>
+      <app-form-field [label]="'diag_menu_paste_label' | translatePipe" forId="diag-menu-text">
         <textarea
           id="diag-menu-text"
           class="c-input"
@@ -43,7 +42,7 @@
           [ngModel]="text_()"
           (ngModelChange)="text_.set($event)"
         ></textarea>
-      </label>
+      </app-form-field>
       <button
         type="button"
         class="c-btn-primary"

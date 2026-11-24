@@ -1,41 +1,38 @@
 @if (open()) {
-  <div #overlay class="c-modal-overlay" popover="manual" (click)="onClose()" (keydown.escape)="onClose()">
-    <div
-      class="c-modal-card paste-ingredients-card"
-      dir="rtl"
-      role="dialog"
-      aria-modal="true"
-      [attr.aria-label]="'paste_ingredients' | translatePipe"
-      (click)="$event.stopPropagation()"
-    >
-      <h3>{{ 'paste_ingredients' | translatePipe }}</h3>
+  <app-modal-shell
+    [topLayer]="true"
+    cardClass="paste-ingredients-card"
+    labelKey="paste_ingredients"
+    [hasChanges]="text_().trim() !== '' && !isSaving_()"
+    (dismissed)="onClose()"
+  >
+    <h3>{{ 'paste_ingredients' | translatePipe }}</h3>
 
-      <div class="c-modal-body">
-        <textarea
-          appTextareaAutoGrow
-          #pasteBox
-          class="c-input paste-box"
-          dir="rtl"
-          rows="8"
-          spellcheck="false"
-          [value]="text_()"
-          (input)="text_.set($any($event.target).value)"
-        ></textarea>
-        <p class="paste-hint">{{ 'paste_ingredients_hint' | translatePipe }}</p>
-      </div>
-
-      <div class="c-modal-actions">
-        <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-        <button
-          type="button"
-          class="c-btn-primary"
-          [disabled]="!text_().trim() || isSaving_()"
-          [attr.aria-busy]="isSaving_() || null"
-          (click)="onSubmit()"
-        >
-          {{ (isSaving_() ? 'saving' : 'paste_ingredients_add') | translatePipe }}
-        </button>
-      </div>
+    <div class="c-modal-body">
+      <textarea
+        appTextareaAutoGrow
+        #pasteBox
+        class="c-input paste-box"
+        dir="rtl"
+        rows="8"
+        spellcheck="false"
+        [value]="text_()"
+        (input)="text_.set($any($event.target).value)"
+      ></textarea>
+      <p class="paste-hint">{{ 'paste_ingredients_hint' | translatePipe }}</p>
     </div>
-  </div>
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        [disabled]="!text_().trim() || isSaving_()"
+        [attr.aria-busy]="isSaving_() || null"
+        (click)="onSubmit()"
+      >
+        {{ (isSaving_() ? 'saving' : 'paste_ingredients_add') | translatePipe }}
+      </button>
+    </div>
+  </app-modal-shell>
 }

@@ -13,6 +13,7 @@ import { MenuEventDataService } from '@services/menu-event-data.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
@@ -59,6 +60,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    EmptyStateComponent,
     TaxonomyKindManagerComponent,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,

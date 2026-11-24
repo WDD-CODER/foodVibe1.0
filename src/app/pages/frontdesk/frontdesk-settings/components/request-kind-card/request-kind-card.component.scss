@@ -5,33 +5,20 @@
 .rk-card {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.rk-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.rk-title {
-  margin: 0;
-  font-size: 1.05rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
 }
 
 .rk-summary,
 .rk-hint {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
 }
 
 .rk-body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
   min-inline-size: 0;
   margin: 0;
   padding: 0;
@@ -41,7 +28,7 @@
 .rk-questions {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -50,17 +37,17 @@
 .rk-question {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid rgb(0 0 0 / 12%);
-  border-radius: 0.75rem;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
 }
 
 .rk-question-main,
 .rk-rules {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .rk-question-actions,
@@ -69,13 +56,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .rk-options {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .rk-number {

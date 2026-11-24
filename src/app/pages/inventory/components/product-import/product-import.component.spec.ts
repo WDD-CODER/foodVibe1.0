@@ -408,6 +408,14 @@ describe('ProductImportComponent', () => {
     expect(all('import-status').map((chip) => chip.textContent?.trim())).toEqual(['import_status_update'])
   })
 
+  it('draws the preview in the shared table, one tbody row per parsed row (plan 712)', async () => {
+    await setup(of({ rows: [row('עגבנייה', 6.2), row('מלפפון', 4.5), row('בצל', 3)], truncated: false }))
+    await pasteAndParse()
+    const table = (fixture.nativeElement as HTMLElement).querySelector('table.c-table')
+    expect(table).not.toBeNull()
+    expect(table!.querySelectorAll('tbody tr').length).toBe(3)
+  })
+
   it('deleting a row adds one to skipped, and save sends one request with the kept rows', async () => {
     await setup(of({ rows: [row('עגבנייה', 6.2), row('מלפפון', 4.5), row('בצל', 3)], truncated: false }))
     await pasteAndParse()

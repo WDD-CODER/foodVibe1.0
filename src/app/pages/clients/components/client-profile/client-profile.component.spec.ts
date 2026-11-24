@@ -115,7 +115,7 @@ describe('ClientProfileComponent (plan 551)', () => {
 
   it('lists requests, bookings, events and event notes of this client only, newest first', async () => {
     await setup()
-    const rows = Array.from(el().querySelectorAll('.timeline-row'))
+    const rows = Array.from(el().querySelectorAll('[data-testid="client-timeline"] .c-list-row'))
     expect(rows.map((r) => r.getAttribute('data-kind'))).toEqual(['note', 'booking', 'event', 'request', 'event'])
     expect(rows[2].textContent).toContain('new event')
     expect(rows[4].textContent).toContain('old event')

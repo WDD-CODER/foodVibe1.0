@@ -166,6 +166,58 @@ describe('EquipmentListComponent', () => {
     expect(fixture.nativeElement.querySelector('.col-scaling')).not.toBeNull()
   })
 
+  describe('shared empty state and phone sheet (plan 711)', () => {
+    const item = {
+      _id: 'e9',
+      nameHebrew: 'סיר',
+      category: 'tool',
+      ownedQuantity: 1,
+      isConsumable: false,
+      createdAt: 1,
+      updatedAt: 1
+    }
+    interface Internals {
+      searchQuery_: { set(v: string): void }
+      editingId_: { set(id: string | null): void; (): string | null }
+      isDesktop_: unknown
+      hydrateEditForm(e: object): void
+    }
+    const internals = () => component as unknown as Internals
+    afterEach(() => {
+      // The list keeps its search in sessionStorage: put it back so the next test sees a clean list.
+      internals().searchQuery_.set('')
+      fixture.detectChanges()
+      sessionStorage.clear()
+      mockEquipment.set([])
+    })
+
+    it('a search with no match shows one shared empty state', () => {
+      mockEquipment.set([item] as never)
+      internals().searchQuery_.set('zzzz')
+      fixture.detectChanges()
+      expect(fixture.nativeElement.querySelectorAll('app-empty-state').length).toBe(1)
+      expect(fixture.nativeElement.querySelector('.no-results')).toBeNull()
+    })
+
+    it('on a phone, editing a row opens the shared popup and Escape closes it with nothing typed', async () => {
+      mockEquipment.set([item] as never)
+      internals().isDesktop_ = signal(false)
+      const outside = spyOn(
+        component as unknown as { onInlinePanelClickOutside(): Promise<void> },
+        'onInlinePanelClickOutside'
+      ).and.callThrough()
+      internals().editingId_.set('e9')
+      internals().hydrateEditForm(item)
+      fixture.detectChanges()
+      expect(fixture.nativeElement.querySelector('app-modal-shell')).not.toBeNull()
+      expect(fixture.nativeElement.querySelector('.c-modal-overlay')).not.toBeNull()
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true }))
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      expect(outside).toHaveBeenCalledTimes(1)
+      expect(internals().editingId_()).toBeNull()
+    })
+  })
+
   describe('quick-edit loading rule (plan 640)', () => {
     interface PanelState {
       editingId_: { set(id: string | null): void }

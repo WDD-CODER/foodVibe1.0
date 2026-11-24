@@ -5,13 +5,13 @@
     dir="rtl"
     [attr.aria-label]="'diag_card_title' | translatePipe"
   >
-    <header class="diag-card__head">
-      <span class="diag-card__icon"><lucide-icon name="stethoscope" [size]="16" /></span>
-      <h2 class="diag-card__title">{{ 'diag_card_title' | translatePipe }}</h2>
+    <header class="c-card-head">
+      <span class="c-card-head__icon"><lucide-icon name="stethoscope" [size]="18" /></span>
+      <h3 class="c-card-head__title">{{ 'diag_card_title' | translatePipe }}</h3>
       @if (rows().length) {
-        <span class="diag-card__count" data-testid="diagnosis-card-count">{{ openText() }}</span>
+        <span class="c-card-head__end diag-card__count" data-testid="diagnosis-card-count">{{ openText() }}</span>
       }
-      <a class="diag-card__link" data-testid="diagnosis-card-all" routerLink="/diagnosis">{{
+      <a class="c-btn-ghost--sm" data-testid="diagnosis-card-all" routerLink="/diagnosis">{{
         'diag_card_all' | translatePipe
       }}</a>
     </header>

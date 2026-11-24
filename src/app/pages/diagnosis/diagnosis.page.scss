@@ -7,11 +7,6 @@
     display: grid;
     gap: var(--space-4);
     align-content: start;
-
-    max-inline-size: 48rem;
-    margin-inline: auto;
-
-    padding: var(--space-4);
   }
 
   .diagnosis-form {
@@ -23,26 +18,8 @@
     padding: var(--space-4);
   }
 
-  .diagnosis-form__period {
-    display: grid;
-    gap: var(--space-1);
-    justify-items: start;
-  }
-
-  .diagnosis-form__label {
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-    line-height: var(--lh-snug);
-  }
-
   .diagnosis-list {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-  }
-
-  .diagnosis-list__row {
-    color: inherit;
-    text-decoration: none;
+    --list-cols: minmax(0, 1fr) auto auto;
   }
 
   .diagnosis-list__name {

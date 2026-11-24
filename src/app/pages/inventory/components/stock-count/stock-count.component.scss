@@ -42,32 +42,17 @@
     padding-inline: var(--space-4);
   }
 
-  .stock-count__past {
-    display: flex;
+  // Past counts: date · lines · status chip, in the shared in-panel list (it sits in the list shell's grid).
+  .stock-count__past-list {
+    --list-cols: minmax(0, 1fr) auto auto;
+
     grid-column: 1 / -1;
-    align-items: center;
-    gap: var(--space-4);
-
-    padding-block: var(--space-3);
-    padding-inline: var(--space-4);
-
-    border-block-end: 1px solid var(--border-row);
-    background: var(--bg-glass);
-    text-align: start;
-
-    &:disabled {
-      cursor: default;
-    }
-
-    > :first-child {
-      flex: 1 1 auto;
-    }
   }
 
   .stock-count__filter-title {
     margin-block-end: var(--space-2);
 
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
   }
 
   // Plan 654: the name is always visible — it wraps inside its cell, and the row grows taller when it must.
@@ -114,11 +99,6 @@
   // Plan 658: the compact checkbox takes its box from --row-checkbox-size, set on the cell by the component.
   .stock-count__counted {
     min-block-size: var(--stock-count-mark-tap);
-  }
-
-  .stock-count__counted .c-chip--toggle {
-    min-block-size: var(--stock-count-mark-tap);
-    font-size: var(--stock-count-mark-size);
   }
 
   .stock-count__base-pop {

@@ -1,5 +1,5 @@
 @use '../../../../core/styles/breakpoints' as *;
-/* Supplier form page — mirrors venue-form.component.scss (cssLayer: global tokens, Five-Group rhythm) */
+/* Supplier form page — the frame is the shared .c-form-page (cssLayer: global tokens, Five-Group rhythm) */
 
 @layer components.supplier-form {
   :host {
@@ -7,75 +7,42 @@
   }
 
   .supplier-form-container {
-    max-width: 35rem;
-
-    margin-inline: auto;
-    padding: 1.5rem;
-    background: var(--bg-glass-strong);
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius-xl);
-
-    box-shadow: var(--shadow-glass);
-    backdrop-filter: var(--blur-glass);
-    -webkit-backdrop-filter: var(--blur-glass);
-
-    .form-header {
-      margin-block-end: 1.5rem;
-
-      h2 {
-        font-size: 1.25rem;
-        font-weight: 600;
-
-        margin: 0;
-      }
-    }
-
     .form-body {
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: var(--space-6);
     }
 
     .form-section {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: var(--space-4);
 
       &.days-section {
-        padding-block-start: 1rem;
+        padding-block-start: var(--space-4);
         border-block-start: 1px solid var(--border-default);
 
         h3 {
-          font-size: 1rem;
-          font-weight: 600;
+          font-size: var(--fs-md);
+          font-weight: var(--fw-semibold);
 
           margin: 0;
         }
       }
-    }
-
-    .c-form-actions {
-      padding-block-start: 1rem;
     }
   }
 
   /* Phone density (2026-11-11): contact and phone share a row, and so do minimum order and lead time. */
   @media (max-width: $break-phone-max) {
     .supplier-form-container {
-      padding: 0.875rem;
-
-      .form-header {
-        margin-block-end: 0.75rem;
-      }
-
       .form-body {
-        gap: 0.875rem;
+        gap: var(--space-3);
       }
 
       .form-section:not(.days-section) {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.625rem;
+        gap: var(--space-2);
 
         > :first-child {
           grid-column: 1 / -1;

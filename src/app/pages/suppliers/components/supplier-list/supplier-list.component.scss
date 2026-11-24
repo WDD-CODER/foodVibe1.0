@@ -3,37 +3,8 @@
     display: block;
   }
 
-  .supplier-grid-row {
-    display: contents;
-  }
-
-  .supplier-grid-row .c-list-body-cell {
-    cursor: pointer;
-  }
-
-  .supplier-grid-row:hover .c-icon-btn {
-    opacity: 1;
-  }
-
-  .c-col-actions .c-icon-btn {
-    margin-inline-start: 0.25rem;
-  }
-
-  .no-results {
-    grid-column: 1 / -1;
-
-    padding: 2rem 1rem;
-
-    text-align: center;
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-
-    border-block-end: 1px solid var(--border-default);
-    background: var(--bg-glass-strong);
-  }
-
   .linked-only-toggle {
-    margin-block-start: 0.5rem;
+    margin-block-start: var(--space-2);
   }
 }
 

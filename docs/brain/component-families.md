@@ -79,7 +79,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 ### modal-shell — the popup frame
 
-- Status: converged (plan 451) for the engine-based popups; 7 hand-drawn dialogs remain (follow-up plan)
+- Status: converged (plans 451, 704, 711, 713)
 - Use: `src/app/shared/modal-shell/` · `app-modal-shell` (role=dialog, aria-modal, Escape for the top-most
   popup only, focus in / trap / restore, `dismissible` while busy, `[hasChanges]` = Escape / backdrop ask before discarding typed edits (plan 498; the popup's own Cancel / X never asks), `titleKey` / `labelledBy` / `labelKey` for the
   accessible name). It renders the `.c-modal-overlay` / `.c-modal-card` engines from `src/styles.scss`; put
@@ -91,16 +91,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
 - Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template; rule `native-browser-dialog` warns on a new `window.confirm` / `alert` / `prompt` (use `ConfirmModalService`).
-- Known copies (hand-drawn `.c-modal-overlay` with their own document Escape listener):
-  `src/app/pages/menu-intelligence/components/event-closing-dialog/`,
-  `src/app/pages/menu-intelligence/components/not-closed-dialog/`,
-  `src/app/pages/menu-intelligence/components/prep-sheets/`,
-  `src/app/pages/menu-intelligence/components/supplier-orders/`,
-  `src/app/shared/new-inquiry-dialog/`,
-  `src/app/pages/recipe-builder/components/paste-ingredients-dialog/`,
-  `src/app/pages/equipment/components/equipment-list/` (side panel).
+- Plans 704, 711 and 713 moved the trash history popup, the equipment phone panel and the six popups that drew `.c-modal-overlay` by hand onto `app-modal-shell`; they are users now.
+- Known copies: none. Kept off the shell on purpose:
   Not engine-based (own `role="dialog"` + Escape, kept off the shell to keep their look):
-  `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`.
+  `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`, the stock-count popover (plan 658).
+- Lint (plan 718): rule `own-dialog-role` warns on a new `role="dialog"` in a template outside those pieces.
 
 ### modal-controller — open a popup and get its answer
 
@@ -114,11 +109,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   quick-add-product, quick-edit-product, restore-choice and translation-key `*-modal.service.ts`; in `src/app/shared/`
   the ai-menu, ai-product, ai-recipe and label-creation `*-modal/*.service.ts`.
 - Also used by `PlatformLogisticsItemsComponent` (`ConfirmModalService`, plan 532) and `logistics-item-manager` (`open` / `openTernary` choices: remove, hide, unsaved question, plan 581).
-- Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
+- Known copies: none.
 
 ### list-page — a list screen (header, search, filters, rows, selection)
 
-- Status: converging — plan 453 adds a cards layout and moves the remaining pages on
+- Status: converged (plans 703–717)
 - Use: `src/app/shared/list-shell/` · `app-list-shell` (named slots) with `src/app/shared/page-header/`
   (`app-page-header`), `src/app/shared/selection-bar/` (`app-selection-bar`), `src/app/shared/row-actions-menu/`
   (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
@@ -128,10 +123,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 655 page-local pieces of the stock count page: the draft line's question row (`.stock-ai__question`), the base-amount control (`.stock-count__base-btn`) and its popover (`.stock-count__base-pop`).
 - Plan 658: the stock count shows a unit by its saved Hebrew name (`unitName_` → `TranslationService.translate`, the key when none). `.stock-count__base-pop` is one measured `popover="manual"` box at every width: `max-content` wide, placed by `placeInViewport` below its control (above when no room), re-placed on resize, closed by an outside tap, a scroll or a second tap. `app-modal-shell [light]` (plan 657) is removed. `app-list-row-checkbox` reads `--row-checkbox-size` (default unchanged); the count page sets it per breakpoint.
 - Plan 651: the past-counts list on the stock count page reads `GET /api/v1/stock/counts?status=all` through `PastCountsService` (`src/app/pages/inventory/components/stock-count/past-counts.service.ts`).
-- Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
-- Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
-  `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
-  (card grids need a `layout: 'cards'` first).
+- Users: every entity list page on `app-list-shell` (client list, equipment, inventory products, invoices, stock count, recipe book, suppliers, menu library, trash, the knowledge page `src/app/pages/frontdesk/knowledge/`) and every list inside a card, drawer, tab or panel on `.c-list`.
+- Exceptions the style run recorded (own layout on purpose): the requests cards, the bookings agenda, the inbox split view, the platform grid, the recipe-builder drag grids.
+- In-panel lists: `.c-list` (plan 703) — a list inside a card, drawer, tab or panel with no search; full-page entity lists use `app-list-shell`. Container `role="list"`, rows `.c-list-row` with `role="listitem"`, cells `.c-list-body-cell`; `.c-list-row--link` makes a row clickable, `.c-row-link` is the name in it, `.c-list--plain` drops the cell background inside a `.c-glass-panel`; columns come from `--list-cols`.
+- Known copies: `src/app/pages/venues/components/venue-list/` (cards layout, left to after plan 698) and nothing else.
 
 ### list-logic — search / sort / filter state of a list
 
@@ -152,11 +147,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 ### empty-state — nothing here / no results
 
-- Status: stable
+- Status: converged (plans 703–717)
 - Use: `src/app/shared/empty-state/` · `app-empty-state` (+ `.c-empty-state` in `src/styles.scss`).
 - When: an empty list or a search with no results.
+- Plan 703: `compact` input (default false) adds `.c-empty-state--compact` and a 24 px icon (48 otherwise) — use it for empties inside cards, drawers and tabs.
 - Also used by `PlatformLogisticsItemsComponent` (plan 532) and `PlatformAiShotsComponent` (plan 600, the two example lists).
-- Known copies: not counted.
+- `compact` users (inside cards, drawers and tabs): platform learning, the metadata manager and its user, taxonomy, logistics-item and AI-model managers, prep sheets, event stage bar, event notes log, diagnosis report, dev catalog, dashboard overview, business performance, front-desk checklist card, cook view, bookings page, waitlist drawer and the unassigned / arriving service lists.
+- Lint (plan 718): rule `page-local-empty-state` warns on a new `class="…empty…"` / `no-results` in a template.
+- Known copies: the venues files only (plan 698's scope).
 
 ### form-field — label, input, error
 
@@ -193,6 +191,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   delegation; equipment, supplier and settings (tab switch via `?tab=`) are on it too (plan 498); `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
+- Form container (plan 703): `.c-form-page` in `src/styles.scss` — the glass frame of an entity form (max 48rem, centred); replaces the copies in the equipment and supplier forms.
 - Known copies: none.
 
 ### chip — chips, badges, pills
@@ -223,6 +222,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any wait, success or error the user must see.
 - Also used by `PlatformLogisticsItemsComponent` (`UserMsgService`, plan 532).
 - `app-front-desk-status-banner` (`src/app/shared/front-desk-status-banner/`): the persistent amber notice for a suspended front desk, on the dashboard and `/frontdesk/settings` (plan 557).
+- Plans 705, 706, 708, 710 and 714 added `app-loader` to the bookings page, the front-desk pages (floor plan, simulator, settings, onboarding), the inventory lists and stock count, the platform dashboard panels and the diagnosis pages.
 - Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
 - Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 
@@ -250,14 +250,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 ### engine-classes — shared `.c-*` CSS engines
 
-- Status: stable (plan 458 sweeps the copies)
+- Status: converged (plans 458, 703–717)
 - Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).
 - When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
 - Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Blocked but explained (plan 699): .c-icon-btn[aria-disabled='true'] in src/styles.scss looks like a disabled .c-icon-btn (faded, no hover spin) yet still takes hover, focus and tap, so its `[appTip]` reason shows (family tooltip).
 - Floor plan colours (plan 699): Zone and joined colour tokens --color-zone-0, --color-zone-1, --color-zone-2, --color-zone-3, --color-zone-4, --color-zone-5, --color-zone-6, --color-zone-7, --color-floor-joined — an area's palette index n is `var(--color-zone-n)` (family floor-map); the joined-table border is never in the palette.
-- Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
+- Style pieces (plan 703, appended at the end of `src/styles.scss`; shown on `/dev/catalog` → style-pieces): `.c-page` / `.c-page--narrow` (page frame, `--page-max-content` 72rem, `--page-max-narrow` 48rem, `--page-gutter`), `.c-list` (+ `--plain`, `.c-list-row--link`, `.c-row-link`), `.c-stat-tile` (+ `--hero`; parts `__top`, `__icon`, `__label`, `__value`, `__note`), `.c-card-head` (+ `__icon`, `__title`, `__end`), `.c-form-page`, `.c-table` (token values; `.c-table--compact`), `.c-empty-state--compact`.
+- Page width rule (plan 703): a page inside `app-list-shell` is full width; any other page uses `.c-page` (72rem) or `.c-page--narrow` (48rem, forms and detail pages); a page never sets its own max width.
+- Icon sizes (plan 703): 14 meta, 16 buttons / chips / row actions, 18 header and primary buttons, 24+ only empty states and heroes.
+- Token mapping (plan 703): font-size ≤0.75rem→`--fs-xs`, 0.8–0.8125→`--fs-sm`, 0.84–0.95→`--fs-base`, 1–1.05→`--fs-md`, 1.1–1.3→`--fs-lg`, 1.4–1.6→`--fs-xl`, 1.75→`--fs-2xl`, ≥2→`--fs-3xl`; weight 400→`--fw-regular`, 500→`--fw-medium`, 600→`--fw-semibold`, 700/bold→`--fw-bold`, 800→`--fw-extrabold`; radius ≤4px→`--radius-xs`, 5–7px→`--radius-sm`, 8–16px→`--radius-md`, 17–24px→`--radius-lg`, 25–28px→`--radius-xl`, 50% / 999px→`--radius-full`; a literal shadow→`--shadow-card` (raised) or `--shadow-glass` (flat); a tint with no token→`color-mix(in srgb, var(<nearest colour token>) N%, transparent)` with the same alpha; spacing on the scale→`--space-*`; off-scale spacing (0.375rem, 0.625rem, 0.875rem…) may stay. `scripts/lib/style-guard.mjs` (`styleFindings`) checks a set of files against these rules.
+- Page frame: `.c-page` / `.c-page--narrow` / full width in `app-list-shell` — no page sets its own `max-inline-size`.
+- Lint (plan 718): rule `page-local-width` warns on a new `max-width` / `max-inline-size` in a page `.scss`.
+- Known copies: 6 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally): `src/app/pages/venues/components/venue-form/venue-form.component.scss`, `src/app/pages/welcome/welcome.page.scss`, `src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.scss`, `src/app/shared/client-form/client-form.component.scss`, `src/app/shared/hours-editor/hours-editor.component.scss`, `src/app/shared/unit-creator/unit-creator.component.scss`.
 
 ### voice-note — record or type a spoken note
 
@@ -934,4 +940,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 702
 - Use: `src/app/core/utils/assistant-failure.util.ts` — `assistantFailureKey(reason)` and `showAssistantFailure(conversation)`; the reason line of the inbox suggestion bar (input `failKey`); the small map before a time is chosen is the same `app-floor-map` in `src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.html`.
 - When: a page tells the host why a suggestion failed or why a chat was handed over (inbox, simulator).
+- Known copies: none.
+
+### style-guard — `styleFindings(files, { root, allow })` in `scripts/lib/style-guard.mjs` (plan 703)
+
+- Status: stable
+- Use: `scripts/lib/style-guard.mjs` · `styleFindings` returns `[{ file, line, rule, text }]` for `.scss` (colour, font-size, font-weight, radius, shadow, space-scale, physical, engine-in-component) and `.html` (hand-drawn-dialog, local-empty, local-loading, bare-input); an `allow` entry `{ rule, file, line?, why }` removes a finding and needs a `why`.
+- When: a style plan's `[auto]` check that its files use the shared pieces and tokens (`scripts/test/style-703.test.mjs` is the pattern).
+- Known copies: none.
+
+### style-run-guard — the run-wide style regression test (plan 718)
+
+- Status: stable
+- Use: `scripts/test/style-718.test.mjs` runs `styleFindings` over every file plans 704–717 converged (each of their tests exports `FILES` and `ALLOW`) and checks the reuse-lint rules `page-local-empty-state`, `own-dialog-role` and `page-local-width`.
+- When: a later plan converges more pages — export `FILES` and `ALLOW` from its style test and add it to the list in that file.
 - Known copies: none.

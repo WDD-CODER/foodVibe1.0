@@ -106,6 +106,16 @@ describe('TableSheetComponent (plan 686)', () => {
     expect(byId('tsh-no-show')).toBeTruthy()
   })
 
+  it('shows the table title without a hand h3 and closes from an icon button (plan 705)', () => {
+    const out = setup({ bookings: [booking()], look: confirmedLook })
+    expect(byId('tsh-title')?.textContent).toContain('tsh_title')
+    expect(el().querySelector('h3')).toBeNull()
+    const close = byId('tsh-close') as HTMLButtonElement
+    expect(close.classList.contains('c-icon-btn')).toBeTrue()
+    close.click()
+    expect(out.closed).toHaveBeenCalledTimes(1)
+  })
+
   it('no-show is absent before the start time', () => {
     setup({ bookings: [booking({ startAt: NOW + 10 * MIN })], look: confirmedLook })
     expect(byId('tsh-seat')).toBeTruthy()

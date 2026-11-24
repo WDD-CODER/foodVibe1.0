@@ -1,104 +1,56 @@
-<div class="menu-library-container" dir="rtl">
-  <app-page-header class="menu-library-header" titleKey="menu_library" [listLayout]="true">
-    <div header-search class="search-wrap">
-      <div class="c-input-wrapper">
-        <lucide-icon name="search" [size]="18"></lucide-icon>
-        <input
-          #searchInput
-          type="text"
-          [ngModel]="searchQuery_()"
-          (ngModelChange)="searchQuery_.set($event)"
-          [placeholder]="'search' | translatePipe"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          (keydown.escape)="onSearchEscape($event, searchInput)"
-        />
-        <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
-      </div>
+<app-list-shell
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [gridTemplate]="'minmax(10rem, 2fr) 1fr 1fr 1fr 0.7fr 3rem'"
+  [mobileGridTemplate]="'1fr auto 3rem'"
+  [resultCount]="filteredEvents_().length"
+  [resultTotal]="events_().length"
+>
+  <ng-container shell-title>{{ 'menu_library' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="menu-library-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        class="c-input"
+        #searchInput
+        id="menu-library-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (keydown.escape)="onSearchEscape($event, searchInput)"
+      />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
     </div>
-    <button header-actions type="button" class="c-btn-ghost header-inquiry-btn" (click)="openInquiry()">
+  </ng-container>
+
+  <ng-container shell-actions>
+    <button type="button" class="c-btn-ghost" (click)="openInquiry()">
       <lucide-icon name="phone-incoming" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'new_inquiry' | translatePipe }}</span>
     </button>
-    <button header-actions type="button" class="c-btn-primary" (click)="onCreateNew()">
+    <button type="button" class="c-btn-primary" (click)="onCreateNew()">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'menu_new_event' | translatePipe }}</span>
     </button>
-  </app-page-header>
+  </ng-container>
 
-  @if (events_().length > 0) {
-    <div class="filters-bar">
-      <label class="filter-item">
-        <span>{{ 'stage_filter' | translatePipe }}</span>
-        <app-custom-select
-          [ngModel]="stageFilter_()"
-          (ngModelChange)="stageFilter_.set($event)"
-          [options]="stageOptions_"
-          placeholder="stage_filter_active"
-        />
-      </label>
+  <ng-container shell-table-header>
+    <div class="c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
+    <div class="c-grid-header-cell" role="columnheader">{{ 'stage_filter' | translatePipe }}</div>
+    <div class="col-cost c-grid-header-cell" role="columnheader">{{ 'menu_food_cost' | translatePipe }}</div>
+    <div class="col-sale c-grid-header-cell" role="columnheader">{{ 'menu_total_revenue' | translatePipe }}</div>
+    <div class="col-guests c-grid-header-cell" role="columnheader">{{ 'menu_guests' | translatePipe }}</div>
+    <div class="c-grid-header-cell" role="columnheader"></div>
+  </ng-container>
 
-      <label class="filter-item">
-        <span>{{ 'menu_event_type' | translatePipe }}</span>
-        <app-custom-select
-          [ngModel]="eventTypeFilter_()"
-          (ngModelChange)="eventTypeFilter_.set($event)"
-          [options]="eventTypeSelectOptions_()"
-          placeholder="all"
-          [typeToFilter]="true"
-        />
-      </label>
-
-      <label class="filter-item">
-        <span>{{ 'menu_serving_style' | translatePipe }}</span>
-        <app-custom-select
-          [ngModel]="servingStyleFilter_()"
-          (ngModelChange)="servingStyleFilter_.set($event)"
-          [options]="servingStyleOptions_"
-          placeholder="all"
-          [typeToFilter]="true"
-        />
-      </label>
-
-      <div class="filter-item date-range-wrap">
-        <span class="date-range-label">{{ 'menu_date_from' | translatePipe }}</span>
-        <div class="date-input-wrap">
-          <app-date-field
-            inputId="menu-library-date-from"
-            ariaLabelKey="menu_date_from"
-            variant="outline"
-            [(value)]="dateFrom_"
-          />
-        </div>
-      </div>
-
-      <div class="filter-item sort-wrap">
-        <span class="sort-label">{{ 'sort' | translatePipe }}</span>
-        <div class="sort-controls">
-          <app-custom-select
-            [ngModel]="sortBy_()"
-            (ngModelChange)="sortBy_.set($event)"
-            [options]="sortBySelectOptions_"
-            placeholder="sort"
-            [typeToFilter]="true"
-          />
-          <button
-            type="button"
-            class="sort-order-btn"
-            (click)="toggleSortOrder()"
-            [attr.aria-label]="getSortOrderLabel()"
-            [attr.title]="getSortOrderLabel()"
-          >
-            {{ getSortOrderLabel() | translatePipe }}
-          </button>
-        </div>
-      </div>
-    </div>
-  }
-
-  <div class="events-list">
+  <ng-container shell-table-body>
     @if (events_().length === 0) {
       <app-empty-state
         messageKey="menu_empty_library"
@@ -110,68 +62,63 @@
       <app-empty-state messageKey="no_menus_match" icon="search" />
     }
     @for (event of filteredEvents_(); track event._id) {
-      <article
-        class="event-card"
-        (click)="onOpen(event)"
-        (keydown.enter)="onOpen(event)"
-        (keydown.space)="$event.preventDefault(); onOpen(event)"
-        tabindex="0"
-        role="button"
-      >
-        <div class="card-main">
-          <h3 class="card-title">{{ event.name }}</h3>
-          <p class="card-subtitle">
-            {{ event.eventType | translatePipe }} · {{ event.eventDate || ('menu_no_date' | translatePipe) }}
-          </p>
+      <div class="c-list-row c-list-row--link" role="row" (click)="onOpen(event)">
+        <div class="c-list-body-cell name-cell" role="cell">
+          <a class="c-row-link" [routerLink]="['/menu-intelligence', event._id]" (click)="$event.stopPropagation()">{{
+            event.name
+          }}</a>
+          <span class="event-date">{{ event.eventDate || ('menu_no_date' | translatePipe) }}</span>
         </div>
-        <div class="card-tags">
+        <div class="c-list-body-cell c-chip-group c-chip-group--tight" role="cell">
           <span
-            class="tag stage"
-            [class.stage--lost]="event.stage === 'not_closed'"
-            [class.stage--done]="event.stage === 'finished'"
+            class="c-chip c-chip--tag c-chip--sm"
+            [class.c-chip--teal]="isActiveStage(event.stage)"
+            [class.c-chip--red]="event.stage === 'not_closed'"
             >{{ stageLabelKey(event.stage ?? 'inquiry') | translatePipe }}</span
           >
           @if (event.legacy) {
-            <span class="tag legacy">{{ 'event_legacy' | translatePipe }}</span>
+            <span class="c-chip c-chip--tag c-chip--sm">{{ 'event_legacy' | translatePipe }}</span>
           }
-          <span class="tag cost"
-            >{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}
+        </div>
+        <div class="col-cost c-list-body-cell" role="cell">
+          <span class="c-chip c-chip--tag c-chip--sm" [class.c-chip--amber]="event.pricing?.partial">
+            {{ getFoodCostPctDisplay(event) }}
             @if (event.pricing?.partial) {
-              <span class="tag-value">{{ 'partial_total' | translatePipe }}</span>
+              {{ 'partial_total' | translatePipe }}
             }
           </span>
-          <span class="tag sale"
-            >{{ 'menu_total_revenue' | translatePipe }}:
-            <span class="tag-value" dir="ltr">{{ getTotalSalePriceDisplay(event) }}</span></span
-          >
-          <span class="tag guests"
-            >{{ 'menu_guests' | translatePipe }}
-            <span class="tag-value" dir="ltr">{{ getGuestCountDisplay(event) }}</span></span
-          >
         </div>
-        <div class="card-actions" (click)="$event.stopPropagation()">
+        <div class="col-sale c-list-body-cell" role="cell">
+          <span class="c-chip c-chip--tag c-chip--sm c-chip--teal" dir="ltr">{{
+            getTotalSalePriceDisplay(event)
+          }}</span>
+        </div>
+        <div class="col-guests c-list-body-cell" role="cell">
+          <span class="c-chip c-chip--tag c-chip--sm" dir="ltr">{{ getGuestCountDisplay(event) }}</span>
+        </div>
+        <app-row-actions-menu class="c-list-body-cell" role="cell">
           <button
             type="button"
-            class="action-btn edit"
-            (click)="onOpen(event)"
+            class="c-icon-btn"
+            (click)="onOpen(event); $event.stopPropagation()"
             [attr.aria-label]="'edit' | translatePipe"
             [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
           >
-            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
           </button>
           @if (cloningId_() === event._id) {
             <app-loader size="small" [inline]="true" />
           } @else {
             <button
               type="button"
-              class="action-btn clone"
-              (click)="onClone(event)"
+              class="c-icon-btn"
+              (click)="onClone(event); $event.stopPropagation()"
               [attr.aria-label]="'menu_clone' | translatePipe"
               [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
-              <lucide-icon name="copy" [size]="18"></lucide-icon>
+              <lucide-icon name="copy" [size]="16"></lucide-icon>
             </button>
           }
           @if (deletingId_() === event._id) {
@@ -179,21 +126,92 @@
           } @else {
             <button
               type="button"
-              class="action-btn delete"
-              (click)="onDelete(event)"
+              class="c-icon-btn danger"
+              (click)="onDelete(event); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
               [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
-              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
             </button>
           }
-        </div>
-      </article>
+        </app-row-actions-menu>
+      </div>
     }
-  </div>
-</div>
+  </ng-container>
 
-@if (isInquiryOpen_()) {
-  <app-new-inquiry-dialog (saved)="closeInquiry()" (cancelled)="closeInquiry()" />
-}
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="resetFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="c-filter-section">
+      <div class="c-filter-category">
+        <span class="filter-label">{{ 'stage_filter' | translatePipe }}</span>
+        <app-custom-select
+          [ngModel]="stageFilter_()"
+          (ngModelChange)="stageFilter_.set($event)"
+          [options]="stageOptions_"
+          placeholder="stage_filter_active"
+        />
+      </div>
+      <div class="c-filter-category">
+        <span class="filter-label">{{ 'menu_event_type' | translatePipe }}</span>
+        <app-custom-select
+          [ngModel]="eventTypeFilter_()"
+          (ngModelChange)="eventTypeFilter_.set($event)"
+          [options]="eventTypeSelectOptions_()"
+          placeholder="all"
+          [typeToFilter]="true"
+        />
+      </div>
+      <div class="c-filter-category">
+        <span class="filter-label">{{ 'menu_serving_style' | translatePipe }}</span>
+        <app-custom-select
+          [ngModel]="servingStyleFilter_()"
+          (ngModelChange)="servingStyleFilter_.set($event)"
+          [options]="servingStyleOptions_"
+          placeholder="all"
+          [typeToFilter]="true"
+        />
+      </div>
+      <div class="c-filter-category">
+        <span class="filter-label">{{ 'menu_date_from' | translatePipe }}</span>
+        <app-date-field
+          inputId="menu-library-date-from"
+          ariaLabelKey="menu_date_from"
+          variant="outline"
+          [(value)]="dateFrom_"
+        />
+      </div>
+      <div class="c-filter-category">
+        <span class="filter-label">{{ 'sort' | translatePipe }}</span>
+        <app-custom-select
+          [ngModel]="sortBy_()"
+          (ngModelChange)="sortBy_.set($event)"
+          [options]="sortBySelectOptions_"
+          placeholder="sort"
+          [typeToFilter]="true"
+        />
+        <button
+          type="button"
+          class="c-btn-ghost--sm"
+          (click)="toggleSortOrder()"
+          [attr.aria-label]="getSortOrderLabel() | translatePipe"
+        >
+          {{ getSortOrderLabel() | translatePipe }}
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (isInquiryOpen_()) {
+      <app-new-inquiry-dialog (saved)="closeInquiry()" (cancelled)="closeInquiry()" />
+    }
+  </ng-container>
+</app-list-shell>

@@ -16,7 +16,7 @@
           [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
         >
           <span>{{ 'edit_recipe' | translatePipe }}</span>
-          <lucide-icon name="pencil" [size]="20"></lucide-icon>
+          <lucide-icon name="pencil" [size]="18"></lucide-icon>
         </button>
         <div class="cv-menu-sep"></div>
         }
@@ -111,14 +111,14 @@
         [attr.aria-label]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
         [attr.title]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
       >
-        <lucide-icon [name]="isDarkTheme_() ? 'sun' : 'moon'" [size]="20"></lucide-icon>
+        <lucide-icon [name]="isDarkTheme_() ? 'sun' : 'moon'" [size]="18"></lucide-icon>
       </button>
     </ng-template>
 
     <!-- Phone top bar (up to 620px, where the app header is hidden): back, title, theme, more -->
     <div class="cv-topbar">
       <button type="button" class="cv-icon-btn" (click)="goBack()" [attr.aria-label]="'back' | translatePipe">
-        <lucide-icon name="arrow-right" [size]="22"></lucide-icon>
+        <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
       </button>
       <h1 class="cv-topbar-title">{{ recipe.nameHebrew }}</h1>
       <ng-container *ngTemplateOutlet="themeToggle"></ng-container>
@@ -131,7 +131,7 @@
           [attr.aria-label]="'more_actions' | translatePipe"
           [attr.aria-expanded]="cookExport.isExportBarExpanded_()"
         >
-          <lucide-icon name="more-vertical" [size]="22"></lucide-icon>
+          <lucide-icon name="more-vertical" [size]="18"></lucide-icon>
         </button>
         @if (cookExport.isExportBarExpanded_()) {
         <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: !isEditMode_() }"></ng-container>
@@ -196,7 +196,7 @@
       <div class="cv-ph-scrim" aria-hidden="true"></div>
       }
       <button type="button" class="cv-back" (click)="goBack()" [attr.aria-label]="'back' | translatePipe">
-        <lucide-icon name="arrow-right" [size]="20"></lucide-icon>
+        <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
       </button>
       <div class="cv-ph-text">
         <h1 class="cv-ph-title">{{ recipe.nameHebrew }}</h1>
@@ -317,7 +317,7 @@
           >
           @if (allIngredientsChecked_() && ingredientCheckProgress_().total > 0) {
           <span class="cv-ready-badge">
-            <lucide-icon name="check" [size]="13"></lucide-icon>
+            <lucide-icon name="check" [size]="14"></lucide-icon>
             {{ 'all_ingredients_ready_label' | translatePipe }}
           </span>
           }
@@ -475,7 +475,7 @@
                   >
                     {{ row.name }} @if (scaleByIngredientIndex_() === i) {
                     <span class="cv-source-pill">
-                      <lucide-icon name="pin" [size]="11"></lucide-icon>
+                      <lucide-icon name="pin" [size]="14"></lucide-icon>
                       {{ 'source_ingredient' | translatePipe }}
                     </span>
                     }
@@ -483,7 +483,7 @@
                   <span class="cv-ing-amt cv-num">{{ getDisplayAmount(i, row) | formatQuantity }}</span>
                   <span class="cv-ing-unit">
                     {{ getDisplayUnit(i, row) | translatePipe }} @if (row.availableUnits.length > 1) {
-                    <lucide-icon name="arrow-left-right" [size]="12"></lucide-icon>
+                    <lucide-icon name="arrow-left-right" [size]="14"></lucide-icon>
                     }
                   </span>
                   <button
@@ -594,9 +594,9 @@
               (click)="$event.stopPropagation(); cookTimer.dismissTimerDone(si)"
               (keydown.enter)="$event.stopPropagation(); cookTimer.dismissTimerDone(si)"
             >
-              <lucide-icon name="timer" [size]="13"></lucide-icon>
+              <lucide-icon name="timer" [size]="14"></lucide-icon>
               {{ 'timer_done' | translatePipe }}
-              <lucide-icon name="x" [size]="13"></lucide-icon>
+              <lucide-icon name="x" [size]="14"></lucide-icon>
             </span>
             } @else if (cookTimer.hasCountdown(si)) {
             <span
@@ -606,9 +606,9 @@
               (click)="$event.stopPropagation(); cookTimer.toggleTimer(si)"
               (keydown.enter)="$event.stopPropagation(); cookTimer.toggleTimer(si)"
             >
-              <lucide-icon name="timer" [size]="13"></lucide-icon>
+              <lucide-icon name="timer" [size]="14"></lucide-icon>
               {{ cookTimer.timerDisplay(si) }}
-              <lucide-icon [name]="cookTimer.isTimerPaused(si) ? 'play' : 'pause'" [size]="12"></lucide-icon>
+              <lucide-icon [name]="cookTimer.isTimerPaused(si) ? 'play' : 'pause'" [size]="14"></lucide-icon>
             </span>
             } @if (cookTimer.hasStopwatch(si)) {
             <span
@@ -618,9 +618,9 @@
               (click)="$event.stopPropagation(); cookTimer.toggleStopwatch(si)"
               (keydown.enter)="$event.stopPropagation(); cookTimer.toggleStopwatch(si)"
             >
-              <lucide-icon name="watch" [size]="13"></lucide-icon>
+              <lucide-icon name="watch" [size]="14"></lucide-icon>
               {{ cookTimer.stopwatchDisplay(si) }}
-              <lucide-icon [name]="cookTimer.isStopwatchPaused(si) ? 'play' : 'pause'" [size]="12"></lucide-icon>
+              <lucide-icon [name]="cookTimer.isStopwatchPaused(si) ? 'play' : 'pause'" [size]="14"></lucide-icon>
             </span>
             }
           </ng-template>
@@ -639,7 +639,7 @@
                 {{ row.name }}
               </p>
               <button type="button" class="cv-go" (click)="markStepDone(si)">
-                <lucide-icon name="check" [size]="20"></lucide-icon>
+                <lucide-icon name="check" [size]="18"></lucide-icon>
                 {{ 'mark_step_done' | translatePipe }}
               </button>
             </div>
@@ -651,7 +651,7 @@
               (click)="unmarkStepDone(si)"
               [attr.aria-label]="'reopen_step' | translatePipe"
             >
-              <span class="cv-ok"><lucide-icon name="check" [size]="15"></lucide-icon></span>
+              <span class="cv-ok"><lucide-icon name="check" [size]="16"></lucide-icon></span>
               <s>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</s>
               <lucide-icon class="cv-dn-undo" name="undo-2" [size]="18"></lucide-icon>
             </button>
@@ -663,7 +663,7 @@
               >
             </button>
             } } } @else {
-            <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
+            <app-empty-state [compact]="true" messageKey="no_preparations_defined" />
             } } @else {
             <!-- Recipe mode: done rows · active card · pending rows -->
             @if (recipe.steps && recipe.steps.length) { @for (step of recipe.steps; track step.order; let si = $index) {
@@ -782,7 +782,7 @@
               }
 
               <button type="button" class="cv-go" (click)="markStepDone(si)">
-                <lucide-icon name="check" [size]="20"></lucide-icon>
+                <lucide-icon name="check" [size]="18"></lucide-icon>
                 {{ 'mark_step_done' | translatePipe }}
               </button>
             </div>
@@ -795,7 +795,7 @@
               (click)="unmarkStepDone(si)"
               [attr.aria-label]="'reopen_step' | translatePipe"
             >
-              <span class="cv-ok"><lucide-icon name="check" [size]="15"></lucide-icon></span>
+              <span class="cv-ok"><lucide-icon name="check" [size]="16"></lucide-icon></span>
               <s>{{ step.instruction }}</s>
               <ng-container *ngTemplateOutlet="rowPills; context: { si: si }"></ng-container>
               <lucide-icon class="cv-dn-undo" name="undo-2" [size]="18"></lucide-icon>
@@ -813,16 +813,16 @@
               <ng-container *ngTemplateOutlet="rowPills; context: { si: si }"></ng-container>
               @if (stepMinutes(step) > 0 && !cookTimer.hasCountdown(si)) {
               <span class="cv-pd-min cv-num">
-                <lucide-icon name="timer" [size]="13"></lucide-icon>
+                <lucide-icon name="timer" [size]="14"></lucide-icon>
                 {{ stepMinutes(step) }} {{ 'min' | translatePipe }}
               </span>
               }
             </button>
             } } } @else {
-            <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+            <app-empty-state [compact]="true" messageKey="no_steps_defined" />
             } } @if (cookingComplete_()) {
             <div class="cv-fin-ban">
-              <lucide-icon name="party-popper" [size]="22"></lucide-icon>
+              <lucide-icon name="party-popper" [size]="18"></lucide-icon>
               {{ 'cooking_complete_label' | translatePipe }}
             </div>
             }
@@ -850,13 +850,13 @@
   <app-approve-stamp [approved]="recipe.isApproved" [disabled]="isSaving_()" (approve)="onApproveStamp()" />
   } @else {
   <!-- Enhanced empty state: friendly icon, CTA, recent recipe quick-picks -->
-  <div class="cook-view-empty">
-    <lucide-icon name="utensils" [size]="48"></lucide-icon>
-    <p>{{ 'pick_recipe_to_cook' | translatePipe }}</p>
-    <a routerLink="/recipe-book" class="cv-pill-btn cv-pill-btn--primary">
-      <lucide-icon name="book-open" [size]="16"></lucide-icon>
-      {{ 'recipe_book' | translatePipe }}
-    </a>
+  <div class="cv-no-recipe">
+    <app-empty-state
+      icon="utensils"
+      messageKey="pick_recipe_to_cook"
+      ctaLabelKey="recipe_book"
+      (ctaClick)="goToRecipeBook()"
+    />
     @if (recentRecipes_().length > 0) {
     <div class="cv-recent-chips">
       <span class="cv-recent-label">{{ 'recent_recipes' | translatePipe }}</span>

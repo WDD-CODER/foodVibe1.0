@@ -247,4 +247,74 @@
       <div class="c-glass-panel dc-card">c-glass-panel</div>
     </div>
   </section>
+
+  <section id="style-pieces" class="dc-section">
+    <h2>style-pieces</h2>
+    <code>.c-page--narrow</code>
+    <div class="c-page c-page--narrow">
+      <div class="c-glass-panel dc-card">c-page--narrow</div>
+    </div>
+    <code>.c-list c-list--plain inside .c-glass-panel, then .c-list in the page</code>
+    <div class="c-glass-panel dc-card">
+      <ul class="c-list c-list--plain" role="list">
+        @for (item of items_; track item.id) {
+        <li class="c-list-row c-list-row--link" role="listitem" [class.is-selected]="item.id === selectedId_()">
+          <span class="c-list-body-cell"><a class="c-row-link" href="#style-pieces">{{ item.name }}</a></span>
+          <span class="c-list-body-cell c-list-body-cell--end c-num">{{ item.qty }}</span>
+        </li>
+        }
+      </ul>
+    </div>
+    <ul class="c-list" role="list">
+      @for (item of items_; track item.id) {
+      <li class="c-list-row" role="listitem" [class.is-selected]="item.id === selectedId_()">
+        <span class="c-list-body-cell">{{ item.name }}</span>
+        <span class="c-list-body-cell c-list-body-cell--end c-num">{{ item.qty }}</span>
+      </li>
+      }
+    </ul>
+    <code>.c-stat-tile, .c-stat-tile--hero</code>
+    <div class="dc-grid">
+      <div class="c-stat-tile">
+        <div class="c-stat-tile__top"><span class="c-stat-tile__label">{{ stat_.label }}</span></div>
+        <span class="c-stat-tile__value">{{ stat_.value }}</span>
+        <span class="c-stat-tile__note">{{ stat_.note }}</span>
+      </div>
+      <div class="c-stat-tile c-stat-tile--hero">
+        <div class="c-stat-tile__top"><span class="c-stat-tile__label">{{ stat_.label }}</span></div>
+        <span class="c-stat-tile__value">{{ stat_.value }}</span>
+        <span class="c-stat-tile__note">{{ stat_.note }}</span>
+      </div>
+    </div>
+    <code>.c-card-head</code>
+    <div class="c-glass-panel dc-card">
+      <div class="c-card-head">
+        <h3 class="c-card-head__title">c-card-head</h3>
+        <a class="c-card-head__end c-row-link" href="#style-pieces">link</a>
+      </div>
+    </div>
+    <code>.c-form-page</code>
+    <div class="c-form-page">c-form-page</div>
+    <code>.c-table c-table--compact</code>
+    <table class="c-table c-table--compact">
+      <thead>
+        <tr>
+          <th>name</th>
+          <th>qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items_; track item.id) {
+        <tr>
+          <td>{{ item.name }}</td>
+          <td class="c-num">{{ item.qty }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    <code>.c-empty-state--compact</code>
+    <div class="c-glass-panel dc-card">
+      <app-empty-state messageKey="empty_inventory" icon="inbox" [compact]="true" />
+    </div>
+  </section>
 </main>

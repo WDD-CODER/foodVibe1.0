@@ -52,6 +52,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
 import { failedSaveMessage } from 'src/app/core/utils/product-form-errors.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
@@ -118,6 +119,7 @@ const SERVER_FIELD_MAP: Record<string, string> = {
     SelectOnFocusDirective,
     TranslatePipe,
     LoaderComponent,
+    PageHeaderComponent,
     CustomSelectComponent,
     ChipSearchDropdownComponent,
     ProductPriceLockComponent,

@@ -1,53 +1,59 @@
-<section class="manager-card c-glass-panel" (appClickOutside)="onClickOutside($event)">
-  <div class="card-title">
-    <lucide-icon name="scale" class="icon-primary"></lucide-icon>
-    <h2>{{ 'metadata_coefficients_title' | translatePipe }}</h2>
-  </div>
-  <p class="card-desc">{{ 'metadata_coefficients_desc' | translatePipe }}</p>
+<section class="c-glass-panel mm-card" (appClickOutside)="onClickOutside($event)">
+  <header class="c-card-head">
+    <lucide-icon name="scale" class="c-card-head__icon" [size]="18"></lucide-icon>
+    <h2 class="c-card-head__title">{{ 'metadata_coefficients_title' | translatePipe }}</h2>
+  </header>
+  <p class="mm-card-desc">{{ 'metadata_coefficients_desc' | translatePipe }}</p>
 
   <h3 class="list-title">{{ 'metadata_event_types_title' | translatePipe }}</h3>
-  <ul class="coef-list">
+  <ul class="c-list c-list--plain mm-coef-list" role="list">
     @for (term of eventTypes_(); track term.key) {
-      <li class="coef-row" appNumberBox>
-        <span class="coef-name">{{ term.key | translatePipe }}</span>
-        @if (!canEdit(term)) {
-          <lucide-icon
-            name="lock"
-            [size]="14"
-            [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-            [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-          ></lucide-icon>
-        }
-        <input
-          #coefInput
-          appSelectOnFocus
-          type="number"
-          inputmode="decimal"
-          step="0.01"
-          min="0.01"
-          class="c-input coef-input"
-          [attr.aria-label]="'coefficient_label' | translatePipe"
-          [attr.data-coef-row]="rowId('eventType', term)"
-          [attr.aria-invalid]="isRowInvalid(rowId('eventType', term)) ? 'true' : null"
-          [value]="formatCoefficient(term.coefficient ?? 1)"
-          [disabled]="!canEdit(term)"
-          (input)="onDraftInput('eventType', term, coefInput.value)"
-          (keyup.enter)="onSave()"
-        />
-        @if (canEdit(term)) {
-          <button
-            type="button"
-            class="c-icon-btn danger"
-            [attr.aria-label]="'delete' | translatePipe"
-            [attr.title]="'delete' | translatePipe"
-            (click)="onDeleteEventType(term)"
-          >
-            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-          </button>
-        }
+      <li class="c-list-row" role="listitem">
+        <span class="c-list-body-cell coef-name">
+          {{ term.key | translatePipe }}
+          @if (!canEdit(term)) {
+            <lucide-icon
+              name="lock"
+              [size]="14"
+              [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+              [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+            ></lucide-icon>
+          }
+        </span>
+        <span class="c-list-body-cell" appNumberBox>
+          <input
+            #coefInput
+            appSelectOnFocus
+            type="number"
+            inputmode="decimal"
+            step="0.01"
+            min="0.01"
+            class="c-input coef-input"
+            [attr.aria-label]="'coefficient_label' | translatePipe"
+            [attr.data-coef-row]="rowId('eventType', term)"
+            [attr.aria-invalid]="isRowInvalid(rowId('eventType', term)) ? 'true' : null"
+            [value]="formatCoefficient(term.coefficient ?? 1)"
+            [disabled]="!canEdit(term)"
+            (input)="onDraftInput('eventType', term, coefInput.value)"
+            (keyup.enter)="onSave()"
+          />
+        </span>
+        <span class="c-list-body-cell c-col-actions">
+          @if (canEdit(term)) {
+            <button
+              type="button"
+              class="c-icon-btn danger"
+              [attr.aria-label]="'delete' | translatePipe"
+              [attr.title]="'delete' | translatePipe"
+              (click)="onDeleteEventType(term)"
+            >
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+            </button>
+          }
+        </span>
       </li>
       @if (isRowInvalid(rowId('eventType', term))) {
-        <li class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</li>
+        <li class="c-field-error mm-coef-error" role="listitem">{{ 'coefficient_invalid' | translatePipe }}</li>
       }
     }
   </ul>
@@ -84,37 +90,42 @@
   }
 
   <h3 class="list-title">{{ 'metadata_serving_types_title' | translatePipe }}</h3>
-  <ul class="coef-list">
+  <ul class="c-list c-list--plain mm-coef-list" role="list">
     @for (term of servingTypes_(); track term.key) {
-      <li class="coef-row" appNumberBox>
-        <span class="coef-name">{{ term.key | translatePipe }}</span>
-        @if (!canEdit(term)) {
-          <lucide-icon
-            name="lock"
-            [size]="14"
-            [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-            [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-          ></lucide-icon>
-        }
-        <input
-          #servingInput
-          appSelectOnFocus
-          type="number"
-          inputmode="decimal"
-          step="0.01"
-          min="0.01"
-          class="c-input coef-input"
-          [attr.aria-label]="'coefficient_label' | translatePipe"
-          [attr.data-coef-row]="rowId('menuType', term)"
-          [attr.aria-invalid]="isRowInvalid(rowId('menuType', term)) ? 'true' : null"
-          [value]="formatCoefficient(term.coefficient ?? 1)"
-          [disabled]="!canEdit(term)"
-          (input)="onDraftInput('menuType', term, servingInput.value)"
-          (keyup.enter)="onSave()"
-        />
+      <li class="c-list-row" role="listitem">
+        <span class="c-list-body-cell coef-name">
+          {{ term.key | translatePipe }}
+          @if (!canEdit(term)) {
+            <lucide-icon
+              name="lock"
+              [size]="14"
+              [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+              [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+            ></lucide-icon>
+          }
+        </span>
+        <span class="c-list-body-cell" appNumberBox>
+          <input
+            #servingInput
+            appSelectOnFocus
+            type="number"
+            inputmode="decimal"
+            step="0.01"
+            min="0.01"
+            class="c-input coef-input"
+            [attr.aria-label]="'coefficient_label' | translatePipe"
+            [attr.data-coef-row]="rowId('menuType', term)"
+            [attr.aria-invalid]="isRowInvalid(rowId('menuType', term)) ? 'true' : null"
+            [value]="formatCoefficient(term.coefficient ?? 1)"
+            [disabled]="!canEdit(term)"
+            (input)="onDraftInput('menuType', term, servingInput.value)"
+            (keyup.enter)="onSave()"
+          />
+        </span>
+        <span class="c-list-body-cell c-col-actions"></span>
       </li>
       @if (isRowInvalid(rowId('menuType', term))) {
-        <li class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</li>
+        <li class="c-field-error mm-coef-error" role="listitem">{{ 'coefficient_invalid' | translatePipe }}</li>
       }
     }
   </ul>

@@ -1,6 +1,8 @@
 @let s = service();
-<section class="ts-card c-glass-card" data-testid="table-service-card">
-  <h2 class="ts-title">{{ 'fd_ts_title' | translatePipe }}</h2>
+<section class="ts-card c-glass-panel" data-testid="table-service-card">
+  <div class="c-card-head">
+    <h2 class="c-card-head__title">{{ 'fd_ts_title' | translatePipe }}</h2>
+  </div>
 
   <div class="ts-mode">
     <label class="c-chip c-chip--toggle">
@@ -64,7 +66,7 @@
             @if (s.turnMinutes.length > 1) {
               <button
                 type="button"
-                class="c-btn-ghost"
+                class="c-icon-btn"
                 data-testid="ts-ladder-remove"
                 [attr.aria-label]="'remove' | translatePipe"
                 (click)="removeStep_(i)"

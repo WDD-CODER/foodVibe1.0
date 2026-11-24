@@ -31,16 +31,7 @@
   }
 
   .loading-table {
-    inline-size: 100%;
-    border-collapse: collapse;
     font-variant-numeric: tabular-nums;
-
-    th,
-    td {
-      padding: var(--space-1) var(--space-2);
-      text-align: start;
-      border-block-end: 1px solid var(--border-subtle, currentColor);
-    }
 
     .col-tick {
       inline-size: 2.5rem;

@@ -14,7 +14,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  gap: 0.25rem;
+  gap: var(--space-1);
   block-size: 3.5rem;
 }
 
@@ -48,7 +48,7 @@
 
 .strip-summary,
 .strip-failed {
-  margin-block: 0.25rem 0;
+  margin-block: var(--space-1) 0;
   font-size: var(--fs-xs);
   color: var(--color-text-muted);
 }

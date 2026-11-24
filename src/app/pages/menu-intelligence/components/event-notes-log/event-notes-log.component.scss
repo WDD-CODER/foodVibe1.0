@@ -10,11 +10,6 @@
     gap: var(--space-3);
 
     padding: var(--space-4);
-
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-
-    background: var(--bg-glass-strong);
   }
 
   .notes-title {
@@ -50,13 +45,6 @@
   .notes-counter {
     color: var(--color-text-muted);
     font-size: var(--fs-xs);
-  }
-
-  .notes-empty {
-    margin: 0;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
   }
 
   .notes-list {
@@ -105,30 +93,6 @@
     gap: var(--space-1);
 
     margin-inline-start: auto;
-  }
-
-  .note-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-inline-size: 2rem;
-    min-block-size: 2rem;
-
-    border: 0;
-    border-radius: var(--radius-sm);
-
-    background: transparent;
-    color: var(--color-text-muted);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--color-text-main);
-    }
-
-    &.note-delete:hover {
-      color: var(--color-danger);
-    }
   }
 
   .note-text {

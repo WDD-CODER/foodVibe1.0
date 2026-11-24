@@ -76,6 +76,7 @@ describe('DiagnosisWorkspaceComponent', () => {
   it('shows the name and the invoices tab by default; ?tab= picks another', async () => {
     await setup(async () => ({ diagnosis: stored('open'), volatility: [] }))
     expect(byId('diagnosis-title')!.textContent).toContain('Client')
+    expect(byId('diagnosis-title')!.closest('app-page-header h1')).not.toBeNull()
     expect(byId('stub-invoices')).not.toBeNull()
     expect(byId('stub-menu')).toBeNull()
     query$.next(convertToParamMap({ tab: 'report' }))

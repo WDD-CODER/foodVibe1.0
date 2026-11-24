@@ -4166,6 +4166,188 @@
       "notes": "Unit tests for the Style QA sign-in wrapper (bearer header on API requests only)."
     },
     {
+      "path": "scripts/lib/style-guard.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/styleqa/static-checks.mjs"
+      ],
+      "notes": "Plan 703: styleFindings — the style guard later style plans use as their [auto] check (stylesheet and template rules)."
+    },
+    {
+      "path": "scripts/test/style-guard.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 703: fixture tests of the style guard."
+    },
+    {
+      "path": "scripts/test/style-703.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs",
+        "src/styles.scss"
+      ],
+      "notes": "Plan 703: the catalog is clean, each new engine is defined once, and src/styles.scss is append-only above the plan marker."
+    },
+    {
+      "path": "scripts/test/style-704.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 704: the menu library and the trash sit on the shared list page and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-705.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 705: the bookings agenda, waiting list, table sheet and service lists sit on the shared rows and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-706.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 706: the requests queue, its dialogs and the inbox sit on the shared frame, rows and fields and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-707.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 707: clients, settings and knowledge sit on the shared rows, fields and empty states and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-708.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 708: front desk settings, onboarding and the guest booking pages sit on the shared loader, empty state, card head and chips and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-709.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 709: the dashboard tiles, card heads, activity feed, chips and empty states sit on the shared pieces and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-710.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 710: the platform page, the diagnosis screens and the report sit on the shared tables, tiles, loader, empty state and header and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-712.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 712: the product, equipment and supplier forms, the product import and the suppliers sub-nav sit on the shared frame, header, table and chips and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-711.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 711: the product, equipment, supplier and stock-count lists sit on the shared rows, empty state, chips and popup sheet and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-715.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 715: the recipe book and recipe builder sit on the shared empty state, panel, chips, buttons and tokens and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-716.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 716: the cook view keeps its ink skin on tokens, the shared empty state and the four icon sizes, and passes the style guard."
+    },
+    {
+      "path": "scripts/test/style-718.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs",
+        "scripts/lib/registry-families.mjs"
+      ],
+      "notes": "Plan 718: runs the style guard over every file plans 704–717 converged and checks the three new reuse-lint rules."
+    },
+    {
+      "path": "scripts/test/style-717.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 717: the event-menu editor keeps its paper skin on tokens and uses the shared tab chips, panel, empty state and table, and passes the style guard."
+    },
+    {
+      "path": "scripts/test/style-714.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 714: the metadata manager cards sit on the shared panel, head, rows, empty state and loader and pass the style guard."
+    },
+    {
+      "path": "scripts/test/style-713.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 713: the menu and recipe popups sit on the shared popup frame, empty state and table and pass the style guard."
+    },
+    {
       "path": "scripts/test/breakpoints-no-literals.test.mjs",
       "tier": "project",
       "action": "stay",

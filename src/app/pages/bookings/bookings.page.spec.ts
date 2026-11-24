@@ -48,10 +48,11 @@ describe('BookingsPage (plan 552)', () => {
   let userMsg: jasmine.SpyObj<UserMsgService>
   const el = (): HTMLElement => fixture.nativeElement
 
-  async function setup(list: Booking[]): Promise<void> {
+  async function setup(list: Booking[], loading = false, view = ''): Promise<void> {
+    const params = convertToParamMap(view ? { view } : {})
     bookingData = {
       all_: signal(list),
-      ensureLoaded: () => Promise.resolve(),
+      ensureLoaded: () => (loading ? new Promise<void>(() => undefined) : Promise.resolve()),
       reloadFromStorage: jasmine.createSpy('reloadFromStorage').and.resolveTo(),
       setStatus: jasmine.createSpy('setStatus').and.resolveTo({ ok: true })
     }
@@ -80,6 +81,9 @@ describe('BookingsPage (plan 552)', () => {
       ],
       providers: [
         provideRouter([]),
+        ...(view
+          ? [{ provide: ActivatedRoute, useValue: { queryParamMap: of(params), snapshot: { queryParamMap: params } } }]
+          : []),
         { provide: ModuleService, useValue: { has: () => false } },
         { provide: BookingDataService, useValue: bookingData },
         { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(true) } },
@@ -96,6 +100,26 @@ describe('BookingsPage (plan 552)', () => {
   it('shows the empty state when the day has no bookings', async () => {
     await setup([])
     expect(el().querySelector('app-empty-state')?.textContent).toContain('bk_empty_day')
+  })
+
+  it('renders one loader while the bookings load (plan 705)', async () => {
+    await setup([], true)
+    expect(el().querySelectorAll('app-loader').length).toBe(1)
+    expect(el().querySelector('app-empty-state')).toBeNull()
+  })
+
+  it('draws two bookings at the same time as two shared rows under one time heading (plan 705)', async () => {
+    await setup([booking('a', 'confirmed', Date.now() + 3600_000), booking('b', 'confirmed', Date.now() + 3600_001)])
+    expect(el().querySelectorAll('.c-list-row').length).toBe(2)
+    expect(el().querySelectorAll('.bk-time').length).toBe(1)
+    expect(el().querySelector('article')).toBeNull()
+  })
+
+  it('a week day with no booking shows a compact empty state (plan 705)', async () => {
+    await setup([], false, 'week')
+    expect(el().querySelectorAll('section.bk-day app-empty-state').length).toBe(7)
+    expect(el().querySelector('section.bk-day app-empty-state')?.textContent).toContain('bk_empty_day')
+    expect(el().querySelector('section.bk-day .c-empty-state--compact')).toBeTruthy()
   })
 
   it('offers "seated" on a confirmed booking and calls setStatus', async () => {

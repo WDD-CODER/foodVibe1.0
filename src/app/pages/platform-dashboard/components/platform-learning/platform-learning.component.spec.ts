@@ -194,7 +194,7 @@ describe('PlatformLearningComponent (plans 630, 647)', () => {
     dict['platform_learning_empty_private'] = '{count} פרטיים ואין נתונים'
     await setup(() => Promise.resolve(stats({ flows: [], privateBusinesses: 2 })))
     expect(el().querySelector('[data-testid="learning-empty-private"]')?.textContent).toContain('2 פרטיים')
-    expect(el().querySelector('app-empty-state')).toBeNull()
+    expect(el().querySelector('app-empty-state[data-testid="learning-empty-private"]')).not.toBeNull()
     delete dict['platform_learning_empty_private']
   })
 

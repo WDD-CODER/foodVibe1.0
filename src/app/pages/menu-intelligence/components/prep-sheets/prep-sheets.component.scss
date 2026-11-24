@@ -1,32 +1,97 @@
 @use '../../../../core/styles/breakpoints' as *;
+
+// The card lives in the shared popup frame (its own view), so it is reached through :host. These rules sit outside the
+// layer: the engine `.c-modal-card` / `.c-modal-overlay` (styles.scss) are unlayered and would beat a layered rule.
+:host ::ng-deep .prep-sheets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  inline-size: min(100%, 60rem);
+  max-inline-size: none;
+  min-block-size: 100dvh;
+  max-block-size: 100dvh;
+  overflow-y: auto;
+
+  padding: var(--space-3);
+
+  background: var(--bg-glass-strong);
+
+  @media (min-width: $break-tablet-min) {
+    min-block-size: 0;
+    max-block-size: calc(100dvh - var(--space-4) * 2);
+    margin-block: var(--space-4);
+
+    border-radius: var(--radius-xl);
+  }
+}
+
+// The table keeps its own paper look: black text and rules, over the shared compact table.
+.prep-table {
+  inline-size: 100%;
+
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: start;
+    overflow-wrap: anywhere;
+
+    background: none;
+    color: var(--paper-ink);
+    border-block-end: 1px solid var(--paper-ink);
+  }
+
+  th {
+    font-size: inherit;
+    font-weight: var(--fw-bold);
+    letter-spacing: normal;
+  }
+
+  td {
+    font-size: inherit;
+  }
+
+  tbody tr:hover {
+    background: none;
+  }
+}
+
+@media print {
+  // Only the sheet prints: the popup frame loses its backdrop, shadow and border.
+  :host ::ng-deep .c-modal-overlay {
+    position: static;
+
+    display: block;
+    overflow: visible;
+
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  :host ::ng-deep .prep-sheets {
+    display: block;
+
+    inline-size: auto;
+    max-inline-size: none;
+    min-block-size: 0;
+    max-block-size: none;
+    overflow: visible;
+
+    margin: 0;
+    padding: 0;
+
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}
+
 @layer components.prep-sheets {
   :host {
     display: contents;
-  }
-
-  // The engine's `.c-modal-overlay` (styles.scss) is unlayered and beats this layer, so the print reset of
-  // `.prep-overlay` lives in styles.scss. Here `.prep-sheets` scrolls itself, so the engine's centering is harmless.
-  .prep-sheets {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-
-    inline-size: min(100%, 60rem);
-    min-block-size: 100dvh;
-    max-block-size: 100dvh;
-    overflow-y: auto;
-
-    padding: var(--space-3);
-
-    background: var(--bg-glass-strong);
-
-    @media (min-width: $break-tablet-min) {
-      min-block-size: 0;
-      max-block-size: calc(100dvh - var(--space-4) * 2);
-      margin-block: var(--space-4);
-
-      border-radius: var(--radius-xl);
-    }
   }
 
   .prep-bar {
@@ -62,12 +127,6 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-  }
-
-  .prep-nothing {
-    margin: 0;
-
-    color: var(--color-text-muted);
   }
 
   .prep-choose {
@@ -114,10 +173,10 @@
   .prep-page {
     padding: var(--space-4);
 
-    color: black;
+    color: var(--paper-ink);
     font-size: 14pt;
 
-    background: white;
+    background: var(--paper-bg);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-glass);
@@ -131,38 +190,13 @@
     margin: 0;
 
     font-size: 20pt;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
   }
 
   .prep-meta {
     margin-block: var(--space-1) var(--space-3);
 
     font-size: 14pt;
-  }
-
-  .prep-empty {
-    margin: 0;
-  }
-
-  .prep-table {
-    inline-size: 100%;
-
-    border-collapse: collapse;
-
-    th,
-    td {
-      padding-block: var(--space-2);
-      padding-inline: var(--space-2);
-
-      text-align: start;
-      overflow-wrap: anywhere;
-
-      border-block-end: 1px solid black;
-    }
-
-    th {
-      font-weight: 700;
-    }
   }
 
   .prep-num {
@@ -179,25 +213,10 @@
     inline-size: 1.1rem;
     block-size: 1.1rem;
 
-    border: 1px solid black;
+    border: 1px solid var(--paper-ink);
   }
 
   @media print {
-    .prep-sheets {
-      display: block;
-
-      inline-size: auto;
-      min-block-size: 0;
-      max-block-size: none;
-      overflow: visible;
-
-      margin: 0;
-      padding: 0;
-
-      background: none;
-      border-radius: 0;
-    }
-
     .prep-papers {
       display: block;
     }
@@ -205,7 +224,7 @@
     .prep-page {
       padding: 0;
 
-      color: black;
+      color: var(--paper-ink);
 
       background: none;
       border: 0;

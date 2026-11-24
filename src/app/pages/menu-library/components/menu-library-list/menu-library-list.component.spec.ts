@@ -27,7 +27,9 @@ describe('MenuLibraryListComponent stage filter', () => {
   })
 
   const names = () =>
-    Array.from(fixture.nativeElement.querySelectorAll('.card-title')).map((n) => (n as HTMLElement).textContent?.trim())
+    Array.from(fixture.nativeElement.querySelectorAll('.c-list-row .c-row-link')).map((n) =>
+      (n as HTMLElement).textContent?.trim()
+    )
   const filter = () => component as unknown as { stageFilter_: { (): string; set(v: string): void } }
 
   beforeEach(async () => {
@@ -79,12 +81,41 @@ describe('MenuLibraryListComponent stage filter', () => {
   })
 
   it('shows a stage chip on every card and the "ישן" tag only on legacy events', () => {
-    const cards = Array.from(fixture.nativeElement.querySelectorAll('article.event-card')) as HTMLElement[]
+    const cards = Array.from(fixture.nativeElement.querySelectorAll('.c-list-row')) as HTMLElement[]
     expect(cards.length).toBe(4)
-    expect(cards.every((card) => !!card.querySelector('.tag.stage'))).toBeTrue()
-    const legacy = cards.filter((card) => !!card.querySelector('.tag.legacy'))
+    expect(cards.every((card) => !!card.querySelector('.c-chip--tag'))).toBeTrue()
+    const legacy = cards.filter((card) => (card.textContent ?? '').includes('event_legacy'))
     expect(legacy.length).toBe(1)
-    expect(legacy[0].querySelector('.card-title')?.textContent?.trim()).toBe('אירוע f')
+    expect(legacy[0].querySelector('.c-row-link')?.textContent?.trim()).toBe('אירוע f')
+  })
+
+  it('renders one .c-list-row per event', () => {
+    filter().stageFilter_.set('all')
+    fixture.detectChanges()
+    expect(fixture.nativeElement.querySelectorAll('.c-list-row').length).toBe(6)
+  })
+
+  it('a stage filter set to closed leaves only the closed event', () => {
+    filter().stageFilter_.set('finished')
+    fixture.detectChanges()
+    expect(names()).toEqual(['אירוע d'])
+  })
+
+  it('a search with no match renders an empty state', () => {
+    ;(component as unknown as { searchQuery_: { set(v: string): void } }).searchQuery_.set('zzzz-no-match')
+    fixture.detectChanges()
+    expect(fixture.nativeElement.querySelectorAll('.c-list-row').length).toBe(0)
+    expect(fixture.nativeElement.querySelector('app-empty-state')).not.toBeNull()
+  })
+
+  it("the row menu's delete runs the existing delete path", () => {
+    const c = component as unknown as { onDelete(e: MenuEvent): Promise<void> }
+    const spy = spyOn(c, 'onDelete').and.resolveTo()
+    const del = fixture.nativeElement.querySelector(
+      '.c-list-row app-row-actions-menu .c-icon-btn.danger'
+    ) as HTMLButtonElement
+    del.click()
+    expect(spy).toHaveBeenCalledTimes(1)
   })
 
   describe('revenue and food cost from the pricing summary (plan 445)', () => {
@@ -112,7 +143,7 @@ describe('MenuLibraryListComponent stage filter', () => {
     it('marks a partial summary on the card', () => {
       store.set([make('p', 'inquiry', { pricing: { ...pricing, partial: true } })])
       fixture.detectChanges()
-      expect(fixture.nativeElement.querySelector('.tag.cost')?.textContent).toContain('partial_total')
+      expect(fixture.nativeElement.querySelector('.c-list-row .col-cost')?.textContent).toContain('partial_total')
     })
 
     it('sorts by food cost % with events without pricing last, in both directions', () => {

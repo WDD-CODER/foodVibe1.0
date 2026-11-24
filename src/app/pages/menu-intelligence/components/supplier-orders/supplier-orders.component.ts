@@ -12,6 +12,7 @@ import {
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import type { RawLine } from 'src/app/core/engine/event-plan.types'
@@ -48,11 +49,10 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 @Component({
   selector: 'app-supplier-orders',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, PartialCostBadgeComponent],
+  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, PartialCostBadgeComponent, ModalShellComponent],
   templateUrl: './supplier-orders.component.html',
   styleUrl: './supplier-orders.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'close.emit()' }
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupplierOrdersComponent {
   // 1. INJECTED
@@ -220,10 +220,6 @@ export class SupplierOrdersComponent {
     } else {
       await this.copy(message)
     }
-  }
-
-  protected onOverlayClick(ev: MouseEvent): void {
-    if (ev.target === ev.currentTarget) this.close.emit()
   }
 
   private async copy(text: string, msgKey = 'supplier_orders_copied', warn = false): Promise<void> {

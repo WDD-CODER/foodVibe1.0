@@ -119,6 +119,35 @@ describe('KnowledgePage (plan 554)', () => {
     expect(el().querySelectorAll('[data-testid="knowledge-row"]').length).toBe(1)
   })
 
+  it('every text box in the add and import popups has c-input and the label renders once', () => {
+    type Popups = { openAdd: () => void; openImport: () => void; setImportTab: (t: 'text' | 'url') => void }
+    setup([])
+    const page = fixture.componentInstance as unknown as Popups
+    page.openAdd()
+    fixture.detectChanges()
+    const boxes = Array.from(el().querySelectorAll('app-modal-shell input[type="text"], app-modal-shell textarea'))
+    expect(boxes.length).toBeGreaterThan(0)
+    expect(boxes.every((b) => b.classList.contains('c-input'))).toBeTrue()
+    expect(el().querySelector('label[for="knowledge-question"]')?.textContent?.trim()).toBe('knowledge_question')
+    expect(el().querySelector('.c-modal-body')).not.toBeNull()
+    TestBed.resetTestingModule()
+    setup([])
+    const page2 = fixture.componentInstance as unknown as Popups
+    page2.openImport()
+    fixture.detectChanges()
+    expect(el().querySelector('textarea')?.classList.contains('c-input')).toBeTrue()
+    page2.setImportTab('url')
+    fixture.detectChanges()
+    expect(el().querySelector('input[type="url"]')?.classList.contains('c-input')).toBeTrue()
+  })
+
+  it('shows the no-match empty state when a search matches nothing', () => {
+    setup([item('1', 'faq')])
+    ;(fixture.componentInstance as unknown as { searchQuery_: { set: (v: string) => void } }).searchQuery_.set('zzz')
+    fixture.detectChanges()
+    expect(el().querySelector('app-empty-state')).not.toBeNull()
+  })
+
   it('the owner sees the add and import controls', () => {
     setup([])
     expect(el().querySelector('[data-testid="knowledge-add"]')).not.toBeNull()

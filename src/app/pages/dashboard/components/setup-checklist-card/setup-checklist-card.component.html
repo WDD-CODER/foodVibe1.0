@@ -5,10 +5,10 @@
     dir="rtl"
     [attr.aria-label]="'setup_card_title' | translatePipe"
   >
-    <header class="setup-card__head">
-      <span class="setup-card__icon"><lucide-icon name="clipboard-list" [size]="16" /></span>
-      <h2 class="setup-card__title">{{ 'setup_card_title' | translatePipe }}</h2>
-      <span class="setup-card__progress" data-testid="setup-progress">
+    <header class="c-card-head">
+      <span class="c-card-head__icon"><lucide-icon name="clipboard-list" [size]="18" /></span>
+      <h3 class="c-card-head__title">{{ 'setup_card_title' | translatePipe }}</h3>
+      <span class="c-card-head__end setup-card__progress" data-testid="setup-progress">
         {{ doneRequired() }} {{ 'setup_progress_of' | translatePipe }} {{ requiredTotal() }}
       </span>
       <button type="button" class="c-btn-ghost--sm" data-testid="setup-hide" (click)="hide()">
@@ -21,7 +21,7 @@
           @if (step.done) {
             <lucide-icon class="setup-step__mark" name="circle-check" [size]="18" data-testid="setup-step-done" />
           } @else {
-            <span class="setup-step__mark setup-step__mark--empty" aria-hidden="true"></span>
+            <span class="setup-step__mark setup-step__mark--open" aria-hidden="true"></span>
           }
           @if (step.done) {
             <span class="setup-step__label">{{ step.labelKey | translatePipe }}</span>

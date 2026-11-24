@@ -2,12 +2,12 @@
   <div class="tsh" data-testid="table-sheet">
     <header class="tsh__head">
       <div class="tsh__headline">
-        <h3 id="tsh-title" class="tsh__title" data-testid="tsh-title">{{ title_() }}</h3>
+        <p id="tsh-title" class="tsh__title" data-testid="tsh-title">{{ title_() }}</p>
         <span class="c-chip--tag c-chip--sm" data-testid="tsh-state">{{ stateLabel_() }}</span>
       </div>
       <button
         type="button"
-        class="c-btn-ghost c-btn-ghost--sm tsh__x"
+        class="c-icon-btn"
         data-testid="tsh-close"
         [attr.aria-label]="'close' | translatePipe"
         (click)="closed.emit()"

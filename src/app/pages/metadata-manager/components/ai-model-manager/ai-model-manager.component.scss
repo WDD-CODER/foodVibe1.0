@@ -1,124 +1,50 @@
 @use '../../../../core/styles/breakpoints' as *;
+
 :host {
   display: block;
 }
 
-.manager-card {
-  height: fit-content;
-
-  padding: 1.5rem;
-
-  background: var(--bg-glass-strong);
-
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-
-  @media (max-width: $break-phone-max) {
-    padding: 1rem;
-  }
+// grip · rank · name and usage · on-toggle
+.mm-model-list {
+  --list-cols: auto auto minmax(0, 1fr) auto;
 }
 
-.card-icon {
-  color: var(--color-primary);
-}
-
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-
-  margin-block-end: 1rem;
-  padding-block-end: 1rem;
-  border-block-end: 1px solid var(--border-default);
-
-  h2 {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--color-text-main);
-
-    margin: 0;
-  }
-}
-
-.card-desc {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-
-  margin: 0 0 1rem;
-}
-
-.model-list {
+// A display: contents element cannot be dragged, so the draggable AI-model rows are a subgrid
+// row spanning the list's columns. This rule is unlayered on purpose (host selector, so it beats
+// the engine's layered `.c-list-row { display: contents }`).
+:host .mm-model-row {
   display: grid;
-  gap: 0.5rem;
-
-  margin: 0;
-  padding: 0;
-
-  list-style: none;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
 }
 
-.model-row {
-  display: grid;
-  grid-template-columns: auto auto 1fr auto;
-  align-items: center;
-  gap: 0.75rem;
+// Retired by Google (plan 412): read-only. The row is display: contents, so the dimming sits on its cells.
+.is-removed > .c-list-body-cell {
+  opacity: 0.6;
+}
 
-  color: var(--color-text-main);
-  background: var(--bg-glass);
+.mm-model-row.is-off {
+  opacity: 0.6;
+}
 
-  padding-block: 0.5rem;
-  padding-inline: 0.75rem;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
+// Just dropped: a primary flash on the row and its rank, so the moved model is easy to spot
+// among the look-alike names.
+.mm-model-row.is-just-moved {
+  animation: model-landed 1.6s var(--ease-smooth);
 
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    opacity 0.2s ease;
-
-  &:hover {
-    background: var(--bg-glass-hover);
-    border-color: var(--border-default);
+  .model-rank {
+    animation: model-rank-pop 0.6s var(--ease-spring);
   }
+}
 
-  &.is-off {
-    opacity: 0.6;
-  }
+// Phones: still one row — a smaller toggle makes room for the name.
+@media (max-width: $break-phone-max) {
+  .model-toggle {
+    min-block-size: 1.625rem;
 
-  // Retired by Google (plan 412): no grip, so one column fewer; read-only.
-  &.is-removed {
-    grid-template-columns: auto 1fr auto;
+    font-size: var(--fs-xs);
 
-    opacity: 0.6;
-  }
-
-  // Just dropped: a primary flash on the row and its rank, so the moved model is easy to spot
-  // among the look-alike names.
-  &.is-just-moved {
-    animation: model-landed 1.6s var(--ease-smooth);
-
-    .model-rank {
-      animation: model-rank-pop 0.6s var(--ease-spring);
-    }
-  }
-
-  // Phones: still one row — tighter gaps and a smaller toggle make room for the name.
-  @media (max-width: $break-phone-max) {
-    gap: 0.5rem;
-
-    padding-inline: 0.5rem;
-
-    .model-toggle {
-      min-block-size: 1.625rem;
-
-      font-size: 0.75rem;
-
-      padding-inline: 0.5rem;
-      padding-block: 0.125rem;
-    }
+    padding-inline: var(--space-2);
   }
 }
 
@@ -137,13 +63,14 @@
 }
 
 /* Drag & drop (CDK): the lifted row, the slot it will land in, and the rows sliding aside. */
-.model-row.cdk-drag-preview {
+.mm-model-row.cdk-drag-preview {
+  // The preview lives in <body>, outside the list's grid, so it brings its own columns.
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+
   background: var(--bg-glass-strong);
 
   border: 1px solid var(--color-primary);
-  box-shadow:
-    var(--shadow-card),
-    0 0 0 4px var(--color-primary-glow);
+  box-shadow: var(--shadow-hover);
 
   transform-origin: center;
   rotate: -1deg;
@@ -152,6 +79,7 @@
 }
 
 .model-placeholder {
+  grid-column: 1 / -1;
   min-block-size: 3rem;
 
   background: var(--color-primary-soft);
@@ -160,17 +88,16 @@
   border-radius: var(--radius-md);
 }
 
-.model-row.cdk-drag-placeholder {
-  padding: 0;
-  border: none;
-  background: transparent;
+.mm-model-row.cdk-drag-placeholder {
+  border-style: none;
+  background: none;
 }
 
 .cdk-drag-animating {
   transition: transform 300ms var(--ease-spring);
 }
 
-.model-list.cdk-drop-list-dragging .model-row:not(.cdk-drag-placeholder) {
+.mm-model-list.cdk-drop-list-dragging .mm-model-row:not(.cdk-drag-placeholder) {
   transition: transform 250ms var(--ease-smooth);
 }
 
@@ -178,13 +105,11 @@
   0%,
   35% {
     background: var(--color-primary-soft);
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-glow);
+    box-shadow: var(--shadow-focus);
   }
 
   100% {
-    background: var(--bg-glass);
-    border-color: transparent;
+    background: transparent;
     box-shadow: none;
   }
 }
@@ -206,14 +131,15 @@
 .model-rank {
   min-inline-size: 1.5rem;
 
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--color-primary);
-  text-align: center;
+  justify-content: center;
 }
 
 .model-info {
   display: flex;
-  place-items: center;
+  align-items: flex-start;
+  justify-content: center;
   flex-direction: column;
   gap: 0.125rem;
 
@@ -222,15 +148,16 @@
 
 .model-name {
   overflow: hidden;
+  max-inline-size: 100%;
 
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
   text-align: start;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .model-usage {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   color: var(--color-text-muted);
 }
 
@@ -246,21 +173,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 
-  margin-block-start: 1rem;
-}
-
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-
-  color: var(--color-text-muted);
-  font-style: italic;
-
-  padding: 2rem;
-  border: 1px dashed var(--border-default);
-  border-radius: var(--radius-md);
+  margin-block-start: var(--space-4);
 }
