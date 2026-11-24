@@ -69,12 +69,34 @@ try {
   process.exit(1)
 }
 
-if (args['checkout-branch'] &&git(['branch', '--show-current']) === '') {
-  git(['checkout', '-q', '-B', branch])
+/** The commit's parents, or [] when it cannot be read. */
+function parentsOf(rev) {
+  try {
+    return git(['rev-list', '--parents', '-n', '1', rev]).split(/\s+/).slice(1)
+  } catch {
+    return []
+  }
 }
 
-console.log(`ci-scope-check: ${branch} -> ${plan}, diff against ${base}`)
-const run = spawnSync(process.execPath, [join(scriptsDir, 'scope-check.mjs'), `--diff=${base}`, `--plan=${plan}`], {
+let diffBase = base
+if (args['checkout-branch'] && git(['branch', '--show-current']) === '') {
+  // CI checks out GitHub's PR merge commit: parent 1 = the base branch tip it was merged onto, parent 2 = the PR head.
+  // That tip can be newer than BASE_SHA (the base moved after the event, or the job was re-run), and then every file
+  // the base branch gained since BASE_SHA looked like a change of this PR. Check the PR head against that tip instead:
+  // the diff is then exactly the PR's own changes, and the plan's test lines are read from the current base.
+  const parents = parentsOf('HEAD')
+  if (parents.length === 2) {
+    const [baseTip, prHead] = parents
+    git(['checkout', '-q', '-B', branch, prHead])
+    diffBase = baseTip
+    console.log(`ci-scope-check: merge commit — checking the PR head ${prHead.slice(0, 8)} against the base tip ${baseTip.slice(0, 8)}`)
+  } else {
+    git(['checkout', '-q', '-B', branch])
+  }
+}
+
+console.log(`ci-scope-check: ${branch} -> ${plan}, diff against ${diffBase}`)
+const run = spawnSync(process.execPath, [join(scriptsDir, 'scope-check.mjs'), `--diff=${diffBase}`, `--plan=${plan}`], {
   cwd: repoRoot,
   encoding: 'utf8'
 })
