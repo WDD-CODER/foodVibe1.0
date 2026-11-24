@@ -1,6 +1,8 @@
 import { computed, signal } from '@angular/core'
 import { TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { ActivatedRoute, provideRouter } from '@angular/router'
+import { ActivatedRoute, Router, provideRouter } from '@angular/router'
+import { CookViewStateService } from '@services/cook-view-state.service'
+import { KitchenStateService } from '@services/kitchen-state.service'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { of } from 'rxjs'
@@ -89,6 +91,59 @@ describe('CookViewPage', () => {
       expect(registry.getConversion).not.toHaveBeenCalled()
       expect(chooseUnit).toHaveBeenCalledWith(2, 'jar')
     }))
+  })
+
+  // Plan 716 - the three empty cases use the shared empty state.
+  describe('empty states (plan 716)', () => {
+    const recent = signal<string[]>([])
+    const setup = async (recipe: Recipe | null) => {
+      await TestBed.configureTestingModule({
+        imports: [CookViewPage, LucideAngularModule.pick({ ...icons, MoreVertical: icons.EllipsisVertical })],
+        providers: [
+          provideRouter([]),
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          { provide: TranslationService, useValue: { translate: (k: string) => k, resolveUnit: (k: string) => k } },
+          { provide: ActivatedRoute, useValue: { data: of({ recipe }), snapshot: { params: {} } } },
+          {
+            provide: CookViewStateService,
+            useValue: { recentIds: recent.asReadonly(), setRecent: () => {}, addRecent: () => {} }
+          },
+          {
+            provide: KitchenStateService,
+            useValue: { recipes_: () => [{ _id: 'a', nameHebrew: 'Soup' }], products_: () => [] }
+          }
+        ]
+      }).compileComponents()
+      const fixture = TestBed.createComponent(CookViewPage)
+      fixture.detectChanges()
+      return fixture
+    }
+
+    it('with no recipe shows the shared empty state whose button opens the recipe book', async () => {
+      recent.set(['a'])
+      const fixture = await setup(null)
+      const router = TestBed.inject(Router)
+      const nav = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true))
+      const el = fixture.nativeElement as HTMLElement
+      const empty = el.querySelector('app-empty-state')
+      expect(empty?.textContent).toContain('pick_recipe_to_cook')
+      ;(empty?.querySelector('button') as HTMLButtonElement).click()
+      expect(nav).toHaveBeenCalledWith(['/recipe-book'])
+      expect(el.querySelectorAll('.cv-recent-chips .cv-chip').length).toBe(1)
+    })
+
+    it('a recipe with no steps shows the compact empty state', async () => {
+      recent.set([])
+      const recipe = { _id: 'r1', nameHebrew: 'x', ingredients: [], steps: [], yieldAmount: 1 } as unknown as Recipe
+      const fixture = await setup(recipe)
+      const el = fixture.nativeElement as HTMLElement
+      const empty = Array.from(el.querySelectorAll('app-empty-state')).find((e) =>
+        e.textContent?.includes('no_steps_defined')
+      )
+      expect(empty).toBeTruthy()
+      expect(empty?.querySelector('.c-empty-state--compact')).toBeTruthy()
+    })
   })
 
   // Plan 476 - staff on someone else's recipe get Cook View with no edit buttons.
