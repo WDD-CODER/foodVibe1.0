@@ -1,29 +1,31 @@
 @use '../../../../core/styles/breakpoints' as *;
 
+/* The card lives in app-modal-shell (its own view), so reach it through :host. Outside the layer: the engine
+   `.c-modal-card` is unlayered and would beat a layered rule. */
+/* Phones: a full-height sheet. Desktop: a wide card that scrolls inside itself. */
+:host ::ng-deep .closing-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  inline-size: 100%;
+  max-block-size: 92dvh;
+
+  padding: var(--space-4);
+
+  overflow: hidden;
+
+  @media (max-width: $break-phone-max) {
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+
+    border-radius: 0;
+  }
+}
+
 @layer components.event-closing-dialog {
   :host {
     display: contents;
-  }
-
-  /* Phones: a full-height sheet. Desktop: a wide card that scrolls inside itself. */
-  .closing-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-
-    inline-size: 100%;
-    max-block-size: 92dvh;
-
-    padding: var(--space-4);
-
-    overflow: hidden;
-
-    @media (max-width: $break-phone-max) {
-      block-size: 100dvh;
-      max-block-size: 100dvh;
-
-      border-radius: 0;
-    }
   }
 
   .closing-header {

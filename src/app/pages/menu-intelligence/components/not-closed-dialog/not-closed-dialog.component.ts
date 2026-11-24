@@ -1,5 +1,6 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject, output, signal } from '@angular/core'
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { NOT_CLOSED_REASONS } from '@schemas/entities'
@@ -17,11 +18,10 @@ export interface NotClosedAnswer {
 @Component({
   selector: 'app-not-closed-dialog',
   standalone: true,
-  imports: [TextareaAutoGrowDirective, FormsModule, TranslatePipe],
+  imports: [TextareaAutoGrowDirective, FormsModule, TranslatePipe, ModalShellComponent],
   templateUrl: './not-closed-dialog.component.html',
   styleUrl: './not-closed-dialog.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'cancelled.emit()' }
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotClosedDialogComponent {
   /** Plan 502: true from the first click until the dialog is closed by its parent; a second click does nothing. */

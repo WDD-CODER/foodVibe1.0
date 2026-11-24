@@ -110,7 +110,7 @@ describe('PrepSheetsComponent', () => {
   it('by dish: the dish without preps shows its empty text', () => {
     create('by_dish')
     expect(pages().length).toBe(2)
-    expect(pages()[1].querySelector('.prep-empty')?.textContent).toBe('אין הכנות במנה זו')
+    expect(pages()[1].querySelector('app-empty-state')?.textContent).toContain('אין הכנות במנה זו')
   })
 
   it('unchecking a group marks its page is-excluded and drops its @page rule', () => {
@@ -181,8 +181,22 @@ describe('PrepSheetsComponent', () => {
     component.close.subscribe(() => closed++)
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     ;(el().querySelector('.prep-bar .c-icon-btn') as HTMLElement).click()
-    ;(el().querySelector('.prep-overlay') as HTMLElement).click()
+    ;(el().querySelector('.c-modal-overlay') as HTMLElement).click()
     expect(closed).toBe(3)
+  })
+
+  it('draws the prep table with the shared table class', () => {
+    create()
+    expect(pages()[0].querySelector('table')?.classList.contains('c-table')).toBeTrue()
+  })
+
+  it('Escape emits close once, through the shared frame', () => {
+    create()
+    let closed = 0
+    component.close.subscribe(() => closed++)
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    expect(closed).toBe(1)
+    expect(el().querySelector('[role="dialog"]')).toBeTruthy()
   })
 
   it('says there is nothing to print when the plan has no groups', () => {
@@ -191,6 +205,6 @@ describe('PrepSheetsComponent', () => {
     fixture.componentRef.setInput('event', { ...input.event })
     fixture.detectChanges()
     expect(pages().length).toBe(0)
-    expect(el().querySelector('.prep-nothing')?.textContent).toContain('prep_sheets_nothing')
+    expect(el().querySelector('app-empty-state')?.textContent).toContain('prep_sheets_nothing')
   })
 })

@@ -94,4 +94,10 @@ describe('DepositPaidDialogComponent', () => {
     expect(cancels).toBe(2)
     expect(answers).toEqual([])
   })
+
+  it('cancels on a backdrop click', async () => {
+    await create()
+    el.querySelector<HTMLElement>('.c-modal-overlay')!.click()
+    expect(cancels).toBe(1)
+  })
 })

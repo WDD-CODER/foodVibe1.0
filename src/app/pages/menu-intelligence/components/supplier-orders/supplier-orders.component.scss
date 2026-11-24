@@ -1,16 +1,19 @@
 @use '../../../../core/styles/breakpoints' as *;
+
+/* The card lives in app-modal-shell (its own view), so reach it through :host. Outside the layer: the engine
+   `.c-modal-card` is unlayered and would beat a layered rule. */
+:host ::ng-deep .so-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  max-inline-size: 56rem;
+  max-block-size: 90dvh;
+
+  overflow-y: auto;
+}
+
 @layer components.supplier-orders {
-  .so-sheet {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-
-    max-inline-size: 56rem;
-    max-block-size: 90dvh;
-
-    overflow-y: auto;
-  }
-
   .so-header {
     display: flex;
     align-items: center;

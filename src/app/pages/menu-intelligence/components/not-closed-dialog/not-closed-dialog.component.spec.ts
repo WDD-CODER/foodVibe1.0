@@ -53,6 +53,11 @@ describe('NotClosedDialogComponent', () => {
     expect(cancels).toBe(1)
   })
 
+  it('cancels on a backdrop click', () => {
+    el.querySelector<HTMLElement>('.c-modal-overlay')!.click()
+    expect(cancels).toBe(1)
+  })
+
   it('ignores a second click on save while saving and shows the busy state', () => {
     el.querySelectorAll<HTMLInputElement>('input[type="radio"]')[0].click()
     fixture.detectChanges()

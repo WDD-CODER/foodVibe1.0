@@ -140,11 +140,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Move the deposit-paid and not-closed popups onto the shared frame with the same outputs — src/app/pages/menu-intelligence/components/deposit-paid-dialog/**, src/app/pages/menu-intelligence/components/not-closed-dialog/**
-- [ ] A2: Move the event-closing popup onto the shared frame with an icon close — src/app/pages/menu-intelligence/components/event-closing-dialog/**
-- [ ] A3: Move supplier orders and prep sheets onto the shared frame, keep printing clean, and use the shared table and empty state — src/app/pages/menu-intelligence/components/supplier-orders/**, src/app/pages/menu-intelligence/components/prep-sheets/**
-- [ ] A4: Move the paste-ingredients popup onto the shared frame with the discard question — src/app/pages/recipe-builder/components/paste-ingredients-dialog/**
-- [ ] A5: Lock the six popups on the shared frame with the style guard — scripts/test/style-713.test.mjs
+- [x] A1: Move the deposit-paid and not-closed popups onto the shared frame with the same outputs — src/app/pages/menu-intelligence/components/deposit-paid-dialog/**, src/app/pages/menu-intelligence/components/not-closed-dialog/**
+- [x] A2: Move the event-closing popup onto the shared frame with an icon close — src/app/pages/menu-intelligence/components/event-closing-dialog/**
+- [x] A3: Move supplier orders and prep sheets onto the shared frame, keep printing clean, and use the shared table and empty state — src/app/pages/menu-intelligence/components/supplier-orders/**, src/app/pages/menu-intelligence/components/prep-sheets/**
+- [x] A4: Move the paste-ingredients popup onto the shared frame with the discard question — src/app/pages/recipe-builder/components/paste-ingredients-dialog/**
+- [x] A5: Lock the six popups on the shared frame with the style guard — scripts/test/style-713.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-713.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -166,3 +166,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: Escape and a backdrop tap on the paste and deposit popups now ask before discarding typed text (the shared frame's rule, plan 498); their Cancel button still closes at once.
 - behaviour: supplier orders and prep sheets open as bottom sheets on phones (`[sheet]="true"`), centred popups from the tablet width up.
+- behaviour: the paste popup keeps `[topLayer]="true"` (it sits inside the recipe page's backdrop-filter card, which would otherwise shrink the overlay to that card; the existing spec guards it) — reverse: drop the input.
+- card layout rules (`:host ::ng-deep`) sit outside `@layer` in the six stylesheets: the engine `.c-modal-card` is unlayered and would beat a layered rule.
+- seen: src/styles.scss:2122 `body.prep-sheets-open .prep-overlay` print reset is now dead (class removed); styles.scss is append-only, so left for plan 718 / a cleanup.
+- evidence: pnpm run build → 0; pnpm run lint → 0 (0 errors); pnpm run test:ci → 0, 3191 SUCCESS; node --test scripts/test/style-713.test.mjs → 3 pass.

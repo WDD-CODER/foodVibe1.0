@@ -208,6 +208,7 @@ describe('SupplierOrdersComponent', () => {
     expect(spy).toHaveBeenCalledTimes(1)
     click('.c-modal-overlay')
     expect(spy).toHaveBeenCalledTimes(2)
+    expect((fixture.nativeElement as HTMLElement).querySelector('[role="dialog"]')).toBeTruthy()
   })
 
   describe('cheaper elsewhere and per-event move (plan 536)', () => {
