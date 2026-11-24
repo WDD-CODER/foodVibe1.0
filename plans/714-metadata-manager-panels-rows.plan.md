@@ -64,6 +64,8 @@ src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
 src/app/pages/metadata-manager/components/user-management/user-management.component.spec.ts
 src/app/pages/metadata-manager/components/ai-model-manager/ai-model-manager.component.spec.ts
 scripts/test/style-714.test.mjs
+src/app/pages/dashboard/dashboard.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
