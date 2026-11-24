@@ -15,6 +15,7 @@ const { actorOf } = require('../utils/actor');
 const { logger } = require('../logger');
 const { listConversations, loadConversation, closeConversation } = require('../services/conversations');
 const { sendOut } = require('../services/outbound');
+const { answerWaiting } = require('../services/inbound');
 const { MESSAGE_TEMPLATES, MESSAGE_TEMPLATE_NAMES, templateMessage } = require('../generated/schemas/front-desk/message-templates');
 
 const router = Router();
@@ -130,10 +131,15 @@ router.post('/:id/messages', async (req, res) => {
     const actor = actorOf(req);
     const result = await sendOut(db(), conversation, built.outbound, 'member', { memberId: actor.userId });
     if (!result.ok) return res.status(REFUSAL_STATUS[result.reason] || 409).json({ error: result.reason });
+    const heldAt = Date.now();
     if (conversation.status === 'bot') {
       await db().collection('conversations').updateOne(
         { _id: conversation._id, businessId: conversation.businessId, status: 'bot' },
-        { $set: { status: 'human', assignedTo: actor.userId, updatedAt: Date.now() } }
+        { $set: { status: 'human', assignedTo: actor.userId, heldAt, updatedAt: heldAt } }
+      );
+    } else if (conversation.status === 'human') {
+      await db().collection('conversations').updateOne(
+        { _id: conversation._id, businessId: conversation.businessId, status: 'human' }, { $set: { heldAt } }
       );
     }
     logOf(req).info({ event: 'conversations.replied', kind: built.outbound.kind });
@@ -144,7 +150,7 @@ router.post('/:id/messages', async (req, res) => {
 });
 
 /** One move, conditional on the status that was read; a lost race or a move that does not apply is 409 BAD_STATUS. */
-async function move(req, res, allowedFrom, to, apply) {
+async function move(req, res, allowedFrom, to, apply, after) {
   try {
     const conversation = await loadFor(req, res);
     if (!conversation) return;
@@ -164,16 +170,24 @@ async function move(req, res, allowedFrom, to, apply) {
       updated = await loadConversation(db(), businessId, _id);
     }
     logOf(req).info({ event: 'conversations.moved', from: conversation.status, to });
-    return res.json({ conversation: updated });
+    res.json({ conversation: updated });
+    if (after) after(req, updated);
+    return;
   } catch (err) {
     return failed(req, res, 'conversations.move.failed', err);
   }
 }
 
 router.put('/:id/takeover', (req, res) => move(req, res, ['bot', 'human'], 'human',
-  (r, now) => ({ $set: { status: 'human', assignedTo: actorOf(r).userId, updatedAt: now } })));
+  (r, now) => ({ $set: { status: 'human', assignedTo: actorOf(r).userId, heldAt: now, updatedAt: now } })));
 router.put('/:id/release', (req, res) => move(req, res, ['human'], 'bot',
-  (_r, now) => ({ $set: { status: 'bot', updatedAt: now }, $unset: { assignedTo: '', suggestion: '' } })));
+  (_r, now) => ({ $set: { status: 'bot', updatedAt: now }, $unset: { assignedTo: '', heldAt: '', suggestion: '' } }),
+  (r, updated) => {
+    const log = logOf(r);
+    answerWaiting(db(), updated, { log }).catch(err => {
+      log.warn({ event: 'conversations.release.turn_failed', conversationId: updated._id, errName: err && err.name });
+    });
+  }));
 router.put('/:id/close', (req, res) => move(req, res, ['bot', 'human'], 'closed'));
 
 module.exports = router;

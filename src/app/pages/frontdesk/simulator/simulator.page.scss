@@ -183,6 +183,36 @@
   font-size: var(--fs-sm);
 }
 
+.sim-level,
+.sim-held {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
+.sim-level {
+  margin-block-end: 0.5rem;
+}
+
+.sim-held {
+  flex-wrap: wrap;
+}
+
+.sim-draft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+  border-block-start: 1px dashed var(--border-default);
+}
+
 .sim-box {
   display: flex;
   align-items: flex-end;
