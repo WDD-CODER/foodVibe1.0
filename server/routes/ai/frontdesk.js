@@ -20,25 +20,49 @@ const { runTurn } = require('../../services/frontdesk-turn');
 const { knowledgeImportItemSchema } = require('../../generated/schemas/entities');
 const { checkStoredDoc, badRequest } = require('../../middleware/validate');
 const { newId } = require('../../utils/id');
+const { withShapeReminder } = require('../../services/frontdesk-prompt');
 const { buildCorrectionBody } = require('../../services/knowledge-correction-prompt');
 
 const router = Router();
 
+const TURN_BUDGET_MS = 35000;
+const MIN_RETRY_MS = 2000; // the floor of plan 701's MIN_CALL_MS
+const issuePaths = issues => issues.slice(0, 10).map(i => (i.path.length ? i.path.join('.') : '(root)'));
+const issueCodes = issues => issues.slice(0, 10).map(i => i.code);
+
 /**
- * One model call. `{ ok: true, answer }` or `{ ok: false, reason }`; `reason` is the failure kind of `callGemini`,
- * `bad_json` or `bad_shape`. Never throws.
+ * One model call, and one retry on a malformed answer, inside the same 35 s budget. `{ ok: true, answer }` or
+ * `{ ok: false, reason }`; `reason` is the failure kind of `callGemini`, `bad_json` or `bad_shape`. Never throws.
  */
 async function askTurnModel({ body, usage, log }) {
-  // Plan 701: no user is there to pick another model, so an overloaded model moves on to the next free one.
-  const call = await callGemini({
-    body, timeoutMs: 15000, deadlineMs: 35000, fallback: true, log, eventPrefix: 'frontdesk.turn', usage,
-  });
-  if (call.kind !== 'ok') return { ok: false, reason: call.kind, status: call.status };
-  const payload = extractJsonPayload(responseText(call.data));
-  if (payload.error) return { ok: false, reason: 'bad_json' };
-  const parsed = turnAnswerSchema.safeParse(payload.value);
-  if (!parsed.success) return { ok: false, reason: 'bad_shape' };
-  return { ok: true, answer: parsed.data };
+  const startedAt = Date.now();
+  const attempt = async (reqBody, deadlineMs, n) => {
+    // Plan 701: no user is there to pick another model, so an overloaded model moves on to the next free one.
+    const call = await callGemini({
+      body: reqBody, timeoutMs: 15000, deadlineMs, fallback: true, log, eventPrefix: 'frontdesk.turn', usage,
+    });
+    if (call.kind !== 'ok') return { ok: false, reason: call.kind, status: call.status, retry: false };
+    const payload = extractJsonPayload(responseText(call.data));
+    if (payload.error) {
+      log.warn({ event: 'frontdesk.turn.bad_answer', reason: 'bad_json', attempt: n, paths: [], codes: [] });
+      return { ok: false, reason: 'bad_json', retry: true };
+    }
+    const parsed = turnAnswerSchema.safeParse(payload.value);
+    if (!parsed.success) {
+      log.warn({
+        event: 'frontdesk.turn.bad_answer', reason: 'bad_shape', attempt: n,
+        paths: issuePaths(parsed.error.issues), codes: issueCodes(parsed.error.issues),
+      });
+      return { ok: false, reason: 'bad_shape', retry: true };
+    }
+    return { ok: true, answer: parsed.data };
+  };
+  const strip = ({ retry: _retry, ...rest }) => rest;
+  const first = await attempt(body, TURN_BUDGET_MS, 1);
+  if (!first.retry) return strip(first);
+  const left = TURN_BUDGET_MS - (Date.now() - startedAt);
+  if (left < MIN_RETRY_MS) return strip(first);
+  return strip(await attempt(withShapeReminder(body), left, 2));
 }
 
 const suggestLimiter = createRateLimiter({

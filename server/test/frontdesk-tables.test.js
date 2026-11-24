@@ -132,6 +132,30 @@ describe('book, auto', () => {
   });
 });
 
+describe('plan 731: the table question of the end-to-end test', () => {
+  const TEXT = 'אפשר שולחן לארבעה מחר ב-20:00?';
+  const offerText = fixedText('fd_ai_offer', { date: ddmm(TOMORROW), time: '20:00', party: 4 });
+
+  it('a well-shaped answer offers a table after one call', async () => {
+    const { conversation } = await setup();
+    await say(conversation, BOOK(FULL_ASK), { text: TEXT });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const offer = await lastOut();
+    expect(offer).toMatchObject({ kind: 'button', text: offerText });
+    expect(offer.buttons.map(b => b.id)).toEqual(['OK:1', 'OTHER']);
+  });
+
+  it('one bad shape first, then the same answer: the same offer after two calls', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValueOnce(modelAnswer({ reply: 'x', intent: 'weird' }));
+    await say(conversation, BOOK(FULL_ASK), { text: TEXT });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const offer = await lastOut();
+    expect(offer).toMatchObject({ kind: 'button', text: offerText });
+    expect(offer.buttons.map(b => b.id)).toEqual(['OK:1', 'OTHER']);
+  });
+});
+
 describe('book, manual and over the limit', () => {
   it('manual: a qualified request, no booking, no hold', async () => {
     const { conversation } = await setup({ mode: 'manual' });

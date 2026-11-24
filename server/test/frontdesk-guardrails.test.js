@@ -200,3 +200,15 @@ describe('table replies (plan 680)', () => {
     expect(applyGuardrails(answer('נתראה ב-20:00'), ctx()).ok).toBe(true);
   });
 });
+
+describe('plan 731: a guest asks for a person', () => {
+  it.each([
+    'אפשר לדבר עם מישהו?', 'אני רוצה לדבר עם בן אדם', 'אפשר נציג?', 'אני צריך נציג אנושי',
+    'תעבירו אותי למישהו בבקשה', 'can I talk to a person?',
+  ])('"%s" → keyword', text => {
+    expect(preCheck(ctx({ history: [guest(text)] }))).toEqual({ ok: false, reason: 'keyword' });
+  });
+  it.each(['אפשר שולחן לארבעה מחר ב-20:00?', 'מישהו מאיתנו יאחר בעשר דקות'])('"%s" passes', text => {
+    expect(preCheck(ctx({ history: [guest(text)] }))).toEqual({ ok: true });
+  });
+});

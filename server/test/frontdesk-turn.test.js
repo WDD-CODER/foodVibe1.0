@@ -435,3 +435,81 @@ describe('plan 689: guardrails in the turn', () => {
     for (const secret of ['אבדוק', 'GUEST-SECRET-TEXT', HANDOFF_TEXT]) expect(text).not.toContain(secret);
   });
 });
+
+describe('plan 731: one more try on a malformed answer', () => {
+  const { SHAPE_RETRY_LINE } = require('../services/frontdesk-prompt');
+  const BAD = { reply: 'x', intent: 'weird' };
+  const bodyOf = n => JSON.parse(fetchMock.mock.calls[n][1].body);
+
+  it('a bad shape then a good answer: answered, two calls, the reminder ends the rules, paths logged', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValueOnce(modelAnswer(BAD)).mockResolvedValueOnce(modelAnswer(SMALL));
+    await turn(conversation);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(await outbound()).toHaveLength(1);
+    const after = await conv(conversation._id);
+    expect(after.status).toBe('bot');
+    expect(after.assistantFailed).toBeUndefined();
+    expect(bodyOf(1).systemInstruction.parts[0].text.endsWith(SHAPE_RETRY_LINE)).toBe(true);
+    expect(bodyOf(1).contents).toEqual(bodyOf(0).contents);
+    const bad = logs.byEvent('frontdesk.turn.bad_answer');
+    expect(bad).toHaveLength(1);
+    expect(bad[0]).toMatchObject({ reason: 'bad_shape', attempt: 1, paths: ['intent'] });
+  });
+
+  it('two bad shapes: two calls, silent handoff as before, privacy of the log', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'MODEL-REPLY-TEXT', intent: 'weird' }));
+    await turn(conversation);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(await outbound()).toHaveLength(0);
+    const after = await conv(conversation._id);
+    expect(after.status).toBe('human');
+    expect(after.assistantFailed.reason).toBe('other');
+    const failed = logs.byEvent('frontdesk.turn.failed');
+    expect(failed).toHaveLength(1);
+    expect(failed[0].reason).toBe('bad_shape');
+    expect(logs.byEvent('frontdesk.turn.bad_answer').map(r => r.attempt)).toEqual([1, 2]);
+    const text = JSON.stringify(logs.records);
+    for (const secret of ['GUEST-SECRET-TEXT', 'MODEL-REPLY-TEXT', 'Invalid']) expect(text).not.toContain(secret);
+  });
+
+  it('a non-JSON answer then a good one: answered', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValueOnce(modelAnswer('not json at all')).mockResolvedValueOnce(modelAnswer(SMALL));
+    await turn(conversation);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(await outbound()).toHaveLength(1);
+    expect(logs.byEvent('frontdesk.turn.bad_answer')[0]).toMatchObject({ reason: 'bad_json', attempt: 1, paths: [] });
+  });
+
+  it('less than 2000 ms of the budget left: no retry, the turn fails as before', async () => {
+    const { conversation } = await setup();
+    const realNow = Date.now.bind(Date);
+    let jump = 0;
+    vi.spyOn(Date, 'now').mockImplementation(() => realNow() + jump);
+    fetchMock.mockImplementation(async () => { jump = 34000; return modelAnswer(BAD); });
+    try {
+      await turn(conversation);
+    } finally {
+      vi.restoreAllMocks();
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(await outbound()).toHaveLength(0);
+    expect(logs.byEvent('frontdesk.turn.failed')[0].reason).toBe('bad_shape');
+  });
+
+  it('a person request: no model call, the handoff sentence, status human, blocked by keyword', async () => {
+    const { conversation } = await setup({ assistant: { handoffText: 'נעביר אותך לצוות' } });
+    await db().collection('messages').updateOne({ _id: 'g1' }, { $set: { text: 'אפשר לדבר עם מישהו?' } });
+    await turn(conversation);
+    expect(fetchMock).not.toHaveBeenCalled();
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0].text).toBe('נעביר אותך לצוות');
+    expect((await conv(conversation._id)).status).toBe('human');
+    const blocked = logs.byEvent('frontdesk.turn.blocked');
+    expect(blocked).toHaveLength(1);
+    expect(blocked[0].reason).toBe('keyword');
+  });
+});
