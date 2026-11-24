@@ -33,8 +33,6 @@ const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models
 const MODEL_DAILY_BUDGETS = {
   'gemini-3.1-flash-lite': 500,
   'gemini-3.5-flash-lite': 500,
-  'gemini-2.5-flash-lite': 20,
-  'gemini-2.5-flash': 20,
   'gemini-3.6-flash': 20,
   'gemini-3.8-flash': 20,
   'gemini-3-flash-preview': 20,
@@ -51,12 +49,12 @@ const MODEL_DAILY_BUDGETS = {
  *
  * Dropped 2026-10-19 (plan 412): the 3.5 and 3.7 flash models — deprecated 2026-10-08,
  * Google answers them with gemini-3.6-flash / gemini-3.8-flash. Paid-only models never belong here.
+ * Dropped 2026-11-24 (plan 730): gemini-2.5-flash-lite (Google answers 404 'no longer available') and gemini-2.5-flash
+ * (shutdown 2026-12-01, aistudio.google.com/docs/deprecations).
  */
 const DEFAULT_MODELS = [
   'gemini-3.1-flash-lite',
   'gemini-3.5-flash-lite',
-  'gemini-2.5-flash-lite',
-  'gemini-2.5-flash',
   'gemini-3.6-flash',
   'gemini-3.8-flash',
   'gemini-3-flash-preview',
@@ -72,6 +70,8 @@ const SETTINGS_DOC_ID = 'chain-settings';
 
 /** model -> Date it becomes usable again */
 const exhaustedUntil = new Map();
+/** Plan 730: model -> Date Google's quota day resets; a model that answered 404 / "no longer available". Read only by the fallback. */
+const goneUntil = new Map();
 /** The admin's saved chain ([{ name, enabled }] in order), or null when none is saved. */
 let adminSettings = null;
 let loadPromise = null;
@@ -141,15 +141,13 @@ function isVisionModel(model) {
 /**
  * Plan 619: the media each default model takes as input. Source: the model pages under
  * https://aistudio.google.com/docs/models/ read on 2026-11-17 (inputs listed: text, image, video, audio, PDF;
- * gemini-2.5-flash lists no PDF and is deprecated), https://aistudio.google.com/docs/audio and
+ * every catalog model takes all three since plan 730 dropped gemini-2.5-flash), https://aistudio.google.com/docs/audio and
  * https://aistudio.google.com/docs/document-processing.
  */
 const ALL_MEDIA = ['image', 'audio', 'pdf'];
 const MODEL_MEDIA = Object.freeze({
   'gemini-3.1-flash-lite': ALL_MEDIA,
   'gemini-3.5-flash-lite': ALL_MEDIA,
-  'gemini-2.5-flash-lite': ALL_MEDIA,
-  'gemini-2.5-flash': ['image', 'audio'],
   'gemini-3.6-flash': ALL_MEDIA,
   'gemini-3.8-flash': ALL_MEDIA,
   'gemini-3-flash-preview': ALL_MEDIA,
@@ -304,6 +302,21 @@ function exhaustedResetAt(model, now) {
     return null;
   }
   return resetAt;
+}
+
+function goneResetAt(model, now) {
+  const resetAt = goneUntil.get(model);
+  if (!resetAt) return null;
+  if (resetAt <= now) {
+    goneUntil.delete(model);
+    return null;
+  }
+  return resetAt;
+}
+
+/** Plan 730: usable by the fallback loop = neither out of its daily quota nor gone. */
+function usableForFallback(model, now) {
+  return exhaustedResetAt(model, now) === null && goneResetAt(model, now) === null;
 }
 
 function markExhausted(model, now) {
@@ -474,8 +487,10 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
   const knownReset = exhaustedResetAt(model, now);
   if (knownReset && fallback) {
     // Plan 701: nobody is there to choose the next model; start on the first usable one (one exists: checked above).
+    const start = candidates.find(m => usableForFallback(m, now));
+    if (!start) return allExhausted(candidates);
     return callWithFallback({
-      model: firstUsable(candidates, now), body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now,
+      model: start, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now,
     });
   }
   if (knownReset) {
@@ -485,7 +500,10 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
   // Plan 614: a failure that goes away by itself (Google overloaded or unavailable, a dropped connection) is
   // tried again, up to MAX_ATTEMPTS calls in all. Every attempt is a real call and is counted and logged on its own.
   if (fallback) {
-    return callWithFallback({ model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
+    // Plan 730: a model that answered "gone" earlier today is skipped; none usable -> all_exhausted as today.
+    const start = usableForFallback(model, now) ? model : candidates.find(m => usableForFallback(m, now));
+    if (!start) return allExhausted(candidates);
+    return callWithFallback({ model: start, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
   }
   let result;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -507,12 +525,17 @@ function isOverloaded(result) {
   return result.kind === 'gemini_error' && FALLBACK_STATUSES.has(result.status);
 }
 
+/** Plan 730: with `fallback`, a model Google no longer serves: a 404, or a message saying "no longer available". Not a retry case. */
+function isGone(result) {
+  return result.kind === 'gemini_error' && (result.status === 404 || /no longer available/i.test(result.message ?? ''));
+}
+
 /** The next usable model after `current` in chain order, wrapping around; `current` itself when it is the only one. */
 function nextUsableAfter(candidates, current, now) {
   const at = candidates.indexOf(current);
   for (let i = 1; i <= candidates.length; i++) {
     const m = candidates[(at + i) % candidates.length];
-    if (exhaustedResetAt(m, now) === null) return m;
+    if (usableForFallback(m, now)) return m;
   }
   return null;
 }
@@ -534,6 +557,13 @@ async function callWithFallback({ model, body, timeoutMs, deadlineMs, log, event
     if (result.kind === 'model_exhausted') {
       next = result.nextModel;
       wait = 0;
+    } else if (isGone(result)) {
+      const resetAt = nextResetAt(new Date());
+      goneUntil.set(current, resetAt);
+      log.warn({ event: 'ai.model.gone', model: current, resetAt: resetAt.toISOString() });
+      next = nextUsableAfter(candidates, current, new Date());
+      if (next === current) next = null;
+      wait = 0;
     } else if (isOverloaded(result)) {
       next = nextUsableAfter(candidates, current, new Date());
       wait = retryDelayMs(attempt);
@@ -542,7 +572,7 @@ async function callWithFallback({ model, body, timeoutMs, deadlineMs, log, event
     }
     if (!next) break;
     if (hasDeadline && deadlineMs - (Date.now() - startedAt) - wait < MIN_CALL_MS) break;
-    const fields = { from: current, to: next, attempt, kind: result.kind, status: result.status };
+    const fields = { from: current, to: next, attempt, kind: isGone(result) ? 'gone' : result.kind, status: result.status };
     if (next !== current) log.warn({ event: `${eventPrefix}.fallback`, ...fields });
     else log.warn({ event: `${eventPrefix}.retry`, model: current, attempt, kind: result.kind, status: result.status });
     if (wait > 0) await sleep(wait);
@@ -627,6 +657,7 @@ function responseText(data) {
 /** Test-only: forget all exhausted state and reload from Mongo on the next call. */
 function resetForTests() {
   exhaustedUntil.clear();
+  goneUntil.clear();
   adminSettings = null;
   loadPromise = null;
 }

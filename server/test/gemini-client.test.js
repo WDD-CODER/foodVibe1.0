@@ -88,8 +88,8 @@ describe('model chain', () => {
   });
 
   it('GEMINI_MODELS overrides the order', async () => {
-    process.env.GEMINI_MODELS = ' gemini-3.6-flash , gemini-2.5-flash ';
-    expect(modelChain()).toEqual(['gemini-3.6-flash', 'gemini-2.5-flash']);
+    process.env.GEMINI_MODELS = ' gemini-3.6-flash , gemini-3.8-flash ';
+    expect(modelChain()).toEqual(['gemini-3.6-flash', 'gemini-3.8-flash']);
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
     const result = await call(fakeLog());
     expect(result.model).toBe('gemini-3.6-flash');
@@ -152,7 +152,7 @@ describe('daily quota — one call, the user decides the switch', () => {
   it('a catalog model the chain has switched off is ignored in favour of the chain first', async () => {
     process.env.GEMINI_MODELS = 'gemini-3.1-flash-lite';
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
-    const result = await call(fakeLog(), { model: 'gemini-2.5-flash' });
+    const result = await call(fakeLog(), { model: 'gemini-3.8-flash' });
     expect(result.model).toBe('gemini-3.1-flash-lite');
   });
 
@@ -213,28 +213,21 @@ describe('vision', () => {
 });
 
 describe('needsMedia (plan 619)', () => {
-  const chain = () => setChainSettingsForTests([{ name: 'gemini-2.5-flash', enabled: true }, { name: 'gemini-3.1-flash-lite', enabled: true }]);
+  const chain = () => setChainSettingsForTests([{ name: 'gemini-3.6-flash', enabled: true }, { name: 'gemini-3.1-flash-lite', enabled: true }]);
 
-  it('a pdf call skips gemini-2.5-flash', async () => {
+  it('every catalog model takes pdf, audio and image (plan 730)', async () => {
     chain();
+    for (const m of DEFAULT_MODELS) for (const medium of ['pdf', 'audio', 'image']) expect(modelTakes(m, medium), `${m} ${medium}`).toBe(true);
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
     const result = await call(fakeLog(), { needsMedia: 'pdf' });
-    expect(result.model).toBe('gemini-3.1-flash-lite');
-    expect(modelOf(fetchMock.mock.calls[0])).toBe('gemini-3.1-flash-lite');
-  });
-
-  it('an audio call goes to gemini-2.5-flash', async () => {
-    chain();
-    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
-    const result = await call(fakeLog(), { needsMedia: 'audio' });
-    expect(result.model).toBe('gemini-2.5-flash');
+    expect(result.model).toBe('gemini-3.6-flash');
   });
 
   it('needsVision: true behaves as needsMedia image', async () => {
     chain();
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
-    expect((await call(fakeLog(), { needsVision: true })).model).toBe('gemini-2.5-flash');
-    expect(modelTakes('gemini-2.5-flash', 'image')).toBe(true);
+    expect((await call(fakeLog(), { needsVision: true })).model).toBe('gemini-3.6-flash');
+    expect(modelTakes('gemini-3.6-flash', 'image')).toBe(true);
   });
 
   it('every default model has a media entry', () => {
@@ -246,13 +239,34 @@ describe('needsMedia (plan 619)', () => {
     await expect(call(fakeLog(), { needsMedia: 'video' })).rejects.toThrow('unknown needsMedia');
   });
 
-  it('no model takes the medium: all_exhausted and one warn', async () => {
-    setChainSettingsForTests([{ name: 'gemini-2.5-flash', enabled: true }]);
-    const log = fakeLog();
-    const result = await call(log, { needsMedia: 'pdf' });
-    expect(result.kind).toBe('all_exhausted');
+});
+
+describe('retired models (plan 730)', () => {
+  it('the catalog, budgets and media no longer list the retired 2.5 models', () => {
+    expect(DEFAULT_MODELS).toEqual(['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3-flash-preview']);
+    for (const m of ['gemini-2.5-flash-lite', 'gemini-2.5-flash']) {
+      expect(MODEL_DAILY_BUDGETS).not.toHaveProperty(m);
+      expect(MODEL_MEDIA).not.toHaveProperty(m);
+    }
+  });
+
+  it('a saved chain naming gemini-2.5-flash-lite shows it removed and never calls it', async () => {
+    setChainSettingsForTests([
+      { name: 'gemini-2.5-flash-lite', enabled: true },
+      { name: 'gemini-3.1-flash-lite', enabled: true },
+    ]);
+    expect(modelChain()).toEqual(['gemini-3.1-flash-lite']);
+    const settings = await getChainSettings();
+    expect(settings.find(m => m.name === 'gemini-2.5-flash-lite')).toMatchObject({ removed: true, enabled: false });
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+    expect((await call(fakeLog())).model).toBe('gemini-3.1-flash-lite');
+    expect(fetchMock.mock.calls.map(modelOf)).not.toContain('gemini-2.5-flash-lite');
+  });
+
+  it('a request for gemini-2.5-flash is refused without a call', async () => {
+    const result = await call(fakeLog(), { model: 'gemini-2.5-flash' });
+    expect(result).toEqual({ kind: 'model_removed', model: 'gemini-2.5-flash' });
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(log.warn).toHaveBeenCalledWith({ event: 'ai.media.no_model', medium: 'pdf' });
   });
 });
 
@@ -260,14 +274,14 @@ describe('removed models (plan 412)', () => {
   it('a saved chain naming gemini-3.7-flash skips it, flags it removed, and never calls it', async () => {
     setChainSettingsForTests([
       { name: 'gemini-3.7-flash', enabled: true },
-      { name: 'gemini-2.5-flash', enabled: true },
+      { name: 'gemini-3.8-flash', enabled: true },
     ]);
-    expect(modelChain()).toEqual(['gemini-2.5-flash']);
+    expect(modelChain()).toEqual(['gemini-3.8-flash']);
     const settings = await getChainSettings();
     expect(settings.find(m => m.name === 'gemini-3.7-flash')).toMatchObject({ removed: true, enabled: false });
     expect(settings.filter(m => !m.removed).map(m => m.name).sort()).toEqual([...DEFAULT_MODELS].sort());
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
-    expect((await call(fakeLog())).model).toBe('gemini-2.5-flash');
+    expect((await call(fakeLog())).model).toBe('gemini-3.8-flash');
     expect(fetchMock.mock.calls.map(modelOf)).not.toContain('gemini-3.7-flash');
   });
 
@@ -349,9 +363,9 @@ describe('admin chain settings', () => {
     setChainSettingsForTests([
       { name: 'gemini-3.6-flash', enabled: true },
       { name: 'gemini-3.1-flash-lite', enabled: false },
-      { name: 'gemini-2.5-flash', enabled: true },
+      { name: 'gemini-3.8-flash', enabled: true },
     ]);
-    expect(modelChain()).toEqual(['gemini-3.6-flash', 'gemini-2.5-flash']);
+    expect(modelChain()).toEqual(['gemini-3.6-flash', 'gemini-3.8-flash']);
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
     expect((await call(fakeLog())).model).toBe('gemini-3.6-flash');
   });

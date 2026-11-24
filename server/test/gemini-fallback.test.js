@@ -109,6 +109,56 @@ describe('fallback: true', () => {
     expect(again).toMatchObject({ kind: 'ok', model: B });
   });
 
+  describe('a gone model (plan 730)', () => {
+    const GONE = jsonResponse(404, { error: { message: `This model models/${A} is no longer available to new users.` } });
+    const gone = () => ({ ...GONE });
+
+    it('a 404 on A goes to B with no wait, then A is skipped until reset', async () => {
+      fetchMock.mockResolvedValueOnce(gone()).mockResolvedValue(jsonResponse(200, OK_DATA));
+      const log = fakeLog();
+      expect(await fb(log)).toMatchObject({ kind: 'ok', model: B });
+      expect(models()).toEqual([A, B]);
+      const fallbacks = log.warn.mock.calls.map(c => c[0]).filter(e => e.event === 'frontdesk.turn.fallback');
+      expect(fallbacks).toEqual([{ event: 'frontdesk.turn.fallback', from: A, to: B, attempt: 1, kind: 'gone', status: 404 }]);
+      expect(log.warn.mock.calls.map(c => c[0].event)).toContain('ai.model.gone');
+
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+      expect(await fb(fakeLog())).toMatchObject({ kind: 'ok', model: B });
+      expect(models()).toEqual([B]);
+
+      resetForTests();
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+      await fb(fakeLog());
+      expect(models()).toEqual([A]);
+    });
+
+    it('a 404 on the only model of a one-model chain ends after one call', async () => {
+      process.env.GEMINI_MODELS = A;
+      resetForTests();
+      fetchMock.mockResolvedValue(gone());
+      expect(await fb(fakeLog())).toMatchObject({ kind: 'gemini_error', status: 404 });
+      expect(models()).toEqual([A]);
+    });
+
+    it('404 on A, 503 on B, then ok on C', async () => {
+      fetchMock.mockResolvedValueOnce(gone()).mockResolvedValueOnce(jsonResponse(503, {})).mockResolvedValue(jsonResponse(200, OK_DATA));
+      expect(await fb(fakeLog())).toMatchObject({ kind: 'ok', model: C });
+      expect(models()).toEqual([A, B, C]);
+    });
+
+    it('without fallback a 404 returns gemini_error after one call and A is called again next time', async () => {
+      fetchMock.mockResolvedValue(gone());
+      const log = fakeLog();
+      expect(await call(log)).toMatchObject({ kind: 'gemini_error', model: A, status: 404 });
+      expect(models()).toEqual([A]);
+      expect(log.warn.mock.calls.map(c => c[0].event)).not.toContain('frontdesk.turn.fallback');
+      await call(fakeLog());
+      expect(models()).toEqual([A, A]);
+    });
+  });
+
   it('a 400 does not fall back', async () => {
     fetchMock.mockResolvedValue(jsonResponse(400, { error: { message: 'bad' } }));
     const result = await fb(fakeLog());
