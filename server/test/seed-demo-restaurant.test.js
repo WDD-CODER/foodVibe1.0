@@ -86,6 +86,12 @@ describe('buildDemoRestaurant', () => {
   })
 })
 
+describe('demo assistant level (plan 719)', () => {
+  it('builds the demo profile at level 1', () => {
+    expect(buildDemoRestaurant({ now: Date.now() }).frontDeskProfiles[0].assistant.level).toBe(1)
+  })
+})
+
 describe('seedDemoRestaurant', () => {
   const holdCount = () => testDb().collection('tableHolds').countDocuments({ businessId: 'demo_restaurant' })
 
@@ -142,6 +148,44 @@ describe('seedDemoRestaurant', () => {
     expect(log.mock.calls.map(c => c[0])).toContain('already seeded')
     expect(await holdCount()).toBe(holdsBefore)
     log.mockRestore()
+  })
+
+  describe('raising a stored level-0 profile (plan 719)', () => {
+    const profiles = () => testDb().collection('frontDeskProfiles')
+    const seeded = async () => {
+      const log = quiet()
+      await seedDemoRestaurant(testDb(), { write: true, now: Date.now(), passwordHash: HASH })
+      log.mockRestore()
+    }
+    const run = async write => {
+      const log = quiet()
+      await seedDemoRestaurant(testDb(), { write, now: Date.now(), passwordHash: HASH })
+      const lines = log.mock.calls.map(c => c[0])
+      log.mockRestore()
+      return lines
+    }
+    const levelOf = async () => (await profiles().findOne({ _id: 'demo_rest_profile' })).assistant.level
+
+    it('raises level 0 with no adminHistory, and a dry run changes nothing', async () => {
+      await seeded()
+      await profiles().updateOne({ _id: 'demo_rest_profile' }, { $set: { 'assistant.level': 0 } })
+      const dry = await run(false)
+      expect(dry).toContain('would raise the demo assistant to level 1')
+      expect(await levelOf()).toBe(0)
+      const lines = await run(true)
+      expect(lines).toContain('raised the demo assistant to level 1')
+      expect(await levelOf()).toBe(1)
+    })
+
+    it('leaves a profile with adminHistory or level 1 or 2 as it is', async () => {
+      await seeded()
+      await profiles().updateOne({ _id: 'demo_rest_profile' }, { $set: { 'assistant.level': 0, adminHistory: [{ at: 1 }] } })
+      expect(await run(true)).not.toContain('raised the demo assistant to level 1')
+      expect(await levelOf()).toBe(0)
+      await profiles().updateOne({ _id: 'demo_rest_profile' }, { $set: { 'assistant.level': 2 }, $unset: { adminHistory: '' } })
+      await run(true)
+      expect(await levelOf()).toBe(2)
+    })
   })
 })
 

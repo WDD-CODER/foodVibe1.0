@@ -5,7 +5,7 @@
  * Fills a LOCAL database with one demo restaurant ("מסעדת הדגמה"): an owner user, a public profile with table settings,
  * a 14-table room with 2 joins, 6 clients, 40 bookings over seven days on real tables (each live booking holds its tables
  * in `tableHolds`) and 4 waiting parties. The business is `internal: true` (kept out of platform totals).
- * Idempotent: only documents whose `_id` is not in the database yet are inserted; nothing existing is changed.
+ * Idempotent: only documents whose `_id` is not in the database yet are inserted; nothing existing is changed, except the demo assistant's level (plan 719).
  * Booking statuses come from the clock of the run, so seed a fresh scratch database shortly before a demo.
  *
  * Local only: `--target=atlas` and `--confirm-host` are refused. Dry run by default (writes nothing). Add --write:
@@ -115,6 +115,14 @@ async function seedDemoRestaurant(db, { write = false, now = Date.now(), passwor
       }
       console.log(`inserted ${freshBookings.length} bookings`);
     }
+  }
+
+  const levelFilter = { _id: 'demo_rest_profile', businessId: BUSINESS_ID, 'assistant.level': 0, 'adminHistory.0': { $exists: false } };
+  if (write) {
+    const raised = await db.collection('frontDeskProfiles').updateOne(levelFilter, { $set: { 'assistant.level': 1, updatedAt: now } });
+    if (raised.matchedCount) console.log('raised the demo assistant to level 1');
+  } else if (await db.collection('frontDeskProfiles').findOne(levelFilter, { projection: { _id: 1 } })) {
+    console.log('would raise the demo assistant to level 1');
   }
 
   const total = plan.reduce((n, [, docs]) => n + docs.length, 0) + data.bookings.length;

@@ -349,7 +349,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 663: openRangesOf in qualify.ts (`shared/schemas/front-desk/qualify.ts`) — the checkable opening ranges of a date (`hoursCheck` is built on it).
 - Plan 663: jerusalemDateTime in local-time.ts (`shared/schemas/front-desk/local-time.ts`) — the inverse of `jerusalemEpoch`.
 - Plan 675: `sendOut` in `server/services/outbound.js` — every outbound message goes through `sendOut`; never call a transport.
-- Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler.
+- Plan 675: `handleInbound` in `server/services/inbound.js` — every inbound message (simulator or phone) goes through it; never a second handler. A `human` conversation goes back to `bot` on the guest's next message after a failed turn or 2 h member idle (plan 719) — never a second handler.
 - Plan 675: `templateMessage` in `shared/schemas/front-desk/message-templates.ts` — the closed list of outbound templates and their one-line parameters; never a template name typed elsewhere.
 - Plan 670: `bookingIcs` / `downloadIcs` in `src/app/pages/public-request/services/booking-calendar.util.ts` — a page-local helper (only the two guest pages use it): one booking as a calendar file, the `ics` package loaded lazily.
 - When: any pure helper (time, number, text). Never page-local.
@@ -882,7 +882,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### simulator-page — the owner plays a test guest (plan 678)
 
 - Status: stable — plan 678
-- Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data.
+- Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data; plan 719 adds the assistant level line, the held-by-staff line with hand back, and the level-0 draft.
 - Pieces: SimulatorPage, SimulatorService.
 - When: any test of the conversation channel from inside the app; a second simulator screen is never added.
 - Known copies: none.

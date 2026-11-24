@@ -133,3 +133,91 @@ describe('handleInbound', () => {
     expect(text).not.toContain('secret-words')
   })
 })
+
+describe('back to the assistant (plan 719)', () => {
+  const { HUMAN_IDLE_MS } = require('../services/inbound')
+  const { conversationSchema } = require('../generated/schemas/entities/conversation.schema')
+  const patch = (set, unset) => db().collection('conversations').updateOne(
+    { businessId: 'b1' }, { $set: set, ...(unset && { $unset: unset }) }
+  )
+  const idleAgo = ms => Date.now() - ms
+  // Opens a conversation with a no-op turn, then makes it human with the given fields.
+  async function humanWith(set) {
+    setTurnHandler(async () => {})
+    await (await inbound({ at: NOW })).settled
+    await patch({ status: 'human', ...set })
+  }
+  const next = async turn => {
+    setTurnHandler(turn)
+    await (await inbound({ at: NOW + 60000 })).settled
+  }
+
+  it('(a) a failed conversation with no member goes back and runs one turn', async () => {
+    await humanWith({ assistantFailed: { at: 1, reason: 'busy' }, suggestion: 'old' })
+    const turn = vi.fn(async () => {})
+    await next(turn)
+    expect(turn).toHaveBeenCalledTimes(1)
+    const [c] = await conv()
+    expect(c.status).toBe('bot')
+    expect(c.suggestion).toBeUndefined()
+    expect(conversationSchema.safeParse(c).success).toBe(true)
+    expect(logs.byEvent('inbound.back_to_bot').at(-1)).toMatchObject({ why: 'failed' })
+  })
+
+  it('(b) a member idle for more than 2 h hands the chat back; (c) 1 h 59 min does not', async () => {
+    await humanWith({ assignedTo: 'st1', heldAt: idleAgo(HUMAN_IDLE_MS + 60000) })
+    const turn = vi.fn(async () => {})
+    await next(turn)
+    expect(turn).toHaveBeenCalledTimes(1)
+    const [c] = await conv()
+    expect(c.status).toBe('bot')
+    expect(c.assignedTo).toBeUndefined()
+    expect(c.heldAt).toBeUndefined()
+    expect(conversationSchema.safeParse(c).success).toBe(true)
+    expect(logs.byEvent('inbound.back_to_bot').at(-1)).toMatchObject({ why: 'idle' })
+
+    await patch({ status: 'human', assignedTo: 'st1', heldAt: idleAgo(HUMAN_IDLE_MS - 60000) })
+    turn.mockClear()
+    await next(turn)
+    expect(turn).not.toHaveBeenCalled()
+    expect((await conv())[0].status).toBe('human')
+  })
+
+  it('(d) a guardrail handoff, (e) do-not-contact and (f) no heldAt stay human', async () => {
+    const turn = vi.fn(async () => {})
+    await humanWith({})
+    await next(turn)
+    expect((await conv())[0].status).toBe('human')
+
+    await patch({ status: 'human', assignedTo: 'st1' })
+    await next(turn)
+    expect((await conv())[0].status).toBe('human')
+
+    await patch({ status: 'human', assistantFailed: { at: 1, reason: 'busy' } }, { assignedTo: '' })
+    await db().collection('clients').updateMany({ businessId: 'b1' }, { $set: { doNotContact: { at: 1, reason: 'asked', via: 'member' } } })
+    await next(turn)
+    expect((await conv())[0].status).toBe('human')
+    expect(turn).not.toHaveBeenCalled()
+  })
+
+  it('(g) a conversation held by a member recently stays with them', async () => {
+    await humanWith({ assignedTo: 'st1', heldAt: Date.now() })
+    const turn = vi.fn(async () => {})
+    await next(turn)
+    expect(turn).not.toHaveBeenCalled()
+  })
+
+  it('(h) a burst of two guest messages to a failed conversation runs one turn', async () => {
+    await humanWith({ assistantFailed: { at: 1, reason: 'busy' } })
+    const w = controllableWait()
+    setWaitForTest(w.wait)
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    const first = await inbound({ at: NOW + 60000 })
+    const second = await inbound({ at: NOW + 62000 })
+    await new Promise(r => setTimeout(r, 20))
+    w.release()
+    await Promise.all([first.settled, second.settled])
+    expect(turn).toHaveBeenCalledTimes(1)
+  })
+})

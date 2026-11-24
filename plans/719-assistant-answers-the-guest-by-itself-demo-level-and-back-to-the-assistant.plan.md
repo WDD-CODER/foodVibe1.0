@@ -260,13 +260,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Make the demo restaurant's assistant answer guests by itself — level 1 in the demo data, the seed raises a stored level-0 demo profile once, tests — server/scripts/lib/demo-restaurant-data.js, server/scripts/seed-demo-restaurant.js, server/test/seed-demo-restaurant.test.js
-- [ ] A2: Record when a member took the chat, so an idle one can be told apart — heldAt in the schema, set on reply and take over, removed on hand back, tests — shared/schemas/entities/conversation.schema.ts, server/routes/conversations.js, server/test/conversations-router.test.js
-- [ ] A3: Give a stuck chat back to the assistant on the guest's next message — after a failed turn with no member, or 2 h member idle; guardrail handoffs and do-not-contact stay with a person; tests for every case — server/services/inbound.js, server/test/inbound.test.js
-- [ ] A4: Answer the waiting guest when a member hands the chat back — answerWaiting in inbound, called by the release route, tests — server/services/inbound.js, server/routes/conversations.js, server/test/conversations-router.test.js
-- [ ] A5: Show in the simulator who answers — the level line, the held line with hand back, the level-0 draft, dictionary keys, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.scss, src/app/pages/frontdesk/simulator/simulator.page.spec.ts, public/assets/data/dictionary.json
-- [ ] A6: Update the maps the next plan reads — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md (only if it lists these parts)
-- [ ] A7: Run every check of this plan and record the evidence — test:server, test:ci, build, both lints, log-query; evidence into Execution Notes. The builder does not run the seed against any database: the Planner runs the demo seed with --write in slot wt-2 after the merge, so `demo_rest_profile` is at level 1 before the Human's cards
+- [x] A1: Make the demo restaurant's assistant answer guests by itself — level 1 in the demo data, the seed raises a stored level-0 demo profile once, tests — server/scripts/lib/demo-restaurant-data.js, server/scripts/seed-demo-restaurant.js, server/test/seed-demo-restaurant.test.js
+- [x] A2: Record when a member took the chat, so an idle one can be told apart — heldAt in the schema, set on reply and take over, removed on hand back, tests — shared/schemas/entities/conversation.schema.ts, server/routes/conversations.js, server/test/conversations-router.test.js
+- [x] A3: Give a stuck chat back to the assistant on the guest's next message — after a failed turn with no member, or 2 h member idle; guardrail handoffs and do-not-contact stay with a person; tests for every case — server/services/inbound.js, server/test/inbound.test.js
+- [x] A4: Answer the waiting guest when a member hands the chat back — answerWaiting in inbound, called by the release route, tests — server/services/inbound.js, server/routes/conversations.js, server/test/conversations-router.test.js
+- [x] A5: Show in the simulator who answers — the level line, the held line with hand back, the level-0 draft, dictionary keys, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.scss, src/app/pages/frontdesk/simulator/simulator.page.spec.ts, public/assets/data/dictionary.json
+- [x] A6: Update the maps the next plan reads — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md (only if it lists these parts)
+- [x] A7: Run every check of this plan and record the evidence — test:server, test:ci, build, both lints, log-query; evidence into Execution Notes. The builder does not run the seed against any database: the Planner runs the demo seed with --write in slot wt-2 after the merge, so `demo_rest_profile` is at level 1 before the Human's cards
 
 ## Technical Considerations
 - Dependencies: `handleInbound` / `afterStored` (675), the member routes (687), `runTurn` / `handOff` (679, 689),
@@ -308,3 +308,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: hand back answers the guest's waiting message at once (no 6 s wait); when the newest message is ours, nothing runs.
 - behaviour: going back to the assistant clears `assignedTo`, `heldAt` and the old `suggestion`, as hand back does today.
 - checked: 675, 676, 677, 678, 681, 687, 701, 702 (built on `chore/restaurant-staging`; this plan builds on them, none is the same work).
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors); `pnpm run test:ci` → 0 (3217 of 3217); `pnpm run test:server` → 0; override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check, lint:icons, lint:no-native-select → 0; kit-manifest-check → ok; log-query → SKIP (no database configured).
+- A7: the seed was not run against any database (the Planner runs it in wt-2 after the merge).
+- behaviour: the release route answers the waiting guest without awaiting it (response first). Reverse: drop the `answerWaiting` call in the release route.
