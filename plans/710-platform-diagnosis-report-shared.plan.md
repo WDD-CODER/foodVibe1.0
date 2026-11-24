@@ -110,6 +110,7 @@ append the path to the scope block above and retry.
 - Loading — family: feedback — rung: 1 — why: `app-loader`.
 - Empty — family: empty-state — rung: 1 — why: `app-empty-state`.
 - Hand field labels — family: form-field — rung: 1 — why: `app-form-field`.
+- Classes named in the stylesheets: `.c-stat-tile`, `.c-stat-tile--hero` (the shared tile, only placed in a grid), `.report__tiles`, `.tile__values` (existing report tile hooks kept for the print rules), `.ai-num` (a number cell of the AI table), `.diagnosis-workspace__toggle` and `.ph-back` (print hide of the header's own button and back link).
 - none new.
 
 ## Defaults
