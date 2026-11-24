@@ -2,7 +2,7 @@
   @if (isHistoryViewMode_()) {
   <div class="history-view-banner">
     <span>{{ 'history_view_only_banner' | translatePipe }}</span>
-    <button type="button" class="btn-back" (click)="navigateBackFromHistory()">
+    <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="navigateBackFromHistory()">
       {{ 'back_to_list' | translatePipe }}
     </button>
   </div>
@@ -232,12 +232,12 @@
 
     <section class="builder-section">
       <div
-        class="section-card collapsible table-logic"
+        class="c-glass-panel rb-section collapsible table-logic"
         [class.is-collapsed]="isTableLogicCollapsed_()"
         (click)="isTableLogicCollapsed_() && toggleTableLogic()"
       >
         <div
-          class="section-card-header"
+          class="rb-section-head"
           (click)="toggleTableLogic(); $event.stopPropagation()"
           role="button"
           tabindex="0"
@@ -247,15 +247,15 @@
           <h2 class="section-title">{{ 'ingredients_index' | translatePipe }}</h2>
           <button
             type="button"
-            class="section-toggle-btn"
+            class="c-icon-btn no-print"
             tabindex="-1"
             (click)="toggleTableLogic(); $event.stopPropagation()"
             [attr.aria-expanded]="!isTableLogicCollapsed_()"
           >
-            <lucide-icon [name]="isTableLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
+            <lucide-icon [name]="isTableLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="18"></lucide-icon>
           </button>
         </div>
-        <div class="section-card-body" (click)="$event.stopPropagation()">
+        <div class="rb-section-body" (click)="$event.stopPropagation()">
           <app-recipe-ingredients-table
             [ingredientsFormArray]="ingredientsArray"
             [portions]="portions_() ?? 1"
@@ -267,7 +267,7 @@
           </app-recipe-ingredients-table>
 
           @if (!isHistoryViewMode_()) {
-          <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">
+          <button type="button" class="c-btn-ghost no-print" (click)="addNewIngredientRow();$event.stopPropagation()">
             <lucide-icon name="plus" [size]="18"></lucide-icon>
             {{ 'add_row' | translatePipe }}
           </button>
@@ -277,12 +277,12 @@
     </section>
     <section class="builder-section">
       <div
-        class="section-card collapsible workflow-logic"
+        class="c-glass-panel rb-section collapsible workflow-logic"
         [class.is-collapsed]="isWorkflowLogicCollapsed_()"
         (click)="isWorkflowLogicCollapsed_() && toggleWorkflowLogic()"
       >
         <div
-          class="section-card-header"
+          class="rb-section-head"
           (click)="toggleWorkflowLogic(); $event.stopPropagation()"
           role="button"
           tabindex="0"
@@ -294,15 +294,15 @@
           </h2>
           <button
             type="button"
-            class="section-toggle-btn"
+            class="c-icon-btn no-print"
             tabindex="-1"
             (click)="toggleWorkflowLogic(); $event.stopPropagation()"
             [attr.aria-expanded]="!isWorkflowLogicCollapsed_()"
           >
-            <lucide-icon [name]="isWorkflowLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
+            <lucide-icon [name]="isWorkflowLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="18"></lucide-icon>
           </button>
         </div>
-        <div class="section-card-body" (click)="$event.stopPropagation()">
+        <div class="rb-section-body" (click)="$event.stopPropagation()">
           <app-recipe-workflow
             [workflowFormArray]="workflowArray"
             [type]="recipeType_()"
@@ -320,12 +320,12 @@
     @if (!isHistoryViewMode_()) {
     <section class="builder-section">
       <div
-        class="section-card collapsible logistics-logic"
+        class="c-glass-panel rb-section collapsible logistics-logic"
         [class.is-collapsed]="isLogisticsLogicCollapsed_()"
         (click)="isLogisticsLogicCollapsed_() && toggleLogisticsLogic()"
       >
         <div
-          class="section-card-header"
+          class="rb-section-head"
           (click)="toggleLogisticsLogic(); $event.stopPropagation()"
           role="button"
           tabindex="0"
@@ -335,18 +335,18 @@
           <h2 class="section-title">{{ 'dish_logistics' | translatePipe }}</h2>
           <button
             type="button"
-            class="section-toggle-btn"
+            class="c-icon-btn no-print"
             tabindex="-1"
             (click)="toggleLogisticsLogic(); $event.stopPropagation()"
             [attr.aria-expanded]="!isLogisticsLogicCollapsed_()"
           >
             <lucide-icon
               [name]="isLogisticsLogicCollapsed_() ? 'chevron-down' : 'chevron-up'"
-              [size]="20"
+              [size]="18"
             ></lucide-icon>
           </button>
         </div>
-        <div class="section-card-body" (click)="$event.stopPropagation()">
+        <div class="rb-section-body" (click)="$event.stopPropagation()">
           <div class="logistics-grid" [formGroup]="recipeForm_">
             <div class="logistics-add-wrap">
               <div class="logistics-add-inner">
@@ -377,7 +377,7 @@
                 />
                 <button
                   type="button"
-                  class="logistics-add-btn"
+                  class="c-btn-primary"
                   [disabled]="!logisticsPicker.selectedToolId_() && !logisticsPicker.searchQuery_().trim()"
                   (click)="logisticsPicker.onAddClick()"
                 >

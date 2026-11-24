@@ -5,7 +5,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   container-type: inline-size;
   container-name: ingredients;
 
-  width: 100%;
+  inline-size: 100%;
 
   overflow: visible;
 }
@@ -29,8 +29,8 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   opacity: 0.95;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 0.75rem;
+  gap: var(--space-3);
+  padding: 0.625rem var(--space-3);
   box-sizing: border-box;
 }
 
@@ -51,10 +51,10 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   display: grid;
   grid-template-columns: $ingredients-grid-template;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-3);
 
-  padding-inline: 1rem;
-  padding-block: 0.5rem;
+  padding-inline: var(--space-4);
+  padding-block: var(--space-2);
 
   .col-actions {
     display: grid;
@@ -69,8 +69,8 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 .ingredient-grid-row .col-actions .c-icon-btn {
-  width: 1.5rem;
-  height: 1.5rem;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
 }
 
 // Plan 348: hover-reveal only where hovering exists — on touch the row trash is always visible.
@@ -87,13 +87,13 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 .ingredients-grid-header {
-  padding-inline: 0.75rem;
+  padding-inline: var(--space-3);
   padding-block: 0.625rem;
 
   background: var(--bg-glass);
   color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
 
   border-block-end: 1px solid var(--border-default);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
@@ -108,7 +108,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 .ingredient-grid-row {
-  min-height: 4rem;
+  min-block-size: 4rem;
 
   overflow: visible;
 
@@ -129,85 +129,41 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.5rem;
+    min-block-size: 2.5rem;
   }
 }
 
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-
-  .qty-btn {
-    display: grid;
-    place-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition:
-      background 0.2s ease,
-      border-color 0.2s ease;
-
-    &:hover:not(:disabled) {
-      background: var(--bg-glass-hover);
-      border-color: var(--border-strong);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
+  gap: var(--space-1);
 
   .qty-input {
     flex: 1;
-    min-width: 2.5rem;
+    min-inline-size: 2.5rem;
     text-align: center;
   }
 }
 
 .col-percent {
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--fs-base);
 }
 
 .col-cost {
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--color-success);
   text-align: start;
 
   &.is-zero {
     color: var(--color-text-muted-light);
-    font-weight: 400;
-  }
-}
-
-.grid-input {
-  width: 100%;
-  padding: 0.5rem;
-  background-color: var(--bg-pure);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  outline: none;
-
-  &:focus {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus);
-  }
-
-  &.has-error {
-    border-color: var(--color-danger);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 15%, transparent);
+    font-weight: var(--fw-regular);
   }
 }
 
 .grid-select {
-  width: 100%;
-  padding: 0.5rem;
+  inline-size: 100%;
+  padding: var(--space-2);
   background-color: var(--bg-pure);
   border: none;
   border-radius: var(--radius-sm);
@@ -232,9 +188,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 .selected-item-display {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 
-  padding: 0.375rem 0.75rem;
+  padding: 0.375rem var(--space-3);
 
   background: var(--bg-muted);
 
@@ -242,7 +198,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 
   .item-text {
     flex: 1;
-    font-weight: 500;
+    font-weight: var(--fw-medium);
     cursor: pointer;
   }
 
@@ -269,91 +225,21 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-.unlinked-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-
-  padding: 0;
-
-  background: transparent;
-  color: var(--color-danger);
-
-  border: none;
-
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.15);
-  }
-
-  .badge-label {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-semibold);
-    line-height: 1;
-    white-space: nowrap;
-  }
-}
-
 .paste-ingredients-btn {
-  margin-block-start: 0.5rem;
+  margin-block-start: var(--space-2);
 }
 
-.incomplete-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-
-  padding: 0;
-
-  background: transparent;
-  color: var(--color-danger);
-
-  border: none;
-
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
-  animation: incomplete-pulse 2s ease-in-out infinite;
-
-  &:hover {
-    color: var(--color-danger-hover);
-    transform: scale(1.15);
-  }
-
-  .badge-label {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-semibold);
-    line-height: 1;
-  }
-}
-
-.warning-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  background: transparent;
-  color: var(--color-warning);
-
-  border: none;
-
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+/* Attention pulse on the incomplete / warning chips (the chips come from .c-chip--tag). */
+.rb-pulse {
   animation: warning-pulse 3s ease-in-out infinite;
 
+  &.rb-pulse--strong {
+    animation-name: incomplete-pulse;
+    animation-duration: 2s;
+  }
+
   &:hover {
-    transform: scale(1.15);
+    animation-play-state: paused;
   }
 }
 
@@ -367,30 +253,6 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-.warning-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  background: transparent;
-  color: var(--border-warning);
-
-  border: none;
-
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
-  animation: warning-pulse 3s ease-in-out infinite;
-
-  &:hover {
-    color: var(--text-warning);
-    transform: scale(1.15);
-  }
-}
-
 @keyframes warning-pulse {
   0%,
   100% {
@@ -401,57 +263,25 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-.clear-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0.25rem;
-
-  background: none;
-  border: none;
-  color: var(--color-text-muted);
-
-  cursor: pointer;
-  transition: color 0.15s ease;
-
-  &:hover {
-    color: var(--color-danger);
-  }
+/* Small icon buttons beside the name and around the quantity: only the size is local. */
+.rb-mini-btn {
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
 }
 
-.edit-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 0;
-
-  background: transparent;
-  color: var(--color-text-muted);
-
-  border: none;
-
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    opacity 0.2s ease,
-    transform 0.2s ease;
-
-  &:hover {
-    color: var(--color-primary);
-    transform: scale(1.15);
-  }
+.rb-step-btn {
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
 }
 
-// Plan 348: the edit badge is hover-revealed only on hover-capable devices.
+// Plan 348: the edit chip is hover-revealed only on hover-capable devices.
 @media (hover: hover) {
-  .edit-badge {
+  .rb-reveal {
     opacity: 0;
   }
 
-  .selected-item-display:hover .edit-badge,
-  .edit-badge:focus-visible {
+  .selected-item-display:hover .rb-reveal,
+  .rb-reveal:focus-visible {
     opacity: 1;
   }
 }
@@ -471,8 +301,8 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     grid-template-rows: auto auto;
     column-gap: var(--space-3);
     row-gap: var(--space-2);
-    padding: 0.75rem;
-    margin-block-end: 0.5rem;
+    padding: var(--space-3);
+    margin-block-end: var(--space-2);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     background: var(--bg-glass);
@@ -486,11 +316,6 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
       grid-column: 1 / 4;
       grid-row: 1;
       min-inline-size: 0;
-
-      .grid-input {
-        inline-size: 100%;
-        min-inline-size: 0;
-      }
     }
 
     .col-actions {
@@ -498,9 +323,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
       grid-row: 1;
       justify-content: center;
 
-      .c-icon-btn {
-        width: 2.75rem;
-        height: 2.75rem;
+      button {
+        inline-size: 2.75rem;
+        block-size: 2.75rem;
 
         opacity: 1;
       }
@@ -529,12 +354,12 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 
     // Compact stepper buttons so the amount itself gets the room; the input flexes between them.
     .quantity-controls {
-      gap: 0.25rem;
+      gap: var(--space-1);
 
       inline-size: 100%;
     }
 
-    .quantity-controls .qty-btn {
+    .quantity-controls .rb-step-btn {
       flex-shrink: 0;
       min-inline-size: 2rem;
 
