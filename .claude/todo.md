@@ -712,3 +712,10 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A6: Put the fixed, labour and purchases inputs into the month form and its save — defaults for an older month, changed groups only, leave question; page spec — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
 - [ ] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
 - [ ] A8: Record the new fields and cards in the maps and run every automatic check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
+
+### Plan 730 — The assistant skips AI models Google has retired and moves on when a model is gone
+- [ ] A1: Stop calling the two Gemini models Google has retired, so they show as removed — drop gemini-2.5-flash-lite and gemini-2.5-flash from the catalog, budgets, media and price maps, update comments, rewrite the media and removed-model cases — server/services/gemini-client.js, server/constants/ai-prices.js, server/test/gemini-client.test.js
+- [ ] A2: Let the front desk move to the next model when one is gone, and skip it for the rest of the day — isGone, goneUntil, fallback start and loop, gone log; new cases plus the unchanged default path — server/services/gemini-client.js, server/test/gemini-fallback.test.js
+- [ ] A3: Note the gone-model rule where the next plan looks — server/breadcrumbs.md
+- [ ] A4: Confirm every model left in the list still has a price, so cost estimates stay right — run only, no edit expected — server/test/ai-usage.test.js
+- [ ] A5: Run every check of this plan and hand Dandan the hand check — test:server, server lint, log-query; evidence into Execution Notes
