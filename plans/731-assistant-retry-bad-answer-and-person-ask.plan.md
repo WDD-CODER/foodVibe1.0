@@ -98,6 +98,7 @@ server/test/frontdesk-turn.test.js
 server/test/frontdesk-guardrails.test.js
 server/test/frontdesk-tables.test.js
 server/test/frontdesk-prompt.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
