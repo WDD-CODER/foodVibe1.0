@@ -32,6 +32,7 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
   let profile_: WritableSignal<FrontDeskProfile | null>
   let data: { createFromTemplate: jasmine.Spy; save: jasmine.Spy; setConfirmMode: jasmine.Spy }
   let userMsg: jasmine.SpyObj<UserMsgService>
+  let loadPending = false
 
   type Internals = {
     hasRealChanges: () => boolean
@@ -69,7 +70,7 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
           provide: FrontDeskProfileDataService,
           useValue: {
             profile_,
-            ensureLoaded: () => Promise.resolve(),
+            ensureLoaded: () => (loadPending ? new Promise<void>(() => undefined) : Promise.resolve()),
             reloadFromStorage: () => Promise.resolve(),
             ...data
           }
@@ -89,6 +90,16 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
     fixture = TestBed.createComponent(FrontdeskSettingsPage)
     await settle()
   }
+
+  it('shows one app-loader while the profile loads (plan 708)', async () => {
+    loadPending = true
+    try {
+      await setup(null)
+      expect(el().querySelectorAll('app-loader').length).toBe(1)
+    } finally {
+      loadPending = false
+    }
+  })
 
   it('shows the type picker when there is no profile', async () => {
     await setup(null)

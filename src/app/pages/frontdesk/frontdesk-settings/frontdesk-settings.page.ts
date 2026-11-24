@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
@@ -92,6 +93,7 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
     TranslatePipe,
     PageHeaderComponent,
     EmptyStateComponent,
+    LoaderComponent,
     FormFieldComponent,
     CustomSelectComponent,
     DateFieldComponent,

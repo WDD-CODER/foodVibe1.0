@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -24,7 +25,7 @@ const WAITING: readonly string[] = ['new', 'qualified', 'needs_info']
 @Component({
   selector: 'app-public-request-status-page',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, TranslatePipe, EmptyStateComponent, PublicBrandComponent],
+  imports: [RouterLink, LucideAngularModule, TranslatePipe, EmptyStateComponent, LoaderComponent, PublicBrandComponent],
   providers: [PublicRequestService],
   templateUrl: './public-request-status.page.html',
   styleUrl: '../public-request.page.scss',

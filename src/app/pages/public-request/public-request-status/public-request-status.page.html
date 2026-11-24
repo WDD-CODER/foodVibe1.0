@@ -1,13 +1,13 @@
 <main class="pb-page" dir="rtl" lang="he">
   @switch (state_()) { @case ('loading') {
-  <p class="pb-loading" aria-busy="true">{{ 'pb_loading' | translatePipe }}</p>
+  <app-loader label="pb_loading" />
   } @case ('not_found') {
   <app-empty-state messageKey="pb_request_not_found" icon="clipboard-check" />
   } @case ('failed') {
   <app-empty-state messageKey="pb_load_failed" icon="clipboard-check" ctaLabelKey="pb_retry" (ctaClick)="load()" />
   } @case ('ready') { @if (status_(); as s) {
   <app-public-brand [name]="s.displayName" />
-  <section class="pb-card" data-testid="pb-status">
+  <section class="pb-card c-glass-panel" data-testid="pb-status">
     <p class="pb-reference" data-testid="pb-reference">{{ referenceText_() }}</p>
     <p class="pb-sub">{{ wantedLine_() }}</p>
 

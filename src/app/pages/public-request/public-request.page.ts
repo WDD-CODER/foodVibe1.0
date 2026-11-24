@@ -18,6 +18,7 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { TimeFieldComponent } from 'src/app/shared/time-field/time-field.component'
 import { TranslationService } from '@services/translation.service'
@@ -61,6 +62,7 @@ const dayMonth = (date: string): string => date.slice(8, 10) + '/' + date.slice(
     DateFieldComponent,
     TimeFieldComponent,
     EmptyStateComponent,
+    LoaderComponent,
     FormFieldComponent,
     PublicBrandComponent
   ],
