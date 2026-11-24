@@ -20,7 +20,7 @@
     flex-direction: column;
 
     inline-size: min(22rem, calc(100vw - 2rem));
-    max-block-size: min(24rem, 70vh);
+    max-block-size: min(24rem, 70dvh);
     margin: 0;
     overflow: visible;
 
@@ -47,21 +47,6 @@
 
     &.partial-popover--below::before {
       inset-block: auto 100%;
-    }
-
-    @media (max-width: $break-phone-max) {
-      inset-block: auto var(--space-4);
-      inset-inline: var(--space-4);
-      inline-size: auto;
-
-      &::before {
-        content: none;
-      }
-    }
-
-    // Plan 481: the bottom sheet sits above the shell's bottom tab bar, so its last line is never under it.
-    @media (max-width: $break-phone-max) {
-      inset-block-end: calc(var(--tabbar-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
     }
   }
 

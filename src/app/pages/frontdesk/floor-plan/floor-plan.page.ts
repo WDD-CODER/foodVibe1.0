@@ -54,6 +54,7 @@ import { LoggingService } from '@services/logging.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { PHONE_QUERY } from '@utils/breakpoints'
 import { useUnsavedChanges } from '@utils/unsaved-changes'
 import { emptyFloorPlan } from '@schemas/front-desk/floor-plan-check'
 import type { FloorJoin, FloorPlanBody, FloorTable } from '@models/floor-plan.model'
@@ -128,8 +129,6 @@ export class FloorPlanPage {
   protected readonly joinMarkKey_ = signal<string | null>(null)
   /** Phone only: the room panel (areas, size, joins) is open in the sheet. */
   protected readonly roomOpen_ = signal(false)
-  /** Height of the panel as rendered, for the page's bottom padding under the sheet. */
-  protected readonly sheetH_ = signal(0)
   /** True right after a duplicate: the copy's number field takes the focus. */
   protected readonly focusNumber_ = signal(false)
 
@@ -228,14 +227,6 @@ export class FloorPlanPage {
 
   constructor() {
     void this.load()
-    // The page pads its bottom by the sheet's measured height (phone only, in the stylesheet).
-    effect((onCleanup) => {
-      const el = this.panelEl()?.nativeElement
-      if (!el || typeof ResizeObserver === 'undefined') return
-      const observer = new ResizeObserver(() => this.sheetH_.set(Math.ceil(el.getBoundingClientRect().height)))
-      observer.observe(el)
-      onCleanup(() => observer.disconnect())
-    })
     // The selected table is kept in view above the sheet.
     effect(() => {
       const key = this.selectedKey_()
@@ -245,6 +236,24 @@ export class FloorPlanPage {
         table?.scrollIntoView?.({ block: 'nearest' })
       })
     })
+    // Plan 721: on a phone the panel opens in the page under the map; scroll it into view (runs last).
+    effect(() => {
+      const open = this.sheetOpen_()
+      const opened = open && !this.wasOpen_
+      this.wasOpen_ = open
+      if (!opened || !this.isPhone_()) return
+      queueMicrotask(() => this.panelEl()?.nativeElement.scrollIntoView?.({ block: 'nearest' }))
+    })
+  }
+
+  private wasOpen_ = false
+
+  private isPhone_(): boolean {
+    try {
+      return window.matchMedia(PHONE_QUERY).matches
+    } catch {
+      return false
+    }
   }
 
   /** Route guard (`pendingChangesGuard`): unsaved drawing asks before leaving. */

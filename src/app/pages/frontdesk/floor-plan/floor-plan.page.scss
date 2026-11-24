@@ -143,33 +143,14 @@
   font-weight: var(--fw-semibold);
 }
 
-/* Plan 666: under 768 px the panel is a non-modal sheet at the bottom; the room above it stays in view. */
+/* Plan 721: under 768 px the panel is shown only when open, in the page under the map. */
 @media (max-width: $break-phone-max) {
-  .floor-plan.floor-plan--sheet {
-    padding-block-end: calc(var(--fp-sheet-h, 0px) + var(--bottom-bar-h, 0px) + var(--space-4));
-  }
-
   .floor-plan__panel {
     display: none;
   }
 
   .floor-plan__panel.floor-plan__panel--open {
-    position: fixed;
-    inset-block-end: var(--bottom-bar-h, 0px);
-    inset-inline: 0;
-    z-index: var(--z-floating);
-
     display: block;
-    inline-size: auto;
-    max-block-size: 45vh;
-    overflow-y: auto;
-
-    background: var(--bg-pure);
-
-    padding: var(--space-3) var(--space-4);
-    border-start-start-radius: var(--radius-lg);
-    border-start-end-radius: var(--radius-lg);
-    box-shadow: var(--shadow-modal);
   }
 
   .floor-plan__sheet-head {

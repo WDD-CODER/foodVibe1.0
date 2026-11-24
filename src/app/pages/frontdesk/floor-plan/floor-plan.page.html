@@ -1,4 +1,4 @@
-<section class="floor-plan" dir="rtl" [class.floor-plan--sheet]="sheetOpen_()" [style.--fp-sheet-h.px]="sheetH_()">
+<section class="floor-plan" dir="rtl">
   <app-page-header titleKey="fp_title">
     @if (canEdit_() && draft_() && dirty_()) {
     <span header-actions class="floor-plan__unsaved" data-testid="fp-unsaved">
