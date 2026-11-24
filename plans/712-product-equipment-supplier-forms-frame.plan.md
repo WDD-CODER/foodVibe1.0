@@ -68,6 +68,8 @@ src/app/pages/suppliers/suppliers.page.html
 src/app/pages/suppliers/suppliers.page.scss
 src/app/pages/suppliers/suppliers.page.ts
 scripts/test/style-712.test.mjs
+src/app/pages/diagnosis/components/diag-invoice-queue/diag-invoice-queue.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
