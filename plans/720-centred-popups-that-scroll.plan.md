@@ -134,6 +134,7 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
 scripts/test/style-703.test.mjs
+scripts/test/style-711.test.mjs
 ```
 
 ## Read Scope
