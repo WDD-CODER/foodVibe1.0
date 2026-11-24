@@ -1,9 +1,9 @@
 @use '../../core/styles/breakpoints' as *;
 .metadata-page {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 1.5rem;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  padding: var(--space-6);
   background: transparent;
   font-family: 'Heebo', sans-serif;
 
@@ -24,8 +24,8 @@
       z-index: 5;
 
       display: block;
-      margin-block-end: 1.5rem;
-      padding: 0.375rem 0.25rem;
+      margin-block-end: var(--space-6);
+      padding: 0.375rem var(--space-1);
 
       background: var(--bg-glass-strong);
       border: 1px solid var(--border-default);
@@ -72,106 +72,35 @@
     grid-auto-flow: dense;
     grid-template-columns: repeat(auto-fit, minmax(335px, 1fr));
     place-content: center;
-    gap: 2rem;
+    gap: var(--space-8);
 
     @media (max-width: $break-phone-max) {
       // minmax(0, ...): the track may shrink below its widest card content (plan 468, G1).
       grid-template-columns: minmax(0, 1fr);
-      max-width: 28rem;
+      max-inline-size: 28rem;
       margin-inline: auto;
     }
   }
 }
 
-.manager-card {
-  height: fit-content;
-  padding: 1.5rem;
-  background: var(--bg-glass-strong);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-
-  .card-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-block-end: 1.5rem;
-    padding-block-end: 1rem;
-    border-block-end: 1px solid var(--border-default);
-
-    h2 {
-      margin: 0;
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--color-text-main);
-    }
-  }
-
-  .card-desc {
-    margin: 0 0 1rem;
-
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-  }
-
-  @media (max-width: $break-phone-max) {
-    padding: 1rem;
-  }
-}
-
-.list-container {
-  margin-block-start: 1.5rem;
-
-  .list-stack {
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.5rem;
-  }
-
-  .list-item {
-    color: var(--color-text-main);
-    font-weight: 600;
-    background: var(--bg-glass);
-
-    padding: 0.75rem 1rem;
-    border: 1px solid transparent;
-    border-radius: var(--radius-md);
-    backdrop-filter: var(--blur-glass);
-  }
-}
-
 // Menu types (plan 340): the name on its own line (tap opens its edit/delete menu), then all
 // 5 dish fields as toggle chips in ALL_DISH_FIELDS order.
-.menu-types-card {
-  .menu-type-row {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+.mm-menu-list {
+  --list-cols: minmax(0, 1fr) auto;
+}
 
-    gap: 0.5rem;
-  }
+.menu-type-row app-inline-rename-field {
+  inline-size: 100%;
+}
 
-  .menu-type-row app-inline-rename-field {
-    inline-size: 100%;
-  }
+.menu-type-fields-cell {
+  grid-column: 1 / -1;
+}
 
-  .menu-type-fields {
-    padding-block: 0;
-  }
+.menu-type-fields {
+  padding-block: 0;
 }
 
 .icon-primary {
   color: var(--color-primary);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-text-muted);
-  border: 1px dashed var(--border-default);
-  border-radius: var(--radius-md);
-  font-style: italic;
 }

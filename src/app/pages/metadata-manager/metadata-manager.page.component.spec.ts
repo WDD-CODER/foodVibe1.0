@@ -333,7 +333,7 @@ describe('MetadataManagerPageComponent', () => {
     const card = fixture.debugElement.query(By.css('#mm-sec-category'))
     const chips = card.queryAll(By.css('button.c-chip--tap'))
     expect(chips.map((c) => c.nativeElement.textContent.trim())).toEqual(['vegetables', 'meat'])
-    expect(fixture.debugElement.queryAll(By.css('.manager-card .c-icon-btn')).length).toBe(0)
+    expect(fixture.debugElement.queryAll(By.css('.mm-card .c-icon-btn')).length).toBe(0)
     // System units are locked, not tappable.
     const unitCard = fixture.debugElement.query(By.css('#mm-sec-unit'))
     expect(unitCard.queryAll(By.css('button.c-chip--tap')).length).toBe(0)
@@ -374,6 +374,29 @@ describe('MetadataManagerPageComponent', () => {
     await component.onToggleMenuTypeField('buffet', 'serving_portions')
     expect(metadataRegistrySpy.updateMenuType).toHaveBeenCalledWith('buffet', [])
     mockMenuTypes.set([])
+  })
+
+  // --- Plan 714: the menu types card is a shared panel with shared rows and a shared empty state ---
+
+  it('draws two menu types as two shared list rows', () => {
+    mockMenuTypes.set([
+      { key: 'buffet', fields: [] },
+      { key: 'plated', fields: [] }
+    ])
+    fixture.detectChanges()
+    const card = fixture.debugElement.query(By.css('#mm-sec-menu-type'))
+    expect(card.nativeElement.classList.contains('c-glass-panel')).toBeTrue()
+    expect(card.queryAll(By.css('.c-list > li.c-list-row')).length).toBe(2)
+    expect(card.query(By.css('app-empty-state'))).toBeNull()
+    mockMenuTypes.set([])
+  })
+
+  it('shows a compact empty state when there are no menu types', () => {
+    mockMenuTypes.set([])
+    fixture.detectChanges()
+    const card = fixture.debugElement.query(By.css('#mm-sec-menu-type'))
+    expect(card.queryAll(By.css('.c-list-row')).length).toBe(0)
+    expect(card.query(By.css('app-empty-state .c-empty-state--compact'))).not.toBeNull()
   })
 
   // --- Mobile/tablet jump nav ---

@@ -158,18 +158,41 @@ describe('UserManagementComponent', () => {
     expect(buttons.map((b) => b.disabled)).toEqual([true, false, false])
   })
 
-  // Plan 468 - the trash icon sits under the email, inside the card, never over it.
-  it('puts the email and the remove button on separate rows, the button last in the card', () => {
-    const items = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.list-item.group'))
+  // Plan 468 - the trash icon never floats over the email: it has its own cell, last in the row.
+  it('puts the email and the remove button in separate cells, the button last in the row', () => {
+    const items = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.c-list-row'))
     expect(items.length).toBe(3)
     for (const item of items) {
       const info = item.querySelector<HTMLElement>('.user-info')!
-      const actions = item.querySelector<HTMLElement>('.item-actions')!
+      const actions = item.querySelector<HTMLElement>('.c-col-actions')!
       expect(info.contains(actions)).toBeFalse()
       expect(info.querySelector('.user-email')).not.toBeNull()
       expect(info.querySelector('button')).toBeNull()
       expect(actions.querySelector('button.c-icon-btn.danger')).not.toBeNull()
       expect(item.lastElementChild).toBe(actions)
     }
+  })
+
+  // Plan 714
+  it('shows the shared loader while the users load, and no rows', () => {
+    component['isLoading_'].set(true)
+    fixture.detectChanges()
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('app-loader')).not.toBeNull()
+    expect(host.querySelectorAll('.c-list-row').length).toBe(0)
+  })
+
+  it('draws two users as two shared rows', () => {
+    component['users_'].set([OWNER, STAFF])
+    fixture.detectChanges()
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelectorAll('li.c-list-row').length).toBe(2)
+    expect(host.querySelector('app-loader')).toBeNull()
+  })
+
+  it('shows a compact empty state when there are no users', () => {
+    component['users_'].set([])
+    fixture.detectChanges()
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-empty-state')).not.toBeNull()
   })
 })

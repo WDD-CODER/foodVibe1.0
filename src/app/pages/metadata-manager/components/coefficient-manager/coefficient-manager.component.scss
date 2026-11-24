@@ -5,88 +5,33 @@
     display: block;
   }
 
-  .manager-card {
-    block-size: fit-content;
-
-    padding: 1.5rem;
-
-    @media (max-width: $break-phone-max) {
-      padding: 1rem;
-    }
-  }
-
-  .card-title {
-    display: flex;
-    align-items: center;
-
-    gap: 0.75rem;
-    margin-block-end: 1rem;
-    padding-block-end: 1rem;
-
-    border-block-end: 1px solid var(--border-default);
-
-    h2 {
-      margin: 0;
-
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--color-text-main);
-    }
-  }
-
-  .card-desc {
-    margin-block: 0 1rem;
-    margin-inline: 0;
-
-    font-size: 0.875rem;
-    color: var(--color-text-muted);
-  }
-
-  .icon-primary {
-    color: var(--color-primary);
-  }
-
   .list-title {
-    margin-block: 1.25rem 0.5rem;
+    margin-block: var(--space-5) var(--space-2);
 
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: var(--fs-md);
+    font-weight: var(--fw-bold);
     color: var(--color-text-main);
   }
 
-  .coef-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-
-    margin: 0;
-    padding: 0;
-
-    list-style: none;
+  // name · input · actions
+  .mm-coef-list {
+    --list-cols: minmax(0, 1fr) 7rem auto;
   }
 
-  .coef-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    min-block-size: 2.5rem;
-    padding-inline: 0.5rem;
-
-    border-radius: var(--radius-md);
+  .mm-coef-error {
+    grid-column: 1 / -1;
   }
 
   .coef-name {
-    flex: 1;
-    min-inline-size: 0;
+    gap: var(--space-2);
 
-    font-size: 0.875rem;
+    font-size: var(--fs-base);
     color: var(--color-text-main);
   }
 
   // Look comes from the .c-input engine; only the sizing is local.
   .coef-input {
-    inline-size: 5rem;
+    inline-size: 100%;
     min-block-size: 2.25rem;
 
     text-align: center;
@@ -99,9 +44,9 @@
   .coef-add {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
 
-    margin-block-start: 0.75rem;
+    margin-block-start: var(--space-3);
   }
 
   .coef-add-name {
@@ -116,10 +61,10 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: var(--space-2);
 
-    margin-block-start: 1.25rem;
-    padding-block-start: 1rem;
+    margin-block-start: var(--space-5);
+    padding-block-start: var(--space-4);
 
     border-block-start: 1px solid var(--border-default);
   }
@@ -127,7 +72,7 @@
   .coef-unsaved {
     margin-inline-end: auto;
 
-    font-size: 0.875rem;
+    font-size: var(--fs-base);
     color: var(--text-warning);
   }
 }

@@ -80,26 +80,28 @@
       (removeRequested)="onRemoveMetadata($event, 'course')"
     />
 
-    <section class="manager-card menu-types-card" id="mm-sec-menu-type">
-      <div class="card-title">
-        <lucide-icon name="utensils-crossed" class="icon-primary"></lucide-icon>
-        <h2>{{ 'metadata_menu_types_title' | translatePipe }}</h2>
-      </div>
-      <p class="card-desc">{{ 'metadata_menu_types_desc' | translatePipe }}</p>
-      <button
-        type="button"
-        class="c-btn-primary"
-        (click)="onAddMenuType()"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-      >
-        {{ 'metadata_add_menu_type' | translatePipe }}
-      </button>
-      <div class="list-container">
-        @if (allMenuTypes_().length > 0) {
-          <div class="list-stack">
-            @for (def of allMenuTypes_(); track def.key) {
-              <div class="list-item menu-type-row">
+    <section class="c-glass-panel mm-card menu-types-card" id="mm-sec-menu-type">
+      <header class="c-card-head">
+        <lucide-icon name="utensils-crossed" class="c-card-head__icon" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'metadata_menu_types_title' | translatePipe }}</h2>
+        <div class="c-card-head__end">
+          <button
+            type="button"
+            class="c-btn-primary"
+            (click)="onAddMenuType()"
+            [disabled]="!isLoggedIn()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
+            {{ 'metadata_add_menu_type' | translatePipe }}
+          </button>
+        </div>
+      </header>
+      <p class="mm-card-desc">{{ 'metadata_menu_types_desc' | translatePipe }}</p>
+      @if (allMenuTypes_().length > 0) {
+        <ul class="c-list c-list--plain mm-menu-list" role="list">
+          @for (def of allMenuTypes_(); track def.key) {
+            <li class="c-list-row menu-type-row" role="listitem">
+              <div class="c-list-body-cell">
                 @if (renamingMenuTypeKey_() === def.key) {
                   <app-inline-rename-field
                     [value]="def.key"
@@ -126,6 +128,8 @@
                     ></lucide-icon>
                   </span>
                 }
+              </div>
+              <div class="c-list-body-cell menu-type-fields-cell">
                 <div class="c-chip-group menu-type-fields">
                   @for (f of ALL_DISH_FIELDS; track f.key) {
                     <label class="c-chip c-chip--toggle">
@@ -140,12 +144,12 @@
                   }
                 </div>
               </div>
-            }
-          </div>
-        } @else {
-          <div class="empty-state">{{ 'metadata_no_menu_types' | translatePipe }}</div>
-        }
-      </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <app-empty-state [compact]="true" messageKey="metadata_no_menu_types" />
+      }
     </section>
 
     <app-coefficient-manager id="mm-sec-coefficients" />

@@ -1,9 +1,9 @@
-<section class="manager-card c-glass-panel" data-testid="staff-stages-card">
-  <div class="card-title">
-    <lucide-icon name="eye" class="icon-primary"></lucide-icon>
-    <h2>{{ 'metadata_staff_stages_title' | translatePipe }}</h2>
-  </div>
-  <p class="card-desc">{{ 'metadata_staff_stages_desc' | translatePipe }}</p>
+<section class="c-glass-panel mm-card" data-testid="staff-stages-card">
+  <header class="c-card-head">
+    <lucide-icon name="eye" class="c-card-head__icon" [size]="18"></lucide-icon>
+    <h2 class="c-card-head__title">{{ 'metadata_staff_stages_title' | translatePipe }}</h2>
+  </header>
+  <p class="mm-card-desc">{{ 'metadata_staff_stages_desc' | translatePipe }}</p>
 
   <div class="c-chip-group">
     @for (stage of stages; track stage) {

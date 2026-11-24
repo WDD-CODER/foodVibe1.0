@@ -1,16 +1,17 @@
-<section class="manager-card">
-  <div class="card-title">
-    <lucide-icon [name]="icon()" [class]="iconClass()"></lucide-icon>
-    <h2>{{ titleKey() | translatePipe }}</h2>
-  </div>
+<section class="c-glass-panel mm-card">
+  <header class="c-card-head">
+    <lucide-icon class="c-card-head__icon" [name]="icon()" [size]="18" [class]="iconClass()"></lucide-icon>
+    <h2 class="c-card-head__title">{{ titleKey() | translatePipe }}</h2>
+  </header>
   @if (descKey(); as desc) {
-    <p class="card-desc">{{ desc | translatePipe }}</p>
+    <p class="mm-card-desc">{{ desc | translatePipe }}</p>
   }
 
   <div class="input-group">
     <input
       #newInput
       type="text"
+      class="c-input"
       [placeholder]="
         placeholderKey()
           ? (placeholderKey()! | translatePipe)
@@ -74,14 +75,7 @@
         }
       </div>
     } @else {
-      <div class="empty-state">
-        @if (emptyKey(); as empty) {
-          {{ empty | translatePipe }}
-        } @else {
-          {{ 'metadata_no_items_prefix' | translatePipe }} {{ titleKey() | translatePipe }}
-          {{ 'metadata_no_items_suffix' | translatePipe }}
-        }
-      </div>
+      <app-empty-state [compact]="true" [messageKey]="emptyMessage_()" />
     }
   </div>
 </section>
