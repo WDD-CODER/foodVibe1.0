@@ -99,6 +99,7 @@ server/test/frontdesk-guardrails.test.js
 server/test/frontdesk-tables.test.js
 server/test/frontdesk-prompt.test.js
 docs/workflow-kit/manifest.json
+server/test/file-store.test.js
 ```
 
 ## Read Scope
