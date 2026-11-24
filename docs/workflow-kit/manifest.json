@@ -4166,6 +4166,37 @@
       "notes": "Unit tests for the Style QA sign-in wrapper (bearer header on API requests only)."
     },
     {
+      "path": "scripts/lib/style-guard.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/styleqa/static-checks.mjs"
+      ],
+      "notes": "Plan 703: styleFindings — the style guard later style plans use as their [auto] check (stylesheet and template rules)."
+    },
+    {
+      "path": "scripts/test/style-guard.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 703: fixture tests of the style guard."
+    },
+    {
+      "path": "scripts/test/style-703.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs",
+        "src/styles.scss"
+      ],
+      "notes": "Plan 703: the catalog is clean, each new engine is defined once, and src/styles.scss is append-only above the plan marker."
+    },
+    {
       "path": "scripts/test/breakpoints-no-literals.test.mjs",
       "tier": "project",
       "action": "stay",

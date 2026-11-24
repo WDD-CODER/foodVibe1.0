@@ -2945,3 +2945,242 @@ input[type='number']::-webkit-outer-spin-button {
   border-radius: var(--radius-sm);
   pointer-events: none;
 }
+
+/* ==== Plan 703 — style unification pieces ==== */
+/* Shared pieces the style plans (704–718) use instead of page-local copies. Appended only. */
+
+:root {
+  --page-max-content: 72rem;
+  --page-max-narrow: 48rem;
+  --page-gutter: var(--space-4);
+
+  @media (min-width: $break-desktop-min) {
+    --page-gutter: var(--space-6);
+  }
+}
+
+/* ---- Engine: Page frame (a page inside app-list-shell uses neither class: full width) ---- */
+.c-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+
+  inline-size: 100%;
+  max-inline-size: var(--page-max-content);
+  margin-inline: auto;
+  padding: var(--page-gutter);
+}
+
+.c-page--narrow {
+  max-inline-size: var(--page-max-narrow);
+}
+
+/* ---- Engine: In-panel list (rows are display:contents; border, background and hover live on the cells) ---- */
+.c-list {
+  display: grid;
+  grid-template-columns: var(--list-cols, minmax(0, 1fr) auto);
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  > .c-list-row > .c-list-body-cell {
+    justify-content: flex-start;
+    text-align: start;
+  }
+
+  > .c-list-row > .c-list-body-cell.c-col-actions,
+  > .c-list-row > .c-list-body-cell--end {
+    justify-content: flex-end;
+  }
+
+  > .c-list-row:last-child > .c-list-body-cell {
+    border-block-end: 0;
+  }
+}
+
+.c-list--plain > .c-list-row > .c-list-body-cell {
+  background: transparent;
+}
+
+.c-list-row--link > .c-list-body-cell {
+  cursor: pointer;
+}
+
+.c-list-row:hover:not(.is-selected) > .c-list-body-cell,
+.c-list-row:focus-within:not(.is-selected) > .c-list-body-cell {
+  background: var(--bg-glass-hover);
+}
+
+.c-list-row:is(:hover, :focus-within) .c-icon-btn {
+  opacity: 1;
+}
+
+.c-sortable-header {
+  user-select: none;
+}
+
+.c-row-link {
+  color: var(--color-text-main);
+  font-weight: var(--fw-medium);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+}
+
+/* ---- Engine: Stat tile (KPI) ---- */
+.c-stat-tile {
+  display: grid;
+  gap: var(--space-1);
+
+  padding: var(--space-4);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+}
+
+.c-stat-tile__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.c-stat-tile__icon {
+  color: var(--color-primary);
+}
+
+.c-stat-tile__label {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.c-stat-tile__value {
+  font-size: var(--fs-2xl);
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+.c-stat-tile__note {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+}
+
+.c-stat-tile--hero {
+  color: var(--color-on-bar);
+
+  padding-block: var(--space-5);
+  padding-inline: var(--space-6);
+  background: var(--color-primary-hover);
+  border-color: transparent;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+
+  .c-stat-tile__label,
+  .c-stat-tile__value,
+  .c-stat-tile__note,
+  .c-stat-tile__icon {
+    color: var(--color-on-bar);
+  }
+}
+
+/* ---- Engine: Card head (small-card title row) ---- */
+.c-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  margin-block-end: var(--space-3);
+}
+
+.c-card-head__icon {
+  color: var(--color-primary);
+}
+
+.c-card-head__title {
+  margin: 0;
+
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+}
+
+.c-card-head__end {
+  margin-inline-start: auto;
+}
+
+/* ---- Engine: Form page (entity form container) ---- */
+.c-form-page {
+  inline-size: 100%;
+  max-inline-size: var(--page-max-narrow);
+  margin-inline: auto;
+  padding: var(--space-6);
+
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+
+  @media (max-width: $break-phone-max) {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* ---- Engine: Modern Data Table — token values (override of the block above; no page used it before) ---- */
+.c-table {
+  th {
+    position: static;
+
+    padding-block: var(--space-3);
+    padding-inline: var(--space-4);
+    background: var(--bg-muted);
+    color: var(--color-text-muted);
+    font-family: inherit;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  td {
+    padding-block: var(--space-3);
+    padding-inline: var(--space-4);
+
+    font-size: var(--fs-base);
+    border-block-end: 1px solid var(--border-row);
+  }
+
+  tbody tr {
+    cursor: default;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+    }
+  }
+}
+
+.c-table--compact {
+  th,
+  td {
+    padding-block: var(--space-2);
+    padding-inline: var(--space-2);
+  }
+}
+
+/* ---- Engine: Empty state, compact (inside cards and drawers) ---- */
+.c-empty-state--compact {
+  gap: var(--space-2);
+  padding-block: var(--space-4);
+
+  .c-empty-state__msg {
+    font-size: var(--fs-base);
+  }
+}

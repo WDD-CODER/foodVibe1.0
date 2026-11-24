@@ -129,6 +129,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 658: the stock count shows a unit by its saved Hebrew name (`unitName_` → `TranslationService.translate`, the key when none). `.stock-count__base-pop` is one measured `popover="manual"` box at every width: `max-content` wide, placed by `placeInViewport` below its control (above when no room), re-placed on resize, closed by an outside tap, a scroll or a second tap. `app-modal-shell [light]` (plan 657) is removed. `app-list-row-checkbox` reads `--row-checkbox-size` (default unchanged); the count page sets it per breakpoint.
 - Plan 651: the past-counts list on the stock count page reads `GET /api/v1/stock/counts?status=all` through `PastCountsService` (`src/app/pages/inventory/components/stock-count/past-counts.service.ts`).
 - Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
+- In-panel lists: `.c-list` (plan 703) — a list inside a card, drawer, tab or panel with no search; full-page entity lists use `app-list-shell`. Container `role="list"`, rows `.c-list-row` with `role="listitem"`, cells `.c-list-body-cell`; `.c-list-row--link` makes a row clickable, `.c-row-link` is the name in it, `.c-list--plain` drops the cell background inside a `.c-glass-panel`; columns come from `--list-cols`.
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
@@ -155,6 +156,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/shared/empty-state/` · `app-empty-state` (+ `.c-empty-state` in `src/styles.scss`).
 - When: an empty list or a search with no results.
+- Plan 703: `compact` input (default false) adds `.c-empty-state--compact` and a 24 px icon (48 otherwise) — use it for empties inside cards, drawers and tabs.
 - Also used by `PlatformLogisticsItemsComponent` (plan 532) and `PlatformAiShotsComponent` (plan 600, the two example lists).
 - Known copies: not counted.
 
@@ -193,6 +195,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   delegation; equipment, supplier and settings (tab switch via `?tab=`) are on it too (plan 498); `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
+- Form container (plan 703): `.c-form-page` in `src/styles.scss` — the glass frame of an entity form (max 48rem, centred); replaces the copies in the equipment and supplier forms.
 - Known copies: none.
 
 ### chip — chips, badges, pills
@@ -257,6 +260,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Blocked but explained (plan 699): .c-icon-btn[aria-disabled='true'] in src/styles.scss looks like a disabled .c-icon-btn (faded, no hover spin) yet still takes hover, focus and tap, so its `[appTip]` reason shows (family tooltip).
 - Floor plan colours (plan 699): Zone and joined colour tokens --color-zone-0, --color-zone-1, --color-zone-2, --color-zone-3, --color-zone-4, --color-zone-5, --color-zone-6, --color-zone-7, --color-floor-joined — an area's palette index n is `var(--color-zone-n)` (family floor-map); the joined-table border is never in the palette.
+- Style pieces (plan 703, appended at the end of `src/styles.scss`; shown on `/dev/catalog` → style-pieces): `.c-page` / `.c-page--narrow` (page frame, `--page-max-content` 72rem, `--page-max-narrow` 48rem, `--page-gutter`), `.c-list` (+ `--plain`, `.c-list-row--link`, `.c-row-link`), `.c-stat-tile` (+ `--hero`; parts `__top`, `__icon`, `__label`, `__value`, `__note`), `.c-card-head` (+ `__icon`, `__title`, `__end`), `.c-form-page`, `.c-table` (token values; `.c-table--compact`), `.c-empty-state--compact`.
+- Page width rule (plan 703): a page inside `app-list-shell` is full width; any other page uses `.c-page` (72rem) or `.c-page--narrow` (48rem, forms and detail pages); a page never sets its own max width.
+- Icon sizes (plan 703): 14 meta, 16 buttons / chips / row actions, 18 header and primary buttons, 24+ only empty states and heroes.
+- Token mapping (plan 703): font-size ≤0.75rem→`--fs-xs`, 0.8–0.8125→`--fs-sm`, 0.84–0.95→`--fs-base`, 1–1.05→`--fs-md`, 1.1–1.3→`--fs-lg`, 1.4–1.6→`--fs-xl`, 1.75→`--fs-2xl`, ≥2→`--fs-3xl`; weight 400→`--fw-regular`, 500→`--fw-medium`, 600→`--fw-semibold`, 700/bold→`--fw-bold`, 800→`--fw-extrabold`; radius ≤4px→`--radius-xs`, 5–7px→`--radius-sm`, 8–16px→`--radius-md`, 17–24px→`--radius-lg`, 25–28px→`--radius-xl`, 50% / 999px→`--radius-full`; a literal shadow→`--shadow-card` (raised) or `--shadow-glass` (flat); a tint with no token→`color-mix(in srgb, var(<nearest colour token>) N%, transparent)` with the same alpha; spacing on the scale→`--space-*`; off-scale spacing (0.375rem, 0.625rem, 0.875rem…) may stay. `scripts/lib/style-guard.mjs` (`styleFindings`) checks a set of files against these rules.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note
@@ -934,4 +941,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 702
 - Use: `src/app/core/utils/assistant-failure.util.ts` — `assistantFailureKey(reason)` and `showAssistantFailure(conversation)`; the reason line of the inbox suggestion bar (input `failKey`); the small map before a time is chosen is the same `app-floor-map` in `src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.html`.
 - When: a page tells the host why a suggestion failed or why a chat was handed over (inbox, simulator).
+- Known copies: none.
+
+### style-guard — `styleFindings(files, { root, allow })` in `scripts/lib/style-guard.mjs` (plan 703)
+
+- Status: stable
+- Use: `scripts/lib/style-guard.mjs` · `styleFindings` returns `[{ file, line, rule, text }]` for `.scss` (colour, font-size, font-weight, radius, shadow, space-scale, physical, engine-in-component) and `.html` (hand-drawn-dialog, local-empty, local-loading, bare-input); an `allow` entry `{ rule, file, line?, why }` removes a finding and needs a `why`.
+- When: a style plan's `[auto]` check that its files use the shared pieces and tokens (`scripts/test/style-703.test.mjs` is the pattern).
 - Known copies: none.
