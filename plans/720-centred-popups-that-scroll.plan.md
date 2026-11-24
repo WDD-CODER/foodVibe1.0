@@ -38,7 +38,7 @@ Verified on `chore/restaurant-staging` (`dcf66fec`, 2026-11-24), measured in the
   onto `app-modal-shell`; `grep -rn as-modal src/app` → no match).
 - `app-modal-shell` `src/app/shared/modal-shell/modal-shell.component.ts:72-73` (`readonly sheet = input(false)`),
   `.html:4` `[class.m-sheet]="sheet()"`, `.html:15` `[class.m-sheet-card]="sheet()"`; spec
-  `modal-shell.component.spec.ts:108-116` tests the helpers; `pricing-meter.component.spec.ts:280-290` finds the card by
+  `modal-shell.component.spec.ts:108-116` tests the helpers; `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts:280-290` finds the card by
   `.m-sheet-card`.
 - The 19 `[sheet]="true"` bindings: `pages/bookings/components/new-booking-dialog/new-booking-dialog.component.html:4`,
   `table-sheet/table-sheet.component.html:1`, `waitlist-drawer/waitlist-drawer.component.html:1`,
@@ -81,8 +81,8 @@ the window, keeps its title and action row in view, and scrolls its body; nothin
 bottom sheet any more.
 
 - [auto] `pnpm run test:scripts` passes, including the new `scripts/test/modal-guard.test.mjs` (fixtures inline): `modalFindings` reports `bottom-sheet` for a block with `.m-sheet` in its prelude, for `align-items: flex-end` (and `end`) in a block whose selector contains `overlay`, `backdrop`, `sheet` or `modal`, for a block with `border-end-start-radius: 0` + `border-end-end-radius: 0` and a non-zero `border-start-start-radius`, for `position: fixed` + `inset-block-end` (or `bottom`) + a non-zero start radius, and for `inset-block: auto <length>` together with `inset-inline`; `top-sheet` for `position: fixed` + `inset-block-start: 0` + `inset-inline: 0` + end radii with no start radii; `sheet-binding` for `[sheet]="true"` and `class="m-sheet"` in a template; `modal-no-scroll` for `overflow: hidden`, `overflow-y: visible` or `max-block-size: none` in a block whose selector names `.c-modal-card`, `.c-modal-body` or a `cardClass` value found in the scanned templates; nothing inside `@media print`; an `allow` entry `{ rule, file, selector, why }` removes the matching finding and an entry without `why` throws.
-- [auto] `scripts/test/style-720.test.mjs`: (1) `modalFindings` over every `.scss` under `src/` and every `.html` under `src/app/` returns only the entries of its allow list, and each allow entry still matches a finding (a fixed one must leave the list); (2) the block below `/* ==== Plan 720 — centred popups that scroll ==== */` in `src/styles.scss` gives `.c-modal-overlay` `align-items: center`, gives `.c-modal-card` `display: flex`, `flex-direction: column`, `overflow-y: auto` and a `max-block-size` whose value contains `dvh`, `safe-area-inset-top`, `safe-area-inset-bottom` and `--kb-inset`, and gives `.c-modal-card > .c-modal-body` `min-block-size: 0` and `overflow-y: auto`; (3) no file under `src/app` contains `m-sheet` or `as-modal`, and `modal-shell.component.ts` has no `sheet` input; (4) the text of `src/styles.scss` above the plan 720 marker equals the base file's text above it (base as in `style-703.test.mjs`: `origin/orch/rs-style`, then `origin/main`; skipped with a printed reason when neither exists).
-- [auto] `pnpm run test:ci` passes, including `src/app/shared/modal-shell/modal-shell.component.spec.ts`: the old "sheet=true" case is replaced by "never a bottom sheet" (no `m-sheet` / `m-sheet-card` class; the overlay's computed `align-items` is `center`); a new case renders a heading, a `.c-modal-body` of 60 lines and a `.c-modal-actions` row and checks, in the Karma window, that the card's top ≥ 0 and bottom ≤ `window.innerHeight`, the action row's bottom ≤ `window.innerHeight`, the heading's top ≥ 0, and the body's `scrollHeight > clientHeight` with computed `overflow-y: auto`; a third case puts the same 60 lines in a plain `<div>` (no `.c-modal-body`) and checks the card itself scrolls (`scrollHeight > clientHeight`) and stays inside the window. `pricing-meter.component.spec.ts` "phone sheet" cases find the card by `app-modal-shell .c-modal-card` and still pass.
+- [auto] `scripts/test/style-720.test.mjs`: (1) `modalFindings` over every `.scss` under `src/` and every `.html` under `src/app/` returns only the entries of its allow list, and each allow entry still matches a finding (a fixed one must leave the list); (2) the block below `/* ==== Plan 720 — centred popups that scroll ==== */` in `src/styles.scss` gives `.c-modal-overlay` `align-items: center`, gives `.c-modal-card` `display: flex`, `flex-direction: column`, `overflow-y: auto` and a `max-block-size` whose value contains `dvh`, `safe-area-inset-top`, `safe-area-inset-bottom` and `--kb-inset`, and gives `.c-modal-card > .c-modal-body` `min-block-size: 0` and `overflow-y: auto`; (3) no file under `src/app` contains `m-sheet` or `as-modal`, and `modal-shell.component.ts` has no `sheet` input; (4) the text of `src/styles.scss` above the plan 720 marker equals the base file's text above it (base as in `scripts/test/style-703.test.mjs`: `origin/orch/rs-style`, then `origin/main`; skipped with a printed reason when neither exists).
+- [auto] `pnpm run test:ci` passes, including `src/app/shared/modal-shell/modal-shell.component.spec.ts`: the old "sheet=true" case is replaced by "never a bottom sheet" (no `m-sheet` / `m-sheet-card` class; the overlay's computed `align-items` is `center`); a new case renders a heading, a `.c-modal-body` of 60 lines and a `.c-modal-actions` row and checks, in the Karma window, that the card's top ≥ 0 and bottom ≤ `window.innerHeight`, the action row's bottom ≤ `window.innerHeight`, the heading's top ≥ 0, and the body's `scrollHeight > clientHeight` with computed `overflow-y: auto`; a third case puts the same 60 lines in a plain `<div>` (no `.c-modal-body`) and checks the card itself scrolls (`scrollHeight > clientHeight`) and stays inside the window. `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts` "phone sheet" cases find the card by `app-modal-shell .c-modal-card` and still pass.
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm run lint:reuse` exits 0; `node scripts/reuse-lint.mjs --check-registry` exits 0; `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] the booking popup on a tablet · window 1024×768, `/bookings` → press "הזמנה חדשה" · the popup opens in the middle of the screen, its title is at the top of the popup and the save button is visible without scrolling the page; the form between them scrolls
@@ -119,7 +119,6 @@ src/app/pages/inbox/components/fix-answer-dialog/fix-answer-dialog.component.htm
 src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.html
 src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
 src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
-src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
 src/app/pages/menu-intelligence/components/supplier-orders/supplier-orders.component.html
 src/app/pages/requests/components/approve-table-dialog/approve-table-dialog.component.html
 src/app/pages/requests/components/ask-dialog/ask-dialog.component.html
@@ -134,6 +133,7 @@ src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+scripts/test/style-703.test.mjs
 ```
 
 ## Read Scope
@@ -218,7 +218,7 @@ line or file this plan names was removed, renamed or rewritten).
 
 **The 19 bindings** — remove the attribute `[sheet]="true"` (and only it) from each line listed in the Problem
 Statement. Nothing else in those templates changes.
-- [ ] `pricing-meter.component.spec.ts:281`: `sheetCard` becomes `root().querySelector('app-modal-shell .c-modal-card')`;
+- [ ] `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts:281`: `sheetCard` becomes `root().querySelector('app-modal-shell .c-modal-card')`;
   the describe title becomes `'pricing popup on a phone (plan 487, centred since 720)'`; its cases keep their checks.
 
 **Guard** — `scripts/lib/modal-guard.mjs`, Node built-ins plus `parseStylesheet`; single quotes, no semicolons.
