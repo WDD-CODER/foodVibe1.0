@@ -52,6 +52,7 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 scripts/lib/registry-families.mjs
 scripts/test/style-718.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
