@@ -9,7 +9,8 @@ beforeAll(async () => { await buildTestApp(); }, 60000);
 afterAll(async () => { await teardownTestApp(); });
 
 const DAY = 86_400_000;
-const CONFIG = { cloudName: 'demo', apiKey: 'k', apiSecret: 'abcd' };
+const SECRET = 'zQ-not-hex-secret-9';
+const CONFIG = { cloudName: 'demo', apiKey: 'k', apiSecret: SECRET };
 const fakeReq = (businessId = 'b1') => ({ user: { userId: 'u1', name: 'n', businessId }, log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } });
 const BUF = Buffer.from('hello');
 const clearKeys = () => { for (const k of ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET']) delete process.env[k]; };
@@ -30,9 +31,9 @@ describe('cloudinary-requests', () => {
     expect(v.url).toBe('https://api.cloudinary.com/v1_1/demo/video/upload');
     expect(i.url).toBe('https://api.cloudinary.com/v1_1/demo/image/upload');
     expect(v.fields.type).toBe('authenticated');
-    expect(JSON.stringify(v)).not.toContain('abcd');
+    expect(JSON.stringify(v)).not.toContain(SECRET);
     expect(v.fields.file).toBe('data:audio/webm;base64,' + BUF.toString('base64'));
-    expect(v.fields.signature).toBe(signParams({ public_id: 'p', timestamp: 5, type: 'authenticated' }, 'abcd'));
+    expect(v.fields.signature).toBe(signParams({ public_id: 'p', timestamp: 5, type: 'authenticated' }, SECRET));
     expect(resourceTypeOf('image/png')).toBe('image');
   });
   it('the download link carries expires_at and type authenticated, and no secret', () => {
@@ -42,14 +43,14 @@ describe('cloudinary-requests', () => {
     expect(q.get('expires_at')).toBe('1700000300');
     expect(q.get('type')).toBe('authenticated');
     expect(q.get('public_id')).toBe('fv/b1/voice/x');
-    expect(q.get('signature')).toBe(signParams({ expires_at: 1700000300, format: 'webm', public_id: 'fv/b1/voice/x', timestamp: 1700000000, type: 'authenticated' }, 'abcd'));
-    expect(url).not.toContain('abcd');
+    expect(q.get('signature')).toBe(signParams({ expires_at: 1700000300, format: 'webm', public_id: 'fv/b1/voice/x', timestamp: 1700000000, type: 'authenticated' }, SECRET));
+    expect(url).not.toContain(SECRET);
   });
   it('destroy request', () => {
     const d = destroyRequest(CONFIG, { publicId: 'p', resourceType: 'image', timestamp: 7 });
     expect(d.url).toBe('https://api.cloudinary.com/v1_1/demo/image/destroy');
     expect(d.fields.type).toBe('authenticated');
-    expect(JSON.stringify(d)).not.toContain('abcd');
+    expect(JSON.stringify(d)).not.toContain(SECRET);
   });
 });
 
@@ -65,7 +66,7 @@ describe('the real store over a stubbed fetch', () => {
     expect(url).toBe('https://api.cloudinary.com/v1_1/demo/video/upload');
     expect(init.body).toBeInstanceOf(FormData);
     expect(init.body.get('type')).toBe('authenticated');
-    expect(String(url) + [...init.body.values()].join('')).not.toContain('abcd');
+    expect(String(url) + [...init.body.values()].join('')).not.toContain(SECRET);
     fetchMock.mockResolvedValue({ ok: true, status: 200, json: async () => ({ result: 'not found' }) });
     expect(await store.destroy({ providerId: 'fv/x', resourceType: 'video' })).toBe(true);
     fetchMock.mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
