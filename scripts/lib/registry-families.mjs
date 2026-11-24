@@ -100,5 +100,33 @@ export const REUSE_RULES = [
     files: ['src/app/**/*.html'],
     pattern: /\.toFixed\(/,
     hint: 'show numbers through core/engine/rounding.ts (formatPct1, formatPctInt, formatMoney) or the formatQuantity pipe, not toFixed in a template'
+  },
+  {
+    id: 'page-local-empty-state',
+    family: 'empty-state',
+    files: ['src/app/**/*.html'],
+    pattern: /class="[^"]*(?<![\w-])(?!c-empty)[\w-]*(?:empty|no-results)\b/,
+    hint: 'use app-empty-state (src/app/shared/empty-state/), compact inside cards'
+  },
+  {
+    id: 'own-dialog-role',
+    family: 'modal-shell',
+    files: ['src/app/**/*.html'],
+    exclude: [
+      'src/app/shared/modal-shell/**',
+      'src/app/pages/menu-intelligence/components/menu-export-sheet/**',
+      'src/app/shared/export-preview/**',
+      'src/app/pages/inventory/components/stock-count/**'
+    ],
+    pattern: /role="dialog"/,
+    hint: 'use app-modal-shell (src/app/shared/modal-shell/): it sets the role, Escape and focus'
+  },
+  {
+    id: 'page-local-width',
+    family: 'engine-classes',
+    files: ['src/app/pages/**/*.scss'],
+    pattern: /max-(?:inline-size|width):\s*\d/,
+    skip: /@media/,
+    hint: 'use .c-page / .c-page--narrow (src/styles.scss) or app-list-shell; a page sets no max width of its own'
   }
 ]
