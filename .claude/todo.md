@@ -618,3 +618,19 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A5: Show in the simulator who answers — the level line, the held line with hand back, the level-0 draft, dictionary keys, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.scss, src/app/pages/frontdesk/simulator/simulator.page.spec.ts, public/assets/data/dictionary.json
 - [ ] A6: Update the maps the next plan reads — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md (only if it lists these parts)
 - [ ] A7: Run every check of this plan and record the evidence — test:server, test:ci, build, both lints, log-query; evidence into Execution Notes. The builder does not run the seed against any database: the Planner runs the demo seed with --write in slot wt-2 after the merge, so `demo_rest_profile` is at level 1 before the Human's cards
+
+### Plan 720 — Every popup centred on every screen, with a body that scrolls
+- [ ] A1: Write the guard that finds bottom sheets, top sheets, sheet bindings and popup cards that stop scrolling, with its fixture test — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs
+- [ ] A2: Append the centred, height-limited, scrolling popup rules under their own marker — src/styles.scss
+- [ ] A3: Take the bottom-sheet switch out of the shared popup frame and prove a tall popup fits the window — src/app/shared/modal-shell/modal-shell.component.ts, .html, .spec.ts
+- [ ] A4: Remove the switch from the 19 popups that asked for it and update the pricing spec — the 17 templates in the scope, src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
+- [ ] A5: Lock it with the repo scan, the engine values and the append-only check — scripts/test/style-720.test.mjs
+- [ ] A6: Record the rule in the registry and the folder maps, regenerate the inventory, register the new scripts — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/inventory.md, docs/workflow-kit/manifest.json
+
+### Plan 721 — The pieces that draw their own panel: no sheet from the bottom or the top
+- [ ] A1: Show the floor editor's phone panel in the page under the map and scroll to it when it opens — src/app/pages/frontdesk/floor-plan/floor-plan.page.html, .scss, .ts, .spec.ts
+- [ ] A2: Place the missing-prices box beside its chip on a phone too — src/app/shared/partial-cost-badge/partial-cost-badge.component.scss, .ts, .spec.ts
+- [ ] A3: Centre the menu export sheet with a header that stays — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.scss, .spec.ts
+- [ ] A4: Size the export preview by the visible screen — src/app/shared/export-preview/export-preview.component.scss, .spec.ts
+- [ ] A5: Let the guard cover these files: drop their allow entries — scripts/test/style-720.test.mjs
+- [ ] A6: Update the registry and the folder maps, regenerate the inventory — docs/brain/component-families.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/inventory.md
