@@ -44,6 +44,9 @@ import { EquipmentCategoryRegistryService } from '@services/equipment-category-r
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
@@ -75,7 +78,10 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     ClickOutSideDirective,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
-    InputClearComponent
+    InputClearComponent,
+    EmptyStateComponent,
+    ModalShellComponent,
+    FormFieldComponent
   ],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',

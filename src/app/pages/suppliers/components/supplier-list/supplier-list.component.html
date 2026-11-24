@@ -86,23 +86,21 @@
 
   <ng-container shell-table-body>
     @if (filteredSuppliers_().length === 0) {
-      <div class="no-results">
-        @if (isEmptyList_()) {
-          <app-empty-state
-            messageKey="empty_suppliers"
-            icon="truck"
-            ctaLabelKey="add_supplier"
-            [ctaDisabled]="!isLoggedIn()"
-            (ctaClick)="onAdd()"
-          />
-        } @else {
-          {{ 'no_suppliers_match' | translatePipe }}
-        }
-      </div>
+      @if (isEmptyList_()) {
+        <app-empty-state
+          messageKey="empty_suppliers"
+          icon="truck"
+          ctaLabelKey="add_supplier"
+          [ctaDisabled]="!isLoggedIn()"
+          (ctaClick)="onAdd()"
+        />
+      } @else {
+        <app-empty-state messageKey="no_suppliers_match" icon="search" />
+      }
     }
     @for (item of filteredSuppliers_(); track item._id) {
       <div
-        class="supplier-grid-row c-list-row"
+        class="c-list-row c-list-row--link"
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
@@ -146,7 +144,7 @@
             [disabled]="!isLoggedIn()"
             [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
           >
-            <lucide-icon name="pencil" [size]="18"></lucide-icon>
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
           </button>
           @if (deletingId_() === item._id) {
             <app-loader size="small" [inline]="true" />
@@ -159,7 +157,7 @@
               [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
-              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
             </button>
           }
         </app-row-actions-menu>

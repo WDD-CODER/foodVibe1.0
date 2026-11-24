@@ -101,7 +101,8 @@ append the path to the scope block above and retry.
 - Low stock, unpriced, allergen buttons — family: chip — rung: 1 — why: `c-chip c-chip--tag c-chip--sm c-chip--amber|--red`, allergens as `c-chip c-chip--tap`.
 - Equipment phone edit panel — family: modal-shell — rung: 1 — why: `app-modal-shell [sheet]="true"` around the same `panelBody` template; fields `app-form-field`.
 - Past counts and below-minimum rows — family: list-page — rung: 1 — why: `.c-list` (703).
-- none new.
+- .stock-below-min__table — family: list-page — rung: 1 — why: page-local hook that only sets the shared `.c-list`'s `--list-cols`.
+- .stock-count__past-list — family: list-page — rung: 1 — why: page-local hook that only sets `--list-cols` and spans the list shell's grid.
 
 ## Defaults
 
@@ -157,11 +158,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Remove the copied engine rules from the three model lists and show their no-match case as the shared empty state — src/app/pages/inventory/components/inventory-product-list/*, src/app/pages/equipment/components/equipment-list/*, src/app/pages/suppliers/components/supplier-list/*, src/app/pages/inventory/components/invoices-list/*
-- [ ] A2: Turn the inventory badges into shared chips — src/app/pages/inventory/components/inventory-product-list/*
-- [ ] A3: Open the equipment edit panel on phones in the shared popup sheet with shared fields — src/app/pages/equipment/components/equipment-list/*
-- [ ] A4: Draw past counts and the below-minimum list as shared rows so they stay on one line — src/app/pages/inventory/components/stock-count/stock-count.component.*, src/app/pages/inventory/components/stock-count/stock-below-minimum/*
-- [ ] A5: Lock the lists on the shared pieces and tokens — scripts/test/style-711.test.mjs
+- [x] A1: Remove the copied engine rules from the three model lists and show their no-match case as the shared empty state — src/app/pages/inventory/components/inventory-product-list/*, src/app/pages/equipment/components/equipment-list/*, src/app/pages/suppliers/components/supplier-list/*, src/app/pages/inventory/components/invoices-list/*
+- [x] A2: Turn the inventory badges into shared chips — src/app/pages/inventory/components/inventory-product-list/*
+- [x] A3: Open the equipment edit panel on phones in the shared popup sheet with shared fields — src/app/pages/equipment/components/equipment-list/*
+- [x] A4: Draw past counts and the below-minimum list as shared rows so they stay on one line — src/app/pages/inventory/components/stock-count/stock-count.component.*, src/app/pages/inventory/components/stock-count/stock-below-minimum/*
+- [x] A5: Lock the lists on the shared pieces and tokens — scripts/test/style-711.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-711.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -181,3 +182,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: the equipment phone panel becomes a bottom sheet (`[sheet]="true"`), the shared phone popup form; on tablet it is the centred popup.
 - behaviour: Escape now also closes the equipment sheet, through the same leave question a backdrop tap already asks (`mayLeaveRowPanel_`).
+- behaviour: `style-711.test.mjs` allows `bare-input` for the four list search boxes (each sits in a `c-input-wrapper`, as in plan 707) besides the one `hand-drawn-dialog` entry the plan names — reverse: wrap the search boxes differently and drop the entries.
+- behaviour: past counts are `li.c-list-row` (not buttons); only a draft is clickable and focusable, a final one carries `aria-disabled="true"` (it was a disabled button) — reverse: render buttons again.
+- removes: the header hover tint on sortable column titles of the inventory and equipment lists (the local `.c-sortable-header` copy went; the shared rule keeps cursor and no-select) — reverse: add the hover rule to `src/styles.scss`.
+- behaviour: trash/pencil icons in the supplier and inventory rows are 16 like the equipment row (they were 18) — reverse: set size 18.
+- Evidence: pnpm run build → 0; pnpm run lint → 0 errors; pnpm run test:ci → 3185 SUCCESS; pnpm run test:scripts → pass 178, fail 0; lint:icons, lint:no-native-select, lint:reuse, override-check, plan-ledger-check, breadcrumbs-check, kit-manifest-check, kit-checks (ok, 6 checks) → 0; log-query → no database configured (skip).

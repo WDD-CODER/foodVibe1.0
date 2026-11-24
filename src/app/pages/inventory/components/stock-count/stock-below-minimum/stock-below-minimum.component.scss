@@ -3,11 +3,8 @@
     display: block;
   }
 
-  .stock-below-min__head,
-  .stock-below-min__row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    align-items: center;
+  .stock-below-min__table {
+    --list-cols: 2fr 1fr 1fr 1fr;
   }
 
   .stock-below-min__state {

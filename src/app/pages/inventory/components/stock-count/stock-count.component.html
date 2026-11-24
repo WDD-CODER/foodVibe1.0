@@ -117,19 +117,28 @@
           />
         </div>
       } @else {
-        @for (c of pastCounts_(); track c._id) {
-          <button
-            type="button"
-            class="stock-count__past"
-            data-testid="stk-past-row"
-            [disabled]="c.status !== 'draft'"
-            (click)="openPastDraft(c)"
-          >
-            <span>{{ c.countedAt | date: 'dd/MM/yyyy' }}</span>
-            <span class="c-chip c-chip--tag">{{ countStatusKey_(c) | translatePipe }}</span>
-            <span>{{ c.lines.length }}</span>
-          </button>
-        } @empty {
+        @if (pastCounts_().length > 0) {
+          <ul class="c-list stock-count__past-list" role="list">
+            @for (c of pastCounts_(); track c._id) {
+              <li
+                class="c-list-row"
+                [class.c-list-row--link]="c.status === 'draft'"
+                role="listitem"
+                data-testid="stk-past-row"
+                [attr.tabindex]="c.status === 'draft' ? 0 : null"
+                [attr.aria-disabled]="c.status !== 'draft'"
+                (click)="openPastDraft(c)"
+                (keydown.enter)="openPastDraft(c)"
+              >
+                <span class="c-list-body-cell">{{ c.countedAt | date: 'dd/MM/yyyy' }}</span>
+                <span class="c-list-body-cell">{{ c.lines.length }}</span>
+                <span class="c-list-body-cell">
+                  <span class="c-chip c-chip--tag">{{ countStatusKey_(c) | translatePipe }}</span>
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
           <div class="stock-count__state" data-testid="stk-past-empty">
             <app-empty-state messageKey="stk_past_counts" icon="list-checks" />
           </div>
