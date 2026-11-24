@@ -67,6 +67,7 @@ src/app/pages/bookings/components/table-sheet/**
 src/app/pages/bookings/components/table-sheet/table-sheet.component.spec.ts
 src/app/pages/bookings/components/service-lists/**
 scripts/test/style-705.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
