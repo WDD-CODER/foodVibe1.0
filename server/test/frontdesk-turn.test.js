@@ -513,3 +513,36 @@ describe('plan 731: one more try on a malformed answer', () => {
     expect(blocked[0].reason).toBe('keyword');
   });
 });
+
+describe('plan 732: numbers and booleans in collected', () => {
+  it('a numeric party_size is accepted, no bad_answer, the request keeps partySize 4', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, collected: { party_size: 4, date: DATE, time: '19:00' } }));
+    await turn(conversation);
+    expect(logs.byEvent('frontdesk.turn.bad_answer')).toHaveLength(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const requests = await db().collection('requests').find({}).toArray();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].wanted).toMatchObject({ date: DATE, time: '19:00', partySize: 4 });
+  });
+
+  it('the schema turns a number into "4" and a boolean into "true"; other values are refused', () => {
+    const { turnAnswerSchema } = require('../generated/schemas/front-desk/turn-answer.schema');
+    const parse = collected => turnAnswerSchema.safeParse({ reply: 'x', intent: 'request', collected });
+    const ok = parse({ party_size: 4, flag: true });
+    expect(ok.success).toBe(true);
+    expect(ok.data.collected).toMatchObject({ party_size: '4', flag: 'true' });
+    expect(parse({ a: { b: 1 } }).success).toBe(false);
+    expect(parse({ a: [1] }).success).toBe(false);
+    expect(parse({ a: null }).success).toBe(false);
+    expect(parse({ a: 'x'.repeat(301) }).success).toBe(false);
+  });
+
+  it('an object under a collected key still fails the turn as bad_shape', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, collected: { party_size: { n: 4 } } }));
+    await turn(conversation);
+    expect(logs.byEvent('frontdesk.turn.bad_answer')[0]).toMatchObject({ reason: 'bad_shape', paths: ['collected.party_size'] });
+    expect(await outbound()).toHaveLength(0);
+  });
+});
