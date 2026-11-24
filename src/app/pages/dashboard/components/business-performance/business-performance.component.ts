@@ -11,6 +11,7 @@ import { UserService } from '@services/user.service'
 import type { BusinessStats, FunnelStage, StatsPeriod } from '@models/business-stats.model'
 import { formatDecimal1, formatMoney, formatPct1, formatPctInt } from 'src/app/core/engine/rounding'
 import { stageLabelKey } from 'src/app/core/utils/event-stage-ui.util'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 
 /** One card as the template draws it: every text is ready to show. */
 interface StatCard {
@@ -34,7 +35,7 @@ const EMPTY = '—'
 @Component({
   selector: 'app-business-performance',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, RouterLink, TranslatePipe],
+  imports: [DatePipe, LucideAngularModule, RouterLink, TranslatePipe, EmptyStateComponent],
   templateUrl: './business-performance.component.html',
   styleUrl: './business-performance.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

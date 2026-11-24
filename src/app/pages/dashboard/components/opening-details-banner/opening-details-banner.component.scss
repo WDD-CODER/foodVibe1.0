@@ -13,23 +13,6 @@
     padding: var(--space-4);
   }
 
-  .opening-banner__main {
-    display: flex;
-    flex: 1 1 18rem;
-    align-items: center;
-    gap: var(--space-3);
-
-    min-inline-size: 0;
-    padding: 0;
-    border: none;
-    background: none;
-
-    color: inherit;
-    font: inherit;
-    text-align: start;
-    cursor: pointer;
-  }
-
   .opening-banner__icon {
     display: inline-flex;
     flex: 0 0 auto;
@@ -48,7 +31,7 @@
   .opening-banner__title {
     color: var(--color-text-main);
     font-size: var(--fs-md);
-    font-weight: 700;
+    font-weight: var(--fw-bold);
   }
 
   .opening-banner__text {
@@ -63,4 +46,17 @@
     align-items: center;
     gap: var(--space-2);
   }
+}
+
+/* Outside the layer on purpose: the shared ghost button is unlayered and would win over these. */
+.opening-banner__main.c-btn-ghost {
+  flex: 1 1 18rem;
+  justify-content: flex-start;
+  gap: var(--space-3);
+
+  min-inline-size: 0;
+
+  font: inherit;
+  text-align: start;
+  white-space: normal;
 }

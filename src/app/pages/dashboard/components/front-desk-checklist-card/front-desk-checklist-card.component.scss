@@ -12,37 +12,7 @@
     padding-inline: var(--space-5);
   }
 
-  .fd-card__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .fd-card__icon {
-    display: inline-flex;
-
-    color: var(--color-primary);
-  }
-
-  .fd-card__title {
-    margin: 0;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-md);
-    font-weight: var(--fw-semibold);
-  }
-
   .fd-card__progress {
-    margin-inline-start: auto;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-  }
-
-  .fd-card__none {
-    margin: 0;
-
     color: var(--color-text-muted);
     font-size: var(--fs-sm);
   }

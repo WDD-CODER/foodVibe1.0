@@ -146,11 +146,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Draw the overview's number tiles, view links, status labels and activity feed with the shared tile, button, chip and list — src/app/pages/dashboard/components/dashboard-overview/*
-- [ ] A2: Draw the performance tiles, the dark lead tile and the funnel and upcoming rows with the shared tile and list — src/app/pages/dashboard/components/business-performance/*
-- [ ] A3: Give the five small cards one shared head and the shared small empty state — src/app/pages/dashboard/components/{front-desk-checklist-card,frontdesk-week-card,price-rises-card,setup-checklist-card,diagnosis-card}/*
-- [ ] A4: Put the opening banner button and the dashboard page spacing on shared buttons and tokens, and give the trash tab the list host — src/app/pages/dashboard/components/opening-details-banner/*, src/app/pages/dashboard/dashboard.page.html, src/app/pages/dashboard/dashboard.page.scss
-- [ ] A5: Lock the dashboard on the shared pieces and tokens — scripts/test/style-709.test.mjs
+- [x] A1: Draw the overview's number tiles, view links, status labels and activity feed with the shared tile, button, chip and list — src/app/pages/dashboard/components/dashboard-overview/*
+- [x] A2: Draw the performance tiles, the dark lead tile and the funnel and upcoming rows with the shared tile and list — src/app/pages/dashboard/components/business-performance/*
+- [x] A3: Give the five small cards one shared head and the shared small empty state — src/app/pages/dashboard/components/{front-desk-checklist-card,frontdesk-week-card,price-rises-card,setup-checklist-card,diagnosis-card}/*
+- [x] A4: Put the opening banner button and the dashboard page spacing on shared buttons and tokens, and give the trash tab the list host — src/app/pages/dashboard/components/opening-details-banner/*, src/app/pages/dashboard/dashboard.page.html, src/app/pages/dashboard/dashboard.page.scss
+- [x] A5: Lock the dashboard on the shared pieces and tokens — scripts/test/style-709.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-709.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -170,3 +170,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: the warning / info KPI tiles differ by icon colour only (the tile surface is the same for all), as one tile shape.
 - behaviour: funnel and upcoming rows become list rows with a button in the name cell (keyboard reachable), not bare reset buttons.
+- behaviour: the old `.perf__empty` block held only the "create first inquiry" button (no text), so it stays a button panel under the new class `perf__start` (testids `perf-empty`, `create-first-inquiry` kept); the `upcoming_empty` text, the activity feed and the front-desk checklist use `app-empty-state [compact]` — reverse: add a message key and use `app-empty-state` with `ctaLabelKey`.
+- removes: the KPI tiles' hover lift and the compact phone layout (number beside the title) — they are the shared tile now — reverse: restore the two local rules on a `kpi-grid > .c-stat-tile` selector.
+- removes: the activity rows' type avatar icon (the entity type is the chip) — reverse: add an icon cell back to the row.
+- Evidence: node --test scripts/test/style-709.test.mjs -> exit 0, pass 5; pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, 3204 SUCCESS; lint:icons exit 0; lint:no-native-select exit 0; lint:reuse "REUSE: ok".
+- The dashboard, overview, performance and front-desk checklist specs got `Inbox` in their local icon providers because `app-empty-state` draws `inbox`.
+- The opening banner button rule sits outside the `@layer` on purpose (the unlayered `.c-btn-ghost` would win).

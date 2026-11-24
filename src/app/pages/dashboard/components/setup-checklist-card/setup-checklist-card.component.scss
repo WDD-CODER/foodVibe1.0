@@ -14,30 +14,7 @@
     padding-inline: var(--space-5);
   }
 
-  .setup-card__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .setup-card__icon {
-    display: inline-flex;
-
-    color: var(--color-primary);
-  }
-
-  .setup-card__title {
-    margin: 0;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-md);
-    font-weight: var(--fw-semibold);
-  }
-
   .setup-card__progress {
-    margin-inline-end: auto;
-
     color: var(--color-text-muted);
     font-size: var(--fs-sm);
   }
@@ -73,7 +50,7 @@
     color: var(--color-success);
   }
 
-  .setup-step__mark--empty {
+  .setup-step__mark--open {
     inline-size: 18px;
     block-size: 18px;
 

@@ -11,7 +11,7 @@
     gap: var(--space-4);
   }
 
-  .perf__head {
+  .perf__bar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -52,108 +52,15 @@
     }
   }
 
-  .perf-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-
-    min-inline-size: 0;
-
-    padding-block: var(--space-3);
-    padding-inline: var(--space-4);
-  }
-
-  /* Plan 578 (Depth): the one dark tile that leads the dashboard. It does not carry the panel engine
-     (the template drops `c-glass-panel` for it): this file is a cascade layer, and an unlayered engine
-     rule would win over anything written here. */
-  .perf-card.perf-card--hero {
+  /* Plan 578 (Depth): the one dark tile that leads the dashboard. Its colours come from the shared
+     `.c-stat-tile--hero`; only its place in the grid is local. */
+  .perf__lead {
     grid-column: span 2;
     order: -1;
-    justify-content: space-between;
-
-    color: var(--color-on-bar);
-
-    padding-block: var(--space-5);
-    padding-inline: var(--space-6);
-    background: var(--color-primary-hover);
-    border: 1px solid transparent;
-    border-radius: var(--radius-lg);
-
-    box-shadow: var(--shadow-card);
-
-    .perf-card__label,
-    .perf-card__note {
-      color: var(--color-on-bar-muted);
-    }
-
-    .perf-card__value {
-      color: var(--color-on-bar);
-      font-size: var(--fs-3xl);
-    }
-
-    .perf-card__icon {
-      color: var(--color-on-bar);
-
-      background: var(--border-bar);
-    }
-
-    .perf-card__change.is-good {
-      color: var(--color-primary-light);
-    }
-
-    .perf-card__change.is-bad {
-      color: var(--color-on-bar-bad);
-    }
+    align-content: space-between;
   }
 
-  .perf-card__top {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .perf-card__icon {
-    display: grid;
-    place-content: center;
-    flex-shrink: 0;
-
-    inline-size: 1.5rem;
-    block-size: 1.5rem;
-
-    color: var(--color-primary-hover);
-
-    background: var(--color-primary-soft);
-    border-radius: var(--radius-sm);
-  }
-
-  .perf-card__label {
-    margin: 0;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-medium);
-    line-height: 1.2;
-  }
-
-  .perf-card__value {
-    margin: 0;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-extrabold);
-    font-variant-numeric: tabular-nums;
-    line-height: var(--lh-tight);
-    overflow-wrap: anywhere;
-  }
-
-  .perf-card__note {
-    margin: 0;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-xs);
-  }
-
-  .perf-card__change {
+  .perf__change {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
@@ -173,7 +80,17 @@
     }
   }
 
-  .perf__empty {
+  .perf__lead .perf__change {
+    &.is-good {
+      color: var(--color-primary-light);
+    }
+
+    &.is-bad {
+      color: var(--color-on-bar-bad);
+    }
+  }
+
+  .perf__start {
     display: flex;
     justify-content: center;
 
@@ -210,60 +127,17 @@
     font-weight: var(--fw-semibold);
   }
 
-  .perf-panel__empty {
-    margin: 0;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
+  .funnel {
+    --list-cols: minmax(5.5rem, 9rem) minmax(0, 1fr) 2rem;
   }
 
-  .funnel,
   .upcoming {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-
-    margin: 0;
-    padding: 0;
-
-    list-style: none;
-  }
-
-  .funnel__row {
-    display: grid;
-    grid-template-columns: minmax(5.5rem, 9rem) minmax(0, 1fr) 2rem;
-    align-items: center;
-    gap: var(--space-2);
-
-    inline-size: 100%;
-    min-block-size: 2.25rem;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-sm);
-    text-align: start;
-
-    padding-block: var(--space-1);
-    padding-inline: var(--space-2);
-    background: none;
-    border: none;
-    border-radius: var(--radius-sm);
-
-    cursor: pointer;
-
-    &:hover {
-      background: var(--color-primary-soft);
-    }
-  }
-
-  .funnel__name {
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    --list-cols: auto minmax(0, 1fr) auto;
   }
 
   .funnel__track {
     display: block;
+    inline-size: 100%;
 
     block-size: 0.5rem;
 
@@ -283,47 +157,25 @@
   .funnel__count {
     font-variant-numeric: tabular-nums;
     font-weight: var(--fw-semibold);
-    text-align: end;
-  }
-
-  .upcoming__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-
-    inline-size: 100%;
-    min-block-size: 2.25rem;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-sm);
-    text-align: start;
-
-    padding-block: var(--space-1);
-    padding-inline: var(--space-2);
-    background: none;
-    border: none;
-    border-radius: var(--radius-sm);
-
-    cursor: pointer;
-
-    &:hover {
-      background: var(--color-primary-soft);
-    }
   }
 
   .upcoming__date {
     color: var(--color-text-muted);
+    font-size: var(--fs-sm);
     font-variant-numeric: tabular-nums;
   }
 
   .upcoming__name {
-    flex: 1 1 8rem;
+    max-inline-size: 100%;
 
-    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-    font-weight: var(--fw-semibold);
-    overflow-wrap: anywhere;
+  .upcoming__meta {
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
   .upcoming__guests {
@@ -332,6 +184,7 @@
     gap: var(--space-1);
 
     color: var(--color-text-muted);
+    font-size: var(--fs-sm);
   }
 }
 

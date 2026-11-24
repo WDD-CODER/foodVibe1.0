@@ -14,7 +14,7 @@ import { MetadataManagerComponent } from '../metadata-manager/metadata-manager.p
 import { VenueListComponent } from '../venues/components/venue-list/venue-list.component'
 import { VenueFormComponent } from '../venues/components/venue-form/venue-form.component'
 import { TrashPage } from '../trash/trash.page'
-import { LucideAngularModule } from 'lucide-angular'
+import { Inbox, LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 @Component({ selector: 'app-metadata-manager', template: '', standalone: true })
@@ -57,7 +57,7 @@ describe('DashboardPage', () => {
     queryParamsSubject = new BehaviorSubject<Record<string, string>>({})
 
     await TestBed.configureTestingModule({
-      imports: [DashboardPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [DashboardPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Inbox })],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),

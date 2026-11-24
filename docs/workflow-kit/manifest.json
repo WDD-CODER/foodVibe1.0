@@ -4247,6 +4247,16 @@
       "notes": "Plan 708: front desk settings, onboarding and the guest booking pages sit on the shared loader, empty state, card head and chips and pass the style guard."
     },
     {
+      "path": "scripts/test/style-709.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 709: the dashboard tiles, card heads, activity feed, chips and empty states sit on the shared pieces and pass the style guard."
+    },
+    {
       "path": "scripts/test/style-711.test.mjs",
       "tier": "project",
       "action": "stay",

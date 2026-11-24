@@ -5,10 +5,12 @@
     dir="rtl"
     [attr.aria-label]="'frontdesk_week_title' | translatePipe"
   >
-    <header class="fd-week__head">
-      <span class="fd-week__icon"><lucide-icon name="clipboard-list" [size]="16" /></span>
-      <h2 class="fd-week__title">{{ 'frontdesk_week_title' | translatePipe }}</h2>
-      <a class="fd-week__link" routerLink="/requests">{{ 'frontdesk_week_all_requests' | translatePipe }}</a>
+    <header class="c-card-head">
+      <span class="c-card-head__icon"><lucide-icon name="clipboard-list" [size]="18" /></span>
+      <h3 class="c-card-head__title">{{ 'frontdesk_week_title' | translatePipe }}</h3>
+      <a class="c-btn-ghost--sm c-card-head__end" routerLink="/requests">{{
+        'frontdesk_week_all_requests' | translatePipe
+      }}</a>
     </header>
     <p class="fd-week__sentence" data-testid="frontdesk-week-sentence">{{ sentence() }}</p>
   </section>
