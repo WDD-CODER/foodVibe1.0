@@ -1,69 +1,130 @@
-<div class="trash-page" dir="rtl">
-  <app-page-header class="trash-header" titleKey="trash">
-    <button header-actions type="button" class="btn-refresh" (click)="refresh()" [disabled]="isLoading()">
-      {{ isLoading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
-    </button>
-  </app-page-header>
+<app-list-shell
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [gridTemplate]="'minmax(8rem, 2fr) 1fr 1fr minmax(12rem, 1.6fr)'"
+  [mobileGridTemplate]="'1fr auto'"
+  [resultCount]="rows_().length"
+  [resultTotal]="totalCount_()"
+>
+  <ng-container shell-title>{{ 'trash' | translatePipe }}</ng-container>
 
-  @if (isLoading()) {
-  <app-loader size="medium" label="loader_loading" />
-  } @else if (loadError()) {
-  <p class="trash-error">{{ loadError() }}</p>
-  <button type="button" class="btn-refresh" (click)="refresh()">{{ 'refresh_again' | translatePipe }}</button>
-  } @else {
-  <div class="trash-sections">
-    @for (section of sections; track section.type) {
-    <section class="trash-section">
-      <div class="trash-section-header">
-        <h2>{{ section.titleKey | translatePipe }}</h2>
-        @if (items()[section.type].length > 0) {
-        <div class="trash-section-actions">
-          <button type="button" class="btn-action btn-restore" (click)="onRestoreAll(section.type)">
-            <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
-            {{ 'trash_recover_all' | translatePipe }}
-          </button>
-          <button type="button" class="btn-action btn-dispose" (click)="onDisposeAll(section.type)">
-            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-            {{ 'trash_dispose_all' | translatePipe }}
-          </button>
-        </div>
+  <ng-container shell-search>
+    <label class="visually-hidden" for="trash-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        class="c-input"
+        id="trash-search"
+        type="text"
+        [ngModel]="query_()"
+        (ngModelChange)="query_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    @if (typeFilter_() !== 'all') {
+    <button type="button" class="c-btn-ghost" (click)="onRestoreAll($any(typeFilter_()))">
+      <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'trash_recover_all' | translatePipe }}</span>
+    </button>
+    <button type="button" class="c-btn-ghost" (click)="onDisposeAll($any(typeFilter_()))">
+      <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'trash_dispose_all' | translatePipe }}</span>
+    </button>
+    }
+    <button type="button" class="c-btn-ghost" (click)="refresh()" [disabled]="isLoading()">
+      <lucide-icon name="refresh-cw" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ isLoading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
+    <div class="col-type c-grid-header-cell" role="columnheader">{{ 'type' | translatePipe }}</div>
+    <div class="col-date c-grid-header-cell" role="columnheader">{{ 'trash_deleted_at' | translatePipe }}</div>
+    <div class="c-grid-header-cell" role="columnheader"></div>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (isLoading()) {
+    <app-loader size="medium" label="loader_loading" />
+    } @else if (loadError()) {
+    <app-empty-state messageKey="trash_load_error" icon="alert-triangle" ctaLabelKey="refresh" (ctaClick)="refresh()" />
+    } @else if (rows_().length === 0) {
+    <app-empty-state messageKey="trash_empty" icon="trash-2" />
+    } @if (!isLoading() && !loadError()) { @for (row of rows_(); track row.type + row.item._id) {
+    <div class="c-list-row" role="row">
+      <div class="c-list-body-cell" role="cell">{{ row.item.name }}</div>
+      <div class="col-type c-list-body-cell" role="cell">
+        <span class="c-chip c-chip--tag c-chip--sm">{{ row.titleKey | translatePipe }}</span>
+      </div>
+      <div class="col-date c-list-body-cell muted-cell" role="cell">{{ formatDeletedAt(row.item.deletedAt) }}</div>
+      <div class="c-list-body-cell actions-cell" role="cell">
+        <button type="button" class="c-btn-ghost--sm" (click)="onRestore(row.type, row.item._id)">
+          <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+          {{ 'trash_recover' | translatePipe }}
+        </button>
+        <button type="button" class="c-btn-ghost--sm danger-text" (click)="onDispose(row.type, row.item._id)">
+          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          {{ 'trash_dispose' | translatePipe }}
+        </button>
+        @if (row.historyType; as historyType) {
+        <button
+          type="button"
+          class="c-icon-btn"
+          [attr.aria-label]="'history' | translatePipe"
+          [attr.title]="'history' | translatePipe"
+          (click)="openHistory(historyType, row.item._id, row.item.name)"
+        >
+          <lucide-icon name="history" [size]="16"></lucide-icon>
+        </button>
         }
       </div>
-      @if (items()[section.type].length === 0) {
-      <p class="trash-empty">{{ 'trash_empty' | translatePipe }}</p>
-      } @else {
-      <ul class="trash-list">
-        @for (item of items()[section.type]; track item._id) {
-        <li class="trash-item">
-          <span class="trash-item-name">{{ item.name }}</span>
-          <span class="trash-item-meta"
-            >{{ 'trash_deleted_at' | translatePipe }}: {{ formatDeletedAt(item.deletedAt) }}</span
-          >
-          <div class="trash-item-actions">
-            @if (section.historyType; as historyType) {
-            <button type="button" class="btn-item btn-history" (click)="openHistory(historyType, item._id, item.name)">
-              {{ 'history' | translatePipe }}
-            </button>
-            }
-            <button type="button" class="btn-item btn-restore" (click)="onRestore(section.type, item._id)">
-              <lucide-icon name="rotate-ccw" [size]="14"></lucide-icon>
-              {{ 'trash_recover' | translatePipe }}
-            </button>
-            <button type="button" class="btn-item btn-dispose" (click)="onDispose(section.type, item._id)">
-              <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-              {{ 'trash_dispose' | translatePipe }}
-            </button>
-          </div>
-        </li>
-        }
-      </ul>
-      }
-    </section>
-    }
-  </div>
-  } @if (historyFor_(); as h) {
-  <div class="history-overlay" (click)="closeHistory()">
-    <div class="history-overlay-panel" (click)="$event.stopPropagation()">
+    </div>
+    } }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="c-filter-section">
+      <div class="c-filter-category">
+        <span class="filter-label">{{ 'type' | translatePipe }}</span>
+        <div class="c-chip-group">
+          <label class="c-chip c-chip--toggle">
+            <input
+              type="radio"
+              name="trash-type"
+              [checked]="typeFilter_() === 'all'"
+              (change)="typeFilter_.set('all')"
+            />
+            <span>{{ 'all' | translatePipe }}</span>
+            <span class="c-chip__count">{{ totalCount_() }}</span>
+          </label>
+          @for (section of typesWithItems_(); track section.type) {
+          <label class="c-chip c-chip--toggle">
+            <input
+              type="radio"
+              name="trash-type"
+              [checked]="typeFilter_() === section.type"
+              (change)="typeFilter_.set(section.type)"
+            />
+            <span>{{ section.titleKey | translatePipe }}</span>
+            <span class="c-chip__count">{{ items()[section.type].length }}</span>
+          </label>
+          }
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (historyFor_(); as h) {
+    <app-modal-shell size="md" titleKey="history" (dismissed)="closeHistory()">
       <app-version-history-panel
         [entityType]="h.entityType"
         [entityId]="h.entityId"
@@ -72,7 +133,7 @@
         (closed)="closeHistory()"
         (restored)="closeHistory(); refresh()"
       />
-    </div>
-  </div>
-  }
-</div>
+    </app-modal-shell>
+    }
+  </ng-container>
+</app-list-shell>
