@@ -2,11 +2,11 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .att-label {
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 .att-line {
@@ -16,4 +16,10 @@
 .att-map {
   max-block-size: 18rem;
   overflow: auto;
+}
+
+.att-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }

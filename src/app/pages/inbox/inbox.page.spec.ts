@@ -184,6 +184,18 @@ describe('InboxPage (plan 677)', () => {
     expect(text(rowEls()[0].querySelector('[data-testid="unread-count"]'))).toBe('2')
   })
 
+  it('draws the conversations as shared rows, marks the open one and links to /inbox/:id (plan 706)', async () => {
+    conversations.set([row('1', 'א'), row('2', 'ב'), row('3', 'ג')])
+    await create('2')
+    const rows = Array.from(el().querySelectorAll<HTMLElement>('.c-list-row'))
+    expect(rows.length).toBe(3)
+    const selected = rows.filter((r) => r.classList.contains('is-selected'))
+    expect(selected.length).toBe(1)
+    expect(text(selected[0].querySelector('.ibx-name'))).toBe('ב')
+    const hrefs = rows.map((r) => r.querySelector('a.c-row-link')?.getAttribute('href'))
+    expect(hrefs.sort()).toEqual(['/inbox/1', '/inbox/2', '/inbox/3'])
+  })
+
   it('narrows the list by the filter chips and reads the test conversations for "בדיקה"', async () => {
     conversations.set([
       row('1', 'בוט'),

@@ -4217,6 +4217,16 @@
       "notes": "Plan 705: the bookings agenda, waiting list, table sheet and service lists sit on the shared rows and pass the style guard."
     },
     {
+      "path": "scripts/test/style-706.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 706: the requests queue, its dialogs and the inbox sit on the shared frame, rows and fields and pass the style guard."
+    },
+    {
       "path": "scripts/test/breakpoints-no-literals.test.mjs",
       "tier": "project",
       "action": "stay",

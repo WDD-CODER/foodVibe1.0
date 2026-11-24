@@ -141,11 +141,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Put the requests queue in the shared page frame and show the loader while it loads — src/app/pages/requests/requests.page.html, .scss, .ts, .spec.ts
-- [ ] A2: Give every field of the three request popups the shared field piece — src/app/pages/requests/components/new-request-dialog/*, src/app/pages/requests/components/ask-dialog/*, src/app/pages/requests/components/decline-dialog/*
-- [ ] A3: Move the request card and the approve-table popup stylesheets onto tokens — src/app/pages/requests/components/request-card/request-card.component.scss, src/app/pages/requests/components/approve-table-dialog/approve-table-dialog.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss
-- [ ] A4: Draw the inbox conversations as shared rows with the shared selected look, and the thread as a glass panel — src/app/pages/inbox/inbox.page.html, .scss, .ts, .spec.ts, src/app/pages/inbox/components/reply-box/reply-box.component.scss
-- [ ] A5: Lock both pages on the shared pieces and tokens — scripts/test/style-706.test.mjs
+- [x] A1: Put the requests queue in the shared page frame and show the loader while it loads — src/app/pages/requests/requests.page.html, .scss, .ts, .spec.ts
+- [x] A2: Give every field of the three request popups the shared field piece — src/app/pages/requests/components/new-request-dialog/*, src/app/pages/requests/components/ask-dialog/*, src/app/pages/requests/components/decline-dialog/*
+- [x] A3: Move the request card and the approve-table popup stylesheets onto tokens — src/app/pages/requests/components/request-card/request-card.component.scss, src/app/pages/requests/components/approve-table-dialog/approve-table-dialog.component.scss, src/app/pages/requests/components/day-load-strip/day-load-strip.component.scss
+- [x] A4: Draw the inbox conversations as shared rows with the shared selected look, and the thread as a glass panel — src/app/pages/inbox/inbox.page.html, .scss, .ts, .spec.ts, src/app/pages/inbox/components/reply-box/reply-box.component.scss
+- [x] A5: Lock both pages on the shared pieces and tokens — scripts/test/style-706.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-706.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.

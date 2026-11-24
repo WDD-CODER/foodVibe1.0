@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { BookingDataService } from '@services/booking-data.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
@@ -43,6 +44,7 @@ const decidedAt = (r: FrontDeskRequest): number => r.statusHistory[r.statusHisto
     TranslatePipe,
     PageHeaderComponent,
     EmptyStateComponent,
+    LoaderComponent,
     RequestCardComponent,
     AskDialogComponent,
     DeclineDialogComponent,

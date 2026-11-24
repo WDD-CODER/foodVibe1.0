@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, output, signal } from '@a
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { DECLINE_REASONS, type DeclineReason } from '@models/request.model'
 
@@ -11,7 +12,7 @@ export const DECLINE_TEXT_MAX = 300
 @Component({
   selector: 'app-decline-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, ModalShellComponent, CustomSelectComponent],
+  imports: [FormsModule, TranslatePipe, ModalShellComponent, CustomSelectComponent, FormFieldComponent],
   templateUrl: './decline-dialog.component.html',
   styleUrl: './decline-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
