@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core'
-import { toSignal } from '@angular/core/rxjs-interop'
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core'
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { UserService } from '@services/user.service'
@@ -10,6 +10,11 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { formatVenueHours } from 'src/app/core/utils/venue-hours.util'
 import { videoSourceKey } from 'src/app/core/utils/video-link.util'
+import { CloudinaryService, checkVideoFile } from '@services/cloudinary.service'
+import { VenueDataService } from '@services/venue-data.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { isoToLocalEpoch, todayIso } from 'src/app/core/utils/date-input.util'
 
 @Component({
   selector: 'app-venue-detail',
@@ -24,13 +29,30 @@ export class VenueDetailComponent implements OnInit {
   private readonly router = inject(Router)
   private readonly menuEventData = inject(MenuEventDataService)
   private readonly equipmentData = inject(EquipmentDataService)
+  private readonly cloudinary = inject(CloudinaryService)
+  private readonly venueData = inject(VenueDataService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly destroyRef = inject(DestroyRef)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
+
+  /** Plan 698: percent of the running video upload; null when none is running. */
+  protected readonly uploading_ = signal<number | null>(null)
+  protected readonly uploadingLabel_ = computed(() =>
+    this.translation.translate('venue_video_uploading').replace('{percent}', String(this.uploading_() ?? 0))
+  )
+  /** Plan 698: the venue as last saved by the upload (the route data does not refresh). */
+  private readonly saved_ = signal<VenueProfile | null>(null)
 
   private readonly routeData_ = toSignal(this.route.data, { initialValue: this.route.snapshot.data })
   // Reads route.data reactively (not route.snapshot.data) — the resolver re-runs on
   // every navigation to this route, including param-only changes when Angular reuses
   // the component instance across /venues/view/:id -> /venues/view/:otherId.
-  protected readonly venue_ = computed(() => (this.routeData_()['venue'] as VenueProfile | null) ?? null)
+  protected readonly venue_ = computed(() => {
+    const fromRoute = (this.routeData_()['venue'] as VenueProfile | null) ?? null
+    const saved = this.saved_()
+    return saved && saved._id === fromRoute?._id ? saved : fromRoute
+  })
 
   /** design-port session 6 — reads the (currently unwired-elsewhere) logistics.venueProfileId
    * link; see MenuEvent/EventLogistics models and the new venue-link-chip on menu-intelligence. */
@@ -114,5 +136,50 @@ export class VenueDetailComponent implements OnInit {
   protected onEdit(): void {
     const id = this.venue_()?._id
     if (id) this.router.navigate(['/venues/edit', id])
+  }
+
+  /** Plan 698: uploads the picked video, then saves the venue with it first in the list. */
+  protected onVideoPicked(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    const venue = this.venue_()
+    if (!file || !venue || this.uploading_() !== null) return
+    const refusal = checkVideoFile(file)
+    if (refusal) {
+      this.userMsg.onSetErrorMsg(this.translation.translate(refusal))
+      return
+    }
+    this.uploading_.set(0)
+    this.cloudinary
+      .uploadVideo(file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (ev) => {
+          if (ev.kind === 'progress') this.uploading_.set(ev.percent)
+          else void this.saveVideo(venue, ev.url)
+        },
+        error: () => {
+          this.uploading_.set(null)
+          this.userMsg.onSetErrorMsg(this.translation.translate('venue_video_upload_failed'))
+        }
+      })
+  }
+
+  private async saveVideo(venue: VenueProfile, url: string): Promise<void> {
+    const visitDate = isoToLocalEpoch(todayIso())
+    try {
+      const saved = await this.venueData.updateVenue({
+        ...venue,
+        videos: [{ url, visitDate }, ...(venue.videos ?? [])]
+      })
+      this.saved_.set(saved)
+      this.userMsg.onSetSuccessMsg(this.translation.translate('venue_video_added'))
+    } catch {
+      // The venue data service already logged it; the venue stays as it was.
+      this.userMsg.onSetErrorMsg(this.translation.translate('venue_video_upload_failed'))
+    } finally {
+      this.uploading_.set(null)
+    }
   }
 }

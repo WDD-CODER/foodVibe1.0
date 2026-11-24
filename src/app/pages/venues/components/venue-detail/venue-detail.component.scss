@@ -331,6 +331,25 @@
     font-size: var(--fs-xs);
   }
 
+  // Plan 698: the upload button sits at the header's inline end; the progress bar spans the card.
+  .video-upload-btn {
+    margin-inline-start: auto;
+  }
+
+  .video-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block-end: var(--space-2);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+
+    progress {
+      flex: 1;
+    }
+  }
+
   // Plan 373: a video row keeps the open button on the same line, the note may wrap.
   .video-row {
     gap: var(--space-2);

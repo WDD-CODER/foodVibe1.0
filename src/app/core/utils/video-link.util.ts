@@ -1,6 +1,6 @@
 /** Plan 373: translation keys for where a video link points. */
 export type VideoSourceKey =
-  'video_source_youtube' | 'video_source_drive' | 'video_source_whatsapp' | 'video_source_link'
+  'video_source_youtube' | 'video_source_drive' | 'video_source_whatsapp' | 'video_source_upload' | 'video_source_link'
 
 /** Plan 373: the translation key naming where a video link points, from its hostname; anything else is a plain link. */
 export function videoSourceKey(url: string): VideoSourceKey {
@@ -15,5 +15,6 @@ export function videoSourceKey(url: string): VideoSourceKey {
   if (host === 'wa.me' || host === 'whatsapp.com' || host.endsWith('.whatsapp.com') || host.endsWith('.whatsapp.net')) {
     return 'video_source_whatsapp'
   }
+  if (host === 'res.cloudinary.com') return 'video_source_upload'
   return 'video_source_link'
 }

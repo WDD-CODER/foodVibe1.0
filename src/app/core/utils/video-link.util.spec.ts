@@ -17,6 +17,10 @@ describe('videoSourceKey (plan 373)', () => {
     expect(videoSourceKey('https://mmg.whatsapp.net/v/x.mp4')).toBe('video_source_whatsapp')
   })
 
+  it('names an uploaded video (Cloudinary)', () => {
+    expect(videoSourceKey('https://res.cloudinary.com/x/video/upload/v.mp4')).toBe('video_source_upload')
+  })
+
   it('treats look-alike hosts, other hosts and broken URLs as a plain link', () => {
     expect(videoSourceKey('https://notyoutube.com/x')).toBe('video_source_link')
     expect(videoSourceKey('https://example.com/v.mp4')).toBe('video_source_link')
