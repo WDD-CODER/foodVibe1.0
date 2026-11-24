@@ -167,6 +167,12 @@
           <app-loader size="medium" />
           }
         </div>
+        @if (failNoteKey_(); as noteKey) {
+        <p class="ai-failed-note" role="status" data-testid="ai-failed-note">
+          <lucide-icon name="alert-triangle" [size]="16" aria-hidden="true"></lucide-icon>
+          <span>{{ noteKey | translatePipe }}</span>
+        </p>
+        }
         <div class="sim-box">
           <textarea
             class="c-input sim-text"

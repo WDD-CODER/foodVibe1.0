@@ -253,6 +253,21 @@ describe('SimulatorPage (plan 678)', () => {
     expect(sim['tap']).toHaveBeenCalledOnceWith('0500000001', 'CANCEL:bk')
   })
 
+  it('shows the assistant-failed note under the chat while at >= lastMessageAt, and not after', async () => {
+    conversations.set([
+      row('a', 'אורח בדיקה', '0500000001', { lastMessageAt: NOW, assistantFailed: { at: NOW, reason: 'busy' } })
+    ])
+    await create()
+    await pickGuest()
+    expect(byId('ai-failed-note')).not.toBeNull()
+    conversations.set([
+      row('a', 'אורח בדיקה', '0500000001', { lastMessageAt: NOW + 1, assistantFailed: { at: NOW, reason: 'busy' } })
+    ])
+    thread.set({ conversation: conversations()[0], messages: [] })
+    fixture.detectChanges()
+    expect(byId('ai-failed-note')).toBeNull()
+  })
+
   it('shows the time left of the window from the server clock', async () => {
     conversations.set([row('a', 'אורח בדיקה', '0500000001')])
     await create()

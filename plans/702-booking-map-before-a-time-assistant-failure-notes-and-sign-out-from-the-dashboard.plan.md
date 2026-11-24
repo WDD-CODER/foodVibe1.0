@@ -236,14 +236,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show the room and the info icon as soon as the booking window opens — map under plan_ only, choose-a-time line, taps ignored before a time, the whole room without an inner scroll — src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.ts, .html, .scss, .spec.ts
-- [ ] A2: Make sign-out work from the dashboard itself — skip the same-page navigation that Angular ignores, keep the unsaved-changes question elsewhere — src/app/core/components/header/header.component.ts, src/app/core/components/header/header.component.spec.ts
-- [ ] A3: Read the assistant's failure reason in the browser — suggest returns the reason, the shared util for keys and for when the note shows — src/app/core/services/conversation-data.service.ts, .spec.ts, src/app/core/utils/assistant-failure.util.ts, .spec.ts
-- [ ] A4: Tell the staff in Hebrew why the assistant stopped — the reason line in the suggestion bar, the note in the inbox thread and in the simulator — src/app/pages/inbox/components/suggestion-bar/*, src/app/pages/inbox/inbox.page.*, src/app/pages/frontdesk/simulator/simulator.page.*
-- [ ] A5: Add the nine Hebrew texts — public/assets/data/dictionary.json
-- [ ] A6: Record the new util where the next plan looks — src/app/core/breadcrumbs.md, docs/brain/inventory.md (src/app/pages/breadcrumbs.md and docs/brain/component-families.md only if a line there names a changed piece)
-- [ ] A7: Prove the three screen checks with short scripts — each signs in with signInQa and answers the calls itself, saves a screenshot — e2e/ui/702-1.spec.ts, e2e/ui/702-2.spec.ts, e2e/ui/702-3.spec.ts
-- [ ] A8: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
+- [x] A1: Show the room and the info icon as soon as the booking window opens — map under plan_ only, choose-a-time line, taps ignored before a time, the whole room without an inner scroll — src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.ts, .html, .scss, .spec.ts
+- [x] A2: Make sign-out work from the dashboard itself — skip the same-page navigation that Angular ignores, keep the unsaved-changes question elsewhere — src/app/core/components/header/header.component.ts, src/app/core/components/header/header.component.spec.ts
+- [x] A3: Read the assistant's failure reason in the browser — suggest returns the reason, the shared util for keys and for when the note shows — src/app/core/services/conversation-data.service.ts, .spec.ts, src/app/core/utils/assistant-failure.util.ts, .spec.ts
+- [x] A4: Tell the staff in Hebrew why the assistant stopped — the reason line in the suggestion bar, the note in the inbox thread and in the simulator — src/app/pages/inbox/components/suggestion-bar/*, src/app/pages/inbox/inbox.page.*, src/app/pages/frontdesk/simulator/simulator.page.*
+- [x] A5: Add the nine Hebrew texts — public/assets/data/dictionary.json
+- [x] A6: Record the new util where the next plan looks — src/app/core/breadcrumbs.md, docs/brain/inventory.md (src/app/pages/breadcrumbs.md and docs/brain/component-families.md only if a line there names a changed piece)
+- [x] A7: Prove the three screen checks with short scripts — each signs in with signInQa and answers the calls itself, saves a screenshot — e2e/ui/702-1.spec.ts, e2e/ui/702-2.spec.ts, e2e/ui/702-3.spec.ts
+- [x] A8: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
 - Dependencies: plan 701 (`reason` on the 502, `assistantFailed` in the shared schema — `Conversation` in
@@ -276,3 +276,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: on the bare dashboard, sign-out happens at once; the dashboard's only unsaved-changes case (`?tab=metadata`) is a different URL and still asks.
 - behaviour: "fix this answer" stays on assistant messages only (plan 682); a failed turn writes no message, so the staff note explains the handoff instead.
 - behaviour: the staff note hides as soon as anyone writes in the chat after the failure (`at` < `lastMessageAt`).
+- evidence: pnpm run build -> exit 0 (first try failed the 1 MB initial budget: a runtime import of the schema enum pulled zod in; the util now keeps the list locally with a type-only import)
+- evidence: pnpm run lint -> exit 0; lint:icons, lint:no-native-select, lint:reuse, override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check, kit-manifest-check, log-query -> exit 0
+- evidence: pnpm run test:ci -> exit 0, 3093 SUCCESS (first run: 2 ExportService 5 s timeouts, unrelated; rerun once, green)
+- [ui] items 702-1..3: written, not run

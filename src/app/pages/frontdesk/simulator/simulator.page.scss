@@ -173,6 +173,16 @@
   overflow-y: auto;
 }
 
+.ai-failed-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem;
+  color: var(--text-secondary);
+  font-size: var(--fs-sm);
+}
+
 .sim-box {
   display: flex;
   align-items: flex-end;

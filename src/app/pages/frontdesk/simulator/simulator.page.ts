@@ -17,6 +17,7 @@ import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.comp
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { assistantFailureKey, showAssistantFailure } from 'src/app/core/utils/assistant-failure.util'
 import { ChatThreadComponent } from 'src/app/shared/chat-thread/chat-thread.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ConversationDataService } from '@services/conversation-data.service'
@@ -104,6 +105,10 @@ export class SimulatorPage {
     return t && id && t.conversation._id === id ? t : null
   })
 
+  protected readonly failNoteKey_ = computed(() => {
+    const c = this.thread_()?.conversation
+    return c?.assistantFailed && showAssistantFailure(c) ? assistantFailureKey(c.assistantFailed.reason, 'note') : null
+  })
   protected readonly threadFailed_ = computed(() => !!this.guest_()?.conversationId && !!this.data.threadFailed_())
 
   protected readonly bookingId_ = computed(() => this.thread_()?.conversation.bookingId ?? null)

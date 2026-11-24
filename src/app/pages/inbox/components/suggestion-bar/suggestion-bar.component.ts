@@ -23,6 +23,8 @@ export class SuggestionBarComponent {
   readonly state = input<SuggestionState>('idle')
   /** A dictionary key for a refused send (window closed, do-not-contact, failed). */
   readonly errorKey = input<string | null>(null)
+  /** The dictionary key of the failed-suggestion line. */
+  readonly failKey = input('ibx_sg_failed')
   readonly busy = input(false)
   readonly send = output<void>()
   readonly edit = output<void>()

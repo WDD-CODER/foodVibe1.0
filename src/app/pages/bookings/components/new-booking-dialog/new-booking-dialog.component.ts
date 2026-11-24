@@ -204,7 +204,7 @@ export class NewBookingDialogComponent {
 
   /** An owner's tap on a table: it replaces the offer; a tap on it again goes back to the offer. */
   protected onMapTap(key: string): void {
-    if (!this.isOwner_() || this.isSaving_()) return
+    if (!this.isOwner_() || this.isSaving_() || !this.time_()) return
     this.override_.update((current) => (current === key ? null : key))
     this.noTable_.set(false)
   }
