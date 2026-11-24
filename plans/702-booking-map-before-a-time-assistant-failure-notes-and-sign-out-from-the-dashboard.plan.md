@@ -280,3 +280,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - evidence: pnpm run lint -> exit 0; lint:icons, lint:no-native-select, lint:reuse, override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check, kit-manifest-check, log-query -> exit 0
 - evidence: pnpm run test:ci -> exit 0, 3093 SUCCESS (first run: 2 ExportService 5 s timeouts, unrelated; rerun once, green)
 - [ui] items 702-1..3: written, not run
+
+- Round 1 fix: build -> exit 0; lint -> exit 0; test:ci -> exit 0 (3093 SUCCESS); lint:icons, lint:no-native-select, lint:reuse, override/ledger/breadcrumbs/ci-scope/kit-manifest/kit-checks, log-query -> exit 0.
