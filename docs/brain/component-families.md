@@ -948,3 +948,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `scripts/lib/style-guard.mjs` · `styleFindings` returns `[{ file, line, rule, text }]` for `.scss` (colour, font-size, font-weight, radius, shadow, space-scale, physical, engine-in-component) and `.html` (hand-drawn-dialog, local-empty, local-loading, bare-input); an `allow` entry `{ rule, file, line?, why }` removes a finding and needs a `why`.
 - When: a style plan's `[auto]` check that its files use the shared pieces and tokens (`scripts/test/style-703.test.mjs` is the pattern).
 - Known copies: none.
+
+### style-run-guard — the run-wide style regression test (plan 718)
+
+- Status: stable
+- Use: `scripts/test/style-718.test.mjs` runs `styleFindings` over every file plans 704–717 converged (each of their tests exports `FILES` and `ALLOW`) and checks the reuse-lint rules `page-local-empty-state`, `own-dialog-role` and `page-local-width`.
+- When: a later plan converges more pages — export `FILES` and `ALLOW` from its style test and add it to the list in that file.
+- Known copies: none.

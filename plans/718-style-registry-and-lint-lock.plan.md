@@ -134,9 +134,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the run-wide regression test and the lint-rule samples — scripts/test/style-718.test.mjs
-- [ ] A2: Add the three lint rules that stop new page-local empties, overlays and widths — scripts/lib/registry-families.mjs
-- [ ] A3: Record the converged families, users, exceptions and remaining copies in the registry and regenerate the inventory — docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A1: Add the run-wide regression test and the lint-rule samples — scripts/test/style-718.test.mjs
+- [x] A2: Add the three lint rules that stop new page-local empties, overlays and widths — scripts/lib/registry-families.mjs
+- [x] A3: Record the converged families, users, exceptions and remaining copies in the registry and regenerate the inventory — docs/brain/component-families.md, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: 704–717 merged.
@@ -157,3 +157,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - behaviour: the new lint rules warn on added lines only (reuse-lint's diff mode), so existing copies in venues do not fail CI.
+- node scripts/reuse-lint.mjs --diff / kit-checks: fail — the new rules count existing copies (reuse-copy.empty-state 0→15, reuse-copy.engine-classes 23→60) against _shared/debt-baseline.json, which is outside the scope; needs approved: _shared/debt-baseline.json (regenerate the two counts).
+- build, lint, test:ci, test:scripts, kit-manifest-check, registry check, override/icons/select/ledger/breadcrumbs: pass.
