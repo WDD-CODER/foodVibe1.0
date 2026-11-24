@@ -938,7 +938,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — server only
 - Use: an unattended caller (the front desk) passes `fallback: true` (and `deadlineMs`) to `callGemini` in `server/services/gemini-client.js`: on overload the same request tries the next free catalog model. `failureReason(kind, status)` in `server/services/frontdesk-turn.js` maps a failure to `busy`, `timeout`, `quota` or `other`; a failed guest turn stores it as `assistantFailed` on the conversation.
-- Pieces: callGemini({ fallback, deadlineMs }), failureReason(kind, status) in server/services/frontdesk-turn.js, assistantFailed, gemini-fallback.test.js.
+- Pieces: callGemini({ fallback, deadlineMs }), failureReason(kind, status) in server/services/frontdesk-turn.js, assistantFailed, gemini-fallback.test.js; plan 730: `isGone(result)` and the `goneUntil` map in `server/services/gemini-client.js` (a retired model is skipped), with the new cases in `server/test/gemini-fallback.test.js`.
 - When: any new unattended model call or failure reason; a second model-switching loop is never added.
 - Known copies: none.
 

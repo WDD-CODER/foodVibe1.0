@@ -1,0 +1,240 @@
+{
+  "run": "rs-models",
+  "branch": "orch/rs-models",
+  "base": "main",
+  "startedAt": "2026-11-24T10:12:38.317Z",
+  "mainShaAtStart": "b52cc08d005ca363f4485600b5d060ec9d6036e7",
+  "plans": {
+    "730": {
+      "nnn": "730",
+      "title": "The assistant skips AI models Google has retired and moves on when a model is gone",
+      "branch": "feat/730-skip-retired-ai-models",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T10:14:25.568Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T10:29:18.991Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T10:38:51.457Z"
+        }
+      },
+      "humanItems": [
+        "On the simulator (`/frontdesk/simulator`, as `demo_host`), the test guest writes \"מתי אתם פתוחים?\" three"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T10:14:25.403Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:14:25.569Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:29:11.814Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:29:18.559Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:29:18.864Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:29:18.993Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:30:02.220Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:38:43.346Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:38:51.458Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:39:06.757Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T10:40:14.449Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.7,
+      "sha": "baf133f50b6c581a41157e600e116673280d6690",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 883.7,
+          "tokens": {
+            "input": 840445,
+            "output": 17534
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 40.7,
+          "tokens": {
+            "input": 175047,
+            "output": 3266
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.9,
+          "tokens": {
+            "input": 37012,
+            "output": 1557
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md"
+      ],
+      "checkedHead": "5b303f5ca3433d92f7a6673b397260f198f14f5c"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-24T10:14:25.219Z",
+      "plan": "730",
+      "text": "the folder foodVibe1.0-orch-rs-models-730 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T10:29:09.352Z",
+      "plan": "730",
+      "text": "builder left undone (round 0): [human] simulator check (three guest turns of 'מתי אתם פתוחים?'): not run, left for the Human"
+    },
+    {
+      "at": "2026-11-24T10:29:12.341Z",
+      "plan": "730",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-24T10:29:17.803Z",
+      "plan": "730",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-24T10:29:17.920Z",
+      "plan": "730",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-24T10:29:18.046Z",
+      "plan": "730",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-24T10:29:18.177Z",
+      "plan": "730",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-24T10:29:18.306Z",
+      "plan": "730",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-24T10:29:18.437Z",
+      "plan": "730",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed first; runs after the fix: pnpm run test:server"
+    },
+    {
+      "at": "2026-11-24T10:29:18.680Z",
+      "plan": "730",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-models --plan plans/730-skip-retired-ai-models.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-24T10:30:02.707Z",
+      "plan": "730",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-24T10:39:15.680Z",
+      "plan": "730",
+      "text": "the folder foodVibe1.0-orch-merge-rs-models was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T10:41:36.168Z",
+      "text": "FINAL: same tree as plan 730's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 13.7,
+  "updatedAt": "2026-11-24T10:44:36.703Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "730",
+      "type": "behaviour",
+      "text": "behaviour: removed the ai.media.no_model test (no catalog model lacks a medium now) and rewrote the plan-619 pdf/audio cases as 'every catalog model takes pdf, audio and image' — reverse: restore the cases if a model without a medium is added",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "730",
+      "type": "behaviour",
+      "text": "behaviour: the fallback log for a gone model carries kind 'gone' (as the plan says), and an extra warn ai.model.gone {model, resetAt} is logged — reverse: remove the warn line in callWithFallback",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-24T10:44:36.701Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-24T10:44:36.703Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
