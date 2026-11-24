@@ -37,7 +37,7 @@ test('684-4: a new area named "גינה" shows as a chip above the map', async (
 
   await page.goto('/frontdesk/floor-plan')
   await page.getByRole('button', { name: 'הוספת אזור' }).click()
-  await page.locator('[data-testid="room-area-name"]').last().fill('גינה')
+  await page.locator('[data-testid="zone-name"]').fill('גינה')
   await expect(page.locator('.floor-plan__areas').getByText('גינה')).toBeVisible()
   await page.screenshot({ path: 'screens/684-4.png' })
 })

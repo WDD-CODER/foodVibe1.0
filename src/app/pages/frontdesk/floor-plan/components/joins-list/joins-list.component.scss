@@ -48,3 +48,67 @@
   column-gap: var(--space-3);
   row-gap: var(--space-1);
 }
+
+.joins-list__toggle {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-inline-size: 0;
+
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.joins-list__toggle--marked .joins-list__label-chip {
+  border-color: var(--color-primary);
+}
+
+.joins-list__label-chip {
+  flex: none;
+}
+
+.joins-list__summary {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.joins-list__chevron {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.joins-list__chevron--open {
+  transform: rotate(180deg);
+}
+
+.joins-list__editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: var(--space-2) var(--space-3);
+  min-inline-size: 0;
+}
+
+.joins-list__editor .joins-list__seats {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.joins-list__online {
+  grid-column: 1 / -1;
+  justify-self: start;
+}

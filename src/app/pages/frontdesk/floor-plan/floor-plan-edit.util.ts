@@ -34,6 +34,7 @@ export type TablePatch = Partial<
 export type AreaOp =
   | { type: 'add'; key: string; name: string }
   | { type: 'rename'; key: string; name: string }
+  | { type: 'color'; key: string; color: number }
   | { type: 'move'; key: string; dir: 'up' | 'down' }
   | { type: 'remove'; key: string }
 
@@ -246,6 +247,13 @@ export function areaNameError(plan: Pick<FloorPlanBody, 'areas'>, key: string, n
   return null
 }
 
+/** The first free name: `base`, then `base 2`, `base 3` … (`base` is the text of `fp_area_new`). */
+export function newAreaName(plan: Pick<FloorPlanBody, 'areas'>, base = 'אזור חדש'): string {
+  const taken = new Set(plan.areas.map((a) => a.name.trim()))
+  if (!taken.has(base)) return base
+  for (let n = 2; ; n++) if (!taken.has(`${base} ${n}`)) return `${base} ${n}`
+}
+
 const inOrder = (areas: FloorArea[]): FloorArea[] => [...areas].sort((a, b) => a.order - b.order)
 
 /** One change of the areas, or null when it is refused (a bad name, ten areas, tables in the area, the last area). */
@@ -260,6 +268,12 @@ export function withArea(plan: FloorPlanBody, op: AreaOp): FloorPlanBody | null 
     case 'rename': {
       if (areaNameError(plan, op.key, op.name) || !plan.areas.some((a) => a.key === op.key)) return null
       return { ...plan, areas: plan.areas.map((a) => (a.key === op.key ? { ...a, name: op.name.trim() } : a)) }
+    }
+    case 'color': {
+      const color = op.color
+      if (!plan.areas.some((a) => a.key === op.key)) return null
+      if (!Number.isInteger(color) || color < 0 || color >= ZONE_COLOR_COUNT) return null
+      return { ...plan, areas: plan.areas.map((a) => (a.key === op.key ? { ...a, color } : a)) }
     }
     case 'move': {
       const sorted = inOrder(plan.areas)
