@@ -18,7 +18,7 @@
   </button>
 
   @if (isSheetOpen()) {
-    <app-modal-shell [sheet]="true" labelledBy="pricing-sheet-title" (dismissed)="closeSheet()">
+    <app-modal-shell labelledBy="pricing-sheet-title" (dismissed)="closeSheet()">
       <div class="sheet-head">
         <h3 id="pricing-sheet-title">{{ 'pricing_meter_open' | translatePipe }}</h3>
         <button

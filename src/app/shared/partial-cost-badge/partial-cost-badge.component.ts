@@ -28,10 +28,6 @@ import { isValidQuickPrice, withQuickPrice } from 'src/app/core/utils/quick-pric
 import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
-import { PHONE_QUERY } from '@utils/breakpoints'
-
-/** On a phone the popover is a full-width bottom sheet (`$break-phone-max` in the scss). */
-const MOBILE_QUERY = PHONE_QUERY
 
 /** The «add new» option of the link field; `addNewChosen` carries the typed name, the value itself is ignored. */
 const ADD_PRODUCT_VALUE = '__add_product__'
@@ -311,14 +307,6 @@ export class PartialCostBadgeComponent {
   private place_(popover: HTMLElement): void {
     const chip = this.chipRef_()?.nativeElement
     if (!chip) return
-    if (this.isMobile_()) {
-      // Full-width bottom sheet: the scss pins it to the viewport, so no inline position.
-      popover.style.top = ''
-      popover.style.left = ''
-      popover.style.maxBlockSize = ''
-      this.isBelow_.set(false)
-      return
-    }
     popover.style.maxBlockSize = ''
     const { width, height } = popover.getBoundingClientRect()
     const placed = placeInViewport({
@@ -331,13 +319,5 @@ export class PartialCostBadgeComponent {
     popover.style.maxBlockSize = placed.maxHeight === null ? '' : `${placed.maxHeight}px`
     popover.style.top = `${placed.top}px`
     popover.style.left = `${placed.left}px`
-  }
-
-  private isMobile_(): boolean {
-    try {
-      return typeof matchMedia === 'function' && matchMedia(MOBILE_QUERY).matches
-    } catch {
-      return false
-    }
   }
 }

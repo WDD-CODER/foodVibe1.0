@@ -27,41 +27,43 @@
 
 .mes-sheet {
   position: fixed;
-  inset-block-start: 0;
-  inset-inline: 0;
+  inset: 0;
   z-index: 1200;
 
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 
-  max-block-size: 80dvh;
-  margin-inline: auto;
+  block-size: fit-content;
+  inline-size: calc(100% - 2 * var(--space-4));
+  max-block-size: var(--modal-max-block);
   max-inline-size: 40rem;
+  margin: auto;
   padding: var(--space-4);
-  padding-block-start: calc(var(--space-4) + env(safe-area-inset-top, 0px));
 
   overflow-y: auto;
 
   background: var(--bg-glass-strong);
   border: 1px solid var(--border-glass);
-  border-block-start: none;
-  border-end-start-radius: var(--radius-xl);
-  border-end-end-radius: var(--radius-xl);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-modal);
   backdrop-filter: var(--blur-modal);
   -webkit-backdrop-filter: var(--blur-modal);
 
-  transform: translateY(-100%);
+  opacity: 0;
+  transform: scale(0.98);
   visibility: hidden;
   transition:
+    opacity 200ms ease,
     transform 200ms ease,
     visibility 0s linear 200ms;
 
   &.is-open {
-    transform: translateY(0);
+    opacity: 1;
+    transform: none;
     visibility: visible;
     transition:
+      opacity 200ms ease,
       transform 200ms ease,
       visibility 0s;
   }
@@ -76,9 +78,15 @@
 }
 
 .mes-header {
+  position: sticky;
+  inset-block-start: calc(-1 * var(--space-4));
+  z-index: 1;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  background: inherit;
 }
 
 .mes-title {

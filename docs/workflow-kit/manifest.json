@@ -4197,6 +4197,37 @@
       "notes": "Plan 703: the catalog is clean, each new engine is defined once, and src/styles.scss is append-only above the plan marker."
     },
     {
+      "path": "scripts/lib/modal-guard.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/styleqa/static-checks.mjs"
+      ],
+      "notes": "Plan 720: modalFindings — finds bottom sheets, top sheets, [sheet] bindings and popup cards that turn scrolling off."
+    },
+    {
+      "path": "scripts/test/modal-guard.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/modal-guard.mjs"
+      ],
+      "notes": "Plan 720: fixture tests of the modal guard."
+    },
+    {
+      "path": "scripts/test/style-720.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/modal-guard.mjs",
+        "src/styles.scss"
+      ],
+      "notes": "Plan 720: the repo has no unlisted bottom sheet, the popup engines centre and scroll, and src/styles.scss is append-only above the plan marker."
+    },
+    {
       "path": "scripts/test/style-704.test.mjs",
       "tier": "project",
       "action": "stay",

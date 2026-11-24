@@ -1,7 +1,6 @@
 <div
   #overlay
   class="c-modal-overlay"
-  [class.m-sheet]="sheet()"
   [style.z-index]="zIndex()"
   [attr.popover]="topLayer() ? 'manual' : null"
   (click)="onBackdropClick()"
@@ -12,7 +11,6 @@
     [class.c-modal-card--md]="size() === 'md'"
     [class.c-modal-card--fluid]="size() === 'fluid'"
     [class]="cardClass()"
-    [class.m-sheet-card]="sheet()"
     role="dialog"
     aria-modal="true"
     [attr.aria-labelledby]="titleKey() ? titleId : labelledBy()"

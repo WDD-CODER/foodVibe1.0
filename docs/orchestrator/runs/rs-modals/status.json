@@ -1,0 +1,500 @@
+{
+  "run": "rs-modals",
+  "branch": "orch/rs-modals",
+  "base": "main",
+  "startedAt": "2026-11-24T08:09:41.793Z",
+  "mainShaAtStart": "33a6c572363224595414107e81a9733a330eede6",
+  "plans": {
+    "720": {
+      "nnn": "720",
+      "title": "Every popup centred on every screen, with a body that scrolls",
+      "branch": "feat/720-centred-popups-that-scroll",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T08:59:31.254Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T09:23:29.470Z"
+        }
+      },
+      "humanItems": [
+        "the booking popup on a tablet · window 1024×768, `/bookings` → press \"הזמנה חדשה\" · the popup opens in the middle of the screen, its title is at the top of the popup and the save button is visible without scrolling the page; the form between them scrolls",
+        "the same popup standing up · window 768×1024, `/bookings` → \"הזמנה חדשה\" · the popup is in the middle, nothing is cut off at the top or the bottom, the form scrolls",
+        "a popup that used to slide up on a phone · window 390×844, `/requests` → open a request → \"דחייה\" (decline) · the popup opens in the middle with all four corners rounded, not stuck to the bottom of the screen",
+        "a short popup on a laptop · `/clients` → \"הוסף לקוח חדש\" · it looks as before: centred, no scroll bar",
+        "the waiting list on a phone · window 390×844, `/bookings` → \"רשימת המתנה\" · it opens in the middle of the screen, not from the bottom, and its rows scroll inside it"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T08:12:05.392Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T08:12:05.571Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T08:35:44.179Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T08:38:47.115Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T08:59:31.118Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T08:59:31.256Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:18:09.035Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:23:19.202Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:23:29.472Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:23:45.097Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:25:44.695Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "720",
+          "title": "Every popup centred on every screen, with a body that scrolls",
+          "branch": "feat/720-centred-popups-that-scroll",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-24T08:12:05.569Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 9.2,
+          "reason": "asking 720-1: ESCALATE scope: ESCALATE: scope scripts/test/style-711.test.mjs — test 'the equipment phone panel is the shared popup sheet' (line 51) requires `[sheet]=\"true\"`, which this plan removes; `pnpm run test:scripts` fails until its regex is changed.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1418.1,
+              "tokens": {
+                "input": 2748403,
+                "output": 33284
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-24T08:38:32.603Z",
+            "reason": "ESCALATE scope: ESCALATE: scope scripts/test/style-711.test.mjs — test 'the equipment phone panel is the shared popup sheet' (line 51) requires `[sheet]=\"true\"`, which this plan removes; `pnpm run test:scripts` fails until its regex is changed."
+          },
+          "parkBranch": "park/rs-modals-720"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 720-1: ESCALATE scope: ESCALATE: scope scripts/test/style-711.test.mjs — test 'the equipment phone panel is the shared popup sheet' (line 51) r",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.8,
+      "sha": "5f74d8e2b918f172e906ff31977bc2433e27179d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1115.1,
+          "tokens": {
+            "input": 39276,
+            "output": 762
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.9,
+          "tokens": {
+            "input": 125106,
+            "output": 778
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "95a0371591d6bfd1a4a792716423a5187339dc88"
+    },
+    "721": {
+      "nnn": "721",
+      "title": "The pieces that draw their own panel: no sheet from the bottom or the top",
+      "branch": "feat/721-own-panels-centred-or",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T09:29:26.228Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T09:50:05.525Z"
+        }
+      },
+      "humanItems": [
+        "the floor editor on a phone · window 390×844, `/frontdesk/floor-plan` → tap a table · the table's panel appears in the page right under the room map (the page scrolls to it), not stuck to the bottom of the screen; the X closes it",
+        "the floor editor on a phone, room panel · window 390×844, `/frontdesk/floor-plan` → press the room button under the map · the room panel opens under the map and scrolls with the page",
+        "the missing-prices box on a phone · window 390×844, an event menu with a dish that has no price → tap the \"חלקי\" chip · the box opens right above or below the chip, as wide as its text, never cut off, not stuck to the bottom of the screen",
+        "the menu export sheet · an event menu → the toolbar's export button · the options open in the middle of the screen with all corners rounded, not dropping from the top; the list scrolls when the window is short (1024×600)",
+        "any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off (on a phone, 390×844: the \"חלקי\" chip of an event menu dish near the top and near the bottom; default `anchored-popup`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T08:38:48.383Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:29:26.064Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:29:26.229Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:45:47.517Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:49:55.853Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:50:05.527Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:50:34.884Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T09:53:04.484Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "721",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 720-1",
+          "freeDiskGb": 9.2
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 13.7,
+      "sha": "904849503d9edff7e631dc7982d9e41650198db3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 978.7,
+          "tokens": {
+            "input": 2005287,
+            "output": 18324
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 24.1,
+          "tokens": {
+            "input": 140753,
+            "output": 829
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "904849503d9edff7e631dc7982d9e41650198db3",
+      "reason": "environment: merge: git push origin orch/rs-modals failed: fatal: unable to access 'https://github.com/WDD-CODER/foodVibe1.0.git/': Recv failure: Connection was reset",
+      "park": {
+        "at": "2026-11-24T09:53:45.401Z",
+        "reason": "environment: merge: git push origin orch/rs-modals failed: fatal: unable to access 'https://github.com/WDD-CODER/foodVibe1.0.git/': Recv failure: Connection was reset"
+      }
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-24T08:12:05.222Z",
+      "plan": "720",
+      "text": "the folder foodVibe1.0-orch-rs-modals-720 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T08:35:43.849Z",
+      "plan": "720",
+      "text": "builder left undone (round 0): scripts/test/style-711.test.mjs:51 still expects [sheet]=\"true\" (out of scope), so test:scripts fails; No CHECKS entry was run for the kit scope-check and kit-checks commands; I did not run them"
+    },
+    {
+      "at": "2026-11-24T08:38:46.745Z",
+      "plan": "720",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-24T08:38:47.493Z",
+      "plan": "720",
+      "text": "ask 720-1 (scope, the Human or the advisor answers): May this plan edit scripts/test/style-711.test.mjs to drop the `[sheet]=\"true\"` expectation (line 51)?"
+    },
+    {
+      "at": "2026-11-24T08:38:48.687Z",
+      "text": "plan 720 asks 720-1 — 721 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-24T08:57:19.561Z",
+      "plan": "720",
+      "text": "ask 720-1 answered by the human: approved: scripts/test/style-711.test.mjs"
+    },
+    {
+      "at": "2026-11-24T08:57:31.683Z",
+      "plan": "720",
+      "text": "scope of plan 720 extended on orch/rs-modals by the answer to 720-1: scripts/test/style-711.test.mjs"
+    },
+    {
+      "at": "2026-11-24T08:59:24.878Z",
+      "plan": "720",
+      "text": "resumed from park/rs-modals-720: round 0, tier build, after: asking 720-1: ESCALATE scope: ESCALATE: scope scripts/test/style-711.test.mjs — test 'the equipment phone panel is the shared popup sheet' (line 51) requires `["
+    },
+    {
+      "at": "2026-11-24T08:59:30.987Z",
+      "plan": "720",
+      "text": "the folder foodVibe1.0-orch-rs-modals-720 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T09:18:06.467Z",
+      "plan": "720",
+      "text": "builder left undone (round 0): [human] Done-when items left for the Human to check"
+    },
+    {
+      "at": "2026-11-24T09:23:58.420Z",
+      "plan": "720",
+      "text": "the folder foodVibe1.0-orch-merge-rs-modals was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T09:29:25.880Z",
+      "plan": "721",
+      "text": "the folder foodVibe1.0-orch-rs-modals-721 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T09:45:45.028Z",
+      "plan": "721",
+      "text": "builder left undone (round 0): [human] items (floor editor on a phone, room panel, missing-prices box on a phone, menu export sheet, small floating box near the top and bottom): left for the Human; scope-check (kit copy) --diff: not run as a separate command; scripts/ci-scope-check.mjs --checkout-branch exited 0"
+    },
+    {
+      "at": "2026-11-24T09:55:00.521Z",
+      "plan": "721",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-24T09:55:22.432Z",
+      "text": "FINAL: same tree as plan 720's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-24T09:55:23.137Z",
+      "text": "make this a default? the style-703 and style-720 base-ref lists start with `origin/orch/rs-modals`, because `origin/orch/rs-style` does not exist and `origin/main` differs from staging (style-703 failed on it) — reverse:  (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 13.7,
+  "updatedAt": "2026-11-24T09:55:25.008Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "720",
+      "type": "behaviour",
+      "text": "behaviour: the style-703 and style-720 base-ref lists start with `origin/orch/rs-modals`, because `origin/orch/rs-style` does not exist and `origin/main` differs from staging (style-703 failed on it) — reverse: delete that first entry",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "720",
+      "type": "behaviour",
+      "text": "behaviour: the guard reads the longhand corner radii only, not the `border-radius` shorthand, which matched table headers and a banner — reverse: add shorthand parsing in radii()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "720",
+      "type": "behaviour",
+      "text": "behaviour: the guard scans declarations in a nested @media or @supports block as the rule they sit in. This is how it finds the `&.as-modal` phone block and the `.partial-popover` phone block — reverse: drop the nested handling in stylesheetFindings",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "720",
+      "type": "behaviour",
+      "text": "behaviour: the allow list has no `.floor-plan.floor-plan--sheet` entry, because the guard finds nothing there and an allow entry must match a finding; the plan's text listed it — reverse: add it if the guard rule changes",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "720",
+      "type": "behaviour",
+      "text": "behaviour: the `&.as-modal` selector is the allow key for the dead styles.scss block, since the guard reports the block's own prelude",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "720",
+      "type": "seen",
+      "text": "seen: scripts/test/mcp launcher test 'the launcher starts the installed server and lists only local read tools' fails in test:scripts (15 s, environment)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "721",
+      "type": "behaviour",
+      "text": "behaviour: the floor editor's phone panel is an inline panel under the map, not a centred popup, and the page scrolls it into view (block: 'nearest') when it opens — reverse: use a centred app-modal-shell and drop the scroll effect",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "721",
+      "type": "behaviour",
+      "text": "behaviour: the missing-prices box follows the anchored-popup default on a phone (beside its chip) — reverse: restore the phone branch in place_() and the scss blocks",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "721",
+      "type": "behaviour",
+      "text": "behaviour: the menu export sheet stays its own component and is centred with CSS only, with a 200 ms fade and slight scale instead of the slide from the top — reverse: restore the translateY slide",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "721",
+      "type": "behaviour",
+      "text": "behaviour: the new export-sheet spec measures the right gap with document.documentElement.clientWidth, because window.innerWidth includes the scrollbar in Karma — reverse: n/a, test-only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-24T09:55:25.006Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-24T09:55:25.008Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

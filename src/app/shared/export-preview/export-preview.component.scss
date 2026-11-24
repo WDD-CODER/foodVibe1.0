@@ -30,7 +30,7 @@
 
     inline-size: 100%;
     max-inline-size: 640px;
-    max-block-size: 90vh;
+    max-block-size: var(--modal-max-block);
 
     color: var(--paper-ink);
     background: var(--paper-bg);

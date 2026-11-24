@@ -178,7 +178,7 @@
        backdrop-filter (fixed-position containing block — see list-shell.component.html). -->
   @if (!isDesktop_() && editingItem_(); as item) {
     <ng-container shell-modal>
-      <app-modal-shell [sheet]="true" size="md" labelKey="edit" (dismissed)="onInlinePanelClickOutside()">
+      <app-modal-shell size="md" labelKey="edit" (dismissed)="onInlinePanelClickOutside()">
         <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
       </app-modal-shell>
     </ng-container>

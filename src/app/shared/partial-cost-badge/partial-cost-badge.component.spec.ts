@@ -381,13 +381,19 @@ describe('PartialCostBadgeComponent', () => {
       expect(top + popover(el).offsetHeight).toBeLessThanOrEqual(viewH())
     })
 
-    it('leaves the inline position unset on a phone, where the scss pins a full-width bottom sheet', async () => {
+    it('places the popover beside the chip on a phone too', async () => {
       forceLayout(true)
       const el = await setup([unpriced])
       pinHost(el, 'left: 0; top: 300px')
       openPopover(el)
-      expect(popover(el).style.left).toBe('')
-      expect(popover(el).style.top).toBe('')
+      expect(popover(el).style.left).not.toBe('')
+      expect(popover(el).style.top).not.toBe('')
+      const left = parseFloat(popover(el).style.left)
+      const top = parseFloat(popover(el).style.top)
+      expect(left).toBeGreaterThanOrEqual(0)
+      expect(left + popover(el).offsetWidth).toBeLessThanOrEqual(viewW())
+      expect(top).toBeGreaterThanOrEqual(0)
+      expect(top + popover(el).offsetHeight).toBeLessThanOrEqual(viewH())
     })
   })
 })

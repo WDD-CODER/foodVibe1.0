@@ -262,7 +262,7 @@
 
   <ng-container shell-modal>
     @if (isAddOpen_()) {
-      <app-modal-shell size="md" titleKey="client_new" [sheet]="true" (dismissed)="closeAdd()">
+      <app-modal-shell size="md" titleKey="client_new" (dismissed)="closeAdd()">
         <app-client-form (saved)="onSaved()" (cancelled)="closeAdd()" />
       </app-modal-shell>
     }

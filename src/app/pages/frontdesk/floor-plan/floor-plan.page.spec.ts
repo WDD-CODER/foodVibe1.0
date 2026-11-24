@@ -27,6 +27,7 @@ import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { PHONE_QUERY } from '@utils/breakpoints'
 import type { FloorPlan } from '@models/floor-plan.model'
 
 const DICT: Record<string, string> = {
@@ -594,6 +595,30 @@ describe('FloorPlanPage (plan 665)', () => {
         await click('fp-sheet-close')
         expect(el().querySelector('[data-testid="fp-panel"]')?.classList).not.toContain('floor-plan__panel--open')
       })
+
+      it('never pins the page to a sheet: no floor-plan--sheet class, no --fp-sheet-h style', async () => {
+        await setup({ saved: THREE })
+        await click('fp-room-open')
+        const section = el().querySelector('section.floor-plan') as HTMLElement
+        expect(section.classList).not.toContain('floor-plan--sheet')
+        expect(section.style.getPropertyValue('--fp-sheet-h')).toBe('')
+      })
+
+      for (const phone of [true, false]) {
+        it(`${phone ? 'scrolls' : 'does not scroll'} the room panel into view when it opens (phone query ${phone})`, async () => {
+          await setup({ saved: THREE })
+          spyOn(window, 'matchMedia').and.callFake(
+            (q: string) => ({ matches: phone && q === PHONE_QUERY, media: q }) as MediaQueryList
+          )
+          const panel = el().querySelector('[data-testid="fp-panel"]') as HTMLElement
+          const scroll = jasmine.createSpy('scrollIntoView')
+          panel.scrollIntoView = scroll
+          await click('fp-room-open')
+          await Promise.resolve()
+          if (phone) expect(scroll).toHaveBeenCalledWith({ block: 'nearest' })
+          else expect(scroll).not.toHaveBeenCalled()
+        })
+      }
     })
 
     it('shows no panel to staff', async () => {
