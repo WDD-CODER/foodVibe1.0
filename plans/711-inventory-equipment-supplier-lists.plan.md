@@ -76,6 +76,7 @@ src/app/pages/equipment/components/equipment-list/equipment-list.component.spec.
 src/app/pages/suppliers/components/supplier-list/**
 src/app/pages/suppliers/components/supplier-list/supplier-list.component.spec.ts
 scripts/test/style-711.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
