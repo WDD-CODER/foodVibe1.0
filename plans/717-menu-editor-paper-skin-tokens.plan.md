@@ -70,6 +70,7 @@ src/app/pages/menu-intelligence/components/loading-list/**
 scripts/test/style-717.test.mjs
 src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
 src/app/pages/menu-intelligence/components/event-notes-log/event-notes-log.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
