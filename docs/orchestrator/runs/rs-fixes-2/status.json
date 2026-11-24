@@ -1,0 +1,561 @@
+{
+  "run": "rs-fixes-2",
+  "branch": "orch/rs-fixes-2",
+  "base": "main",
+  "startedAt": "2026-11-23T22:54:01.818Z",
+  "mainShaAtStart": "54f0a65accb1b321f1e052eb7bf9e60e1ebcb6e7",
+  "plans": {
+    "701": {
+      "nnn": "701",
+      "title": "The assistant answers when Google is busy: a second model on overload, a reason the staff can read, and a steady voice test",
+      "branch": "feat/701-assistant-answers-when-google",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T23:22:39.406Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-23T23:59:44.699Z"
+        }
+      },
+      "humanItems": [
+        "On the simulator (`/frontdesk/simulator`, as `demo_host`), the test guest writes three questions in a row"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T22:55:25.764Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T22:55:25.882Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:11:53.361Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:12:58.667Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:22:39.238Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:22:39.407Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:46:44.684Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:59:33.903Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:59:44.702Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:00:00.071Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:01:05.702Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "701",
+          "title": "The assistant answers when Google is busy: a second model on overload, a reason the staff can read, and a steady voice test",
+          "branch": "feat/701-assistant-answers-when-google",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-23T22:55:25.881Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 12,
+          "reason": "asking 701-1: replan needed: ESCALATE: scope docs/brain/component-families.md — `node scripts/kit-checks.mjs --base origin/orch/rs-fixes-2 --plan plans/701-...plan.md` exits 1 with 3 reuse-registry-missing-piece findings; each needs a family heading there, and the path is outside the plan's Read-Write Scope.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 987.2,
+              "tokens": {
+                "input": 2275649,
+                "output": 30158
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-23T23:12:49.371Z",
+            "reason": "replan needed: ESCALATE: scope docs/brain/component-families.md — `node scripts/kit-checks.mjs --base origin/orch/rs-fixes-2 --plan plans/701-...plan.md` exits 1 with 3 reuse-registry-missing-piece findings; each needs a family heading there, and the path is outside the plan's Read-Write Scope."
+          },
+          "parkBranch": "park/rs-fixes-2-701"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 701-1: replan needed: ESCALATE: scope docs/brain/component-families.md — `node scripts/kit-checks.mjs --base origin/orch/rs-fixes-2 --plan plan",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10,
+      "sha": "aad8b8f4dbbdc751d8ca84ffb5360669a8fb223b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1442.7,
+          "tokens": {
+            "input": 797652,
+            "output": 7245
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.4,
+          "tokens": {
+            "input": 45672,
+            "output": 1077
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "7b1270ece55856f9ee9dee7e0264b86fae098b72"
+    },
+    "702": {
+      "nnn": "702",
+      "title": "The new-booking map shows before a time is picked, the staff read why the assistant stopped, and sign-out works from the dashboard",
+      "branch": "feat/702-booking-map-before-a",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T00:04:07.598Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T00:23:26.839Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T00:30:28.453Z"
+        }
+      },
+      "humanItems": [
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page",
+        "Sign out from the dashboard: sign in as `demo_host`, stay on the dashboard, press your name at the top →",
+        "Fix this answer (replays the failed card): in the simulator the test guest asks \"יש חניה?\" and the"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T23:12:59.136Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:04:07.456Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:04:07.600Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:20:04.059Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:20:15.131Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:20:15.483Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:20:15.654Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:23:26.268Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:23:26.526Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T00:23:26.690Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:23:26.840Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:27:36.237Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:30:21.615Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:30:28.454Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:30:40.552Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:31:19.499Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "702",
+          "round": 0,
+          "models": {},
+          "state": "queued",
+          "reason": "waits on the answer to ask 701-1",
+          "freeDiskGb": 12
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.8,
+      "sha": "d21774046bc8e3a22a83f6c26c52597dbf2e80dc",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 953.4,
+          "tokens": {
+            "input": 3724934,
+            "output": 33947
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 187.5,
+          "tokens": {
+            "input": 373457,
+            "output": 6463
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 246.8,
+          "tokens": {
+            "input": 139928,
+            "output": 3080
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.6,
+          "tokens": {
+            "input": 48611,
+            "output": 909
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md",
+        "round 1: Done-when item left undone: [auto] `pnpm run test:ci` passes, including the new cases in"
+      ],
+      "checkedHead": "be322055a4123557b6a154520655e7aec8ec117d"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T22:55:25.639Z",
+      "plan": "701",
+      "text": "the folder foodVibe1.0-orch-rs-fixes-2-701 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T23:11:53.197Z",
+      "plan": "701",
+      "text": "builder left undone (round 0): kit-checks reuse-registry check: needs a family heading in docs/brain/component-families.md that names the three Reuse Check rows (callGemini options, failureReason, gemini-fallback.test.js). The file is not in the plan's scope.; [human] simulator check (three questions answered within about half a"
+    },
+    {
+      "at": "2026-11-23T23:12:58.546Z",
+      "plan": "701",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-23T23:12:58.789Z",
+      "plan": "701",
+      "text": "ask 701-1 (scope, the Human or the advisor answers): May the builder add a family heading naming callGemini fallback/deadlineMs, failureReason and gemini-fallback.test.js to docs/brain/component-families.md (and regenerate docs/brain/inventory.md if needed)?"
+    },
+    {
+      "at": "2026-11-23T23:12:59.343Z",
+      "text": "plan 701 asks 701-1 — 702 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-23T23:20:59.762Z",
+      "plan": "701",
+      "text": "ask 701-1 answered by the human: approved: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T23:21:10.090Z",
+      "plan": "701",
+      "text": "scope of plan 701 extended on orch/rs-fixes-2 by the answer to 701-1: docs/brain/component-families.md"
+    },
+    {
+      "at": "2026-11-23T23:22:29.832Z",
+      "plan": "701",
+      "text": "resumed from park/rs-fixes-2-701: round 0, tier build, after: asking 701-1: replan needed: ESCALATE: scope docs/brain/component-families.md — `node scripts/kit-checks.mjs --base origin/orch/rs-fixes-2 --plan plans/701-...p"
+    },
+    {
+      "at": "2026-11-23T23:22:39.090Z",
+      "plan": "701",
+      "text": "the folder foodVibe1.0-orch-rs-fixes-2-701 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T23:46:42.234Z",
+      "plan": "701",
+      "text": "builder left undone (round 0): [human] simulator check: three questions each get an answer within about half a minute"
+    },
+    {
+      "at": "2026-11-24T00:00:11.475Z",
+      "plan": "701",
+      "text": "the folder foodVibe1.0-orch-merge-rs-fixes-2 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T00:04:07.310Z",
+      "plan": "702",
+      "text": "the folder foodVibe1.0-orch-rs-fixes-2-702 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T00:20:01.190Z",
+      "plan": "702",
+      "text": "builder left undone (round 0): [ui] 702-1: written, not run; [ui] 702-2: written, not run; [ui] 702-3: written, not run; [human] cards: not ticked"
+    },
+    {
+      "at": "2026-11-24T00:20:13.652Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-24T00:20:13.816Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-24T00:20:14.008Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-24T00:20:14.263Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-24T00:20:14.456Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-24T00:20:14.638Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-24T00:20:14.951Z",
+      "plan": "702",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed first; runs after the fix: pnpm run lint:reuse"
+    },
+    {
+      "at": "2026-11-24T00:20:15.307Z",
+      "plan": "702",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-fixes-2 --plan plans/702-booking-map-before-a-time-assistant-failure-notes-and-sign-out-from-the-dashboard.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-24T00:23:23.289Z",
+      "plan": "702",
+      "text": "builder left undone (round 0): pnpm run build, pnpm run test:ci, lint:icons, lint:no-native-select, log-query: not run in this round; ci-scope-check --checkout-branch: skipped (it reported branch \"\" is not feat/NNN-*, so I could not confirm it)"
+    },
+    {
+      "at": "2026-11-24T00:27:33.788Z",
+      "plan": "702",
+      "text": "builder left undone (round 1): I did not run the scope-check (kit copy) --diff command by name. kit-checks and ci-scope-check passed.; The `[ui]` items are written, not run."
+    },
+    {
+      "at": "2026-11-24T00:32:00.522Z",
+      "text": "FINAL: same tree as plan 702's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 10.8,
+  "updatedAt": "2026-11-24T00:32:02.624Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: with fallback, a model already known to be out of its daily quota is skipped at the start; the request starts on the first usable model instead of answering model_exhausted, because the front desk has no user to choose — reverse: drop the `knownReset && fallback` branch in callGemini",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: /suggest always answers `reason` on a 502 ('other' when the result has no group), so the existing 400 case now expects { error: 'AI_FAILED', reason: 'other' } — reverse: send reason only when the group is not 'other'",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: assistantFailed is removed by a wrapper around runTurn whenever a turn in mode `turn` returns ok, a blocked turn that hands off included — reverse: unset it only on the frontdesk.turn.done paths",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "701",
+      "type": "behaviour",
+      "text": "behaviour: the front desk switches to the next free model on overload; this is a narrow exception to the 2026-10-09 rule that the server never switches models by itself. It applies only to callers that pass fallback and only among free catalog models on the shared key — reverse: drop fallback: true in server/routes/ai/frontdesk.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "702",
+      "type": "behaviour",
+      "text": "behaviour: the map shows read-only until a time is chosen; the owner's table pick still needs a time first — reverse: drop !this.time_() from onMapTap",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "702",
+      "type": "behaviour",
+      "text": "behaviour: on the bare dashboard, sign-out happens at once; /dashboard?tab=metadata still asks about unsaved changes — reverse: remove the _isOnBareDashboard() condition in logout()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "702",
+      "type": "behaviour",
+      "text": "behaviour: the staff note hides as soon as anyone writes in the chat after the failure — reverse: change showAssistantFailure()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-24T00:32:02.621Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-24T00:32:02.623Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

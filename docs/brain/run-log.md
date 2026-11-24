@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (83 runs): plans 224 · merged 202 · parked 19 · fix rounds 102 · escalations 45 · gate fails 29 · ✗ 14 · checker misses 0 — per run: plans 2.7 · parked 0.23 · fix rounds 1.23 · ✗ per plan 0.06
+Earlier (84 runs): plans 225 · merged 203 · parked 19 · fix rounds 102 · escalations 45 · gate fails 30 · ✗ 14 · checker misses 0 — per run: plans 2.68 · parked 0.23 · fix rounds 1.21 · ✗ per plan 0.06
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-20 | mod-dash-diag | 652 | 1 | 0 | - | 0 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-21 | mod-count-units | 654 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-21 | mod-count-compact | 655 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-21 | mod-breakpoints | 656 | 1 | 0 | - | 2 | 2 | 1 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (83 runs): plans 224 · merged 202 · parked 19 · fix rounds 102 · esc
 | 2026-11-23 | rs-conv-ui | 677,678 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-demo | 674 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-ai | 679,680,681,682,689 | 5 | 0 | - | 2 | 3 | 1 | ok | 0 | 0 | 0 |
-| 2026-11-23 | rs-fixes | 701,702 | 0 | 1 | other | 1 | 1 | 0 | - | - | - | - |
+| 2026-11-23 | rs-fixes | 701,702 | 0 | 1 | other | 1 | 1 | 0 | - | 0 | 0 | 0 |
+| 2026-11-24 | rs-fixes-2 | 701,702 | 2 | 0 | - | 1 | 1 | 1 | ok | - | - | - |
