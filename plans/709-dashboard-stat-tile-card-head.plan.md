@@ -88,6 +88,22 @@ append the path to the scope block above and retry.
 - View links and row buttons — family: engine-classes — rung: 1 — why: `.c-btn-ghost--sm`; the funnel / upcoming rows become `.c-list-row--link` rows.
 - Empties — family: empty-state — rung: 1 — why: `app-empty-state [compact]="true"`.
 - none new.
+- New class `.perf__bar` (business-performance.component.scss) — the title row of the performance section (renamed from the old head class).
+- New class `.perf__lead` (business-performance.component.scss) — the hero tile's place in the grid (span 2, first).
+- New class `.perf__change` (business-performance.component.scss) — the change line under a tile number.
+- New class `.perf__start` (business-performance.component.scss) — the panel holding the "create first inquiry" button.
+- New class `.upcoming__meta` (business-performance.component.scss) — the guests and stage chips cell of an upcoming row.
+- New class `.kpi-icon--warning` (dashboard-overview.component.scss) — icon colour only, on `.c-stat-tile__icon`.
+- New class `.kpi-icon--info` (dashboard-overview.component.scss) — icon colour only, on `.c-stat-tile__icon`.
+- New class `.c-stat-tile__icon` (dashboard-overview.component.scss) — the shared tile icon, referenced only to set its colour for the two tones above.
+- New class `.kpi-link` (dashboard-overview.component.scss) — layout of the tile links (icon beside the text, disabled look).
+- New class `.act-text` (dashboard-overview.component.scss) — the name and action chip cell of a feed row.
+- New class `.act-changes-cell` (dashboard-overview.component.scss) — the full-width cell under a feed row holding the change chips.
+- New class `.act-change` (dashboard-overview.component.scss) — layout of one change chip (on the shared `c-chip--tag`).
+- New class `.act-change-label` (dashboard-overview.component.scss) — the label inside a change chip.
+- New class `.act-change-values` (dashboard-overview.component.scss) — the old and new values inside a change chip.
+- New class `.c-btn-ghost` (opening-details-banner.component.scss) — the shared ghost button, its layout set outside the layer on `.opening-banner__main`.
+- New class `.setup-step__mark--open` (setup-checklist-card.component.scss) — renamed from `--empty` so the template holds no local empty class.
 
 ## Defaults
 
