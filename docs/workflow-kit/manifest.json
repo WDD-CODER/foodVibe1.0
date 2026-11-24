@@ -4257,6 +4257,16 @@
       "notes": "Plan 709: the dashboard tiles, card heads, activity feed, chips and empty states sit on the shared pieces and pass the style guard."
     },
     {
+      "path": "scripts/test/style-712.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 712: the product, equipment and supplier forms, the product import and the suppliers sub-nav sit on the shared frame, header, table and chips and pass the style guard."
+    },
+    {
       "path": "scripts/test/style-711.test.mjs",
       "tier": "project",
       "action": "stay",

@@ -30,6 +30,7 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -52,7 +53,8 @@ const CATEGORIES: EquipmentCategory[] = [
     LoaderComponent,
     CustomSelectComponent,
     FormFieldComponent,
-    NumberBoxDirective
+    NumberBoxDirective,
+    PageHeaderComponent
   ],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',

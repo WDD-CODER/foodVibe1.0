@@ -23,8 +23,7 @@
     @if (!embedded() || errorKey_()) {
       <section class="import-paste c-glass-panel" [class.import-paste--compact]="rows_().length > 0">
         @if (!embedded()) {
-          <label class="import-field" for="import-text">
-            <span class="import-field__label">{{ 'import_paste_hint' | translatePipe }}</span>
+          <app-form-field label="import_paste_hint" forId="import-text">
             <textarea
               appTextareaAutoGrow
               id="import-text"
@@ -36,12 +35,11 @@
               (ngModelChange)="text_.set($event)"
               [disabled]="isParsing_() || isSaving_()"
             ></textarea>
-          </label>
+          </app-form-field>
 
           <div class="import-paste__row">
             @if (!showStrip_()) {
-              <div class="import-field import-field--supplier">
-                <span class="import-field__label">{{ 'import_supplier_optional' | translatePipe }}</span>
+              <app-form-field class="import-field--supplier" label="import_supplier_optional">
                 <app-custom-select
                   [ngModel]="supplierId_()"
                   (ngModelChange)="supplierId_.set($event)"
@@ -50,7 +48,7 @@
                   [typeToFilter]="true"
                   data-testid="import-supplier"
                 />
-              </div>
+              </app-form-field>
             }
             <input
               #cameraInput
@@ -149,7 +147,7 @@
           </p>
         }
         <div class="import-table-wrap">
-          <table class="import-table">
+          <table class="c-table c-table--compact import-table">
             <thead>
               <tr>
                 <th scope="col" class="import-table__name">{{ 'name' | translatePipe }}</th>

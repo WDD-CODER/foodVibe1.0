@@ -1,16 +1,17 @@
-<div class="product-form-container" [class.edit-mode]="isEditMode_()">
+<div class="c-form-page product-form-container" [class.edit-mode]="isEditMode_()">
   <form [formGroup]="productForm_" (ngSubmit)="onSubmit()" class="form-container" dir="rtl">
-    <header class="form-header">
-      @if (isEditMode_()) {
-        <h2 class="form-header__title">
+    @if (isEditMode_()) {
+      <app-page-header>
+        <ng-container header-title>
           {{ 'edit_product_title' | translatePipe }}:
           {{ productForm_.get('productName')?.value ?? initialProduct()?.nameHebrew ?? '' }}
-        </h2>
-      } @else {
-        <h2 class="form-header__title">{{ 'add_product_inventory_title' | translatePipe }}</h2>
-        <p class="subtitle">{{ 'add_product_subtitle' | translatePipe }}</p>
-      }
-    </header>
+        </ng-container>
+      </app-page-header>
+    } @else {
+      <app-page-header subtitleKey="add_product_subtitle">
+        <ng-container header-title>{{ 'add_product_inventory_title' | translatePipe }}</ng-container>
+      </app-page-header>
+    }
 
     <div class="form-section form-section--mandatory">
       @let nameControl = productForm_.get('productName');
@@ -42,7 +43,7 @@
 
       <div class="product-field" [class.c-input--invalid]="validationErrors_()['categories']">
         <label class="label-row collapsible-field__label-with-icon">
-          <lucide-icon [size]="16" name="tags" class="icon-xs icon-muted"></lucide-icon>
+          <lucide-icon [size]="16" name="tags" class="icon-muted"></lucide-icon>
           {{ 'category' | translatePipe }}
         </label>
         <app-chip-search-dropdown
@@ -108,7 +109,7 @@
     <div class="form-section form-section--purchase border-top" formArrayName="purchaseOptions">
       <label class="section-header">
         <button type="button" class="c-btn-ghost" (click)="addPurchaseOption()">
-          <lucide-icon name="plus" class="icon-xs"></lucide-icon> {{ 'add_purchase_unit' | translatePipe }}
+          <lucide-icon [size]="16" name="plus"></lucide-icon> {{ 'add_purchase_unit' | translatePipe }}
         </button>
       </label>
 
@@ -207,13 +208,13 @@
               (click)="onDeletePurchaseOption(idx)"
               [attr.aria-label]="'remove' | translatePipe"
             >
-              <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
+              <lucide-icon [size]="16" name="trash-2"></lucide-icon>
             </button>
           </div>
 
           @if (option.invalid && (option.dirty || isSubmitted)) {
             <div class="error-message-row">
-              <lucide-icon name="alert-circle" class="icon-xs"></lucide-icon>
+              <lucide-icon [size]="14" name="alert-circle"></lucide-icon>
               {{ 'purchase_unit_details_invalid' | translatePipe }}
             </div>
           }
@@ -231,7 +232,7 @@
           (appClickOutside)="onSupplierBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon [size]="16" name="truck" class="icon-xs icon-muted"></lucide-icon>
+            <lucide-icon [size]="16" name="truck" class="icon-muted"></lucide-icon>
             {{ 'supplier' | translatePipe }}
           </label>
           <app-chip-search-dropdown
@@ -257,7 +258,7 @@
           role="button"
           tabindex="0"
         >
-          <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
+          <lucide-icon [size]="14" name="truck" class="icon-muted"></lucide-icon>
           <span>{{ 'supplier' | translatePipe }}</span>
         </div>
       </div>
@@ -269,7 +270,7 @@
           (appClickOutside)="onAllergensBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon [size]="16" name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
+            <lucide-icon [size]="16" name="shield-alert" class="icon-warning"></lucide-icon>
             {{ 'allergens' | translatePipe }}
           </label>
           <app-chip-search-dropdown
@@ -295,7 +296,7 @@
           role="button"
           tabindex="0"
         >
-          <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
+          <lucide-icon [size]="14" name="shield-alert" class="icon-warning"></lucide-icon>
           <span>{{ 'allergens' | translatePipe }}</span>
         </div>
       </div>
@@ -307,7 +308,7 @@
           (appClickOutside)="onWasteYieldBlur($event)"
         >
           <div class="collapsible-field__label-with-icon">
-            <lucide-icon [size]="16" name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
+            <lucide-icon [size]="16" name="flask-conical" class="icon-primary"></lucide-icon>
             <span class="label-text">{{ 'waste_yield_logic' | translatePipe }}</span>
           </div>
           <div class="two-col-grid">
@@ -361,7 +362,7 @@
           role="button"
           tabindex="0"
         >
-          <lucide-icon name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
+          <lucide-icon [size]="14" name="flask-conical" class="icon-primary"></lucide-icon>
           <span>{{ 'waste_yield_logic' | translatePipe }}</span>
         </div>
       </div>
@@ -373,7 +374,7 @@
           (appClickOutside)="onMinStockBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon [size]="16" name="package" class="icon-xs icon-muted"></lucide-icon>
+            <lucide-icon [size]="16" name="package" class="icon-muted"></lucide-icon>
             {{ 'min_stock_level' | translatePipe }}
           </label>
           <input type="number" formControlName="minStockLevel" min="0" placeholder="0" class="c-input" />
@@ -387,7 +388,7 @@
           role="button"
           tabindex="0"
         >
-          <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
+          <lucide-icon [size]="14" name="package" class="icon-muted"></lucide-icon>
           <span>{{ 'min_stock_level' | translatePipe }}</span>
         </div>
       </div>
@@ -400,7 +401,7 @@
           (appClickOutside)="onExpiryDaysBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
-            <lucide-icon [size]="16" name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
+            <lucide-icon [size]="16" name="calendar-clock" class="icon-muted"></lucide-icon>
             {{ 'expiry_days_default' | translatePipe }}
           </label>
           <input type="number" formControlName="expiryDaysDefault" min="0" placeholder="0" class="c-input" />
@@ -414,22 +415,22 @@
           role="button"
           tabindex="0"
         >
-          <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
+          <lucide-icon [size]="14" name="calendar-clock" class="icon-muted"></lucide-icon>
           <span>{{ 'expiry_days_default' | translatePipe }}</span>
         </div>
       </div>
     </div>
 
-    <div class="form-actions">
-      <button type="button" class="c-btn-primary" (click)="onCancel()">
-        <lucide-icon name="arrow-right" class="icon-sm"></lucide-icon>
+    <div class="c-form-actions">
+      <button type="button" class="c-btn-ghost" (click)="onCancel()">
+        <lucide-icon [size]="16" name="arrow-right"></lucide-icon>
         {{ 'back_to_list' | translatePipe }}
       </button>
       <button type="submit" [disabled]="isSaving_()" class="c-btn-primary">
         @if (isSaving_()) {
           <app-loader size="small" [inline]="true" />
         }
-        <lucide-icon [name]="isEditMode_() ? 'save' : 'plus'" class="icon-sm"></lucide-icon>
+        <lucide-icon [size]="16" [name]="isEditMode_() ? 'save' : 'plus'"></lucide-icon>
         {{ isEditMode_() ? ('update_product' | translatePipe) : ('save_product' | translatePipe) }}
       </button>
     </div>
