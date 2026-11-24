@@ -70,6 +70,7 @@ src/app/pages/recipe-builder/components/recipe-workflow/**
 src/app/pages/recipe-builder/components/ingredient-search/**
 src/app/pages/recipe-builder/components/preparation-search/**
 scripts/test/style-715.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
