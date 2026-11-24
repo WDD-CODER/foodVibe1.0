@@ -2,10 +2,10 @@
   <form class="baseline-form c-glass-panel" data-testid="baseline-form" [formGroup]="form" (ngSubmit)="save()">
     <p class="baseline-intro">{{ 'baseline_intro' | translatePipe }}</p>
     @for (field of fields; track field.key) {
-      <label class="baseline-field" appNumberBox>
-        <span class="baseline-field__label">{{ field.labelKey | translatePipe }}</span>
+      <app-form-field appNumberBox [label]="field.labelKey" [forId]="'baseline-' + field.key">
         <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
           <input
+            [id]="'baseline-' + field.key"
             type="number"
             inputmode="decimal"
             step="any"
@@ -23,7 +23,7 @@
             {{ 'baseline_value_invalid' | translatePipe }}
           </span>
         }
-      </label>
+      </app-form-field>
     }
     @for (group of groups; track group.id) {
       <button
@@ -41,10 +41,10 @@
         <div class="baseline-group" [id]="'baseline-group-' + group.id + '-body'">
           <p class="baseline-intro">{{ 'baseline_group_hint' | translatePipe }}</p>
           @for (field of group.fields; track field.key) {
-            <label class="baseline-field" appNumberBox>
-              <span class="baseline-field__label">{{ field.labelKey | translatePipe }}</span>
+            <app-form-field appNumberBox [label]="field.labelKey" [forId]="'baseline-' + field.key">
               <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
                 <input
+                  [id]="'baseline-' + field.key"
                   type="number"
                   inputmode="decimal"
                   step="any"
@@ -62,7 +62,7 @@
                   {{ 'baseline_value_invalid' | translatePipe }}
                 </span>
               }
-            </label>
+            </app-form-field>
           }
         </div>
       }

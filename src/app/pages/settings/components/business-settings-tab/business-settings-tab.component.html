@@ -2,10 +2,10 @@
   <app-business-name-form />
   <form class="business-form c-glass-panel" data-testid="business-settings-form" [formGroup]="form" (ngSubmit)="save()">
     @for (field of fields; track field.key) {
-      <label class="business-field" appNumberBox>
-        <span class="business-field__label">{{ field.labelKey | translatePipe }}</span>
+      <app-form-field appNumberBox [label]="field.labelKey" [forId]="'business-' + field.key">
         <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
           <input
+            [id]="'business-' + field.key"
             type="number"
             inputmode="decimal"
             step="0.1"
@@ -23,7 +23,7 @@
         } @else {
           <span class="business-field__help">{{ field.helpKey | translatePipe }}</span>
         }
-      </label>
+      </app-form-field>
     }
     <div class="c-form-actions">
       <button

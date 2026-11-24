@@ -154,51 +154,67 @@
       @if (timeline_().length === 0) {
         <app-empty-state messageKey="client_timeline_empty" icon="clock" />
       } @else {
-        <ul class="timeline-list">
+        <ul class="c-list timeline-list" role="list">
           @for (item of timeline_(); track item.kind + item.id) {
-            <li class="timeline-row" [attr.data-kind]="item.kind">
+            <li class="c-list-row" [attr.data-kind]="item.kind">
               @switch (item.kind) {
                 @case ('request') {
-                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_request' | translatePipe }}</span>
-                  <span class="timeline-row__main">{{ 'client_tl_kind_' + item.request.kind | translatePipe }}</span>
-                  <span class="c-chip--tag c-chip--sm">{{
-                    'client_tl_status_' + item.request.status | translatePipe
-                  }}</span>
-                  @if (item.request.wanted.date) {
-                    <span class="timeline-row__meta" dir="ltr">{{ item.request.wanted.date }}</span>
-                  }
+                  <span class="c-list-body-cell"
+                    ><span class="c-chip--tag c-chip--sm">{{ 'client_timeline_request' | translatePipe }}</span></span
+                  >
+                  <span class="c-list-body-cell timeline-main">
+                    <span>{{ 'client_tl_kind_' + item.request.kind | translatePipe }}</span>
+                    <span class="c-chip--tag c-chip--sm">{{
+                      'client_tl_status_' + item.request.status | translatePipe
+                    }}</span>
+                    @if (item.request.wanted.date) {
+                      <span class="timeline-meta" dir="ltr">{{ item.request.wanted.date }}</span>
+                    }
+                  </span>
                 }
                 @case ('booking') {
-                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_booking' | translatePipe }}</span>
-                  <span class="timeline-row__main">{{ 'client_tl_kind_' + item.booking.kind | translatePipe }}</span>
-                  <span class="c-chip--tag c-chip--sm">{{
-                    'client_tl_status_' + item.booking.status | translatePipe
-                  }}</span>
-                  <span class="timeline-row__meta" dir="ltr"
-                    >{{ item.booking.date }} {{ item.booking.time }} · {{ item.booking.partySize }}</span
+                  <span class="c-list-body-cell"
+                    ><span class="c-chip--tag c-chip--sm">{{ 'client_timeline_booking' | translatePipe }}</span></span
                   >
+                  <span class="c-list-body-cell timeline-main">
+                    <span>{{ 'client_tl_kind_' + item.booking.kind | translatePipe }}</span>
+                    <span class="c-chip--tag c-chip--sm">{{
+                      'client_tl_status_' + item.booking.status | translatePipe
+                    }}</span>
+                    <span class="timeline-meta" dir="ltr"
+                      >{{ item.booking.date }} {{ item.booking.time }} · {{ item.booking.partySize }}</span
+                    >
+                  </span>
                 }
                 @case ('event') {
-                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_event' | translatePipe }}</span>
-                  <a class="timeline-row__main" [routerLink]="['/menu-intelligence', item.event._id]">{{
-                    item.event.name
-                  }}</a>
-                  @if (item.event.stage) {
-                    <span class="c-chip--tag c-chip--sm">{{ stageLabelKey(item.event.stage) | translatePipe }}</span>
-                  }
-                  @if (item.event.eventDate) {
-                    <span class="timeline-row__meta" dir="ltr">{{ item.event.eventDate }}</span>
-                  }
+                  <span class="c-list-body-cell"
+                    ><span class="c-chip--tag c-chip--sm">{{ 'client_timeline_event' | translatePipe }}</span></span
+                  >
+                  <span class="c-list-body-cell timeline-main">
+                    <a class="c-row-link" [routerLink]="['/menu-intelligence', item.event._id]">{{
+                      item.event.name
+                    }}</a>
+                    @if (item.event.stage) {
+                      <span class="c-chip--tag c-chip--sm">{{ stageLabelKey(item.event.stage) | translatePipe }}</span>
+                    }
+                    @if (item.event.eventDate) {
+                      <span class="timeline-meta" dir="ltr">{{ item.event.eventDate }}</span>
+                    }
+                  </span>
                 }
                 @case ('note') {
-                  <span class="c-chip--tag c-chip--sm">{{ 'client_timeline_note' | translatePipe }}</span>
-                  <span class="timeline-row__main timeline-row__note">{{ item.text }}</span>
-                  <a class="timeline-row__meta" [routerLink]="['/menu-intelligence', item.event._id]"
-                    >{{ item.byName }} · {{ item.event.name }}</a
+                  <span class="c-list-body-cell"
+                    ><span class="c-chip--tag c-chip--sm">{{ 'client_timeline_note' | translatePipe }}</span></span
                   >
+                  <span class="c-list-body-cell timeline-main">
+                    <span class="timeline-note">{{ item.text }}</span>
+                    <a class="timeline-meta" [routerLink]="['/menu-intelligence', item.event._id]"
+                      >{{ item.byName }} · {{ item.event.name }}</a
+                    >
+                  </span>
                 }
               }
-              <span class="timeline-row__date">{{ item.at | date: 'd.M.yy' }}</span>
+              <span class="c-list-body-cell timeline-meta">{{ item.at | date: 'd.M.yy' }}</span>
             </li>
           }
         </ul>
@@ -244,10 +260,10 @@
 @if (isReasonOpen_()) {
   <app-modal-shell size="sm" titleKey="client_do_not_contact" [sheet]="true" (dismissed)="isReasonOpen_.set(false)">
     <div class="c-modal-body">
-      <div class="c-input-stack">
-        <label for="client-dnc-reason">{{ 'client_do_not_contact_reason' | translatePipe }}</label>
+      <app-form-field label="client_do_not_contact_reason" forId="client-dnc-reason">
         <input
           id="client-dnc-reason"
+          class="c-input"
           type="text"
           autocomplete="off"
           [maxLength]="reasonMax"
@@ -255,7 +271,7 @@
           (ngModelChange)="reason_.set($event)"
           (keydown.enter)="onReasonSave()"
         />
-      </div>
+      </app-form-field>
     </div>
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="isReasonOpen_.set(false)">

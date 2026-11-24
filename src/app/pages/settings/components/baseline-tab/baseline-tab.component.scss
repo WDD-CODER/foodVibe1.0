@@ -27,15 +27,6 @@
     font-size: var(--fs-sm);
   }
 
-  .baseline-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-  }
-
   .baseline-group {
     display: flex;
     flex-direction: column;
@@ -44,11 +35,6 @@
 
   .baseline-group__toggle {
     align-self: flex-start;
-  }
-
-  .baseline-field__label {
-    color: var(--color-text-main);
-    font-weight: 600;
   }
 
   .baseline-field__suffix {

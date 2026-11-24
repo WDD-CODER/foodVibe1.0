@@ -67,23 +67,21 @@
 
   <ng-container shell-table-body>
     @if (filteredClients_().length === 0) {
-      <div class="no-results">
-        @if (isEmptyList_()) {
-          <app-empty-state
-            messageKey="clients_empty"
-            icon="users"
-            [ctaLabelKey]="isOwner_() ? 'add_new_client' : null"
-            (ctaClick)="openAdd()"
-          />
-        } @else {
-          {{ 'clients_no_results' | translatePipe }}
-        }
-      </div>
+      @if (isEmptyList_()) {
+        <app-empty-state
+          messageKey="clients_empty"
+          icon="users"
+          [ctaLabelKey]="isOwner_() ? 'add_new_client' : null"
+          (ctaClick)="openAdd()"
+        />
+      } @else {
+        <app-empty-state messageKey="clients_no_results" icon="search" />
+      }
     }
     @for (item of filteredClients_(); track item._id) {
       <div class="client-grid-row c-list-row" role="row" (click)="openClient(item)">
         <div class="col-name c-list-body-cell" role="cell">
-          <a class="client-name" [routerLink]="['/clients', item._id]" (click)="$event.stopPropagation()">{{
+          <a class="client-name c-row-link" [routerLink]="['/clients', item._id]" (click)="$event.stopPropagation()">{{
             item.name
           }}</a>
         </div>
