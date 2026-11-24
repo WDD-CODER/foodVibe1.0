@@ -160,3 +160,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the new lint rules warn on added lines only (reuse-lint's diff mode), so existing copies in venues do not fail CI.
 - node scripts/reuse-lint.mjs --diff / kit-checks: fail — the new rules count existing copies (reuse-copy.empty-state 0→15, reuse-copy.engine-classes 23→60) against _shared/debt-baseline.json, which is outside the scope; needs approved: _shared/debt-baseline.json (regenerate the two counts).
 - build, lint, test:ci, test:scripts, kit-manifest-check, registry check, override/icons/select/ledger/breadcrumbs: pass.
+- scope extended per ask 718-1 (approved): _shared/debt-baseline.json — regenerated reuse-copy.empty-state (15) and reuse-copy.engine-classes (60); reuse-lint --diff → ok, kit-checks → ok (6 checks). test:scripts failed once on an MCP launcher timeout (environment), passed on rerun.
