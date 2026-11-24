@@ -52,7 +52,7 @@ describe('EventStageBarComponent', () => {
 
   const stageLink = (key: string) =>
     Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-link')).find((b) => b.textContent?.includes(`T:${key}`))!
-  const pills = () => Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-pill'))
+  const pills = () => Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-tab'))
   const pill = (stage: string) => pills().find((p) => p.textContent?.trim() === `T:event_stage_${stage}`)!
 
   async function setup(event: MenuEvent = base): Promise<void> {
@@ -112,8 +112,8 @@ describe('EventStageBarComponent', () => {
   it('shows the seven stages in order plus "not closed", with the current one marked', async () => {
     await setup()
     expect(pills().length).toBe(8)
-    expect(pill('inquiry').classList).toContain('is-current')
-    expect(pill('quote_sent').classList).not.toContain('is-current')
+    expect(pill('inquiry').classList).toContain('active')
+    expect(pill('quote_sent').classList).not.toContain('active')
   })
 
   it('moves the event when a stage is clicked', async () => {
@@ -245,6 +245,25 @@ describe('EventStageBarComponent', () => {
       await setup({ ...base, clientId: 'c1', clientName: 'ישן', clientPhone: '000' })
       expect(chips()).toEqual(['דנה'])
       expect(changeButton()!.textContent).toContain('T:client_change')
+    })
+
+    it('draws the current stage as a shared tab chip marked active (plan 717)', async () => {
+      await setup()
+      const current = pill('inquiry')
+      expect(current.classList).toContain('c-chip')
+      expect(current.classList).toContain('c-chip--tab')
+      expect(current.classList).toContain('active')
+    })
+
+    it('gives the client chip the chip base class (plan 717)', async () => {
+      await setup({ ...base, clientId: 'c1' })
+      expect(el.querySelector('a.client-chip')?.classList).toContain('c-chip')
+    })
+
+    it('shows the compact empty state when the event has no client (plan 717)', async () => {
+      await setup()
+      expect(el.querySelector('.client-row app-empty-state')).not.toBeNull()
+      expect(el.querySelector('.client-chip')).toBeNull()
     })
 
     it('the client chip links to the client profile (plan 551)', async () => {
@@ -414,14 +433,14 @@ describe('EventStageBarComponent', () => {
   describe('scroll rail (plan 467)', () => {
     it('puts the stage pills in the shared scroll rail', async () => {
       await setup()
-      expect(el.querySelectorAll('app-scroll-rail .stage-pill').length).toBe(8)
+      expect(el.querySelectorAll('app-scroll-rail .stage-tab').length).toBe(8)
     })
 
     it('brings the current stage into view when the screen opens', async () => {
       const spy = spyOn(Element.prototype, 'scrollIntoView')
       await setup({ ...base, stage: 'ordering' })
       await fixture.whenStable()
-      const current = el.querySelector('.stage-pill.is-current')!
+      const current = el.querySelector('.stage-tab.active')!
       expect(spy.calls.all().some((c) => c.object === current)).toBeTrue()
     })
   })
@@ -473,7 +492,7 @@ describe('EventStageBarComponent', () => {
 
     it('marks "finished" as the current stage once the event is finished', async () => {
       await setup({ ...base, stage: 'finished' })
-      expect(pill('finished').classList).toContain('is-current')
+      expect(pill('finished').classList).toContain('active')
       expect(closingLink()).toBeTruthy()
     })
   })

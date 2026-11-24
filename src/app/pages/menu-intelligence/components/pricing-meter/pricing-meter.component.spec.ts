@@ -174,7 +174,7 @@ describe('PricingMeterComponent', () => {
     const price = fixture.nativeElement.querySelector('input[name="pricePerGuest"]') as HTMLInputElement
     expect(price.disabled).toBeFalse()
     expect(fixture.nativeElement.querySelector('input[name="profitTargetPct"]')).toBeNull()
-    ;(fixture.nativeElement.querySelector('.targets-toggle') as HTMLButtonElement).click()
+    ;(fixture.nativeElement.querySelector('.targets-chip') as HTMLButtonElement).click()
     fixture.detectChanges()
     expect(fixture.nativeElement.querySelector('input[name="profitTargetPct"]')).toBeTruthy()
   })
@@ -189,7 +189,7 @@ describe('PricingMeterComponent', () => {
   })
 
   const root = (): HTMLElement => fixture.nativeElement as HTMLElement
-  const chip = (): HTMLButtonElement => root().querySelector('.targets-toggle') as HTMLButtonElement
+  const chip = (): HTMLButtonElement => root().querySelector('.targets-chip') as HTMLButtonElement
   const targetBox = (): HTMLInputElement | null => root().querySelector('input[name="profitTargetPct"]')
   const click = (el: HTMLElement): void => {
     el.click()
@@ -290,7 +290,7 @@ describe('PricingMeterComponent', () => {
       expect(card.querySelector('.sheet-summary')?.textContent).toContain('meets_target')
       expect(card.querySelector('.sheet-body input[name="pricePerGuest"]')).toBeTruthy()
       expect(card.querySelector('.sheet-body .meter-numbers')?.textContent).toContain('menu_total_cost')
-      expect(card.querySelector('.sheet-body .targets-toggle')).toBeTruthy()
+      expect(card.querySelector('.sheet-body .targets-chip')).toBeTruthy()
       expect(card.querySelector('.sheet-summary')?.tagName).toBe('DIV')
     })
 

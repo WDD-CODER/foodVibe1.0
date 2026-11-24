@@ -9,6 +9,7 @@ import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
 import { UserService } from '@services/user.service'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { NOTE_MAX_LENGTH } from '@schemas/entities'
 import type { EventNote } from '@models/menu-event.model'
 
@@ -19,7 +20,7 @@ import type { EventNote } from '@models/menu-event.model'
 @Component({
   selector: 'app-event-notes-log',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [DatePipe, FormsModule, LucideAngularModule, TranslatePipe, EmptyStateComponent],
   templateUrl: './event-notes-log.component.html',
   styleUrl: './event-notes-log.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

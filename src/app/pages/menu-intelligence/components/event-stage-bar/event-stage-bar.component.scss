@@ -30,69 +30,24 @@
   }
 }
 
-/* Plan 479: the pills are <button>s. Outside the layer so they beat the unlayered button reset in src/styles.scss
-   (unlayered rules win over every @layer rule), same as .header-btn there. */
-.stage-pill {
-  flex: 0 0 auto;
+/* The stage tabs are shared tab chips (plan 717); these state rules sit outside the layer so they beat the
+   unlayered chip engine. */
+.stage-tab {
   scroll-snap-align: center;
 
-  min-block-size: 2.25rem;
-  padding-inline: var(--space-4);
-
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-full);
-
-  background: transparent;
-  color: var(--color-primary-hover);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  white-space: nowrap;
-  cursor: pointer;
-
-  transition: background var(--ease-smooth);
-
-  &:hover:not(.is-locked) {
+  &.is-past:not([aria-current]) {
     background: var(--color-primary-soft);
   }
 
-  &.is-current {
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-  }
-
-  &.is-past {
-    background: var(--color-primary-soft);
-  }
-
-  &.is-locked {
+  &.is-locked:not([aria-current]) {
     border-color: var(--border-strong);
 
     color: var(--color-text-muted);
     cursor: default;
-
-    &.is-current {
-      border-color: var(--color-primary);
-
-      background: var(--color-primary);
-      color: var(--color-text-on-primary);
-    }
   }
 
-  &.stage-pill--danger {
+  &.stage-lost {
     margin-inline-start: auto;
-
-    border-color: var(--color-danger);
-
-    color: var(--color-danger);
-
-    &.is-current {
-      background: var(--color-danger);
-      color: var(--color-text-on-primary);
-    }
-
-    &:hover:not(.is-locked) {
-      background: var(--bg-danger-subtle);
-    }
   }
 }
 
@@ -117,12 +72,6 @@
     gap: var(--space-2);
   }
 
-  .client-row-empty {
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-    opacity: 0.6;
-  }
-
   .client-picker {
     min-inline-size: 0;
     padding: var(--space-2) var(--space-3);
@@ -137,15 +86,6 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
-
-    padding: 0;
-
-    border: 0;
-
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: var(--fs-sm);
-    cursor: pointer;
   }
 
   .stage-link-icon {

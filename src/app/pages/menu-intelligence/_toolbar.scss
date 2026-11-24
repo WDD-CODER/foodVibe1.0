@@ -9,11 +9,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
-  margin-bottom: 14px;
-  width: 100%;
-  max-width: 680px;
+  margin-block-end: 14px;
+  inline-size: 100%;
+  max-inline-size: 680px;
 }
 
 .pill {
@@ -21,14 +21,14 @@
   align-items: center;
   gap: 5px;
 
-  min-height: var(--tap); /* plan 305 M7 — touch floor; padding/type/color otherwise untouched */
+  min-block-size: var(--tap); /* plan 305 M7 — touch floor; padding/type/color otherwise untouched */
   padding: 5px 14px;
 
-  background: rgba(255, 255, 255, 0.9);
+  background: color-mix(in srgb, var(--paper-sheet) 90%, transparent);
   border: 1px solid var(--paper-border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   font-family: var(--font-serif);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   color: var(--paper-brown);
   cursor: pointer;
   transition:
@@ -98,10 +98,10 @@
   .pill-row {
     gap: 6px;
 
-    margin-bottom: 8px;
+    margin-block-end: var(--space-2);
   }
 
   .pill {
-    min-height: 2.5rem;
+    min-block-size: 2.5rem;
   }
 }

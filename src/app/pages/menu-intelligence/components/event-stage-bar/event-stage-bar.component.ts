@@ -34,6 +34,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import type { Client } from '@models/client.model'
 import { ClientPickerComponent } from 'src/app/shared/client-picker/client-picker.component'
@@ -54,6 +55,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
   standalone: true,
   imports: [
     SelectOnFocusDirective,
+    EmptyStateComponent,
     DatePipe,
     LucideAngularModule,
     RouterLink,
@@ -149,7 +151,7 @@ export class EventStageBarComponent {
       if (!rail) return
       afterNextRender(
         () => {
-          const pill = this.host_.nativeElement.querySelector<HTMLElement>('.stage-pill.is-current')
+          const pill = this.host_.nativeElement.querySelector<HTMLElement>('.stage-tab.active')
           if (pill) rail.centerChild(pill)
         },
         { injector: this.injector }

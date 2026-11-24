@@ -65,7 +65,7 @@
           }
         </span>
         <span
-          class="c-input-wrapper"
+          class="c-input-wrapper meter-input"
           [class.invalid]="moneyForm().controls.pricePerGuest.invalid && moneyForm().controls.pricePerGuest.touched"
         >
           @if (!canEditMoney_()) {
@@ -87,7 +87,7 @@
       <label class="meter-field" appNumberBox>
         <span class="fin-label">{{ 'extra_costs' | translatePipe }}</span>
         <span
-          class="c-input-wrapper"
+          class="c-input-wrapper meter-input"
           [class.invalid]="moneyForm().controls.extraCostAmount.invalid && moneyForm().controls.extraCostAmount.touched"
         >
           @if (!canEditMoney_()) {
@@ -110,7 +110,7 @@
 
       <label class="meter-field">
         <span class="fin-label">{{ 'extra_costs_note' | translatePipe }}</span>
-        <span class="c-input-wrapper">
+        <span class="c-input-wrapper meter-input">
           <input type="text" maxlength="200" [formControl]="moneyForm().controls.extraCostNote" name="extraCostNote" />
         </span>
       </label>
@@ -118,7 +118,7 @@
       <div class="meter-field meter-field--chip">
         <button
           type="button"
-          class="c-chip targets-toggle"
+          class="c-chip c-chip--tap targets-chip"
           [class.teal]="targetsHaveData_()"
           [attr.aria-expanded]="targetsOpen_()"
           (click)="toggleTargets()"
@@ -131,7 +131,7 @@
         <label class="meter-field" appNumberBox>
           <span class="fin-label">{{ 'profit_target_pct' | translatePipe }}</span>
           <span
-            class="c-input-wrapper"
+            class="c-input-wrapper meter-input"
             [class.invalid]="
               moneyForm().controls.profitTargetPct.invalid && moneyForm().controls.profitTargetPct.touched
             "
@@ -153,7 +153,7 @@
         <label class="meter-field" appNumberBox>
           <span class="fin-label">{{ 'safety_margin_pct' | translatePipe }}</span>
           <span
-            class="c-input-wrapper"
+            class="c-input-wrapper meter-input"
             [class.invalid]="
               moneyForm().controls.safetyMarginPct.invalid && moneyForm().controls.safetyMarginPct.touched
             "

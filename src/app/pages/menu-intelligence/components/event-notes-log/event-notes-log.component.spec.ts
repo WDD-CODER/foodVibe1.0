@@ -75,7 +75,8 @@ describe('EventNotesLogComponent', () => {
     expect(el.querySelector('.note-author')?.textContent?.trim()).toBe('נועה')
     store.set([{ ...event, notes: [] }])
     fixture.detectChanges()
-    expect(el.querySelector('.notes-empty')).toBeTruthy()
+    expect(el.querySelector('app-empty-state')).toBeTruthy()
+    expect(el.querySelector('.notes-empty')).toBeNull()
   })
 
   it('adds a note through the pipeline service and clears the box', async () => {
