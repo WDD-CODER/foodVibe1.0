@@ -725,3 +725,8 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A2: Give the model one more try when its answer comes back malformed, inside the same time budget — SHAPE_RETRY_LINE and withShapeReminder, the retry in askTurnModel with the 2000 ms floor, the bad_answer log line with zod paths only, turn and prompt tests — server/routes/ai/frontdesk.js, server/services/frontdesk-prompt.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
 - [ ] A3: Prove the morning's table question still gets a table offer, also after one malformed answer — two cases beside "offers with OK:1 / OTHER" — server/test/frontdesk-tables.test.js
 - [ ] A4: Run every check of this plan and hand Dandan the simulator check — test:server, server lint, log-query; evidence into Execution Notes
+
+### Plan 732 — The assistant's table answers stop failing when the model writes a number as a number
+- [ ] A1: Let the assistant's collected answers hold a number or a yes/no the way the model writes them — catch-all accepts string, number, boolean and keeps them as text — shared/schemas/front-desk/turn-answer.schema.ts, server/generated/schemas/front-desk/turn-answer.schema.js (rebuilt by build:schemas)
+- [ ] A2: Prove a table question with a numeric party size is answered, and that bad values are still refused — the cases of Goals in server/test/frontdesk-turn.test.js — server/test/frontdesk-turn.test.js
+- [ ] A3: Run every check of this plan and record the evidence — test:server, build, log-query; evidence into Execution Notes
