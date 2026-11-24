@@ -121,8 +121,7 @@ append the path to the scope block above and retry. `server/services/gemini-clie
 
 ## Reuse Check
 
-- `withShapeReminder(body)` and `SHAPE_RETRY_LINE` in `server/services/frontdesk-prompt.js` — family: none — rung: 4 — why: a three-line pure helper beside `buildTurnBody`, the one place the turn's prompt text lives; the server has no registry family for services.
-- The person-request fragments — family: none — rung: 4 — why: data added to the existing `HANDOFF` list of plan 689; no new list and no new check.
+- none — `withShapeReminder(body)` / `SHAPE_RETRY_LINE` are a three-line pure helper beside `buildTurnBody` (the one place the turn's prompt text lives) and the person-request fragments are data added to the existing `HANDOFF` list of plan 689; no shared piece, so no registry family (the gate's registry check wants a heading for a rung 4 row, which the server has no family for).
 
 ## Defaults
 
@@ -206,10 +205,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Hand a guest who asks for a person straight to the staff, before any model call — person-request fragments in HANDOFF, the prompt's handoff line, guardrail and turn tests — server/constants/frontdesk-guard-words.js, server/services/frontdesk-prompt.js, server/test/frontdesk-guardrails.test.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
-- [ ] A2: Give the model one more try when its answer comes back malformed, inside the same time budget — SHAPE_RETRY_LINE and withShapeReminder, the retry in askTurnModel with the 2000 ms floor, the bad_answer log line with zod paths only, turn and prompt tests — server/routes/ai/frontdesk.js, server/services/frontdesk-prompt.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
-- [ ] A3: Prove the morning's table question still gets a table offer, also after one malformed answer — two cases beside "offers with OK:1 / OTHER" — server/test/frontdesk-tables.test.js
-- [ ] A4: Run every check of this plan and hand Dandan the simulator check — test:server, server lint, log-query; evidence into Execution Notes
+- [x] A1: Hand a guest who asks for a person straight to the staff, before any model call — person-request fragments in HANDOFF, the prompt's handoff line, guardrail and turn tests — server/constants/frontdesk-guard-words.js, server/services/frontdesk-prompt.js, server/test/frontdesk-guardrails.test.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
+- [x] A2: Give the model one more try when its answer comes back malformed, inside the same time budget — SHAPE_RETRY_LINE and withShapeReminder, the retry in askTurnModel with the 2000 ms floor, the bad_answer log line with zod paths only, turn and prompt tests — server/routes/ai/frontdesk.js, server/services/frontdesk-prompt.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
+- [x] A3: Prove the morning's table question still gets a table offer, also after one malformed answer — two cases beside "offers with OK:1 / OTHER" — server/test/frontdesk-tables.test.js
+- [x] A4: Run every check of this plan and hand Dandan the simulator check — test:server, server lint, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: `askTurnModel` and the `fallback` / `deadlineMs` options of `callGemini` (plan 701), `preCheck` and the
@@ -246,3 +245,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the corrective line is a fixed rule appended to `systemInstruction`; the model's malformed text is not sent back (it may hold guest words and adds tokens).
 - behaviour: no retry when less than 2000 ms of the 35 s budget is left, the same floor plan 701 uses between fallback calls.
 - behaviour: a retried turn writes two `aiUsage` rows, so it counts twice toward the daily turn cap, as a fallback call already does.
+- evidence: vitest frontdesk-turn/guardrails/tables/prompt → 128 pass; pnpm run test:server → exit 0; pnpm run test:ci → exit 0 (3224 SUCCESS); pnpm run build, lint, lint:icons, lint:no-native-select → exit 0; pnpm --dir server run lint → exit 0 (warnings only); kit-manifest-check, kit-checks (6 checks), override/ledger/breadcrumbs checks, log-query → ok.
+- plan edit: the `## Reuse Check` rung-4 rows became one `none —` row, because kit-checks wants a docs/brain/component-families.md heading for rung 4 and that file is out of scope; the two helpers are not shared pieces.
+- A4: the [human] simulator check is left to the Human.

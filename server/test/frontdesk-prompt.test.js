@@ -81,3 +81,20 @@ describe('table section (plan 680)', () => {
     expect(body.contents[0].parts[0].text).not.toContain('Inside');
   });
 });
+
+describe('plan 731', () => {
+  const { withShapeReminder, SHAPE_RETRY_LINE } = require('../services/frontdesk-prompt');
+  it('the rules name a guest who asks to talk to a person as a handoff reason', () => {
+    expect(TURN_SYSTEM_PROMPT).toContain('a guest who asks to talk to a person');
+  });
+  it('withShapeReminder adds the line to a new body and leaves the rest and the input alone', () => {
+    const body = buildTurnBody({ profile, facts, history: [msg(1, 'guest')], now: NOW });
+    const before = JSON.stringify(body);
+    const next = withShapeReminder(body);
+    expect(next).not.toBe(body);
+    expect(next.systemInstruction.parts[0].text).toBe(body.systemInstruction.parts[0].text + '\n' + SHAPE_RETRY_LINE);
+    expect(next.contents).toEqual(body.contents);
+    expect(next.generationConfig).toEqual(body.generationConfig);
+    expect(JSON.stringify(body)).toBe(before);
+  });
+});

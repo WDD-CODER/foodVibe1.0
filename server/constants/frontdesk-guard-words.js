@@ -6,11 +6,13 @@
  */
 const list = items => Object.freeze([...items]);
 
-/** A guest message with one of these goes to a person at once (complaint, refund, allergy emergency). */
+/** A guest message with one of these goes to a person at once (complaint, refund, allergy emergency, a guest asking for a person). */
 const HANDOFF = list([
   'תלונה', 'להתלונן', 'מתלונן', 'שירות גרוע', 'מנהל', 'complaint',
   'החזר כספי', 'זיכוי', 'refund',
   'הרעלה', 'הרעלת מזון', 'אלרגיה חמורה', 'תגובה אלרגית', 'אפיפן', 'בית חולים', 'אמבולנס',
+  'לדבר עם מישהו', 'עם בן אדם', 'אדם אמיתי', 'נציג', 'תעבירו אותי', 'להעביר אותי',
+  'talk to a person', 'talk to someone', 'real person',
 ]);
 
 /** R-05: a promise to come back later. */
