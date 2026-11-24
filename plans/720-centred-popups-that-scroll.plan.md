@@ -193,48 +193,48 @@ line or file this plan names was removed, renamed or rewritten).
 
 **Engines — appended at the end of `src/styles.scss` under `/* ==== Plan 720 — centred popups that scroll ==== */`**
 (logical properties, tokens; nothing above the marker changes; outside any `@layer`, like the engines it overrides)
-- [ ] `:root { --modal-gap: var(--space-4); --modal-max-block: calc(100dvh - 2 * var(--modal-gap) -
+- [x] `:root { --modal-gap: var(--space-4); --modal-max-block: calc(100dvh - 2 * var(--modal-gap) -
   env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - var(--kb-inset, 0px)) }`.
-- [ ] `.c-modal-overlay { align-items: center; justify-content: center; overscroll-behavior: contain }` — centred at every
+- [x] `.c-modal-overlay { align-items: center; justify-content: center; overscroll-behavior: contain }` — centred at every
   width (states the engine value again after the dead `.m-sheet` rule, so nothing can pull a card down).
-- [ ] `.c-modal-card { display: flex; flex-direction: column; max-block-size: var(--modal-max-block); overflow-y: auto;
+- [x] `.c-modal-card { display: flex; flex-direction: column; max-block-size: var(--modal-max-block); overflow-y: auto;
   overscroll-behavior: contain }` — every width (this supersedes the phone-only `max-height` at `:822`; same
   specificity, later in the file). `.c-modal-card > * { flex-shrink: 0 }` keeps the title, a custom head and the action
   row at their height.
-- [ ] `.c-modal-card > .c-modal-body { flex: 1 1 auto; min-block-size: 0; overflow-y: auto; overscroll-behavior:
+- [x] `.c-modal-card > .c-modal-body { flex: 1 1 auto; min-block-size: 0; overflow-y: auto; overscroll-behavior:
   contain }` — the body takes the room that is left and scrolls; the title (`h3`) above it and `.c-modal-actions`
   below it stay in view.
-- [ ] `body.kb-open .c-modal-card { max-block-size: var(--modal-max-block) }` — the keyboard rule at `:2074` reads the
+- [x] `body.kb-open .c-modal-card { max-block-size: var(--modal-max-block) }` — the keyboard rule at `:2074` reads the
   same token (it already subtracts `--kb-inset`).
-- [ ] No rule for `.m-sheet`, `.m-sheet-card` or `.inline-edit-panel.as-modal` is written: once the shell stops setting
+- [x] No rule for `.m-sheet`, `.m-sheet-card` or `.inline-edit-panel.as-modal` is written: once the shell stops setting
   the first two and nothing sets the third, they have no user. They stay in the file (append-only hotspot) and the
   guard's allow list names them with that reason.
 
 **Shared shell**
-- [ ] `modal-shell.component.ts`: remove `readonly sheet = input(false)` and its doc comment (`:72-73`).
-- [ ] `modal-shell.component.html`: remove `[class.m-sheet]="sheet()"` (`:4`) and `[class.m-sheet-card]="sheet()"` (`:15`).
-- [ ] `modal-shell.component.spec.ts`: drop `sheet_` from the test host; replace the case at `:108-116` and add the two
+- [x] `modal-shell.component.ts`: remove `readonly sheet = input(false)` and its doc comment (`:72-73`).
+- [x] `modal-shell.component.html`: remove `[class.m-sheet]="sheet()"` (`:4`) and `[class.m-sheet-card]="sheet()"` (`:15`).
+- [x] `modal-shell.component.spec.ts`: drop `sheet_` from the test host; replace the case at `:108-116` and add the two
   measuring cases named in Done when (heading + 60-line body + actions; 60 lines without a body). The host renders the
   shell at `size="md"`; the measure happens after `fixture.detectChanges()` and `await fixture.whenStable()`.
 
 **The 19 bindings** — remove the attribute `[sheet]="true"` (and only it) from each line listed in the Problem
 Statement. Nothing else in those templates changes.
-- [ ] `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts:281`: `sheetCard` becomes `root().querySelector('app-modal-shell .c-modal-card')`;
+- [x] `src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts:281`: `sheetCard` becomes `root().querySelector('app-modal-shell .c-modal-card')`;
   the describe title becomes `'pricing popup on a phone (plan 487, centred since 720)'`; its cases keep their checks.
 
 **Guard** — `scripts/lib/modal-guard.mjs`, Node built-ins plus `parseStylesheet`; single quotes, no semicolons.
-- [ ] `export function modalFindings(files, { root = process.cwd(), allow = [], cardClasses = [] } = {})` →
+- [x] `export function modalFindings(files, { root = process.cwd(), allow = [], cardClasses = [] } = {})` →
   `[{ file, line, rule, selector, text }]` sorted by file and line; a missing file throws. `.html` files give
   `sheet-binding` findings and add every `cardClass="…"` token of an `<app-modal-shell` to the card class set
   (together with `c-modal-card`, `c-modal-body` and the `cardClasses` option); `.scss` files give `bottom-sheet`,
   `top-sheet` and `modal-no-scroll` findings with the rules named in Done when. A block's declarations are its own
   (not its children's); a block inside `@media print` is skipped; `!important` is ignored when reading a value.
-- [ ] `allow` entries `{ rule, file, selector, why }` drop findings whose rule, file and selector match exactly; a
+- [x] `allow` entries `{ rule, file, selector, why }` drop findings whose rule, file and selector match exactly; a
   missing or empty `why` throws.
-- [ ] `scripts/test/modal-guard.test.mjs`: one fixture per rule (positive and negative): the pricing bar
+- [x] `scripts/test/modal-guard.test.mjs`: one fixture per rule (positive and negative): the pricing bar
   (`position: fixed; inset-inline: 0; inset-block-end: 0` with no radius) and the header's bottom tab bar are **not**
   findings; `.c-modal-overlay[popover] { overflow: visible }` is **not** a `modal-no-scroll` finding (overlay, not card).
-- [ ] `scripts/test/style-720.test.mjs` holds the allow list, each entry with its reason:
+- [x] `scripts/test/style-720.test.mjs` holds the allow list, each entry with its reason:
   - `bottom-sheet` · `src/styles.scss` · `.m-sheet` and `.m-sheet-card` — "retired by plan 720: no template sets the
     class; the hotspot is append-only".
   - `bottom-sheet` · `src/styles.scss` · the `.inline-edit-panel.as-modal` phone block — "dead since plan 711: nothing
@@ -252,7 +252,7 @@ Statement. Nothing else in those templates changes.
   The worker runs the guard once, compares its output with this list and records the exact selectors it printed.
 
 **Registry and maps**
-- [ ] `docs/brain/component-families.md` `modal-shell`: replace the "Phone bottom sheet" bullet with "Always centred
+- [x] `docs/brain/component-families.md` `modal-shell`: replace the "Phone bottom sheet" bullet with "Always centred
   (plan 720): no bottom sheet at any width — the shell has no `sheet` input. Height: never taller than the window
   (`--modal-max-block`: `dvh`, safe areas, keyboard). Put the content as title → `.c-modal-body` → `.c-modal-actions`
   straight inside the shell; the body scrolls and the title and actions stay. Content without a `.c-modal-body` makes the
@@ -261,17 +261,17 @@ Statement. Nothing else in those templates changes.
   `modal-no-scroll`), run by `scripts/test/style-720.test.mjs`." `floor-plan-joins-sheet` and the `table-sheet`,
   `waitlist-drawer`, new-booking / walk-in / approve-table entries: "`app-modal-shell [sheet]`" becomes
   "`app-modal-shell`" (centred).
-- [ ] `src/app/shared/breadcrumbs.md` `modal-shell/` row: add "centred at every width, body scrolls (plan 720)".
+- [x] `src/app/shared/breadcrumbs.md` `modal-shell/` row: add "centred at every width, body scrolls (plan 720)".
   `src/app/pages/breadcrumbs.md`: only if a row names a "bottom sheet" for a page listed here — reword to "popup".
-- [ ] `docs/brain/inventory.md` regenerated with `node scripts/inventory.mjs` (never by hand).
-- [ ] `docs/workflow-kit/manifest.json`: entries for `scripts/lib/modal-guard.mjs`, `scripts/test/modal-guard.test.mjs`,
+- [x] `docs/brain/inventory.md` regenerated with `node scripts/inventory.mjs` (never by hand).
+- [x] `docs/workflow-kit/manifest.json`: entries for `scripts/lib/modal-guard.mjs`, `scripts/test/modal-guard.test.mjs`,
   `scripts/test/style-720.test.mjs` (`tier: project`, `action: stay`, refs and notes like the plan 703 entries).
 
 ### Should Have (P1)
-- [ ] none
+- [x] none
 
 ### Nice to Have (P2)
-- [ ] none
+- [x] none
 
 ## UI/UX Notes
 - Hebrew RTL; logical properties only; no width in a media query.
@@ -283,12 +283,12 @@ Statement. Nothing else in those templates changes.
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the guard that finds bottom sheets, top sheets, sheet bindings and popup cards that stop scrolling, with its fixture test — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs
-- [ ] A2: Append the centred, height-limited, scrolling popup rules under their own marker — src/styles.scss
-- [ ] A3: Take the bottom-sheet switch out of the shared popup frame and prove a tall popup fits the window — src/app/shared/modal-shell/modal-shell.component.ts, .html, .spec.ts
-- [ ] A4: Remove the switch from the 19 popups that asked for it and update the pricing spec — the 17 templates in the scope, src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
-- [ ] A5: Lock it with the repo scan, the engine values and the append-only check — scripts/test/style-720.test.mjs
-- [ ] A6: Record the rule in the registry and the folder maps, regenerate the inventory, register the new scripts — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/inventory.md, docs/workflow-kit/manifest.json
+- [x] A1: Write the guard that finds bottom sheets, top sheets, sheet bindings and popup cards that stop scrolling, with its fixture test — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs
+- [x] A2: Append the centred, height-limited, scrolling popup rules under their own marker — src/styles.scss
+- [x] A3: Take the bottom-sheet switch out of the shared popup frame and prove a tall popup fits the window — src/app/shared/modal-shell/modal-shell.component.ts, .html, .spec.ts
+- [x] A4: Remove the switch from the 19 popups that asked for it and update the pricing spec — the 17 templates in the scope, src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.spec.ts
+- [x] A5: Lock it with the repo scan, the engine values and the append-only check — scripts/test/style-720.test.mjs
+- [x] A6: Record the rule in the registry and the folder maps, regenerate the inventory, register the new scripts — docs/brain/component-families.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/inventory.md, docs/workflow-kit/manifest.json
 
 ## Technical Considerations
 - Dependencies: none.
@@ -324,3 +324,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the `sheet` input is removed, not kept as a no-op, so a new `[sheet]` binding fails the build as well as the guard.
 - behaviour: the guard lives in its own file (`modal-guard.mjs`), not in `style-guard.mjs`, so the 704–718 tests keep their results.
 - proposed default (for the Human; this plan does not write `_shared/product-defaults.md`): `centred-scrolling-popup` — "Every popup opens in the middle of the screen at every size, never taller than the screen, and its content scrolls; no popup slides up from the bottom" — how: `app-modal-shell` (family `modal-shell`); check: `scripts/test/style-720.test.mjs`. Turn on with `default yes centred-scrolling-popup`.
+- Evidence (builder): pnpm run build → 0; pnpm run lint → 0 (0 errors); pnpm run test:ci → 0 (3216 SUCCESS); modal-guard, style-720, style-703 node tests → pass 18; reuse-lint --check-registry → 0 after prepare; breadcrumbs-check, lint:reuse, lint:icons, plan-ledger-check, kit-manifest-check → 0.
+- scope: style-703/style-720 base ref list now starts with `origin/orch/rs-modals` (the run branch), because `origin/orch/rs-style` does not exist and `origin/main` differs from staging.
+- test:scripts fails on `scripts/test/style-711.test.mjs:51` ("the equipment phone panel is the shared popup sheet" expects `<app-modal-shell [sheet]="true"`): that file is outside the scope and needs `[sheet]` dropped from its regex. Also "the launcher starts the installed server…" fails (MCP launcher, environment, unrelated).

@@ -1,10 +1,4 @@
-<app-modal-shell
-  size="md"
-  titleKey="ibx_fix_title"
-  [sheet]="true"
-  [hasChanges]="hasChanges_()"
-  (dismissed)="closed.emit()"
->
+<app-modal-shell size="md" titleKey="ibx_fix_title" [hasChanges]="hasChanges_()" (dismissed)="closed.emit()">
   <div class="fx" dir="rtl" data-testid="fix-dialog">
     <blockquote class="fx-quote" data-testid="fix-quote">{{ quote() }}</blockquote>
     <app-form-field [label]="'ibx_fix_answer_label' | translatePipe" forId="fx-answer">

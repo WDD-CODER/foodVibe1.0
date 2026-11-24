@@ -3201,3 +3201,43 @@ input[type='number']::-webkit-outer-spin-button {
   font-size: var(--fs-base);
   color: var(--color-text-muted);
 }
+
+/* ==== Plan 720 — centred popups that scroll ==== */
+// Every app-modal-shell popup: centred at every width, never taller than the window (dvh, safe areas, on-screen
+// keyboard), title and actions stay, the .c-modal-body scrolls. Unlayered, like the engines it overrides.
+:root {
+  --modal-gap: var(--space-4);
+  --modal-max-block: calc(
+    100dvh - 2 * var(--modal-gap) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) -
+      var(--kb-inset, 0px)
+  );
+}
+
+.c-modal-overlay {
+  align-items: center;
+  justify-content: center;
+  overscroll-behavior: contain;
+}
+
+.c-modal-card {
+  display: flex;
+  flex-direction: column;
+  max-block-size: var(--modal-max-block);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.c-modal-card > * {
+  flex-shrink: 0;
+}
+
+.c-modal-card > .c-modal-body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+body.kb-open .c-modal-card {
+  max-block-size: var(--modal-max-block);
+}
