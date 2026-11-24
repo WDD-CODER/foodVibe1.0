@@ -154,7 +154,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `assistantFailureKey(reason)` and `showAssistantFailure(conversation)` in `src/app/core/utils/assistant-failure.util.ts` — family: none — rung: 4 — why: two pure functions shared by the inbox and the simulator (two pages, so not page-local); no util family covers assistant states.
-- The staff note under the thread (`.ai-failed-note`) — family: feedback — rung: 1 — why: a `role="status"` line with the registered `alert-triangle` icon and the text colour tokens, the inline-notice pattern of the floor-plan notice; no new `.c-*` class.
+- The staff note under the thread (`.ai-failed-note` in the simulator, `.ibx-ai-failed-note` in the inbox) — family: feedback — rung: 1 — why: a `role="status"` line with the registered `alert-triangle` icon and the text colour tokens, the inline-notice pattern of the floor-plan notice; no new `.c-*` class.
 - Reason lines of the suggestion bar — family: none — rung: 4 — why: one more input (`failKey`) on the inbox's page-local `app-suggestion-bar` (plan 682); no new piece.
 - The small map before a time is chosen — family: none — rung: 4 — why: the same `app-floor-map` the dialog already uses, shown under a wider condition; no new piece.
 
