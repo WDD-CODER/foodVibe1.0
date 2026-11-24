@@ -27,7 +27,8 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
    (`x.spec.ts` next to `x.ts`, or in a `__tests__/` folder there) is in scope: write it, never ask. Another file outside
    it that is truly needed: add it to the scope block and log `scope extended: <path> — <why>` in `## Execution Notes`.
    Under `scripts/run-plans.mjs` the gate checks the scope as the run branch holds it, so a scope you extend yourself
-   still fails there: return `ESCALATE` with the path and why instead.
+   still fails there: return `ESCALATE` with the path and why instead. An in-scope `.claude/` file refused as "a sensitive
+   file": write the whole file to `.kit/staged-claude/<its path, each .claude as _claude>` (the run puts it in place); no ESCALATE.
    **Manifest:** when the project has a kit manifest (the manifest.json under docs/workflow-kit), the per-plan gate runs `node scripts/kit-manifest-check.mjs`;
    a file you add under the manifest inventory (scripts, agents, commands, skills, `docs/brain/**`, `docs/agent/**`,
    `.github/workflows`) or an ADR needs its manifest entry in the same branch, or the gate sends it back as `unclassified: <path>`.
@@ -41,7 +42,7 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
    <how>`; when the plan cannot be done without that removal, return `ESCALATE` instead.
 4. Write real tests for the plan's `[auto]` Done-when items. Run every `CHECKS` entry (the `node …` ones too: seconds)
    after your last commit; all must pass before you return `built`, and each is in `checksRun`. A check that fails for an environment reason (network, a temp folder in use)
-   is rerun once, and you say so.
+   is rerun once, and you say so. With `GATE_SUITES`, never run those whole suites (the gate does): run `FOCUSED_TESTS` and each test file it prints, one file at a time with the project's runner.
 5. For each `[ui]` Done-when item (`docs/agent/job-validation.md` Tier 1b) write **one short end-to-end test** with
    the project's e2e command (`commands.e2e`; Playwright when the project has none): open the item's page, do its one
    action, assert the quoted text or element, save one screenshot under `screens/` named after the plan and item

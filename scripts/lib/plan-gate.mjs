@@ -24,6 +24,7 @@ import { tmpdir } from 'node:os'
 import { spawn, spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 import { extractScopeGlobs, isSiblingTest } from './plan-scope.mjs'
+import { holdHeavyLock } from './heavy-lock.mjs'
 
 /** The gate line of the trusted scope check (run in this process from the main folder's scripts, never the branch's). */
 export const scopeMarker = (base, plan) => `scope-check (kit copy) --diff=${base} --plan=${plan}`
@@ -241,7 +242,19 @@ export function isCheapCheck(command, builtins = {}) {
  * a fix round see every failing check at once. `onResult(result)` is called after each command (the caller's calls.csv);
  * `onStart({ command, index, total })` before each one (index from 1; a retry keeps its index), for a live view.
  */
-export async function runGate({ folder, commands: given, timeoutMin = 15, receipt = true, onResult = null, onStart = null, env = process.env, builtins = {}, beforeRetry = null, cheapFirst = false, stopOnCheap = false }) {
+export async function runGate(opts) {
+  // One heavy job on this PC at a time (lib/heavy-lock.mjs): a gate with any slow check waits its turn; a gate of only
+  // seconds-long checks does not. The commands it starts carry KIT_HEAVY_LOCK_HELD, so they never wait for it.
+  const heavy = (opts.commands ?? []).some((c) => !isCheapCheck(c, opts.builtins ?? {}))
+  const say = (l) => process.stdout.write(`${l}\n`)
+  const release = heavy ? await holdHeavyLock(opts.lockLabel ?? `gate in ${String(opts.folder).split(/[\\/]/).pop()}`, { say }) : () => {}
+  try {
+    const held = process.env.KIT_HEAVY_LOCK_HELD
+    return await runGateCommands({ ...opts, env: held ? { ...(opts.env ?? process.env), KIT_HEAVY_LOCK_HELD: held } : (opts.env ?? process.env) })
+  } finally { release() }
+}
+
+async function runGateCommands({ folder, commands: given, timeoutMin = 15, receipt = true, onResult = null, onStart = null, env = process.env, builtins = {}, beforeRetry = null, cheapFirst = false, stopOnCheap = false }) {
   const results = []
   const flaky = []
   // cheapFirst: the seconds-long checks (isCheapCheck) run before the rest, in their order; stopOnCheap: a cheap check

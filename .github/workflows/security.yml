@@ -4,6 +4,18 @@ on:
   pull_request:
   push:
     branches: [main]
+    # A docs-only push has nothing to audit. Same paths as the docs-only list in ci.yml (Detect app/code changes);
+    # change both together. pull_request and schedule always run.
+    paths-ignore:
+      - 'docs/**'
+      - 'plans/**'
+      - 'sessions/**'
+      - 'notes/**'
+      - 'bugs/**'
+      - 'archive/**'
+      - '.claude/**'
+      - '.cursor/**'
+      - '**/*.md'
   schedule:
     - cron: '0 6 * * 1'
 
