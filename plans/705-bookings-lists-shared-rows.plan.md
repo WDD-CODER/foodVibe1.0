@@ -93,6 +93,7 @@ append the path to the scope block above and retry.
 - Sheet title and close — family: modal-shell — rung: 1 — why: `titleKey` on `app-modal-shell` plus a `.c-icon-btn` close.
 - Loading — family: feedback — rung: 1 — why: `app-loader`.
 - Week-day and drawer empties — family: empty-state — rung: 1 — why: `app-empty-state [compact]="true"`.
+- Local layout hooks (a column template or a flex gap on the shared list, no new look): `.bk-list`, `.sl__rows--short`, `.wl__close`, `.wl-who`, `.wl-pos`, `.wl-name`, `.wl-meta`, `.wl-over`, `.wl-actions`, `.wl-text`, `.c-list-body-cell`.
 - none new.
 
 ## Defaults
@@ -152,11 +153,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Draw the day and week agenda as one-line rows in the in-panel list, with a loader while it loads and a small empty state for an empty day — src/app/pages/bookings/bookings.page.html, .scss, .ts
-- [ ] A2: Prove the agenda rows, loader, empty day and seated action — src/app/pages/bookings/bookings.page.spec.ts
-- [ ] A3: Give the waiting list and the table sheet the shell's title and an icon close, and draw the waiting rows as shared rows — src/app/pages/bookings/components/waitlist-drawer/*, src/app/pages/bookings/components/table-sheet/*
-- [ ] A4: Give the arriving and not-assigned lists real list cells and a small empty state — src/app/pages/bookings/components/service-lists/*
-- [ ] A5: Lock the bookings screen on the shared pieces and tokens — scripts/test/style-705.test.mjs
+- [x] A1: Draw the day and week agenda as one-line rows in the in-panel list, with a loader while it loads and a small empty state for an empty day — src/app/pages/bookings/bookings.page.html, .scss, .ts
+- [x] A2: Prove the agenda rows, loader, empty day and seated action — src/app/pages/bookings/bookings.page.spec.ts
+- [x] A3: Give the waiting list and the table sheet the shell's title and an icon close, and draw the waiting rows as shared rows — src/app/pages/bookings/components/waitlist-drawer/*, src/app/pages/bookings/components/table-sheet/*
+- [x] A4: Give the arriving and not-assigned lists real list cells and a small empty state — src/app/pages/bookings/components/service-lists/*
+- [x] A5: Lock the bookings screen on the shared pieces and tokens — scripts/test/style-705.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-705.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -180,3 +181,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: agenda rows are grouped by time with a heading row instead of a time column beside cards — the shared row has one line, the time heading keeps the "who comes at 19:00" reading.
 - behaviour: the action chips keep their order and conditions; on a phone they may wrap inside the actions cell, the rest of the row stays on one line.
+- behaviour: the table sheet title stays a plain `<p id="tsh-title">` (not the shell's `titleKey`) because it is built from `tsh_title` with the table number filled in, which `titleKey` cannot do — reverse: add a number slot to the shell.
+- Evidence: pnpm run build → 0; pnpm run test:ci → 0 (3169 SUCCESS); pnpm run lint → 0 (0 errors); lint:icons, lint:no-native-select, lint:reuse, test:scripts → 0; kit-manifest-check → ok (457 classified); scope-check → ok; kit-checks → 0 findings (debt style-duplicate-class 177→178 names other plans' files).
+- seen: kit-checks debt `style-duplicate-class 177 → 178` names equipment-list, menu-library-list, recipe-ingredients-table and trash.page scss, none in this plan.
+- scope extended: none.

@@ -88,6 +88,18 @@ describe('WaitlistDrawerComponent (plan 673)', () => {
     flush()
   }))
 
+  it('draws three waiting parties as three shared rows, with the shell title and an icon close (plan 705)', fakeAsync(() => {
+    const out = setup([entry('a'), entry('b'), entry('c')])
+    expect(el().querySelectorAll('.c-list-row').length).toBe(3)
+    expect(el().querySelector('h3')?.textContent).toContain('wl_title')
+    const close = byId('wl-close') as HTMLButtonElement
+    expect(close.classList.contains('c-icon-btn')).toBeTrue()
+    close.click()
+    expect(out.closed).toHaveBeenCalledTimes(1)
+    fixture.destroy()
+    flush()
+  }))
+
   it('flags a wait that passed the quoted minutes', fakeAsync(() => {
     setup([entry('a', { joinedAt: NOW - 20 * MIN, quotedMinutes: 15 }), entry('b', { quotedMinutes: 15 })])
     expect(all('wl-over').length).toBe(1)

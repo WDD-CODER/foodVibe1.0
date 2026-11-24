@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { FloorViewComponent } from './components/floor-view/floor-view.component'
 import { BookingDataService } from '@services/booking-data.service'
@@ -51,6 +52,7 @@ export function weekStartIso(iso: string): string {
     TranslatePipe,
     PageHeaderComponent,
     EmptyStateComponent,
+    LoaderComponent,
     FloorViewComponent
   ],
   templateUrl: './bookings.page.html',

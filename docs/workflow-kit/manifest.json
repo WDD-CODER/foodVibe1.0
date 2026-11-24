@@ -4207,6 +4207,16 @@
       "notes": "Plan 704: the menu library and the trash sit on the shared list page and pass the style guard."
     },
     {
+      "path": "scripts/test/style-705.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 705: the bookings agenda, waiting list, table sheet and service lists sit on the shared rows and pass the style guard."
+    },
+    {
       "path": "scripts/test/breakpoints-no-literals.test.mjs",
       "tier": "project",
       "action": "stay",

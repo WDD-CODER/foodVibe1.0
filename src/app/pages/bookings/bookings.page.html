@@ -1,4 +1,4 @@
-<section class="bk-page" dir="rtl">
+<section class="c-page" dir="rtl">
   <app-page-header titleKey="fd_chip_bookings" />
 
   <div class="bk-bar">
@@ -50,28 +50,33 @@
 
   @if (view_() === 'floor') {
   <app-floor-view [date]="date_()" [at]="at_()" (atChange)="setAt($event)" />
-  } @else if (!isLoading_()) { @if (isEmpty_() && view_() === 'day') {
+  } @else if (isLoading_()) {
+  <app-loader />
+  } @else { @if (isEmpty_() && view_() === 'day') {
   <app-empty-state messageKey="bk_empty_day" icon="clipboard-check" />
   } @else { @for (section of sections_(); track section.date) {
   <section class="bk-day" [attr.data-date]="section.date">
     @if (view_() === 'week') {
     <h2 class="bk-day-title">{{ dayName(section.date) }} · {{ dmy(section.date) }}</h2>
     } @if (section.groups.length === 0 && view_() === 'week') {
-    <p class="bk-none">{{ 'bk_empty_day' | translatePipe }}</p>
-    } @for (group of section.groups; track group.time) {
-    <div class="bk-group">
+    <app-empty-state [compact]="true" messageKey="bk_empty_day" icon="clipboard-check" />
+    } @if (section.groups.length > 0) {
+    <div class="c-glass-panel">
+      @for (group of section.groups; track group.time) {
       <span class="bk-time" dir="ltr">{{ group.time }}</span>
-      <div class="bk-rows">
+      <ul class="c-list c-list--plain bk-list" role="list">
         @for (b of group.bookings; track b._id) {
-        <article class="bk-row c-glass-card" data-testid="booking-row" [attr.data-status]="b.status">
-          <div class="bk-main">
-            <a class="bk-name" [routerLink]="['/clients', b.clientId]">{{ b.guestName }}</a>
-            <span class="bk-meta">{{ b.partySize }} · {{ 'fd_kind_' + b.kind | translatePipe }}</span>
+        <li class="c-list-row" role="listitem" data-testid="booking-row" [attr.data-status]="b.status">
+          <span class="c-list-body-cell">
+            <a class="c-row-link" [routerLink]="['/clients', b.clientId]">{{ b.guestName }}</a>
+          </span>
+          <span class="c-list-body-cell bk-meta">{{ b.partySize }} · {{ 'fd_kind_' + b.kind | translatePipe }}</span>
+          <span class="c-list-body-cell">
             <span class="c-chip--tag c-chip--sm" data-testid="booking-status"
               >{{ 'bk_status_' + b.status | translatePipe }}</span
             >
-          </div>
-          <div class="bk-actions">
+          </span>
+          <span class="c-list-body-cell c-col-actions bk-actions">
             @if (b.status === 'confirmed') {
             <button
               type="button"
@@ -80,7 +85,7 @@
               [disabled]="busyId_() === b._id"
               (click)="setStatus(b, 'seated')"
             >
-              <lucide-icon name="user-check" [size]="15"></lucide-icon>
+              <lucide-icon name="user-check" [size]="16"></lucide-icon>
               {{ 'bk_seated' | translatePipe }}
             </button>
             } @if (b.status === 'seated') {
@@ -91,7 +96,7 @@
               [disabled]="busyId_() === b._id"
               (click)="setStatus(b, 'finished')"
             >
-              <lucide-icon name="circle-check" [size]="15"></lucide-icon>
+              <lucide-icon name="circle-check" [size]="16"></lucide-icon>
               {{ 'bk_finished' | translatePipe }}
             </button>
             } @if (canNoShow(b)) {
@@ -102,7 +107,7 @@
               [disabled]="busyId_() === b._id"
               (click)="setStatus(b, 'no_show')"
             >
-              <lucide-icon name="circle-slash" [size]="15"></lucide-icon>
+              <lucide-icon name="circle-slash" [size]="16"></lucide-icon>
               {{ 'bk_no_show' | translatePipe }}
             </button>
             } @if (canCancel(b)) {
@@ -113,14 +118,15 @@
               [disabled]="busyId_() === b._id"
               (click)="setStatus(b, 'cancelled')"
             >
-              <lucide-icon name="circle-x" [size]="15"></lucide-icon>
+              <lucide-icon name="circle-x" [size]="16"></lucide-icon>
               {{ 'bk_cancel' | translatePipe }}
             </button>
             }
-          </div>
-        </article>
+          </span>
+        </li>
         }
-      </div>
+      </ul>
+      }
     </div>
     }
   </section>
