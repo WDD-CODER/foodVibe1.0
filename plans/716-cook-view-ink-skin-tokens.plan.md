@@ -76,6 +76,7 @@ append the path to the scope block above and retry.
 - Empty states — family: empty-state — rung: 1 — why: `app-empty-state` (page empty with CTA; compact for no preparations / no steps).
 - Ink set (`cv-*` chips, pills, buttons) — family: chip — rung: 1 — why: kept on purpose by the registry; only their values move to tokens.
 - `.cv-pane` surface — family: engine-classes — rung: 1 — why: values from the `.c-glass-panel` tokens (`--bg-glass-strong`, `--border-glass`, `--radius-lg`, `--shadow-glass`) — the class stays because the ink skin overrides its background in dark sections.
+- `.cv-no-recipe` — family: empty-state — rung: 1 — why: layout-only wrapper (column, centred, gap) that stacks `app-empty-state` and the recent-recipe chips; the picture is the shared empty state.
 - none new.
 
 ## Defaults
@@ -120,10 +121,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show the cook view's three empty cases with the shared empty state, keeping the recent recipes — src/app/pages/cook-view/cook-view.page.html, .ts, .spec.ts
-- [ ] A2: Move every value of the ink stylesheet onto the shared tokens and logical properties without changing the layout — src/app/pages/cook-view/cook-view.page.scss
-- [ ] A3: Bring the icons onto the four shared sizes — src/app/pages/cook-view/cook-view.page.html
-- [ ] A4: Lock the page with the style guard — scripts/test/style-716.test.mjs
+- [x] A1: Show the cook view's three empty cases with the shared empty state, keeping the recent recipes — src/app/pages/cook-view/cook-view.page.html, .ts, .spec.ts
+- [x] A2: Move every value of the ink stylesheet onto the shared tokens and logical properties without changing the layout — src/app/pages/cook-view/cook-view.page.scss
+- [x] A3: Bring the icons onto the four shared sizes — src/app/pages/cook-view/cook-view.page.html
+- [x] A4: Lock the page with the style guard — scripts/test/style-716.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-716.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -144,4 +145,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - behaviour: the ink skin, headers, menu and stepper keep their look and behaviour; only values move to tokens.
+- A1–A4 done; evidence: pnpm run build 0, lint 0 (warnings only), test:ci 3203 SUCCESS, test:scripts 0, lint:icons/reuse 0.
+- behaviour: the five cook-view inputs (cv-amount-input, cv-clock-input) stay ink-styled, so the style test allows rule bare-input for that file — reverse: give them c-input classes.
+- behaviour: three shadows with no token (the red alert ring, the grow pulse) became page custom properties `--cv-alert-ring`, `--cv-grow-from`, `--cv-grow-to` on :host; look unchanged — reverse: replace with --shadow-focus.
 - behaviour: radii and sizes snap to the nearest token (e.g. 14px → 0.875rem `--radius-md` is the same; 11px → `--radius-md` is 3px rounder).

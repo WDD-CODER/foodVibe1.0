@@ -28,6 +28,7 @@ import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stam
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { RecipeWorkflowComponent } from '@pages/recipe-builder/components/recipe-workflow/recipe-workflow.component'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe'
@@ -67,6 +68,7 @@ const MULTIPLIER_CHIPS = [
     TranslatePipe,
     RecipeWorkflowComponent,
     LoaderComponent,
+    EmptyStateComponent,
     CustomSelectComponent,
     FormatQuantityPipe,
     ExportPreviewComponent,
@@ -642,6 +644,10 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.isEditMode_.set(false)
       this.unitOverrides_.set({})
     }
+  }
+
+  protected goToRecipeBook(): void {
+    void this.router.navigate(['/recipe-book'])
   }
 
   protected onApproveStamp(): void {
