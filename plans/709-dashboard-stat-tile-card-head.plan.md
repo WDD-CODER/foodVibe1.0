@@ -60,6 +60,7 @@ src/app/pages/dashboard/**
 src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.spec.ts
 src/app/pages/dashboard/components/business-performance/business-performance.component.spec.ts
 scripts/test/style-709.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
