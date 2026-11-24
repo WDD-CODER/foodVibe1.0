@@ -97,6 +97,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`, the stock-count popover (plan 658).
 - Lint (plan 718): rule `own-dialog-role` warns on a new `role="dialog"` in a template outside those pieces.
 
+### modal-guard — the popup rules checked by a script
+
+- Status: stable (plan 720)
+- Use: `scripts/lib/modal-guard.mjs` (`modalFindings`), run by `scripts/test/style-720.test.mjs`.
+- When: changing a popup template or style; it flags bottom sheets, a `sheet` binding and a popup that cannot scroll.
+
 ### modal-controller — open a popup and get its answer
 
 - Status: converged (plan 451)
@@ -258,6 +264,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Blocked but explained (plan 699): .c-icon-btn[aria-disabled='true'] in src/styles.scss looks like a disabled .c-icon-btn (faded, no hover spin) yet still takes hover, focus and tap, so its `[appTip]` reason shows (family tooltip).
 - Floor plan colours (plan 699): Zone and joined colour tokens --color-zone-0, --color-zone-1, --color-zone-2, --color-zone-3, --color-zone-4, --color-zone-5, --color-zone-6, --color-zone-7, --color-floor-joined — an area's palette index n is `var(--color-zone-n)` (family floor-map); the joined-table border is never in the palette.
 - Style pieces (plan 703, appended at the end of `src/styles.scss`; shown on `/dev/catalog` → style-pieces): `.c-page` / `.c-page--narrow` (page frame, `--page-max-content` 72rem, `--page-max-narrow` 48rem, `--page-gutter`), `.c-list` (+ `--plain`, `.c-list-row--link`, `.c-row-link`), `.c-stat-tile` (+ `--hero`; parts `__top`, `__icon`, `__label`, `__value`, `__note`), `.c-card-head` (+ `__icon`, `__title`, `__end`), `.c-form-page`, `.c-table` (token values; `.c-table--compact`), `.c-empty-state--compact`.
+- Popup height (plan 720): --modal-gap, --modal-max-block (tokens) in `src/styles.scss` cap every `.c-modal-card`; see modal-shell.
 - Page width rule (plan 703): a page inside `app-list-shell` is full width; any other page uses `.c-page` (72rem) or `.c-page--narrow` (48rem, forms and detail pages); a page never sets its own max width.
 - Icon sizes (plan 703): 14 meta, 16 buttons / chips / row actions, 18 header and primary buttons, 24+ only empty states and heroes.
 - Token mapping (plan 703): font-size ≤0.75rem→`--fs-xs`, 0.8–0.8125→`--fs-sm`, 0.84–0.95→`--fs-base`, 1–1.05→`--fs-md`, 1.1–1.3→`--fs-lg`, 1.4–1.6→`--fs-xl`, 1.75→`--fs-2xl`, ≥2→`--fs-3xl`; weight 400→`--fw-regular`, 500→`--fw-medium`, 600→`--fw-semibold`, 700/bold→`--fw-bold`, 800→`--fw-extrabold`; radius ≤4px→`--radius-xs`, 5–7px→`--radius-sm`, 8–16px→`--radius-md`, 17–24px→`--radius-lg`, 25–28px→`--radius-xl`, 50% / 999px→`--radius-full`; a literal shadow→`--shadow-card` (raised) or `--shadow-glass` (flat); a tint with no token→`color-mix(in srgb, var(<nearest colour token>) N%, transparent)` with the same alpha; spacing on the scale→`--space-*`; off-scale spacing (0.375rem, 0.625rem, 0.875rem…) may stay. `scripts/lib/style-guard.mjs` (`styleFindings`) checks a set of files against these rules.

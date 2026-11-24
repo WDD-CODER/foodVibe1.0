@@ -48,6 +48,6 @@ test('the old local classes are gone', () => {
 
 test('the equipment phone panel is the shared popup sheet', () => {
   const html = readFileSync('src/app/pages/equipment/components/equipment-list/equipment-list.component.html', 'utf8')
-  assert.match(html, /<app-modal-shell\s+\[sheet\]="true"/)
+  assert.match(html, /<app-modal-shell\s+size="md"/)
   assert.ok(!html.includes('c-modal-overlay'))
 })
