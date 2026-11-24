@@ -62,6 +62,7 @@ src/app/pages/inbox/inbox.page.ts
 src/app/pages/inbox/inbox.page.spec.ts
 src/app/pages/inbox/components/reply-box/reply-box.component.scss
 scripts/test/style-706.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
