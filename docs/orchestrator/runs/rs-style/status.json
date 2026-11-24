@@ -1,0 +1,3162 @@
+{
+  "run": "rs-style",
+  "branch": "orch/rs-style",
+  "base": "main",
+  "startedAt": "2026-11-24T01:23:16.414Z",
+  "mainShaAtStart": "54f0a65accb1b321f1e052eb7bf9e60e1ebcb6e7",
+  "plans": {
+    "703": {
+      "nnn": "703",
+      "title": "Shared style pieces: page widths, in-panel list, stat tile, card head, form page, table tokens and a style guard",
+      "branch": "feat/703-shared-style-pieces",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T01:26:50.612Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T01:42:04.137Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T01:47:05.392Z"
+        }
+      },
+      "humanItems": [
+        "`/dev/catalog` on a laptop: the new section \"style pieces\" shows a narrow page frame, a three-row in-panel list (one row selected), a normal and a dark KPI tile, a card head with a link, a form frame, a small data table and a compact empty state — and they look like parts of the same app as the list pages (`/inventory`, `/clients`).",
+        "the list's page with no items · open the page · a message says the list is empty (`/dev/catalog` → style pieces: the compact empty sample; default `empty-state-on-list`)",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (`/dev/catalog` → style pieces: the in-panel list sample next to `/clients`; default `app-list-container`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T01:26:50.489Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:26:50.613Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:41:56.038Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:42:03.757Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:42:04.009Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:42:04.138Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:43:53.784Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:46:58.990Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:47:05.394Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:47:19.800Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:48:17.631Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.8,
+      "sha": "e7cc624a8a9b258841b8983391d09750b92b7960",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 903,
+          "tokens": {
+            "input": 4667526,
+            "output": 49304
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 107,
+          "tokens": {
+            "input": 281113,
+            "output": 4072
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 13.1,
+          "tokens": {
+            "input": 106292,
+            "output": 1087
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md"
+      ],
+      "checkedHead": "39673a8e9afd9b833f18ac7764eb1aeface3dc77"
+    },
+    "704": {
+      "nnn": "704",
+      "title": "Menu library and trash on the shared list page",
+      "branch": "feat/704-menu-library-trash-list",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T01:50:04.089Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T02:12:59.588Z"
+        }
+      },
+      "humanItems": [
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (`/menu-library` and `/trash`, next to `/recipe-book`; default `app-list-container`).",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed (`/menu-library`, row menu → delete; default `confirm-destructive-action`).",
+        "`/trash` with a deleted recipe: press \"היסטוריה\" on its row — a popup opens over the page, Escape closes it, and the trash list is unchanged behind it.",
+        "the list's page with no items · open the page · a message says the list is empty (`/trash` with nothing deleted: \"אין פריטים באשפה\"; default `empty-state-on-list`)",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (`/trash` with the server stopped: the trash load error and the \"רענן\" button; default `loading-and-error-states`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T01:50:03.894Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T01:50:04.091Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:09:41.391Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:12:52.984Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:12:59.589Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:13:12.240Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:13:48.684Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.8,
+      "sha": "0a4e29513de2f29ed58d6df4d16b0e728bc44b46",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1174.7,
+          "tokens": {
+            "input": 5754473,
+            "output": 41809
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.3,
+          "tokens": {
+            "input": 106036,
+            "output": 807
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "fbc374b41e89ae6cc1789ff975a8fc478514ced2"
+    },
+    "705": {
+      "nnn": "705",
+      "title": "Bookings agenda, waiting list and service lists as shared rows",
+      "branch": "feat/705-bookings-lists-shared-rows",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T02:15:35.004Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T02:23:58.009Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T02:31:01.148Z"
+        }
+      },
+      "humanItems": [
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (`/bookings?view=day`, the waiting list and the \"arriving next\" list; default `app-list-container`).",
+        "`/bookings?view=day` on a tablet: the booking rows, the waiting-list rows and the \"arriving next\" rows look like one family (same height, same separators, same chip buttons).",
+        "the list's page with no items · open the page · a message says the list is empty (`/bookings?view=week` on a day with no booking; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T02:15:34.877Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:15:35.006Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:23:49.998Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:23:57.595Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:23:57.883Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:23:58.010Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:27:54.587Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:30:54.314Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:31:01.150Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:31:13.124Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:31:50.264Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.7,
+      "sha": "c8af430d56c7e1cea633a91f730e02c87501d0e5",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 492.5,
+          "tokens": {
+            "input": 2693582,
+            "output": 27248
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 234.1,
+          "tokens": {
+            "input": 288260,
+            "output": 4173
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.7,
+          "tokens": {
+            "input": 41797,
+            "output": 1021
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md"
+      ],
+      "checkedHead": "0d0ae422ccfc03b4603d361ab2fa4ecbb5b926f0"
+    },
+    "706": {
+      "nnn": "706",
+      "title": "Requests and inbox on the shared frame, rows and fields",
+      "branch": "feat/706-requests-inbox-shared-pieces",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T02:33:37.381Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T02:54:49.915Z"
+        }
+      },
+      "humanItems": [
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (`/inbox` with a few conversations; default `app-list-container`).",
+        "`/requests` → \"בקשה חדשה\": every field in the popup has the same label style and the same box; type nothing in a required field and press save — the error shows under that field the same way for every field.",
+        "the list's page with no items · open the page · a message says the list is empty (`/requests` → the \"נדחו\" tab with no declined request; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T02:33:37.254Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:33:37.382Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:51:26.450Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:54:43.214Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:54:49.917Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:55:01.597Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:55:38.052Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.7,
+      "sha": "d1446d0b443f0d92d44946afcdbcfb07749ac56f",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1066,
+          "tokens": {
+            "input": 3427492,
+            "output": 29595
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.5,
+          "tokens": {
+            "input": 40901,
+            "output": 1000
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "ae41181ca4d1a11fcb4703adabba98b2841d7495"
+    },
+    "707": {
+      "nnn": "707",
+      "title": "Clients, settings and knowledge: shared rows, fields and empty states",
+      "branch": "feat/707-clients-settings-knowledge-shared",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T02:57:24.730Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T03:15:57.009Z"
+        }
+      },
+      "humanItems": [
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (`/clients` names are dark text, not blue links; `/settings` Team tab; default `app-list-container`).",
+        "`/settings` on a laptop: the title \"הגדרות\" is the same size as \"לקוחות\" on `/clients`; the Team tab with only you shows your row and no \"no team members\" message.",
+        "`/frontdesk/knowledge` → add an item: every box in the popup has the same frame as the other popups.",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed (`/settings` → Team → remove a member, then cancel; default `confirm-destructive-action`)",
+        "the list's page with no items · open the page · a message says the list is empty (`/settings` → Access with no consultant; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T02:57:24.607Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T02:57:24.731Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:12:52.388Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:15:50.571Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:15:57.013Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:16:10.396Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:16:47.862Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.7,
+      "sha": "452735d39c1bb25cc90323f7b3ec3f74a9f5f258",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 924.9,
+          "tokens": {
+            "input": 5244670,
+            "output": 42478
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.1,
+          "tokens": {
+            "input": 99782,
+            "output": 1049
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "2cfd2a1060ac51b1cb010b4cee7b848b585dd460"
+    },
+    "708": {
+      "nnn": "708",
+      "title": "Front desk settings, onboarding and the public booking page on shared states and cards",
+      "branch": "feat/708-frontdesk-setup-public-page",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T03:18:34.452Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T03:33:09.006Z"
+        }
+      },
+      "humanItems": [
+        "`/frontdesk/onboarding` on a laptop: the three buttons that looked like plain grey browser buttons now look like the app's other light buttons; closed dates look like the chips on `/frontdesk/settings`.",
+        "`/frontdesk/settings`: every card title has the same size and the same icon placement.",
+        "the guest page `/book/<your slug>` on a phone: while it loads a spinner shows (not the word \"loading\"), and the form card looks like the app's other cards.",
+        "the list's page with no items · open the page · a message says the list is empty (`/book/no-such-place`: the not-found message; default `empty-state-on-list`)",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (`/book/<your slug>` with the server stopped: \"לא הצלחנו לטעון את הדף\"; default `loading-and-error-states`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T03:18:34.333Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:18:34.454Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:30:05.259Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:33:02.236Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:33:09.007Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:33:22.092Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:34:00.027Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.6,
+      "sha": "74027c9eec1279c423b4afb2a8d9cd728d7e570f",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 687.9,
+          "tokens": {
+            "input": 5360100,
+            "output": 34546
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.9,
+          "tokens": {
+            "input": 156013,
+            "output": 775
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "ec232d8b89f10d0f90ec22d42efa05f56593e03f"
+    },
+    "709": {
+      "nnn": "709",
+      "title": "Dashboard cards on one stat tile and one card head",
+      "branch": "feat/709-dashboard-stat-tile-card",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T05:15:23.782Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T05:33:16.637Z"
+        }
+      },
+      "humanItems": [
+        "`/dashboard` on a laptop: all number tiles share one shape and one number size; the dark lead tile is still dark; every small card's title row (icon, title, link at the end) lines up the same way.",
+        "the list's page with no items · open the page · a message says the list is empty (`/dashboard` for a new business: the activity feed; default `empty-state-on-list`)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T05:15:23.644Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:15:23.783Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:29:53.605Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:33:10.281Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:33:16.639Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:33:29.498Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:34:07.761Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.2,
+      "sha": "c2134281100a4754cd1cf4f83c607fba63c0eebb",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 867.3,
+          "tokens": {
+            "input": 6730839,
+            "output": 55651
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.7,
+          "tokens": {
+            "input": 163417,
+            "output": 779
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "56aab488cc1416075789c53d277ef015f0b59d48"
+    },
+    "710": {
+      "nnn": "710",
+      "title": "Platform, diagnosis and report: shared tables, tiles, loaders and headers",
+      "branch": "feat/710-platform-diagnosis-report-shared",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T06:13:22.000Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T06:24:37.800Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T06:33:14.892Z"
+        }
+      },
+      "humanItems": [
+        "`/platform` as the platform admin: the column sort arrows look like the clients list's; the total tiles look like the dashboard's tiles; the AI usage table has the same header style as the list headers.",
+        "`/report` → print preview (Ctrl+P): the A4 page still fits on one page and the trend table is readable.",
+        "the list's page with no items · open the page · a message says the list is empty (`/platform` → learning panel for a business with no data; default `empty-state-on-list`)",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page (`/platform` with the server stopped: the logistics panel shows \"טעינת הפריטים נכשלה\"; default `loading-and-error-states`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T06:13:21.875Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:13:22.001Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:24:37.190Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:24:37.400Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:24:37.588Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T06:24:37.803Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T06:29:54.281Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T06:33:08.349Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T06:33:14.893Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T06:33:28.875Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T06:34:07.659Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10,
+      "sha": "4f898af6f556137b308c2349c6901896276c8f79",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 672.3,
+          "tokens": {
+            "input": 5640879,
+            "output": 37149
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 314,
+          "tokens": {
+            "input": 570591,
+            "output": 8563
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.7,
+          "tokens": {
+            "input": 160844,
+            "output": 760
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [auto] `pnpm run test:ci` passes, including new cases in `src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts` (pressing the \"name\" column head sorts by name as before; no businesses → `a"
+      ],
+      "checkedHead": "a20ec5bb0a01b2010c09644aa4396705bb2d7859"
+    },
+    "711": {
+      "nnn": "711",
+      "title": "Inventory, equipment and supplier lists: drop engine copies, shared empty state and popup",
+      "branch": "feat/711-inventory-equipment-supplier-lists",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T03:35:45.690Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T03:53:18.453Z"
+        }
+      },
+      "humanItems": [
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (`/inventory`, `/inventory/equipment`, `/suppliers`; default `app-list-container`).",
+        "`/inventory/stock-count` with an item under its minimum: the \"below minimum\" rows show name, count, minimum and unit side by side on one line (today they may stack).",
+        "`/inventory/equipment` on a phone: tap the edit icon of a row — a popup sheet opens; tap outside — it closes as before.",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed (`/inventory/equipment` → a row's delete, then cancel; default `confirm-destructive-action`)",
+        "the list's page with no items · open the page · a message says the list is empty (`/suppliers` → search \"zzzz\"; default `empty-state-on-list`)",
+        "any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off (`/inventory/stock-count` → the base-amount box of the first and of the last line — unchanged by this plan; default `anchored-popup`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T03:35:45.523Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:35:45.691Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:50:08.009Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:53:10.325Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:53:18.454Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:53:31.541Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:54:16.127Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.6,
+      "sha": "223e3165d83191f0e5d6640d0ae0d787f01df1d8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 859.6,
+          "tokens": {
+            "input": 6362582,
+            "output": 41751
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.9,
+          "tokens": {
+            "input": 89764,
+            "output": 668
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "2b14251533855256e42434ece0e1e8459d6cda09"
+    },
+    "712": {
+      "nnn": "712",
+      "title": "Product, equipment and supplier forms on one frame",
+      "branch": "feat/712-product-equipment-supplier-forms",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T05:35:51.629Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T05:48:00.642Z"
+        }
+      },
+      "humanItems": [
+        "the form's page · change one field, then follow a link out of the page · a question asks whether to leave or stay (`/inventory` → open a product; default `unsaved-changes-on-leave`).",
+        "open a product, an equipment item and a supplier one after the other: the three forms have the same frame, the same title size, and one green main button with a light Cancel next to it."
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T05:35:51.486Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:35:51.630Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:44:54.687Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:47:54.313Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:48:00.644Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:48:12.196Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:48:49.238Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.1,
+      "sha": "81ed5f74ff71788f1916e4a2ba2bdd9a672eac36",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 540.4,
+          "tokens": {
+            "input": 3978780,
+            "output": 36055
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.3,
+          "tokens": {
+            "input": 91462,
+            "output": 638
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "78e8764ef0d55eca0c35d65cf864d22c95070f4f"
+    },
+    "713": {
+      "nnn": "713",
+      "title": "Menu and recipe popups on the shared popup frame",
+      "branch": "feat/713-menu-recipe-popups-modal",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T03:56:12.015Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T04:12:53.750Z"
+        }
+      },
+      "humanItems": [
+        "an event menu → \"סגירת אירוע\": the popup opens, Tab stays inside it, Escape closes it and the focus returns to the button you pressed.",
+        "an event menu → prep sheets → print preview (Ctrl+P): the printed sheet looks as before (no dark backdrop, no popup frame on paper).",
+        "a recipe → \"הדבקת רכיבים\": paste two lines and press Escape — the popup asks before throwing away the text.",
+        "the list's page with no items · open the page · a message says the list is empty (an event menu with no dishes → prep sheets; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T03:56:11.887Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T03:56:12.016Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:09:29.133Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:12:47.185Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:12:53.752Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:13:11.210Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:13:48.948Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.3,
+      "sha": "f8fe4043337c9ffd9e0f94c1a2b6cdd3482b2716",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 794.3,
+          "tokens": {
+            "input": 6428866,
+            "output": 42866
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 16.2,
+          "tokens": {
+            "input": 174791,
+            "output": 1344
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "da147789eb43c5e7f5faaeee50700f686eb87204"
+    },
+    "714": {
+      "nnn": "714",
+      "title": "Metadata manager: one panel, shared rows, empty states and loaders",
+      "branch": "feat/714-metadata-manager-panels-rows",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T04:15:34.168Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T04:37:25.297Z"
+        }
+      },
+      "humanItems": [
+        "`/dashboard?tab=metadata` on a laptop: every card has the same frame and title row; the users, logistics, coefficients and AI-model lists have the same row height and separators.",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed (`/dashboard?tab=metadata`, a menu type's remove; default `confirm-destructive-action`).",
+        "the list's page with no items · open the page · a message says the list is empty (`/dashboard?tab=metadata` → AI models card with no model; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T04:15:34.036Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:15:34.170Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:34:13.396Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:37:18.589Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:37:25.298Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:37:40.603Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:38:17.444Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.3,
+      "sha": "e6beb8cc614350ffecc04753127dd877a00b2b13",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1116.7,
+          "tokens": {
+            "input": 9897176,
+            "output": 66089
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 14.1,
+          "tokens": {
+            "input": 110609,
+            "output": 1063
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "9d709e7b59cde93082c92cb8e609475e9c5eb98d"
+    },
+    "715": {
+      "nnn": "715",
+      "title": "Recipe book and recipe builder: empty state, panels, chips, buttons and tokens",
+      "branch": "feat/715-recipe-book-builder-tokens",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T04:40:00.751Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T04:59:01.816Z"
+        }
+      },
+      "humanItems": [
+        "a recipe in the builder on a tablet: the three sections have the same frame as the other app panels; the \"missing price\" / \"not linked\" marks look like the app's other small tags; dragging an ingredient row still moves it.",
+        "`/recipe-book`: search for \"zzzz\" — the same no-result picture as in the menu library appears.",
+        "the list's page with no items · open the page · a message says the list is empty (`/recipe-book` → search \"zzzz\"; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T04:40:00.628Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:40:00.753Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:55:51.616Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:58:55.430Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:59:01.817Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:59:13.388Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T04:59:50.390Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.2,
+      "sha": "5f53533f84fdf34a51b0686575d5ca69bd5c5e65",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 947.9,
+          "tokens": {
+            "input": 8467328,
+            "output": 52267
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.3,
+          "tokens": {
+            "input": 112326,
+            "output": 685
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "a74650f9a6c2f06e25e1de6e453f8ed406d8c34b"
+    },
+    "716": {
+      "nnn": "716",
+      "title": "Cook view: keep the ink skin, move it onto tokens, shared empty states and four icon sizes",
+      "branch": "feat/716-cook-view-ink-skin",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T05:01:34.066Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T05:12:52.746Z"
+        }
+      },
+      "humanItems": [
+        "a recipe in the cook view on a tablet and on a phone, side by side with yesterday's screenshot (or memory): the screen looks the same — same dark chips, same pill buttons, same layout — only small size and corner differences.",
+        "`/cook` with no recipe chosen: the empty picture matches the one on `/recipe-book` when it is empty, with the recent recipes under it.",
+        "the list's page with no items · open the page · a message says the list is empty (`/cook` with no recipe chosen; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T05:01:33.948Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:01:34.067Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:09:43.796Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:12:46.215Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:12:52.747Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:13:04.452Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:13:41.141Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 9.9,
+      "sha": "dad177625bd1f47234d031a8c041fe7fa8d738a6",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 487,
+          "tokens": {
+            "input": 1949287,
+            "output": 20637
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 10.5,
+          "tokens": {
+            "input": 37466,
+            "output": 1035
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "f88de1aee99828c464105ef207f853804e21c245"
+    },
+    "717": {
+      "nnn": "717",
+      "title": "Event-menu editor: paper skin on tokens, shared empty states, panels and table",
+      "branch": "feat/717-menu-editor-paper-skin",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T05:50:34.238Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T06:10:51.247Z"
+        }
+      },
+      "humanItems": [
+        "an event menu on a laptop: the paper menu looks the same as before; the stage row above it uses the same tab chips as the rest of the app; the notes and logistics boxes have the same frame as other panels.",
+        "an event → loading list → print preview: the table prints as before.",
+        "the list's page with no items · open the page · a message says the list is empty (an event with no notes: the notes log; default `empty-state-on-list`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T05:50:34.115Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T05:50:34.239Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:07:24.977Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:10:44.715Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:10:51.249Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:11:00.617Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:11:37.902Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.1,
+      "sha": "3a5fe3f57e34a4ab17584b909ac80128451fe3aa",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1008,
+          "tokens": {
+            "input": 5382086,
+            "output": 37003
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.2,
+          "tokens": {
+            "input": 52357,
+            "output": 601
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "58ed92bdc123ba666e4ef81c3e38803464f9218d"
+    },
+    "718": {
+      "nnn": "718",
+      "title": "Style run close-out: registry, inventory and reuse-lint rules that keep pages unified",
+      "branch": "feat/718-style-registry-and-lint",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T06:48:09.431Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T06:53:38.611Z"
+        }
+      },
+      "humanItems": [
+        "open `/inventory`, `/clients`, `/menu-library`, `/trash`, `/settings`, `/requests`, `/inbox`, `/dashboard` one after the other on a laptop: titles are the same size, lists look like one family, empty and loading states look the same — reply with the page names that still look \"different\".",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line (the eight pages named in the card above, phone and desktop; default `app-list-container`)"
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T06:36:02.025Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:36:02.184Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:43:28.395Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:44:12.220Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:48:09.144Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:48:09.433Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:50:30.656Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:53:27.416Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:53:38.613Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:53:50.828Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T06:55:24.186Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "718",
+          "title": "Style run close-out: registry, inventory and reuse-lint rules that keep pages unified",
+          "branch": "feat/718-style-registry-and-lint",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-24T06:36:02.182Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 10.8,
+          "reason": "asking 718-1: ESCALATE scope: ESCALATE: scope _shared/debt-baseline.json — the new page-local-empty-state and page-local-width rules count existing copies, so pnpm run lint:reuse exits 1 (reuse-copy.empty-state 0 -> 15, reuse-copy.engine-classes 23 -> 60). Approving the file lets the builder regenerate those two counts.",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 445.9,
+              "tokens": {
+                "input": 1732283,
+                "output": 19082
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-24T06:44:01.614Z",
+            "reason": "ESCALATE scope: ESCALATE: scope _shared/debt-baseline.json — the new page-local-empty-state and page-local-width rules count existing copies, so pnpm run lint:reuse exits 1 (reuse-copy.empty-state 0 -> 15, reuse-copy.engine-classes 23 -> 60). Approving the file lets the builder regenerate those two counts."
+          },
+          "parkBranch": "park/rs-style-718"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 718-1: ESCALATE scope: ESCALATE: scope _shared/debt-baseline.json — the new page-local-empty-state and page-local-width rules count existing co",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 10.5,
+      "sha": "83c660504d59cfbb66559b57c13eef81098d4cf7",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 137.9,
+          "tokens": {
+            "input": 260878,
+            "output": 4328
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.4,
+          "tokens": {
+            "input": 35293,
+            "output": 784
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "aaf55ab1b36d9c1d424f538f85d3c2a2b8297dc8"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-24T01:26:50.368Z",
+      "plan": "703",
+      "text": "the folder foodVibe1.0-orch-rs-style-703 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T01:42:02.719Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-24T01:42:02.839Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-24T01:42:02.953Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-24T01:42:03.068Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-24T01:42:03.279Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-24T01:42:03.397Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-24T01:42:03.515Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run test:scripts"
+    },
+    {
+      "at": "2026-11-24T01:42:03.629Z",
+      "plan": "703",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed first; runs after the fix: pnpm run lint:reuse"
+    },
+    {
+      "at": "2026-11-24T01:42:03.874Z",
+      "plan": "703",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/703-shared-style-pieces.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-24T01:47:27.773Z",
+      "plan": "703",
+      "text": "the folder foodVibe1.0-orch-merge-rs-style was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T01:50:03.768Z",
+      "plan": "704",
+      "text": "the folder foodVibe1.0-orch-rs-style-704 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T02:15:34.750Z",
+      "plan": "705",
+      "text": "the folder foodVibe1.0-orch-rs-style-705 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T02:23:56.509Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-24T02:23:56.630Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-24T02:23:56.837Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-24T02:23:56.958Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-24T02:23:57.085Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-24T02:23:57.203Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-24T02:23:57.330Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run test:scripts"
+    },
+    {
+      "at": "2026-11-24T02:23:57.449Z",
+      "plan": "705",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed first; runs after the fix: pnpm run lint:reuse"
+    },
+    {
+      "at": "2026-11-24T02:23:57.743Z",
+      "plan": "705",
+      "text": "node \"C:/coding projects/Cursor/foodVibe1.0/scripts/kit-checks.mjs\" --base origin/orch/rs-style --plan plans/705-bookings-lists-shared-rows.plan.md failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-24T02:33:37.134Z",
+      "plan": "706",
+      "text": "the folder foodVibe1.0-orch-rs-style-706 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T02:51:23.518Z",
+      "plan": "706",
+      "text": "builder left undone (round 0): [ui] and [human] Done-when items (phone and desktop row look, the new-request popup field style and error, the empty declined tab): no e2e written or run; the Human checks them."
+    },
+    {
+      "at": "2026-11-24T02:57:24.481Z",
+      "plan": "707",
+      "text": "the folder foodVibe1.0-orch-rs-style-707 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T03:12:49.775Z",
+      "plan": "707",
+      "text": "builder left undone (round 0): [ui] items (/clients names, /settings title and Team tab, /frontdesk/knowledge popup): not run here, left to the run's [ui] step and the Human"
+    },
+    {
+      "at": "2026-11-24T03:18:34.208Z",
+      "plan": "708",
+      "text": "the folder foodVibe1.0-orch-rs-style-708 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T03:30:02.489Z",
+      "plan": "708",
+      "text": "builder left undone (round 0): The [human] checks in the plan: the onboarding buttons and chips, the settings card titles, and the guest page loader and cards."
+    },
+    {
+      "at": "2026-11-24T03:35:45.298Z",
+      "plan": "711",
+      "text": "the folder foodVibe1.0-orch-rs-style-711 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T03:50:05.444Z",
+      "plan": "711",
+      "text": "builder left undone (round 0): The scope-check diff against origin/orch/rs-style printed SCOPE: out for plan and todo files I did not touch; I treated that as the remote run branch having moved on.; The [human] items (list pages on phone and desktop, below-minimum rows on one line, equipment edit sheet on a phone) are not ticked;"
+    },
+    {
+      "at": "2026-11-24T03:56:11.762Z",
+      "plan": "713",
+      "text": "the folder foodVibe1.0-orch-rs-style-713 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T04:09:26.476Z",
+      "plan": "713",
+      "text": "builder left undone (round 0): [human] items from the plan (closing popup focus, print preview, paste discard question, prep-sheets empty message) were not ticked and need the Human"
+    },
+    {
+      "at": "2026-11-24T04:15:33.901Z",
+      "plan": "714",
+      "text": "the folder foodVibe1.0-orch-rs-style-714 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T04:40:00.498Z",
+      "plan": "715",
+      "text": "the folder foodVibe1.0-orch-rs-style-715 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T04:55:48.775Z",
+      "plan": "715",
+      "text": "builder left undone (round 0): [human] checks: tablet look of the three sections and the missing-price / not-linked marks, dragging an ingredient row, /recipe-book search \"zzzz\" showing the empty-state picture"
+    },
+    {
+      "at": "2026-11-24T05:01:33.823Z",
+      "plan": "716",
+      "text": "the folder foodVibe1.0-orch-rs-style-716 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T05:09:41.231Z",
+      "plan": "716",
+      "text": "builder left undone (round 0): [human] checks (tablet and phone comparison, /cook empty look): not done; log-query item: the check itself skipped because no database is configured"
+    },
+    {
+      "at": "2026-11-24T05:15:23.424Z",
+      "plan": "709",
+      "text": "the folder foodVibe1.0-orch-rs-style-709 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T05:29:51.226Z",
+      "plan": "709",
+      "text": "builder left undone (round 0): [human] checks (laptop view of /dashboard, empty feed on a new business): left for the Human"
+    },
+    {
+      "at": "2026-11-24T05:35:51.332Z",
+      "plan": "712",
+      "text": "the folder foodVibe1.0-orch-rs-style-712 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T05:44:52.153Z",
+      "plan": "712",
+      "text": "builder left undone (round 0): Both [human] items are left for the Human to check: the leave-or-stay question on a changed field, and the same frame, title size and button look across the three forms. I wrote no [ui] tests."
+    },
+    {
+      "at": "2026-11-24T05:50:33.976Z",
+      "plan": "717",
+      "text": "the folder foodVibe1.0-orch-rs-style-717 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T06:07:22.383Z",
+      "plan": "717",
+      "text": "builder left undone (round 0): [human] items (paper menu looks the same, loading-list print preview, empty list message) are left for the Human"
+    },
+    {
+      "at": "2026-11-24T06:13:21.743Z",
+      "plan": "710",
+      "text": "the folder foodVibe1.0-orch-rs-style-710 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T06:24:34.528Z",
+      "plan": "710",
+      "text": "builder left undone (round 0): [human] checks of /platform, /report and its print preview, the empty list and the failing-request cases are left for the Human; No error state with a retry: the three panels keep their existing toast on a failed load. I did not build the plan's `app-empty-state icon=alert-triangle` error view or th"
+    },
+    {
+      "at": "2026-11-24T06:36:01.810Z",
+      "plan": "718",
+      "text": "the folder foodVibe1.0-orch-rs-style-718 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T06:43:28.213Z",
+      "plan": "718",
+      "text": "builder left undone (round 0): pnpm run lint:reuse and kit-checks exit 0: the new rules count existing copies (15 empty-state, 37 engine-classes) above the baseline in _shared/debt-baseline.json, which is outside the scope"
+    },
+    {
+      "at": "2026-11-24T06:44:12.073Z",
+      "plan": "718",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-24T06:44:12.366Z",
+      "plan": "718",
+      "text": "ask 718-1 (scope, the Human or the advisor answers): Add _shared/debt-baseline.json to the plan's scope so the baseline counts for reuse-copy.empty-state and reuse-copy.engine-classes can be updated to match the tree?"
+    },
+    {
+      "at": "2026-11-24T06:46:13.329Z",
+      "plan": "718",
+      "text": "ask 718-1 answered by the human: approved: _shared/debt-baseline.json"
+    },
+    {
+      "at": "2026-11-24T06:46:29.469Z",
+      "plan": "718",
+      "text": "scope of plan 718 extended on orch/rs-style by the answer to 718-1: _shared/debt-baseline.json"
+    },
+    {
+      "at": "2026-11-24T06:48:02.386Z",
+      "plan": "718",
+      "text": "resumed from park/rs-style-718: round 0, tier build, after: asking 718-1: ESCALATE scope: ESCALATE: scope _shared/debt-baseline.json — the new page-local-empty-state and page-local-width rules count existing copies, so p"
+    },
+    {
+      "at": "2026-11-24T06:48:08.760Z",
+      "plan": "718",
+      "text": "the folder foodVibe1.0-orch-rs-style-718 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T06:50:32.674Z",
+      "plan": "718",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 710"
+    },
+    {
+      "at": "2026-11-24T06:56:37.892Z",
+      "text": "FINAL: same tree as plan 718's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    },
+    {
+      "at": "2026-11-24T07:01:42.770Z",
+      "text": "make this a default? the plan's Reuse Check now also lists the modifier and part classes (.c-stat-tile__*, .c-card-head__*, .c-list--plain, .c-list-body-cell--end, .c-table--compact) so kit-checks stops reporting them as  (trigger: list) — reply: default yes run-list"
+    },
+    {
+      "at": "2026-11-24T07:01:42.982Z",
+      "text": "make this a default? the `.dc-item`, `.dc-card` and `code` rules in the catalog stylesheet carry one extra declaration so they are not copies of rules in other components. — reverse: delete those lines (trigger: destructive-action) — reply: default yes run-destructive-action"
+    },
+    {
+      "at": "2026-11-24T07:01:43.174Z",
+      "text": "make this a default? new-request extra-question labels pass 'label *' to app-form-field instead of an aria-hidden asterisk span — reverse: restore a custom label (trigger: editable-form) — reply: default yes run-editable-form"
+    },
+    {
+      "at": "2026-11-24T07:01:43.360Z",
+      "text": "make this a default? kept the rq-page class on the requests root next to c-page because e2e/ui/602-2 selects it; it carries no styles — reverse: drop the class and update that spec (trigger: screen) — reply: default yes run-screen"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 10.5,
+  "updatedAt": "2026-11-24T07:01:46.072Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "703",
+      "type": "behaviour",
+      "text": "behaviour: the append-only test in style-703.test.mjs takes its base from origin/orch/rs-style first, then origin/main. A merge-base with origin/main alone fails on this staging branch's own changes to styles.scss. — reverse: use origin/main only",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "703",
+      "type": "behaviour",
+      "text": "behaviour: the style guard flags box-shadow unless the value is one var(...) or none. The plan text says 'no var(', but its own fixture `0 2px 4px var(--x)` must be flagged. — reverse: flag only values with no var(",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "703",
+      "type": "behaviour",
+      "text": "behaviour: the plan's Reuse Check now also lists the modifier and part classes (.c-stat-tile__*, .c-card-head__*, .c-list--plain, .c-list-body-cell--end, .c-table--compact) so kit-checks stops reporting them as undeclared. — reverse: delete that line from the plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "703",
+      "type": "behaviour",
+      "text": "behaviour: the `.dc-item`, `.dc-card` and `code` rules in the catalog stylesheet carry one extra declaration so they are not copies of rules in other components. — reverse: delete those lines",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "703",
+      "type": "behaviour",
+      "text": "behaviour: no e2e test or uiCards entry, because the plan's two [ui]-style items are tagged [human]. — reverse: add a test under e2e",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "703",
+      "type": "seen",
+      "text": "seen: kit-checks reports style-duplicate-block debt 363 -> 366 on this run's base (client-profile, cook-view, opening-details-banner, room-panel, zone-panel and price-impact-panel stylesheets); my dev-catalog stylesheet adds none of it.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "703",
+      "type": "seen",
+      "text": "seen: the plan says box-shadow is flagged when its value 'has no var(', which contradicts its own fixture; I followed the fixture.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "704",
+      "type": "behaviour",
+      "text": "behaviour: the trash's per-type 'recover all' and 'dispose all' buttons show in the header only while one type is selected in the filter, with the same handlers and confirmations — reverse: drop the two buttons",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "704",
+      "type": "behaviour",
+      "text": "behaviour: the trash type filter does not reset on refresh; a type with no items shows the trash_empty state — reverse: reset typeFilter_ to 'all' in refresh()",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "704",
+      "type": "behaviour",
+      "text": "behaviour: the trash load error shows the existing key trash_load_error with a 'refresh' button as the retry, rather than the raw error message — reverse: show loadError() text in the empty state",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "704",
+      "type": "behaviour",
+      "text": "behaviour: the menu-library filter-clear button also resets sort and sort order to date, newest first — reverse: leave sortBy_ and sortOrder_ out of resetFilters",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "704",
+      "type": "behaviour",
+      "text": "behaviour: the phone hides cost, sale and guests (and, in the trash, type and date) with a phone-breakpoint rule in the page stylesheet — reverse: remove the @media blocks",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "705",
+      "type": "behaviour",
+      "text": "behaviour: the table sheet title stays a plain <p id=\"tsh-title\"> instead of the shell's titleKey, because tsh_title carries a {n} slot for the table number that titleKey cannot fill — reverse: add a number slot to the shell and switch to titleKey",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "705",
+      "type": "behaviour",
+      "text": "behaviour: agenda rows are grouped by a time heading above each list instead of a time column beside cards; action chips may wrap only inside the actions cell — reverse: restore the time column",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "705",
+      "type": "behaviour",
+      "text": "behaviour: style-705.test.mjs ignores data-testid=\"wl-row\" when checking for the old wl-row class, because the e2e spec e2e/ui/673-1.spec.ts and the unit tests query that test id — reverse: rename the test id and update those tests",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "705",
+      "type": "seen",
+      "text": "seen: kit-checks debt style-duplicate-class 177→178 names equipment-list, menu-library-list, recipe-ingredients-table and trash.page scss; none are in this plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "706",
+      "type": "behaviour",
+      "text": "behaviour: data-testid=\"inbox-row\" sits on the li.c-list-row, which is display:contents, so e2e specs that click it (e2e/ui/677-2, 677-3) may fail to click it — reverse: move the testid to the name link and update the specs",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "706",
+      "type": "behaviour",
+      "text": "behaviour: the old ibx-row-current look is dropped for the shared .is-selected outline (the plan's own note) — reverse: restore the inset box-shadow rule",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "706",
+      "type": "behaviour",
+      "text": "behaviour: new-request extra-question labels pass 'label *' to app-form-field instead of an aria-hidden asterisk span — reverse: restore a custom label",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D20",
+      "plan": "706",
+      "type": "behaviour",
+      "text": "behaviour: the client picker label now always shows; before it hid while the picker was open — reverse: wrap the field in @if (!picking_())",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D21",
+      "plan": "706",
+      "type": "behaviour",
+      "text": "behaviour: kept the rq-page class on the requests root next to c-page because e2e/ui/602-2 selects it; it carries no styles — reverse: drop the class and update that spec",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D22",
+      "plan": "706",
+      "type": "behaviour",
+      "text": "behaviour: approve-table-dialog also lost c-input-stack, because the style-706 test requires none in any requests template; it now lays out with a [data-testid] selector — reverse: restore the class",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D23",
+      "plan": "706",
+      "type": "seen",
+      "text": "seen: e2e/ui/602-2.spec.ts:9 — still measures the old 60rem rq-page/rq-list width and will fail against the 72rem c-page",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D24",
+      "plan": "707",
+      "type": "behaviour",
+      "text": "behaviour: knowledge bulk actions stay as the page's own approve-selected button in the shell-selection-bar slot, shown only while rows are selected. `app-selection-bar` has no slot for an approve action and would add a bulk delete. 'Approve all drafts' stays in the header row — reverse: replace the slot content with app-selection-bar and add an approve output to it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D25",
+      "plan": "707",
+      "type": "behaviour",
+      "text": "behaviour: the Team and Access lists keep their existing columns (name, role chip or granted date, last login, remove) instead of a joined date, because the old rows showed last login — reverse: swap the date field",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D26",
+      "plan": "707",
+      "type": "behaviour",
+      "text": "behaviour: inputs inside c-input-wrapper (the header search boxes, the baseline and business number boxes, the business-name form) are allowed as bare-input in style-707 with a stated reason, since the wrapper draws the box — reverse: add c-input to them and drop the ALLOW entries",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D27",
+      "plan": "707",
+      "type": "behaviour",
+      "text": "behaviour: the variation inputs inside the knowledge chip got c-input, as the plan requires every text box in the popups to have it — reverse: remove the class from the variation input",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D28",
+      "plan": "707",
+      "type": "behaviour",
+      "text": "behaviour: the team-tab spec 'centred in a wide page (plan 469)' now asserts no own max-width and full width inside the narrow page — reverse: restore the 36rem limit and the old test",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D29",
+      "plan": "707",
+      "type": "seen",
+      "text": "seen: src/app/shared/selection-bar/selection-bar.component.html — no slot for custom bulk actions, so pages whose bulk action is not delete or field edit cannot use it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D30",
+      "plan": "708",
+      "type": "behaviour",
+      "text": "behaviour: the guest 'unavailable' state keeps its phone button beside app-empty-state in a new .pb-unavailable column, because app-empty-state has no slot for a link — reverse: drop the wrapper and the button",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D31",
+      "plan": "708",
+      "type": "behaviour",
+      "text": "behaviour: card heads got icons the app already registers (building-2, clock, sparkles, circle-check, user-check, info, heart, clipboard-list, help-circle) so every card has the same icon placement — reverse: delete the icon lines",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D32",
+      "plan": "708",
+      "type": "behaviour",
+      "text": "behaviour: the honeypot input on the booking page is allow-listed in the style test (it is hidden off-screen on purpose) rather than given c-input — reverse: add c-input and drop the ALLOW entry",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D33",
+      "plan": "708",
+      "type": "behaviour",
+      "text": "behaviour: c-btn-secondary became c-btn-ghost, the nearest existing secondary button — reverse: restore the class",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D34",
+      "plan": "708",
+      "type": "removes",
+      "text": "removes: the strike-through look on a taken time slot on the guest page; the chip engine's disabled look now shows it — reverse: restore .pb-time--taken and its class binding",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D35",
+      "plan": "708",
+      "type": "seen",
+      "text": "seen: src/testing/test-lucide-icons.ts lacks bot, phone, message-square, file-text, clipboard-check and list-checks, so specs that use them fail with 'icon has not been provided'; I used icons the file already has",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D36",
+      "plan": "711",
+      "type": "behaviour",
+      "text": "behaviour: style-711.test.mjs also allows `bare-input` for the four list search boxes, because each sits in a c-input-wrapper (the same as plan 707). The plan names only one allow entry. — reverse: change the search boxes and drop the four entries",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D37",
+      "plan": "711",
+      "type": "behaviour",
+      "text": "behaviour: past counts are li.c-list-row. Only a draft is clickable and focusable; a final count has aria-disabled=\"true\" where it used to be a disabled button. — reverse: render buttons again",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D38",
+      "plan": "711",
+      "type": "behaviour",
+      "text": "behaviour: the pencil and trash icons in the supplier and inventory rows are 16 (they were 18), to match the equipment row. — reverse: set the size back to 18",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D39",
+      "plan": "711",
+      "type": "removes",
+      "text": "removes: the hover tint on sortable column headers in the inventory and equipment lists (the local .c-sortable-header copy went; the shared rule keeps the pointer cursor and no text selection) — reverse: add a hover rule for .c-sortable-header to src/styles.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D40",
+      "plan": "711",
+      "type": "behaviour",
+      "text": "behaviour: the scaling hint in the equipment panel is now a plain <p> instead of a p.inline-edit-field. — reverse: restore the class",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D41",
+      "plan": "711",
+      "type": "behaviour",
+      "text": "behaviour: the inventory allergen button hides itself with the shared .visually-hidden class while the expanded list is open (the old rule moved it to left: -9999px). — reverse: restore the old rule",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D42",
+      "plan": "713",
+      "type": "behaviour",
+      "text": "behaviour: the paste popup keeps [topLayer]=\"true\" because it sits inside the recipe page's backdrop-filter card, and the existing spec guards it — reverse: drop the input",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D43",
+      "plan": "713",
+      "type": "behaviour",
+      "text": "behaviour: the card layout rules (:host ::ng-deep) sit outside @layer in the six stylesheets, because the unlayered engine .c-modal-card would beat a layered rule — reverse: move them back into the layer",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D44",
+      "plan": "713",
+      "type": "behaviour",
+      "text": "behaviour: deposit-paid and paste hasChanges is true once an amount or text is typed, so Escape or a backdrop click asks before discarding — reverse: remove [hasChanges]",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D45",
+      "plan": "713",
+      "type": "seen",
+      "text": "seen: src/styles.scss:2122 the `body.prep-sheets-open .prep-overlay` print reset is now dead (class removed). styles.scss is append-only, so it was left for plan 718 or a cleanup",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D46",
+      "plan": "714",
+      "type": "behaviour",
+      "text": "behaviour: the menu-type add button moved from under the description into the card head's end slot — reverse: move it back under `.mm-card-desc`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D47",
+      "plan": "714",
+      "type": "behaviour",
+      "text": "behaviour: menu-type rows keep the name above the five field chips (the fields cell spans both columns) so the card stays narrow — reverse: remove `.menu-type-fields-cell`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D48",
+      "plan": "714",
+      "type": "behaviour",
+      "text": "behaviour: the taxonomy card's default empty text (prefix + title + suffix) is composed in the component and passed to app-empty-state as its message — reverse: always pass `emptyKey`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D49",
+      "plan": "714",
+      "type": "behaviour",
+      "text": "behaviour: `.mm-card` and `.mm-card-desc` are appended once to src/styles.scss (an allowed hotspot) because eight identical component copies failed the kit duplicate-block check — reverse: move them back into each component stylesheet",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D50",
+      "plan": "714",
+      "type": "seen",
+      "text": "seen: coefficient-manager.component.html:27 and :111 — lint:reuse still prints the line-based `number-input-outside-number-box` warning although the inputs sit in an appNumberBox cell; exit 0",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D51",
+      "plan": "714",
+      "type": "seen",
+      "text": "seen: public/assets/data/dictionary.json — key `ai_model_loading` is now unused because app-loader uses its default label",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D52",
+      "plan": "715",
+      "type": "behaviour",
+      "text": "behaviour: the cost and last-updated hover bubbles use the shared [appTip] (plan 699) instead of one page-local .rb-tooltip. The plan said no shared tooltip piece exists, which is stale, and a page-local bubble would have needed a registry heading outside scope. RecipeListTooltipsService is deleted. — reverse: restore the service and the two page-local bubbles",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D53",
+      "plan": "715",
+      "type": "behaviour",
+      "text": "behaviour: the three builder sections use the plain .c-glass-panel frame, so the 4px primary start-border accent of the old .section-card is gone — reverse: add a border-inline-start rule on .rb-section",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D54",
+      "plan": "715",
+      "type": "removes",
+      "text": "removes: the incomplete and warning badges' hover scale, the type toggle's green dish-mode colour and the .add-custom-chip dashed border are replaced by the shared chip looks — reverse: restore the local rules",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D55",
+      "plan": "715",
+      "type": "behaviour",
+      "text": "behaviour: the history banner keeps the class history-view-banner, and the section toggles and add-row buttons get no-print, so the global print rule still hides them — reverse: rename the class and update the print rule in styles.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D56",
+      "plan": "715",
+      "type": "seen",
+      "text": "seen: e2e/ui/603-5.spec.ts:9 and :11 query .section-card, which no longer exists (now c-glass-panel rb-section); outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D57",
+      "plan": "715",
+      "type": "seen",
+      "text": "seen: src/styles.scss:1947-1948 print rule names .section-card-header button and .add-row-btn, which are now unused; outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D58",
+      "plan": "715",
+      "type": "seen",
+      "text": "seen: pnpm run lint:reuse reports a family-styled-from-outside note at recipe-book-list.component.scss:41 (a rule on the .rb-search-miss wrapper around app-empty-state); the command still exits 0",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D59",
+      "plan": "716",
+      "type": "behaviour",
+      "text": "behaviour: the cook view's amount and clock inputs keep their ink classes, so style-716.test.mjs allows rule bare-input for that file — reverse: give them c-input classes and drop the ALLOW entry",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D60",
+      "plan": "716",
+      "type": "behaviour",
+      "text": "behaviour: the red alert ring and the two grow-pulse shadows have no token, so they became page custom properties --cv-alert-ring, --cv-grow-from and --cv-grow-to on :host, with the same look — reverse: use --shadow-focus and --shadow-glass",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D61",
+      "plan": "716",
+      "type": "behaviour",
+      "text": "behaviour: a layout-only wrapper .cv-no-recipe stacks the empty state and the recent chips; declared in the plan's Reuse Check — reverse: put the chips into app-empty-state content",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D62",
+      "plan": "709",
+      "type": "behaviour",
+      "text": "behaviour: the old `.perf__empty` block held only the 'create first inquiry' button and no text, so it stays a button panel under the new class `perf__start` (testids kept). The upcoming, activity and front-desk empties use `app-empty-state [compact]`. Reverse: add a message key and use app-empty-state with ctaLabelKey.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D63",
+      "plan": "709",
+      "type": "behaviour",
+      "text": "behaviour: the funnel and upcoming rows are list rows. The click handler is on the row, and a real `c-btn-ghost--sm` button sits in the name cell for keyboard use. Reverse: put the handler back on a bare button.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D64",
+      "plan": "709",
+      "type": "behaviour",
+      "text": "behaviour: the warning and info tiles differ from the others by icon colour only. Reverse: add tone classes to the tile.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D65",
+      "plan": "709",
+      "type": "behaviour",
+      "text": "behaviour: the opening banner button rule sits outside the @layer because the unlayered `.c-btn-ghost` would win over a layered one. Reverse: move it back inside the layer and use a more specific selector.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D66",
+      "plan": "709",
+      "type": "removes",
+      "text": "removes: the KPI tiles' hover lift and their compact phone layout (number beside the title), since they are the shared tile now. Reverse: restore two local rules on `.kpi-grid > .c-stat-tile`.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D67",
+      "plan": "709",
+      "type": "removes",
+      "text": "removes: the type avatar icon on each activity row (the entity-type chip carries it now). Reverse: add an icon cell back to the row.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D68",
+      "plan": "709",
+      "type": "removes",
+      "text": "removes: the hero tile's larger number size (`--fs-3xl`) and muted label colour. The shared hero tile now sets both. Reverse: add local overrides on `.perf__lead`.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D69",
+      "plan": "709",
+      "type": "behaviour",
+      "text": "behaviour: renamed `perf__head` to `perf__bar`, the `act-chip*` classes to `act-change*`, and `setup-step__mark--empty` to `--open`. The plan or the style guard forbids the old names in templates. Reverse: rename them back.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D70",
+      "plan": "709",
+      "type": "seen",
+      "text": "seen: src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss:41 — lint:reuse prints a family-styled-from-outside note (outside this plan's scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D71",
+      "plan": "709",
+      "type": "seen",
+      "text": "seen: event-closing-dialog.component.html:177 and coefficient-manager.component.html:27,111 — lint:reuse prints number-input-outside-number-box notes (outside this plan's scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D72",
+      "plan": "712",
+      "type": "behaviour",
+      "text": "behaviour: the product form's add subtitle now goes through app-page-header's subtitleKey, so the header hides it on phones (the old form hid it there too) — reverse: put the subtitle back as a local paragraph",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D73",
+      "plan": "712",
+      "type": "behaviour",
+      "text": "behaviour: the product form's edit-mode title no longer turns primary-coloured, because the old rule targeted the removed .form-header__title — reverse: re-add a colour rule on the header title",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D74",
+      "plan": "712",
+      "type": "behaviour",
+      "text": "behaviour: the product form's glass container now uses the shared .c-form-page values instead of its own modal shadow and blur — reverse: restore the local glass block",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D75",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: the stage tabs keep local is-past and is-locked state rules (outside the layer) on top of the shared tab chip — reverse: drop the two rules",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D76",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: the paper skin's inline inputs, the pricing-meter inputs (inside c-input-wrapper) and the deposit input (inside c-input-stack) keep no c-input class; the style test lists them in ALLOW with a reason — reverse: add c-input to each and empty ALLOW",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D77",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: the pricing-meter bar keeps a local dark-bar colour rule on its tap chip (.targets-chip) — reverse: remove it and accept the engine colours on the dark bar",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D78",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: text-align: right became start and the dish-remove button's left: 0 became inset-inline-end: 0 (the same side in RTL) — reverse: restore the physical values",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D79",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: the pricing-meter floating button's shadow is now var(--shadow-glow) only (the guard allows one var); it dropped the card shadow — reverse: restore the two-shadow value and allow it in the style test",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D80",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: the plan's Reuse Check gained one line declaring the local hooks .stage-tab, .stage-lost, .targets-chip and .meter-input (kit-checks asked) — reverse: remove the line and the hooks",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D81",
+      "plan": "717",
+      "type": "behaviour",
+      "text": "behaviour: the pricing-meter, event-stage-bar and event-notes-log specs now use the new selectors, so no old class is queried",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D82",
+      "plan": "717",
+      "type": "seen",
+      "text": "seen: e2e/ui/546-2.spec.ts:29 and e2e/ui/551-2.spec.ts:18 still use .client-chip, which I kept; they stay valid",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D83",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the diagnosis list's status header reuses the existing key `fd_card_status` because the plan adds no dictionary key and no neutral status key exists — reverse: add a `diag_col_status` key and swap it in diagnosis.page.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D84",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the report shows its loader only while no report is loaded yet (`loading() && !report()`), so changing the month keeps the old report on screen — reverse: drop `&& !report()`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D85",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the platform CSV export button sits in the page header and shows only while there are businesses (as before) — reverse: remove the `@if (rows_().length)` around it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D86",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the learning panel's \"no drafts, private businesses\" message is now an app-empty-state compact whose message is the computed text; the old learning-empty-private paragraph is gone — reverse: restore the `<p>` and the spec line",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D87",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the platform business-name sort head is the button itself with role=columnheader; the old inner `.sort-btn` is gone and the spec selector is now `button.c-sortable-header`",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D88",
+      "plan": "710",
+      "type": "seen",
+      "text": "seen: scope-check (kit copy) --diff=origin/orch/rs-style prints `SCOPE: out` for files in the main checkout (.claude/todo.md, plans/*.plan.md); the branch's own diff against the merge-base is all in scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D89",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the AI-examples panel hides its lists and shows the error view when its reload fails, including the reload that follows a refused action (the simplest option) — reverse: remove the `loadFailed_` branch in platform-ai-shots.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D90",
+      "plan": "710",
+      "type": "behaviour",
+      "text": "behaviour: the learning panel shows the error view only when the learning numbers fail to load; a failed file-store status check still only logs, as before — reverse: set `loadFailed_` in `loadStatus()` as well",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D91",
+      "plan": "718",
+      "type": "behaviour",
+      "text": "behaviour: wrote the plan's empty-state pattern with a (?<![\\w-]) lookbehind instead of a bare \\b, because the plan's pattern also flagged class=\"c-empty-state\" — reverse: use the plan's original pattern",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D92",
+      "plan": "718",
+      "type": "behaviour",
+      "text": "behaviour: added a new registry heading `style-run-guard` naming scripts/test/style-718.test.mjs, because the kit's reuse check requires a rung-4 piece to have its own heading — reverse: delete that heading and the check fails again",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D93",
+      "plan": "718",
+      "type": "behaviour",
+      "text": "behaviour: added a manifest.json entry for scripts/test/style-718.test.mjs, which the plan's scope already allows — reverse: delete the entry",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D94",
+      "plan": "718",
+      "type": "seen",
+      "text": "seen: src/app/pages/metadata-manager has no app-list-shell, yet the plan's list-page text says only venue-list is a known copy; I followed the plan",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D95",
+      "plan": "718",
+      "type": "seen",
+      "text": "seen: the page-local-width pattern also flags `max-width: 100%`, since the plan's pattern needs only a digit after the colon",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-24T07:01:46.070Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-24T07:01:46.072Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
