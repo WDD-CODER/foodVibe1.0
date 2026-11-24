@@ -21,6 +21,7 @@ import { assistantFailureKey, showAssistantFailure } from 'src/app/core/utils/as
 import { ChatThreadComponent } from 'src/app/shared/chat-thread/chat-thread.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ConversationDataService } from '@services/conversation-data.service'
+import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -68,6 +69,7 @@ interface Guest {
 export class SimulatorPage {
   private readonly sim = inject(SimulatorService)
   private readonly data = inject(ConversationDataService)
+  private readonly profiles = inject(FrontDeskProfileDataService)
   private readonly permission = inject(PermissionService)
   private readonly user = inject(UserService)
   private readonly confirm = inject(ConfirmModalService)
@@ -109,6 +111,15 @@ export class SimulatorPage {
     const c = this.thread_()?.conversation
     return c?.assistantFailed && showAssistantFailure(c) ? assistantFailureKey(c.assistantFailed.reason, 'note') : null
   })
+  /** Plan 719: the assistant level of the business, or null while the profile is not loaded. */
+  protected readonly level_ = computed(() => this.profiles.profile_()?.assistant.level ?? null)
+  protected readonly heldByStaff_ = computed(() => this.thread_()?.conversation.status === 'human')
+  protected readonly handBackBusy_ = signal(false)
+  /** The assistant's draft for the staff, shown only at level 0 on a conversation the assistant still holds. */
+  protected readonly draft_ = computed(() => {
+    const c = this.thread_()?.conversation
+    return this.level_() === 0 && c?.status === 'bot' && c.suggestion ? c.suggestion : null
+  })
   protected readonly threadFailed_ = computed(() => !!this.guest_()?.conversationId && !!this.data.threadFailed_())
 
   protected readonly bookingId_ = computed(() => this.thread_()?.conversation.bookingId ?? null)
@@ -142,7 +153,25 @@ export class SimulatorPage {
   constructor() {
     if (this.allowed_()) {
       void this.data.list({ test: true })
+      void this.profiles.ensureLoaded()
       this.startTimer()
+    }
+  }
+
+  protected async handBack(): Promise<void> {
+    const id = this.guest_()?.conversationId
+    if (!id || this.handBackBusy_()) return
+    this.handBackBusy_.set(true)
+    try {
+      const res = await this.data.handBack(id)
+      if (!res.ok) {
+        this.userMsg.onSetErrorMsg(this.translation.translate('sim_hand_back_failed'))
+        return
+      }
+      this.afterAction()
+      await this.readThread()
+    } finally {
+      this.handBackBusy_.set(false)
     }
   }
 

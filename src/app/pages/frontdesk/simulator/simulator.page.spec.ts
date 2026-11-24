@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal, WritableSignal } from '@angular/core'
 import { provideRouter } from '@angular/router'
-import { FastForward, LucideAngularModule, MessageCircle, Send, Smartphone } from 'lucide-angular'
+import { Bot, FastForward, LucideAngularModule, MessageCircle, Send, Smartphone } from 'lucide-angular'
+import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ConversationDataService } from '@services/conversation-data.service'
@@ -27,7 +28,13 @@ const DICT: Record<string, string> = {
   sim_start: 'התחלת שיחה',
   sim_send: 'שליחה',
   sim_clear: 'ניקוי נתוני בדיקה',
-  sim_clear_confirm_text: 'כל נתוני הבדיקה יימחקו'
+  sim_clear_confirm_text: 'כל נתוני הבדיקה יימחקו',
+  sim_level_0: 'רמת טיוטות',
+  sim_level_1: 'העוזר עונה לאורחים לבד',
+  sim_held_by_staff: 'השיחה אצל הצוות',
+  sim_draft_label: 'טיוטת העוזר לצוות',
+  sim_hand_back_failed: 'לא הצלחנו להחזיר',
+  ibx_hand_back: 'החזרה לעוזר'
 }
 
 const NOW = Date.UTC(2026, 10, 20, 12, 0)
@@ -75,15 +82,20 @@ describe('SimulatorPage (plan 678)', () => {
   let sim: Record<string, jasmine.Spy>
   let confirm: jasmine.Spy
   let userMsg: jasmine.SpyObj<UserMsgService>
+  let profile: WritableSignal<{ assistant: { level: number } } | null>
 
   async function create() {
     await TestBed.configureTestingModule({
       imports: [
         SimulatorPage,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, FastForward, MessageCircle, Send, Smartphone })
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, FastForward, MessageCircle, Send, Smartphone, Bot })
       ],
       providers: [
         provideRouter([]),
+        {
+          provide: FrontDeskProfileDataService,
+          useValue: { profile_: profile, ensureLoaded: () => Promise.resolve() }
+        },
         { provide: ConversationDataService, useValue: data },
         { provide: SimulatorService, useValue: sim },
         { provide: PermissionService, useValue: { isOwner_: owner } },
@@ -101,6 +113,7 @@ describe('SimulatorPage (plan 678)', () => {
 
   beforeEach(() => {
     owner = signal(true)
+    profile = signal(null)
     conversations = signal<ConversationRow[]>([])
     thread = signal(null)
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
@@ -117,7 +130,8 @@ describe('SimulatorPage (plan 678)', () => {
         const r = conversations().find((c) => c._id === id)
         thread.set({ conversation: r ?? conv(id), messages: [msg('m1', 'in', 'שלום'), msg('m2', 'out', 'היי')] })
       }),
-      closeThread: jasmine.createSpy('closeThread').and.callFake(() => thread.set(null))
+      closeThread: jasmine.createSpy('closeThread').and.callFake(() => thread.set(null)),
+      handBack: jasmine.createSpy('handBack').and.resolveTo({ ok: true })
     }
     sim = {
       send: jasmine.createSpy('send').and.resolveTo({ ok: true, conversationId: 'a' }),
@@ -266,6 +280,44 @@ describe('SimulatorPage (plan 678)', () => {
     thread.set({ conversation: conversations()[0], messages: [] })
     fixture.detectChanges()
     expect(byId('ai-failed-note')).toBeNull()
+  })
+
+  it('says who answers: level 0, level 1 or 2, and nothing while no profile is loaded (plan 719)', async () => {
+    await create()
+    expect(byId('sim-level')).toBeNull()
+    profile.set({ assistant: { level: 0 } })
+    await settle()
+    expect(text(byId('sim-level'))).toContain('רמת טיוטות')
+    profile.set({ assistant: { level: 1 } })
+    await settle()
+    expect(text(byId('sim-level'))).toContain('העוזר עונה לאורחים לבד')
+    profile.set({ assistant: { level: 2 } })
+    await settle()
+    expect(text(byId('sim-level'))).toContain('העוזר עונה לאורחים לבד')
+  })
+
+  it('a human conversation shows who holds it and hand back calls handBack once, then reads the thread (plan 719)', async () => {
+    conversations.set([row('a', 'אורח בדיקה', '0500000001', { status: 'human' })])
+    await create()
+    await pickGuest()
+    expect(text(byId('sim-held'))).toContain('השיחה אצל הצוות')
+    const openCalls = (data['open'] as jasmine.Spy).calls.count()
+    byId<HTMLButtonElement>('sim-hand-back')!.click()
+    await settle()
+    expect(data['handBack']).toHaveBeenCalledOnceWith('a')
+    expect((data['open'] as jasmine.Spy).calls.count()).toBeGreaterThan(openCalls)
+  })
+
+  it('shows the level-0 draft under the chat, and no draft at level 1 (plan 719)', async () => {
+    conversations.set([row('a', 'אורח בדיקה', '0500000001', { suggestion: 'לאיזה תאריך?' })])
+    profile.set({ assistant: { level: 0 } })
+    await create()
+    await pickGuest()
+    expect(text(byId('sim-draft'))).toContain('לאיזה תאריך?')
+    expect(byId('sim-held')).toBeNull()
+    profile.set({ assistant: { level: 1 } })
+    await settle()
+    expect(byId('sim-draft')).toBeNull()
   })
 
   it('shows the time left of the window from the server clock', async () => {

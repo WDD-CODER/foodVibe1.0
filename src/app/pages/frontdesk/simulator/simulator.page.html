@@ -8,6 +8,12 @@
     <lucide-icon name="flask-conical" [size]="18"></lucide-icon>
     <span>{{ 'sim_banner' | translatePipe }}</span>
   </p>
+  @if (level_() !== null) {
+  <p class="sim-level" data-testid="sim-level" role="status">
+    <lucide-icon name="bot" [size]="18" aria-hidden="true"></lucide-icon>
+    <span>{{ (level_() === 0 ? 'sim_level_0' : 'sim_level_1') | translatePipe }}</span>
+  </p>
+  }
 
   <div class="sim-body">
     <aside class="sim-side" data-testid="sim-side">
@@ -167,7 +173,26 @@
           <app-loader size="medium" />
           }
         </div>
-        @if (failNoteKey_(); as noteKey) {
+        @if (draft_(); as draft) {
+        <div class="sim-draft" data-testid="sim-draft">
+          <strong>{{ 'sim_draft_label' | translatePipe }}</strong>
+          <span>{{ draft }}</span>
+        </div>
+        } @if (heldByStaff_()) {
+        <p class="sim-held" data-testid="sim-held">
+          <span>{{ 'sim_held_by_staff' | translatePipe }}</span>
+          <button
+            type="button"
+            class="c-btn-ghost"
+            data-testid="sim-hand-back"
+            [disabled]="handBackBusy_()"
+            (click)="handBack()"
+          >
+            <lucide-icon name="undo-2" [size]="16" aria-hidden="true"></lucide-icon>
+            <span class="btn-label">{{ 'ibx_hand_back' | translatePipe }}</span>
+          </button>
+        </p>
+        } @if (failNoteKey_(); as noteKey) {
         <p class="ai-failed-note" role="status" data-testid="ai-failed-note">
           <lucide-icon name="alert-triangle" [size]="16" aria-hidden="true"></lucide-icon>
           <span>{{ noteKey | translatePipe }}</span>
