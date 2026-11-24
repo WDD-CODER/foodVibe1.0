@@ -452,14 +452,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A8: Write down how to switch it on safely — the go-live section with gate G-WA's list, the deployment variables comment, the folder map, the map's extension line — docs/security-go-live.md, render.yaml, server/breadcrumbs.md, docs/restaurant/restaurant-map.md
 - [ ] A9: Run every check of this plan and hand Dandan the two phone checks — test:server, test:ci, build, server lint, the channel-name grep, the architecture gate, log-query; evidence into Execution Notes
 
-### Plan 698 — Upload a tour video from the phone, straight onto the venue page (`plans/698-venue-tour-video-upload-from-the-phone.plan.md`)
-- [ ] A1: Let the app upload a video to Cloudinary with progress
-- [ ] A2: Label an uploaded video as uploaded
-- [ ] A3: Add the one-tap upload button and progress to the venue page
-- [ ] A4: Prove the venue page flow with unit tests
-- [ ] A5: Add the Hebrew words
-- [ ] A6: Record the upload in the maps and run every `[auto]` check
-
 ### Plan 699 — Zones on the room map: every area has a colour and a shape, tables wear their area's colour, joined tables stand out
 - [ ] A1: Let an area carry a colour and a rectangle in the stored plan, and have the server refuse a zone outside the room or on top of another — the two optional fields, the two issue codes, starting colours — shared/schemas/entities/floor-plan.schema.ts, shared/schemas/front-desk/floor-plan-check.ts, server/test/floor-plan-check.test.js
 - [ ] A2: Write the zone cell arithmetic as pure tested functions — colorOf, rectFromCells, cellAtPoint (RTL), resizedRect, movedRect, rectsOverlap, rectInGrid, tableCentreIn — src/app/shared/floor-map/floor-zones.util.ts, src/app/shared/floor-map/floor-zones.util.spec.ts

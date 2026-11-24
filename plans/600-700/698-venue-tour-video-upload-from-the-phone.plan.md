@@ -1,6 +1,6 @@
 # Plan 698 — Upload a tour video from the phone, straight onto the venue page
 
-Status: draft
+Status: done
 Depends-on: 373
 Track: code
 Snapshot: e40c4787
