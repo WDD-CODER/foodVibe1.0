@@ -3,7 +3,7 @@ import { InboxBadgeService } from '@services/inbox-badge.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
-import { provideRouter, RouterLinkWithHref } from '@angular/router'
+import { provideRouter, Router, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
 import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -556,5 +556,72 @@ describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
     expect(hit === avatar || avatar.contains(hit)).toBeTrue()
     ;(hit as HTMLElement).click()
     expect(logout).toHaveBeenCalledTimes(1)
+  })
+})
+
+/** Plan 702: sign-out from the bare dashboard, where Angular ignores a navigation to the URL already shown. */
+describe('HeaderComponent logout (plan 702)', () => {
+  let component: HeaderComponent
+  let router: Router
+  const logout = jasmine.createSpy('logout').and.returnValue(of(null))
+
+  beforeEach(async () => {
+    logout.calls.reset()
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
+      providers: [
+        moduleStub,
+        inboxStub,
+        provideRouter([
+          { path: 'dashboard', children: [] },
+          { path: 'inventory', children: [] }
+        ]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => false,
+            user_: signal(null),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
+            logout
+          }
+        }
+      ]
+    }).compileComponents()
+    const fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+    component = fixture.componentInstance
+    router = TestBed.inject(Router)
+    spyOn(component as unknown as { _isCurrentRouteProtected(): boolean }, '_isCurrentRouteProtected').and.returnValue(
+      true
+    )
+  })
+
+  const doLogout = () => (component as unknown as { logout(): Promise<void> }).logout()
+
+  it('on /dashboard with no query it signs out and does not navigate', async () => {
+    await router.navigateByUrl('/dashboard')
+    const nav = spyOn(router, 'navigate').and.callThrough()
+    await doLogout()
+    expect(nav).not.toHaveBeenCalled()
+    expect(logout).toHaveBeenCalledTimes(1)
+  })
+
+  it('on /dashboard?tab=metadata it navigates first and signs out when that resolves true', async () => {
+    await router.navigateByUrl('/dashboard?tab=metadata')
+    const nav = spyOn(router, 'navigate').and.resolveTo(true)
+    await doLogout()
+    expect(nav).toHaveBeenCalledWith(['/dashboard'])
+    expect(logout).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not sign out when a guard cancels the navigation on another page', async () => {
+    await router.navigateByUrl('/inventory')
+    spyOn(router, 'navigate').and.resolveTo(false)
+    await doLogout()
+    expect(logout).not.toHaveBeenCalled()
   })
 })

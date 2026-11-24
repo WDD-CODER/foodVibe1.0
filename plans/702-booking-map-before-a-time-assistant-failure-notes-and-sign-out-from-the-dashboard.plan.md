@@ -154,7 +154,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `assistantFailureKey(reason)` and `showAssistantFailure(conversation)` in `src/app/core/utils/assistant-failure.util.ts` — family: none — rung: 4 — why: two pure functions shared by the inbox and the simulator (two pages, so not page-local); no util family covers assistant states.
-- The staff note under the thread (`.ai-failed-note`) — family: feedback — rung: 1 — why: a `role="status"` line with the registered `alert-triangle` icon and the text colour tokens, the inline-notice pattern of the floor-plan notice; no new `.c-*` class.
+- The staff note under the thread (`.ai-failed-note` in the simulator, `.ibx-ai-failed-note` in the inbox) — family: feedback — rung: 1 — why: a `role="status"` line with the registered `alert-triangle` icon and the text colour tokens, the inline-notice pattern of the floor-plan notice; no new `.c-*` class.
 - Reason lines of the suggestion bar — family: none — rung: 4 — why: one more input (`failKey`) on the inbox's page-local `app-suggestion-bar` (plan 682); no new piece.
 - The small map before a time is chosen — family: none — rung: 4 — why: the same `app-floor-map` the dialog already uses, shown under a wider condition; no new piece.
 
@@ -236,14 +236,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show the room and the info icon as soon as the booking window opens — map under plan_ only, choose-a-time line, taps ignored before a time, the whole room without an inner scroll — src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.ts, .html, .scss, .spec.ts
-- [ ] A2: Make sign-out work from the dashboard itself — skip the same-page navigation that Angular ignores, keep the unsaved-changes question elsewhere — src/app/core/components/header/header.component.ts, src/app/core/components/header/header.component.spec.ts
-- [ ] A3: Read the assistant's failure reason in the browser — suggest returns the reason, the shared util for keys and for when the note shows — src/app/core/services/conversation-data.service.ts, .spec.ts, src/app/core/utils/assistant-failure.util.ts, .spec.ts
-- [ ] A4: Tell the staff in Hebrew why the assistant stopped — the reason line in the suggestion bar, the note in the inbox thread and in the simulator — src/app/pages/inbox/components/suggestion-bar/*, src/app/pages/inbox/inbox.page.*, src/app/pages/frontdesk/simulator/simulator.page.*
-- [ ] A5: Add the nine Hebrew texts — public/assets/data/dictionary.json
-- [ ] A6: Record the new util where the next plan looks — src/app/core/breadcrumbs.md, docs/brain/inventory.md (src/app/pages/breadcrumbs.md and docs/brain/component-families.md only if a line there names a changed piece)
-- [ ] A7: Prove the three screen checks with short scripts — each signs in with signInQa and answers the calls itself, saves a screenshot — e2e/ui/702-1.spec.ts, e2e/ui/702-2.spec.ts, e2e/ui/702-3.spec.ts
-- [ ] A8: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
+- [x] A1: Show the room and the info icon as soon as the booking window opens — map under plan_ only, choose-a-time line, taps ignored before a time, the whole room without an inner scroll — src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.ts, .html, .scss, .spec.ts
+- [x] A2: Make sign-out work from the dashboard itself — skip the same-page navigation that Angular ignores, keep the unsaved-changes question elsewhere — src/app/core/components/header/header.component.ts, src/app/core/components/header/header.component.spec.ts
+- [x] A3: Read the assistant's failure reason in the browser — suggest returns the reason, the shared util for keys and for when the note shows — src/app/core/services/conversation-data.service.ts, .spec.ts, src/app/core/utils/assistant-failure.util.ts, .spec.ts
+- [x] A4: Tell the staff in Hebrew why the assistant stopped — the reason line in the suggestion bar, the note in the inbox thread and in the simulator — src/app/pages/inbox/components/suggestion-bar/*, src/app/pages/inbox/inbox.page.*, src/app/pages/frontdesk/simulator/simulator.page.*
+- [x] A5: Add the nine Hebrew texts — public/assets/data/dictionary.json
+- [x] A6: Record the new util where the next plan looks — src/app/core/breadcrumbs.md, docs/brain/inventory.md (src/app/pages/breadcrumbs.md and docs/brain/component-families.md only if a line there names a changed piece)
+- [x] A7: Prove the three screen checks with short scripts — each signs in with signInQa and answers the calls itself, saves a screenshot — e2e/ui/702-1.spec.ts, e2e/ui/702-2.spec.ts, e2e/ui/702-3.spec.ts
+- [x] A8: Run every check of this plan and hand Dandan the hand checks — test:ci, build, lint, lint:icons, lint:reuse, log-query; evidence into Execution Notes; then the human cards
 
 ## Technical Considerations
 - Dependencies: plan 701 (`reason` on the 502, `assistantFailed` in the shared schema — `Conversation` in
@@ -276,3 +276,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: on the bare dashboard, sign-out happens at once; the dashboard's only unsaved-changes case (`?tab=metadata`) is a different URL and still asks.
 - behaviour: "fix this answer" stays on assistant messages only (plan 682); a failed turn writes no message, so the staff note explains the handoff instead.
 - behaviour: the staff note hides as soon as anyone writes in the chat after the failure (`at` < `lastMessageAt`).
+- evidence: pnpm run build -> exit 0 (first try failed the 1 MB initial budget: a runtime import of the schema enum pulled zod in; the util now keeps the list locally with a type-only import)
+- evidence: pnpm run lint -> exit 0; lint:icons, lint:no-native-select, lint:reuse, override-check, plan-ledger-check, breadcrumbs-check, ci-scope-check, kit-manifest-check, log-query -> exit 0
+- evidence: pnpm run test:ci -> exit 0, 3093 SUCCESS (first run: 2 ExportService 5 s timeouts, unrelated; rerun once, green)
+- [ui] items 702-1..3: written, not run
+
+- Round 1 fix: build -> exit 0; lint -> exit 0; test:ci -> exit 0 (3093 SUCCESS); lint:icons, lint:no-native-select, lint:reuse, override/ledger/breadcrumbs/ci-scope/kit-manifest/kit-checks, log-query -> exit 0.

@@ -32,6 +32,8 @@ import { UserMsgService } from '@services/user-msg.service'
 import { API } from '@services/http-storage.adapter'
 import type { Booking } from '@models/booking.model'
 import type { ConversationRow, LinkedCard } from '@models/conversation.model'
+import type { AssistantFailureReason } from '@schemas/entities'
+import { assistantFailureKey, showAssistantFailure } from 'src/app/core/utils/assistant-failure.util'
 import { ReplyBoxComponent } from './components/reply-box/reply-box.component'
 import { SuggestionBarComponent, type SuggestionState } from './components/suggestion-bar/suggestion-bar.component'
 import { FixAnswerDialogComponent } from './components/fix-answer-dialog/fix-answer-dialog.component'
@@ -180,6 +182,15 @@ export class InboxPage {
   /** Plan 682: per conversation, the suggestion text a member dismissed or sent; a different text shows again. */
   private readonly hiddenSuggestion_ = signal<Record<string, string>>({})
   protected readonly sgState_ = signal<SuggestionState>('idle')
+  /** Plan 702: the last suggest failure reason per conversation. */
+  private readonly sgFailReason_ = signal<Record<string, AssistantFailureReason>>({})
+  protected readonly sgFailKey_ = computed(() =>
+    assistantFailureKey(this.sgFailReason_()[this.id_() ?? ''] ?? 'other', 'suggest')
+  )
+  protected readonly failNoteKey_ = computed(() => {
+    const c = this.data.thread_()?.conversation
+    return c?.assistantFailed && showAssistantFailure(c) ? assistantFailureKey(c.assistantFailed.reason, 'note') : null
+  })
   protected readonly sgError_ = signal<string | null>(null)
   protected readonly sgBusy_ = signal(false)
   /** The bar belongs to a conversation a member holds, while the 24-hour window is open. */
@@ -279,7 +290,10 @@ export class InboxPage {
         return rest
       })
       this.sgState_.set('idle')
-    } else this.sgState_.set('failed')
+    } else {
+      this.sgFailReason_.update((r) => ({ ...r, [id]: res.reason }))
+      this.sgState_.set('failed')
+    }
   }
 
   protected dismissSuggestion(): void {

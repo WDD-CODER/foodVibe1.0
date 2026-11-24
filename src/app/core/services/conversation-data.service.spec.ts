@@ -193,7 +193,20 @@ describe('ConversationDataService (plan 677)', () => {
       http
         .expectOne((r) => r.url.endsWith('/frontdesk/suggest'))
         .flush({ error: 'AI_FAILED' }, { status: 502, statusText: 'x' })
-      expect(await p).toEqual({ ok: false })
+      expect(await p).toEqual({ ok: false, reason: 'other' })
+    })
+
+    it('suggest returns the reason of a 502 AI_FAILED, and other for an unknown one', async () => {
+      const p = service.suggest('a')
+      http
+        .expectOne((r) => r.url.endsWith('/frontdesk/suggest'))
+        .flush({ error: 'AI_FAILED', reason: 'busy' }, { status: 502, statusText: 'x' })
+      expect(await p).toEqual({ ok: false, reason: 'busy' })
+      const q = service.suggest('a')
+      http
+        .expectOne((r) => r.url.endsWith('/frontdesk/suggest'))
+        .flush({ error: 'AI_FAILED', reason: 'weird' }, { status: 502, statusText: 'x' })
+      expect(await q).toEqual({ ok: false, reason: 'other' })
     })
 
     it('fixAnswer posts the correction and returns drafted', async () => {

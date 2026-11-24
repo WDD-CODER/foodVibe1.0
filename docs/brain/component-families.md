@@ -908,3 +908,10 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: callGemini({ fallback, deadlineMs }), failureReason(kind, status) in server/services/frontdesk-turn.js, assistantFailed, gemini-fallback.test.js.
 - When: any new unattended model call or failure reason; a second model-switching loop is never added.
 - Known copies: none.
+
+### assistant-failure — `assistantFailureKey(reason)`, `showAssistantFailure(conversation)`, the Reason lines of the suggestion bar, the small map before a time is chosen (plan 702)
+
+- Status: stable — plan 702
+- Use: `src/app/core/utils/assistant-failure.util.ts` — `assistantFailureKey(reason)` and `showAssistantFailure(conversation)`; the reason line of the inbox suggestion bar (input `failKey`); the small map before a time is chosen is the same `app-floor-map` in `src/app/pages/bookings/components/new-booking-dialog/new-booking-dialog.component.html`.
+- When: a page tells the host why a suggestion failed or why a chat was handed over (inbox, simulator).
+- Known copies: none.

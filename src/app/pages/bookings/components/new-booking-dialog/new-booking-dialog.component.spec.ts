@@ -50,7 +50,7 @@ describe('NewBookingDialogComponent (plan 672)', () => {
     type('nb-phone', '052-1234567')
   }
 
-  function setup(owner: boolean): { saved: jasmine.Spy; closed: jasmine.Spy } {
+  function setup(owner: boolean, plan: typeof ROOM | null = ROOM): { saved: jasmine.Spy; closed: jasmine.Spy } {
     create = jasmine.createSpy('create').and.resolveTo({ ok: true, booking: { tableKeys: [tableKeyOf(1)] } })
     availability = jasmine.createSpy('availability').and.callFake(() => Promise.resolve(SLOTS))
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
@@ -70,7 +70,7 @@ describe('NewBookingDialogComponent (plan 672)', () => {
         },
         {
           provide: FloorPlanDataService,
-          useValue: { plan_: signal(ROOM), ensureLoaded: () => Promise.resolve(), loadFailed_: signal(false) }
+          useValue: { plan_: signal(plan), ensureLoaded: () => Promise.resolve(), loadFailed_: signal(false) }
         },
         {
           provide: FrontDeskProfileDataService,
@@ -120,6 +120,36 @@ describe('NewBookingDialogComponent (plan 672)', () => {
     expect(byId('floor-table-1')?.getAttribute('aria-pressed')).toBe('true')
     expect(byId('floor-table-2')?.getAttribute('aria-pressed')).toBe('false')
     expect(byId('nb-offered')?.textContent).toContain('nb_offered')
+    flush()
+  }))
+
+  it('plan 702: the owner sees the map and the info button before a time is chosen; a tap changes nothing', fakeAsync(() => {
+    setup(true)
+    fillGuest()
+    expect(byId('nb-map')).toBeTruthy()
+    expect(byId('nb-pick-other')).toBeTruthy()
+    expect(byId('nb-pick-time')?.textContent).toContain('nb_pick_time_first')
+    expect(byId('nb-offered')).toBeNull()
+    ;(byId('floor-table-2') as HTMLElement).click()
+    fixture.detectChanges()
+    expect(byId('floor-table-2')?.getAttribute('aria-pressed')).toBe('false')
+    chooseTime('20:00')
+    expect(byId('nb-pick-time')).toBeNull()
+    expect(byId('nb-offered')).toBeTruthy()
+    save().click()
+    settle()
+    expect(create.calls.mostRecent().args[0].tableKeys).toBeUndefined()
+    flush()
+  }))
+
+  it('plan 702: staff see the map without the info button before a time; with no plan there is no map', fakeAsync(() => {
+    setup(false)
+    expect(byId('nb-map')).toBeTruthy()
+    expect(byId('nb-pick-other')).toBeNull()
+    flush()
+    TestBed.resetTestingModule()
+    setup(true, null)
+    expect(byId('nb-map')).toBeNull()
     flush()
   }))
 

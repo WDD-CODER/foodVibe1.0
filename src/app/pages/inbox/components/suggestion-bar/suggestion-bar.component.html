@@ -35,7 +35,7 @@
     </button>
   } @else {
     @if (state() === 'failed') {
-      <p class="sg-fail" role="alert" data-testid="suggestion-failed">{{ 'ibx_sg_failed' | translatePipe }}</p>
+      <p class="sg-fail" role="alert" data-testid="suggestion-failed">{{ failKey() | translatePipe }}</p>
     }
     <button type="button" class="c-btn-ghost" data-testid="suggestion-ask" (click)="ask.emit()">
       @if (state() === 'failed') {

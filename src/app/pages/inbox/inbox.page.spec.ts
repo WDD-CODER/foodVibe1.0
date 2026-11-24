@@ -339,6 +339,32 @@ describe('InboxPage (plan 677)', () => {
       expect(el().querySelector('[data-testid="suggestion-failed"]')).not.toBeNull()
     })
 
+    it('a failed suggest shows the line of its reason', async () => {
+      for (const reason of ['busy', 'timeout', 'quota', 'other']) {
+        humanWith()
+        ;(data['suggest'] as jasmine.Spy).and.resolveTo({ ok: false, reason })
+        await create('1')
+        click('suggestion-ask')
+        await fixture.whenStable()
+        fixture.detectChanges()
+        const key = reason === 'other' ? 'ibx_sg_failed' : 'ibx_sg_failed_' + reason
+        expect(text(el().querySelector('[data-testid="suggestion-failed"]'))).toBe(key)
+        fixture.destroy()
+        TestBed.resetTestingModule()
+      }
+    })
+
+    it('shows the handed-over note while assistantFailed.at >= lastMessageAt, and hides it after', async () => {
+      humanWith({ lastMessageAt: NOW - 1000, assistantFailed: { at: NOW - 1000, reason: 'busy' } })
+      await create('1')
+      expect(text(el().querySelector('[data-testid="ai-failed-note"]'))).toBe('ibx_ai_failed_busy')
+      fixture.destroy()
+      TestBed.resetTestingModule()
+      humanWith({ lastMessageAt: NOW - 500, assistantFailed: { at: NOW - 1000, reason: 'busy' } })
+      await create('1')
+      expect(el().querySelector('[data-testid="ai-failed-note"]')).toBeNull()
+    })
+
     it('fix opens the dialog under an assistant message, saves and shows the saved message', async () => {
       humanWith()
       await create('1')

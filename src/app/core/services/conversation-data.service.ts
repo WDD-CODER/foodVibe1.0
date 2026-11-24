@@ -5,6 +5,8 @@ import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
 import type { Conversation, ConversationRow, Message } from '@models/conversation.model'
+import type { AssistantFailureReason } from '@schemas/entities'
+import { toAssistantFailureReason } from '../utils/assistant-failure.util'
 
 const conversationsUrl = () => `${environment.apiUrl}${API.conversations}`
 const aiFrontdeskUrl = () => `${environment.apiUrl}${API.ai('frontdesk')}`
@@ -95,7 +97,7 @@ export class ConversationDataService {
   }
 
   /** Plan 682: asks the assistant for a fresh draft reply; the held conversation gets the new `suggestion`. */
-  async suggest(id: string): Promise<{ ok: true; suggestion: string } | { ok: false }> {
+  async suggest(id: string): Promise<{ ok: true; suggestion: string } | { ok: false; reason: AssistantFailureReason }> {
     try {
       const res = await firstValueFrom(
         this.http.post<{ suggestion: string }>(`${aiFrontdeskUrl()}/suggest`, { conversationId: id })
@@ -107,8 +109,9 @@ export class ConversationDataService {
       this.patchRow(id, { suggestion })
       return { ok: true, suggestion }
     } catch (err) {
-      this.logFailure('suggest', err)
-      return { ok: false }
+      const reason = toAssistantFailureReason((err as { error?: { reason?: unknown } }).error?.reason)
+      this.logFailure('suggest', err, reason)
+      return { ok: false, reason }
     }
   }
 
@@ -192,14 +195,14 @@ export class ConversationDataService {
     }
   }
 
-  private logFailure(name: string, err: unknown): void {
+  private logFailure(name: string, err: unknown, reason?: string): void {
     const status = (err as { status?: number }).status
     const code = (err as { error?: { error?: string } }).error?.error ?? ''
     const refused = status !== undefined && status >= 400 && status < 500
     this.logging[refused ? 'warn' : 'error']({
       event: `conversations.${name}_${refused ? 'refused' : 'failed'}`,
       message: 'Conversations call failed',
-      context: { status: String(status ?? ''), code }
+      context: { status: String(status ?? ''), code, ...(reason ? { reason } : {}) }
     })
   }
 }
