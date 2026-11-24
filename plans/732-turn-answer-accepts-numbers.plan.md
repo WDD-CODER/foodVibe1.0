@@ -54,6 +54,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 shared/schemas/front-desk/turn-answer.schema.ts
 server/generated/schemas/front-desk/turn-answer.schema.js
 server/test/frontdesk-turn.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
