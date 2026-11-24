@@ -4267,6 +4267,16 @@
       "notes": "Plan 715: the recipe book and recipe builder sit on the shared empty state, panel, chips, buttons and tokens and pass the style guard."
     },
     {
+      "path": "scripts/test/style-716.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 716: the cook view keeps its ink skin on tokens, the shared empty state and the four icon sizes, and passes the style guard."
+    },
+    {
       "path": "scripts/test/style-714.test.mjs",
       "tier": "project",
       "action": "stay",
