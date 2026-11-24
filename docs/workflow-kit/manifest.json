@@ -4307,6 +4307,17 @@
       "notes": "Plan 716: the cook view keeps its ink skin on tokens, the shared empty state and the four icon sizes, and passes the style guard."
     },
     {
+      "path": "scripts/test/style-718.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs",
+        "scripts/lib/registry-families.mjs"
+      ],
+      "notes": "Plan 718: runs the style guard over every file plans 704–717 converged and checks the three new reuse-lint rules."
+    },
+    {
       "path": "scripts/test/style-717.test.mjs",
       "tier": "project",
       "action": "stay",
