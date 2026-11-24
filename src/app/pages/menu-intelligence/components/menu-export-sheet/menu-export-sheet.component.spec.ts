@@ -33,6 +33,18 @@ describe('MenuExportSheetComponent', () => {
     expect(sheet.classList).toContain('is-open')
   })
 
+  it('is centred inside the window when open and capped in height', () => {
+    open()
+    const sheet = fixture.debugElement.query(By.css('.mes-sheet')).nativeElement as HTMLElement
+    const box = sheet.getBoundingClientRect()
+    expect(box.top).toBeGreaterThanOrEqual(0)
+    expect(box.bottom).toBeLessThanOrEqual(window.innerHeight)
+    const leftGap = box.left
+    const rightGap = document.documentElement.clientWidth - box.right
+    expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(2)
+    expect(getComputedStyle(sheet).maxBlockSize).not.toBe('none')
+  })
+
   it('emits close on backdrop click', () => {
     open()
     const spy = jasmine.createSpy('close')

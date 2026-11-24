@@ -21,9 +21,6 @@ const ALLOW = [
   { rule: 'bottom-sheet', file: 'src/styles.scss', selector: '.m-sheet', why: 'retired by plan 720: no template sets the class; the hotspot is append-only' },
   { rule: 'bottom-sheet', file: 'src/styles.scss', selector: '.m-sheet-card', why: 'retired by plan 720: no template sets the class; the hotspot is append-only' },
   { rule: 'bottom-sheet', file: 'src/styles.scss', selector: '&.as-modal', why: 'dead since plan 711: nothing sets as-modal; the hotspot is append-only' },
-  { rule: 'bottom-sheet', file: 'src/app/pages/frontdesk/floor-plan/floor-plan.page.scss', selector: '.floor-plan__panel.floor-plan__panel--open', why: 'plan 721 makes the phone panel inline' },
-  { rule: 'bottom-sheet', file: 'src/app/shared/partial-cost-badge/partial-cost-badge.component.scss', selector: '.partial-popover', why: 'plan 721 places it beside the chip' },
-  { rule: 'top-sheet', file: 'src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.scss', selector: '.mes-sheet', why: 'plan 721 centres it' },
   { rule: 'modal-no-scroll', file: 'src/app/pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog.component.scss', selector: ':host ::ng-deep .closing-card', why: 'the card is a column whose list scrolls (scss line 69)' },
   { rule: 'modal-no-scroll', file: 'src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss', selector: ':host ::ng-deep .quick-edit-product-modal', why: 'its panel scrolls (quick-edit-product-panel.component.scss:17-20)' }
 ]

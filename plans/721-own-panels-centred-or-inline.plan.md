@@ -232,12 +232,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show the floor editor's phone panel in the page under the map and scroll to it when it opens — src/app/pages/frontdesk/floor-plan/floor-plan.page.html, .scss, .ts, .spec.ts
-- [ ] A2: Place the missing-prices box beside its chip on a phone too — src/app/shared/partial-cost-badge/partial-cost-badge.component.scss, .ts, .spec.ts
-- [ ] A3: Centre the menu export sheet with a header that stays — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.scss, .spec.ts
-- [ ] A4: Size the export preview by the visible screen — src/app/shared/export-preview/export-preview.component.scss, .spec.ts
-- [ ] A5: Let the guard cover these files: drop their allow entries — scripts/test/style-720.test.mjs
-- [ ] A6: Update the registry and the folder maps, regenerate the inventory — docs/brain/component-families.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/inventory.md
+- [x] A1: Show the floor editor's phone panel in the page under the map and scroll to it when it opens — src/app/pages/frontdesk/floor-plan/floor-plan.page.html, .scss, .ts, .spec.ts
+- [x] A2: Place the missing-prices box beside its chip on a phone too — src/app/shared/partial-cost-badge/partial-cost-badge.component.scss, .ts, .spec.ts
+- [x] A3: Centre the menu export sheet with a header that stays — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.scss, .spec.ts
+- [x] A4: Size the export preview by the visible screen — src/app/shared/export-preview/export-preview.component.scss, .spec.ts
+- [x] A5: Let the guard cover these files: drop their allow entries — scripts/test/style-720.test.mjs
+- [x] A6: Update the registry and the folder maps, regenerate the inventory — docs/brain/component-families.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/inventory.md
 
 ## Technical Considerations
 - Dependencies: plan 720 (token `--modal-max-block`, `scripts/lib/modal-guard.mjs`, `scripts/test/style-720.test.mjs`).

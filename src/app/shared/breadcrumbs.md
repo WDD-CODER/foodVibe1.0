@@ -42,7 +42,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `front-desk-status-banner/` | One-line amber notice when the front desk is suspended (plan 557) | FrontDeskStatusBannerComponent |
 | `modal-shell/` | The one popup shell: engines + dialog role, Escape (top-most only), focus trap; centred at every width, body scrolls (plan 720) | ModalShellComponent |
 | `nutrition-badge/` | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
-| `partial-cost-badge/` | "חלקי" badge + missing-prices popover (owner can price in place) | PartialCostBadgeComponent |
+| `partial-cost-badge/` | "חלקי" badge + missing-prices popover, beside its chip on every screen (owner can price in place) | PartialCostBadgeComponent |
 | `page-header/` | Standard page title bar: title, subtitle, result-count pill, back link | PageHeaderComponent |
 | `supplier-picker/` | Truck button + popover: pick which priced supplier a line is bought from (owner only) | SupplierPickerComponent |
 | `search-combobox/` | Search box with a results list, keyboard (rule K) and one add option (family search-combobox) | SearchComboboxComponent, SearchPick, SearchAddPick |
