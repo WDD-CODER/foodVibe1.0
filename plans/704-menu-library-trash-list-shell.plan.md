@@ -69,6 +69,8 @@ src/app/pages/menu-library/components/menu-library-list/menu-library-list.compon
 src/app/pages/trash/**
 src/app/pages/trash/trash.page.spec.ts
 scripts/test/style-704.test.mjs
+src/app/pages/dashboard/dashboard.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
