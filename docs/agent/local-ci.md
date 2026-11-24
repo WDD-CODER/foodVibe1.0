@@ -66,6 +66,20 @@ Before a release (the kit: before the tag), on a folder at `origin/<main>` with 
 release-only ones included, nothing reused. It posts the `local-ci` status on that commit and writes a receipt with
 `tier: "release"`. A HEAD that is not `origin/<main>` is refused (exit 2). `--dry-run` prints the list.
 
+## One heavy job on this PC at a time
+
+Local CI, `ship-prep.mjs --gate` and every orchestrator gate, merge check and final gate take one lock for the whole PC
+(`~/.ai-workflow-kit/heavy.lock`), whichever session, project or run started them: a second one prints
+`HEAVY_LOCK: waiting — <who> holds it` and starts when the first ends. Two test suites at once each run 2–3 times
+slower, so taking turns finishes both sooner. Builders, reviewers and a gate of only seconds-long checks never wait.
+A holder whose process is gone (a crash, a restart) is taken over at once. A command typed by hand (`pnpm test`) does
+not take it. `KIT_HEAVY_LOCK=off` turns it off for one command.
+
+Before it joins the queue, local CI waits for 4 GB of free memory (`LOCAL_CI: waiting — <n> GB free`, a line every
+10 minutes, at most 120 minutes, then it starts anyway; `KIT_CI_MIN_FREE_GB` sets the floor, `0` turns it off), so a
+CI waiting for memory never holds the lock. It runs at below-normal priority, so the checks it starts leave the CPU to
+builders and the Human's own work.
+
 ## The merge guard
 
 `gh pr merge` still needs the Human's yes. With failing checks it allows the merge only when **every** failing check is

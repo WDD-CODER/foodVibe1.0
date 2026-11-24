@@ -80,6 +80,7 @@ import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots, retryGit
 import { removeMergedBuilder } from './worktree-clean.mjs'
 import { agreementStats, addLesson, lessonParts, ruleLines, LESSON_ROLES } from './decision-log.mjs'
 import { failingLines, planWithoutNotes, triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, planLines, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES, askCard, ASK_ID_RE, scorecard } from './lib/orch-run.mjs'
+import { selfDecidedSection } from './lib/ask-advisor.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const MAIN = 'main'
@@ -184,7 +185,12 @@ function emit(result, lines = []) {
 const fail = (error, extra = {}) => emit({ ok: false, error, ...extra }, [`ORCH_STATE: FAIL — ${error}`])
 if (parsed.problem) fail(parsed.problem)
 
-// Run notes: pushed to status.notes in order (`note`, and `--note "a || b"` on set for this plan).
+/** The report's "## Decided without you", right after the summary: before "## Plans", else at the end. */
+function withSelfDecided(status, report) {
+  const block = selfDecidedSection(status.selfDecided).join('\n')
+  const at = report.indexOf('\n## Plans\n')
+  return at < 0 ? `${report}\n\n${block}\n` : `${report.slice(0, at + 1)}${block}\n\n${report.slice(at + 1)}`
+}
 /** The report's "## Plans changed during the run" section (from status.plansChanged), placed before the run notes. */
 function withPlansChanged(status, report) {
   const list = Array.isArray(status.plansChanged) ? status.plansChanged : []
@@ -194,6 +200,7 @@ function withPlansChanged(status, report) {
   return at < 0 ? `${report}\n\n${block.join('\n')}` : `${report.slice(0, at)}${block.join('\n')}\n${report.slice(at)}`
 }
 
+// Run notes: pushed to status.notes in order (`note`, and `--note "a || b"` on set for this plan).
 function addNotes(status, items) {
   status.notes ??= []
   // An item with an id is recorded once: a rerun or a re-sent queue carries the same ids (status.noteIds).
@@ -1593,6 +1600,24 @@ const commands = {
     emit(r)
   },
 
+  // What the run decided without the Human: the advisor's answers, staged .claude writes, a plan file copied
+  // from main, a weakened test. --b64: base64 of a JSON list of { plan, kind, what, why, undo }; appended to
+  // status.selfDecided, which `finish` writes as the report's "## Decided without you".
+  'self-decided'() {
+    const run = runName()
+    let items
+    try {
+      items = JSON.parse(Buffer.from(String(args.b64 ?? ''), 'base64').toString('utf8'))
+    } catch (e) {
+      fail(`--b64 is not base64 of a JSON list: ${e.message}`)
+    }
+    if (!Array.isArray(items) || !items.length || items.some((i) => !i || typeof i !== 'object' || !String(i.what ?? '').trim())) fail('--b64 must hold a non-empty JSON list of { plan, kind, what, why, undo }')
+    const status = needStatus(run)
+    status.selfDecided ??= []
+    for (const i of items) status.selfDecided.push({ plan: String(i.plan ?? ''), kind: String(i.kind ?? '').slice(0, 40), what: String(i.what).slice(0, 600), why: String(i.why ?? '').slice(0, 400), undo: String(i.undo ?? '').slice(0, 400), at: new Date().toISOString() })
+    writeStatus(run, status)
+    emit({ ok: true, count: items.length, selfDecided: status.selfDecided.length })
+  },
   // Every decision (and repeat marker) of a run in one call: --b64 is the base64 of a JSON list; each item holds the
   // flags of one `decision` call as keys (plan, id, text, verdict, kind, confidence, rec, why — or plan, dup-of, text,
   // role, round). Same rules per item; one bad item exits 1 and writes nothing.
@@ -1857,7 +1882,7 @@ function publishReport(run, status, { merged, slots, message, brain }) {
     } catch (e) {
       learnError = e.message
     }
-    const report = withPlansChanged(status, formatReport({ status, merged, mainShaNow, finishedAt: status.finishedAt, runBranch: branch, mainBranch: MAIN, mainChangedFiles, appErrors, decisions: status.decisions ?? [], triage, learning: learned ? { budget: learned.budget.line, trend: learned.trend.line } : null, score: (() => { try { return scoreOf(join(runsDir(), run), status) } catch { return null } })() }))
+    const report = withSelfDecided(status, withPlansChanged(status, formatReport({ status, merged, mainShaNow, finishedAt: status.finishedAt, runBranch: branch, mainBranch: MAIN, mainChangedFiles, appErrors, decisions: status.decisions ?? [], triage, learning: learned ? { budget: learned.budget.line, trend: learned.trend.line } : null, score: (() => { try { return scoreOf(join(runsDir(), run), status) } catch { return null } })() })))
     // What the command prints: this launch's decisions, and an earlier launch's that has no grade for this run yet.
     const attempt = status.attempts ?? 1
     const inView = decisionsInView(status.decisions ?? [], { attempt, run, gradeRows })

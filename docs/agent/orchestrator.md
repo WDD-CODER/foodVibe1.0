@@ -41,6 +41,7 @@ now are ignored by install and sync with a `NOTE orchestrator: <key> removed` li
 | `mergeChecks` | `build` | What the merge step runs on the merged tree: `build` = the project build plus the plan's scope check, `full` = the plan's whole check list on every merge |
 | `ciMirror` | `["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]` | CI commands (`npm run <script>`, `pnpm run <script>`, `node scripts/…` or `node tools/…`, no write flag) the final gate runs after the project checks and the kit manifest check. Install and sync print a `NOTE ci-mirror:` line for each CI command the final gate does not run; they never write the list |
 | `finalGate` | `full` | `full` (default) = the final gate runs every `ciMirror` command again; `ci` = it runs the project checks and only the suites the run changed and that have not passed on the run branch's files; CI runs the full set on the pull request. Install and sync print `NOTE final-gate: ci — <command> is not run by any CI workflow` for a `ciMirror` command no workflow runs. See "What a gate runs" |
+| `builderTests` | `{{orchestrator.builderTests}}` | Optional, not in the scaffold. `full` (default) = the builder runs every gate check before it reports; `focused` = it runs the cheap checks (build, lint, the `node …` checks, the plan's own `[auto]` commands) and only the tests its change needs (`node scripts/lib/builder-tests.mjs --base origin/<run branch>` lists them: the test files it changed plus the tests that name a changed file); the whole suites go to the gate, whose list never changes. Try it for a week and compare the scorecards' `building` minutes and fix rounds |
 | `suiteTouches` | `[{"command":"pnpm run test:ci","touches":["src/**","public/**","shared/**","angular.json","tsconfig*.json","karma.conf.*"]},{"command":"pnpm run test:server","touches":["server/**","shared/**"]}]` | Optional `[{ "command", "touches": [globs] }]` for the test script (skipped when no changed file matches, reused from the cache) and a plan's own `[auto]` commands (reused only). Unset: both always run. See "What a gate runs" |
 | `prepare` | `[{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]` | Files the gate generates before the tests: `{ "missing": "<path>", "script": "<npm script>", "in": "<folder, default .>" }`, run as `node scripts/orch-state.mjs prepare …` first in every plan gate and the final gate, only when the path is absent |
 | `useSlots` | `false` | Whether a builder takes an idle `wt-N` slot before making its own folder. The scaffold says `false`: builders get folders of their own (one per plan in flight, at most `concurrency`), and the Human's slots stay free |
@@ -128,7 +129,10 @@ two marked **model**.
      worktree `.env` gets the two keys at install). A card signs in when it says so ("log in", "signed in", "as the
      admin user", "role: admin"), or every card does when `.env` sets `ORCH_UI_LOGIN_URL` (an app whose pages all need
      a signed-in user); a card on a page anyone can open needs no login. `--approve-asks` is the Human's `approve`: the paths are written into
-     the plan's scope block on the run branch before the run starts. `node tools/replay-asks.mjs <project>` (kit repo)
+     the plan's scope block on the run branch before the run starts. Without it the advisor answers the tests-and-manifest
+     question itself when the paths pass its scope rule (named files, none sensitive, at most 5) — the dry run says
+     `readiness asks: answered by the advisor` and the report lists it under "Questions up front"; a missing QA login
+     still makes only that plan `NOT READY`. `node tools/replay-asks.mjs <project>` (kit repo)
      measures it on the recorded asks.
    - **Asks.** Every question a run raises is one file, `.claude/orchestrator-runs/<run>/asks/<NNN>-<n>.json`:
      `{ id, plan, kind, question, options[], recommendation, humanOnly, context }` (the recommended option is stored
@@ -150,6 +154,29 @@ two marked **model**.
      `ANSWER` in the builder's prompt, and then the plans it held. An answer file with `by: advisor` on a `humanOnly`
      ask is refused with a run note and the ask stays open. An ask unanswered after `ASK_PARK_MIN` (24 h) parks its
      plan with its question in the run notes; a plan asks at most 3 times in one run.
+   - **The advisor** (`lib/ask-advisor.mjs`, rules in code, no model call) answers a low-risk ask the moment it is
+     written (`by: advisor`), and the plan goes on at the end of its wave through the same path a Human's answer takes
+     (an answer already on disk is never replaced): a `scope` ask whose paths — taken only from its `approved:` option
+     or the question's backticked paths — are all inside the repo, named files (no glob), not sensitive (`isSensitive`), not `.env*`,
+     `package.json`, a lockfile, `.github/`, `.husky/`, a migration, `plans/`, the invariants or the Human's decisions,
+     and at most 5 granted paths per plan per run → `approved: <paths>`; a `technical` ask → one `retry:` on the
+     judgment tier, the next one `park:` — and `park:` at once when the judgment-tier builder already failed (INV-1:
+     no third builder); a `review` ask → one `review again:`, the next `park:`; an `environment` ask (after the run's own
+     repair) → one `retry:` when it offers one, the next `park:`, and `park:` at once when it has nothing to retry (a
+     login only the Human can add) — parking stops only that plan. `unstated` and every `humanOnly` kind wait for the
+     Human. Only an ask the advisor did not answer goes to the desktop and the phone (`lib/notify.mjs`); so does the end
+     of a run (finished or stopped; not a rate-limit stop, which the supervisor relaunches). Off for one run with
+     `--no-advisor`, for one plan with an `Advisor: off` line. `node tools/replay-asks.mjs --advisor <project>` (kit repo) replays the recorded asks.
+   - **Decided without you.** Every advisor answer, a plan file copied from `main` (saved after the run branch was cut:
+     copied in one commit, no ask), a staged `.claude/` file put in place, and an existing test the plan made weaker
+     (fewer `assert`/`expect` calls, or an added skip/only/todo) is recorded with `orch-state.mjs self-decided` and
+     written as the report's `## Decided without you`, right after the summary, each with why and how to undo it,
+     grouped: questions up front, scope, retry or park, environment, written a different way, tests that check less.
+   - **Staged `.claude/` files.** Claude Code refuses a headless builder any edit under a `.claude/` path. The builder
+     writes the whole file to `.kit/staged-claude/<path, each .claude as _claude>`; after the builder, the run writes it
+     to its target when the plan's scope allows it (else a `scope` ask), removes the stage, runs `tools/sync.mjs` in the
+     kit repo for a `core/` source, and commits on the plan branch. The report names it "written a different way —
+     permanent fix still open".
 4. **Final gate** on the run branch (`prepare`, the project checks, the manifest check, `ciMirror`). Every one of
    those commands is also in each plan's own gate (the manifest check reads the plan's folder), so the final gate finds
    nothing a plan's gate did not. When it still fails on a command whose output names a file that exactly one merged
@@ -303,6 +330,10 @@ guard hooks; a hook's deny wins over `--allowedTools`. With no such hooks the ru
 unguarded. The reviewer gets its read tools and no Bash (its diff and the gate receipt come inline in the prompt), and
 is refused when the review folder holds a `.claude/settings.local.json`.
 `RUN_PLANS_CLAUDE` replaces `claude` (tests pass a fake).
+
+A gate, a merge check and the final gate wait for the PC-wide heavy-job lock when another session's gate or local CI
+holds it (`HEAVY_LOCK: waiting — …` in the console log; `docs/agent/local-ci.md` → One heavy job on this PC at a time).
+The waiting plan stays in `gate`; builders and reviewers never wait for it.
 
 ## Running beside a Planner session
 
