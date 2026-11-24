@@ -36,20 +36,20 @@ Verified on `chore/restaurant-staging` (`dcf66fec`, 2026-11-24):
   [class.floor-plan__panel--open]="sheetOpen_()" data-testid="fp-panel">`), `:222-240` the head with `fp-sheet-close`,
   `:273-277` `fp-room-open`. Class `floor-plan.page.ts:102` `panelEl`, `:129-132` `roomOpen_`, `sheetH_`, `:169-171`
   `sheetOpen_`, `:231-237` the `ResizeObserver` effect that fills `sheetH_`, `:238-247` the effect that scrolls the
-  selected table into view, `:383-387` `closeSheet()`. Spec `floor-plan.page.spec.ts:590-596` (room panel opens / the
+  selected table into view, `:383-387` `closeSheet()`. Spec `src/app/pages/frontdesk/floor-plan/floor-plan.page.spec.ts:590-596` (room panel opens / the
   close clears it).
 - Missing-prices box: `src/app/shared/partial-cost-badge/partial-cost-badge.component.scss:52-66` — two phone blocks:
   `inset-block: auto var(--space-4); inset-inline: var(--space-4); inline-size: auto; &::before { content: none }` and
   `inset-block-end: calc(var(--tabbar-h) + var(--space-2) + env(safe-area-inset-bottom, 0px))`. Class
   `partial-cost-badge.component.ts:31` imports `PHONE_QUERY`, `:34` `const MOBILE_QUERY = PHONE_QUERY`, `:311-334`
   `place_()` returns early on a phone ("Full-width bottom sheet"), `:336-341` `isMobile_()`. Spec
-  `partial-cost-badge.component.spec.ts:384-391` "leaves the inline position unset on a phone, where the scss pins a
+  `src/app/shared/partial-cost-badge/partial-cost-badge.component.spec.ts:384-391` "leaves the inline position unset on a phone, where the scss pins a
   full-width bottom sheet"; `forceLayout(mobile)` at `:336-341`.
 - Menu export sheet: `src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.scss:28-76`
   `.mes-sheet` (`position: fixed; inset-block-start: 0; inset-inline: 0; max-block-size: 80dvh; max-inline-size: 40rem;
   margin-inline: auto`, `padding-block-start` with the top safe area, `overflow-y: auto`, only the bottom corners
   rounded, `border-block-start: none`, `transform: translateY(-100%)` → `translateY(0)` when `.is-open`); header
-  `.mes-header` `:78`. Spec `menu-export-sheet.component.spec.ts:30-33` (the `is-open` class).
+  `.mes-header` `:78`. Spec `src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.spec.ts:30-33` (the `is-open` class).
 - Export preview: `src/app/shared/export-preview/export-preview.component.scss:21-41` `.export-preview-paper-wrap`
   (`max-block-size: 90vh`, `overflow: hidden`; `.paper` `:73-84` scrolls).
 - From plan 720: the token `--modal-max-block`, `scripts/lib/modal-guard.mjs` (`modalFindings`) and the allow list in
@@ -67,7 +67,7 @@ editor's phone panel sits in the page under the map, the missing-prices box open
 sheet and the export preview are centred and never taller than the visible screen.
 
 - [auto] `pnpm run test:scripts` passes, including `scripts/test/style-720.test.mjs` after this plan removes its four "plan 721" allow entries (`.floor-plan.floor-plan--sheet`, `.floor-plan__panel.floor-plan__panel--open`, the phone `.partial-popover` block, `.mes-sheet`): `modalFindings` over `src/` returns only the entries left on the list.
-- [auto] `pnpm run test:ci` passes, including: `floor-plan.page.spec.ts` — the section never has the class `floor-plan--sheet` nor a `--fp-sheet-h` style; the room panel still opens from `fp-room-open` and `fp-sheet-close` closes it (`:590-596` unchanged); with `window.matchMedia` stubbed to match the phone query, opening the room panel calls `scrollIntoView` on `[data-testid="fp-panel"]` with `{ block: 'nearest' }`, and with it not matching, it does not; `partial-cost-badge.component.spec.ts` — the case at `:384-391` is replaced by "places the popover beside the chip on a phone too" (`forceLayout(true)`, chip at `left: 0; top: 300px`: `style.left` and `style.top` are set, the box is inside the viewport as in the desktop cases); `menu-export-sheet.component.spec.ts` — after open, the `.mes-sheet` box's top ≥ 0, bottom ≤ `window.innerHeight`, and its left and right gaps to the window differ by at most 2 px; its computed `max-block-size` is not `none`; `export-preview.component.spec.ts` (if the folder has none, the worker adds it) — the `.export-preview-paper-wrap` box's bottom ≤ `window.innerHeight` when the paper holds 80 lines.
+- [auto] `pnpm run test:ci` passes, including: `src/app/pages/frontdesk/floor-plan/floor-plan.page.spec.ts` — the section never has the class `floor-plan--sheet` nor a `--fp-sheet-h` style; the room panel still opens from `fp-room-open` and `fp-sheet-close` closes it (`:590-596` unchanged); with `window.matchMedia` stubbed to match the phone query, opening the room panel calls `scrollIntoView` on `[data-testid="fp-panel"]` with `{ block: 'nearest' }`, and with it not matching, it does not; `src/app/shared/partial-cost-badge/partial-cost-badge.component.spec.ts` — the case at `:384-391` is replaced by "places the popover beside the chip on a phone too" (`forceLayout(true)`, chip at `left: 0; top: 300px`: `style.left` and `style.top` are set, the box is inside the viewport as in the desktop cases); `src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.spec.ts` — after open, the `.mes-sheet` box's top ≥ 0, bottom ≤ `window.innerHeight`, and its left and right gaps to the window differ by at most 2 px; its computed `max-block-size` is not `none`; `src/app/shared/export-preview/export-preview.component.spec.ts` (if the folder has none, the worker adds it) — the `.export-preview-paper-wrap` box's bottom ≤ `window.innerHeight` when the paper holds 80 lines.
 - [auto] `pnpm run build` passes; `pnpm run lint` exits 0; `pnpm run lint:reuse` exits 0; `node scripts/reuse-lint.mjs --check-registry` exits 0; `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] the floor editor on a phone · window 390×844, `/frontdesk/floor-plan` → tap a table · the table's panel appears in the page right under the room map (the page scrolls to it), not stuck to the bottom of the screen; the X closes it
@@ -99,7 +99,6 @@ src/app/shared/partial-cost-badge/partial-cost-badge.component.spec.ts
 src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.scss
 src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.spec.ts
 src/app/shared/export-preview/export-preview.component.scss
-src/app/shared/export-preview/export-preview.component.spec.ts
 src/app/shared/export-preview/export-preview.component.spec.ts
 scripts/test/style-720.test.mjs
 src/app/pages/breadcrumbs.md
@@ -176,7 +175,7 @@ line or file this plan names was removed, renamed or rewritten).
   `partial-cost-badge.component.ts:336-341`), `queueMicrotask(() => this.panelEl()?.nativeElement.scrollIntoView?.({
   block: 'nearest' }))`. The previous value is held in a private plain field (`private wasOpen_ = false`), not a signal.
   Declared after the selected-table effect, so the panel scroll runs last.
-- [ ] `floor-plan.page.spec.ts`: the three cases named in Done when.
+- [ ] `src/app/pages/frontdesk/floor-plan/floor-plan.page.spec.ts`: the three cases named in Done when.
 
 **Missing-prices box — beside its chip at every width**
 - [ ] `partial-cost-badge.component.scss:52-66`: delete both phone blocks (the bottom pin and the tab-bar lift). The
@@ -184,7 +183,7 @@ line or file this plan names was removed, renamed or rewritten).
   `max-block-size: min(24rem, 70dvh)`.
 - [ ] `partial-cost-badge.component.ts`: delete the phone branch of `place_()` (`:314-321`), `isMobile_()`
   (`:336-341`), `MOBILE_QUERY` (`:34`) and the `PHONE_QUERY` import when nothing else uses it.
-- [ ] `partial-cost-badge.component.spec.ts`: replace the case at `:384-391` as named in Done when; `forceLayout`
+- [ ] `src/app/shared/partial-cost-badge/partial-cost-badge.component.spec.ts`: replace the case at `:384-391` as named in Done when; `forceLayout`
   stays for it.
 
 **Menu export sheet — centred**
@@ -196,12 +195,12 @@ line or file this plan names was removed, renamed or rewritten).
   transform: none; visibility: visible`, transitions on `opacity` and `transform` 200 ms (the reduced-motion block
   stays). `overflow-y: auto` stays; `.mes-header` gets `position: sticky; inset-block-start: calc(-1 *
   var(--space-4)); z-index: 1; background: inherit` so the title and the X stay while the options scroll.
-- [ ] `menu-export-sheet.component.spec.ts`: the case named in Done when.
+- [ ] `src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.spec.ts`: the case named in Done when.
 
 **Export preview**
 - [ ] `export-preview.component.scss:33` `.export-preview-paper-wrap`: `max-block-size: 90vh` →
   `max-block-size: var(--modal-max-block)`.
-- [ ] `export-preview.component.spec.ts`: the case named in Done when (create the spec if the folder has none,
+- [ ] `src/app/shared/export-preview/export-preview.component.spec.ts`: the case named in Done when (create the spec if the folder has none,
   with the component's existing inputs).
 
 **Guard, registry and maps**
