@@ -41,7 +41,7 @@ now are ignored by install and sync with a `NOTE orchestrator: <key> removed` li
 | `mergeChecks` | `build` | What the merge step runs on the merged tree: `build` = the project build plus the plan's scope check, `full` = the plan's whole check list on every merge |
 | `ciMirror` | `["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs","node scripts/ci-scope-check.mjs --checkout-branch"]` | CI commands (`npm run <script>`, `pnpm run <script>`, `node scripts/…` or `node tools/…`, no write flag) the final gate runs after the project checks and the kit manifest check. Install and sync print a `NOTE ci-mirror:` line for each CI command the final gate does not run; they never write the list |
 | `finalGate` | `full` | `full` (default) = the final gate runs every `ciMirror` command again; `ci` = it runs the project checks and only the suites the run changed and that have not passed on the run branch's files; CI runs the full set on the pull request. Install and sync print `NOTE final-gate: ci — <command> is not run by any CI workflow` for a `ciMirror` command no workflow runs. See "What a gate runs" |
-| `builderTests` | `{{orchestrator.builderTests}}` | Optional, not in the scaffold. `full` (default) = the builder runs every gate check before it reports; `focused` = it runs the cheap checks (build, lint, the `node …` checks, the plan's own `[auto]` commands) and only the tests its change needs (`node scripts/lib/builder-tests.mjs --base origin/<run branch>` lists them: the test files it changed plus the tests that name a changed file); the whole suites go to the gate, whose list never changes. Try it for a week and compare the scorecards' `building` minutes and fix rounds |
+| `builderTests` | `full` | Optional, not in the scaffold. `full` (default) = the builder runs every gate check before it reports; `focused` = it runs the cheap checks (build, lint, the `node …` checks, the plan's own `[auto]` commands) and only the tests its change needs (`node scripts/lib/builder-tests.mjs --base origin/<run branch>` lists them: the test files it changed plus the tests that name a changed file); the whole suites go to the gate, whose list never changes. Try it for a week and compare the scorecards' `building` minutes and fix rounds |
 | `suiteTouches` | `[{"command":"pnpm run test:ci","touches":["src/**","public/**","shared/**","angular.json","tsconfig*.json","karma.conf.*"]},{"command":"pnpm run test:server","touches":["server/**","shared/**"]}]` | Optional `[{ "command", "touches": [globs] }]` for the test script (skipped when no changed file matches, reused from the cache) and a plan's own `[auto]` commands (reused only). Unset: both always run. See "What a gate runs" |
 | `prepare` | `[{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]` | Files the gate generates before the tests: `{ "missing": "<path>", "script": "<npm script>", "in": "<folder, default .>" }`, run as `node scripts/orch-state.mjs prepare …` first in every plan gate and the final gate, only when the path is absent |
 | `useSlots` | `false` | Whether a builder takes an idle `wt-N` slot before making its own folder. The scaffold says `false`: builders get folders of their own (one per plan in flight, at most `concurrency`), and the Human's slots stay free |
@@ -158,7 +158,7 @@ two marked **model**.
      written (`by: advisor`), and the plan goes on at the end of its wave through the same path a Human's answer takes
      (an answer already on disk is never replaced): a `scope` ask whose paths — taken only from its `approved:` option
      or the question's backticked paths — are all inside the repo, named files (no glob), not sensitive (`isSensitive`), not `.env*`,
-     `package.json`, a lockfile, `.github/`, `.husky/`, a migration, `plans/`, the invariants or the Human's decisions,
+     `package.json`, a lockfile, `.github/`, `.husky/`, any `.claude/` folder, `.kit/`, a migration, `plans/`, the invariants or the Human's decisions,
      and at most 5 granted paths per plan per run → `approved: <paths>`; a `technical` ask → one `retry:` on the
      judgment tier, the next one `park:` — and `park:` at once when the judgment-tier builder already failed (INV-1:
      no third builder); a `review` ask → one `review again:`, the next `park:`; an `environment` ask (after the run's own
@@ -174,7 +174,8 @@ two marked **model**.
      grouped: questions up front, scope, retry or park, environment, written a different way, tests that check less.
    - **Staged `.claude/` files.** Claude Code refuses a headless builder any edit under a `.claude/` path. The builder
      writes the whole file to `.kit/staged-claude/<path, each .claude as _claude>`; after the builder, the run writes it
-     to its target when the plan's scope allows it (else a `scope` ask), removes the stage, runs `tools/sync.mjs` in the
+     to its target when the plan's scope allows it (else a `scope` ask only the Human answers), refuses a link in the
+     staged entry or on the way to its target, removes the stage, runs `tools/sync.mjs` in the
      kit repo for a `core/` source, and commits on the plan branch. The report names it "written a different way —
      permanent fix still open".
 4. **Final gate** on the run branch (`prepare`, the project checks, the manifest check, `ciMirror`). Every one of

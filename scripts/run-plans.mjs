@@ -97,7 +97,7 @@ const CONCURRENCY = 1
 const ON_PARK = "dependents"
 const MAX_FIX_ROUNDS = Number(2) || 2
 // focused = the builder runs the cheap checks and only the tests its change needs; anything else = every gate check.
-const BUILDER_TESTS = {{orchestrator.builderTests|json}} === 'focused' ? 'focused' : 'full'
+const BUILDER_TESTS = "full" === 'focused' ? 'focused' : 'full'
 // Unset or anything but advisory: gate (a STOP parks after its fix round).
 const REVIEWER_MODE = "gate" === 'advisory' ? 'advisory' : 'gate'
 const REVIEWER_MODEL = "sonnet"
@@ -944,7 +944,7 @@ async function main() {
     }
     if (r.outOfScope.length) {
       const list = r.outOfScope.join(', ')
-      return { ask: { reason: `replan needed: staged .claude file(s) outside the scope: ${list}`, q: { kind: 'scope', stated: true, question: `May plan ${nnn} write ${list}? The builder staged ${r.outOfScope.length === 1 ? 'it' : 'them'} because Claude Code refuses it .claude/ files.`, options: [`approved: ${list}`] } } }
+      return { ask: { reason: `replan needed: staged .claude file(s) outside the scope: ${list}`, q: { kind: 'scope', stated: true, humanOnly: true, question: `May plan ${nnn} write ${list}? The builder staged ${r.outOfScope.length === 1 ? 'it' : 'them'} because Claude Code refuses it .claude/ files.`, options: [`approved: ${list}`] } } }
     }
     return {}
   }

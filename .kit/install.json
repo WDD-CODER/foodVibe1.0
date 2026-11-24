@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.10.0"
+    "version": "3.10.1"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.10.0",
-  "commit": "98e43e327309efcd0b5a04b5bb9a31037bc6a2fb",
+  "ref": "v3.10.1",
+  "commit": "94bca5e9ca27c3e2ca92bf4c3197db1a037f7bd8",
   "packs": [
     "angular",
     "node-express"
@@ -648,7 +648,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "d2a19edb84343899b59eb3f101b18e6275021189ff54ea5c3529e6b505ee0e9c",
+      "sha256": "2636b15ec86d1e250c903c15bf77271374795e7148ee2309e211df1651336a3f",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -1008,7 +1008,7 @@
       "source": "core/scripts/lib/adopt-check.mjs"
     },
     "scripts/lib/ask-advisor.mjs": {
-      "sha256": "38d9b6eb7003a4c96ed3b4d2775855492e84bf90b1db4f8dac7c9894e789429c",
+      "sha256": "01f8189a4a5c2e574fd58fd278d11c5a83b6294c0459421eb936211cd800ba30",
       "kind": "managed",
       "source": "core/scripts/lib/ask-advisor.mjs"
     },
@@ -1253,7 +1253,7 @@
       "source": "core/scripts/lib/slot.mjs"
     },
     "scripts/lib/staged-claude.mjs": {
-      "sha256": "abe74c5647f371212958e38c4bf59b71afc1ca5b1e3024613439f57df708f32d",
+      "sha256": "881c5a9f7b2a02bcb85cc7b00bd18630bdf5836e2ef17007af706a7a896599b9",
       "kind": "managed",
       "source": "core/scripts/lib/staged-claude.mjs"
     },
@@ -1378,7 +1378,7 @@
       "source": "core/scripts/reuse-scan.mjs"
     },
     "scripts/run-plans.mjs": {
-      "sha256": "3eef487c7bb55c4cf9f931a957ad11d6b60c95ab80959471c0948e64671d2658",
+      "sha256": "ec76571be561cba9ee92cd7d62b2d3ba78e50f1dfa92e26a05e04651701ba4cc",
       "kind": "managed",
       "source": "core/scripts/run-plans.mjs"
     },
@@ -1563,7 +1563,7 @@
       "base": ".kit/base/.claude/commands/fix.md.base"
     },
     ".claude/references/prd-template.md": {
-      "sha256": "3c05f0d67b20695755a94a44ac074183a858e0fdef99b0a54a3dba5695409732",
+      "sha256": "6efb4e9e424da0eb3ad163396283b3b943ca2e57daae3a7d04fb5a7c116c473d",
       "base": ".kit/base/.claude/references/prd-template.md.base"
     },
     ".claude/settings.json": {

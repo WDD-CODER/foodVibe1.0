@@ -23,6 +23,9 @@ const DENY = [
   [/^\.husky\//i, 'a git hook'],
   [/(^|\/)migrations?\//i, 'a database migration'],
   [/^plans\//i, 'a plan file'],
+  // Settings, hooks, agents and commands steer every later session; the kit's own config steers every sync.
+  [/(^|\/)\.claude\//i, 'Claude Code configuration (.claude/)'],
+  [/^\.kit\//i, 'the kit configuration (.kit/)'],
   [/^docs\/brain\/(invariants\.md|human-decisions\.md|decisions\/)/i, 'an architecture rule or a Human decision'],
 ]
 /** Why the advisor will not add `path` to a plan's scope, or null when it may. */
