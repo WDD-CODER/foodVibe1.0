@@ -53,6 +53,7 @@ src/app/pages/cook-view/cook-view.page.scss
 src/app/pages/cook-view/cook-view.page.ts
 src/app/pages/cook-view/cook-view.page.spec.ts
 scripts/test/style-716.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
