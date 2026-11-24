@@ -1,0 +1,276 @@
+{
+  "run": "rs-zones-2",
+  "branch": "orch/rs-zones-2",
+  "base": "main",
+  "startedAt": "2026-11-23T23:24:16.756Z",
+  "mainShaAtStart": "54f0a65accb1b321f1e052eb7bf9e60e1ebcb6e7",
+  "plans": {
+    "700": {
+      "nnn": "700",
+      "title": "Floor plan editor redesign: a toolbar, a canvas with a zone legend, an inspector that edits zones",
+      "branch": "feat/700-floor-plan-editor-layout",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T23:25:54.493Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-23T23:58:26.275Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T00:21:30.265Z"
+        }
+      },
+      "humanItems": [
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal",
+        "the list's page with no items · open the page · a message says the list is empty",
+        "any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off",
+        "On a laptop, `/frontdesk/floor-plan` (demo_host): the page reads as an editor — a toolbar card on top, the",
+        "Draw \"בחוץ\" around tables 10, 11 and 12 with the zone tool → a coloured, labelled shape appears and those",
+        "Select a zone, change its name and colour in the side card → the label on the map, the legend chip and the",
+        "Draw a zone that would cover part of another zone → the message \"אזורים לא יכולים לחפוף\" shows and nothing",
+        "On a phone (or a 375 px window): the tools scroll sideways in one row, a tap on a legend chip opens the zone"
+      ],
+      "history": [
+        {
+          "at": "2026-11-23T23:25:54.327Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:25:54.495Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:54:29.812Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:58:25.813Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-23T23:58:26.082Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-23T23:58:26.280Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:17:44.956Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:21:21.103Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:21:30.267Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:21:51.393Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-24T00:23:17.616Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 9.1,
+      "sha": "6f45e2811e163b29ba0191fb194a38ddc3fd770b",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1711.5,
+          "tokens": {
+            "input": 10083422,
+            "output": 89237
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 1155.1,
+          "tokens": {
+            "input": 1850202,
+            "output": 15241
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 19.8,
+          "tokens": {
+            "input": 263694,
+            "output": 1530
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci"
+      ],
+      "checkedHead": "80834f440bcde54ac0225bd47cda6149cf39840a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-23T23:25:54.154Z",
+      "plan": "700",
+      "text": "the folder foodVibe1.0-orch-rs-zones-2-700 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-23T23:54:26.138Z",
+      "plan": "700",
+      "text": "builder left undone (round 0): [ui] 700-1: written, not run; [ui] 700-2: written, not run; [ui] 684-4 (rewritten to the add-area flow): written, not run; [ui] 700-3 (375 px toolbar, no horizontal scroll): written, not run"
+    },
+    {
+      "at": "2026-11-24T00:17:41.542Z",
+      "plan": "700",
+      "text": "builder left undone (round 1): The other gate checks were not rerun: kit-manifest-check, scope-check, kit-checks, override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, ci-scope-check, lint:reuse, log-query. Only the files floor-plan.page.html and floor-plan.page.spec.ts changed. The commit hook"
+    },
+    {
+      "at": "2026-11-24T00:22:02.870Z",
+      "plan": "700",
+      "text": "the folder foodVibe1.0-orch-merge-rs-zones-2 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T00:24:52.174Z",
+      "text": "FINAL: same tree as plan 700's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-24T00:24:54.749Z",
+      "text": "make this a default? the table card keeps its own head and close button, so the inspector's title row (with fp-sheet-close) shows only for a zone or the room — reverse: add the row above the table card. (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 9.1,
+  "updatedAt": "2026-11-24T00:24:58.032Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "700",
+      "type": "behaviour",
+      "text": "behaviour: the table card keeps its own head and close button, so the inspector's title row (with fp-sheet-close) shows only for a zone or the room — reverse: add the row above the table card.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "700",
+      "type": "behaviour",
+      "text": "behaviour: pressing a legend chip or a zone on the map while the join tool is on switches back to the select tool — reverse: ignore the press in the join tool.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "700",
+      "type": "behaviour",
+      "text": "behaviour: a tap on a table in the zone tool does nothing (the tool only draws) — reverse: select the table.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "700",
+      "type": "behaviour",
+      "text": "behaviour: `withArea` op `color` with a value outside 0–7 is refused (returns null) like the other refused ops — reverse: store no colour instead.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "700",
+      "type": "removes",
+      "text": "removes: the old room card's name inputs, remove buttons and pending add-area row — names, colour and removal now live in the zone card, and the old `fp-multi` switch became the `fp-tool-join` tool, as the plan says — reverse: restore the old room-panel template.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "700",
+      "type": "seen",
+      "text": "seen: e2e/ui/699-3.spec.ts:30 — it hovers `room-area-remove`, which no longer exists (the bin is now `zone-remove` in the zone card); the file is outside this plan's scope, so I did not edit it.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "700",
+      "type": "behaviour",
+      "text": "behaviour: the map's zone shapes can be moved and resized while the zone tool is active (the page passes zoneEditable for every tool except join). Drawing needs zoneEditable, so this was the simplest fix — reverse: set zoneEditable in floor-plan.page.html back to canEdit_() && tool_() === 'select', which also turns drawing off again.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-24T00:24:58.029Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-24T00:24:58.031Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
