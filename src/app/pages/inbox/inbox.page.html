@@ -37,7 +37,7 @@
       } @else if (rows_().length === 0) {
       <app-empty-state [messageKey]="filter_() === 'all' ? 'ibx_empty' : 'ibx_empty_filter'" icon="message-circle" />
       } @else {
-      <ul class="c-list ibx-items" role="list">
+      <ul class="c-list" role="list">
         @for (row of rows_(); track row._id) {
         <li
           class="c-list-row c-list-row--link"
@@ -45,7 +45,7 @@
           [class.is-selected]="row._id === id_()"
           data-testid="inbox-row"
         >
-          <span class="c-list-body-cell ibx-main">
+          <span class="c-list-body-cell">
             <a
               class="c-row-link ibx-name"
               [routerLink]="['/inbox', row._id]"
@@ -54,7 +54,7 @@
             >
             <span class="ibx-preview">{{ previewOf(row) }}</span>
           </span>
-          <span class="c-list-body-cell c-list-body-cell--end ibx-meta">
+          <span class="c-list-body-cell c-list-body-cell--end">
             <span class="ibx-time">{{ timeOf(row.lastMessageAt) }}</span>
             <span class="c-chip c-chip--tag c-chip--sm" data-testid="holder-tag"
               >{{ holderKey(row) | translatePipe }}</span

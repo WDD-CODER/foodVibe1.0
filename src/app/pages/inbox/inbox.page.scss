@@ -23,11 +23,7 @@
   flex-wrap: wrap;
 }
 
-.ibx-items {
-  min-inline-size: 0;
-}
-
-.ibx-main {
+span:has(> .ibx-name) {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-1);
@@ -49,7 +45,7 @@
   font-size: var(--fs-sm);
 }
 
-.ibx-meta {
+span:has(> .ibx-time) {
   gap: var(--space-2);
   white-space: nowrap;
 }
