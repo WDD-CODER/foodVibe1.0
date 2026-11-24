@@ -5,19 +5,19 @@
 
   .supplier-prices {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--space-3);
   }
 
   .supplier-prices__title {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     opacity: 0.7;
   }
 
   .supplier-prices__row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .relative-input {
@@ -27,22 +27,22 @@
     flex: 1;
 
     input {
-      width: 100%;
+      inline-size: 100%;
       padding-inline-start: 1.2rem;
     }
 
     .prefix {
       position: absolute;
-      inset-inline-end: 0.55rem;
+      inset-inline-end: var(--space-2);
       color: var(--color-text-muted-light);
-      font-size: 0.875rem;
-      font-weight: 600;
+      font-size: var(--fs-base);
+      font-weight: var(--fw-semibold);
     }
   }
 
   .supplier-prices__unit {
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     opacity: 0.7;
   }
 }

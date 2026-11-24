@@ -18,6 +18,7 @@ import { refusalShownToUser, serverFieldErrors } from '@utils/server-refusal.uti
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 
 const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 
@@ -31,7 +32,8 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
     LucideAngularModule,
     TranslatePipe,
     FormFieldComponent,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    PageHeaderComponent
   ],
   templateUrl: './supplier-form.component.html',
   styleUrl: './supplier-form.component.scss',

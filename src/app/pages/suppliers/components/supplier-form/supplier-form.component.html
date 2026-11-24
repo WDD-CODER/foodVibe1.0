@@ -1,11 +1,13 @@
-<div class="supplier-form-container" dir="rtl">
-  <header class="form-header">
+<div class="c-form-page supplier-form-container" dir="rtl">
+  <app-page-header>
     @if (isEditMode_()) {
-      <h2>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('nameHebrew')?.value }}</h2>
+      <ng-container header-title
+        >{{ 'edit' | translatePipe }}: {{ supplierForm_.get('nameHebrew')?.value }}</ng-container
+      >
     } @else {
-      <h2>{{ 'add_supplier' | translatePipe }}</h2>
+      <ng-container header-title>{{ 'add_supplier' | translatePipe }}</ng-container>
     }
-  </header>
+  </app-page-header>
 
   <form [formGroup]="supplierForm_" (ngSubmit)="onSubmit()" class="form-body">
     <div class="form-section">

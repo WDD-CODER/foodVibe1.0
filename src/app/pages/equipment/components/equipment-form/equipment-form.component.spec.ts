@@ -60,6 +60,18 @@ describe('EquipmentFormComponent unsaved work (plan 498)', () => {
     expect(setup(EQUIPMENT).hasRealChanges()).toBeFalse()
   })
 
+  it('shows the title in the page header and keeps a light Cancel that calls the handler (plan 712)', () => {
+    const page = setup(null)
+    const el = fixture.nativeElement as HTMLElement
+    expect(el.querySelector('.c-form-page')).not.toBeNull()
+    expect(el.querySelector('app-page-header h1.ph-title')?.textContent).toContain('add_equipment')
+    const cancel = el.querySelector<HTMLButtonElement>('.c-form-actions button[type="button"]')
+    expect(cancel?.classList).toContain('c-btn-ghost')
+    const spy = spyOn(page, 'onCancel')
+    cancel!.click()
+    expect(spy).toHaveBeenCalled()
+  })
+
   it('typing a name makes the guard ask; typing it back makes it stop asking', () => {
     const page = setup(EQUIPMENT)
     const form = (page as unknown as { equipmentForm_: { patchValue(v: object): void } }).equipmentForm_

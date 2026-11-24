@@ -19,6 +19,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { Product } from '@models/product.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { GeminiService } from '@services/gemini.service'
@@ -80,6 +81,7 @@ const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
     LucideAngularModule,
     TranslatePipe,
     CustomSelectComponent,
+    FormFieldComponent,
     EmptyStateComponent,
     PageHeaderComponent,
     TextareaAutoGrowDirective,
