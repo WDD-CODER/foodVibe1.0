@@ -10,32 +10,12 @@
     padding: var(--space-4);
   }
 
-  .diag-card__head {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .diag-card__title {
-    margin: 0;
-
-    font-size: var(--fs-md);
-    font-weight: var(--fw-bold);
-  }
-
-  .diag-card__icon,
-  .diag-card__link {
-    color: var(--color-primary);
-  }
-
   .diag-card__count,
   .diag-card__date {
     opacity: 0.75;
   }
 
   .diag-card__count,
-  .diag-card__link,
   .diag-card__row {
     font-size: var(--fs-sm);
   }

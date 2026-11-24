@@ -9,7 +9,7 @@ import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 
 import { DashboardOverviewComponent } from './dashboard-overview.component'
-import { LucideAngularModule } from 'lucide-angular'
+import { Inbox, LucideAngularModule } from 'lucide-angular'
 import { DiagnosisCardComponent } from '../diagnosis-card/diagnosis-card.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { KitchenStateService } from '@services/kitchen-state.service'
@@ -104,7 +104,7 @@ describe('DashboardOverviewComponent', () => {
     mockTranslation.translate.and.callFake((k: string) => k)
 
     await TestBed.configureTestingModule({
-      imports: [DashboardOverviewComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [DashboardOverviewComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Inbox })],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -166,7 +166,7 @@ describe('DashboardOverviewComponent', () => {
     fixture.detectChanges()
     mockProducts.set([{} as Product, {} as Product, {} as Product])
     fixture.detectChanges()
-    const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-total-products"] .kpi-value'))
+    const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-total-products"] .c-stat-tile__value'))
     expect(kpiVal.nativeElement.textContent.trim()).toBe('3')
   })
 
@@ -180,7 +180,7 @@ describe('DashboardOverviewComponent', () => {
     freshFixture.detectChanges()
     await freshFixture.whenStable()
     freshFixture.detectChanges()
-    const kpiVal = freshFixture.debugElement.query(By.css('[data-testid="kpi-total-recipes"] .kpi-value'))
+    const kpiVal = freshFixture.debugElement.query(By.css('[data-testid="kpi-total-recipes"] .c-stat-tile__value'))
     expect(kpiVal.nativeElement.textContent.trim()).toBe('2')
   })
 
@@ -188,7 +188,7 @@ describe('DashboardOverviewComponent', () => {
     fixture.detectChanges()
     mockLowStock.set([{} as Product])
     fixture.detectChanges()
-    const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-low-stock"] .kpi-value'))
+    const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-low-stock"] .c-stat-tile__value'))
     expect(kpiVal.nativeElement.textContent.trim()).toBe('1')
   })
 
@@ -200,7 +200,7 @@ describe('DashboardOverviewComponent', () => {
     freshFixture.detectChanges()
     await freshFixture.whenStable()
     freshFixture.detectChanges()
-    const kpiVal = freshFixture.debugElement.query(By.css('[data-testid="kpi-unapproved"] .kpi-value'))
+    const kpiVal = freshFixture.debugElement.query(By.css('[data-testid="kpi-unapproved"] .c-stat-tile__value'))
     expect(kpiVal.nativeElement.textContent.trim()).toBe('2')
   })
 
@@ -209,6 +209,13 @@ describe('DashboardOverviewComponent', () => {
   it('should show empty state when no activity', () => {
     fixture.detectChanges()
     expect(fixture.debugElement.query(By.css('[data-testid="activity-empty"]'))).not.toBeNull()
+  })
+
+  it('draws the empty feed as one compact empty state', () => {
+    fixture.detectChanges()
+    const empties = fixture.debugElement.queryAll(By.css('.activity-section app-empty-state'))
+    expect(empties.length).toBe(1)
+    expect((empties[0].nativeElement as HTMLElement).querySelector('.c-empty-state--compact')).not.toBeNull()
   })
 
   it('should render activity items when entries exist', () => {
@@ -274,7 +281,7 @@ describe('DashboardOverviewComponent', () => {
   it('renders one chip per change with old/new values resolved', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
     fixture.detectChanges()
-    const chips = fixture.debugElement.queryAll(By.css('.act-chip'))
+    const chips = fixture.debugElement.queryAll(By.css('[data-testid="act-chip"]'))
     expect(chips.length).toBe(4)
     const supplierChip = chips[1].nativeElement as HTMLElement
     expect(supplierChip.querySelector('.act-old')?.textContent?.trim()).toBe('ירקות כהן')
@@ -294,7 +301,7 @@ describe('DashboardOverviewComponent', () => {
       })
     ])
     fixture.detectChanges()
-    expect(fixture.debugElement.queryAll(By.css('.act-chip')).length).toBe(1)
+    expect(fixture.debugElement.queryAll(By.css('[data-testid="act-chip"]')).length).toBe(1)
   })
 
   it('shows no chips for an update without changes', () => {
@@ -306,7 +313,7 @@ describe('DashboardOverviewComponent', () => {
   it('expands an entry on click and collapses it on a second click or an outside click', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
     fixture.detectChanges()
-    const item = fixture.debugElement.query(By.css('.activity-item')).nativeElement as HTMLElement
+    const item = fixture.debugElement.query(By.css('[data-testid="activity-item"]')).nativeElement as HTMLElement
     item.click()
     fixture.detectChanges()
     expect(item.classList.contains('is-expanded')).toBeTrue()

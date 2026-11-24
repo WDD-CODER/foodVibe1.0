@@ -6,12 +6,13 @@ import { BusinessService, type FrontDeskSetup } from '@services/business.service
 import { LoggingService } from '@services/logging.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 
 /** Plan 556: what the front desk still needs (computed by the server); owner only, hides itself when all is done. */
 @Component({
   selector: 'app-front-desk-checklist-card',
   standalone: true,
-  imports: [LucideAngularModule, RouterLink, TranslatePipe],
+  imports: [LucideAngularModule, RouterLink, TranslatePipe, EmptyStateComponent],
   templateUrl: './front-desk-checklist-card.component.html',
   styleUrl: './front-desk-checklist-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

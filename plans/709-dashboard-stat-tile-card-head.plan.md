@@ -88,6 +88,22 @@ append the path to the scope block above and retry.
 - View links and row buttons — family: engine-classes — rung: 1 — why: `.c-btn-ghost--sm`; the funnel / upcoming rows become `.c-list-row--link` rows.
 - Empties — family: empty-state — rung: 1 — why: `app-empty-state [compact]="true"`.
 - none new.
+- New class `.perf__bar` (business-performance.component.scss) — the title row of the performance section (renamed from the old head class).
+- New class `.perf__lead` (business-performance.component.scss) — the hero tile's place in the grid (span 2, first).
+- New class `.perf__change` (business-performance.component.scss) — the change line under a tile number.
+- New class `.perf__start` (business-performance.component.scss) — the panel holding the "create first inquiry" button.
+- New class `.upcoming__meta` (business-performance.component.scss) — the guests and stage chips cell of an upcoming row.
+- New class `.kpi-icon--warning` (dashboard-overview.component.scss) — icon colour only, on `.c-stat-tile__icon`.
+- New class `.kpi-icon--info` (dashboard-overview.component.scss) — icon colour only, on `.c-stat-tile__icon`.
+- New class `.c-stat-tile__icon` (dashboard-overview.component.scss) — the shared tile icon, referenced only to set its colour for the two tones above.
+- New class `.kpi-link` (dashboard-overview.component.scss) — layout of the tile links (icon beside the text, disabled look).
+- New class `.act-text` (dashboard-overview.component.scss) — the name and action chip cell of a feed row.
+- New class `.act-changes-cell` (dashboard-overview.component.scss) — the full-width cell under a feed row holding the change chips.
+- New class `.act-change` (dashboard-overview.component.scss) — layout of one change chip (on the shared `c-chip--tag`).
+- New class `.act-change-label` (dashboard-overview.component.scss) — the label inside a change chip.
+- New class `.act-change-values` (dashboard-overview.component.scss) — the old and new values inside a change chip.
+- New class `.c-btn-ghost` (opening-details-banner.component.scss) — the shared ghost button, its layout set outside the layer on `.opening-banner__main`.
+- New class `.setup-step__mark--open` (setup-checklist-card.component.scss) — renamed from `--empty` so the template holds no local empty class.
 
 ## Defaults
 
@@ -146,11 +162,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Draw the overview's number tiles, view links, status labels and activity feed with the shared tile, button, chip and list — src/app/pages/dashboard/components/dashboard-overview/*
-- [ ] A2: Draw the performance tiles, the dark lead tile and the funnel and upcoming rows with the shared tile and list — src/app/pages/dashboard/components/business-performance/*
-- [ ] A3: Give the five small cards one shared head and the shared small empty state — src/app/pages/dashboard/components/{front-desk-checklist-card,frontdesk-week-card,price-rises-card,setup-checklist-card,diagnosis-card}/*
-- [ ] A4: Put the opening banner button and the dashboard page spacing on shared buttons and tokens, and give the trash tab the list host — src/app/pages/dashboard/components/opening-details-banner/*, src/app/pages/dashboard/dashboard.page.html, src/app/pages/dashboard/dashboard.page.scss
-- [ ] A5: Lock the dashboard on the shared pieces and tokens — scripts/test/style-709.test.mjs
+- [x] A1: Draw the overview's number tiles, view links, status labels and activity feed with the shared tile, button, chip and list — src/app/pages/dashboard/components/dashboard-overview/*
+- [x] A2: Draw the performance tiles, the dark lead tile and the funnel and upcoming rows with the shared tile and list — src/app/pages/dashboard/components/business-performance/*
+- [x] A3: Give the five small cards one shared head and the shared small empty state — src/app/pages/dashboard/components/{front-desk-checklist-card,frontdesk-week-card,price-rises-card,setup-checklist-card,diagnosis-card}/*
+- [x] A4: Put the opening banner button and the dashboard page spacing on shared buttons and tokens, and give the trash tab the list host — src/app/pages/dashboard/components/opening-details-banner/*, src/app/pages/dashboard/dashboard.page.html, src/app/pages/dashboard/dashboard.page.scss
+- [x] A5: Lock the dashboard on the shared pieces and tokens — scripts/test/style-709.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-709.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -170,3 +186,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: the warning / info KPI tiles differ by icon colour only (the tile surface is the same for all), as one tile shape.
 - behaviour: funnel and upcoming rows become list rows with a button in the name cell (keyboard reachable), not bare reset buttons.
+- behaviour: the old `.perf__empty` block held only the "create first inquiry" button (no text), so it stays a button panel under the new class `perf__start` (testids `perf-empty`, `create-first-inquiry` kept); the `upcoming_empty` text, the activity feed and the front-desk checklist use `app-empty-state [compact]` — reverse: add a message key and use `app-empty-state` with `ctaLabelKey`.
+- removes: the KPI tiles' hover lift and the compact phone layout (number beside the title) — they are the shared tile now — reverse: restore the two local rules on a `kpi-grid > .c-stat-tile` selector.
+- removes: the activity rows' type avatar icon (the entity type is the chip) — reverse: add an icon cell back to the row.
+- Evidence: node --test scripts/test/style-709.test.mjs -> exit 0, pass 5; pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, 3204 SUCCESS; lint:icons exit 0; lint:no-native-select exit 0; lint:reuse "REUSE: ok".
+- The dashboard, overview, performance and front-desk checklist specs got `Inbox` in their local icon providers because `app-empty-state` draws `inbox`.
+- The opening banner button rule sits outside the `@layer` on purpose (the unlayered `.c-btn-ghost` would win).

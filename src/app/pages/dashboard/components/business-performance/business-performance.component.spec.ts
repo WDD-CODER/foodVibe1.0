@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
-import { LucideAngularModule, TrendingDown, TrendingUp } from 'lucide-angular'
+import { Inbox, LucideAngularModule, TrendingDown, TrendingUp } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { BusinessStatsService } from '@services/business-stats.service'
 import { LoggingService } from '@services/logging.service'
@@ -72,7 +72,7 @@ describe('BusinessPerformanceComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         BusinessPerformanceComponent,
-        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, TrendingUp, TrendingDown })
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Inbox, TrendingUp, TrendingDown })
       ],
       providers: [
         { provide: BusinessStatsService, useValue: { get } },
@@ -108,8 +108,8 @@ describe('BusinessPerformanceComponent', () => {
 
   it('makes the revenue card the hero and no other card (plan 578)', async () => {
     await setup(stats())
-    expect(byId('stat-revenue')?.classList.contains('perf-card--hero')).toBeTrue()
-    expect(el().querySelectorAll('.perf-card--hero').length).toBe(1)
+    expect(byId('stat-revenue')?.classList.contains('c-stat-tile--hero')).toBeTrue()
+    expect(el().querySelectorAll('.c-stat-tile--hero').length).toBe(1)
   })
 
   it('writes a rise against the opening baseline with a plus', async () => {

@@ -5,15 +5,15 @@
     dir="rtl"
     [attr.aria-label]="'frontdesk_setup_title' | translatePipe"
   >
-    <header class="fd-card__head">
-      <span class="fd-card__icon"><lucide-icon name="clipboard-check" [size]="16" /></span>
-      <h2 class="fd-card__title">{{ 'frontdesk_setup_title' | translatePipe }}</h2>
+    <header class="c-card-head">
+      <span class="c-card-head__icon"><lucide-icon name="clipboard-check" [size]="18" /></span>
+      <h3 class="c-card-head__title">{{ 'frontdesk_setup_title' | translatePipe }}</h3>
       @if (hasProfile_()) {
-        <span class="fd-card__progress" data-testid="frontdesk-setup-progress">{{ progress_() }}</span>
+        <span class="c-card-head__end fd-card__progress" data-testid="frontdesk-setup-progress">{{ progress_() }}</span>
       }
     </header>
     @if (!hasProfile_()) {
-      <p class="fd-card__none">{{ 'frontdesk_setup_none' | translatePipe }}</p>
+      <app-empty-state [compact]="true" messageKey="frontdesk_setup_none" icon="inbox" />
       <a class="c-btn-primary fd-card__start" routerLink="/frontdesk/onboarding" data-testid="frontdesk-setup-start">
         {{ 'frontdesk_setup_start' | translatePipe }}
       </a>
