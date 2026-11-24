@@ -409,9 +409,14 @@ function allExhausted(candidates) {
 
 /**
  * Every real HTTP call writes one ledger row (plan 566); `usage: { businessId, userId?, feature }`
- * is required (a call without it throws under vitest). Sends `body` to ONE model — never a second model per request (plan 395, Human
- * 2026-10-09: switching models is the user's decision, not the server's). Plan 614: the same model is tried
- * again, up to 4 calls in all, when a failure goes away by itself (network drop, 429 not daily, 5xx). The model is
+ * is required (a call without it throws under vitest). Sends `body` to ONE model — the server never switches models by
+ * itself (plan 395, Human 2026-10-09: switching models is the user's decision) EXCEPT for a caller that passes
+ * `fallback: true` — the unattended front desk (plan 701), which has no user to ask — and then only among the
+ * free-tier catalog models on the shared key. Plan 614: the same model is tried
+ * again, up to 4 calls in all, when a failure goes away by itself (network drop, 429 not daily, 5xx). With
+ * `fallback` an overloaded answer (network, timeout, 429 not daily, 500/502/503/504) moves the next attempt to the next
+ * usable model of the chain (wrapping; one usable model = the same model); `deadlineMs` ends the request when less
+ * than 2000 ms would be left for the next call. The model is
  * `model` when the user picked one (it must be an enabled chain model), else the first in
  * the chain. If that model is out of its daily quota — known already, or learned from this
  * call's 429 — the result is 'model_exhausted' naming the next usable model, and the user
@@ -425,7 +430,7 @@ function allExhausted(candidates) {
  *   { kind: 'gemini_error', model, status, message }
  *   { kind: 'timeout' | 'network', model }
  */
-async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage }) {
+async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, needsMedia, model: requested, usage, fallback = false, deadlineMs }) {
   let meter = true;
   if (!usage || !isAiFeature(usage.feature)) {
     if (process.env.VITEST) throw new Error('callGemini: usage.feature required');
@@ -467,12 +472,21 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
     }
   }
   const knownReset = exhaustedResetAt(model, now);
+  if (knownReset && fallback) {
+    // Plan 701: nobody is there to choose the next model; start on the first usable one (one exists: checked above).
+    return callWithFallback({
+      model: firstUsable(candidates, now), body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now,
+    });
+  }
   if (knownReset) {
     return { kind: 'model_exhausted', model, nextModel: firstUsable(candidates, now), resetAt: knownReset.toISOString() };
   }
 
   // Plan 614: a failure that goes away by itself (Google overloaded or unavailable, a dropped connection) is
   // tried again, up to MAX_ATTEMPTS calls in all. Every attempt is a real call and is counted and logged on its own.
+  if (fallback) {
+    return callWithFallback({ model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
+  }
   let result;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     result = await callOnce({ model, body, timeoutMs, log, eventPrefix, apiKey, usage, meter, candidates, now });
@@ -484,6 +498,58 @@ async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = fal
 }
 
 const MAX_ATTEMPTS = 4;
+const MIN_CALL_MS = 2000;
+const FALLBACK_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+/** Plan 701: with `fallback`, a call worth moving to another model: network, timeout, 429 (not daily) or 5xx. */
+function isOverloaded(result) {
+  if (result.kind === 'network' || result.kind === 'timeout') return true;
+  return result.kind === 'gemini_error' && FALLBACK_STATUSES.has(result.status);
+}
+
+/** The next usable model after `current` in chain order, wrapping around; `current` itself when it is the only one. */
+function nextUsableAfter(candidates, current, now) {
+  const at = candidates.indexOf(current);
+  for (let i = 1; i <= candidates.length; i++) {
+    const m = candidates[(at + i) % candidates.length];
+    if (exhaustedResetAt(m, now) === null) return m;
+  }
+  return null;
+}
+
+/** Plan 701: the retry loop of a caller that passes `fallback` (the front desk). At most MAX_ATTEMPTS calls in all. */
+async function callWithFallback({ model, body, timeoutMs, deadlineMs, log, eventPrefix, apiKey, usage, meter, candidates, now }) {
+  const startedAt = Date.now();
+  const hasDeadline = typeof deadlineMs === 'number';
+  let current = model;
+  let result;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const remaining = hasDeadline ? deadlineMs - (Date.now() - startedAt) : Infinity;
+    result = await callOnce({
+      model: current, body, timeoutMs: Math.min(timeoutMs, remaining), log, eventPrefix, apiKey, usage, meter, candidates, now,
+    });
+    if (attempt === MAX_ATTEMPTS) break;
+    let next;
+    let wait;
+    if (result.kind === 'model_exhausted') {
+      next = result.nextModel;
+      wait = 0;
+    } else if (isOverloaded(result)) {
+      next = nextUsableAfter(candidates, current, new Date());
+      wait = retryDelayMs(attempt);
+    } else {
+      break;
+    }
+    if (!next) break;
+    if (hasDeadline && deadlineMs - (Date.now() - startedAt) - wait < MIN_CALL_MS) break;
+    const fields = { from: current, to: next, attempt, kind: result.kind, status: result.status };
+    if (next !== current) log.warn({ event: `${eventPrefix}.fallback`, ...fields });
+    else log.warn({ event: `${eventPrefix}.retry`, model: current, attempt, kind: result.kind, status: result.status });
+    if (wait > 0) await sleep(wait);
+    current = next;
+  }
+  return result;
+}
 const TRANSIENT_STATUSES = new Set([429, 500, 502, 503, 504]);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 /** 0.5 s, 1 s, 2 s between attempts; no wait under the test runner. */

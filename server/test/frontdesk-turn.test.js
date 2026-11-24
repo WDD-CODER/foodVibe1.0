@@ -219,6 +219,68 @@ describe('R-04: a failure is silent', () => {
   }
 });
 
+describe('plan 701: the reason a turn failed (staff only)', () => {
+  const { conversationSchema } = require('../generated/schemas/entities');
+  const { failureReason } = require('../services/frontdesk-turn');
+  const failed = async arrange => {
+    const { conversation } = await setup({ level: 1 });
+    await arrange();
+    await turn(conversation);
+    expect(await outbound()).toHaveLength(0);
+    return { conversation, after: await conv(conversation._id) };
+  };
+
+  it('failureReason maps kinds and statuses', () => {
+    expect(failureReason('network')).toBe('busy');
+    expect(failureReason('gemini_error', 503)).toBe('busy');
+    expect(failureReason('gemini_error', 429)).toBe('busy');
+    expect(failureReason('gemini_error', 400)).toBe('other');
+    expect(failureReason('timeout')).toBe('timeout');
+    for (const k of ['model_exhausted', 'all_exhausted', 'business_cap', 'cap']) expect(failureReason(k)).toBe('quota');
+    for (const k of ['bad_json', 'bad_shape', 'model_removed']) expect(failureReason(k)).toBe('other');
+  });
+
+  it('503 on every model: human and assistantFailed busy, valid against the schema', async () => {
+    const { after } = await failed(() => fetchMock.mockResolvedValue(jsonResponse(503, {})));
+    expect(after.status).toBe('human');
+    expect(after.assistantFailed).toMatchObject({ reason: 'busy' });
+    expect(typeof after.assistantFailed.at).toBe('number');
+    expect(conversationSchema.safeParse(after).success).toBe(true);
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it('a timeout: reason timeout', async () => {
+    const { after } = await failed(() => fetchMock.mockRejectedValue(Object.assign(new Error('t'), { name: 'TimeoutError' })));
+    expect(after.assistantFailed.reason).toBe('timeout');
+  });
+
+  it('the daily turn cap: reason quota', async () => {
+    const { conversation } = await setup({ level: 1 });
+    await db().collection('aiUsage').insertMany(Array.from({ length: FRONTDESK_DAILY_TURNS }, (_, i) => ({
+      businessId: 'b1', day: jerusalemDate(Date.now()), feature: 'frontdesk_turn', ok: true, at: Date.now(), i,
+    })));
+    await turn(conversation);
+    expect((await conv(conversation._id)).assistantFailed.reason).toBe('quota');
+  });
+
+  it('a bad_json answer: reason other', async () => {
+    const { after } = await failed(() => fetchMock.mockResolvedValue(modelAnswer('not json at all')));
+    expect(after.assistantFailed.reason).toBe('other');
+  });
+
+  it('the next completed turn removes assistantFailed', async () => {
+    const { conversation, after } = await failed(() => fetchMock.mockResolvedValue(jsonResponse(503, {})));
+    expect(after.assistantFailed).toBeDefined();
+    await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { status: 'bot' } });
+    fetchMock.mockReset();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(await conv(conversation._id));
+    const next = await conv(conversation._id);
+    expect(next.assistantFailed).toBeUndefined();
+    expect(conversationSchema.safeParse(next).success).toBe(true);
+  });
+});
+
 describe('the daily cap', () => {
   const fill = (n, extra = {}) => db().collection('aiUsage').insertMany(Array.from({ length: n }, (_, i) => ({
     businessId: 'b1', day: jerusalemDate(Date.now()), feature: 'frontdesk_turn', ok: true, at: Date.now(), i, ...extra,

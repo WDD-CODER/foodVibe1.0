@@ -94,11 +94,11 @@ function decide(answer, ctx) {
 }
 
 /** `keepStatus`: a blocked turn at level 0 only stores the handoff sentence as the suggestion; the status stays. */
-async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger, keepStatus = false }) {
+async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger, keepStatus = false, assistantFailed }) {
   if (!(keepStatus && levelOf(profile) === 0)) {
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId: conversation.businessId },
-      { $set: { status: 'human', updatedAt: now } }
+      { $set: { status: 'human', updatedAt: now, ...(assistantFailed && { assistantFailed }) } }
     );
   }
   if (silent || mode !== 'turn') return;
@@ -142,8 +142,33 @@ async function blockTurn(db, conversation, base, { reason, stage }) {
 
 const handOffSilently = (db, conversation, opts) => handOff(db, conversation, { ...opts, silent: true });
 
+const BUSY_STATUSES = new Set([429, 500, 502, 503, 504]);
+
+/**
+ * Plan 701: why the assistant did not answer, in four words the inbox can show: `busy`, `timeout`, `quota`, `other`.
+ * `kind` is the failure kind of `callGemini` (or `bad_json`, `bad_shape`, `cap`); `status` the Google HTTP status.
+ */
+function failureReason(kind, status) {
+  if (kind === 'network') return 'busy';
+  if (kind === 'gemini_error') return BUSY_STATUSES.has(status) ? 'busy' : 'other';
+  if (kind === 'timeout') return 'timeout';
+  if (['model_exhausted', 'all_exhausted', 'business_cap', 'cap'].includes(kind)) return 'quota';
+  return 'other';
+}
+
+/** A turn that completes in mode `turn` removes the reason an earlier turn of this conversation failed (plan 701). */
+async function runTurn(db, conversation, opts = {}) {
+  const result = await runTurnInner(db, conversation, opts);
+  if (conversation.assistantFailed && (opts.mode ?? 'turn') === 'turn' && result && result.ok) {
+    await colOf(db, 'conversations').updateOne(
+      { _id: conversation._id, businessId: conversation.businessId }, { $unset: { assistantFailed: '' } }
+    );
+  }
+  return result;
+}
+
 /** `feature` (plan 681) is only for the hand-run eval: its live turns are metered as `eval`, never as a business's turn. */
-async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature } = {}) {
+async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature } = {}) {
   const businessId = conversation.businessId;
   if (mode === 'turn' && conversation.status !== 'bot') return { skipped: 'not_bot' };
   const profile = await colOf(db, 'frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } });
@@ -156,8 +181,8 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     });
     if (used >= FRONTDESK_DAILY_TURNS) {
       log.info({ event: 'frontdesk.turn.cap', conversationId: conversation._id });
-      await handOffSilently(db, conversation, base);
-      return { ok: false, reason: 'cap' };
+      await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: 'quota' } });
+      return { ok: false, reason: 'cap', group: 'quota' };
     }
   }
 
@@ -189,9 +214,10 @@ async function runTurn(db, conversation, { log = logger, mode = 'turn', now = Da
     log,
   });
   if (!asked.ok) {
-    log.info({ event: 'frontdesk.turn.failed', reason: asked.reason, mode, conversationId: conversation._id });
-    if (mode === 'turn') await handOffSilently(db, conversation, base);
-    return { ok: false, reason: asked.reason };
+    const group = failureReason(asked.reason, asked.status);
+    log.info({ event: 'frontdesk.turn.failed', reason: asked.reason, group, mode, conversationId: conversation._id });
+    if (mode === 'turn') await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: group } });
+    return { ok: false, reason: asked.reason, group };
   }
 
   const modelAnswer = !tables && asked.answer.intent === 'book' ? bookAsRequest(asked.answer) : asked.answer;
@@ -293,4 +319,4 @@ async function finishSuggestion(db, conversation, text, now) {
 
 setTurnHandler(runTurn);
 
-module.exports = { runTurn, decide, FRONTDESK_DAILY_TURNS };
+module.exports = { runTurn, decide, failureReason, FRONTDESK_DAILY_TURNS };
