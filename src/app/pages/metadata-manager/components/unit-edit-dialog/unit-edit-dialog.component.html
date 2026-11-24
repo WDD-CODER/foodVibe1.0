@@ -5,6 +5,7 @@
       <input
         id="unit-edit-hebrew"
         type="text"
+        class="c-input"
         [ngModel]="hebrewLabel_()"
         (ngModelChange)="hebrewLabel_.set($event)"
         autocomplete="off"
@@ -19,6 +20,7 @@
       <input
         id="unit-edit-key"
         type="text"
+        class="c-input"
         dir="ltr"
         [ngModel]="key_()"
         (ngModelChange)="key_.set($event)"
@@ -35,6 +37,7 @@
         id="unit-edit-rate"
         appSelectOnFocus
         type="number"
+        class="c-input"
         min="0.0001"
         [ngModel]="gramRate_()"
         (ngModelChange)="gramRate_.set($event)"

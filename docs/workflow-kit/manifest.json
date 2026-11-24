@@ -4257,6 +4257,16 @@
       "notes": "Plan 711: the product, equipment, supplier and stock-count lists sit on the shared rows, empty state, chips and popup sheet and pass the style guard."
     },
     {
+      "path": "scripts/test/style-714.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 714: the metadata manager cards sit on the shared panel, head, rows, empty state and loader and pass the style guard."
+    },
+    {
       "path": "scripts/test/style-713.test.mjs",
       "tier": "project",
       "action": "stay",

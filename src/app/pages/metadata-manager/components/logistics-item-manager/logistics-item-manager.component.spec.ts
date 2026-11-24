@@ -145,7 +145,7 @@ describe('LogisticsItemManagerComponent', () => {
     const groups = component.sections()
     expect(groups.map((g) => g.section)[0]).toBe('infrastructure')
     expect(groups.find((g) => g.section === 'access')?.rows.map((r) => r.term.key)).toEqual([own.key])
-    expect(host().querySelector('[data-section="space"] .logistics-empty')).not.toBeNull()
+    expect(host().querySelector('[data-section="space"] app-empty-state')).not.toBeNull()
   })
 
   it('starts with every environment checked and shows no scope radios to an owner', () => {

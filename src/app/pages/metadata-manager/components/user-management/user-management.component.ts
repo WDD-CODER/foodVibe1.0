@@ -8,11 +8,13 @@ import { LoggingService } from '@services/logging.service'
 import { AdminUser } from '@models/admin-user.model'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, LoaderComponent, EmptyStateComponent],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

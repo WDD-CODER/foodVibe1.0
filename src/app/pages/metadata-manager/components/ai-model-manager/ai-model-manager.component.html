@@ -1,39 +1,45 @@
-<section class="manager-card">
-  <div class="card-title">
-    <lucide-icon name="sparkles" class="card-icon"></lucide-icon>
-    <h2>{{ 'ai_model_manager' | translatePipe }}</h2>
-  </div>
-  <p class="card-desc">{{ 'ai_model_manager_desc' | translatePipe }}</p>
+<section class="c-glass-panel mm-card">
+  <header class="c-card-head">
+    <lucide-icon name="sparkles" class="c-card-head__icon" [size]="18"></lucide-icon>
+    <h2 class="c-card-head__title">{{ 'ai_model_manager' | translatePipe }}</h2>
+  </header>
+  <p class="mm-card-desc">{{ 'ai_model_manager_desc' | translatePipe }}</p>
 
   @if (!isAdmin_()) {
-    <div class="empty-state">
-      <lucide-icon name="lock" [size]="18"></lucide-icon>
-      {{ 'admin_only' | translatePipe }}
-    </div>
+    <app-empty-state [compact]="true" icon="lock" messageKey="admin_only" />
   } @else if (isLoading_()) {
-    <div class="empty-state">{{ 'ai_model_loading' | translatePipe }}</div>
+    <app-loader size="small" />
   } @else {
-    <ol class="model-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="onDrop($event)">
+    <ol
+      class="c-list c-list--plain mm-model-list"
+      role="list"
+      cdkDropList
+      cdkDropListLockAxis="y"
+      (cdkDropListDropped)="onDrop($event)"
+    >
       @for (model of models_(); track model.name) {
         <li
-          class="model-row"
+          class="c-list-row mm-model-row"
+          role="listitem"
           [class.is-off]="!model.enabled"
           [class.is-just-moved]="justMoved_() === model.name"
           cdkDrag
           [cdkDragData]="model.name"
         >
           <div class="model-placeholder" *cdkDragPlaceholder></div>
-          <span
-            class="model-grip"
-            cdkDragHandle
-            [attr.aria-label]="'ai_model_drag' | translatePipe"
-            [attr.title]="'ai_model_drag' | translatePipe"
-          >
-            <lucide-icon name="grip-vertical" [size]="16"></lucide-icon>
+          <span class="c-list-body-cell">
+            <span
+              class="model-grip"
+              cdkDragHandle
+              [attr.aria-label]="'ai_model_drag' | translatePipe"
+              [attr.title]="'ai_model_drag' | translatePipe"
+            >
+              <lucide-icon name="grip-vertical" [size]="16"></lucide-icon>
+            </span>
           </span>
-          <span class="model-rank">{{ ranks_().get(model.name) ?? '—' }}</span>
+          <span class="c-list-body-cell model-rank">{{ ranks_().get(model.name) ?? '—' }}</span>
 
-          <div class="model-info">
+          <div class="c-list-body-cell model-info">
             <span class="model-name" dir="ltr">{{ model.name }}</span>
             <span class="model-usage">
               {{ usageLabel(model) }}
@@ -43,27 +49,32 @@
             </span>
           </div>
 
-          <label class="c-chip c-chip--toggle model-toggle">
-            <input type="checkbox" [checked]="model.enabled" (change)="onToggle(model.name)" />
-            <span>{{ 'ai_model_on' | translatePipe }}</span>
-          </label>
+          <span class="c-list-body-cell c-col-actions">
+            <label class="c-chip c-chip--toggle model-toggle">
+              <input type="checkbox" [checked]="model.enabled" (change)="onToggle(model.name)" />
+              <span>{{ 'ai_model_on' | translatePipe }}</span>
+            </label>
+          </span>
         </li>
       }
     </ol>
 
     @if (removedModels_().length > 0) {
-      <ul class="model-list model-list-removed">
+      <ul class="c-list c-list--plain mm-model-list model-list-removed" role="list">
         @for (model of removedModels_(); track model.name) {
-          <li class="model-row is-removed">
-            <span class="model-rank">—</span>
-            <div class="model-info">
+          <li class="c-list-row is-removed" role="listitem">
+            <span class="c-list-body-cell"></span>
+            <span class="c-list-body-cell model-rank">—</span>
+            <div class="c-list-body-cell model-info">
               <span class="model-name" dir="ltr">{{ model.name }}</span>
               <span class="model-usage model-removed">{{ 'ai_model_removed' | translatePipe }}</span>
             </div>
-            <label class="c-chip c-chip--toggle model-toggle">
-              <input type="checkbox" [checked]="false" disabled />
-              <span>{{ 'ai_model_on' | translatePipe }}</span>
-            </label>
+            <span class="c-list-body-cell c-col-actions">
+              <label class="c-chip c-chip--toggle model-toggle">
+                <input type="checkbox" [checked]="false" disabled />
+                <span>{{ 'ai_model_on' | translatePipe }}</span>
+              </label>
+            </span>
           </li>
         }
       </ul>

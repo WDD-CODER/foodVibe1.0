@@ -93,7 +93,7 @@ append the path to the scope block above and retry.
 - Loading texts — family: feedback — rung: 1 — why: `app-loader size="small"`.
 - Taxonomy add input — family: form-field — rung: 1 — why: `.c-input` inside the existing `.c-input-wrapper`.
 - Role chips — family: chip — rung: 1 — why: `c-chip c-chip--tag c-chip--sm c-chip--teal|--amber`.
-- none new.
+- mm-card, mm-card-desc, mm-model-list, mm-model-row, mm-users-list, mm-logistics-list, mm-removed-list, mm-coef-list, mm-coef-error, mm-menu-list, menu-type-fields-cell, user-name, c-list-body-cell — family: engine-classes — rung: 1 — why: `.mm-card` and `.mm-card-desc` are padding and size only (one rule in `src/styles.scss`); the `mm-*` list classes only set `--list-cols`, a column span or the draggable subgrid row on the shared `.c-list` / `.c-list-body-cell`; `.c-list-body-cell` is only dimmed there.
 
 ## Defaults
 
@@ -147,12 +147,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give every metadata card the shared panel and head, and the menu types the shared rows — src/app/pages/metadata-manager/metadata-manager.page.component.*
-- [ ] A2: Draw the users list as shared rows with a loader, small empty state and tone chips — src/app/pages/metadata-manager/components/user-management/*
-- [ ] A3: Draw the logistics items and coefficients as shared rows — src/app/pages/metadata-manager/components/logistics-item-manager/*, src/app/pages/metadata-manager/components/coefficient-manager/*
-- [ ] A4: Draw the AI models as shared rows that can still be dragged, with a loader and small empty state — src/app/pages/metadata-manager/components/ai-model-manager/*
-- [ ] A5: Fix the bare taxonomy input and move the remaining cards' stylesheets onto tokens — src/app/pages/metadata-manager/components/{taxonomy-kind-manager,staff-stages-manager,ai-examples-share,station-manager,section-category-manager,preparation-category-manager,unit-edit-dialog}/*
-- [ ] A6: Lock the folder on the shared pieces and tokens — scripts/test/style-714.test.mjs
+- [x] A1: Give every metadata card the shared panel and head, and the menu types the shared rows — src/app/pages/metadata-manager/metadata-manager.page.component.*
+- [x] A2: Draw the users list as shared rows with a loader, small empty state and tone chips — src/app/pages/metadata-manager/components/user-management/*
+- [x] A3: Draw the logistics items and coefficients as shared rows — src/app/pages/metadata-manager/components/logistics-item-manager/*, src/app/pages/metadata-manager/components/coefficient-manager/*
+- [x] A4: Draw the AI models as shared rows that can still be dragged, with a loader and small empty state — src/app/pages/metadata-manager/components/ai-model-manager/*
+- [x] A5: Fix the bare taxonomy input and move the remaining cards' stylesheets onto tokens — src/app/pages/metadata-manager/components/{taxonomy-kind-manager,staff-stages-manager,ai-examples-share,station-manager,section-category-manager,preparation-category-manager,unit-edit-dialog}/*
+- [x] A6: Lock the folder on the shared pieces and tokens — scripts/test/style-714.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-714.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -173,3 +173,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: draggable rows (AI models) use a subgrid row instead of `display: contents`; they look the same as the other rows.
 - behaviour: no page header is added — `app-dashboard-header` above the tab is the page header.
+- behaviour: menu-type add button moved from under the description into the card head's end slot — reverse: move it back under `.card-desc`.
+- behaviour: menu-type rows keep the name above the five field chips (the fields cell spans both columns) so the card stays narrow — reverse: drop `.menu-type-fields-cell`.
+- behaviour: the taxonomy card's default empty text (prefix + title + suffix) is composed in the component and passed to `app-empty-state` as its message — reverse: pass `emptyKey` always.
+- seen: `lint:reuse` still prints `number-input-outside-number-box` for coefficient-manager html:27,111 — the rule is line-based; the inputs sit in an `appNumberBox` cell (exit 0).
+- The dictionary key `ai_model_loading` is now unused (the loader uses its default label).
+- Evidence: pnpm run build → exit 0; pnpm run lint → exit 0 (0 errors); pnpm run test:ci → exit 0, 3200 SUCCESS; pnpm run test:scripts → exit 0; lint:icons, lint:no-native-select, lint:reuse → exit 0.

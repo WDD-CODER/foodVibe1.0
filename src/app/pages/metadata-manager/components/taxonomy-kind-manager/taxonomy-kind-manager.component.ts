@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal, viewChild } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, viewChild } from '@angular/core'
+import { TranslationService } from '@services/translation.service'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
@@ -25,7 +27,13 @@ export interface TaxonomyRenameEvent {
 @Component({
   selector: 'app-taxonomy-kind-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent, InlineRenameFieldComponent],
+  imports: [
+    LucideAngularModule,
+    TranslatePipe,
+    RowActionsMenuComponent,
+    InlineRenameFieldComponent,
+    EmptyStateComponent
+  ],
   templateUrl: './taxonomy-kind-manager.component.html',
   styleUrl: './taxonomy-kind-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,6 +41,7 @@ export interface TaxonomyRenameEvent {
 export class TaxonomyKindManagerComponent {
   //INJECTED
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly translation = inject(TranslationService)
 
   //INPUTS
   readonly items = input.required<string[]>()
@@ -66,6 +75,12 @@ export class TaxonomyKindManagerComponent {
   //SIGNALS
   /** Chip whose tap menu is open. */
   protected readonly menuItem_ = signal<string | null>(null)
+  /** The empty text: the given key, or "<prefix> <title> <suffix>" already translated (the pipe leaves it as is). */
+  protected readonly emptyMessage_ = computed(
+    () =>
+      this.emptyKey() ??
+      `${this.translation.translate('metadata_no_items_prefix')} ${this.translation.translate(this.titleKey())} ${this.translation.translate('metadata_no_items_suffix')}`
+  )
   /** Chip being renamed in place. */
   protected readonly editingItem_ = signal<string | null>(null)
 

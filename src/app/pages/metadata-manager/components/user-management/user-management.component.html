@@ -1,50 +1,51 @@
-<section class="manager-card">
-  <div class="card-title">
-    <lucide-icon name="users" class="card-icon"></lucide-icon>
-    <h2>{{ 'user_management' | translatePipe }}</h2>
-  </div>
-  <p class="card-desc">{{ 'user_management_desc' | translatePipe }}</p>
+<section class="c-glass-panel mm-card">
+  <header class="c-card-head">
+    <lucide-icon name="users" class="c-card-head__icon" [size]="18"></lucide-icon>
+    <h2 class="c-card-head__title">{{ 'user_management' | translatePipe }}</h2>
+  </header>
+  <p class="mm-card-desc">{{ 'user_management_desc' | translatePipe }}</p>
 
-  <div class="list-container">
-    @if (isLoading_()) {
-      <div class="empty-state">{{ 'loader_loading' | translatePipe }}</div>
-    } @else if (users_().length === 0) {
-      <div class="empty-state">{{ 'no_users_registered' | translatePipe }}</div>
-    } @else {
-      <div class="list-stack">
-        @for (user of users_(); track user._id) {
-          <div class="list-item group">
-            <div class="user-info">
-              <span>{{ user.name }}</span>
-              <span class="user-email">{{ user.email }}</span>
-              @if (user.businessName) {
-                <span class="user-business">{{ user.businessName }}</span>
-              }
-              <span class="user-chips">
-                @if (user.businessRole) {
-                  <span class="c-chip teal">{{ 'business_role_' + user.businessRole | translatePipe }}</span>
-                }
-                @if (user.isPlatformAdmin) {
-                  <span class="c-chip amber" [attr.title]="'platform_admin' | translatePipe">
-                    <lucide-icon name="crown" [size]="12"></lucide-icon>
-                  </span>
-                }
-              </span>
-            </div>
-            <div class="item-actions">
-              <button
-                class="c-icon-btn danger"
-                (click)="onDeleteUser(user)"
-                [disabled]="isOwnBusiness(user)"
-                [attr.aria-label]="'remove' | translatePipe"
-                [attr.title]="'remove' | translatePipe"
-              >
-                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-              </button>
-            </div>
+  @if (isLoading_()) {
+    <app-loader size="small" />
+  } @else if (users_().length === 0) {
+    <app-empty-state [compact]="true" messageKey="no_users_registered" />
+  } @else {
+    <ul class="c-list c-list--plain mm-users-list" role="list">
+      @for (user of users_(); track user._id) {
+        <li class="c-list-row" role="listitem">
+          <div class="c-list-body-cell user-info">
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-email">{{ user.email }}</span>
+            @if (user.businessName) {
+              <span class="user-business">{{ user.businessName }}</span>
+            }
           </div>
-        }
-      </div>
-    }
-  </div>
+          <div class="c-list-body-cell user-chips">
+            @if (user.businessRole) {
+              <span class="c-chip c-chip--tag c-chip--sm c-chip--teal">{{
+                'business_role_' + user.businessRole | translatePipe
+              }}</span>
+            }
+            @if (user.isPlatformAdmin) {
+              <span class="c-chip c-chip--tag c-chip--sm c-chip--amber" [attr.title]="'platform_admin' | translatePipe">
+                <lucide-icon name="crown" [size]="12"></lucide-icon>
+              </span>
+            }
+          </div>
+          <div class="c-list-body-cell c-col-actions">
+            <button
+              type="button"
+              class="c-icon-btn danger"
+              (click)="onDeleteUser(user)"
+              [disabled]="isOwnBusiness(user)"
+              [attr.aria-label]="'remove' | translatePipe"
+              [attr.title]="'remove' | translatePipe"
+            >
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
 </section>

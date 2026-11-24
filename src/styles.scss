@@ -3188,3 +3188,16 @@ input[type='number']::-webkit-outer-spin-button {
     font-size: var(--fs-base);
   }
 }
+
+/* ---- Metadata manager (plan 714): card layout on top of .c-glass-panel; padding and size only ---- */
+.mm-card {
+  block-size: fit-content;
+  padding: var(--space-4);
+}
+
+.mm-card-desc {
+  margin: 0 0 var(--space-4);
+
+  font-size: var(--fs-base);
+  color: var(--color-text-muted);
+}
