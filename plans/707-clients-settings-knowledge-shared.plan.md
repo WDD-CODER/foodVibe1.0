@@ -68,6 +68,7 @@ src/app/pages/settings/components/access-tab/access-tab.component.spec.ts
 src/app/pages/frontdesk/knowledge/**
 src/app/pages/frontdesk/knowledge/knowledge.page.spec.ts
 scripts/test/style-707.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
