@@ -7,6 +7,15 @@ import {
   nextTableNumber,
   sizeFor
 } from 'src/app/shared/floor-map/floor-geometry.util'
+import {
+  colorOf,
+  MIN_ZONE_SIDE,
+  rectInGrid,
+  rectsOverlap,
+  tableCentreIn,
+  ZONE_COLOR_COUNT,
+  type ZoneRect
+} from 'src/app/shared/floor-map/floor-zones.util'
 
 /** Plan 684: the editing rules of the room draft. Pure: every function returns a new plan and never changes its input. */
 
@@ -25,6 +34,7 @@ export type TablePatch = Partial<
 export type AreaOp =
   | { type: 'add'; key: string; name: string }
   | { type: 'rename'; key: string; name: string }
+  | { type: 'color'; key: string; color: number }
   | { type: 'move'; key: string; dir: 'up' | 'down' }
   | { type: 'remove'; key: string }
 
@@ -145,8 +155,8 @@ export function overlapping(plan: Pick<FloorPlanBody, 'tables'>): string[] {
   return plan.tables.filter((t) => hit.has(t.key)).map((t) => t.key)
 }
 
-/** The smallest room that still holds every table (never under 10 × 10). */
-export function minGrid(plan: Pick<FloorPlanBody, 'tables'>): { cols: number; rows: number } {
+/** The smallest room that still holds every table and (plan 699) every zone (never under 10 × 10). */
+export function minGrid(plan: Pick<FloorPlanBody, 'tables' | 'areas'>): { cols: number; rows: number } {
   let cols = MIN_GRID
   let rows = MIN_GRID
   for (const t of plan.tables) {
@@ -154,7 +164,79 @@ export function minGrid(plan: Pick<FloorPlanBody, 'tables'>): { cols: number; ro
     cols = Math.max(cols, t.x + w)
     rows = Math.max(rows, t.y + h)
   }
+  for (const a of plan.areas) {
+    if (!a.zone) continue
+    cols = Math.max(cols, a.zone.x + a.zone.w)
+    rows = Math.max(rows, a.zone.y + a.zone.h)
+  }
   return { cols, rows }
+}
+
+/** Plan 699: why a zone was not stored (a dictionary key). */
+export type ZoneRefusal = 'fp_zone_overlap' | 'fp_zone_small' | 'fp_zone_outside'
+export type ZoneResult =
+  { plan: FloorPlanBody; movedKeys: string[]; droppedJoins: FloorJoin[] } | { refused: ZoneRefusal }
+
+/**
+ * Plan 699: an area's zone set (a rect) or cleared (null). A rect under 2 × 2, outside the room or sharing a cell with
+ * another area's zone is refused and nothing changes. A stored rect takes into its area every table of another area
+ * whose centre lies in it (a join across areas drops, as with `withTable`). Clearing moves no table.
+ */
+export function withZone(plan: FloorPlanBody, areaKey: string, rect: ZoneRect | null): ZoneResult {
+  const area = plan.areas.find((a) => a.key === areaKey)
+  if (!area) return { plan, movedKeys: [], droppedJoins: [] }
+  if (rect === null) {
+    if (!area.zone) return { plan, movedKeys: [], droppedJoins: [] }
+    const areas = plan.areas.map((a) => {
+      if (a.key !== areaKey) return a
+      const { zone: _gone, ...rest } = a
+      return rest
+    })
+    return { plan: { ...plan, areas }, movedKeys: [], droppedJoins: [] }
+  }
+  if (rect.w < MIN_ZONE_SIDE || rect.h < MIN_ZONE_SIDE) return { refused: 'fp_zone_small' }
+  if (!rectInGrid(rect, plan.grid)) return { refused: 'fp_zone_outside' }
+  if (plan.areas.some((a) => a.key !== areaKey && a.zone && rectsOverlap(a.zone, rect))) {
+    return { refused: 'fp_zone_overlap' }
+  }
+  const zone = { x: rect.x, y: rect.y, w: rect.w, h: rect.h }
+  let next: FloorPlanBody = { ...plan, areas: plan.areas.map((a) => (a.key === areaKey ? { ...a, zone } : a)) }
+  const movedKeys: string[] = []
+  const droppedJoins: FloorJoin[] = []
+  for (const t of plan.tables) {
+    if (t.areaKey === areaKey || !tableCentreIn(t, zone)) continue
+    const result = withTable(next, t.key, { areaKey })
+    next = result.plan
+    movedKeys.push(t.key)
+    for (const j of result.droppedJoins) if (!droppedJoins.some((d) => d.key === j.key)) droppedJoins.push(j)
+  }
+  return { plan: next, movedKeys, droppedJoins }
+}
+
+/**
+ * Plan 699: a table dropped at `x`, `y`. When its centre then lies in another area's zone it joins that area (a join
+ * across areas drops); a centre in no zone keeps the table's area.
+ */
+export function withTableDropped(
+  plan: FloorPlanBody,
+  key: string,
+  x: number,
+  y: number
+): { plan: FloorPlanBody; droppedJoins: FloorJoin[] } {
+  const current = plan.tables.find((t) => t.key === key)
+  if (!current) return { plan, droppedJoins: [] }
+  const moved = { ...current, x, y }
+  const next: FloorPlanBody = { ...plan, tables: plan.tables.map((t) => (t.key === key ? moved : t)) }
+  const home = plan.areas.find((a) => a.zone && tableCentreIn(moved, a.zone))
+  if (!home || home.key === current.areaKey) return { plan: next, droppedJoins: [] }
+  return withTable(next, key, { areaKey: home.key })
+}
+
+/** Plan 699: the lowest palette colour no area has; `order % 8` when all eight are taken. */
+function freeColor(areas: readonly FloorArea[], order: number): number {
+  const used = new Set(areas.map((a) => colorOf(a)))
+  for (let i = 0; i < ZONE_COLOR_COUNT; i++) if (!used.has(i)) return i
+  return order % ZONE_COLOR_COUNT
 }
 
 /** An error key when `name` cannot be the name of area `key`, else null. */
@@ -165,6 +247,13 @@ export function areaNameError(plan: Pick<FloorPlanBody, 'areas'>, key: string, n
   return null
 }
 
+/** The first free name: `base`, then `base 2`, `base 3` … (`base` is the text of `fp_area_new`). */
+export function newAreaName(plan: Pick<FloorPlanBody, 'areas'>, base = 'אזור חדש'): string {
+  const taken = new Set(plan.areas.map((a) => a.name.trim()))
+  if (!taken.has(base)) return base
+  for (let n = 2; ; n++) if (!taken.has(`${base} ${n}`)) return `${base} ${n}`
+}
+
 const inOrder = (areas: FloorArea[]): FloorArea[] => [...areas].sort((a, b) => a.order - b.order)
 
 /** One change of the areas, or null when it is refused (a bad name, ten areas, tables in the area, the last area). */
@@ -173,11 +262,18 @@ export function withArea(plan: FloorPlanBody, op: AreaOp): FloorPlanBody | null 
     case 'add': {
       if (plan.areas.length >= MAX_AREAS || areaNameError(plan, op.key, op.name)) return null
       const order = plan.areas.reduce((m, a) => Math.max(m, a.order), -1) + 1
-      return { ...plan, areas: [...plan.areas, { key: op.key, name: op.name.trim(), order }] }
+      const color = freeColor(plan.areas, order)
+      return { ...plan, areas: [...plan.areas, { key: op.key, name: op.name.trim(), order, color }] }
     }
     case 'rename': {
       if (areaNameError(plan, op.key, op.name) || !plan.areas.some((a) => a.key === op.key)) return null
       return { ...plan, areas: plan.areas.map((a) => (a.key === op.key ? { ...a, name: op.name.trim() } : a)) }
+    }
+    case 'color': {
+      const color = op.color
+      if (!plan.areas.some((a) => a.key === op.key)) return null
+      if (!Number.isInteger(color) || color < 0 || color >= ZONE_COLOR_COUNT) return null
+      return { ...plan, areas: plan.areas.map((a) => (a.key === op.key ? { ...a, color } : a)) }
     }
     case 'move': {
       const sorted = inOrder(plan.areas)

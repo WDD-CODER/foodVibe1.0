@@ -1,0 +1,163 @@
+@if (area_(); as area) {
+  <div class="zone-panel" data-testid="zone-panel">
+    <app-form-field label="fp_area_name" forId="zp-name" [error]="nameError_()">
+      <input
+        id="zp-name"
+        class="c-input"
+        type="text"
+        autocomplete="off"
+        data-testid="zone-name"
+        [class.c-input--invalid]="!!nameError_()"
+        [attr.aria-invalid]="nameError_() ? 'true' : null"
+        [value]="area.name"
+        (input)="onNameInput($event)"
+        (blur)="onNameBlur($event)"
+      />
+    </app-form-field>
+
+    <div class="zone-panel__block" role="radiogroup" [attr.aria-label]="'fp_zone_color' | translatePipe">
+      <span class="zone-panel__label">{{ 'fp_zone_color' | translatePipe }}</span>
+      <div class="c-chip-group zone-panel__swatches">
+        @for (n of colors; track n) {
+          <label class="c-chip c-chip--toggle">
+            <input
+              type="radio"
+              name="zp-color"
+              [attr.data-testid]="'zone-color-' + n"
+              [checked]="color_() === n"
+              [value]="n"
+              (change)="colorChange.emit({ key: area.key, color: n })"
+            />
+            <span class="c-chip__dot" [style.background]="'var(--color-zone-' + n + ')'"></span>
+            <span>{{ colorName(n) | translatePipe }}</span>
+          </label>
+        }
+      </div>
+    </div>
+
+    <div class="zone-panel__block" data-testid="zone-shape">
+      @if (drawing()) {
+        <p class="zone-panel__hint" data-testid="zone-draw-hint">{{ hint_() }}</p>
+        <button
+          type="button"
+          class="c-btn-ghost c-btn-ghost--sm"
+          data-testid="zone-draw-cancel"
+          (click)="drawCancelled.emit()"
+        >
+          {{ 'fp_draw_cancel' | translatePipe }}
+        </button>
+      } @else if (counters_()) {
+        @let c = counters_()!;
+        <div class="zone-panel__rect">
+          <div class="zone-panel__field">
+            <span class="zone-panel__label">{{ 'fp_zone_col' | translatePipe }}</span>
+            <app-counter
+              data-testid="zone-col"
+              [value]="c.zone.x + 1"
+              [min]="1"
+              [max]="c.colMax"
+              (valueChange)="onRect('x', $event - 1)"
+            />
+          </div>
+          <div class="zone-panel__field">
+            <span class="zone-panel__label">{{ 'fp_zone_row' | translatePipe }}</span>
+            <app-counter
+              data-testid="zone-row"
+              [value]="c.zone.y + 1"
+              [min]="1"
+              [max]="c.rowMax"
+              (valueChange)="onRect('y', $event - 1)"
+            />
+          </div>
+          <div class="zone-panel__field">
+            <span class="zone-panel__label">{{ 'fp_zone_w' | translatePipe }}</span>
+            <app-counter
+              data-testid="zone-w"
+              [value]="c.zone.w"
+              [min]="2"
+              [max]="c.wMax"
+              (valueChange)="onRect('w', $event)"
+            />
+          </div>
+          <div class="zone-panel__field">
+            <span class="zone-panel__label">{{ 'fp_zone_d' | translatePipe }}</span>
+            <app-counter
+              data-testid="zone-d"
+              [value]="c.zone.h"
+              [min]="2"
+              [max]="c.dMax"
+              (valueChange)="onRect('h', $event)"
+            />
+          </div>
+        </div>
+        <div class="zone-panel__actions">
+          <button
+            type="button"
+            class="c-btn-ghost c-btn-ghost--sm"
+            data-testid="zone-redraw"
+            (click)="drawRequested.emit(area.key)"
+          >
+            {{ 'fp_zone_redraw' | translatePipe }}
+          </button>
+          <button
+            type="button"
+            class="c-btn-ghost c-btn-ghost--sm"
+            data-testid="zone-clear"
+            (click)="cleared.emit(area.key)"
+          >
+            {{ 'fp_zone_clear' | translatePipe }}
+          </button>
+        </div>
+      } @else {
+        <p class="zone-panel__none">{{ 'fp_zone_none' | translatePipe }}</p>
+        <button type="button" class="c-btn-primary" data-testid="zone-draw" (click)="drawRequested.emit(area.key)">
+          <lucide-icon name="square-dashed" [size]="16"></lucide-icon>
+          {{ 'fp_zone_draw' | translatePipe }}
+        </button>
+      }
+    </div>
+
+    <p class="zone-panel__facts" data-testid="zone-count">
+      {{ countText_() }}
+    </p>
+
+    <div class="zone-panel__order">
+      <button
+        type="button"
+        class="c-icon-btn"
+        data-testid="zone-up"
+        [attr.aria-label]="'fp_area_up' | translatePipe"
+        [disabled]="index_() <= 0"
+        (click)="moved.emit({ key: area.key, dir: 'up' })"
+      >
+        <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+      </button>
+      <button
+        type="button"
+        class="c-icon-btn"
+        data-testid="zone-down"
+        [attr.aria-label]="'fp_area_down' | translatePipe"
+        [disabled]="index_() === sorted_().length - 1"
+        (click)="moved.emit({ key: area.key, dir: 'down' })"
+      >
+        <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="c-btn-ghost zone-panel__remove"
+      data-testid="zone-remove"
+      [attr.aria-disabled]="blockedKey_() ? 'true' : null"
+      [appTip]="reason_() || null"
+      [attr.aria-describedby]="blockedKey_() ? 'zp-why' : null"
+      (click)="remove()"
+    >
+      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+      {{ 'fp_area_delete' | translatePipe }}
+    </button>
+    @if (blockedKey_()) {
+      <span class="visually-hidden" id="zp-why">{{ reason_() }}</span>
+    }
+  </div>
+}
