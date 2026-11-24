@@ -719,3 +719,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A3: Note the gone-model rule where the next plan looks — server/breadcrumbs.md
 - [ ] A4: Confirm every model left in the list still has a price, so cost estimates stay right — run only, no edit expected — server/test/ai-usage.test.js
 - [ ] A5: Run every check of this plan and hand Dandan the hand check — test:server, server lint, log-query; evidence into Execution Notes
+
+### Plan 731 — The assistant tries once more when its answer comes back malformed, and hands a guest who asks for a person to the staff
+- [ ] A1: Hand a guest who asks for a person straight to the staff, before any model call — person-request fragments in HANDOFF, the prompt's handoff line, guardrail and turn tests — server/constants/frontdesk-guard-words.js, server/services/frontdesk-prompt.js, server/test/frontdesk-guardrails.test.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
+- [ ] A2: Give the model one more try when its answer comes back malformed, inside the same time budget — SHAPE_RETRY_LINE and withShapeReminder, the retry in askTurnModel with the 2000 ms floor, the bad_answer log line with zod paths only, turn and prompt tests — server/routes/ai/frontdesk.js, server/services/frontdesk-prompt.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-prompt.test.js
+- [ ] A3: Prove the morning's table question still gets a table offer, also after one malformed answer — two cases beside "offers with OK:1 / OTHER" — server/test/frontdesk-tables.test.js
+- [ ] A4: Run every check of this plan and hand Dandan the simulator check — test:server, server lint, log-query; evidence into Execution Notes
