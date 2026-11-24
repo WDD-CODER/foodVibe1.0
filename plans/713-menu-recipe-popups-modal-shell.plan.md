@@ -64,6 +64,8 @@ src/app/pages/menu-intelligence/components/prep-sheets/**
 src/app/pages/recipe-builder/components/paste-ingredients-dialog/**
 scripts/test/style-713.test.mjs
 src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.spec.ts
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
