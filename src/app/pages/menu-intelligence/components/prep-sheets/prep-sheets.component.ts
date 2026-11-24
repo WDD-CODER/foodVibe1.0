@@ -13,6 +13,8 @@ import {
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { EventPlanService } from 'src/app/core/engine/event-plan.service'
 import {
   buildPrepSheetGroups,
@@ -59,11 +61,10 @@ function cssString(text: string): string {
 @Component({
   selector: 'app-prep-sheets',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, ModalShellComponent, EmptyStateComponent],
   templateUrl: './prep-sheets.component.html',
   styleUrl: './prep-sheets.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'close.emit()' }
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PrepSheetsComponent {
   // 1. INJECTED
@@ -185,10 +186,6 @@ export class PrepSheetsComponent {
         context: { err }
       })
     }
-  }
-
-  protected onOverlayClick(ev: MouseEvent): void {
-    if (ev.target === ev.currentTarget) this.close.emit()
   }
 
   /** One named `@page` per printed group, its footer "page X of Y · group" from the dictionary text. */

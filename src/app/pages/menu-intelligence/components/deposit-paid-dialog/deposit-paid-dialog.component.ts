@@ -13,6 +13,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { todayIso } from 'src/app/core/utils/date-input.util'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 
 export interface DepositPaidAnswer {
@@ -30,11 +31,10 @@ export interface DepositPaidAnswer {
 @Component({
   selector: 'app-deposit-paid-dialog',
   standalone: true,
-  imports: [NumberBoxDirective, TranslatePipe, DateFieldComponent, SelectOnFocusDirective],
+  imports: [NumberBoxDirective, TranslatePipe, DateFieldComponent, SelectOnFocusDirective, ModalShellComponent],
   templateUrl: './deposit-paid-dialog.component.html',
   styleUrl: './deposit-paid-dialog.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'cancelled.emit()' }
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DepositPaidDialogComponent {
   /** Plan 502: true from the first click until the dialog is closed by its parent; a second click does nothing. */

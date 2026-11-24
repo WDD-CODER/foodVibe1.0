@@ -361,4 +361,14 @@ describe('EventClosingDialogComponent', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     expect(closed).toHaveBeenCalledTimes(1)
   })
+
+  it('a backdrop click emits closed, and the X is an icon button', async () => {
+    await setup()
+    const closed = jasmine.createSpy('closed')
+    fixture.componentInstance.closed.subscribe(closed)
+    const el = fixture.nativeElement as HTMLElement
+    el.querySelector<HTMLElement>('.c-modal-overlay')!.click()
+    expect(closed).toHaveBeenCalledTimes(1)
+    expect(el.querySelector('.closing-header .c-icon-btn')).toBeTruthy()
+  })
 })

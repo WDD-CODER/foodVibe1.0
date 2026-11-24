@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input
 import { firstValueFrom } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { BusinessService } from '@services/business.service'
 import { CloudinaryService } from '@services/cloudinary.service'
@@ -45,11 +46,17 @@ export interface ClosingRowView {
 @Component({
   selector: 'app-event-closing-dialog',
   standalone: true,
-  imports: [NumberBoxDirective, LucideAngularModule, TranslatePipe, CustomSelectComponent, SelectOnFocusDirective],
+  imports: [
+    NumberBoxDirective,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    SelectOnFocusDirective,
+    ModalShellComponent
+  ],
   templateUrl: './event-closing-dialog.component.html',
   styleUrl: './event-closing-dialog.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:keydown.escape)': 'closed.emit()' }
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventClosingDialogComponent {
   // 1. INJECTED

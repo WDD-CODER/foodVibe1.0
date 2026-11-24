@@ -1,15 +1,14 @@
-/* Uses engine: .c-modal-overlay, .c-modal-card, .c-modal-body, .c-modal-actions, .c-input, .c-btn-ghost, .c-btn-primary */
+/* Uses engine: .c-modal-body, .c-modal-actions, .c-input, .c-btn-ghost, .c-btn-primary (frame: the shared popup) */
+
+/* The card lives in the shared popup frame (its own view), so reach it through :host. Outside the layer: the engine
+   `.c-modal-card` is unlayered and would beat a layered rule. */
+:host ::ng-deep .paste-ingredients-card {
+  inline-size: min(32rem, 92vw);
+  max-block-size: 90dvh;
+  overflow-y: auto;
+}
+
 @layer components.paste-ingredients-dialog {
-  :host .c-modal-overlay {
-    z-index: 1100;
-  }
-
-  .paste-ingredients-card {
-    inline-size: min(32rem, 92vw);
-    max-block-size: 90dvh;
-    overflow-y: auto;
-  }
-
   .paste-box {
     inline-size: 100%;
     box-sizing: border-box;
@@ -19,7 +18,7 @@
   }
 
   .paste-hint {
-    margin-block: 0.5rem 0;
+    margin-block: var(--space-2) 0;
 
     color: var(--color-text-muted);
     font-size: var(--fs-xs);
