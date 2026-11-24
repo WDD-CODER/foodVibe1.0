@@ -3050,6 +3050,7 @@ input[type='number']::-webkit-outer-spin-button {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-inline-size: 0;
 }
 
 .c-stat-tile__icon {
@@ -3059,6 +3060,7 @@ input[type='number']::-webkit-outer-spin-button {
 .c-stat-tile__label {
   color: var(--color-text-muted);
   font-size: var(--fs-sm);
+  min-inline-size: 0;
 }
 
 .c-stat-tile__value {
@@ -3071,6 +3073,7 @@ input[type='number']::-webkit-outer-spin-button {
 .c-stat-tile__note {
   color: var(--color-text-muted);
   font-size: var(--fs-xs);
+  min-inline-size: 0;
 }
 
 .c-stat-tile--hero {
@@ -3109,6 +3112,7 @@ input[type='number']::-webkit-outer-spin-button {
 
   font-size: var(--fs-md);
   font-weight: var(--fw-semibold);
+  min-inline-size: 0;
 }
 
 .c-card-head__end {
