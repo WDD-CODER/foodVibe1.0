@@ -1,6 +1,6 @@
-<div class="c-empty-state">
+<div class="c-empty-state" [class.c-empty-state--compact]="compact()">
   @if (icon()) {
-    <lucide-icon [name]="icon()!" [size]="48" class="c-empty-state__icon" />
+    <lucide-icon [name]="icon()!" [size]="compact() ? 24 : 48" class="c-empty-state__icon" />
   }
   <p class="c-empty-state__msg">{{ messageKey() | translatePipe }}</p>
   @if (ctaLabelKey()) {

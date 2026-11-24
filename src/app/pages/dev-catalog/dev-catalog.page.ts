@@ -73,7 +73,8 @@ export class DevCatalogPage {
     'feedback',
     'edit-gate',
     'cost-badge',
-    'engine-classes'
+    'engine-classes',
+    'style-pieces'
   ] as const
 
   protected readonly options_: SampleOption[] = [
@@ -88,6 +89,15 @@ export class DevCatalogPage {
   ]
   protected readonly labelOf_ = (o: SampleOption): string => o.label
   protected readonly keyOf_ = (o: SampleOption): string => o.value
+
+  // style-pieces
+  protected readonly items_ = [
+    { id: 1, name: 'recipes', qty: 12 },
+    { id: 2, name: 'products', qty: 48 },
+    { id: 3, name: 'suppliers', qty: 7 }
+  ]
+  protected readonly selectedId_ = signal(2)
+  protected readonly stat_ = { label: 'recipes', value: '1,240', note: 'products' }
 
   // search-combobox
   protected readonly queryEmpty_ = signal('')

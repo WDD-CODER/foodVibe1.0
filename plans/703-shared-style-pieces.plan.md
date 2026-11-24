@@ -102,6 +102,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - `.c-page`, `.c-page--narrow` and the tokens `--page-max-content`, `--page-max-narrow`, `--page-gutter` — family: engine-classes — rung: 3 — why: eight pages set their own width today; one engine replaces them (no family holds a page frame).
+- `.c-list-body-cell--end`, `.c-list--plain`, `.c-stat-tile__top`, `.c-stat-tile__icon`, `.c-stat-tile__label`, `.c-stat-tile__value`, `.c-stat-tile__note`, `.c-card-head__icon`, `.c-card-head__title`, `.c-card-head__end`, `.c-table--compact` — family: engine-classes — rung: 3 — why: modifiers and parts of the engines declared in the neighbouring lines.
 - `.c-list`, `.c-list-row--link`, `.c-row-link` — family: list-page — rung: 3 — why: the in-panel sibling of `app-list-shell`; it reuses `.c-list-row` / `.c-list-body-cell` as they are and only adds the grid container, start alignment and the clickable-row look that three list pages copy locally.
 - `.c-stat-tile`, `.c-stat-tile--hero` — family: engine-classes — rung: 3 — why: the KPI tile is drawn four times (dashboard, business performance, platform, report); promote, don't repeat (cssLayer rule).
 - `.c-card-head` (+ `__icon`, `__title`, `__end`) — family: engine-classes — rung: 3 — why: five dashboard cards and four front-desk cards each write their own head.
@@ -222,12 +223,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Write the style guard that later plans use as their check — styleFindings with the stylesheet and template rules and the allow list, and its fixture test — scripts/lib/style-guard.mjs, scripts/test/style-guard.test.mjs
-- [ ] A2: Add the shared frame, list, tile, card head, form page, table and compact empty engines at the end of the global stylesheet — src/styles.scss
-- [ ] A3: Give the empty state a compact size for cards and drawers — src/app/shared/empty-state/empty-state.component.ts, .html, .spec.ts
-- [ ] A4: Show every new piece on the catalog page and clear its literal values — src/app/pages/dev-catalog/dev-catalog.page.html, .scss, .ts, .spec.ts
-- [ ] A5: Prove the append-only rule and the clean catalog in one test — scripts/test/style-703.test.mjs
-- [ ] A6: Record the pieces, the page-width, icon-size and token-mapping rules in the registry and regenerate the inventory — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md
+- [x] A1: Write the style guard that later plans use as their check — styleFindings with the stylesheet and template rules and the allow list, and its fixture test — scripts/lib/style-guard.mjs, scripts/test/style-guard.test.mjs
+- [x] A2: Add the shared frame, list, tile, card head, form page, table and compact empty engines at the end of the global stylesheet — src/styles.scss
+- [x] A3: Give the empty state a compact size for cards and drawers — src/app/shared/empty-state/empty-state.component.ts, .html, .spec.ts
+- [x] A4: Show every new piece on the catalog page and clear its literal values — src/app/pages/dev-catalog/dev-catalog.page.html, .scss, .ts, .spec.ts
+- [x] A5: Prove the append-only rule and the clean catalog in one test — scripts/test/style-703.test.mjs
+- [x] A6: Record the pieces, the page-width, icon-size and token-mapping rules in the registry and regenerate the inventory — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md
 
 ## Technical Considerations
 - Dependencies: none.
@@ -262,4 +263,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: page widths are three (full, 72rem, 48rem) — the nearest one to what a page uses today; narrow is 48rem, not 36rem, so the page header title keeps its full size.
 - behaviour: `.c-list` rows are 44 px tall (the existing cell padding), not denser — the app is used on kitchen tablets.
 - behaviour: `.c-table` is changed by an appended override instead of a rewrite, because `src/styles.scss` is append-only; it has no user today, so nothing on screen changes.
+- Evidence: build exit 0; lint exit 0 (0 errors); test:ci 3157 SUCCESS; test:scripts exit 0 (style-guard 8 pass, style-703 3 pass); lint:icons, lint:no-native-select, lint:reuse, reuse-lint --check-registry, breadcrumbs-check, plan-ledger-check, override-check, ci-scope-check, log-query, kit-manifest-check all exit 0; kit-checks: 0 findings, one debt line `style-duplicate-block 363 → 366` that is present without my dev-catalog stylesheet too.
+- behaviour: the append-only assertion in `style-703.test.mjs` takes its base from `origin/orch/rs-style` first (then `origin/main`), because this run's staging branch already differs from `origin/main`; a merge-base with `origin/main` alone fails on staging's own changes — reverse: use `origin/main` only.
+- behaviour: the style guard flags `box-shadow` unless the value is one `var(...)` or `none` (the plan text says "no var(" but its fixture `0 2px 4px var(--x)` must be flagged) — reverse: flag only values with no `var(`.
+- behaviour: the `/dev/catalog` style-pieces section holds no `[ui]` item; the two `[human]` items are checked by the Human, so no e2e test was written.
+- seen: scripts/styleqa — kit-checks reports `style-duplicate-block` debt 363 → 366 on the run base itself (client-profile, cook-view, opening-details-banner, room-panel, zone-panel, price-impact-panel stylesheets), not from this plan.
 - behaviour: the style guard counts `width`/`height`/`top`/`bottom` as physical properties (the project rule is logical properties only); plans convert them in the files they touch.
