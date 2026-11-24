@@ -48,6 +48,22 @@ describe('TeamTabComponent', () => {
     expect(rows[1].textContent).toContain('—')
   })
 
+  it('with only the owner it shows one row and no empty message; with a member, two rows', () => {
+    team.teamList_.set([TEAM[0]])
+    fixture.detectChanges()
+    expect(el().querySelectorAll('.c-list-row').length).toBe(1)
+    expect(el().querySelector('app-empty-state')).toBeNull()
+    team.teamList_.set(TEAM)
+    fixture.detectChanges()
+    expect(el().querySelectorAll('.c-list-row').length).toBe(2)
+  })
+
+  it('shows the empty message only when there is no member at all', () => {
+    team.teamList_.set([])
+    fixture.detectChanges()
+    expect(el().querySelector('app-empty-state')).not.toBeNull()
+  })
+
   it('only staff rows have a remove button', () => {
     const rows = el().querySelectorAll('[data-testid="team-row"]')
     expect(rows[0].querySelector('[data-testid="team-remove"]')).toBeNull()
@@ -97,16 +113,15 @@ describe('TeamTabComponent', () => {
     expect(cmp['isFormOpen_']()).toBeTrue()
   })
 
-  it('the form is centred in a wide page: equal, positive inline margins (plan 469 H1)', () => {
+  it('the tab fills the narrow settings page and sets no width limit of its own (plan 707)', () => {
     const host = fixture.nativeElement as HTMLElement
     host.style.display = 'block'
     host.style.inlineSize = '1280px'
     document.body.appendChild(host)
     try {
       const root = host.querySelector('.team-tab') as HTMLElement
-      const style = getComputedStyle(root)
-      expect(parseFloat(style.marginInlineStart)).toBeGreaterThan(0)
-      expect(style.marginInlineStart).toBe(style.marginInlineEnd)
+      expect(getComputedStyle(root).maxInlineSize).toBe('none')
+      expect(root.getBoundingClientRect().width).toBe(1280)
     } finally {
       host.remove()
     }

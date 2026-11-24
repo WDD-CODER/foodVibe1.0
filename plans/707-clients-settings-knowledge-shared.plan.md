@@ -94,7 +94,7 @@ append the path to the scope block above and retry.
 - Team / baseline / business fields, profile reason input, knowledge inputs — family: form-field — rung: 1 — why: `app-form-field` + `.c-input`.
 - Knowledge bulk actions — family: list-page — rung: 1 — why: `app-selection-bar` in `shell-selection-bar`.
 - Settings width — family: engine-classes — rung: 1 — why: `.c-page--narrow`.
-- none new.
+- Cell text classes in the new rows (`.timeline-main`, `.timeline-note`, `.timeline-meta`, `.team-name`, `.team-last`, `.access-name`, `.access-since`, `.baseline-field__suffix`, `.business-field__suffix`, `.knowledge-selection`, `.knowledge-selection__count`, `.knowledge-selection__label`) — family: list-page — rung: 2 — why: one-off text styles inside a `.c-list-body-cell`; no shared class carries them.
 
 ## Defaults
 
@@ -154,12 +154,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show client names as row names and the no-match case as the shared empty state — src/app/pages/clients/components/client-list/*
-- [ ] A2: Draw the client timeline as shared rows and the reason field as a shared field — src/app/pages/clients/components/client-profile/*
-- [ ] A3: Put settings at the narrow page width and draw the team and access lists as shared rows, with the empty message only when there is no row — src/app/pages/settings/settings.page.scss, src/app/pages/settings/components/team-tab/*, src/app/pages/settings/components/access-tab/*
-- [ ] A4: Replace the local field wrappers of the baseline and business tabs with the shared field — src/app/pages/settings/components/baseline-tab/*, src/app/pages/settings/components/business-settings-tab/*
-- [ ] A5: Give the knowledge popups real input boxes and single-translated labels, the no-match empty state and the bulk actions in the selection bar — src/app/pages/frontdesk/knowledge/*
-- [ ] A6: Lock the three areas on the shared pieces and tokens — scripts/test/style-707.test.mjs
+- [x] A1: Show client names as row names and the no-match case as the shared empty state — src/app/pages/clients/components/client-list/*
+- [x] A2: Draw the client timeline as shared rows and the reason field as a shared field — src/app/pages/clients/components/client-profile/*
+- [x] A3: Put settings at the narrow page width and draw the team and access lists as shared rows, with the empty message only when there is no row — src/app/pages/settings/settings.page.scss, src/app/pages/settings/components/team-tab/*, src/app/pages/settings/components/access-tab/*
+- [x] A4: Replace the local field wrappers of the baseline and business tabs with the shared field — src/app/pages/settings/components/baseline-tab/*, src/app/pages/settings/components/business-settings-tab/*
+- [x] A5: Give the knowledge popups real input boxes and single-translated labels, the no-match empty state and the bulk actions in the selection bar — src/app/pages/frontdesk/knowledge/*
+- [x] A6: Lock the three areas on the shared pieces and tokens — scripts/test/style-707.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-707.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -181,3 +181,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the Team tab's empty message counts the owner as a member — with only the owner it shows the owner row and no message.
 - behaviour: knowledge bulk actions appear in the selection bar only while rows are selected (Polaris rule: bulk actions replace filters while selecting).
 - behaviour: settings width 48rem (narrow page) instead of 36rem.
+- behaviour: knowledge bulk actions — `app-selection-bar` has no slot for an "approve" action and would add a bulk delete, so the page keeps its own approve-selected button in the `shell-selection-bar` slot (shown while rows are selected); "approve all drafts" stays in the header row — reverse: swap the slot content for `app-selection-bar`.
+- Checks: build 0, lint 0, test:ci 3176 pass, test:scripts 172 pass, lint:reuse ok, lint:icons 0, kit-checks ok, kit-manifest ok.
+- team-tab spec "centred in a wide page (plan 469)" now asserts the tab sets no width limit and fills the narrow page (the page frame centres it).
+- style-707 ALLOW: inputs inside `c-input-wrapper` are allowed as bare-input (the wrapper draws the box).

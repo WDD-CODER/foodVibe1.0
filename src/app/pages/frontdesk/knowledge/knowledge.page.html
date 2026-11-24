@@ -38,6 +38,25 @@
     }
   </ng-container>
 
+  <ng-container shell-selection-bar>
+    @if (isOwner_() && selected_().size > 0) {
+    <div class="knowledge-selection" data-testid="knowledge-selection-bar">
+      <span class="knowledge-selection__count">{{ selected_().size }}</span>
+      <span class="knowledge-selection__label">{{ 'items_selected' | translatePipe }}</span>
+      <button
+        type="button"
+        class="c-btn-ghost--sm"
+        data-testid="knowledge-approve-selected"
+        [disabled]="isBusy_()"
+        (click)="approveSelected()"
+      >
+        <lucide-icon name="check" [size]="16"></lucide-icon>
+        {{ 'knowledge_approve_selected' | translatePipe }}
+      </button>
+    </div>
+    }
+  </ng-container>
+
   <ng-container shell-table-header>
     <div class="c-grid-header-cell filter-row" role="columnheader">
       @for (f of filters; track f) {
@@ -55,16 +74,6 @@
       <button
         type="button"
         class="c-btn-ghost--sm"
-        data-testid="knowledge-approve-selected"
-        [disabled]="selected_().size === 0 || isBusy_()"
-        (click)="approveSelected()"
-      >
-        <lucide-icon name="check" [size]="16"></lucide-icon>
-        {{ 'knowledge_approve_selected' | translatePipe }}
-      </button>
-      <button
-        type="button"
-        class="c-btn-ghost--sm"
         data-testid="knowledge-approve-all"
         [disabled]="draftsInView_().length === 0 || isBusy_()"
         (click)="approveAllDrafts()"
@@ -77,63 +86,65 @@
   </ng-container>
 
   <ng-container shell-table-body>
-    @if (groups_().length === 0) {
-    <div class="no-results">
-      @if (isEmptyList_()) {
-      <app-empty-state
-        messageKey="knowledge_empty"
-        icon="book-open"
-        [ctaLabelKey]="isOwner_() ? 'knowledge_add' : null"
-        (ctaClick)="openAdd()"
-      />
-      } @else { {{ 'knowledge_no_results' | translatePipe }} }
-    </div>
-    } @for (group of groups_(); track group.topic) {
-    <div class="topic-header c-list-row" role="row" [attr.data-testid]="'knowledge-topic-' + group.topic">
-      <lucide-icon name="book-open" [size]="16"></lucide-icon>
-      <strong>{{ 'knowledge_topic_' + group.topic | translatePipe }}</strong>
+    @if (groups_().length === 0) { @if (isEmptyList_()) {
+    <app-empty-state
+      messageKey="knowledge_empty"
+      icon="book-open"
+      [ctaLabelKey]="isOwner_() ? 'knowledge_add' : null"
+      (ctaClick)="openAdd()"
+    />
+    } @else {
+    <app-empty-state messageKey="knowledge_no_results" icon="search" />
+    } } @for (group of groups_(); track group.topic) {
+    <div class="c-list-row" role="row" [attr.data-testid]="'knowledge-topic-' + group.topic">
+      <div class="c-list-body-cell topic-header" role="cell">
+        <lucide-icon name="book-open" [size]="16"></lucide-icon>
+        <strong>{{ 'knowledge_topic_' + group.topic | translatePipe }}</strong>
+      </div>
     </div>
     @for (item of group.items; track item._id) {
-    <div class="knowledge-row c-list-row" role="row" data-testid="knowledge-row">
-      @if (isOwner_() && item.status === 'draft') {
-      <input
-        type="checkbox"
-        class="row-select"
-        [checked]="selected_().has(item._id)"
-        [attr.aria-label]="item.question"
-        (change)="toggleSelected(item._id)"
-      />
-      }
-      <div class="row-text">
-        <span class="row-question">{{ item.question }}</span>
-        <span class="row-answer">{{ item.answer }}</span>
-      </div>
-      <div class="row-chips">
-        <span class="c-chip--tag c-chip--sm" [class.c-chip--amber]="item.status === 'draft'"
-          >{{ 'knowledge_status_' + item.status | translatePipe }}</span
-        >
-        @if (item.visibility === 'internal') {
-        <span class="c-chip--tag c-chip--sm">
-          <lucide-icon name="eye-off" [size]="12"></lucide-icon>
-          {{ 'knowledge_visibility_internal' | translatePipe }}
-        </span>
+    <div class="c-list-row" role="row" data-testid="knowledge-row">
+      <div class="c-list-body-cell knowledge-row" role="cell">
+        @if (isOwner_() && item.status === 'draft') {
+        <input
+          type="checkbox"
+          class="row-select"
+          [checked]="selected_().has(item._id)"
+          [attr.aria-label]="item.question"
+          (change)="toggleSelected(item._id)"
+        />
+        }
+        <div class="row-text">
+          <span class="row-question">{{ item.question }}</span>
+          <span class="row-answer">{{ item.answer }}</span>
+        </div>
+        <div class="row-chips">
+          <span class="c-chip--tag c-chip--sm" [class.c-chip--amber]="item.status === 'draft'"
+            >{{ 'knowledge_status_' + item.status | translatePipe }}</span
+          >
+          @if (item.visibility === 'internal') {
+          <span class="c-chip--tag c-chip--sm">
+            <lucide-icon name="eye-off" [size]="12"></lucide-icon>
+            {{ 'knowledge_visibility_internal' | translatePipe }}
+          </span>
+          }
+        </div>
+        @if (isOwner_()) {
+        <div class="row-actions">
+          <button
+            type="button"
+            class="c-icon-btn"
+            [attr.aria-label]="'knowledge_edit' | translatePipe"
+            (click)="openEdit(item)"
+          >
+            <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          </button>
+          <button type="button" class="c-icon-btn" [attr.aria-label]="'delete' | translatePipe" (click)="remove(item)">
+            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+          </button>
+        </div>
         }
       </div>
-      @if (isOwner_()) {
-      <div class="row-actions">
-        <button
-          type="button"
-          class="c-icon-btn"
-          [attr.aria-label]="'knowledge_edit' | translatePipe"
-          (click)="openEdit(item)"
-        >
-          <lucide-icon name="pencil" [size]="16"></lucide-icon>
-        </button>
-        <button type="button" class="c-icon-btn" [attr.aria-label]="'delete' | translatePipe" (click)="remove(item)">
-          <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-        </button>
-      </div>
-      }
     </div>
     } }
   </ng-container>
@@ -146,8 +157,8 @@
       [sheet]="true"
       (dismissed)="closeForm()"
     >
-      <div class="knowledge-form">
-        <app-form-field [label]="'knowledge_topic' | translatePipe">
+      <div class="c-modal-body knowledge-form">
+        <app-form-field label="knowledge_topic">
           <app-custom-select
             [ngModel]="formTopic_()"
             (ngModelChange)="formTopic_.set($event)"
@@ -156,12 +167,13 @@
           />
         </app-form-field>
         <app-form-field
-          [label]="'knowledge_question' | translatePipe"
+          label="knowledge_question"
           forId="knowledge-question"
-          [error]="isFormTouched_() && !formQuestion_().trim() ? ('field_required' | translatePipe) : null"
+          [error]="isFormTouched_() && !formQuestion_().trim() ? 'field_required' : null"
         >
           <input
             id="knowledge-question"
+            class="c-input"
             type="text"
             autocomplete="off"
             [maxLength]="questionMax"
@@ -170,12 +182,13 @@
           />
         </app-form-field>
         <app-form-field
-          [label]="'knowledge_answer' | translatePipe"
+          label="knowledge_answer"
           forId="knowledge-answer"
-          [error]="isFormTouched_() && !formAnswer_().trim() ? ('field_required' | translatePipe) : null"
+          [error]="isFormTouched_() && !formAnswer_().trim() ? 'field_required' : null"
         >
           <textarea
             id="knowledge-answer"
+            class="c-input"
             rows="4"
             [maxLength]="answerMax"
             [ngModel]="formAnswer_()"
@@ -191,6 +204,7 @@
           @for (v of formVariations_(); track $index) {
           <span class="c-chip c-chip--removable">
             <input
+              class="c-input"
               type="text"
               autocomplete="off"
               [maxLength]="questionMax"
@@ -206,23 +220,23 @@
           </button>
           }
         </div>
-        <div class="c-modal-actions">
-          <button type="button" class="c-btn-ghost" (click)="closeForm()">{{ 'cancel' | translatePipe }}</button>
-          <button
-            type="button"
-            class="c-btn-primary"
-            data-testid="knowledge-save"
-            [disabled]="isBusy_()"
-            (click)="saveForm()"
-          >
-            {{ 'save' | translatePipe }}
-          </button>
-        </div>
+      </div>
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" (click)="closeForm()">{{ 'cancel' | translatePipe }}</button>
+        <button
+          type="button"
+          class="c-btn-primary"
+          data-testid="knowledge-save"
+          [disabled]="isBusy_()"
+          (click)="saveForm()"
+        >
+          {{ 'save' | translatePipe }}
+        </button>
       </div>
     </app-modal-shell>
     } @if (isImportOpen_()) {
     <app-modal-shell size="md" titleKey="knowledge_import" [sheet]="true" (dismissed)="closeImport()">
-      <div class="knowledge-form">
+      <div class="c-modal-body knowledge-form">
         <div class="import-tabs">
           <button
             type="button"
@@ -244,6 +258,7 @@
         </div>
         @if (importTab_() === 'text') {
         <textarea
+          class="c-input"
           rows="8"
           data-testid="knowledge-import-text"
           [maxLength]="importTextMax"
@@ -253,6 +268,7 @@
         ></textarea>
         } @else {
         <input
+          class="c-input"
           type="url"
           dir="ltr"
           autocomplete="off"
@@ -264,21 +280,21 @@
         } @if (importError_(); as errorKey) {
         <span class="c-field-error" role="alert">{{ errorKey | translatePipe }}</span>
         }
-        <div class="c-modal-actions">
-          <button type="button" class="c-btn-ghost" [disabled]="isImporting_()" (click)="closeImport()">
-            {{ 'cancel' | translatePipe }}
-          </button>
-          <button
-            type="button"
-            class="c-btn-primary"
-            data-testid="knowledge-import-submit"
-            [disabled]="!canImport()"
-            (click)="submitImport()"
-          >
-            <lucide-icon name="sparkles" [size]="16"></lucide-icon>
-            {{ 'knowledge_import_submit' | translatePipe }}
-          </button>
-        </div>
+      </div>
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" [disabled]="isImporting_()" (click)="closeImport()">
+          {{ 'cancel' | translatePipe }}
+        </button>
+        <button
+          type="button"
+          class="c-btn-primary"
+          data-testid="knowledge-import-submit"
+          [disabled]="!canImport()"
+          (click)="submitImport()"
+        >
+          <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+          {{ 'knowledge_import_submit' | translatePipe }}
+        </button>
       </div>
     </app-modal-shell>
     }

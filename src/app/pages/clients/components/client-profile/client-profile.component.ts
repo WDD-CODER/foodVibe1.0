@@ -16,6 +16,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RESERVED_CLIENT_TAGS, type Client } from '@models/client.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { ClientFormComponent } from 'src/app/shared/client-form/client-form.component'
@@ -50,6 +51,7 @@ const REASON_MAX = 200
     TranslatePipe,
     PageHeaderComponent,
     EmptyStateComponent,
+    FormFieldComponent,
     ModalShellComponent,
     ClientFormComponent,
     ClientPickerComponent,

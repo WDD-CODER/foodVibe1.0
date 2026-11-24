@@ -69,6 +69,14 @@ describe('AccessTabComponent (plan 632)', () => {
     expect(removeGrant).toHaveBeenCalledOnceWith('g1')
   })
 
+  it('draws two grants as two shared rows', () => {
+    setup([
+      { _id: 'g1', name: 'a', grantedAt: 1 },
+      { _id: 'g2', name: 'b', grantedAt: 2 }
+    ])
+    expect(el().querySelectorAll('.c-list-row').length).toBe(2)
+  })
+
   it('declining the question removes nothing', async () => {
     setup([{ _id: 'g1', name: 'cons', grantedAt: 1 }])
     confirm.open.and.resolveTo(false)

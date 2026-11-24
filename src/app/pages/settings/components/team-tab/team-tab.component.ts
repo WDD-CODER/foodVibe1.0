@@ -7,12 +7,13 @@ import { TeamService, TeamMember } from '../../services/team.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { validatePassword, validateUsername } from 'src/app/core/utils/auth-validation.util'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 
 @Component({
   selector: 'app-team-tab',
   standalone: true,
-  imports: [FormsModule, DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [FormsModule, DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent, FormFieldComponent],
   templateUrl: './team-tab.component.html',
   styleUrl: './team-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,7 +34,7 @@ export class TeamTabComponent implements OnInit {
   protected readonly errorKey_ = signal<string | null>(null)
 
   // 5. COMPUTED
-  readonly hasStaff_ = computed(() => this.team_().some((member) => member.businessRole === 'staff'))
+  readonly hasMembers_ = computed(() => this.team_().length > 0)
 
   ngOnInit(): void {
     void this.teamService.loadTeam()

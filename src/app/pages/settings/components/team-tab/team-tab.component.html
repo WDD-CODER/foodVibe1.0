@@ -10,9 +10,9 @@
 
   @if (isFormOpen_()) {
     <form class="team-form c-glass-panel" data-testid="team-add-form" (ngSubmit)="addMember()">
-      <label class="team-field">
-        <span>{{ 'username' | translatePipe }}</span>
+      <app-form-field label="username" forId="team-name">
         <input
+          id="team-name"
           class="c-input"
           name="name"
           type="text"
@@ -22,10 +22,10 @@
           (ngModelChange)="name_.set($event)"
           [attr.aria-invalid]="errorKey_() !== null"
         />
-      </label>
-      <label class="team-field">
-        <span>{{ 'team_initial_password' | translatePipe }}</span>
+      </app-form-field>
+      <app-form-field label="team_initial_password" forId="team-password">
         <input
+          id="team-password"
           class="c-input"
           name="password"
           type="password"
@@ -34,7 +34,7 @@
           (ngModelChange)="password_.set($event)"
           [attr.aria-invalid]="errorKey_() !== null"
         />
-      </label>
+      </app-form-field>
       @if (errorKey_(); as key) {
         <span class="c-field-error" role="alert" data-testid="team-add-error">{{ key | translatePipe }}</span>
       }
@@ -47,40 +47,47 @@
     </form>
   }
 
-  <ul class="team-list c-glass-panel" data-testid="team-list">
-    @for (member of team_(); track member._id) {
-      <li class="team-row" data-testid="team-row">
-        <span class="team-row__name">{{ member.name }}</span>
-        <span
-          class="team-row__role c-chip"
-          [attr.aria-label]="'team_col_role' | translatePipe"
-          [class.teal]="member.businessRole === 'owner'"
-        >
-          {{ (member.businessRole === 'owner' ? 'business_role_owner' : 'business_role_staff') | translatePipe }}
-        </span>
-        <span class="team-row__last" [attr.aria-label]="'team_col_last_login' | translatePipe">
-          @if (member.lastActiveAt) {
-            {{ member.lastActiveAt | date: 'dd/MM/yyyy HH:mm' }}
-          } @else {
-            —
-          }
-        </span>
-        @if (member.businessRole === 'staff') {
-          <button
-            type="button"
-            class="c-icon-btn danger team-row__remove"
-            data-testid="team-remove"
-            [attr.aria-label]="'remove' | translatePipe"
-            (click)="removeMember(member)"
-          >
-            <lucide-icon name="trash-2" [size]="16" />
-          </button>
+  @if (hasMembers_()) {
+    <div class="c-glass-panel">
+      <ul class="c-list team-list" role="list" data-testid="team-list">
+        @for (member of team_(); track member._id) {
+          <li class="c-list-row" data-testid="team-row">
+            <span class="c-list-body-cell team-name">{{ member.name }}</span>
+            <span class="c-list-body-cell">
+              <span
+                class="c-chip c-chip--tag c-chip--sm"
+                [class.c-chip--teal]="member.businessRole === 'owner'"
+                [class.c-chip--amber]="member.businessRole !== 'owner'"
+                [attr.aria-label]="'team_col_role' | translatePipe"
+              >
+                {{ (member.businessRole === 'owner' ? 'business_role_owner' : 'business_role_staff') | translatePipe }}
+              </span>
+            </span>
+            <span class="c-list-body-cell team-last" [attr.aria-label]="'team_col_last_login' | translatePipe">
+              @if (member.lastActiveAt) {
+                {{ member.lastActiveAt | date: 'dd/MM/yyyy HH:mm' }}
+              } @else {
+                —
+              }
+            </span>
+            <span class="c-list-body-cell c-col-actions">
+              @if (member.businessRole === 'staff') {
+                <button
+                  type="button"
+                  class="c-icon-btn danger"
+                  data-testid="team-remove"
+                  [attr.aria-label]="'remove' | translatePipe"
+                  (click)="removeMember(member)"
+                >
+                  <lucide-icon name="trash-2" [size]="16" />
+                </button>
+              }
+            </span>
+          </li>
         }
-      </li>
-    }
-  </ul>
-
-  @if (!hasStaff_()) {
+      </ul>
+    </div>
+  } @else {
     <app-empty-state messageKey="team_empty" icon="users" />
   }
 </section>

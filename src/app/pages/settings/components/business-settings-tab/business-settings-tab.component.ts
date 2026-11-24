@@ -30,10 +30,18 @@ interface FieldDef {
   errorKey: string
 }
 
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 @Component({
   selector: 'app-business-settings-tab',
   standalone: true,
-  imports: [NumberBoxDirective, ReactiveFormsModule, TranslatePipe, BusinessNameFormComponent, SelectOnFocusDirective],
+  imports: [
+    FormFieldComponent,
+    NumberBoxDirective,
+    ReactiveFormsModule,
+    TranslatePipe,
+    BusinessNameFormComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './business-settings-tab.component.html',
   styleUrl: './business-settings-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
