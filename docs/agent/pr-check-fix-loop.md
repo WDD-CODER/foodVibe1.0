@@ -17,7 +17,7 @@ Use plain `gh` / `git` / `npx` / `npm` shell only — identical from Claude Code
 | `build` | `.github/workflows/ci.yml` | Build → `[build]` |
 | `test` | `.github/workflows/ci.yml` | Unit tests → `[test]` |
 | `gitleaks` | `.github/workflows/ci.yml` | Secret scan (gitleaks) → `[security-scan]` |
-| `ci` | `.github/workflows/ci.yml` | Aggregator — if red, inspect failed dependency (`lint` / `build` / `test` / `gitleaks`). Docs-only PRs may skip `lint`/`build`/`test` while `gitleaks` + `ci` still run. |
+| `ci` | `.github/workflows/ci.yml` | Aggregator — if red, inspect failed dependency (`lint` / `build` / `test` / `gitleaks`). Docs-only PRs and docs-only pushes to main skip `lint`/`build`/`test` while `gitleaks` + `ci` still run (a push with no usable base commit runs everything). |
 | `security` | `.github/workflows/security.yml` | npm audit (root/server) → `[audit]`; Semgrep OWASP Top Ten → `[security-scan]` |
 
 ---

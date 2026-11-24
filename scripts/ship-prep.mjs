@@ -17,6 +17,7 @@ import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { isSlot, listSlots, scopedPlanPath } from './lib/slot.mjs'
 import { isOpenPlanPath } from './lib/plan-paths.mjs'
+import { holdHeavyLockSync } from './lib/heavy-lock.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
@@ -266,7 +267,13 @@ function spawnGateCommand(cmd, cwd = repoRoot) {
  * (its warnings are advisory); the first failure prints its last lines and `GATE: FAIL — <cmd>` and stops (exit 1).
  * `run` (tests) replaces spawnSync. Returns { exit, results: [{ command, status, exit, tail }] } — the gate receipt.
  */
-export function runShipGate({ commands, run = spawnGateCommand, log = console.log }) {
+export function runShipGate({ commands, run = spawnGateCommand, log = console.log, lock = run === spawnGateCommand }) {
+  // One heavy job on this PC at a time (lib/heavy-lock.mjs): the gate waits its turn behind another session's gate or CI.
+  const release = lock ? holdHeavyLockSync(`ship gate in ${process.cwd().split(/[\\/]/).pop()}`, { say: log }) : () => {}
+  try { return runShipCommands({ commands, run, log }) } finally { release() }
+}
+
+function runShipCommands({ commands, run, log }) {
   const results = []
   for (const command of commands) {
     const r = run(command)

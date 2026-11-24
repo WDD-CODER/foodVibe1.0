@@ -40,6 +40,8 @@ import { createRequire } from 'node:module'
 import { extractScopeGlobs, testRefusals, plannedTestPaths, bareTestLines, bareLineReason } from './lib/plan-scope.mjs'
 import { readAgent, claudeArgs, runAgent, parseResult, passedModel } from './lib/claude-run.mjs'
 import { isSensitive } from './ship-prep.mjs'
+import { adviseAsk, advisorOff, weakenedTest, scopePathProblem, ADVISOR_MAX_PATHS } from './lib/ask-advisor.mjs'
+import { applyStaged, stagedFiles } from './lib/staged-claude.mjs'
 import { notifyHuman } from './lib/notify.mjs'
 import { gateCommands, runGate, scopeCheck, scopeMarker, TREE_PASSES_FILE, treeOf, readTreePasses, recordTreePasses, sameTreeSplit } from './lib/plan-gate.mjs'
 import { selectGate, entryOf, readCache, writeCache, cacheFileOf } from './lib/gate-select.mjs'
@@ -50,6 +52,7 @@ import { mergePlan, orchState } from './lib/plan-merge.mjs'
 import { runOrder, unitsOf, afterPark, blockedBy } from './lib/run-order.mjs'
 import { planBranch, planBranchProblem, runNameProblem, startTier, humanOnlyAsk, ASK_KINDS, askCard, ASK_ID_RE, failingLines, NO_PLAN_FILE_NOTE } from './lib/orch-run.mjs'
 import { readinessAsks } from './lib/readiness-asks.mjs'
+import { splitBuilderChecks } from './lib/builder-tests.mjs'
 import { ensureEnv, failingTree, depFolders, retryGit, dropScopeCommitsOnRef } from './lib/orch-folders.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -93,6 +96,8 @@ const MAIN = 'main'
 const CONCURRENCY = 1
 const ON_PARK = "dependents"
 const MAX_FIX_ROUNDS = Number(2) || 2
+// focused = the builder runs the cheap checks and only the tests its change needs; anything else = every gate check.
+const BUILDER_TESTS = "full" === 'focused' ? 'focused' : 'full'
 // Unset or anything but advisory: gate (a STOP parks after its fix round).
 const REVIEWER_MODE = "gate" === 'advisory' ? 'advisory' : 'gate'
 const REVIEWER_MODEL = "sonnet"
@@ -413,6 +418,7 @@ function parseArgs(argv) {
     else if (k === '--plans') o.plans = String(val() ?? '').split(',').map((s) => s.trim()).filter(Boolean)
     else if (k === '--dry-run') o.dryRun = true
     else if (k === '--approve-asks') o.approveAsks = true
+    else if (k === '--no-advisor') o.noAdvisor = true
     else if (k === '--concurrency') o.concurrency = Number(val())
     else if (k === '--db') o.db = val()
     else if (k === '--claude') o.claude = val()
@@ -454,6 +460,7 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const decided = [...decisionProblems(text, statuses), ...productionProblems(nnn, text), ...opt.problems]
   problems.push(...decided)
   lines.push(`decisions: ${decided.length ? `${decided.length} problem(s)` : 'ok'}${opt.notes.length ? ` · ${opt.notes.join(' · ')}` : ''}`)
+  lines.push(`advisor: ${opts?.noAdvisor ? 'off (--no-advisor)' : advisorOff(text) ? "off (the plan's Advisor: off line)" : `on (scope ≤${ADVISOR_MAX_PATHS} paths, not sensitive · technical/review/environment: 1 retry, then park · questions up front: tests and manifest · humanOnly asks go to the Human)`}`)
   // A `proposed` product default the plan triggers is a question for the Human before any builder starts, never mid-run.
   // Shown, not a refusal: the seed's starter defaults are all `proposed`, and a proposed default changes no check.
   const unanswered = unansweredProposed(text, readContract(ROOT))
@@ -518,8 +525,13 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const ra = readinessAsks({ root: ROOT, planText: text, envText: existsSync(join(ROOT, '.env')) ? readFileSync(join(ROOT, '.env'), 'utf8') : null })
   lines.push(...ra.lines)
   problems.push(...ra.problems)
-  if (ra.paths.length && !opts?.approveAsks) problems.push(`readiness question (${ra.question})`)
-  const outOfScope = testsOutOfScope(text, gateFiles).filter((x) => !(opts?.approveAsks && ra.paths.includes(x.file)))
+  // The advisor answers the tests-and-manifest question itself (the same rule as a scope ask: named files, none
+  // sensitive, at most ADVISOR_MAX_PATHS); the QA login stays a problem of this plan only (ra.problems).
+  const advisorYes = !opts?.approveAsks && !opts?.noAdvisor && !advisorOff(text) && ra.paths.length > 0 && ra.paths.length <= ADVISOR_MAX_PATHS && ra.paths.every((p) => !scopePathProblem(p, { isSensitive }))
+  const approved = Boolean(opts?.approveAsks) || advisorYes
+  if (advisorYes) lines.push(`readiness asks: answered by the advisor — ${ra.paths.join(', ')} go into the scope at the start`)
+  if (ra.paths.length && !approved) problems.push(`readiness question (${ra.question})`)
+  const outOfScope = testsOutOfScope(text, gateFiles).filter((x) => !(approved && ra.paths.includes(x.file)))
   for (const r of outOfScope) problems.push(`test file gate: ${r.reason}; add this line to the scope block: ${r.file}`)
   // A scope line that is only a test's file name matches nothing the plan means (scope-check --tests says `bad`).
   for (const g of bareTestLines(extractScopeGlobs(text.replace(/\r\n/g, '\n')) ?? [])) problems.push(`scope line: ${bareLineReason(g)}`)
@@ -531,7 +543,7 @@ function lintPlan(nnn, path, runBranch, { statuses = null, opts = null, runPlans
   const checks = gateCommands({ ...gateOpts, ciMirror: mirror, extra: own })
   // `always` = what runs whatever the diff changed (the project checks and the plan's own [auto] commands); `mirror` = what the diff picks from.
   const always = [...gateCommands({ ...gateOpts, extra: own })]
-  return { nnn, path, askedPaths: opts?.approveAsks ? ra.paths : [], mirror, always, own, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
+  return { nnn, path, askedPaths: approved ? ra.paths : [], readinessByAdvisor: advisorYes, mirror, always, own, title: (/^#\s+(.*)$/m.exec(text)?.[1] ?? '').trim(), branch, lines, problems, notes, dropped, checks, start: startTier(text), reviewerMode: opt.reviewerMode, ready: problems.length === 0 }
 }
 
 /**
@@ -832,11 +844,17 @@ async function main() {
   const mergeFolder = init.mergeFolder
   // The Human's `approve` of the readiness question (--approve-asks): its paths go into each plan's scope block on the
   // run branch (one commit per plan, like an answered scope ask) before any builder starts.
+  // The advisor's answers (readinessByAdvisor) are recorded for "Decided without you" once the run's state exists, and
+  // only when lines were added (a relaunch finds them listed already).
+  const readinessDecided = []
   for (const nnn of all) {
     const paths = lint[nnn].askedPaths ?? []
     if (!paths.length) continue
     const s = extendScope({ mergeFolder, runBranch: RUN_BRANCH, planPath: lint[nnn].path, paths, id: `${nnn}-readiness`, run: RUN, nnn })
     say(s.ok ? `RUN_PLANS: plan ${nnn} — scope extended by the readiness question: ${s.added.join(', ') || 'already listed'}` : `RUN_PLANS: plan ${nnn} — the readiness scope lines could not be written: ${s.error}`)
+    if (s.ok && lint[nnn].readinessByAdvisor) readinessDecided.push({ nnn, added: s.added, paths })
+    // The advisor's answer could not be written: the builder will raise the same files as a scope ask mid-run.
+    if (!s.ok && lint[nnn].readinessByAdvisor) say(`RUN_PLANS: plan ${nnn} — the advisor's answer to the question up front could not be written; the plan asks for those files mid-run instead`)
   }
   const runDir = join(ROOT, '.claude', 'orchestrator-runs', RUN)
   const guardSettings = builderSettings(runDir)
@@ -886,6 +904,50 @@ async function main() {
     return r
   }
   const decisions = []
+  // What the run decided without the Human: written to status.json at once, so a crash keeps it; the report's
+  // "## Decided without you". advisorUse: per plan, the paths the advisor granted and its technical/review answers.
+  const advisorUse = new Map()
+  const decided = (row) => {
+    const r = state('self-decided', { run: RUN, b64: b64(JSON.stringify([row])) })
+    if (!r.ok) say(`RUN_PLANS: could not record a decision for the report: ${r.error ?? ''}`)
+    note(`decided without the Human: ${row.kind}: ${row.what}`.slice(0, 380), row.plan)
+  }
+  for (const r of readinessDecided) {
+    // The paths granted up front count against the advisor's ADVISOR_MAX_PATHS for this plan, as a scope answer would.
+    advisorUse.set(r.nnn, { granted: r.paths.length, technical: 0, review: 0 })
+    if (!r.added.length) continue
+    decided({ plan: r.nnn, kind: 'advisor · readiness', what: `the question up front (tests and manifest the plan needs) answered: approved: ${r.added.join(', ')}`, why: `scope: ${r.added.length} named file(s), none sensitive — the same rule as a scope ask`, undo: `before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- ${r.added.join(' ')}` })
+  }
+  /**
+   * The staged .claude files of a plan's folder put in place (lib/staged-claude.mjs), committed on the plan branch, and
+   * recorded. Returns {} (done), { ask: { reason, q } } (a target outside the scope: a scope ask), or { failure }.
+   */
+  const applyStagedIn = (wt, nnn) => {
+    const onBase = git(ROOT, 'show', `origin/${RUN_BRANCH}:${lint[nnn].path}`)
+    const planText = onBase.status === 0 ? onBase.out : readFileSync(join(ROOT, lint[nnn].path), 'utf8')
+    const picomatch = createRequire(import.meta.url)('picomatch')
+    const globs = extractScopeGlobs(String(planText).replace(/\r\n/g, '\n')) ?? []
+    const inScope = (t) => globs.some((g) => picomatch(g, { dot: true })(t))
+    const r = applyStaged(wt, { inScope })
+    for (const x of r.refused) note(`staged file not applied: ${x.target} — ${x.why}`, nnn)
+    if (r.written.length) {
+      // In the kit repo a staged core/ source is followed by the sync that renders its installed copy.
+      const kitSource = r.written.some((t) => /^(core|packs|layers|templates)\//.test(t))
+      if (kitSource && existsSync(join(wt, 'tools', 'sync.mjs'))) spawnSync(process.execPath, ['tools/sync.mjs', '--target', '.', '--apply'], { cwd: wt, encoding: 'utf8', windowsHide: true })
+      // The stage folder is gone from disk: drop it from the index only when the builder committed it.
+      git(wt, 'rm', '-r', '-q', '--cached', '--ignore-unmatch', '--', '.kit/staged-claude')
+      const add = git(wt, 'add', '-A', '--', ...r.written, ...(kitSource ? ['.claude', '.kit/install.json'] : []))
+      if (add.status !== 0) return { failure: { why: `staged .claude files could not be added: ${lastLine(add.err)}` } }
+      const c = git(wt, 'commit', '-q', '-m', `chore(run): put staged .claude files in place (plan ${nnn}; the builder could not write them)`)
+      if (c.status !== 0 && !/nothing to commit/i.test(`${c.out} ${c.err}`)) return { failure: { why: `staged .claude files could not be committed: ${lastLine(c.err)}` } }
+      for (const t of r.written) decided({ plan: nnn, kind: 'written a different way', what: `${t} — Claude Code refused the builder this .claude/ file, so the run's script wrote the builder's staged copy (this run only)`, why: 'a headless builder may not edit .claude/ paths; no allow rule lifts it', undo: `permanent fix still open — make builders able to write .claude/ for every project; to drop this change: git checkout origin/main -- ${t} on the run branch before merge it` })
+    }
+    if (r.outOfScope.length) {
+      const list = r.outOfScope.join(', ')
+      return { ask: { reason: `replan needed: staged .claude file(s) outside the scope: ${list}`, q: { kind: 'scope', stated: true, question: `May plan ${nnn} write ${list}? The builder staged ${r.outOfScope.length === 1 ? 'it' : 'them'} because Claude Code refuses it .claude/ files.`, options: [`approved: ${list}`] } } }
+    }
+    return {}
+  }
   const priorTop = Math.max(0, ...(init.priorDecisions ?? []).map((d) => Number(String(d.id).slice(1)) || 0))
   // The heartbeat: a builder may work for many minutes; `watch` must still read RUNNING.
   const beat = setInterval(() => state('touch', { run: RUN }), Math.max(15_000, Math.min(60_000, (STALE_MIN * 60_000) / 3)))
@@ -941,6 +1003,12 @@ async function main() {
       const waiting = pendingAsk(nnn)
       if (waiting) return { nnn, state: 'asking', ask: waiting, reason: String(waiting.context?.reason ?? '') }
     }
+    // A plan saved on main after the run branch was cut: copied onto the run branch before its folder is made.
+    if (!finalFix && !o.noAdvisor) {
+      const cp = await serial(() => copyPlanToRun({ mergeFolder, runBranch: RUN_BRANCH, planPath: l.path, nnn }))
+      if (!cp.ok) note(`plan file not copied from ${MAIN}: ${cp.error}`, nnn)
+      else if (cp.copied) decided({ plan: nnn, kind: 'plan file copied', what: `${l.path} was on ${MAIN} but not on ${RUN_BRANCH}: the run copied it there (one commit) instead of asking`, why: 'the plan was saved after the run branch was cut', undo: 'nothing to undo: the same file as on main' })
+    }
     // A relaunch continues a plan that stopped for a reason that was not its own code (or an answered ask): from the
     // saved work. Not a final-gate fix round: that one starts from the merged plan's branch.
     const resume = finalFix ? null : resumeOf({ root: ROOT, run: RUN, runBranch: RUN_BRANCH, nnn, branch: l.branch, answered: Boolean(answer) })
@@ -972,6 +1040,11 @@ async function main() {
       ctx.answer = { id: answer.ask.id, kind: answer.ask.kind, question: answer.ask.question, answer: answer.answer, by: answer.by }
       // "review again": the saved commits go back through the gate and the review, no builder.
       if (resume?.kind === 'park' && /^review again:/i.test(answer.answer)) ctx.skipBuild = true
+      // "retry:" on a technical ask is what its option says: a fresh builder on the judgment tier, with the hand-off.
+      if (answer.ask.kind === 'technical' && /^retry:/i.test(answer.answer) && ctx.tier !== 'judgment') {
+        ctx.tier = 'judgment'
+        ctx.tierReason = `the answer to ${answer.ask.id}: retry on the judgment tier`
+      }
     }
     // The plan file the builder starts from (the run branch's commit that last changed it): a later change is recorded.
     let planStart = null
@@ -999,13 +1072,16 @@ async function main() {
       park(reason, { quiet: true })
       const stated = q.stated !== false
       const o = askOptions({ kind: q.kind, options: q.options ?? [], recommendation: q.recommendation ?? null, paths: q.kind === 'scope' ? scopePaths(`${q.question} ${reason}`) : [] })
-      const context = { reason: String(reason).slice(0, 600), at: nowIso(), goal: goalLine(readFileSync(join(ROOT, l.path), 'utf8')), files, ...extra }
+      // tier/escalated: the advisor never retries a plan whose judgment-tier builder already failed (INV-1).
+      const context = { reason: String(reason).slice(0, 600), at: nowIso(), goal: goalLine(readFileSync(join(ROOT, l.path), 'utf8')), files, tier: ctx.tier, escalated: Boolean(ctx.escalated), ...extra }
       const a = writeAsk(runDir, { nnn, kind: q.kind, humanOnly: q.humanOnly ?? humanOnlyAsk(q.kind, stated), question: q.question, ...o, context })
       setPlan(nnn, { state: 'asking', round: ctx.round, tier: ctx.tier, reason: `asking ${a.id}: ${reason}`.slice(0, 380) })
       note(`ask ${a.id} (${a.kind}, ${a.humanOnly ? 'only the Human answers' : 'the Human or the advisor answers'}): ${a.question}`, nnn)
       say(`RUN_PLANS: plan ${nnn} asks ${a.id} — it waits; the run goes on with the plans it does not block`)
       for (const line of askCard(a, RUN)) say(line)
-      notifyHuman(askNotice(RUN, a))
+      // The advisor's turn now (its answer file; the plan still resumes at the end of its wave): only a question that
+      // really waits for the Human reaches the desktop and the phone, the moment it is asked.
+      if (!adviseNow(nnn, a) && !existsSync(join(runDir, 'asks', `${a.id}.answer.json`))) notifyHuman(askNotice(RUN, a))
       return { nnn, state: 'asking', ask: a, reason, round: ctx.round }
     }
     if (!ctx.wt?.ok) {
@@ -1067,6 +1143,13 @@ async function main() {
       else if (q && q.kind === 'db-write') return ask(`ask: ${result.blocker}`, q, proposal)
       else if (q && (q.stated || (result.status === 'ESCALATE' && ctx.tier === 'judgment'))) return ask(`ESCALATE ${q.kind}: ${String(result.blocker ?? '').slice(0, 300)}`, q, proposal)
       else if (result && result.status && result.status !== 'built') failure = { why: `builder ${result.status}: ${String(result.blocker ?? '').slice(0, 300)}`, escalate: true }
+      // A .claude/ file the builder could not write (Claude Code's sensitive-file refusal) and staged instead: the run's
+      // own script puts it in place for this run only, and the report says it was done another way.
+      if (!failure && stagedFiles(wt).length) {
+        const st = applyStagedIn(wt, nnn)
+        if (st.ask) return ask(st.ask.reason, st.ask.q)
+        if (st.failure) failure = st.failure
+      }
       if (!failure) failure = landBranch(wt, info.branch, RUN_BRANCH)
       let checkedHead = null
       let receipt = null
@@ -1182,6 +1265,13 @@ async function main() {
           }
           setPlan(nnn, { state: 'merged', round: ctx.round, tier: ctx.tier, sha: m.sha })
           say(`RUN_PLANS: plan ${nnn} merged into ${RUN_BRANCH} (${m.sha.slice(0, 7)})`)
+          // An existing test the plan made weaker (fewer checks, or an added skip/only/todo): listed for the Human.
+          for (const f of git(mergeFolder, 'diff', '--name-only', '--diff-filter=M', `${m.sha}^1`, m.sha).out.split('\n').map((x) => x.trim()).filter((x) => /(\.|_)(test|spec)\.[cm]?[jt]sx?$|__tests__\//.test(x))) {
+            const before = git(mergeFolder, 'show', `${m.sha}^1:${f}`)
+            const after = git(mergeFolder, 'show', `${m.sha}:${f}`)
+            const w = before.status === 0 && after.status === 0 ? weakenedTest(before.out, after.out) : null
+            if (w) decided({ plan: nnn, kind: 'test changed — fewer checks?', what: `${f}: ${w.before} → ${w.after} checks${w.added ? `, ${w.added} skip/only/todo added` : ''}`, why: 'an existing test the plan changed now checks less; it may be right (an old check removed on purpose) or a test bent to pass', undo: `read the diff: git diff ${m.sha.slice(0, 8)}^1 ${m.sha.slice(0, 8)} -- ${f}` })
+          }
           return { nnn, state: 'merged', sha: m.sha, round: ctx.round, tier: ctx.tier }
         }
         if (m.pin) return park(m.why)
@@ -1277,9 +1367,39 @@ async function main() {
     }
     return freed.sort((a, b) => rank(a) - rank(b))
   }
+  /**
+   * The advisor's answer to a plan's new ask, written as `<id>.answer.json` with `by: advisor` and recorded for the
+   * report, or null (the Human answers it). Off with --no-advisor or a plan's `Advisor: off` line.
+   */
+  const adviseNow = (nnn, ask) => {
+    // An answer already there (the Human's, given while the run was down, or the advisor's before a crash) stands.
+    if (existsSync(join(runDir, 'asks', `${ask.id}.answer.json`))) return null
+    const planText = (() => { try { return readFileSync(join(ROOT, lint[nnn].path), 'utf8') } catch { return '' } })()
+    const use = advisorUse.get(nnn) ?? { granted: 0, technical: 0, review: 0 }
+    // The paths come only from the ask's own `approved: …` option, else the question's backticked paths — never prose.
+    const approved = (Array.isArray(ask.options) ? ask.options : []).find((x) => /^approved:/i.test(String(x)))
+    const paths = ask.kind !== 'scope' ? [] : approved ? scopePaths(String(approved).replace(/^approved:/i, '')) : scopePaths([...String(ask.question ?? '').matchAll(/`([^`]+)`/g)].map((m) => m[1]).join(' '))
+    const off = o.noAdvisor || advisorOff(planText)
+    const advice = adviseAsk(ask, { paths, granted: use.granted, used: use, off, isSensitive })
+    if (!advice) return null
+    writeFileSync(join(runDir, 'asks', `${ask.id}.answer.json`), `${JSON.stringify({ by: 'advisor', option: advice.option, at: nowIso() }, null, 2)}\n`)
+    if (ask.kind === 'scope') use.granted += paths.length
+    else use[ask.kind] = (use[ask.kind] ?? 0) + 1
+    advisorUse.set(nnn, use)
+    const undo = /^park:/i.test(advice.option) ? `${advice.undo} — the work is kept on park/${RUN}-${nnn}` : /^retry:/i.test(advice.option) ? `${advice.undo}; the first attempt is kept on park/${RUN}-${nnn}` : advice.undo
+    decided({ plan: nnn, kind: `advisor · ${ask.kind}`, what: `ask ${ask.id} ("${String(ask.question ?? '').slice(0, 160)}") answered: ${advice.option}`, why: advice.why, undo })
+    const ans = readAnswer(runDir, ask)
+    return ans && !ans.refused ? ans : null
+  }
   /** A plan's result: asking waits, held waits on its root, anything else is an outcome (and ends what it held). */
   const settle = async (x) => {
-    if (x.state === 'asking') return void asking.set(x.nnn, { ask: x.ask, reason: x.reason, deadline: null })
+    if (x.state === 'asking') {
+      // The advisor writes its answer file now; the plan waits like any asking plan (so what it holds is
+      // registered first) and drainAnswered() resumes it at the end of this wave, through a Human answer's path.
+      // An ask raised before a relaunch gets the advisor's turn here (a new one had it in ask()); no second notice.
+      adviseNow(x.nnn, x.ask)
+      return void asking.set(x.nnn, { ask: x.ask, reason: x.reason, deadline: null })
+    }
     if (x.state === 'held') return hold(x.nnn, x.by, x.reason)
     outcomes.push(x)
     if (x.state === 'parked') parkedRoots.push(x.nnn)
@@ -1332,6 +1452,25 @@ async function main() {
     }
     await settle(await runOne(nnn, { answer: { ...ans, ask: a.ask } }))
   }
+  /** The run note of a refused answer (readAnswer has moved the file aside, so only this read sees it). */
+  const refusedNote = (nnn, a, ans) => note(`ask ${a.ask.id}: an answer by the ${ans.by} was refused: ${ans.why}; the ask stays open`, nnn)
+  /** Every asking plan whose answer is already written (the advisor's): resumed now, one at a time, as waitForAnswers does. */
+  const drainAnswered = async () => {
+    for (let moved = true; moved && !stopReason;) {
+      moved = false
+      for (const [nnn, a] of [...asking]) {
+        if (!existsSync(join(runDir, 'asks', `${a.ask.id}.answer.json`))) continue
+        const ans = readAnswer(runDir, a.ask)
+        // A refused answer is moved aside by readAnswer: whichever read finds it first writes the note.
+        if (ans?.refused) refusedNote(nnn, a, ans)
+        if (!ans || ans.refused) continue
+        asking.delete(nnn)
+        await answered(nnn, a, ans)
+        moved = true
+        break
+      }
+    }
+  }
   /** Once every other plan has ended: poll the answers every ASK_POLL_MS; an ask past ASK_WAIT_MS stays open (one note,
    * then at most one an hour); only one past ASK_PARK_MS parks. */
   const waitForAnswers = async () => {
@@ -1342,7 +1481,7 @@ async function main() {
         a.since ??= Date.now()
         a.deadline ??= a.since + ASK_WAIT_MS
         const ans = readAnswer(runDir, a.ask)
-        if (ans?.refused) note(`ask ${a.ask.id}: an answer by the ${ans.by} was refused: ${ans.why}; the ask stays open`, nnn)
+        if (ans?.refused) refusedNote(nnn, a, ans)
         if (!ans || ans.refused) continue
         asking.delete(nnn)
         await answered(nnn, a, ans)
@@ -1432,6 +1571,8 @@ async function main() {
         for (let k = 0; k < rest.length; k++) waves[w + 1 + k] = a.waves[k]
         if (a.blocked.size) note(`plan ${root} asks ${asking.get(root)?.ask.id} — ${[...a.blocked.keys()].join(', ')} wait on the answer; the rest go on`)
       }
+      // The asks the advisor answered in this wave: resumed now, with what they hold already registered.
+      await drainAnswered()
     }
     // ---- the answers: once every other plan has ended ----
     await waitForAnswers()
@@ -1545,6 +1686,14 @@ async function main() {
   const skippedList = outcomes.filter((x) => x.state === 'skipped').map((x) => x.nnn)
   say(`RUN_PLANS: ${stopReason ? `stopped (${stopReason})` : 'finished'} — merged ${mergedList.join(', ') || 'none'}; parked ${parkedList.join(', ') || 'none'}; skipped ${skippedList.join(', ') || 'none'}`)
   say(`RUN_PLANS: report ${fin.report ?? '(not committed)'} · local copy ${fin.local ?? '?'} · calls ${csv.replace(/\\/g, '/')}`)
+  // The end of a run reaches the desktop and the phone; a rate-limit stop does not (the supervisor relaunches it).
+  if (!(stopReason && /^rate-limit/.test(stopReason))) {
+    const waiting = [...asking.keys()]
+    notifyHuman({
+      title: `Run ${RUN}: ${stopReason ? 'stopped' : 'finished'}`,
+      text: `merged ${mergedList.length}, parked ${parkedList.length}, skipped ${skippedList.length}${waiting.length ? `, waiting for you: ${waiting.join(', ')}` : ''}${stopReason ? ` — ${String(stopReason).slice(0, 120)}` : ''}`,
+    })
+  }
   say(`RUN_PLANS_JSON ${JSON.stringify({ ok: !stopReason && !parkedList.length && !skippedList.length, run: RUN, branch: RUN_BRANCH, merged: mergedList, parked: parkedList, skipped: skippedList, outcomes, stopReason, ...(stopReason && /^rate-limit/.test(stopReason) ? { stopped: 'rate-limit' } : {}), finalGate, report: fin.report ?? null, local: fin.local ?? null, calls: csv.replace(/\\/g, '/') })}`)
   return mergedList.length === all.length && !stopReason ? 0 : 2
 }
@@ -1646,6 +1795,33 @@ export function extendScope({ mergeFolder, runBranch, planPath, paths, id, run, 
   return { ok: false, error: `${error} (${SCOPE_PUSH_TRIES} tries)` }
 }
 
+/**
+ * A plan saved on main after the run branch was cut is copied onto the run branch (one commit through the merge folder)
+ * instead of a builder asking for it. { ok, copied } — copied false when the run branch already has it or
+ * main does not.
+ */
+export function copyPlanToRun({ mergeFolder, runBranch, planPath, main = MAIN, nnn }) {
+  git(mergeFolder, 'fetch', '--quiet', 'origin')
+  if (git(mergeFolder, 'cat-file', '-e', `origin/${runBranch}:${planPath}`).status === 0) return { ok: true, copied: false }
+  const onMain = git(mergeFolder, 'show', `origin/${main}:${planPath}`)
+  if (onMain.status !== 0) return { ok: true, copied: false }
+  const ff = git(mergeFolder, 'merge', '--quiet', '--ff-only', `origin/${runBranch}`)
+  if (ff.status !== 0) return { ok: false, error: `the merge folder does not fast-forward to origin/${runBranch}: ${lastLine(ff.err)}` }
+  const file = join(mergeFolder, planPath)
+  mkdirSync(dirname(file), { recursive: true })
+  writeFileSync(file, `${onMain.out}\n`)
+  for (const step of [['add', '--', planPath], ['commit', '--quiet', '-m', `plan(${nnn}): copied from ${main} — saved after the run branch was cut`]]) {
+    const r = git(mergeFolder, ...step)
+    if (r.status !== 0) return { ok: false, error: `git ${step[0]}: ${lastLine(r.err || r.out)}` }
+  }
+  const p = git(mergeFolder, 'push', '--quiet', 'origin', `HEAD:refs/heads/${runBranch}`)
+  if (p.status !== 0) {
+    git(mergeFolder, 'reset', '--quiet', '--keep', 'HEAD~1')
+    return { ok: false, error: `git push: ${lastLine(p.err || p.out)}` }
+  }
+  return { ok: true, copied: true }
+}
+
 /** After the builder: no uncommitted file, at least one commit beyond the run branch, and the branch on origin. */
 function landBranch(wt, branch, runBranch) {
   const dirty = git(wt, 'status', '--porcelain').out.split('\n').filter((l) => l && !/^\?\? \.worktree-/.test(l) && !l.endsWith('.claude/gate-receipt.json'))
@@ -1658,12 +1834,16 @@ function landBranch(wt, branch, runBranch) {
 }
 
 /** The builder's task, in the workflow's KEY: value shape, with the Human's two hard limits. */
-export function builderPrompt({ RUN, RUN_BRANCH, ctx, l, LESSONS }) {
+export function builderPrompt({ RUN, RUN_BRANCH, ctx, l, LESSONS, builderTests = BUILDER_TESTS }) {
   const task = (o) => Object.entries(o).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}: ${typeof v === 'string' ? v : JSON.stringify(v)}`).join('\n')
+  // focused: the whole suites go to GATE_SUITES (the gate runs them after the builder); the gate's own list is unchanged.
+  const split = splitBuilderChecks(l.checks, { mode: builderTests, testScripts: [COMMANDS.test, COMMANDS.testCi].filter(Boolean), own: l.own ?? [] })
   return [
     `Build plan ${ctx.nnn} of orchestrator run ${RUN} (mode: ${ctx.mode}). Follow your instructions (.claude/agents/orch-builder.md) and docs/agent/agent-roles.md.`,
     task({
-      PLAN: l.path, BRANCH: ctx.info.branch, WORKTREE: ctx.wt.path, RUN_BRANCH, MODE: ctx.mode, TIER: ctx.tier, ROUND: ctx.round, CHECKS: l.checks,
+      PLAN: l.path, BRANCH: ctx.info.branch, WORKTREE: ctx.wt.path, RUN_BRANCH, MODE: ctx.mode, TIER: ctx.tier, ROUND: ctx.round, CHECKS: split.checks,
+      GATE_SUITES: split.suites.length ? split.suites : undefined,
+      FOCUSED_TESTS: split.suites.length ? `node scripts/lib/builder-tests.mjs --base origin/${RUN_BRANCH}` : undefined,
       FINDINGS: ctx.mode === 'fix' && ctx.findings.length ? ctx.findings : undefined, HANDOFF: ctx.mode === 'handoff' || ctx.mode === 'resume' ? ctx.handoff : undefined, LESSONS,
       ANSWER: ctx.answer ?? undefined,
     }),

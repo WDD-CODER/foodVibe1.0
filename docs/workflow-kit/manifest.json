@@ -5062,6 +5062,38 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.9.0): the Adopt Check behind scope-check --adopt. Classified project/stay like the other kit-synced files."
     },
     {
+      "path": "scripts/lib/ask-advisor.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.10.0): the advisor that answers a run's non-human asks. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/builder-tests.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.10.0): the builder's test-run helper. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/heavy-lock.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.10.0): the heavy-job lock helper. Classified project/stay like the other kit-synced files."
+    },
+    {
+      "path": "scripts/lib/staged-claude.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 3.10.0): staged Claude settings for the run's headless calls. Classified project/stay like the other kit-synced files."
+    },
+    {
       "path": "scripts/local-ci.mjs",
       "tier": "project",
       "action": "stay",
