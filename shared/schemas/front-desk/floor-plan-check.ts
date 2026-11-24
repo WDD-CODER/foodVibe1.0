@@ -13,7 +13,9 @@ export const FLOOR_PLAN_ISSUE_CODES = [
   'duplicate_join',
   'join_table_missing',
   'join_repeated_table',
-  'join_mixed_areas'
+  'join_mixed_areas',
+  'zone_outside_grid',
+  'zone_overlap'
 ] as const
 export type FloorPlanIssueCode = (typeof FLOOR_PLAN_ISSUE_CODES)[number]
 
@@ -34,6 +36,19 @@ export function checkFloorPlan(plan: FloorPlanParts): FloorPlanIssue[] {
   for (const a of plan.areas) {
     if (areaKeys.has(a.key)) add('duplicate_area', a.key)
     areaKeys.add(a.key)
+  }
+
+  // Plan 699: a zone stays inside the room and shares no cell with an earlier area's zone (touching is fine).
+  type Zone = NonNullable<FloorPlanParts['areas'][number]['zone']>
+  const zones: Zone[] = []
+  for (const a of plan.areas) {
+    const z = a.zone
+    if (!z) continue
+    if (z.x < 0 || z.y < 0 || z.x + z.w > plan.grid.cols || z.y + z.h > plan.grid.rows) add('zone_outside_grid', a.key)
+    if (zones.some((o) => z.x < o.x + o.w && o.x < z.x + z.w && z.y < o.y + o.h && o.y < z.y + z.h)) {
+      add('zone_overlap', a.key)
+    }
+    zones.push(z)
   }
 
   const tableArea = new Map<string, string>()
@@ -75,7 +90,8 @@ export function emptyFloorPlan(areaNames: readonly string[], makeKey: () => stri
   }
   return {
     grid: { cols: 24, rows: 16 },
-    areas: names.map((name, order) => ({ key: makeKey(), name, order })),
+    // Plan 699: area n starts with palette colour n (the palette has 8, so the 9th and 10th wrap) and no zone.
+    areas: names.map((name, order) => ({ key: makeKey(), name, order, color: order % 8 })),
     tables: [],
     joins: []
   }

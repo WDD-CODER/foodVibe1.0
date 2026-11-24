@@ -3,12 +3,15 @@ import {
   areaNameError,
   duplicateTable,
   minGrid,
+  newAreaName,
   numberError,
   overlapping,
   restoreDropped,
   withArea,
   withoutTable,
-  withTable
+  withTable,
+  withTableDropped,
+  withZone
 } from './floor-plan-edit.util'
 
 const table = (over: Partial<FloorTable>): FloorTable => ({
@@ -119,8 +122,110 @@ describe('floor-plan-edit.util (plan 684)', () => {
   })
 
   it('minGrid is the smallest room that holds every table, never under 10', () => {
-    expect(minGrid({ tables: [] })).toEqual({ cols: 10, rows: 10 })
-    expect(minGrid({ tables: [table({ x: 9, y: 2 })] })).toEqual({ cols: 12, rows: 10 })
+    expect(minGrid({ tables: [], areas: [] })).toEqual({ cols: 10, rows: 10 })
+    expect(minGrid({ tables: [table({ x: 9, y: 2 })], areas: [] })).toEqual({ cols: 12, rows: 10 })
+  })
+
+  it('minGrid also holds every zone (plan 699)', () => {
+    const areas = [{ key: 'areaa1', name: 'בפנים', order: 0, zone: { x: 10, y: 9, w: 4, h: 3 } }]
+    expect(minGrid({ tables: [table({ x: 9, y: 2 })], areas })).toEqual({ cols: 14, rows: 12 })
+  })
+
+  describe('zones (plan 699)', () => {
+    // 24 × 16 room; tab001 (3 × 3 at 0,0, centre 1.5,1.5) and tab002 (3 × 3 at 5,0, centre 6.5,1.5) are joined, area a1.
+    const roomy = (over: Partial<FloorPlanBody> = {}): FloorPlanBody => plan({ grid: { cols: 24, rows: 16 }, ...over })
+
+    it('withZone stores the rect and moves into the area every table whose centre is in it', () => {
+      const result = withZone(roomy(), 'areab2', { x: 4, y: 0, w: 6, h: 4 })
+      if ('refused' in result) return fail('refused')
+      expect(result.plan.areas.find((a) => a.key === 'areab2')?.zone).toEqual({ x: 4, y: 0, w: 6, h: 4 })
+      expect(result.movedKeys).toEqual(['tab002'])
+      expect(result.plan.tables.find((t) => t.key === 'tab002')?.areaKey).toBe('areab2')
+      expect(result.plan.tables.find((t) => t.key === 'tab001')?.areaKey).toBe('areaa1')
+      expect(result.droppedJoins.map((j) => j.key)).toEqual(['join01'])
+      expect(result.plan.joins).toEqual([])
+    })
+
+    it('withZone moves no table of the same area and drops no join', () => {
+      const result = withZone(roomy(), 'areaa1', { x: 0, y: 0, w: 10, h: 4 })
+      if ('refused' in result) return fail('refused')
+      expect(result.movedKeys).toEqual([])
+      expect(result.droppedJoins).toEqual([])
+      expect(result.plan.joins.length).toBe(1)
+    })
+
+    it('withZone refuses an overlap, a rect under 2 × 2 and a rect outside the room', () => {
+      const base = roomy({
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0, zone: { x: 0, y: 0, w: 4, h: 4 } },
+          { key: 'areab2', name: 'בחוץ', order: 1 }
+        ]
+      })
+      expect(withZone(base, 'areab2', { x: 3, y: 3, w: 4, h: 4 })).toEqual({ refused: 'fp_zone_overlap' })
+      expect(withZone(base, 'areab2', { x: 8, y: 8, w: 1, h: 4 })).toEqual({ refused: 'fp_zone_small' })
+      expect(withZone(base, 'areab2', { x: 22, y: 0, w: 4, h: 4 })).toEqual({ refused: 'fp_zone_outside' })
+      // Touching is fine; the area's own old zone never blocks it.
+      expect('refused' in withZone(base, 'areab2', { x: 4, y: 0, w: 4, h: 4 })).toBeFalse()
+      expect('refused' in withZone(base, 'areaa1', { x: 1, y: 1, w: 4, h: 4 })).toBeFalse()
+    })
+
+    it('withZone(plan, key, null) clears the shape and moves no table', () => {
+      const base = roomy({
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0 },
+          { key: 'areab2', name: 'בחוץ', order: 1, color: 4, zone: { x: 4, y: 0, w: 6, h: 4 } }
+        ]
+      })
+      const result = withZone(base, 'areab2', null)
+      if ('refused' in result) return fail('refused')
+      expect(result.plan.areas[1]).toEqual({ key: 'areab2', name: 'בחוץ', order: 1, color: 4 })
+      expect(result.movedKeys).toEqual([])
+      expect(result.plan.tables).toEqual(base.tables)
+    })
+
+    it('withTableDropped moves a table into the zone that holds its centre, dropping a join across areas', () => {
+      const base = roomy({
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0 },
+          { key: 'areab2', name: 'בחוץ', order: 1, zone: { x: 12, y: 8, w: 8, h: 6 } }
+        ]
+      })
+      const { plan: next, droppedJoins } = withTableDropped(base, 'tab002', 13, 9)
+      const t = next.tables.find((x) => x.key === 'tab002')
+      expect([t?.x, t?.y, t?.areaKey]).toEqual([13, 9, 'areab2'])
+      expect(droppedJoins.map((j) => j.key)).toEqual(['join01'])
+      expect(next.joins).toEqual([])
+    })
+
+    it('withTableDropped keeps the area when the centre is in no zone', () => {
+      const base = roomy({
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0, zone: { x: 0, y: 0, w: 4, h: 4 } },
+          { key: 'areab2', name: 'בחוץ', order: 1, zone: { x: 12, y: 8, w: 8, h: 6 } }
+        ]
+      })
+      const { plan: next, droppedJoins } = withTableDropped(base, 'tab002', 6, 6)
+      const t = next.tables.find((x) => x.key === 'tab002')
+      expect([t?.x, t?.y, t?.areaKey]).toEqual([6, 6, 'areaa1'])
+      expect(droppedJoins).toEqual([])
+      expect(next.joins.length).toBe(1)
+    })
+
+    it('withArea add takes the first free palette colour, or order % 8 when all are taken', () => {
+      const taken = roomy({
+        areas: [
+          { key: 'areaa1', name: 'בפנים', order: 0, color: 0 },
+          { key: 'areab2', name: 'בחוץ', order: 1, color: 2 }
+        ]
+      })
+      expect(withArea(taken, { type: 'add', key: 'areac3', name: 'בר' })!.areas.at(-1)?.color).toBe(1)
+      const full = roomy({
+        areas: Array.from({ length: 8 }, (_, i) => ({ key: `area0${i}x`, name: `א${i}`, order: i, color: i })),
+        tables: [],
+        joins: []
+      })
+      expect(withArea(full, { type: 'add', key: 'areac9', name: 'בר' })!.areas.at(-1)?.color).toBe(0)
+    })
   })
 
   describe('withArea', () => {
@@ -133,7 +238,7 @@ describe('floor-plan-edit.util (plan 684)', () => {
 
     it('adds, renames and orders areas; refuses a repeated name', () => {
       const added = withArea(plan(), { type: 'add', key: 'areac3', name: ' גינה ' })!
-      expect(added.areas.at(-1)).toEqual({ key: 'areac3', name: 'גינה', order: 2 })
+      expect(added.areas.at(-1)).toEqual({ key: 'areac3', name: 'גינה', order: 2, color: 2 })
       expect(withArea(plan(), { type: 'add', key: 'areac3', name: 'בפנים' })).toBeNull()
       expect(areaNameError(plan(), 'areab2', 'בפנים')).toBe('fp_err_area_name')
       expect(withArea(plan(), { type: 'rename', key: 'areab2', name: '' })).toBeNull()
@@ -143,6 +248,20 @@ describe('floor-plan-edit.util (plan 684)', () => {
         ['areab2', 0]
       ])
       expect(withArea(plan(), { type: 'move', key: 'areaa1', dir: 'up' })).toBeNull()
+    })
+
+    it('sets the colour of an area (0–7) and refuses another value (plan 700)', () => {
+      const next = withArea(plan(), { type: 'color', key: 'areab2', color: 5 })!
+      expect(next.areas.find((a) => a.key === 'areab2')?.color).toBe(5)
+      expect(withArea(plan(), { type: 'color', key: 'areab2', color: 8 })).toBeNull()
+      expect(withArea(plan(), { type: 'color', key: 'areab2', color: -1 })).toBeNull()
+      expect(withArea(plan(), { type: 'color', key: 'nope000', color: 1 })).toBeNull()
+    })
+
+    it('names a new area אזור חדש, then אזור חדש 2 when taken (plan 700)', () => {
+      expect(newAreaName(plan())).toBe('אזור חדש')
+      const one = withArea(plan(), { type: 'add', key: 'areac3', name: 'אזור חדש' })!
+      expect(newAreaName(one)).toBe('אזור חדש 2')
     })
   })
 })

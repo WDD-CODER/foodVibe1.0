@@ -15,10 +15,22 @@ export const floorKeyField = z.string().regex(FLOOR_KEY_PATTERN)
 
 const seats = z.number().int().min(1).max(30)
 
+/** Plan 699: an area's zone on the map, in cells (same origin as tables: `x` from the inline start), at least 2 × 2. */
+export const floorZoneSchema = z.strictObject({
+  x: z.number().int().min(0),
+  y: z.number().int().min(0),
+  w: z.number().int().min(2).max(80),
+  h: z.number().int().min(2).max(80)
+})
+
 export const floorAreaSchema = z.strictObject({
   key: floorKeyField,
   name: nameField,
-  order: z.number().int()
+  order: z.number().int(),
+  /** Plan 699: index into the zone palette (0–7); none = `order % 8`. */
+  color: z.number().int().min(0).max(7).optional(),
+  /** Plan 699: the area's rectangle on the map; none = the area is only a tag. */
+  zone: floorZoneSchema.optional()
 })
 
 export const floorTableSchema = z
@@ -63,3 +75,4 @@ export type FloorPlan = z.infer<typeof floorPlanSchema>
 export type FloorTable = z.infer<typeof floorTableSchema>
 export type FloorArea = z.infer<typeof floorAreaSchema>
 export type FloorJoin = z.infer<typeof floorJoinSchema>
+export type FloorZone = z.infer<typeof floorZoneSchema>

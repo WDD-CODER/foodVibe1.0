@@ -8,13 +8,20 @@
         <div class="joins-list__head">
           <button
             type="button"
-            class="c-chip c-chip--tap"
+            class="joins-list__toggle"
             data-testid="join-label"
-            [class.active]="row.marked"
-            [attr.aria-pressed]="row.marked"
-            (click)="joinPressed.emit(row.join.key)"
+            [class.joins-list__toggle--marked]="row.marked"
+            [attr.aria-expanded]="row.open"
+            (click)="press(row.join.key)"
           >
-            {{ row.label }}
+            <span class="c-chip joins-list__label-chip">{{ row.label }}</span>
+            <span class="joins-list__summary">{{ row.summary }}</span>
+            <lucide-icon
+              class="joins-list__chevron"
+              [class.joins-list__chevron--open]="row.open"
+              name="chevron-down"
+              [size]="16"
+            ></lucide-icon>
           </button>
           <button
             type="button"
@@ -26,36 +33,40 @@
             <lucide-icon name="trash-2" [size]="16"></lucide-icon>
           </button>
         </div>
-        <div class="joins-list__seats">
-          <span class="joins-list__label">{{ 'fp_field_seats_min' | translatePipe }}</span>
-          <app-counter
-            data-testid="join-min"
-            [value]="row.join.minSeats"
-            [min]="1"
-            [max]="row.join.maxSeats"
-            (valueChange)="joinChange.emit({ key: row.join.key, patch: { minSeats: $event } })"
-          />
-        </div>
-        <div class="joins-list__seats">
-          <span class="joins-list__label">{{ 'fp_field_seats_max' | translatePipe }}</span>
-          <app-counter
-            data-testid="join-max"
-            [value]="row.join.maxSeats"
-            [min]="row.join.minSeats"
-            [max]="maxSeats"
-            (valueChange)="joinChange.emit({ key: row.join.key, patch: { maxSeats: $event } })"
-          />
-        </div>
-        <label class="c-chip c-chip--toggle">
-          <input
-            type="checkbox"
-            role="switch"
-            data-testid="join-online"
-            [checked]="row.join.online"
-            (change)="setOnline(row.join.key, $event)"
-          />
-          <span>{{ 'fp_join_online' | translatePipe }}</span>
-        </label>
+        @if (row.open) {
+          <div class="joins-list__editor">
+            <div class="joins-list__seats">
+              <span class="joins-list__label">{{ 'fp_field_seats_min' | translatePipe }}</span>
+              <app-counter
+                data-testid="join-min"
+                [value]="row.join.minSeats"
+                [min]="1"
+                [max]="row.join.maxSeats"
+                (valueChange)="joinChange.emit({ key: row.join.key, patch: { minSeats: $event } })"
+              />
+            </div>
+            <div class="joins-list__seats">
+              <span class="joins-list__label">{{ 'fp_field_seats_max' | translatePipe }}</span>
+              <app-counter
+                data-testid="join-max"
+                [value]="row.join.maxSeats"
+                [min]="row.join.minSeats"
+                [max]="maxSeats"
+                (valueChange)="joinChange.emit({ key: row.join.key, patch: { maxSeats: $event } })"
+              />
+            </div>
+            <label class="c-chip c-chip--toggle joins-list__online">
+              <input
+                type="checkbox"
+                role="switch"
+                data-testid="join-online"
+                [checked]="row.join.online"
+                (change)="setOnline(row.join.key, $event)"
+              />
+              <span>{{ 'fp_join_online' | translatePipe }}</span>
+            </label>
+          </div>
+        }
       </div>
     }
   }
