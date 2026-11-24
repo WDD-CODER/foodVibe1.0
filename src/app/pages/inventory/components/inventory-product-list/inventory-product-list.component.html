@@ -137,23 +137,21 @@
 
   <ng-container shell-table-body>
     @if (filteredProducts_().length === 0) {
-      <div class="no-results">
-        @if (isEmptyList_()) {
-          <app-empty-state
-            messageKey="empty_inventory"
-            icon="package"
-            ctaLabelKey="add_first_product"
-            [ctaDisabled]="!isLoggedIn()"
-            (ctaClick)="onAddProduct()"
-          />
-        } @else {
-          {{ 'no_products_match' | translatePipe }}
-        }
-      </div>
+      @if (isEmptyList_()) {
+        <app-empty-state
+          messageKey="empty_inventory"
+          icon="package"
+          ctaLabelKey="add_first_product"
+          [ctaDisabled]="!isLoggedIn()"
+          (ctaClick)="onAddProduct()"
+        />
+      } @else {
+        <app-empty-state messageKey="no_products_match" icon="search" />
+      }
     }
     @for (row of pagedRows_(); track row.product._id) {
       <div
-        class="product-grid-row c-list-row"
+        class="product-grid-row c-list-row c-list-row--link"
         [class.row--invalid]="row.validationStatus === 'invalid'"
         [class.row--incomplete]="row.validationStatus === 'incomplete'"
         role="button"
@@ -171,7 +169,7 @@
       >
         <div class="col-name c-list-body-cell" role="cell">
           @if (isLowStock(row.product)) {
-            <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{
+            <span class="c-chip c-chip--tag c-chip--sm c-chip--amber" [attr.title]="'low_stock' | translatePipe">{{
               'low_stock' | translatePipe
             }}</span>
           }
@@ -196,7 +194,7 @@
                     <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
                   }
                   @case ('unpriced') {
-                    <span class="c-chip amber unpriced-badge">
+                    <span class="c-chip c-chip--tag c-chip--sm c-chip--amber unpriced-badge">
                       <lucide-icon name="coins" [size]="11"></lucide-icon>
                       <span class="unpriced-badge__label">{{ 'product_unpriced' | translatePipe }}</span>
                     </span>
@@ -238,7 +236,12 @@
                 "
                 (appClickOutside)="closeAllergenView($event)"
               >
-                <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(row.product._id)">
+                <button
+                  type="button"
+                  class="c-chip c-chip--tap c-chip--amber"
+                  [class.visually-hidden]="isAllergenAllExpanded_() || allergenPopoverProductId_() === row.product._id"
+                  (click)="toggleAllergenPopover(row.product._id)"
+                >
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
                   {{ row.product.allergens.length }}
                 </button>
@@ -277,7 +280,7 @@
               [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
-              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
             </button>
           }
         </app-row-actions-menu>

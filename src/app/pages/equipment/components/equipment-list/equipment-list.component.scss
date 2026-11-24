@@ -4,47 +4,8 @@
     display: block;
   }
 
-  .c-sortable-header {
-    cursor: pointer;
-
-    user-select: none;
-  }
-
-  .equipment-grid-row {
-    display: contents;
-  }
-
-  .equipment-grid-row .c-list-body-cell {
-    cursor: pointer;
-  }
-
-  .equipment-grid-row:hover .c-icon-btn {
-    opacity: 1;
-  }
-
-  .c-col-actions .c-icon-btn {
-    margin-inline-start: 0.25rem;
-  }
-
-  .no-results {
-    grid-column: 1 / -1;
-
-    padding: 2rem 1rem;
-
-    text-align: center;
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-
-    border-block-end: 1px solid var(--border-default);
-    background: var(--bg-glass-strong);
-  }
-
   /* Inline edit: grid-column span for list context */
   .inline-edit-panel {
-    grid-column: 1 / -1;
-  }
-
-  .inline-edit-notes {
     grid-column: 1 / -1;
   }
 

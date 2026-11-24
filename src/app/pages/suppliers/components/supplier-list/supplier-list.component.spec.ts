@@ -15,6 +15,8 @@ import { LoggingService } from '@services/logging.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { Supplier } from '@models/supplier.model'
 import { Product } from '@models/product.model'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 /** Exposes the protected bulk handler to the spec. */
 class TestableSupplierList extends SupplierListComponent {
@@ -146,5 +148,39 @@ describe('SupplierListComponent delete flow (plan 366)', () => {
       count: 2
     })
     expect(calls).toEqual(['master:s1', 'remove:s1', 'unlink:s1', 'remove:s2', 'unlink:s2'])
+  })
+})
+
+describe('SupplierListComponent empty state (plan 711)', () => {
+  it('a search with no match shows one shared empty state', () => {
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    const router = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree', 'serializeUrl'], { events: of() })
+    TestBed.configureTestingModule({
+      imports: [SupplierListComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        { provide: SupplierDataService, useValue: { allSuppliers_: signal([supplier('s1')]) } },
+        { provide: ProductDataService, useValue: {} },
+        { provide: KitchenStateService, useValue: { products_: signal([]) } },
+        { provide: MasterPushService, useValue: {} },
+        { provide: ConfirmModalService, useValue: {} },
+        { provide: TranslationService, useValue: translation },
+        { provide: UserService, useValue: { isLoggedIn: signal(true) } },
+        { provide: RequireAuthService, useValue: { requireAuth: () => true } },
+        { provide: LoggingService, useValue: jasmine.createSpyObj('LoggingService', ['error', 'info']) },
+        {
+          provide: HeroFabService,
+          useValue: jasmine.createSpyObj('HeroFabService', ['setPageActions', 'clearPageActions'])
+        },
+        { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParams: {} }, queryParams: of({}) } }
+      ]
+    })
+    const fixture = TestBed.createComponent(SupplierListComponent)
+    ;(fixture.componentInstance as unknown as { searchQuery_: { set(v: string): void } }).searchQuery_.set('zzzz')
+    fixture.detectChanges()
+    const root = fixture.nativeElement as HTMLElement
+    expect(root.querySelectorAll('app-empty-state').length).toBe(1)
+    expect(root.querySelector('.no-results')).toBeNull()
   })
 })

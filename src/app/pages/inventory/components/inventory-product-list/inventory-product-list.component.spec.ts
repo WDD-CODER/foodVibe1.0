@@ -229,6 +229,21 @@ describe('InventoryProductListComponent', () => {
       expect(confirmOpen).not.toHaveBeenCalled()
     })
   })
+  describe('no match (plan 711)', () => {
+    afterEach(() => {
+      // The list keeps its search in sessionStorage: put it back so the next test sees a clean list.
+      ;(component as any).searchQuery_.set('')
+      fixture.detectChanges()
+      sessionStorage.clear()
+    })
+    it('a search with no match shows one shared empty state', () => {
+      ;(component as any).searchQuery_.set('zzzzzz')
+      fixture.detectChanges()
+      const root = fixture.nativeElement as HTMLElement
+      expect(root.querySelectorAll('app-empty-state').length).toBe(1)
+      expect(root.querySelector('.no-results')).toBeNull()
+    })
+  })
   describe('unknown supplier (plan 649)', () => {
     it('shows supplier_unknown for a supplier outside the business list, never its id', () => {
       const names = (component as any).getSupplierNames(['Supplier A', 'ghost-id-123']) as string

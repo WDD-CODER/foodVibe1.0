@@ -49,6 +49,19 @@ describe('StockBelowMinimumComponent', () => {
     expect(text).toContain('05/11/2026')
   })
 
+  it('plan 711: two items are two shared list rows whose cells are direct grid items of one list', () => {
+    setup({ rows: [row('a', 4), row('b', 5)] })
+    const list = el().querySelector('.c-list') as HTMLElement
+    expect(list).not.toBeNull()
+    const rows = Array.from(list.querySelectorAll('[data-testid="stk-below-row"].c-list-row'))
+    expect(rows.length).toBe(2)
+    for (const r of rows) {
+      expect(r.parentElement).toBe(list)
+      expect(getComputedStyle(r).display).toBe('contents')
+      expect(r.querySelectorAll(':scope > .c-list-body-cell').length).toBe(4)
+    }
+  })
+
   it('plan 658: the amounts show the unit name, not its key', () => {
     setup({ rows: [row('a', 4)], names: { kg: 'קילו' } })
     const text = el().querySelector('[data-testid="stk-below-row"]')?.textContent ?? ''

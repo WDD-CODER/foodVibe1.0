@@ -107,13 +107,11 @@
 
   <ng-container shell-table-body>
     @if (filteredEquipment_().length === 0) {
-      <div class="no-results">
-        {{ 'no_equipment_match' | translatePipe }}
-      </div>
+      <app-empty-state messageKey="no_equipment_match" icon="search" />
     }
     @for (item of filteredEquipment_(); track item._id) {
       <div
-        class="equipment-grid-row c-list-row"
+        class="c-list-row c-list-row--link"
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
@@ -156,7 +154,7 @@
               [disabled]="!isLoggedIn()"
               [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
-              <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+              <lucide-icon name="trash-2" [size]="16"></lucide-icon>
             </button>
           }
         </app-row-actions-menu>
@@ -180,14 +178,9 @@
        backdrop-filter (fixed-position containing block — see list-shell.component.html). -->
   @if (!isDesktop_() && editingItem_(); as item) {
     <ng-container shell-modal>
-      <div class="c-modal-overlay" (click)="onInlinePanelClickOutside()"></div>
-      <div
-        class="inline-edit-panel as-modal"
-        [class.closing]="closingId_() === item._id"
-        (appClickOutside)="onInlinePanelClickOutside()"
-      >
+      <app-modal-shell [sheet]="true" size="md" labelKey="edit" (dismissed)="onInlinePanelClickOutside()">
         <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
-      </div>
+      </app-modal-shell>
     </ng-container>
   }
 
@@ -202,12 +195,10 @@
 
       <div class="inline-edit-section">
         <div class="inline-edit-grid">
-          <div class="inline-edit-field">
-            <label for="inline-name">{{ 'name' | translatePipe }}</label>
+          <app-form-field label="name" forId="inline-name">
             <input id="inline-name" type="text" formControlName="nameHebrew" class="c-input" />
-          </div>
-          <div class="inline-edit-field">
-            <label for="inline-category">{{ 'category' | translatePipe }}</label>
+          </app-form-field>
+          <app-form-field label="category" forId="inline-category">
             <app-custom-select
               triggerId="inline-category"
               formControlName="category"
@@ -220,11 +211,10 @@
               (addNewChosen)="pendingAddName_.set($event)"
               (valueChange)="onCategoryValueChange($event, 'inline')"
             />
-          </div>
-          <div class="inline-edit-field">
-            <label for="inline-owned">{{ 'owned_quantity' | translatePipe }}</label>
+          </app-form-field>
+          <app-form-field label="owned_quantity" forId="inline-owned">
             <input id="inline-owned" type="number" formControlName="ownedQuantity" min="0" class="c-input" />
-          </div>
+          </app-form-field>
         </div>
         <div class="inline-edit-checkboxes">
           <label class="c-chip c-chip--toggle">
@@ -237,38 +227,37 @@
           </label>
         </div>
         @if (scalingEnabled_()) {
-          <p class="inline-edit-field">{{ 'scaling_rule_hint' | translatePipe }}</p>
+          <p>{{ 'scaling_rule_hint' | translatePipe }}</p>
           <div class="inline-edit-grid">
-            <div class="inline-edit-field">
-              <label for="inline-per-guests">{{ 'per_guests' | translatePipe }}</label>
+            <app-form-field
+              label="per_guests"
+              forId="inline-per-guests"
+              [error]="scalingErrors_()['perGuests'] ?? null"
+            >
               <!-- prettier-ignore -->
               <div appNumberBox><input id="inline-per-guests" type="number" formControlName="perGuests" min="1" step="1" class="c-input" /></div>
-              @if (scalingErrors_()['perGuests']; as err) {
-                <span class="c-field-error">{{ err | translatePipe }}</span>
-              }
-            </div>
-            <div class="inline-edit-field">
-              <label for="inline-min-quantity">{{ 'min_quantity' | translatePipe }}</label>
+            </app-form-field>
+            <app-form-field
+              label="min_quantity"
+              forId="inline-min-quantity"
+              [error]="scalingErrors_()['minQuantity'] ?? null"
+            >
               <!-- prettier-ignore -->
               <div appNumberBox><input id="inline-min-quantity" type="number" formControlName="minQuantity" min="0" step="1" class="c-input" /></div>
-              @if (scalingErrors_()['minQuantity']; as err) {
-                <span class="c-field-error">{{ err | translatePipe }}</span>
-              }
-            </div>
-            <div class="inline-edit-field">
-              <label for="inline-max-quantity">{{ 'max_quantity' | translatePipe }}</label>
+            </app-form-field>
+            <app-form-field
+              label="max_quantity"
+              forId="inline-max-quantity"
+              [error]="scalingErrors_()['maxQuantity'] ?? null"
+            >
               <!-- prettier-ignore -->
               <div appNumberBox><input id="inline-max-quantity" type="number" formControlName="maxQuantity" min="0" step="1" class="c-input" /></div>
-              @if (scalingErrors_()['maxQuantity']; as err) {
-                <span class="c-field-error">{{ err | translatePipe }}</span>
-              }
-            </div>
+            </app-form-field>
           </div>
         }
-        <div class="inline-edit-field inline-edit-notes">
-          <label for="inline-notes">{{ 'notes' | translatePipe }}</label>
+        <app-form-field label="notes" forId="inline-notes" layout="full">
           <textarea id="inline-notes" formControlName="notes" rows="2" class="c-input"></textarea>
-        </div>
+        </app-form-field>
       </div>
 
       <div class="inline-edit-actions">
