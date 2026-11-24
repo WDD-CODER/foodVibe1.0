@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PlatformAdminService, type LearningStats } from '@services/platform-admin.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { LoggingService } from '@services/logging.service'
@@ -19,7 +20,7 @@ const LOW_SAMPLE = 5
 @Component({
   selector: 'app-platform-learning',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent, LoaderComponent],
   templateUrl: './platform-learning.component.html',
   styleUrl: './platform-learning.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

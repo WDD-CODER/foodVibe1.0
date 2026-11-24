@@ -14,7 +14,7 @@
     </p>
 
     <div class="diag-report__wrap">
-      <table class="diag-report__table" data-testid="diag-dishes">
+      <table class="c-table c-table--compact diag-report__table" data-testid="diag-dishes">
         <thead>
           <tr>
             <th scope="col">{{ 'diag_col_dish' | translatePipe }}</th>
@@ -69,10 +69,10 @@
 
     <h2 class="diag-report__h2">{{ volatilityTitle_() }}</h2>
     @if (moves_().length === 0) {
-      <p class="diag-report__note" data-testid="diag-volatility-empty">{{ 'diag_volatility_empty' | translatePipe }}</p>
+      <app-empty-state messageKey="diag_volatility_empty" [compact]="true" data-testid="diag-volatility-empty" />
     } @else {
       <div class="diag-report__wrap">
-        <table class="diag-report__table" data-testid="diag-moves">
+        <table class="c-table c-table--compact diag-report__table" data-testid="diag-moves">
           <thead>
             <tr>
               <th scope="col">{{ 'diag_col_product' | translatePipe }}</th>

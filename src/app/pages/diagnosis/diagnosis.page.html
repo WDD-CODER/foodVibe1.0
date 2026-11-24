@@ -1,4 +1,4 @@
-<div class="diagnosis-page" dir="rtl">
+<div class="diagnosis-page c-page c-page--narrow" dir="rtl">
   <app-page-header titleKey="diagnosis" />
 
   <section class="diagnosis-form c-glass-panel" data-testid="diagnosis-form">
@@ -14,10 +14,9 @@
         (ngModelChange)="name_.set($event)"
       />
     </app-form-field>
-    <div class="diagnosis-form__period">
-      <span class="diagnosis-form__label">{{ 'diag_period_days' | translatePipe }}</span>
+    <app-form-field [label]="'diag_period_days' | translatePipe">
       <app-counter [value]="periodDays_()" [min]="30" [max]="365" (valueChange)="periodDays_.set($event)" />
-    </div>
+    </app-form-field>
     <button
       type="button"
       class="c-btn-primary"
@@ -35,17 +34,24 @@
   } @else if (items_().length === 0) {
   <app-empty-state messageKey="diag_empty" icon="file-text" data-testid="diagnosis-empty" />
   } @else {
-  <div class="diagnosis-list">
+  <div class="diagnosis-list c-list c-glass-panel" role="table" [attr.aria-label]="'diagnosis' | translatePipe">
+    <div class="c-list-row" role="row">
+      <div class="c-grid-header-cell" role="columnheader">{{ 'diag_name' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'date' | translatePipe }}</div>
+      <div class="c-grid-header-cell" role="columnheader">{{ 'fd_card_status' | translatePipe }}</div>
+    </div>
     @for (item of items_(); track item._id) {
-    <a class="c-list-row diagnosis-list__row" data-testid="diagnosis-row" [routerLink]="['/diagnosis', item._id]">
-      <div class="c-list-body-cell diagnosis-list__name" dir="auto">{{ item.name }}</div>
-      <div class="c-list-body-cell" dir="ltr">{{ item.createdAt | date: 'dd/MM/yyyy' }}</div>
-      <div class="c-list-body-cell">
+    <div class="c-list-row" role="row" data-testid="diagnosis-row">
+      <div class="c-list-body-cell diagnosis-list__name" role="cell" dir="auto">
+        <a class="c-row-link" [routerLink]="['/diagnosis', item._id]">{{ item.name }}</a>
+      </div>
+      <div class="c-list-body-cell" role="cell" dir="ltr">{{ item.createdAt | date: 'dd/MM/yyyy' }}</div>
+      <div class="c-list-body-cell" role="cell">
         <span class="c-chip c-chip--tag" [class.c-chip--green]="item.status === 'done'">
           {{ (item.status === 'done' ? 'diag_status_done' : 'diag_status_open') | translatePipe }}
         </span>
       </div>
-    </a>
+    </div>
     }
   </div>
   }

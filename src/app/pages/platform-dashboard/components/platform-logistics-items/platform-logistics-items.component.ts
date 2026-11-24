@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PlatformAdminService, type AdminTermRow } from '@services/platform-admin.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -27,7 +28,7 @@ export interface LogisticsItemGroup {
 @Component({
   selector: 'app-platform-logistics-items',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent, LoaderComponent],
   templateUrl: './platform-logistics-items.component.html',
   styleUrl: './platform-logistics-items.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

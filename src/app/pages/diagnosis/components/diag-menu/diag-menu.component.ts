@@ -21,6 +21,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { DiagnosisService } from '../../services/diagnosis.service'
@@ -51,6 +52,7 @@ interface DishOption {
     SelectOnFocusDirective,
     TranslatePipe,
     CounterComponent,
+    FormFieldComponent,
     LoaderComponent,
     SearchComboboxComponent
   ],

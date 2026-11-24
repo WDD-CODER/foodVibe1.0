@@ -2,7 +2,9 @@
   <h2 class="learning__title">{{ 'platform_learning_title' | translatePipe }}</h2>
   <p class="learning__desc">{{ 'platform_learning_desc' | translatePipe }}</p>
   <p class="learning__hint" data-testid="learning-kept-hint">{{ 'platform_learning_kept_hint' | translatePipe }}</p>
-  @if (!isLoading_()) {
+  @if (isLoading_()) {
+    <app-loader />
+  } @else {
     @if (fileStore_() === false) {
       <p class="learning__warn" role="status" data-testid="learning-no-file-store">
         <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
@@ -11,16 +13,18 @@
     }
     @if (!stats_()?.flows?.length) {
       @if (privateCount() > 0) {
-        <p class="learning__empty" role="status" data-testid="learning-empty-private">
-          {{ emptyPrivate(privateCount()) }}
-        </p>
+        <app-empty-state
+          data-testid="learning-empty-private"
+          [compact]="true"
+          [messageKey]="emptyPrivate(privateCount())"
+        />
       } @else {
-        <app-empty-state messageKey="platform_learning_empty" />
+        <app-empty-state messageKey="platform_learning_empty" [compact]="true" />
       }
     } @else {
       <div class="learning__cards">
         @for (flow of stats_()!.flows; track rowKey(flow.feature, flow.model)) {
-          <article class="learning__card" data-testid="learning-flow-card">
+          <article class="learning__card c-glass-panel" data-testid="learning-flow-card">
             <header class="learning__card-head">
               <h3 class="learning__card-name">{{ 'ai_feature_' + flow.feature | translatePipe }}</h3>
               <span class="learning__model">
@@ -102,15 +106,15 @@
       <div class="learning__brain" data-testid="learning-brain">
         <h3 class="learning__heading">{{ 'platform_learning_brain_title' | translatePipe }}</h3>
         <div class="learning__tiles">
-          <div class="learning__tile" data-testid="learning-tile">
+          <div class="learning__tile c-stat-tile" data-testid="learning-tile">
             <span dir="ltr" class="learning__value c-num">{{ stats.brain.suppliers }}</span>
             <span class="learning__meaning">{{ 'platform_learning_brain_suppliers' | translatePipe }}</span>
           </div>
-          <div class="learning__tile" data-testid="learning-tile">
+          <div class="learning__tile c-stat-tile" data-testid="learning-tile">
             <span dir="ltr" class="learning__value c-num">{{ stats.brain.names }}</span>
             <span class="learning__meaning">{{ 'platform_learning_brain_names' | translatePipe }}</span>
           </div>
-          <div class="learning__tile" data-testid="learning-tile">
+          <div class="learning__tile c-stat-tile" data-testid="learning-tile">
             <span dir="ltr" class="learning__value c-num">{{ stats.brain.businesses }}</span>
             <span class="learning__meaning">{{ 'platform_learning_brain_businesses' | translatePipe }}</span>
           </div>

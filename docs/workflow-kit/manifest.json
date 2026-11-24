@@ -4257,6 +4257,16 @@
       "notes": "Plan 709: the dashboard tiles, card heads, activity feed, chips and empty states sit on the shared pieces and pass the style guard."
     },
     {
+      "path": "scripts/test/style-710.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 710: the platform page, the diagnosis screens and the report sit on the shared tables, tiles, loader, empty state and header and pass the style guard."
+    },
+    {
       "path": "scripts/test/style-712.test.mjs",
       "tier": "project",
       "action": "stay",

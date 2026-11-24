@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { DatePipe } from '@angular/common'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PlatformAdminService } from '@services/platform-admin.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { LoggingService } from '@services/logging.service'
@@ -16,7 +17,7 @@ import type { AiShotRow } from '@models/ai-shot.model'
 @Component({
   selector: 'app-platform-ai-shots',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, TranslatePipe, EmptyStateComponent, LoaderComponent],
   templateUrl: './platform-ai-shots.component.html',
   styleUrl: './platform-ai-shots.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

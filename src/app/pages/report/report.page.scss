@@ -55,8 +55,7 @@
   }
 
   &__since,
-  &__trend,
-  &__notice {
+  &__trend {
     padding: var(--space-4);
   }
 
@@ -74,18 +73,11 @@
 }
 
 .tile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border: 1px solid var(--color-border, rgba(0, 0, 0, 0.1));
-  border-radius: var(--radius-md);
-
   &__label {
     margin: 0;
     color: var(--color-text-muted);
     font-size: var(--fs-sm);
-    font-weight: var(--fw-medium, 500);
+    font-weight: var(--fw-medium);
   }
 
   &__values {
@@ -121,30 +113,19 @@
     flex-direction: column;
     margin: var(--space-1) 0 0;
     color: var(--color-text-muted-light);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     font-weight: normal;
   }
 }
 
 .trend {
-  inline-size: 100%;
-  border-collapse: collapse;
-  font-size: var(--fs-sm);
-
-  th,
-  td {
-    padding: var(--space-1) var(--space-2);
-    text-align: start;
-    vertical-align: middle;
-  }
-
   &__bar {
     display: block;
     inline-size: 100%;
-    min-inline-size: 2rem;
-    block-size: 0.4rem;
-    background: rgba(15, 118, 110, 0.1);
-    border-radius: 999px;
+    min-inline-size: var(--space-8);
+    block-size: var(--space-2);
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    border-radius: var(--radius-full);
     overflow: hidden;
 
     > span {
@@ -176,8 +157,7 @@
     }
 
     &__since,
-    &__trend,
-    &__notice {
+    &__trend {
       padding: 2mm;
       box-shadow: none;
       break-inside: avoid;
@@ -198,11 +178,11 @@
     }
   }
 
-  .tile {
+  .report__tiles .c-stat-tile {
     padding: 1.5mm;
     break-inside: avoid;
 
-    &__values {
+    .tile__values {
       font-size: 11pt;
     }
   }
@@ -243,6 +223,6 @@
   display: flex;
   gap: var(--space-2);
   color: var(--color-text-muted-light);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   font-weight: normal;
 }
