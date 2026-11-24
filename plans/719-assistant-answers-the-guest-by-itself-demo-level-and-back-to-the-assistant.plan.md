@@ -142,7 +142,7 @@ append the path to the scope block above and retry.
 
 - `backToBot(db, conversation, { now, log })` in `server/services/inbound.js` — family: none — rung: 4 — why: a private step of the one inbound handler (`handleInbound`, component-families "Plan 675: never a second handler"); no service family exists on the server for it.
 - `answerWaiting(db, conversation, { log })` exported from `server/services/inbound.js` — family: none — rung: 4 — why: the release route needs the same "run the turn for the newest guest message" the inbound handler already does; it lives beside `turnHandler` so there is still one way to start a guest turn.
-- Simulator level line, held line and draft block — family: none — rung: 4 — why: three short template blocks inside the existing simulator page beside its `ai-failed-note` (plan 702); they reuse `c-btn-ghost` and the page's existing note style, no new shared component or `.c-*` class.
+- Simulator level line, held line and draft block (new classes `.sim-level`, `.sim-held`, `.sim-draft`) — family: none — rung: 4 — why: three short template blocks inside the existing simulator page beside its `ai-failed-note` (plan 702); they reuse `c-btn-ghost` and the page's existing note style, no new shared component or `.c-*` class.
 
 ## Defaults
 
