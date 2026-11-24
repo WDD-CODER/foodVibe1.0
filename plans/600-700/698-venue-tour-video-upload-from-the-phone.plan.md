@@ -30,8 +30,8 @@ uploads with a progress bar and appears at the top of «סרטוני סיור»,
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/698-venue-tour-video-upload-from-the-phone.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/698-venue-tour-video-upload-from-the-phone.plan.md` exits 0.
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
-- [human] On a phone (or the PC), on a venue page, tap «העלה סרטון סיור», pick or record a short video: a progress bar runs, then the video is first in «סרטוני סיור» with today's date and the chip «הועלה»; «פתח סרטון» plays it in a new tab; after a reload it is still there.
-- [human] A video over 100 MB is refused before any upload with «הסרטון גדול מדי (עד 100MB)», and the venue is unchanged.
+- [x] [human] On a phone (or the PC), on a venue page, tap «העלה סרטון סיור», pick or record a short video: a progress bar runs, then the video is first in «סרטוני סיור» with today's date and the chip «הועלה»; «פתח סרטון» plays it in a new tab; after a reload it is still there.
+- [x] [human] A video over 100 MB is refused before any upload with «הסרטון גדול מדי (עד 100MB)», and the venue is unchanged.
 
 ## Execution Mode
 - Parallel: yes — no open plan writes these files (Restaurant plans 663–689 touch no venue or Cloudinary file).
@@ -164,6 +164,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   not settle is a `behaviour:` decision for him to grade.
 
 ## Execution Notes
+- Planner close-out 2026-11-24: run run-698 merged to main as #656 (ea867c40), final gate ok, all PR checks green. [human] both cards validated by Dandan ("ok: 1,2") on slot wt-3. Decisions D1–D3 of the run: "decisions: ok". Todo V1 done.
 - Planner 2026-11-23: written from todo V1 (PR #638 grading). Checked on main e40c4787: CSP already allows
   Cloudinary connect and media; the image upload path and the plan 373 videos card are in place.
 - Builder: build exit 0; lint exit 0 (0 errors); lint:icons 0; test:ci 2778 SUCCESS (exit 0).
