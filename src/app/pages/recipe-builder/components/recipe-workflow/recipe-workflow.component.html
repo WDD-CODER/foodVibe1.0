@@ -17,7 +17,7 @@
             <!-- Right: drag handle + step badge -->
             <div class="col-drag-id" cdkDragHandle>
               <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
-              <span class="step-badge">{{ i + 1 }}</span>
+              <span class="c-chip c-chip--tag c-chip--soft c-chip--teal rb-step-num">{{ i + 1 }}</span>
             </div>
 
             <!-- Center: textarea -->
@@ -25,7 +25,7 @@
               <textarea
                 #instructionField
                 formControlName="instruction"
-                class="workflow-textarea"
+                class="c-input rb-step-text"
                 appSelectOnFocus
                 appTextareaAutoGrow
                 placeholder="{{ 'instruction_placeholder' | translatePipe }}"
@@ -38,29 +38,29 @@
               <!-- clock icon = labor time (admin analytics) -->
               <button
                 type="button"
-                class="timer-toggle-btn"
-                [class.timer-active]="isTimerOpen(i)"
+                class="c-chip c-chip--toggle rb-timer-toggle"
+                [class.is-on]="isTimerOpen(i)"
                 [class.timer-has-value]="!isTimerOpen(i) && (group.get('labor_time')?.value ?? 0) > 0"
                 (click)="toggleTimer(i)"
                 [attr.aria-label]="'labor_time_minutes' | translatePipe"
                 tabindex="-1"
               >
-                <lucide-icon name="clock" class="wf-icon"></lucide-icon>
+                <lucide-icon name="clock" [size]="16"></lucide-icon>
               </button>
               <!-- timer icon = cooking time (countdown) -->
               <button
                 type="button"
-                class="timer-toggle-btn"
-                [class.timer-active]="isCookTimeOpen(i)"
+                class="c-chip c-chip--toggle rb-timer-toggle"
+                [class.is-on]="isCookTimeOpen(i)"
                 [class.timer-has-value]="!isCookTimeOpen(i) && (group.get('cooking_time')?.value ?? 0) > 0"
                 (click)="toggleCookTime(i)"
                 [attr.aria-label]="'cooking_time_minutes' | translatePipe"
                 tabindex="-1"
               >
-                <lucide-icon name="timer" class="wf-icon"></lucide-icon>
+                <lucide-icon name="timer" [size]="16"></lucide-icon>
               </button>
               <button type="button" (click)="removeItem.emit(i)" class="c-icon-btn danger step-delete-btn">
-                <lucide-icon name="trash-2" class="wf-icon"></lucide-icon>
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
               </button>
             </div>
 
@@ -71,20 +71,20 @@
                 <div class="timer-counter">
                   <button
                     type="button"
-                    class="counter-btn minus"
+                    class="c-icon-btn rb-step-btn"
                     [disabled]="(group.get('labor_time')?.value ?? 0) <= 0"
                     appStepHold
                     [stepHoldStop]="(group.get('labor_time')?.value ?? 0) <= 0"
                     (stepHold)="decrementLaborTime(group)"
                     tabindex="-1"
                   >
-                    <lucide-icon name="minus" class="wf-icon"></lucide-icon>
+                    <lucide-icon name="minus" [size]="14"></lucide-icon>
                   </button>
                   @if (editingLaborTimeIndex_() === i) {
                     <input
                       #laborTimeInput
                       type="text"
-                      class="timer-field"
+                      class="c-input c-input--outline timer-field"
                       [value]="laborTimeEditStr_()"
                       (input)="laborTimeEditStr_.set($any($event.target).value)"
                       placeholder="0:00"
@@ -108,12 +108,12 @@
                   }
                   <button
                     type="button"
-                    class="counter-btn plus"
+                    class="c-icon-btn rb-step-btn"
                     appStepHold
                     (stepHold)="incrementLaborTime(group)"
                     tabindex="-1"
                   >
-                    <lucide-icon name="plus" class="wf-icon"></lucide-icon>
+                    <lucide-icon name="plus" [size]="16"></lucide-icon>
                   </button>
                 </div>
               </div>
@@ -126,20 +126,20 @@
                 <div class="timer-counter">
                   <button
                     type="button"
-                    class="counter-btn minus"
+                    class="c-icon-btn rb-step-btn"
                     [disabled]="(group.get('cooking_time')?.value ?? 0) <= 0"
                     appStepHold
                     [stepHoldStop]="(group.get('cooking_time')?.value ?? 0) <= 0"
                     (stepHold)="decrementCookTime(group)"
                     tabindex="-1"
                   >
-                    <lucide-icon name="minus" class="wf-icon"></lucide-icon>
+                    <lucide-icon name="minus" [size]="14"></lucide-icon>
                   </button>
                   @if (editingCookTimeIndex_() === i) {
                     <input
                       #cookTimeInput
                       type="text"
-                      class="timer-field timer-field--wide"
+                      class="c-input c-input--outline timer-field timer-field--wide"
                       [value]="cookTimeEditStr_()"
                       (input)="cookTimeEditStr_.set($any($event.target).value)"
                       placeholder="00:00:00"
@@ -163,12 +163,12 @@
                   }
                   <button
                     type="button"
-                    class="counter-btn plus"
+                    class="c-icon-btn rb-step-btn"
                     appStepHold
                     (stepHold)="incrementCookTime(group)"
                     tabindex="-1"
                   >
-                    <lucide-icon name="plus" class="wf-icon"></lucide-icon>
+                    <lucide-icon name="plus" [size]="16"></lucide-icon>
                   </button>
                 </div>
               </div>
@@ -177,8 +177,8 @@
         }
       </div>
 
-      <button type="button" (click)="addItem.emit()" class="add-row-btn">
-        <lucide-icon name="plus" class="wf-icon"></lucide-icon>
+      <button type="button" (click)="addItem.emit()" class="c-btn-ghost">
+        <lucide-icon name="plus" [size]="16"></lucide-icon>
         {{ 'add_prep_stage' | translatePipe }}
       </button>
     </div>
@@ -227,7 +227,11 @@
                   (keydown.space)="$event.preventDefault(); editingPreparationNameAtRow_.set(i)"
                 >
                   <span class="item-text">{{ group.get('preparationName')?.value }}</span>
-                  <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearPreparation(group)">
+                  <button
+                    type="button"
+                    class="c-icon-btn rb-mini-btn"
+                    (click)="$event.stopPropagation(); clearPreparation(group)"
+                  >
                     <lucide-icon name="x" [size]="14"></lucide-icon>
                   </button>
                 </div>
@@ -273,7 +277,7 @@
 
             <div class="col-prep-actions">
               <button type="button" (click)="removeItem.emit(i)" class="c-icon-btn danger">
-                <lucide-icon name="trash-2" class="wf-icon"></lucide-icon>
+                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
               </button>
             </div>
           </div>
@@ -281,8 +285,8 @@
       </div>
 
       <div class="add-row-wrap">
-        <button type="button" (click)="addItem.emit(); $event.stopPropagation()" class="add-row-btn">
-          <lucide-icon name="plus" class="wf-icon"></lucide-icon>
+        <button type="button" (click)="addItem.emit(); $event.stopPropagation()" class="c-btn-ghost">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
           {{ 'add_preparation' | translatePipe }}
         </button>
       </div>

@@ -73,7 +73,7 @@ import {
   compareRecipes
 } from './utils/recipe-book-list.util'
 import { RecipeRowActionsService } from './services/recipe-row-actions.service'
-import { RecipeListTooltipsService } from './services/recipe-list-tooltips.service'
+import { TipDirective } from 'src/app/shared/tip/tip.directive'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 /** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
@@ -100,9 +100,10 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     RatingStarsComponent,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
-    InputClearComponent
+    InputClearComponent,
+    TipDirective
   ],
-  providers: [RecipeRowActionsService, RecipeListTooltipsService],
+  providers: [RecipeRowActionsService],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -120,7 +121,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly heroFab = inject(HeroFabService)
   private readonly aiRecipeModal = inject(AiRecipeModalService)
   protected readonly rowActions = inject(RecipeRowActionsService)
-  protected readonly tooltips = inject(RecipeListTooltipsService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoggedIn = this.userService.isLoggedIn
@@ -363,16 +363,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   )
 
   protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0)
-
-  protected activeCostTooltipRecipe_ = computed(() => {
-    const id = this.tooltips.costHoveredId() ?? this.tooltips.costTappedId()
-    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
-  })
-
-  protected activeDateTooltipRecipe_ = computed(() => {
-    const id = this.tooltips.dateHoveredId()
-    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
-  })
 
   protected hasActiveFilters_ = computed(
     () =>

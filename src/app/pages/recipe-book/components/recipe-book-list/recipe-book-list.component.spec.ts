@@ -155,6 +155,15 @@ describe('RecipeBookListComponent', () => {
     expect(filtered.length).toBe(0)
   })
 
+  it('shows the shared empty state when a search matches no recipe (plan 715)', () => {
+    const el = fixture.nativeElement as HTMLElement
+    ;(component as any).searchQuery_.set('zzzz')
+    fixture.detectChanges()
+
+    expect(el.querySelector('.rb-search-miss app-empty-state')).not.toBeNull()
+    expect(el.querySelector('.no-results')).toBeNull()
+  })
+
   it('should call deleteRecipe when delete is confirmed', async () => {
     const confirmModal = TestBed.inject(ConfirmModalService)
     ;(confirmModal.open as jasmine.Spy).and.returnValue(Promise.resolve(true))

@@ -1,6 +1,6 @@
 @layer components.recipe-book {
   :host {
     display: block;
-    min-height: 100%;
+    min-block-size: 100%;
   }
 }

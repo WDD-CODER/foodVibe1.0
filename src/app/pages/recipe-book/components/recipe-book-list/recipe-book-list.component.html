@@ -21,6 +21,7 @@
         #searchInput
         id="recipe-search"
         type="text"
+        class="c-input"
         [ngModel]="searchQuery_()"
         (ngModelChange)="searchQuery_.set($event)"
         [placeholder]="'search' | translatePipe"
@@ -172,7 +173,7 @@
 
   <ng-container shell-table-body>
     @if (filteredRecipes_().length === 0) {
-      <div class="no-results">
+      <div class="rb-search-miss">
         @if (isEmptyList_()) {
           <app-empty-state
             messageKey="empty_recipe_book"
@@ -182,7 +183,7 @@
             (ctaClick)="onAddRecipe()"
           />
         } @else {
-          {{ 'no_recipes_match' | translatePipe }}
+          <app-empty-state messageKey="no_recipes_match" icon="search" />
         }
       </div>
     }
@@ -207,7 +208,7 @@
           @if (!row.recipe.isApproved) {
             <button
               type="button"
-              class="approval-pending-badge"
+              class="c-chip c-chip--tag c-chip--sm c-chip--amber approval-pending"
               [attr.aria-label]="'approve_recipe' | translatePipe"
               [attr.title]="'recipe_pending_approval' | translatePipe"
               (click)="rowActions.toggleApproval(row.recipe); $event.stopPropagation()"
@@ -232,7 +233,11 @@
                 (keydown.enter)="labelsExpand.toggleOne(row.recipe._id)"
                 (keydown.space)="$event.preventDefault(); labelsExpand.toggleOne(row.recipe._id)"
               >
-                <button type="button" class="labels-btn">
+                <button
+                  type="button"
+                  class="c-chip c-chip--tap"
+                  [attr.aria-expanded]="labelsExpand.isExpanded(row.recipe._id)"
+                >
                   <lucide-icon name="tag" [size]="16"></lucide-icon>
                   {{ row.labels.length }}
                 </button>
@@ -263,7 +268,12 @@
                 [class.allergen-expanded-open]="allergenExpand.isExpanded(row.recipe._id)"
                 (appClickOutside)="closeAllergenView($event)"
               >
-                <button type="button" class="allergen-btn" (click)="allergenExpand.toggleOne(row.recipe._id)">
+                <button
+                  type="button"
+                  class="c-chip c-chip--tap"
+                  [attr.aria-expanded]="allergenExpand.isExpanded(row.recipe._id)"
+                  (click)="allergenExpand.toggleOne(row.recipe._id)"
+                >
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
                   {{ row.allergens.length }}
                 </button>
@@ -281,14 +291,10 @@
           </div>
           @if (!shouldHideDateColumn_()) {
             <div
-              class="col-date c-list-body-cell date-cell-wrap"
+              class="col-date c-list-body-cell"
               appColumnSlide
               [label]="'date_added' | translatePipe"
-              (mouseenter)="tooltips.showDate(row.recipe._id, $event)"
-              (mouseleave)="tooltips.hideDate()"
-              [attr.aria-describedby]="
-                tooltips.dateHoveredId() === row.recipe._id ? 'date-tooltip-' + row.recipe._id : null
-              "
+              [appTip]="('date_updated' | translatePipe) + ': ' + formatUpdatedAtWithTime(row.recipe.updatedAt)"
             >
               {{ formatAddedAt(row.recipe.createdAt) }}
             </div>
@@ -310,14 +316,7 @@
             class="col-cost c-list-body-cell cost-cell-wrap"
             appColumnSlide
             [label]="'cost' | translatePipe"
-            (mouseenter)="tooltips.showCost(row.recipe._id, $event)"
-            (mouseleave)="tooltips.hideCost()"
-            (click)="tooltips.toggleCostTap(row.recipe._id, $event)"
-            [attr.aria-describedby]="
-              tooltips.costHoveredId() === row.recipe._id || tooltips.costTappedId() === row.recipe._id
-                ? 'cost-tooltip-' + row.recipe._id
-                : null
-            "
+            [appTip]="('price_for' | translatePipe) + getRecipeYieldDescription(row.recipe)"
           >
             ₪{{ row.cost | number: '1.2-2' }}
           </div>
@@ -412,7 +411,7 @@
             </button>
           }
           @if (getSelectedProducts().length) {
-            <button type="button" class="ingredient-clear-btn" (click)="clearIngredientProducts()">
+            <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="clearIngredientProducts()">
               {{ 'clear' | translatePipe }}
             </button>
           }
@@ -516,30 +515,3 @@
     </div>
   </ng-container>
 </app-list-shell>
-
-@if (activeCostTooltipRecipe_(); as recipe) {
-  @if (tooltips.costAnchor(); as anchor) {
-    <div
-      class="cost-tooltip cost-tooltip-fixed"
-      [id]="'cost-tooltip-' + recipe._id"
-      (appClickOutside)="tooltips.closeCostTap()"
-      [style.top.px]="anchor.bottom + 4"
-      [style.left.px]="anchor.left + anchor.width / 2"
-    >
-      {{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(recipe) }}
-    </div>
-  }
-}
-
-@if (activeDateTooltipRecipe_(); as recipe) {
-  @if (tooltips.dateAnchor(); as anchor) {
-    <div
-      class="date-tooltip date-tooltip-fixed"
-      [id]="'date-tooltip-' + recipe._id"
-      [style.top.px]="anchor.bottom + 4"
-      [style.left.px]="anchor.left + anchor.width / 2"
-    >
-      {{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(recipe.updatedAt) }}
-    </div>
-  }
-}

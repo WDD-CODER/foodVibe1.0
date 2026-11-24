@@ -5,12 +5,6 @@
   justify-content: space-evenly;
 }
 
-// ---- Icon utilities (replaces Tailwind h-4 w-4 / text-slate-400) ----
-.wf-icon {
-  width: 1rem;
-  height: 1rem;
-}
-
 // ---- Column alignment ----
 .col-center {
   text-align: center;
@@ -35,10 +29,10 @@
     grid-template-columns: auto 1fr auto;
     grid-template-rows: auto;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
 
-    margin: 0.375rem 0.5rem;
-    padding: 0.625rem 0.75rem;
+    margin: 0.375rem var(--space-2);
+    padding: 0.625rem var(--space-3);
 
     background: color-mix(in srgb, var(--color-primary) 6%, var(--bg-glass-strong));
     border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--border-glass));
@@ -72,11 +66,11 @@
 .col-step-actions {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 
   .step-delete-btn {
-    width: 1.75rem;
-    height: 1.75rem;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
     opacity: 0.4;
     transition: opacity 0.15s ease;
   }
@@ -92,32 +86,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding-block-start: 0.5rem;
+  gap: var(--space-3);
+  padding-block-start: var(--space-2);
   border-block-start: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
-  margin-block-start: 0.25rem;
+  margin-block-start: var(--space-1);
 }
 
 .timer-row-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
   color: var(--color-text-muted);
   white-space: nowrap;
 }
 
 @media (max-width: $break-phone-max) {
-  .timer-row .counter-btn {
+  .timer-row .rb-step-btn {
     display: none;
   }
 
   .timer-row .timer-value {
-    min-width: 3rem;
-    padding: 0.375rem 0.5rem;
+    min-inline-size: 3rem;
+    padding: 0.375rem var(--space-2);
     background: var(--bg-glass);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     text-align: center;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
   }
 }
 
@@ -136,16 +130,16 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   .grid-header.prep-grid-header {
     display: grid;
     grid-template-columns: $prep-grid-template;
-    gap: 0.75rem;
+    gap: var(--space-3);
     justify-content: space-evenly;
 
-    padding-inline: 0.75rem;
+    padding-inline: var(--space-3);
     padding-block: 0.625rem;
 
     background: var(--bg-glass);
     color: var(--color-text-muted);
-    font-size: 0.8125rem;
-    font-weight: 600;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
 
     border-block-end: 1px solid var(--border-default);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
@@ -155,12 +149,12 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   .prep-grid-row {
     display: grid;
     grid-template-columns: $prep-grid-template;
-    gap: 0.75rem;
+    gap: var(--space-3);
     align-items: center;
 
-    min-height: 4rem;
-    padding-inline: 1rem;
-    padding-block: 0.5rem;
+    min-block-size: 4rem;
+    padding-inline: var(--space-4);
+    padding-block: var(--space-2);
 
     background: transparent;
 
@@ -182,8 +176,8 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     }
 
     .col-prep-actions .c-icon-btn {
-      width: 1.5rem;
-      height: 1.5rem;
+      inline-size: 1.5rem;
+      block-size: 1.5rem;
       opacity: 0;
       transition: opacity 0.15s ease;
     }
@@ -198,30 +192,18 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.375rem 0.75rem;
+    padding: 0.375rem var(--space-3);
     background: var(--bg-muted);
     border-radius: var(--radius-sm);
 
     .item-text {
-      font-weight: 500;
-    }
-  }
-
-  .clear-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-text-muted);
-    padding: 0.25rem;
-
-    &:hover {
-      color: var(--color-danger);
+      font-weight: var(--fw-medium);
     }
   }
 
   .grid-select {
-    width: 100%;
-    padding: 0.5rem;
+    inline-size: 100%;
+    padding: var(--space-2);
     background-color: var(--bg-pure);
     border: none;
     border-radius: var(--radius-sm);
@@ -233,127 +215,68 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   }
 }
 
-.step-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  background: var(--color-primary);
-  color: var(--color-text-on-primary);
-  border-radius: var(--radius-sm);
-  font-weight: 800;
+.rb-step-num {
+  flex-shrink: 0;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
 }
 
-.workflow-textarea {
+/* Step text: .c-input draws the field; this is layout and auto-grow only. */
+.rb-step-text {
   display: block;
-  width: 100%;
-  min-height: 2.5rem;
-  padding: 0.5rem;
-  background: transparent;
-  color: var(--color-text-main);
-  font-size: 0.95rem;
-  border: 1px solid transparent;
-  border-radius: 0;
-  outline: none;
+  inline-size: 100%;
+  min-block-size: var(--space-10);
+
   resize: none;
   overflow-y: hidden;
   field-sizing: content;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease;
-
-  &:focus {
-    border-color: var(--border-default);
-    background: var(--bg-glass);
-    border-radius: var(--radius-sm);
-  }
 }
 
-.timer-toggle-btn {
-  display: grid;
-  place-content: center;
-
-  width: 2rem;
-  height: 2rem;
+/* Timer toggles (.c-chip--toggle): icon-only, square; a set value tints the chip. */
+.rb-timer-toggle {
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: var(--space-8);
   padding: 0;
-
-  background: transparent;
-  color: var(--color-text-muted-light);
-
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-
-  cursor: pointer;
-  transition:
-    color 0.2s ease,
-    background 0.2s ease,
-    border-color 0.2s ease;
-
-  &:hover {
-    background: var(--bg-glass);
-    border-color: var(--border-default);
-    color: var(--color-text-muted);
-  }
-
-  &.timer-active {
-    color: var(--color-primary);
-    background: var(--color-primary-soft);
-    border-color: var(--color-primary);
-  }
 
   &.timer-has-value {
     color: var(--color-primary);
     border-color: var(--color-primary);
-    opacity: 0.6;
   }
+}
+
+.rb-mini-btn {
+  min-inline-size: 0;
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
+}
+
+.rb-step-btn {
+  min-inline-size: 0;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
 }
 
 .col-timer {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .timer-counter {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: var(--space-1);
 
   .timer-field,
   .timer-value {
     display: inline-block;
-    min-width: 3rem;
+    min-inline-size: 3rem;
     text-align: center;
   }
 
   .timer-field--wide {
-    min-width: 5.5rem;
-  }
-
-  .counter-btn {
-    display: grid;
-    place-content: center;
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition:
-      background 0.2s ease,
-      border-color 0.2s ease;
-
-    &:hover:not(:disabled) {
-      background: var(--bg-glass-hover);
-      border-color: var(--border-strong);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    min-inline-size: 5.5rem;
   }
 }
 
@@ -363,27 +286,6 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   justify-content: center;
 }
 
-.add-row-btn {
-  gap: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-block-start: 0.5rem;
-  padding: 0.5rem;
-  background: transparent;
-  border: none;
-  border-block-end: 1px solid var(--border-default);
-  color: var(--color-primary);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--color-primary-soft);
-  }
-}
-
 /* Recipe builder unified tablet/mobile breakpoint */
 @media (max-width: $break-phone-max) {
   // Preparation steps: row 1 = drag + number + instruction (full width);
@@ -391,12 +293,12 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   .workflow-grid .grid-row {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-rows: auto auto;
-    gap: 0.25rem;
+    gap: var(--space-1);
 
-    margin-block: 0.25rem;
-    margin-inline: 0.25rem;
+    margin-block: var(--space-1);
+    margin-inline: var(--space-1);
     padding-block: 0.375rem;
-    padding-inline: 0.5rem;
+    padding-inline: var(--space-2);
 
     &.timer-open {
       grid-template-rows: auto auto auto;
@@ -405,7 +307,7 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     .col-drag-id {
       grid-column: 1;
       grid-row: 1;
-      gap: 0.25rem;
+      gap: var(--space-1);
     }
 
     .col-instruction {
@@ -421,7 +323,7 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
       gap: 0.125rem;
     }
 
-    .timer-toggle-btn,
+    .rb-timer-toggle,
     .col-step-actions .step-delete-btn {
       inline-size: 1.75rem;
       block-size: 1.75rem;
@@ -433,11 +335,11 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
       align-self: center;
     }
 
-    .workflow-textarea {
+    .rb-step-text {
       text-align: center;
 
-      padding-block: 0.25rem;
-      padding-inline: 0.25rem;
+      padding-block: var(--space-1);
+      padding-inline: var(--space-1);
     }
   }
 
@@ -451,12 +353,12 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     display: grid;
     grid-template-columns: auto minmax(0, 1.2fr) auto minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
-    gap: 0.25rem;
+    gap: var(--space-1);
 
-    min-height: auto;
+    min-block-size: auto;
 
     padding-block: 0.375rem;
-    padding-inline: 0.5rem;
+    padding-inline: var(--space-2);
 
     .col-drag {
       grid-column: 1;
@@ -500,22 +402,22 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
     }
 
     .grid-select {
-      font-size: 0.8125rem;
+      font-size: var(--fs-sm);
 
-      padding: 0.25rem;
+      padding: var(--space-1);
     }
 
     .selected-item-display {
       min-inline-size: 0;
 
-      padding-block: 0.25rem;
-      padding-inline: 0.5rem;
+      padding-block: var(--space-1);
+      padding-inline: var(--space-2);
 
       .item-text {
         flex: 1;
         min-inline-size: 0;
 
-        font-size: 0.95rem;
+        font-size: var(--fs-md);
         line-height: 1.4;
         white-space: normal;
         overflow-wrap: anywhere;
@@ -543,8 +445,8 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
   opacity: 0.95;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 0.75rem;
+  gap: var(--space-3);
+  padding: 0.625rem var(--space-3);
   box-sizing: border-box;
 }
 

@@ -95,7 +95,8 @@ append the path to the scope block above and retry.
 - Badges (incomplete, warning, unlinked, edit, step, yield-sync, approval pending) — family: chip — rung: 1 — why: `c-chip c-chip--tag c-chip--sm` + tone (amber warning, red incomplete, teal edit/step, glass sync); approval pending as `c-chip--tag c-chip--amber`.
 - Buttons (add row ×2, logistics add, clear ×2, labels, allergens, ingredient clear, type toggle, timer toggle, history back) — family: engine-classes — rung: 1 — why: `.c-btn-ghost` / `.c-btn-ghost--sm` / `.c-btn-primary` / `.c-icon-btn`; the labels and allergen expanders → `c-chip c-chip--tap` (`aria-expanded`).
 - Grid inputs, workflow textarea, recipe name input — family: form-field — rung: 1 — why: `.c-input` (outline variant `.c-input--outline` where the field sits inside a grid cell).
-- Tooltips — family: none — rung: 4 — why: the two identical tooltips merge into one page-local `.rb-tooltip` rule with logical placement (`inset-inline-start: 50%` + `translate: -50%` mirrored by `:dir(rtl)`); no shared tooltip piece exists and the `anchored-popup` default covers popovers, not hover hints.
+- Tooltips (cost, last-updated) — family: tooltip — rung: 1 — why: `[appTip]` (`TipDirective`, plan 699) replaces the two page-local hover bubbles and their service; the plan's "no shared tooltip piece exists" was stale.
+- approval-pending, rb-search-miss, rb-section, rb-section-head, rb-section-body, rb-pulse, rb-pulse--strong, rb-reveal, rb-mini-btn, rb-step-btn, rb-step-num, rb-step-text, rb-timer-toggle, rb-add-chip, yield-sync, c-chip--tap, c-chip--toggle, c-icon-btn — family: engine-classes — rung: 1 — why: the `rb-*` classes, `approval-pending` and `yield-sync` only set layout, size, placement or an attention pulse on a shared `.c-chip`, `.c-icon-btn`, `.c-input`, `.c-glass-panel` or `.c-btn-*`; `.c-chip--tap`, `.c-chip--toggle` and `.c-icon-btn` are used as shared and only positioned by a local rule.
 - none new shared.
 
 ## Adopt Check
@@ -149,12 +150,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Show the recipe book's no-match case as the shared empty state and its buttons and badges as shared ones — src/app/pages/recipe-book/**
-- [ ] A2: Draw the builder's sections as shared panels with shared buttons — src/app/pages/recipe-builder/recipe-builder.page.html, .scss
-- [ ] A3: Turn the ingredient table's badges, buttons and inputs into shared chips, icon buttons and inputs without touching drag or steppers — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [ ] A4: Do the same for the workflow steps and the recipe header — src/app/pages/recipe-builder/components/recipe-workflow/**, src/app/pages/recipe-builder/components/recipe-header/**
-- [ ] A5: Move the two search pickers' stylesheets onto tokens — src/app/pages/recipe-builder/components/ingredient-search/**, src/app/pages/recipe-builder/components/preparation-search/**
-- [ ] A6: Lock both pages on the shared pieces and tokens — scripts/test/style-715.test.mjs
+- [x] A1: Show the recipe book's no-match case as the shared empty state and its buttons and badges as shared ones — src/app/pages/recipe-book/**
+- [x] A2: Draw the builder's sections as shared panels with shared buttons — src/app/pages/recipe-builder/recipe-builder.page.html, .scss
+- [x] A3: Turn the ingredient table's badges, buttons and inputs into shared chips, icon buttons and inputs without touching drag or steppers — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
+- [x] A4: Do the same for the workflow steps and the recipe header — src/app/pages/recipe-builder/components/recipe-workflow/**, src/app/pages/recipe-builder/components/recipe-header/**
+- [x] A5: Move the two search pickers' stylesheets onto tokens — src/app/pages/recipe-builder/components/ingredient-search/**, src/app/pages/recipe-builder/components/preparation-search/**
+- [x] A6: Lock both pages on the shared pieces and tokens — scripts/test/style-715.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-715.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -175,3 +176,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: ingredient and workflow grids stay grids (drag rows), restyled with tokens and shared badges only.
 - behaviour: the quantity and counter buttons keep their hold-to-repeat behaviour; only their look becomes `.c-icon-btn`.
+- tooltips: the cost and last-updated hover bubbles now use the shared `[appTip]` (plan 699) instead of one page-local `.rb-tooltip`; the plan's "no shared tooltip piece exists" was stale, and `RecipeListTooltipsService` (only used by this list) is deleted. Reverse: restore the service and two page-local bubbles.
+- section frame: the three builder sections lose the 4px primary start-border accent of the old `.section-card` and use the plain `.c-glass-panel` frame (Done-when: same frame as the other app panels).
+- history banner keeps the class `history-view-banner` (a global print rule hides it); section toggles and add-row buttons carry `no-print` so print still hides them.
+- evidence: pnpm run build → exit 0; pnpm run lint → exit 0 (0 errors); pnpm run test:ci → exit 0, 3201 SUCCESS; pnpm run test:scripts → exit 0, fail 0; node --test scripts/test/style-715.test.mjs → pass 2, fail 0; lint:icons, lint:no-native-select, lint:reuse → exit 0; kit-checks → ok (6 checks); kit-manifest-check → ok.
+- seen: e2e/ui/603-5.spec.ts:9 and :11 query `.section-card`, which no longer exists (now `c-glass-panel rb-section`); outside this plan's scope.
+- seen: src/styles.scss:1947-1948 print rule names `.section-card-header button` and `.add-row-btn`, now unused; outside this plan's scope.

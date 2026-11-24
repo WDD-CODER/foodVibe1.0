@@ -14,38 +14,15 @@
   justify-content: center;
   position: relative;
 
-  gap: 1rem;
-  padding: var(--rb-gap-mid) 1rem;
+  gap: var(--space-4);
+  padding: var(--rb-gap-mid) var(--space-4);
   margin: var(--rb-banner-margin);
 
   background: var(--bg-warning);
   color: var(--text-warning);
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 
   border-block-end: 2px solid var(--border-warning);
-
-  .btn-back {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding-block: 0.4rem;
-    padding-inline: var(--rb-gap-mid);
-
-    background: var(--bg-pure);
-    color: var(--text-warning);
-    font-size: 0.875rem;
-
-    border: 1px solid var(--border-warning);
-    border-radius: var(--radius-md);
-
-    cursor: pointer;
-    transition: background 0.2s ease;
-
-    &:hover {
-      background: var(--bg-warning);
-    }
-  }
 }
 
 /* ---- Main container ---- */
@@ -53,9 +30,9 @@
   display: block;
   position: relative;
 
-  min-height: 100vh;
-  min-height: 100dvh;
-  padding: 2rem 1rem;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  padding: var(--space-8) var(--space-4);
 
   background: transparent;
   font-family: 'Heebo', sans-serif;
@@ -65,9 +42,9 @@
     flex-direction: column;
     position: relative;
 
-    max-width: 60rem;
+    max-inline-size: 60rem;
     margin: 0 auto;
-    gap: 1.5rem;
+    gap: var(--space-6);
 
     .builder-section {
       position: relative;
@@ -88,40 +65,30 @@
   }
 }
 
-/* ---- Section card (reuses global tokens) ---- */
-.section-card {
-  display: block;
-
-  padding: 1.5rem;
-
-  background: var(--bg-glass-strong);
-
-  border-inline-start: 4px solid var(--color-primary);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
+/* ---- Section frame: .c-glass-panel draws it; padding and gap only ---- */
+.rb-section {
+  padding: var(--space-6);
 }
 
 .section-title {
   display: block;
 
-  margin-block-end: 1rem;
+  margin-block-end: var(--space-4);
 
   color: var(--color-primary);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-bold);
   text-align: center;
 }
 
-/* ---- Collapsible section card ---- */
-.section-card.collapsible {
-  .section-card-header {
+/* ---- Collapsible section ---- */
+.rb-section.collapsible {
+  .rb-section-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: var(--space-2);
 
     margin-block-end: 0;
     padding-block-end: 0;
@@ -140,62 +107,37 @@
     }
   }
 
-  .section-toggle-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0.25rem;
-    min-width: 2rem;
-    min-height: 2rem;
-
-    background: transparent;
-    color: var(--color-primary);
-
-    border: none;
-    border-radius: var(--radius-sm);
-
-    cursor: pointer;
-    transition:
-      background 0.2s ease,
-      color 0.2s ease,
-      opacity 0.2s ease;
-
-    &:hover {
-      background: var(--bg-glass-hover);
-    }
-  }
-
   /* open state: chevron hidden by default, revealed on header hover */
-  &:not(.is-collapsed) .section-toggle-btn {
+  &:not(.is-collapsed) .c-icon-btn {
     opacity: 0;
     pointer-events: none;
   }
 
-  &:not(.is-collapsed) .section-card-header:hover .section-toggle-btn {
+  &:not(.is-collapsed) .rb-section-head:hover .c-icon-btn {
     opacity: 1;
     pointer-events: auto;
+    transition: opacity 0.15s ease;
   }
 
-  .section-card-body {
-    margin-block-start: 1rem;
+  .rb-section-body {
+    margin-block-start: var(--space-4);
   }
 
   &.is-collapsed {
     cursor: pointer;
   }
 
-  &.is-collapsed .section-card-body {
+  &.is-collapsed .rb-section-body {
     display: none;
   }
 }
 
 /* ---- Blocking ingredients error ---- */
 .blocking-ingredients-error {
-  margin-block: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  margin-block: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
   color: var(--color-danger);
   background: color-mix(in srgb, var(--color-danger) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--color-danger) 30%, transparent);
@@ -207,31 +149,9 @@
 .main-submit-btn {
   display: block;
 
-  width: var(--rb-submit-width);
-  margin-block: 2rem;
+  inline-size: var(--rb-submit-width);
+  margin-block: var(--space-8);
   margin-inline: auto;
-}
-
-/* ---- Add row button (match workflow add-row design) ---- */
-.add-row-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  margin-block-start: 0.5rem;
-  padding: 0.5rem;
-  background: transparent;
-  border: none;
-  border-block-end: 1px solid var(--border-default);
-  color: var(--color-primary);
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--color-primary-soft);
-  }
 }
 
 /* ---- Logistics section ---- */
@@ -247,8 +167,8 @@
     display: flex;
     flex-direction: column;
 
-    min-height: 2.5rem;
-    min-width: 0;
+    min-block-size: 2.5rem;
+    min-inline-size: 0;
     padding: var(--rb-gap-tight);
 
     background: var(--bg-muted);
@@ -275,14 +195,14 @@
     flex-wrap: nowrap;
     gap: 0.2rem;
 
-    padding-inline: 0.5rem;
+    padding-inline: var(--space-2);
     padding-block: 0.35rem;
-    min-height: 2rem;
+    min-block-size: 2rem;
 
     background: var(--bg-glass-strong);
     color: var(--color-text-secondary);
-    font-size: 0.8125rem;
-    font-weight: 500;
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
 
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-sm);
@@ -315,8 +235,8 @@
   .logistics-chip-label {
     flex-shrink: 0;
 
-    width: fit-content;
-    min-width: fit-content;
+    inline-size: fit-content;
+    min-inline-size: fit-content;
     white-space: nowrap;
   }
 
@@ -330,8 +250,8 @@
     display: flex;
     flex-direction: column;
 
-    gap: 0.25rem;
-    max-width: 100%;
+    gap: var(--space-1);
+    max-inline-size: 100%;
     min-inline-size: 0;
   }
 
@@ -348,66 +268,34 @@
     --search-combobox-z-index: 50;
 
     flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .logistics-add-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding-inline: var(--rb-gap-mid);
-    padding-block: 0.5rem;
-
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-    font-weight: 600;
-    font-size: 0.875rem;
-
-    border: none;
-    border-radius: var(--radius-md);
-
-    cursor: pointer;
-    transition: filter 0.2s ease;
-
-    &:hover:not(:disabled) {
-      filter: brightness(1.08);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    min-inline-size: 0;
   }
 }
 
 /* ---- Responsive ---- */
 @media (max-width: $break-phone-max) {
   .recipe-builder-container {
-    padding-block: 1rem;
-    padding-inline: 0.75rem;
+    padding-block: var(--space-4);
+    padding-inline: var(--space-3);
   }
 
   .builder-shell {
-    gap: 1.25rem;
+    gap: var(--space-5);
   }
 
-  .section-card {
-    padding: 1rem;
-
-    border-inline-start-width: 3px;
-    border-radius: var(--radius-md);
+  .rb-section {
+    padding: var(--space-4);
   }
 
   .section-title {
-    margin-block-end: 1rem;
+    margin-block-end: var(--space-4);
 
-    font-size: 1.1rem;
+    font-size: var(--fs-lg);
   }
 
   .main-submit-btn {
-    width: 100%;
-    max-width: none;
+    inline-size: 100%;
+    max-inline-size: none;
   }
 
   .logistics-logic .logistics-grid {
@@ -416,13 +304,13 @@
 }
 
 /* Text-import just-filled highlight: brief glow on patched fields */
-.recipe-builder-container.just-filled .section-card {
+.recipe-builder-container.just-filled .rb-section {
   animation: just-filled-fade 1.5s ease forwards;
 }
 
 @keyframes just-filled-fade {
   0% {
-    box-shadow: 0 0 0 2px var(--color-primary);
+    box-shadow: var(--shadow-focus);
   }
   100% {
     box-shadow: none;
