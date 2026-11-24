@@ -244,6 +244,11 @@ describe('FloorPlanPage (plan 665)', () => {
       ;(el().querySelector(`[data-testid="${testId}"]`) as HTMLElement).click()
       await settle()
     }
+    // A tool button has a tip: its tap timer would keep whenStable waiting for seconds, so only render.
+    const tap = (testId: string) => {
+      ;(el().querySelector(`[data-testid="${testId}"]`) as HTMLElement).click()
+      fixture.detectChanges()
+    }
     type Full = { draft_: () => { tables: { key: string }[]; joins: { key: string }[] } }
     const draft = () => (cmp() as unknown as Full).draft_()
 
@@ -324,24 +329,24 @@ describe('FloorPlanPage (plan 665)', () => {
       it('the zone tool passes the selected zone key to the map', async () => {
         await setup({ saved: ZONED })
         await click('fp-legend-areab2')
-        await click('fp-tool-zone')
+        await tap('fp-tool-zone')
         expect(map().drawZoneKey()).toBe('areab2')
         expect(pressed('fp-tool-zone')).toBe('true')
-        await click('fp-tool-zone')
+        await tap('fp-tool-zone')
         expect(pressed('fp-tool-select')).toBe('true')
         expect(map().drawZoneKey()).toBeNull()
       })
 
       it('the zone tool with nothing selected draws the first area without a zone', async () => {
         await setup({ saved: ZONED })
-        await click('fp-tool-zone')
+        await tap('fp-tool-zone')
         expect(map().drawZoneKey()).toBe('areaa1')
       })
 
       it('a drawn zone is set in the draft, returns to select and selects that zone', async () => {
         await setup({ saved: NOZONE })
         await click('fp-legend-areab2')
-        await click('fp-tool-zone')
+        await tap('fp-tool-zone')
         map().zoneDrawn.emit({ areaKey: 'areab2', rect: { x: 12, y: 8, w: 6, h: 4 } })
         await settle()
         expect(areas().find((a) => a.key === 'areab2')?.zone).toEqual({ x: 12, y: 8, w: 6, h: 4 })
@@ -352,7 +357,7 @@ describe('FloorPlanPage (plan 665)', () => {
 
       it('a refused draw (overlap) keeps the draft and shows fp_zone_overlap as an error', async () => {
         await setup({ saved: ZONED })
-        await click('fp-tool-zone')
+        await tap('fp-tool-zone')
         const before = JSON.stringify(areas())
         map().zoneDrawn.emit({ areaKey: 'areaa1', rect: { x: 14, y: 9, w: 4, h: 4 } })
         await settle()
@@ -374,7 +379,7 @@ describe('FloorPlanPage (plan 665)', () => {
 
       it('Escape in the zone tool returns to "בחירה"', async () => {
         await setup({ saved: ZONED })
-        await click('fp-tool-zone')
+        await tap('fp-tool-zone')
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
         await settle()
         expect(pressed('fp-tool-select')).toBe('true')
@@ -540,7 +545,7 @@ describe('FloorPlanPage (plan 665)', () => {
 
       it('multi-select: a tap picks a table, a second removes it, no table panel opens', async () => {
         await setup({ saved: THREE })
-        await click('fp-tool-join')
+        await tap('fp-tool-join')
         await click('floor-table-1')
         expect(picked()).toEqual(['tab001'])
         expect(el().querySelector('[data-testid="table-panel"]')).toBeNull()
@@ -552,7 +557,7 @@ describe('FloorPlanPage (plan 665)', () => {
 
       it('"חיבור השולחנות" adds one join and leaves multi-select', async () => {
         await setup({ saved: THREE })
-        await click('fp-tool-join')
+        await tap('fp-tool-join')
         expect((el().querySelector('[data-testid="fp-join-action"]') as HTMLButtonElement).disabled).toBeTrue()
         await click('floor-table-1')
         await click('floor-table-2')

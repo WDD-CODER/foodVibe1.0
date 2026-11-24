@@ -177,7 +177,7 @@
         [colorTables]="true"
         [joinedKeys]="joinedKeys_()"
         [warnKeys]="canEdit_() ? warnKeys_() : []"
-        [zoneEditable]="canEdit_() && tool_() === 'select'"
+        [zoneEditable]="canEdit_() && tool_() !== 'join'"
         [selectedZoneKey]="zoneKey_()"
         [drawZoneKey]="drawZoneKey_()"
         (tableTapped)="onTableTapped($event)"
