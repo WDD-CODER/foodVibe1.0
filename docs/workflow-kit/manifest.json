@@ -4237,6 +4237,16 @@
       "notes": "Plan 707: clients, settings and knowledge sit on the shared rows, fields and empty states and pass the style guard."
     },
     {
+      "path": "scripts/test/style-708.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 708: front desk settings, onboarding and the guest booking pages sit on the shared loader, empty state, card head and chips and pass the style guard."
+    },
+    {
       "path": "scripts/test/breakpoints-no-literals.test.mjs",
       "tier": "project",
       "action": "stay",

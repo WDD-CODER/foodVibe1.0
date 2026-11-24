@@ -1,8 +1,8 @@
-<section class="ob-page" dir="rtl">
+<section class="ob-page c-page c-page--narrow" dir="rtl">
   <app-page-header titleKey="onboarding_title"></app-page-header>
 
   @if (isLoading_()) {
-  <p class="ob-loading" aria-busy="true">{{ 'fd_loading' | translatePipe }}</p>
+  <app-loader label="fd_loading" />
   } @else if (loadFailed_()) {
   <app-empty-state
     messageKey="onboarding_load_failed"
@@ -19,7 +19,7 @@
     <ng-template #field let-key let-long="long" let-kind="kind" let-dir="dir">
       <app-form-field [label]="'onboarding_q_' + key" [forId]="'ob-' + key">
         @if (kind === 'flag') {
-        <label class="ob-flag">
+        <label class="c-chip c-chip--toggle">
           <input type="checkbox" [id]="'ob-' + key" [formControlName]="key" />
           <span>{{ 'onboarding_q_' + key | translatePipe }}</span>
         </label>
@@ -47,7 +47,7 @@
       </app-form-field>
     </ng-template>
 
-    <section class="ob-card c-glass-card">
+    <section class="ob-card c-glass-panel">
       <div class="ob-grid">
         <app-form-field label="onboarding_business_type" [error]="showErrors_() && !type_() ? 'field_required' : null">
           <app-custom-select
@@ -62,8 +62,11 @@
 
     @if (type_()) {
     <!-- Every business: basics -->
-    <section class="ob-card c-glass-card" data-testid="sec-basics">
-      <h2 class="ob-title">{{ 'onboarding_sec_basics' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-basics">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="building-2" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_basics' | translatePipe }}</h2>
+      </div>
       <div class="ob-grid">
         <app-form-field
           label="fd_display_name"
@@ -99,40 +102,46 @@
     </section>
 
     <!-- Hours and dates -->
-    <section class="ob-card c-glass-card" data-testid="sec-hours">
-      <h2 class="ob-title">{{ 'onboarding_sec_hours' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-hours">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="clock" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_hours' | translatePipe }}</h2>
+      </div>
       <app-hours-editor [rows]="hoursRows_()" (rowsChange)="hoursRows_.set($event)" [showMarks]="showErrors_()" />
       <h3 class="ob-sub">{{ 'fd_closed_dates' | translatePipe }}</h3>
       <div class="ob-add-date">
         <app-date-field ariaLabelKey="fd_closed_dates" [value]="newClosed_()" (valueChange)="newClosed_.set($event)" />
-        <button type="button" class="c-btn-secondary" (click)="addClosedDate()">
-          <lucide-icon name="plus" [size]="14"></lucide-icon>
+        <button type="button" class="c-btn-ghost" (click)="addClosedDate()">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
           <span>{{ 'add' | translatePipe }}</span>
         </button>
       </div>
-      <ul class="ob-dates">
+      <div class="c-chip-group">
         @for (d of closedDates_(); track d) {
-        <li>
+        <span class="c-chip c-chip--removable">
           <span dir="ltr">{{ d }}</span>
           <button
             type="button"
-            class="c-btn-ghost--sm ob-no-print"
+            class="c-chip__remove ob-no-print"
             [attr.aria-label]="'delete' | translatePipe"
             (click)="removeClosedDate(d)"
           >
             <lucide-icon name="x" [size]="14"></lucide-icon>
           </button>
-        </li>
+        </span>
         }
-      </ul>
+      </div>
       @for (f of hoursItems; track f.key) {
       <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
       }
     </section>
 
     <!-- Who answers today -->
-    <section class="ob-card c-glass-card" data-testid="sec-channels">
-      <h2 class="ob-title">{{ 'onboarding_sec_channels' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-channels">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="user-check" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_channels' | translatePipe }}</h2>
+      </div>
       <div class="ob-grid">
         @for (key of channelKeys; track key) {
         <ng-container *ngTemplateOutlet="field; context: { $implicit: key }"></ng-container>
@@ -141,8 +150,11 @@
     </section>
 
     <!-- FAQ -->
-    <section class="ob-card c-glass-card" data-testid="sec-faq">
-      <h2 class="ob-title">{{ 'onboarding_sec_faq' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-faq">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="help-circle" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_faq' | translatePipe }}</h2>
+      </div>
       @for (i of faqIndexes; track i) {
       <div class="ob-faq-row">
         <app-form-field label="onboarding_q_faq_question" [forId]="'ob-faq-q-' + i">
@@ -180,16 +192,22 @@
     </section>
 
     <!-- Policies -->
-    <section class="ob-card c-glass-card" data-testid="sec-policies">
-      <h2 class="ob-title">{{ 'onboarding_sec_policies' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-policies">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="info" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_policies' | translatePipe }}</h2>
+      </div>
       @for (f of policyItems; track f.key) {
       <ng-container *ngTemplateOutlet="field; context: { $implicit: f.key, long: f.long }"></ng-container>
       }
     </section>
 
     <!-- Tone -->
-    <section class="ob-card c-glass-card" data-testid="sec-tone">
-      <h2 class="ob-title">{{ 'onboarding_sec_tone' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-tone">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="heart" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_tone' | translatePipe }}</h2>
+      </div>
       <app-form-field label="onboarding_q_tone">
         <app-custom-select
           triggerId="ob-tone"
@@ -206,8 +224,11 @@
     </section>
 
     <!-- Approvals -->
-    <section class="ob-card c-glass-card" data-testid="sec-approvals">
-      <h2 class="ob-title">{{ 'onboarding_sec_approvals' | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" data-testid="sec-approvals">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="circle-check" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_approvals' | translatePipe }}</h2>
+      </div>
       <div class="ob-grid">
         @for (key of approvalKeys; track key) {
         <ng-container *ngTemplateOutlet="field; context: { $implicit: key }"></ng-container>
@@ -217,8 +238,11 @@
 
     <!-- The chosen type's own section -->
     @if (typeSection_(); as ts) {
-    <section class="ob-card c-glass-card" [attr.data-testid]="'sec-' + type_()">
-      <h2 class="ob-title">{{ 'onboarding_sec_' + type_() | translatePipe }}</h2>
+    <section class="ob-card c-glass-panel" [attr.data-testid]="'sec-' + type_()">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="clipboard-list" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'onboarding_sec_' + type_() | translatePipe }}</h2>
+      </div>
       <div class="ob-grid">
         @for (key of ts.flags; track key) {
         <ng-container *ngTemplateOutlet="field; context: { $implicit: key, kind: 'flag' }"></ng-container>
@@ -247,7 +271,7 @@
     }
 
     <!-- Baseline (D15): collapsed, optional -->
-    <section class="ob-card c-glass-card" data-testid="sec-baseline">
+    <section class="ob-card c-glass-panel" data-testid="sec-baseline">
       <button
         type="button"
         class="c-chip c-chip--tap ob-baseline-toggle"
@@ -295,18 +319,18 @@
       >
         {{ (isSaving_() ? 'saving' : 'onboarding_save') | translatePipe }}
       </button>
-      <button type="button" class="c-btn-secondary" data-testid="onboarding-print" (click)="print()">
-        <lucide-icon name="printer" [size]="14"></lucide-icon>
+      <button type="button" class="c-btn-ghost" data-testid="onboarding-print" (click)="print()">
+        <lucide-icon name="printer" [size]="16"></lucide-icon>
         <span>{{ 'onboarding_print' | translatePipe }}</span>
       </button>
       <button
         type="button"
-        class="c-btn-secondary"
+        class="c-btn-ghost"
         data-testid="onboarding-test-request"
         [disabled]="!testKind_() || isSendingTest_()"
         (click)="sendTestRequest()"
       >
-        <lucide-icon name="send" [size]="14"></lucide-icon>
+        <lucide-icon name="send" [size]="16"></lucide-icon>
         <span>{{ 'onboarding_test_request' | translatePipe }}</span>
       </button>
     </div>

@@ -3,19 +3,10 @@
   display: block;
 }
 
-.fs-page {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  max-inline-size: 48rem;
-  margin-inline: auto;
-  padding: 1rem;
-}
-
 .fs-fieldset {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
   min-inline-size: 0;
   margin: 0;
   padding: 0;
@@ -25,27 +16,19 @@
 .fs-card {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.fs-card-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 1.05rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
 }
 
 .fs-sub {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .fs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .fs-link,
@@ -55,7 +38,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .fs-link-text {
@@ -65,13 +48,13 @@
 .fs-closed {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .fs-banner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
   margin: 0;
 }
 
@@ -84,21 +67,21 @@
 
 .fs-note,
 .fs-warning {
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
 }
 
 .fs-savebar {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 0.75rem 0;
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
 
   @media (max-width: $break-phone-max) {
     position: sticky;
     inset-block-end: 0;
-    padding: 0.75rem 1rem;
-    background: var(--bg-surface, #fff);
-    box-shadow: 0 -2px 8px rgb(0 0 0 / 10%);
+    padding: var(--space-3) var(--space-4);
+    background: var(--bg-glass-strong);
+    box-shadow: var(--shadow-card);
   }
 }
 
@@ -106,13 +89,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .fs-qr-side {
   display: grid;
   justify-items: start;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .fs-qr-print {
@@ -133,8 +116,8 @@
     inset-inline: 0;
     display: grid;
     justify-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
+    gap: var(--space-4);
+    padding: var(--space-6);
     text-align: center;
   }
 

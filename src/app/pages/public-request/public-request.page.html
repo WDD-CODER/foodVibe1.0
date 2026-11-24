@@ -1,6 +1,6 @@
 <main class="pb-page" dir="rtl" lang="he">
   @switch (state_()) { @case ('loading') {
-  <p class="pb-loading" aria-busy="true" data-testid="pb-loading">{{ 'pb_loading' | translatePipe }}</p>
+  <app-loader label="pb_loading" data-testid="pb-loading" />
   @if (waking_()) {
   <p class="pb-waking" data-testid="pb-waking">{{ 'pb_waking' | translatePipe }}</p>
   } } @case ('not_found') {
@@ -8,8 +8,8 @@
   } @case ('failed') {
   <app-empty-state messageKey="pb_load_failed" icon="clipboard-check" ctaLabelKey="pb_retry" (ctaClick)="load()" />
   } @case ('unavailable') {
-  <div class="c-empty-state" data-testid="pb-unavailable">
-    <p class="c-empty-state__msg">{{ unavailableText_() }}</p>
+  <div class="pb-unavailable" data-testid="pb-unavailable">
+    <app-empty-state [messageKey]="unavailableText_()" icon="phone" />
     @if (telLink_(); as tel) {
     <a class="c-btn-primary" [href]="tel">
       <lucide-icon name="phone" [size]="16"></lucide-icon>
@@ -19,7 +19,7 @@
   </div>
   } @case ('done') {
   <app-public-brand [name]="profile_()?.displayName ?? ''" [logoUrl]="profile_()?.logoUrl" />
-  <section class="pb-card pb-done" data-testid="pb-done">
+  <section class="pb-card c-glass-panel pb-done" data-testid="pb-done">
     <lucide-icon name="check-circle" [size]="40" class="pb-done-icon"></lucide-icon>
     @if (tableMode_() && confirmed_()) {
     <h2 class="pb-title" data-testid="pb-done-title">{{ 'pb_done_confirmed_title' | translatePipe }}</h2>
@@ -64,7 +64,7 @@
   </p>
   }
 
-  <form class="pb-card" (ngSubmit)="submit()" novalidate>
+  <form class="pb-card c-glass-panel" (ngSubmit)="submit()" novalidate>
     @if (step_() > (hasKindStep_() ? 1 : 2)) {
     <button type="button" class="c-btn-ghost pb-back" data-testid="pb-back" (click)="goBack()">
       <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
@@ -75,7 +75,7 @@
       <legend class="pb-title">{{ 'rq_kind' | translatePipe }}</legend>
       <div class="c-chip-group">
         @for (k of profile_()!.kinds; track k.kind) {
-        <label class="c-chip c-chip--toggle pb-kind">
+        <label class="c-chip c-chip--toggle">
           <input type="radio" name="pb-kind" [checked]="kind_() === k.kind" (change)="setKind(k.kind)" />
           <span>{{ kindLabel(k.kind) | translatePipe }}</span>
         </label>
@@ -112,9 +112,7 @@
       <fieldset class="pb-kinds" data-testid="pb-times-box">
         <legend>{{ 'fd_q_time' | translatePipe }}</legend>
         @switch (timesState_()) { @case ('loading') {
-        <p class="pb-loading" aria-busy="true" data-testid="pb-times-loading">
-          {{ 'pb_times_loading' | translatePipe }}
-        </p>
+        <app-loader label="pb_times_loading" data-testid="pb-times-loading" />
         } @case ('failed') {
         <p class="c-field-error" role="alert" data-testid="pb-times-failed">{{ 'pb_times_failed' | translatePipe }}</p>
         <button type="button" class="c-btn-ghost" data-testid="pb-times-retry" (click)="reloadTimes()">
@@ -134,11 +132,7 @@
         } }
         <div class="c-chip-group pb-times" role="radiogroup" data-testid="pb-times">
           @for (s of slots_(); track s.time) {
-          <label
-            class="c-chip c-chip--toggle pb-time"
-            [class.pb-time--taken]="!s.available"
-            [attr.data-testid]="'pb-time-' + s.time"
-          >
+          <label class="c-chip c-chip--toggle" [attr.data-testid]="'pb-time-' + s.time">
             <input
               type="radio"
               name="pb-time"
@@ -159,7 +153,7 @@
         @if (alternatives_().length) {
         <div class="c-chip-group">
           @for (alt of alternatives_(); track alt.date + alt.time) {
-          <button type="button" class="c-btn-ghost" data-testid="pb-alt" (click)="pickDay(alt)">
+          <button type="button" class="c-chip c-chip--tap" data-testid="pb-alt" (click)="pickDay(alt)">
             {{ dayMonth(alt.date) + ' ' + alt.time }}
           </button>
           }
@@ -170,12 +164,12 @@
       <fieldset class="pb-kinds" data-testid="pb-areas">
         <legend>{{ 'pb_area' | translatePipe }}</legend>
         <div class="c-chip-group">
-          <label class="c-chip c-chip--toggle pb-time">
+          <label class="c-chip c-chip--toggle">
             <input type="radio" name="pb-area" [checked]="!area_()" (change)="area_.set('')" />
             <span>{{ 'pb_area_any' | translatePipe }}</span>
           </label>
           @for (a of areas_(); track a.key) {
-          <label class="c-chip c-chip--toggle pb-time">
+          <label class="c-chip c-chip--toggle">
             <input type="radio" name="pb-area" [checked]="area_() === a.key" (change)="area_.set(a.key)" />
             <span>{{ a.name }}</span>
           </label>

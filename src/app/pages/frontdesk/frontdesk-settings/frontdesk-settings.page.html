@@ -1,9 +1,9 @@
-<section class="fs-page" dir="rtl">
+<section class="c-page c-page--narrow" dir="rtl">
   <app-page-header titleKey="fd_chip_settings"></app-page-header>
   <app-front-desk-status-banner />
 
   @if (isLoading_()) {
-  <p class="fs-loading" aria-busy="true">{{ 'fd_loading' | translatePipe }}</p>
+  <app-loader label="fd_loading" />
   } @else if (loadFailed_()) {
   <app-empty-state
     messageKey="fd_profile_load_failed"
@@ -15,8 +15,11 @@
   } @else if (!profile_()) { @if (!canEdit_()) {
   <app-empty-state messageKey="fd_no_profile_staff" icon="settings" data-testid="no-profile-staff" />
   } @else {
-  <section class="fs-card c-glass-card" data-testid="type-picker">
-    <h2 class="fs-card-title">{{ 'fd_pick_type' | translatePipe }}</h2>
+  <section class="fs-card c-glass-panel" data-testid="type-picker">
+    <div class="c-card-head">
+      <lucide-icon class="c-card-head__icon" name="settings" [size]="18"></lucide-icon>
+      <h2 class="c-card-head__title">{{ 'fd_pick_type' | translatePipe }}</h2>
+    </div>
     <div class="fs-grid">
       <app-form-field label="fd_business_type" [error]="createTried_() && !newType_() ? 'field_required' : null">
         <app-custom-select
@@ -81,8 +84,11 @@
 
   <fieldset class="fs-fieldset" [disabled]="!canEdit_()">
     <!-- Card 1: business and link -->
-    <section class="fs-card c-glass-card" data-testid="card-business">
-      <h2 class="fs-card-title">{{ 'fd_card_business' | translatePipe }}</h2>
+    <section class="fs-card c-glass-panel" data-testid="card-business">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="building-2" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'fd_card_business' | translatePipe }}</h2>
+      </div>
       <p class="fs-type">{{ 'fd_type_label' | translatePipe }}: {{ typeKey_() | translatePipe }}</p>
       <div class="fs-grid">
         <app-form-field
@@ -196,11 +202,11 @@
     </section>
 
     <!-- Card 2: opening hours -->
-    <section class="fs-card c-glass-card" data-testid="card-hours">
-      <h2 class="fs-card-title">
-        <lucide-icon name="clock" [size]="18"></lucide-icon>
-        {{ 'fd_card_hours' | translatePipe }}
-      </h2>
+    <section class="fs-card c-glass-panel" data-testid="card-hours">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="clock" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'fd_card_hours' | translatePipe }}</h2>
+      </div>
       <app-hours-editor [rows]="d.hoursRows" (rowsChange)="patch({ hoursRows: $event })" [showMarks]="showErrors_()" />
       <div class="fs-closed">
         <h3 class="fs-sub">{{ 'fd_closed_dates' | translatePipe }}</h3>
@@ -261,8 +267,11 @@
     }
 
     <!-- Card 7: assistant -->
-    <section class="fs-card c-glass-card" data-testid="card-assistant">
-      <h2 class="fs-card-title">{{ 'fd_card_assistant' | translatePipe }}</h2>
+    <section class="fs-card c-glass-panel" data-testid="card-assistant">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="sparkles" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'fd_card_assistant' | translatePipe }}</h2>
+      </div>
       <p class="fs-level">{{ levelKey_() | translatePipe }}</p>
       <p class="fs-note">{{ 'fd_assistant_level_admin' | translatePipe }}</p>
       <div class="fs-grid">
@@ -304,8 +313,11 @@
     </section>
 
     <!-- Card 8: status -->
-    <section class="fs-card c-glass-card" data-testid="card-status">
-      <h2 class="fs-card-title">{{ 'fd_card_status' | translatePipe }}</h2>
+    <section class="fs-card c-glass-panel" data-testid="card-status">
+      <div class="c-card-head">
+        <lucide-icon class="c-card-head__icon" name="circle-check" [size]="18"></lucide-icon>
+        <h2 class="c-card-head__title">{{ 'fd_card_status' | translatePipe }}</h2>
+      </div>
       <p class="fs-level">{{ statusKey_() | translatePipe }}</p>
       <p class="fs-note">{{ 'fd_status_admin' | translatePipe }}</p>
     </section>

@@ -5,16 +5,8 @@
 .de-card {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.de-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-  font-size: 1.05rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
 }
 
 .de-hint {
@@ -24,5 +16,5 @@
 .de-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }

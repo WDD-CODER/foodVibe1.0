@@ -1,7 +1,7 @@
-<section class="rk-card c-glass-card" [attr.data-testid]="'kind-card-' + kind()">
-  <header class="rk-head">
-    <h3 class="rk-title">{{ 'fd_kind_' + kind() | translatePipe }}</h3>
-    <label class="c-chip c-chip--toggle">
+<section class="rk-card c-glass-panel" [attr.data-testid]="'kind-card-' + kind()">
+  <header class="c-card-head">
+    <h3 class="c-card-head__title">{{ 'fd_kind_' + kind() | translatePipe }}</h3>
+    <label class="c-chip c-chip--toggle c-card-head__end">
       <input
         type="checkbox"
         [checked]="config().enabled"
@@ -86,7 +86,7 @@
               </label>
               <button
                 type="button"
-                class="c-btn-ghost"
+                class="c-icon-btn"
                 [disabled]="i === 0"
                 [attr.aria-label]="'fd_move_up' | translatePipe"
                 (click)="move_(i, -1)"
@@ -95,7 +95,7 @@
               </button>
               <button
                 type="button"
-                class="c-btn-ghost"
+                class="c-icon-btn"
                 [disabled]="i === config().questions.length - 1"
                 [attr.aria-label]="'fd_move_down' | translatePipe"
                 (click)="move_(i, 1)"
@@ -104,7 +104,7 @@
               </button>
               <button
                 type="button"
-                class="c-btn-ghost"
+                class="c-icon-btn"
                 data-testid="remove-question"
                 [attr.aria-label]="'remove' | translatePipe"
                 (click)="remove_(i)"

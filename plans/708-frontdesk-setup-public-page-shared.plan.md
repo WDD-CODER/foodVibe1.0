@@ -91,7 +91,7 @@ append the path to the scope block above and retry.
 - `.pb-card`, `.rk-question`, `.fs-savebar` surfaces — family: engine-classes — rung: 1 — why: `.c-glass-panel` (cards), tokens for the save bar (`--bg-glass-strong`, `--shadow-card`).
 - `c-btn-secondary` and icon-only ghost buttons — family: engine-classes — rung: 1 — why: `.c-btn-ghost`, `.c-icon-btn`.
 - Closed dates, flag checkbox, alternative times, kind and time chips — family: chip — rung: 1 — why: `.c-chip--removable`, `.c-chip--toggle`, `.c-chip--tap`; taken times use the chip's `disabled` look.
-- none new.
+- New class `.pb-unavailable` (public-request.page.scss) — a column that stacks `app-empty-state` and the phone button; the empty state has no slot for a link CTA.
 
 ## Defaults
 
@@ -147,11 +147,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give the front-desk settings page the shared loader, card heads and a token save bar — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, .scss, .ts, .spec.ts
-- [ ] A2: Put the three settings cards on the shared card head and icon buttons — src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/*, table-service-card/*, data-export-card/*
-- [ ] A3: Fix the unstyled onboarding buttons and draw closed dates and the flag as shared chips — src/app/pages/frontdesk/frontdesk-onboarding/*
-- [ ] A4: Give the guest booking and status pages the shared loader, empty state, card and chips — src/app/pages/public-request/**
-- [ ] A5: Lock the three areas on the shared pieces and tokens — scripts/test/style-708.test.mjs
+- [x] A1: Give the front-desk settings page the shared loader, card heads and a token save bar — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, .scss, .ts, .spec.ts
+- [x] A2: Put the three settings cards on the shared card head and icon buttons — src/app/pages/frontdesk/frontdesk-settings/components/request-kind-card/*, table-service-card/*, data-export-card/*
+- [x] A3: Fix the unstyled onboarding buttons and draw closed dates and the flag as shared chips — src/app/pages/frontdesk/frontdesk-onboarding/*
+- [x] A4: Give the guest booking and status pages the shared loader, empty state, card and chips — src/app/pages/public-request/**
+- [x] A5: Lock the three areas on the shared pieces and tokens — scripts/test/style-708.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-708.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -174,3 +174,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: `c-btn-secondary` (undefined) becomes `c-btn-ghost` — the closest existing secondary button.
 - behaviour: card titles use `--fs-md` semibold (`.c-card-head__title`), the size four of the five cards were close to.
+- pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0 (3180 specs, after swapping icons to ones the test icon set has)
+- node --test scripts/test/style-708.test.mjs -> pass 2; pnpm run test:scripts, lint:icons, lint:no-native-select, lint:reuse, kit-manifest-check, kit-checks, log-query -> exit 0
+- behaviour: the unavailable state keeps its phone button beside app-empty-state in a new .pb-unavailable column (the empty state has no link slot) — reverse: drop the wrapper and the button
+- behaviour: card heads got registered icons (building-2, clock, sparkles, circle-check, user-check, info, heart, clipboard-list, help-circle) so every card has the same icon placement — reverse: delete the icon lines
+- removes: the hand-written taken-time strike-through on the guest booking page (now the chip engine disabled look) — reverse: restore .pb-time--taken
