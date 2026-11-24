@@ -1,0 +1,144 @@
+{
+  "run": "rs-schema",
+  "branch": "orch/rs-schema",
+  "base": "main",
+  "startedAt": "2026-11-24T20:42:11.738Z",
+  "mainShaAtStart": "273699fb0eb10da2d6ee8380c78cef5123f63ac4",
+  "plans": {
+    "732": {
+      "nnn": "732",
+      "title": "The assistant's table answers stop failing when the model writes a number as a number",
+      "branch": "feat/732-turn-answer-accepts-numbers",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-24T20:43:40.958Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-24T21:04:16.715Z"
+        }
+      },
+      "humanItems": [
+        "Simulator (`/frontdesk/simulator`, as `demo_host`): a new test guest writes \"אפשר שולחן לארבעה מחר ב-20:00?\""
+      ],
+      "history": [
+        {
+          "at": "2026-11-24T20:43:40.657Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T20:43:40.960Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T20:53:16.970Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T21:04:09.776Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T21:04:16.716Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T21:04:24.086Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-24T21:05:22.377Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 9,
+      "sha": "18fe99f1051bb3358802c492ac0d340a6867af6e",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 573.4,
+          "tokens": {
+            "input": 258480,
+            "output": 5134
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 6,
+          "tokens": {
+            "input": 25198,
+            "output": 292
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "4d4b97fa1038fe6d540dd9208e773bc1bb3d30dd"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-24T20:43:40.526Z",
+      "plan": "732",
+      "text": "the folder foodVibe1.0-orch-rs-schema-732 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T20:53:14.484Z",
+      "plan": "732",
+      "text": "builder left undone (round 0): [human] simulator check with the guest message for a table for four: not run, left for the Human"
+    },
+    {
+      "at": "2026-11-24T21:04:32.103Z",
+      "plan": "732",
+      "text": "the folder foodVibe1.0-orch-merge-rs-schema was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-24T21:06:01.046Z",
+      "text": "FINAL: same tree as plan 732's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 9,
+  "updatedAt": "2026-11-24T21:06:03.304Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "732",
+      "type": "behaviour",
+      "text": "behaviour: numbers and booleans are kept as their string form (4 -> \"4\"), the simplest option, so everything after the parse sees the same type as before — reverse: restore .catchall(z.string().max(300))",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-24T21:06:03.302Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-24T21:06:03.303Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
