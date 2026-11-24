@@ -5,8 +5,8 @@
 .rb {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  gap: var(--space-2);
+  padding: var(--space-2);
   border-block-start: 1px solid var(--border-default);
   background: var(--bg-pure);
 }
@@ -15,7 +15,7 @@
 .rb-row {
   display: flex;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .rb-bot {

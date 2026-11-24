@@ -19,8 +19,7 @@
     </div>
   } @else {
     <div class="c-modal-body nr-body">
-      <div class="c-input-stack">
-        <label for="nr-kind">{{ 'rq_kind' | translatePipe }}</label>
+      <app-form-field label="rq_kind" forId="nr-kind" [error]="touched_() && !kind_() ? 'rq_kind_required' : null">
         <app-custom-select
           triggerId="nr-kind"
           placeholder="rq_kind"
@@ -28,16 +27,14 @@
           [ngModel]="kind_()"
           (ngModelChange)="kind_.set($event); touch()"
         />
-        @if (touched_() && !kind_()) {
-          <span class="c-field-error" role="alert">{{ 'rq_kind_required' | translatePipe }}</span>
-        }
-      </div>
+      </app-form-field>
 
       @if (isOwner_()) {
-        <div class="c-input-stack">
-          @if (!picking_()) {
-            <label for="nr-client">{{ 'client' | translatePipe }}</label>
-          }
+        <app-form-field
+          label="client"
+          forId="nr-client"
+          [error]="touched_() && !client_() && !picking_() ? 'client_required' : null"
+        >
           <app-client-picker
             inputId="nr-client"
             [selected]="client_()"
@@ -45,14 +42,10 @@
             (cleared)="client_.set(null)"
             (addingChange)="picking_.set($event)"
           />
-          @if (touched_() && !client_() && !picking_()) {
-            <span class="c-field-error" role="alert">{{ 'client_required' | translatePipe }}</span>
-          }
-        </div>
+        </app-form-field>
       } @else {
         <div class="nr-row">
-          <div class="c-input-stack">
-            <label for="nr-name">{{ 'name' | translatePipe }}</label>
+          <app-form-field label="name" forId="nr-name">
             <input
               id="nr-name"
               class="c-input"
@@ -62,9 +55,8 @@
               [ngModel]="name_()"
               (ngModelChange)="name_.set($event); touch()"
             />
-          </div>
-          <div class="c-input-stack">
-            <label for="nr-phone">{{ 'phone' | translatePipe }}</label>
+          </app-form-field>
+          <app-form-field label="phone" forId="nr-phone">
             <input
               id="nr-phone"
               class="c-input"
@@ -74,7 +66,7 @@
               [ngModel]="phone_()"
               (ngModelChange)="phone_.set($event); touch()"
             />
-          </div>
+          </app-form-field>
         </div>
         @if (touched_() && !clientValid_()) {
           <span class="c-field-error" role="alert">{{ 'rq_guest_required' | translatePipe }}</span>
@@ -100,8 +92,11 @@
             </app-form-field>
           }
           @if (hasParty_()) {
-            <div class="c-input-stack">
-              <label for="nr-party">{{ 'fd_q_party_size' | translatePipe }}</label>
+            <app-form-field
+              label="fd_q_party_size"
+              forId="nr-party"
+              [error]="missing('party_size', party_()) ? 'rq_field_required' : null"
+            >
               <input
                 id="nr-party"
                 class="c-input"
@@ -111,17 +106,13 @@
                 [ngModel]="party_()"
                 (ngModelChange)="party_.set($event); touch()"
               />
-              @if (missing('party_size', party_())) {
-                <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
-              }
-            </div>
+            </app-form-field>
           }
         </div>
 
         @if (isEvent_()) {
           <div class="nr-row">
-            <div class="c-input-stack">
-              <label for="nr-budget">{{ 'fd_q_budget_per_guest' | translatePipe }}</label>
+            <app-form-field label="fd_q_budget_per_guest" forId="nr-budget">
               <input
                 id="nr-budget"
                 class="c-input"
@@ -131,9 +122,12 @@
                 [ngModel]="budget_()"
                 (ngModelChange)="budget_.set($event); touch()"
               />
-            </div>
-            <div class="c-input-stack">
-              <label for="nr-location">{{ 'fd_q_location' | translatePipe }}</label>
+            </app-form-field>
+            <app-form-field
+              label="fd_q_location"
+              forId="nr-location"
+              [error]="missing('location', location_().trim()) ? 'rq_field_required' : null"
+            >
               <input
                 id="nr-location"
                 class="c-input"
@@ -142,21 +136,16 @@
                 [ngModel]="location_()"
                 (ngModelChange)="location_.set($event); touch()"
               />
-              @if (missing('location', location_().trim())) {
-                <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
-              }
-            </div>
+            </app-form-field>
           </div>
         }
 
         @for (q of extraQuestions_(); track q.key) {
-          <div class="c-input-stack">
-            <label [attr.for]="'nr-q-' + q.key"
-              >{{ q.label }}
-              @if (q.required) {
-                <span aria-hidden="true"> *</span>
-              }
-            </label>
+          <app-form-field
+            [label]="q.required ? q.label + ' *' : q.label"
+            [forId]="'nr-q-' + q.key"
+            [error]="touched_() && q.required && !(answers_()[q.key] ?? '').trim() ? 'rq_field_required' : null"
+          >
             @if (q.type === 'choice') {
               <app-custom-select
                 [triggerId]="'nr-q-' + q.key"
@@ -174,10 +163,7 @@
                 (ngModelChange)="setAnswer(q.key, '' + $event)"
               />
             }
-            @if (touched_() && q.required && !(answers_()[q.key] ?? '').trim()) {
-              <span class="c-field-error" role="alert">{{ 'rq_field_required' | translatePipe }}</span>
-            }
-          </div>
+          </app-form-field>
         }
       }
 

@@ -57,6 +57,7 @@ describe('RequestsPage (plan 552)', () => {
   let bookings: { day: jasmine.Spy }
 
   type Internals = {
+    isLoading_: WritableSignal<boolean>
     waiting_: () => FrontDeskRequest[]
     onApprove: (r: FrontDeskRequest, edit: { wanted: FrontDeskRequest['wanted'] } | null) => Promise<void>
     onDecline: (c: { reason: string; text?: string }) => Promise<void>
@@ -239,6 +240,15 @@ describe('RequestsPage (plan 552)', () => {
     expect(bookings.day).toHaveBeenCalledTimes(1)
     expect(bookings.day).toHaveBeenCalledWith('2030-05-01')
     expect(el().querySelectorAll('app-day-load-strip').length).toBe(2)
+  })
+
+  it('shows one loader and no card while loading (plan 706)', async () => {
+    await setup([req('a', 'new')])
+    expect(el().querySelectorAll('app-request-card').length).toBe(1)
+    cmp().isLoading_.set(true)
+    fixture.detectChanges()
+    expect(el().querySelectorAll('app-loader').length).toBe(1)
+    expect(el().querySelectorAll('app-request-card').length).toBe(0)
   })
 
   it('shows the empty state for an empty tab', async () => {

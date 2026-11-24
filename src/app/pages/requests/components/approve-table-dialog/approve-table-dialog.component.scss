@@ -2,11 +2,11 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .att-label {
-  font-weight: 600;
+  font-weight: var(--fw-semibold);
 }
 
 .att-line {
@@ -16,4 +16,13 @@
 .att-map {
   max-block-size: 18rem;
   overflow: auto;
+}
+
+[data-testid='approve-table-dialog'],
+[data-testid='att-alternatives'],
+[data-testid='att-tables'] {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
 }

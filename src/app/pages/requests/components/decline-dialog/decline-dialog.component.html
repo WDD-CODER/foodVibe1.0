@@ -1,7 +1,10 @@
 <app-modal-shell size="sm" titleKey="rq_decline" [sheet]="true" [hasChanges]="dirty_()" (dismissed)="onClose()">
   <div class="c-modal-body">
-    <div class="c-input-stack">
-      <label for="decline-reason">{{ 'rq_decline_reason' | translatePipe }}</label>
+    <app-form-field
+      label="rq_decline_reason"
+      forId="decline-reason"
+      [error]="touched_() && !reason_() ? 'rq_reason_required' : null"
+    >
       <app-custom-select
         triggerId="decline-reason"
         placeholder="rq_decline_reason"
@@ -9,12 +12,12 @@
         [ngModel]="reason_()"
         (ngModelChange)="onReason($event)"
       />
-      @if (touched_() && !reason_()) {
-        <span class="c-field-error" role="alert">{{ 'rq_reason_required' | translatePipe }}</span>
-      }
-    </div>
-    <div class="c-input-stack">
-      <label for="decline-text">{{ 'rq_decline_text' | translatePipe }}</label>
+    </app-form-field>
+    <app-form-field
+      label="rq_decline_text"
+      forId="decline-text"
+      [error]="touched_() && textMissing_() ? 'rq_decline_text_required' : null"
+    >
       <textarea
         id="decline-text"
         class="c-input"
@@ -23,10 +26,7 @@
         [ngModel]="text_()"
         (ngModelChange)="onText($event)"
       ></textarea>
-      @if (touched_() && textMissing_()) {
-        <span class="c-field-error" role="alert">{{ 'rq_decline_text_required' | translatePipe }}</span>
-      }
-    </div>
+    </app-form-field>
   </div>
   <div class="c-modal-actions">
     <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>

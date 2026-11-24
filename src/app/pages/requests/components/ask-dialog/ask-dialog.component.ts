@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { waLink } from 'src/app/core/utils/wa-link.util'
 
 export const ASK_NOTE_MAX = 300
@@ -10,7 +11,7 @@ export const ASK_NOTE_MAX = 300
 @Component({
   selector: 'app-ask-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, ModalShellComponent],
+  imports: [FormsModule, TranslatePipe, ModalShellComponent, FormFieldComponent],
   templateUrl: './ask-dialog.component.html',
   styleUrl: './ask-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

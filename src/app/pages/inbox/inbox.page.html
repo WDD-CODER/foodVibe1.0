@@ -1,4 +1,4 @@
-<section class="ibx" dir="rtl" [class.ibx--thread]="id_()" data-testid="inbox-page">
+<section class="c-page ibx" dir="rtl" [class.ibx--thread]="id_()" data-testid="inbox-page">
   <app-page-header class="ibx-header" titleKey="ibx_title">
     @if (canSimulate_()) {
     <a header-actions class="c-btn-ghost" routerLink="/frontdesk/simulator" data-testid="sim-link">
@@ -37,37 +37,51 @@
       } @else if (rows_().length === 0) {
       <app-empty-state [messageKey]="filter_() === 'all' ? 'ibx_empty' : 'ibx_empty_filter'" icon="message-circle" />
       } @else {
-      <ul class="ibx-rows">
+      <ul class="c-list" role="list">
         @for (row of rows_(); track row._id) {
-        <li>
-          <a
-            class="ibx-row"
-            [class.ibx-row--current]="row._id === id_()"
-            [routerLink]="['/inbox', row._id]"
-            [attr.aria-current]="row._id === id_() ? 'true' : null"
-            data-testid="inbox-row"
-          >
-            <span class="ibx-name">{{ nameOf(row) }}</span>
-            <span class="c-chip--tag c-chip--sm" data-testid="holder-tag">{{ holderKey(row) | translatePipe }}</span>
-            @if (row.test) {
-            <span class="c-chip--tag c-chip--sm" data-testid="test-tag">{{ 'rq_test_tag' | translatePipe }}</span>
-            }
+        <li
+          class="c-list-row c-list-row--link"
+          role="listitem"
+          [class.is-selected]="row._id === id_()"
+          data-testid="inbox-row"
+        >
+          <span class="c-list-body-cell">
+            <a
+              class="c-row-link ibx-name"
+              [routerLink]="['/inbox', row._id]"
+              [attr.aria-current]="row._id === id_() ? 'true' : null"
+              >{{ nameOf(row) }}</a
+            >
             <span class="ibx-preview">{{ previewOf(row) }}</span>
+          </span>
+          <span class="c-list-body-cell c-list-body-cell--end">
             <span class="ibx-time">{{ timeOf(row.lastMessageAt) }}</span>
-            @if (row.unread > 0) {
+            <span class="c-chip c-chip--tag c-chip--sm" data-testid="holder-tag"
+              >{{ holderKey(row) | translatePipe }}</span
+            >
+            @if (row.test) {
+            <span class="c-chip c-chip--tag c-chip--sm" data-testid="test-tag"
+              >{{ 'rq_test_tag' | translatePipe }}</span
+            >
+            } @if (row.unread > 0) {
             <span class="c-chip__count" data-testid="unread-count">{{ row.unread }}</span>
             }
-          </a>
+          </span>
         </li>
         }
       </ul>
       }
     </aside>
 
-    <div class="ibx-thread" data-testid="inbox-thread">
+    <div class="c-glass-panel ibx-thread" data-testid="inbox-thread">
       @if (current_(); as t) { @if (true) {
       <header class="ibx-thread-head">
-        <a class="ibx-back" routerLink="/inbox" [attr.aria-label]="'back' | translatePipe" data-testid="inbox-back">
+        <a
+          class="c-btn-ghost--sm ibx-back"
+          routerLink="/inbox"
+          [attr.aria-label]="'back' | translatePipe"
+          data-testid="inbox-back"
+        >
           <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
           <span class="btn-label">{{ 'back' | translatePipe }}</span>
         </a>
@@ -120,7 +134,7 @@
         }
         <span class="c-chip--tag c-chip--sm">{{ card.statusKey | translatePipe }}</span>
         <a
-          class="ibx-card-link"
+          class="c-btn-ghost--sm ibx-card-link"
           [routerLink]="card.link"
           [queryParams]="card.queryParams ?? null"
           data-testid="card-open"
