@@ -12,6 +12,7 @@ import { SuggestionBarComponent, type SuggestionState } from './suggestion-bar.c
     [suggestion]="text()"
     [state]="state()"
     [errorKey]="error()"
+    [failKey]="failKey()"
     (send)="sent = sent + 1"
     (edit)="edited = edited + 1"
     (dismiss)="dismissed = dismissed + 1"
@@ -22,6 +23,7 @@ class HostComponent {
   text = signal('שלום')
   state = signal<SuggestionState>('idle')
   error = signal<string | null>(null)
+  failKey = signal('ibx_sg_failed')
   sent = 0
   edited = 0
   dismissed = 0
@@ -73,6 +75,16 @@ describe('SuggestionBarComponent (plan 682)', () => {
     expect(q('suggestion-failed')?.textContent).toContain('ibx_sg_failed')
     q('suggestion-ask')?.click()
     expect(host.asked).toBe(1)
+  })
+
+  it('shows the line of the failKey it is given', () => {
+    host.text.set('')
+    host.state.set('failed')
+    for (const key of ['ibx_sg_failed_busy', 'ibx_sg_failed_timeout', 'ibx_sg_failed_quota']) {
+      host.failKey.set(key)
+      fixture.detectChanges()
+      expect(q('suggestion-failed')?.textContent).toContain(key)
+    }
   })
 
   it('shows a refusal key under the bar', () => {

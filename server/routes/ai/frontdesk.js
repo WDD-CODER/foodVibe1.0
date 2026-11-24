@@ -29,8 +29,11 @@ const router = Router();
  * `bad_json` or `bad_shape`. Never throws.
  */
 async function askTurnModel({ body, usage, log }) {
-  const call = await callGemini({ body, timeoutMs: 20000, log, eventPrefix: 'frontdesk.turn', usage });
-  if (call.kind !== 'ok') return { ok: false, reason: call.kind };
+  // Plan 701: no user is there to pick another model, so an overloaded model moves on to the next free one.
+  const call = await callGemini({
+    body, timeoutMs: 15000, deadlineMs: 35000, fallback: true, log, eventPrefix: 'frontdesk.turn', usage,
+  });
+  if (call.kind !== 'ok') return { ok: false, reason: call.kind, status: call.status };
   const payload = extractJsonPayload(responseText(call.data));
   if (payload.error) return { ok: false, reason: 'bad_json' };
   const parsed = turnAnswerSchema.safeParse(payload.value);
@@ -57,7 +60,7 @@ router.post('/suggest', verifyToken, requireModule('frontdesk'), suggestLimiter,
     const conversation = await db.collection('conversations').findOne({ _id: id, ...scopeFilter(req) });
     if (!conversation) return res.status(404).json({ error: 'NOT_FOUND' });
     const result = await runTurn(db, conversation, { log: req.log, mode: 'suggest' });
-    if (!result || !result.ok) return res.status(502).json({ error: 'AI_FAILED' });
+    if (!result || !result.ok) return res.status(502).json({ error: 'AI_FAILED', reason: (result && result.group) || 'other' });
     return res.json({ suggestion: result.suggestion });
   } catch (err) {
     req.log.error({ err, event: 'frontdesk.suggest.failed' });
@@ -103,7 +106,7 @@ router.post('/fix', verifyToken, requireModule('frontdesk'), fixLimiter, async (
     if (process.env.GEMINI_API_KEY) {
       const body = buildCorrectionBody({ guestText, wrongText: message.text, answer, issue });
       const call = await callGemini({
-        body, timeoutMs: 20000, log: req.log, eventPrefix: 'frontdesk.fix',
+        body, timeoutMs: 20000, deadlineMs: 35000, fallback: true, log: req.log, eventPrefix: 'frontdesk.fix',
         usage: { businessId: req.user.businessId, userId: req.user.userId, feature: 'knowledge_correction' },
       });
       if (call.kind === 'ok') {

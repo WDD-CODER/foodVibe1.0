@@ -106,16 +106,18 @@
       }
     </div>
 
-    @if (time_() && plan_(); as plan) {
+    @if (plan_(); as plan) {
       <div class="c-input-stack" data-testid="nb-offer">
-        @if (hasOffer_() && !noTable_()) {
+        @if (!time_()) {
+          <p class="nb-line" data-testid="nb-pick-time">{{ 'nb_pick_time_first' | translatePipe }}</p>
+        } @else if (hasOffer_() && !noTable_()) {
           <p class="nb-line" data-testid="nb-offered">{{ offeredLine_() }}</p>
         } @else if (showNoOffer_()) {
           <p class="nb-line c-field-error" role="alert" data-testid="nb-no-table">
             {{ 'nb_no_table' | translatePipe }}
           </p>
         }
-        <div class="nb-map">
+        <div class="nb-map" data-testid="nb-map">
           <app-floor-map [plan]="plan" [selectedKeys]="selectedKeys_()" (tableTapped)="onMapTap($event)" />
           @if (isOwner_()) {
             <button
