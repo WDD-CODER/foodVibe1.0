@@ -98,6 +98,7 @@ append the path to the scope block above and retry.
 - Note buttons, stage link — family: engine-classes — rung: 1 — why: `.c-icon-btn`, `.c-btn-ghost--sm`.
 - Empties — family: empty-state — rung: 1 — why: `app-empty-state [compact]`.
 - Loading list table — family: engine-classes — rung: 1 — why: `.c-table.c-table--compact`.
+- Local state hooks `.stage-tab`, `.stage-lost`, `.targets-chip`, `.meter-input` — family: chip — rung: 1 — why: names on shared chips and the shared input wrapper for state rules (past/locked tab, far-end lost tab, dark-bar colour, wrapper width); no new look.
 - none new.
 
 ## Defaults
@@ -120,18 +121,18 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `_paper-ui.scss`, `_toolbar.scss`, `_layout.scss`, `menu-intelligence.page.scss`: every literal → token (703
+- [x] `_paper-ui.scss`, `_toolbar.scss`, `_layout.scss`, `menu-intelligence.page.scss`: every literal → token (703
   mapping; a paper tint without a token → `color-mix(in srgb, var(--token) N%, transparent)` with the same alpha);
   physical → logical; class names unchanged.
-- [ ] Stage bar: `.stage-pill(--danger)` → `c-chip c-chip--tab` (`.active` for the current stage, `c-chip--red` for
+- [x] Stage bar: `.stage-pill(--danger)` → `c-chip c-chip--tab` (`.active` for the current stage, `c-chip--red` for
   lost); the client chip gets `c-chip`; `.client-row-empty` → `app-empty-state [compact]="true"` with its key;
   `.stage-link` → `.c-btn-ghost--sm`.
-- [ ] Notes log: `.notes-log` → `.c-glass-panel` (+ local padding only); `.notes-empty` → compact empty state;
+- [x] Notes log: `.notes-log` → `.c-glass-panel` (+ local padding only); `.notes-empty` → compact empty state;
   `.note-btn` → `.c-icon-btn` (16, same labels).
-- [ ] Logistics panel: `.logistics` surface → `.c-glass-panel`.
-- [ ] Menu dish row and pricing meter: literals → tokens, physical → logical; the pricing meter's `.c-*` restyle goes;
+- [x] Logistics panel: `.logistics` surface → `.c-glass-panel`.
+- [x] Menu dish row and pricing meter: literals → tokens, physical → logical; the pricing meter's `.c-*` restyle goes;
   `targets-toggle` → `c-chip c-chip--tap`.
-- [ ] Loading list: `<table class="c-table c-table--compact">` (print rules stay in `@media print`).
+- [x] Loading list: `<table class="c-table c-table--compact">` (print rules stay in `@media print`).
 
 ### Should Have (P1)
 - [ ] none
@@ -146,12 +147,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Move the paper skin, toolbar and editor layout values onto tokens and logical properties without changing their look — src/app/pages/menu-intelligence/_paper-ui.scss, _toolbar.scss, _layout.scss, menu-intelligence.page.scss, menu-intelligence.page.html
-- [ ] A2: Draw the stage bar with shared tab chips, fix the client chip's base class and use the small empty state — src/app/pages/menu-intelligence/components/event-stage-bar/**
-- [ ] A3: Put the notes log and logistics panel on the shared panel with shared icon buttons and empty state — src/app/pages/menu-intelligence/components/event-notes-log/**, src/app/pages/menu-intelligence/components/event-logistics-panel/**
-- [ ] A4: Move the dish row and pricing meter onto tokens and the shared tap chip — src/app/pages/menu-intelligence/components/menu-dish-row/**, src/app/pages/menu-intelligence/components/pricing-meter/**
-- [ ] A5: Draw the loading list as the shared table — src/app/pages/menu-intelligence/components/loading-list/**
-- [ ] A6: Lock the editor on the shared pieces and tokens — scripts/test/style-717.test.mjs
+- [x] A1: Move the paper skin, toolbar and editor layout values onto tokens and logical properties without changing their look — src/app/pages/menu-intelligence/_paper-ui.scss, _toolbar.scss, _layout.scss, menu-intelligence.page.scss, menu-intelligence.page.html
+- [x] A2: Draw the stage bar with shared tab chips, fix the client chip's base class and use the small empty state — src/app/pages/menu-intelligence/components/event-stage-bar/**
+- [x] A3: Put the notes log and logistics panel on the shared panel with shared icon buttons and empty state — src/app/pages/menu-intelligence/components/event-notes-log/**, src/app/pages/menu-intelligence/components/event-logistics-panel/**
+- [x] A4: Move the dish row and pricing meter onto tokens and the shared tap chip — src/app/pages/menu-intelligence/components/menu-dish-row/**, src/app/pages/menu-intelligence/components/pricing-meter/**
+- [x] A5: Draw the loading list as the shared table — src/app/pages/menu-intelligence/components/loading-list/**
+- [x] A6: Lock the editor on the shared pieces and tokens — scripts/test/style-717.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-717.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -171,3 +172,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Execution Notes
 - behaviour: the paper skin keeps its classes and look; only its values become tokens (small rounding differences are accepted).
 - behaviour: the stage pills become the app's tab chips — the one visible change on the editor's top row.
+- behaviour: the stage tabs keep local `is-past` / `is-locked` state rules (outside the layer) on top of the shared tab chip — reverse: drop the two rules.
+- behaviour: the paper skin's inline inputs, the pricing-meter inputs (inside `c-input-wrapper`) and the deposit input (inside `c-input-stack`) stay without `c-input`; the style test lists them in ALLOW with a reason — reverse: add `c-input` to each.
+- behaviour: the pricing-meter bar keeps a local dark-bar colour rule on its tap chip (`.targets-chip`) — reverse: remove it and accept the engine colours on the dark bar.
+- behaviour: `text-align: right` became `start` and the dish-remove button's `left: 0` became `inset-inline-end: 0` (the same side in RTL).
+- scope: the plan's own Reuse Check gained one line declaring the four local state hooks (kit-checks asked).
+- Evidence: build 0; lint 0 errors; test:ci 0 (3211 specs); test:scripts 0 (style-717 3 pass); lint:icons, lint:no-native-select, lint:reuse, breadcrumbs-check, plan-ledger-check, override-check, ci-scope-check, log-query, kit-manifest-check, kit-checks, scope-check all exit 0. test:ci first run failed 6 pricing-meter specs on the old `.targets-toggle` selector; fixed in the spec and rerun green.

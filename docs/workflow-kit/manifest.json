@@ -4297,6 +4297,16 @@
       "notes": "Plan 716: the cook view keeps its ink skin on tokens, the shared empty state and the four icon sizes, and passes the style guard."
     },
     {
+      "path": "scripts/test/style-717.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 717: the event-menu editor keeps its paper skin on tokens and uses the shared tab chips, panel, empty state and table, and passes the style guard."
+    },
+    {
       "path": "scripts/test/style-714.test.mjs",
       "tier": "project",
       "action": "stay",

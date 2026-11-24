@@ -12,13 +12,13 @@
 
   display: block;
 
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
 }
 
 .menu-editor-shell {
-  padding: 1rem 1.25rem 6rem;
-  max-width: 860px;
+  padding: var(--space-4) var(--space-5) 6rem;
+  max-inline-size: 860px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -26,8 +26,8 @@
 }
 
 .paper-outer {
-  width: 100%;
-  max-width: 720px;
+  inline-size: 100%;
+  max-inline-size: 45rem;
   margin: 0 auto;
   flex-shrink: 0;
 }
@@ -35,6 +35,6 @@
 // Phone density (2026-11-11): the menu paper starts higher and uses the full width.
 @media (max-width: $break-phone-max) {
   .menu-editor-shell {
-    padding: 0.5rem 0.625rem 6rem;
+    padding: var(--space-2) 0.625rem 6rem;
   }
 }

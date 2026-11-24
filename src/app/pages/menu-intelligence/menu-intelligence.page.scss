@@ -12,33 +12,33 @@
 
 app-event-stage-bar,
 app-event-notes-log {
-  max-inline-size: 720px;
+  max-inline-size: 45rem;
 }
 
 app-event-stage-bar {
-  margin-block-end: 1rem;
+  margin-block-end: var(--space-4);
 }
 
 app-event-notes-log {
-  margin-block-start: 1.5rem;
+  margin-block-start: var(--space-6);
 }
 
 @media (min-width: $break-desktop-min) {
   .menu-editor-shell.has-notes {
     display: grid;
-    grid-template-columns: minmax(0, 720px) 20rem;
+    grid-template-columns: minmax(0, 45rem) 20rem;
     justify-content: center;
     align-items: start;
-    column-gap: 1.5rem;
+    column-gap: var(--space-6);
 
-    max-inline-size: 1120px;
+    max-inline-size: 70rem;
 
     .pill-row,
     app-event-stage-bar {
       grid-column: 1 / -1;
       justify-self: center;
       inline-size: 100%;
-      max-inline-size: 720px;
+      max-inline-size: 45rem;
     }
 
     .paper-outer {
@@ -48,7 +48,7 @@ app-event-notes-log {
     app-event-notes-log {
       grid-column: 2;
       position: sticky;
-      inset-block-start: 1rem;
+      inset-block-start: var(--space-4);
       margin-block-start: 0;
       max-inline-size: none;
     }
