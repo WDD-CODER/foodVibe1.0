@@ -35,9 +35,11 @@ describe('PlatformLogisticsItemsComponent', () => {
   let confirmOpen: jasmine.Spy
   let userMsg: jasmine.SpyObj<UserMsgService>
 
-  async function setup(rows: AdminTermRow[]): Promise<void> {
+  async function setup(rows: AdminTermRow[], failLoad = false): Promise<void> {
     rows_ = signal(rows)
-    loadTerms = jasmine.createSpy('loadTerms').and.resolveTo()
+    loadTerms = jasmine.createSpy('loadTerms')
+    if (failLoad) loadTerms.and.rejectWith(new Error('down'))
+    else loadTerms.and.resolveTo()
     add = jasmine.createSpy('add').and.resolveTo({})
     confirmOpen = jasmine.createSpy('open').and.resolveTo(true)
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
@@ -113,5 +115,19 @@ describe('PlatformLogisticsItemsComponent', () => {
     await setup([])
     expect(el().querySelector('app-empty-state')).not.toBeNull()
     expect(el().querySelector('.logistics-group')).toBeNull()
+  })
+
+  it('a failed load shows the error state with a retry that reloads', async () => {
+    await setup([], true)
+    const empty = el().querySelector('app-empty-state')
+    expect(empty?.textContent).toContain('platform_logistics_load_failed')
+    expect(el().querySelector('.logistics-group')).toBeNull()
+    loadTerms.calls.reset()
+    loadTerms.and.resolveTo()
+    el().querySelector<HTMLButtonElement>('app-empty-state button')!.click()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(loadTerms).toHaveBeenCalledWith('logisticsItem')
+    expect(el().textContent).not.toContain('platform_logistics_load_failed')
   })
 })

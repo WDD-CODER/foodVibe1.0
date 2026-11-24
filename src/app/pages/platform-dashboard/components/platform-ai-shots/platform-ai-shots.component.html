@@ -2,7 +2,16 @@
   <h2 class="ai-shots__title">{{ 'platform_ai_shots_title' | translatePipe }}</h2>
   <p class="ai-shots__desc" data-testid="ai-shots-desc">{{ 'platform_ai_shots_desc_all' | translatePipe }}</p>
 
-  @if (!isLoading_()) {
+  @if (isLoading_()) {
+    <app-loader />
+  } @else if (loadFailed_()) {
+    <app-empty-state
+      icon="alert-triangle"
+      messageKey="platform_ai_shots_error"
+      ctaLabelKey="retry"
+      (ctaClick)="retry()"
+    />
+  } @else {
     <div class="ai-shots__group">
       <h3 class="ai-shots__heading">{{ 'platform_ai_shots_shared' | translatePipe }}</h3>
       <p class="ai-shots__hint">{{ 'platform_ai_shots_shared_hint' | translatePipe }}</p>

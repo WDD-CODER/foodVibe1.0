@@ -1,7 +1,16 @@
 <section class="logistics-items">
   <h2 class="logistics-items__title">{{ 'platform_logistics_title' | translatePipe }}</h2>
 
-  @if (!isLoading_()) {
+  @if (isLoading_()) {
+    <app-loader />
+  } @else if (loadFailed_()) {
+    <app-empty-state
+      icon="alert-triangle"
+      messageKey="platform_logistics_load_failed"
+      ctaLabelKey="retry"
+      (ctaClick)="retry()"
+    />
+  } @else {
     @if (!groups_().length) {
       <app-empty-state messageKey="platform_logistics_empty" />
     } @else {
@@ -24,7 +33,7 @@
           </div>
           <ul class="logistics-group__businesses">
             @for (row of group.rows; track row.id) {
-              <li class="c-chip--tag">
+              <li class="c-chip c-chip--tag">
                 {{ row.businessName ?? row.businessId }}
                 @if (row.createdAt) {
                   · {{ row.createdAt | date: 'dd/MM/yy' }}

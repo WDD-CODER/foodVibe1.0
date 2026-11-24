@@ -28,8 +28,10 @@
     </div>
   </header>
 
-  @if (forbidden()) {
-  <p class="report__notice c-glass-panel" data-testid="report-forbidden">{{ 'report_owner_only' | translatePipe }}</p>
+  @if (loading() && !report()) {
+  <app-loader />
+  } @else if (forbidden()) {
+  <app-empty-state messageKey="report_owner_only" icon="lock" data-testid="report-forbidden" />
   } @else if (isEmpty()) {
   <app-empty-state messageKey="report_empty" icon="trending-up" />
   } @else if (report()) { @let r = report()!;
@@ -46,7 +48,7 @@
     }
     <div class="report__tiles">
       @for (tile of tiles(); track tile.key) {
-      <article class="tile" [attr.data-testid]="'tile-' + tile.key">
+      <article class="c-stat-tile" [attr.data-testid]="'tile-' + tile.key">
         <h3 class="tile__label">{{ tile.labelKey | translatePipe }}</h3>
         <p class="tile__values">
           <span class="tile__start" dir="ltr" [attr.data-testid]="'start-' + tile.key">
@@ -85,7 +87,7 @@
 
   <section class="report__trend c-glass-panel" data-testid="report-trend" aria-labelledby="report-trend-title">
     <h2 id="report-trend-title" class="report__h2">{{ 'report_trend_title' | translatePipe }}</h2>
-    <table class="trend">
+    <table class="c-table c-table--compact trend">
       <thead>
         <tr>
           <th scope="col"></th>

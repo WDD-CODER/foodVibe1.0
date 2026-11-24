@@ -3,24 +3,28 @@
     <app-loader />
   } @else {
     @if (item_(); as item) {
-      <div class="diagnosis-workspace__back">
-        <app-page-header [titleKey]="null" backLink="/diagnosis" />
-      </div>
-      <div class="diagnosis-workspace__head">
-        <h1 class="diagnosis-workspace__title" dir="auto" data-testid="diagnosis-title">{{ item.name }}</h1>
-        <span class="c-chip c-chip--tag" [class.c-chip--green]="item.status === 'done'" data-testid="diagnosis-status">
-          {{ (item.status === 'done' ? 'diag_status_done' : 'diag_status_open') | translatePipe }}
-        </span>
+      <app-page-header [titleKey]="null" backLink="/diagnosis">
+        <ng-container header-title>
+          <span dir="auto" data-testid="diagnosis-title">{{ item.name }}</span>
+          <span
+            class="c-chip c-chip--tag"
+            [class.c-chip--green]="item.status === 'done'"
+            data-testid="diagnosis-status"
+          >
+            {{ (item.status === 'done' ? 'diag_status_done' : 'diag_status_open') | translatePipe }}
+          </span>
+        </ng-container>
         <button
+          header-actions
           type="button"
-          class="c-btn-ghost"
+          class="c-btn-ghost diagnosis-workspace__toggle"
           data-testid="diagnosis-toggle-done"
           [disabled]="isBusy_()"
           (click)="toggleDone()"
         >
           {{ (item.status === 'done' ? 'diag_reopen' : 'diag_mark_done') | translatePipe }}
         </button>
-      </div>
+      </app-page-header>
 
       <div class="diagnosis-workspace__tabs" role="tablist">
         <app-scroll-rail>

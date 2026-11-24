@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { DatePipe } from '@angular/common'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PlatformAdminService } from '@services/platform-admin.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { LoggingService } from '@services/logging.service'
@@ -16,7 +17,7 @@ import type { AiShotRow } from '@models/ai-shot.model'
 @Component({
   selector: 'app-platform-ai-shots',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, TranslatePipe, EmptyStateComponent, LoaderComponent],
   templateUrl: './platform-ai-shots.component.html',
   styleUrl: './platform-ai-shots.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,11 +31,18 @@ export class PlatformAiShotsComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoading_ = signal(true)
+  protected readonly loadFailed_ = signal(false)
   protected readonly candidates_ = signal<AiShotRow[]>([])
   protected readonly shared_ = signal<AiShotRow[]>([])
 
   // 6. METHODS
   async ngOnInit(): Promise<void> {
+    await this.reload()
+    this.isLoading_.set(false)
+  }
+
+  protected async retry(): Promise<void> {
+    this.isLoading_.set(true)
     await this.reload()
     this.isLoading_.set(false)
   }
@@ -65,11 +73,13 @@ export class PlatformAiShotsComponent implements OnInit {
   }
 
   private async reload(): Promise<void> {
+    this.loadFailed_.set(false)
     try {
       const report = await this.platformAdmin.getAiShots()
       this.candidates_.set(report.candidates)
       this.shared_.set(report.shared)
     } catch (err) {
+      this.loadFailed_.set(true)
       this.logging.error({
         event: 'platform.ai_shots_load_failed',
         message: 'Loading the AI examples failed',

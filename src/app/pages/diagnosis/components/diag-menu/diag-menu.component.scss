@@ -35,15 +35,6 @@
     font-size: var(--fs-sm);
   }
 
-  .diag-menu__field {
-    display: grid;
-    gap: var(--space-1);
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-    line-height: var(--lh-snug);
-  }
-
   .diag-menu__error {
     margin: 0;
 

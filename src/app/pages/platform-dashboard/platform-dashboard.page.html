@@ -1,39 +1,73 @@
 <section class="platform-page">
-  <app-page-header titleKey="platform_dashboard" class="platform-header" />
+  <app-page-header titleKey="platform_dashboard" class="platform-header">
+    @if (rows_().length) {
+    <button
+      header-actions
+      type="button"
+      class="c-btn-ghost--sm"
+      data-testid="fd-export-csv"
+      (click)="exportFrontDeskCsv()"
+    >
+      <lucide-icon name="download" [size]="14"></lucide-icon>
+      {{ "platform_fd_export_csv" | translatePipe }}
+    </button>
+    }
+  </app-page-header>
 
   @if (isLoading_()) {
   <app-loader />
   } @else if (!rows_().length) {
-  <p class="platform-empty">{{ "platform_no_businesses" | translatePipe }}</p>
+  <app-empty-state icon="building-2" messageKey="platform_no_businesses" />
   } @else { @let totals = totals_();
   <div class="platform-totals" data-testid="platform-totals" [attr.aria-label]="'platform_totals' | translatePipe">
-    <div class="total-tile total-tile--hero">
-      <span class="total-tile__label">{{ "platform_col_business" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ totals.businesses }}</strong>
+    <div class="c-stat-tile c-stat-tile--hero">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_business" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ totals.businesses }}</strong>
     </div>
-    <div class="total-tile c-glass-panel">
-      <span class="total-tile__label">{{ "platform_col_staff" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ totals.staff }}</strong>
+    <div class="c-stat-tile">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_staff" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ totals.staff }}</strong>
     </div>
-    <div class="total-tile c-glass-panel">
-      <span class="total-tile__label">{{ "platform_col_events_total" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ totals.total }}</strong>
+    <div class="c-stat-tile">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_events_total" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ totals.total }}</strong>
     </div>
-    <div class="total-tile c-glass-panel">
-      <span class="total-tile__label">{{ "platform_col_events_active" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ totals.active }}</strong>
+    <div class="c-stat-tile">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_events_active" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ totals.active }}</strong>
     </div>
-    <div class="total-tile c-glass-panel">
-      <span class="total-tile__label">{{ "platform_col_events_closed" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ totals.closed }}</strong>
+    <div class="c-stat-tile">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_events_closed" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ totals.closed }}</strong>
     </div>
-    <div class="total-tile c-glass-panel">
-      <span class="total-tile__label">{{ "platform_col_events_finished" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ totals.finished }}</strong>
+    <div class="c-stat-tile">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_events_finished" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ totals.finished }}</strong>
     </div>
-    <div class="total-tile c-glass-panel">
-      <span class="total-tile__label">{{ "platform_col_close_rate" | translatePipe }}</span>&ngsp;
-      <strong class="total-tile__value c-num">{{ rate(totals.closeRate) }}</strong>
+    <div class="c-stat-tile">
+      <div class="c-stat-tile__top">
+        <span class="c-stat-tile__label">{{ "platform_col_close_rate" | translatePipe }}</span>
+      </div>
+      &ngsp;
+      <strong class="c-stat-tile__value c-num">{{ rate(totals.closeRate) }}</strong>
     </div>
   </div>
 
@@ -45,30 +79,30 @@
       [attr.aria-label]="'platform_dashboard' | translatePipe"
     >
       <div class="c-list-row" role="row">
-        <div
+        <button
+          type="button"
           class="col-name c-grid-header-cell c-sortable-header"
           role="columnheader"
           [attr.aria-sort]="ariaSort('name')"
+          (click)="sortBy('name')"
         >
-          <button type="button" class="sort-btn" (click)="sortBy('name')">
-            {{ "platform_col_business" | translatePipe }}
-            <lucide-icon name="arrow-up-down" [size]="12"></lucide-icon>
-          </button>
-        </div>
+          {{ "platform_col_business" | translatePipe }}
+          <lucide-icon name="arrow-up-down" [size]="14"></lucide-icon>
+        </button>
         <app-column-carousel-header>
           @for (col of carouselColumns; track col.key) {
-          <div
+          <button
+            type="button"
             class="c-grid-header-cell c-sortable-header"
             appColumnSlide
             [label]="col.labelKey"
             role="columnheader"
             [attr.aria-sort]="ariaSort(col.key)"
+            (click)="sortBy(col.key)"
           >
-            <button type="button" class="sort-btn" (click)="sortBy(col.key)">
-              {{ col.labelKey | translatePipe }}
-              <lucide-icon name="arrow-up-down" [size]="12"></lucide-icon>
-            </button>
-          </div>
+            {{ col.labelKey | translatePipe }}
+            <lucide-icon name="arrow-up-down" [size]="14"></lucide-icon>
+          </button>
           }
           <div class="c-grid-header-cell" appColumnSlide label="platform_frontdesk_col" role="columnheader">
             {{ "platform_frontdesk_col" | translatePipe }}
@@ -149,13 +183,10 @@
             {{ fdNumber(fdStats_().get(row._id)?.noShowRatePct) }}
           </div>
           <div class="c-list-body-cell" appColumnSlide label="platform_col_internal">
-            <input
-              type="checkbox"
-              class="internal-toggle"
-              [checked]="row.internal"
-              [attr.aria-label]="'platform_col_internal' | translatePipe"
-              (change)="toggleInternal(row, $event)"
-            />
+            <label class="c-chip c-chip--toggle">
+              <input type="checkbox" [checked]="row.internal" (change)="toggleInternal(row, $event)" />
+              <span class="visually-hidden">{{ "platform_col_internal" | translatePipe }}</span>
+            </label>
           </div>
           <div class="c-list-body-cell" appColumnSlide label="platform_col_modules" data-testid="biz-modules">
             {{ modulesText(row) }}
@@ -224,11 +255,6 @@
       }
     </div>
   </div>
-  <button type="button" class="c-btn-ghost--sm" data-testid="fd-export-csv" (click)="exportFrontDeskCsv()">
-    <lucide-icon name="download" [size]="14"></lucide-icon>
-    {{ "platform_fd_export_csv" | translatePipe }}
-  </button>
-
   }
 
   <section class="ai-usage c-glass-panel" aria-labelledby="ai-usage-title">
@@ -239,7 +265,7 @@
     <app-empty-state messageKey="platform_ai_empty" />
     } @else { @let report = aiUsage_()!;
     <div class="table-scroll">
-      <table class="platform-table ai-table">
+      <table class="c-table ai-table">
         <thead>
           <tr>
             <th scope="col">{{ "platform_col_business" | translatePipe }}</th>
@@ -259,18 +285,18 @@
             (keydown.enter)="toggleAiDrill(row.key)"
           >
             <th scope="row">{{ row.label ?? row.key }}</th>
-            <td class="num">{{ row.calls }}</td>
-            <td class="num" [attr.title]="failureTitle(row)">{{ row.failedCalls }}</td>
-            <td class="num">{{ row.totalTokens }}</td>
-            <td class="num">{{ cost(row.estCostUsd) }}</td>
+            <td class="ai-num">{{ row.calls }}</td>
+            <td class="ai-num" [attr.title]="failureTitle(row)">{{ row.failedCalls }}</td>
+            <td class="ai-num">{{ row.totalTokens }}</td>
+            <td class="ai-num">{{ cost(row.estCostUsd) }}</td>
           </tr>
           @if (aiDrill_()?.businessId === row.key) { @for (feature of aiDrill_()!.rows; track feature.key) {
           <tr class="ai-drill-row">
             <th scope="row">{{ "ai_feature_" + feature.key | translatePipe }}</th>
-            <td class="num">{{ feature.calls }}</td>
-            <td class="num" [attr.title]="failureTitle(feature)">{{ feature.failedCalls }}</td>
-            <td class="num">{{ feature.totalTokens }}</td>
-            <td class="num">{{ cost(feature.estCostUsd) }}</td>
+            <td class="ai-num">{{ feature.calls }}</td>
+            <td class="ai-num" [attr.title]="failureTitle(feature)">{{ feature.failedCalls }}</td>
+            <td class="ai-num">{{ feature.totalTokens }}</td>
+            <td class="ai-num">{{ cost(feature.estCostUsd) }}</td>
           </tr>
           } } }
         </tbody>

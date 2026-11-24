@@ -110,6 +110,7 @@ append the path to the scope block above and retry.
 - Loading — family: feedback — rung: 1 — why: `app-loader`.
 - Empty — family: empty-state — rung: 1 — why: `app-empty-state`.
 - Hand field labels — family: form-field — rung: 1 — why: `app-form-field`.
+- Classes named in the stylesheets: `.c-stat-tile`, `.c-stat-tile--hero` (the shared tile, only placed in a grid), `.report__tiles`, `.tile__values` (existing report tile hooks kept for the print rules), `.ai-num` (a number cell of the AI table), `.diagnosis-workspace__toggle` and `.ph-back` (print hide of the header's own button and back link).
 - none new.
 
 ## Defaults
@@ -170,12 +171,12 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Put the platform business grid on the shared sort heads, the totals on the shared tile and the AI usage on the shared table — src/app/pages/platform-dashboard/platform-dashboard.page.html, .scss, .ts, .spec.ts
-- [ ] A2: Show a loader in the three platform panels and fix the chip without its base class — src/app/pages/platform-dashboard/components/{platform-ai-shots,platform-logistics-items,platform-learning}/*
-- [ ] A3: Give the diagnosis list header cells and row links, and put the workspace title in the shared header — src/app/pages/diagnosis/diagnosis.page.*, src/app/pages/diagnosis/components/diagnosis-workspace/*
-- [ ] A4: Draw the diagnosis report tables as shared tables and its fields as shared fields — src/app/pages/diagnosis/components/diag-report/*, src/app/pages/diagnosis/components/diag-menu/*
-- [ ] A5: Show the report's loader, shared tiles and shared trend table without breaking the A4 print — src/app/pages/report/*
-- [ ] A6: Lock the three areas on the shared pieces and tokens — scripts/test/style-710.test.mjs
+- [x] A1: Put the platform business grid on the shared sort heads, the totals on the shared tile and the AI usage on the shared table — src/app/pages/platform-dashboard/platform-dashboard.page.html, .scss, .ts, .spec.ts
+- [x] A2: Show a loader in the three platform panels and fix the chip without its base class — src/app/pages/platform-dashboard/components/{platform-ai-shots,platform-logistics-items,platform-learning}/*
+- [x] A3: Give the diagnosis list header cells and row links, and put the workspace title in the shared header — src/app/pages/diagnosis/diagnosis.page.*, src/app/pages/diagnosis/components/diagnosis-workspace/*
+- [x] A4: Draw the diagnosis report tables as shared tables and its fields as shared fields — src/app/pages/diagnosis/components/diag-report/*, src/app/pages/diagnosis/components/diag-menu/*
+- [x] A5: Show the report's loader, shared tiles and shared trend table without breaking the A4 print — src/app/pages/report/*
+- [x] A6: Lock the three areas on the shared pieces and tokens — scripts/test/style-710.test.mjs
 
 ## Technical Considerations
 - The style test `scripts/test/style-710.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
@@ -198,3 +199,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the report keeps its hand header (print document, `report_print` button) — the one page header exception besides the editors.
 - behaviour: the CSV export button moves into the platform page header (one place for page actions).
 - behaviour: the idle-row tint stays an unlayered rule (it must beat the cell engine), scoped under the page's row class.
+- behaviour: the diagnosis list status header uses the existing key `fd_card_status` because no neutral status key exists and the plan adds no key — reverse: add a `diag_col_status` key and swap it in `diagnosis.page.html`.
+- behaviour: the report shows its loader only while there is no report yet (`loading() && !report()`), so a month switch keeps the old report on screen — reverse: drop `&& !report()`.
+- behaviour: the platform CSV export button shows in the page header only while there are businesses (as before) — reverse: remove the `@if (rows_().length)` around it.
+- evidence: `pnpm run build` exit 0; `pnpm run lint` exit 0 (0 errors); `pnpm run test:ci` exit 0, 3213 of 3213 SUCCESS; `node --test scripts/test/style-710.test.mjs` 4 pass, 0 fail.
+- fix round 1: the three platform panels (logistics, learning, AI examples) now show app-empty-state icon=alert-triangle with a retry button on a failed load; logistics spec covers it. build/lint/test:ci (3214) exit 0.

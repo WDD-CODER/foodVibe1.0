@@ -45,7 +45,9 @@ describe('DiagnosisPage', () => {
     expect(rows[0].textContent).toContain('05/11/2026')
     expect(rows[0].textContent).toContain('diag_status_open')
     expect(rows[1].textContent).toContain('diag_status_done')
-    expect(rows[0].getAttribute('href')).toBe('/diagnosis/a')
+    expect(rows[0].querySelector('a.c-row-link')!.getAttribute('href')).toBe('/diagnosis/a')
+    expect(el().querySelectorAll('.c-list-row[role="row"] > .c-grid-header-cell').length).toBe(3)
+    expect(el().querySelectorAll('.c-list > .c-list-row').length).toBe(3)
   })
 
   it('shows the empty state when there are none', async () => {

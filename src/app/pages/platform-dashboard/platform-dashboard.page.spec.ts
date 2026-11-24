@@ -157,7 +157,9 @@ describe('PlatformDashboardPage', () => {
       (el) => (el.textContent ?? '').trim().split(/\s+/)[0]
     )
   const header = (index: number): HTMLButtonElement =>
-    (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.platform-grid .sort-btn')[index]
+    (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
+      '.platform-grid button.c-sortable-header'
+    )[index]
 
   it('sorts by last activity, newest first, never-active last', async () => {
     await setup([
@@ -176,6 +178,12 @@ describe('PlatformDashboardPage', () => {
     header(6).click()
     fixture.detectChanges()
     expect(names()).toEqual(['a', 'c', 'b'])
+  })
+
+  it('shows the shared empty state when there are no businesses', async () => {
+    await setup([])
+    expect((fixture.nativeElement as HTMLElement).querySelector('app-empty-state')).not.toBeNull()
+    expect((fixture.nativeElement as HTMLElement).querySelector('.platform-grid')).toBeNull()
   })
 
   it('colours idle rows', async () => {
