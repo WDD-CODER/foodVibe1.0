@@ -65,6 +65,7 @@ src/app/pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding.page.spec.ts
 src/app/pages/public-request/**
 src/app/pages/public-request/public-request.page.spec.ts
 scripts/test/style-708.test.mjs
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
