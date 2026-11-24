@@ -34,6 +34,7 @@ export class PlatformLearningComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoading_ = signal(true)
+  protected readonly loadFailed_ = signal(false)
   protected readonly stats_ = signal<LearningStats | null>(null)
   protected readonly fileStore_ = signal<boolean | null>(null)
   protected readonly openKey_ = signal<string | null>(null)
@@ -41,6 +42,12 @@ export class PlatformLearningComponent implements OnInit {
 
   // 6. METHODS
   async ngOnInit(): Promise<void> {
+    await Promise.all([this.loadStats(), this.loadStatus()])
+    this.isLoading_.set(false)
+  }
+
+  protected async retry(): Promise<void> {
+    this.isLoading_.set(true)
     await Promise.all([this.loadStats(), this.loadStatus()])
     this.isLoading_.set(false)
   }
@@ -85,9 +92,11 @@ export class PlatformLearningComponent implements OnInit {
   }
 
   private async loadStats(): Promise<void> {
+    this.loadFailed_.set(false)
     try {
       this.stats_.set(await this.platformAdmin.getLearningStats())
     } catch (err) {
+      this.loadFailed_.set(true)
       this.logging.error({
         event: 'platform.learning_load_failed',
         message: 'Loading the learning numbers failed',

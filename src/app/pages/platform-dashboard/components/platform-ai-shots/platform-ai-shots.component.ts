@@ -31,11 +31,18 @@ export class PlatformAiShotsComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoading_ = signal(true)
+  protected readonly loadFailed_ = signal(false)
   protected readonly candidates_ = signal<AiShotRow[]>([])
   protected readonly shared_ = signal<AiShotRow[]>([])
 
   // 6. METHODS
   async ngOnInit(): Promise<void> {
+    await this.reload()
+    this.isLoading_.set(false)
+  }
+
+  protected async retry(): Promise<void> {
+    this.isLoading_.set(true)
     await this.reload()
     this.isLoading_.set(false)
   }
@@ -66,11 +73,13 @@ export class PlatformAiShotsComponent implements OnInit {
   }
 
   private async reload(): Promise<void> {
+    this.loadFailed_.set(false)
     try {
       const report = await this.platformAdmin.getAiShots()
       this.candidates_.set(report.candidates)
       this.shared_.set(report.shared)
     } catch (err) {
+      this.loadFailed_.set(true)
       this.logging.error({
         event: 'platform.ai_shots_load_failed',
         message: 'Loading the AI examples failed',

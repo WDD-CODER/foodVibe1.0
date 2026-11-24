@@ -4,6 +4,14 @@
   <p class="learning__hint" data-testid="learning-kept-hint">{{ 'platform_learning_kept_hint' | translatePipe }}</p>
   @if (isLoading_()) {
     <app-loader />
+  } @else if (loadFailed_()) {
+    <app-empty-state
+      icon="alert-triangle"
+      messageKey="platform_learning_error"
+      [compact]="true"
+      ctaLabelKey="retry"
+      (ctaClick)="retry()"
+    />
   } @else {
     @if (fileStore_() === false) {
       <p class="learning__warn" role="status" data-testid="learning-no-file-store">

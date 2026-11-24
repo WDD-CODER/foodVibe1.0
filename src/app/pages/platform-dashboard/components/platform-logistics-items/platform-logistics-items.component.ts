@@ -44,6 +44,7 @@ export class PlatformLogisticsItemsComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoading_ = signal(true)
+  protected readonly loadFailed_ = signal(false)
 
   // 5. COMPUTED
   protected readonly groups_ = computed<LogisticsItemGroup[]>(() => {
@@ -111,10 +112,18 @@ export class PlatformLogisticsItemsComponent implements OnInit {
     }
   }
 
+  protected async retry(): Promise<void> {
+    this.isLoading_.set(true)
+    await this.reload()
+    this.isLoading_.set(false)
+  }
+
   private async reload(): Promise<void> {
+    this.loadFailed_.set(false)
     try {
       await this.platformAdmin.loadTerms('logisticsItem')
     } catch (err) {
+      this.loadFailed_.set(true)
       this.logging.error({
         event: 'platform.logistics_load_failed',
         message: 'Loading the logistics items failed',

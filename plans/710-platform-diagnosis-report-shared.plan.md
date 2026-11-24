@@ -203,3 +203,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the report shows its loader only while there is no report yet (`loading() && !report()`), so a month switch keeps the old report on screen — reverse: drop `&& !report()`.
 - behaviour: the platform CSV export button shows in the page header only while there are businesses (as before) — reverse: remove the `@if (rows_().length)` around it.
 - evidence: `pnpm run build` exit 0; `pnpm run lint` exit 0 (0 errors); `pnpm run test:ci` exit 0, 3213 of 3213 SUCCESS; `node --test scripts/test/style-710.test.mjs` 4 pass, 0 fail.
+- fix round 1: the three platform panels (logistics, learning, AI examples) now show app-empty-state icon=alert-triangle with a retry button on a failed load; logistics spec covers it. build/lint/test:ci (3214) exit 0.

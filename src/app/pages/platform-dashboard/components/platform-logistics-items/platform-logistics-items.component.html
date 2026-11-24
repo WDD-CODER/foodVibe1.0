@@ -3,6 +3,13 @@
 
   @if (isLoading_()) {
     <app-loader />
+  } @else if (loadFailed_()) {
+    <app-empty-state
+      icon="alert-triangle"
+      messageKey="platform_logistics_load_failed"
+      ctaLabelKey="retry"
+      (ctaClick)="retry()"
+    />
   } @else {
     @if (!groups_().length) {
       <app-empty-state messageKey="platform_logistics_empty" />
