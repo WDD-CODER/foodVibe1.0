@@ -96,6 +96,19 @@ append the path to the scope block above and retry.
 - Stage / cost / sale / guests labels — family: chip — rung: 1 — why: `.c-chip c-chip--tag c-chip--sm` with tones teal (active stage, sale), amber (cost warning), red (lost), none (guests, legacy).
 - Empty and error texts — family: empty-state — rung: 1 — why: `app-empty-state`.
 - History popup — family: modal-shell — rung: 1 — why: `app-modal-shell size="md"` around `app-version-history-panel`.
+- .menu-library-list — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .name-cell — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .event-date — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .chip-cell — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .filter-label — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .col-cost — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .col-sale — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .col-guests — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .muted-cell — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .actions-cell — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .danger-text — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .col-type — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
+- .col-date — family: list-page — rung: 1 — why: page-local cell hook in the page layer (as .chip-cell and .col-phone in the clients list); no shared piece does this one job
 - none new — no component, util, pipe, service or `.c-*` class is created.
 
 ## Defaults
@@ -173,11 +186,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Put the event-menu list on the shared list page with one line per event and the filters in the side panel — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, .ts, .scss
-- [ ] A2: Prove the menu list keeps its rows, filters, search and row menu — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
-- [ ] A3: Turn the trash into one searchable list with type filters, shared buttons and a real popup for history — src/app/pages/trash/trash.page.html, .ts, .scss
-- [ ] A4: Prove the trash rows, empty state and history popup — src/app/pages/trash/trash.page.spec.ts
-- [ ] A5: Lock both pages on the shared pieces and tokens with the style guard — scripts/test/style-704.test.mjs
+- [x] A1: Put the event-menu list on the shared list page with one line per event and the filters in the side panel — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html, .ts, .scss
+- [x] A2: Prove the menu list keeps its rows, filters, search and row menu — src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
+- [x] A3: Turn the trash into one searchable list with type filters, shared buttons and a real popup for history — src/app/pages/trash/trash.page.html, .ts, .scss
+- [x] A4: Prove the trash rows, empty state and history popup — src/app/pages/trash/trash.page.spec.ts
+- [x] A5: Lock both pages on the shared pieces and tokens with the style guard — scripts/test/style-704.test.mjs
 ## Technical Considerations
 - The style test `scripts/test/style-704.test.mjs` exports `FILES` (the checked paths) and `ALLOW` (its allow entries, `[]` when none), so plan 718 re-checks the whole run without editing it.
 - Dependencies: 703 (engines and the guard), `app-list-shell`, `app-row-actions-menu`, `app-modal-shell`,
@@ -207,3 +220,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the trash gains a search box (the shared header always has one); it filters by name only.
 - behaviour: menu-library edit / clone / delete move into the row menu (three actions → menu, Polaris rule); pressing the row still opens the event.
 - behaviour: the phone shows name, stage and actions; cost, sale and guests show from the tablet width up, like the other lists hide secondary columns.
+- behaviour: the per-type "recover all" / "dispose all" buttons of the old trash sections show in the header only while one type is selected in the filter (same handlers and confirmations) — reverse: drop the two buttons.
+- Evidence: pnpm run build → 0; pnpm run lint → 0; pnpm run test:ci → 3164 SUCCESS; pnpm run test:scripts → 0; lint:icons, lint:reuse, lint:no-native-select, override/ledger/breadcrumbs/ci-scope checks → 0; log-query → 0.

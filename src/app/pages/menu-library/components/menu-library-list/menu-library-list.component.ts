@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, signal, WritableSignal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
+import { RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -20,7 +21,9 @@ import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.comp
 import { useListState, StringParam, ParamSerializer } from 'src/app/core/utils/list-state.util'
 import { EVENT_STAGE_ORDER, isActiveStage, stageLabelKey } from 'src/app/core/utils/event-stage-ui.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { NewInquiryDialogComponent } from 'src/app/shared/new-inquiry-dialog/new-inquiry-dialog.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
@@ -48,7 +51,9 @@ const StageFilterParam: ParamSerializer<string> = {
     CustomSelectComponent,
     EmptyStateComponent,
     InputClearComponent,
-    PageHeaderComponent,
+    ListShellComponent,
+    RowActionsMenuComponent,
+    RouterLink,
     NewInquiryDialogComponent
   ],
   templateUrl: './menu-library-list.component.html',
@@ -82,8 +87,24 @@ export class MenuLibraryListComponent {
   /** The "פנייה חדשה" form is open while the URL carries `?new=inquiry` (the FAB action and the header button both set it). */
   protected readonly isInquiryOpen_ = signal(false)
   protected readonly stageLabelKey = stageLabelKey
+  protected readonly isActiveStage = isActiveStage
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
+
+  protected readonly hasActiveFilters_ = computed(
+    () =>
+      this.stageFilter_() !== 'active' ||
+      this.eventTypeFilter_() !== 'all' ||
+      this.servingStyleFilter_() !== 'all' ||
+      this.dateFrom_() !== '' ||
+      this.sortBy_() !== 'date' ||
+      this.sortOrder_() !== 'desc'
+  )
 
   constructor() {
+    const panel = useResponsivePanelState('menu-library')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
     useListState('menu-library', [
       { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
       { urlParam: 'sort', signal: this.sortBy_, serializer: StringParam },
@@ -187,6 +208,21 @@ export class MenuLibraryListComponent {
       default:
         return 0
     }
+  }
+
+  protected togglePanel(): void {
+    this.togglePanelState_()
+  }
+
+  protected resetFilters(): void {
+    this.listControls.clearAll(
+      () => this.stageFilter_.set('active'),
+      () => this.eventTypeFilter_.set('all'),
+      () => this.servingStyleFilter_.set('all'),
+      () => this.dateFrom_.set(''),
+      () => this.sortBy_.set('date'),
+      () => this.sortOrder_.set('desc')
+    )
   }
 
   protected setSort(field: SortField): void {

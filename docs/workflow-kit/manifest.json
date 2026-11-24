@@ -4197,6 +4197,16 @@
       "notes": "Plan 703: the catalog is clean, each new engine is defined once, and src/styles.scss is append-only above the plan marker."
     },
     {
+      "path": "scripts/test/style-704.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/style-guard.mjs"
+      ],
+      "notes": "Plan 704: the menu library and the trash sit on the shared list page and pass the style guard."
+    },
+    {
       "path": "scripts/test/breakpoints-no-literals.test.mjs",
       "tier": "project",
       "action": "stay",
