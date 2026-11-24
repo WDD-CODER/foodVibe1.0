@@ -50,7 +50,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.bk-list > [data-status='cancelled'] > .c-list-body-cell,
-.bk-list > [data-status='no_show'] > .c-list-body-cell {
+.bk-list > [data-status='cancelled'] > *,
+.bk-list > [data-status='no_show'] > * {
   opacity: 0.6;
 }
