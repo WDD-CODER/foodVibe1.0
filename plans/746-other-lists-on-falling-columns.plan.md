@@ -195,13 +195,13 @@ fall order and the fixed columns are the Human's and are not changed. Shared val
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Move the recipe book onto falling columns so recipe names stop being squeezed — the columns list, the header and row cells, the spec — src/app/pages/recipe-book/components/recipe-book-list/**
-- [ ] A2: Move the supplier list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/suppliers/components/supplier-list/**
-- [ ] A3: Move the equipment list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/equipment/components/equipment-list/**
-- [ ] A4: Move the client list onto falling columns for owner and staff — the computed columns list, the removed grid constants, the header and row cells, the spec — src/app/pages/clients/components/client-list/**
-- [ ] A5: Give the invoices list a switching column for the first time — the carousel group, the header and cell wrappers, the columns list, the spec — src/app/pages/inventory/components/invoices-list/**
-- [ ] A6: Check two of the lists at a medium width with a script and record the change — the two ui specs, the column-carousel rule's gaps, the registry line, the inventory — e2e/ui/746-1.spec.ts, e2e/ui/746-2.spec.ts, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
-- [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+- [x] A1: Move the recipe book onto falling columns so recipe names stop being squeezed — the columns list, the header and row cells, the spec — src/app/pages/recipe-book/components/recipe-book-list/**
+- [x] A2: Move the supplier list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/suppliers/components/supplier-list/**
+- [x] A3: Move the equipment list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/equipment/components/equipment-list/**
+- [x] A4: Move the client list onto falling columns for owner and staff — the computed columns list, the removed grid constants, the header and row cells, the spec — src/app/pages/clients/components/client-list/**
+- [x] A5: Give the invoices list a switching column for the first time — the carousel group, the header and cell wrappers, the columns list, the spec — src/app/pages/inventory/components/invoices-list/**
+- [x] A6: Check two of the lists at a medium width with a script and record the change — the two ui specs, the column-carousel rule's gaps, the registry line, the inventory — e2e/ui/746-1.spec.ts, e2e/ui/746-2.spec.ts, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: plan 745's `columns` input, `ListColumn`, `fitColumns`, `*appFallColumn` and the measured mode of
@@ -226,3 +226,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Q: The stock count, the knowledge list and the platform list? A: left as they are (proposed with the table on 2026-11-25 and approved with it).
 
 ## Execution Notes
+- pnpm run build → exit 0; pnpm run lint → exit 0 (0 errors); pnpm run test:ci → exit 0, 2822 SUCCESS
+- kit-manifest-check ok; kit-checks ok (6 checks); override, lint:icons, plan-ledger, breadcrumbs, reuse registry, ARCH ok; log-query SKIP
+- git grep gridTemplate/OWNER_GRID in the five folders → empty; appColumnSlide in html → stock-count, platform-dashboard only
+- inventory.md regenerated: no change. e2e 746-1, 746-2 written, not run (no app); 586-1/603-3/609-1 not run.
+- behaviour: min values kept as the plan's starting values (no tuning).
