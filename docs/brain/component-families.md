@@ -683,3 +683,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP, buildRecipeInfoWorkbook, buildShoppingListWorkbook, buildMenuInfoWorkbook, buildAllTogetherMenuWorkbook.
 - When: any new Excel sheet. Sheet names, headers and fallbacks come from `dictionary.json` through `TranslationService`, never an English literal.
 - Known copies: none (no other file in `src/app` calls `addWorksheet`, checked 2026-11-22).
+
+### platform-admin-script — the one-off script that sets `isPlatformAdmin` (plan 737)
+
+- Status: stable — plan 737
+- Use: `server/scripts/set-platform-admin.js` — an operator script beside `set-front-desk-status.js`: `--target` required, Atlas only with `--confirm-host`, dry run by default and `--write` to apply; it changes one `users` document by `_id` and `--off` undoes it.
+- Pieces: set-platform-admin.js, parseArgs, planChange, applyChange.
+- When: the Human sets or clears the platform admin on a live database (runbook in `docs/security-go-live.md`); never a build step, never a route.
+- Known copies: none.
