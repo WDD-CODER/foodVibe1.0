@@ -102,6 +102,7 @@ src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
 public/assets/data/dictionary.json
 docs/brain/component-families.md
 src/app/pages/breadcrumbs.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
