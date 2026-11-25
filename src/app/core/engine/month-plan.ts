@@ -52,12 +52,35 @@ export type Band = 'below' | 'in' | 'above'
 
 const nullPair = (): Pair => ({ plan: null, actual: null })
 
+const sumOf = (values: (number | null)[]): number | null =>
+  values.every((v) => v === null) ? null : values.reduce<number>((s, v) => s + (v ?? 0), 0)
+
+export function fixedInputOf(fixed: MonthPlan['fixed']): MonthInput['fixed'] {
+  if (!fixed) return { ...nullPair(), entered: 0, lines: 0 }
+  if (fixed.mode === 'rough') {
+    return { ...fixed.rough, entered: fixed.rough.actual === null ? 0 : 1, lines: 1 }
+  }
+  return {
+    plan: sumOf(fixed.lines.map((l) => l.plan)),
+    actual: sumOf(fixed.lines.map((l) => l.actual)),
+    entered: fixed.lines.filter((l) => l.actual !== null).length,
+    lines: fixed.lines.length
+  }
+}
+
+function labourInputOf(labour: MonthPlan['labour']): MonthInput['labour'] {
+  if (!labour) return { ...nullPair(), estimate: false }
+  if (labour.mode === 'employer') return { plan: labour.plan, actual: labour.actual, estimate: false }
+  const times = (n: number | null): number | null => (n === null ? null : roundMoney(n * labour.factor))
+  return { plan: times(labour.plan), actual: times(labour.actual), estimate: true }
+}
+
 export function monthInputOf(month: MonthPlan): MonthInput {
   return {
     revenue: { plan: month.revenue.plan, actual: month.revenue.actual },
-    foodCost: nullPair(),
-    labour: { ...nullPair(), estimate: false },
-    fixed: { ...nullPair(), entered: 0, lines: 0 },
+    foodCost: { plan: null, actual: month.purchases?.actual ?? null },
+    labour: labourInputOf(month.labour),
+    fixed: fixedInputOf(month.fixed),
     targets: { ...month.targets },
     vatRatePct: month.vatRatePct,
     dealerType: month.dealerType

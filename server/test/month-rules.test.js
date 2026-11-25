@@ -66,3 +66,21 @@ describe('the monthly_plan module', () => {
     expect(S.MODULE_OF_TYPE.monthPlans).toBeUndefined()
   })
 })
+
+describe('fixed lines and labour defaults (plan 729)', () => {
+  it('the starter keys include kashrut, the cap is 40 and the factor is 1.25', () => {
+    expect(R.FIXED_STARTER_KEYS).toEqual(['rent', 'arnona', 'electricity', 'water', 'gas', 'insurance', 'kashrut', 'marketing'])
+    expect(R.FIXED_LINES_MAX).toBe(40)
+    expect(R.LABOUR_FACTOR_DEFAULT).toBe(1.25)
+  })
+
+  it('defaultFixed is one blank line per starter key in lines mode; defaultLabour is employer mode at 1.25', () => {
+    const fixed = R.defaultFixed()
+    expect(fixed.mode).toBe('lines')
+    expect(fixed.lines.map(l => l.id)).toEqual(R.FIXED_STARTER_KEYS)
+    expect(fixed.lines.every(l => l.id === l.starterKey && l.plan === null && l.actual === null)).toBe(true)
+    expect(fixed.rough).toEqual({ plan: null, actual: null })
+    expect(R.defaultLabour()).toEqual({ mode: 'employer', factor: 1.25, plan: null, actual: null })
+    expect(R.defaultFixed()).not.toBe(R.defaultFixed())
+  })
+})

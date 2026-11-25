@@ -209,14 +209,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give every new month the same starter fixed lines and labour settings — starter keys incl. kashrut, defaults, line cap and factor; tests — shared/schemas/month/month-rules.ts, server/test/month-rules.test.js
-- [ ] A2: Store fixed lines or one total, the labour total and typed purchases on the month — optional schema groups, update input, money fields, seeded on create, saved by group; tests: lines cap and unique ids, one of starter key or name, null kept apart from 0, staff refused, closed month refused, an older month still valid — shared/schemas/entities/month-plan.schema.ts, shared/schemas/money-fields.ts, server/routes/month-plans.js, server/test/month-plans.test.js
-- [ ] A3: Feed fixed costs, labour and purchases into the month figures without double counting — lines vs rough, gross × factor as an estimate, purchases as actual food cost; spec cases of the Done-when — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
-- [ ] A4: Let the owner type fixed costs as lines or as one total — the fixed card with add, rename, remove after a confirmation, the switch and the entered count; spec — src/app/pages/monthly-plan/components/fixed-costs-card/**
-- [ ] A5: Let the owner type the team's cost as employer cost or as gross pay with a factor — the labour card with the estimate label; spec — src/app/pages/monthly-plan/components/labour-card/**
-- [ ] A6: Put the fixed, labour and purchases inputs into the month form and its save — defaults for an older month, changed groups only, leave question; page spec — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
-- [ ] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A8: Record the new fields and cards in the maps and run every automatic check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
+- [x] A1: Give every new month the same starter fixed lines and labour settings — starter keys incl. kashrut, defaults, line cap and factor; tests — shared/schemas/month/month-rules.ts, server/test/month-rules.test.js
+- [x] A2: Store fixed lines or one total, the labour total and typed purchases on the month — optional schema groups, update input, money fields, seeded on create, saved by group; tests: lines cap and unique ids, one of starter key or name, null kept apart from 0, staff refused, closed month refused, an older month still valid — shared/schemas/entities/month-plan.schema.ts, shared/schemas/money-fields.ts, server/routes/month-plans.js, server/test/month-plans.test.js
+- [x] A3: Feed fixed costs, labour and purchases into the month figures without double counting — lines vs rough, gross × factor as an estimate, purchases as actual food cost; spec cases of the Done-when — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
+- [x] A4: Let the owner type fixed costs as lines or as one total — the fixed card with add, rename, remove after a confirmation, the switch and the entered count; spec — src/app/pages/monthly-plan/components/fixed-costs-card/**
+- [x] A5: Let the owner type the team's cost as employer cost or as gross pay with a factor — the labour card with the estimate label; spec — src/app/pages/monthly-plan/components/labour-card/**
+- [x] A6: Put the fixed, labour and purchases inputs into the month form and its save — defaults for an older month, changed groups only, leave question; page spec — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [x] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A8: Record the new fields and cards in the maps and run every automatic check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
 
 ## What happens when
 - The owner switches to «סכום אחד» with lines filled: the lines stay stored and are shown again on switching back; only
@@ -254,3 +254,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-24: written from the research report and Dandan's decisions.
+- Builder: pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, 2910 SUCCESS; vitest month-plans + month-rules -> 28 passed.
+- extra dictionary key mp_estimate («הערכה») used by the page flag beside the figures; page shows «חלקי»/«הערכה» chips under the figures card (the shared month-figures component is outside scope).

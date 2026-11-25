@@ -106,5 +106,72 @@ describe('month-plan engine (plan 728)', () => {
     expect(i.revenue).toEqual({ plan: 5, actual: 0 })
     expect(i.foodCost).toEqual({ plan: null, actual: null })
     expect(i.dealerType).toBe('patur')
+    expect(i.fixed).toEqual({ plan: null, actual: null, entered: 0, lines: 0 })
+    expect(i.labour).toEqual({ plan: null, actual: null, estimate: false })
+  })
+})
+
+describe('monthInputOf fixed, labour and purchases (plan 729)', () => {
+  const base = { revenue: { plan: null, actual: null }, targets: input().targets, vatRatePct: 18, dealerType: 'murshe' }
+  const line = (id: string, plan: number | null, actual: number | null) => ({ id, name: id, plan, actual })
+  const rough = { plan: 30000, actual: 31000 }
+
+  it('lines mode sums only entered lines and counts entered of all', () => {
+    const i = monthInputOf({
+      ...base,
+      fixed: { mode: 'lines', lines: [line('a', 100, 120), line('b', null, null), line('c', 50, 0)], rough }
+    } as unknown as MonthPlan)
+    expect(i.fixed).toEqual({ plan: 150, actual: 120, entered: 2, lines: 3 })
+  })
+
+  it('lines mode with every line null is null, not 0', () => {
+    const i = monthInputOf({
+      ...base,
+      fixed: { mode: 'lines', lines: [line('a', null, null)], rough }
+    } as unknown as MonthPlan)
+    expect(i.fixed).toEqual({ plan: null, actual: null, entered: 0, lines: 1 })
+  })
+
+  it('rough mode uses only the rough total even when lines hold numbers', () => {
+    const i = monthInputOf({
+      ...base,
+      fixed: { mode: 'rough', lines: [line('a', 100, 120)], rough }
+    } as unknown as MonthPlan)
+    expect(i.fixed).toEqual({ plan: 30000, actual: 31000, entered: 1, lines: 1 })
+    const empty = monthInputOf({
+      ...base,
+      fixed: { mode: 'rough', lines: [line('a', 100, 120)], rough: { plan: null, actual: null } }
+    } as unknown as MonthPlan)
+    expect(empty.fixed).toEqual({ plan: null, actual: null, entered: 0, lines: 1 })
+  })
+
+  it('gross 10000 × 1.25 is 12500 and an estimate; employer mode is as typed and not an estimate', () => {
+    const gross = monthInputOf({
+      ...base,
+      labour: { mode: 'gross', factor: 1.25, plan: null, actual: 10000 }
+    } as unknown as MonthPlan)
+    expect(gross.labour).toEqual({ plan: null, actual: 12500, estimate: true })
+    const zero = monthInputOf({
+      ...base,
+      labour: { mode: 'gross', factor: 1.25, plan: null, actual: 0 }
+    } as unknown as MonthPlan)
+    expect(zero.labour.actual).toBe(0)
+    const employer = monthInputOf({
+      ...base,
+      labour: { mode: 'employer', factor: 1.25, plan: 9000, actual: 10000 }
+    } as unknown as MonthPlan)
+    expect(employer.labour).toEqual({ plan: 9000, actual: 10000, estimate: false })
+  })
+
+  it('purchases are the actual food cost; the plan food cost stays null (target-based)', () => {
+    const i = monthInputOf({ ...base, purchases: { actual: 4200 } } as unknown as MonthPlan)
+    expect(i.foodCost).toEqual({ plan: null, actual: 4200 })
+  })
+
+  it('a month stored before this plan (no groups) still maps to null pairs', () => {
+    const i = monthInputOf(base as unknown as MonthPlan)
+    expect(i.foodCost).toEqual({ plan: null, actual: null })
+    expect(i.labour).toEqual({ plan: null, actual: null, estimate: false })
+    expect(i.fixed).toEqual({ plan: null, actual: null, entered: 0, lines: 0 })
   })
 })

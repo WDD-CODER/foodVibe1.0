@@ -1,0 +1,96 @@
+<div class="fc" data-testid="fc-card">
+  <h2 class="fc__title">{{ 'mp_fixed_title' | translatePipe }}</h2>
+
+  <div class="c-chip-group" role="radiogroup">
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="radio"
+        name="fc-mode"
+        data-testid="fc-mode-lines"
+        [checked]="group().mode === 'lines'"
+        [disabled]="disabled()"
+        (change)="setMode('lines')"
+      />
+      <span>{{ 'mp_fixed_mode_lines' | translatePipe }}</span>
+    </label>
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="radio"
+        name="fc-mode"
+        data-testid="fc-mode-rough"
+        [checked]="group().mode === 'rough'"
+        [disabled]="disabled()"
+        (change)="setMode('rough')"
+      />
+      <span>{{ 'mp_fixed_mode_rough' | translatePipe }}</span>
+    </label>
+  </div>
+
+  @if (group().mode === 'rough') {
+    <div class="fc__row">
+      @for (side of sides; track side.key) {
+        <div class="fc__field">
+          <label class="fc__label" [for]="'fc-rough-' + side.key">{{ side.labelKey | translatePipe }}</label>
+          <!-- prettier-ignore -->
+          <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" [id]="'fc-rough-' + side.key" [attr.data-testid]="'fc-rough-' + side.key" [placeholder]="'mp_not_entered' | translatePipe" [disabled]="disabled()" [ngModel]="group().rough[side.key]" (ngModelChange)="setRough(side.key, $event)" /><span class="fc__suffix" aria-hidden="true">₪</span></div>
+        </div>
+      }
+    </div>
+    <p class="fc__muted" data-testid="fc-rough-note">{{ 'mp_fixed_rough_note' | translatePipe }}</p>
+  } @else {
+    @if (group().lines.length === 0) {
+      <p class="fc__muted" data-testid="fc-empty">{{ 'mp_fixed_empty' | translatePipe }}</p>
+    }
+    @for (line of group().lines; track line.id) {
+      <div class="fc__line" [attr.data-testid]="'fc-line-' + line.id">
+        @if (line.starterKey) {
+          <span class="fc__name" [attr.data-testid]="'fc-name-' + line.id">{{ nameKey(line) | translatePipe }}</span>
+        } @else {
+          <input
+            type="text"
+            class="fc__name-input"
+            maxlength="60"
+            [id]="'fc-name-' + line.id"
+            [attr.data-testid]="'fc-name-' + line.id"
+            [attr.aria-label]="'mp_fixed_name' | translatePipe"
+            [placeholder]="'mp_fixed_name' | translatePipe"
+            [disabled]="disabled()"
+            [ngModel]="line.name"
+            (ngModelChange)="rename(line.id, $event)"
+          />
+        }
+        @for (side of sides; track side.key) {
+          <div class="fc__field">
+            <label class="fc__label" [for]="'fc-' + line.id + '-' + side.key">{{
+              side.labelKey | translatePipe
+            }}</label>
+            <!-- prettier-ignore -->
+            <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" [id]="'fc-' + line.id + '-' + side.key" [attr.data-testid]="'fc-' + line.id + '-' + side.key" [placeholder]="'mp_not_entered' | translatePipe" [disabled]="disabled()" [ngModel]="line[side.key]" (ngModelChange)="setLine(line.id, side.key, $event)" /><span class="fc__suffix" aria-hidden="true">₪</span></div>
+          </div>
+        }
+        @if (!disabled()) {
+          <button
+            type="button"
+            class="c-btn-ghost--sm"
+            [attr.data-testid]="'fc-remove-' + line.id"
+            (click)="remove(line.id)"
+          >
+            {{ 'mp_fixed_remove' | translatePipe }}
+          </button>
+        }
+      </div>
+    }
+    @if (!disabled()) {
+      <button type="button" class="c-btn-ghost" data-testid="fc-add" (click)="add()">
+        {{ 'mp_fixed_add' | translatePipe }}
+      </button>
+    }
+    @if (showMax_() && maxReached_()) {
+      <p class="fc__muted" role="status" data-testid="fc-max">{{ 'mp_fixed_max' | translatePipe }}</p>
+    }
+    <p class="fc__muted" data-testid="fc-entered">
+      {{ enteredLine_() }} · {{ 'mp_plan' | translatePipe }}: {{ planTotal_() }} · {{ 'mp_actual' | translatePipe }}:
+      {{ actualTotal_() }}
+    </p>
+  }
+</div>

@@ -24,5 +24,5 @@ export const MONEY_FIELDS: Record<string, readonly string[]> = {
   menuDishes: ['priceWithVat', 'typedCost'],
   dishSalesMonths: ['rows[].netSales', 'frozen'],
   // Plan 727: a month's targets, VAT copy and revenue.
-  monthPlans: ['targets', 'revenue', 'vatRatePct'],
+  monthPlans: ['targets', 'revenue', 'vatRatePct', 'fixed', 'labour', 'purchases'],
 }

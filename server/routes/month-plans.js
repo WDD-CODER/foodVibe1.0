@@ -16,7 +16,7 @@ const { actorOf } = require('../utils/actor')
 const { newId } = require('../utils/id')
 const { getBusiness } = require('../services/business')
 const { BUSINESS_SETTINGS_DEFAULTS, monthPlanCreateInputSchema, monthPlanUpdateInputSchema } = require('../generated/schemas/entities')
-const { MONTH_KEY_PATTERN, MONTH_TARGET_DEFAULTS } = require('../generated/schemas/month/month-rules')
+const { MONTH_KEY_PATTERN, MONTH_TARGET_DEFAULTS, defaultFixed, defaultLabour } = require('../generated/schemas/month/month-rules')
 
 const TYPE = 'monthPlans'
 const LIST_CAP = 120
@@ -84,7 +84,10 @@ router.post('/', async (req, res) => {
       targets: { ...MONTH_TARGET_DEFAULTS, ...(settings.monthTargets ?? {}) },
       vatRatePct: settings.vatRatePct,
       dealerType: settings.dealerType,
-      revenue: { plan: null, actual: null }
+      revenue: { plan: null, actual: null },
+      fixed: defaultFixed(),
+      labour: defaultLabour(),
+      purchases: { actual: null }
     }
     const check = checkStoredDoc(TYPE, doc)
     if (!check.ok) {
@@ -114,8 +117,11 @@ router.put('/:month', async (req, res) => {
     const set = {}
     for (const [key, value] of Object.entries(parsed.data.revenue ?? {})) if (value !== undefined) set[`revenue.${key}`] = value
     for (const [key, value] of Object.entries(parsed.data.targets ?? {})) if (value !== undefined) set[`targets.${key}`] = value
+    // Plan 729: a named group (fixed, labour, purchases) is replaced as sent.
+    const groups = {}
+    for (const group of ['fixed', 'labour', 'purchases']) if (parsed.data[group] !== undefined) groups[group] = parsed.data[group]
     const updatedAt = Date.now()
-    const next = { ...doc, revenue: { ...doc.revenue }, targets: { ...doc.targets }, updatedAt }
+    const next = { ...doc, revenue: { ...doc.revenue }, targets: { ...doc.targets }, ...groups, updatedAt }
     for (const [path, value] of Object.entries(set)) {
       const [group, key] = path.split('.')
       next[group][key] = value
@@ -125,8 +131,8 @@ router.put('/:month', async (req, res) => {
       req.log.warn({ event: 'month.saved.failed', reason: 'stored_doc', issues: check.issues.length })
       return res.status(400).json({ error: 'Validation failed', issues: check.issues })
     }
-    await col().updateOne({ _id: doc._id, ...scopeFilter(req), status: 'open' }, { $set: { ...set, updatedAt } })
-    req.log.info({ event: 'month.saved', monthId: doc._id, month })
+    await col().updateOne({ _id: doc._id, ...scopeFilter(req), status: 'open' }, { $set: { ...set, ...groups, updatedAt } })
+    req.log.info({ event: 'month.saved', monthId: doc._id, month, lines: groups.fixed?.lines.length })
     res.json(next)
   } catch (err) {
     fail(req, res, 'month.saved.failed', err)

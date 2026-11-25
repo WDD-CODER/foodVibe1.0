@@ -173,3 +173,69 @@ describe('who may', () => {
     expect(await db('monthPlans').countDocuments({})).toBe(1)
   })
 })
+
+describe('fixed, labour and purchases (plan 729)', () => {
+  const line = (id, over = {}) => ({ id, name: id, plan: null, actual: null, ...over })
+  const fixedOf = lines => ({ mode: 'lines', lines, rough: { plan: null, actual: null } })
+
+  it('a new month starts with the eight starter lines, kashrut among them, labour and purchases blank', async () => {
+    const res = await post({ month: '2026-11' })
+    expect(res.body.fixed.mode).toBe('lines')
+    expect(res.body.fixed.lines.map(l => l.starterKey)).toEqual(['rent', 'arnona', 'electricity', 'water', 'gas', 'insurance', 'kashrut', 'marketing'])
+    expect(res.body.fixed.lines.every(l => l.plan === null && l.actual === null)).toBe(true)
+    expect(res.body.labour).toEqual({ mode: 'employer', factor: 1.25, plan: null, actual: null })
+    expect(res.body.purchases).toEqual({ actual: null })
+  })
+
+  it('saves a group as sent, keeps 0 apart from null, leaves the other groups alone', async () => {
+    await post({ month: '2026-11' })
+    const lines = [line('rent', { name: undefined, starterKey: 'rent', actual: 12000 }), line('own1', { name: 'הנהלת חשבונות', actual: 0 })]
+    const res = await put('2026-11', { fixed: fixedOf(lines), purchases: { actual: 4200 } })
+    expect(res.status).toBe(200)
+    const stored = await db('monthPlans').findOne({ month: '2026-11' })
+    expect(stored.fixed.lines).toHaveLength(2)
+    expect(stored.fixed.lines[1].actual).toBe(0)
+    expect(stored.purchases.actual).toBe(4200)
+    expect(stored.labour.factor).toBe(1.25)
+    const labour = await put('2026-11', { labour: { mode: 'gross', factor: 1.3, plan: null, actual: 40000 } })
+    expect(labour.body.labour).toEqual({ mode: 'gross', factor: 1.3, plan: null, actual: 40000 })
+    expect((await db('monthPlans').findOne({ month: '2026-11' })).fixed.lines).toHaveLength(2)
+  })
+
+  it('refuses more than 40 lines, duplicate ids, a line with both or neither of starter key and name, a factor outside 1–2', async () => {
+    await post({ month: '2026-11' })
+    const many = Array.from({ length: 41 }, (_, i) => line(`l${i}`))
+    const bad = [
+      { fixed: fixedOf(many) },
+      { fixed: fixedOf([line('a'), line('a')]) },
+      { fixed: fixedOf([line('a', { starterKey: 'rent' })]) },
+      { fixed: fixedOf([{ id: 'a', plan: null, actual: null }]) },
+      { fixed: fixedOf([line('a', { name: '  ' })]) },
+      { fixed: fixedOf([line('a', { actual: -1 })]) },
+      { labour: { mode: 'gross', factor: 0.9, plan: null, actual: null } },
+      { labour: { mode: 'gross', factor: 2.1, plan: null, actual: null } },
+      { labour: { mode: 'gross', factor: 1.25, plan: null, actual: null, person: 'x' } },
+      { purchases: { actual: -5 } },
+    ]
+    for (const body of bad) expect((await put('2026-11', body)).status, JSON.stringify(body)).toBe(400)
+    expect((await put('2026-11', { fixed: fixedOf(many.slice(0, 40)) })).status).toBe(200)
+  })
+
+  it('staff are refused and a closed month refuses the new groups', async () => {
+    await post({ month: '2026-11' })
+    expect((await put('2026-11', { purchases: { actual: 1 } }, STAFF)).status).toBe(403)
+    await db('monthPlans').updateOne({ month: '2026-11' }, { $set: { status: 'closed' } })
+    const res = await put('2026-11', { purchases: { actual: 1 } })
+    expect(res.status).toBe(409)
+    expect((await db('monthPlans').findOne({ month: '2026-11' })).purchases.actual).toBeNull()
+  })
+
+  it('a month stored before this plan (no groups) is still valid and saves its first group', async () => {
+    await post({ month: '2026-11' })
+    await db('monthPlans').updateOne({ month: '2026-11' }, { $unset: { fixed: '', labour: '', purchases: '' } })
+    expect((await get('/2026-11')).body.fixed).toBeUndefined()
+    const res = await put('2026-11', { revenue: { plan: 5 } })
+    expect(res.status).toBe(200)
+    expect((await put('2026-11', { purchases: { actual: 7 } })).status).toBe(200)
+  })
+})

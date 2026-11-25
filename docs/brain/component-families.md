@@ -345,6 +345,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   by the business VAT rate and dealer type (`patur` = unchanged); the menu page, the month close and the analysis use it.
 - the month key (plan 726): `month-key.util` in `src/app/core/utils/month-key.util.ts` — `currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel` for a `YYYY-MM` month; the monthly plan page (727) uses it too.
 - the month and target rules (plan 727): `month-rules` in `shared/schemas/month/month-rules.ts` — `MONTH_KEY_PATTERN`, `monthKeyOf` (the Asia/Jerusalem month), `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`; no zod; `month-key.util` wraps it so there is one month rule.
+- the starter fixed lines and labour defaults (plan 729): in the same `month-rules.ts` — `FIXED_STARTER_KEYS`, `FIXED_LINES_MAX`, `LABOUR_FACTOR_DEFAULT`, `defaultFixed()`, `defaultLabour()`; the server's new month and the browser's older month start from the same lines.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
