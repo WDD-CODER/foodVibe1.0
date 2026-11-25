@@ -94,6 +94,7 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 _shared/debt-baseline.json
 docs/workflow-kit/manifest.json
+src/app/pages/recipe-book/recipe-book.page.spec.ts
 ```
 
 `_shared/debt-baseline.json` and `docs/workflow-kit/manifest.json` are listed so a count that only goes down, or a
