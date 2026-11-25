@@ -75,6 +75,16 @@ describe('businessSchema new optional fields', () => {
     expect(S.businessSettingsSchema.safeParse({ ...s, priceRiseAlertPct: 101 }).success).toBe(false)
     expect(S.BUSINESS_SETTINGS_DEFAULTS.priceRiseAlertPct).toBe(5)
   })
+
+  it('settings: vatRatePct 0, 18 and 100 are valid, 101 and -1 refused; dealerType is murshe or patur; defaults 18 and murshe (plan 723)', () => {
+    const s = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 }
+    for (const v of [0, 18, 100]) expect(S.businessSettingsSchema.safeParse({ ...s, vatRatePct: v }).success).toBe(true)
+    for (const v of [101, -1]) expect(S.businessSettingsSchema.safeParse({ ...s, vatRatePct: v }).success).toBe(false)
+    expect(S.businessSettingsSchema.safeParse({ ...s, dealerType: 'patur' }).success).toBe(true)
+    expect(S.businessSettingsSchema.safeParse({ ...s, dealerType: 'other' }).success).toBe(false)
+    expect(S.BUSINESS_SETTINGS_DEFAULTS.vatRatePct).toBe(18)
+    expect(S.BUSINESS_SETTINGS_DEFAULTS.dealerType).toBe('murshe')
+  })
 })
 
 describe('supplier taxId and event siteLogistics.loaded', () => {

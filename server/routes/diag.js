@@ -17,6 +17,8 @@ const { newId } = require('../utils/id')
 const { LIVE } = require('../jobs/purge-deleted')
 const { confirmAiDraft } = require('../services/ai-drafts')
 const { diagCreateInputSchema, diagMenuInputSchema, diagInvoicesInputSchema, diagStatusInputSchema } = require('../generated/schemas/diag/diag-inputs')
+const { getBusiness } = require('../services/business')
+const { BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 const { menuKeptRatio } = require('../generated/schemas/diag/menu-draft')
 const { priceVolatility } = require('../generated/schemas/diag/volatility')
 
@@ -67,7 +69,7 @@ router.post('/', async (req, res) => {
       homeBusinessId: req.user.homeBusinessId ?? req.user.businessId,
       status: 'open',
       pricesIncludeVat: parsed.data.pricesIncludeVat ?? true,
-      vatPct: parsed.data.vatPct ?? 18
+      vatPct: parsed.data.vatPct ?? (await businessVatRate(req.user.businessId))
     }
     const check = checkStoredDoc(TYPE, doc)
     if (!check.ok) return storeFailure(req, res, 'diag.created.failed', check)
@@ -78,6 +80,12 @@ router.post('/', async (req, res) => {
     fail(req, res, 'diag.created.failed', err)
   }
 })
+
+/** Plan 723: the active business's VAT rate (18 when nothing is stored). */
+async function businessVatRate(businessId) {
+  const business = await getBusiness(businessId)
+  return { ...BUSINESS_SETTINGS_DEFAULTS, ...(business?.settings ?? {}) }.vatRatePct
+}
 
 /** Loads the diagnosis of the active business; answers 404 (and returns null) when it is not there. */
 async function load(req, res) {

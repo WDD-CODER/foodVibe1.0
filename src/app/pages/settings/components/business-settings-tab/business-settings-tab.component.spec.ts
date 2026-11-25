@@ -16,7 +16,14 @@ const BUSINESS: Business = {
   createdAt: 1,
   internal: false,
   lastSyncedMasterVersion: 0,
-  settings: { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 7 }
+  settings: {
+    profitTargetPct: 25,
+    safetyMarginPct: 10,
+    overrunThresholdPct: 10,
+    priceRiseAlertPct: 7,
+    vatRatePct: 18,
+    dealerType: 'murshe'
+  }
 }
 
 describe('BusinessSettingsTabComponent', () => {
@@ -93,7 +100,7 @@ describe('BusinessSettingsTabComponent', () => {
     expect(saveBtn().disabled).toBeTrue()
   })
 
-  it('a valid change enables save, sends all four numbers and toasts', async () => {
+  it('a valid change enables save, sends all six settings and toasts', async () => {
     type('profitTargetPct', '30')
     expect(saveBtn().disabled).toBeFalse()
     await fixture.componentInstance.save()
@@ -101,11 +108,45 @@ describe('BusinessSettingsTabComponent', () => {
       profitTargetPct: 30,
       safetyMarginPct: 10,
       overrunThresholdPct: 10,
-      priceRiseAlertPct: 7
+      priceRiseAlertPct: 7,
+      vatRatePct: 18,
+      dealerType: 'murshe'
     })
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('settings_saved')
     fixture.detectChanges()
     expect(saveBtn().disabled).toBeTrue()
+  })
+
+  it('shows the VAT rate 18 and the dealer type murshe by default (plan 723)', () => {
+    business_.set({ ...BUSINESS, settings: undefined })
+    fixture.detectChanges()
+    expect(input('vatRatePct').value).toBe('18')
+    expect(fixture.componentInstance.form.controls.dealerType.value).toBe('murshe')
+    expect(el().querySelector('[data-testid="business-dealerType-row"]')?.textContent).toContain('dealer_type_murshe')
+  })
+
+  it('101 in the VAT rate shows the range error and disables save (plan 723)', () => {
+    type('vatRatePct', '101')
+    expect(el().querySelector('[data-testid="business-error-vatRatePct"]')?.textContent).toContain('vat_rate_range')
+    expect(saveBtn().disabled).toBeTrue()
+  })
+
+  it('changing only the dealer type enables save, sends all six and counts as unsaved (plan 723)', async () => {
+    const cmp = fixture.componentInstance
+    expect(cmp.hasRealChanges()).toBeFalse()
+    cmp.form.controls.dealerType.setValue('patur')
+    fixture.detectChanges()
+    expect(cmp.hasRealChanges()).toBeTrue()
+    expect(saveBtn().disabled).toBeFalse()
+    await cmp.save()
+    expect(updateSettings).toHaveBeenCalledWith({
+      profitTargetPct: 25,
+      safetyMarginPct: 10,
+      overrunThresholdPct: 10,
+      priceRiseAlertPct: 7,
+      vatRatePct: 18,
+      dealerType: 'patur'
+    })
   })
 
   it('a server refusal shows the invalid-settings toast', async () => {
