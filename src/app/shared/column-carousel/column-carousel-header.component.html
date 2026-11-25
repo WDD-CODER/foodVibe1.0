@@ -1,23 +1,44 @@
-<ng-content></ng-content>
-<div class="cc-header" tabindex="0" [attr.aria-label]="activeLabel() | translatePipe">
-  @if (dots().length > 1) {
-    <span class="cc-dots" aria-hidden="true">
-      @for (i of dots(); track i) {
-        <span class="cc-dot" [class.is-active]="i === group.index()"></span>
-      }
-    </span>
+@if (measured()) {
+  @for (part of parts(); track part.key) {
+    @if (part.kind === 'own') {
+      <ng-container *ngTemplateOutlet="part.col.template"></ng-container>
+    } @else {
+      <div class="cc-box cc-box--header c-grid-header-cell">
+        <div class="cc-fall">
+          @if (part.active) {
+            <ng-container *ngTemplateOutlet="part.active.template"></ng-container>
+          }
+        </div>
+        <ng-container *ngTemplateOutlet="chrome"></ng-container>
+      </div>
+    }
   }
-</div>
-<button
-  type="button"
-  class="cc-arrow cc-arrow--float cc-arrow--prev"
-  (click)="prev($event)"
-  aria-label="Previous column"
->
-  <lucide-icon class="cc-icon-rtl" name="chevron-right" [size]="14"></lucide-icon>
-  <lucide-icon class="cc-icon-ltr" name="chevron-left" [size]="14"></lucide-icon>
-</button>
-<button type="button" class="cc-arrow cc-arrow--float cc-arrow--next" (click)="next($event)" aria-label="Next column">
-  <lucide-icon class="cc-icon-rtl" name="chevron-left" [size]="14"></lucide-icon>
-  <lucide-icon class="cc-icon-ltr" name="chevron-right" [size]="14"></lucide-icon>
-</button>
+} @else {
+  <ng-content></ng-content>
+  <ng-container *ngTemplateOutlet="chrome"></ng-container>
+}
+
+<ng-template #chrome>
+  <div class="cc-header" tabindex="0" [attr.aria-label]="activeLabel() | translatePipe">
+    @if (dots().length > 1) {
+      <span class="cc-dots" aria-hidden="true">
+        @for (i of dots(); track i) {
+          <span class="cc-dot" [class.is-active]="i === group.index()"></span>
+        }
+      </span>
+    }
+  </div>
+  <button
+    type="button"
+    class="cc-arrow cc-arrow--float cc-arrow--prev"
+    (click)="prev($event)"
+    aria-label="Previous column"
+  >
+    <lucide-icon class="cc-icon-rtl" name="chevron-right" [size]="14"></lucide-icon>
+    <lucide-icon class="cc-icon-ltr" name="chevron-left" [size]="14"></lucide-icon>
+  </button>
+  <button type="button" class="cc-arrow cc-arrow--float cc-arrow--next" (click)="next($event)" aria-label="Next column">
+    <lucide-icon class="cc-icon-rtl" name="chevron-left" [size]="14"></lucide-icon>
+    <lucide-icon class="cc-icon-ltr" name="chevron-right" [size]="14"></lucide-icon>
+  </button>
+</ng-template>

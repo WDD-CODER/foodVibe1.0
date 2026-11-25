@@ -161,12 +161,12 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 ### house-column-carousel
 
 - status: proposed
-- rule: A list with more columns than the screen can show keeps the name and the main columns in place and puts the rest into one carousel column the user switches; a row never wraps and the list never scrolls sideways.
+- rule: A list shows as many columns as fit its measured width; as space runs short they fall one by one (two the first time) into one carousel column the user switches, in the order the list sets (from the end by default), the name protected first; a row never wraps and the list never scrolls sideways.
 - applies when: custom
 - plan words: \b(?:list columns?|table columns?|column carousel|list-shell|list container|list page)\b
-- how: family list-page — app-column-carousel-header and app-column-carousel-cell with the appColumnSlide directive (src/app/shared/column-carousel/), inside app-list-shell (gridTemplate for wide screens, mobileGridTemplate for the phone); the widths are the shared breakpoints only
+- how: family list-page — the list declares its columns (ListColumn) and passes them as [columns] to app-list-shell; fitColumns() decides what fits; *appFallColumn inside app-column-carousel-header and app-column-carousel-cell (src/app/shared/column-carousel/)
 - check: card
-- card: any list with many columns, on a phone and on a tablet · look at the header and press the carousel arrow · the name stays, one column changes to the next piece of information, no row wraps and nothing scrolls sideways
+- card: any list with many columns, narrowing the window slowly · the columns fall one by one into the switching column in the list's order, the name stays readable, press its arrow and every row shows the next piece of information, no row wraps and nothing scrolls sideways
 - exceptions: a list that is not drawn as a table (cards layout); declare `exception — why: <one line>`
 
 ### house-sideways-row

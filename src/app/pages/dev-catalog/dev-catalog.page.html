@@ -108,6 +108,45 @@
     </app-list-shell>
   </section>
 
+  <section id="falling-columns" class="dc-section">
+    <h2>falling-columns</h2>
+    <div class="dc-resizable">
+      <app-list-shell appColumnCarouselGroup [columns]="fallColumns_">
+        <ng-container shell-table-header>
+          <div class="c-grid-header-cell">name</div>
+          <app-column-carousel-header>
+            <div class="c-grid-header-cell" *appFallColumn="'a'; label: 'a'">a</div>
+            <div class="c-grid-header-cell" *appFallColumn="'b'; label: 'b'">b</div>
+            <div class="c-grid-header-cell" *appFallColumn="'c'; label: 'c'">c</div>
+          </app-column-carousel-header>
+          <div class="c-grid-header-cell">price</div>
+        </ng-container>
+        <ng-container shell-table-body>
+          @for (row of rows_; track row) {
+          <div class="c-list-row">
+            <div class="c-list-body-cell">{{ row | translatePipe }}</div>
+            <app-column-carousel-cell>
+              <div class="c-list-body-cell" *appFallColumn="'a'; label: 'a'">{{ row }} a</div>
+              <div class="c-list-body-cell" *appFallColumn="'b'; label: 'b'">{{ row }} b</div>
+              <div class="c-list-body-cell" *appFallColumn="'c'; label: 'c'">{{ row }} c</div>
+            </app-column-carousel-cell>
+            <div class="c-list-body-cell">1.00</div>
+          </div>
+          }
+          <div class="c-list-row">
+            <div class="c-list-body-cell">fourth</div>
+            <app-column-carousel-cell>
+              <div class="c-list-body-cell" *appFallColumn="'a'; label: 'a'">fourth a</div>
+              <div class="c-list-body-cell" *appFallColumn="'b'; label: 'b'">fourth b</div>
+              <div class="c-list-body-cell" *appFallColumn="'c'; label: 'c'">fourth c</div>
+            </app-column-carousel-cell>
+            <div class="c-list-body-cell">1.00</div>
+          </div>
+        </ng-container>
+      </app-list-shell>
+    </div>
+  </section>
+
   <section id="empty-state" class="dc-section">
     <h2>empty-state</h2>
     <app-empty-state messageKey="empty_inventory" />

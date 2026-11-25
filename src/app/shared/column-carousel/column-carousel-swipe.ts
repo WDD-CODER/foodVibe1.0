@@ -25,9 +25,15 @@ export function isRtl(el: HTMLElement): boolean {
   return getComputedStyle(el).direction === 'rtl'
 }
 
-/** The carousel only exists on a phone (≤767px); from tablet up the slides are plain grid cells. */
+/** The slide-mode carousel only exists on a phone (≤767px); from tablet up the slides are plain grid cells. */
 export const CAROUSEL_MEDIA_QUERY = PHONE_QUERY
 
-export function isCarouselActive(): boolean {
+/**
+ * Whether swipe and the arrow keys apply. In measured mode (plan 745) the group knows: it is active while some
+ * column has fallen. Otherwise the phone media query decides.
+ */
+export function isCarouselActive(group?: { collapsed(): readonly string[] | null }): boolean {
+  const collapsed = group?.collapsed() ?? null
+  if (collapsed) return collapsed.length > 0
   return typeof window !== 'undefined' && window.matchMedia(CAROUSEL_MEDIA_QUERY).matches
 }

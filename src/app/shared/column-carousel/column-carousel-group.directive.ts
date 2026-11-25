@@ -16,13 +16,23 @@ export class ColumnCarouselGroupDirective {
   /** Active slide; two-way bindable. */
   readonly columnCarouselIndex = model(0)
 
+  /**
+   * Ids of the columns that fell into the switching column (plan 745), set by `app-list-shell` when the list
+   * declares its columns. `null` = today's phone-only mode, where the slides are the count.
+   */
+  readonly collapsed = signal<readonly string[] | null>(null)
+
   private readonly count_ = signal(0)
-  /** Number of slides (reported by the header / cells). */
-  readonly count = this.count_.asReadonly()
+  private readonly slideCount = computed(() => {
+    const collapsed = this.collapsed()
+    return collapsed ? collapsed.length : this.count_()
+  })
+  /** Number of slides (reported by the header / cells); in measured mode the number of collapsed columns. */
+  readonly count = this.slideCount
 
   /** Active slide, clamped to the current slide count. */
   readonly index = computed(() => {
-    const count = this.count_()
+    const count = this.slideCount()
     const raw = this.columnCarouselIndex()
     if (count === 0) return 0
     return Math.min(count - 1, Math.max(0, raw))
@@ -36,20 +46,20 @@ export class ColumnCarouselGroupDirective {
 
   /** Next slide; wraps to the first after the last (plan 349, Critical Question → a). */
   next(): void {
-    const count = this.count_()
+    const count = this.slideCount()
     if (count === 0) return
     this.columnCarouselIndex.set((this.index() + 1) % count)
   }
 
   /** Previous slide; wraps to the last before the first. */
   prev(): void {
-    const count = this.count_()
+    const count = this.slideCount()
     if (count === 0) return
     this.columnCarouselIndex.set((this.index() - 1 + count) % count)
   }
 
   go(index: number): void {
-    const count = this.count_()
+    const count = this.slideCount()
     if (count === 0) return
     this.columnCarouselIndex.set(Math.min(count - 1, Math.max(0, index)))
   }

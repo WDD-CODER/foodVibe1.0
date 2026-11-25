@@ -17,6 +17,8 @@ import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/c
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
@@ -49,6 +51,7 @@ interface SampleOption {
     ModalShellComponent,
     PageHeaderComponent,
     ListShellComponent,
+    ...COLUMN_CAROUSEL,
     EmptyStateComponent,
     FormFieldComponent,
     DateFieldComponent,
@@ -79,6 +82,7 @@ export class DevCatalogPage {
     'multi-pick',
     'modal-shell',
     'list-page',
+    'falling-columns',
     'empty-state',
     'form-field',
     'number-box',
@@ -106,6 +110,15 @@ export class DevCatalogPage {
   ]
   protected readonly labelOf_ = (o: SampleOption): string => o.label
   protected readonly keyOf_ = (o: SampleOption): string => o.value
+
+  // falling-columns (plan 745)
+  protected readonly fallColumns_: readonly ListColumn[] = [
+    { id: 'name', track: '1fr', min: '6rem' },
+    { id: 'a', track: '1fr', min: '5rem', fall: 3 },
+    { id: 'b', track: '1fr', min: '5rem', fall: 2 },
+    { id: 'c', track: '1fr', min: '5rem', fall: 1 },
+    { id: 'price', track: '4rem', min: '4rem' }
+  ]
 
   // search-combobox
   protected readonly queryEmpty_ = signal('')

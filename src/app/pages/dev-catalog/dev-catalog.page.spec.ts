@@ -25,16 +25,17 @@ describe('DevCatalogPage', () => {
     fixture.detectChanges()
   })
 
-  it('renders 17 sections whose headings are the family ids in order', () => {
+  it('renders 18 sections whose headings are the family ids in order', () => {
     const el = fixture.nativeElement as HTMLElement
     const sections = el.querySelectorAll('main > section')
-    expect(sections.length).toBe(17)
+    expect(sections.length).toBe(18)
     const ids = Array.from(sections).map((s) => s.querySelector('h2')?.textContent?.trim())
     expect(ids).toEqual([
       'search-combobox',
       'multi-pick',
       'modal-shell',
       'list-page',
+      'falling-columns',
       'empty-state',
       'form-field',
       'number-box',
@@ -54,6 +55,6 @@ describe('DevCatalogPage', () => {
   it('has an app-search-combobox in the first section and a link per section', () => {
     const el = fixture.nativeElement as HTMLElement
     expect(el.querySelector('main > section app-search-combobox')).toBeTruthy()
-    expect(el.querySelectorAll('nav a[href^="#"]').length).toBe(17)
+    expect(el.querySelectorAll('nav a[href^="#"]').length).toBe(18)
   })
 })
