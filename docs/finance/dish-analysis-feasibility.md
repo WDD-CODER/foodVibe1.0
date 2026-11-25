@@ -221,3 +221,45 @@ Each decision lists the options; the recommended one is first.
 6. VAT rate: (a) one rate per business, 18% default like the diagnosis — recommended; (b) a rate per dish.
 7. Who switches the screen on: (a) a new module the platform admin sets — recommended, like the other modules; (b) on
    for every business with the events module.
+
+## 9. Updated decisions (2026-11-24)
+
+Dandan approved every recommended option on 2026-11-24 ("decisions: all recommended"). The reasons and sources are in
+[the research report](dish-and-month-research.md), section "Updated decisions". Section 8 above is kept as the
+original question; this table is the answer the build plans follow.
+
+| # | Status | Chosen option |
+|---|---|---|
+| 1 | keep | A new owner-only entity for the standing menu. Each dish has a stable id, a category (course), a price with VAT and a cost source. |
+| 2 | change | Both in version one: a typed month comes first, as the fallback for small menus and for returns; a CSV/Excel import with remembered aliases follows in the next slice, built only after one real export from a target owner is in hand. |
+| 3 | keep | A fixed short list of return reasons the owner can extend, with "other" and an optional note. Seed: returned by guest, kitchen mistake, staff meal, comp/goodwill, expired. |
+| 4 | change | Yes, in version one: each sold dish is costed by recipe, by a linked product or typed cost, or counted in units only. Units-only and partial-cost dishes count in the sales mix but not in the CM averages or the class, and are labelled. |
+| 5 | keep, refined | Cost per portion with its partial flag: live while the month is open, frozen at month close (the same event as the monthly lock). The screen shows "cost as of <date>". |
+| 6 | keep, refined | One VAT rate per business, default 18%, stored at business level and shared with the month screen and the diagnosis. Price and cost are net; a dealer-type setting (מורשה/פטור) decides whether costs are net or gross. |
+| 7 | keep | A new module the platform admin switches on. |
+| N-D1 | new | Popular means above 0.7 × equal share; CM high means above the unit-weighted average. Classify within each course, falling back to the whole menu when a course has too few costed dishes, and state the rule on screen. |
+| N-D2 | new | CM uses the menu price ÷ 1.18. Revenue uses the file's net-of-discount sales when present, otherwise units × net price. |
+| N-D3 | new | Each alias maps a sales name to a dish with a portion factor (default factor 1); cost = recipe cost × factor. |
+| N-D4 | new | The import cannot be applied until each name is matched, skipped or added, and the choice is remembered. Skipped names are listed on the month as "not counted". |
+| N-D5 | new | A month is the unit of entry. The matrix can combine up to 3 months and says how many months it uses. |
+| N-D6 | new | Return rate and return cost per dish are shown as separate figures; they do not change the dish's class. |
+| N-D7 | new | Labour is never in the class or the CM; at most an optional information column, built last. |
+| N-D8 | new | Static actions per quadrant plus a "margin dropped since last month" rule. No AI. |
+| N-X1 | new | One business-level VAT rate and dealer-type setting, read by dish analysis, the month and the diagnosis (plan 723). |
+| N-X2 | new | Closing a month locks the monthly actuals and freezes the dish costs in one server request (INV-3). |
+| N-X3 | new | One sales import per month, owned by dish analysis; its net total is offered as the month's revenue hint. The dish import is built before the monthly revenue-source slice. |
+
+**Revised build order** (dish analysis, as chosen):
+
+1. Module and registration — unchanged (plan 724).
+2. Standing menu with category, VAT price and the three cost states; absorbs old slice 10 (plans 724 and 725).
+3. Typed monthly sales and returns — unchanged (plan 726).
+4. Analysis function with per-category thresholds, net prices and the window (N-D1, N-D2, N-D5).
+5. Sales file import with aliases, portion factors and the unmapped queue — moved up from 7; it waits for one real
+   sales export from a target owner.
+6. Analysis screen — was 5.
+7. Written insights — was 6.
+8. New-dish calculator, after plan 661 — was 9.
+9. Labour roll-up as an optional information column — moved last from 8.
+
+The shared business VAT setting (N-X1) is plan 723.

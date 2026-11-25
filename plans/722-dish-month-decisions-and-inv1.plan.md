@@ -112,17 +112,17 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] **Research copy:** `docs/finance/dish-and-month-research.md` is an exact copy of the research report (A1 names the source). No edits; the reports link to it.
-- [ ] **Dish report section 9:** `docs/finance/dish-analysis-feasibility.md` gains, after section 8 and changing nothing above it, `## 9. Updated decisions (2026-11-24)`:
+- [x] **Research copy:** `docs/finance/dish-and-month-research.md` is an exact copy of the research report (A1 names the source). No edits; the reports link to it.
+- [x] **Dish report section 9:** `docs/finance/dish-analysis-feasibility.md` gains, after section 8 and changing nothing above it, `## 9. Updated decisions (2026-11-24)`:
   - One opening paragraph: Dandan approved every recommended option on 2026-11-24 ("decisions: all recommended"); the reasons and sources are in [the research report](dish-and-month-research.md), section "Updated decisions"; section 8 above is kept as the original question.
   - A table `| # | Status | Chosen option |` with one row per decision: `| 1 `…`| 7 ` (dish decisions, status `keep`, `keep, refined` or `change` exactly as the research table says), `| N-D1 `…`| N-D8 ` and `| N-X1 `…`| N-X3 ` (status `new`). "Chosen option" is the research's "Updated recommended option" in one or two plain sentences, keeping every number (0.7 × equal share, ÷ 1.18, factor 1, up to 3 months).
   - A short list "Revised build order" with the research's revised dish slice order (1–9) as chosen, saying that import (slice 5) waits for one real sales export from a target owner.
-- [ ] **Monthly report section 9:** `docs/finance/monthly-planning-feasibility.md` gains the same section: rows `| 1 `…`| 10 `, `| N-M1 `…`| N-M8 `, `| N-X1 `…`| N-X3 `, and the revised monthly slice order (1–12). Row N-M3 adds: "INV-1 changed with Dandan's `approve arch change INV-1` (2026-11-24); see ADR 0034."
-- [ ] **ADR 0034:** `docs/brain/decisions/0034-salary-lines-owner-only.md` from `docs/brain/decisions/_TEMPLATE.md`, front matter `status: accepted`, `date: 2026-11-24`, `review-by: 2027-05-24`, `supersedes: 0032-one-user-more-than-one-business (the consultant bullet of Decision, only for per-employee pay lines)`. Content in UI/UX Notes below.
-- [ ] **INV-1 amended** in `docs/brain/invariants.md`, keeping the exact `## INV-n — <title>` + five `- Field:` shape that `scripts/lib/invariants.mjs` parses: the Rule's consultant clause, Source, Touches and Users-lose lines change as in UI/UX Notes. No other invariant changes.
+- [x] **Monthly report section 9:** `docs/finance/monthly-planning-feasibility.md` gains the same section: rows `| 1 `…`| 10 `, `| N-M1 `…`| N-M8 `, `| N-X1 `…`| N-X3 `, and the revised monthly slice order (1–12). Row N-M3 adds: "INV-1 changed with Dandan's `approve arch change INV-1` (2026-11-24); see ADR 0034."
+- [x] **ADR 0034:** `docs/brain/decisions/0034-salary-lines-owner-only.md` from `docs/brain/decisions/_TEMPLATE.md`, front matter `status: accepted`, `date: 2026-11-24`, `review-by: 2027-05-24`, `supersedes: 0032-one-user-more-than-one-business (the consultant bullet of Decision, only for per-employee pay lines)`. Content in UI/UX Notes below.
+- [x] **INV-1 amended** in `docs/brain/invariants.md`, keeping the exact `## INV-n — <title>` + five `- Field:` shape that `scripts/lib/invariants.mjs` parses: the Rule's consultant clause, Source, Touches and Users-lose lines change as in UI/UX Notes. No other invariant changes.
 
 ### Should Have (P1)
-- [ ] Section 9 of each report names which build plans carry the first slices (dish: 724, 725, 726; month: 727, 728, 729; both: 723 for N-X1), so a reader can go from a decision to its plan.
+- [x] Section 9 of each report names which build plans carry the first slices (dish: 724, 725, 726; month: 727, 728, 729; both: 723 for N-X1), so a reader can go from a decision to its plan.
 
 ### Nice to Have (P2)
 - [ ] none.
@@ -152,11 +152,11 @@ No screen is built and no dictionary key is added. The exact texts:
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Put the research report in the repo so every plan can cite it — exact copy of `C:\Users\danwe\AppData\Local\Temp\claude\4560911dcd58a9c2\717c5d93-0414-4514-b4d8-331e3aad7a3d\scratchpad\reports\Restaurant dish and month analytics.md` (if the file is gone, STOP and ask the Human for it) — docs/finance/dish-and-month-research.md
-- [ ] A2: Write down which dish decisions Dandan approved and the new dish build order — section 9 of the dish report as in P0 — docs/finance/dish-analysis-feasibility.md
-- [ ] A3: Write down which month decisions Dandan approved and the new month build order — section 9 of the monthly report as in P0, N-M3 row pointing at ADR 0034 — docs/finance/monthly-planning-feasibility.md
-- [ ] A4: Record why only the owner may see each employee's pay — ADR 0034 with the text of UI/UX Notes — docs/brain/decisions/0034-salary-lines-owner-only.md
-- [ ] A5: Change the ownership rule so pay per person is the owner's alone — INV-1 Rule clause, Source, Touches, Users-lose as in UI/UX Notes; run `node --test scripts/test/invariants.test.mjs` — docs/brain/invariants.md
+- [x] A1: Put the research report in the repo so every plan can cite it — exact copy of `C:\Users\danwe\AppData\Local\Temp\claude\4560911dcd58a9c2\717c5d93-0414-4514-b4d8-331e3aad7a3d\scratchpad\reports\Restaurant dish and month analytics.md` (if the file is gone, STOP and ask the Human for it) — docs/finance/dish-and-month-research.md
+- [x] A2: Write down which dish decisions Dandan approved and the new dish build order — section 9 of the dish report as in P0 — docs/finance/dish-analysis-feasibility.md
+- [x] A3: Write down which month decisions Dandan approved and the new month build order — section 9 of the monthly report as in P0, N-M3 row pointing at ADR 0034 — docs/finance/monthly-planning-feasibility.md
+- [x] A4: Record why only the owner may see each employee's pay — ADR 0034 with the text of UI/UX Notes — docs/brain/decisions/0034-salary-lines-owner-only.md
+- [x] A5: Change the ownership rule so pay per person is the owner's alone — INV-1 Rule clause, Source, Touches, Users-lose as in UI/UX Notes; run `node --test scripts/test/invariants.test.mjs` — docs/brain/invariants.md
 - [ ] A6: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
 ## What happens when
