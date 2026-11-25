@@ -34,7 +34,7 @@ const teamLimiter = createRateLimiter({
 })
 
 /** Plan 723: settings keys older forms do not send; a PUT without one keeps the stored value. */
-const OPTIONAL_SETTINGS_KEYS = ['priceRiseAlertPct', 'vatRatePct', 'dealerType']
+const OPTIONAL_SETTINGS_KEYS = ['priceRiseAlertPct', 'vatRatePct', 'dealerType', 'monthTargets']
 
 // GET /api/v1/business — the business document of the signed-in user; `settings` always has the defaults filled in (nothing is written on read). Any member may read it.
 router.get('/', verifyToken, async (req, res) => {

@@ -2,8 +2,12 @@ import { currentMonthKey, isMonthKey, monthKeyLabel, shiftMonthKey } from './mon
 
 describe('month-key.util (plan 726)', () => {
   it('currentMonthKey names the month of the date', () => {
-    expect(currentMonthKey(new Date(2026, 10, 30))).toBe('2026-11')
-    expect(currentMonthKey(new Date(2026, 0, 1))).toBe('2026-01')
+    expect(currentMonthKey(new Date(Date.UTC(2026, 10, 30, 12)))).toBe('2026-11')
+    expect(currentMonthKey(new Date(Date.UTC(2026, 0, 1, 12)))).toBe('2026-01')
+  })
+
+  it('currentMonthKey counts the Jerusalem month: the last evening of November (UTC) is already December', () => {
+    expect(currentMonthKey(new Date(Date.UTC(2026, 10, 30, 22, 30)))).toBe('2026-12')
   })
 
   it('shiftMonthKey crosses the year in both directions', () => {

@@ -73,7 +73,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
 | `product-name-matcher.service.ts` | Links a typed or pasted product name to an existing product: exact + plural/spelling variants in the browser, then one AI call for the rest (plan 463) | ProductNameMatcherService |
 | `gemini-shots.service.ts` | Gemini image/shot capture flow | GeminiShotsService |
-| `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
+| `http-storage.adapter.ts` | HTTP-backed storage adapter; its path map also names the month plan routes (plan 727; client in pages/monthly-plan/services) | HttpStorageAdapter |
 | `master-push.service.ts` | Push local entity to master/global | MasterPushService |
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
 | `event-pipeline.service.ts` | Client of the events API routes (`API` in `http-storage.adapter`): stage moves and notes; writes the returned event into the store (plan 443) | EventPipelineService |

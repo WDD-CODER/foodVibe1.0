@@ -13,7 +13,7 @@ afterAll(async () => { await teardownTestApp() })
 
 const ADMIN = { userId: 'boss', role: 'admin', businessId: 'bBoss', businessRole: 'owner', isPlatformAdmin: true }
 const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
-const SERVER_ONLY = ['priceHistory', 'invoiceAliases', 'storedFiles', 'businessAccess']
+const SERVER_ONLY = ['priceHistory', 'invoiceAliases', 'storedFiles', 'businessAccess', 'monthPlans']
 const file = (id, businessId) => ({
   _id: id, businessId, kind: 'voice', mimeType: 'audio/webm', bytes: 3, provider: 'cloudinary', providerId: 'fv/' + id,
   resourceType: 'video', createdBy: 'u', createdAt: 1,

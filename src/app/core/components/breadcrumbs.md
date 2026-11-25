@@ -14,7 +14,7 @@ Global shell UI: header (primary nav), floating hero FAB, auth modal, and global
 | `terms-modal/` | Terms popup: scroll to the end to enable confirm (plan 584) | TermsModalComponent |
 | `terms-gate/` | Shows the terms popup to users who have not accepted the current version | TermsGateComponent |
 | `user-msg/` | Toast / user message strip | UserMsg |
-| `tab-chips/` | Tab-style chip navigation | TabChipsComponent |
+| `tab-chips/` | Tab-style chip navigation; a chip hides by module or, with its money flag, from staff (plan 727: the monthly plan chip) | TabChipsComponent |
 | `acting-banner/` | Bar under the header, on every non-bare screen, shown while the user acts in another business: names it and goes back home with one tap (plan 632) | ActingBannerComponent |
 | `notification-bell/` | Header bell with the unread count and the list of the user's alerts; click opens the product (plan 646) | NotificationBellComponent |
 | `update-banner/` | App-update available banner | UpdateBannerComponent |

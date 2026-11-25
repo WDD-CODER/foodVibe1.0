@@ -15,6 +15,7 @@ export const API = {
   admin: (path: string) => `${API_ROOT}/admin/${path}`,
   access: (path: string) => `${API_ROOT}/access/${path}`,
   diag: (path?: string) => (path ? `${API_ROOT}/diag/${path}` : `${API_ROOT}/diag`),
+  monthPlans: (path?: string) => (path ? `${API_ROOT}/month-plans/${path}` : `${API_ROOT}/month-plans`),
   business: (path?: string) => (path ? `${API_ROOT}/business/${path}` : `${API_ROOT}/business`),
   stats: (path: string) => `${API_ROOT}/stats/${path}`,
   stock: (path: string) => `${API_ROOT}/stock/${path}`,

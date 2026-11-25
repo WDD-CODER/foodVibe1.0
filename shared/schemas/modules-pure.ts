@@ -1,7 +1,7 @@
 /** Plan 620: the module helpers without zod, so the browser's first bundle does not pull the validation library. */
 
-/** Plan 615 (C-MODULES): the six modules a business may have switched on. */
-export const MODULE_KEYS = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis'] as const
+/** Plan 615 (C-MODULES): the seven modules a business may have switched on. */
+export const MODULE_KEYS = ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan'] as const
 export type ModuleKey = (typeof MODULE_KEYS)[number]
 
 /** What a business that has no stored `modules` list gets. */

@@ -73,7 +73,8 @@ const COLLECTIONS = [
   { name: 'aiDrafts',                 userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-AIDRAFT, plan 618
   { name: 'storedFiles',              userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-FILES, plan 619
   { name: 'businessAccess',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ACCESS, plan 631
-  { name: 'notifications',             userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-NOTIFY, plan 646
+  { name: 'monthPlans',               userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // plan 727, written only by routes/month-plans.js
+  { name: 'notifications',            userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-NOTIFY, plan 646
 ]
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)

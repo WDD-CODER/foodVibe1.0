@@ -1,0 +1,123 @@
+<div class="mp-page" dir="rtl">
+  <app-page-header titleKey="mp_title">
+    <ng-container header-actions>
+      @if (!isLoading_() && !loadFailed_() && months_().length > 0) {
+      <button type="button" class="c-btn-primary" data-testid="mp-new-month" (click)="startNew()">
+        {{ 'mp_new_month' | translatePipe }}
+      </button>
+      }
+    </ng-container>
+  </app-page-header>
+
+  @if (isCreating_()) {
+  <section class="mp-new c-glass-panel" data-testid="mp-new-form">
+    <app-form-field [label]="'mp_month_label' | translatePipe" forId="mp-new-month-select">
+      <app-custom-select
+        triggerId="mp-new-month-select"
+        [translateLabels]="false"
+        [options]="newMonthOptions_()"
+        [ngModel]="newMonth_()"
+        (ngModelChange)="newMonth_.set($event)"
+      />
+    </app-form-field>
+    <button type="button" class="c-btn-primary" data-testid="mp-create" [disabled]="isSaving_()" (click)="create()">
+      {{ 'mp_create' | translatePipe }}
+    </button>
+  </section>
+  } @if (isLoading_()) {
+  <app-loader />
+  } @else if (loadFailed_()) {
+  <div class="mp-error c-glass-panel" role="alert" data-testid="mp-load-error">
+    <p>{{ 'mp_load_failed' | translatePipe }}</p>
+    <button type="button" class="c-btn-ghost" data-testid="mp-retry" (click)="retry()">
+      {{ 'mp_retry' | translatePipe }}
+    </button>
+  </div>
+  } @else if (months_().length === 0) {
+  <app-empty-state
+    messageKey="mp_empty"
+    icon="calendar-days"
+    ctaLabelKey="mp_new_month"
+    data-testid="mp-empty"
+    (ctaClick)="startNew()"
+  />
+  } @else { @if (open_(); as month) {
+  <section class="mp-picker c-glass-panel">
+    <app-form-field [label]="'mp_month_label' | translatePipe" forId="mp-month-select">
+      <app-custom-select
+        triggerId="mp-month-select"
+        [translateLabels]="false"
+        [options]="monthOptions_()"
+        [ngModel]="month.month"
+        (ngModelChange)="pick($event)"
+      />
+    </app-form-field>
+    @if (isClosed_()) {
+    <span class="c-chip c-chip--tag" data-testid="mp-closed">{{ 'mp_status_closed' | translatePipe }}</span>
+    }
+  </section>
+
+  <section class="mp-card c-glass-panel" data-testid="mp-revenue">
+    <h2 class="mp-card__title">{{ 'mp_revenue_title' | translatePipe }}</h2>
+    <p class="mp-muted">{{ 'mp_revenue_rule' | translatePipe }}</p>
+    <div class="mp-grid">
+      @for (box of revenueBoxes; track box.key) {
+      <div class="mp-field">
+        <label class="mp-field__label" [for]="'mp-revenue-' + box.key">{{ box.labelKey | translatePipe }}</label>
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" [id]="'mp-revenue-' + box.key" [attr.data-testid]="'mp-revenue-' + box.key" [placeholder]="'mp_not_entered' | translatePipe" [disabled]="isClosed_()" [ngModel]="draft_().revenue[box.key]" (ngModelChange)="setRevenue(box.key, $event)" (blur)="applyVat(box.key)" /><span class="mp-suffix" aria-hidden="true">₪</span></div>
+        @if (month.dealerType !== 'patur' && !isClosed_()) {
+        <label class="mp-check">
+          <input
+            type="checkbox"
+            [attr.data-testid]="'mp-incl-vat-' + box.key"
+            [ngModel]="includesVat_()[box.key]"
+            (ngModelChange)="toggleIncludesVat(box.key, $event)"
+          />
+          {{ 'mp_includes_vat' | translatePipe }}
+        </label>
+        }
+      </div>
+      }
+    </div>
+    <p class="mp-muted" data-testid="mp-vat-line">{{ vatLine_() }}</p>
+  </section>
+
+  <section class="mp-card c-glass-panel" data-testid="mp-targets">
+    <h2 class="mp-card__title">{{ 'mp_targets_title' | translatePipe }}</h2>
+    <div class="mp-grid">
+      @for (field of targetFields; track field.key) {
+      <div class="mp-field">
+        <label class="mp-field__label" [for]="'mp-target-' + field.key">{{ field.labelKey | translatePipe }}</label>
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" max="100" step="any" dir="ltr" [id]="'mp-target-' + field.key" [attr.data-testid]="'mp-target-' + field.key" [disabled]="isClosed_()" [ngModel]="draft_().targets[field.key]" (ngModelChange)="setTarget(field.key, $event)" /><span class="mp-suffix" aria-hidden="true">%</span></div>
+        <span class="mp-muted" [attr.data-testid]="'mp-band-' + field.key">
+          {{ band(field.key) }} @if (outOfBand(field.key)) {
+          <span class="c-chip c-chip--tag c-chip--amber" [attr.data-testid]="'mp-out-' + field.key"
+            >{{ 'mp_out_of_band' | translatePipe }}</span
+          >
+          }
+        </span>
+      </div>
+      }
+    </div>
+    @if (sumOff_()) {
+    <p class="mp-muted" data-testid="mp-sum-off">{{ sumLine_() }}</p>
+    }
+  </section>
+
+  @if (!isClosed_()) {
+  <div class="c-form-actions">
+    <button
+      type="button"
+      class="c-btn-primary"
+      data-testid="mp-save"
+      [disabled]="!canSave_()"
+      [attr.aria-busy]="isSaving_() || null"
+      (click)="save()"
+    >
+      {{ (isSaving_() ? 'saving' : 'mp_save') | translatePipe }}
+    </button>
+  </div>
+  } } }
+</div>

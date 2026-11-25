@@ -194,6 +194,8 @@ async function connectDb() {
   await db.collection('dishSalesMonths').createIndex({ businessId: 1, month: 1 }, { unique: true, name: 'dish_sales_months_business_month' })
   await db.collection('dishSalesAliases').createIndex({ businessId: 1, nameKey: 1 }, { unique: true, name: 'dish_sales_aliases_business_key' })
   await db.collection('dishSalesAliases').createIndex({ businessId: 1, menuDishId: 1 }, { name: 'dish_sales_aliases_business_dish' })
+  // Plan 727: one month plan per business and month.
+  await db.collection('monthPlans').createIndex({ businessId: 1, month: 1 }, { unique: true, name: 'month_plans_business_month' })
   logger.debug({ event: 'mongo.index.ensured', index: 'modules' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).

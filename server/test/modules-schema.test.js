@@ -40,10 +40,19 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
   })
 
   it('plan 724: dish_analysis is the sixth key, not a default, and gates the three dish types', () => {
-    expect(S.MODULE_KEYS).toEqual(['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis'])
+    expect(S.MODULE_KEYS.slice(0, 6)).toEqual(['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis'])
     expect(S.DEFAULT_MODULES).not.toContain('dish_analysis')
     for (const t of ['menuDishes', 'dishSalesMonths', 'dishSalesAliases']) expect(S.MODULE_OF_TYPE[t]).toEqual(['dish_analysis'])
     expect(S.modulesFieldSchema.safeParse(S.MODULE_KEYS).success).toBe(true)
+  })
+
+  it('plan 727: monthly_plan is the seventh key, off by default, gates no generic type and the max follows the key count', () => {
+    expect(S.MODULE_KEYS[6]).toBe('monthly_plan')
+    expect(S.MODULE_KEYS).toHaveLength(7)
+    expect(S.DEFAULT_MODULES).not.toContain('monthly_plan')
+    expect(S.MODULE_OF_TYPE.monthPlans).toBeUndefined()
+    expect(S.modulesFieldSchema.safeParse(S.MODULE_KEYS).success).toBe(true)
+    expect(S.modulesFieldSchema.safeParse([...S.MODULE_KEYS, 'events']).success).toBe(false)
   })
 
   it('platformUpdateSchema needs a reason and at least one change', () => {
@@ -65,7 +74,7 @@ describe('businessSchema new optional fields', () => {
   })
 
   it.each([
-    ['a seventh module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'events'] }],
+    ['an eighth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'monthly_plan', 'events'] }],
     ['a repeated module', { modules: ['events', 'events'] }],
     ['a 51st history row', { platformHistory: Array.from({ length: 51 }, (_, i) => row(i)) }],
     ['a cap of -1', { aiMonthlyTokenCap: -1 }],
