@@ -25,6 +25,11 @@
         }
       </label>
     }
+    <div class="business-field" data-testid="business-dealerType-row">
+      <span class="business-field__label">{{ 'dealer_type' | translatePipe }}</span>
+      <app-custom-select formControlName="dealerType" [options]="dealerOptions" />
+      <span class="business-field__help">{{ 'dealer_type_help' | translatePipe }}</span>
+    </div>
     <div class="c-form-actions">
       <button
         type="submit"

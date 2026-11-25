@@ -18,7 +18,7 @@ const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
 const OWNER = { userId: 'own1', name: 'owner1', businessId: 'b1', businessRole: 'owner' }
 const OWNER_Y = { userId: 'own2', name: 'owner2', businessId: 'b2', businessRole: 'owner' }
 const STAFF = { userId: 'st1', name: 'staff1', businessId: 'b1', businessRole: 'staff' }
-const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5 }
+const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe' }
 const VALID = { profitTargetPct: 30, safetyMarginPct: 12.5, overrunThresholdPct: 15 }
 const URL = '/api/v1/business'
 const put = (body, who = OWNER) => request(app).put(`${URL}/settings`).set(as(who)).send(body)
@@ -67,12 +67,39 @@ describe('PUT /api/v1/business/settings', () => {
     expect(get.body.settings.priceRiseAlertPct).toBe(5)
   })
 
+  it('stores a VAT rate and dealer type, and a three-number body keeps them (plan 723)', async () => {
+    const res = await put({ ...VALID, vatRatePct: 17, dealerType: 'patur' })
+    expect(res.status).toBe(200)
+    const get = await request(app).get(URL).set(as(OWNER))
+    expect(get.body.settings).toMatchObject({ vatRatePct: 17, dealerType: 'patur' })
+    expect((await put({ ...VALID, profitTargetPct: 31 })).status).toBe(200)
+    expect((await stored('b1')).settings).toMatchObject({ vatRatePct: 17, dealerType: 'patur', profitTargetPct: 31 })
+  })
+
+  it('refuses vatRatePct 101 and an unknown dealer type with 400 (plan 723)', async () => {
+    expect((await put({ ...VALID, vatRatePct: 101 })).status).toBe(400)
+    expect((await put({ ...VALID, dealerType: 'x' })).status).toBe(400)
+    expect((await stored('b1')).settings).toBeUndefined()
+  })
+
+  it('staff cannot change the VAT rate (plan 723)', async () => {
+    expect((await put({ ...VALID, vatRatePct: 17 }, STAFF)).status).toBe(403)
+    expect((await stored('b1')).settings).toBeUndefined()
+  })
+
+  it('consultant is refused with 403 and nothing changes (plan 723)', async () => {
+    await testDb().collection('businessAccess').insertOne({ _id: 'g1', userId: 'c1', businessId: 'b1', role: 'consultant', grantedBy: 'own1', grantedByName: 'owner1', grantedAt: 1 })
+    const consultant = { userId: 'c1', name: 'c', businessId: 'b1', businessRole: 'consultant', homeBusinessId: 'b2', acting: 'consultant' }
+    expect((await put({ ...VALID, vatRatePct: 17 }, consultant)).status).toBe(403)
+    expect((await stored('b1')).settings).toBeUndefined()
+  })
+
   it('owner saves valid numbers and the next GET returns them', async () => {
     const res = await put(VALID)
     expect(res.status).toBe(200)
     expect(res.body).toEqual({ settings: VALID })
     const get = await request(app).get(URL).set(as(OWNER))
-    expect(get.body.settings).toEqual({ ...VALID, priceRiseAlertPct: 5 })
+    expect(get.body.settings).toEqual({ ...VALID, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe' })
   })
 
   it.each([
