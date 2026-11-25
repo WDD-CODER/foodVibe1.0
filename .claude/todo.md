@@ -779,3 +779,30 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A5: Add the license, the contributing note and the security note — LICENSE, CONTRIBUTING.md, SECURITY.md
 - [ ] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
 - [ ] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
+
+### Plan 739 — House rules for one product feel: page recipes, behaviour rules and an audit of every route
+- [ ] A1: Read how the six standard screens are built and note what they share — pieces, frame, states, scroll, motion, drag, feedback, per screen, as working notes under Execution Notes — this plan file
+- [ ] A2: Write the five page recipes so a builder knows what each kind of page is made of — the `## Page recipes` part with every field of P0 — docs/agent/house-style.md
+- [ ] A3: Write the seven behaviour rules so every page scrolls, moves, loads and answers the same way — the `## Behaviour rules` part with every field of P0, citing the existing defaults — docs/agent/house-style.md
+- [ ] A4: Make Style QA cover the routes it does not measure yet — entries for diagnosis, invoices, stock count and command center — docs/qa/styleqa-pages.json
+- [ ] A5: Measure the look of every page — slot servers up, `/styleqa` on all pages, the report path and the summary lines under Execution Notes — this plan file
+- [ ] A6: Write the audit that says which rules each page breaks and in what order to fix them — the four sections of P0, `gaps today` filled back into each rule — docs/qa/house-style-audit.md, docs/agent/house-style.md
+- [ ] A7: Run every automatic check and hand Dandan the two reading cards — outputs under Execution Notes — this plan file
+
+### Plan 740 — A new page is built to the house rules from the start: plan check, proposed defaults and lint rules
+- [ ] A1: Make every plan that adds a page name the recipe it is built from — the new Page recipe section — docs/agent/plan-checks.md
+- [ ] A2: Offer each behaviour rule to Dandan as a product default he can turn on with one word — one proposed section per rule marked default — _shared/product-defaults.md
+- [ ] A3: Warn in the diff when new code breaks a rule a script can see — one house lint rule per rule marked lint, each tried on the six standard screens first — scripts/lib/registry-families.mjs
+- [ ] A4: Give motion two shared durations so new code stops inventing its own — two tokens after the easing tokens and two rows in the Animation table — src/styles.scss, .interface-design/system.md
+- [ ] A5: Point builders and the style reviewer at the rules where they already look — the registry pointer and Recipes lines, the regenerated inventory, the House rules section — docs/brain/component-families.md, docs/brain/inventory.md, docs/qa/styleqa-theme.md
+- [ ] A6: Start the record that proves the rules work, and list what the kit must own — the Pilot log table and the Kit needs lines — docs/agent/house-style.md
+- [ ] A7: Run every check of this plan and hand Dandan the two cards — outputs under Execution Notes — this plan file
+
+### Plan 741 — Move the proven house-rules mechanism into the workflow kit so every project gets it
+- [ ] A1: Check that the rules really worked on three new pages before anything moves to the kit — count the Pilot log rows with no fix-up; stop when fewer than three — docs/agent/house-style.md
+- [ ] A2: Sort what the pilot built into what every project needs and what is only FoodVibe's — the mechanism / content list under Execution Notes — this plan file
+- [ ] A3: Write the kit's own plan for the mechanism in the kit repository — the seven items of P0, through a kit branch and pull request — ../ai-workflow-kit/plans (the kit's next number)
+- [ ] A4: Get Dandan's approval of the kit plan, then build and release it the kit's way — the kit plan card; the release tag under Execution Notes — this plan file
+- [ ] A5: Bring the released kit version into FoodVibe and drop the pilot text the kit now owns — kit-sync with the release tag, the plan-checks pointer line, the config key — docs/agent/plan-checks.md, kit.config.json, docs/workflow-kit/**
+- [ ] A6: Record the decision so the next project knows how the rules got into the kit — the ADR and its index line — docs/brain/decisions/**, docs/brain/index.md
+- [ ] A7: Run every check and hand Dandan the gate card — outputs under Execution Notes — this plan file
