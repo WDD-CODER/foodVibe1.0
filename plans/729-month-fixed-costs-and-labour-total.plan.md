@@ -83,6 +83,7 @@ src/app/pages/monthly-plan/components/labour-card/labour-card.component.spec.ts
 server/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
