@@ -115,11 +115,6 @@ export class SimulatorPage {
   protected readonly level_ = computed(() => this.profiles.profile_()?.assistant.level ?? null)
   protected readonly heldByStaff_ = computed(() => this.thread_()?.conversation.status === 'human')
   protected readonly handBackBusy_ = signal(false)
-  /** The assistant's draft for the staff, shown only at level 0 on a conversation the assistant still holds. */
-  protected readonly draft_ = computed(() => {
-    const c = this.thread_()?.conversation
-    return this.level_() === 0 && c?.status === 'bot' && c.suggestion ? c.suggestion : null
-  })
   protected readonly threadFailed_ = computed(() => !!this.guest_()?.conversationId && !!this.data.threadFailed_())
 
   protected readonly bookingId_ = computed(() => this.thread_()?.conversation.bookingId ?? null)

@@ -193,7 +193,7 @@ describe('R-10: a closed day', () => {
   });
 });
 
-describe('R-04: a failure is silent', () => {
+describe('R-04 as changed by plan 733: a failure sends one holding message', () => {
   const cases = {
     'a 500 answer': () => fetchMock.mockResolvedValue(jsonResponse(500, {})),
     'a timeout': () => fetchMock.mockRejectedValue(Object.assign(new Error('t'), { name: 'TimeoutError' })),
@@ -208,15 +208,125 @@ describe('R-04: a failure is silent', () => {
     'an answer that fails the schema': () => fetchMock.mockResolvedValue(modelAnswer({ reply: 5, intent: 'nope' })),
   };
   for (const [name, arrange] of Object.entries(cases)) {
-    it(`${name}: nothing sent, handed to a person, suggestion untouched`, async () => {
+    it(`${name}: one holding message, handed to a person, suggestion untouched`, async () => {
       const { conversation } = await setup({ level: 1 });
       await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { suggestion: 'KEEP' } });
       await arrange();
       await turn(conversation);
-      expect(await outbound()).toHaveLength(0);
+      const out = await outbound();
+      expect(out).toHaveLength(1);
+      expect(out[0]).toMatchObject({ author: 'server', text: fixedText('fd_ai_holding_default') });
       expect(await conv(conversation._id)).toMatchObject({ status: 'human', suggestion: 'KEEP' });
+      expect(logs.byEvent('frontdesk.turn.holding')).toHaveLength(1);
+      expect(logs.byEvent('frontdesk.turn.holding')[0]).toMatchObject({ sent: true });
+      expect(JSON.stringify(logs.records)).not.toContain('GUEST-SECRET-TEXT');
+      expect(JSON.stringify(logs.records)).not.toContain(fixedText('fd_ai_holding_default'));
     });
   }
+});
+
+describe('plan 733: the simulator answers as level 1, a failure holds the guest once', () => {
+  const FAIL503 = () => fetchMock.mockResolvedValue(jsonResponse(503, {}));
+  const setStatus = (id, status) => db().collection('conversations').updateOne({ _id: id }, { $set: { status } });
+
+  it('a test conversation at level 0 is answered, no suggestion stored', async () => {
+    const { conversation } = await setup({ level: 0, test: true });
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation);
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ author: 'ai', text: 'שלום' });
+    const after = await conv(conversation._id);
+    expect(after.suggestion).toBeUndefined();
+    expect(after.status).toBe('bot');
+  });
+
+  it('a test conversation at level 0 with a table request: a test request and the will-confirm sentence', async () => {
+    const { conversation } = await setup({ level: 0, test: true });
+    fetchMock.mockResolvedValue(modelAnswer(COMPLETE));
+    await turn(conversation);
+    const requests = await db().collection('requests').find({}).toArray();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].test).toBe(true);
+    expect((await outbound())[0].text).toBe(fixedText('fd_ai_will_confirm'));
+  });
+
+  it('a held test conversation at level 0 gets no answer', async () => {
+    const { conversation } = await setup({ level: 0, test: true, status: 'human' });
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    const res = await turn(await conv(conversation._id));
+    expect(res).toEqual({ skipped: 'not_bot' });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(await outbound()).toHaveLength(0);
+  });
+
+  it('the business handoff text is the holding text', async () => {
+    const { conversation } = await setup({ level: 1, assistant: { handoffText: 'HANDOFF-X' } });
+    FAIL503();
+    await turn(conversation);
+    expect((await outbound())[0].text).toBe('HANDOFF-X');
+  });
+
+  it('the daily cap sends the holding message', async () => {
+    const { conversation } = await setup({ level: 1 });
+    await db().collection('aiUsage').insertMany(Array.from({ length: FRONTDESK_DAILY_TURNS }, (_, i) => ({
+      businessId: 'b1', day: jerusalemDate(Date.now()), feature: 'frontdesk_turn', ok: true, at: Date.now(), i,
+    })));
+    await turn(conversation);
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0].text).toBe(fixedText('fd_ai_holding_default'));
+  });
+
+  it('a test conversation at level 0 with a 503 sends the holding message', async () => {
+    const { conversation } = await setup({ level: 0, test: true });
+    FAIL503();
+    await turn(conversation);
+    expect((await outbound())[0].text).toBe(fixedText('fd_ai_holding_default'));
+  });
+
+  it('one holding message per guest message', async () => {
+    const { conversation } = await setup({ level: 1 });
+    FAIL503();
+    await turn(conversation);
+    expect(await outbound()).toHaveLength(1);
+    await setStatus(conversation._id, 'bot');
+    await turn(await conv(conversation._id));
+    expect(await outbound()).toHaveLength(1);
+    await setStatus(conversation._id, 'bot');
+    await db().collection('messages').insertOne({
+      _id: 'g2', businessId: 'b1', conversationId: conversation._id, direction: 'in', author: 'guest', kind: 'text',
+      text: 'again', at: Date.now() + 10000, providerMessageId: 'pm2', status: 'delivered',
+    });
+    await turn(await conv(conversation._id));
+    expect(await outbound()).toHaveLength(2);
+  });
+
+  it('a real conversation at level 0 gets nothing', async () => {
+    const { conversation } = await setup({ level: 0 });
+    FAIL503();
+    await turn(conversation);
+    expect(await outbound()).toHaveLength(0);
+    expect(await conv(conversation._id)).toMatchObject({ status: 'human', assistantFailed: { reason: 'busy' } });
+  });
+
+  it('suggest mode with a 503: nothing sent, status unchanged', async () => {
+    const { conversation } = await setup({ level: 1 });
+    FAIL503();
+    await turn(conversation, { mode: 'suggest' });
+    expect(await outbound()).toHaveLength(0);
+    expect((await conv(conversation._id)).status).toBe('bot');
+  });
+
+  it('a guardrail block at level 1 still sends the handoff sentence by the assistant, no holding row', async () => {
+    const { conversation } = await setup({ level: 1 });
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'אבדוק ואחזור אליך', intent: 'smalltalk' }));
+    await turn(conversation);
+    const out = await outbound();
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ author: 'ai', text: fixedText('fd_ai_handoff_default') });
+    expect(logs.byEvent('frontdesk.turn.holding')).toHaveLength(0);
+  });
 });
 
 describe('plan 701: the reason a turn failed (staff only)', () => {
@@ -226,7 +336,7 @@ describe('plan 701: the reason a turn failed (staff only)', () => {
     const { conversation } = await setup({ level: 1 });
     await arrange();
     await turn(conversation);
-    expect(await outbound()).toHaveLength(0);
+    expect(await outbound()).toHaveLength(1);
     return { conversation, after: await conv(conversation._id) };
   };
 
@@ -292,7 +402,7 @@ describe('the daily cap', () => {
     fetchMock.mockResolvedValue(modelAnswer(SMALL));
     await turn(conversation);
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(await outbound()).toHaveLength(0);
+    expect(await outbound()).toHaveLength(1);
     expect((await conv(conversation._id)).status).toBe('human');
   });
 
@@ -462,7 +572,7 @@ describe('plan 731: one more try on a malformed answer', () => {
     fetchMock.mockResolvedValue(modelAnswer({ reply: 'MODEL-REPLY-TEXT', intent: 'weird' }));
     await turn(conversation);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(await outbound()).toHaveLength(0);
+    expect(await outbound()).toHaveLength(1);
     const after = await conv(conversation._id);
     expect(after.status).toBe('human');
     expect(after.assistantFailed.reason).toBe('other');
@@ -495,7 +605,7 @@ describe('plan 731: one more try on a malformed answer', () => {
       vi.restoreAllMocks();
     }
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(await outbound()).toHaveLength(0);
+    expect(await outbound()).toHaveLength(1);
     expect(logs.byEvent('frontdesk.turn.failed')[0].reason).toBe('bad_shape');
   });
 
@@ -543,6 +653,6 @@ describe('plan 732: numbers and booleans in collected', () => {
     fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, collected: { party_size: { n: 4 } } }));
     await turn(conversation);
     expect(logs.byEvent('frontdesk.turn.bad_answer')[0]).toMatchObject({ reason: 'bad_shape', paths: ['collected.party_size'] });
-    expect(await outbound()).toHaveLength(0);
+    expect(await outbound()).toHaveLength(1);
   });
 });

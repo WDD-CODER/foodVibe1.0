@@ -2,8 +2,8 @@
 /**
  * Plan 679 (C-AI): the assistant's turn. The model proposes (one JSON answer); the server validates what it
  * collected, runs the rules, writes the request and decides what is sent. Level 0 stores a suggestion, level 1 (and the
- * reserved level 2) answers through `sendOut`. A failure is always silent (R-04): the conversation goes to a person and
- * nothing is sent. Logs carry ids, enums and booleans only — never guest text, a name or a phone.
+ * reserved level 2) answers through `sendOut`. A technical failure hands the conversation to a person and sends one holding
+ * message per guest message at level 1 or in a test conversation (plan 733, R-22, which supersedes R-04's silence). Logs carry ids, enums and booleans only — never guest text, a name or a phone.
  * The one model call is `askTurnModel` (routes/ai/frontdesk.js, INV-6); it is required lazily because that file
  * requires this one.
  */
@@ -13,7 +13,7 @@ const { buildTurnBody, HISTORY_WINDOW } = require('./frontdesk-prompt');
 const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
 const { sendOut } = require('./outbound');
 const { setTurnHandler } = require('./inbound');
-const { tablesFor, handleTableIntent, deliver, cleanSuggested } = require('./frontdesk-tables');
+const { tablesFor, handleTableIntent, deliver, cleanSuggested, turnProfile } = require('./frontdesk-tables');
 const { createRequest, runQualify } = require('../utils/request-create');
 const { fixedText, reasonText } = require('../utils/fixed-text');
 const { jerusalemDate } = require('../middleware/usage');
@@ -115,6 +115,18 @@ async function handOff(db, conversation, { now, silent = false, profile, mode = 
 
 const handoffSentence = profile => (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_handoff_default');
 
+/** Plan 733 (R-22): one holding message per guest message after a technical failure; never to a real level-0 guest. */
+async function holdGuest(db, conversation, { now, profile, mode, log }, group) {
+  if (mode !== 'turn' || levelOf(profile) < 1) return;
+  const [last] = await colOf(db, 'messages')
+    .find({ businessId: conversation.businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(1).toArray();
+  if (!last || last.direction !== 'in') return;
+  const text = (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_holding_default');
+  const sent = await sendOut(db, conversation, { kind: 'text', text }, 'server', { now });
+  if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
+  log.info({ event: 'frontdesk.turn.holding', conversationId: conversation._id, group, sent: !!sent.ok });
+}
+
 /** R-02: the guest asked to be removed. One fixed sentence, the do-not-contact flag, then a person. */
 async function removeGuest(db, conversation, { now, log }) {
   const businessId = conversation.businessId;
@@ -171,8 +183,9 @@ async function runTurn(db, conversation, opts = {}) {
 async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature } = {}) {
   const businessId = conversation.businessId;
   if (mode === 'turn' && conversation.status !== 'bot') return { skipped: 'not_bot' };
-  const profile = await colOf(db, 'frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } });
-  if (!profile) return { skipped: 'no_profile' };
+  const stored = await colOf(db, 'frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } });
+  if (!stored) return { skipped: 'no_profile' };
+  const profile = turnProfile(stored, conversation);
   const base = { now, profile, mode, log };
 
   if (mode === 'turn' && !conversation.test) {
@@ -182,6 +195,7 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     if (used >= FRONTDESK_DAILY_TURNS) {
       log.info({ event: 'frontdesk.turn.cap', conversationId: conversation._id });
       await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: 'quota' } });
+      await holdGuest(db, conversation, base, 'quota');
       return { ok: false, reason: 'cap', group: 'quota' };
     }
   }
@@ -216,7 +230,10 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
   if (!asked.ok) {
     const group = failureReason(asked.reason, asked.status);
     log.info({ event: 'frontdesk.turn.failed', reason: asked.reason, group, mode, conversationId: conversation._id });
-    if (mode === 'turn') await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: group } });
+    if (mode === 'turn') {
+      await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: group } });
+      await holdGuest(db, conversation, base, group);
+    }
     return { ok: false, reason: asked.reason, group };
   }
 

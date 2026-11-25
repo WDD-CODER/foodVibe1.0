@@ -408,6 +408,19 @@ describe('change', () => {
   });
 });
 
+describe('plan 733: a test conversation at level 0', () => {
+  it('sends the offer and a tap books a test booking', async () => {
+    const { conversation } = await setup({ level: 0, test: true });
+    await say(conversation, BOOK(FULL_ASK));
+    expect((await outs()).length).toBeGreaterThan(0);
+    expect((await conv(conversation._id)).suggestion).toBeUndefined();
+    await tap('OK:1');
+    const rows = await bookings();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].test).toBe(true);
+  });
+});
+
 describe('level 0', () => {
   it('stores the offer as the suggestion, sends nothing, writes no pending; a tap writes nothing', async () => {
     const { conversation } = await setup({ level: 0 });

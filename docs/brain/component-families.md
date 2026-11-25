@@ -980,6 +980,6 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### simulator-level-held-draft — the simulator's level line, held line and draft block (plan 719)
 
 - Status: stable
-- Use: `src/app/pages/frontdesk/simulator/simulator.page.html` and `.scss` · `.sim-level`, `.sim-held`, `.sim-draft` beside `ai-failed-note`.
+- Use: `src/app/pages/frontdesk/simulator/simulator.page.html` and `.scss` · `.sim-level`, `.sim-held` beside `ai-failed-note` (the draft block was removed by plan 733).
 - When: another note about the assistant's state in the simulator — extend these blocks.
 - Known copies: none.

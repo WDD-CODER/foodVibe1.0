@@ -29,7 +29,7 @@ const DICT: Record<string, string> = {
   sim_send: 'שליחה',
   sim_clear: 'ניקוי נתוני בדיקה',
   sim_clear_confirm_text: 'כל נתוני הבדיקה יימחקו',
-  sim_level_0: 'רמת טיוטות',
+  sim_level_0_sim: 'בסימולטור העוזר עונה כמו ברמה 1',
   sim_level_1: 'העוזר עונה לאורחים לבד',
   sim_held_by_staff: 'השיחה אצל הצוות',
   sim_draft_label: 'טיוטת העוזר לצוות',
@@ -287,7 +287,7 @@ describe('SimulatorPage (plan 678)', () => {
     expect(byId('sim-level')).toBeNull()
     profile.set({ assistant: { level: 0 } })
     await settle()
-    expect(text(byId('sim-level'))).toContain('רמת טיוטות')
+    expect(text(byId('sim-level'))).toContain('בסימולטור העוזר עונה כמו ברמה 1')
     profile.set({ assistant: { level: 1 } })
     await settle()
     expect(text(byId('sim-level'))).toContain('העוזר עונה לאורחים לבד')
@@ -308,12 +308,12 @@ describe('SimulatorPage (plan 678)', () => {
     expect((data['open'] as jasmine.Spy).calls.count()).toBeGreaterThan(openCalls)
   })
 
-  it('shows the level-0 draft under the chat, and no draft at level 1 (plan 719)', async () => {
+  it('never shows a draft block, also at level 0 with a suggestion (plan 733)', async () => {
     conversations.set([row('a', 'אורח בדיקה', '0500000001', { suggestion: 'לאיזה תאריך?' })])
     profile.set({ assistant: { level: 0 } })
     await create()
     await pickGuest()
-    expect(text(byId('sim-draft'))).toContain('לאיזה תאריך?')
+    expect(byId('sim-draft')).toBeNull()
     expect(byId('sim-held')).toBeNull()
     profile.set({ assistant: { level: 1 } })
     await settle()

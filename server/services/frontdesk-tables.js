@@ -31,6 +31,17 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const colOf = (db, name) => db.collection(name);
 const levelOf = profile => (profile && profile.assistant && profile.assistant.level) || 0;
+
+/**
+ * A test conversation (the simulator) is answered as level 1 whatever the business's level (plan 733, R-23);
+ * real guests keep the level. Pure: the input is not mutated.
+ */
+function turnProfile(profile, conversation) {
+  if (conversation && conversation.test === true && levelOf(profile) < 1) {
+    return { ...profile, assistant: { ...(profile.assistant || {}), level: 1 } };
+  }
+  return profile;
+}
 const ddmm = date => `${date.slice(8, 10)}/${date.slice(5, 7)}`;
 const slotTitle = (date, time) => `${ddmm(date)} ${time}`;
 const validDate = v => typeof v === 'string' && DATE_RE.test(v) && new Date(v + 'T00:00:00Z').toISOString().startsWith(v);
@@ -299,7 +310,7 @@ async function onTap(db, conversation, at, fn) {
   const conv = await loadConversation(db, conversation.businessId, conversation._id);
   if (!conv || conv.status !== 'bot') return;
   const tables = await tablesFor(db, conv.businessId);
-  if (!tables || levelOf(tables.profile) < 1) return;
+  if (!tables || levelOf(turnProfile(tables.profile, conv)) < 1) return;
   const res = await fn(conv, tables);
   if (!res) return;
   await deliver(db, conv, res, { now: at, profile: tables.profile });
@@ -353,4 +364,4 @@ function registerTableButtons(register = registerButton) {
 }
 registerTableButtons();
 
-module.exports = { tablesFor, handleTableIntent, deliver, registerTableButtons, cleanSuggested, EXPIRE_MS };
+module.exports = { turnProfile, tablesFor, handleTableIntent, deliver, registerTableButtons, cleanSuggested, EXPIRE_MS };
