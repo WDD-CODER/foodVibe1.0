@@ -107,6 +107,8 @@ src/app/shared/breadcrumbs.md
 src/app/core/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/workflow-kit/manifest.json
+src/app/appRoot/app.component.spec.ts
+src/app/pages/dashboard/dashboard.page.spec.ts
 ```
 
 `_shared/debt-baseline.json` and `docs/workflow-kit/manifest.json` are listed so a count that only goes down, or a
