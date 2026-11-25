@@ -35,6 +35,7 @@ const NAME_MAX = 80
 const FAST_MS = 2_000
 const FAST_WINDOW_MS = 30_000
 const SLOW_EVERY = 5
+const TYPING_MAX_MS = 45_000
 const PHONE_CHARS = /^[\d\s+-]+$/
 
 /** The test guest the owner plays: a phone and a name, and the conversation once the first message was sent. */
@@ -114,6 +115,17 @@ export class SimulatorPage {
   /** Plan 719: the assistant level of the business, or null while the profile is not loaded. */
   protected readonly level_ = computed(() => this.profiles.profile_()?.assistant.level ?? null)
   protected readonly heldByStaff_ = computed(() => this.thread_()?.conversation.status === 'human')
+  /**
+   * Plan 735: the assistant is still working on the guest's message — the newest message is the guest's and the
+   * assistant still holds the chat; hidden after 45 s so a crashed turn never leaves the dots.
+   */
+  protected readonly typing_ = computed(() => {
+    const t = this.thread_()
+    if (!t || t.conversation.status !== 'bot') return false
+    const last = t.messages[t.messages.length - 1]
+    if (!last || last.direction !== 'in' || last.author !== 'guest' || last.kind !== 'text') return false
+    return this.threadNow_() - last.at < TYPING_MAX_MS
+  })
   protected readonly handBackBusy_ = signal(false)
   protected readonly threadFailed_ = computed(() => !!this.guest_()?.conversationId && !!this.data.threadFailed_())
 
@@ -318,7 +330,7 @@ export class SimulatorPage {
       setInterval(() => {
         if (document.visibilityState === 'hidden') return
         this.tick++
-        const fast = Date.now() < this.fastUntil
+        const fast = Date.now() < this.fastUntil || untracked(() => this.typing_())
         if (fast || this.tick % SLOW_EVERY === 0) untracked(() => void this.readThread())
       }, FAST_MS)
     )

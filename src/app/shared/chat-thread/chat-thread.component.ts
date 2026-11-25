@@ -64,6 +64,8 @@ export class ChatThreadComponent {
   /** Plan 682: shows "fix this answer" under every message the assistant wrote. */
   readonly fixable = input(false)
   readonly fixRequested = output<string>()
+  /** Plan 735: shows the other side's 'writing…' bubble after the last message. */
+  readonly typing = input(false)
 
   protected readonly items_ = computed<ChatItem[]>(() => {
     const list = this.messages()

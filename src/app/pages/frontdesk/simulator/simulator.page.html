@@ -165,6 +165,7 @@
             [now]="threadNow_()"
             perspective="guest"
             [buttonsEnabled]="!tapBusy_()"
+            [typing]="typing_()"
             (buttonTapped)="tap($event)"
           />
           } @else if (threadFailed_()) {

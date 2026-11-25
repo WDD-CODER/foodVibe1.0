@@ -555,7 +555,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### chat-thread — the message thread of a guest conversation
 
 - Status: stable — plan 677
-- Use: `src/app/shared/chat-thread/` · `app-chat-thread` (inputs `messages`, `now`, `perspective` `'business' | 'guest'`, `buttonsEnabled`, `fixable` (plan 682: a "fix this answer" button under assistant messages); outputs `buttonTapped`, `fixRequested`): read-only bubbles, a template message shown as its dictionary body with its values, the author tag, the delivery state as an icon with a label, buttons on the newest outbound message, a day line between Jerusalem dates. No service inside: the page gives it the messages.
+- Use: `src/app/shared/chat-thread/` · `app-chat-thread` (inputs `messages`, `now`, `perspective` `'business' | 'guest'`, `buttonsEnabled`, `fixable` (plan 682: a "fix this answer" button under assistant messages); `typing` (plan 735: the other side's "writing…" bubble with three moving dots, a static text under reduced motion, a polite live region; classes `.ct-typing`, `.ct-dot`); outputs `buttonTapped`, `fixRequested`): read-only bubbles, a template message shown as its dictionary body with its values, the author tag, the delivery state as an icon with a label, buttons on the newest outbound message, a day line between Jerusalem dates. No service inside: the page gives it the messages.
+- Typing row (plan 735): the typing row is drawn inside the one list by the `typing` input; its classes are `.ct-typing`, `.ct-dot`, `.ct-typing-text` (own stylesheet).
 - Classes: `.ct`, `.ct-row`, `.ct-bubble`, `.ct-meta`, `.ct-status` (the component's own stylesheet; no `.c-*` class added).
 - When: any screen that draws a guest conversation (the inbox, the simulator of plan 678) — never a second bubble list.
 - Second user: the simulator (`src/app/pages/frontdesk/simulator/`, plan 678) draws it with `perspective` `'guest'` and `buttonsEnabled` true.
@@ -890,7 +891,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### simulator-page — the owner plays a test guest (plan 678)
 
 - Status: stable — plan 678
-- Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data; plan 719 adds the assistant level line, the held-by-staff line with hand back, and the level-0 draft.
+- Use: `src/app/pages/frontdesk/simulator/` · `SimulatorPage` at `/frontdesk/simulator`: a banner that nothing leaves the app, the test guests, a phone-shaped chat (`app-chat-thread` as the guest), the window clock, the reminder / late-mark buttons and clear test data; plan 719 adds the assistant level line, the held-by-staff line with hand back, and the level-0 draft; the typing dots while the assistant works (plan 735).
+- The "assistant is working" rule (plan 735): `typing_` in `SimulatorPage`, from the newest message, the status and the server clock.
 - Pieces: SimulatorPage, SimulatorService.
 - When: any test of the conversation channel from inside the app; a second simulator screen is never added.
 - Known copies: none.
@@ -1004,4 +1006,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `server/routes/business.js` · the owner switches `assistant.level` between 0 and 1; refused for staff (`editFrontDesk`), a reserved level 2 and a draft or suspended front desk; each switch is a `levelHistory` row. Client: `FrontDeskProfileDataService.setAssistantLevel`.
 - When: another one-field owner write on the front desk profile — add a sibling route beside it, not a generic data PUT.
+- Known copies: none.
+
+### chat-typing-dots — the moving dots of a "writing…" bubble (plan 735)
+
+- Status: stable — plan 735
+- Use: `src/app/shared/chat-thread/chat-thread.component.scss` · the moving dots are three `.ct-dot` inside `.ct-typing`, one keyframe `ct-typing-bounce`; hidden under `prefers-reduced-motion`, where `.ct-typing-text` shows. Not `app-loader` (a page / section spinner).
+- Classes: `.ct-dot`, `.ct-typing`, `.ct-typing-text`.
+- When: only the chat thread's own typing row; one user, so no `.c-*` class.
 - Known copies: none.
