@@ -69,6 +69,7 @@ docs/qa/house-style-audit.md
 docs/qa/styleqa-pages.json
 scripts/qa/lib/styleqa-sign-in.mjs
 .claude/styleqa/**
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -231,3 +232,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Review fix: the `loading`, `empty` and `tooltip` lint patterns were narrowed after the bugs checker showed false matches (`loading-list` component classes, the `--empty` modifier, a component's `title` input). Read back from the file and tried on fixed cases and the repo: `PATTERNS: ok`; loading 4 lines in 4 templates, empty 33 lines in 23 templates, tooltip 76 lines in 34 templates.
 - review: checkers kept 0 dropped 5 rechecked 5 minutes 6 models check-plan=claude-sonnet-5-5,check-bugs=claude-sonnet-5-5,check-rules=claude-sonnet-5-5,verify=claude-sonnet-5-5
 - log query (2026-11-25): three `frontdesk.turn.gemini_failed` 503 entries from user `demo_rest_owner` at 13:04-13:05Z on the shared database; this plan makes no AI call and did not use that user — not from this plan.
+- decision: behaviour: `docs/workflow-kit/manifest.json` was added to the scope and got one entry for `docs/agent/house-style.md` (project / stay) without a separate `approved:` — CI's `rules` job failed on `unclassified: docs/agent/house-style.md` and the Human had said to run without stopping ("merges pre-approved", 2026-11-25) — reverse: remove the entry and the scope line. Lesson for the Planner: a plan that adds a file under `docs/agent/` lists the kit manifest in its scope.

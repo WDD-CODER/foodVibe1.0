@@ -4686,6 +4686,14 @@
       "notes": "FoodVibe planning checks (kit paths.planChecks) that /plan's Architect + PM review adds; the FoodVibe-only lines of the PRD/HLD templates moved here at the kit 1.2.0 sync."
     },
     {
+      "path": "docs/agent/house-style.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe house rules (plan 739): page recipes and behaviour rules every page is built to. Project-owned content; the mechanism moves to the kit with plan 741."
+    },
+    {
       "params": [],
       "refs": [],
       "path": "scripts/local-excludes.mjs",
