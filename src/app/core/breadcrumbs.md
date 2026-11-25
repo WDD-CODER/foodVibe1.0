@@ -16,7 +16,7 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 | `guards/welcome.guard.ts` | Sends a signed-in user from `/welcome` to `/dashboard` | welcomeGuard |
 | `resolvers/` | Entity fetch for edit routes | productResolver, recipeResolver, equipmentResolver, venueResolver, supplierResolver |
 | `pipes/` | Translation and quantity formatting | TranslatePipe, FormatQuantityPipe |
-| `directives/` | Focus, scroll, click-outside, textarea grow | SelectOnFocusDirective, FocusByRowDirective, ClickOutSideDirective, ScrollIndicatorsDirective, TextareaAutoGrowDirective |
+| `directives/` | Focus, scroll, arrow-key reorder, click-outside, textarea grow | SelectOnFocusDirective, FocusByRowDirective, ClickOutSideDirective, ScrollIndicatorsDirective, ReorderKeysDirective, TextareaAutoGrowDirective |
 | `validators/item.validators.ts` | Duplicate-name checks for forms | duplicateNameValidator, duplicateEntityNameValidator |
 | `engine/` | Pure quantity and cost engine for event lists (plan 433): raw/prep lines, dish and event cost, rounding helpers; its shared 04.1 test fixture lives in the testing folder | computeEventPlan, EventPlanService, chooseSupplier, roundPortions, formatQty, formatMoney, computePortions |
 | `utils/returning-visitor.util.ts` | `fv_returning` device mark: has someone signed in here before (set on sign-in, cleared on logout) | markReturningVisitor, clearReturningVisitor, isReturningVisitor |

@@ -77,6 +77,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+_shared/product-defaults.md
 src/app/shared/scroll-area/**
 src/app/core/directives/reorder-keys.directive.ts
 src/app/core/directives/reorder-keys.directive.spec.ts
@@ -228,15 +229,15 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give every drag list one shared look for the lifted row, the gap and the settle — the drag block with three engine classes — src/styles.scss
-- [ ] A2: Move the four drag lists onto the shared look and delete their own copies — engine classes in the templates, the cdk rules out of the four stylesheets — the four drag component folders
-- [ ] A3: Let a row be moved with the arrow keys from its grip, so reordering works without a mouse — the reorder-keys directive with its spec — src/app/core/directives/reorder-keys.directive.ts, src/app/core/directives/reorder-keys.directive.spec.ts
-- [ ] A4: Wire the keyboard move into the four lists through the same reorder a drop uses — one move method per component, the handle label key, one spec case each — the four drag component folders, public/assets/data/dictionary.json
-- [ ] A5: Make the "more to scroll" arrows available to any block, not only to lists — the scroll block in the styles and the scroll-area component with its spec — src/styles.scss, src/app/shared/scroll-area/**
-- [ ] A6: Use the shared scroll area in the trash history and show both new pieces in the catalog — the trash panel, two catalog entries — src/app/pages/trash/**, src/app/pages/dev-catalog/**
-- [ ] A7: Show one focus ring on every button and link reached with the keyboard — the focus block; the count of controls that still hide it under Execution Notes — src/styles.scss
-- [ ] A8: Record the new pieces where builders look, and name them in the house rules — the two registry families, engine lines, inventory, folder maps, the three rules — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md, src/app/core/breadcrumbs.md, docs/agent/house-style.md, .interface-design/system.md
-- [ ] A9: Run every check of this plan and hand Dandan the seven cards — outputs under Execution Notes — this plan file
+- [x] A1: Give every drag list one shared look for the lifted row, the gap and the settle — the drag block with three engine classes — src/styles.scss
+- [x] A2: Move the four drag lists onto the shared look and delete their own copies — engine classes in the templates, the cdk rules out of the four stylesheets — the four drag component folders
+- [x] A3: Let a row be moved with the arrow keys from its grip, so reordering works without a mouse — the reorder-keys directive with its spec — src/app/core/directives/reorder-keys.directive.ts, src/app/core/directives/reorder-keys.directive.spec.ts
+- [x] A4: Wire the keyboard move into the four lists through the same reorder a drop uses — one move method per component, the handle label key, one spec case each — the four drag component folders, public/assets/data/dictionary.json
+- [x] A5: Make the "more to scroll" arrows available to any block, not only to lists — the scroll block in the styles and the scroll-area component with its spec — src/styles.scss, src/app/shared/scroll-area/**
+- [x] A6: Use the shared scroll area in the trash history and show both new pieces in the catalog — the trash panel, two catalog entries — src/app/pages/trash/**, src/app/pages/dev-catalog/**
+- [x] A7: Show one focus ring on every button and link reached with the keyboard — the focus block; the count of controls that still hide it under Execution Notes — src/styles.scss
+- [x] A8: Record the new pieces where builders look, and name them in the house rules — the two registry families, engine lines, inventory, folder maps, the three rules — docs/brain/component-families.md, docs/brain/inventory.md, src/app/shared/breadcrumbs.md, src/app/core/breadcrumbs.md, docs/agent/house-style.md, .interface-design/system.md
+- [x] A9: Run every check of this plan and hand Dandan the seven cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: `@angular/cdk/drag-drop` (already used), `ScrollIndicatorsDirective`, Lucide `chevron-up` /
@@ -267,3 +268,24 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Q: Does the AI model list keep its own fancier drag look? A: no — one look everywhere is the point; it is listed as a `removes:` decision and has its own card.
 
 ## Execution Notes
+- decision: seen: the Done-when "needs: prints 0" predates the two rules the Human added; sideways-row and tooltip keep their needs: and later check: lines
+- decision: removes: the AI model row's tilt and dashed drop box — reverse: restore ai-model-manager.component.scss:140-174
+- decision: removes: the `.<row>.cdk-drag-preview { display; align-items; gap; padding }` layout rules the plan said to keep — they match the Done-when grep `\.cdk-drag-(preview|animating)` (which must print nothing); the lifted row keeps its own row-class layout (the clone carries the row classes) — reverse: re-add `.<row class>.cdk-drag-preview { display: flex; align-items: center; gap; padding }` in the three stylesheets
+- decision: behaviour: appReorderKeys returns focus to the host handle itself when it is still in the page (rows tracked by identity are moved, not re-created) and uses the `[data-reorder-key]` lookup inside the nearest `.c-drag-list` only when the host is gone — reverse: always use the key lookup
+- decision: behaviour: the recipe ingredient table's `@for` now tracks the form group (was `$index`) so a moved row keeps its own handle and focus — reverse: `track $index` (focus then stays on the old position)
+- decision: behaviour: recipe ingredients and steps pass `$index` as `reorderKey` (form groups have no id); it is only the fallback and never used while the handle is still in the page — reverse: n/a
+- decision: behaviour: ai-model-manager, ai-draft-editor had no spec file; two new spec files hold the one new case each (the ai-draft-editor one covers an ingredient and a step) — reverse: delete the two spec files
+- decision: behaviour: the dev catalog gets two sections ("scroll-area", "drag-list") before "engine-classes", so its section-count spec went from 13 to 15 — reverse: remove the two sections and set the spec back to 13
+- decision: behaviour: the `.c-scroll-arrow` engine has no `z-index`; `app-scroll-area` adds `position: relative; z-index: 1` to its arrows in its own stylesheet, and uses its own `.scroll-area` / `.scroll-arrow--*` class names for the sibling selector (a component stylesheet may not define `.c-*`) — reverse: move the rules into the engine
+- decision: seen: `git grep -c "outline: none\|outline: 0" -- src` counts 42 lines in 21 files — controls that still hide the ring; not fixed here
+- decision: behaviour: the lifted row keeps its layout through cdkDragPreviewClass="is-lifted" and a top-level .<row>.is-lifted rule, because nested and subgrid row layouts do not apply once the CDK moves the preview to <body> — reverse: remove the class and the rules
+- decision: behaviour: the empty custom drag placeholders were removed in all four lists so the CDK's default placeholder keeps the row's height (the gap where the row will land); before, the recipe lists' slot had no height — reverse: put back <div *cdkDragPlaceholder>
+- decision: behaviour: ai-model-manager's `.model-row` lays itself out (own grid, not nested), so it got no `is-lifted` class; the unused `.c-scroll-arrow.is-shown` rule was removed from `src/styles.scss` (a comment says the engine's user sets opacity 0.8) — reverse: re-add the rule
+- Review fix round (2026-11-25): the bugs checker found three majors — the lifted row lost its layout in recipe-workflow and in the AI draft editor (nested and subgrid row layouts do not apply once the CDK moves the preview to <body>), and the drop slot had no height in the AI model list. Fixed with `cdkDragPreviewClass="is-lifted"` and by removing the empty custom placeholders; the verifier refuted all three after the fix.
+- decision: behaviour: the lifted row's layout is one engine rule `.c-drag-item.is-lifted` in `src/styles.scss` (recipe steps and ingredients had identical rules and kit-checks reported a duplicated block); the AI draft editor keeps its own tighter `.is-lifted` rule; the grip's centring moved into `.c-drag-handle` and the scroll arrow's position into `.c-scroll-arrow` for the same reason — reverse: move the three blocks back into the component stylesheets.
+- review: checkers kept 0 dropped 5 rechecked 6 minutes 9 models check-plan=claude-sonnet-5-5,check-bugs=claude-sonnet-5-5,check-rules=claude-sonnet-5-5,verify=claude-sonnet-5-5
+- Gate (2026-11-25, after the fixes): `pnpm run build` → exit 0; `pnpm run lint` → exit 0; `pnpm run test:ci` → exit 0; `scope-check --diff` → `SCOPE: ok`; `node scripts/kit-checks.mjs --base origin/main` → exit 1 with 2 findings, both `default unsaved-changes-on-leave` on `recipe-ingredients-table.component.ts:19` and `recipe-workflow.component.ts:15`. Both files are parts of the recipe builder page, whose route has the leave guard; both are already in `_shared/debt-baseline.json` (1 each), but the diff check flags any changed file that triggers the default. Not fixed here: the fix is an `exclude` in the default's rule in `_shared/product-defaults.md`, which is the Human's file and outside this plan's scope — asked as `approved: _shared/product-defaults.md`.
+- Scope addition approved by the Human, 2026-11-25: `_shared/product-defaults.md` — one `exclude` on the `unsaved-changes-on-leave` rule for the recipe ingredients table and the recipe steps (parts of the recipe builder page, whose route has the guard). After it: `node scripts/kit-checks.mjs --base origin/main` → `KIT_CHECKS: ok (6 checks)`.
+- decision: seen: five more page parts with a form and no guard of their own are in `_shared/debt-baseline.json` (`product-price-lock`, `menu-dish-row`, `recipe-header`, `scaling-chip`, `venue-link-chip`); a plan that edits one will fail the same check.
+- Cards shown as 7 checks on 5 pages (the dev catalog's drag list and scroll area stood in for the AI recipe draft, which needs an AI call to produce a draft; said so to the Human).
+- VALIDATED BY HUMAN (2026-11-25): the seven cards — "done".

@@ -2702,6 +2702,7 @@
     "venue_video_upload_failed": "העלאת הסרטון נכשלה. נסו שוב.",
     "video_too_big": "הסרטון גדול מדי (עד 100MB)",
     "video_not_video": "הקובץ שנבחר אינו סרטון",
-    "video_source_upload": "הועלה"
+    "video_source_upload": "הועלה",
+    "drag_reorder_hint": "גרירה, או חצים למעלה ולמטה, לשינוי הסדר"
   }
 }

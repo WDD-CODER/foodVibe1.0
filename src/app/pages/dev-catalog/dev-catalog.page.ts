@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop'
+import { LucideAngularModule } from 'lucide-angular'
+import { ScrollAreaComponent } from 'src/app/shared/scroll-area/scroll-area.component'
+import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserMsgService } from '@services/user-msg.service'
 import { MissingItem } from 'src/app/core/engine/event-plan.types'
@@ -50,7 +54,13 @@ interface SampleOption {
     CounterComponent,
     LoaderComponent,
     EditGateComponent,
-    PartialCostBadgeComponent
+    PartialCostBadgeComponent,
+    ScrollAreaComponent,
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
+    ReorderKeysDirective,
+    LucideAngularModule
   ],
   templateUrl: './dev-catalog.page.html',
   styleUrl: './dev-catalog.page.scss',
@@ -73,6 +83,8 @@ export class DevCatalogPage {
     'feedback',
     'edit-gate',
     'cost-badge',
+    'scroll-area',
+    'drag-list',
     'engine-classes'
   ] as const
 
@@ -114,6 +126,29 @@ export class DevCatalogPage {
 
   // number-box / stepper
   protected readonly counterValue_ = signal(5)
+
+  // scroll-area
+  protected readonly lines_ = Array.from({ length: 20 }, (_, i) => `line ${i + 1}`)
+
+  // drag-list
+  protected readonly dragRows_ = signal(['first', 'second', 'third', 'fourth'])
+
+  protected onDrop(event: CdkDragDrop<string[]>): void {
+    this.moveRow_(event.previousIndex, event.currentIndex)
+  }
+
+  protected onReorder(index: number, step: -1 | 1): void {
+    this.moveRow_(index, index + step)
+  }
+
+  private moveRow_(from: number, to: number): void {
+    if (from === to) return
+    this.dragRows_.update((rows) => {
+      const copy = [...rows]
+      moveItemInArray(copy, from, to)
+      return copy
+    })
+  }
 
   protected onText(event: Event): void {
     this.text_.set((event.target as HTMLInputElement).value)

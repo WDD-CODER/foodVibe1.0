@@ -2879,3 +2879,117 @@ input[type='number']::-webkit-outer-spin-button {
 .confirm-modal-message {
   white-space: pre-line;
 }
+
+/* ── Drag & drop — shared look (plan 742) ──
+   .c-drag-list on the cdkDropList, .c-drag-item on the cdkDrag row, .c-drag-handle on the cdkDragHandle.
+   The CDK moves the lifted preview to <body>, so its look must be a global rule keyed on .c-drag-item.
+   The lifted row's own layout (display, gap, padding) stays in each component on its row class. */
+.c-drag-list.cdk-drop-list-dragging .c-drag-item:not(.cdk-drag-placeholder) {
+  transition: transform var(--dur-slow) var(--ease-smooth);
+}
+
+.c-drag-item.cdk-drag-preview {
+  box-sizing: border-box;
+
+  cursor: grabbing;
+
+  background: var(--bg-glass-strong);
+
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-card);
+  opacity: 0.95;
+}
+
+.c-drag-item.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.c-drag-item.cdk-drag-animating {
+  transition: transform var(--dur-slow) var(--ease-smooth);
+}
+
+/* The lifted row is moved to <body>, where a layout that depends on its list (a nested selector, a subgrid) is
+   gone: a row whose cdkDrag sets cdkDragPreviewClass="is-lifted" is laid out here as one flex row. */
+.c-drag-item.is-lifted {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.625rem 0.75rem;
+}
+
+.c-drag-handle {
+  display: grid;
+  place-content: center;
+
+  cursor: grab;
+  touch-action: none;
+
+  color: var(--color-text-muted);
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* ── Scroll area — shared look (plan 742) ──
+   Used by app-scroll-area: a block that scrolls with no scrollbar and shows an arrow while there is more. */
+.c-scroll-area {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* The user of this engine sets `opacity: 0.8` when its scroll area can scroll in that direction. */
+.c-scroll-arrow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-block-size: 1.5rem;
+
+  color: var(--color-text-muted);
+
+  padding-block: 0.2rem;
+
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-smooth);
+}
+
+.c-scroll-arrow--top {
+  align-self: start;
+
+  background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+.c-scroll-arrow--bottom {
+  align-self: end;
+
+  background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+/* ── Keyboard focus ring (plan 742) ──
+   One ring for every control reached with the keyboard. :where() keeps specificity at zero, so a component
+   rule that styles its own focus still wins. Fields are not listed: they keep --shadow-focus. */
+:where(
+    button,
+    a[href],
+    summary,
+    [role='button'],
+    [role='tab'],
+    [role='menuitem'],
+    [role='option'],
+    [tabindex]:not([tabindex='-1'])
+  ):focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}

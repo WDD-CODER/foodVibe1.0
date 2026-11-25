@@ -38,6 +38,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { map } from 'rxjs'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
+import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { TranslationService } from '@services/translation.service'
@@ -88,6 +89,7 @@ const MAX_ROW_SUGGESTIONS = 5
     CdkDrag,
     CdkDropList,
     CdkDragHandle,
+    ReorderKeysDirective,
     ClickOutSideDirective,
     NutritionBadgeComponent,
     PasteIngredientsDialogComponent,
@@ -167,11 +169,20 @@ export class RecipeIngredientsTableComponent {
   // GETTERS
 
   onDropIngredient(event: CdkDragDrop<FormGroup[]>): void {
-    if (event.previousIndex === event.currentIndex) return
+    this.moveIngredient(event.previousIndex, event.currentIndex)
+  }
+
+  /** The arrow keys on a row's grip: one step up (-1) or down (1), the same move a drop makes. */
+  onReorderIngredient(index: number, step: -1 | 1): void {
+    this.moveIngredient(index, index + step)
+  }
+
+  private moveIngredient(from: number, to: number): void {
+    if (from === to) return
     const formArray = this.ingredientsFormArray()
-    const item = formArray.at(event.previousIndex)
-    formArray.removeAt(event.previousIndex)
-    formArray.insert(event.currentIndex, item)
+    const item = formArray.at(from)
+    formArray.removeAt(from)
+    formArray.insert(to, item)
   }
 
   get ingredientGroups() {

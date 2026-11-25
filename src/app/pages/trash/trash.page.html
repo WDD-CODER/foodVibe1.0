@@ -64,14 +64,16 @@
   } @if (historyFor_(); as h) {
   <div class="history-overlay" (click)="closeHistory()">
     <div class="history-overlay-panel" (click)="$event.stopPropagation()">
-      <app-version-history-panel
-        [entityType]="h.entityType"
-        [entityId]="h.entityId"
-        [entityName]="h.entityName"
-        [recoverBeforeRestore]="getRecoverBeforeRestore(h)"
-        (closed)="closeHistory()"
-        (restored)="closeHistory(); refresh()"
-      />
+      <app-scroll-area maxBlockSize="90dvh">
+        <app-version-history-panel
+          [entityType]="h.entityType"
+          [entityId]="h.entityId"
+          [entityName]="h.entityName"
+          [recoverBeforeRestore]="getRecoverBeforeRestore(h)"
+          (closed)="closeHistory()"
+          (restored)="closeHistory(); refresh()"
+        />
+      </app-scroll-area>
     </div>
   </div>
   }

@@ -122,57 +122,7 @@
   }
 }
 
-.model-grip {
-  display: grid;
-  place-content: center;
-
-  color: var(--color-text-muted);
-
-  touch-action: none;
-  cursor: grab;
-
-  &:active {
-    cursor: grabbing;
-  }
-}
-
-/* Drag & drop (CDK): the lifted row, the slot it will land in, and the rows sliding aside. */
-.model-row.cdk-drag-preview {
-  background: var(--bg-glass-strong);
-
-  border: 1px solid var(--color-primary);
-  box-shadow:
-    var(--shadow-card),
-    0 0 0 4px var(--color-primary-glow);
-
-  transform-origin: center;
-  rotate: -1deg;
-  scale: 1.03;
-  cursor: grabbing;
-}
-
-.model-placeholder {
-  min-block-size: 3rem;
-
-  background: var(--color-primary-soft);
-
-  border: 2px dashed var(--color-primary);
-  border-radius: var(--radius-md);
-}
-
-.model-row.cdk-drag-placeholder {
-  padding: 0;
-  border: none;
-  background: transparent;
-}
-
-.cdk-drag-animating {
-  transition: transform 300ms var(--ease-spring);
-}
-
-.model-list.cdk-drop-list-dragging .model-row:not(.cdk-drag-placeholder) {
-  transition: transform 250ms var(--ease-smooth);
-}
+/* Drag & drop: the look of the lifted row, its slot and the settle is the shared .c-drag-* engines. */
 
 @keyframes model-landed {
   0%,

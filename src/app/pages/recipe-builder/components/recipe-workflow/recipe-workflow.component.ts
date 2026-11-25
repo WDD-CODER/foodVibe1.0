@@ -28,6 +28,7 @@ import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.direct
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
+import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 
@@ -47,6 +48,7 @@ import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
     CdkDrag,
     CdkDropList,
     CdkDragHandle,
+    ReorderKeysDirective,
     CounterComponent
   ],
   templateUrl: './recipe-workflow.component.html',
@@ -154,11 +156,20 @@ export class RecipeWorkflowComponent {
   })
 
   onDropStep(event: CdkDragDrop<FormGroup[]>): void {
-    if (event.previousIndex === event.currentIndex) return
+    this.moveStep(event.previousIndex, event.currentIndex)
+  }
+
+  /** The arrow keys on a row's grip: one step up (-1) or down (1), the same move a drop makes. */
+  onReorderStep(index: number, step: -1 | 1): void {
+    this.moveStep(index, index + step)
+  }
+
+  private moveStep(from: number, to: number): void {
+    if (from === to) return
     const formArray = this.workflowFormArray()
-    const item = formArray.at(event.previousIndex)
-    formArray.removeAt(event.previousIndex)
-    formArray.insert(event.currentIndex, item)
+    const item = formArray.at(from)
+    formArray.removeAt(from)
+    formArray.insert(to, item)
     if (this.type() === 'preparation') {
       formArray.controls.forEach((group, i) => {
         group.get('order')?.setValue(i + 1)

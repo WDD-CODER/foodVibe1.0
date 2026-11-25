@@ -85,24 +85,22 @@ enforced: `plan`, `default`, `lint` or `card`), `later check` (optional: a lint 
 - kind: behaviour
 - rule: On a phone the whole page scrolls. On a wide screen a list scrolls only its rows, and any area that scrolls on its own shows small arrows when there is more above or below; scrollbars are never drawn.
 - applies to: every page, and every inner area that scrolls (list rows, filter panel, dropdown list, a long card).
-- built from: `app-list-shell` (its rows and filter panel already do it); the directive `appScrollIndicators` (`src/app/core/directives/scroll-indicators.directive.ts`, classes `can-scroll-up` / `can-scroll-down`); sideways rows through `app-scroll-rail` (`src/app/shared/scroll-rail/`); `scrollbar-width: none` on the area. needs: a shared `.c-scroll-area` engine with the arrows — today the arrow style (`.scroll-arrow`) lives only inside `src/app/shared/list-shell/list-shell.component.scss`, so a page that scrolls on its own cannot show the same arrows.
-- reference: `src/app/shared/list-shell/` as used by `src/app/pages/recipe-book/components/recipe-book-list/`
+- built from: `app-list-shell` (its rows and filter panel already do it); the directive `appScrollIndicators` (`src/app/core/directives/scroll-indicators.directive.ts`, classes `can-scroll-up` / `can-scroll-down`); sideways rows through `app-scroll-rail` (`src/app/shared/scroll-rail/`); `scrollbar-width: none` on the area; any other block that scrolls on its own uses `app-scroll-area` (`src/app/shared/scroll-area/`, family `scroll-area`; the engines `.c-scroll-area` and `.c-scroll-arrow` in `src/styles.scss`; `maxBlockSize` caps its height).
+- reference: `src/app/shared/list-shell/` as used by `src/app/pages/recipe-book/components/recipe-book-list/`; `src/app/pages/trash/` for `app-scroll-area`
 - existing default: none
-- check: default — card: any page with a long inner area on a wide screen · scroll it · no scrollbar is drawn and an arrow shows while there is more
-- later check: lint after the shared scroll area exists — files: `src/app/pages/**/*.scss`; pattern: `overflow(-y)?:\s*(auto|scroll)`; hint: a page does not make its own scroll area: use app-list-shell, app-scroll-rail or the shared scroll area with appScrollIndicators
-- gaps today: 10 files in 4 page folders make their own scroll area (trash, platform ×2, menu-intelligence ×5, recipe-builder ×2)
+- check: lint — files: `src/app/pages/**/*.scss`; pattern: `overflow(-y)?:\s*(auto|scroll)`; hint: a page does not make its own scroll area: use app-list-shell, app-scroll-rail or app-scroll-area
+- gaps today: 9 page files still make their own scroll area (dashboard overview, platform dashboard, menu-intelligence ×5, recipe-builder ×2)
 
 ### drag
 
 - kind: behaviour
 - rule: Anything that can be reordered has the same grip handle, lifts the same way while it is moved, leaves the same gap where it will land, and can also be moved with the keyboard.
 - applies to: every reorderable list (recipe ingredients, recipe steps, AI draft lines, AI model order).
-- built from: Angular CDK `cdkDropList` / `cdkDrag` with a `cdkDragHandle` showing the Lucide `grip-vertical` icon and a `*cdkDragPlaceholder`; the row being moved carries `--shadow-card`; rows settle in 250ms. needs: one shared drag style in `src/styles.scss` (`.cdk-drag-preview`, `.cdk-drag-placeholder`, `.cdk-drag-animating`) — today each of the four files styles them itself (settle time 250ms in three, 300ms in one) and `.cdk-custom-placeholder` has no style at all. needs: a keyboard way to reorder (move up / move down) — none of the four has one.
+- built from: Angular CDK `cdkDropList` / `cdkDrag` with a `cdkDragHandle` showing the Lucide `grip-vertical` icon and a `*cdkDragPlaceholder`; the shared drag look is the three engine classes in `src/styles.scss` — `.c-drag-list` on the drop list, `.c-drag-item` on the dragged row, `.c-drag-handle` on the grip (the row being moved carries `--shadow-card`; rows settle in `--dur-slow`); the keyboard way is the directive `appReorderKeys` (`src/app/core/directives/reorder-keys.directive.ts`) on the grip: arrow up / down emit `reorder`, and the list calls the same move method its drop handler uses; family `drag-reorder`.
 - reference: `src/app/pages/recipe-builder/components/recipe-ingredients-table/`
 - existing default: none
-- check: default — card: any list that can be reordered · drag a row by its grip and drop it · the row lifts with a shadow, a gap shows where it lands, and it can also be moved with the keyboard
-- later check: lint after the shared drag style exists — files: `src/app/**/*.scss`; pattern: `\.cdk-drag-(preview|placeholder|animating)`; hint: drag looks come from the shared drag style in src/styles.scss, not from the component
-- gaps today: 4 files (all four drag lists)
+- check: lint — files: `src/app/**/*.scss`; pattern: `\.cdk-drag-(preview|placeholder|animating)`; hint: drag looks come from the shared drag style in src/styles.scss, not from the component
+- gaps today: 0 files (all four drag lists use the shared pieces)
 
 ### motion
 
@@ -153,11 +151,22 @@ enforced: `plan`, `default`, `lint` or `card`), `later check` (optional: a lint 
 - kind: behaviour
 - rule: Every control shows the same ring when reached with the keyboard; Escape always goes one step back, Enter confirms, and when a popup closes the focus returns to what opened it.
 - applies to: every button, link, row, chip, field and popup.
-- built from: the ring `outline: 2px solid var(--border-focus); outline-offset: 2px` on `:focus-visible` (today only on `.c-chip--toggle`, `.c-chip--tap`, `.c-chip__remove` and the venue cards); fields use `--shadow-focus` (`.c-input`, `.c-select`); family `modal-shell` — `app-modal-shell` owns Escape (top-most popup only, asks first when there are changes), the Tab trap and the return of focus; search fields clear and close on Escape through `src/app/core/utils/list-controls.util.ts`; `app-row-actions-menu` closes on Escape. needs: one global `:focus-visible` rule in `src/styles.scss` for buttons, links and rows — there is none, so most controls show the browser's default ring or nothing.
+- built from: the ring `outline: 2px solid var(--border-focus); outline-offset: 2px` on `:focus-visible`, given to every button, link, summary and `role` / `tabindex` control by one zero-specificity `:where(…):focus-visible` rule in `src/styles.scss` (a component rule that styles its own focus still wins); fields use `--shadow-focus` (`.c-input`, `.c-select`); family `modal-shell` — `app-modal-shell` owns Escape (top-most popup only, asks first when there are changes), the Tab trap and the return of focus; search fields clear and close on Escape through `src/app/core/utils/list-controls.util.ts`; `app-row-actions-menu` closes on Escape.
 - reference: `src/app/shared/modal-shell/` (Escape, trap, return), `src/app/pages/venues/components/venue-list/venue-list.component.scss` (the ring)
 - existing default: none
 - check: default — card: any page · press Tab through the buttons, open a popup and press Escape · every control shows the same ring, Escape closes only the popup, and the focus is back on the button that opened it
-- gaps today: 7 hand-made popups do not use `app-modal-shell` (equipment list, menu intelligence ×5, recipe builder ×1), so they miss its Escape, trap and focus return; the missing global ring touches every page
+- gaps today: 7 hand-made popups do not use `app-modal-shell` (equipment list, menu intelligence ×5, recipe builder ×1), so they miss its Escape, trap and focus return; controls that hide the ring with `outline: none` or `outline: 0` (42 lines in 21 files) still show none
+
+### column-carousel
+
+- kind: behaviour
+- rule: A list with more columns than the screen can show keeps the name and the main columns in place and puts the rest into one carousel column: the user switches which piece of information that column shows, on every list the same way. How many columns stay depends on the screen width (phone, tablet, desktop); a row never wraps and the list never scrolls sideways.
+- applies to: every list drawn as a table (`recipe-list` in the table layout), at every one of the three shared widths.
+- built from: family `list-page` — `app-column-carousel-header` and `app-column-carousel-cell` with the `appColumnSlide` directive (`src/app/shared/column-carousel/`), inside `app-list-shell` (`gridTemplate` for wide screens, `mobileGridTemplate` for the phone); the widths are the shared breakpoints only (default `one-breakpoint-set`).
+- reference: `src/app/pages/inventory/components/inventory-product-list/`
+- existing default: `app-list-container` (every row stays on one line at every screen size); `one-breakpoint-set`
+- check: default — card: any list with many columns, on a phone and on a tablet · look at the header and press the carousel arrow · the name stays, one column changes to the next piece of information, no row wraps and nothing scrolls sideways
+- gaps today: 2 table lists do not use the carousel (invoices, the front desk knowledge list); menu-library and trash are not on the list container at all (counted under `recipe-list`). Style QA found names squeezed into a narrow column on inventory and recipe-book (the carousel keeps too many columns at that width). Added by the Human, 2026-11-25.
 
 ### sideways-row
 
