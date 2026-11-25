@@ -59,7 +59,7 @@ CI badge.
 - [auto] `grep -c "All rights reserved" LICENSE` prints at least `1`; `grep -c '"name": "foodvibe"' package.json` prints `1`.
 - [auto] `node scripts/kit-manifest-check.mjs` exits 0 (root files the kit inventories are unchanged).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/738-repo-readme-license-and-tidy.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0.
-- [auto] `node scripts/scope-check.mjs --diff=origin/main --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0.
+- [auto] `node scripts/scope-check.mjs --diff=origin/orch/live-ready --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0 (changed from `--diff=origin/main` by the Human's answer to ask 738-1).
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 - [human] Card — read the README on GitHub as a recruiter: open the branch's README on github.com; in under two minutes you can say what FoodVibe does, open the live demo from the link, see the screenshots, and nothing reads as unfinished or explains how to copy the workflow.
@@ -271,3 +271,6 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   - `node scripts/scope-check.mjs --diff=origin/main` fails already at the base 325c68d, before any change of this
     plan: it lists files of plans 736/737 that are on `orch/live-ready` but not yet on main. The same check against
     `origin/orch/live-ready` (the plan's own diff) is the one that applies inside the run.
+- Builder (round 2, resume) 2026-11-25: ask 738-1 answered by the Human — the Done-when scope check now diffs against
+  `origin/orch/live-ready`. `node scripts/scope-check.mjs --diff=origin/orch/live-ready --plan=plans/738-repo-readme-license-and-tidy.plan.md` → `SCOPE: ok`, exit 0.
+  The gate's own `--diff=origin/main` check entry is run config, not a plan file; it still lists plans 736/737 files until they reach main.
