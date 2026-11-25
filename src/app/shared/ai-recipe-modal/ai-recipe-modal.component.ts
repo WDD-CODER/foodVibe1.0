@@ -15,7 +15,8 @@ import {
   getGeminiUsage,
   geminiModelAvailability,
   geminiUsageStatus,
-  geminiBudgetUsedPercent
+  geminiBudgetUsedPercent,
+  aiCallsLeftLine
 } from '../../core/utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
@@ -91,6 +92,8 @@ export class AiRecipeModalComponent implements OnInit {
     const offer = this.gemini.modelSwitch()
     return offer ? this.translation.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
   })
+  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) under the daily bar; '' when signed out. */
+  protected readonly callsLeftLine_ = computed(() => aiCallsLeftLine(this.geminiUsage_(), this.translation))
   /** "נותרו X" — calls left today across the model chain (shared by all users). */
   protected readonly budgetLeftLabel_ = computed(() =>
     this.translation.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))

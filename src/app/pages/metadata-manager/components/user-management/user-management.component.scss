@@ -106,6 +106,38 @@
     gap: 0.25rem;
   }
 
+  // Plan 736: the AI allowance sits on the row's inline end before the delete button; it wraps on a narrow card.
+  .item-actions {
+    flex-wrap: wrap;
+  }
+
+  .ai-allowance {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-inline-end: auto;
+
+    font-size: var(--fs-sm);
+    font-weight: 400;
+  }
+
+  .ai-allowance__label {
+    color: var(--color-text-muted);
+  }
+
+  .ai-allowance__input {
+    inline-size: 6rem;
+  }
+
+  .ai-allowance__used {
+    color: var(--color-text-muted);
+  }
+
+  .ai-allowance__error {
+    flex-basis: 100%;
+  }
+
   .c-icon-btn.danger {
     display: grid;
     place-content: center;

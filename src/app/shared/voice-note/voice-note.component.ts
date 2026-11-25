@@ -7,6 +7,8 @@ import { GeminiService, type VoicePurpose } from '@services/gemini.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { aiCapErrorKey } from '@utils/ai-error.util'
+import { refusalShownToUser } from '@utils/server-refusal.util'
 import { VOICE_MAX_SECONDS, VOICE_MIME_TYPES, VOICE_TRANSCRIPT_MAX } from '@schemas/ai-voice.schema'
 
 /** What the host gets when the person presses the send button. */
@@ -166,11 +168,17 @@ export class VoiceNoteComponent {
       this.dropRecording()
       this.state_.set('idle')
     } catch (err) {
+      // Plan 736: the interceptor already toasted the AI-allowance refusal with the contact email; no second toast.
+      if (refusalShownToUser(err)) {
+        this.state_.set('recorded')
+        return
+      }
       const e = err as { status?: number; message?: string; error?: { error?: string } }
       const code = e.error?.error
+      const capKey = aiCapErrorKey(err)
       let key = 'voice_note_failed'
       if (e.message === 'AUDIO_TOO_LARGE' || code === 'AUDIO_TOO_LARGE') key = 'voice_note_too_large'
-      else if (code === 'ai_monthly_cap_reached') key = 'ai_monthly_cap_reached'
+      else if (capKey) key = capKey
       else if (e.status === 429) key = 'ai_daily_limit_reached_all'
       this.userMsg.onSetErrorMsg(this.translation.translate(key))
       this.logging.error({

@@ -425,7 +425,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 617
 - Use: `server/services/ai-cap.js` — `capState`, `monthTokensByBusiness`, `clearCapCache`; checked before the model call
-  in `server/services/gemini-client.js`.
+  in `server/services/gemini-client.js`. Plan 736: its per-user twin `server/services/ai-allowance.js` (`reserveAiCall`,
+  `refundAiCall`, `allowanceOf`, `trackAiAllowance`) counts each user's lifetime AI requests at the same point; the
+  browser reads the 402 `AI_BUDGET_EXHAUSTED` through `aiCapErrorKey` / `isAiBudgetExhausted` (`src/app/core/utils/ai-error.util.ts`).
 - When: a server path calls the model and must refuse once the business has used its monthly cap.
 - Known copies: none.
 

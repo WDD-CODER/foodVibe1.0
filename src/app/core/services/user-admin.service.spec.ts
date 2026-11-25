@@ -23,6 +23,16 @@ describe('UserAdminService.deleteUser (plan 639)', () => {
     http.verify()
   })
 
+  it('plan 736: setAiAllowance sends one PUT with the number', async () => {
+    const done = firstValueFrom(service.setAiAllowance('u1', 7))
+    const req = http.expectOne((r) => r.url.endsWith('/admin/users/u1/ai-allowance'))
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual({ aiAllowance: 7 })
+    req.flush({ ok: true, aiAllowance: 7, aiCallsUsed: 3 })
+    expect(await done).toEqual({ ok: true, aiAllowance: 7, aiCallsUsed: 3 })
+    http.verify()
+  })
+
   it('adds ?eraseLearned=true only when true', async () => {
     const done = firstValueFrom(service.deleteUser('u1', true))
     http.expectOne((r) => r.urlWithParams.endsWith('/admin/users/u1?eraseLearned=true')).flush({ ok: true })

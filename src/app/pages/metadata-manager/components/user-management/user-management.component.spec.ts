@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
-import { of } from 'rxjs'
+import { of, throwError } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { UserManagementComponent } from './user-management.component'
@@ -45,7 +45,7 @@ describe('UserManagementComponent', () => {
   let msg: jasmine.SpyObj<UserMsgService>
 
   beforeEach(async () => {
-    admin = jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsers', 'deleteUser'])
+    admin = jasmine.createSpyObj<UserAdminService>('UserAdminService', ['getUsers', 'deleteUser', 'setAiAllowance'])
     admin.getUsers.and.returnValue(of([MINE, OWNER, STAFF]))
     admin.deleteUser.and.returnValue(of({ ok: true, deletedBusiness: true, usersDeleted: 2 }))
     confirm = jasmine.createSpyObj<ConfirmModalService>('ConfirmModalService', ['open', 'openTernary'])
@@ -156,6 +156,61 @@ describe('UserManagementComponent', () => {
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.c-icon-btn.danger')
     )
     expect(buttons.map((b) => b.disabled)).toEqual([true, false, false])
+  })
+
+  describe('the AI allowance on a row (plan 736)', () => {
+    const rowOf = (i: number) =>
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.list-item.group')[i]
+    const inputOf = (i: number) => rowOf(i).querySelector<HTMLInputElement>('.ai-allowance__input')!
+    const saveOf = (i: number) => rowOf(i).querySelector<HTMLButtonElement>('.ai-allowance__save')!
+    const type = (i: number, value: string) => {
+      const input = inputOf(i)
+      input.value = value
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+
+    it('shows the default 100 and the used count; save is off until the number changes', () => {
+      expect(inputOf(1).value).toBe('100')
+      expect(rowOf(1).textContent).toContain('admin_ai_allowance_used')
+      expect(saveOf(1).disabled).toBeTrue()
+      type(1, '100')
+      expect(saveOf(1).disabled).toBeTrue()
+    })
+
+    it('sends the PUT with the number and shows the saved numbers', () => {
+      admin.setAiAllowance.and.returnValue(of({ ok: true, aiAllowance: 2, aiCallsUsed: 1 }))
+      type(1, '2')
+      expect(saveOf(1).disabled).toBeFalse()
+      saveOf(1).click()
+      fixture.detectChanges()
+      expect(admin.setAiAllowance).toHaveBeenCalledOnceWith('o1', 2)
+      expect(msg.onSetSuccessMsg).toHaveBeenCalledWith('admin_ai_allowance_saved')
+      expect(inputOf(1).value).toBe('2')
+      expect(saveOf(1).disabled).toBeTrue()
+    })
+
+    it('a bad number shows the error line and never sends', () => {
+      for (const bad of ['-1', '1.5', '100001', '']) {
+        type(1, bad)
+        expect(saveOf(1).disabled).withContext(bad).toBeTrue()
+        expect(rowOf(1).querySelector('.ai-allowance__error')?.textContent).toContain('admin_ai_allowance_invalid')
+        component.onSaveAllowance(OWNER)
+      }
+      expect(admin.setAiAllowance).not.toHaveBeenCalled()
+    })
+
+    it('a failed save shows server_error, keeps the saved number and lets the admin retry', () => {
+      admin.setAiAllowance.and.returnValue(throwError(() => new Error('down')))
+      type(1, '5')
+      saveOf(1).click()
+      fixture.detectChanges()
+      expect(msg.onSetErrorMsg).toHaveBeenCalledWith('server_error')
+      expect(rowOf(1).textContent).not.toContain('admin_ai_allowance_saved')
+      expect(saveOf(1).disabled).toBeFalse()
+      saveOf(1).click()
+      expect(admin.setAiAllowance).toHaveBeenCalledTimes(2)
+    })
   })
 
   // Plan 468 - the trash icon sits under the email, inside the card, never over it.

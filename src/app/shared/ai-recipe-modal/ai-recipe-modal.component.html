@@ -73,6 +73,9 @@
               <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
             </div>
           </div>
+          @if (callsLeftLine_()) {
+            <p class="ai-calls-left">{{ callsLeftLine_() }}</p>
+          }
 
           <div class="ai-modal-footer">
             <button type="button" class="c-btn-ghost" (click)="onClose()">
@@ -287,6 +290,9 @@
               <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
             </div>
           </div>
+          @if (callsLeftLine_()) {
+            <p class="ai-calls-left">{{ callsLeftLine_() }}</p>
+          }
 
           <div class="ai-modal-footer">
             <button
