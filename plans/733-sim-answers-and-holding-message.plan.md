@@ -119,6 +119,7 @@ server/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
