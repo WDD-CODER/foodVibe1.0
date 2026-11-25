@@ -64,6 +64,7 @@ server/test/set-platform-admin.test.js
 server/breadcrumbs.md
 docs/security-go-live.md
 docs/workflow-kit/manifest.json
+docs/brain/component-families.md
 ```
 
 ## Read Scope
