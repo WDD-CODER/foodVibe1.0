@@ -127,6 +127,7 @@ docs/agent/standards-backend.md
 docs/modules/modules-map.md
 docs/brain/component-families.md
 docs/workflow-kit/manifest.json
+server/test/helpers/app.js
 ```
 
 ## Read Scope
