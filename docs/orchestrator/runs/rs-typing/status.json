@@ -1,0 +1,144 @@
+{
+  "run": "rs-typing",
+  "branch": "orch/rs-typing",
+  "base": "main",
+  "startedAt": "2026-11-25T12:54:26.144Z",
+  "mainShaAtStart": "8850d870cdd3ad7e41f63d5afb3545c68b5c5bf3",
+  "plans": {
+    "735": {
+      "nnn": "735",
+      "title": "The simulator shows three moving dots while the assistant is still writing its answer",
+      "branch": "feat/735-sim-typing-dots",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T12:58:13.227Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T13:24:01.778Z"
+        }
+      },
+      "humanItems": [
+        "On the simulator (`http://localhost:4202/frontdesk/simulator`, as `demo_host`), pick a test guest and write"
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T12:58:12.912Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T12:58:13.230Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:17:19.764Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:23:45.934Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:24:01.780Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:24:11.674Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T13:26:38.430Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 6.6,
+      "sha": "03a775fc5ee90e852d29e2f63e313baf5538670d",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1141.5,
+          "tokens": {
+            "input": 1739840,
+            "output": 20980
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 8.4,
+          "tokens": {
+            "input": 37108,
+            "output": 625
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "dcaa6a0db94e82e1981749ec3e400b9b07c7e71a"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-25T12:58:12.592Z",
+      "plan": "735",
+      "text": "the folder foodVibe1.0-orch-rs-typing-735 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T13:17:15.095Z",
+      "plan": "735",
+      "text": "builder left undone (round 0): [human] simulator check on http://localhost:4202/frontdesk/simulator: dots show after sending, vanish on the answer, absent when a staff member holds the chat — not run"
+    },
+    {
+      "at": "2026-11-25T13:24:27.092Z",
+      "plan": "735",
+      "text": "the folder foodVibe1.0-orch-merge-rs-typing was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T13:28:19.490Z",
+      "text": "FINAL: same tree as plan 735's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 6.6,
+  "updatedAt": "2026-11-25T13:28:23.477Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "735",
+      "type": "behaviour",
+      "text": "behaviour: .ct-typing-text is display:none by default and display:inline under prefers-reduced-motion, instead of a clip-based visually-hidden block, because the clip block duplicated a style block in page-header.component.scss and the kit check failed on it — reverse: restore the clip block in chat-thread.component.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-25T13:28:23.473Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-25T13:28:23.476Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
