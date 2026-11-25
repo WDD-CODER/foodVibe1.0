@@ -2,8 +2,7 @@
   appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
-  [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1.6fr minmax(4.75rem, auto) 40px 28px'"
+  [columns]="columns"
   [dir]="'rtl'"
   [resultCount]="filteredProducts_().length"
   [resultTotal]="kitchenStateService.products_().length"
@@ -87,8 +86,7 @@
     <app-column-carousel-header>
       <div
         class="col-category c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="category"
+        *appFallColumn="'category'; label: 'category'"
         (click)="setSort('category')"
         (keydown.enter)="setSort('category')"
         (keydown.space)="$event.preventDefault(); setSort('category')"
@@ -99,8 +97,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="allergens"
+        *appFallColumn="'allergens'; label: 'allergens'"
         (click)="toggleAllergenExpandAll()"
         (keydown.enter)="toggleAllergenExpandAll()"
         (keydown.space)="$event.preventDefault(); toggleAllergenExpandAll()"
@@ -111,8 +108,7 @@
       </div>
       <div
         class="col-supplier c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="supplier"
+        *appFallColumn="'supplier'; label: 'supplier'"
         (click)="setSort('supplier')"
         (keydown.enter)="setSort('supplier')"
         (keydown.space)="$event.preventDefault(); setSort('supplier')"
@@ -121,7 +117,7 @@
       >
         {{ 'supplier' | translatePipe }}
       </div>
-      <div class="col-unit c-grid-header-cell" appColumnSlide label="unit" role="presentation">
+      <div class="col-unit c-grid-header-cell" *appFallColumn="'unit'; label: 'unit'" role="presentation">
         {{ 'unit' | translatePipe }}
       </div>
     </app-column-carousel-header>
@@ -222,10 +218,10 @@
           }
         </div>
         <app-column-carousel-cell>
-          <div class="col-category c-list-body-cell" appColumnSlide [label]="'category' | translatePipe">
+          <div class="col-category c-list-body-cell" *appFallColumn="'category'; label: 'category' | translatePipe">
             {{ row.category || '—' }}
           </div>
-          <div class="col-allergens c-list-body-cell" appColumnSlide [label]="'allergens' | translatePipe">
+          <div class="col-allergens c-list-body-cell" *appFallColumn="'allergens'; label: 'allergens' | translatePipe">
             @if (row.product.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
@@ -250,10 +246,10 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-supplier c-list-body-cell" appColumnSlide [label]="'supplier' | translatePipe">
+          <div class="col-supplier c-list-body-cell" *appFallColumn="'supplier'; label: 'supplier' | translatePipe">
             {{ row.supplierNames || '—' }}
           </div>
-          <div class="col-unit c-list-body-cell" appColumnSlide [label]="'unit' | translatePipe">
+          <div class="col-unit c-list-body-cell" *appFallColumn="'unit'; label: 'unit' | translatePipe">
             {{ row.product.baseUnit | translatePipe }}
           </div>
         </app-column-carousel-cell>

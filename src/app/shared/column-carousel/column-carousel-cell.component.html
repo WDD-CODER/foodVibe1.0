@@ -1,4 +1,23 @@
-<div class="cc-cell-label" aria-hidden="true">
-  <span class="cc-cell-label-text">{{ activeLabel() | translatePipe }}</span>
-</div>
-<ng-content></ng-content>
+@if (measured()) {
+  @for (part of parts(); track part.key) {
+    @if (part.kind === 'own') {
+      <ng-container *ngTemplateOutlet="part.col.template"></ng-container>
+    } @else {
+      <div class="cc-box cc-box--cell c-list-body-cell">
+        <div class="cc-cell-label" aria-hidden="true">
+          <span class="cc-cell-label-text">{{ part.active?.label() ?? '' | translatePipe }}</span>
+        </div>
+        <div class="cc-fall">
+          @if (part.active) {
+            <ng-container *ngTemplateOutlet="part.active.template"></ng-container>
+          }
+        </div>
+      </div>
+    }
+  }
+} @else {
+  <div class="cc-cell-label" aria-hidden="true">
+    <span class="cc-cell-label-text">{{ activeLabel() | translatePipe }}</span>
+  </div>
+  <ng-content></ng-content>
+}

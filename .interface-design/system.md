@@ -294,3 +294,5 @@ Chosen by the Human on 2026-11-11 from the design canvas ("ליטוש 2 · עו�
 - A status is a white tag with a dot (a colour chip on a `span`); colour never carries meaning alone. Pressable chips keep their own look.
 - Spacing only from the `--space-*` scale.
 - The dark kitchen theme and the paper tokens are untouched.
+
+- Lists show as many columns as fit their measured width; the rest fall one by one into one switching (carousel) column, in the order each list sets, name protected first (plan 745, `[columns]` on `app-list-shell`).

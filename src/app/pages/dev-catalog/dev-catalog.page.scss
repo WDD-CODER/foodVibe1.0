@@ -80,3 +80,13 @@ code {
   inline-size: 20rem;
   max-inline-size: 100%;
 }
+
+// falling-columns (plan 745): drag the corner to narrow the list.
+.dc-resizable {
+  inline-size: 100%;
+  min-inline-size: 12rem;
+  max-inline-size: 100%;
+  overflow: hidden;
+  resize: horizontal;
+  border: 1px dashed var(--border-default);
+}

@@ -67,6 +67,7 @@ import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-produc
 import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
@@ -99,6 +100,21 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryProductListComponent implements OnInit, OnDestroy {
+  /**
+   * Declared columns (plan 745): the list container measures its width and drops columns into the switching
+   * column in `fall` order — unit → supplier → allergens → category. Name, price and actions always stay.
+   */
+  protected readonly columns: readonly ListColumn[] = [
+    { id: 'name', track: '2fr', min: '12rem', phoneMin: '8rem' },
+    { id: 'category', track: '1fr', min: '7rem', fall: 4 },
+    { id: 'allergens', track: '1fr', min: '7rem', fall: 3 },
+    { id: 'supplier', track: '1fr', min: '8rem', fall: 2 },
+    { id: 'unit', track: 'minmax(48px, 0.8fr)', min: '4rem', fall: 1 },
+    { id: 'price', track: '0.8fr', min: '5.5rem', phoneTrack: 'minmax(4.75rem, auto)', phoneMin: '4.75rem' },
+    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px' },
+    { id: 'select', track: 'auto', min: '1.75rem', phoneTrack: '28px', phoneMin: '28px', hideOnTouchPhone: true }
+  ]
+
   protected readonly kitchenStateService = inject(KitchenStateService)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)

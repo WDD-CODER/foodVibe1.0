@@ -135,6 +135,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
+- Plan 745: `app-list-shell` takes `[columns]` (`ListColumn[]`, `src/app/shared/list-shell/list-columns.util.ts`); it measures its own width with a ResizeObserver and `fitColumns()` decides which columns still fit as their own cell and which fall into the carousel column (two the first time, then one by one, in each column's `fall` order). The column carousel renders a fall column either way through `*appFallColumn` (`fall-column.directive.ts`); `ColumnCarouselGroupDirective.collapsed` carries the fallen ids. Lists without `columns` keep `gridTemplate` / `mobileGridTemplate` and the phone-only carousel.
+- Plan 745 pieces: `.column-carousel--measured`, `.cc-box`, `.cc-box--cell`, `.cc-box--header`, `.cc-fall` (the switching column inside a measured carousel host) and `.dc-resizable` (the dev catalog box the reader resizes).
+- Design changes: 2026-11-25 plan 745 — columns fall into the carousel by measured width — base — re-checked: products (the other lists keep the old mode)
 - Recipes: recipe-list, recipe-detail, recipe-form, recipe-settings, recipe-board
 
 ### list-logic — search / sort / filter state of a list
