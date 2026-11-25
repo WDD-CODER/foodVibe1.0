@@ -63,6 +63,7 @@ server/scripts/set-platform-admin.js
 server/test/set-platform-admin.test.js
 server/breadcrumbs.md
 docs/security-go-live.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
