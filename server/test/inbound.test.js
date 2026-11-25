@@ -220,4 +220,13 @@ describe('back to the assistant (plan 719)', () => {
     await Promise.all([first.settled, second.settled])
     expect(turn).toHaveBeenCalledTimes(1)
   })
+
+  it('(i) two guest messages stored at the same time to a failed conversation still run one turn', async () => {
+    await humanWith({ assistantFailed: { at: 1, reason: 'busy' } })
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    const [first, second] = await Promise.all([inbound({ at: NOW + 60000 }), inbound({ at: NOW + 62000 })])
+    await Promise.all([first.settled, second.settled])
+    expect(turn).toHaveBeenCalledTimes(1)
+  })
 })

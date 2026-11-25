@@ -80,8 +80,12 @@ async function afterStored(db, conversation, { buttonId, at }, log) {
       return;
     }
   }
-  if (conversation.status === 'human' && await backToBot(db, conversation, { now: Date.now(), log })) {
-    conversation = { ...conversation, status: 'bot' };
+  if (conversation.status === 'human') {
+    // A second guest message of a burst can lose the race to move the conversation back: read the status again,
+    // so the message still waits and the burst gets its one turn.
+    const moved = await backToBot(db, conversation, { now: Date.now(), log })
+      || (await loadConversation(db, conversation.businessId, conversation._id))?.status === 'bot';
+    if (moved) conversation = { ...conversation, status: 'bot' };
   }
   if (conversation.status !== 'bot') return;
   await wait(COALESCE_MS);
@@ -129,7 +133,8 @@ async function handleInbound(db, input, { log = logger } = {}) {
   }
   await db.collection('conversations').updateOne(
     { _id: conversation._id, businessId },
-    { $set: { lastInboundAt: at, lastMessageAt: at, windowExpiresAt: at + DAY_MS, updatedAt: at }, $inc: { unread: 1 } }
+    // $max: two messages stored at the same time may write in either order; the newest time must win (R-03 coalescing).
+    { $max: { lastInboundAt: at, lastMessageAt: at, windowExpiresAt: at + DAY_MS, updatedAt: at }, $inc: { unread: 1 } }
   );
   log.info({ event: 'inbound.stored', kind: row.kind, created, duplicate: false });
 

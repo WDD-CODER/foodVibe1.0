@@ -1,6 +1,6 @@
 {
   "id": "20",
-  "title": "Level 0: nothing is sent, the offer is stored as a suggestion",
+  "title": "Level 0, a real guest: nothing is sent, the offer is stored as a suggestion",
   "businessType": "restaurant",
   "tags": ["tables", "book", "level0"],
   "setup": { "modules": ["frontdesk", "tables"], "confirmMode": "auto", "level": 0, "now": "2030-01-07T10:00", "floor": "room14" },

@@ -39,7 +39,7 @@
 | `routes/ai/diag.js` | Mounted at `/api/v1/ai/diag` (plan 615, C-DIAG): empty until plan 633 |
 | `routes/ai/stock.js` | Mounted at `/api/v1/ai/stock` (plan 615, C-STOCK): empty until plan 637 |
 | `services/ai-key.js` | `keyFor(businessId)` (plan 679, C-AIKEY): the one place that resolves a model key; the environment key today |
-| `services/frontdesk-turn.js` | `runTurn`, `decide`, `failureReason`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded; plan 701: a failed guest turn stores `assistantFailed { at, reason: busy\|timeout\|quota\|other }` on the conversation |
+| `services/frontdesk-turn.js` | `runTurn`, `decide`, `failureReason`, `FRONTDESK_DAILY_TURNS` (plan 679, C-AI): the assistant's turn — registered with `setTurnHandler` when loaded; plan 701: a failed guest turn stores `assistantFailed { at, reason: busy\|timeout\|quota\|other }` on the conversation; plan 733: one holding message on a technical failure; a test conversation is answered as level 1 (`turnProfile`) |
 | `services/gemini-client.js` | `callGemini` (plans 395, 614): plan 701 adds the opt-in `fallback` (next free model on overload) and `deadlineMs` for the front desk only — every other caller keeps one model per request; a gone model (404 / no longer available) is skipped by the fallback until the quota day resets (plan 730) |
 | `services/frontdesk-prompt.js` | `buildTurnBody`, `TURN_SYSTEM_PROMPT`, `todayBlock` (plan 679): the English rules and the request body of a turn |
 | `services/frontdesk-guardrails.js` | `preCheck(ctx)`, `applyGuardrails(answer, ctx)`, `isRemoval` (plan 679, filled by 689): the one place of the assistant's blocks |

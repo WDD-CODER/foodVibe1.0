@@ -1,0 +1,455 @@
+{
+  "run": "rs-sim",
+  "branch": "orch/rs-sim",
+  "base": "main",
+  "startedAt": "2026-11-25T06:44:09.515Z",
+  "mainShaAtStart": "28d7e0ede7d645bba233b7f489c4f100c8a2086f",
+  "plans": {
+    "733": {
+      "nnn": "733",
+      "title": "The simulator's assistant always answers the test guest, and a real guest gets a holding message when the assistant fails",
+      "branch": "feat/733-sim-answers-and-holding",
+      "state": "merged",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T08:23:43.033Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T08:45:36.199Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-25T09:43:38.947Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T11:19:33.772Z"
+        }
+      },
+      "humanItems": [
+        "On the simulator (`http://localhost:4202/frontdesk/simulator`) of a business whose assistant level is 0, the",
+        "Same chat: take the conversation over as a team member (plan 719's take-over), then write as the guest"
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T06:45:51.931Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T06:45:52.064Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T07:06:23.887Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T07:07:42.738Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T08:23:42.687Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T08:23:43.036Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T08:45:32.274Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T08:45:35.600Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T08:45:35.965Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T08:45:36.201Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T09:43:18.852Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T09:43:22.032Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-25T09:43:38.656Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-25T09:43:38.951Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-25T10:56:24.446Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-25T11:19:18.823Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-25T11:19:33.774Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-25T11:19:46.735Z",
+          "state": "merging",
+          "round": 2
+        },
+        {
+          "at": "2026-11-25T11:23:00.592Z",
+          "state": "merged",
+          "round": 2
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "733",
+          "title": "The simulator's assistant always answers the test guest, and a real guest gets a holding message when the assistant fails",
+          "branch": "feat/733-sim-answers-and-holding",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-25T06:45:52.063Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 9.5,
+          "reason": "asking 733-1: ESCALATE scope: ESCALATE: scope server/eval/frontdesk/dialogues/20-level-zero-suggestion.json — `pnpm run test:server` exit 1: server/test/frontdesk-eval.test.js 'dialogue 20 passes' fails (failed: serverAction, suggestion). Its conversation is a test conversation at level 0, which plan 733 (R-23) now answers inste",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1231.5,
+              "tokens": {
+                "input": 2546299,
+                "output": 23520
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-25T07:07:33.271Z",
+            "reason": "ESCALATE scope: ESCALATE: scope server/eval/frontdesk/dialogues/20-level-zero-suggestion.json — `pnpm run test:server` exit 1: server/test/frontdesk-eval.test.js 'dialogue 20 passes' fails (failed: serverAction, suggestion). Its conversation is a test conversation at level 0, which plan 733 (R-23) now answers inste"
+          },
+          "parkBranch": "park/rs-sim-733"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 733-1: ESCALATE scope: ESCALATE: scope server/eval/frontdesk/dialogues/20-level-zero-suggestion.json — `pnpm run test:server` exit 1: server/te",
+          "check": "(not given)"
+        },
+        {
+          "step": "round 2",
+          "check": "done-when"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 6.3,
+      "sha": "f70c6ecd199fc4eca684a9f845115a11108a357a",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1304.7,
+          "tokens": {
+            "input": 791905,
+            "output": 7786
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 3457.4,
+          "tokens": {
+            "input": 420828,
+            "output": 4553
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 4360.7,
+          "tokens": {
+            "input": 7644233,
+            "output": 41446
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 9.8,
+          "tokens": {
+            "input": 52754,
+            "output": 575
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: Done-when item left undone: [auto] `pnpm run test:server` → exit 0, including the new and changed cases in `server/test/frontdesk-turn.test.js`",
+        "round 2: Done-when item left undone: [auto] `pnpm run test:server` → exit 0, including the new and changed cases in `server/test/frontdesk-turn.test.js`"
+      ],
+      "resetToBase": "c6a7757be9dc463d460b87485e3da9f6e751a4d6",
+      "resetFrom": "a44cc774d3170688c9ff4cb6f7196a5b3f577289",
+      "checkedHead": "4f5e01b504aebfeceeb1925f26fee516e1ebd468"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-25T06:45:51.800Z",
+      "plan": "733",
+      "text": "the folder foodVibe1.0-orch-rs-sim-733 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T07:06:23.715Z",
+      "plan": "733",
+      "text": "builder left undone (round 0): A5: test:server is not green because of eval dialogue 20 (see blocker). The two [human] simulator checks are for the Human."
+    },
+    {
+      "at": "2026-11-25T07:07:42.599Z",
+      "plan": "733",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-25T07:07:42.882Z",
+      "plan": "733",
+      "text": "ask 733-1 (scope, the Human or the advisor answers): Eval dialogue 20 (level-0 suggestion) plays a test conversation, which now gets answered as level 1. May I change the dialogue file so it still tests level 0, with the change below?"
+    },
+    {
+      "at": "2026-11-25T08:20:14.834Z",
+      "plan": "733",
+      "text": "ask 733-1 answered by the human: approved: server/scripts/ai-eval-frontdesk.js, server/eval/frontdesk/dialogues/20-level-zero-suggestion.json"
+    },
+    {
+      "at": "2026-11-25T08:20:38.269Z",
+      "plan": "733",
+      "text": "scope of plan 733 extended on orch/rs-sim by the answer to 733-1: server/scripts/ai-eval-frontdesk.js, server/eval/frontdesk/dialogues/20-level-zero-suggestion.json"
+    },
+    {
+      "at": "2026-11-25T08:23:14.877Z",
+      "plan": "733",
+      "text": "resumed from park/rs-sim-733: round 0, tier build, after: asking 733-1: ESCALATE scope: ESCALATE: scope server/eval/frontdesk/dialogues/20-level-zero-suggestion.json — `pnpm run test:server` exit 1: server/test/frontde"
+    },
+    {
+      "at": "2026-11-25T08:23:42.001Z",
+      "plan": "733",
+      "text": "the folder foodVibe1.0-orch-rs-sim-733 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T08:45:28.046Z",
+      "plan": "733",
+      "text": "builder left undone (round 0): [human] simulator checks 1 and 2: need a human with a running app; pnpm run test:server was not run in full after the fix. The only full run began before the fix and ended with frontdesk-eval, product-import-price-rises and ai-invoice-read failing. Run alone, the files in this task pass, except fron"
+    },
+    {
+      "at": "2026-11-25T08:45:35.245Z",
+      "plan": "733",
+      "text": "[auto] `pnpm run test:server` → exit 0, including the new and changed cases in `server/test/frontdesk-turn.test.js`: the main folder's backend was started"
+    },
+    {
+      "at": "2026-11-25T09:43:13.912Z",
+      "plan": "733",
+      "text": "builder left undone (round 1): pnpm run test:server does not exit 0 in a full run: invoice-memory and soft-delete failed in their hooks after about 10s, which looks like the Mongo start timeout (I did not read the error text). Both pass alone, so the gate may need a rerun.; I did not run the kit-manifest, scope-check or kit-check"
+    },
+    {
+      "at": "2026-11-25T09:43:21.703Z",
+      "plan": "733",
+      "text": "[auto] `pnpm run test:server` → exit 0, including the new and changed cases in `server/test/frontdesk-turn.test.js`: the main folder's backend was started"
+    },
+    {
+      "at": "2026-11-25T09:43:38.276Z",
+      "plan": "733",
+      "text": "escalated to a fresh judgment-tier builder (round 2): Done-when item left undone: [auto] `pnpm run test:server` → exit 0, including the new and changed cases in `server/test/frontdesk-turn.test.js`"
+    },
+    {
+      "at": "2026-11-25T11:20:10.552Z",
+      "plan": "733",
+      "text": "the folder foodVibe1.0-orch-merge-rs-sim was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T11:26:11.611Z",
+      "text": "FINAL: same tree as plan 733's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-25T11:26:13.748Z",
+      "text": "make this a default? the eval runner plays any level-0 dialogue as a real guest's conversation, because the dialogue schema (dialogue-schema.js, out of scope) rejects a new setup key — reverse: remove the level === 0 bran (trigger: destructive-action) — reply: default yes run-destructive-action"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 6.3,
+  "updatedAt": "2026-11-25T11:26:17.698Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "733",
+      "type": "seen",
+      "text": "seen: server/eval/frontdesk/dialogues/20-level-zero-suggestion.json — scripted eval plays a level-0 business as a test conversation; plan 733's R-23 makes its `suggestion` expectation false",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "733",
+      "type": "seen",
+      "text": "seen: src/app/pages/products ProductFormComponent specs failed in one test:ci run and passed on rerun (flaky)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "733",
+      "type": "behaviour",
+      "text": "behaviour: the eval runner plays any level-0 dialogue as a real guest's conversation, because the dialogue schema (dialogue-schema.js, out of scope) rejects a new setup key — reverse: remove the level === 0 branch in ai-eval-frontdesk.js and give dialogue 20 a different level, or add the key to the schema",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "733",
+      "type": "seen",
+      "text": "seen: server/test/ai-invoice-read.test.js 'no log record holds the supplier name...' and product-import-price-rises.test.js failed in the full pre-fix test:server run; both passed in the later combined run, so they look flaky or load-dependent",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "733",
+      "type": "behaviour",
+      "text": "behaviour: eval dialogue 20 keeps testing level 0 because the eval script plays every level-0 dialogue (setup.level === 0) as a real guest, passing { ...conversation, test: false } to the turn only. The strict dialogue schema allows no new setup field. A button tap in such a dialogue would still be read as a test conversation (dialogue 20 has none) — reverse: drop asRealGuest i",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "733",
+      "type": "behaviour",
+      "text": "behaviour: cases in the plan 701, 731 and 732 test blocks that expected no outbound row after a failed level-1 turn now expect the one holding row (only those assertions changed) — reverse: revert those lines in server/test/frontdesk-turn.test.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "733",
+      "type": "behaviour",
+      "text": "behaviour: kit-checks requires a family heading for each rung-4 Reuse Check row, so two were added to docs/brain/component-families.md: test-turn-profile and guest-holding-message — reverse: delete both headings and rerun node scripts/inventory.mjs",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "733",
+      "type": "seen",
+      "text": "seen: docs/frontdesk/frontdesk-map.md:7 and docs/frontdesk/frontdesk-program-brief.md:9 still say 'R-01…R-21'; the table now runs to R-23. Both files are outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "733",
+      "type": "seen",
+      "text": "seen: pnpm run test:server sometimes fails 2 random files in their hooks with mongodb-memory-server 'Instance failed to start within 10000ms' under load; the base did it too (generate-from-url, modules-gate), and so did my first run (product-import-invoice, restaurant-registry)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-25T11:26:17.690Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-25T11:26:17.697Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
