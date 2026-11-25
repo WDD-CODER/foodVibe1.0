@@ -84,6 +84,32 @@ describe('plan 631: consultant', () => {
   })
 })
 
+describe('plan 724: dish analysis types', () => {
+  const { staffProjection, LOCKED_TAXONOMY_KINDS } = require('../utils/permissions')
+  const TYPES = ['menuDishes', 'dishSalesMonths', 'dishSalesAliases']
+
+  it('staff may not create, edit or delete them; owner and consultant may', () => {
+    const CONSULTANT = { userId: 'c1', businessId: 'b1', businessRole: 'consultant', homeBusinessId: 'b9', acting: 'consultant' }
+    for (const type of TYPES) {
+      for (const a of ['create', 'edit', 'delete']) {
+        expect(can(STAFF, a, { type, doc: mine })).toEqual({ ok: false, reason: 'OWNER_ONLY_TYPE' })
+        expect(can(OWNER, a, { type, doc: own })).toEqual({ ok: true })
+        expect(can(CONSULTANT, a, { type, doc: own })).toEqual({ ok: true })
+      }
+    }
+  })
+  it('a staff read hides every non-base field', () => {
+    expect(staffProjection('menuDishes')).toMatchObject({ name: 0, priceWithVat: 0, typedCost: 0 })
+    expect(staffProjection('dishSalesMonths')).toMatchObject({ rows: 0, month: 0, frozen: 0 })
+    expect(staffProjection('dishSalesAliases')).toMatchObject({ name: 0, nameKey: 0 })
+    expect(staffProjection('menuDishes')._id).toBeUndefined()
+  })
+  it('the own return reasons are an owner-only taxonomy kind', () => {
+    expect(LOCKED_TAXONOMY_KINDS).toContain('dishReturnReason')
+    expect(can(STAFF, 'editTaxonomy', { type: 'taxonomyTerms' })).toEqual({ ok: false, reason: 'OWNER_ONLY' })
+  })
+})
+
 describe('plan 549: manageRequests', () => {
   it('any member of the business may, with or without a doc; another business and no role may not', () => {
     for (const u of [OWNER, STAFF]) {

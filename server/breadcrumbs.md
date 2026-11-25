@@ -6,7 +6,7 @@
 | `index.js` | Express app entry — middleware, route mounting, static file serving, error handler |
 | `db.js` | MongoDB connection via Mongoose; target chosen by `utils/db-target.js` (local by default; Atlas only via git-ignored `server/.env.live` or Render's env) |
 | `models/entity.model.js` | Generic entity schema: `_id` (string), `entityType`, `data` (Mixed) |
-| `routes/generic.js` | Full CRUD at `/api/v1/data/:type` — mirrors Angular's `StorageService` |
+| `routes/generic.js` | Full CRUD at `/api/v1/data/:type` — mirrors Angular's `StorageService`; plan 724: dish month (`MONTH_CLOSED`, `MONTH_EXISTS`) and alias (`nameKey`, `ALIAS_EXISTS`) rules |
 | `routes/business.js` | The caller's business at `/api/v1/business` (plan 425; owner-only sub-routes arrive with plans 427-431; plan 579: `PUT /logistics-hidden`, the business's hidden logistics questions with their dates; plan 723: the business settings hold the VAT rate `vatRatePct` and the dealer type `dealerType`, kept when an older form saves without them) |
 | `routes/auth.js` | Login, signup, refresh, logout, accept-terms at `/api/v1/auth` — JWT + rate limiting; signup needs the current terms version (plan 584); plan 631: `signAccess` signs the active business from `resolveSession`, `POST /switch-business` |
 | `routes/clients.js` | Client actions at `/api/v1/clients` (plan 551): merge a duplicate into another client, set or clear do-not-contact; the only writer of `mergedInto` and `doNotContact` |

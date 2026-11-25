@@ -62,6 +62,10 @@ const COLLECTIONS = [
   { name: 'invoices',                 userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-INVOICE, filled by plan 625
   { name: 'diagnoses',                userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-DIAG, filled by plan 633
   { name: 'stockCounts',              userData: true , cloneable: false, backup: true , searchable: false, softDelete: false, routerWrites: true }, // C-STOCK, filled by plan 635
+  // Plan 724: the dish analysis store, written through the generic API (owner and consultant).
+  { name: 'menuDishes',               userData: true , cloneable: false, backup: true , searchable: false, softDelete: false },
+  { name: 'dishSalesMonths',          userData: true , cloneable: false, backup: true , searchable: false, softDelete: false },
+  { name: 'dishSalesAliases',         userData: true , cloneable: false, backup: true , searchable: false, softDelete: false },
   // Server-only (no generic API).
   { name: 'priceHistory',             userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-INVOICE, plan 625
   { name: 'invoiceAliases',           userData: false, cloneable: false, backup: false, searchable: false, softDelete: false }, // C-ALIAS, plan 627
