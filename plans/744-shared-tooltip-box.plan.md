@@ -119,6 +119,8 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 - `appTooltip` directive with its box (`src/app/shared/tooltip/`) — family: none — rung: 4 — why: no shared tooltip exists; two pages draw their own and 37 templates use the browser's `title`. New family `tooltip`. It reuses `placeInViewport` (family `helpers`) for placement.
+- `tooltip-box` component (`src/app/shared/tooltip/tooltip-box.component.ts`) — family: tooltip — rung: 4 — why: the box the `appTooltip` directive creates; part of the same new family.
+- `.c-tooltip--below` — family: engine-classes — rung: 3 — why: the modifier of `.c-tooltip` that flips the arrow when the box sits under the control.
 - `.c-tooltip` — family: engine-classes — rung: 3 — why: the box is appended outside the component that asks for it, so its look must be a global engine in `src/styles.scss`.
 
 ## Adopt Check
