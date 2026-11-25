@@ -226,14 +226,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Compute a month's profit, prime cost, break-even and room for the team in one tested place — engine, input mapping, missing list, completeness, bands; spec with the Toast break-even example and every null case — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
-- [ ] A2: Give the recommended dish price the same tested rule, net and with VAT — dishPrice, patur without VAT; spec with the 5.00 at 30% example — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
-- [ ] A3: Name the month engine in the pricing contract so profit is never computed elsewhere — one sentence — src/app/core/engine/event-pricing.ts
-- [ ] A4: Show the month's plan and actual figures with what is missing marked — the figures card, badge, missing list, partial and band tags; spec: null shows not entered, partial shows the tag, 0 counts as entered — src/app/shared/month-figures/**
-- [ ] A5: Let the owner price a dish from its plate cost and the month's food target — calculator card; spec for murshe and patur — src/app/pages/monthly-plan/components/dish-price-calc/**
-- [ ] A6: Put both cards on the monthly page, fed from the saved month — computed figures, update after save; page spec case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
-- [ ] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A8: Record the engine and the cards in the maps and run every automatic check — paste outputs under Execution Notes — src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
+- [x] A1: Compute a month's profit, prime cost, break-even and room for the team in one tested place — engine, input mapping, missing list, completeness, bands; spec with the Toast break-even example and every null case — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
+- [x] A2: Give the recommended dish price the same tested rule, net and with VAT — dishPrice, patur without VAT; spec with the 5.00 at 30% example — src/app/core/engine/month-plan.ts, src/app/core/engine/month-plan.spec.ts
+- [x] A3: Name the month engine in the pricing contract so profit is never computed elsewhere — one sentence — src/app/core/engine/event-pricing.ts
+- [x] A4: Show the month's plan and actual figures with what is missing marked — the figures card, badge, missing list, partial and band tags; spec: null shows not entered, partial shows the tag, 0 counts as entered — src/app/shared/month-figures/**
+- [x] A5: Let the owner price a dish from its plate cost and the month's food target — calculator card; spec for murshe and patur — src/app/pages/monthly-plan/components/dish-price-calc/**
+- [x] A6: Put both cards on the monthly page, fed from the saved month — computed figures, update after save; page spec case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [x] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A8: Record the engine and the cards in the maps and run every automatic check — paste outputs under Execution Notes — src/app/core/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md
 
 ## What happens when
 - Revenue is 0 or `null`: all percents are «—»; money figures still show, marked «חלקי» when an input is missing.
@@ -270,3 +270,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-24: written from the research report and Dandan's decisions.
+- Builder 2026-11-25: pnpm run build → 0; pnpm run lint → 0 (warnings only); pnpm run test:ci → 0, TOTAL 2889 SUCCESS; kit-manifest-check ok; breadcrumbs-check clean; scope-check --arch → ARCH: ok INV-none; --reuse → ok; plan-ledger ok; override-check ok; log-query → SKIP: no database configured; kit-checks → 1 finding (inventory-stale: docs/brain/inventory.md is out of scope, regenerate with node scripts/inventory.mjs), 0 debt raised.
+- Decisions: behaviour: derived figures with every input blank show «לא הוזן» (partial column) instead of 0 — reverse: show «—». behaviour: a plan food cost taken from the target does not count as missing. Reuse Check rows added for the card classes (the kit check matches one row per class).
