@@ -128,6 +128,7 @@ docs/modules/modules-map.md
 docs/brain/component-families.md
 docs/workflow-kit/manifest.json
 server/test/helpers/app.js
+server/test/admin-business.test.js
 ```
 
 ## Read Scope
