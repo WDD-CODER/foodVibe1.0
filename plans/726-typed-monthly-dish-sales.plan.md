@@ -141,6 +141,10 @@ append the path to the scope block above and retry.
 - `month-key.util.ts` (`currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel`) — family: helpers — rung: 3 — why: no month helper exists in `src/app/core/utils/`; one file with a spec, so the monthly plan page (727) can use it too
 - restaurant tab group (`tab-chips.component.ts`) — family: chip — rung: 1 — why: one more group in `CHIPS_BY_GROUP` with `modules`
 - `.ds-row__*` page-local cell widths (dish-sales.page.scss) — family: engine-classes — rung: 3 — why: column widths only on top of `.c-list-row`; no `.c-*` class
+- `dish-sales-month-data` (`dish-sales-month-data.service.ts`) — family: entity-data-service — rung: 2 — why: the service named in the line above, written down by its file name
+- `return-reasons-dialog` — family: modal-shell — rung: 2 — why: the popup named above, written down by its folder name
+- classes `.ds-row__notice`, `.ds-row__months`, `.ds-row__month`, `.ds-row__intro`, `.ds-row__progress`, `.ds-row__banner`, `.ds-row__live`, `.ds-row__state`, `.ds-row__cell`, `.ds-row__cell--name`, `.ds-row__ellipsis`, `.ds-row__removed`, `.ds-row__reasons--over`, `.ds-row__skipped`, `.ds-row__skipped-list`, `.ds-row__wide` — family: engine-classes — rung: 3 — why: page-local spacing and column rules on top of `.c-list-row`; the number column uses the engine's `.c-num`
+- classes `.rr-dialog`, `.rr-dialog__title`, `.rr-dialog__list`, `.rr-dialog__row`, `.rr-dialog__label`, `.rr-dialog__note`, `.rr-dialog__error`, `.rr-dialog__given`, `.rr-dialog__given--over` — family: engine-classes — rung: 3 — why: layout inside the centred popup only; no `.c-*` class
 
 ## Defaults
 
@@ -246,14 +250,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add a small month helper so pages can name, step and check a month — current, shift, check, Hebrew label, with a spec — src/app/core/utils/month-key.util.ts, src/app/core/utils/month-key.util.spec.ts
-- [ ] A2: Let the app load a month's sales and save the whole month in one request — model re-export, data service with the MONTH_EXISTS retry, spec — src/app/core/models/dish-sales-month.model.ts, src/app/core/services/dish-sales-month-data.service.ts, src/app/core/services/dish-sales-month-data.service.spec.ts
-- [ ] A3: Add the monthly sales page where empty stays «not entered» and 0 stays 0 — route, month arrows, rows, progress line, save, closed-month read-only, staff notice — src/app/pages/restaurant-menu/dish-sales/**, src/app/app.routes.ts
-- [ ] A4: Add the reasons popup with the built-in list, the owner's own reasons and the «other» note — counters, the given-of-returned check, add a reason — src/app/pages/restaurant-menu/dish-sales/components/return-reasons-dialog/**
-- [ ] A5: Put «Menu» and «This month's sales» chips on both restaurant pages for businesses with dish analysis — new chip group with a spec case — src/app/core/components/tab-chips/tab-chips.component.ts, src/app/core/components/tab-chips/tab-chips.component.spec.ts
-- [ ] A6: Prove the page, the popup and the leave question with unit tests — null vs 0, rows not sent, blocked save, reload, closed month, route guard — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts, src/app/pages/restaurant-menu/dish-sales/components/return-reasons-dialog/return-reasons-dialog.component.spec.ts, src/app/core/guards/pending-changes-routes.spec.ts
-- [ ] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A8: Record the page in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/breadcrumbs.md, docs/brain/component-families.md, docs/modules/modules-map.md
+- [x] A1: Add a small month helper so pages can name, step and check a month — current, shift, check, Hebrew label, with a spec — src/app/core/utils/month-key.util.ts, src/app/core/utils/month-key.util.spec.ts
+- [x] A2: Let the app load a month's sales and save the whole month in one request — model re-export, data service with the MONTH_EXISTS retry, spec — src/app/core/models/dish-sales-month.model.ts, src/app/core/services/dish-sales-month-data.service.ts, src/app/core/services/dish-sales-month-data.service.spec.ts
+- [x] A3: Add the monthly sales page where empty stays «not entered» and 0 stays 0 — route, month arrows, rows, progress line, save, closed-month read-only, staff notice — src/app/pages/restaurant-menu/dish-sales/**, src/app/app.routes.ts
+- [x] A4: Add the reasons popup with the built-in list, the owner's own reasons and the «other» note — counters, the given-of-returned check, add a reason — src/app/pages/restaurant-menu/dish-sales/components/return-reasons-dialog/**
+- [x] A5: Put «Menu» and «This month's sales» chips on both restaurant pages for businesses with dish analysis — new chip group with a spec case — src/app/core/components/tab-chips/tab-chips.component.ts, src/app/core/components/tab-chips/tab-chips.component.spec.ts
+- [x] A6: Prove the page, the popup and the leave question with unit tests — null vs 0, rows not sent, blocked save, reload, closed month, route guard — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts, src/app/pages/restaurant-menu/dish-sales/components/return-reasons-dialog/return-reasons-dialog.component.spec.ts, src/app/core/guards/pending-changes-routes.spec.ts
+- [x] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A8: Record the page in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/breadcrumbs.md, docs/brain/component-families.md, docs/modules/modules-map.md
 
 ## What happens when
 - A dish's «הוחזרו» is lowered below the reasons already given: the row shows «סיבות (3/2)» in red and «שמירה» is
@@ -295,3 +299,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the forward arrow stops at the current month (no future months) — reverse: allow typing a future month
 - behaviour: reasons are optional per return (given ≤ returned), not forced to add up — Square forces one per void, but a typed month often has a total without a split — reverse: block the save until every return has a reason
 - behaviour: a dish with nothing typed sends no row, so «לא הוזן» is the missing row or null — reverse: send every dish with nulls
+- scope extended: none. Builder 2026-11-25: all sub-tasks A1-A8 done.
+- behaviour: a stored row of a dish that is no longer on the menu at all is kept unchanged when the month is saved (no data loss) — reverse: drop such rows on save
+- behaviour: the reasons popup lists the unused reasons in the add box so one can be picked or typed; typing the name of an existing reason only selects it — reverse: allow duplicate-named reasons
+- behaviour: the menu chip uses an empty queryParams object so only the matching chip is lit (tab-chips.component.html is outside the scope) — reverse: add an exact flag to TabChip and the template
+- behaviour: the skipped-names section is a toggle chip (c-chip c-chip--tap), not a native details — reverse: use details
+- behaviour: setting returned to 0 drops reasons like clearing it (the server refuses reasons above returned) — reverse: keep reasons at 0 and block the save
+- Evidence: pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, TOTAL 2843 SUCCESS; kit-manifest-check -> ok; kit-checks -> KIT_CHECKS ok (6 checks); scope-check --arch -> ARCH ok; --reuse -> REUSE ok; breadcrumbs-check -> clean; lint:icons / lint:no-native-select / override-check / plan-ledger-check -> exit 0; log-query -> SKIP: no database configured.

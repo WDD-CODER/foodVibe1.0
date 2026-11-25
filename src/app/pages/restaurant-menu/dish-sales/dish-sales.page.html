@@ -116,7 +116,7 @@
           {{ reasonsText(row.dish._id) }}
         </button>
       </div>
-      <div class="c-list-body-cell ds-row__cell ds-row__num ds-row__wide" role="cell" data-testid="dish-sales-cost">
+      <div class="c-list-body-cell ds-row__cell c-num ds-row__wide" role="cell" data-testid="dish-sales-cost">
         @if (row.frozenCost !== undefined) {
         <span class="ds-row__ellipsis">{{ money(row.frozenCost) }}</span>
         } @else { @switch (row.cost.state) { @case ('units') {
