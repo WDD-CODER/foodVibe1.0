@@ -56,6 +56,7 @@ src/app/pages/settings/components/business-settings-tab/**
 src/app/pages/settings/components/business-settings-tab/business-settings-tab.component.spec.ts
 src/app/pages/breadcrumbs.md
 server/breadcrumbs.md
+src/app/pages/settings/settings.page.spec.ts
 ```
 
 ## Read Scope
