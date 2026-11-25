@@ -94,6 +94,27 @@ Apply locally (`--db=<scratch>` for a copy), then on Atlas after a backup:
 
 It deletes the person's clients (live, in Trash and merged), requests, bookings, conversations and messages, and removes `clientId`, `clientName` and `clientPhone` from their events (the event, its money and history stay). The phone `052-123 4567`, `+972 52 123 4567` and `972521234567` are the same person. Free-text event notes may still name the person: check them by hand.
 
+### הפיכת משתמש למנהל מערכת באפליקציה החיה
+Make one existing user the platform admin on the live app (plan 737). Nothing else grants it: no route, sign-up rule or environment setting sets `isPlatformAdmin`. Agents never run this against Atlas; it is the Human's, from the main folder (the only folder with `server/.env.live`).
+
+1. Open https://foodvibe1-0-1-frankfurt.onrender.com/ (the first load can take about 50 seconds) and sign up with your own email and a password. If sign-up says the email is taken and you never signed up, do not run the script for that email: sign up with another address you own and use that one.
+2. In PowerShell in the main folder, one command at a time. First:
+
+       node server/scripts/set-platform-admin.js --target=atlas --email=<your email>
+
+   It stops with `Atlas host confirm required: re-run with --confirm-host=<host>`. Re-run with that host (a dry run, nothing written):
+
+       node server/scripts/set-platform-admin.js --target=atlas --confirm-host=<host> --email=<your email>
+
+   Check the line `PLATFORM_ADMIN: <your user id> false → true (dry run — add --write to apply)`, then apply:
+
+       node server/scripts/set-platform-admin.js --target=atlas --confirm-host=<host> --email=<your email> --write
+
+   It prints `PLATFORM_ADMIN: <your user id> false → true written`.
+3. On the live app, sign out and sign in again: the profile menu shows «דאשבורד מערכת».
+
+To take it away, run the same commands with `--off` (dry run, then `--off --write`). Every write adds a row to the user's `platformAdminHistory` (`at`, `on`, `by: 'script'`). The output names the user id only, never the email or the name. A refusal (no user, more than one user, a removed user, a user changed meanwhile) writes nothing and exits 1.
+
 ### Logging
 - Phones, names and tokens are never written to logs or to the script's output.
 
