@@ -110,6 +110,7 @@ src/app/core/components/breadcrumbs.md
 docs/brain/component-families.md
 docs/modules/modules-map.md
 docs/workflow-kit/manifest.json
+src/app/appRoot/app.component.spec.ts
 ```
 
 ## Read Scope
