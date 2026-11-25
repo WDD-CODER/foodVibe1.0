@@ -3,11 +3,23 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { FormControl, FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import type { MonthPlan, MonthPlanUpdateInput } from '@schemas/entities'
-import { MONTH_TARGET_KEYS, monthKeyOf, monthLabel, shiftMonth, type MonthTargetKey } from '@schemas/month/month-rules'
+import {
+  MONTH_TARGET_KEYS,
+  defaultFixed,
+  defaultLabour,
+  monthKeyOf,
+  monthLabel,
+  shiftMonth,
+  type FixedGroup,
+  type LabourGroup,
+  type MonthTargetKey
+} from '@schemas/month/month-rules'
 import { monthFigures, monthInputOf } from '../../core/engine/month-plan'
 import { roundMoney } from '../../core/engine/rounding'
 import { MonthFiguresComponent } from 'src/app/shared/month-figures/month-figures.component'
 import { DishPriceCalcComponent } from './components/dish-price-calc/dish-price-calc.component'
+import { FixedCostsCardComponent } from './components/fixed-costs-card/fixed-costs-card.component'
+import { LabourCardComponent } from './components/labour-card/labour-card.component'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { LoggingService } from '@services/logging.service'
@@ -23,9 +35,22 @@ import { MONTH_TARGET_FIELDS, bandLine, isOutOfBand } from './month-target-field
 import { MonthPlanService } from './services/month-plan.service'
 
 type RevenueKey = 'plan' | 'actual'
-type Draft = { revenue: Record<RevenueKey, number | null>; targets: Record<MonthTargetKey, number | null> }
+type Draft = {
+  revenue: Record<RevenueKey, number | null>
+  targets: Record<MonthTargetKey, number | null>
+  fixed: FixedGroup
+  labour: LabourGroup
+  purchases: number | null
+}
 
-const draftOf = (month: MonthPlan): Draft => ({ revenue: { ...month.revenue }, targets: { ...month.targets } })
+/** A month stored before plan 729 shows the defaults; they are stored on its first save. */
+const draftOf = (month: MonthPlan): Draft => ({
+  revenue: { ...month.revenue },
+  targets: { ...month.targets },
+  fixed: structuredClone(month.fixed ?? defaultFixed()),
+  labour: { ...(month.labour ?? defaultLabour()) },
+  purchases: month.purchases?.actual ?? null
+})
 
 /** One typed box → a number, or `null` when empty / not a number (N-M2: 0 is a real value). */
 const toNumber = (value: number | string | null): number | null => {
@@ -51,7 +76,9 @@ const toNumber = (value: number | string | null): number | null => {
     LoaderComponent,
     PageHeaderComponent,
     MonthFiguresComponent,
-    DishPriceCalcComponent
+    DishPriceCalcComponent,
+    FixedCostsCardComponent,
+    LabourCardComponent
   ],
   templateUrl: './monthly-plan.page.html',
   styleUrl: './monthly-plan.page.scss',
@@ -77,7 +104,13 @@ export class MonthlyPlanPage {
   protected readonly isSaving_ = signal(false)
   protected readonly months_ = signal<MonthPlan[]>([])
   protected readonly open_ = signal<MonthPlan | null>(null)
-  protected readonly draft_ = signal<Draft>({ revenue: { plan: null, actual: null }, targets: this.emptyTargets_() })
+  protected readonly draft_ = signal<Draft>({
+    revenue: { plan: null, actual: null },
+    targets: this.emptyTargets_(),
+    fixed: defaultFixed(),
+    labour: defaultLabour(),
+    purchases: null
+  })
   protected readonly isCreating_ = signal(false)
   protected readonly newMonth_ = signal(monthKeyOf(Date.now()))
   /** «הסכום כולל מע״מ» per revenue box (plan 727 P1). */
@@ -121,6 +154,13 @@ export class MonthlyPlanPage {
     const month = this.open_()
     return month ? monthFigures(monthInputOf(month)) : null
   })
+  /** Flags beside the figures: the labour figure is an estimate (gross × factor); the fixed figure is partial. */
+  protected readonly flags_ = computed(() => {
+    const month = this.open_()
+    if (!month) return { estimate: false, fixedPartial: false }
+    const input = monthInputOf(month)
+    return { estimate: input.labour.estimate, fixedPartial: input.fixed.entered < input.fixed.lines }
+  })
   protected readonly vatLine_ = computed(() => {
     const month = this.open_()
     if (!month) return ''
@@ -162,6 +202,22 @@ export class MonthlyPlanPage {
     if (this.isClosed_()) return
     const n = toNumber(value)
     this.draft_.update((d) => ({ ...d, revenue: { ...d.revenue, [key]: n === null ? null : Math.max(0, n) } }))
+  }
+
+  protected setFixed(fixed: FixedGroup): void {
+    if (this.isClosed_()) return
+    this.draft_.update((d) => ({ ...d, fixed }))
+  }
+
+  protected setLabour(labour: LabourGroup): void {
+    if (this.isClosed_()) return
+    this.draft_.update((d) => ({ ...d, labour }))
+  }
+
+  protected setPurchases(value: number | string | null): void {
+    if (this.isClosed_()) return
+    const n = toNumber(value)
+    this.draft_.update((d) => ({ ...d, purchases: n === null ? null : Math.max(0, n) }))
   }
 
   protected setTarget(key: MonthTargetKey, value: number | string | null): void {
@@ -307,6 +363,11 @@ export class MonthlyPlanPage {
     const body: MonthPlanUpdateInput = {}
     if (Object.keys(revenue).length) body.revenue = revenue
     if (Object.keys(targets).length) body.targets = targets
+    // Whole groups; a month without a group stores the shown default on its first save.
+    const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b)
+    if (!month.fixed || !same(draft.fixed, month.fixed)) body.fixed = draft.fixed
+    if (!month.labour || !same(draft.labour, month.labour)) body.labour = draft.labour
+    if (!month.purchases || draft.purchases !== month.purchases.actual) body.purchases = { actual: draft.purchases }
     return Object.keys(body).length ? body : null
   }
 

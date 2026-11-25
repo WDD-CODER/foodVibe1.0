@@ -1,0 +1,48 @@
+<div class="lc" data-testid="lc-card">
+  <div class="c-chip-group" role="radiogroup">
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="radio"
+        name="lc-mode"
+        data-testid="lc-mode-employer"
+        [checked]="group().mode === 'employer'"
+        [disabled]="disabled()"
+        (change)="setMode('employer')"
+      />
+      <span>{{ 'mp_labour_mode_employer' | translatePipe }}</span>
+    </label>
+    <label class="c-chip c-chip--toggle">
+      <input
+        type="radio"
+        name="lc-mode"
+        data-testid="lc-mode-gross"
+        [checked]="group().mode === 'gross'"
+        [disabled]="disabled()"
+        (change)="setMode('gross')"
+      />
+      <span>{{ 'mp_labour_mode_gross' | translatePipe }}</span>
+    </label>
+  </div>
+
+  <div class="lc__row">
+    @for (side of sides; track side.key) {
+      <div class="lc__field">
+        <label class="lc__label" [for]="'lc-' + side.key">{{ side.labelKey | translatePipe }}</label>
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" [id]="'lc-' + side.key" [attr.data-testid]="'lc-' + side.key" [placeholder]="'mp_not_entered' | translatePipe" [disabled]="disabled()" [ngModel]="group()[side.key]" (ngModelChange)="setAmount(side.key, $event)" /><span class="lc__suffix" aria-hidden="true">₪</span></div>
+        @if (group().mode === 'gross' && estimates_()[side.key]; as estimate) {
+          <span class="lc__muted" [attr.data-testid]="'lc-estimate-' + side.key">{{ estimate }}</span>
+        }
+      </div>
+    }
+    @if (group().mode === 'gross') {
+      <div class="lc__field">
+        <label class="lc__label" for="lc-factor">{{ 'mp_labour_factor' | translatePipe }}</label>
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="1" max="2" step="0.01" dir="ltr" id="lc-factor" data-testid="lc-factor" [disabled]="disabled()" [ngModel]="group().factor" (ngModelChange)="setFactor($event)" /></div>
+      </div>
+    }
+  </div>
+
+  <p class="lc__muted" data-testid="lc-note">{{ 'mp_labour_note' | translatePipe }}</p>
+</div>

@@ -41,3 +41,43 @@ export const MONTH_TARGET_BANDS: Readonly<Record<MonthTargetKey, readonly [numbe
   fixedPct: [20, 25],
   profitPct: [5, 10]
 }
+
+/** Plan 729: the starter fixed lines, in screen order (N-M8: kashrut supervision sits beside rent and arnona). */
+export const FIXED_STARTER_KEYS = ['rent', 'arnona', 'electricity', 'water', 'gas', 'insurance', 'kashrut', 'marketing'] as const
+export type FixedStarterKey = (typeof FIXED_STARTER_KEYS)[number]
+export const FIXED_LINES_MAX = 40
+/** N-M1: employer cost = gross pay × this factor, until the owner types his own. */
+export const LABOUR_FACTOR_DEFAULT = 1.25
+
+export interface FixedLine {
+  id: string
+  starterKey?: FixedStarterKey
+  name?: string
+  plan: number | null
+  actual: number | null
+}
+export interface FixedGroup {
+  mode: 'lines' | 'rough'
+  lines: FixedLine[]
+  rough: { plan: number | null; actual: number | null }
+}
+export interface LabourGroup {
+  mode: 'employer' | 'gross'
+  factor: number
+  plan: number | null
+  actual: number | null
+}
+
+/** A new month's fixed costs: one blank line per starter key (id = key), lines mode. */
+export function defaultFixed(): FixedGroup {
+  return {
+    mode: 'lines',
+    lines: FIXED_STARTER_KEYS.map((key) => ({ id: key, starterKey: key, plan: null, actual: null })),
+    rough: { plan: null, actual: null }
+  }
+}
+
+/** A new month's labour: one employer-cost total, factor 1.25 ready for gross mode. */
+export function defaultLabour(): LabourGroup {
+  return { mode: 'employer', factor: LABOUR_FACTOR_DEFAULT, plan: null, actual: null }
+}

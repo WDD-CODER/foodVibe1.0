@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router } from '@angular/router'
 import { LucideAngularModule, CalendarDays } from 'lucide-angular'
 import type { MonthPlan } from '@schemas/entities'
-import { monthKeyOf } from '@schemas/month/month-rules'
+import { defaultFixed, defaultLabour, monthKeyOf } from '@schemas/month/month-rules'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -24,6 +24,9 @@ const month = (key: string, over: Partial<MonthPlan> = {}): MonthPlan =>
     vatRatePct: 18,
     dealerType: 'murshe',
     revenue: { plan: null, actual: null },
+    fixed: defaultFixed(),
+    labour: defaultLabour(),
+    purchases: { actual: null },
     ...over
   }) as MonthPlan
 
@@ -207,6 +210,68 @@ describe('MonthlyPlanPage (plan 727)', () => {
   it('a dealer without VAT (patur) has no "includes VAT" box', async () => {
     await setup([month('2026-11', { dealerType: 'patur', vatRatePct: 0 })])
     expect(byId('mp-incl-vat-plan')).toBeNull()
+  })
+
+  describe('plan 729: fixed costs, labour and purchases', () => {
+    it('shows the three inputs; a typed purchases total and a fixed line are saved as whole groups', async () => {
+      await setup([month('2026-11')])
+      expect(byId('fc-card')).not.toBeNull()
+      expect(byId('lc-card')).not.toBeNull()
+      service.update.and.callFake(async (key, body) =>
+        month(key, { fixed: body.fixed, purchases: body.purchases } as Partial<MonthPlan>)
+      )
+      type('mp-purchases-actual', '4200')
+      type('fc-rent-actual', '12000')
+      byId<HTMLButtonElement>('mp-save')!.click()
+      await settle()
+      const body = service.update.calls.mostRecent().args[1]
+      expect(body.purchases).toEqual({ actual: 4200 })
+      expect(body.fixed!.lines.find((l) => l.id === 'rent')!.actual).toBe(12000)
+      expect(body.labour).toBeUndefined()
+      expect(body.revenue).toBeUndefined()
+      expect(byId('fc-entered')!.textContent).toContain('mp_fixed_entered')
+    })
+
+    it('a month stored before this plan shows the defaults and stores them on its first save', async () => {
+      const older = month('2026-11')
+      delete (older as Partial<MonthPlan>).fixed
+      delete (older as Partial<MonthPlan>).labour
+      delete (older as Partial<MonthPlan>).purchases
+      await setup([older])
+      expect(el().querySelectorAll('[data-testid^="fc-line-"]').length).toBe(8)
+      expect(byId<HTMLButtonElement>('mp-save')!.disabled).toBeTrue()
+      service.update.and.resolveTo(month('2026-11', { revenue: { plan: 5, actual: null } }))
+      type('mp-revenue-plan', '5')
+      byId<HTMLButtonElement>('mp-save')!.click()
+      await settle()
+      const body = service.update.calls.mostRecent().args[1]
+      expect(body.revenue).toEqual({ plan: 5 })
+      expect(body.fixed).toEqual(defaultFixed())
+      expect(body.labour).toEqual(defaultLabour())
+      expect(body.purchases).toEqual({ actual: null })
+    })
+
+    it('a changed line counts as unsaved changes until saved', async () => {
+      await setup([month('2026-11')])
+      expect(byId<HTMLButtonElement>('mp-save')!.disabled).toBeTrue()
+      type('fc-rent-plan', '9000')
+      expect(byId<HTMLButtonElement>('mp-save')!.disabled).toBeFalse()
+    })
+
+    it('gross labour on the saved month is flagged as an estimate; fixed lines not all entered are flagged partial', async () => {
+      await setup([
+        month('2026-11', { labour: { mode: 'gross', factor: 1.25, plan: null, actual: 10000 } } as Partial<MonthPlan>)
+      ])
+      expect(byId('mp-flag-estimate')).not.toBeNull()
+      expect(byId('mp-flag-fixed-partial')).not.toBeNull()
+    })
+
+    it('a closed month keeps the new boxes read-only', async () => {
+      await setup([month('2026-11', { status: 'closed' })])
+      expect(byId<HTMLInputElement>('mp-purchases-actual')!.disabled).toBeTrue()
+      expect(byId<HTMLInputElement>('fc-rent-actual')!.disabled).toBeTrue()
+      expect(byId<HTMLInputElement>('lc-actual')!.disabled).toBeTrue()
+    })
   })
 
   it('shows the soft line when the targets do not add up to 100', async () => {
