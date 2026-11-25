@@ -122,6 +122,14 @@ src/app/core/components/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
 docs/modules/modules-map.md
+server/test/admin-platform.test.js
+server/test/cross-business.test.js
+server/test/helpers/app.js
+server/test/invoice-memory.test.js
+server/test/permissions.test.js
+src/app/core/services/async-storage.service.spec.ts
+src/app/pages/settings/settings.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
