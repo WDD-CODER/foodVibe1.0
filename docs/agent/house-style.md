@@ -166,7 +166,7 @@ enforced: `plan`, `default`, `lint` or `card`), `later check` (optional: a lint 
 - reference: `src/app/pages/inventory/components/inventory-product-list/`
 - existing default: `app-list-container` (every row stays on one line at every screen size); `one-breakpoint-set`
 - check: default — card: any list with many columns, on a phone and on a tablet · look at the header and press the carousel arrow · the name stays, one column changes to the next piece of information, no row wraps and nothing scrolls sideways
-- gaps today: only the product list is measured (plan 745). Not moved yet (plan 746): clients, equipment, recipe book, suppliers, invoices. The stock count (one column that could fall, nothing to switch between) and the platform dashboard (its own grid) stay as they are; the front desk knowledge list has one column and is not a table. menu-library and trash are not on the list container at all (counted under `recipe-list`). Added by the Human, 2026-11-25.
+- gaps today: none of the table lists on the list container is outside the rule (products plan 745; clients, equipment, recipe book, suppliers, invoices plan 746). The stock count (one column that could fall, nothing to switch between) and the platform dashboard (its own grid) stay as they are; the front desk knowledge list has one column and is not a table. menu-library and trash are not on the list container at all (counted under `recipe-list`). Added by the Human, 2026-11-25.
 
 ### sideways-row
 

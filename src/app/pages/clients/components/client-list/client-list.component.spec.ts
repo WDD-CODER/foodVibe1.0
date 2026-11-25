@@ -34,6 +34,7 @@ describe('ClientListComponent (plan 547)', () => {
     filteredClients_: () => Client[]
     allTags_: () => string[]
     onSaved: () => void
+    columns: () => unknown[]
     isAddOpen_: WritableSignal<boolean>
   }
   const cmp = (): Internals => fixture.componentInstance as unknown as Internals
@@ -170,25 +171,20 @@ describe('ClientListComponent (plan 547)', () => {
     expect(el().querySelector('a.client-name')?.getAttribute('href')).toBe('/clients/1')
   })
 
-  it('puts the non-name columns in the column carousel header (owner: six slides)', () => {
+  const fallOrder = (): string[] =>
+    (cmp().columns() as { id: string; fall?: number }[])
+      .filter((c) => (c.fall ?? 0) > 0)
+      .sort((a, b) => (a.fall as number) - (b.fall as number))
+      .map((c) => c.id)
+
+  it('declares the owner columns so they fall: requests, events, tags, kinds, last contact, phone (plan 746)', () => {
     setup([client('1', 'א')])
-    const header = el().querySelector('app-column-carousel-header')
-    expect(header).not.toBeNull()
-    const labels = Array.from(header!.querySelectorAll('[appColumnSlide]')).map((d) => d.textContent?.trim())
-    expect(labels).toEqual([
-      'client_phone',
-      'client_kinds',
-      'client_tags',
-      'client_last_contact',
-      'client_events_count',
-      'client_requests_count'
-    ])
-    expect(el().querySelectorAll('app-column-carousel-cell').length).toBe(1)
+    expect(fallOrder()).toEqual(['requests', 'events', 'tags', 'kinds', 'last', 'phone'])
+    expect(el().querySelector('app-column-carousel-header')).not.toBeNull()
   })
 
-  it('offers staff only phone, kinds and tags in the carousel', () => {
+  it('declares staff only tags, kinds and phone as falling columns, in the same order', () => {
     setup([client('1', 'א')], false)
-    const header = el().querySelector('app-column-carousel-header')!
-    expect(header.querySelectorAll('[appColumnSlide]').length).toBe(3)
+    expect(fallOrder()).toEqual(['tags', 'kinds', 'phone'])
   })
 })

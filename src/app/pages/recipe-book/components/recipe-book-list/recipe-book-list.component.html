@@ -2,12 +2,7 @@
   appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="
-    shouldHideDateColumn_()
-      ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto'
-      : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'
-  "
-  [mobileGridTemplate]="'2fr 0.7fr 1.8fr 40px 28px'"
+  [columns]="columns"
   [resultCount]="filteredRecipes_().length"
   [resultTotal]="kitchenState.recipes_().length"
 >
@@ -100,8 +95,7 @@
     <app-column-carousel-header>
       <div
         class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
-        appColumnSlide
-        label="labels"
+        *appFallColumn="'labels'; label: 'labels'"
         (click)="labelsExpand.toggleAll()"
         (keydown.enter)="labelsExpand.toggleAll()"
         (keydown.space)="$event.preventDefault(); labelsExpand.toggleAll()"
@@ -112,8 +106,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col"
-        appColumnSlide
-        label="allergens"
+        *appFallColumn="'allergens'; label: 'allergens'"
         (click)="allergenExpand.toggleAll()"
         (keydown.enter)="allergenExpand.toggleAll()"
         (keydown.space)="$event.preventDefault(); allergenExpand.toggleAll()"
@@ -125,8 +118,7 @@
       @if (!shouldHideDateColumn_()) {
         <div
           class="col-date c-grid-header-cell c-sortable-header"
-          appColumnSlide
-          label="date_added"
+          *appFallColumn="'date'; label: 'date_added'"
           (click)="setSort('dateAdded')"
           (keydown.enter)="setSort('dateAdded')"
           (keydown.space)="$event.preventDefault(); setSort('dateAdded')"
@@ -138,8 +130,7 @@
       }
       <div
         class="col-rating c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="rating"
+        *appFallColumn="'rating'; label: 'rating'"
         (click)="setSort('rating')"
         (keydown.enter)="setSort('rating')"
         (keydown.space)="$event.preventDefault(); setSort('rating')"
@@ -150,8 +141,7 @@
       </div>
       <div
         class="col-cost c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="cost"
+        *appFallColumn="'cost'; label: 'cost'"
         (click)="setSort('cost')"
         (keydown.enter)="setSort('cost')"
         (keydown.space)="$event.preventDefault(); setSort('cost')"
@@ -220,7 +210,10 @@
           {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
         </div>
         <app-column-carousel-cell>
-          <div class="col-labels c-list-body-cell c-dense-chip-col" appColumnSlide [label]="'labels' | translatePipe">
+          <div
+            class="col-labels c-list-body-cell c-dense-chip-col"
+            *appFallColumn="'labels'; label: 'labels' | translatePipe"
+          >
             @if (row.labels.length) {
               <div
                 class="labels-btn-wrapper"
@@ -254,8 +247,7 @@
           </div>
           <div
             class="col-allergens c-list-body-cell c-dense-chip-col"
-            appColumnSlide
-            [label]="'allergens' | translatePipe"
+            *appFallColumn="'allergens'; label: 'allergens' | translatePipe"
           >
             @if (row.allergens.length) {
               <div
@@ -282,8 +274,7 @@
           @if (!shouldHideDateColumn_()) {
             <div
               class="col-date c-list-body-cell date-cell-wrap"
-              appColumnSlide
-              [label]="'date_added' | translatePipe"
+              *appFallColumn="'date'; label: 'date_added' | translatePipe"
               [appTooltip]="dateTip"
               tooltipPlacement="below"
             >
@@ -295,8 +286,7 @@
           }
           <div
             class="col-rating c-list-body-cell"
-            appColumnSlide
-            [label]="'rating' | translatePipe"
+            *appFallColumn="'rating'; label: 'rating' | translatePipe"
             (click)="$event.stopPropagation()"
           >
             <app-rating-stars
@@ -308,8 +298,7 @@
           </div>
           <div
             class="col-cost c-list-body-cell cost-cell-wrap"
-            appColumnSlide
-            [label]="'cost' | translatePipe"
+            *appFallColumn="'cost'; label: 'cost' | translatePipe"
             [appTooltip]="costTip"
             [tooltipOnClick]="true"
             tooltipPlacement="below"
