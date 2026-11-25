@@ -1,0 +1,19 @@
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+
+  min-block-size: 0;
+}
+
+/* The content and both arrows share the one grid cell: the arrows stay put while the content scrolls under them. */
+.scroll-area,
+.scroll-arrow {
+  grid-area: 1 / 1;
+}
+
+/* The scrolling div comes first, the arrows after it, so its can-scroll-* classes can show them. */
+.scroll-area.can-scroll-up ~ .scroll-arrow--top,
+.scroll-area.can-scroll-down ~ .scroll-arrow--bottom {
+  opacity: 0.8;
+}

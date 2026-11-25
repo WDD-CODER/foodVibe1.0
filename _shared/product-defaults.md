@@ -31,8 +31,8 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - how: src/app/core/guards/pending-changes.guard.ts (canDeactivate in app.routes.ts; the entity-form family)
 - check: card
 - card: the form's page · change one field, then follow a link out of the page · a question asks whether to leave or stay
-- check: files: **/*.component.ts; trigger: \b(?:FormGroup|FormBuilder|FormControl|NgForm|ngModel)\b; evidence: {stem}[\s\S]{0,300}canDeactivate\s*:; in: src/app/app.routes.ts
-- exceptions: a read-only form, a search box or a filter bar; declare `exception — why: <one line>`
+- check: files: **/*.component.ts; trigger: \b(?:FormGroup|FormBuilder|FormControl|NgForm|ngModel)\b; evidence: {stem}[\s\S]{0,300}canDeactivate\s*:; in: src/app/app.routes.ts; exclude: src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/components/recipe-workflow/**
+- exceptions: a read-only form, a search box or a filter bar; declare `exception — why: <one line>`. A part of a page whose route already has the guard (the recipe builder's ingredients table and steps: the page asks, not its parts) is listed in the rule's `exclude` (Human, 2026-11-25, plan 742).
 - turned on: the Human, 2026-11-22
 
 ### activity-log-on-write

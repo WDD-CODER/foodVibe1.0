@@ -231,6 +231,41 @@
     <app-partial-cost-badge [missing]="missing_" />
   </section>
 
+  <section id="scroll-area" class="dc-section">
+    <h2>scroll-area</h2>
+    <code>maxBlockSize='10rem', twenty lines</code>
+    <app-scroll-area maxBlockSize="10rem">
+      @for (line of lines_; track line) {
+      <p class="dc-line">{{ line }}</p>
+      }
+    </app-scroll-area>
+  </section>
+
+  <section id="drag-list" class="dc-section">
+    <h2>drag-list</h2>
+    <code>c-drag-list, c-drag-item, c-drag-handle, appReorderKeys (grip: drag, or arrow up / down)</code>
+    <div class="dc-drag-list c-drag-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+      @for (row of dragRows_(); track row; let i = $index) {
+      <div class="dc-drag-row c-drag-item" cdkDrag>
+        <span
+          class="dc-drag-grip c-drag-handle"
+          cdkDragHandle
+          appReorderKeys
+          [reorderIndex]="i"
+          [reorderCount]="dragRows_().length"
+          [reorderKey]="row"
+          (reorder)="onReorder(i, $event)"
+          [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+          [attr.title]="'drag_reorder_hint' | translatePipe"
+        >
+          <lucide-icon name="grip-vertical" [size]="16"></lucide-icon>
+        </span>
+        <span>{{ row }}</span>
+      </div>
+      }
+    </div>
+  </section>
+
   <section id="engine-classes" class="dc-section">
     <h2>engine-classes</h2>
     <div class="dc-row">

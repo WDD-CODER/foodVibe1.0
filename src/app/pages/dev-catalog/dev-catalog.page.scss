@@ -45,6 +45,27 @@
   margin-block: 0.5rem;
 }
 
+.dc-line {
+  margin: 0;
+  padding-block: 0.25rem;
+}
+
+.dc-drag-list {
+  display: grid;
+  gap: 0.5rem;
+  max-inline-size: 20rem;
+  margin-block: 0.5rem;
+}
+
+.dc-drag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
 .dc-card {
   padding: 1rem;
 }

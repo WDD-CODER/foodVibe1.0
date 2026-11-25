@@ -8,6 +8,7 @@ import { LoggingService } from '@services/logging.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { ScrollAreaComponent } from 'src/app/shared/scroll-area/scroll-area.component'
 import type { VersionEntityType } from '@services/version-history.service'
 import { TranslationService } from '@services/translation.service'
 
@@ -20,7 +21,8 @@ import { TranslationService } from '@services/translation.service'
     TranslatePipe,
     VersionHistoryPanelComponent,
     LoaderComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    ScrollAreaComponent
   ],
   templateUrl: './trash.page.html',
   styleUrl: './trash.page.scss',

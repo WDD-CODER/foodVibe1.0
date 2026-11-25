@@ -248,6 +248,23 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a line may be bought from one of several priced suppliers and the owner chooses.
 - Known copies: none.
 
+### drag-reorder — drag a row to reorder, or move it with the arrow keys
+
+- Status: stable (plan 742)
+- Use: engines `.c-drag-list` (on `cdkDropList`), `.c-drag-item` (on `cdkDrag`), `.c-drag-handle` (on `cdkDragHandle`) in `src/styles.scss`; keyboard: `src/app/core/directives/reorder-keys.directive.ts` · `appReorderKeys` on the grip. Users: `src/app/pages/recipe-builder/components/recipe-ingredients-table/`, `src/app/pages/recipe-builder/components/recipe-workflow/`, `src/app/shared/ai-recipe-modal/ai-draft-editor/`, `src/app/pages/metadata-manager/components/ai-model-manager/`.
+- When: a list whose rows the user can put in another order.
+- Inputs / variants: `appReorderKeys` — `reorderIndex`, `reorderCount`, `reorderKey` (the row's track value); output `reorder` = `-1 | 1`. The list has one move method that both its drop handler and `(reorder)` call. The grip's label is the key `drag_reorder_hint`.
+- Design changes: 2026-11-25 plan 742 — AI model row takes the shared drag look — base — re-checked: metadata manager
+- Known copies: none.
+
+### scroll-area — a block that scrolls with arrows and no scrollbar
+
+- Status: stable (plan 742)
+- Use: `src/app/shared/scroll-area/` · `app-scroll-area`; engines `.c-scroll-area`, `.c-scroll-arrow` in `src/styles.scss`; the arrows follow `appScrollIndicators` (`src/app/core/directives/scroll-indicators.directive.ts`).
+- When: a block outside the list container scrolls on its own and must show there is more above or below.
+- Inputs / variants: `maxBlockSize` (a CSS length; empty = fills its parent).
+- Known copies: `src/app/shared/list-shell/` keeps its own arrows (same look); 9 page `.scss` files still make their own `overflow: auto` area (see `docs/agent/house-style.md`, rule `scroll`).
+
 ### engine-classes — shared `.c-*` CSS engines
 
 - Status: stable (plan 458 sweeps the copies)
@@ -256,6 +273,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
+- Plan 742: `.c-drag-list`, `.c-drag-item`, `.c-drag-handle` (the shared drag look, family `drag-reorder`); `.c-scroll-area`, `.c-scroll-arrow` (family `scroll-area`); plus one zero-specificity `:where(…):focus-visible` keyboard ring for every button, link and `role` / `tabindex` control.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note

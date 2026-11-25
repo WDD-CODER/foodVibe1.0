@@ -64,6 +64,17 @@ describe('RecipeWorkflowComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('textarea').length).toBe(1)
   })
 
+  it('the down arrow on the first step grip moves it to the second place (plan 742)', () => {
+    const arr = component.workflowFormArray()
+    arr.at(0).patchValue({ instruction: 'first' })
+    arr.push(fb.group({ instruction: ['second'], labor_time: [0], cooking_time: [0] }))
+    fixture.detectChanges()
+    const grip = fixture.nativeElement.querySelector('.grid-row .col-drag-id') as HTMLElement
+    grip.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }))
+    expect(arr.at(0).get('instruction')?.value).toBe('second')
+    expect(arr.at(1).get('instruction')?.value).toBe('first')
+  })
+
   it('step form group contains cooking_time control with default value 0', () => {
     const group = fb.group({ instruction: [''], labor_time: [0], cooking_time: [0] })
     expect(group.get('cooking_time')).toBeTruthy()

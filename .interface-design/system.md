@@ -220,6 +220,9 @@ Pre-built surface + behavior combos. Use these before writing one-off styles.
 | `.c-dropdown` | Dropdown panel |
 | `.c-chip` | Pill chip |
 | `.c-table-wrap` | Table container |
+| `.c-drag-list` / `.c-drag-item` / `.c-drag-handle` | Drag to reorder: the drop list, the lifted row (shadow, accent border, gap that settles) and the grip |
+| `.c-scroll-area` | A block that scrolls with no scrollbar (used by `app-scroll-area`) |
+| `.c-scroll-arrow` | The "more to scroll" arrow, `--top` / `--bottom` (shown while there is more) |
 
 Full engine source: `src/styles.scss`. New patterns must extend these — no divergent one-off surfaces.
 

@@ -50,7 +50,7 @@
   <!-- ── Ingredients ── -->
   <div class="editor-section">
     <p class="editor-section-title">{{ 'ai_recipe_preview_ingredients' | translatePipe }}</p>
-    <div class="editor-ing-table" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
+    <div class="editor-ing-table c-drag-list" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
       <div class="editor-ing-header">
         <span></span>
         <span>{{ 'ingredient_name' | translatePipe }}</span>
@@ -59,9 +59,23 @@
         <span></span>
       </div>
       @for (ing of ingredients(); track ing.id; let i = $index) {
-        <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew" cdkDrag>
-          <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-          <div class="editor-drag-handle" cdkDragHandle>
+        <div
+          class="editor-ing-row c-drag-item"
+          [class.editor-ing-row--new]="ing.isNew"
+          cdkDrag
+          cdkDragPreviewClass="is-lifted"
+        >
+          <div
+            class="editor-drag-handle c-drag-handle"
+            cdkDragHandle
+            appReorderKeys
+            [reorderIndex]="i"
+            [reorderCount]="ingredients().length"
+            [reorderKey]="ing.id"
+            (reorder)="onReorderIngredient(i, $event)"
+            [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+            [attr.title]="'drag_reorder_hint' | translatePipe"
+          >
             <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
           </div>
           <div class="editor-ing-name-cell">
@@ -114,11 +128,20 @@
   @if (!isDish_()) {
     <div class="editor-section">
       <p class="editor-section-title">{{ 'ai_recipe_preview_steps' | translatePipe }}</p>
-      <div class="editor-steps-list" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
+      <div class="editor-steps-list c-drag-list" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
         @for (item of workflowItems_(); track item.id; let i = $index) {
-          <div class="editor-step-row" cdkDrag>
-            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-            <div class="editor-drag-handle" cdkDragHandle>
+          <div class="editor-step-row c-drag-item" cdkDrag cdkDragPreviewClass="is-lifted">
+            <div
+              class="editor-drag-handle c-drag-handle"
+              cdkDragHandle
+              appReorderKeys
+              [reorderIndex]="i"
+              [reorderCount]="workflowItems_().length"
+              [reorderKey]="item.id"
+              (reorder)="onReorderWorkflow(i, $event)"
+              [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+              [attr.title]="'drag_reorder_hint' | translatePipe"
+            >
               <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
             </div>
             <span class="editor-step-num">{{ i + 1 }}</span>
@@ -146,7 +169,7 @@
   @if (isDish_()) {
     <div class="editor-section">
       <p class="editor-section-title">{{ 'preparation' | translatePipe }}</p>
-      <div class="editor-prep-table" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
+      <div class="editor-prep-table c-drag-list" cdkDropList (cdkDropListDropped)="onDropWorkflow($event)">
         <div class="editor-prep-header">
           <span></span>
           <span>{{ 'preparation' | translatePipe }}</span>
@@ -155,9 +178,18 @@
           <span></span>
         </div>
         @for (item of workflowItems_(); track item.id; let i = $index) {
-          <div class="editor-prep-row" cdkDrag>
-            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-            <div class="editor-drag-handle" cdkDragHandle>
+          <div class="editor-prep-row c-drag-item" cdkDrag cdkDragPreviewClass="is-lifted">
+            <div
+              class="editor-drag-handle c-drag-handle"
+              cdkDragHandle
+              appReorderKeys
+              [reorderIndex]="i"
+              [reorderCount]="workflowItems_().length"
+              [reorderKey]="item.id"
+              (reorder)="onReorderWorkflow(i, $event)"
+              [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+              [attr.title]="'drag_reorder_hint' | translatePipe"
+            >
               <lucide-icon name="grip-vertical" [size]="14" class="drag-handle-icon" />
             </div>
             <input
