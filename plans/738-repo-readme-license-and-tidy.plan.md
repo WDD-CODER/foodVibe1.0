@@ -274,3 +274,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Builder (round 2, resume) 2026-11-25: ask 738-1 answered by the Human — the Done-when scope check now diffs against
   `origin/orch/live-ready`. `node scripts/scope-check.mjs --diff=origin/orch/live-ready --plan=plans/738-repo-readme-license-and-tidy.plan.md` → `SCOPE: ok`, exit 0.
   The gate's own `--diff=origin/main` check entry is run config, not a plan file; it still lists plans 736/737 files until they reach main.
+- Builder (fix round, finding gate-1) 2026-11-25: the gate still read line 62 from the run branch's copy of this plan
+  (`origin/orch/live-ready` still says `--diff=origin/main`); this branch has the answered line. Reran all checks:
+  build, lint, test:ci (2794 SUCCESS), test:server (151 files / 2023 tests passed), lint:icons, lint:no-native-select,
+  kit-manifest-check (both copies), kit-checks, override, plan-ledger, breadcrumbs, ci-scope, arch, reuse,
+  `--diff=origin/orch/live-ready` (`SCOPE: ok`) → all exit 0; log-query → `SKIP: no database configured`.
+  `--diff=origin/main` still lists only plan 736/737 files (no 738 file).
