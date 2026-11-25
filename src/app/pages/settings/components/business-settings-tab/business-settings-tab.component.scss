@@ -28,6 +28,18 @@
     font-size: var(--fs-sm);
   }
 
+  .business-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .business-group__title {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+  }
+
   .business-field__label {
     color: var(--color-text-main);
     font-weight: 600;

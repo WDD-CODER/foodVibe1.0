@@ -1,23 +1,24 @@
-import { MONTH_KEY_PATTERN } from '@schemas/entities'
+import { MONTH_KEY_PATTERN, monthKeyOf, monthLabel, shiftMonth } from '@schemas/month/month-rules'
 
-/** Plan 726: a month is named `YYYY-MM` (the key of a `dishSalesMonths` document). */
+/**
+ * Plan 726, rewritten plan 727: a month is named `YYYY-MM`. One month rule, not two: these are thin names over
+ * `shared/schemas/month/month-rules.ts`, the same rules the server uses to open a month.
+ */
 export function isMonthKey(key: unknown): key is string {
   return typeof key === 'string' && MONTH_KEY_PATTERN.test(key)
 }
 
+/** The calendar month in Asia/Jerusalem. */
 export function currentMonthKey(now: Date = new Date()): string {
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  return monthKeyOf(now.getTime())
 }
 
 /** The month `n` months after (or before, when negative) `key`. */
 export function shiftMonthKey(key: string, n: number): string {
-  const [year, month] = key.split('-').map(Number)
-  const index = year * 12 + (month - 1) + n
-  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, '0')}`
+  return shiftMonth(key, n)
 }
 
 /** «נובמבר 2026». */
 export function monthKeyLabel(key: string): string {
-  const [year, month] = key.split('-').map(Number)
-  return new Intl.DateTimeFormat('he-IL', { month: 'long', year: 'numeric' }).format(new Date(year, month - 1, 1))
+  return monthLabel(key, 'he-IL')
 }

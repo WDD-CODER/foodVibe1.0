@@ -20,8 +20,10 @@ import { BUSINESS_SETTINGS_DEFAULTS, type BusinessSettings, type DealerType } fr
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { MONTH_TARGET_KEYS } from '@schemas/month/month-rules'
+import { MONTH_TARGET_FIELDS, bandLine } from '../../../monthly-plan/month-target-fields'
 
-type SettingsField = Exclude<keyof BusinessSettings, 'dealerType'>
+type SettingsField = Exclude<keyof BusinessSettings, 'dealerType' | 'monthTargets'>
 
 /** All six settings the form saves: the five number fields plus the dealer type (plan 723). */
 const ALL_KEYS = [
@@ -32,6 +34,8 @@ const ALL_KEYS = [
   'vatRatePct',
   'dealerType'
 ] as const
+
+const monthTargetValidators = [Validators.required, Validators.min(0), Validators.max(100)]
 
 /** One number field of the form: its label, help text and range-error dictionary keys. */
 interface FieldDef {
@@ -92,8 +96,17 @@ export class BusinessSettingsTabComponent {
       Validators.min(0),
       Validators.max(100)
     ]),
-    dealerType: this.fb.control<DealerType>(BUSINESS_SETTINGS_DEFAULTS.dealerType)
+    dealerType: this.fb.control<DealerType>(BUSINESS_SETTINGS_DEFAULTS.dealerType),
+    /** Plan 727: the targets a new month starts from (a month keeps its own copy). */
+    monthTargets: this.fb.group({
+      foodPct: this.fb.control<number>(BUSINESS_SETTINGS_DEFAULTS.monthTargets.foodPct, monthTargetValidators),
+      labourPct: this.fb.control<number>(BUSINESS_SETTINGS_DEFAULTS.monthTargets.labourPct, monthTargetValidators),
+      primePct: this.fb.control<number>(BUSINESS_SETTINGS_DEFAULTS.monthTargets.primePct, monthTargetValidators),
+      fixedPct: this.fb.control<number>(BUSINESS_SETTINGS_DEFAULTS.monthTargets.fixedPct, monthTargetValidators),
+      profitPct: this.fb.control<number>(BUSINESS_SETTINGS_DEFAULTS.monthTargets.profitPct, monthTargetValidators)
+    })
   })
+  readonly monthTargetFields = MONTH_TARGET_FIELDS
   readonly dealerOptions = [
     { value: 'murshe', label: 'dealer_type_murshe' },
     { value: 'patur', label: 'dealer_type_patur' }
@@ -198,12 +211,18 @@ export class BusinessSettingsTabComponent {
     }
   }
 
-  /** True when any of the six settings differs from the stored one. */
+  /** True when any of the six settings or one of the five month targets differs from the stored one. */
   private differs(
-    value: Partial<Record<(typeof ALL_KEYS)[number], unknown>>,
+    value: Partial<Record<(typeof ALL_KEYS)[number], unknown>> & { monthTargets?: Partial<Record<string, unknown>> },
     stored: Required<BusinessSettings>
   ): boolean {
-    return ALL_KEYS.some((key) => value[key] !== stored[key])
+    if (ALL_KEYS.some((key) => value[key] !== stored[key])) return true
+    return MONTH_TARGET_KEYS.some((key) => value.monthTargets?.[key] !== stored.monthTargets[key])
+  }
+
+  /** «מקובל בישראל: 30–35%» under a month target. */
+  protected band(key: (typeof MONTH_TARGET_KEYS)[number]): string {
+    return bandLine((k) => this.translation.translate(k), key)
   }
 
   protected hasError(key: SettingsField): boolean {

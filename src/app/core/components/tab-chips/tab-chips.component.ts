@@ -26,6 +26,8 @@ interface TabChip {
   badge?: boolean
   /** Plan 620: shown only when the business has any one of these modules. */
   modules?: readonly ModuleKey[]
+  /** Plan 727: a money chip — shown only to a role that may `editMoney` (owner, consultant), never to staff. */
+  money?: boolean
 }
 
 type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk' | 'restaurant'
@@ -35,6 +37,7 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/dashboard', 'dashboard'],
   ['/venues', 'dashboard'],
   ['/suppliers', 'dashboard'],
+  ['/monthly-plan', 'dashboard'],
   ['/trash', 'dashboard'],
   ['/inventory', 'inventory'],
   ['/diagnosis', 'inventory'],
@@ -61,6 +64,14 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
       queryParams: { tab: 'metadata' }
     },
     { id: 'suppliers', labelKey: 'suppliers', icon: 'truck', path: '/suppliers' },
+    {
+      id: 'monthly-plan',
+      labelKey: 'mp_chip',
+      icon: 'calendar-days',
+      path: '/monthly-plan',
+      modules: ['monthly_plan'],
+      money: true
+    },
     { id: 'trash', labelKey: 'trash', icon: 'trash-2', path: '/trash' }
   ],
   inventory: [
@@ -152,6 +163,7 @@ function currentDashboardChipId(url: string): string | null {
   const [path, query = ''] = url.split('?')
   if (path.startsWith('/venues')) return 'venues'
   if (path.startsWith('/suppliers')) return 'suppliers'
+  if (path.startsWith('/monthly-plan')) return 'monthly-plan'
   if (path.startsWith('/trash')) return 'trash'
   if (path.startsWith('/dashboard')) {
     const tab = new URLSearchParams(query.split('#')[0]).get('tab')
@@ -192,7 +204,9 @@ export class TabChipsComponent {
     const group = GROUP_BY_PATH_PREFIX.find(([prefix]) => path.startsWith(prefix))?.[1]
     if (!group) return []
     const all = CHIPS_BY_GROUP[group]
-    const chips = all.filter((chip) => !chip.modules || this.modules.has(chip.modules))
+    const chips = all.filter(
+      (chip) => (!chip.modules || this.modules.has(chip.modules)) && (!chip.money || this.permission.can('editMoney'))
+    )
     // Plan 620: a group the modules cut down to fewer than two chips has nothing to switch to.
     if (chips.length < all.length && chips.length < 2) return []
     if (group === 'dashboard') {

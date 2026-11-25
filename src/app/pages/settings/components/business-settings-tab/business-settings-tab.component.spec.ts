@@ -9,6 +9,8 @@ import { UserMsgService } from '@services/user-msg.service'
 import type { Business } from '@schemas/entities'
 import { BusinessSettingsTabComponent } from './business-settings-tab.component'
 
+const MONTH_TARGETS = { foodPct: 32, labourPct: 33, primePct: 65, fixedPct: 25, profitPct: 10 }
+
 const BUSINESS: Business = {
   _id: 'b1',
   name: 'x',
@@ -110,7 +112,8 @@ describe('BusinessSettingsTabComponent', () => {
       overrunThresholdPct: 10,
       priceRiseAlertPct: 7,
       vatRatePct: 18,
-      dealerType: 'murshe'
+      dealerType: 'murshe',
+      monthTargets: MONTH_TARGETS
     })
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('settings_saved')
     fixture.detectChanges()
@@ -145,8 +148,47 @@ describe('BusinessSettingsTabComponent', () => {
       overrunThresholdPct: 10,
       priceRiseAlertPct: 7,
       vatRatePct: 18,
-      dealerType: 'patur'
+      dealerType: 'patur',
+      monthTargets: MONTH_TARGETS
     })
+  })
+
+  it('shows the five month targets with the Israeli band beside each (plan 727)', () => {
+    const month = (key: string) => el().querySelector(`[data-testid="business-month-${key}"]`) as HTMLInputElement
+    expect(['foodPct', 'labourPct', 'primePct', 'fixedPct', 'profitPct'].map((k) => month(k).value)).toEqual([
+      '32',
+      '33',
+      '65',
+      '25',
+      '10'
+    ])
+    const group = el().querySelector('[data-testid="business-month-targets"]')!.textContent!
+    expect(group).toContain('mp_settings_targets_title')
+    expect(group).toContain('mp_band')
+    expect(group).toContain('mp_band_max')
+  })
+
+  it('changing one month target enables save and sends it with the other numbers (plan 727)', async () => {
+    const cmp = fixture.componentInstance
+    expect(cmp.hasRealChanges()).toBeFalse()
+    const box = el().querySelector('[data-testid="business-month-profitPct"]') as HTMLInputElement
+    box.value = '8'
+    box.dispatchEvent(new Event('input'))
+    fixture.detectChanges()
+    expect(cmp.hasRealChanges()).toBeTrue()
+    expect(saveBtn().disabled).toBeFalse()
+    await cmp.save()
+    expect(updateSettings).toHaveBeenCalledWith(
+      jasmine.objectContaining({ monthTargets: { ...MONTH_TARGETS, profitPct: 8 }, profitTargetPct: 25 })
+    )
+  })
+
+  it('101 in a month target disables save (plan 727)', () => {
+    const box = el().querySelector('[data-testid="business-month-foodPct"]') as HTMLInputElement
+    box.value = '101'
+    box.dispatchEvent(new Event('input'))
+    fixture.detectChanges()
+    expect(saveBtn().disabled).toBeTrue()
   })
 
   it('a server refusal shows the invalid-settings toast', async () => {

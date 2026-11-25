@@ -431,6 +431,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
   `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
 - plan 724 adds `menu-dish.schema.ts`, `dish-sales-month.schema.ts` and `dish-sales-alias.schema.ts` (dish analysis store).
+- plan 727 adds `month-plan.schema.ts` (`monthPlans`, server-only; `null` = not entered, 0 = a real zero) and the pure month and target rules in `shared/schemas/month/month-rules.ts` (`MONTH_KEY_PATTERN`, `monthKeyOf` in Asia/Jerusalem, `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`); `src/app/core/utils/month-key.util.ts` is a thin wrapper over them, so there is one month rule. The chip flag `TabChip.money` (tab-chips) hides a chip from a role that cannot `editMoney`.
 - When: a new stored collection needs a shape.
 - Known copies: none.
 

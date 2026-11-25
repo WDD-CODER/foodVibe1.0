@@ -18,7 +18,8 @@ const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
 const OWNER = { userId: 'own1', name: 'owner1', businessId: 'b1', businessRole: 'owner' }
 const OWNER_Y = { userId: 'own2', name: 'owner2', businessId: 'b2', businessRole: 'owner' }
 const STAFF = { userId: 'st1', name: 'staff1', businessId: 'b1', businessRole: 'staff' }
-const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe' }
+const MONTH_TARGETS = { foodPct: 32, labourPct: 33, primePct: 65, fixedPct: 25, profitPct: 10 }
+const DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe', monthTargets: MONTH_TARGETS }
 const VALID = { profitTargetPct: 30, safetyMarginPct: 12.5, overrunThresholdPct: 15 }
 const URL = '/api/v1/business'
 const put = (body, who = OWNER) => request(app).put(`${URL}/settings`).set(as(who)).send(body)
@@ -99,7 +100,24 @@ describe('PUT /api/v1/business/settings', () => {
     expect(res.status).toBe(200)
     expect(res.body).toEqual({ settings: VALID })
     const get = await request(app).get(URL).set(as(OWNER))
-    expect(get.body.settings).toEqual({ ...VALID, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe' })
+    expect(get.body.settings).toEqual({ ...VALID, priceRiseAlertPct: 5, vatRatePct: 18, dealerType: 'murshe', monthTargets: MONTH_TARGETS })
+  })
+
+  it('stores monthTargets, keeps them when a later body leaves them out, and refuses a bad one (plan 727)', async () => {
+    const monthTargets = { foodPct: 30, labourPct: 31, primePct: 61, fixedPct: 22, profitPct: 8 }
+    expect((await put({ ...VALID, monthTargets })).status).toBe(200)
+    expect((await stored('b1')).settings.monthTargets).toEqual(monthTargets)
+    expect((await put({ ...VALID, profitTargetPct: 31 })).status).toBe(200)
+    expect((await stored('b1')).settings.monthTargets).toEqual(monthTargets)
+    const get = await request(app).get(URL).set(as(OWNER))
+    expect(get.body.settings.monthTargets).toEqual(monthTargets)
+    expect((await put({ ...VALID, monthTargets: { ...monthTargets, foodPct: 101 } })).status).toBe(400)
+    expect((await put({ ...VALID, monthTargets: { foodPct: 30 } })).status).toBe(400)
+  })
+
+  it('staff cannot change the default month targets (plan 727)', async () => {
+    expect((await put({ ...VALID, monthTargets: MONTH_TARGETS }, STAFF)).status).toBe(403)
+    expect((await stored('b1')).settings).toBeUndefined()
   })
 
   it.each([
