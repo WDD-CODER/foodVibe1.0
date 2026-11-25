@@ -780,15 +780,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
 - [ ] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
-### Plan 739 — House rules for one product feel: page recipes, behaviour rules and an audit of every route
-- [ ] A1: Read how the six standard screens are built and note what they share — pieces, frame, states, scroll, motion, drag, feedback, per screen, as working notes under Execution Notes — this plan file
-- [ ] A2: Write the five page recipes so a builder knows what each kind of page is made of — the `## Page recipes` part with every field of P0 — docs/agent/house-style.md
-- [ ] A3: Write the seven behaviour rules so every page scrolls, moves, loads and answers the same way — the `## Behaviour rules` part with every field of P0, citing the existing defaults — docs/agent/house-style.md
-- [ ] A4: Make Style QA cover the routes it does not measure yet — entries for diagnosis, invoices, stock count and command center — docs/qa/styleqa-pages.json
-- [ ] A5: Measure the look of every page — slot servers up, `/styleqa` on all pages, the report path and the summary lines under Execution Notes — this plan file
-- [ ] A6: Write the audit that says which rules each page breaks and in what order to fix them — the four sections of P0, `gaps today` filled back into each rule — docs/qa/house-style-audit.md, docs/agent/house-style.md
-- [ ] A7: Run every automatic check and hand Dandan the two reading cards — outputs under Execution Notes — this plan file
-
 ### Plan 740 — A new page is built to the house rules from the start: plan check, proposed defaults and lint rules
 - [ ] A1: Make every plan that adds a page name the recipe it is built from — the new Page recipe section — docs/agent/plan-checks.md
 - [ ] A2: Offer each behaviour rule to Dandan as a product default he can turn on with one word — one proposed section per rule marked default — _shared/product-defaults.md
