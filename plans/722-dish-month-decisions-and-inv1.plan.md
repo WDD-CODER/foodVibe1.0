@@ -65,6 +65,7 @@ docs/brain/decisions/0034-salary-lines-owner-only.md
 docs/brain/invariants.md
 scripts/test/invariants.test.mjs
 docs/workflow-kit/manifest.json
+origin/main
 ```
 
 `scripts/test/invariants.test.mjs` is listed so the check can run against it; this plan does not change it.
