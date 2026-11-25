@@ -31,11 +31,12 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { join, resolve, dirname } from 'node:path'
-import { tmpdir, hostname } from 'node:os'
+import { tmpdir, hostname, freemem, setPriority, constants as osConstants } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { spawnSync } from './lib/proc.mjs'
 import { gateCommands, commandArgv, runCommand, treeOf, sameTreeSplit } from './lib/plan-gate.mjs'
 import { runsInside } from './lib/gate-select.mjs'
+import { holdHeavyLock } from './lib/heavy-lock.mjs'
 import { PATTERNS } from './pre-commit-secret-scan.mjs'
 import { workflowCommands, prTriggered, prHead, commitBudget, receiptPath, repoWorkflows, ciMode, STATUS_CONTEXT, treePassSources, globFiles, focusedTests, nodeTestGlobs } from './lib/local-ci.mjs'
 
@@ -187,7 +188,43 @@ function postStatus(ghFn, repo, sha, state, description) {
  * Run `list` in order, write the receipt for `head.sha` under `root`, post the `local-ci` status. Returns the exit code
  * (0 pass, 1 a command failed, 2 the status could not be posted).
  */
-export async function runList({ root = ROOT, gh: ghFn = gh, head, pr, list, skipped = [], timeoutMin = DEFAULT_TIMEOUT_MIN, tier = 'pr', reuse = tier !== 'release', releaseOnly = [] }) {
+export async function runList(opts) {
+  // Free memory first, before the queue: a CI waiting for memory never holds the heavy-job lock other gates wait for.
+  await waitForMemory()
+  // One heavy job on this PC at a time (lib/heavy-lock.mjs): local CI waits its turn behind another gate or CI run.
+  const release = await holdHeavyLock(`local CI ${opts.pr ? `PR #${opts.pr}` : opts.tier ?? 'pr'} in ${String(opts.root ?? ROOT).split(/[\\/]/).pop()}`)
+  try { return await runListCommands(opts) } finally { release() }
+}
+
+// Free memory local CI waits for before it starts (GB): below it, the PC is already busy (dev servers, a run's gate)
+// and a test suite on top would push it to the floor. KIT_CI_MIN_FREE_GB overrides it; 0 turns the wait off.
+export const CI_MIN_FREE_GB = 4
+// The longest wait (minutes): a PC that never frees that much memory (os.freemem counts only free pages on some systems)
+// still gets its CI, late rather than never.
+export const CI_MEM_WAIT_MAX_MIN = 120
+/**
+ * Wait until free memory is at least `minGb`: re-checked every minute, one line when it starts waiting and one every
+ * 10 minutes, at most CI_MEM_WAIT_MAX_MIN (then it starts anyway and says so). Off under `node --test` unless
+ * KIT_CI_MIN_FREE_GB is set. Returns the minutes waited.
+ */
+export async function waitForMemory({ env = process.env, freeGb = () => freemem() / 1024 ** 3, say = (l) => console.log(l), sleepMs = 60_000, maxMin = CI_MEM_WAIT_MAX_MIN } = {}) {
+  const set = env.KIT_CI_MIN_FREE_GB
+  if (env.NODE_TEST_CONTEXT && set === undefined) return 0
+  const minGb = set === undefined || set === '' ? CI_MIN_FREE_GB : Number(set)
+  if (!(minGb > 0)) return 0
+  let waited = 0
+  let free
+  while ((free = freeGb()) < minGb) {
+    if (waited >= maxMin) { say(`LOCAL_CI: still ${free.toFixed(1)} GB free after ${waited} min — starting anyway`); return waited }
+    if (waited % 10 === 0) say(`LOCAL_CI: waiting — ${free.toFixed(1)} GB free, starts at ${minGb} GB (${waited} min so far)`)
+    await new Promise((r) => setTimeout(r, sleepMs))
+    waited++
+  }
+  if (waited) say(`LOCAL_CI: ${free.toFixed(1)} GB free after ${waited} min — starting`)
+  return waited
+}
+
+async function runListCommands({ root = ROOT, gh: ghFn = gh, head, pr, list, skipped = [], timeoutMin = DEFAULT_TIMEOUT_MIN, tier = 'pr', reuse = tier !== 'release', releaseOnly = [] }) {
   const results = []
   const reused = []
   const started = Date.now()
@@ -345,6 +382,8 @@ async function main() {
     process.exit(2)
   }
   if (o.which) process.exit(which())
+  // Below-normal priority: the checks this process starts inherit it, so builders and the Human's own work keep the CPU.
+  try { setPriority(process.pid, osConstants.priority.PRIORITY_BELOW_NORMAL) } catch { /* not allowed here: run as is */ }
   if (o.use) process.exit(useMode(o.use))
   process.exit(o.closePlans ? closePlans(o) : o.release ? await runRelease(o) : await runPr(o))
 }

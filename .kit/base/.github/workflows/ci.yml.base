@@ -17,16 +17,24 @@ jobs:
       - id: detect
         name: Detect app/code changes
         shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          if [[ "${{ github.event_name }}" != "pull_request" ]]; then
-            echo "run-gates=true" >> "$GITHUB_OUTPUT"
-            echo "Non-PR event: running full gates"
-            exit 0
-          fi
+          full() { echo "run-gates=true" >> "$GITHUB_OUTPUT"; echo "$1: running full gates"; exit 0; }
+          case "$EVENT" in
+            pull_request) BASE="$PR_BASE"; HEAD="$PR_HEAD" ;;
+            push) BASE="$PUSH_BEFORE"; HEAD="$PUSH_SHA" ;;
+            *) full "Event $EVENT" ;;
+          esac
+          if [[ -z "$BASE" || "$BASE" =~ ^0+$ ]]; then full "No base commit (new branch or first push)"; fi
+          if ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then full "Base $BASE is not in the clone (force push)"; fi
 
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
+          # The docs-only path list below matches security.yml on.push.paths-ignore; change both together.
           mapfile -t FILES < <(git diff --name-only "$BASE" "$HEAD")
 
           if [[ ${#FILES[@]} -eq 0 ]]; then
@@ -244,5 +252,5 @@ jobs:
             fi
             echo "All quality gates passed"
           else
-            echo "Docs-only PR: lint/build/test skipped; gitleaks passed"
+            echo "Docs-only change (PR or push): lint/build/test skipped; gitleaks passed"
           fi
