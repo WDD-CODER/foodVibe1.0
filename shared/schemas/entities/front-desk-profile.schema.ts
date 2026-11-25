@@ -9,7 +9,7 @@ export const ASSISTANT_TONES = ['warm', 'formal'] as const
 /** The request kinds a front desk takes; plan 549's `REQUEST_KINDS` re-exports this list. */
 export const FRONT_DESK_REQUEST_KINDS = ['table', 'event', 'tasting', 'consultation'] as const
 /** Plan 548: fields only the server writes; the generic data API drops them from every profile write. */
-export const PROFILE_SERVER_FIELDS = ['status', 'whatsapp', 'adminHistory'] as const
+export const PROFILE_SERVER_FIELDS = ['status', 'whatsapp', 'adminHistory', 'levelHistory'] as const
 
 export const FRONT_DESK_PLANS = ['pilot', 'basic', 'pro'] as const
 export type FrontDeskPlan = (typeof FRONT_DESK_PLANS)[number]
@@ -114,6 +114,14 @@ export const frontDeskProfileSchema = z.strictObject({
     assistantLevel: z.union([z.literal(0), z.literal(1)]).optional(),
     plan: z.enum(FRONT_DESK_PLANS).optional(),
     reason: z.string().min(1).max(200)
+  })).max(50).optional(),
+  /** Plan 734: the owner's assistant level switches, newest last, at most 50. */
+  levelHistory: z.array(z.strictObject({
+    at: z.number(),
+    by: z.string(),
+    byName: z.string().max(80),
+    from: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+    to: z.union([z.literal(0), z.literal(1)])
   })).max(50).optional()
 })
 export type FrontDeskProfile = z.infer<typeof frontDeskProfileSchema>

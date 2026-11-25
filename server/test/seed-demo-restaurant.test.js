@@ -186,6 +186,13 @@ describe('seedDemoRestaurant', () => {
       await run(true)
       expect(await levelOf()).toBe(2)
     })
+
+    it('leaves a level the owner chose (a levelHistory row) as it is (plan 734)', async () => {
+      await seeded()
+      await profiles().updateOne({ _id: 'demo_rest_profile' }, { $set: { 'assistant.level': 0, levelHistory: [{ at: 1, by: 'o', byName: 'o', from: 1, to: 0 }] } })
+      expect(await run(true)).not.toContain('raised the demo assistant to level 1')
+      expect(await levelOf()).toBe(0)
+    })
   })
 })
 
