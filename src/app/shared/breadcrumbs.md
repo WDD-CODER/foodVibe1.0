@@ -55,6 +55,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `scaling-chip/` | Recipe scaling chip | ScalingChipComponent |
 | `scrollable-dropdown/` | Scrollable dropdown | ScrollableDropdownComponent |
 | `scroll-rail/` | Horizontal scroll strip with edge fades and arrow buttons; `centerChild(el)` glides a tapped chip to the middle | ScrollRailComponent |
+| `tooltip/` | The one hint box: `[appTooltip]` (hover, focus, tap; placed by `placeInViewport`), box looks from the global c-tooltip class | TooltipDirective, TooltipBoxComponent |
 | `scroll-area/` | A block that scrolls with no scrollbar and shows an arrow while there is more above or below (`maxBlockSize`) | ScrollAreaComponent |
 | `inline-rename-field/` | Inline rename input with Save and Cancel buttons (Enter saves, Escape cancels, blur does nothing) | InlineRenameFieldComponent |
 | `selection-bar/` | Bulk selection bar | SelectionBarComponent |

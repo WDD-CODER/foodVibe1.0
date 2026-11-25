@@ -278,6 +278,29 @@
     </div>
   </section>
 
+  <section id="tooltip" class="dc-section">
+    <h2>tooltip</h2>
+    <code>appTooltip, tooltipPlacement, tooltipOnClick, c-tooltip (hover, focus, tap; Escape closes)</code>
+    <div class="dc-row">
+      <button type="button" class="c-btn-ghost" id="dc-tooltip-text" [appTooltip]="'dc_tooltip_sample' | translatePipe">
+        text
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost"
+        id="dc-tooltip-template"
+        [appTooltip]="chipsTip"
+        tooltipPlacement="below"
+      >
+        template
+      </button>
+      <ng-template #chipsTip>
+        <span class="c-chip c-chip--tag c-chip--sm">chip</span>
+        <span class="c-chip c-chip--tag c-chip--sm">chip</span>
+      </ng-template>
+    </div>
+  </section>
+
   <section id="engine-classes" class="dc-section">
     <h2>engine-classes</h2>
     <div class="dc-row">

@@ -119,6 +119,8 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 - `appTooltip` directive with its box (`src/app/shared/tooltip/`) — family: none — rung: 4 — why: no shared tooltip exists; two pages draw their own and 37 templates use the browser's `title`. New family `tooltip`. It reuses `placeInViewport` (family `helpers`) for placement.
+- `tooltip-box` component (`src/app/shared/tooltip/tooltip-box.component.ts`) — family: tooltip — rung: 4 — why: the box the `appTooltip` directive creates; part of the same new family.
+- `.c-tooltip--below` — family: engine-classes — rung: 3 — why: the modifier of `.c-tooltip` that flips the arrow when the box sits under the control.
 - `.c-tooltip` — family: engine-classes — rung: 3 — why: the box is appended outside the component that asks for it, so its look must be a global engine in `src/styles.scss`.
 
 ## Adopt Check
@@ -235,14 +237,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Build the one tooltip box every hint will use — the engine block, the directive, the box component and their spec — src/styles.scss, src/app/shared/tooltip/**
-- [ ] A2: Move the product list's warning hint onto the shared tooltip and delete its own copy — the template, the removed state and CSS, the spec — src/app/pages/inventory/components/inventory-product-list/**
-- [ ] A3: Move the recipe book's cost and date hints onto the shared tooltip and delete their own boxes — the triggers, the removed boxes, CSS and service, the spec — src/app/pages/recipe-book/**
-- [ ] A4: Use the shared tooltip on three hints people meet every day — the bell, the page header's count, the taxonomy icon buttons — src/app/core/components/notification-bell/**, src/app/shared/page-header/**, src/app/pages/metadata-manager/components/taxonomy-kind-manager/**
-- [ ] A5: Show the tooltip in the dev catalog and check it with a script — the catalog entry, the dictionary key, the count spec, the ui spec — src/app/pages/dev-catalog/**, public/assets/data/dictionary.json, e2e/ui/744-1.spec.ts
-- [ ] A6: Warn when new code uses the browser's own title for a hint, and record the hints that still do — the house-tooltip lint rule with its round-trip proof, the debt baseline kind — scripts/lib/registry-families.mjs, _shared/debt-baseline.json
-- [ ] A7: Reword the default and the house rule to name the shared tooltip, and record the piece where builders look — the two how lines, the tooltip rule, the registry family, the inventory, the design system row, the folder maps — _shared/product-defaults.md, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, .interface-design/system.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md
-- [ ] A8: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+- [x] A1: Build the one tooltip box every hint will use — the engine block, the directive, the box component and their spec — src/styles.scss, src/app/shared/tooltip/**
+- [x] A2: Move the product list's warning hint onto the shared tooltip and delete its own copy — the template, the removed state and CSS, the spec — src/app/pages/inventory/components/inventory-product-list/**
+- [x] A3: Move the recipe book's cost and date hints onto the shared tooltip and delete their own boxes — the triggers, the removed boxes, CSS and service, the spec — src/app/pages/recipe-book/**
+- [x] A4: Use the shared tooltip on three hints people meet every day — the bell, the page header's count, the taxonomy icon buttons — src/app/core/components/notification-bell/**, src/app/shared/page-header/**, src/app/pages/metadata-manager/components/taxonomy-kind-manager/**
+- [x] A5: Show the tooltip in the dev catalog and check it with a script — the catalog entry, the dictionary key, the count spec, the ui spec — src/app/pages/dev-catalog/**, public/assets/data/dictionary.json, e2e/ui/744-1.spec.ts
+- [x] A6: Warn when new code uses the browser's own title for a hint, and record the hints that still do — the house-tooltip lint rule with its round-trip proof, the debt baseline kind — scripts/lib/registry-families.mjs, _shared/debt-baseline.json
+- [x] A7: Reword the default and the house rule to name the shared tooltip, and record the piece where builders look — the two how lines, the tooltip rule, the registry family, the inventory, the design system row, the folder maps — _shared/product-defaults.md, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, .interface-design/system.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [x] A8: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: `placeInViewport`; the browser `popover` API (already used by the nutrition box and the stock
@@ -273,3 +275,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Q: Are all `title` hints converted now? A: no — the box, the two hand-made tooltips and three examples first; the rest after he has seen it (proposed to him on 2026-11-25, not objected to).
 
 ## Execution Notes
+- evidence: `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0, 2808 SUCCESS (first run: 1 failed, the new spec's "no room above" case; fixed by pinning the box to the top, rerun green).
+- evidence: `git grep -l appTooltip -- "src/app/**/*.html"` → product list, recipe book list, notification bell, page header, taxonomy kind manager, dev catalog. `git grep -n "validation-tooltip\|cost-tooltip\|date-tooltip" -- src/app` → nothing.
+- evidence: `grep -c c-tooltip src/styles.scss` → 2; styles.scss diff against origin/main has no removed lines.
+- evidence: `grep -c "needs:" docs/agent/house-style.md` → origin/main 2, now 1 (the `tooltip` rule's is gone); tooltip rule is `- check: lint — …`, no `later check` line.
+- evidence: `grep -c "no new tooltip piece" _shared/product-defaults.md` → 0; `grep -c "^- status: on"` → 10 on origin/main and now.
+- evidence: lint round-trip proof (throwaway script outside the repo) → `true \[attr\.title\]=|\[title\]=|<(?:button|a|span|div|p|i|li|td|th|label|input|img|lucide-icon)\b[^>]*\stitle="`
+- evidence: `node scripts/debt-baseline.mjs --add-kind reuse-copy.tooltip` → `DEBT: added reuse-copy.tooltip at 79` (79 hints in 35 templates).
+- decision: removes: the product list badge's own open/close state (replaced by the shared tooltip, which opens on hover, focus and tap as before) — reverse: restore inventory-product-list.component.{html,ts,scss} from origin/main
+- decision: removes: the recipe book's own cost and date tooltip state and `recipe-list-tooltips.service.ts` (replaced by the shared tooltip, which opens on hover, focus and tap as before) — reverse: restore recipe-book-list.component.{html,ts,scss} and services/recipe-list-tooltips.service.ts from origin/main
+- decision: behaviour: the "reworded" stamp of `hints-in-tooltips` is on its `turned on` line (`…2026-11-19; reworded: the Human, 2026-11-25 (plan 744)`) because the defaults contract (scripts/lib/product-defaults.mjs FIELDS) refuses a `reworded` field — reverse: edit that line
+- decision: behaviour: the cost and date tooltips are templates inside the cell (same text as before, one line each); the dev catalog "tooltip" entry is a new section, so the catalog spec counts 17 sections.

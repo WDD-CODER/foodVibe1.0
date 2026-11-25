@@ -1,0 +1,6 @@
+@let value = content();
+@if (asTemplate(value); as tpl) {
+  <ng-container [ngTemplateOutlet]="tpl"></ng-container>
+} @else {
+  {{ value }}
+}

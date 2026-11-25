@@ -284,13 +284,13 @@
               class="col-date c-list-body-cell date-cell-wrap"
               appColumnSlide
               [label]="'date_added' | translatePipe"
-              (mouseenter)="tooltips.showDate(row.recipe._id, $event)"
-              (mouseleave)="tooltips.hideDate()"
-              [attr.aria-describedby]="
-                tooltips.dateHoveredId() === row.recipe._id ? 'date-tooltip-' + row.recipe._id : null
-              "
+              [appTooltip]="dateTip"
+              tooltipPlacement="below"
             >
               {{ formatAddedAt(row.recipe.createdAt) }}
+              <ng-template #dateTip
+                >{{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(row.recipe.updatedAt) }}</ng-template
+              >
             </div>
           }
           <div
@@ -310,16 +310,14 @@
             class="col-cost c-list-body-cell cost-cell-wrap"
             appColumnSlide
             [label]="'cost' | translatePipe"
-            (mouseenter)="tooltips.showCost(row.recipe._id, $event)"
-            (mouseleave)="tooltips.hideCost()"
-            (click)="tooltips.toggleCostTap(row.recipe._id, $event)"
-            [attr.aria-describedby]="
-              tooltips.costHoveredId() === row.recipe._id || tooltips.costTappedId() === row.recipe._id
-                ? 'cost-tooltip-' + row.recipe._id
-                : null
-            "
+            [appTooltip]="costTip"
+            [tooltipOnClick]="true"
+            tooltipPlacement="below"
           >
             ₪{{ row.cost | number: '1.2-2' }}
+            <ng-template #costTip
+              >{{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(row.recipe) }}</ng-template
+            >
           </div>
         </app-column-carousel-cell>
         <app-row-actions-menu class="c-col-actions c-list-body-cell">
@@ -516,30 +514,3 @@
     </div>
   </ng-container>
 </app-list-shell>
-
-@if (activeCostTooltipRecipe_(); as recipe) {
-  @if (tooltips.costAnchor(); as anchor) {
-    <div
-      class="cost-tooltip cost-tooltip-fixed"
-      [id]="'cost-tooltip-' + recipe._id"
-      (appClickOutside)="tooltips.closeCostTap()"
-      [style.top.px]="anchor.bottom + 4"
-      [style.left.px]="anchor.left + anchor.width / 2"
-    >
-      {{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(recipe) }}
-    </div>
-  }
-}
-
-@if (activeDateTooltipRecipe_(); as recipe) {
-  @if (tooltips.dateAnchor(); as anchor) {
-    <div
-      class="date-tooltip date-tooltip-fixed"
-      [id]="'date-tooltip-' + recipe._id"
-      [style.top.px]="anchor.bottom + 4"
-      [style.left.px]="anchor.left + anchor.width / 2"
-    >
-      {{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(recipe.updatedAt) }}
-    </div>
-  }
-}

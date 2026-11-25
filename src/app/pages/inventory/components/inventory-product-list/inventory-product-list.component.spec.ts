@@ -256,8 +256,19 @@ describe('InventoryProductListComponent', () => {
       fixture.detectChanges()
     }
     const root = (): HTMLElement => fixture.nativeElement as HTMLElement
-    const chips = (): string[] =>
-      Array.from(root().querySelectorAll('.validation-tooltip .c-chip')).map((c) => c.textContent?.trim() ?? '')
+    const tip = (): HTMLElement | null => document.body.querySelector<HTMLElement>('.c-tooltip')
+    afterEach(() => document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove()))
+    /** The reasons in the shared tooltip: tap the mark to pin it open, read the chips, tap again to close. */
+    const chips = (): string[] => {
+      const btn = root().querySelector<HTMLButtonElement>('.row-status')
+      btn?.click()
+      fixture.detectChanges()
+      const found = Array.from(document.body.querySelectorAll('.c-tooltip .c-chip')).map(
+        (c) => c.textContent?.trim() ?? ''
+      )
+      btn?.click()
+      return found
+    }
 
     it('three gaps (price, category, supplier) render one amber chip mark with three chips and no triangle', () => {
       setProducts({ ...base, _id: 'a', categories: [], sources: [] })
@@ -279,7 +290,7 @@ describe('InventoryProductListComponent', () => {
     it('a complete product renders no mark', () => {
       setProducts({ ...base, _id: 'c' })
       expect(root().querySelectorAll('.row-status').length).toBe(0)
-      expect(root().querySelectorAll('.validation-tooltip').length).toBe(0)
+      expect(tip()).toBeNull()
     })
 
     it('a product with no unit renders the red circle only, with a price chip when also unpriced', () => {
@@ -314,11 +325,12 @@ describe('InventoryProductListComponent', () => {
       const btn = root().querySelector<HTMLButtonElement>('.row-status') as HTMLButtonElement
       btn.click()
       fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('true')
+      expect(tip()).not.toBeNull()
+      expect(btn.getAttribute('aria-describedby')).toBe(tip()!.id)
       expect(mockRouter.navigate).not.toHaveBeenCalled()
       btn.click()
       fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      expect(tip()).toBeNull()
       expect(mockRouter.navigate).not.toHaveBeenCalled()
     })
 
@@ -328,16 +340,15 @@ describe('InventoryProductListComponent', () => {
       const btn = root().querySelector<HTMLButtonElement>('.row-status') as HTMLButtonElement
       btn.click()
       fixture.detectChanges()
-      root().querySelector<HTMLElement>('.validation-tooltip')?.click()
+      tip()?.click()
       expect(mockRouter.navigate).not.toHaveBeenCalled()
-      document.body.click()
-      fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+      expect(tip()).toBeNull()
       btn.click()
       fixture.detectChanges()
       btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
       fixture.detectChanges()
-      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      expect(tip()).toBeNull()
     })
 
     it('a tap on the product name still opens the edit page', () => {

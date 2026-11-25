@@ -11,6 +11,7 @@ import {
 } from '@angular/core'
 import { Router } from '@angular/router'
 import { DatePipe } from '@angular/common'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
@@ -25,7 +26,7 @@ import { UserService } from '@services/user.service'
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, DatePipe],
+  imports: [LucideAngularModule, TranslatePipe, DatePipe, TooltipDirective],
   templateUrl: './notification-bell.component.html',
   styleUrl: './notification-bell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

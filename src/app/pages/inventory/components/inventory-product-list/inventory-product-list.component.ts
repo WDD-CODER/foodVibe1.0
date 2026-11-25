@@ -59,6 +59,7 @@ import {
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from '@utils/filter-category-counts.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { ProductDataService } from '@services/product-data.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -88,6 +89,7 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
+    TooltipDirective,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
     InputClearComponent
@@ -132,8 +134,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
   protected readonly filterCategories = useCollapsibleCategories()
   protected allergenPopoverProductId_ = signal<string | null>(null)
-  /** Product whose status tooltip is pinned open by a tap (touch devices; hover opens it by CSS). */
-  protected openStatusId_ = signal<string | null>(null)
   protected isAllergenAllExpanded_ = signal<boolean>(false)
   protected isLowStockOnly_ = signal<boolean>(false)
   protected shouldShowInvalidOnly_ = signal<boolean>(false)
@@ -521,17 +521,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     if (status === 'invalid') return 'invalid'
     if (unpriced) return 'unpriced'
     return status === 'incomplete' ? 'incomplete' : null
-  }
-
-  protected toggleStatus(productId: string | undefined): void {
-    const id = productId ?? ''
-    this.openStatusId_.update((open) => (open === id ? null : id))
-  }
-
-  /** Closes only this product's box, so a tap on another row's mark is not undone by the document click. */
-  protected closeStatus(productId?: string): void {
-    if (productId !== undefined && this.openStatusId_() !== productId) return
-    this.openStatusId_.set(null)
   }
 
   protected statusLabel(fields: string[]): string {

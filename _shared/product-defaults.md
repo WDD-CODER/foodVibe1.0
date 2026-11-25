@@ -84,11 +84,11 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - rule: An explanation of a control in a dialog shows as a hover tooltip on that control (a title plus an accessible description), not as text on the modal.
 - applies when: custom
 - plan words: \b(hint|tooltip|explanation|explain)s?\b|רמז|הסבר
-- how: native [attr.title] plus [attr.aria-label] or aria-describedby on the control, as the history button of platform-business-dialog does (plan 638); no new tooltip piece
+- how: the shared tooltip [appTooltip] (src/app/shared/tooltip/, family tooltip) on the control, with an aria-label on the control when it has no visible name; never the browser title
 - check: card
 - card: a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal
 - exceptions: (say where it does not apply)
-- turned on: the Human, 2026-11-19
+- turned on: the Human, 2026-11-19; reworded: the Human, 2026-11-25 (plan 744)
 
 ### unit-dropdown-add
 
@@ -186,7 +186,7 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - rule: Every short explanation that appears when a control is hovered, focused or tapped shows in the app's one tooltip box: the same surface, text size and arrow, opening beside the control on the side with room and never cut off by the screen.
 - applies when: custom
 - plan words: \b(hint|tooltip|explanation|explain|what is this)s?\b|רמז|הסבר
-- how: placement by placeInViewport (src/app/core/utils/viewport-placement.util.ts), as src/app/shared/nutrition-badge/ does; the one shared tooltip piece is not built yet (the plan that builds it asks the Human to reword hints-in-tooltips, whose how line still names the browser title)
+- how: the shared tooltip [appTooltip] (src/app/shared/tooltip/, family tooltip), placed by placeInViewport (src/app/core/utils/viewport-placement.util.ts) as src/app/shared/nutrition-badge/ does; a new hint uses it, never the browser title
 - check: card
 - card: any page with an icon button or an explained control · hover it with the mouse, then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen
 - exceptions: the product nutrition box (src/app/shared/nutrition-badge/) keeps the look it already has; declare `exception — why: <one line>`

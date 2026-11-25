@@ -246,6 +246,46 @@
         "src/app/pages/cook-view/cook-view.page.html": 1
       }
     },
+    "reuse-copy.tooltip": {
+      "total": 79,
+      "files": {
+        "src/app/pages/cook-view/cook-view.page.html": 8,
+        "src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html": 1,
+        "src/app/pages/dev-catalog/dev-catalog.page.html": 1,
+        "src/app/pages/equipment/components/equipment-list/equipment-list.component.html": 2,
+        "src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html": 4,
+        "src/app/pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft.component.html": 1,
+        "src/app/pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog.component.html": 1,
+        "src/app/pages/menu-intelligence/components/event-logistics-panel/event-logistics-panel.component.html": 2,
+        "src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html": 1,
+        "src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html": 1,
+        "src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html": 2,
+        "src/app/pages/menu-intelligence/components/supplier-orders/supplier-orders.component.html": 1,
+        "src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html": 4,
+        "src/app/pages/metadata-manager/components/ai-examples-share/ai-examples-share.component.html": 1,
+        "src/app/pages/metadata-manager/components/ai-model-manager/ai-model-manager.component.html": 1,
+        "src/app/pages/metadata-manager/components/coefficient-manager/coefficient-manager.component.html": 3,
+        "src/app/pages/metadata-manager/components/logistics-item-manager/logistics-item-manager.component.html": 3,
+        "src/app/pages/metadata-manager/components/taxonomy-kind-manager/taxonomy-kind-manager.component.html": 2,
+        "src/app/pages/metadata-manager/components/user-management/user-management.component.html": 2,
+        "src/app/pages/metadata-manager/metadata-manager.page.component.html": 4,
+        "src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.html": 3,
+        "src/app/pages/platform-dashboard/components/platform-learning/platform-learning.component.html": 3,
+        "src/app/pages/platform-dashboard/platform-dashboard.page.html": 2,
+        "src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html": 2,
+        "src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html": 3,
+        "src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.html": 4,
+        "src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.html": 2,
+        "src/app/pages/suppliers/components/supplier-list/supplier-list.component.html": 3,
+        "src/app/pages/venues/components/venue-detail/venue-detail.component.html": 2,
+        "src/app/pages/venues/components/venue-form/venue-form.component.html": 1,
+        "src/app/pages/venues/components/venue-list/venue-list.component.html": 3,
+        "src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.html": 3,
+        "src/app/shared/approve-stamp/approve-stamp.component.html": 1,
+        "src/app/shared/supplier-picker/supplier-picker.component.html": 1,
+        "src/app/shared/voice-note/voice-note.component.html": 1
+      }
+    },
     "style-duplicate-block": {
       "total": 363,
       "files": {
