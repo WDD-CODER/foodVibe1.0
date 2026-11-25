@@ -300,6 +300,7 @@ Numbers
   | `events` or `frontdesk` | generic `clients`, `/api/v1/clients/**` | header link `/clients`, chip `clients`, routes `clients/**` |
   | `ai_create` | `POST /api/v1/ai/` `generate`, `parse-text`, `generate-from-url`, `generate-from-image`, `patch-recipe`, `generate-menu`, `patch-menu`, `generate-product`, `patch-product`, `generate-product-from-image`, `shots`, `shots/confirm`, `save-menu-shot` | every "create with AI" entry point (the buttons and the AI modals) |
   | `consultant_diag` | `/api/v1/diag/**`, `/api/v1/ai/diag/**` through `requireHomeModule` | the diagnosis entry in the acting banner / inventory group |
+  | `dish_analysis` | generic `menuDishes`, `dishSalesMonths`, `dishSalesAliases` (plan 724) | the menu page and the sales page (plans 725–726) |
 
   Never gated: products, suppliers, equipment, recipes, dishes, cook view, taxonomy (all kinds stay readable),
   settings, team, Trash, `/stats/business`, `/stats/report`, `/api/v1/product-import/**`,

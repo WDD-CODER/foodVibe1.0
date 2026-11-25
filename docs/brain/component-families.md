@@ -323,6 +323,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - the browser breakpoint constants (plan 656): `breakpoints` in `src/app/core/utils/breakpoints.ts` — `PHONE_MAX`,
   `TABLET_MAX`, `PHONE_QUERY`, `TABLET_DOWN_QUERY`, `DESKTOP_QUERY` (phone ≤767, tablet ≤1023, desktop ≥1024); the
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
+- the net price of a dish (plan 724): `netPriceOf` in `shared/schemas/dish-analysis/net-price.ts` — the price without VAT
+  by the business VAT rate and dealer type (`patur` = unchanged); the menu page, the month close and the analysis use it.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
@@ -418,6 +420,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
   `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+- plan 724 adds `menu-dish.schema.ts`, `dish-sales-month.schema.ts` and `dish-sales-alias.schema.ts` (dish analysis store).
 - When: a new stored collection needs a shape.
 - Known copies: none.
 

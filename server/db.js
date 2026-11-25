@@ -189,6 +189,11 @@ async function connectDb() {
   await db.collection('notifications').createIndex({ userId: 1, createdAt: -1 }, { name: 'notifications_user_created' })
   // C-STOCK: the on-hand read.
   await db.collection('stockCounts').createIndex({ businessId: 1, status: 1, countedAt: -1 }, { name: 'stock_counts_business_status_counted' })
+  // Plan 724: dish analysis store (not cloneable, so the generic businessId loop does not cover them).
+  await db.collection('menuDishes').createIndex({ businessId: 1, active: 1, name: 1 }, { name: 'menu_dishes_business_active' })
+  await db.collection('dishSalesMonths').createIndex({ businessId: 1, month: 1 }, { unique: true, name: 'dish_sales_months_business_month' })
+  await db.collection('dishSalesAliases').createIndex({ businessId: 1, nameKey: 1 }, { unique: true, name: 'dish_sales_aliases_business_key' })
+  await db.collection('dishSalesAliases').createIndex({ businessId: 1, menuDishId: 1 }, { name: 'dish_sales_aliases_business_dish' })
   logger.debug({ event: 'mongo.index.ensured', index: 'modules' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).

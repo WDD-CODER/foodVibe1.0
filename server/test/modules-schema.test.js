@@ -34,9 +34,16 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.hasModule({ modules: ['consultant_diag'] }, 'consultant_diag')).toBe(true)
   })
 
-  it('MODULE_OF_TYPE has exactly the seven types of the C-MODULES table', () => {
-    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'frontDeskProfiles', 'knowledgeItems', 'menuEvents', 'requests', 'venues'])
+  it('MODULE_OF_TYPE has exactly the ten types of the C-MODULES table', () => {
+    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'dishSalesAliases', 'dishSalesMonths', 'frontDeskProfiles', 'knowledgeItems', 'menuDishes', 'menuEvents', 'requests', 'venues'])
     expect(S.MODULE_OF_TYPE.clients).toEqual(['events', 'frontdesk'])
+  })
+
+  it('plan 724: dish_analysis is the sixth key, not a default, and gates the three dish types', () => {
+    expect(S.MODULE_KEYS).toEqual(['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis'])
+    expect(S.DEFAULT_MODULES).not.toContain('dish_analysis')
+    for (const t of ['menuDishes', 'dishSalesMonths', 'dishSalesAliases']) expect(S.MODULE_OF_TYPE[t]).toEqual(['dish_analysis'])
+    expect(S.modulesFieldSchema.safeParse(S.MODULE_KEYS).success).toBe(true)
   })
 
   it('platformUpdateSchema needs a reason and at least one change', () => {
@@ -58,7 +65,7 @@ describe('businessSchema new optional fields', () => {
   })
 
   it.each([
-    ['a sixth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'events'] }],
+    ['a seventh module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'dish_analysis', 'events'] }],
     ['a repeated module', { modules: ['events', 'events'] }],
     ['a 51st history row', { platformHistory: Array.from({ length: 51 }, (_, i) => row(i)) }],
     ['a cap of -1', { aiMonthlyTokenCap: -1 }],

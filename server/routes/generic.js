@@ -12,6 +12,9 @@ const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { CLIENT_SERVER_FIELDS } = require('../generated/schemas/entities/client.schema');
 const { PROFILE_SERVER_FIELDS } = require('../generated/schemas/entities/front-desk-profile.schema');
+const { DISH_MONTH_SERVER_FIELDS } = require('../generated/schemas/entities/dish-sales-month.schema');
+const { DISH_ALIAS_SERVER_FIELDS } = require('../generated/schemas/entities/dish-sales-alias.schema');
+const { normalizeProductName } = require('../utils/price-list-import');
 const { normalizePhone, phoneKey } = require('../generated/schemas/phone');
 const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections');
 const { expireDue } = require('../utils/request-expiry');
@@ -118,10 +121,28 @@ const EVENTS = 'menuEvents';
 const CLIENTS = 'clients';
 const PROFILES = 'frontDeskProfiles';
 const PROFILE_EXISTS = { error: 'PROFILE_EXISTS' };
+// Plan 724: the dish analysis store.
+const DISH_MONTHS = 'dishSalesMonths';
+const DISH_ALIASES = 'dishSalesAliases';
+const MONTH_CLOSED = { error: 'MONTH_CLOSED', messageKey: 'dish_month_closed' };
+const MONTH_EXISTS = { error: 'MONTH_EXISTS', messageKey: 'dish_month_exists' };
+const ALIAS_EXISTS = { error: 'ALIAS_EXISTS', messageKey: 'dish_alias_exists' };
+/** Plan 724: the 409 body an E11000 on a dish month or alias answers; null for other types. */
+const dishDuplicate = type => (type === DISH_MONTHS ? MONTH_EXISTS : type === DISH_ALIASES ? ALIAS_EXISTS : null);
+
+/** Plan 724: body without the month or alias fields only the server writes. */
+function withoutServerDishFields(type, body) {
+  const fields = type === DISH_MONTHS ? DISH_MONTH_SERVER_FIELDS : type === DISH_ALIASES ? DISH_ALIAS_SERVER_FIELDS : null;
+  if (!fields) return body;
+  const copy = { ...body };
+  for (const key of fields) delete copy[key];
+  return copy;
+}
+
 const SLUG_TAKEN = { error: 'SLUG_TAKEN', messageKey: 'fd_slug_taken' };
 
 /** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
-const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems']);
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS, PROFILES, 'knowledgeItems', 'menuDishes', DISH_MONTHS, DISH_ALIASES]);
 
 /** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
 const readProjection = (req, type) => {
@@ -573,6 +594,9 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === CLIENTS) safeEntity = withoutServerClientFields(safeEntity);
     // Plan 548: a client never sets a profile's status or WhatsApp routing; every profile starts as a draft.
     if (entityType === PROFILES) safeEntity = withoutServerProfileFields(safeEntity);
+    // Plan 724: a client never sets a month's close fields or an alias's counters; the alias key is the normalised name.
+    safeEntity = withoutServerDishFields(entityType, safeEntity);
+    if (entityType === DISH_ALIASES) safeEntity = { ...safeEntity, nameKey: normalizeProductName(safeEntity.name), hits: 0 };
     // Plan 557: only the platform admin raises the assistant level; a new profile starts at 0.
     if (entityType === PROFILES && safeEntity.assistant && typeof safeEntity.assistant === 'object') {
       safeEntity = { ...safeEntity, assistant: { ...safeEntity.assistant, level: 0 } };
@@ -663,6 +687,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     }
     res.status(201).json(doc);
   } catch (err) {
+    if (err.code === 11000 && dishDuplicate(req.params.type)) return res.status(409).json(dishDuplicate(req.params.type));
     if (err.code === 11000 && req.params.type === PROFILES) {
       return res.status(409).json(/businessId/.test(err.message) ? PROFILE_EXISTS : SLUG_TAKEN);
     }
@@ -747,6 +772,11 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     if (req.params.type === CLIENTS) updatable = withoutServerClientFields(updatable);
     // Plan 548: the stored `status` and `whatsapp` survive a client PUT unchanged.
     if (req.params.type === PROFILES) updatable = withoutServerProfileFields(updatable);
+    // Plan 724: stored close fields and alias counters survive a client PUT; the alias key follows a changed name.
+    updatable = withoutServerDishFields(req.params.type, updatable);
+    if (req.params.type === DISH_ALIASES && typeof updatable.name === 'string') {
+      updatable = { ...updatable, nameKey: normalizeProductName(updatable.name) };
+    }
     let rekeyed = null;
     let previousEventClientId;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
@@ -759,6 +789,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (!current) {
         return res.status(404).json({ error: `Cannot update, item ${req.params.id} does not exist` });
       }
+      // Plan 724: a closed month is frozen.
+      if (req.params.type === DISH_MONTHS && current.closedAt) return res.status(409).json(MONTH_CLOSED);
       if (isTerm && updatable.kind !== undefined && updatable.kind !== current.kind) {
         return res.status(400).json({ error: "A term's kind cannot change" });
       }
@@ -847,6 +879,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     res.json(result);
   } catch (err) {
     if (err.code === 11000 && req.params.type === CLIENTS) return res.status(409).json(PHONE_TAKEN);
+    if (err.code === 11000 && dishDuplicate(req.params.type)) return res.status(409).json(dishDuplicate(req.params.type));
     if (err.code === 11000 && req.params.type === PROFILES) return res.status(409).json(SLUG_TAKEN);
     if (err.code === 11000) return res.status(409).json({ error: 'Entity already exists' });
     req.log.error({ err, event: 'data.put.failed' });
@@ -1433,6 +1466,8 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${type} does not exist` });
     }
     if (!authorizeDelete(req, res, type, existing)) return;
+    // Plan 724: a closed month is never deleted.
+    if (type === DISH_MONTHS && existing.closedAt) return res.status(409).json(MONTH_CLOSED);
 
     // A1: referential integrity — block deleting a live product that a live recipe/dish uses.
     // Prevents orphaned ingredient referenceIds in recipes and dishes.
