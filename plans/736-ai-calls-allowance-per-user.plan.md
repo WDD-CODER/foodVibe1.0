@@ -306,3 +306,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   - `node scripts/breadcrumbs-check.mjs` → `BREADCRUMBS: clean`. kit-manifest-check → `KIT_MANIFEST: ok`.
   - `pnpm run test:ci` → exit 0, `TOTAL: 2794 SUCCESS`.
   - override-check, lint:icons, lint:no-native-select, plan-ledger-check → exit 0.
+  - kit-checks against `origin/orch/live-ready` first → `KIT_CHECKS: fail` (new classes `.ai-calls-left` /
+    `.ai-allowance__*`, a number input not on the `appNumberBox` line, no `entity-schemas` registry line). Fixed by
+    reusing the existing classes (`.user-chips`, `.user-email`, the windows' own usage-bar label classes), the number
+    input on the `appNumberBox` line (as in diag-menu) and a registry line → `KIT_CHECKS: ok (6 checks)`.
+  - `pnpm run test:server` (whole suite, 2 workers) → exit 0, `Test Files 150 passed (150)`, `Tests 2013 passed`.
+  - After the class fix: build exit 0, lint exit 0, focused karma (user-management + three AI windows) `TOTAL: 33 SUCCESS`;
+    full `pnpm run test:ci` → exit 0, `TOTAL: 2794 SUCCESS`.
+  - `node scripts/log-query.mjs --since=plan-start --level=error` → `SKIP: no database configured`.
