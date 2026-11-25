@@ -23,8 +23,14 @@ Verified on `origin/main` 72a33e4c:
 - `src/styles.scss:156-162` has the easing tokens and three duration tokens (`--dur-fast` 0.15s, `--dur-base` 0.2s,
   `--dur-slow` 0.25s); only Cook View uses the duration tokens. `.interface-design/system.md` "Animation" lists the
   easing tokens and gives the durations in words only.
-- Plan 742 (merged first) builds the shared drag look, the scroll area and the focus ring, so every rule in
-  `docs/agent/house-style.md` names a piece that exists and no rule is `lint after …`.
+- Plan 742 (merged, 518bd0cf) built the shared drag look, the scroll area and the focus ring. Verified on
+  `origin/main` 518bd0cf: `docs/agent/house-style.md` has **15 rules** — five recipes (`check: plan`), five rules
+  with `check: lint` (`scroll`, `drag`, `motion`, `loading`, `empty`), one with `check: card` (`feedback`) and four
+  with `check: default` (`keyboard-focus`, `column-carousel`, `sideways-row`, `tooltip`). The Human added
+  `column-carousel`, `sideways-row` and `tooltip` on 2026-11-25. Two optional fields exist beyond the first shape:
+  `- later check:` (a lint that waits for a piece that is not built yet: `sideways-row`, `tooltip`) and
+  `- exception:` (`tooltip`: the nutrition box keeps its look). A `check: lint` line may carry `exclude: <globs>`
+  (`loading`).
 - `docs/qa/styleqa-theme.md` is what the Style QA reviewer reads about the project's look.
 
 ## Goals & Success Criteria
@@ -126,15 +132,21 @@ line or file this plan names was removed, renamed or rewritten).
   `check: default`, append one `### house-<id>` section in the file's field shape: `status: proposed`; `rule` (the
   rule's sentence); `applies when` (`screen`, `list` or `custom` with `plan words` taken from the rule's
   `applies to`); `how` (the rule's `built from`); `check: card`; `card` (the rule's card); `exceptions`. Never
-  `status: on` and never a `turned on:` line. A rule whose `existing default` is not `none` gets no new section:
-  its house-style entry already points at that default.
+  `status: on` and never a `turned on:` line. A rule with `check: default` gets its section even when its
+  `existing default` names one (the existing default covers a neighbouring behaviour, not this one): today that is
+  four sections — `house-keyboard-focus`, `house-column-carousel`, `house-sideways-row`, `house-tooltip`; an
+  `- exception:` line of the rule goes into the section's `exceptions`. A rule with any other `check` gets no
+  section.
 - [ ] **Lint rules — `scripts/lib/registry-families.mjs`:** for every rule with `check: lint`, append one entry to
   `REUSE_RULES` with `id: 'house-<id>'`, the `files`, `pattern` and `hint` the rule gives, `exclude` for the shared
   piece's own folder and for `**/*.spec.ts`, and `family` = the registry family in the rule's `built from` (when it
   names tokens only, `engine-classes`). Before adding, run the pattern over the six standard screens' files: a
   pattern that matches a line the rules call correct is narrowed, or the rule's check is changed to `card` with one
-  `behaviour:` decision under Execution Notes. After plan 742 no rule is `lint after …`; one that still is, is skipped and
-  listed under Execution Notes.
+  `behaviour:` decision under Execution Notes. A `- later check:` line is never turned into a lint
+  rule here (its piece is not built): list each under Execution Notes. A `check: lint` line's own `exclude:` globs
+  are added to the rule's `exclude`. Read each pattern back from the Markdown file (the text between backticks) and
+  never type it through a shell; `motion` matches hundreds of existing lines, which is expected — reuse-lint warns
+  on added lines only.
 - [ ] **Motion tokens in the design system — `.interface-design/system.md`:** add `--dur-fast`, `--dur-base` and
   `--dur-slow` (they already exist in `src/styles.scss:160-162`) to the "Animation" table with their values and
   uses, as the `motion` rule of `docs/agent/house-style.md` gives them. `src/styles.scss` is not changed.
