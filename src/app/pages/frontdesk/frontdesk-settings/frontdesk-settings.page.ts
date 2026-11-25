@@ -298,6 +298,42 @@ export class FrontdeskSettingsPage {
     }
   }
 
+  // --- assistant level (plan 734; saved by its own call, not part of the draft) ---
+  protected readonly levelChoices: readonly (0 | 1)[] = [0, 1]
+  protected readonly level_ = computed(() => this.profile_()?.assistant.level ?? 0)
+  /** Level 2 is the admin's reserved level: the owner sees it read-only and gets no choices. */
+  protected readonly levelReserved_ = computed(() => this.level_() === 2)
+  /** Answering guests alone is open only for a front desk in pilot or active. */
+  protected readonly levelLocked_ = computed(() => {
+    const status = this.profile_()?.status
+    return status !== 'pilot' && status !== 'active'
+  })
+
+  protected async chooseLevel(level: 0 | 1, event: Event): Promise<void> {
+    const group = (event.target as HTMLElement | null)?.closest('[role="radiogroup"]') ?? null
+    try {
+      if (this.switching_() || !this.canEdit_() || level === this.level_()) return
+      if (level === 1 && (this.levelLocked_() || !(await this.confirm.open('fd_assistant_level_confirm')))) return
+      this.switching_.set(true)
+      try {
+        const res = await this.profiles.setAssistantLevel(level)
+        if (res.ok) {
+          this.userMsg.onSetSuccessMsg(this.translation.translate('fd_assistant_level_saved'))
+        } else {
+          const key = res.code === 'LEVEL_LOCKED' ? 'fd_assistant_level_locked' : 'save_failed'
+          this.userMsg.onSetErrorMsg(this.translation.translate(key))
+        }
+      } finally {
+        this.switching_.set(false)
+      }
+    } finally {
+      // The radio the user clicked is checked in the DOM; put the checked state back to the stored level.
+      group?.querySelectorAll<HTMLInputElement>('input[type="radio"]').forEach((input, i) => {
+        input.checked = this.levelChoices[i] === this.level_()
+      })
+    }
+  }
+
   protected printQr(): void {
     window.print()
   }
@@ -328,7 +364,7 @@ export class FrontdeskSettingsPage {
         })
         .map(draftToHours)
     const text = (v: string) => v.trim() || undefined
-    const { status: _status, whatsapp: _whatsapp, adminHistory: _history, ...base } = p
+    const { status: _status, whatsapp: _whatsapp, adminHistory: _history, levelHistory: _levels, ...base } = p
     const assistant: FrontDeskProfile['assistant'] = {
       level: p.assistant.level,
       tone: d.tone,

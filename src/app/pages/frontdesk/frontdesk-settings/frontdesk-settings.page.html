@@ -272,8 +272,38 @@
         <lucide-icon class="c-card-head__icon" name="sparkles" [size]="18"></lucide-icon>
         <h2 class="c-card-head__title">{{ 'fd_card_assistant' | translatePipe }}</h2>
       </div>
+      @if (levelReserved_()) {
       <p class="fs-level">{{ levelKey_() | translatePipe }}</p>
       <p class="fs-note">{{ 'fd_assistant_level_admin' | translatePipe }}</p>
+      } @else {
+      <div
+        class="c-chip-group"
+        role="radiogroup"
+        [attr.aria-label]="'fd_card_assistant' | translatePipe"
+        [attr.aria-busy]="switching_()"
+      >
+        @for (choice of levelChoices; track choice) {
+        <label class="c-chip c-chip--toggle" [attr.data-testid]="'assistant-level-' + choice">
+          <input
+            type="radio"
+            name="assistant-level"
+            [checked]="level_() === choice"
+            [disabled]="!canEdit_() || switching_() || (choice === 1 && levelLocked_())"
+            (change)="chooseLevel(choice, $event)"
+          />
+          <span>{{ 'fd_assistant_choice_' + choice | translatePipe }}</span>
+        </label>
+        }
+      </div>
+      @for (choice of levelChoices; track choice) {
+      <p class="fs-note" [attr.data-testid]="'assistant-level-hint-' + choice">
+        {{ 'fd_assistant_choice_' + choice + '_hint' | translatePipe }}
+      </p>
+      } @if (levelLocked_()) {
+      <p class="fs-note" data-testid="assistant-level-locked">{{ 'fd_assistant_level_locked' | translatePipe }}</p>
+      }
+      <p class="fs-note">{{ 'fd_assistant_level_owner' | translatePipe }}</p>
+      }
       <div class="fs-grid">
         <app-form-field label="fd_tone">
           <app-custom-select [options]="toneOptions" [ngModel]="d.tone" (ngModelChange)="patch({ tone: $event })" />

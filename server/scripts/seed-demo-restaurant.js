@@ -117,7 +117,7 @@ async function seedDemoRestaurant(db, { write = false, now = Date.now(), passwor
     }
   }
 
-  const levelFilter = { _id: 'demo_rest_profile', businessId: BUSINESS_ID, 'assistant.level': 0, 'adminHistory.0': { $exists: false } };
+  const levelFilter = { _id: 'demo_rest_profile', businessId: BUSINESS_ID, 'assistant.level': 0, 'adminHistory.0': { $exists: false }, 'levelHistory.0': { $exists: false } };
   if (write) {
     const raised = await db.collection('frontDeskProfiles').updateOne(levelFilter, { $set: { 'assistant.level': 1, updatedAt: now } });
     if (raised.matchedCount) console.log('raised the demo assistant to level 1');

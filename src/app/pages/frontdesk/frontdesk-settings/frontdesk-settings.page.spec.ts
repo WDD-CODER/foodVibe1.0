@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
 import { Component, signal, WritableSignal } from '@angular/core'
 import { provideRouter } from '@angular/router'
-import { LucideAngularModule, QrCode, Settings } from 'lucide-angular'
+import { CirclePause, LucideAngularModule, QrCode, Settings } from 'lucide-angular'
 import { FrontdeskSettingsPage } from './frontdesk-settings.page'
 import { DataExportCardComponent } from './components/data-export-card/data-export-card.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -30,7 +30,13 @@ const profile = (): FrontDeskProfile =>
 describe('FrontdeskSettingsPage (plan 553)', () => {
   let fixture: ComponentFixture<FrontdeskSettingsPage>
   let profile_: WritableSignal<FrontDeskProfile | null>
-  let data: { createFromTemplate: jasmine.Spy; save: jasmine.Spy; setConfirmMode: jasmine.Spy }
+  let data: {
+    createFromTemplate: jasmine.Spy
+    save: jasmine.Spy
+    setConfirmMode: jasmine.Spy
+    setAssistantLevel: jasmine.Spy
+  }
+  let confirmOpen: jasmine.Spy
   let userMsg: jasmine.SpyObj<UserMsgService>
   let loadPending = false
 
@@ -58,12 +64,17 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
     profile_ = signal(initial)
     data = {
       setConfirmMode: jasmine.createSpy('setConfirmMode').and.resolveTo(true),
+      setAssistantLevel: jasmine.createSpy('setAssistantLevel').and.resolveTo({ ok: true }),
       createFromTemplate: jasmine.createSpy('create').and.resolveTo(profile()),
       save: jasmine.createSpy('save').and.callFake(async (p: FrontDeskProfile) => p)
     }
+    confirmOpen = jasmine.createSpy('open').and.resolveTo(true)
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     TestBed.configureTestingModule({
-      imports: [FrontdeskSettingsPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, QrCode })],
+      imports: [
+        FrontdeskSettingsPage,
+        LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Settings, QrCode, CirclePause })
+      ],
       providers: [
         provideRouter([]),
         {
@@ -80,7 +91,7 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
         { provide: StorageService, useValue: { query: () => Promise.resolve([]) } },
         { provide: TranslationService, useValue: { translate: (k: string | undefined) => k ?? '' } },
         { provide: UserMsgService, useValue: userMsg },
-        { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(true) } }
+        { provide: ConfirmModalService, useValue: { open: confirmOpen } }
       ]
     })
     TestBed.overrideComponent(FrontdeskSettingsPage, {
@@ -241,6 +252,73 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
     it('staff see the switch disabled', async () => {
       await setup(profile(), false, true)
       expect((el().querySelector('[data-testid="confirm-mode-switch"]') as HTMLInputElement).disabled).toBeTrue()
+    })
+  })
+
+  describe('assistant level (plan 734)', () => {
+    const withLevel = (level: 0 | 1 | 2, status = 'pilot'): FrontDeskProfile => {
+      const p = profile()
+      return { ...p, status, assistant: { ...p.assistant, level } } as unknown as FrontDeskProfile
+    }
+    const choice = (n: number) => el().querySelector(`[data-testid="assistant-level-${n}"] input`) as HTMLInputElement
+    const text = (id: string) => el().querySelector(`[data-testid="${id}"]`)?.textContent?.trim()
+
+    it('shows two choices with a hint each; level 1 asks first, then saves', async () => {
+      await setup(withLevel(0))
+      expect(choice(0).checked).toBeTrue()
+      expect(choice(1).disabled).toBeFalse()
+      expect(text('assistant-level-hint-0')).toBe('fd_assistant_choice_0_hint')
+      expect(text('assistant-level-hint-1')).toBe('fd_assistant_choice_1_hint')
+      choice(1).click()
+      await settle()
+      expect(confirmOpen).toHaveBeenCalledOnceWith('fd_assistant_level_confirm')
+      expect(data.setAssistantLevel).toHaveBeenCalledOnceWith(1)
+      expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('fd_assistant_level_saved')
+    })
+
+    it('a declined confirm saves nothing and keeps the stored choice selected', async () => {
+      await setup(withLevel(0))
+      confirmOpen.and.resolveTo(false)
+      choice(1).click()
+      await settle()
+      expect(data.setAssistantLevel).not.toHaveBeenCalled()
+      expect(choice(0).checked).toBeTrue()
+      expect(choice(1).checked).toBeFalse()
+    })
+
+    it('lowering saves at once with no confirm', async () => {
+      await setup(withLevel(1))
+      choice(0).click()
+      await settle()
+      expect(confirmOpen).not.toHaveBeenCalled()
+      expect(data.setAssistantLevel).toHaveBeenCalledOnceWith(0)
+    })
+
+    it('a refusal shows the error toast', async () => {
+      await setup(withLevel(0))
+      data.setAssistantLevel.and.resolveTo({ ok: false, code: 'LEVEL_LOCKED' })
+      choice(1).click()
+      await settle()
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('fd_assistant_level_locked')
+    })
+
+    it('a suspended front desk cannot be raised and says why', async () => {
+      await setup(withLevel(0, 'suspended'))
+      expect(choice(1).disabled).toBeTrue()
+      expect(text('assistant-level-locked')).toBe('fd_assistant_level_locked')
+    })
+
+    it('staff see both choices disabled', async () => {
+      await setup(withLevel(0), false)
+      expect(choice(0).disabled).toBeTrue()
+      expect(choice(1).disabled).toBeTrue()
+    })
+
+    it('a reserved level 2 shows read-only with no choices', async () => {
+      await setup(withLevel(2))
+      expect(choice(0)).toBeNull()
+      expect(el().querySelector('[data-testid="card-assistant"]')?.textContent).toContain('fd_assistant_level_2')
+      expect(el().querySelector('[data-testid="card-assistant"]')?.textContent).toContain('fd_assistant_level_admin')
     })
   })
 

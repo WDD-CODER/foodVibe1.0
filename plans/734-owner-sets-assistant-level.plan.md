@@ -103,6 +103,7 @@ public/assets/data/dictionary.json
 docs/brain/component-families.md
 src/app/pages/breadcrumbs.md
 docs/workflow-kit/manifest.json
+docs/brain/inventory.md
 ```
 
 ## Read Scope
@@ -205,13 +206,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Keep a server-owned record of the owner's level switches on the profile — levelHistory in the profile schema and PROFILE_SERVER_FIELDS — shared/schemas/entities/front-desk-profile.schema.ts
-- [ ] A2: Let the owner switch the assistant level on the server, refused for staff, a reserved level and a closed front desk — PUT /business/front-desk/assistant-level, history row, log line, route tests — server/routes/business.js, server/test/front-desk-owner-level.test.js
-- [ ] A3: Stop the demo seed from overriding a level the owner chose — levelHistory guard in the raise filter and its test — server/scripts/seed-demo-restaurant.js, server/test/seed-demo-restaurant.test.js
-- [ ] A4: Give the browser one call that saves the level and updates the shown profile — setAssistantLevel and its spec — src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts
-- [ ] A5: Show the owner two plain choices with a one-line explanation on the settings page — chip radiogroup, confirm for answering alone, lock line, new dictionary keys, page spec — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.ts, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.scss, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts, public/assets/data/dictionary.json
-- [ ] A6: Record the new call and the owner switch in the project maps — http family line and the frontdesk breadcrumbs row — docs/brain/component-families.md, src/app/pages/breadcrumbs.md
-- [ ] A7: Run every check of this plan and hand Dandan the settings page check — test:server, test:ci, ng build, server lint, log-query; evidence into Execution Notes
+- [x] A1: Keep a server-owned record of the owner's level switches on the profile — levelHistory in the profile schema and PROFILE_SERVER_FIELDS — shared/schemas/entities/front-desk-profile.schema.ts
+- [x] A2: Let the owner switch the assistant level on the server, refused for staff, a reserved level and a closed front desk — PUT /business/front-desk/assistant-level, history row, log line, route tests — server/routes/business.js, server/test/front-desk-owner-level.test.js
+- [x] A3: Stop the demo seed from overriding a level the owner chose — levelHistory guard in the raise filter and its test — server/scripts/seed-demo-restaurant.js, server/test/seed-demo-restaurant.test.js
+- [x] A4: Give the browser one call that saves the level and updates the shown profile — setAssistantLevel and its spec — src/app/core/services/front-desk-profile-data.service.ts, src/app/core/services/front-desk-profile-data.service.spec.ts
+- [x] A5: Show the owner two plain choices with a one-line explanation on the settings page — chip radiogroup, confirm for answering alone, lock line, new dictionary keys, page spec — src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.ts, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.html, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.scss, src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts, public/assets/data/dictionary.json
+- [x] A6: Record the new call and the owner switch in the project maps — http family line and the frontdesk breadcrumbs row — docs/brain/component-families.md, src/app/pages/breadcrumbs.md
+- [x] A7: Run every check of this plan and hand Dandan the settings page check — test:server, test:ci, ng build, server lint, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: `assertCan` / `editFrontDesk` (plans 427, 548), `requireModule` (plan 616), the confirm-mode switch pattern (plan 667), the admin front-desk route (plan 557).
@@ -234,6 +235,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+- scope extended: docs/brain/inventory.md — the new rung-4 family heading in component-families.md makes the generated inventory stale (kit-checks `inventory-stale`); regenerated with `node scripts/inventory.mjs`.
+- behaviour: the two choices are radio inputs inside `.c-chip-group` `role="radiogroup"` (the repo's existing chip-group pattern), not buttons with `aria-checked` — reverse: swap the inputs for chip buttons.
+- evidence: `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0, 3234 SUCCESS; `pnpm --dir server run lint` → exit 0; `vitest run test/front-desk-owner-level.test.js` → 7 passed; seed-demo-restaurant test → passed; kit-manifest-check, override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check → ok.
 - behaviour: the owner's permission is the existing `editFrontDesk` action, so a consultant with a live grant and the platform admin acting in the business may switch too (INV-1: a consultant may do what the owner may except the team and the business settings); refusing consultants here would change INV-1 and is not done.
 - behaviour: the admin's lock is the front desk status — the owner may raise to level 1 only when the status is `pilot` or `active`; `draft` and `suspended` refuse with `LEVEL_LOCKED`; lowering to 0 is always allowed; no separate lock flag.
 - behaviour: suspending a front desk does not move the stored level; outbound already sends only for a `pilot` or `active` profile (`server/services/outbound.js:15` `LIVE_STATUSES`), the same pair this plan's lock uses.
