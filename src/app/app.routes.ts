@@ -308,6 +308,13 @@ export const routes: Routes = [
     canActivate: [authGuard, platformAdminGuard],
   },
   { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
+  // Plan 725: the restaurant's standing menu (module dish_analysis; the server is the real gate).
+  {
+    path: 'restaurant-menu',
+    loadComponent: () => import('./pages/restaurant-menu/restaurant-menu.page').then(m => m.RestaurantMenuPage),
+    canActivate: [authGuard, moduleGuard(['dish_analysis'])],
+    resolve: { kitchenLoaded: kitchenDataEnsureLoadedResolver },
+  },
   { path: 'report', loadComponent: () => import('./pages/report/report.page').then(m => m.ReportPage), canActivate: [authGuard] },
   // Plan 634: the consultant's diagnosis (home module consultant_diag; the server is the real gate).
   {

@@ -241,6 +241,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a cost is shown that may be missing prices.
 - Known copies: none.
 
+### menu-dish-cost — the cost of a standing-menu dish
+
+- Status: stable (plan 725)
+- Use: `src/app/core/services/menu-dish-cost.service.ts` · `MenuDishCostService` (`costOf`, `netPrice`, `leftPerDish`).
+- When: any screen that shows what a menu dish costs or leaves (the menu page, the sales page, the later analysis). Never compute a menu dish's cost twice.
+- Known copies: none.
+
 ### supplier-picker — pick one of a product's suppliers for a line
 
 - Status: stable (plan 536)
@@ -256,6 +263,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
+- Plan 725: `.rm-row__notice`, `.rm-row__filters`, `.rm-row__vat-note`, `.rm-row__state`, `.rm-row__cell`, `.rm-row__cell--name`, `.rm-row__num`, `.rm-row__ellipsis`, `.rm-row__pct`, `.rm-row__wide`, `.rm-row__form`, `.rm-row__pair`, `.rm-row__sources`, `.rm-row__live` (page-local cell spacing and form layout of `restaurant-menu.page.scss` and the menu dish popup) sit on top of `.c-list-row`, `.c-list-body-cell` and `.c-input-wrapper`; no new `.c-*` class.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note

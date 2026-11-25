@@ -14,6 +14,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
 import { ModuleService } from '@services/module.service'
+import { PermissionService } from '@services/permission.service'
 import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
@@ -34,6 +35,8 @@ const NAV_LINKS = [
 ]
 /** Plan 646: the consultant's tool, shown with the consultant_diag module (the home module while acting). */
 const DIAGNOSIS_LINK = { path: '/diagnosis', key: 'diagnosis', icon: 'stethoscope' }
+/** Plan 725: the restaurant's standing menu, for the owner (or acting consultant) of a business with dish_analysis. */
+const RESTAURANT_MENU_LINK = { path: '/restaurant-menu', key: 'restaurant_menu', icon: 'utensils' }
 /** Only the business owner gets this one (plan 428). */
 const SETTINGS_LINK = { path: '/settings', key: 'settings', icon: 'sliders-vertical' }
 /** Only the platform admin gets this one (plan 448). */
@@ -59,6 +62,7 @@ export class HeaderComponent {
   private readonly userService = inject(UserService)
   private readonly businessService = inject(BusinessService)
   private readonly modules = inject(ModuleService)
+  private readonly permission = inject(PermissionService)
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
   private readonly translation = inject(TranslationService)
@@ -86,12 +90,17 @@ export class HeaderComponent {
       ? this.userService.homeModules_().includes('consultant_diag')
       : this.modules.has('consultant_diag')
   )
+  /** Plan 725: owner-only (the owner or an acting consultant) and only with dish analysis switched on. */
+  protected readonly showRestaurantMenu_ = computed(
+    () => this.modules.has('dish_analysis') && this.permission.isOwner_()
+  )
   protected readonly navLinks_ = computed(() => [
     ...NAV_LINKS.filter(
       (link) =>
         (link.path !== '/menu-library' || this.showEvents_()) && (link.path !== '/clients' || this.showClients_())
     ),
     ...(this.showDiagnosis_() ? [DIAGNOSIS_LINK] : []),
+    ...(this.showRestaurantMenu_() ? [RESTAURANT_MENU_LINK] : []),
     ...(this.isOwner_() ? [SETTINGS_LINK] : []),
     ...(this.isPlatformAdmin_() ? [PLATFORM_LINK] : [])
   ])

@@ -4,7 +4,8 @@ import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
 import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope } from 'lucide-angular'
+import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope, Utensils } from 'lucide-angular'
+import { PermissionService } from '@services/permission.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { Component, signal } from '@angular/core'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
@@ -18,7 +19,7 @@ import { ModuleService } from '@services/module.service'
 import { PHONE_QUERY } from '@utils/breakpoints'
 
 /** Plan 646: the header now holds the bell and the diagnosis entry. */
-const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope }
+const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope, Utensils }
 
 /** Plan 620: every module on by default; a case sets `modulesOn` to turn some off. */
 const ALL_MODULES: ModuleKey[] = ['events', 'event_logistics', 'frontdesk', 'ai_create']
@@ -27,7 +28,13 @@ const moduleStub = {
   provide: ModuleService,
   useValue: { has: (keys: ModuleKey | readonly ModuleKey[]) => [keys].flat().some((key) => modulesOn().includes(key)) }
 }
-beforeEach(() => modulesOn.set(ALL_MODULES))
+/** Plan 725: who has the owner's rights (the owner or an acting consultant); staff and guests do not. */
+const ownerRights = signal(false)
+const permissionStub = { provide: PermissionService, useValue: { isOwner_: ownerRights.asReadonly() } }
+beforeEach(() => {
+  modulesOn.set(ALL_MODULES)
+  ownerRights.set(false)
+})
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent
@@ -38,6 +45,7 @@ describe('HeaderComponent', () => {
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
       providers: [
         moduleStub,
+        permissionStub,
         // מספקים נתיבים ריקים כדי לאפשר ל-RouterLink לעבוד בבדיקה
         provideRouter([
           { path: 'dashboard', redirectTo: '' },
@@ -126,6 +134,30 @@ describe('HeaderComponent', () => {
       modulesOn.set(ALL_MODULES)
       fixture.detectChanges()
       expect(diag().length).toBe(0)
+    })
+
+    it('shows «תפריט המסעדה» only to the owner of a business with dish_analysis, in the pills and the phone bar (plan 725)', () => {
+      const pills = () => fixture.nativeElement.querySelectorAll('.nav-pills a[href="/restaurant-menu"]').length
+      const bar = () => fixture.nativeElement.querySelectorAll('.bottom-nav a[href="/restaurant-menu"]').length
+      // module on, not an owner (staff or guest): hidden
+      modulesOn.set([...ALL_MODULES, 'dish_analysis'])
+      fixture.detectChanges()
+      expect(pills()).toBe(0)
+      expect(bar()).toBe(0)
+      // owner, module off: hidden
+      ownerRights.set(true)
+      modulesOn.set(ALL_MODULES)
+      fixture.detectChanges()
+      expect(pills()).toBe(0)
+      expect(bar()).toBe(0)
+      // owner, module on: shown in both
+      modulesOn.set([...ALL_MODULES, 'dish_analysis'])
+      fixture.detectChanges()
+      expect(pills()).toBe(1)
+      expect(bar()).toBe(1)
+      expect(fixture.nativeElement.querySelector('.bottom-nav a[href="/restaurant-menu"]').textContent).toContain(
+        'restaurant_menu'
+      )
     })
 
     it('shows the diagnosis entry in the phone bottom bar too (plan 651)', () => {

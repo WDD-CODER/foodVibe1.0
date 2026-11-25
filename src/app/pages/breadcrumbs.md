@@ -7,6 +7,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `welcome/` | `/welcome` — the signed-out front door: the mark, the promise, sign-up and sign-in; `/` leads here for a first-time visitor (home-redirect.ts) |
 | `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
 | `report/` | `/report` — the business report: measured start vs latest, monthly trend, findings, one-page A4 print (plan 568); the platform admin opens it with `?businessId=` |
+| `restaurant-menu/` | `/restaurant-menu` — the restaurant's standing menu: dishes with price, net price, cost per portion (module `dish_analysis`, owner only; plan 725) |
 | `diagnosis/` | `/diagnosis` — the consultant's diagnosis: invoice queue, menu with prices, printable margin report (plan 634) |
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |

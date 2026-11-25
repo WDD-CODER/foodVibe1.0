@@ -223,4 +223,10 @@
       <span class="bottom-nav__label">{{ 'diagnosis' | translatePipe }}</span>
     </a>
   }
+  @if (showRestaurantMenu_()) {
+    <a routerLink="/restaurant-menu" routerLinkActive="active" (click)="closeMobileMenu()">
+      <lucide-icon name="utensils" [size]="22"></lucide-icon>
+      <span class="bottom-nav__label">{{ 'restaurant_menu' | translatePipe }}</span>
+    </a>
+  }
 </nav>

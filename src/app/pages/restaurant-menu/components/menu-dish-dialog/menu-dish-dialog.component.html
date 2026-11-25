@@ -1,0 +1,204 @@
+<app-modal-shell
+  size="md"
+  [titleKey]="dish() ? 'menu_dish_edit' : 'menu_dish_add'"
+  [hasChanges]="hasChanges_()"
+  [dismissible]="!isBusy_()"
+  (dismissed)="close()"
+>
+  <div class="rm-row__form" data-testid="menu-dish-dialog">
+    <app-form-field
+      [label]="'menu_dish_name' | translatePipe"
+      forId="menu-dish-name"
+      [error]="nameError_() ? (nameError_()! | translatePipe) : null"
+    >
+      <input
+        id="menu-dish-name"
+        type="text"
+        autocomplete="off"
+        [maxLength]="nameMax"
+        [ngModel]="name_()"
+        (ngModelChange)="name_.set($event)"
+      />
+    </app-form-field>
+
+    <div class="rm-row__pair">
+      <app-form-field [label]="'menu_dish_course' | translatePipe">
+        <app-custom-select
+          [ngModel]="course_()"
+          (ngModelChange)="course_.set($event)"
+          [options]="courseOptions_()"
+          placeholder="menu_dish_course"
+        />
+      </app-form-field>
+      <app-form-field [label]="'menu_dish_price_with_vat' | translatePipe" forId="menu-dish-price">
+        <div class="c-input-wrapper" appNumberBox>
+          <input
+            id="menu-dish-price"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="0.5"
+            [ngModel]="price_()"
+            (ngModelChange)="setNumber('price', $event)"
+          />
+        </div>
+      </app-form-field>
+    </div>
+
+    <fieldset class="rm-row__sources">
+      <legend>{{ 'menu_dish_source' | translatePipe }}</legend>
+      <div class="c-chip-group" role="radiogroup">
+        @for (source of sources; track source) {
+          <label class="c-chip c-chip--toggle" [attr.title]="hintText(source)">
+            <input
+              type="radio"
+              name="menu-dish-source"
+              [value]="source"
+              [checked]="source_() === source"
+              [attr.aria-describedby]="'menu-dish-hint-' + source"
+              [attr.data-testid]="'menu-dish-source-' + source"
+              (change)="setSource(source)"
+            />
+            <span>{{ sourceLabelKey(source) | translatePipe }}</span>
+            <span class="visually-hidden" [id]="'menu-dish-hint-' + source">{{ hintText(source) }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    @switch (source_()) {
+      @case ('recipe') {
+        <app-form-field [label]="'menu_dish_pick_recipe' | translatePipe" forId="menu-dish-recipe">
+          <app-search-combobox
+            inputId="menu-dish-recipe"
+            [options]="recipes_()"
+            [labelOf]="recipeLabel"
+            [keyOf]="recipeKey"
+            [(query)]="recipeQuery_"
+            [(open)]="recipeOpen_"
+            [openOnFocus]="false"
+            placeholder="menu_dish_pick_recipe"
+            icon="search"
+            listPosition="inline"
+            [maxResults]="30"
+            (picked)="onRecipePicked($event)"
+          />
+        </app-form-field>
+      }
+      @case ('product') {
+        <app-form-field [label]="'menu_dish_pick_product' | translatePipe" forId="menu-dish-product">
+          <app-search-combobox
+            inputId="menu-dish-product"
+            [options]="products_()"
+            [labelOf]="productLabel"
+            [keyOf]="productKey"
+            [(query)]="productQuery_"
+            [(open)]="productOpen_"
+            [openOnFocus]="false"
+            placeholder="menu_dish_pick_product"
+            icon="search"
+            listPosition="inline"
+            [maxResults]="30"
+            (picked)="onProductPicked($event)"
+          />
+        </app-form-field>
+        <div class="rm-row__pair">
+          <app-form-field [label]="'menu_dish_product_amount' | translatePipe" forId="menu-dish-amount">
+            <div class="c-input-wrapper" appNumberBox>
+              <input
+                id="menu-dish-amount"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="any"
+                [ngModel]="productAmount_()"
+                (ngModelChange)="setNumber('amount', $event)"
+              />
+            </div>
+          </app-form-field>
+          <app-form-field [label]="'menu_dish_product_unit' | translatePipe">
+            <app-custom-select
+              [ngModel]="productUnit_()"
+              (ngModelChange)="productUnit_.set($event)"
+              [options]="unitOptions_()"
+              placeholder="menu_dish_product_unit"
+            />
+          </app-form-field>
+        </div>
+      }
+      @case ('typed') {
+        <app-form-field [label]="'menu_dish_typed_cost' | translatePipe" forId="menu-dish-typed">
+          <div class="c-input-wrapper" appNumberBox>
+            <input
+              id="menu-dish-typed"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.1"
+              [ngModel]="typedCost_()"
+              (ngModelChange)="setNumber('typed', $event)"
+            />
+          </div>
+        </app-form-field>
+      }
+    }
+
+    <app-form-field [label]="'menu_dish_note' | translatePipe" forId="menu-dish-note">
+      <input
+        id="menu-dish-note"
+        type="text"
+        autocomplete="off"
+        [maxLength]="noteMax"
+        [ngModel]="note_()"
+        (ngModelChange)="note_.set($event)"
+      />
+    </app-form-field>
+
+    <p class="rm-row__live" data-testid="menu-dish-live">
+      <span>{{ 'menu_dish_net_price' | translatePipe }} {{ money(live_().net) }}</span>
+      <span>
+        {{ 'menu_dish_cost_per_portion' | translatePipe }}
+        @switch (live_().cost.state) {
+          @case ('units') {
+            {{ 'menu_dish_no_cost' | translatePipe }}
+          }
+          @case ('missing') {
+            —
+          }
+          @default {
+            {{ money(live_().cost.costPerPortion) }}
+          }
+        }
+      </span>
+      <span>
+        {{ 'menu_dish_left' | translatePipe }}
+        @if (live_().left != null) {
+          {{ money(live_().left) }}
+        } @else if (live_().net == null) {
+          —
+        } @else {
+          {{ 'menu_dish_left_unknown' | translatePipe }}
+        }
+      </span>
+    </p>
+
+    @if (serverError_(); as message) {
+      <span class="c-field-error" role="alert" data-testid="menu-dish-error">{{ message }}</span>
+    }
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" [disabled]="isBusy_()" (click)="close()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        data-testid="menu-dish-save"
+        [disabled]="isBusy_() || !isValid_()"
+        (click)="save()"
+      >
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</app-modal-shell>
