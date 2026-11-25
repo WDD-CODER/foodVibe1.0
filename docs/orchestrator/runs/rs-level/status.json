@@ -1,0 +1,157 @@
+{
+  "run": "rs-level",
+  "branch": "orch/rs-level",
+  "base": "main",
+  "startedAt": "2026-11-25T08:21:57.248Z",
+  "mainShaAtStart": "84703cef0f6a37876ed78ce69193b4d54dcd4762",
+  "plans": {
+    "734": {
+      "nnn": "734",
+      "title": "The business owner switches the assistant between drafts only and answering guests alone",
+      "branch": "feat/734-owner-sets-assistant-level",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T08:24:51.163Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T09:59:30.873Z"
+        }
+      },
+      "humanItems": [
+        "On the settings page (`http://localhost:4202/frontdesk/settings`, signed in as the demo restaurant's owner,"
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T08:24:50.936Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T08:24:51.166Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T09:28:57.359Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T09:59:04.471Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T09:59:30.877Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T09:59:47.252Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T10:03:08.873Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 2.5,
+      "sha": "e6b6aaceee99997fc7fdbedf8e518aea03908e97",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 3839.2,
+          "tokens": {
+            "input": 5735973,
+            "output": 37360
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 12.3,
+          "tokens": {
+            "input": 50757,
+            "output": 874
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "603856cf16a8b06f3b1cc4b962fee95a74f3cf74"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-25T08:24:50.735Z",
+      "plan": "734",
+      "text": "the folder foodVibe1.0-orch-rs-level-734 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T09:28:50.755Z",
+      "plan": "734",
+      "text": "builder left undone (round 0): [human] settings page check on localhost:4202/frontdesk/settings: not run"
+    },
+    {
+      "at": "2026-11-25T10:00:26.337Z",
+      "plan": "734",
+      "text": "the folder foodVibe1.0-orch-merge-rs-level was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T10:06:13.535Z",
+      "text": "FINAL: same tree as plan 734's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 2.5,
+  "updatedAt": "2026-11-25T10:06:16.940Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "734",
+      "type": "behaviour",
+      "text": "behaviour: the two choices are radio inputs inside `.c-chip-group` `role=\"radiogroup\"`, the repo's existing chip pattern, not buttons with aria-checked — reverse: swap the inputs for chip buttons",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "734",
+      "type": "behaviour",
+      "text": "behaviour: the family heading in component-families.md is written without backticks, because the reuse check matches the piece text literally — reverse: n/a",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-25T10:06:16.937Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-25T10:06:16.940Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

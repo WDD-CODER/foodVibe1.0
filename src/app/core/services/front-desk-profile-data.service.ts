@@ -78,6 +78,34 @@ export class FrontDeskProfileDataService extends BaseEntityDataService<FrontDesk
     }
   }
 
+  /**
+   * Plan 734: the owner's assistant level switch (0 drafts only, 1 answers guests alone), saved by its own call.
+   * On success the stored profile shows the new level; on a failure nothing changes and it answers the server's
+   * error code (`'error'` when there is none).
+   */
+  async setAssistantLevel(level: 0 | 1): Promise<{ ok: true } | { ok: false; code: string }> {
+    try {
+      await firstValueFrom(
+        this.http.put<{ level: number }>(`${environment.apiUrl}${API.business('front-desk/assistant-level')}`, {
+          level
+        })
+      )
+      this.updateItems((items) => items.map((p, i) => (i === 0 ? { ...p, assistant: { ...p.assistant, level } } : p)))
+      return { ok: true }
+    } catch (err) {
+      const status = (err as { status?: number }).status
+      if (status !== 401) {
+        this.logging.error({
+          event: 'crud.frontDeskProfile.assistant_level_error',
+          message: 'Failed to change the assistant level',
+          context: { status: String(status ?? '') }
+        })
+      }
+      const code = err instanceof HttpErrorResponse ? (err.error as { error?: unknown } | null)?.error : undefined
+      return { ok: false, code: typeof code === 'string' ? code : 'error' }
+    }
+  }
+
   async save(profile: FrontDeskProfile): Promise<FrontDeskProfile> {
     try {
       const updated = await this.storage.put<FrontDeskProfile>(ENTITY, profile)

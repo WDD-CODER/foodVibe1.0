@@ -173,6 +173,42 @@ function mergeIntakeKinds(stored, template, incoming) {
 
 const hasBaselineValue = baseline => !!baseline && Object.values(baseline).some(v => v !== undefined)
 
+// PUT /api/v1/business/front-desk/assistant-level  { level: 0 | 1 } -> { level }  (plan 734: the owner's one-switch of the assistant level)
+router.put('/front-desk/assistant-level', verifyToken, requireModule('frontdesk'), async (req, res) => {
+  try {
+    const body = req.body
+    const keys = body && typeof body === 'object' ? Object.keys(body) : []
+    if (keys.length !== 1 || keys[0] !== 'level' || (body.level !== 0 && body.level !== 1)) return res.status(400).json({ error: 'BAD_REQUEST_INPUT' })
+    const level = body.level
+    const profile = await mongoose.connection.db.collection('frontDeskProfiles').findOne({ ...scopeFilter(req), ...LIVE })
+    if (!profile) return res.status(404).json({ error: 'NO_PROFILE' })
+    if (!assertCan(req, res, 'editFrontDesk', { type: 'frontDeskProfiles', doc: profile })) return
+    const refuse = (reason, error) => {
+      req.log.info({ event: 'business.assistant_level.refused', reason })
+      return res.status(409).json({ error })
+    }
+    const from = profile.assistant?.level ?? 0
+    if (from === 2) return refuse('reserved', 'LEVEL_RESERVED')
+    if (level === 1 && profile.status !== 'pilot' && profile.status !== 'active') return refuse('locked', 'LEVEL_LOCKED')
+    if (from === level) return res.json({ level })
+    const now = Date.now()
+    const actor = actorOf(req)
+    const entry = { at: now, by: actor.userId, byName: String(actor.name ?? '').slice(0, 80), from, to: level }
+    const merged = { ...profile, assistant: { ...profile.assistant, level }, levelHistory: [...(profile.levelHistory ?? []), entry].slice(-50), updatedAt: now }
+    const check = checkStoredDoc('frontDeskProfiles', merged)
+    if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues })
+    await mongoose.connection.db.collection('frontDeskProfiles').updateOne(
+      { _id: profile._id, businessId: profile.businessId },
+      { $set: { 'assistant.level': level, updatedAt: now }, $push: { levelHistory: { $each: [entry], $slice: -50 } } }
+    )
+    req.log.info({ event: 'business.assistant_level.changed', from, to: level })
+    res.json({ level })
+  } catch (err) {
+    req.log.error({ err, event: 'business.assistant_level.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
 // POST /api/v1/business/front-desk-intake — the owner's whole onboarding form in one save (plan 556): profile, draft knowledge items, optional baseline.
 router.post('/front-desk-intake', verifyToken, requireModule('frontdesk'), async (req, res) => {
   try {
