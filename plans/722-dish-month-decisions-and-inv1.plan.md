@@ -40,7 +40,7 @@ salary-lines rule; INV-1's rule text says per-employee pay lines are the owner's
 - [auto] `grep -c "ADR 0034" docs/brain/invariants.md` prints at least `2` (Rule and Source); `grep -c "TBD" docs/brain/decisions/0034-salary-lines-owner-only.md` prints `0`.
 - [auto] `node --test scripts/test/invariants.test.mjs` exits 0 (the registry still parses: 6 invariants, each with Touches and a users-lose line).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/722-dish-month-decisions-and-inv1.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/722-dish-month-decisions-and-inv1.plan.md` exits 0.
-- [auto] `node scripts/scope-check.mjs --diff=origin/main --plan=plans/722-dish-month-decisions-and-inv1.plan.md` exits 0 (only the listed documents changed).
+- [auto] Only the listed documents changed — the run's own scope check against its base branch (no separate command: a check pinned to origin/main fails inside a run whose branch already holds the other plans' files).
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [human] Dandan reads section 9 of both reports and says each row's chosen option is what he approved ("all recommended").
 - [human] Dandan reads the new INV-1 sentence (UI/UX Notes below, as written into `docs/brain/invariants.md`) and says it is the change he approved: per-employee pay lines are the owner's alone; a consultant, a platform admin acting in the business and every other non-owner see labour totals only.
