@@ -152,10 +152,14 @@ const handOffSilently = (db, conversation, opts) => handOff(db, conversation, { 
  */
 async function holdGuest(db, conversation, { now, profile, mode, log = logger }, group) {
   if (mode !== 'turn' || levelOf(profile) < 1) return;
-  const [last] = await colOf(db, 'messages')
-    .find({ businessId: conversation.businessId, conversationId: conversation._id })
-    .sort({ at: -1, _id: -1 }).limit(1).toArray();
-  if (!last || last.direction !== 'in') return;
+  const scope = { businessId: conversation.businessId, conversationId: conversation._id };
+  const [lastIn] = await colOf(db, 'messages')
+    .find({ ...scope, direction: 'in' }).sort({ at: -1, _id: -1 }).limit(1).toArray();
+  if (!lastIn) return;
+  // Something already went out at or after the guest's last message (also a holding message sent in the same
+  // millisecond): the guest is not left waiting, so no second holding message.
+  const answered = await colOf(db, 'messages').countDocuments({ ...scope, direction: 'out', at: { $gte: lastIn.at } });
+  if (answered > 0) return;
   const text = (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_holding_default');
   const sent = await sendOut(db, conversation, { kind: 'text', text }, 'server', { now });
   if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });

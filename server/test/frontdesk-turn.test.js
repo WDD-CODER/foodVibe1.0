@@ -662,6 +662,17 @@ describe('plan 733: one holding message on a technical failure', () => {
     expect(await holdingRows()).toHaveLength(2);
   });
 
+  it('no spam when the holding message has the same millisecond as the guest message', async () => {
+    const { conversation } = await setup();
+    const T = Date.now();
+    await db().collection('messages').updateMany({ conversationId: conversation._id }, { $set: { at: T } });
+    fail503();
+    await turn(conversation, { now: T });
+    await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { status: 'bot' } });
+    await turn(await conv(conversation._id), { now: T });
+    expect(await holdingRows()).toHaveLength(1);
+  });
+
   it('a real conversation at level 0 with a 503 answer: nothing sent, human, busy', async () => {
     const { conversation } = await setup({ level: 0 });
     fail503();
