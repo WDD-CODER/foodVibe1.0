@@ -110,7 +110,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 - `fixed-costs-card` — family: list-page — rung: 2 — why: editable rows of `app-form-field` + `appNumberBox` inside the month form, the remove button with `ConfirmModalService`, the lines/total switch as `.c-chip--toggle` radios; no list shell (a card, not a page list)
 - `labour-card` — family: number-box — rung: 2 — why: two `appNumberBox` boxes and the employer/gross switch as `.c-chip--toggle` radios
-- card-local classes `.fc`, `.fc__row`, `.fc__line`, `.fc__field`, `.fc__label`, `.fc__name`, `.fc__name-input`, `.fc__suffix`, `.fc__muted`, `.lc`, `.lc__row`, `.lc__field`, `.lc__label`, `.lc__suffix`, `.lc__muted` — family: list-page / number-box — rung: 2 — why: layout of rows and boxes inside the two cards (encapsulated styles cannot reach the page's `.mp-*` classes); the card titles use the page's `.mp-card__title`
+- card-local classes `.fc`, `.fc__row`, `.fc__line`, `.fc__field`, `.fc__label`, `.fc__name`, `.fc__name-input`, `.fc__suffix`, `.fc__muted`, `.lc`, `.lc__row`, `.lc__field`, `.lc__label`, `.lc__suffix`, `.lc__muted` — family: list-page — rung: 2 — why: layout of rows and boxes inside the two cards (encapsulated styles cannot reach the page's `.mp-*` classes); the card titles use the page's `.mp-card__title`
 - starter fixed lines and default groups (`FIXED_STARTER_KEYS`, `defaultFixed`, `defaultLabour`, `LABOUR_FACTOR_DEFAULT`) — family: helpers — rung: 3 — why: added to plan 727's `shared/schemas/month/month-rules.ts`, so the server's new month and the browser's older month start from the same lines
 - `monthInputOf` fixed, labour and purchases mapping — family: event-plan — rung: 3 — why: fills plan 728's engine inputs; no new engine
 
