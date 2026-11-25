@@ -12,6 +12,7 @@ const { captureLogs } = require('./helpers/log-capture')
 const { menuEventBody, stored, logisticsItemBody } = require('./helpers/v2-docs')
 const { resetForTests } = require('../services/gemini-client')
 const { clearModuleCache } = require('../middleware/require-module')
+const { _waitForUsageWritesForTests } = require('../services/ai-usage')
 
 let app
 let fetchMock
@@ -124,6 +125,7 @@ describe('POST /ai/logistics/extract', () => {
   it('writes one usage row, one pending draft with the model, and confirm stores keptRatio 0.5', async () => {
     fetchMock.mockResolvedValue(modelAnswer({ answers: [{ i: 0, status: 'needed' }, { i: 2, status: 'not_needed' }] }))
     const res = await post(BODY)
+    await _waitForUsageWritesForTests()
     const usage = await testDb().collection('aiUsage').find({ feature: 'logistics_extract' }).toArray()
     expect(usage).toHaveLength(1)
     const drafts = await testDb().collection('aiDrafts').find({}).toArray()

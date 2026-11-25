@@ -1,5 +1,5 @@
 {
-  "name": "food-vibe1.0",
+  "name": "foodvibe",
   "version": "0.1.0.0",
   "scripts": {
     "logs": "node scripts/log-query.mjs",

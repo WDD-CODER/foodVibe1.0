@@ -192,13 +192,13 @@ Screenshots (A3): file names `docs/images/<screen>.png`, 1280 px wide desktop sh
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Stop the server test that sometimes fails on main — wait for the usage writes before reading them, in both tests; run `pnpm run test:server` three times — server/test/ai-logistics-extract.test.js, server/test/ai-stock-extract.test.js
-- [ ] A2: Count the tests for the README — unit: the `Executed N of N` line of `pnpm run test:ci`; server: the `Tests N passed` line of `pnpm run test:server`; end-to-end: the `Total: N tests` line of `pnpm exec playwright test --list`; paste the three lines under Execution Notes — (no file)
+- [x] A1: Stop the server test that sometimes fails on main — wait for the usage writes before reading them, in both tests; run `pnpm run test:server` three times — server/test/ai-logistics-extract.test.js, server/test/ai-stock-extract.test.js
+- [x] A2: Count the tests for the README — unit: the `Executed N of N` line of `pnpm run test:ci`; server: the `Tests N passed` line of `pnpm run test:server`; end-to-end: the `Total: N tests` line of `pnpm exec playwright test --list`; paste the three lines under Execution Notes — (no file)
 - [ ] A3: Take the screenshots from the running app — in the slot (`node scripts/slot-serve.mjs`), with gstack `/browse`, signed in as the QA user (the `ORCH_QA_USER` / `QA_USER` login the e2e `signInQa` helper uses; never print it), take the dashboard, the recipe or dish page with costing, an event, inventory, and one AI helper screen; check each image shows no real person's name, phone or email (blur or skip it); if the app cannot be signed into or the data is empty, take none and list the names for the Human's card — docs/images/**
-- [ ] A4: Write the new README — the twelve sections of P0 with A2's counts and A3's images — README.md
-- [ ] A5: Add the license, the contributing note and the security note — LICENSE, CONTRIBUTING.md, SECURITY.md
-- [ ] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
-- [ ] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
+- [x] A4: Write the new README — the twelve sections of P0 with A2's counts and A3's images — README.md
+- [x] A5: Add the license, the contributing note and the security note — LICENSE, CONTRIBUTING.md, SECURITY.md
+- [x] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
+- [x] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
 ## What happens when
 - The slot's database is empty or holds real customer data: A3 takes no screenshot of that screen; the README keeps the section with the images that are clean, and the third `[human]` card lists the missing ones.
@@ -249,3 +249,25 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-25: written from Dandan's requests of 2026-11-25
+- Builder (round 2, fresh judgment builder) 2026-11-25: re-implemented from base 325c68d.
+  - A1: `await _waitForUsageWritesForTests()` (required from `../services/ai-usage`) added right before the `aiUsage`
+    read in both tests. `pnpm run test:server` ×3 → exit 0 each: `Tests  2013 passed (2013)` /
+    `Tests  2013 passed (2013)` / `Tests  2013 passed (2013)`.
+  - A2: unit `Executed 2794 of 2794 SUCCESS` (`pnpm run test:ci` → exit 0); server `Tests  2013 passed (2013)`;
+    e2e `Total: 157 tests in 137 files` (`pnpm exec playwright test --list` → exit 0).
+  - A3: not done — the builder's worktree has no running app and no QA login (builder rule: never read `.env`, never
+    ask for QA credentials). No screenshot taken. The README already references these names, for the Human's third
+    card: `docs/images/dashboard.png` (dashboard), `docs/images/recipe-costing.png` (a recipe or dish with costing),
+    `docs/images/event.png` (an event), `docs/images/inventory.png` (inventory), `docs/images/ai-helper.png` (one AI
+    helper screen) — 1280 px wide, Hebrew UI, no real person's name, phone or email.
+  - A4/A5: README.md rewritten (12 sections), LICENSE, CONTRIBUTING.md, SECURITY.md added. The "100 AI calls"
+    sentence is written as stated (plan 736 is merged on the run branch).
+  - A6: `git mv ROUTE_INVENTORY.md docs/archive/route-inventory-2026-04.md`, `git mv .qa-reports
+    docs/archive/qa-reports-2026-04`, `git rm -r .clone`; `.gitignore` gets `!docs/images/*.png` after the icons
+    carve-out and `/.clone/`, `/Claude outputs/` at the end; `package.json` name → `foodvibe`.
+  - A7: `git check-ignore -q docs/images/dashboard.png` → exit 1; `git check-ignore -q "Screenshot 2026-08-12
+    094815.png"` → exit 0; README kit grep → `0`; `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors, 69
+    existing warnings). Gate-script results below.
+  - `node scripts/scope-check.mjs --diff=origin/main` fails already at the base 325c68d, before any change of this
+    plan: it lists files of plans 736/737 that are on `orch/live-ready` but not yet on main. The same check against
+    `origin/orch/live-ready` (the plan's own diff) is the one that applies inside the run.
