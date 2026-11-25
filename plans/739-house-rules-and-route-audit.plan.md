@@ -67,6 +67,8 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 docs/agent/house-style.md
 docs/qa/house-style-audit.md
 docs/qa/styleqa-pages.json
+scripts/qa/lib/styleqa-sign-in.mjs
+.claude/styleqa/**
 ```
 
 ## Read Scope
@@ -177,13 +179,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Read how the six standard screens are built and note what they share — pieces, frame, states, scroll, motion, drag, feedback, per screen, as working notes under Execution Notes — this plan file
-- [ ] A2: Write the five page recipes so a builder knows what each kind of page is made of — the `## Page recipes` part with every field of P0 — docs/agent/house-style.md
-- [ ] A3: Write the seven behaviour rules so every page scrolls, moves, loads and answers the same way — the `## Behaviour rules` part with every field of P0, citing the existing defaults — docs/agent/house-style.md
-- [ ] A4: Make Style QA cover the routes it does not measure yet — entries for diagnosis, invoices, stock count and command center — docs/qa/styleqa-pages.json
-- [ ] A5: Measure the look of every page — slot servers up, `/styleqa` on all pages, the report path and the summary lines under Execution Notes — this plan file
-- [ ] A6: Write the audit that says which rules each page breaks and in what order to fix them — the four sections of P0, `gaps today` filled back into each rule — docs/qa/house-style-audit.md, docs/agent/house-style.md
-- [ ] A7: Run every automatic check and hand Dandan the two reading cards — outputs under Execution Notes — this plan file
+- [x] A1: Read how the six standard screens are built and note what they share — pieces, frame, states, scroll, motion, drag, feedback, per screen, as working notes under Execution Notes — this plan file
+- [x] A2: Write the five page recipes so a builder knows what each kind of page is made of — the `## Page recipes` part with every field of P0 — docs/agent/house-style.md
+- [x] A3: Write the seven behaviour rules so every page scrolls, moves, loads and answers the same way — the `## Behaviour rules` part with every field of P0, citing the existing defaults — docs/agent/house-style.md
+- [x] A4: Make Style QA cover the routes it does not measure yet — entries for diagnosis, invoices, stock count and command center — docs/qa/styleqa-pages.json
+- [x] A5: Measure the look of every page — slot servers up, `/styleqa` on all pages, the report path and the summary lines under Execution Notes — this plan file
+- [x] A6: Write the audit that says which rules each page breaks and in what order to fix them — the four sections of P0, `gaps today` filled back into each rule — docs/qa/house-style-audit.md, docs/agent/house-style.md
+- [x] A7: Run every automatic check and hand Dandan the two reading cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: none changed. Reads `src/app/pages/**`, `src/app/shared/**`, `src/styles.scss`,
@@ -210,3 +212,22 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Q: Must all containers be identical? A: no — the same feel and behaviour; each keeps its own properties (Dandan, 2026-11-25).
 
 ## Execution Notes
+- Run from the Planner session in slot wt-1 on the Human's word ("you can switch to a separate worktree or branch", 2026-11-25), branch `feat/739-house-rules-and-route-audit`.
+- A1 working notes: the six standard screens share `app-list-shell` (which draws `app-page-header`), `app-selection-bar`, `app-row-actions-menu`, `.c-list-row`, `app-empty-state`, the full-page `app-loader` through `LoadingService`, `UserMsgService` toasts and `ConfirmModalService`. They differ in: the form and detail headers (own `form-header` / `detail-topbar`), "no results" (plain text in five of six lists), and typed transition times (0.15s, 0.2s, 0.25s, 0.3s, 150ms).
+- decision: behaviour: the form and detail recipes name `app-page-header` as the header, although the four forms of the standard screens draw their own `form-header` — the shared header is the registered family piece and the newer pages already use it — reverse: change `built from` of `recipe-form` and `recipe-detail` to `header.form-header` and drop those gaps from the audit.
+- decision: behaviour: bookings and requests are filed under `recipe-board`, not `recipe-list` (day sections and cards, not rows) — reverse: change the recipe column of those two rows.
+- decision: behaviour: menu-intelligence, recipe-builder, cook and welcome are `no recipe`; no sixth recipe was added — reverse: the Human names a recipe for work surfaces.
+- decision: behaviour: `/diagnosis/:id` and `/command-center` are in the Style QA map as `excluded` (a record of a consultant account; a redirect), `/diagnosis`, `/inventory/invoices`, `/inventory/count` as pages — reverse: move an entry between the two lists in `docs/qa/styleqa-pages.json`.
+- decision: seen: `scripts/styleqa/sweep.mjs:200-202` installs the read-only guard after `signIn`, so the guard aborts `POST /api/v1/auth/refresh`, the app clears the session (`user.service.ts:153-161`) and every `auth` page is measured as `/welcome`. Proven with and without the guard. Worked around in `scripts/qa/lib/styleqa-sign-in.mjs` (approved: Human 2026-11-25); kit need logged in `docs/agent/house-style.md`.
+- decision: seen: Style QA measures `/platform` and `/diagnosis` as the dashboard (the QA user is redirected); their three screenshots are byte-identical to the dashboard's (72,568 bytes at 1366).
+- decision: seen: the slot API server once went into a `node --watch` restart loop (37 restarts, no error line) during a Style QA start; a stop and start cleared it; cause not found.
+- Scope additions approved by the Human, 2026-11-25: `scripts/qa/lib/styleqa-sign-in.mjs`, `.claude/styleqa/**`.
+- A5 evidence: `STYLEQA: sweep — 29 pages, 8522 findings, 61 rails`; `STYLEQA: map check ok — 41 routes all in pages or excluded`; `STYLEQA: summary measured: 1735 open; visual: 60 open (high 2, medium 37, low 21)`; report `.claude/styleqa/report.md`. Reviewed 26 pages; `client-detail` skipped (no record), `platform` and `diagnosis` not reviewed (redirected).
+- VERIFIED BY AGENT (2026-11-25): `grep -c "^### recipe-" docs/agent/house-style.md` → 5; each of the 12 rule headings present once; `^### ` 12 = `^- check: ` 12 = `^- reference: ` 12; `node scripts/styleqa/run.mjs --list` → 29 pages, including invoices, stock-count, diagnosis; audit table rows 29 = 29 slugs; `git diff --name-only origin/main -- src server shared` → empty; `scope-check --arch` → `ARCH: ok INV-none`; `--reuse` → `REUSE: ok none`; `--diff=origin/main` → `SCOPE: ok`.
+- Human, 2026-11-25: check 1 (the rules) answered `done`, with two rules added by the Human beyond the plan's seven behaviour ids: `sideways-row` (a row wider than the screen sits in one visible container that scrolls sideways with arrows, the same everywhere, top bar and metadata manager included) and `tooltip` (one designated tooltip box used wherever a hint is needed). Both are in `docs/agent/house-style.md` (14 rules) and in the audit's Needs and wave 2.
+- VALIDATED BY HUMAN (2026-11-25): card 1 the rules — "done" (with the two added rules, and the nutrition box kept as an exception to `tooltip`); card 2 the order of work — "bothe done".
+- decision: behaviour: the `motion` rule names three speeds, not the plan's two: the tokens `--dur-fast`, `--dur-base`, `--dur-slow` already exist in `src/styles.scss:160-162` (the plan's "no duration token" was wrong) — reverse: drop `--dur-slow` from the rule and map 0.25s uses to `--dur-base`.
+- decision: behaviour: two fields beyond the plan's list were added to the rule shape: `later check` (a lint that waits for a missing piece, with `check: default` until then) and `exception` (the nutrition box in `tooltip`); both are named in the file's opening lines — reverse: fold `later check` into `check: lint after <piece> exists`.
+- Review fix: the `loading`, `empty` and `tooltip` lint patterns were narrowed after the bugs checker showed false matches (`loading-list` component classes, the `--empty` modifier, a component's `title` input). Read back from the file and tried on fixed cases and the repo: `PATTERNS: ok`; loading 4 lines in 4 templates, empty 33 lines in 23 templates, tooltip 76 lines in 34 templates.
+- review: checkers kept 0 dropped 5 rechecked 5 minutes 6 models check-plan=claude-sonnet-5-5,check-bugs=claude-sonnet-5-5,check-rules=claude-sonnet-5-5,verify=claude-sonnet-5-5
+- log query (2026-11-25): three `frontdesk.turn.gemini_failed` 503 entries from user `demo_rest_owner` at 13:04-13:05Z on the shared database; this plan makes no AI call and did not use that user — not from this plan.
