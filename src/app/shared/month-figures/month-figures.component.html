@@ -1,0 +1,51 @@
+<section class="mf" data-testid="mf-card">
+  <header class="mf__head">
+    <h2 class="mf__title">{{ 'mp_figures_title' | translatePipe }}</h2>
+    <span class="c-chip c-chip--tag" data-testid="mf-badge">{{ badge_() }}</span>
+  </header>
+  @if (missingLine_()) {
+    <p class="mf__muted" data-testid="mf-missing">{{ missingLine_() }}</p>
+  }
+  <div class="mf__grid" role="table">
+    <div class="mf__row mf__row--head" role="row">
+      <span role="columnheader"></span>
+      <span role="columnheader">{{ 'mp_col_plan' | translatePipe }}</span>
+      <span role="columnheader">{{ 'mp_col_actual' | translatePipe }}</span>
+    </div>
+    @for (row of rows_(); track row.key) {
+      <div class="mf__row" role="row" [attr.data-testid]="'mf-row-' + row.key">
+        <span
+          class="mf__label"
+          role="rowheader"
+          [attr.title]="row.ruleKey ? (row.ruleKey | translatePipe) : null"
+          [attr.aria-label]="row.ruleKey ? (row.labelKey | translatePipe) + ': ' + (row.ruleKey | translatePipe) : null"
+          >{{ row.labelKey | translatePipe }}</span
+        >
+        @for (side of ['plan', 'actual']; track side) {
+          @let c = side === 'plan' ? row.plan : row.actual;
+          <span class="mf__cell" role="cell" [attr.data-testid]="'mf-' + side + '-' + row.key">
+            <span class="mf__money" [class.mf__money--neg]="c.negative">{{ c.text }}</span>
+            @if (c.pctText) {
+              <span class="mf__pct">{{ c.pctText }}</span>
+            }
+            @if (c.band === 'in') {
+              <span class="c-chip c-chip--tag c-chip--teal">{{ 'mp_in_band' | translatePipe }}</span>
+            } @else if (c.band === 'out') {
+              <span class="c-chip c-chip--tag c-chip--amber">{{ 'mp_out_of_band' | translatePipe }}</span>
+            }
+            @if (c.partial) {
+              <span class="c-chip c-chip--tag c-chip--amber" data-testid="mf-partial">{{
+                'mp_partial' | translatePipe
+              }}</span>
+            }
+            @if (c.fromTarget) {
+              <span class="c-chip c-chip--tag" data-testid="mf-from-target">{{
+                'mp_from_target' | translatePipe
+              }}</span>
+            }
+          </span>
+        }
+      </div>
+    }
+  </div>
+</section>

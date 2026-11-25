@@ -1,0 +1,15 @@
+<section class="dpc" data-testid="dpc-card">
+  <h2 class="dpc__title">{{ 'mp_dish_title' | translatePipe }}</h2>
+  <div class="dpc__field">
+    <label class="dpc__label" for="dpc-cost">{{ 'mp_dish_cost' | translatePipe }}</label>
+    <!-- prettier-ignore -->
+    <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" id="dpc-cost" data-testid="dpc-cost" [ngModel]="cost_()" (ngModelChange)="setCost($event)" /><span class="dpc__suffix" aria-hidden="true">₪</span></div>
+  </div>
+  @if (price_()) {
+    <p class="dpc__result" data-testid="dpc-net">{{ netLine_() }}</p>
+    @if (dealerType() === 'murshe') {
+      <p class="dpc__result" data-testid="dpc-gross">{{ grossLine_() }}</p>
+    }
+  }
+  <p class="dpc__muted" data-testid="dpc-rule">{{ ruleLine_() }}</p>
+</section>
