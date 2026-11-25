@@ -275,6 +275,15 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Inputs / variants: `maxBlockSize` (a CSS length; empty = fills its parent).
 - Known copies: `src/app/shared/list-shell/` keeps its own arrows (same look); 9 page `.scss` files still make their own `overflow: auto` area (see `docs/agent/house-style.md`, rule `scroll`).
 
+### sideways-row — one framed, draggable row of chips, tabs or buttons that scrolls sideways
+
+- Status: stable (plan 743)
+- Use: `src/app/shared/scroll-rail/` · `app-scroll-rail` (the visible frame, edge arrows, grab and drag; `centerChild(el, { instant? })` slides a child to the middle). Users: `src/app/core/components/header/header.component.html` (the top bar), `src/app/core/components/tab-chips/tab-chips.component.html`, `src/app/pages/settings/settings.page.html`, `src/app/pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace.component.html`, `src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`, `src/app/pages/metadata-manager/metadata-manager.page.component.html`, `src/app/pages/dev-catalog/dev-catalog.page.html`.
+- When: a row of several chips, tabs or buttons that can outgrow its width. Not a data table that scrolls sideways.
+- Inputs / variants: `frame` (`'box'` default draws the container, `'none'` draws no surface), `snap` (`none` / `proximity` / `mandatory`), `arrows` (`auto` / `always` / `never`), `step` (px or `'page'`). Arrows are buttons on a computer and signs only on a phone (≤767px).
+- Page-local state classes (plan 743): `.has-frame`, `.is-dragging` are host classes of `app-scroll-rail`, beside `is-overflowing`; `.dc-rail-box` is the dev catalog's 20rem demo box.
+- Known copies: none.
+
 ### engine-classes — shared `.c-*` CSS engines
 
 - Status: stable (plan 458 sweeps the copies)

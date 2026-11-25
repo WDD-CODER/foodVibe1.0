@@ -3,13 +3,18 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   linkedSignal,
   signal,
-  untracked
+  untracked,
+  viewChild
 } from '@angular/core'
 import { FormsModule } from '@angular/forms'
-import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { filter } from 'rxjs'
+import { ScrollRailComponent } from '../../../shared/scroll-rail/scroll-rail.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
@@ -49,7 +54,8 @@ const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'act
     TranslatePipe,
     FormsModule,
     CustomSelectComponent,
-    NotificationBellComponent
+    NotificationBellComponent,
+    ScrollRailComponent
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -64,6 +70,8 @@ export class HeaderComponent {
   private readonly translation = inject(TranslationService)
   private readonly access = inject(AccessService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly navRail = viewChild(ScrollRailComponent)
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef)
 
   isMobileMenuOpen = signal(false)
   isMobileAvatarOpen = signal(false)
@@ -130,6 +138,21 @@ export class HeaderComponent {
     effect(() => {
       if (userId_()) untracked(() => void this.access.loadBusinesses())
     })
+    // Plan 743: the active link is brought into view in the sideways row after each navigation.
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe(() => {
+        // routerLinkActive sets `.active` after the same event; look once it has.
+        setTimeout(() => {
+          const active = (this.host.nativeElement as HTMLElement).querySelector<HTMLElement>(
+            '.nav-pills a.nav-pill.active'
+          )
+          if (active) this.navRail()?.centerChild(active, { instant: true })
+        })
+      })
     if (this.userService.consumeAccessEndedNotice()) {
       this.userMsg.onSetSuccessMsg(this.translation.translate('access_ended'))
     }

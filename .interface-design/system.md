@@ -200,7 +200,7 @@ Sharper = more technical. Rounder = more approachable. Mix within this scale onl
 
 **Tablet (768–1023px):** Same top bar, tighter padding, no hamburger.
 
-**Mobile (≤620px):** Minimal top bar (auth only) + fixed bottom tab bar `height: 3.5rem`. Bottom bar: `--bg-glass-strong` + `--blur-glass` + `--border-glass` top edge. Active tab: teal text + `translateY(-1px)` on icon.
+**Phone (≤767px, the shared phone breakpoint):** Minimal top bar (auth only) + fixed bottom tab bar `height: 3.5rem`. Bottom bar: `--bg-glass-strong` + `--blur-glass` + `--border-glass` top edge. Active tab: teal text + `translateY(-1px)` on icon.
 
 RTL-aware: `margin-inline-start: auto` for auth section pushes correctly in RTL.
 
@@ -219,6 +219,7 @@ Pre-built surface + behavior combos. Use these before writing one-off styles.
 | `.c-input` | Form input (see cssLayer skill) |
 | `.c-input-wrapper` | Input container with icon slot |
 | `.c-select` | Custom select trigger |
+| `app-scroll-rail` | The sideways row container (family `sideways-row`): one visible frame (the top bar's box), edge arrows like `.c-scroll-arrow` turned sideways, grab and drag; arrows are signs only on a phone |
 | `.c-modal-*` | Modal surface classes |
 | `.c-dropdown` | Dropdown panel |
 | `.c-chip` | Pill chip |

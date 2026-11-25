@@ -241,6 +241,18 @@
     </app-scroll-area>
   </section>
 
+  <section id="sideways-row" class="dc-section">
+    <h2>sideways-row</h2>
+    <code>app-scroll-rail (frame, edge arrows, grab and drag), twelve c-chip--tab chips in 20rem</code>
+    <div class="dc-rail-box">
+      <app-scroll-rail>
+        @for (chip of chips_; track chip) {
+        <button type="button" class="c-chip c-chip--tab">{{ chip }}</button>
+        }
+      </app-scroll-rail>
+    </div>
+  </section>
+
   <section id="drag-list" class="dc-section">
     <h2>drag-list</h2>
     <code>c-drag-list, c-drag-item, c-drag-handle, appReorderKeys (grip: drag, or arrow up / down)</code>

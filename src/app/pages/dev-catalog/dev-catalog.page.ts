@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms'
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop'
 import { LucideAngularModule } from 'lucide-angular'
 import { ScrollAreaComponent } from 'src/app/shared/scroll-area/scroll-area.component'
+import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserMsgService } from '@services/user-msg.service'
@@ -56,6 +57,7 @@ interface SampleOption {
     EditGateComponent,
     PartialCostBadgeComponent,
     ScrollAreaComponent,
+    ScrollRailComponent,
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
@@ -84,6 +86,7 @@ export class DevCatalogPage {
     'edit-gate',
     'cost-badge',
     'scroll-area',
+    'sideways-row',
     'drag-list',
     'engine-classes'
   ] as const
@@ -129,6 +132,9 @@ export class DevCatalogPage {
 
   // scroll-area
   protected readonly lines_ = Array.from({ length: 20 }, (_, i) => `line ${i + 1}`)
+
+  // sideways-row (plan 743)
+  protected readonly chips_ = Array.from({ length: 12 }, (_, i) => `chip ${i + 1}`)
 
   // drag-list
   protected readonly dragRows_ = signal(['first', 'second', 'third', 'fourth'])
