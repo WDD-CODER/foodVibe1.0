@@ -94,6 +94,23 @@ Apply locally (`--db=<scratch>` for a copy), then on Atlas after a backup:
 
 It deletes the person's clients (live, in Trash and merged), requests, bookings, conversations and messages, and removes `clientId`, `clientName` and `clientPhone` from their events (the event, its money and history stay). The phone `052-123 4567`, `+972 52 123 4567` and `972521234567` are the same person. Free-text event notes may still name the person: check them by hand.
 
+### הפיכת משתמש למנהל מערכת באפליקציה החיה
+Plan 737. Nobody becomes platform admin by signing up; only someone with the live `server/.env.live` and the Atlas host can set the flag, with this script.
+
+1. Sign up on the live app with your own email and password. If sign-up says the email is taken and you never signed up, do not run the script for that email: sign up with another address you own and use that one.
+2. In PowerShell, from the main folder (not a `wt-N` slot, which has no `server/.env.live`):
+
+        node server/scripts/set-platform-admin.js --target=atlas --email=<your email>
+
+   It stops with `Atlas host confirm required: re-run with --confirm-host=<host>`. Re-run with that host (dry run), check the line `PLATFORM_ADMIN: <your user id> false → true (dry run — add --write to apply)`, then add `--write`:
+
+        node server/scripts/set-platform-admin.js --target=atlas --confirm-host=<host> --email=<your email>
+        node server/scripts/set-platform-admin.js --target=atlas --confirm-host=<host> --email=<your email> --write
+
+3. Sign out and sign in again, then open «דאשבורד מערכת» in the profile menu.
+
+To take it away, run the same command with `--off --write`. Agents never run this against Atlas.
+
 ### Logging
 - Phones, names and tokens are never written to logs or to the script's output.
 
