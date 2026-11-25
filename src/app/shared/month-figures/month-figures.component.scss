@@ -1,0 +1,80 @@
+@layer components.month-figures {
+  :host {
+    display: block;
+  }
+
+  .mf {
+    display: grid;
+    gap: var(--space-3);
+    inline-size: 100%;
+  }
+
+  .mf__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .mf__title {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-weight: 700;
+  }
+
+  .mf__muted {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
+  }
+
+  .mf__grid {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .mf__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
+    align-items: start;
+    gap: var(--space-3);
+  }
+
+  .mf__row--head {
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .mf__label {
+    color: var(--color-text-main);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    overflow-wrap: anywhere;
+  }
+
+  .mf__cell {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-inline-size: 0;
+  }
+
+  .mf__money {
+    color: var(--color-text-main);
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mf__money--neg {
+    color: var(--color-danger);
+  }
+
+  .mf__pct {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+}

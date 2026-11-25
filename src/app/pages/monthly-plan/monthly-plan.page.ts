@@ -4,7 +4,10 @@ import { FormControl, FormsModule } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import type { MonthPlan, MonthPlanUpdateInput } from '@schemas/entities'
 import { MONTH_TARGET_KEYS, monthKeyOf, monthLabel, shiftMonth, type MonthTargetKey } from '@schemas/month/month-rules'
+import { monthFigures, monthInputOf } from '../../core/engine/month-plan'
 import { roundMoney } from '../../core/engine/rounding'
+import { MonthFiguresComponent } from 'src/app/shared/month-figures/month-figures.component'
+import { DishPriceCalcComponent } from './components/dish-price-calc/dish-price-calc.component'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { LoggingService } from '@services/logging.service'
@@ -46,7 +49,9 @@ const toNumber = (value: number | string | null): number | null => {
     EmptyStateComponent,
     FormFieldComponent,
     LoaderComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    MonthFiguresComponent,
+    DishPriceCalcComponent
   ],
   templateUrl: './monthly-plan.page.html',
   styleUrl: './monthly-plan.page.scss',
@@ -111,6 +116,11 @@ export class MonthlyPlanPage {
   protected readonly sumLine_ = computed(() =>
     this.translation_.translate('mp_targets_sum').replace('{{sum}}', String(Math.round(this.targetsSum_() * 100) / 100))
   )
+  /** The month's figures from the SAVED month, never from typed-but-unsaved numbers (plan 728). */
+  protected readonly figures_ = computed(() => {
+    const month = this.open_()
+    return month ? monthFigures(monthInputOf(month)) : null
+  })
   protected readonly vatLine_ = computed(() => {
     const month = this.open_()
     if (!month) return ''

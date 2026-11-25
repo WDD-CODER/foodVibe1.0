@@ -106,6 +106,20 @@
     }
   </section>
 
+  @if (figures_(); as figures) {
+  <section class="mp-card c-glass-panel" data-testid="mp-figures">
+    <app-month-figures [figures]="figures" [targets]="month.targets" />
+  </section>
+  }
+
+  <section class="mp-card c-glass-panel" data-testid="mp-dish-calc">
+    <app-dish-price-calc
+      [foodTargetPct]="month.targets.foodPct"
+      [vatRatePct]="month.vatRatePct"
+      [dealerType]="month.dealerType"
+    />
+  </section>
+
   @if (!isClosed_()) {
   <div class="c-form-actions">
     <button

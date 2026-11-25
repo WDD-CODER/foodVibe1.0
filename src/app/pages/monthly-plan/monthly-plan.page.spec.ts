@@ -129,6 +129,20 @@ describe('MonthlyPlanPage (plan 727)', () => {
     expect(service.update).toHaveBeenCalledOnceWith('2026-11', { revenue: { actual: null } })
   })
 
+  it('plan 728: the figures card shows the saved month and updates after a save, not while typing', async () => {
+    await setup([month('2026-11', { revenue: { plan: 100000, actual: null } })])
+    expect(byId('mf-card')).not.toBeNull()
+    expect(byId('mf-badge')!.textContent).toContain('mp_completeness')
+    expect(byId('mf-actual-revenue')!.textContent).toContain('mp_not_entered')
+    service.update.and.resolveTo(month('2026-11', { revenue: { plan: 100000, actual: 0 } }))
+    type('mp-revenue-actual', '0')
+    expect(byId('mf-actual-revenue')!.textContent).toContain('mp_not_entered')
+    byId<HTMLButtonElement>('mp-save')!.click()
+    await settle()
+    expect(byId('mf-actual-revenue')!.textContent).toContain('₪0.00')
+    expect(byId('dpc-card')).not.toBeNull()
+  })
+
   it('a failed save keeps the typed values and shows the error', async () => {
     await setup([month('2026-11')])
     service.update.and.rejectWith(new Error('boom'))

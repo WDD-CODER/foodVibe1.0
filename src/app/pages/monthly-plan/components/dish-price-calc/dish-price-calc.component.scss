@@ -1,0 +1,47 @@
+@layer components.dish-price-calc {
+  :host {
+    display: block;
+  }
+
+  .dpc {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+  }
+
+  .dpc__title {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-weight: 700;
+  }
+
+  .dpc__field {
+    display: grid;
+    gap: var(--space-2);
+    inline-size: min(100%, 14rem);
+  }
+
+  .dpc__label {
+    color: var(--color-text-main);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+  }
+
+  .dpc__suffix,
+  .dpc__muted {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .dpc__result {
+    margin: 0;
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-weight: 700;
+  }
+
+  .dpc__muted {
+    margin: 0;
+  }
+}

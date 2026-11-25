@@ -8,7 +8,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
 | `report/` | `/report` — the business report: measured start vs latest, monthly trend, findings, one-page A4 print (plan 568); the platform admin opens it with `?businessId=` |
 | `restaurant-menu/` | `/restaurant-menu` — the restaurant's standing menu: dishes with price, net price, cost per portion (module `dish_analysis`, owner only; plan 725); `restaurant-menu/dish-sales/` — `/restaurant-menu/sales?month=YYYY-MM`: type a month's dish sales and returns, its reasons popup is the return-reasons-dialog component (plan 726) |
-| `monthly-plan/` | `/monthly-plan?month=YYYY-MM` — the monthly plan: open a month, type expected and actual revenue (net, `null` = not entered), five targets with the Israeli band; module `monthly_plan`, owner and consultant only (plan 727) |
+| `monthly-plan/` | `/monthly-plan?month=YYYY-MM` — the monthly plan: open a month, type expected and actual revenue (net, `null` = not entered), five targets with the Israeli band; module `monthly_plan`, owner and consultant only (plan 727); shows «תמונת החודש» (`app-month-figures`) and the dish-price calculator card `components/dish-price-calc/` (plan 728) |
 | `diagnosis/` | `/diagnosis` — the consultant's diagnosis: invoice queue, menu with prices, printable margin report (plan 634) |
 | `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
 | `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
