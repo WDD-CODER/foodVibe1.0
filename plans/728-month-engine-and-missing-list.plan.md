@@ -79,6 +79,8 @@ src/app/core/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
+src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
