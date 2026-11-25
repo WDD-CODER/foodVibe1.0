@@ -780,15 +780,6 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
 - [ ] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
-### Plan 740 — A new page is built to the house rules from the start: plan check, proposed defaults and lint rules
-- [ ] A1: Make every plan that adds a page name the recipe it is built from — the new Page recipe section — docs/agent/plan-checks.md
-- [ ] A2: Offer each behaviour rule to Dandan as a product default he can turn on with one word — one proposed section per rule marked default — _shared/product-defaults.md
-- [ ] A3: Warn in the diff when new code breaks a rule a script can see — one house lint rule per rule marked lint, each tried on the six standard screens first — scripts/lib/registry-families.mjs
-- [ ] A4: Write the three motion speeds into the design system so builders find them — three rows in the Animation table — .interface-design/system.md
-- [ ] A5: Point builders and the style reviewer at the rules where they already look — the registry pointer and Recipes lines, the regenerated inventory, the House rules section — docs/brain/component-families.md, docs/brain/inventory.md, docs/qa/styleqa-theme.md
-- [ ] A6: Start the record that proves the rules work, and list what the kit must own — the Pilot log table and the Kit needs lines — docs/agent/house-style.md
-- [ ] A7: Run every check of this plan and hand Dandan the two cards — outputs under Execution Notes — this plan file
-
 ### Plan 741 — Move the proven house-rules mechanism into the workflow kit so every project gets it
 - [ ] A1: Check that the rules really worked on three new pages before anything moves to the kit — count the Pilot log rows with no fix-up; stop when fewer than three — docs/agent/house-style.md
 - [ ] A2: Sort what the pilot built into what every project needs and what is only FoodVibe's — the mechanism / content list under Execution Notes — this plan file

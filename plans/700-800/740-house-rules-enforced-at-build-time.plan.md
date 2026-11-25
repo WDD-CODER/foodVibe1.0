@@ -1,6 +1,6 @@
 # Plan 740 — A new page is built to the house rules from the start: plan check, proposed defaults and lint rules
 
-Status: active
+Status: done
 Depends-on: 739, 742
 Track: code
 Snapshot: 72a33e4c7cc77199563b28ba9fa9adde21844ebc
