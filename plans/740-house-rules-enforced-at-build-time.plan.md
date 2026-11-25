@@ -180,7 +180,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A4: Write the three motion speeds into the design system so builders find them — three rows in the Animation table — .interface-design/system.md
 - [x] A5: Point builders and the style reviewer at the rules where they already look — the registry pointer and Recipes lines, the regenerated inventory, the House rules section — docs/brain/component-families.md, docs/brain/inventory.md, docs/qa/styleqa-theme.md
 - [x] A6: Start the record that proves the rules work, and list what the kit must own — the Pilot log table and the Kit needs lines — docs/agent/house-style.md
-- [ ] A7: Run every check of this plan and hand Dandan the two cards — outputs under Execution Notes — this plan file
+- [x] A7: Run every check of this plan and hand Dandan the two cards — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: `scripts/reuse-lint.mjs` (read only; it is not changed), the product-defaults skill, `/plan`'s review.
@@ -232,3 +232,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Human, 2026-11-25, card 1 (the proposed defaults): "first I'll see the changes then I approve a default" — all four stay `proposed`; none turned on. He also set how the sideways row behaves (pressable arrows on a computer, grab-and-drag on every screen, swipe only with no arrow buttons on a phone); written into the `sideways-row` rule of `docs/agent/house-style.md`.
 - Card 2 (the plan-check wording): not answered yet — the pull request is opened and not merged until it is.
 - Gate (final text): `GATE: PASS — 6 command(s)`; `pnpm run test:ci` → `TOTAL: 2789 SUCCESS`. One earlier gate run failed `test:ci` while the slot servers were starting during the run; the same tests passed alone and in the next gate run.
+- VALIDATED BY HUMAN (2026-11-25): card 2 the plan-check wording — "done"; card 1 — the four defaults stay proposed until he has seen the pieces ("first I'll see the changes then I approve a default").
