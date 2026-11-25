@@ -95,12 +95,12 @@
 
   <section class="mp-card c-glass-panel" data-testid="mp-fixed">
     <h2 class="mp-card__title">{{ 'mp_fixed_title' | translatePipe }}</h2>
-    <app-fixed-costs-card[group] ="draft_().fixed" [disabled]="isClosed_()" (groupChange)="setFixed($event)" />
+    <app-fixed-costs-card [group]="draft_().fixed" [disabled]="isClosed_()" (groupChange)="setFixed($event)" />
   </section>
 
   <section class="mp-card c-glass-panel" data-testid="mp-labour">
     <h2 class="mp-card__title">{{ 'mp_labour_title' | translatePipe }}</h2>
-    <app-labour-card[group] ="draft_().labour" [disabled]="isClosed_()" (groupChange)="setLabour($event)" />
+    <app-labour-card [group]="draft_().labour" [disabled]="isClosed_()" (groupChange)="setLabour($event)" />
   </section>
 
   <section class="mp-card c-glass-panel" data-testid="mp-targets">
