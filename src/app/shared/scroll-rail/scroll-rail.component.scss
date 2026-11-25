@@ -1,4 +1,7 @@
-// Plan 350 — shared horizontal scroll strip.
+@use '../../core/styles/breakpoints' as *;
+
+// Plans 350 + 743 — the one sideways row container: a visible frame, edge arrows, grab-and-drag.
+// The frame's box values are the top bar's (written once, here).
 :host {
   position: relative;
   display: flex;
@@ -7,15 +10,19 @@
   min-inline-size: 0;
 
   --sr-arrow-size: 1.75rem;
-  --sr-arrow-room: max(
-    0px,
-    calc(var(--sr-arrow-size) + var(--rail-arrow-gap, 0.25rem) - var(--rail-arrow-offset, 0px))
-  );
+  --sr-pad: 0px;
 }
 
-// Overflowing rail: keep one arrow's width free on both sides so no chip sits under an arrow.
-:host(.is-overflowing) {
-  padding-inline: var(--sr-arrow-room);
+:host(.has-frame) {
+  --sr-pad: 0.25rem;
+
+  padding: var(--sr-pad);
+
+  background: var(--bg-chrome);
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 var(--border-glass-strong);
+  backdrop-filter: var(--blur-glass);
 }
 
 .sr-scroller {
@@ -33,22 +40,6 @@
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-
-  // Fade only the edge(s) that can scroll (widths set from the component, physical sides).
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--sr-fade-left, 0px),
-    #000 calc(100% - var(--sr-fade-right, 0px)),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--sr-fade-left, 0px),
-    #000 calc(100% - var(--sr-fade-right, 0px)),
-    transparent 100%
-  );
 
   &::-webkit-scrollbar {
     display: none;
@@ -68,60 +59,66 @@
   }
 }
 
+// A row that can be dragged shows a hand; while it is dragged it grabs and does not snap.
+:host(.is-overflowing) .sr-scroller {
+  cursor: grab;
+}
+
+:host(.is-dragging) .sr-scroller {
+  cursor: grabbing;
+  user-select: none;
+  scroll-snap-type: none;
+}
+
+// Edge arrows: the up-and-down scroll area's arrow (`.c-scroll-arrow`) turned sideways, laid over the
+// inline-start / inline-end edge of the scroller, inside the frame.
 .sr-arrow {
   position: absolute;
   z-index: 2;
-  inset-block-start: 50%;
+  inset-block: var(--sr-pad);
 
   display: grid;
   place-content: center;
 
   inline-size: var(--sr-arrow-size);
-  block-size: var(--sr-arrow-size);
   padding: 0;
 
-  color: var(--color-text-main);
-  background: var(--bg-glass-strong);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-card);
-  backdrop-filter: var(--blur-glass);
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-md);
   cursor: pointer;
 
-  transform: translateY(-50%);
-  transition:
-    opacity 0.15s ease,
-    visibility 0s linear 0s;
+  opacity: 0.8;
+  transition: opacity var(--dur-base) var(--ease-smooth);
 
-  &:hover {
-    background: var(--bg-glass-hover);
+  // Hidden: nothing shifts, nothing can be pressed.
+  &.is-hidden {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0;
   }
 
   &:focus-visible {
     outline: 2px solid var(--border-focus);
-    outline-offset: 2px;
-  }
-
-  // Hidden with visibility, so nothing shifts when an arrow appears.
-  &.is-hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition:
-      opacity 0.15s ease,
-      visibility 0s linear 0.15s;
+    outline-offset: -2px;
   }
 }
 
+// The app is RTL: the previous arrow is on the right. The gradient fades toward the row.
 .sr-arrow--prev {
-  inset-inline-start: calc(-1 * var(--rail-arrow-offset, 0px));
+  inset-inline-start: var(--sr-pad);
+
+  background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
 }
 
 .sr-arrow--next {
-  inset-inline-end: calc(-1 * var(--rail-arrow-offset, 0px));
+  inset-inline-end: var(--sr-pad);
+
+  background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
 }
 
-// The app is RTL; swap the chevrons for an LTR context.
+// The app is RTL; swap the chevrons and gradients for an LTR context.
 .sr-icon-ltr {
   display: none;
 }
@@ -134,6 +131,14 @@
   .sr-icon-ltr {
     display: inline-flex;
   }
+
+  .sr-arrow--prev {
+    background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  .sr-arrow--next {
+    background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
+  }
 }
 
 // Browsers without `safe` alignment: start-align so an overflowing strip never hides its
@@ -141,6 +146,13 @@
 @supports not (justify-content: safe center) {
   .sr-scroller {
     justify-content: var(--rail-justify-fallback, flex-start);
+  }
+}
+
+// A phone: the arrows are signs only; the row is moved by swiping.
+@media (max-width: $break-phone-max) {
+  .sr-arrow {
+    pointer-events: none;
   }
 }
 

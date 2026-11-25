@@ -93,16 +93,85 @@ describe('ScrollRailComponent', () => {
     expect(host().classList).not.toContain('is-overflowing')
   })
 
-  it('marks an overflowing host and keeps the next arrow beside the scroller, not over it', () => {
+  it('marks an overflowing host, draws the frame and keeps the arrows inside it', () => {
     fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
     fixture.detectChanges()
     refresh()
     fixture.detectChanges()
     expect(host().classList).toContain('is-overflowing')
+    expect(host().classList).toContain('has-frame')
+    expect(parseFloat(getComputedStyle(host()).paddingInlineStart)).toBeGreaterThan(0)
     const a = arrow('next').getBoundingClientRect()
-    const s = scroller().getBoundingClientRect()
-    const intersects = a.left < s.right && a.right > s.left && a.top < s.bottom && a.bottom > s.top
-    expect(intersects).toBeFalse()
+    const h = host().getBoundingClientRect()
+    expect(a.left >= h.left - 1 && a.right <= h.right + 1).toBeTrue()
+  })
+
+  describe('grab and drag (plan 743)', () => {
+    const ptr = (type: string, x: number, pointerType = 'mouse'): PointerEvent =>
+      new PointerEvent(type, { pointerId: 1, pointerType, button: 0, clientX: x, bubbles: true })
+
+    beforeEach(() => {
+      fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
+      fixture.detectChanges()
+      refresh()
+    })
+
+    function trackClicks(): { count: number } {
+      const seen = { count: 0 }
+      ;(scroller().children[0] as HTMLElement).addEventListener('click', () => seen.count++)
+      return seen
+    }
+
+    it('moves scrollLeft with a 30px mouse drag and swallows the click that ends it', () => {
+      const el = scroller()
+      const seen = trackClicks()
+      const before = el.scrollLeft
+      el.dispatchEvent(ptr('pointerdown', 100))
+      el.dispatchEvent(ptr('pointermove', 130))
+      expect(el.scrollLeft).not.toBe(before)
+      fixture.detectChanges()
+      expect(host().classList).toContain('is-dragging')
+      el.dispatchEvent(ptr('pointerup', 130))
+      fixture.detectChanges()
+      expect(host().classList).not.toContain('is-dragging')
+      ;(el.children[0] as HTMLElement).dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      expect(seen.count).toBe(0)
+    })
+
+    it('does not swallow the click after a 2px press', () => {
+      const el = scroller()
+      const seen = trackClicks()
+      el.dispatchEvent(ptr('pointerdown', 100))
+      el.dispatchEvent(ptr('pointermove', 102))
+      el.dispatchEvent(ptr('pointerup', 102))
+      ;(el.children[0] as HTMLElement).dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      expect(seen.count).toBe(1)
+    })
+
+    it('does not track a touch pointer', () => {
+      const el = scroller()
+      const before = el.scrollLeft
+      el.dispatchEvent(ptr('pointerdown', 100, 'touch'))
+      el.dispatchEvent(ptr('pointermove', 160, 'touch'))
+      expect(el.scrollLeft).toBe(before)
+      expect(host().classList).not.toContain('is-dragging')
+    })
+  })
+
+  describe('phone arrows (plan 743)', () => {
+    it('makes the arrows signs only when the phone query matches', () => {
+      fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
+      fixture.detectChanges()
+      refresh()
+      const r = rail() as unknown as { phone_: { set(v: boolean): void } }
+      r.phone_.set(true)
+      fixture.detectChanges()
+      expect(arrow('next').getAttribute('tabindex')).toBe('-1')
+      expect(arrow('next').getAttribute('aria-hidden')).toBe('true')
+      r.phone_.set(false)
+      fixture.detectChanges()
+      expect(arrow('next').getAttribute('tabindex')).toBeNull()
+    })
   })
 
   describe('centerChild (plan 468)', () => {
@@ -120,6 +189,13 @@ describe('ScrollRailComponent', () => {
       const opts = spy.calls.mostRecent().args[0] as ScrollIntoViewOptions
       expect(opts.inline).toBe('center')
       expect(opts.block).toBe('nearest')
+    })
+
+    it('uses behavior auto with instant: true', () => {
+      const child = scroller().children[7] as HTMLElement
+      const spy = spyOn(child, 'scrollIntoView')
+      rail().centerChild(child, { instant: true })
+      expect((spy.calls.mostRecent().args[0] as ScrollIntoViewOptions).behavior).toBe('auto')
     })
 
     it('puts the fifth of eight children in the middle of a 300 px rail', async () => {

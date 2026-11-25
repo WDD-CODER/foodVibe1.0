@@ -175,7 +175,7 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container that scrolls sideways, with the same arrow at each end while there is more.
 - applies when: custom
 - plan words: \b(?:filter chips?|tab chips?|chip row|row of chips|tab row|tabs row|stage bar|jump navigation|nav(?:igation)? pills?|scroll(?:s|ing)? sideways|horizontal scroll)\b
-- how: family list-page neighbour app-scroll-rail (src/app/shared/scroll-rail/: arrows at both ends, a fade on the edge that can scroll, snap, arrows, step), as app-tab-chips uses it; a visible frame on the rail is not built yet (the plan that builds it names it)
+- how: family sideways-row — app-scroll-rail (src/app/shared/scroll-rail/): the visible frame (frame="box"), arrows at both ends in the look of the up-and-down scroll area (buttons on a computer, signs only on a phone), grab and drag with the mouse, snap, arrows, step; the top bar, app-tab-chips, the settings tabs, the stage bar and the metadata jump navigation use it
 - check: card
 - card: any page with a row of chips or tabs, on a phone · look at the row and press its arrow · the row sits in a visible rounded container, an arrow shows at the end that has more, and pressing it moves the row one step
 - exceptions: a data table that is wider than the screen; declare `exception — why: <one line>`

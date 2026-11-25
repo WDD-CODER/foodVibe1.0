@@ -193,8 +193,9 @@ export class MetadataManagerComponent implements OnInit {
   protected jumpTo(id: string, chip: HTMLElement): void {
     this.activeSectionId_.set(id)
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    // The chip first (one instant move of the row), then the one smooth page scroll (plan 743).
+    this.jumpRail()?.centerChild(chip, { instant: true })
     this.document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
-    this.jumpRail()?.centerChild(chip)
   }
 
   protected readonly labelColor = (key: string): string => this.metadataRegistry.getLabelColor(key)
