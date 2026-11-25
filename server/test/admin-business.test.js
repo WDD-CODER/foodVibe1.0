@@ -34,7 +34,7 @@ beforeEach(async () => {
   ])
   for (const type of ALL_USER_ENTITY_TYPES) {
     // kind + key keep the taxonomy unique index (kind, key, businessId) happy for the raw fixtures.
-    const doc = (suffix, userId, businessId) => ({ _id: `${type}-${suffix}`, kind: 'k', key: suffix, userId, businessId, createdBy: userId })
+    const doc = (suffix, userId, businessId) => ({ _id: `${type}-${suffix}`, kind: 'k', key: suffix, month: suffix, nameKey: suffix, userId, businessId, createdBy: userId })
     await db.collection(type).insertMany([
       doc('A-owner', 'ownerA', 'bA'),
       doc('A-staff', 'staffA', 'bA'),
