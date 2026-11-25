@@ -788,3 +788,42 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A5: Bring the released kit version into FoodVibe and drop the pilot text the kit now owns — kit-sync with the release tag, the plan-checks pointer line, the config key — docs/agent/plan-checks.md, kit.config.json, docs/workflow-kit/**
 - [ ] A6: Record the decision so the next project knows how the rules got into the kit — the ADR and its index line — docs/brain/decisions/**, docs/brain/index.md
 - [ ] A7: Run every check and hand Dandan the gate card — outputs under Execution Notes — this plan file
+
+
+### Plan 743 — One sideways row container everywhere: a visible frame, edge arrows, grab-and-drag
+- [ ] A1: Give the sideways scroller a visible container and edge arrows that look like the scroll area turned sideways — the frame input, the new arrows, the removed mask and offset variables — src/app/shared/scroll-rail/**
+- [ ] A2: Let the row be grabbed and dragged with the mouse without pressing what is under it, and make the arrows signs only on a phone — the drag tracking, the swallowed click, the phone signal, the instant centring option, the spec cases — src/app/shared/scroll-rail/**
+- [ ] A3: Put the top bar's navigation in the container so it stops scrolling on its own with a scrollbar — the rail in the header, the removed box and overflow rules, the active link kept in view — src/app/core/components/header/**
+- [ ] A4: Fix the metadata row so its arrows sit inside the container and a chip press scrolls once — the removed offset and pill rules, the jumpTo order — src/app/pages/metadata-manager/metadata-manager.page.component.html, src/app/pages/metadata-manager/metadata-manager.page.component.scss, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
+- [ ] A5: Give the tab chips, the settings tabs, the diagnosis tabs, the stage row and the dish row's field strip the same container — the default frame, the removed fighting rules — src/app/core/components/tab-chips/**, src/app/pages/settings/settings.page.html, src/app/pages/settings/settings.page.scss, src/app/pages/diagnosis/components/diagnosis-workspace/**, src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [ ] A6: Show the container in the dev catalog and check the two screens a script can check — the catalog entry and its count spec, the two ui specs — src/app/pages/dev-catalog/**, e2e/ui/743-1.spec.ts, e2e/ui/743-2.spec.ts
+- [ ] A7: Record the container where builders look and name it in the house rules — the sideways-row rule, the new registry family, the inventory, the proposed default's how line, the design system rows — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
+- [ ] A8: Run every check of this plan and hand Dandan the five cards — outputs under Execution Notes — this plan file
+
+### Plan 744 — One tooltip box for every hint: a shared piece, the two hand-made tooltips moved onto it
+- [ ] A1: Build the one tooltip box every hint will use — the engine block, the directive, the box component and their spec — src/styles.scss, src/app/shared/tooltip/**
+- [ ] A2: Move the product list's warning hint onto the shared tooltip and delete its own copy — the template, the removed state and CSS, the spec — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] A3: Move the recipe book's cost and date hints onto the shared tooltip and delete their own boxes — the triggers, the removed boxes, CSS and service, the spec — src/app/pages/recipe-book/**
+- [ ] A4: Use the shared tooltip on three hints people meet every day — the bell, the page header's count, the taxonomy icon buttons — src/app/core/components/notification-bell/**, src/app/shared/page-header/**, src/app/pages/metadata-manager/components/taxonomy-kind-manager/**
+- [ ] A5: Show the tooltip in the dev catalog and check it with a script — the catalog entry, the dictionary key, the count spec, the ui spec — src/app/pages/dev-catalog/**, public/assets/data/dictionary.json, e2e/ui/744-1.spec.ts
+- [ ] A6: Warn when new code uses the browser's own title for a hint, and record the hints that still do — the house-tooltip lint rule with its round-trip proof, the debt baseline kind — scripts/lib/registry-families.mjs, _shared/debt-baseline.json
+- [ ] A7: Reword the default and the house rule to name the shared tooltip, and record the piece where builders look — the two how lines, the tooltip rule, the registry family, the inventory, the design system row, the folder maps — _shared/product-defaults.md, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, .interface-design/system.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [ ] A8: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+
+### Plan 745 — List columns fall into the carousel one by one as the list gets narrower (mechanism + the product list)
+- [ ] A1: Work out which columns fit a given width, as a tested rule with no browser — the column type, the fit function and its spec — src/app/shared/list-shell/list-columns.util.ts, src/app/shared/list-shell/list-columns.util.spec.ts
+- [ ] A2: Let the list container measure itself and lay its columns out from the rule — the columns input, the resize and phone watchers, the grid variables, the collapsed ids handed to the carousel group — src/app/shared/list-shell/**, src/app/shared/column-carousel/column-carousel-group.directive.ts
+- [ ] A3: Let a column be shown either as its own cell or inside the switching column — the fall-column directive, the header and cell rendering, the carousel look and keys freed from the phone width — src/app/shared/column-carousel/**, src/styles.scss
+- [ ] A4: Make the product list declare its columns and their fall order instead of typing layouts — the columns list, the template, the spec — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] A5: Show falling columns in the dev catalog and check three widths with a script — the catalog entry and its count spec, the three ui specs — src/app/pages/dev-catalog/**, e2e/ui/745-1.spec.ts, e2e/ui/745-2.spec.ts, e2e/ui/745-3.spec.ts
+- [ ] A6: Write the new behaviour into the house rules and where builders look — the column-carousel and recipe-list rules, the registry, the inventory, the proposed default's lines, the design system line — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
+- [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+
+### Plan 746 — The other five lists get falling columns: recipe book, suppliers, equipment, clients, invoices
+- [ ] A1: Move the recipe book onto falling columns so recipe names stop being squeezed — the columns list, the header and row cells, the spec — src/app/pages/recipe-book/components/recipe-book-list/**
+- [ ] A2: Move the supplier list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/suppliers/components/supplier-list/**
+- [ ] A3: Move the equipment list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/equipment/components/equipment-list/**
+- [ ] A4: Move the client list onto falling columns for owner and staff — the computed columns list, the removed grid constants, the header and row cells, the spec — src/app/pages/clients/components/client-list/**
+- [ ] A5: Give the invoices list a switching column for the first time — the carousel group, the header and cell wrappers, the columns list, the spec — src/app/pages/inventory/components/invoices-list/**
+- [ ] A6: Check two of the lists at a medium width with a script and record the change — the two ui specs, the column-carousel rule's gaps, the registry line, the inventory — e2e/ui/746-1.spec.ts, e2e/ui/746-2.spec.ts, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
