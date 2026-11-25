@@ -980,6 +980,20 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### simulator-level-held-draft — the simulator's level line, held line and draft block (plan 719)
 
 - Status: stable
-- Use: `src/app/pages/frontdesk/simulator/simulator.page.html` and `.scss` · `.sim-level`, `.sim-held`, `.sim-draft` beside `ai-failed-note`.
+- Use: `src/app/pages/frontdesk/simulator/simulator.page.html` and `.scss` · `.sim-level`, `.sim-held` beside `ai-failed-note` (the draft block was removed by plan 733).
 - When: another note about the assistant's state in the simulator — extend these blocks.
+- Known copies: none.
+
+### test-turn-profile — turnProfile(profile, conversation) in server/services/frontdesk-tables.js (plan 733)
+
+- Status: stable
+- Use: `server/services/frontdesk-tables.js` · `turnProfile` answers a test conversation (the simulator) as level 1 whatever the business's level (R-23); `runTurnInner` in `frontdesk-turn.js` wraps the profile once with it, `onTap` checks it.
+- When: any code that decides by the assistant level for a conversation — read the level through it, never a second test-conversation rule.
+- Known copies: none.
+
+### guest-holding-message — The holding message: holdGuest in server/services/frontdesk-turn.js (plan 733)
+
+- Status: stable
+- Use: `server/services/frontdesk-turn.js` · `holdGuest` sends the business's handoff text, else `fd_ai_holding_default`, through `sendOut` (author `server`) after a technical failure, once until the guest writes again (R-22).
+- When: another failure path of the guest turn that should tell the guest someone will answer — call it, never a second sender.
 - Known copies: none.

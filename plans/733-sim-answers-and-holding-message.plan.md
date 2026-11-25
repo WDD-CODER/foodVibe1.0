@@ -258,11 +258,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the simulator's assistant answer the test guest as at level 1 whatever the business's level — turnProfile helper, runTurnInner and onTap use it, turn and table tests — server/services/frontdesk-tables.js, server/services/frontdesk-turn.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-tables.test.js
-- [ ] A2: Send the guest one holding message when the assistant fails for a technical reason — holdGuest after both silent handoffs, one per guest message, not for a real level-0 guest, fd_ai_holding_default key, R-04 tests rewritten — server/services/frontdesk-turn.js, server/test/frontdesk-turn.test.js, public/assets/data/dictionary.json
-- [ ] A3: Make the simulator's level line tell the truth and drop the staff-draft note from its chat — sim_level_0_sim key, draft_ block and .sim-draft rule removed, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.scss, src/app/pages/frontdesk/simulator/simulator.page.spec.ts, public/assets/data/dictionary.json
-- [ ] A4: Write down that rule R-04 changed and where the new behaviour lives — R-04 note, R-22 and R-23, the map's Contract line, breadcrumbs, the family entry and the inventory — docs/frontdesk/assistant-behaviour-rules.md, docs/restaurant/restaurant-map.md, server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
-- [ ] A5: Run every check of this plan and hand Dandan the two simulator checks — test:server, test:ci, build, both lints, inventory check, log-query; evidence into Execution Notes
+- [x] A1: Let the simulator's assistant answer the test guest as at level 1 whatever the business's level — turnProfile helper, runTurnInner and onTap use it, turn and table tests — server/services/frontdesk-tables.js, server/services/frontdesk-turn.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-tables.test.js
+- [x] A2: Send the guest one holding message when the assistant fails for a technical reason — holdGuest after both silent handoffs, one per guest message, not for a real level-0 guest, fd_ai_holding_default key, R-04 tests rewritten — server/services/frontdesk-turn.js, server/test/frontdesk-turn.test.js, public/assets/data/dictionary.json
+- [x] A3: Make the simulator's level line tell the truth and drop the staff-draft note from its chat — sim_level_0_sim key, draft_ block and .sim-draft rule removed, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.scss, src/app/pages/frontdesk/simulator/simulator.page.spec.ts, public/assets/data/dictionary.json
+- [x] A4: Write down that rule R-04 changed and where the new behaviour lives — R-04 note, R-22 and R-23, the map's Contract line, breadcrumbs, the family entry and the inventory — docs/frontdesk/assistant-behaviour-rules.md, docs/restaurant/restaurant-map.md, server/breadcrumbs.md, src/app/pages/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A5: Run every check of this plan and hand Dandan the two simulator checks — test:server, test:ci, build, both lints, inventory check, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: plan 719 (take-over sets `status: 'human'`, back to the assistant on the guest's next message when
@@ -305,3 +305,16 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the daily-cap failure (`quota`) also sends the holding message, as it is one of plan 701's technical reasons.
 - behaviour: the status change and `assistantFailed` are written before the holding message, so the staff get the conversation even when the send is refused.
 - behaviour: `sim_level_0` and `sim_draft_label` stay in `dictionary.json` unused (append-only hotspot); the simulator shows the new key `sim_level_0_sim`.
+- scope extended (ask 733-1, approved by the Human): `server/scripts/ai-eval-frontdesk.js` — a level-0 dialogue (`setup.level === 0`) plays its guest turns as a real guest (`{ ...conversation, test: false }` on the turn only), so eval dialogue 20 still tests level 0 for real guests; `server/eval/frontdesk/dialogues/20-level-zero-suggestion.json` — title now says "a real guest" (the strict dialogue schema allows no new setup field).
+- behaviour: plans 731 / 732 / 701 cases that expected no outbound row after a failed level-1 turn now expect the one holding row (same file, minimal edit of their assertions).
+- behaviour: two family headings added to `docs/brain/component-families.md` (`test-turn-profile`, `guest-holding-message`) because kit-checks requires a heading for each rung-4 Reuse Check row; inventory regenerated.
+
+### Evidence (round 2, fresh builder)
+- base rerun of `pnpm run test:server` (before any change) → exit 1: 175 files passed, 2 failed in hooks (`generate-from-url`, `modules-gate`) with `Instance failed to start within 10000ms` (mongodb-memory-server) — an environment failure, other files than round 1's.
+- `npx vitest run test/frontdesk-turn.test.js test/frontdesk-tables.test.js test/frontdesk-eval.test.js test/frontdesk-guardrails.test.js` → exit 0, 174 passed.
+- `npx vitest run test/inbound.test.js test/ai-frontdesk-suggest.test.js test/frontdesk-suggested.test.js` → exit 0, 28 passed; `sim-router`, `conversations-router` → exit 0, 19 passed.
+- `pnpm run test:server` (with the change) → first run exit 1: 2 files failed in hooks with `Instance failed to start within 10000ms` (`product-import-invoice`, `restaurant-registry`; 0 assertion failures); those files alone → exit 0, 96 passed; rerun once (environment) → exit 0, `Test Files 177 passed (177)`, `Tests 2504 passed (2504)`.
+- `pnpm run build` → exit 0 · `pnpm run lint` → exit 0 (0 errors) · `pnpm --dir server run lint` → exit 0 (0 errors).
+- `pnpm run test:ci` → exit 0, 3224 of 3224 SUCCESS.
+- `node scripts/inventory.mjs --check` → `INVENTORY: ok` · `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured`.
+- kit-manifest-check → ok · scope-check → `SCOPE: ok` · kit-checks → `KIT_CHECKS: ok (6 checks)` · override, plan-ledger, breadcrumbs, lint:icons, lint:no-native-select → exit 0.
