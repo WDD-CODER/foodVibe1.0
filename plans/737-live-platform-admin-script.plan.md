@@ -37,7 +37,7 @@ signs in again and sees «דאשבורד מערכת» in his profile menu; nobod
 
 - [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
 - [auto] `pnpm run test:server` exits 0, including `server/test/set-platform-admin.test.js` (A1, A2).
-- [auto] `node server/scripts/set-platform-admin.js --email=nobody@example.com` exits 1 and prints `--target=local|atlas is required` (no connection is made).
+- [auto] Run without a target, the script exits 1 and prints «--target=local|atlas is required» with no connection made — a case in the script's server test (run by `pnpm run test:server`).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/737-live-platform-admin-script.plan.md` → `ARCH: ok` or `ARCH: skipped`; `node scripts/scope-check.mjs --reuse --plan=plans/737-live-platform-admin-script.plan.md` exits 0.
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).

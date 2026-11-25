@@ -56,7 +56,7 @@ CI badge.
 - [auto] `git ls-files .clone ROUTE_INVENTORY.md .qa-reports` prints nothing; `git ls-files LICENSE CONTRIBUTING.md SECURITY.md docs/archive/route-inventory-2026-04.md` prints all four.
 - [auto] `git check-ignore -q docs/images/dashboard.png` exits 1 (the carve-out works) and `git check-ignore -q "Screenshot 2026-08-12 094815.png"` exits 0 (stray root shots stay ignored).
 - [auto] `grep -ciE "ai-workflow-kit|README_WORKFLOW|workflow-kit|\.claude/|orchestrator-runs" README.md` prints `0` (the kit is described, never linked or pointed at).
-- [auto] `grep -c "All rights reserved" LICENSE` prints at least `1`; `node -p "require('./package.json').name"` prints `foodvibe`.
+- [auto] `grep -c "All rights reserved" LICENSE` prints at least `1`; `grep -c '"name": "foodvibe"' package.json` prints `1`.
 - [auto] `node scripts/kit-manifest-check.mjs` exits 0 (root files the kit inventories are unchanged).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/738-repo-readme-license-and-tidy.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0.
 - [auto] `node scripts/scope-check.mjs --diff=origin/main --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0.
