@@ -103,9 +103,10 @@ append the path to the scope block above and retry.
 
 ## Reuse Check
 - `month-plan` engine (`monthFigures`, `monthInputOf`, `breakEven`, `dishPrice`, `bandOf`) — family: event-plan — rung: 3 — why: the costing engine family; a second file beside `event-pricing.ts` that names C-PRICING as its counterpart (monthly decision 8), rounding only through `rounding.ts`
-- `month-figures` — family: none — rung: 4 — why: no shared piece shows a plan-versus-actual table with missing marks; built in `src/app/shared/month-figures/` (shared code, never page-local) with a registry entry, so a later month or dish screen reuses it rather than copying
-- `dish-price-calc` — family: number-box — rung: 2 — why: one `appNumberBox` for the plate cost and two read-only result lines; no new control
+- `month-figures` — family: none — rung: 4 — why: no shared piece shows a plan-versus-actual table with missing marks; layout-only classes `.mf`, `.mf__head`, `.mf__title`, `.mf__muted`, `.mf__grid`, `.mf__row`, `.mf__row--head`, `.mf__label`, `.mf__cell`, `.mf__money`, `.mf__money--neg`, `.mf__pct`; built in `src/app/shared/month-figures/` (shared code, never page-local) with a registry entry, so a later month or dish screen reuses it rather than copying
+- `dish-price-calc` — family: number-box — rung: 2 — why: layout-only classes `.dpc`, `.dpc__title`, `.dpc__field`, `.dpc__label`, `.dpc__suffix`, `.dpc__muted`, `.dpc__result`; one `appNumberBox` for the plate cost and two read-only result lines; no new control
 - «חלקי» and band tags — family: chip — rung: 2 — why: `.c-chip--tag --amber` / `--teal` as they are; `app-partial-cost-badge` is the event's missing-price picker and does not fit a month figure
+
 
 ## Adopt Check
 - month-figures — verdict: skip — why: an eight-row plan-versus-actual card with app-specific missing and band marks; a table or grid package would add a dependency for one small card

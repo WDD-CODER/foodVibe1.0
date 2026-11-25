@@ -241,6 +241,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a cost is shown that may be missing prices.
 - Known copies: none.
 
+### month-figures — a month's plan versus actual figures
+
+- Status: stable (plan 728)
+- Use: `src/app/shared/month-figures/` · `app-month-figures` (inputs `figures` from `monthFigures`, `targets`): «לא הוזן», «חלקי», «לפי היעד», band tags and the completeness badge.
+- When: any month or dish screen that shows plan against actual money; never rebuild the table.
+- Known copies: none.
+
 ### menu-dish-cost — the cost of a standing-menu dish
 
 - Status: stable (plan 725)
@@ -390,7 +397,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable (MVP)
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
-  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`; the month engine `src/app/core/engine/month-plan.ts` (plan 728: `monthFigures`, `breakEven`, `dishPrice`, `bandOf`) is the monthly counterpart of C-PRICING; its table is `src/app/shared/month-figures/` · `app-month-figures` (plan versus actual with missing and band marks; reuse it for any month or dish screen).
+  `src/app/core/engine/units.ts` (plan 635: re-exports the one rule in `shared/schemas/units/to-base.ts` — `toBase`, `normalizeUnit`, `unitFamily`, `convertWithinFamily`, `optionRateInBase`, the unit constants, `unitRatesFrom`); portions: `src/app/core/engine/portions.ts`; the month engine `src/app/core/engine/month-plan.ts` (plan 728: `monthFigures`, `breakEven`, `dishPrice`, `bandOf`) is the monthly counterpart of C-PRICING.
 - When: anything that computes quantities, costs or prices for an event.
 - Known copies: none.
 
