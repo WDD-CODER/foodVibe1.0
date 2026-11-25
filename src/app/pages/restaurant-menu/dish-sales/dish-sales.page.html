@@ -1,0 +1,168 @@
+@if (isStaff_()) {
+<p class="ds-row__notice c-glass-panel" data-testid="dish-sales-owner-only">
+  {{ 'restaurant_menu_owner_only' | translatePipe }}
+</p>
+} @else {
+<app-list-shell
+  [isPanelOpen]="false"
+  [gridTemplate]="'minmax(8rem, 2fr) 1fr 7rem 7rem 9rem 1.4fr'"
+  [mobileGridTemplate]="'minmax(4rem, 2fr) 4.5rem 4.5rem 5.5rem'"
+  [dir]="'rtl'"
+  [resultCount]="rows_().length"
+>
+  <ng-container shell-title>{{ 'dish_sales' | translatePipe }}</ng-container>
+
+  <ng-container shell-actions>
+    <div class="ds-row__months" data-testid="dish-sales-months">
+      <button
+        type="button"
+        class="c-btn-ghost--sm"
+        data-testid="dish-sales-prev"
+        [attr.aria-label]="'dish_sales_prev_month' | translatePipe"
+        (click)="goMonth(-1)"
+      >
+        <lucide-icon name="chevron-right" [size]="18"></lucide-icon>
+      </button>
+      <span class="ds-row__month" data-testid="dish-sales-month">{{ monthLabel_() }}</span>
+      <button
+        type="button"
+        class="c-btn-ghost--sm"
+        data-testid="dish-sales-next"
+        [disabled]="isCurrentMonth_()"
+        [attr.aria-label]="'dish_sales_next_month' | translatePipe"
+        (click)="goMonth(1)"
+      >
+        <lucide-icon name="chevron-left" [size]="18"></lucide-icon>
+      </button>
+    </div>
+    @if (!isClosed_()) {
+    <button
+      type="button"
+      class="c-btn-ghost"
+      data-testid="dish-sales-zero-fill"
+      [disabled]="emptySoldCount_() === 0"
+      (click)="fillEmptyWithZero()"
+    >
+      {{ 'dish_sales_zero_fill' | translatePipe }}
+    </button>
+    <button type="button" class="c-btn-primary" data-testid="dish-sales-save" [disabled]="!canSave_()" (click)="save()">
+      <span class="btn-label">{{ 'dish_sales_save' | translatePipe }}</span>
+    </button>
+    }
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="c-grid-header-cell ds-row__intro" role="columnheader">
+      <p class="ds-row__progress" data-testid="dish-sales-progress">{{ progressText_() }}</p>
+      @if (isClosed_()) {
+      <p class="ds-row__banner" data-testid="dish-sales-closed">{{ bannerText() }}</p>
+      }
+    </div>
+    <div class="c-grid-header-cell">{{ 'menu_dish_name' | translatePipe }}</div>
+    <div class="c-grid-header-cell ds-row__wide">{{ 'menu_dish_course' | translatePipe }}</div>
+    <div class="c-grid-header-cell">{{ 'dish_sales_sold' | translatePipe }}</div>
+    <div class="c-grid-header-cell">{{ 'dish_sales_returned' | translatePipe }}</div>
+    <div class="c-grid-header-cell"></div>
+    <div class="c-grid-header-cell ds-row__wide" [attr.title]="'dish_sales_cost_live' | translatePipe">
+      {{ 'menu_dish_cost_per_portion' | translatePipe }}
+    </div>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (isLoading_()) {
+    <div class="ds-row__state"><app-loader /></div>
+    } @else if (loadFailed_()) {
+    <div class="ds-row__state" data-testid="dish-sales-error">
+      <p>{{ 'dish_sales_load_failed' | translatePipe }}</p>
+      <button type="button" class="c-btn-ghost" data-testid="dish-sales-retry" (click)="load()">
+        {{ 'retry' | translatePipe }}
+      </button>
+    </div>
+    } @else if (rows_().length === 0) {
+    <div class="ds-row__state">
+      <app-empty-state messageKey="restaurant_menu_empty" icon="utensils" />
+      <a class="c-btn-ghost" routerLink="/restaurant-menu" data-testid="dish-sales-empty-link">
+        {{ 'dish_sales_empty_link' | translatePipe }}
+      </a>
+    </div>
+    } @else { @for (row of rows_(); track row.dish._id) {
+    <div class="c-list-row" role="row" data-testid="dish-sales-row">
+      <div class="c-list-body-cell ds-row__cell ds-row__cell--name" role="cell" [attr.title]="row.dish.name">
+        <span class="ds-row__ellipsis">{{ row.dish.name }}</span>
+        @if (row.removed) {
+        <small class="ds-row__removed">{{ 'dish_sales_removed_dish' | translatePipe }}</small>
+        }
+      </div>
+      <div class="c-list-body-cell ds-row__cell ds-row__wide" role="cell">
+        <span class="ds-row__ellipsis">{{ courseLabel(row.dish) || '—' }}</span>
+      </div>
+      <div class="c-list-body-cell ds-row__cell" role="cell">
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="numeric" min="0" step="1" data-testid="dish-sales-sold" [attr.aria-label]="'dish_sales_sold' | translatePipe" [placeholder]="'dish_sales_not_entered' | translatePipe" [attr.title]="'dish_sales_not_entered_hint' | translatePipe" [disabled]="isClosed_()" [ngModel]="draftOf(row.dish._id).sold" (ngModelChange)="setNumber(row.dish._id, 'sold', $event)" /></div>
+      </div>
+      <div class="c-list-body-cell ds-row__cell" role="cell">
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="numeric" min="0" step="1" data-testid="dish-sales-returned" [attr.aria-label]="'dish_sales_returned' | translatePipe" [placeholder]="'dish_sales_not_entered' | translatePipe" [attr.title]="'dish_sales_not_entered_hint' | translatePipe" [disabled]="isClosed_()" [ngModel]="draftOf(row.dish._id).returned" (ngModelChange)="setNumber(row.dish._id, 'returned', $event)" /></div>
+      </div>
+      <div class="c-list-body-cell ds-row__cell" role="cell">
+        <button
+          type="button"
+          class="c-btn-ghost--sm ds-row__reasons"
+          [class.ds-row__reasons--over]="given(row.dish._id) > (draftOf(row.dish._id).returned ?? 0)"
+          data-testid="dish-sales-reasons"
+          [disabled]="!canOpenReasons(row.dish._id)"
+          (click)="openReasons(row.dish._id)"
+        >
+          {{ reasonsText(row.dish._id) }}
+        </button>
+      </div>
+      <div class="c-list-body-cell ds-row__cell c-num ds-row__wide" role="cell" data-testid="dish-sales-cost">
+        @if (row.frozenCost !== undefined) {
+        <span class="ds-row__ellipsis">{{ money(row.frozenCost) }}</span>
+        } @else { @switch (row.cost.state) { @case ('units') {
+        <span class="ds-row__ellipsis">{{ 'menu_dish_no_cost' | translatePipe }}</span>
+        } @case ('missing') {
+        <span class="ds-row__ellipsis">—</span>
+        } @default {
+        <span class="ds-row__ellipsis">{{ money(row.cost.costPerPortion) }}</span>
+        @if (row.cost.state === 'partial') {
+        <app-partial-cost-badge [missing]="row.cost.missing" />
+        } } } }
+      </div>
+    </div>
+    }
+    <p class="ds-row__live" data-testid="dish-sales-cost-live">{{ 'dish_sales_cost_live' | translatePipe }}</p>
+    @if (skipped_().length > 0) {
+    <div class="ds-row__skipped" data-testid="dish-sales-skipped">
+      <button
+        type="button"
+        class="c-chip c-chip--tap"
+        [attr.aria-expanded]="showSkipped_()"
+        (click)="showSkipped_.set(!showSkipped_())"
+      >
+        {{ skippedText() }}
+      </button>
+      @if (showSkipped_()) {
+      <ul class="ds-row__skipped-list">
+        @for (item of skipped_(); track $index) {
+        <li>{{ item.name }} · {{ item.units }}</li>
+        }
+      </ul>
+      }
+    </div>
+    } }
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (dialogDish_(); as dish) {
+    <app-return-reasons-dialog
+      [dishName]="dish.name"
+      [returned]="draftOf(dish._id).returned ?? 0"
+      [reasons]="draftOf(dish._id).reasons"
+      (confirmed)="onReasonsConfirmed($event)"
+      (closed)="dialogDishId_.set(null)"
+    />
+    }
+  </ng-container>
+</app-list-shell>
+}

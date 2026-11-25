@@ -1,0 +1,59 @@
+@layer components {
+  :host {
+    display: contents;
+  }
+
+  .rr-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-inline-size: 0;
+  }
+
+  .rr-dialog__title {
+    margin: 0;
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .rr-dialog__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rr-dialog__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-block-size: 2.25rem;
+  }
+
+  .rr-dialog__label {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .rr-dialog__note {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: stretch;
+    min-inline-size: 0;
+  }
+
+  .rr-dialog__error,
+  .rr-dialog__given {
+    margin: 0;
+  }
+
+  .rr-dialog__error,
+  .rr-dialog__given--over {
+    color: var(--color-danger);
+  }
+}
