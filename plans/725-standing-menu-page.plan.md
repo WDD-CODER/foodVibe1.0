@@ -111,6 +111,7 @@ docs/brain/component-families.md
 docs/modules/modules-map.md
 docs/workflow-kit/manifest.json
 src/app/appRoot/app.component.spec.ts
+docs/brain/inventory.md
 ```
 
 ## Read Scope
@@ -142,6 +143,9 @@ append the path to the scope block above and retry.
 - `MenuDishCostService` (`src/app/core/services/menu-dish-cost.service.ts`) — family: none — rung: 4 — why: no piece costs a standing-menu dish from its four sources; it only calls `RecipeCostService` and `netPriceOf`, so the sales page and the later analysis read one cost rule
 - partial cost mark — family: cost-badge — rung: 1 — why: `app-partial-cost-badge` with the missing list
 - `.rm-row__*` page-local cell spacing (restaurant-menu.page.scss) — family: engine-classes — rung: 3 — why: column widths only on top of `.c-list-row`; no `.c-*` class
+- `menu-dish-data` (`MenuDishDataService`) — family: entity-data-service — rung: 2 — why: named as above
+- `menu-dish-dialog` (`MenuDishDialogComponent`) — family: modal-shell — rung: 2 — why: named as above; its form layout reuses the `.rm-row__*` page-local classes
+- `.rm-row__notice`, `.rm-row__filters`, `.rm-row__vat-note`, `.rm-row__state`, `.rm-row__cell`, `.rm-row__cell--name`, `.rm-row__num`, `.rm-row__ellipsis`, `.rm-row__pct`, `.rm-row__wide`, `.rm-row__form`, `.rm-row__pair`, `.rm-row__sources`, `.rm-row__live` — family: engine-classes — rung: 3 — why: the page-local classes of the `.rm-row__*` row above, each named once
 
 ## Defaults
 
@@ -244,14 +248,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the app load and save standing-menu dishes — model re-export and data service with a spec — src/app/core/models/menu-dish.model.ts, src/app/core/services/menu-dish-data.service.ts, src/app/core/services/menu-dish-data.service.spec.ts
-- [ ] A2: Work out each dish's cost per portion and what it leaves, honestly marking partial and missing — MenuDishCostService over RecipeCostService and netPriceOf, with a spec of every source — src/app/core/services/menu-dish-cost.service.ts, src/app/core/services/menu-dish-cost.service.spec.ts
-- [ ] A3: Add the menu page with search, course chips, removed dishes and the owner-only notice — route, page, rows, row menu, empty and error states — src/app/pages/restaurant-menu/**, src/app/app.routes.ts
-- [ ] A4: Add the dish popup with the four cost sources and a live cost line — pickers, validation, server refusals — src/app/pages/restaurant-menu/components/menu-dish-dialog/**
-- [ ] A5: Show the menu link only to the owner or consultant of a business with dish analysis — header pills, drawer and phone bottom bar, with a spec case — src/app/core/components/header/header.component.ts, src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.spec.ts
-- [ ] A6: Prove the page and the popup with unit tests — add, edit, switch source, remove with confirm, restore, staff notice — src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts, src/app/pages/restaurant-menu/components/menu-dish-dialog/menu-dish-dialog.component.spec.ts
-- [ ] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A8: Record the page in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/brain/component-families.md, docs/modules/modules-map.md
+- [x] A1: Let the app load and save standing-menu dishes — model re-export and data service with a spec — src/app/core/models/menu-dish.model.ts, src/app/core/services/menu-dish-data.service.ts, src/app/core/services/menu-dish-data.service.spec.ts
+- [x] A2: Work out each dish's cost per portion and what it leaves, honestly marking partial and missing — MenuDishCostService over RecipeCostService and netPriceOf, with a spec of every source — src/app/core/services/menu-dish-cost.service.ts, src/app/core/services/menu-dish-cost.service.spec.ts
+- [x] A3: Add the menu page with search, course chips, removed dishes and the owner-only notice — route, page, rows, row menu, empty and error states — src/app/pages/restaurant-menu/**, src/app/app.routes.ts
+- [x] A4: Add the dish popup with the four cost sources and a live cost line — pickers, validation, server refusals — src/app/pages/restaurant-menu/components/menu-dish-dialog/**
+- [x] A5: Show the menu link only to the owner or consultant of a business with dish analysis — header pills, drawer and phone bottom bar, with a spec case — src/app/core/components/header/header.component.ts, src/app/core/components/header/header.component.html, src/app/core/components/header/header.component.spec.ts
+- [x] A6: Prove the page and the popup with unit tests — add, edit, switch source, remove with confirm, restore, staff notice — src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts, src/app/pages/restaurant-menu/components/menu-dish-dialog/menu-dish-dialog.component.spec.ts
+- [x] A7: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A8: Record the page in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/brain/component-families.md, docs/modules/modules-map.md
 
 ## What happens when
 - The business has no VAT setting stored yet: 18% and `murshe` (plan 723's defaults); the note under the title says so.
@@ -291,3 +295,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the page lives at /restaurant-menu with its own header link (not under the events menu library), because a restaurant may have dish analysis without events — reverse: put it as a chip of the menus group
 - behaviour: a partial cost shows its number with the badge but no «נשאר למנה» — the number is too low and must not be read as profit — reverse: show «נשאר למנה» with the badge too
 - behaviour: leaving the menu is reversible (active: false), so no hard delete is offered — reverse: add a delete for dishes with no sales
+- scope extended: docs/brain/inventory.md — generated by `node scripts/inventory.mjs` from the new `menu-dish-cost` family; kit-checks reports it stale otherwise
+- Builder: pnpm run build -> exit 0; pnpm run lint -> exit 0 (0 errors); pnpm run test:ci -> exit 0, TOTAL 2807 SUCCESS (includes the new specs).
+- behaviour: on a phone a row shows name, price with VAT, cost and the row menu; course, «נטו» and «נשאר למנה» are hidden (shared phone breakpoint) instead of a column carousel — reverse: move the `.rm-col-wide` cells into app-column-carousel-cell
+- behaviour: the dishes load from the page (`MenuDishDataService.load()`), not a resolver, so a failed load shows the retry and not an empty menu — reverse: load them in a route resolver
+- behaviour: the header link reads `PermissionService.isOwner_` (owner or acting consultant), because the header's own `isOwner_` is the business owner only — reverse: use the header's `isOwner_`

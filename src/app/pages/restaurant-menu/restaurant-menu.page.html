@@ -1,0 +1,173 @@
+@if (isStaff_()) {
+<p class="rm-row__notice c-glass-panel" data-testid="restaurant-menu-owner-only">
+  {{ 'restaurant_menu_owner_only' | translatePipe }}
+</p>
+} @else {
+<app-list-shell
+  [isPanelOpen]="false"
+  [gridTemplate]="'minmax(8rem, 2fr) 1fr 1fr 1fr 1.4fr 1.4fr 3rem'"
+  [mobileGridTemplate]="'minmax(6rem, 2fr) 1fr 1.4fr 3rem'"
+  [dir]="'rtl'"
+  [resultCount]="rows_().length"
+  [resultTotal]="dishes_().length"
+>
+  <ng-container shell-title>{{ 'restaurant_menu' | translatePipe }}</ng-container>
+
+  <ng-container shell-search>
+    <label class="visually-hidden" for="restaurant-menu-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="restaurant-menu-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="searchQuery_.set(''); searchInput.focus()" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
+    <button type="button" class="c-btn-primary" data-testid="menu-dish-add" (click)="openAdd()">
+      <lucide-icon name="plus" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'menu_dish_add' | translatePipe }}</span>
+    </button>
+  </ng-container>
+
+  <ng-container shell-table-header>
+    <div class="c-grid-header-cell rm-row__filters" role="columnheader">
+      <p class="rm-row__vat-note" data-testid="restaurant-menu-vat-note">{{ vatNote_() }}</p>
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        [class.active]="courseFilter_() === allCourses"
+        [attr.aria-pressed]="courseFilter_() === allCourses"
+        (click)="courseFilter_.set(allCourses)"
+      >
+        {{ 'all' | translatePipe }}
+      </button>
+      @for (key of courseChips_(); track key) {
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        [class.active]="courseFilter_() === key"
+        [attr.aria-pressed]="courseFilter_() === key"
+        (click)="courseFilter_.set(key)"
+      >
+        {{ courseLabel(key) }}
+      </button>
+      }
+      <button
+        type="button"
+        class="c-chip c-chip--tab"
+        [class.active]="courseFilter_() === noCourse"
+        [attr.aria-pressed]="courseFilter_() === noCourse"
+        (click)="courseFilter_.set(noCourse)"
+      >
+        {{ 'menu_dish_no_course' | translatePipe }}
+      </button>
+      <label class="c-chip c-chip--toggle">
+        <input
+          type="checkbox"
+          data-testid="menu-dish-show-removed"
+          [checked]="showRemoved_()"
+          (change)="showRemoved_.set(!showRemoved_())"
+        />
+        <span>{{ 'menu_dish_show_removed' | translatePipe }}</span>
+      </label>
+    </div>
+    <div class="c-grid-header-cell">{{ 'menu_dish_name' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_course' | translatePipe }}</div>
+    <div class="c-grid-header-cell">{{ 'menu_dish_price_with_vat' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_net_price' | translatePipe }}</div>
+    <div class="c-grid-header-cell">{{ 'menu_dish_cost_per_portion' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_left' | translatePipe }}</div>
+    <div class="c-grid-header-cell"></div>
+  </ng-container>
+
+  <ng-container shell-table-body>
+    @if (isLoading_()) {
+    <div class="rm-row__state"><app-loader /></div>
+    } @else if (loadFailed_()) {
+    <div class="rm-row__state" data-testid="restaurant-menu-error">
+      <p>{{ 'restaurant_menu_load_failed' | translatePipe }}</p>
+      <button type="button" class="c-btn-ghost" data-testid="restaurant-menu-retry" (click)="load()">
+        {{ 'retry' | translatePipe }}
+      </button>
+    </div>
+    } @else if (rows_().length === 0) {
+    <div class="rm-row__state">
+      @if (isEmptyList_() && !showRemoved_()) {
+      <app-empty-state
+        messageKey="restaurant_menu_empty"
+        icon="utensils"
+        ctaLabelKey="menu_dish_add"
+        (ctaClick)="openAdd()"
+      />
+      } @else {
+      <p data-testid="restaurant-menu-no-match">{{ 'restaurant_menu_no_match' | translatePipe }}</p>
+      }
+    </div>
+    } @else { @for (row of rows_(); track row.dish._id) {
+    <div class="c-list-row" role="row" data-testid="menu-dish-row">
+      <div class="c-list-body-cell rm-row__cell rm-row__cell--name" role="cell" [attr.title]="row.dish.name">
+        <span class="rm-row__ellipsis">{{ row.dish.name }}</span>
+      </div>
+      <div class="c-list-body-cell rm-row__cell rm-row__wide" role="cell">
+        <span class="rm-row__ellipsis">{{ courseLabel(row.dish.course) || '—' }}</span>
+      </div>
+      <div class="c-list-body-cell rm-row__cell rm-row__num" role="cell" data-testid="menu-dish-price">
+        {{ money(row.dish.priceWithVat ?? null) }}
+      </div>
+      <div class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide" role="cell" data-testid="menu-dish-net">
+        <span class="rm-row__ellipsis">{{ 'menu_dish_net_price' | translatePipe }} {{ money(row.net) }}</span>
+      </div>
+      <div class="c-list-body-cell rm-row__cell rm-row__num" role="cell" data-testid="menu-dish-cost">
+        @switch (row.cost.state) { @case ('units') {
+        <span class="rm-row__ellipsis">{{ 'menu_dish_no_cost' | translatePipe }}</span>
+        } @case ('missing') {
+        <span class="rm-row__ellipsis">
+          {{ (row.dish.costSource === 'recipe' ? 'menu_dish_recipe_gone' : 'menu_dish_product_gone') | translatePipe }}
+        </span>
+        } @default {
+        <span class="rm-row__ellipsis">{{ money(row.cost.costPerPortion) }}</span>
+        @if (row.cost.state === 'partial') {
+        <app-partial-cost-badge [missing]="row.cost.missing" />
+        } } }
+      </div>
+      <div class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide" role="cell" data-testid="menu-dish-left">
+        <span class="rm-row__ellipsis">
+          @if (row.left != null) { {{ money(row.left) }} @if (row.foodCostPct) {
+          <small class="rm-row__pct">({{ row.foodCostPct }})</small>
+          } } @else if (row.dish.priceWithVat == null) { — } @else { {{ 'menu_dish_left_unknown' | translatePipe }} }
+        </span>
+      </div>
+      <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
+        <button type="button" class="c-btn-ghost--sm" data-testid="menu-dish-edit" (click)="openEdit(row.dish)">
+          {{ 'edit' | translatePipe }}
+        </button>
+        @if (row.dish.active !== false) {
+        <button type="button" class="c-btn-ghost--sm" data-testid="menu-dish-remove" (click)="remove(row.dish)">
+          {{ 'menu_dish_remove' | translatePipe }}
+        </button>
+        } @else {
+        <button type="button" class="c-btn-ghost--sm" data-testid="menu-dish-restore" (click)="restore(row.dish)">
+          {{ 'menu_dish_restore' | translatePipe }}
+        </button>
+        }
+      </app-row-actions-menu>
+    </div>
+    } }
+  </ng-container>
+
+  <ng-container shell-modal>
+    @if (isFormOpen_()) {
+    <app-menu-dish-dialog [dish]="editing_()" (closed)="closeForm()" />
+    }
+  </ng-container>
+</app-list-shell>
+}
