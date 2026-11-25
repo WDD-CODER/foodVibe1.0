@@ -152,12 +152,12 @@ No screen is built and no dictionary key is added. The exact texts:
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Put the research report in the repo so every plan can cite it — exact copy of `C:\Users\danwe\AppData\Local\Temp\claude\4560911dcd58a9c2\717c5d93-0414-4514-b4d8-331e3aad7a3d\scratchpad\reports\Restaurant dish and month analytics.md` (if the file is gone, STOP and ask the Human for it) — docs/finance/dish-and-month-research.md
-- [ ] A2: Write down which dish decisions Dandan approved and the new dish build order — section 9 of the dish report as in P0 — docs/finance/dish-analysis-feasibility.md
-- [ ] A3: Write down which month decisions Dandan approved and the new month build order — section 9 of the monthly report as in P0, N-M3 row pointing at ADR 0034 — docs/finance/monthly-planning-feasibility.md
-- [ ] A4: Record why only the owner may see each employee's pay — ADR 0034 with the text of UI/UX Notes — docs/brain/decisions/0034-salary-lines-owner-only.md
-- [ ] A5: Change the ownership rule so pay per person is the owner's alone — INV-1 Rule clause, Source, Touches, Users-lose as in UI/UX Notes; run `node --test scripts/test/invariants.test.mjs` — docs/brain/invariants.md
-- [ ] A6: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
+- [x] A1: Put the research report in the repo so every plan can cite it — exact copy of `C:\Users\danwe\AppData\Local\Temp\claude\4560911dcd58a9c2\717c5d93-0414-4514-b4d8-331e3aad7a3d\scratchpad\reports\Restaurant dish and month analytics.md` (if the file is gone, STOP and ask the Human for it) — docs/finance/dish-and-month-research.md
+- [x] A2: Write down which dish decisions Dandan approved and the new dish build order — section 9 of the dish report as in P0 — docs/finance/dish-analysis-feasibility.md
+- [x] A3: Write down which month decisions Dandan approved and the new month build order — section 9 of the monthly report as in P0, N-M3 row pointing at ADR 0034 — docs/finance/monthly-planning-feasibility.md
+- [x] A4: Record why only the owner may see each employee's pay — ADR 0034 with the text of UI/UX Notes — docs/brain/decisions/0034-salary-lines-owner-only.md
+- [x] A5: Change the ownership rule so pay per person is the owner's alone — INV-1 Rule clause, Source, Touches, Users-lose as in UI/UX Notes; run `node --test scripts/test/invariants.test.mjs` — docs/brain/invariants.md
+- [x] A6: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
 ## What happens when
 - The research source file is missing (the scratchpad was cleared): the Worker stops at A1 and asks the Human for the file; nothing else is written first, because sections 9 link to it.
@@ -181,3 +181,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-24: written from the research report and Dandan's decisions
+- Builder 2026-11-25 (run biz-722, branch feat/722-dish-month-decisions-and):
+  - A1: research source found; `cmp "<source>" docs/finance/dish-and-month-research.md` → exit 0.
+  - A2/A3: `grep -c "^## "` → 9 and 9; `grep -c "^## 9. Updated decisions (2026-11-24)$"` → 1 and 1; `grep -c "^| N-D[1-8] "` (dish) → 8; `grep -c "^| N-M[1-8] "` (month) → 8; `grep -c "^| N-X[1-3] "` → 3 and 3; `grep -c "dish-and-month-research.md"` → 1 and 1. Section 9 maps slices to plans 723–729.
+  - A4: `grep -c "TBD" docs/brain/decisions/0034-salary-lines-owner-only.md` → 0; manifest entry added for the new ADR (`docs/workflow-kit/manifest.json`, in scope).
+  - A5: `grep -c "ADR 0034" docs/brain/invariants.md` → 2; `node --test scripts/test/invariants.test.mjs` → exit 0, pass 17, fail 0.
+  - A6: `scope-check --arch` → `ARCH: ok INV-1, INV-none`; `--reuse` → `REUSE: ok none`; `--drift` → `REALITY: clean`; `--diff=origin/orch/biz-722` → `SCOPE: ok`; `breadcrumbs-check` → `BREADCRUMBS: clean`; `kit-manifest-check` → `KIT_MANIFEST: ok — 0 unclassified`; `kit-checks` → `KIT_CHECKS: ok (6 checks)`; `pnpm run build` / `lint` / `test:ci` → exit 0 (Karma `TOTAL: 2778 SUCCESS`); `lint:icons`, `lint:no-native-select`, `override-check`, `plan-ledger-check` → ok.
+  - Note: the kit copy of scope-check run by path from the main folder resolves its repo root to the main folder and lists that folder's untracked `Claude outputs/**`; the identical worktree copy (`diff -q` → same) gives `SCOPE: ok`.
