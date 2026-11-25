@@ -985,7 +985,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: another note about the assistant's state in the simulator — extend these blocks.
 - Known copies: none.
 
-### owner-assistant-level — `PUT /api/v1/business/front-desk/assistant-level` in `server/routes/business.js` (plan 734)
+### owner-assistant-level — PUT /api/v1/business/front-desk/assistant-level in server/routes/business.js (plan 734)
 
 - Status: stable
 - Use: `server/routes/business.js` · the owner switches `assistant.level` between 0 and 1; refused for staff (`editFrontDesk`), a reserved level 2 and a draft or suspended front desk; each switch is a `levelHistory` row. Client: `FrontDeskProfileDataService.setAssistantLevel`.
