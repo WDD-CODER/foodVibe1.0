@@ -55,4 +55,25 @@
       </div>
     </li>
   }
+  @if (typing()) {
+    <li
+      class="ct-row"
+      [class.ct-row--mine]="perspective() === 'business'"
+      data-testid="chat-typing"
+      [attr.data-mine]="perspective() === 'business'"
+      aria-hidden="true"
+    >
+      <div class="ct-bubble ct-typing">
+        <span class="ct-dot" aria-hidden="true"></span>
+        <span class="ct-dot" aria-hidden="true"></span>
+        <span class="ct-dot" aria-hidden="true"></span>
+        <span class="ct-typing-text">{{ 'chat_typing' | translatePipe }}</span>
+      </div>
+    </li>
+  }
 </ol>
+<p class="visually-hidden" aria-live="polite" data-testid="chat-typing-live">
+  @if (typing()) {
+    {{ 'chat_typing' | translatePipe }}
+  }
+</p>

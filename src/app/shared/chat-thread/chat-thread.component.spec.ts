@@ -7,6 +7,7 @@ import { ChatThreadComponent } from './chat-thread.component'
 import type { Message } from '@models/conversation.model'
 
 const DICT: Record<string, string> = {
+  chat_typing: 'העוזר כותב…',
   chat_by_ai: 'העוזר',
   chat_by_member: 'צוות',
   chat_by_server: 'אוטומטי',
@@ -44,12 +45,14 @@ const m = (id: string, over: Partial<Message> = {}): Message =>
     [perspective]="perspective()"
     [buttonsEnabled]="enabled()"
     [fixable]="fixable()"
+    [typing]="typing()"
     (buttonTapped)="tapped.push($event)"
     (fixRequested)="fixed.push($event)"
   />`
 })
 class HostComponent {
   fixable = signal(false)
+  typing = signal(false)
   fixed: string[] = []
   messages = signal<Message[]>([])
   perspective = signal<'business' | 'guest'>('business')
@@ -157,5 +160,26 @@ describe('ChatThreadComponent (plan 677)', () => {
     fixture.detectChanges()
     const tags = Array.from(el().querySelectorAll('[data-testid="chat-author"]')).map((x) => x.textContent?.trim())
     expect(tags).toEqual(['העוזר', 'צוות', 'אוטומטי'])
+  })
+
+  it('draws a typing row after the last message, on the assistant side, with a live region (plan 735)', () => {
+    host.perspective.set('guest')
+    host.messages.set([m('1', { direction: 'in', author: 'guest' })])
+    fixture.detectChanges()
+    const live = () => el().querySelector<HTMLElement>('[data-testid="chat-typing-live"]')!
+    expect(el().querySelector('[data-testid="chat-typing"]')).toBeNull()
+    expect(live().getAttribute('aria-live')).toBe('polite')
+    expect(live().textContent?.trim()).toBe('')
+    host.typing.set(true)
+    fixture.detectChanges()
+    const typing = el().querySelectorAll<HTMLElement>('[data-testid="chat-typing"]')
+    expect(typing.length).toBe(1)
+    expect(typing[0].dataset['mine']).toBe('false')
+    const dots = typing[0].querySelectorAll('.ct-dot')
+    expect(dots.length).toBe(3)
+    dots.forEach((d) => expect(d.getAttribute('aria-hidden')).toBe('true'))
+    expect(typing[0].textContent).toContain('העוזר כותב…')
+    expect(live().textContent?.trim()).toBe('העוזר כותב…')
+    expect(rows().length).toBe(1)
   })
 })
