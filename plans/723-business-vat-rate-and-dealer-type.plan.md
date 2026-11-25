@@ -141,7 +141,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A3: Start a new consultant diagnosis with the kitchen's own VAT rate — read the active business's rate on create; cases (stored 17 → new diagnosis 17; nothing stored → 18; a body vatPct 16 wins; an existing diagnosis is not changed) — server/routes/diag.js, server/test/diag-router.test.js
 - [x] A4: Show and save the VAT rate and dealer type in the business settings tab — fifth number row, dealer-type select, six-key compare and save; spec cases (shows 18 and מורשה by default; 101 shows the range error and disables save; changing only the type enables save and sends all six; leaving with a changed type counts as unsaved) — src/app/pages/settings/components/business-settings-tab/**
 - [x] A5: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A6: Record the settings in the folder maps and run every automatic check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [x] A6: Record the settings in the folder maps and run every automatic check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/pages/breadcrumbs.md
 
 ## What happens when
 - A business has no stored `vatRatePct` or `dealerType` (every business today): reads give 18 and `murshe`; nothing is written until the owner saves.
@@ -171,3 +171,4 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Builder: A1-A5 done. `pnpm run build` → 0; `pnpm run lint` → 0 (warnings only); arch/reuse/breadcrumbs/override/ledger/icons/no-native-select → 0; vitest business-settings, diag-router, modules-schema → 63 pass.
 - BLOCKED: `server/test/business-route.test.js:32` has an exact-defaults `toEqual` that now also needs `vatRatePct: 18, dealerType: 'murshe'` in `settings` (fails under `pnpm run test:server`). File is outside scope → ESCALATE `approved: server/test/business-route.test.js`.
 - `pnpm run test:ci` was started but not seen to finish (A6 not complete); admin-business-delete.test.js failed only on a Mongo memory-server start timeout (environment).
+- Resume: added vatRatePct/dealerType to the exact-defaults expectation in server/test/business-route.test.js (approved by advisor, 723-1). build 0, lint 0, test:server 149 files/1989 pass, test:ci 2781 SUCCESS, arch/reuse/breadcrumbs/override/ledger/icons/no-native-select/log-query all 0.
