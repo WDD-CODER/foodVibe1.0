@@ -284,6 +284,14 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Page-local state classes (plan 743): `.has-frame`, `.is-dragging` are host classes of `app-scroll-rail`, beside `is-overflowing`; `.dc-rail-box` is the dev catalog's 20rem demo box.
 - Known copies: none.
 
+### tooltip — one small box for every hint
+
+- Status: stable (plan 744)
+- Use: `src/app/shared/tooltip/` · `[appTooltip]` (`TooltipDirective`; the box is `TooltipBoxComponent`); engine `.c-tooltip` in `src/styles.scss`; placed by `placeInViewport`. Users: the product list's warning badge, the recipe book list's cost and date, the notification bell, the page header's count, the taxonomy kind manager's icon buttons, the dev catalog.
+- When: a short explanation of a control, shown on hover, keyboard focus or tap — never the browser's `title`.
+- Inputs / variants: `appTooltip` (an already translated string, or a template for rich content; empty = no tooltip), `tooltipPlacement` (`'above'` default / `'below'`), `tooltipOnClick` (a click or tap pins it open). Put no tooltip on a disabled control.
+- Known copies: the browser `title` hints that remain (79 in 35 templates, counted by the `reuse-copy.tooltip` debt baseline and the `house-tooltip` lint); the nutrition box (`src/app/shared/nutrition-badge/`) keeps its own look.
+
 ### engine-classes — shared `.c-*` CSS engines
 
 - Status: stable (plan 458 sweeps the copies)
@@ -293,6 +301,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
 - Plan 742: `.c-drag-list`, `.c-drag-item`, `.c-drag-handle` (the shared drag look, family `drag-reorder`); `.c-scroll-area`, `.c-scroll-arrow` (family `scroll-area`); plus one zero-specificity `:where(…):focus-visible` keyboard ring for every button, link and `role` / `tabindex` control.
+- Plan 744: `.c-tooltip`, `.c-tooltip--below` (the shared tooltip box, family `tooltip`).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### motion-tokens — how long things move and with which curve

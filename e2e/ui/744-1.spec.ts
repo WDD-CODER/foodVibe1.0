@@ -1,0 +1,25 @@
+import { test, expect } from '@playwright/test'
+import { signInQa } from '../helpers/qa-session'
+
+test('744-1: the catalog tooltip opens on hover inside the screen and Escape hides it', async ({ page, context }) => {
+  await signInQa(context)
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await page.goto('/dev/catalog')
+  const button = page.locator('#dc-tooltip-text')
+  await button.scrollIntoViewIfNeeded()
+  await button.hover()
+  const tip = page.locator('.c-tooltip[role="tooltip"]')
+  await expect(tip).toBeVisible()
+  await expect(tip).toHaveText('זה ההסבר הקצר על הכפתור')
+  const box = await tip.boundingBox()
+  expect(box).not.toBeNull()
+  expect(box!.x).toBeGreaterThanOrEqual(0)
+  expect(box!.y).toBeGreaterThanOrEqual(0)
+  expect(box!.x + box!.width).toBeLessThanOrEqual(1366)
+  expect(box!.y + box!.height).toBeLessThanOrEqual(768)
+  const tipId = await tip.getAttribute('id')
+  await expect(button).toHaveAttribute('aria-describedby', tipId!)
+  await page.screenshot({ path: 'screens/744-1.png' })
+  await page.keyboard.press('Escape')
+  await expect(tip).toHaveCount(0)
+})

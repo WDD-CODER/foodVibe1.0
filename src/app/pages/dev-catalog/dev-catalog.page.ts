@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { ScrollAreaComponent } from 'src/app/shared/scroll-area/scroll-area.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserMsgService } from '@services/user-msg.service'
 import { MissingItem } from 'src/app/core/engine/event-plan.types'
@@ -62,6 +63,7 @@ interface SampleOption {
     CdkDrag,
     CdkDragHandle,
     ReorderKeysDirective,
+    TooltipDirective,
     LucideAngularModule
   ],
   templateUrl: './dev-catalog.page.html',
@@ -88,6 +90,7 @@ export class DevCatalogPage {
     'scroll-area',
     'sideways-row',
     'drag-list',
+    'tooltip',
     'engine-classes'
   ] as const
 

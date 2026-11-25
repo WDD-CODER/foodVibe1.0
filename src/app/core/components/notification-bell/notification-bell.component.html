@@ -3,7 +3,7 @@
     type="button"
     class="c-icon-btn bell__btn"
     data-testid="notification-bell"
-    [title]="'alerts_bell_tip' | translatePipe"
+    [appTooltip]="'alerts_bell_tip' | translatePipe"
     [attr.aria-label]="'alerts_title' | translatePipe"
     [attr.aria-expanded]="isOpen_()"
     (click)="toggle()"

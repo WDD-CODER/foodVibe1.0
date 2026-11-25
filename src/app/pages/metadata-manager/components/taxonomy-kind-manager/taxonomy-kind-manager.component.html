@@ -95,7 +95,7 @@
         class="c-icon-btn"
         (click)="onMenuEdit(item)"
         [attr.aria-label]="'edit' | translatePipe"
-        [attr.title]="'edit' | translatePipe"
+        [appTooltip]="'edit' | translatePipe"
       >
         <lucide-icon name="pencil" [size]="18"></lucide-icon>
       </button>
@@ -105,7 +105,7 @@
       class="c-icon-btn danger"
       (click)="onMenuDelete(item)"
       [attr.aria-label]="'delete' | translatePipe"
-      [attr.title]="'delete' | translatePipe"
+      [appTooltip]="'delete' | translatePipe"
     >
       <lucide-icon name="trash-2" [size]="18"></lucide-icon>
     </button>

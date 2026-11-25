@@ -2993,3 +2993,66 @@ input[type='number']::-webkit-outer-spin-button {
   outline: 2px solid var(--border-focus);
   outline-offset: 2px;
 }
+
+/* ── Tooltip — shared look (plan 744) ──
+   The box of the appTooltip directive (src/app/shared/tooltip/). It lives in the browser top layer
+   (popover), appended to <body>, so its look is global. `left` is physical on purpose: --tip-arrow-x is a
+   geometric distance from the box's left edge. */
+.c-tooltip {
+  position: fixed;
+  inset: auto;
+  inline-size: max-content;
+  max-inline-size: min(20rem, calc(100vw - 1rem));
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  overflow: visible;
+
+  color: var(--color-text-main);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+
+  background: var(--bg-glass-dense);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: var(--tip-arrow-x, 50%);
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--border-default);
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(100% - 1px);
+    left: var(--tip-arrow-x, 50%);
+    z-index: 1;
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--bg-glass-dense);
+  }
+}
+
+.c-tooltip--below {
+  &::after {
+    top: auto;
+    bottom: 100%;
+
+    border-top-color: transparent;
+    border-bottom-color: var(--border-default);
+  }
+  &::before {
+    top: auto;
+    bottom: calc(100% - 1px);
+
+    border-top-color: transparent;
+    border-bottom-color: var(--bg-glass-dense);
+  }
+}

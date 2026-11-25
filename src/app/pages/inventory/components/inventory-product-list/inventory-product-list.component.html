@@ -176,18 +176,14 @@
             }}</span>
           }
           @if (row.statusKind) {
-            <span
-              class="validation-badge validation-badge--{{ row.statusKind }}"
-              (appClickOutside)="closeStatus(row.product._id)"
-              (keydown.escape)="closeStatus(row.product._id)"
-            >
+            <span class="validation-badge validation-badge--{{ row.statusKind }}">
               <button
                 type="button"
                 class="row-status"
-                aria-haspopup="true"
-                [attr.aria-expanded]="openStatusId_() === row.product._id"
                 [attr.aria-label]="statusLabel(row.statusFields)"
-                (click)="toggleStatus(row.product._id)"
+                [appTooltip]="statusTip"
+                [tooltipOnClick]="true"
+                tooltipPlacement="below"
                 (keydown.enter)="$event.stopPropagation()"
                 (keydown.space)="$event.stopPropagation()"
               >
@@ -206,7 +202,7 @@
                   }
                 }
               </button>
-              <span class="validation-tooltip" role="tooltip">
+              <ng-template #statusTip>
                 @for (field of row.statusFields; track field) {
                   <span
                     class="c-chip c-chip--tag c-chip--sm c-chip--square"
@@ -217,7 +213,7 @@
                     {{ field | translatePipe }}
                   </span>
                 }
-              </span>
+              </ng-template>
             </span>
           }
           {{ row.product.nameHebrew }}
