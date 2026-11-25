@@ -133,9 +133,9 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add a one-off script that makes one existing user the platform admin, dry run first — argument parsing, the one-user rule, the plan and the guarded write with the history row, the output lines; reuse `parseTarget` and `connect` — server/scripts/set-platform-admin.js
-- [ ] A2: Prove the script on a test database — parse: missing target, missing email, unknown argument, `--db` with Atlas refused; plan: 0, 2 and removed users refused, already-set is "nothing to do", the email is matched lower-cased; apply against the in-memory database: a dry run writes nothing, `--write` sets the flag and one history row, `--off` clears it, a user changed meanwhile is refused — server/test/set-platform-admin.test.js
-- [ ] A3: Write the live runbook for Dandan and list the script in the server map — the section of P0 with the exact commands — docs/security-go-live.md, server/breadcrumbs.md
+- [x] A1: Add a one-off script that makes one existing user the platform admin, dry run first — argument parsing, the one-user rule, the plan and the guarded write with the history row, the output lines; reuse `parseTarget` and `connect` — server/scripts/set-platform-admin.js
+- [x] A2: Prove the script on a test database — parse: missing target, missing email, unknown argument, `--db` with Atlas refused; plan: 0, 2 and removed users refused, already-set is "nothing to do", the email is matched lower-cased; apply against the in-memory database: a dry run writes nothing, `--write` sets the flag and one history row, `--off` clears it, a user changed meanwhile is refused — server/test/set-platform-admin.test.js
+- [x] A3: Write the live runbook for Dandan and list the script in the server map — the section of P0 with the exact commands — docs/security-go-live.md, server/breadcrumbs.md
 - [ ] A4: Run every check and paste the outputs — the `[auto]` items, under Execution Notes — this plan file
 
 ## What happens when
@@ -178,3 +178,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-25: written from Dandan's requests of 2026-11-25
+- Builder 2026-11-25: A1–A3 done; A4 evidence: pnpm run build → 0; pnpm run lint → 0 (0 errors); pnpm run test:ci → 0 (2794 SUCCESS); pnpm run test:server → 0 (151 files, 2026 tests, incl. set-platform-admin.test.js 13 passed); breadcrumbs-check, plan-ledger-check, override-check, lint:icons, lint:no-native-select → 0; scope-check --arch → ARCH: ok; --reuse → ok; log-query → SKIP: no database configured; kit-manifest-check → ok.
+- kit-checks.mjs FAILS: `reuse-registry-missing-piece docs/brain/component-families.md:1` — the Reuse Check row (rung 4) needs a family heading in docs/brain/component-families.md, which is outside the scope. Escalated for `approved: docs/brain/component-families.md`.
