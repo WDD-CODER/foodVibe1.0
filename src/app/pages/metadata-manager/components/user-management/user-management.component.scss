@@ -99,6 +99,8 @@
   .item-actions {
     display: flex;
     align-items: center;
+    // Plan 736: the AI allowance sits before the delete button and wraps on a narrow card.
+    flex-wrap: wrap;
     justify-content: flex-end;
     // Room for the hover wiggle (scale 1.12, rotate 8deg) so it is never clipped by the card.
     padding: 0.125rem;

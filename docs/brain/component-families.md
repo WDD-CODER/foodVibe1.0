@@ -417,7 +417,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: the nine new entity schema files under `shared/schemas/entities/` (`invoice.schema.ts`, `price-history.schema.ts`,
   `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
-  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`. A request body that is not an entity sits beside them
+  in `shared/schemas/` — e.g. plan 736's `shared/schemas/ai-allowance.schema.ts` (`aiAllowanceUpdateSchema`,
+  `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`), read by the admin route and the user list.
 - When: a new stored collection needs a shape.
 - Known copies: none.
 
@@ -425,7 +427,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 617
 - Use: `server/services/ai-cap.js` — `capState`, `monthTokensByBusiness`, `clearCapCache`; checked before the model call
-  in `server/services/gemini-client.js`.
+  in `server/services/gemini-client.js`. Plan 736: its per-user twin `server/services/ai-allowance.js` (`reserveAiCall`,
+  `refundAiCall`, `allowanceOf`, `trackAiAllowance`) counts each user's lifetime AI requests at the same point; the
+  browser reads the 402 `AI_BUDGET_EXHAUSTED` through `aiCapErrorKey` / `isAiBudgetExhausted` (`src/app/core/utils/ai-error.util.ts`).
 - When: a server path calls the model and must refuse once the business has used its monthly cap.
 - Known copies: none.
 

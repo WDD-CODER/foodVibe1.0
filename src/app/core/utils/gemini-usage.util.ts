@@ -21,6 +21,14 @@ export interface GeminiModelStatus {
   remaining: number | null
 }
 
+/** Plan 736: the signed-in user's own lifetime AI allowance (`mine` of `/ai/usage`). */
+export interface GeminiUserAllowance {
+  allowance: number
+  used: number
+  remaining: number
+  unlimited: boolean
+}
+
 export interface GeminiUsage {
   date: string // 'YYYY-MM-DD'
   count: number
@@ -28,6 +36,8 @@ export interface GeminiUsage {
   used: number
   remaining: number
   models: GeminiModelStatus[]
+  /** Plan 736: only with a token; never written to the shared local cache. */
+  mine?: GeminiUserAllowance
 }
 
 export type GeminiUsageStatus = 'ok' | 'warning' | 'danger'
@@ -116,5 +126,27 @@ export function cacheServerGeminiUsage(data: Partial<GeminiUsage>): GeminiUsage 
     models: Array.isArray(data.models) ? data.models : []
   }
   setGeminiUsageCache(usage) // update local cache with server truth
-  return usage
+  const mine = readMine(data.mine)
+  return mine ? { ...usage, mine } : usage
+}
+
+function readMine(raw: unknown): GeminiUserAllowance | null {
+  if (typeof raw !== 'object' || raw === null) return null
+  const m = raw as Partial<Record<keyof GeminiUserAllowance, unknown>>
+  if (typeof m.allowance !== 'number' || typeof m.used !== 'number' || typeof m.remaining !== 'number') return null
+  return { allowance: m.allowance, used: m.used, remaining: m.remaining, unlimited: m.unlimited === true }
+}
+
+/**
+ * Plan 736: the line under the daily bar — «נשארו לך X מתוך Y קריאות AI», or the unlimited line for a platform
+ * admin; '' when the answer had no `mine` (signed out, or not fetched yet).
+ */
+export function aiCallsLeftLine(usage: GeminiUsage, translator: { translate(key: string): string }): string {
+  const mine = usage.mine
+  if (!mine) return ''
+  if (mine.unlimited) return translator.translate('ai_calls_unlimited')
+  return translator
+    .translate('ai_calls_left')
+    .replace('{{left}}', String(mine.remaining))
+    .replace('{{total}}', String(mine.allowance))
 }

@@ -72,6 +72,9 @@
             <div class="ai-usage-track">
               <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
             </div>
+            @if (callsLeftLine_()) {
+              <span class="ai-usage-label" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
+            }
           </div>
 
           <div class="ai-modal-footer">
@@ -286,6 +289,9 @@
             <div class="ai-usage-track">
               <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
             </div>
+            @if (callsLeftLine_()) {
+              <span class="ai-usage-label" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
+            }
           </div>
 
           <div class="ai-modal-footer">

@@ -1,6 +1,7 @@
 import type { ApplyInvoice, InvoiceReadResult } from '@services/product-import.service'
 import { formatPct1 } from 'src/app/core/engine/rounding'
 import { buildInvoiceLines, type KeptRow } from '@utils/invoice-lines.util'
+import { aiCapErrorKey } from '@utils/ai-error.util'
 
 /** `matching`: the AI step has not settled this row yet, so neither `new` nor an existing status is claimed. */
 export type ImportRowStatus = 'new' | 'update' | 'same' | 'matching'
@@ -84,7 +85,9 @@ export function buildApplyInvoice(
 
 /** The message key for a failed read: a pasted list or a file. */
 export function importErrorKey(fromFile: boolean, status: number, code: string, reason: string): string {
-  if (code === 'ai_monthly_cap_reached') return 'ai_monthly_cap_reached'
+  // Plan 736: the monthly cap and the user's own AI allowance read through the shared helper first.
+  const capKey = aiCapErrorKey({ status, error: { error: code, code } })
+  if (capKey) return capKey
   if (status === 429 || code.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
   if (!fromFile) return 'import_ai_failed'
   if (reason === 'FILE_TOO_LARGE' || code === 'FILE_TOO_LARGE' || status === 413) return 'import_file_too_big'

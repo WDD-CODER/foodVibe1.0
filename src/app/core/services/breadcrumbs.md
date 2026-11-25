@@ -87,7 +87,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448); plan 600: `getAiShots`, `promoteAiShot`, `removeSharedAiShot` | PlatformAdminService, BusinessRow |
 | `product-import.service.ts` | Supplier price-list import: cleaned rows from the server, then apply (plan 432) | ProductImportService, ImportRow, ApplyRow, ApplyResult |
 | `unlinked-ingredient-link.service.ts` | Turns a free-text ingredient into a product-linked one in the stored recipes and dishes (plan 466) | UnlinkedIngredientLinkService, LinkUnlinkedRequest |
-| `user-admin.service.ts` | User admin management | UserAdminService |
+| `user-admin.service.ts` | User admin management: list, delete, plan 736 `setAiAllowance` | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 | `request-data.service.ts` | Customer requests through the server routes (plan 549) | RequestDataService |
 | `terms.service.ts` | Loads the terms file, posts the acceptance (plan 584) | TermsService |

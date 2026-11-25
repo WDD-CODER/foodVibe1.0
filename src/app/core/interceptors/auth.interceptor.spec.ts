@@ -144,7 +144,10 @@ describe('authInterceptor — 403 no_permission (plan 428)', () => {
         { provide: AuthModalService, useValue: { open: () => undefined } },
         { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
         { provide: UserMsgService, useValue: { onSetErrorMsg: errorMsg } },
-        { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } }
+        {
+          provide: TranslationService,
+          useValue: { translate: (key: string) => (key === 'ai_budget_exhausted' ? `T:${key} {{email}}` : `T:${key}`) }
+        }
       ]
     })
     http = TestBed.inject(HttpClient)
@@ -185,6 +188,35 @@ describe('authInterceptor — 403 no_permission (plan 428)', () => {
     const arg = error.calls.mostRecent().args[0]
     expect(arg.event).toBe('save.refused')
     expect(arg.context.issues).toEqual([{ path: 'nameHebrew', code: 'too_big', message: 'Too big' }])
+  })
+
+  it('plan 736: a 402 AI_BUDGET_EXHAUSTED toasts the email on every answer and logs at info only', () => {
+    const budget = { error: 'AI_BUDGET_EXHAUSTED', code: 'AI_BUDGET_EXHAUSTED', contactEmail: 'ops@example.test' }
+    for (let n = 0; n < 2; n++) {
+      http.post('/api/v1/ai/generate', {}).subscribe({ error: () => undefined })
+      backend.expectOne('/api/v1/ai/generate').flush(budget, { status: 402, statusText: 'Payment Required' })
+    }
+    expect(errorMsg.calls.allArgs()).toEqual([
+      ['T:ai_budget_exhausted ops@example.test'],
+      ['T:ai_budget_exhausted ops@example.test']
+    ])
+    expect(info).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'ai.budget_exhausted' }))
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('plan 736: without an address in the answer the toast names the default one', () => {
+    http.post('/api/v1/ai/parse-text', {}).subscribe({ error: () => undefined })
+    backend
+      .expectOne('/api/v1/ai/parse-text')
+      .flush({ code: 'AI_BUDGET_EXHAUSTED' }, { status: 402, statusText: 'Payment Required' })
+    expect(errorMsg).toHaveBeenCalledOnceWith('T:ai_budget_exhausted dan.weibren@gmail.com')
+  })
+
+  it('plan 736: another 402 shows no budget toast and logs the http error', () => {
+    http.post('/api/v1/ai/generate', {}).subscribe({ error: () => undefined })
+    backend.expectOne('/api/v1/ai/generate').flush({ code: 'OTHER' }, { status: 402, statusText: 'Payment Required' })
+    expect(errorMsg).not.toHaveBeenCalled()
+    expect(error).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'http.error' }))
   })
 
   it('plan 540: a GET 400 shows no toast', () => {
