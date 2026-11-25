@@ -49,3 +49,16 @@ The UI is Hebrew and right-to-left: the start side is the right. Mirrored layout
   a bottom bar.
 - Dialogs and toasts: `.c-modal-card` (sizes `--md`, `--fluid`) with `.c-modal-actions`; toasts come from the user-msg
   component at the top.
+
+## House rules
+
+Source: `docs/agent/house-style.md`.
+
+- List page: `app-page-header` (title, count, search, actions) over `app-list-shell`; rows `.c-list-row`, one line each.
+- Detail page: `app-page-header` with back, content in titled `.c-glass-panel` sections.
+- Form page: `app-page-header`, `div.form-section` sections, one `.c-form-actions` row: ghost cancel, one primary save.
+- Settings page: `app-page-header`, `app-tab-chips` in `app-scroll-rail`, each group a `.c-glass-panel`.
+- Board page: `app-page-header` over a grid of `.c-glass-panel` cards with one gap and one title style.
+- Scroll: a phone page scrolls whole; inner areas show `.c-scroll-arrow` arrows (`app-scroll-area`), never a scrollbar.
+- Motion: only `--dur-fast`, `--dur-base`, `--dur-slow` with `--ease-spring` or `--ease-smooth`; nothing bounces.
+- Empty: `app-empty-state` (`.c-empty-state`, icon plus message), never plain text.

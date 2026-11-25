@@ -23,6 +23,17 @@ manages.
   `node scripts/scope-check.mjs --reuse --plan=<path>` exits 0. A plan that renames or removes a registered piece
   updates the registry (`node scripts/reuse-lint.mjs --check-registry` exits 0).
 
+## Page recipe
+- Every plan that adds a page or a route, or changes the frame of one (header, list, sections, scroll area), has under
+  `## UI/UX Notes` one line per page: `Page recipe: <recipe id> — <page>`, where the id is a `### recipe-…` heading of
+  `docs/agent/house-style.md`. The plan's steps build the page from that recipe's `built from` pieces and its `states`.
+- `Page recipe: none — <why>` is allowed only for a page with no screen of its own (a print sheet, a redirect).
+- A page no recipe fits is `Page recipe: new — <why>`: the review raises an `open:` line, the Human decides, and a yes
+  adds the recipe to `docs/agent/house-style.md` in the same plan.
+- A plan that builds a drag, an inner scroll area or an animation names the behaviour rule it follows
+  (`Behaviour: <id>`, an id from the behaviour rules of `docs/agent/house-style.md`).
+- Gate today: the Planner's review reads this section. A script gate is a kit need (`docs/agent/house-style.md`, "Kit needs").
+
 ## User stories
 - Write stories from the chef's side: "As a chef, I want [goal] so that [benefit]".
 

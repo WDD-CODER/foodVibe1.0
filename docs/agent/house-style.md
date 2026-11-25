@@ -171,7 +171,7 @@ enforced: `plan`, `default`, `lint` or `card`), `later check` (optional: a lint 
 ### sideways-row
 
 - kind: behaviour
-- rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container that scrolls sideways, with the same arrow at each end while there is more; it looks and works the same everywhere, the top bar and the metadata manager included.
+- rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container that scrolls sideways, with the same arrow at each end while there is more (the look of the up-and-down scroll area, turned sideways); it looks and works the same everywhere, the top bar and the metadata manager included. On every screen the row can be grabbed and dragged sideways. On a computer the arrows are also buttons that move the row one step; on a phone there are no arrow buttons, the row is moved by swiping (Human, 2026-11-25).
 - applies to: every row of several items that can outgrow its width (the top bar's navigation, tab chips, filter chips, stage bars, jump navigation). Not a data table that is wider than the screen.
 - built from: family `list-page` neighbour `app-scroll-rail` (`src/app/shared/scroll-rail/`: arrow buttons at both ends that scroll one step, a fade on the edge that can scroll, `snap`, `arrows`, `step`), already used by `app-tab-chips`, the settings tabs, the metadata manager's jump navigation, the event stage bar, the dish row and the diagnosis workspace. needs: a visible frame on `app-scroll-rail` (today the rail draws no surface of its own, so each user looks different — the top bar's navigation sits in a white rounded pill, the others in nothing). needs: the top bar's navigation on the rail (`.nav-pills` in `src/app/core/components/header/header.component.scss:352-362` scrolls on its own, with no arrows), and the `.m-scroll` strip in `src/styles.scss:1825-1833`.
 - reference: `src/app/core/components/tab-chips/` (the behaviour); the top bar's navigation pill (the frame)
@@ -195,12 +195,19 @@ enforced: `plan`, `default`, `lint` or `card`), `later check` (optional: a lint 
 
 ## Pilot log
 
-Written by plan 740.
+Written by plan 740. The Planner adds a row when a plan that added a page closes: `fix-up: none`, or the plan number of
+the style fix that followed. Plan 741 reads it.
+
+| plan | page added | recipe | style fix-up after the build | date |
+| --- | --- | --- | --- | --- |
 
 ## Kit needs
 
 What the workflow kit must own once the rules are proven (read by plan 741). Plans append one line each.
 
-- A gate that fails a plan that adds a page with no `Page recipe:` line (plan 740 can only describe the check in `docs/agent/plan-checks.md`).
+- A gate that fails a plan that adds a page with no `Page recipe:` line (plan 740 can only describe the check in `docs/agent/plan-checks.md`): `scope-check --recipe`.
+- The `Page recipe:` line in the PRD template (`.claude/references/prd-template.md`), under `## UI/UX Notes`.
+- The review bullet in `/plan`'s Architect + PM review: a page-adding plan names its recipe, or `open:` for `Page recipe: new`.
+- A trigger row in `AGENTS.md`: "adding a page or a route" → `docs/agent/house-style.md` and `docs/agent/plan-checks.md`.
 - Style QA's sweep installs its read-only guard after the sign-in step, so the guard aborts the app's session refresh and signed-in pages are measured signed out (plan 739; worked around in `scripts/qa/lib/styleqa-sign-in.mjs`). The sweep should install the guard first, or let a route another handler answers through.
 - Style QA has one sign-in for all pages; a page behind a role the QA user lacks (`/platform`, `/diagnosis`) is measured as the page it redirects to, with no warning. The sweep should compare the final URL with the route and report a redirect.

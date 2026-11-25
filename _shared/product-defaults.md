@@ -146,3 +146,47 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-22
+
+### house-keyboard-focus
+
+- status: proposed
+- rule: Every control shows the same ring when reached with the keyboard; Escape always goes one step back, Enter confirms, and when a popup closes the focus returns to what opened it.
+- applies when: custom
+- plan words: \b(?:popups?|dialogs?|modals?|keyboard|escape|shortcuts?|focus trap|focus ring)\b
+- how: the one `:where(…):focus-visible` ring in src/styles.scss (`outline: 2px solid var(--border-focus)`, fields `--shadow-focus`); family modal-shell (app-modal-shell owns Escape, the Tab trap and the return of focus); src/app/core/utils/list-controls.util.ts for search fields; app-row-actions-menu closes on Escape
+- check: card
+- card: any page · press Tab through the buttons, open a popup and press Escape · every control shows the same ring, Escape closes only the popup, and the focus is back on the button that opened it
+- exceptions: (say where it does not apply)
+
+### house-column-carousel
+
+- status: proposed
+- rule: A list with more columns than the screen can show keeps the name and the main columns in place and puts the rest into one carousel column the user switches; a row never wraps and the list never scrolls sideways.
+- applies when: custom
+- plan words: \b(?:list columns?|table columns?|column carousel|list-shell|list container|list page)\b
+- how: family list-page — app-column-carousel-header and app-column-carousel-cell with the appColumnSlide directive (src/app/shared/column-carousel/), inside app-list-shell (gridTemplate for wide screens, mobileGridTemplate for the phone); the widths are the shared breakpoints only
+- check: card
+- card: any list with many columns, on a phone and on a tablet · look at the header and press the carousel arrow · the name stays, one column changes to the next piece of information, no row wraps and nothing scrolls sideways
+- exceptions: a list that is not drawn as a table (cards layout); declare `exception — why: <one line>`
+
+### house-sideways-row
+
+- status: proposed
+- rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container that scrolls sideways, with the same arrow at each end while there is more.
+- applies when: custom
+- plan words: \b(?:filter chips?|tab chips?|chip row|row of chips|tab row|tabs row|stage bar|jump navigation|nav(?:igation)? pills?|scroll(?:s|ing)? sideways|horizontal scroll)\b
+- how: family list-page neighbour app-scroll-rail (src/app/shared/scroll-rail/: arrows at both ends, a fade on the edge that can scroll, snap, arrows, step), as app-tab-chips uses it; a visible frame on the rail is not built yet (the plan that builds it names it)
+- check: card
+- card: any page with a row of chips or tabs, on a phone · look at the row and press its arrow · the row sits in a visible rounded container, an arrow shows at the end that has more, and pressing it moves the row one step
+- exceptions: a data table that is wider than the screen; declare `exception — why: <one line>`
+
+### house-tooltip
+
+- status: proposed
+- rule: Every short explanation that appears when a control is hovered, focused or tapped shows in the app's one tooltip box: the same surface, text size and arrow, opening beside the control on the side with room and never cut off by the screen.
+- applies when: custom
+- plan words: \b(hint|tooltip|explanation|explain|what is this)s?\b|רמז|הסבר
+- how: placement by placeInViewport (src/app/core/utils/viewport-placement.util.ts), as src/app/shared/nutrition-badge/ does; the one shared tooltip piece is not built yet (the plan that builds it asks the Human to reword hints-in-tooltips, whose how line still names the browser title)
+- check: card
+- card: any page with an icon button or an explained control · hover it with the mouse, then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen
+- exceptions: the product nutrition box (src/app/shared/nutrition-badge/) keeps the look it already has; declare `exception — why: <one line>`
