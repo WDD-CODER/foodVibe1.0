@@ -98,4 +98,47 @@ describe('FrontDeskProfileDataService', () => {
       expect(service.profile_()).toEqual(stored)
     }))
   })
+
+  describe('setAssistantLevel (plan 734)', () => {
+    let http: HttpTestingController
+    const URL = '/api/v1/business/front-desk/assistant-level'
+    beforeEach(fakeAsync(() => {
+      http = TestBed.inject(HttpTestingController)
+      storageSpy.query.and.returnValue(
+        Promise.resolve([{ ...stored, assistant: { level: 0, tone: 'warm' } } as unknown as FrontDeskProfile])
+      )
+      void service.ensureLoaded()
+      tick()
+    }))
+
+    it('sends one PUT and puts the level into profile_', fakeAsync(() => {
+      let res: { ok: boolean } | undefined
+      void service.setAssistantLevel(1).then((r) => (res = r))
+      const req = http.expectOne((r) => r.url.endsWith(URL))
+      expect(req.request.method).toBe('PUT')
+      expect(req.request.body).toEqual({ level: 1 })
+      req.flush({ level: 1 })
+      tick()
+      expect(res).toEqual({ ok: true })
+      expect(service.profile_()?.assistant.level).toBe(1)
+      http.verify()
+    }))
+
+    it('a failed call leaves profile_ unchanged and answers the server error code', fakeAsync(() => {
+      let res: { ok: boolean; code?: string } | undefined
+      void service.setAssistantLevel(1).then((r) => (res = r))
+      http.expectOne((r) => r.url.endsWith(URL)).flush({ error: 'LEVEL_LOCKED' }, { status: 409, statusText: 'x' })
+      tick()
+      expect(res).toEqual({ ok: false, code: 'LEVEL_LOCKED' })
+      expect(service.profile_()?.assistant.level).toBe(0)
+    }))
+
+    it('answers "error" when the server sends no code', fakeAsync(() => {
+      let res: { ok: boolean; code?: string } | undefined
+      void service.setAssistantLevel(0).then((r) => (res = r))
+      http.expectOne((r) => r.url.endsWith(URL)).flush(null, { status: 500, statusText: 'x' })
+      tick()
+      expect(res).toEqual({ ok: false, code: 'error' })
+    }))
+  })
 })

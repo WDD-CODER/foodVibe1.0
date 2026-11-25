@@ -396,6 +396,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - `PlatformAdminService.getLearningStats`, `PlatformAdminService.getLearningStatus` (`src/app/core/services/platform-admin.service.ts`) read the platform learning numbers through `API.admin(...)` (plan 630).
 - Plan 623: GeminiService.transcribeVoice, extractLogistics, confirmLogisticsDraft call the voice and logistics routes through `API.ai(...)`, the same pattern as the other AI client methods.
 - Plan 667: `FrontDeskProfileDataService.setConfirmMode` (`src/app/core/services/front-desk-profile-data.service.ts`) — one PUT to `API.floorPlan('confirm-mode')`; patches the stored profile on success, returns `false` on a failure. The settings card and the service screen (plan 671) use it.
+- Plan 734: `FrontDeskProfileDataService.setAssistantLevel` (`src/app/core/services/front-desk-profile-data.service.ts`) — one PUT to `API.business('front-desk/assistant-level')`; patches the stored profile's `assistant.level` on success, answers the server's error code on a failure. The settings page's assistant card (the owner's level switch) uses it.
 - A data-API 400 on a write gets one toast and one `save.refused` log in the interceptor; callers skip their own toast with `refusalShownToUser(err)`.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
@@ -982,4 +983,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/pages/frontdesk/simulator/simulator.page.html` and `.scss` · `.sim-level`, `.sim-held`, `.sim-draft` beside `ai-failed-note`.
 - When: another note about the assistant's state in the simulator — extend these blocks.
+- Known copies: none.
+
+### owner-assistant-level — `PUT /api/v1/business/front-desk/assistant-level` in `server/routes/business.js` (plan 734)
+
+- Status: stable
+- Use: `server/routes/business.js` · the owner switches `assistant.level` between 0 and 1; refused for staff (`editFrontDesk`), a reserved level 2 and a draft or suspended front desk; each switch is a `levelHistory` row. Client: `FrontDeskProfileDataService.setAssistantLevel`.
+- When: another one-field owner write on the front desk profile — add a sibling route beside it, not a generic data PUT.
 - Known copies: none.
