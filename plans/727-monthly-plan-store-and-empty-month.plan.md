@@ -379,3 +379,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   - `month-key.util.ts` is now a thin wrapper over `shared/schemas/month/month-rules.ts`; `currentMonthKey` counts the Jerusalem month (spec adjusted to UTC-noon dates).
   - The `.number-box` inputs sit on one `prettier-ignore` line with `appNumberBox` (the family's own line rule, as plan 726 does).
   - BLOCKED on scope: `pnpm run test:server` → exit 1, 1 failure: `server/test/business-route.test.js:32` (GET /business → settings toEqual) now also receives `monthTargets` (the plan's required read default). The fix is one line in that test (add `monthTargets: { foodPct: 32, labourPct: 33, primePct: 65, fixedPct: 25, profitPct: 10 }` to the expected settings); the file is not in the Read-Write Scope. Needs `approved: server/test/business-route.test.js`. Everything else: 152 of 153 server test files pass.
+
+- Resume: updated server/test/business-route.test.js (ask 727-1 approved) for the monthTargets default; test:server 153 files pass, build, lint, test:ci (2874), manifest, kit-checks, scope --arch/--reuse, breadcrumbs, ledger all exit 0.
