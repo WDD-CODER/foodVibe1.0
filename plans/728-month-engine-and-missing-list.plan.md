@@ -107,6 +107,25 @@ append the path to the scope block above and retry.
 - `dish-price-calc` — family: number-box — rung: 2 — why: layout-only classes `.dpc`, `.dpc__title`, `.dpc__field`, `.dpc__label`, `.dpc__suffix`, `.dpc__muted`, `.dpc__result`; one `appNumberBox` for the plate cost and two read-only result lines; no new control
 - «חלקי» and band tags — family: chip — rung: 2 — why: `.c-chip--tag --amber` / `--teal` as they are; `app-partial-cost-badge` is the event's missing-price picker and does not fit a month figure
 
+- `.mf` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__head` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__title` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__muted` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__grid` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__row` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__row--head` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__label` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__cell` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__money` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__money--neg` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.mf__pct` — family: month-figures — rung: 2 — why: layout-only class inside the month-figures card
+- `.dpc` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__title` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__field` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__label` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__suffix` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__muted` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
+- `.dpc__result` — family: number-box — rung: 2 — why: layout-only class inside the dish-price-calc card
 
 ## Adopt Check
 - month-figures — verdict: skip — why: an eight-row plan-versus-actual card with app-specific missing and band marks; a table or grid package would add a dependency for one small card
