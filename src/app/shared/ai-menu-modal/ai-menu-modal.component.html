@@ -25,7 +25,9 @@
       </div>
     </div>
     @if (callsLeftLine_()) {
-      <p class="ai-calls-left">{{ callsLeftLine_() }}</p>
+      <div class="ai-menu-usage-bar">
+        <span class="ai-menu-usage-count" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
+      </div>
     }
 
     @if (modalService.mode() === 'edit') {

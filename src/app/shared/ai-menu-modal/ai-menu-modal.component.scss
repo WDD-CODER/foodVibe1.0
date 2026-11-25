@@ -335,11 +335,3 @@
   font-weight: 500;
   color: var(--color-success-emphasis);
 }
-
-// Plan 736: the user's own AI calls left, under the daily bar.
-.ai-calls-left {
-  margin: 0.25rem 0 0;
-
-  font-size: var(--fs-sm);
-  color: var(--color-text-muted);
-}

@@ -161,8 +161,8 @@ describe('UserManagementComponent', () => {
   describe('the AI allowance on a row (plan 736)', () => {
     const rowOf = (i: number) =>
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.list-item.group')[i]
-    const inputOf = (i: number) => rowOf(i).querySelector<HTMLInputElement>('.ai-allowance__input')!
-    const saveOf = (i: number) => rowOf(i).querySelector<HTMLButtonElement>('.ai-allowance__save')!
+    const inputOf = (i: number) => rowOf(i).querySelector<HTMLInputElement>('[data-testid="ai-allowance-input"]')!
+    const saveOf = (i: number) => rowOf(i).querySelector<HTMLButtonElement>('[data-testid="ai-allowance-save"]')!
     const type = (i: number, value: string) => {
       const input = inputOf(i)
       input.value = value
@@ -194,7 +194,9 @@ describe('UserManagementComponent', () => {
       for (const bad of ['-1', '1.5', '100001', '']) {
         type(1, bad)
         expect(saveOf(1).disabled).withContext(bad).toBeTrue()
-        expect(rowOf(1).querySelector('.ai-allowance__error')?.textContent).toContain('admin_ai_allowance_invalid')
+        expect(rowOf(1).querySelector('[data-testid="ai-allowance-error"]')?.textContent).toContain(
+          'admin_ai_allowance_invalid'
+        )
         component.onSaveAllowance(OWNER)
       }
       expect(admin.setAiAllowance).not.toHaveBeenCalled()
