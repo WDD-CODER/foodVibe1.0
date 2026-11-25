@@ -32,7 +32,6 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `client-data.service.ts` | Clients CRUD (on BaseEntityDataService; owner writes, staff read name + phone) | ClientDataService |
 | `menu-dish-data.service.ts` | Standing-menu dishes (`menuDishes`) load / add / update; leaving the menu is `active: false` (plan 725) | MenuDishDataService |
 | `menu-dish-cost.service.ts` | One cost rule of a menu dish: recipe, bought product, typed cost or units only; net price; what is left per dish (plan 725) | MenuDishCostService |
-| `http-storage.adapter.ts` (`API.monthPlans`) | Path of the month plan routes `/api/v1/month-plans[/:month]` (plan 727); the page-scoped client is `pages/monthly-plan/services/month-plan.service.ts` | API |
 | `dish-sales-month-data.service.ts` | Typed monthly dish sales (`dishSalesMonths`): load, `monthOf(key)`, `saveMonth` (POST or PUT, one request, retries once on 409 MONTH_EXISTS; plan 726) | DishSalesMonthDataService |
 | `knowledge-item-data.service.ts` | Knowledge items CRUD plus `importDrafts` (AI import) and `approve` (bulk), on BaseEntityDataService (plan 554) | KnowledgeItemDataService |
 | `front-desk-profile-data.service.ts` | Front desk profile CRUD, one per business (owner writes; createFromTemplate) | FrontDeskProfileDataService |
@@ -74,7 +73,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
 | `product-name-matcher.service.ts` | Links a typed or pasted product name to an existing product: exact + plural/spelling variants in the browser, then one AI call for the rest (plan 463) | ProductNameMatcherService |
 | `gemini-shots.service.ts` | Gemini image/shot capture flow | GeminiShotsService |
-| `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
+| `http-storage.adapter.ts` | HTTP-backed storage adapter; its path map also names the month plan routes (plan 727; client in pages/monthly-plan/services) | HttpStorageAdapter |
 | `master-push.service.ts` | Push local entity to master/global | MasterPushService |
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
 | `event-pipeline.service.ts` | Client of the events API routes (`API` in `http-storage.adapter`): stage moves and notes; writes the returned event into the store (plan 443) | EventPipelineService |

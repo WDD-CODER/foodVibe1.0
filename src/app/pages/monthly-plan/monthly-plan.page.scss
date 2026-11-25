@@ -5,10 +5,10 @@
 
   .mp-page {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-5);
     align-content: start;
 
-    max-inline-size: 48rem;
+    max-inline-size: 52rem;
     margin-inline: auto;
 
     padding: var(--space-4);
@@ -17,9 +17,9 @@
   .mp-new,
   .mp-picker {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
     align-items: end;
-    gap: var(--space-3);
+    gap: var(--space-4);
 
     padding: var(--space-4);
   }
@@ -27,39 +27,45 @@
   .mp-card,
   .mp-error {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-4);
+    justify-items: start;
 
-    padding: var(--space-4);
+    padding: var(--space-5);
   }
 
   .mp-card__title {
     margin: 0;
+    color: var(--color-text-main);
     font-size: var(--fs-md);
+    font-weight: 700;
   }
 
   .mp-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-4);
+    inline-size: 100%;
   }
 
   .mp-field {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
     align-content: start;
+    min-inline-size: 0;
   }
 
   .mp-field__label {
     color: var(--color-text-main);
     font-weight: 600;
     font-size: var(--fs-sm);
+    line-height: var(--lh-snug);
   }
 
   .mp-muted {
     margin: 0;
     color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-    line-height: var(--lh-snug);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-normal);
   }
 
   .mp-suffix {
@@ -72,6 +78,7 @@
     gap: var(--space-2);
 
     color: var(--color-text-muted);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
+    cursor: pointer;
   }
 }

@@ -166,6 +166,7 @@ append the path to the scope block above and retry.
 - `MonthPlanService` — family: http — rung: 3 — why: a page-scoped client through the `API` map (new `API.monthPlans`), the same shape as `DiagnosisService`
 - `monthlyPlanGuard` — family: page-entry-loading — rung: 3 — why: like `diagnosisGuard`: staff → `/dashboard`, else `moduleGuard(['monthly_plan'])`
 - `monthly-plan.page` — family: list-page — rung: 2 — why: `app-page-header` and `app-empty-state` as they are; the month body is a form of `app-form-field` + `appNumberBox` boxes and `app-custom-select` for the month, no new UI piece
+- `monthly-plan.page.scss` classes (`.monthly-plan-page`, `.mp-page`, `.mp-new`, `.mp-picker`, `.mp-card`, `.mp-error`, `.mp-card__title`, `.mp-grid`, `.mp-field`, `.mp-field__label`, `.mp-muted`, `.mp-suffix`, `.mp-check`) and the settings tab group (`.business-group`, `.business-group__title`) — family: list-page — rung: 2 — why: page-local layout only (a form page of cards and a grid of boxes) on top of `.c-glass-panel`, `.c-input-wrapper` and `.c-chip`; no new `.c-*` class
 - `TabChip.money` flag — family: module-gate — rung: 3 — why: one more hide rule beside `modules` (shown only when `PermissionService.can('editMoney')`), so staff never see a money chip
 
 ## Defaults
@@ -368,3 +369,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-24: written from the research report and Dandan's decisions.
+- Builder 2026-11-25: all sub-tasks A1–A11 done.
+  - Server: `pnpm run test:server` exit 0 (see the final run below); focused `month-plans`, `month-rules`, `business-settings`, `modules-schema`, `collections`, `admin-business-delete`, `modules-registry` → 7 files, 126 tests pass.
+  - Browser: `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors); `pnpm run test:ci` → exit 0 (month-plan page, guard, service, tab-chips, settings tab specs included).
+  - Gate checks: kit-manifest-check ok; `scope-check --diff` ok; kit-checks ok (6 checks); override-check ok; lint:icons ok; lint:no-native-select ok; breadcrumbs-check clean; `--arch` ARCH ok; `--reuse` ok; log-query SKIP (no database configured).
+  - `MODULE_KEYS` already had `dish_analysis` (plan 724 merged) and `modulesFieldSchema` already followed the key count, so only `'monthly_plan'` was appended.
+  - `BUSINESS_SETTINGS_DEFAULTS` now holds `monthTargets: MONTH_TARGET_DEFAULTS`, so `GET /business` fills it and every spread of the defaults carries it; `business-settings.test.js` DEFAULTS updated.
+  - `month-key.util.ts` is now a thin wrapper over `shared/schemas/month/month-rules.ts`; `currentMonthKey` counts the Jerusalem month (spec adjusted to UTC-noon dates).
+  - The `.number-box` inputs sit on one `prettier-ignore` line with `appNumberBox` (the family's own line rule, as plan 726 does).

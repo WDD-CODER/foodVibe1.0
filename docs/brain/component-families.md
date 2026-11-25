@@ -265,6 +265,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
 - Plan 725: `.rm-row__notice`, `.rm-row__filters`, `.rm-row__vat-note`, `.rm-row__state`, `.rm-row__cell`, `.rm-row__cell--name`, `.rm-row__num`, `.rm-row__ellipsis`, `.rm-row__pct`, `.rm-row__wide`, `.rm-row__form`, `.rm-row__pair`, `.rm-row__sources`, `.rm-row__live` (page-local cell spacing and form layout of `restaurant-menu.page.scss` and the menu dish popup) sit on top of `.c-list-row`, `.c-list-body-cell` and `.c-input-wrapper`; no new `.c-*` class.
 - Plan 726: `.ds-row__notice`, `.ds-row__months`, `.ds-row__month`, `.ds-row__intro`, `.ds-row__progress`, `.ds-row__banner`, `.ds-row__live`, `.ds-row__state`, `.ds-row__cell`, `.ds-row__cell--name`, `.ds-row__ellipsis`, `.ds-row__removed`, `.ds-row__reasons--over`, `.ds-row__skipped`, `.ds-row__skipped-list`, `.ds-row__wide` (page-local spacing and column rules of `dish-sales.page.scss`, on top of `.c-list-row`; the number column uses `.c-num`) and `.rr-dialog`, `.rr-dialog__title`, `.rr-dialog__list`, `.rr-dialog__row`, `.rr-dialog__label`, `.rr-dialog__note`, `.rr-dialog__error`, `.rr-dialog__given`, `.rr-dialog__given--over` (layout inside the reasons popup); no new `.c-*` class.
+- Plan 727: `.monthly-plan-page`, `.mp-page`, `.mp-new`, `.mp-picker`, `.mp-card`, `.mp-error`, `.mp-card__title`, `.mp-grid`, `.mp-field`, `.mp-field__label`, `.mp-muted`, `.mp-suffix`, `.mp-check` (page-local layout of `monthly-plan.page.scss`, on top of `.c-glass-panel`, `.c-input-wrapper` and `.c-chip`) and `.business-group`, `.business-group__title` (the month targets group of the business settings tab); no new `.c-*` class.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note
@@ -316,6 +317,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`; the consultant's entry check `diagnosisGuard` in `src/app/pages/diagnosis/diagnosis.guard.ts` (plan 634: home modules while acting, `moduleGuard` at home).
 - When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
+- `monthlyPlanGuard` (`src/app/pages/monthly-plan/monthly-plan.guard.ts`, plan 727): staff go to `/dashboard`, everyone else passes `moduleGuard(['monthly_plan'])`; the server stays the real gate.
 - Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
 ### helpers — pure functions
@@ -335,6 +337,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - the net price of a dish (plan 724): `netPriceOf` in `shared/schemas/dish-analysis/net-price.ts` — the price without VAT
   by the business VAT rate and dealer type (`patur` = unchanged); the menu page, the month close and the analysis use it.
 - the month key (plan 726): `month-key.util` in `src/app/core/utils/month-key.util.ts` — `currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel` for a `YYYY-MM` month; the monthly plan page (727) uses it too.
+- the month and target rules (plan 727): `month-rules` in `shared/schemas/month/month-rules.ts` — `MONTH_KEY_PATTERN`, `monthKeyOf` (the Asia/Jerusalem month), `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`; no zod; `month-key.util` wraps it so there is one month rule.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).
@@ -357,6 +360,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- `MonthPlanService` (`src/app/pages/monthly-plan/services/month-plan.service.ts`, plan 727): page-scoped client of the server-only `monthPlans` through `API.monthPlans`: `list`, `get`, `create`, `update`; throws the `HttpErrorResponse`.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).
@@ -422,6 +426,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   the first bundle).
 - When: a link, chip, screen, button or request belongs to a module. The server is the gate; the browser only hides.
 - Known copies: none.
+- The TabChip.money flag (`src/app/core/components/tab-chips/tab-chips.component.ts`, plan 727): a chip with `money: true` shows only when `PermissionService.can('editMoney')` (owner, consultant), beside `modules`.
 
 ### entity-schemas — one stored shape per file
 
