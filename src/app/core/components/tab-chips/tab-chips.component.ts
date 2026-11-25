@@ -28,7 +28,7 @@ interface TabChip {
   modules?: readonly ModuleKey[]
 }
 
-type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk'
+type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus' | 'frontdesk' | 'restaurant'
 
 /** Longest-prefix-wins route → tab-group map. Mirrors `UI refactor/shell.js` PARENT. */
 const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
@@ -43,6 +43,7 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/cook', 'recipes'],
   ['/menu-library', 'menus'],
   ['/menu-intelligence', 'menus'],
+  ['/restaurant-menu', 'restaurant'],
   ['/requests', 'frontdesk'],
   ['/bookings', 'frontdesk'],
   ['/clients', 'frontdesk'],
@@ -81,6 +82,24 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
       icon: 'clipboard-list',
       path: '/menu-intelligence',
       modules: ['events']
+    }
+  ],
+  restaurant: [
+    {
+      id: 'restaurant-menu',
+      labelKey: 'restaurant_menu_chip',
+      icon: 'utensils',
+      path: '/restaurant-menu',
+      // An (empty) queryParams object makes the active match exact, so this chip is not lit on /restaurant-menu/sales.
+      queryParams: {},
+      modules: ['dish_analysis']
+    },
+    {
+      id: 'dish-sales',
+      labelKey: 'dish_sales',
+      icon: 'calendar-days',
+      path: '/restaurant-menu/sales',
+      modules: ['dish_analysis']
     }
   ],
   frontdesk: [

@@ -308,6 +308,15 @@ export const routes: Routes = [
     canActivate: [authGuard, platformAdminGuard],
   },
   { path: 'welcome', loadComponent: () => import('./pages/welcome/welcome.page').then(m => m.WelcomePage), canActivate: [welcomeGuard] },
+  // Plan 726: the typed monthly dish sales (module dish_analysis; `?month=YYYY-MM`; the server is the real gate).
+  {
+    path: 'restaurant-menu/sales',
+    loadComponent: () => import('./pages/restaurant-menu/dish-sales/dish-sales.page').then(m => m.DishSalesPage),
+    canActivate: [authGuard, moduleGuard(['dish_analysis'])],
+    canDeactivate: [pendingChangesGuard],
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
+    resolve: { kitchenLoaded: kitchenDataEnsureLoadedResolver },
+  },
   // Plan 725: the restaurant's standing menu (module dish_analysis; the server is the real gate).
   {
     path: 'restaurant-menu',

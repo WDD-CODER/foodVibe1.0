@@ -1,0 +1,55 @@
+@layer components {
+  :host {
+    display: contents;
+  }
+
+  .rr-dialog {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    min-inline-size: 0;
+  }
+
+  .rr-dialog__title {
+    margin: 0;
+    font-size: var(--fs-lg);
+  }
+
+  .rr-dialog__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rr-dialog__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .rr-dialog__label {
+    overflow: hidden;
+    min-inline-size: 0;
+    text-overflow: ellipsis;
+  }
+
+  .rr-dialog__note {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .rr-dialog__error,
+  .rr-dialog__given {
+    margin: 0;
+  }
+
+  .rr-dialog__error,
+  .rr-dialog__given--over {
+    color: var(--color-danger);
+  }
+}

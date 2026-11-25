@@ -1,0 +1,108 @@
+@use '../../../core/styles/breakpoints' as *;
+
+@layer components {
+  :host {
+    display: block;
+  }
+
+  .ds-row__notice {
+    margin: 1rem;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .ds-row__months {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .ds-row__month {
+    min-inline-size: 7rem;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* The progress line and the closed banner span every column above the heads. */
+  .ds-row__intro {
+    grid-column: 1 / -1;
+
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+
+    text-transform: none;
+  }
+
+  .ds-row__progress,
+  .ds-row__banner,
+  .ds-row__live {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .ds-row__live {
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+    color: var(--color-text-muted);
+  }
+
+  .ds-row__state {
+    grid-column: 1 / -1;
+
+    padding-block: var(--space-6);
+    padding-inline: var(--space-4);
+
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--fs-base);
+  }
+
+  /* One line per row at every width: long text is cut with an ellipsis. */
+  .ds-row__cell {
+    gap: 0.375rem;
+    white-space: nowrap;
+  }
+
+  .ds-row__cell--name {
+    justify-content: flex-start;
+    font-weight: 600;
+  }
+
+  .ds-row__num {
+    font-variant-numeric: tabular-nums;
+    justify-content: flex-end;
+  }
+
+  .ds-row__ellipsis {
+    overflow: hidden;
+    min-inline-size: 0;
+    text-overflow: ellipsis;
+  }
+
+  .ds-row__removed {
+    color: var(--color-text-muted);
+    font-weight: 400;
+  }
+
+  .ds-row__reasons--over {
+    color: var(--color-danger);
+  }
+
+  .ds-row__skipped {
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+  }
+
+  .ds-row__skipped-list {
+    margin: 0;
+    padding-inline-start: 1.25rem;
+  }
+
+  @media (max-width: $break-phone-max) {
+    .ds-row__wide {
+      display: none;
+    }
+  }
+}

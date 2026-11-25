@@ -264,6 +264,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pass theme (plan 572): `.c-num` gives a number tabular digits (prices, quantities, totals); `.c-pass-line` draws the amber lamp line under what is ready to go out (one per screen area).
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
 - Plan 725: `.rm-row__notice`, `.rm-row__filters`, `.rm-row__vat-note`, `.rm-row__state`, `.rm-row__cell`, `.rm-row__cell--name`, `.rm-row__num`, `.rm-row__ellipsis`, `.rm-row__pct`, `.rm-row__wide`, `.rm-row__form`, `.rm-row__pair`, `.rm-row__sources`, `.rm-row__live` (page-local cell spacing and form layout of `restaurant-menu.page.scss` and the menu dish popup) sit on top of `.c-list-row`, `.c-list-body-cell` and `.c-input-wrapper`; no new `.c-*` class.
+- Plan 726: `.ds-row__*` (`notice`, `months`, `month`, `intro`, `progress`, `banner`, `live`, `state`, `cell`, `cell--name`, `num`, `ellipsis`, `removed`, `reasons`, `skipped`, `wide`) in `dish-sales.page.scss` and `.rr-dialog*` in the reasons popup — column widths and spacing on top of `.c-list-row`; no new `.c-*` class.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note
@@ -333,6 +334,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   only `.ts` file that types a media width. Styles use the same names from `src/app/core/styles/_breakpoints.scss`.
 - the net price of a dish (plan 724): `netPriceOf` in `shared/schemas/dish-analysis/net-price.ts` — the price without VAT
   by the business VAT rate and dealer type (`patur` = unchanged); the menu page, the month close and the analysis use it.
+- the month key (plan 726): `month-key.util` in `src/app/core/utils/month-key.util.ts` — `currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel` for a `YYYY-MM` month; the monthly plan page (727) uses it too.
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).

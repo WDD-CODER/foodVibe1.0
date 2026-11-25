@@ -81,7 +81,9 @@ describe('TabChipsComponent', () => {
           { path: 'diagnosis', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent },
           { path: 'clients', component: BlankStubComponent },
-          { path: 'frontdesk/knowledge', component: BlankStubComponent }
+          { path: 'frontdesk/knowledge', component: BlankStubComponent },
+          { path: 'restaurant-menu', component: BlankStubComponent },
+          { path: 'restaurant-menu/sales', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation },
         { provide: FrontDeskBadgeService, useValue: { waitingCount_: signal(0) } }
@@ -194,6 +196,30 @@ describe('TabChipsComponent', () => {
     const active = fixture.debugElement.query(By.css('a.c-chip--tab.active'))
     expect(active).not.toBeNull()
     expect(active.injector.get(RouterLink).href).toBe('/frontdesk/knowledge')
+  })
+
+  it('shows the menu and sales chips on both restaurant pages with dish_analysis, the right one active (plan 726)', async () => {
+    modulesOn.set([...ALL_MODULES, 'dish_analysis'])
+    for (const [url, active] of [
+      ['/restaurant-menu', '/restaurant-menu'],
+      ['/restaurant-menu/sales?month=2026-10', '/restaurant-menu/sales']
+    ]) {
+      await router.navigateByUrl(url)
+      fixture.detectChanges()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(chipIds()).withContext(url).toEqual(['/restaurant-menu', '/restaurant-menu/sales'])
+      const lit = fixture.debugElement
+        .queryAll(By.css('a.c-chip--tab.active'))
+        .map((d) => d.injector.get(RouterLink).href)
+      expect(lit).withContext(url).toEqual([active])
+    }
+  })
+
+  it('hides the restaurant chip row without dish_analysis (plan 726)', async () => {
+    await router.navigateByUrl('/restaurant-menu/sales')
+    fixture.detectChanges()
+    expect(chipIds()).toEqual([])
   })
 
   it('should render nothing on a route with no mapped chip group', async () => {
