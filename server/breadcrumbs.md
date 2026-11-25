@@ -38,6 +38,7 @@
 | `utils/request-create.js` | `createRequest`, `runQualify` (plan 555): the one request-creation path of the manual route and the public route |
 | `utils/redact-url.js` | `redactUrl` (plan 555): masks a guest's token in a logged URL; used by the pino-http `req` serializer |
 | `scripts/set-front-desk-status.js` | `--slug --status [--target]` (plan 555): sets one profile's status until plan 557's admin switch; prints `FRONT_DESK_STATUS: <slug> <old> → <new>` |
+| `scripts/set-platform-admin.js` | `--target --email [--off] [--confirm-host] [--db] [--write]` (plan 737): the only way to set or clear one user's `isPlatformAdmin`; dry run by default; prints `PLATFORM_ADMIN: <userId> <from> → <to>` |
 | `services/ai-usage.js` | The AI ledger (plan 566): `recordAiUsage` (one `aiUsage` row per Gemini call, fire-and-forget), `estimateCostUsd`, `aggregateAiUsage`, `trackAiOutcome`, `markAiUsageRejected` (plan 580: marks refused answers) |
 | `services/file-store.js` | The private file store (plan 619, C-FILES): `putPrivateFile`, `keepStoredFile`, `signedFileUrl`, `deleteStoredFile`, `readUploadedFile`, `setFileStoreForTests`, `createMemoryFileStore`; only writer of `storedFiles` |
 | `services/cloudinary-requests.js` | Pure request builders for the file store (plan 619): `signParams`, `uploadRequest`, `downloadUrl`, `destroyRequest` |
