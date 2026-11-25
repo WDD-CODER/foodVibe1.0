@@ -1,7 +1,7 @@
 # Plan 740 — A new page is built to the house rules from the start: plan check, proposed defaults and lint rules
 
 Status: draft
-Depends-on: 739
+Depends-on: 739, 742
 Track: code
 Snapshot: 72a33e4c7cc77199563b28ba9fa9adde21844ebc
 
@@ -20,8 +20,11 @@ Verified on `origin/main` 72a33e4c:
 - `scripts/lib/registry-families.mjs` (`REUSE_RULES`) is a project override (`kit.config.json` `overrides`), read by
   `node scripts/reuse-lint.mjs --diff=<base>`, which warns on added lines only; every rule names a family that has a
   `###` heading in `docs/brain/component-families.md` (`--check-registry`).
-- `src/styles.scss:156-157` has the easing tokens and no duration token; `.interface-design/system.md` "Animation"
-  gives the two durations in words (micro 150–200ms, component 250ms).
+- `src/styles.scss:156-162` has the easing tokens and three duration tokens (`--dur-fast` 0.15s, `--dur-base` 0.2s,
+  `--dur-slow` 0.25s); only Cook View uses the duration tokens. `.interface-design/system.md` "Animation" lists the
+  easing tokens and gives the durations in words only.
+- Plan 742 (merged first) builds the shared drag look, the scroll area and the focus ring, so every rule in
+  `docs/agent/house-style.md` names a piece that exists and no rule is `lint after …`.
 - `docs/qa/styleqa-theme.md` is what the Style QA reviewer reads about the project's look.
 
 ## Goals & Success Criteria
@@ -34,13 +37,12 @@ rule and the piece to use.
 - [auto] for every rule with `- check: lint` (not `lint after …`), `scripts/lib/registry-families.mjs` has a rule whose id is `house-<id>` (paste the two counts; they are equal).
 - [auto] `node scripts/reuse-lint.mjs --check-registry` exits 0.
 - [auto] `node scripts/reuse-lint.mjs --diff=origin/main` prints no `REUSE: warn` line for a file this plan changed.
-- [auto] `grep -c "\-\-dur-fast\|\-\-dur-base" src/styles.scss` prints at least `2`; `git diff origin/main -- src/styles.scss` shows added lines only.
+- [auto] `grep -c "dur-fast\|dur-base\|dur-slow" .interface-design/system.md` prints at least `3`; `git diff --name-only origin/main -- src` prints nothing (no app file changes).
 - [auto] `grep -c "^## Pilot log" docs/agent/house-style.md` prints `1`.
-- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0; `pnpm run test:ci` exits 0.
+- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/740-house-rules-enforced-at-build-time.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/740-house-rules-enforced-at-build-time.plan.md` exits 0; `node scripts/scope-check.mjs --diff=origin/main --plan=plans/740-house-rules-enforced-at-build-time.plan.md` exits 0.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 - [human] Card — the proposed defaults: read the `### house-…` sections at the end of `_shared/product-defaults.md`; reply `default yes <id>` or `default no <id>` for each (one reply for all).
-- [human] Card — nothing looks different: open http://localhost:4201/dashboard and http://localhost:4201/inventory/list (slot 1; the builder gives the real port); hover a card and a button; the app looks and moves exactly as before (the two new duration tokens are not used by any existing style yet).
+- [human] Card — the plan check reads right: read the `## Page recipe` section of `docs/agent/plan-checks.md` (one minute); it says what you expect a plan that adds a page to state; reply `done` or the change.
 
 ## Execution Mode
 - Parallel: no — writes `_shared/product-defaults.md`, `docs/agent/plan-checks.md` and `scripts/lib/registry-families.mjs`, which other plans append to.
@@ -52,8 +54,7 @@ rule and the piece to use.
 Always allowed regardless of the list below: this plan file itself, its own
 `.claude/sessions/**`, `.worktree-*`, and the append-only
 hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
-— add to them, never rewrite or remove an existing entry without escalating). This plan appends two tokens to
-`src/styles.scss` and writes no other hotspot.
+— add to them, never rewrite or remove an existing entry without escalating). This plan writes no hotspot.
 
 ```scope
 docs/agent/plan-checks.md
@@ -80,12 +81,11 @@ append the path to the scope block above and retry. A change that needs a kit-ow
 `## Kit needs` in `docs/agent/house-style.md` and go on without it.
 
 ## Architecture Impact
-- INV-none: preserves — planning documents, lint rule data and two unused CSS tokens. No route, schema, permission,
-  AI call, server code or stored data changes; no existing style rule is rewritten.
+- INV-none: preserves — planning documents and lint rule data. No app or server code, route, schema, permission,
+  AI call or stored data changes.
 
 ## Reuse Check
-- none — no component, util, pipe, service or `.c-*` class is created. The two duration tokens are custom properties
-  appended to `:root` in `src/styles.scss` beside `--ease-spring` (family: engine-classes, tokens only).
+- none — no component, util, pipe, service or `.c-*` class is created; the plan writes documents and lint rule data.
 
 ## Defaults
 
@@ -97,7 +97,7 @@ append the path to the scope block above and retry. A change that needs a kit-ow
 - unit-dropdown-add — exception — why: no dropdown is built.
 - leave-and-return — exception — why: no page flow is built.
 - app-list-container — exception — why: no list is built; the default is only cited.
-- one-breakpoint-set — exception — why: the only SCSS written is two tokens on `:root`, no `@media`.
+- one-breakpoint-set — exception — why: no SCSS is written.
 - anchored-popup — exception — why: no floating box is built.
 
 ## Step 0 — Reality Check
@@ -133,12 +133,11 @@ line or file this plan names was removed, renamed or rewritten).
   piece's own folder and for `**/*.spec.ts`, and `family` = the registry family in the rule's `built from` (when it
   names tokens only, `engine-classes`). Before adding, run the pattern over the six standard screens' files: a
   pattern that matches a line the rules call correct is narrowed, or the rule's check is changed to `card` with one
-  `behaviour:` decision under Execution Notes. Rules written `lint after <piece> exists` are skipped and listed
-  under Execution Notes.
-- [ ] **Motion tokens — `src/styles.scss`:** append `--dur-fast` and `--dur-base` to the `:root` block right after
-  `--ease-smooth` (line 157), with the two values the `motion` rule of `docs/agent/house-style.md` gives. No
-  existing declaration is changed to use them (the alignment plans do that). Add the two rows to the "Animation"
-  table of `.interface-design/system.md`.
+  `behaviour:` decision under Execution Notes. After plan 742 no rule is `lint after …`; one that still is, is skipped and
+  listed under Execution Notes.
+- [ ] **Motion tokens in the design system — `.interface-design/system.md`:** add `--dur-fast`, `--dur-base` and
+  `--dur-slow` (they already exist in `src/styles.scss:160-162`) to the "Animation" table with their values and
+  uses, as the `motion` rule of `docs/agent/house-style.md` gives them. `src/styles.scss` is not changed.
 - [ ] **Registry — `docs/brain/component-families.md`:** one line under the opening section pointing at
   `docs/agent/house-style.md` ("which pieces make a whole page, and how pages behave"), and under each family a
   recipe uses, a line `- Recipes: <recipe ids>`. Regenerate `docs/brain/inventory.md` with `node scripts/inventory.mjs`.
@@ -156,7 +155,7 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## UI/UX Notes
 - Page recipe: none — this plan builds no page.
-- No dictionary key. The two tokens are unused by existing styles, so nothing on screen changes.
+- No dictionary key and no app file: nothing on screen changes.
 
 ## Atomic Sub-tasks
 
@@ -165,7 +164,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A1: Make every plan that adds a page name the recipe it is built from — the new Page recipe section — docs/agent/plan-checks.md
 - [ ] A2: Offer each behaviour rule to Dandan as a product default he can turn on with one word — one proposed section per rule marked default — _shared/product-defaults.md
 - [ ] A3: Warn in the diff when new code breaks a rule a script can see — one house lint rule per rule marked lint, each tried on the six standard screens first — scripts/lib/registry-families.mjs
-- [ ] A4: Give motion two shared durations so new code stops inventing its own — two tokens after the easing tokens and two rows in the Animation table — src/styles.scss, .interface-design/system.md
+- [ ] A4: Write the three motion speeds into the design system so builders find them — three rows in the Animation table — .interface-design/system.md
 - [ ] A5: Point builders and the style reviewer at the rules where they already look — the registry pointer and Recipes lines, the regenerated inventory, the House rules section — docs/brain/component-families.md, docs/brain/inventory.md, docs/qa/styleqa-theme.md
 - [ ] A6: Start the record that proves the rules work, and list what the kit must own — the Pilot log table and the Kit needs lines — docs/agent/house-style.md
 - [ ] A7: Run every check of this plan and hand Dandan the two cards — outputs under Execution Notes — this plan file
@@ -178,8 +177,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Auth and validation: none.
 - Security surface: none.
 - Data / migration: none.
-- Project checks: Reuse Check (`- none`); hotspots append-only (`src/styles.scss`); the log-query item (app style
-  file touched); no Hebrew string.
+- Project checks: Reuse Check (`- none`); no hotspot written; no app code, so the log-query item does not apply; no
+  Hebrew string.
 - The gate in this pilot is the Planner's review reading `docs/agent/plan-checks.md`; a script gate is a kit need
   (plan 741). It edits nothing under `.claude/`.
 
