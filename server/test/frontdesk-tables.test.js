@@ -421,6 +421,18 @@ describe('level 0', () => {
     expect(await holdRows()).toHaveLength(0);
     expect(await outs()).toHaveLength(0);
   });
+
+  it('plan 733: a test conversation at level 0 is answered as level 1 — the offer is sent and a tap books a test booking', async () => {
+    const { conversation } = await setup({ level: 0, test: true });
+    await say(conversation, BOOK(FULL_ASK));
+    const offer = await lastOut();
+    expect(offer).toMatchObject({ kind: 'button', author: 'server', text: fixedText('fd_ai_offer', { date: ddmm(TOMORROW), time: '20:00', party: 4 }) });
+    expect((await conv(conversation._id)).suggestion).toBeUndefined();
+    await tap('OK:1');
+    const made = await bookings();
+    expect(made).toHaveLength(1);
+    expect(made[0].test).toBe(true);
+  });
 });
 
 describe('without tables', () => {

@@ -219,7 +219,10 @@ async function runDialogue(db, dialogue, opts = {}) {
     return res;
   };
   p.inbound.setWaitForTest(() => Promise.resolve());
-  p.inbound.setTurnHandler((d, conversation, o) => p.turn.runTurn(d, conversation, {
+  // Plan 733 (R-23): the simulator answers a test conversation as level 1, so a level-0 dialogue plays its guest turns
+  // as a real guest's (`test: false` on the turn only) to keep testing what level 0 does for real guests.
+  const asRealGuest = dialogue.setup.level === 0;
+  p.inbound.setTurnHandler((d, conversation, o) => p.turn.runTurn(d, asRealGuest ? { ...conversation, test: false } : conversation, {
     ...o, now: clock, ...(model === 'live' && { feature: 'eval' }),
   }));
 

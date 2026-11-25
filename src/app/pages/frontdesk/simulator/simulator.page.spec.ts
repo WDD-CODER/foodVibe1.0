@@ -30,6 +30,7 @@ const DICT: Record<string, string> = {
   sim_clear: 'ניקוי נתוני בדיקה',
   sim_clear_confirm_text: 'כל נתוני הבדיקה יימחקו',
   sim_level_0: 'רמת טיוטות',
+  sim_level_0_sim: 'בסימולטור העוזר עונה כמו ברמה 1',
   sim_level_1: 'העוזר עונה לאורחים לבד',
   sim_held_by_staff: 'השיחה אצל הצוות',
   sim_draft_label: 'טיוטת העוזר לצוות',
@@ -282,12 +283,13 @@ describe('SimulatorPage (plan 678)', () => {
     expect(byId('ai-failed-note')).toBeNull()
   })
 
-  it('says who answers: level 0, level 1 or 2, and nothing while no profile is loaded (plan 719)', async () => {
+  it('says who answers: level 0 (the simulator answers as level 1, plan 733), level 1 or 2, and nothing while no profile is loaded (plan 719)', async () => {
     await create()
     expect(byId('sim-level')).toBeNull()
     profile.set({ assistant: { level: 0 } })
     await settle()
-    expect(text(byId('sim-level'))).toContain('רמת טיוטות')
+    expect(text(byId('sim-level'))).toContain('בסימולטור העוזר עונה כמו ברמה 1')
+    expect(text(byId('sim-level'))).not.toContain('רמת טיוטות')
     profile.set({ assistant: { level: 1 } })
     await settle()
     expect(text(byId('sim-level'))).toContain('העוזר עונה לאורחים לבד')
@@ -308,16 +310,19 @@ describe('SimulatorPage (plan 678)', () => {
     expect((data['open'] as jasmine.Spy).calls.count()).toBeGreaterThan(openCalls)
   })
 
-  it('shows the level-0 draft under the chat, and no draft at level 1 (plan 719)', async () => {
+  it('never shows a draft block, also at level 0 with a suggestion (plan 733)', async () => {
     conversations.set([row('a', 'אורח בדיקה', '0500000001', { suggestion: 'לאיזה תאריך?' })])
     profile.set({ assistant: { level: 0 } })
     await create()
     await pickGuest()
-    expect(text(byId('sim-draft'))).toContain('לאיזה תאריך?')
-    expect(byId('sim-held')).toBeNull()
-    profile.set({ assistant: { level: 1 } })
-    await settle()
     expect(byId('sim-draft')).toBeNull()
+    expect(fixture.nativeElement.textContent).not.toContain('טיוטת העוזר לצוות')
+    expect(byId('sim-held')).toBeNull()
+    for (const level of [1, 2]) {
+      profile.set({ assistant: { level } })
+      await settle()
+      expect(byId('sim-draft')).toBeNull()
+    }
   })
 
   it('shows the time left of the window from the server clock', async () => {
