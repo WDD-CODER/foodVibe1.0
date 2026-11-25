@@ -119,7 +119,7 @@ bubble's style lives in the chat thread.
 
 - The typing row — family: chat-thread — rung: 3 — why: a new `typing` input on `app-chat-thread` draws the row inside the one bubble list (the family says never a second bubble list); default false, so the inbox is unchanged.
 - The "assistant is working" rule — family: simulator-page — rung: 3 — why: one `typing_` computed in `SimulatorPage` beside `heldByStaff_`, from data the page already reads; no service and no new piece.
-- The moving dots — family: feedback — rung: 4 — why: `app-loader` (family feedback) is a page/section spinner, not a chat bubble; three `.ct-dot` spans with one keyframe in the chat thread's own stylesheet, no `.c-*` class (one user).
+- The moving dots (`.ct-typing`, `.ct-dot`, `.ct-typing-text`) — family: feedback — rung: 4 — why: `app-loader` (family feedback) is a page/section spinner, not a chat bubble; three `.ct-dot` spans with one keyframe in the chat thread's own stylesheet, no `.c-*` class (one user).
 
 ## Defaults
 
@@ -210,10 +210,10 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the chat thread draw a writing bubble with three moving dots on the other side — typing input, the row after the last message, the polite live region, the keyframe and the reduced-motion text, chat_typing key, spec cases — src/app/shared/chat-thread/chat-thread.component.ts, src/app/shared/chat-thread/chat-thread.component.html, src/app/shared/chat-thread/chat-thread.component.scss, src/app/shared/chat-thread/chat-thread.component.spec.ts, public/assets/data/dictionary.json
-- [ ] A2: Show the dots in the simulator while the assistant is still working on the guest's message — typing_ computed with the 45 s cap, the input on app-chat-thread, fast reads while typing, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.spec.ts
-- [ ] A3: Record the new typing bubble where the next builder looks for it — the chat-thread and simulator-page family lines and the shared folder map — docs/brain/component-families.md, src/app/shared/breadcrumbs.md
-- [ ] A4: Run every check of this plan and hand Dandan the simulator check — test:ci, build, lint, inventory check, log-query; evidence into Execution Notes
+- [x] A1: Let the chat thread draw a writing bubble with three moving dots on the other side — typing input, the row after the last message, the polite live region, the keyframe and the reduced-motion text, chat_typing key, spec cases — src/app/shared/chat-thread/chat-thread.component.ts, src/app/shared/chat-thread/chat-thread.component.html, src/app/shared/chat-thread/chat-thread.component.scss, src/app/shared/chat-thread/chat-thread.component.spec.ts, public/assets/data/dictionary.json
+- [x] A2: Show the dots in the simulator while the assistant is still working on the guest's message — typing_ computed with the 45 s cap, the input on app-chat-thread, fast reads while typing, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.spec.ts
+- [x] A3: Record the new typing bubble where the next builder looks for it — the chat-thread and simulator-page family lines and the shared folder map — docs/brain/component-families.md, src/app/shared/breadcrumbs.md
+- [x] A4: Run every check of this plan and hand Dandan the simulator check — test:ci, build, lint, inventory check, log-query; evidence into Execution Notes
 
 ## Technical Considerations
 - Dependencies: plan 733 (a test conversation always gets a turn unless a member holds it; the holding message ends a
@@ -248,3 +248,5 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: while the dots show the page reads the thread every 2 s, also after its 30 s fast window, so the answer appears within 2 s of being stored.
 - behaviour: the typing bubble is a new `typing` input of the shared `app-chat-thread` (default false), so the simulator does not draw a second bubble list; the inbox does not use it in this plan.
 - behaviour: under `prefers-reduced-motion` the dots are hidden and the bubble shows the still text "העוזר כותב…"; screen readers hear the same text from one always-present polite live region.
+- evidence: pnpm run build → exit 0; pnpm run lint → exit 0 (0 errors); pnpm run test:ci → exit 0, 3242 SUCCESS (before a final scss tweak: `.ct-typing-text` is now display none / inline instead of the clip block, to avoid a duplicate style block; build rerun after it); node scripts/inventory.mjs --check → INVENTORY: ok (regenerated docs/brain/inventory.md); kit-checks → ok; kit-manifest-check → ok; log-query → SKIP no database.
+- seen: the [ui] item is a [human] check on http://localhost:4202/frontdesk/simulator; not run here.

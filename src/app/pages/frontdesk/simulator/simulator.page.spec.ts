@@ -61,7 +61,13 @@ const row = (id: string, name: string, phone: string, over: Partial<Conversation
   last: null
 })
 
-const msg = (id: string, direction: 'in' | 'out', text: string, buttons?: { id: string; title: string }[]): Message =>
+const msg = (
+  id: string,
+  direction: 'in' | 'out',
+  text: string,
+  buttons?: { id: string; title: string }[],
+  extra: Partial<Message> = {}
+): Message =>
   ({
     _id: id,
     conversationId: 'a',
@@ -71,12 +77,14 @@ const msg = (id: string, direction: 'in' | 'out', text: string, buttons?: { id: 
     text,
     status: 'sent',
     at: NOW,
-    ...(buttons && { buttons })
+    ...(buttons && { buttons }),
+    ...extra
   }) as unknown as Message
 
 describe('SimulatorPage (plan 678)', () => {
   let fixture: ComponentFixture<SimulatorPage>
   let conversations: WritableSignal<ConversationRow[]>
+  let threadNow: WritableSignal<number>
   let thread: WritableSignal<{ conversation: Conversation; messages: Message[] } | null>
   let owner: WritableSignal<boolean>
   let data: Record<string, unknown>
@@ -117,6 +125,7 @@ describe('SimulatorPage (plan 678)', () => {
     profile = signal(null)
     conversations = signal<ConversationRow[]>([])
     thread = signal(null)
+    threadNow = signal(NOW)
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
     confirm = jasmine.createSpy('confirm').and.resolveTo(true)
     data = {
@@ -124,7 +133,7 @@ describe('SimulatorPage (plan 678)', () => {
       listLoaded_: signal(true),
       listFailed_: signal(false),
       thread_: thread,
-      threadNow_: signal(NOW),
+      threadNow_: threadNow,
       threadFailed_: signal(null),
       list: jasmine.createSpy('list').and.resolveTo(),
       open: jasmine.createSpy('open').and.callFake(async (id: string) => {
@@ -374,5 +383,69 @@ describe('SimulatorPage (plan 678)', () => {
     await settle()
     expect(userMsg.onSetErrorMsg).toHaveBeenCalled()
     expect(byId('sim-guest')).not.toBeNull()
+  })
+
+  describe('typing dots (plan 735)', () => {
+    const guestAt = (ago: number, extra: Partial<Message> = {}) =>
+      msg('g', 'in', 'שלום', undefined, { at: NOW - ago, ...extra })
+    const typingIs = async (messages: Message[], over: Partial<Conversation> = {}) => {
+      conversations.set([row('a', 'אורח בדיקה', '0500000001', over)])
+      await create()
+      await pickGuest()
+      thread.set({ conversation: conv('a', over), messages })
+      await settle()
+      return byId('chat-typing') !== null
+    }
+
+    it('shows while the newest message is the guest text and the assistant holds the chat', async () => {
+      expect(await typingIs([guestAt(5_000)])).toBeTrue()
+    })
+    it('hides when the newest message is the answer', async () => {
+      expect(await typingIs([guestAt(5_000), msg('o', 'out', 'היי')])).toBeFalse()
+    })
+    it('hides 46 s after the guest message', async () => {
+      expect(await typingIs([guestAt(46_000)])).toBeFalse()
+    })
+    it('hides while a staff member holds the chat', async () => {
+      expect(await typingIs([guestAt(5_000)], { status: 'human' })).toBeFalse()
+      expect(byId('sim-held')).not.toBeNull()
+    })
+    it('hides after a button tap', async () => {
+      expect(await typingIs([guestAt(5_000, { kind: 'button' })])).toBeFalse()
+    })
+    it('hides when no thread is loaded', async () => {
+      conversations.set([row('a', 'אורח בדיקה', '0500000001')])
+      await create()
+      expect(byId('chat-typing')).toBeNull()
+    })
+
+    it('reads every 2 s after the fast window while the dots show, then every 10 s once answered', async () => {
+      jasmine.clock().install()
+      jasmine.clock().mockDate(new Date(NOW))
+      try {
+        conversations.set([row('a', 'אורח בדיקה', '0500000001')])
+        await create()
+        await pickGuest()
+        const open = data['open'] as jasmine.Spy
+        open.and.callFake(async () => {
+          thread.set({ conversation: conv('a'), messages: [guestAt(5_000)] })
+        })
+        thread.set({ conversation: conv('a'), messages: [guestAt(5_000)] })
+        jasmine.clock().tick(40_000)
+        open.calls.reset()
+        jasmine.clock().tick(2_000)
+        expect(open.calls.count()).toBeGreaterThanOrEqual(1)
+        open.and.callFake(async () => {
+          thread.set({ conversation: conv('a'), messages: [guestAt(5_000), msg('o', 'out', 'היי')] })
+        })
+        jasmine.clock().tick(2_000)
+        await Promise.resolve()
+        open.calls.reset()
+        jasmine.clock().tick(10_000)
+        expect(open.calls.count()).toBeLessThanOrEqual(2)
+      } finally {
+        jasmine.clock().uninstall()
+      }
+    })
   })
 })
