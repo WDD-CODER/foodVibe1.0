@@ -120,6 +120,8 @@ src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+server/scripts/ai-eval-frontdesk.js
+server/eval/frontdesk/dialogues/20-level-zero-suggestion.json
 ```
 
 ## Read Scope
