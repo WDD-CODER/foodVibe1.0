@@ -1,6 +1,6 @@
 # Plan 742 — Three shared pieces the house rules need: one drag look, one scroll area with arrows, one keyboard focus ring
 
-Status: active
+Status: done
 Depends-on: 739
 Track: code
 Snapshot: 3f5f24a3
