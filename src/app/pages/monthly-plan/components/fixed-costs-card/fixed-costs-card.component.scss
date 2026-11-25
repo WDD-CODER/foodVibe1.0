@@ -9,14 +9,6 @@
     justify-items: start;
   }
 
-  .fc__title {
-    margin: 0;
-    color: var(--color-text-main);
-    font-size: var(--fs-md);
-    font-weight: 700;
-    line-height: var(--lh-tight);
-  }
-
   .fc__row,
   .fc__line {
     display: grid;
@@ -33,25 +25,23 @@
   }
 
   .fc__label {
-    color: var(--color-text-main);
-    font-weight: 600;
     font-size: var(--fs-sm);
+    font-weight: 600;
   }
 
   .fc__name {
-    color: var(--color-text-main);
-    font-weight: 600;
+    font-weight: 700;
+    min-inline-size: 0;
   }
 
   .fc__name-input {
     min-inline-size: 0;
+    inline-size: 100%;
   }
 
   .fc__suffix,
   .fc__muted {
-    margin: 0;
     color: var(--color-text-muted);
     font-size: var(--fs-xs);
-    line-height: var(--lh-normal);
   }
 }
