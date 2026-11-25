@@ -31,17 +31,8 @@
         />
       </app-form-field>
       <app-form-field [label]="'menu_dish_price_with_vat' | translatePipe" forId="menu-dish-price">
-        <div class="c-input-wrapper" appNumberBox>
-          <input
-            id="menu-dish-price"
-            type="number"
-            inputmode="decimal"
-            min="0"
-            step="0.5"
-            [ngModel]="price_()"
-            (ngModelChange)="setNumber('price', $event)"
-          />
-        </div>
+        <!-- prettier-ignore -->
+        <div class="c-input-wrapper" appNumberBox><input id="menu-dish-price" type="number" inputmode="decimal" min="0" step="0.5" [ngModel]="price_()" (ngModelChange)="setNumber('price', $event)" /></div>
       </app-form-field>
     </div>
 
@@ -104,17 +95,8 @@
         </app-form-field>
         <div class="rm-row__pair">
           <app-form-field [label]="'menu_dish_product_amount' | translatePipe" forId="menu-dish-amount">
-            <div class="c-input-wrapper" appNumberBox>
-              <input
-                id="menu-dish-amount"
-                type="number"
-                inputmode="decimal"
-                min="0"
-                step="any"
-                [ngModel]="productAmount_()"
-                (ngModelChange)="setNumber('amount', $event)"
-              />
-            </div>
+            <!-- prettier-ignore -->
+            <div class="c-input-wrapper" appNumberBox><input id="menu-dish-amount" type="number" inputmode="decimal" min="0" step="any" [ngModel]="productAmount_()" (ngModelChange)="setNumber('amount', $event)" /></div>
           </app-form-field>
           <app-form-field [label]="'menu_dish_product_unit' | translatePipe">
             <app-custom-select
@@ -128,17 +110,8 @@
       }
       @case ('typed') {
         <app-form-field [label]="'menu_dish_typed_cost' | translatePipe" forId="menu-dish-typed">
-          <div class="c-input-wrapper" appNumberBox>
-            <input
-              id="menu-dish-typed"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="0.1"
-              [ngModel]="typedCost_()"
-              (ngModelChange)="setNumber('typed', $event)"
-            />
-          </div>
+          <!-- prettier-ignore -->
+          <div class="c-input-wrapper" appNumberBox><input id="menu-dish-typed" type="number" inputmode="decimal" min="0" step="0.1" [ngModel]="typedCost_()" (ngModelChange)="setNumber('typed', $event)" /></div>
         </app-form-field>
       }
     }
