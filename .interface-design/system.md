@@ -184,6 +184,9 @@ Sharper = more technical. Rounder = more approachable. Mix within this scale onl
 |---|---|---|
 | `--ease-spring` | `cubic-bezier(0.22,1,0.36,1)` | Transforms, hover lifts |
 | `--ease-smooth` | `cubic-bezier(0.4,0,0.2,1)` | Color, opacity transitions |
+| `--dur-fast` | `0.15s` | Hover, press, colour |
+| `--dur-base` | `0.2s` | Fades, small moves |
+| `--dur-slow` | `0.25s` | Panels, lifts, drag settle |
 
 - Micro-interactions: 150–200ms
 - Component transitions: 250ms

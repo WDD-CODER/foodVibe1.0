@@ -7,6 +7,8 @@ find its family here and follow the decision ladder in `docs/agent/standards-reu
 
 See every UI family live at `/dev/catalog` (dev builds only, plan 535).
 
+Which pieces make a whole page, and how pages behave: `docs/agent/house-style.md` (page recipes and behaviour rules).
+
 Reuse enforced from plan: 459
 
 How this file is checked:
@@ -101,6 +103,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/equipment/components/equipment-list/` (side panel).
   Not engine-based (own `role="dialog"` + Escape, kept off the shell to keep their look):
   `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`.
+- Recipes: recipe-detail
 
 ### modal-controller — open a popup and get its answer
 
@@ -132,6 +135,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
+- Recipes: recipe-list, recipe-detail, recipe-form, recipe-settings, recipe-board
 
 ### list-logic — search / sort / filter state of a list
 
@@ -149,6 +153,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.ts`,
   `src/app/pages/suppliers/components/supplier-list/supplier-list.component.ts`,
   `src/app/pages/venues/components/venue-list/venue-list.component.ts`.
+- Recipes: recipe-list
 
 ### empty-state — nothing here / no results
 
@@ -157,6 +162,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: an empty list or a search with no results.
 - Also used by `PlatformLogisticsItemsComponent` (plan 532) and `PlatformAiShotsComponent` (plan 600, the two example lists).
 - Known copies: not counted.
+- Recipes: recipe-list, recipe-detail, recipe-settings, recipe-board
 
 ### form-field — label, input, error
 
@@ -171,6 +177,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
 - Times (plan 537): every time of day is `app-time-field` (`src/app/shared/time-field/`); the only `type="time"` left is its hidden picker. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
 - Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
+- Recipes: recipe-form, recipe-settings
 
 ### number-box — tap anywhere on a number box to edit the number
 
@@ -194,6 +201,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
 - Known copies: none.
+- Recipes: recipe-form
 
 ### chip — chips, badges, pills
 
@@ -209,6 +217,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Tight group (plan 579): `.c-chip-group.c-chip-group--tight` — no block padding, `--space-1` gap, small chips; user: `event-logistics-panel` (one "נדרש" toggle + the two provider radios); plan 581 uses it too.
 - Users (plan 600): `ai-examples-share` — one toggle chip in the owner's settings card (same card shape as `staff-stages-manager`).
 - Users (plans 523, 581): `logistics-item-manager` — phase tabs (`--tab`), every question row a `--tag` (shared + lock), environment chips and the admin's scope radios (`--toggle` in `--tight` groups).
+- Recipes: recipe-board
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
   header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
@@ -233,6 +242,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`PermissionService`). The server still decides every write (`server/utils/permissions.js`).
 - When: a page offers save/edit on a business item.
 - Known copies: none.
+- Recipes: recipe-settings
 
 ### cost-badge — partial / missing cost warning
 
@@ -275,6 +285,13 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 698: `.video-upload-btn`, `.video-progress` (page-local layout in `venue-detail.component.scss`) sit on top of `.c-btn-ghost`; no new `.c-*` class.
 - Plan 742: `.c-drag-list`, `.c-drag-item`, `.c-drag-handle` (the shared drag look, family `drag-reorder`); `.c-scroll-area`, `.c-scroll-arrow` (family `scroll-area`); plus one zero-specificity `:where(…):focus-visible` keyboard ring for every button, link and `role` / `tabindex` control.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
+
+### motion-tokens — how long things move and with which curve
+
+- Status: converging — plan 740 added the lint; the alignment plans move the typed times onto the tokens
+- Use: the tokens in `src/styles.scss` `:root` — `--dur-fast` (0.15s), `--dur-base` (0.2s), `--dur-slow` (0.25s), `--ease-spring`, `--ease-smooth` (house rule `motion` in `docs/agent/house-style.md`).
+- When: any `transition` or `animation`.
+- Known copies: a typed time in a component stylesheet (counted in `_shared/debt-baseline.json` as `reuse-copy.motion-tokens`).
 
 ### voice-note — record or type a spoken note
 
@@ -325,6 +342,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`; the consultant's entry check `diagnosisGuard` in `src/app/pages/diagnosis/diagnosis.guard.ts` (plan 634: home modules while acting, `moduleGuard` at home).
 - When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
+- Recipes: recipe-form
 - Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
 ### helpers — pure functions
