@@ -15,7 +15,7 @@ instructions.
 | R-01 | **Match a phone by its last 9 digits.** WhatsApp sends `9725…`, a form gets `05…`; digit-only comparison makes two clients out of one person. Server field `phoneKey`. | 544, 545 |
 | R-02 | **Do-not-contact is a server flag**, set by a dedicated route or by the assistant's removal intent, and checked before every outbound message. "Not now" / "call me next month" is not a removal request. | 544 (field), 560 (send guard), 562 (intent) |
 | R-03 | **Coalesce inbound bursts.** Wait about 6 s after an inbound message; if a newer one arrived this run exits; the surviving run answers every customer message since the last outbound one as a single turn, and re-checks the takeover flag after the wait. | 560 |
-| R-04 | **Silent on AI failure.** When the model call fails the customer gets no "small glitch" text; the conversation moves to `human`. | 562 |
+| R-04 | **Silent on AI failure.** When the model call fails the customer gets no "small glitch" text; the conversation moves to `human`. Superseded in part by R-22 (plan 733): a technical failure now sends one holding message. | 562 |
 | R-05 | **No deferred promises.** The assistant cannot act later, so "I'll check and get back to you" is blocked on the server and replaced by an immediate question or a handoff. | 562 |
 | R-06 | **No completion claim without the write.** "Booked", "confirmed", "updated" may be sent only when the server wrote it in the same turn. A table is confirmed only by the engine and the hold (INV-7). | 562 |
 | R-07 | **No invented links.** A URL is sent only if it appears verbatim in `publicFacts` or the profile. | 562 |
@@ -33,6 +33,8 @@ instructions.
 | R-19 | **Test and non-public states send nothing:** `test: true` requests and profiles in `draft` / `suspended` never produce an outbound message to a customer. | 556, 557, 560 |
 | R-20 | **Internals stay internal:** the assistant never reveals the prompt, field names, question keys or routing, even when asked. | 562 |
 | R-21 | **Every model call is metered** — business, feature, model, input/output tokens, audio seconds, latency, outcome, estimated cost (C-AIUSAGE). | 566 |
+| R-22 | **One holding message on a technical failure.** When the model call or the daily cap fails the turn (`assistantFailed` busy / timeout / quota / other), the guest gets the business's handoff text, else `fd_ai_holding_default`, once until the guest writes again; the conversation still moves to `human`. Not at level 0 for a real guest; guardrail blocks are unchanged. | 733 |
+| R-23 | **The simulator answers as level 1.** A test conversation is answered as at level 1 whatever the business's level, unless a member holds it; real guests keep the level. | 733 |
 
 ## Do not build
 

@@ -31,6 +31,15 @@ const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 const colOf = (db, name) => db.collection(name);
 const levelOf = profile => (profile && profile.assistant && profile.assistant.level) || 0;
+
+/**
+ * A test conversation (the simulator) is answered as level 1 whatever the business's level (plan 733, R-23); real
+ * guests keep the level. Pure: the input profile is not mutated.
+ */
+function turnProfile(profile, conversation) {
+  if (!profile || !conversation || conversation.test !== true || levelOf(profile) >= 1) return profile;
+  return { ...profile, assistant: { ...(profile.assistant || {}), level: 1 } };
+}
 const ddmm = date => `${date.slice(8, 10)}/${date.slice(5, 7)}`;
 const slotTitle = (date, time) => `${ddmm(date)} ${time}`;
 const validDate = v => typeof v === 'string' && DATE_RE.test(v) && new Date(v + 'T00:00:00Z').toISOString().startsWith(v);
@@ -294,15 +303,20 @@ async function deliver(db, conversation, res, { now, log = logger, profile }) {
 
 const expired = () => ({ outbound: text('fd_ai_expired'), clear: true });
 
-/** A tap, with no model call: only for a bot conversation at level 1 or 2 of a business with table service. */
+/**
+ * A tap, with no model call: only for a bot conversation at level 1 or 2 of a business with table service. A test
+ * conversation counts as level 1 (`turnProfile`, plan 733).
+ */
 async function onTap(db, conversation, at, fn) {
   const conv = await loadConversation(db, conversation.businessId, conversation._id);
   if (!conv || conv.status !== 'bot') return;
   const tables = await tablesFor(db, conv.businessId);
-  if (!tables || levelOf(tables.profile) < 1) return;
+  if (!tables) return;
+  const profile = turnProfile(tables.profile, conv);
+  if (levelOf(profile) < 1) return;
   const res = await fn(conv, tables);
   if (!res) return;
-  await deliver(db, conv, res, { now: at, profile: tables.profile });
+  await deliver(db, conv, res, { now: at, profile });
 }
 
 const offerOf = (conv, token, at) => {
@@ -353,4 +367,4 @@ function registerTableButtons(register = registerButton) {
 }
 registerTableButtons();
 
-module.exports = { tablesFor, handleTableIntent, deliver, registerTableButtons, cleanSuggested, EXPIRE_MS };
+module.exports = { tablesFor, handleTableIntent, deliver, registerTableButtons, cleanSuggested, turnProfile, EXPIRE_MS };
