@@ -157,7 +157,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [x] A3: Write down which month decisions Dandan approved and the new month build order — section 9 of the monthly report as in P0, N-M3 row pointing at ADR 0034 — docs/finance/monthly-planning-feasibility.md
 - [x] A4: Record why only the owner may see each employee's pay — ADR 0034 with the text of UI/UX Notes — docs/brain/decisions/0034-salary-lines-owner-only.md
 - [x] A5: Change the ownership rule so pay per person is the owner's alone — INV-1 Rule clause, Source, Touches, Users-lose as in UI/UX Notes; run `node --test scripts/test/invariants.test.mjs` — docs/brain/invariants.md
-- [ ] A6: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
+- [x] A6: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
 
 ## What happens when
 - The research source file is missing (the scratchpad was cleared): the Worker stops at A1 and asks the Human for the file; nothing else is written first, because sections 9 link to it.
@@ -181,3 +181,11 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-24: written from the research report and Dandan's decisions
+- Builder 2026-11-25 (commit 1c2b96a4):
+  - A1: `cmp "<scratchpad>/reports/Restaurant dish and month analytics.md" docs/finance/dish-and-month-research.md` → exit 0 (source present, 114 lines).
+  - A2/A3: `grep -c "^## "` → 9 and 9; `grep -c "^## 9. Updated decisions (2026-11-24)$"` → 1 each; `grep -c "^| N-D[1-8] "` → 8; `grep -c "^| N-M[1-8] "` → 8; `grep -c "^| N-X[1-3] "` → 3 each; `grep -c "dish-and-month-research.md"` → 1 each.
+  - A4: `grep -c "TBD" docs/brain/decisions/0034-salary-lines-owner-only.md` → 0; manifest entry added for the ADR (`kit-manifest-check` → `KIT_MANIFEST: ok — 452 classified, 0 unclassified`).
+  - A5: `grep -c "ADR 0034" docs/brain/invariants.md` → 2; `node --test scripts/test/invariants.test.mjs` → exit 0, pass 17, fail 0.
+  - A6: `scope-check --arch` → `ARCH: ok INV-1, INV-none`; `--reuse` → `REUSE: ok none`; `breadcrumbs-check` → `BREADCRUMBS: clean`; `pnpm run build`, `lint`, `test:ci` (TOTAL: 2778 SUCCESS), `lint:icons`, `lint:no-native-select`, `override-check`, `plan-ledger-check`, `ci-scope-check --checkout-branch`, `kit-checks --base origin/orch/biz-numbers` → exit 0.
+  - `scope-check --diff=origin/orch/biz-numbers` (worktree copy) → `SCOPE: ok`. The kit copy of scope-check resolves git in the main checkout (`repoRoot = resolve(__dirname, '..')`), so from here it lists that checkout's files (`.claude/todo.md`, `plans/736…`), none in this branch.
+  - `scope-check --diff=origin/main` → exit 1, lists only `plans/723…729` plan files: these are scope edits committed on the run branch (e.g. 92de8524 `plan(723): scope + …`), not in this branch's diff against `origin/orch/biz-numbers` (7 files, all in scope).
