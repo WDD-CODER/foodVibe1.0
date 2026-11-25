@@ -97,6 +97,7 @@ docs/brain/inventory.md
 src/app/shared/breadcrumbs.md
 src/app/pages/breadcrumbs.md
 docs/workflow-kit/manifest.json
+src/app/pages/metadata-manager/components/station-manager/station-manager.component.spec.ts
 ```
 
 `_shared/debt-baseline.json` is listed because the new lint rule counts the existing `title` hints (recorded with
