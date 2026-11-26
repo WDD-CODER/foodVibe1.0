@@ -30,9 +30,10 @@ test('src/styles.scss defines each new piece exactly once', () => {
 test('src/styles.scss above the marker is the base file minus the sheet rules plan 757 removed (append-only)', (t) => {
   // The run branch comes first: this style run is cut from a staging branch that already differs from origin/main,
   // so a merge-base with origin/main would count staging's own changes as edits. origin/main is the fallback.
+  // Plan 757 (answer 757-1): the staging branch comes before origin/main, for when the run branches above are gone.
   let base
   let lastError = 'no base ref'
-  for (const ref of ['origin/orch/rs-modals', 'origin/orch/rs-style', 'origin/main']) {
+  for (const ref of ['origin/orch/rs-modals', 'origin/orch/rs-style', 'origin/chore/restaurant-staging', 'origin/main']) {
     try {
       const mb = execFileSync('git', ['merge-base', 'HEAD', ref], { encoding: 'utf8' }).trim()
       base = execFileSync('git', ['show', `${mb}:src/styles.scss`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })

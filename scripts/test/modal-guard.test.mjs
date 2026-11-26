@@ -96,12 +96,12 @@ test('findings carry file, line and are sorted; a missing file throws', () => {
   assert.throws(() => modalFindings(['does-not-exist.scss'], { root: tmpdir() }))
 })
 
-const WITH_RETIRED_RULES = [
+const RETIRED_FIXTURE = [
   '.inline-edit-panel {',
   '  z-index: 1;',
   '',
-  '  /* Tablet + mobile: the same panel, same form, rendered as a modal',
-  '   * instead of in-flow under the row. */',
+  '  /* Tablet + mobile: the same panel, same form, rendered as a modal instead of',
+  '   * in-flow under the row. */',
   '  &.as-modal {',
   '    position: fixed;',
   '',
@@ -113,7 +113,7 @@ const WITH_RETIRED_RULES = [
   '',
   '@media (max-width: 767px) {',
   '  .m-fab-lift {',
-  '    inset-block-end: 8rem !important;',
+  '    inset-block-end: 0;',
   '  }',
   '',
   '  /* Centred dialogs become bottom sheets. */',
@@ -125,37 +125,38 @@ const WITH_RETIRED_RULES = [
   '    width: 100% !important;',
   '  }',
   '',
+  '  /* Toasts clear the tab bar. */',
   '  .m-toast {',
   '    width: max-content;',
   '  }',
   '}',
   '',
-  '/* 20 stays below the app header (z-index 100). The tablet/phone modal variant (.inline-edit-panel.as-modal,',
+  '/* ---- Plan 459 A2 ----',
+  '   20 stays below the app header (z-index 100). The tablet/phone modal variant (.inline-edit-panel.as-modal,',
   '   position: fixed, z-index 1001) is excluded: it already sits above its backdrop and must stay fixed. */',
-  '.c-modal-body:has(.c-dropdown),',
+  '.c-glass-panel:has(.c-dropdown),',
   '.inline-edit-panel:not(.as-modal):has(.c-dropdown) {',
   '  z-index: 20;',
   '}',
   ''
 ].join('\n')
 
-test('withoutRetiredSheetRules: removes the three retired pieces, with LF and with CRLF line ends', () => {
-  for (const eol of ['\n', '\r\n']) {
-    const out = withoutRetiredSheetRules(WITH_RETIRED_RULES.replaceAll('\n', eol))
-    assert.ok(!/m-sheet|as-modal/.test(out))
-    assert.ok(out.includes(`z-index: 1;${eol}}`))
-    assert.ok(out.includes(`  .m-fab-lift {${eol}    inset-block-end: 8rem !important;${eol}  }${eol}${eol}  .m-toast {`), 'the rule before and the rule after the sheet helpers')
-    assert.ok(out.includes('(z-index 100). */'))
-    assert.ok(out.includes('.inline-edit-panel:has(.c-dropdown)'))
+test('withoutRetiredSheetRules: removes the three pieces and keeps the rules around them', () => {
+  for (const text of [RETIRED_FIXTURE, RETIRED_FIXTURE.replace(/\n/g, '\r\n')]) {
+    const out = withoutRetiredSheetRules(text).replace(/\r\n/g, '\n')
+    assert.ok(!/m-sheet|as-modal/.test(out), out)
+    assert.ok(out.includes('  z-index: 1;\n}\n'))
+    assert.ok(out.includes('  .m-fab-lift {\n    inset-block-end: 0;\n  }\n\n  /* Toasts clear the tab bar. */\n  .m-toast {'))
+    assert.ok(out.includes('20 stays below the app header (z-index 100). */\n'))
+    assert.ok(out.includes('.inline-edit-panel:has(.c-dropdown) {'))
   }
 })
 
-test('withoutRetiredSheetRules: a text without any of the pieces comes back identical', () => {
-  const css = '.c-modal-card { display: flex; }'
-  assert.equal(withoutRetiredSheetRules(css), css)
+test('withoutRetiredSheetRules: a text without the pieces comes back identical', () => {
+  assert.equal(withoutRetiredSheetRules('.c-modal-card { display: flex; }'), '.c-modal-card { display: flex; }')
 })
 
 test('withoutRetiredSheetRules: a second call changes nothing', () => {
-  const once = withoutRetiredSheetRules(WITH_RETIRED_RULES)
+  const once = withoutRetiredSheetRules(RETIRED_FIXTURE)
   assert.equal(withoutRetiredSheetRules(once), once)
 })

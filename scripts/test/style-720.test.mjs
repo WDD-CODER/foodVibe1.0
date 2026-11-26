@@ -106,9 +106,11 @@ test('the contract holds modal-centered and modal-scrollable on, with rule check
 })
 
 test('src/styles.scss above the plan 720 marker is the base file minus the sheet rules plan 757 removed (append-only)', (t) => {
+  // Plan 757 (answer 757-1): the staging branch comes before origin/main once the run branches above are gone;
+  // staging differs from origin/main above the markers, so a merge-base with origin/main counts staging's own changes.
   let base
   let lastError = 'no base ref'
-  for (const ref of ['origin/orch/rs-modals', 'origin/orch/rs-style', 'origin/main']) {
+  for (const ref of ['origin/orch/rs-modals', 'origin/orch/rs-style', 'origin/chore/restaurant-staging', 'origin/main']) {
     try {
       const mb = execFileSync('git', ['merge-base', 'HEAD', ref], { encoding: 'utf8' }).trim()
       base = execFileSync('git', ['show', `${mb}:src/styles.scss`], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
