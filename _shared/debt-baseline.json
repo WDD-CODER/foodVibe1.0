@@ -1,6 +1,14 @@
 {
   "version": 1,
   "counts": {
+    "default.modal-centered": {
+      "total": 0,
+      "files": {}
+    },
+    "default.modal-scrollable": {
+      "total": 0,
+      "files": {}
+    },
     "default.one-breakpoint-set": {
       "total": 0,
       "files": {}

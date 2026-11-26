@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { styleFindings } from '../lib/style-guard.mjs'
+import { withoutRetiredSheetRules } from '../lib/modal-guard.mjs'
 
 const MARKER = '/* ==== Plan 703 — style unification pieces ==== */'
 
@@ -26,7 +27,7 @@ test('src/styles.scss defines each new piece exactly once', () => {
   }
 })
 
-test('src/styles.scss above the marker is the base file (append-only)', (t) => {
+test('src/styles.scss above the marker is the base file minus the sheet rules plan 757 removed (append-only)', (t) => {
   // The run branch comes first: this style run is cut from a staging branch that already differs from origin/main,
   // so a merge-base with origin/main would count staging's own changes as edits. origin/main is the fallback.
   let base
@@ -46,5 +47,5 @@ test('src/styles.scss above the marker is the base file (append-only)', (t) => {
   }
   const now = readFileSync('src/styles.scss', 'utf8')
   const head = (s) => (s.includes(MARKER) ? s.slice(0, s.indexOf(MARKER)) : s).trimEnd()
-  assert.equal(head(now), head(base))
+  assert.equal(head(now), withoutRetiredSheetRules(head(base)))
 })

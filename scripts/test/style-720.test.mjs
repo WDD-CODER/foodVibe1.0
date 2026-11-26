@@ -3,8 +3,9 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
-import { modalFindings } from '../lib/modal-guard.mjs'
+import { modalFindings, withoutRetiredSheetRules } from '../lib/modal-guard.mjs'
 import { parseStylesheet } from '../styleqa/static-checks.mjs'
+import { readContract } from '../lib/product-defaults.mjs'
 
 const MARKER = '/* ==== Plan 720 — centred popups that scroll ==== */'
 
@@ -18,9 +19,6 @@ function walk(dir, out = []) {
 }
 
 const ALLOW = [
-  { rule: 'bottom-sheet', file: 'src/styles.scss', selector: '.m-sheet', why: 'retired by plan 720: no template sets the class; the hotspot is append-only' },
-  { rule: 'bottom-sheet', file: 'src/styles.scss', selector: '.m-sheet-card', why: 'retired by plan 720: no template sets the class; the hotspot is append-only' },
-  { rule: 'bottom-sheet', file: 'src/styles.scss', selector: '&.as-modal', why: 'dead since plan 711: nothing sets as-modal; the hotspot is append-only' },
   { rule: 'modal-no-scroll', file: 'src/app/pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog.component.scss', selector: ':host ::ng-deep .closing-card', why: 'the card is a column whose list scrolls (scss line 69)' },
   { rule: 'modal-no-scroll', file: 'src/app/shared/quick-edit-product-modal/quick-edit-product-modal.component.scss', selector: ':host ::ng-deep .quick-edit-product-modal', why: 'its panel scrolls (quick-edit-product-panel.component.scss:17-20)' }
 ]
@@ -68,16 +66,46 @@ test('the appended engine rules centre the popup, limit its height and scroll it
   assert.equal(body?.get('overflow-y'), 'auto')
 })
 
-test('no file under src/app mentions m-sheet or as-modal, and the shell has no sheet input', () => {
+test('no file under src/app and not src/styles.scss mentions m-sheet or as-modal, and the shell has no sheet input', () => {
   const hits = walk('src/app')
     .filter((f) => /\.(?:ts|html|scss|css)$/.test(f) && !f.endsWith('.spec.ts'))
     .filter((f) => /m-sheet|as-modal/.test(readFileSync(f, 'utf8')))
   assert.deepEqual(hits, [])
+  assert.ok(!/m-sheet|as-modal/.test(readFileSync('src/styles.scss', 'utf8')), 'src/styles.scss still has a retired sheet rule')
   const shell = readFileSync('src/app/shared/modal-shell/modal-shell.component.ts', 'utf8')
   assert.ok(!/\bsheet\s*=\s*input\b/.test(shell))
 })
 
-test('src/styles.scss above the plan 720 marker is the base file (append-only)', (t) => {
+test('the contract holds modal-centered and modal-scrollable on, with rule checks that catch a sheet and a card that cannot scroll', () => {
+  const { entries, errors } = readContract(process.cwd())
+  assert.deepEqual(errors, [])
+  assert.ok(!entries.some((e) => e.id === 'centred-scrolling-popup'))
+  const triggerOf = (id) => {
+    const entry = entries.find((e) => e.id === id)
+    assert.ok(entry, id)
+    assert.equal(entry.status, 'on', id)
+    assert.notEqual(entry.diff, null, id)
+    assert.equal(entry.onBy, 'the Human, 2026-11-26', id)
+    assert.equal(entry.diff.evidence, '(?!x)x', id)
+    return new RegExp(entry.diff.trigger, 'm')
+  }
+  const centred = triggerOf('modal-centered')
+  for (const hit of ['<app-modal-shell [sheet]="true">', '<div class="x m-sheet">', '.panel.as-modal {', '.my-backdrop {\n  align-items: flex-end;\n}']) {
+    assert.match(hit, centred)
+  }
+  for (const miss of ['.c-modal-overlay { align-items: center; }', '.prep-sheets { align-items: flex-end }']) {
+    assert.doesNotMatch(miss, centred)
+  }
+  const scrollable = triggerOf('modal-scrollable')
+  for (const hit of [':host ::ng-deep .c-modal-card {\n  overflow: hidden;\n}', '.c-modal-body {\n  max-block-size: none;\n}']) {
+    assert.match(hit, scrollable)
+  }
+  for (const miss of ['/* .c-modal-card */\n.y { overflow: hidden; }', '.c-modal-body {\n  overflow-y: auto;\n}']) {
+    assert.doesNotMatch(miss, scrollable)
+  }
+})
+
+test('src/styles.scss above the plan 720 marker is the base file minus the sheet rules plan 757 removed (append-only)', (t) => {
   let base
   let lastError = 'no base ref'
   for (const ref of ['origin/orch/rs-modals', 'origin/orch/rs-style', 'origin/main']) {
@@ -95,5 +123,5 @@ test('src/styles.scss above the plan 720 marker is the base file (append-only)',
   }
   const now = readFileSync('src/styles.scss', 'utf8')
   const head = (s) => (s.includes(MARKER) ? s.slice(0, s.indexOf(MARKER)) : s).trimEnd()
-  assert.equal(head(now), head(base))
+  assert.equal(head(now), withoutRetiredSheetRules(head(base)))
 })
