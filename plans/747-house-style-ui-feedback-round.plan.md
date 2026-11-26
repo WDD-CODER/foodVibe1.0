@@ -89,6 +89,21 @@ one-line content.
 - [human] Card — every row of a list stays on one line (default `app-list-container`): any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line. Use the product list.
 - [human] Card — the stock count hints: on a tablet-width window hover what shows a hint on the desktop; it shows there too. At phone width a tap shows it.
 
+Round two (added 2026-11-26, after Dandan's second validation — see "Round two" under Functional Requirements):
+- [auto] `git grep -n "\[href\]=\"'#' + id\"" -- src/app/pages/dev-catalog` prints nothing.
+- [auto] `git grep -lE "\[attr\.title\]=\"[^\"]*(sign_in_to_use|money_locked_hint)" -- "src/app/**/*.html"` lists only `src/app/pages/cook-view/cook-view.page.html`.
+- [auto] `grep -c "^### disabled-explains-why" _shared/product-defaults.md` prints `1`; that section has `- status: on` and `- turned on: the Human, 2026-11-26`; no other `status` line of the file changed.
+- [auto] `pnpm run test:ci` exits 0 twice in a row (paste both `TOTAL` lines), including the new `src/app/shared/tooltip/disabled-why.directive.spec.ts`.
+- [ui] Catalog chips: open `/dev/catalog` at 1366×768 signed in, click the top chip whose text is `tooltip`; the URL path is still `/dev/catalog` and the section with id `tooltip` is inside the viewport.
+- [ui] A sign of more on a phone: open `/settings` at 375×812 signed in; when the tabs row overflows, an element `.sr-more--next` inside the row's frame is visible and no `.sr-arrow` button exists; after scrolling the row to its end `.sr-more--next` is hidden and `.sr-more--prev` is visible.
+- [ui] Aligned triangles: open `/inventory/list` at 1366×768 signed in; for every visible `.row-status` button the distance from its inline-start edge to its name cell's inline-start edge is the same (within 1px).
+- [ui] Why it is disabled: open `/dev/catalog` at 1366×768 signed in; hover the disabled button in the "disabled with a reason" entry; a `.c-tooltip` with the text of the key `dc_disabled_sample` is visible; clicking the button does not change the entry's counter text.
+- [human] Card — the catalog chips: on the dev catalog press a few of the chips at the top; each scrolls the page to its section and you stay on the catalog.
+- [human] Card — the triangle lines up: on the product list the warning triangles sit in one straight column, whatever the names' lengths; rows without a warning keep their names aligned with the others.
+- [human] Card — a sign of more inside the row: at phone width look at the settings tabs, the metadata row and the menu builder's stage row; a small arrow at the edge inside the container shows there is more, on the side that has more, and disappears at the end. On a wide window the round buttons outside the container are there as before.
+- [human] Card — a disabled button says why (new default `disabled-explains-why`): any page with a disabled button · hover it, or tap it on a phone · a tooltip says why it cannot be used. Use the dev catalog's sample and a signed-out action on the product list.
+- [human] Card — the unit column lines up on the stock count: at tablet and phone width the unit selects sit in one straight column whether or not a row has the "i" button.
+
 ## Execution Mode
 - Parallel: no.
 - Concurrent plans: none — it is built on the run branch.
@@ -120,6 +135,30 @@ src/app/pages/clients/components/client-list/**
 src/app/pages/menu-intelligence/components/event-stage-bar/**
 src/app/pages/metadata-manager/metadata-manager.page.component.scss
 src/app/pages/dev-catalog/**
+src/app/pages/dashboard/components/dashboard-overview/**
+src/app/pages/menu-intelligence/components/pricing-meter/**
+src/app/pages/menu-intelligence/components/menu-dish-row/**
+src/app/pages/menu-library/components/menu-library-list/**
+src/app/pages/metadata-manager/metadata-manager.page.component.html
+src/app/pages/metadata-manager/metadata-manager.page.component.ts
+src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
+src/app/pages/metadata-manager/components/logistics-item-manager/**
+src/app/pages/metadata-manager/components/taxonomy-kind-manager/**
+src/app/pages/venues/components/venue-detail/**
+src/app/pages/venues/components/venue-list/**
+scripts/lib/registry-families.mjs
+docs/workflow-kit/manifest.json
+e2e/ui/751-1.spec.ts
+e2e/ui/751-2.spec.ts
+e2e/ui/751-3.spec.ts
+e2e/ui/751-4.spec.ts
+e2e/ui/651-1.spec.ts
+e2e/ui/599-2.spec.ts
+e2e/ui/601-1.spec.ts
+e2e/ui/601-2.spec.ts
+e2e/ui/611-2.spec.ts
+e2e/ui/743-2.spec.ts
+e2e/ui/657-1.spec.ts
 e2e/ui/747-1.spec.ts
 e2e/ui/747-2.spec.ts
 e2e/ui/747-3.spec.ts
@@ -149,11 +188,14 @@ the exact change, and why it can't be done in-scope; offer `approved: <path>`; t
 append the path to the scope block above and retry.
 
 ## Architecture Impact
-- INV-3: preserves — the metadata manager page's stylesheet changes only how its chip row sits beside the rail's arrows; no rename, save or cascading write is touched.
-- INV-6: preserves — the scope matches the invariant's `*ai*` glob only by the folder name `scroll-rail`; no AI call, key or route is touched.
+- INV-3: preserves — the metadata manager pages change only how a chip row sits beside the rail's arrows and how a disabled button explains itself (round two); no rename, save or cascading write is touched.
+- INV-6: preserves — the scope matches the invariant's `*ai*` glob only by the folder names `scroll-rail` and `venue-detail`; no AI call, key or route is touched.
 
 ## Reuse Check
-- none — no new component, util, pipe, service or `.c-*` class: the plan changes the pieces plans 743–746 built (the rail, `fitColumns`, the fall-column rendering, `appTooltip`) and moves three more hints and one chip row onto existing families (`tooltip`, `chip`).
+- appDisabledWhy directive (src/app/shared/tooltip/disabled-why.directive.ts) — family: none — rung: 4 — why: it extends the `tooltip` family, which plan 744 created on the run branch and which is not on `main` yet, so the registry on `main` has no heading for it; a disabled control cannot show a tooltip reliably, and this keeps the control reachable, blocks its action and says why, built on the shared `[appTooltip]`. Everything else changes pieces plans 743–746 built and moves hints and one chip row onto existing families.
+
+## Adopt Check
+- appDisabledWhy directive (src/app/shared/tooltip/disabled-why.directive.ts) — verdict: skip — why: a thin directive over the app's own shared tooltip; nothing to adopt.
 
 ## Defaults
 
@@ -262,6 +304,108 @@ line or file this plan names was removed, renamed or rewritten).
   sections to match (they stay `proposed`). `docs/brain/component-families.md` lines for the changed inputs and
   `node scripts/inventory.mjs`.
 
+### Round two — Dandan's second validation (2026-11-26)
+He validated the first twelve points on the app served from `fix/house-style-ui-feedback` (commit `2d4a0d46`) and
+asked for five more things, to be built after he restarts his computer. No more questions: a choice he did not
+spell out takes the recommended option and is logged as a `behaviour:` decision.
+
+His words: (1) dev catalog — "there are chips at the top of the catalog. When I'm pressing one of them it directs
+me back to the dashboard. Whenever I'm pressing one of the chips at the top, it scrolls me down to the place in the
+page of the catalog." (2) the warning triangle — "the triangle must always be in the same alignment as the rest, no
+matter the name of the item. Some are closer to the names than others and it looks bad." (3) the sideways row — on a
+smaller screen "it just shows the container and there's no hint in the container that there is more scrolling to
+the left or to the right, in contrast to the scroll area in the catalog, where there is some sort of an arrow
+guiding the user. This needs to be on whatever side-scroll row container we have. If it's a huge screen that has
+space for the buttons outside of the container, the buttons will be outside; if there's not enough space we need
+some sort of an arrow guiding." (4) a new default — "whenever we have a button that is untouchable for whatever
+reason, we need a tooltip showing, when hovering on top of it or clicking on it, why it's disabled." (5) the stock
+count's "i" button — "it needs to be placed in a way that doesn't break the alignment of the measurement unit.
+Right now when this icon adds up it moves the measurement unit to the right."
+
+Verified on `origin/fix/house-style-ui-feedback` 2d4a0d46: `src/app/pages/dev-catalog/dev-catalog.page.html:4` — the
+top chips are `<a class="c-chip c-chip--tag" [href]="'#' + id">`, and with the app's `<base href>` that leaves the
+page; `inventory-product-list.component.html:170-200` — the triangle button sits inline before a centred name
+(`.scss:208-226`); `scroll-rail.component.scss:26-52` — the frame draws only a soft fade ("no chevron: the arrows
+are outside") and at phone width the outside buttons are not rendered; `[disabled]=` appears 238 times in 94
+templates, 25 lines in 13 templates carry a reason as a browser `title` (`'sign_in_to_use'`, `'money_locked_hint'`);
+`stock-count.component.html:225-246` — in narrow mode the "i" button sits beside the unit select only on rows with
+a base amount.
+
+- [ ] **G0 — settle the first round's open checks before any new change:** run `e2e/ui/651-1.spec.ts` against the
+  slot's app. If it fails, find out whether this branch caused it (compare with `origin/orch/house-style-ui`, or
+  read the spec and the top bar): a link missing because of the row container is fixed in the rail or the header; a
+  failure from the QA business's data or module is logged as `- decision: seen:` and the spec is left alone. Run
+  `pnpm run test:ci` twice; if the dish row's "partial badge" tests fail in either run, find the cause (the dish
+  row's field strip sits in the rail since plan 743) and fix it in `menu-dish-row` or the rail. Read the stock count
+  diff once for leftovers of the removed popover.
+- [ ] **G1 — the catalog's chips scroll, they do not navigate:** each top chip becomes a `<button type="button"
+  class="c-chip c-chip--tag">` whose click calls `document.getElementById(id)?.scrollIntoView({ block: 'start',
+  behavior: 'smooth' })` (`'auto'` when the user asked for reduced motion) and moves focus to that section's heading
+  (`tabindex="-1"` on it). No `href`, no router navigation. Sections get a `scroll-margin-block-start` so the top
+  bar does not cover the heading.
+- [ ] **G2 — the warning triangle sits in one column:** the product list's name cell lays its content out as a row
+  that starts at the cell's inline-start edge: a fixed slot (`inline-size: 1.5rem`, `flex: 0 0 auto`) that holds the
+  triangle button or is empty, then the name (and its badges) starting at the same place in every row, text aligned
+  to the start; the name column's header lines up with the names. Nothing else in the cell changes.
+- [ ] **G3 — a sign of more inside the row (`app-scroll-rail`):** replace the frame's plain fade by two elements
+  inside the frame, `.sr-more.sr-more--prev` and `.sr-more.sr-more--next`, laid over the inline-start and inline-end
+  edges: a fade from `var(--bg-glass-strong)` to transparent **and** a 16px chevron in `var(--color-text-muted)`,
+  `opacity` 0 → 0.8 over `var(--dur-base) var(--ease-smooth)`, `pointer-events: none`, `aria-hidden="true"` — the
+  look of `.c-scroll-arrow` turned sideways. Each shows only while its side has more, and only when the outside
+  arrow buttons are not shown for that rail (phone width, or `arrows="never"`); when the outside buttons are shown
+  they are the sign. Every user of the rail gets it with no change in its own files.
+- [ ] **G4 — a disabled control says why:**
+  1. `appDisabledWhy` (`src/app/shared/tooltip/disabled-why.directive.ts`, standalone): `appDisabledWhy =
+     input<string | null>(null)` (the reason, already translated; `null` or empty = enabled). With a reason it sets
+     `aria-disabled="true"` and the class `is-disabled` on the host, keeps the host focusable, swallows `click` and
+     `keydown` Enter / Space in the capture phase (`preventDefault` + `stopImmediatePropagation`) so the control's
+     action never runs, and shows the reason through the shared tooltip (compose `TooltipDirective` with
+     `hostDirectives`, `tooltipOnClick` on): on hover and focus with a mouse or keyboard, on tap on touch. It never
+     sets the native `disabled` attribute. Spec: with a reason the host's click handler does not run, `aria-disabled`
+     is `true`, the tooltip opens on hover, on focus and on click; with `null` the control works and has no
+     `aria-disabled`.
+  2. One engine rule appended to `src/styles.scss`: `.is-disabled` with the same look the native `:disabled` state
+     of `.c-btn-primary`, `.c-btn-ghost` and `.c-icon-btn` has (read those rules and match them), plus `cursor:
+     not-allowed`.
+  3. Convert the twelve templates that carry a reason as a `title` on a disabled control (every such folder except
+     cook-view, whose page class is growth-frozen): `[disabled]="cond"` + `[attr.title]="cond ? reason : null"`
+     becomes `[appDisabledWhy]="cond ? reason : null"`. Where the control is also disabled for a reason that has no
+     text (for example `isSaving_()`), keep the native `[disabled]` for that reason only.
+  4. Dev catalog: an entry "disabled with a reason": a `c-btn-primary` with `[appDisabledWhy]="'dc_disabled_sample'
+     | translatePipe"` and a counter that would go up on click. New key `dc_disabled_sample` — Hebrew value
+     `אי אפשר ללחוץ: זו רק הדגמה` (appended to `dictionary.json`).
+  5. The default he asked for — a new section in `_shared/product-defaults.md`, in the file's field shape:
+     `### disabled-explains-why` · `- status: on` · `- rule: A button or control that cannot be used shows, on hover
+     and on tap, a tooltip that says why.` · `- applies when: custom` · `- plan words:
+     \b(?:disabled|locked|read-only|cannot be (?:pressed|used|edited)|greyed out)\b` · `- how: the appDisabledWhy
+     directive (src/app/shared/tooltip/, family tooltip), which keeps the control reachable, blocks its action and
+     shows the reason in the shared tooltip; never a bare disabled attribute when a reason exists` · `- check: card`
+     · `- card: any page with a disabled button · hover it, or tap it on a phone · a tooltip says why it cannot be
+     used` · `- exceptions: a control disabled only while its own action is running (saving, loading); declare
+     exception — why: <one line>` · `- turned on: the Human, 2026-11-26`. His sentence in point (4) is the word that
+     turns it on ("I wanna add another default rule"). No other `status` line of the file changes.
+  6. The lint for new code: append to `REUSE_RULES` in `scripts/lib/registry-families.mjs` a rule `id:
+     'house-disabled-why'`, `family: 'tooltip'`, `files: ['src/app/**/*.html']`, `pattern: /\[disabled\]=/`, `hint:
+     'a control that can be disabled says why: use [appDisabledWhy]="reason" (src/app/shared/tooltip/), or keep
+     [disabled] only while its own action runs'`. The existing bindings are recorded in `_shared/debt-baseline.json`
+     the way `node scripts/debt-baseline.mjs` allows (a new kind with `--add-kind`, or the raised count of
+     `reuse-copy.tooltip`); paste its line.
+- [ ] **G5 — the stock count's unit column lines up:** in narrow mode the unit cell is a two-part row: the unit
+  select (or the unit chips), then a fixed slot (`inline-size: 2rem`, `flex: 0 0 auto`) that holds the "i" button or
+  is empty; the slot exists on every row in narrow mode. Desktop mode is unchanged.
+- [ ] **Scripts and docs (round two):** `e2e/ui/751-1.spec.ts` … `751-4.spec.ts` for the four round-two `[ui]`
+  items; update `743-2` and `747-3` if the signs change what they assert. `docs/agent/house-style.md`:
+  `sideways-row` (a sign of more inside the container whenever the outside buttons are not shown), `tooltip` (a
+  disabled control says why; the directive; the count of `[disabled]` bindings the lint finds in `gaps today`).
+  `docs/brain/component-families.md`: the directive under `### tooltip`, the signs under `### sideways-row`;
+  `node scripts/inventory.mjs`.
+- [ ] **Hand-over:** when every check passes, commit and push `fix/house-style-ui-feedback`, push it onto
+  `orch/house-style-ui` (fast-forward), serve that branch in the slot, and hand Dandan the round-two cards and the
+  first-round cards he has not answered. Nothing is merged into `main` without his `merge it`.
+
+Left out of round two: giving a reason to the other 200-odd disabled controls that have none today (counted by the
+new lint; an alignment plan); the cook view's disabled hints.
+
 ## UI/UX Notes
 - Page recipe: recipe-list — the six list pages keep the recipe; `Behaviour: column-carousel`, `sideways-row`,
   `tooltip`, `motion` (no typed time), `keyboard-focus`.
@@ -282,6 +426,16 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A8: Give the menu builder's stage row the app's chips, and the stock count its hints from tablet width up — F11, F12 — src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/inventory/components/stock-count/**
 - [ ] A9: Update the screen scripts, the house rules and the registry to what was built — the specs, the three rules, the proposed defaults' lines, the registry and inventory — e2e/ui/**, docs/agent/house-style.md, _shared/product-defaults.md, docs/brain/component-families.md, docs/brain/inventory.md
 - [ ] A10: Run every check of this plan and hand Dandan the ten cards — outputs under Execution Notes — this plan file
+- [ ] B1: Settle what the first round left unverified before changing anything — G0: the failing top-bar script, the dish row's two tests, the stock count leftovers — e2e/ui/651-1.spec.ts, src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [ ] B2: Make the catalog's top chips scroll to their section instead of leaving the page — G1 — src/app/pages/dev-catalog/**
+- [ ] B3: Put the product list's warning triangle in one straight column — G2 — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] B4: Show a small arrow inside the row's container when there is more and no outside button — G3 with the rail's spec — src/app/shared/scroll-rail/**
+- [ ] B5: Build the way a disabled control says why — G4.1, G4.2: the directive with its spec, the is-disabled look — src/app/shared/tooltip/**, src/styles.scss
+- [ ] B6: Use it on every button that already had a reason, and show it in the catalog — G4.3, G4.4 — the twelve listed component folders, src/app/pages/dev-catalog/**, public/assets/data/dictionary.json
+- [ ] B7: Record the new default Dandan asked for and warn on new bare disabled controls — G4.5, G4.6 — _shared/product-defaults.md, scripts/lib/registry-families.mjs, _shared/debt-baseline.json
+- [ ] B8: Keep the stock count's unit column straight — G5 — src/app/pages/inventory/components/stock-count/**
+- [ ] B9: Check the four screens with scripts and write the changes into the rules — the four ui specs, the house rules, the registry, the inventory — e2e/ui/**, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] B10: Run every check, push onto the run branch, serve it and hand Dandan the cards of both rounds — outputs under Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: the pieces of plans 743–746 on `origin/orch/house-style-ui`.

@@ -839,6 +839,16 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A8: Give the menu builder's stage row the app's chips, and the stock count its hints from tablet width up — F11, F12 — src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/inventory/components/stock-count/**
 - [ ] A9: Update the screen scripts, the house rules and the registry to what was built — the specs, the three rules, the proposed defaults' lines, the registry and inventory — e2e/ui/**, docs/agent/house-style.md, _shared/product-defaults.md, docs/brain/component-families.md, docs/brain/inventory.md
 - [ ] A10: Run every check of this plan and hand Dandan the ten cards — outputs under Execution Notes — this plan file
+- [ ] B1: Settle what the first round left unverified before changing anything — G0: the failing top-bar script, the dish row's two tests, the stock count leftovers — e2e/ui/651-1.spec.ts, src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [ ] B2: Make the catalog's top chips scroll to their section instead of leaving the page — G1 — src/app/pages/dev-catalog/**
+- [ ] B3: Put the product list's warning triangle in one straight column — G2 — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] B4: Show a small arrow inside the row's container when there is more and no outside button — G3 with the rail's spec — src/app/shared/scroll-rail/**
+- [ ] B5: Build the way a disabled control says why — G4.1, G4.2: the directive with its spec, the is-disabled look — src/app/shared/tooltip/**, src/styles.scss
+- [ ] B6: Use it on every button that already had a reason, and show it in the catalog — G4.3, G4.4 — the twelve listed component folders, src/app/pages/dev-catalog/**, public/assets/data/dictionary.json
+- [ ] B7: Record the new default Dandan asked for and warn on new bare disabled controls — G4.5, G4.6 — _shared/product-defaults.md, scripts/lib/registry-families.mjs, _shared/debt-baseline.json
+- [ ] B8: Keep the stock count's unit column straight — G5 — src/app/pages/inventory/components/stock-count/**
+- [ ] B9: Check the four screens with scripts and write the changes into the rules — the four ui specs, the house rules, the registry, the inventory — e2e/ui/**, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] B10: Run every check, push onto the run branch, serve it and hand Dandan the cards of both rounds — outputs under Execution Notes — this plan file
 
 ### Plan 748 — Restaurant menu and month sales: filters in the panel, clear columns, icons, visible month arrows
 - [ ] A1: Move the menu's type chips and removed toggle into the list's filter panel, like the products list — panel state, collapsible «סוג מנה» category, set filter, clear button, VAT note as the net title's hint — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
