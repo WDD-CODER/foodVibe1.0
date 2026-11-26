@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "3.10.1"
+    "version": "3.10.2"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v3.10.1",
-  "commit": "94bca5e9ca27c3e2ca92bf4c3197db1a037f7bd8",
+  "ref": "v3.10.2",
+  "commit": "fdf3b03471bd4e0953091600f81865024f390e8c",
   "packs": [
     "angular",
     "node-express"
@@ -1563,7 +1563,7 @@
       "base": ".kit/base/.claude/commands/fix.md.base"
     },
     ".claude/references/prd-template.md": {
-      "sha256": "6efb4e9e424da0eb3ad163396283b3b943ca2e57daae3a7d04fb5a7c116c473d",
+      "sha256": "cf4f29eeb8773cf30a26c6dd67470cd03b9970bd46ad9bea97189c4713371d67",
       "base": ".kit/base/.claude/references/prd-template.md.base"
     },
     ".claude/settings.json": {
