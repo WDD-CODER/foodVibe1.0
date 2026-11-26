@@ -30,7 +30,8 @@ const NEXT_PREFIXES = ['ב', 'ל', 'ו']
 const PLAIN_DAYS = new Set(['שלישי', 'רביעי', 'חמישי', 'שישי', 'ששי'])
 /** Friday evening, not Saturday. */
 const EVE_WORDS = new Set(['ערב', 'בערב'])
-const SABBATH_RE = /^[בלו]?ה?שבת$/
+/** Saturday as it counts bare. */
+const SABBATH = new Set(['שבת', 'השבת'])
 
 const own = (table: Record<string, number>, key: string): number | undefined =>
   Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined
@@ -63,7 +64,8 @@ function dayMonthDate(day: number, month: number, year: string | undefined, toda
 function hebrewDay(tokens: string[], i: number): number | undefined {
   const token = tokens[i]
   const before = tokens[i - 1] ?? ''
-  if (SABBATH_RE.test(token) && EVE_WORDS.has(before)) return undefined
+  // `בערב בשבת` is Saturday: only the construct form (`ערב שבת`, `ערב השבת`) means Friday.
+  if (SABBATH.has(token) && EVE_WORDS.has(before)) return undefined
   const bare = own(HEBREW_DAYS, token)
   if (bare !== undefined && DAY_WORDS.has(before)) return bare
   const prefix = token.charAt(0)
@@ -75,7 +77,7 @@ function hebrewDay(tokens: string[], i: number): number | undefined {
   }
   if (prefix === 'ב' && prefixed !== undefined && rest !== 'שני') return prefixed
   if (PLAIN_DAYS.has(token) || (prefix === 'ל' && PLAIN_DAYS.has(rest))) return own(HEBREW_DAYS, token) ?? prefixed
-  if (token === 'שבת' || token === 'השבת') return HEBREW_DAYS['שבת']
+  if (SABBATH.has(token)) return HEBREW_DAYS['שבת']
   return undefined
 }
 
