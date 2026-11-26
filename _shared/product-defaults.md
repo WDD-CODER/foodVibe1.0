@@ -146,3 +146,25 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-22
+
+### modal-centered
+
+- status: on
+- rule: Every popup opens in the middle of the screen at every screen size; no popup slides up from the bottom or drops from the top.
+- applies when: custom
+- plan words: \b(?:modals?|popups?|pop-ups?|dialogs?|bottom[- ]sheets?)\b
+- how: app-modal-shell (src/app/shared/modal-shell/, family modal-shell): it has no sheet input and the engine keeps .c-modal-overlay at align-items: center (the plan 720 block in src/styles.scss); the full proof is scripts/lib/modal-guard.mjs (bottom-sheet, top-sheet, sheet-binding) run by scripts/test/style-720.test.mjs
+- check: files: src/**/*.html, src/**/*.scss; trigger: \[sheet\]|\bm-sheet(?:-card)?\b|\bas-modal\b|^[ \t]*[^\n/*{}]*(?:overlay|backdrop)[^\n{}]*\{[^{}]*align-items:\s*(?:flex-)?end; evidence: (?!x)x
+- exceptions: a working panel that must leave the page visible is shown inside the page, not as a popup (the floor editor phone panel, plan 721); a small box beside a control follows anchored-popup; declare exception — why: one line
+- turned on: the Human, 2026-11-26
+
+### modal-scrollable
+
+- status: on
+- rule: Every popup is never taller than the screen and its content scrolls inside it, so the title and the buttons can always be reached on a phone, a tablet and a desktop.
+- applies when: custom
+- plan words: \b(?:modals?|popups?|pop-ups?|dialogs?|bottom[- ]sheets?)\b
+- how: app-modal-shell (src/app/shared/modal-shell/, family modal-shell) with the engine height limit --modal-max-block on .c-modal-card (dvh, safe areas, keyboard; the plan 720 block in src/styles.scss): put the title, .c-modal-body and .c-modal-actions straight inside the shell and the body scrolls; a card sized through cardClass keeps max-block-size at or under var(--modal-max-block) and a part that scrolls; the full proof is scripts/lib/modal-guard.mjs (modal-no-scroll) and the engine values, both in scripts/test/style-720.test.mjs
+- check: files: src/app/**/*.scss; trigger: ^[ \t]*[^\n/*{}]*\.c-modal-(?:card|body)\b[^\n{}]*\{[^{}]*(?:overflow(?:-y)?:\s*(?:hidden|visible)|max-(?:block-size|height):\s*none); evidence: (?!x)x
+- exceptions: a popup card whose own inner part scrolls is listed with its reason in the allow list of scripts/test/style-720.test.mjs; declare exception — why: one line
+- turned on: the Human, 2026-11-26
