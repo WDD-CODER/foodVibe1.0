@@ -95,7 +95,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [capability] — verdict: skip — why: [one line]
 
 ## Defaults
-<!-- One line per `on` product default the plan triggers (docs/project/product-defaults.md); none triggered: leave empty.
+<!-- One line per `on` product default the plan triggers (_shared/product-defaults.md); none triggered: leave empty.
      A `check: card` default also needs a [human] Done-when item with the contract's card text.
      Checked by node scripts/scope-check.mjs --defaults --plan=<path>. -->
 - [default-id] — applies — how: [the piece the contract names]
