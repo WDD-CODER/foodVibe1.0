@@ -175,6 +175,7 @@ server/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 server/test/frontdesk-eval.test.js
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
