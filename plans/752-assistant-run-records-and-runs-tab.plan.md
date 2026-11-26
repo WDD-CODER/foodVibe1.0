@@ -186,6 +186,15 @@ docs/agent/standards-backend.md
 docs/restaurant/restaurant-map.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+server/test/admin-business-delete.test.js
+server/test/admin-platform.test.js
+server/test/collections.test.js
+server/test/cross-business.test.js
+server/test/helpers/app.js
+server/test/invoice-memory.test.js
+src/app/core/guards/pending-changes-routes.spec.ts
+src/app/core/services/async-storage.service.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 New files: `shared/schemas/entities/assistant-run.schema.ts`, `server/services/frontdesk-runs.js`,
