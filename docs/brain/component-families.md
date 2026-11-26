@@ -908,7 +908,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-turn — `keyFor`, `fixedText`, `turnAnswerSchema`, `buildTurnBody`, `runTurn`, `applyGuardrails`, `askTurnModel` (plan 679)
 
 - Status: stable — server only
-- Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`.
+- Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`. plan 751: between the model's answer and the rules, `runTurn` calls `fillWhen` (`server/services/frontdesk-when.js`, with `currentGuestText`; family date-words).
 - Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, runTurn, decide, applyGuardrails, askTurnModel.
 - When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
 - Known copies: none.
@@ -932,7 +932,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-guardrails — `preCheck`, `applyGuardrails`, `GUARD_WORDS` (plan 689)
 
 - Status: stable — server only
-- Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`). plan 751: a time in a reply is checked against every fact line (R-25).
+- Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`). The time check of applyGuardrails — plan 751: a time in a reply is checked against every fact line (R-25).
 - Pieces: preCheck, applyGuardrails, GUARD_WORDS.
 - When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
 - Known copies: none.
