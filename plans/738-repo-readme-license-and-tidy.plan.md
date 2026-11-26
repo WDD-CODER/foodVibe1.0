@@ -59,7 +59,7 @@ CI badge.
 - [auto] `grep -c "All rights reserved" LICENSE` prints at least `1`; `grep -c '"name": "foodvibe"' package.json` prints `1`.
 - [auto] `node scripts/kit-manifest-check.mjs` exits 0 (root files the kit inventories are unchanged).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/738-repo-readme-license-and-tidy.plan.md` → `ARCH: ok`; `node scripts/scope-check.mjs --reuse --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0.
-- [auto] `node scripts/scope-check.mjs --diff=origin/main --plan=plans/738-repo-readme-license-and-tidy.plan.md` exits 0.
+- [auto] Only scoped files changed — the run's own scope check against its base branch (no separate command: a check pinned to origin/main fails inside a run whose branch holds other plans' files).
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
 - [human] Card — read the README on GitHub as a recruiter: open the branch's README on github.com; in under two minutes you can say what FoodVibe does, open the live demo from the link, see the screenshots, and nothing reads as unfinished or explains how to copy the workflow.

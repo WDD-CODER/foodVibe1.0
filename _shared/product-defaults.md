@@ -202,3 +202,26 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - check: card
 - card: any page with an icon button or an explained control · hover it with the mouse (near the screen's edges too), then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen; on a touch screen a tap shows it
 - exceptions: the product nutrition box (src/app/shared/nutrition-badge/) keeps the look it already has; declare `exception — why: <one line>`
+
+### row-action-icons
+
+- status: on
+- rule: Every edit, remove and delete action in a list row or card uses the app's shared icon buttons (pencil to edit, trash to remove or delete), never a text button.
+- applies when: list
+- how: src/styles.scss .c-icon-btn with the Lucide icons pencil / trash-2 (danger tone for remove), inside src/app/shared/row-actions-menu/ (app-row-actions-menu) where the row already uses a row menu - as on the products list
+- check: card
+- card: any list page with row actions · look at a row's edit and remove actions · they are the pencil and trash icon buttons used on the products list, with no text buttons
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-26
+
+### live-summary
+
+- status: on
+- rule: A summary or totals box on a screen where the user types numbers recalculates live from what is typed, before saving; saving only keeps the data.
+- applies when: custom
+- plan words: \b(summary|totals?|figures|סיכום|תמונת)\b
+- how: a computed() over the page's draft signals (not the saved record) fed to the summary component — the pattern plan 749 adds as liveMonthOf(open_, draft_) in src/app/pages/monthly-plan/month-draft.ts
+- check: card
+- card: a screen with a summary box · change one typed number without saving · the summary box shows the new result at once
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-26
