@@ -92,9 +92,10 @@ You need Node.js 22 or later, [pnpm](https://pnpm.io) and a local MongoDB.
 
 2. Copy `server/.env.example` to `server/.env` and fill it in. Every setting is described in
    [server/.env.example](server/.env.example).
-3. Start the server, and in a second terminal start the app:
+3. Build the shared schemas and start the server, then start the app in a second terminal:
 
    ```bash
+   pnpm run build:schemas
    pnpm --dir server run dev:local
    ```
 
