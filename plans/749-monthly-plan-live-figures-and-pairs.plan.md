@@ -351,3 +351,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
     lines to name — reverse: no hint in that mode.
   - `behaviour:` a filled chip keeps its teal background while it is open or hovered — reverse: drop the
     `.mpp__chip.teal` rule.
+- Builder 2026-11-26 (fix round 1, `rev-1`): an opened filled box now selects its value again after NgModel writes it
+  (`month-pair.component.ts`, `toggle()`), so typing replaces the amount. New pair spec case «opening a filled box
+  selects its value»: before the fix → `Expected '030000' to be '30000'`, 1 FAILED, 13 SUCCESS; after it,
+  `ng test --include="src/app/pages/monthly-plan/**/*.spec.ts"` → exit 0, `TOTAL: 79 SUCCESS`.

@@ -82,7 +82,10 @@ export class MonthPairComponent {
     if (!open) return
     // Render now so the focus stays inside the press (a phone opens its keyboard only then).
     this.changes_.detectChanges()
-    this.host_.nativeElement.querySelector<HTMLInputElement>(`#${CSS.escape(`${this.idPrefix()}-${side}`)}`)?.focus()
+    const box = this.host_.nativeElement.querySelector<HTMLInputElement>(`#${CSS.escape(`${this.idPrefix()}-${side}`)}`)
+    box?.focus()
+    // NgModel writes a new box's value one microtask later, after the select on focus: select it again then.
+    queueMicrotask(() => box?.select())
   }
 
   protected close(side: PairSide, chip: HTMLButtonElement, event: Event): void {

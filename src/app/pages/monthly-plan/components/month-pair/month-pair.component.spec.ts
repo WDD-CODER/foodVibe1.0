@@ -84,6 +84,19 @@ describe('MonthPairComponent (plan 749)', () => {
     expect(box('plan')!.value).toBe('12000')
   })
 
+  it('opening a filled box selects its value, so typing replaces it', async () => {
+    setup({ plan: 12000, actual: 0 })
+    for (const side of ['plan', 'actual'] as const) {
+      press(side)
+      await settle()
+      // Types at the caret, as a keyboard does: a selected value is replaced, an unselected one is added to.
+      document.execCommand('insertText', false, '30000')
+      expect(box(side)!.value).toBe('30000')
+    }
+    expect(plans).toEqual([30000])
+    expect(actuals).toEqual([30000])
+  })
+
   it('Escape in the box closes it, reports that it was left and returns to the chip', () => {
     setup()
     press('actual')
