@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { MenuDishDataService } from '@services/menu-dish-data.service'
@@ -12,6 +12,8 @@ import { UserMsgService } from '@services/user-msg.service'
 import type { MenuDish } from '@models/menu-dish.model'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
 import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
@@ -21,8 +23,7 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { MenuDishDialogComponent } from './components/menu-dish-dialog/menu-dish-dialog.component'
 
-/** The course chip that shows every dish / the one that shows dishes with no course. */
-export const ALL_COURSES = '__all__'
+/** The type chip that shows dishes with no course. */
 export const NO_COURSE = '__none__'
 
 /** Plan 725: the restaurant's standing menu — dishes with price, net price and cost per portion. Owner only. */
@@ -56,17 +57,27 @@ export class RestaurantMenuPage {
   private readonly business = inject(BusinessService).business_
 
   protected readonly isStaff_ = this.permission.isStaff_
-  protected readonly allCourses = ALL_COURSES
   protected readonly noCourse = NO_COURSE
   protected readonly searchQuery_ = signal('')
-  protected readonly courseFilter_ = signal<string>(ALL_COURSES)
+  /** The picked types (course keys, `NO_COURSE`); empty = every dish. A type no longer offered is dropped. */
+  protected readonly courseFilter_ = linkedSignal<string[], ReadonlySet<string>>({
+    source: () => this.courseChips_(),
+    computation: (offered, previous) =>
+      new Set([...(previous?.value ?? [])].filter((key) => key === NO_COURSE || offered.includes(key)))
+  })
   protected readonly showRemoved_ = signal(false)
   protected readonly isLoading_ = signal(true)
   protected readonly loadFailed_ = this.data.loadFailed_
   protected readonly isFormOpen_ = signal(false)
   protected readonly editing_ = signal<MenuDish | null>(null)
 
-  /** The VAT note under the title: the rate, or «עוסק פטור». */
+  private readonly panel_ = useResponsivePanelState('restaurant-menu')
+  protected readonly isPanelOpen_ = this.panel_.isPanelOpen_
+  protected readonly togglePanel = this.panel_.togglePanel
+  protected readonly filterCategories = useCollapsibleCategories()
+  protected readonly hasActiveFilters_ = computed(() => this.courseFilter_().size > 0 || this.showRemoved_())
+
+  /** The VAT note, the hint of the net price column title: the rate, or «עוסק פטור». */
   protected readonly vatNote_ = computed(() => {
     const settings = this.business()?.settings
     if (settings?.dealerType === 'patur') return this.translation.translate('restaurant_menu_vat_note_patur')
@@ -92,7 +103,7 @@ export class RestaurantMenuPage {
 
   protected readonly rows_ = computed(() => {
     const q = normalizeHebrew(this.searchQuery_().trim())
-    const course = this.courseFilter_()
+    const types = this.courseFilter_()
     const order = this.courseOrder_()
     const rank = (c?: string) => {
       const i = c ? order.indexOf(c) : -1
@@ -100,20 +111,19 @@ export class RestaurantMenuPage {
     }
     return this.dishes_()
       .filter((d) => (this.showRemoved_() ? d.active === false : d.active !== false))
-      .filter((d) => course === ALL_COURSES || (course === NO_COURSE ? !d.course : d.course === course))
+      .filter((d) => types.size === 0 || types.has(d.course || NO_COURSE))
       .filter((d) => !q || normalizeHebrew(d.name).includes(q))
       .sort((a, b) => rank(a.course) - rank(b.course) || a.name.localeCompare(b.name, 'he'))
       .map((dish) => {
         const cost = this.cost.costOf(dish)
         const net = this.cost.netPrice(dish)
         const left = this.cost.leftPerDish(dish)
-        const costed = cost.state === 'costed' && cost.costPerPortion != null
         return {
           dish,
           cost,
           net,
           left,
-          foodCostPct: costed && net ? formatPct1((cost.costPerPortion! / net) * 100) : null
+          profitPct: left != null && net ? formatPct1((left / net) * 100) : null
         }
       })
   })
@@ -135,6 +145,19 @@ export class RestaurantMenuPage {
 
   protected courseLabel(key: string | undefined): string {
     return key ? this.translation.translate(key) : ''
+  }
+
+  protected toggleType(key: string): void {
+    this.courseFilter_.update((set) => {
+      const next = new Set(set)
+      if (!next.delete(key)) next.add(key)
+      return next
+    })
+  }
+
+  protected clearFilters(): void {
+    this.courseFilter_.set(new Set())
+    this.showRemoved_.set(false)
   }
 
   protected openAdd(): void {

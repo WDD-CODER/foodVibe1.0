@@ -11,23 +11,6 @@
     text-align: center;
   }
 
-  /* Filter chips + the VAT note sit above the column heads and span every column. */
-  .rm-row__filters {
-    grid-column: 1 / -1;
-
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: flex-start;
-
-    text-transform: none;
-  }
-
-  .rm-row__vat-note {
-    inline-size: 100%;
-    margin: 0;
-    font-weight: 400;
-  }
-
   .rm-row__state {
     grid-column: 1 / -1;
 
@@ -59,10 +42,6 @@
     overflow: hidden;
     min-inline-size: 0;
     text-overflow: ellipsis;
-  }
-
-  .rm-row__pct {
-    color: var(--color-text-muted);
   }
 
   @media (max-width: $break-phone-max) {

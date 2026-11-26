@@ -5,7 +5,6 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ActivatedRoute, Router, RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { MenuDishDataService } from '@services/menu-dish-data.service'
-import { MenuDishCostService } from '@services/menu-dish-cost.service'
 import { DishSalesMonthDataService } from '@services/dish-sales-month-data.service'
 import { PermissionService } from '@services/permission.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -18,12 +17,10 @@ import type { DishReturnReasonLine, DishSalesRow } from '@models/dish-sales-mont
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { currentMonthKey, isMonthKey, monthKeyLabel, shiftMonthKey } from 'src/app/core/utils/month-key.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
-import { formatMoney } from 'src/app/core/engine/rounding'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { ReturnReasonsDialogComponent } from './components/return-reasons-dialog/return-reasons-dialog.component'
 
 /** What the owner typed for one dish: `null` = not entered, 0 = a real zero (N-M2). */
@@ -48,7 +45,6 @@ const EMPTY_DRAFT: Draft = { sold: null, returned: null, reasons: [] }
     ListShellComponent,
     EmptyStateComponent,
     LoaderComponent,
-    PartialCostBadgeComponent,
     ReturnReasonsDialogComponent
   ],
   templateUrl: './dish-sales.page.html',
@@ -58,7 +54,6 @@ const EMPTY_DRAFT: Draft = { sold: null, returned: null, reasons: [] }
 export class DishSalesPage {
   private readonly dishData = inject(MenuDishDataService)
   private readonly months = inject(DishSalesMonthDataService)
-  private readonly cost = inject(MenuDishCostService)
   private readonly permission = inject(PermissionService)
   private readonly metadata = inject(MetadataRegistryService)
   private readonly taxonomy = inject(TaxonomyStore)
@@ -103,21 +98,11 @@ export class DishSalesPage {
       const i = c ? order.indexOf(c) : -1
       return i < 0 ? order.length : i
     }
-    const frozen = new Map((this.stored_()?.frozen?.dishes ?? []).map((d) => [d.menuDishId, d] as const))
-    const closed = this.isClosed_()
     return this.dishData
       .allDishes_()
       .filter((d) => !d.deletedAt && (d.active !== false || stored.has(d._id)))
       .sort((a, b) => rank(a.course) - rank(b.course) || a.name.localeCompare(b.name, 'he'))
-      .map((dish) => {
-        const frozenDish = closed ? frozen.get(dish._id) : undefined
-        return {
-          dish,
-          removed: dish.active === false,
-          cost: this.cost.costOf(dish),
-          frozenCost: frozenDish ? (frozenDish.costPerPortion ?? null) : undefined
-        }
-      })
+      .map((dish) => ({ dish, removed: dish.active === false }))
   })
 
   protected readonly progress_ = computed(() => {
@@ -262,12 +247,10 @@ export class DishSalesPage {
   }
 
   protected reasonsText(id: string): string {
-    const d = this.draftOf(id)
-    if (!d.returned) return this.translation.translate('dish_sales_reasons')
     return this.translation
       .translate('dish_sales_reasons_count')
       .replace('{{given}}', String(this.given(id)))
-      .replace('{{returned}}', String(d.returned))
+      .replace('{{returned}}', String(this.draftOf(id).returned ?? 0))
   }
 
   protected canOpenReasons(id: string): boolean {
@@ -345,10 +328,6 @@ export class DishSalesPage {
   }
 
   // ── display ─────────────────────────────────────────────────────────────
-
-  protected money(n: number | null | undefined): string {
-    return n == null ? '—' : formatMoney(n)
-  }
 
   protected courseLabel(dish: MenuDish): string {
     return dish.course ? this.translation.translate(dish.course) : ''

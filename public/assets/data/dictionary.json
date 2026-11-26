@@ -2880,6 +2880,11 @@
     "return_reasons_add": "הוספת סיבה",
     "add_new_return_reason": "הוסף סיבה חדשה",
     "return_reasons_ok": "אישור",
-    "dish_sales_reasons_cleared": "הסיבות נמחקו כי לא הוזנו החזרות"
+    "dish_sales_reasons_cleared": "הסיבות נמחקו כי לא הוזנו החזרות",
+    "menu_dish_col_type": "סוג מנה",
+    "menu_dish_col_net": "מחיר ללא מע\"מ",
+    "menu_dish_col_profit": "רווח",
+    "menu_dish_col_profit_pct": "רווח באחוזים",
+    "menu_dish_no_type": "ללא סוג מנה"
   }
 }
