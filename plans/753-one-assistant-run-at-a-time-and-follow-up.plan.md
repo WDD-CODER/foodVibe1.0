@@ -63,7 +63,7 @@ is still working sends nothing and writes nothing; several messages in a row all
   `=== UNANSWERED (data) ===` and `no answer yet: 3`. "Seven messages during a run" → one follow-up whose
   `trigger.messageIds` holds the 5 newest ids; the data block says `no answer yet: 5`.
 - [auto] same file, "take over mid-run": the first call is held open with the `COMPLETE` request answer of
-  `frontdesk-turn.test.js`; the conversation is taken over (`PUT /api/v1/conversations/:id/takeover`); the call
+  `server/test/frontdesk-turn.test.js`; the conversation is taken over (`PUT /api/v1/conversations/:id/takeover`); the call
   answers → zero outbound messages, zero `requests`, the conversation has no `requestId`, `suggestion`, `lowTurns`
   or `assistantFailed`, status `human`; one run document with `outcome: 'dropped'`, `reason: 'taken_over'`, step
   `ai` `ok`, steps `guardrails`, `tables`, `decide` `skipped`, step `send` `stopped` with `out.action: 'none'`; one
@@ -174,6 +174,7 @@ docs/agent/standards-backend.md
 server/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+server/test/frontdesk-eval.test.js
 ```
 
 New files: `server/services/frontdesk-lease.js`, `server/test/frontdesk-lease.test.js`,
@@ -510,7 +511,7 @@ drift: check that `runTurn` still starts the run with `startRun` and finishes it
   `waited: true` with `lastInboundAt > at` → `{ do: 'leave', why: 'newer' }`; `waited: true` with `lastInboundAt ===
   at` → `{ do: 'run' }`; `holder: true`, `waited: false`, `at: now - 2000` → `{ do: 'wait', ms: 4000 }` and with
   `at: now - 9000` → `ms: 0`.
-- [ ] `server/test/frontdesk-one-run.test.js`: built like `frontdesk-turn.test.js` (`buildTestApp`, `captureLogs`,
+- [ ] `server/test/frontdesk-one-run.test.js`: built like `server/test/frontdesk-turn.test.js` (`buildTestApp`, `captureLogs`,
   the stubbed `fetch`, `seedBusiness`, a level-1 profile with the `TABLE` request kind), messages sent with
   `handleInbound(db, { businessId: 'b1', channel: 'sim', waId, text, providerMessageId, at: Date.now() })` — the
   call `server/routes/sim.js:54-57` makes — and the real `runTurn` as the turn handler (`setTurnHandler(runTurn)`

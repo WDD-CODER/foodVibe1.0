@@ -229,6 +229,10 @@ docs/restaurant/restaurant-map.md
 server/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+server/test/gemini-client.test.js
+server/test/ai-usage.test.js
+server/test/frontdesk-lease.test.js
+server/test/frontdesk-eval.test.js
 ```
 
 No new file. `server/services/frontdesk-runs.js`, `server/test/frontdesk-runs.test.js` and everything under
