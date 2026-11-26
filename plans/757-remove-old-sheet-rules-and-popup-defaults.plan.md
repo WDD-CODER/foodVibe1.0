@@ -320,11 +320,11 @@ command on one line; the arguments are in single quotes and hold no apostrophe)
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
-- [ ] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
+- [x] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
+- [x] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
 - [ ] A3: Make the guard forbid the removed selectors and teach the two append-only checks this one approved removal — new export withoutRetiredSheetRules with three fixture cases, three allow entries deleted, the stylesheet added to the no-mention test, both append-only assertions compare with the base minus the retired rules — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs, scripts/test/style-720.test.mjs, scripts/test/style-703.test.mjs
-- [ ] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
-- [ ] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
+- [x] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
+- [x] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
 - [ ] A6: Run every check of this plan and hand the Human the two equipment looks — every auto item of Goals with its exact output into Execution Notes; then the two human checks as cards — no file
 
 ## Technical Considerations
@@ -363,3 +363,20 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: `--date 2026-11-26` is passed so `turned on:` carries the day of the Human's words, not the build day.
 - behaviour: this plan's own `## Defaults` has no row for `modal-centered` / `modal-scrollable` — they are not in the contract when the plan is saved, and a row for an unknown id fails the defaults gate.
 - behaviour: A4 comes after A2 (see Technical Considerations), although the turn-on was the first thing asked for.
+
+### Build, 2026-11-26 (orch-builder, run rs-console)
+- Step 0: `REALITY: drift` — `79d691f7` ok · `73be8a0a` ok · `711cd215` ok · `a34fc0e3` ok · `9e339e05` ok · `bbf020bf` ok · `def248b0` ok · `30626b01` ok (contract, baseline, registry, inventory and stylesheet additions only; no symbol or line this plan names was removed or renamed).
+- A1 safety check: the three files exist and `src/styles.scss:3205` holds the plan 720 marker.
+- A1 search 1 (`m-sheet|as-modal`, src): `modal-shell.component.spec.ts:128`, `:129`; `src/styles.scss:1416`, `:1855`, `:1859`, `:2654`, `:2659`. As expected.
+- A1 search 2 (`[sheet]`, src): no match.
+- A1 search 3 (`sheet = input`, modal-shell): no match.
+- A1 search 4 (e2e, server, public, scripts): only `scripts/lib/modal-guard.mjs`, `scripts/test/modal-guard.test.mjs`, `scripts/test/style-720.test.mjs`. As expected.
+- A2: `src/styles.scss` 3243 → 3183 lines; equals `withoutRetiredSheetRules` of the file before (line ends normalised); a second call changes nothing; no `m-sheet` / `as-modal` left.
+- A4: both `add` commands printed their `DEFAULTS: on` line and `DEBT: added default.<id> at 0`.
+- A3 (NOT ticked): all code of the sub-task is written, but both append-only tests fail. Cause: their base lookup is `origin/orch/rs-modals`, `origin/orch/rs-style`, `origin/main`; the first two no longer exist, so the base is the merge-base with `origin/main` (`8bc8ca9d`), which lacks the staging stylesheet changes. The file as it was before this plan already differed from that base above both markers. A3 also says the base lookup does not change, so the first auto item and `test:scripts` cannot pass as written. Checked in memory: with the merge-base of `origin/chore/restaurant-staging` (`103352f3`) or of `origin/orch/rs-console` (`a7e0bd47`) both assertions hold.
+- evidence: `node --test` on modal-guard, style-720, style-703 → 22 tests, 20 pass, 2 fail (the two append-only tests).
+- evidence: all `scripts/test/*.test.mjs` → 269 tests, 266 pass, 3 fail: the two append-only tests, and `the launcher starts the installed server …` (mcp-mongo-local), which passed 5/5 when its file was rerun once.
+- evidence: `pnpm run build` → 0; `pnpm run lint` → 0 (0 errors, 72 warnings); `pnpm run test:ci` → 0, 3242 SUCCESS.
+- evidence: product-defaults list → both `on` lines, no `bad contract`; `debt-baseline --show` → `default.modal-centered 0 → 0`, `default.modal-scrollable 0 → 0`; `inventory --check` → ok.
+- evidence: `lint:reuse`, `lint:icons`, `lint:no-native-select`, `reuse-lint --check-registry`, `breadcrumbs-check`, `plan-ledger-check`, `override-check`, `ci-scope-check` → 0; kit manifest check → ok; `scope-check --diff=origin/orch/rs-console` → `SCOPE: ok`; `kit-checks` → `KIT_CHECKS: ok (6 checks)` after the registry line also named the export as the Reuse Check row words it; `log-query --since=plan-start --level=error` → 0, `SKIP: no database configured`.
+- open for Dandan: the two `[human]` equipment checks.
