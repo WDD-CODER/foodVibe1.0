@@ -72,6 +72,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 src/app/core/components/header/header.component.ts
 src/app/core/components/header/header.component.spec.ts
 src/app/core/components/breadcrumbs.md
+src/app/appRoot/app.component.spec.ts
 ```
 
 ## Read Scope
