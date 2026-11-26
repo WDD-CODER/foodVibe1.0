@@ -1,3 +1,5 @@
+@use '../../seven-digit-box' as *;
+
 @layer components.labour-card {
   :host {
     display: block;
@@ -24,10 +26,6 @@
     letter-spacing: normal;
   }
 
-  .lc__box {
-    inline-size: max-content;
-  }
-
   .lc__muted {
     margin: 0;
     color: var(--color-text-muted);
@@ -36,8 +34,6 @@
   }
 }
 
-/* Outside the layer so it beats the unlayered `.c-input-wrapper input` flex rule. */
-.lc__box input {
-  flex: none;
-  inline-size: 9ch;
+.lc__box {
+  @include seven-digit-box;
 }

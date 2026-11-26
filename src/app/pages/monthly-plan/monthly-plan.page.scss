@@ -1,3 +1,5 @@
+@use './seven-digit-box' as *;
+
 @layer components.monthly-plan-page {
   :host {
     display: block;
@@ -72,17 +74,6 @@
     inline-size: 100%;
   }
 
-  .mp-field__row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .mp-box {
-    inline-size: max-content;
-  }
-
   .mp-field {
     display: grid;
     gap: var(--space-2);
@@ -108,10 +99,16 @@
     color: var(--color-text-muted);
   }
 
+  .mp-field__row,
   .mp-checks {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-4);
+  }
+
+  /* A target box and its out-of-band tag share one line. */
+  .mp-field__row {
+    align-items: center;
   }
 
   .mp-check {
@@ -125,8 +122,6 @@
   }
 }
 
-/* Outside the layer so it beats the unlayered `.c-input-wrapper input` flex rule: room for seven digits. */
-.mp-box input {
-  flex: none;
-  inline-size: 9ch;
+.mp-box {
+  @include seven-digit-box;
 }

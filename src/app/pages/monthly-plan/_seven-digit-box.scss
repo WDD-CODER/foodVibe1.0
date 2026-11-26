@@ -1,0 +1,10 @@
+/* Plan 749: a short amount box, room for seven digits. Include it on the number box wrapper, outside any @layer so it
+   beats the unlayered `.c-input-wrapper input` flex rule. */
+@mixin seven-digit-box {
+  inline-size: max-content;
+
+  input {
+    flex: none;
+    inline-size: 9ch;
+  }
+}
