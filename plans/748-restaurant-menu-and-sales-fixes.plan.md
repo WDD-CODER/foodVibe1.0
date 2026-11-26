@@ -252,14 +252,14 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Move the menu's type chips and removed toggle into the list's filter panel, like the products list — panel state, collapsible «סוג מנה» category, set filter, clear button, VAT note as the net title's hint — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
-- [ ] A2: Rename the menu columns, show net prices as plain numbers and add a profit percent column — new keys, profitPct, grid templates — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
-- [ ] A3: Use the app's edit, remove and restore icons on each menu row instead of text buttons — c-icon-btn in app-row-actions-menu — src/app/pages/restaurant-menu/restaurant-menu.page.html
-- [ ] A4: Prove the menu fixes with unit tests — filters in the panel, multi-type and no-type filter, clear, titles, no «נטו», profit 75 and 75.0%, icon buttons — src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts
-- [ ] A5: Put the month arrows above the sales list where nothing covers them, and keep fill-zero and save visible — shell-pagination pager, one actions wrapper — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.html, .scss
-- [ ] A6: Drop the cost column from the month sales page and show reasons only on dishes that had returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.ts, .html, .scss
-- [ ] A7: Prove the sales fixes with unit tests, including one that fails while the save button covers the arrows — elementFromPoint with the real list shell, no cost cell, reasons button only after returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts
-- [ ] A8: Add the Hebrew words, update the pages map and run every automatic check — keys of UI/UX Notes; paste outputs under Execution Notes — public/assets/data/dictionary.json, src/app/pages/breadcrumbs.md
+- [x] A1: Move the menu's type chips and removed toggle into the list's filter panel, like the products list — panel state, collapsible «סוג מנה» category, set filter, clear button, VAT note as the net title's hint — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
+- [x] A2: Rename the menu columns, show net prices as plain numbers and add a profit percent column — new keys, profitPct, grid templates — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
+- [x] A3: Use the app's edit, remove and restore icons on each menu row instead of text buttons — c-icon-btn in app-row-actions-menu — src/app/pages/restaurant-menu/restaurant-menu.page.html
+- [x] A4: Prove the menu fixes with unit tests — filters in the panel, multi-type and no-type filter, clear, titles, no «נטו», profit 75 and 75.0%, icon buttons — src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts
+- [x] A5: Put the month arrows above the sales list where nothing covers them, and keep fill-zero and save visible — shell-pagination pager, one actions wrapper — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.html, .scss
+- [x] A6: Drop the cost column from the month sales page and show reasons only on dishes that had returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.ts, .html, .scss
+- [x] A7: Prove the sales fixes with unit tests, including one that fails while the save button covers the arrows — elementFromPoint with the real list shell, no cost cell, reasons button only after returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts
+- [x] A8: Add the Hebrew words, update the pages map and run every automatic check — keys of UI/UX Notes; paste outputs under Execution Notes — public/assets/data/dictionary.json, src/app/pages/breadcrumbs.md
 
 ## What happens when
 - The sales page loads with a closed month: the pager still moves between months; the closed banner stays in the
@@ -307,3 +307,15 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the month arrows move to the pager row above the column titles instead of staying in the header — reverse: keep them in the header inside one wrapper with fill-zero and save.
 - behaviour: the «העלות לפי מחירי היום…» line goes with the cost column — reverse: keep the line.
 - behaviour: the sales page's course column is titled «סוג מנה» too — reverse: keep «קורס» there.
+- Builder 2026-11-26, Step 0: 711cd215 ok, a34fc0e3 ok (neither is on this branch; they remove or rename nothing this plan names).
+- behaviour: the menu's desktop actions column is `6rem`, not the plan's `3rem`: at `3rem` a 1369px test browser squeezed the two icon buttons to 20px and the edit button ran past its cell (`edit end: Expected 66.5 to be less than or equal 64.5`) — reverse: set the last track of `gridTemplate` back to `3rem`.
+- behaviour: the sales page's `div.ds-row__actions` is laid out by the engine class `.c-form-actions` (gap 0.75rem), not a page-local rule with `var(--space-2)`, which the diff check rejects as a duplicate style block — reverse: a page-local flex rule in `dish-sales.page.scss`.
+- «נקה סינון» runs through the shared `useListControls().clearAll`; the page method is `clearFilters` (the debt check counts page methods named `clearAllFilters`).
+- Red first: the new arrow spec on the old sales template → `dish-sales-prev is covered`, `dish-sales-next is covered`, `dish-sales-save is covered` (TOTAL: 2 FAILED, 15 SUCCESS; the second failure is the pager spec).
+- Both menu specs also run in a 1369px browser (temporary Karma config, removed): the sales arrow spec passed there too.
+- `pnpm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors, 69 warnings); `pnpm run test:ci` → exit 0, `TOTAL: 2923 SUCCESS`.
+- `pnpm run lint:icons` → exit 0 (113 icons, 0 violations); `pnpm run lint:no-native-select` → exit 0.
+- `scope-check.mjs --arch` → `ARCH: ok INV-1, INV-4, INV-none`; `--reuse` → exit 0; `--diff=origin/orch/biz-fixes` → `SCOPE: ok`.
+- `kit-checks.mjs --base origin/orch/biz-fixes` → `KIT_CHECKS: ok (6 checks)`; `kit-manifest-check.mjs --root .` → 0 unclassified.
+- `breadcrumbs-check.mjs` → `BREADCRUMBS: clean`; `plan-ledger-check.mjs` → OK; `override-check.mjs` → ok; `log-query.mjs --since=plan-start --level=error` → `SKIP: no database configured`.
+- `ci-scope-check.mjs --checkout-branch` → exit 0 (skipped: the branch name reads empty).
