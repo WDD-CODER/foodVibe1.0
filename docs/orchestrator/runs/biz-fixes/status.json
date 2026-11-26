@@ -1,0 +1,519 @@
+{
+  "run": "biz-fixes",
+  "branch": "orch/biz-fixes",
+  "base": "main",
+  "startedAt": "2026-11-26T08:43:03.763Z",
+  "mainShaAtStart": "7acf46c8a9641a554ddc543a11aad5a2c5809341",
+  "plans": {
+    "748": {
+      "nnn": "748",
+      "title": "Restaurant menu and month sales: filters in the panel, clear columns, icons, visible month arrows",
+      "branch": "feat/748-restaurant-menu-and-sales",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T15:03:05.129Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T16:23:19.854Z"
+        }
+      },
+      "humanItems": [
+        "Signed in as `demo_host` (business `demo_restaurant`), open «תפריט המסעדה»: nothing sits above the column",
+        "On the same page the column titles read «שם המנה», «סוג מנה», «מחיר כולל מע\"מ», «מחיר ללא מע\"מ»,",
+        "On a dish row the actions are a pencil and a trash icon like on «ספקים»: the pencil opens the dish, the",
+        "Open «מכירות החודש»: above the column titles the month «נובמבר 2026» sits between two arrows; the right",
+        "On «מכירות החודש» there is no «עלות למנה» column; a dish with an empty or 0 «הוחזרו» shows nothing in the",
+        "the list's page with no items · open the page · a message says the list is empty — here: a filter that matches nothing on «תפריט המסעדה» says «אין מנות שמתאימות לחיפוש», and «מכירות החודש» of a business with no dishes still says «עוד אין מנות בתפריט».",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: with the server stopped, «מכירות החודש» shows «לא הצלחנו לטעון את המכירות» and «נסה שוב», and the month arrows are still there.",
+        "any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line — here: both pages on a phone; the month arrows stay on one line above the rows.",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed — here: the trash icon on a «תפריט המסעדה» row, then «ביטול»: the dish is still listed.",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: on «תפריט המסעדה», hovering the «מחיר ללא מע\"מ» column title shows «המחירים כוללים מע\"מ 18%; נטו = המחיר בלי מע\"מ», and no such line sits above the list."
+      ],
+      "history": [
+        {
+          "at": "2026-11-26T08:47:56.997Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T08:47:57.293Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:45:36.093Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:46:28.372Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:46:29.067Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:46:29.502Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:50:00.174Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T09:50:03.233Z",
+          "state": "parked",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T15:03:04.691Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T15:03:05.131Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:12:58.627Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:23:02.082Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:23:19.856Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:25:09.445Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:19:23.906Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "748",
+          "title": "Restaurant menu and month sales: filters in the panel, clear columns, icons, visible month arrows",
+          "branch": "feat/748-restaurant-menu-and-sales",
+          "state": "parked",
+          "round": 1,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T08:47:57.289Z"
+            },
+            "builder fix": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T09:46:29.499Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 6.1,
+          "sha": "",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 3451.3,
+              "tokens": {
+                "input": 9021046,
+                "output": 83516
+              },
+              "exit": 0
+            },
+            {
+              "stage": "builder fix",
+              "model": "sonnet",
+              "seconds": 210.1,
+              "tokens": {
+                "input": 294349,
+                "output": 9102
+              },
+              "exit": 0
+            }
+          ],
+          "roundCauses": [
+            "round 1: gate: node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root ., node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-checks.mjs\" --base origin/orch/biz-fixes --plan plans/748-restaurant-menu-and-sales-fixes.plan.md",
+            "round 1: builder blocked: The worktree C:/coding projects/Cursor/foodVibe1.0-orch-biz-fixes-748 is no longer a git worktree (`git rev-parse --is-inside-work-tree` -> exit 128), so kit-manifest-check (exit 1) and kit-checks (exit 2) fail again on rerun and the project checks cannot be run"
+          ],
+          "reason": "hand-off file: handoff --reset-base: no common base of feat/748-restaurant-menu-and-sales and origin/orch/biz-fixes in C:\\coding projects\\Cursor\\foodVibe1.0-orch-biz-fixes-748",
+          "park": {
+            "at": "2026-11-26T09:50:04.051Z",
+            "reason": "hand-off file: handoff --reset-base: no common base of feat/748-restaurant-menu-and-sales and origin/orch/biz-fixes in C:\\coding projects\\Cursor\\foodVibe1.0-orch-biz-fixes-748"
+          },
+          "parkBranch": "park/biz-fixes-748"
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.4,
+      "sha": "c0c40ad668f4c5faeee9ecf469d533b6909362d8",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 4186.5,
+          "tokens": {
+            "input": 9243666,
+            "output": 73938
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 106.2,
+          "tokens": {
+            "input": 719529,
+            "output": 10176
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "c66940e2e693c63cae37b7d9bcbc45f5b4ca07b9"
+    },
+    "749": {
+      "nnn": "749",
+      "title": "Monthly plan: live figures, forecast/actual chips, a dense page and gross-only staff cost",
+      "branch": "feat/749-monthly-plan-live-figures",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T18:09:57.688Z"
+        }
+      },
+      "humanItems": [
+        "Signed in as `demo_host`, on «תכנון חודשי» pick «אוקטובר 2026» (actual staff cost missing). In «עלות צוות» press «בפועל» and type 40000, do not save: «תמונת החודש» shows «עלות צוות» בפועל ‎₪50,000.00 at once, and «רווח» בפועל changes with it.",
+        "Same month: under «הוצאות קבועות» press «עלויות משוערות», press «בפועל» and type 30000: «הוצאות קבועות» בפועל in «תמונת החודש» becomes ‎₪30,000.00 at once; press «עלויות מפורטות»: it goes back to the sum of the lines.",
+        "Same month: in «עלויות מפורטות» press «הוסף שורה», name it «הנהלת חשבונות», press its «בפועל» and type 1500: the fixed figure grows by 1,500 at once; press the trash icon on that line, confirm with «הסר»: it shrinks back.",
+        "Pick «נובמבר 2026» (forecast only): every row shows two gray chips «תחזית» (teal, with its amount) and «בפועל» (gray). Press «בפועל» of «הכנסות»: the box shows the forecast amount in faded text, and hovering it says «מולא אוטומטית מהתחזית. הקלידו כדי לשנות.»; «תמונת החודש» still shows «לא הוזן» for הכנסות בפועל. Type a number: it shows as normal text and the chip turns teal. Press the small «בפועל» chip: the box closes back to the chip.",
+        "On «נובמבר 2026», look at the page on the computer: each amount box is short (about 7 digits wide) and the cards sit side by side in a grid, not one wide box per line.",
+        "On «אוקטובר 2026» hover a «חלקי» tag in «תמונת החודש»: the hint lists what is missing (for example «חסר: עלות צוות בפועל»); hover «הוצאות קבועות: חלקי» under the figures: it names the lines without an actual.",
+        "the page with the delete button · press delete, then cancel · a confirmation appears and nothing is removed — on «תכנון חודשי», «אוקטובר 2026», press the trash icon on «שכירות»: «להסיר את השורה?» asks; «ביטול» leaves the line and the figures unchanged.",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — on «תכנון חודשי» (a page, not a dialog), hover the «רווח נקי» target box: «מקובל בישראל: 5–10%» shows as a hover hint and no norm text sits beside the box.",
+        "Open «אוגוסט 2026» (full month): its staff cost shows the gross amount and «עלות מעביד (הערכה)» beside it, and the «עלות צוות» figure is the same as before this change (within one agora)."
+      ],
+      "history": [
+        {
+          "at": "2026-11-26T09:50:17.678Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:23:58.731Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:23:58.918Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:39:57.404Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:09:57.689Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:10:00.684Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "749",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "shares files with parked 748",
+          "freeDiskGb": 6.1
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 14,
+      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 957.9,
+          "tokens": {
+            "input": 3919363,
+            "output": 87976
+          },
+          "exit": 1,
+          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+        },
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 2.8,
+          "tokens": {
+            "input": 0,
+            "output": 0
+          },
+          "exit": 1,
+          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+        }
+      ]
+    },
+    "750": {
+      "nnn": "750",
+      "title": "Signing out works from the dashboard again",
+      "branch": "feat/750-dashboard-sign-out-fix",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {},
+      "humanItems": [
+        "Sign in as `demo_host`: the app opens «לוח בקרה». Without opening another page, press your name at the top",
+        "On a phone (or a narrow window), sign in, stay on «לוח בקרה», open «פרופיל» in the bottom bar and press",
+        "Sign in, open «מלאי», press your name: you are signed out as before (the other pages still work).",
+        "On «לוח בקרה» open the metadata tab, change a coefficient without saving, press your name: the app asks"
+      ],
+      "history": [
+        {
+          "at": "2026-11-26T09:52:13.831Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:44.306Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "750",
+          "title": "Signing out works from the dashboard again",
+          "branch": "feat/750-dashboard-sign-out-fix",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-biz-fixes-750 is on (no branch), not feat/750-dashboard-sign-out-fix",
+          "freeDiskGb": 6
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 14
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-26T08:47:56.613Z",
+      "plan": "748",
+      "text": "the folder foodVibe1.0-orch-biz-fixes-748 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T09:46:12.333Z",
+      "plan": "748",
+      "text": "the folder foodVibe1.0-orch-biz-fixes-748 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T09:46:26.619Z",
+      "plan": "748",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed first; runs after the fix: node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm"
+    },
+    {
+      "at": "2026-11-26T09:46:26.959Z",
+      "plan": "748",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed first; runs after the fix: pnpm run build"
+    },
+    {
+      "at": "2026-11-26T09:46:27.262Z",
+      "plan": "748",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed first; runs after the fix: pnpm run lint"
+    },
+    {
+      "at": "2026-11-26T09:46:27.525Z",
+      "plan": "748",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed first; runs after the fix: pnpm run test:ci"
+    },
+    {
+      "at": "2026-11-26T09:46:27.766Z",
+      "plan": "748",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed first; runs after the fix: pnpm run lint:icons"
+    },
+    {
+      "at": "2026-11-26T09:46:28.017Z",
+      "plan": "748",
+      "text": "GATE: not run — node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed first; runs after the fix: pnpm run lint:no-native-select"
+    },
+    {
+      "at": "2026-11-26T09:46:28.634Z",
+      "plan": "748",
+      "text": "node \"C:/coding projects/Cursor/foodvibe1.0/scripts/kit-manifest-check.mjs\" --root . failed before the slow checks: back to the builder (a bounce, not counted in maxFixRounds); the next gate runs every check"
+    },
+    {
+      "at": "2026-11-26T09:49:59.890Z",
+      "plan": "748",
+      "text": "builder left undone (round 0): gate-1: not fixed; it needs the worktree recreated, with no code or manifest change shown to be needed; gate-2: not fixed; it needs the worktree recreated; CHECKS: only the two failing checks were rerun; the rest were not run because the folder is incomplete"
+    },
+    {
+      "at": "2026-11-26T09:50:16.919Z",
+      "plan": "748",
+      "text": "parked: no folder — nothing to save"
+    },
+    {
+      "at": "2026-11-26T15:03:04.105Z",
+      "plan": "748",
+      "text": "the folder foodVibe1.0-orch-biz-fixes-748 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T16:25:32.746Z",
+      "plan": "748",
+      "text": "the folder foodVibe1.0-orch-merge-biz-fixes was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T17:23:58.536Z",
+      "plan": "749",
+      "text": "the folder foodVibe1.0-orch-biz-fixes-749 was installed (root, scripts, server)"
+    }
+  ],
+  "attempts": 2,
+  "phase": "stopped",
+  "freeDiskGb": 14,
+  "updatedAt": "2026-11-26T18:11:47.937Z",
+  "stops": [
+    {
+      "at": "2026-11-26T09:25:01.652Z",
+      "reason": "environment: disk full, Human restarting the PC to free space (2026-11-26)",
+      "attempt": 1
+    },
+    {
+      "at": "2026-11-26T18:11:44.962Z",
+      "reason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "attempt": 2
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "748",
+      "type": "behaviour",
+      "text": "behaviour: the menu's desktop actions column is 6rem, not the plan's 3rem, because at 3rem the two icon buttons were squeezed to 20px and spilled out of their cell — reverse: set the last track of gridTemplate in restaurant-menu.page.html back to 3rem",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "748",
+      "type": "behaviour",
+      "text": "behaviour: the sales page's fill-zero and save wrapper is laid out by the shared .c-form-actions class (gap 0.75rem) instead of a page rule with var(--space-2), which the diff check rejects as a duplicate style block — reverse: add a page-local flex rule in dish-sales.page.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "748",
+      "type": "seen",
+      "text": "seen: src/app/pages/restaurant-menu/dish-sales/dish-sales.page.html:7 — the sliders (filter) button on «מכירות החודש» does nothing, as the page has no filters (open /restaurant-menu/sales and press it)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "748",
+      "type": "behaviour",
+      "text": "behaviour: the desktop actions column on the menu page is 6.5rem, not the plan's 3rem, because two 2.25rem icon buttons plus the cell padding do not fit in 3rem (worked out from the styles, not seen in a browser) — reverse: set the last desktop grid track back to 3rem",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "748",
+      "type": "behaviour",
+      "text": "behaviour: a picked type that no dish uses any more is dropped from the menu filter, as the plan's 'What happens when' line says — reverse: keep the key until «נקה סינון»",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "748",
+      "type": "removes",
+      "text": "removes: on a phone the VAT note can no longer be read, because it is now the hint of a column title that is hidden on phones — reverse: show vatNote_() as a line at the top of the filter panel",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-26T18:11:47.935Z",
+  "stopReason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+}
