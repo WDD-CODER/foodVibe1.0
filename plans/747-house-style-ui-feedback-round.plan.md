@@ -91,7 +91,7 @@ one-line content.
 
 Round two (added 2026-11-26, after Dandan's second validation — see "Round two" under Functional Requirements):
 - [auto] `git grep -n "\[href\]=\"'#' + id\"" -- src/app/pages/dev-catalog` prints nothing.
-- [auto] `git grep -lE "\[attr\.title\]=\"[^\"]*(sign_in_to_use|money_locked_hint)" -- "src/app/**/*.html"` lists only `src/app/pages/cook-view/cook-view.page.html`.
+- [auto] `git grep -lE "\[attr\.title\]=\"[^\"]*(sign_in_to_use|money_locked_hint)" -- "src/app/**/*.html"` prints nothing (the cook view is included by his amendment).
 - [auto] `grep -c "^### disabled-explains-why" _shared/product-defaults.md` prints `1`; that section has `- status: on` and `- turned on: the Human, 2026-11-26`; no other `status` line of the file changed.
 - [auto] `pnpm run test:ci` exits 0 twice in a row (paste both `TOTAL` lines), including the new `src/app/shared/tooltip/disabled-why.directive.spec.ts`.
 - [ui] Catalog chips: open `/dev/catalog` at 1366×768 signed in, click the top chip whose text is `tooltip`; the URL path is still `/dev/catalog` and the section with id `tooltip` is inside the viewport.
@@ -174,6 +174,8 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 _shared/product-defaults.md
 _shared/debt-baseline.json
+src/app/**
+e2e/**
 ```
 
 ## Read Scope
@@ -403,8 +405,58 @@ a base amount.
   `orch/house-style-ui` (fast-forward), serve that branch in the slot, and hand Dandan the round-two cards and the
   first-round cards he has not answered. Nothing is merged into `main` without his `merge it`.
 
-Left out of round two: giving a reason to the other 200-odd disabled controls that have none today (counted by the
-new lint; an alignment plan); the cook view's disabled hints.
+#### Round two — Dandan's amendments before the build (2026-11-26, after his restart)
+His words: "give back the color to the triangle - orange yellow that we had before!" · "The other 200 or so
+disabled buttons - I do want to add it already to all the other buttons not active" · "The cook view's disabled -
+no, I do want you to include also! Don't mind the freeze in this case!" These three replace the earlier "left out"
+line and the cook-view exclusion in G4.3.
+
+- [ ] **G2b — the triangle's colour:** `.row-status` on the product list uses `color: var(--border-warning)`
+  (`#f59e0b`, the orange-yellow the incomplete mark had before plan 747) instead of `var(--color-warning)`. One
+  colour for every status kind.
+- [ ] **G4.3b — the cook view is included:** its three `!isLoggedIn()` controls with a `title` reason move onto
+  `[appDisabledWhy]` like the other twelve templates. The page's growth freeze does not stop this change (his
+  word): if a size or debt count for `cook-view.page.*` rises, raise that count in `_shared/debt-baseline.json` and
+  log it.
+- [ ] **G6 — every control that is not active says why (all of `src/app/**/*.html`, 238 bindings in 94 templates):**
+  1. Sort each `[disabled]="…"` condition into its parts. A part that only says "this control's own action is
+     running" (`isSaving_()`, `isBusy_()`, `busy()`, `busyId_() === id`, `status_() === 'sending'`, `isLoading_()`,
+     `isSubmitting_()`, `isParsing_()`, `isUploading…`, `isCreating_()`, `isImporting_()` and the like) stays a
+     native `[disabled]` with no tooltip — the default's own exception. Every other part gets a reason:
+     `[disabled]="busy || other"` becomes `[disabled]="busy"` + `[appDisabledWhy]="other ? (reason | translatePipe)
+     : null"`; with several other parts the first true one gives the reason (a small `computed` in the class when
+     the template would get long).
+  2. Reasons reuse existing keys first: `sign_in_to_use` (`!isLoggedIn()`), `no_permission` (`!canEdit…`),
+     `money_locked_hint` (`!canEditMoney_()`), `fill_required_fields` (an invalid form or `!canSave…` /
+     `!isValid()`). New keys, appended to `dictionary.json` under the prefix `why_`, in plain Hebrew that says what
+     to do first — for example `why_nothing_to_save` "אין שינויים לשמור", `why_write_first` "קודם צריך לכתוב
+     משהו", `why_choose_first` "קודם צריך לבחור", `why_first_in_list` "זה כבר הראשון ברשימה", `why_last_in_list`
+     "זה כבר האחרון ברשימה", `why_at_min` / `why_at_max`, `why_nothing_counted`, `why_locked` only where no more
+     exact reason exists (a lock has a cause: say it). Each new key and where it is used is listed under Execution
+     Notes for his grading.
+  3. Controls: a native `<button>` or link takes the directive as built in G4.1. For `<input>`, `<textarea>` and
+     `<select>` the directive, with a reason, sets `aria-disabled`, the `is-disabled` class and `readOnly` (input,
+     textarea) or swallows `mousedown` / `keydown` (select) instead of the native `disabled`, so the hover and tap
+     still reach it; spec cases for each. A shared component that passes a caller's `disabled` input to an inner
+     control (`disabled()`, 17 bindings: counter, date-field, time-field, custom-select, custom-multi-select,
+     approve-stamp, rating-stars and the like) gets an optional `disabledWhy = input<string | null>(null)` that it
+     hands to `[appDisabledWhy]` on the inner control; a call site that disables it for a reason passes the reason.
+     `[disabled]="true"` demo or placeholder controls get a reason that says what they are.
+  4. Unit specs and screen scripts that read the native `disabled` property of a converted control read
+     `aria-disabled="true"` instead (Playwright's `toBeDisabled` already accepts it). A spec that proves the
+     action does not run stays or is added where the control guards money, a delete or a send.
+  5. The lint `house-disabled-why` then finds only the own-action bindings; record that count in the debt baseline
+     and in the rule's `gaps today`.
+- Done when (amendments): [auto] `git grep -nE "\[attr\.title\]=\"[^\"]*(sign_in_to_use|money_locked_hint)" --
+  "src/app/**/*.html"` prints nothing (this replaces the round-two line that allowed cook-view). [auto] every
+  `[disabled]=` binding left in `src/app/**/*.html` has only own-action parts — the builder pastes the grouped list
+  (`condition × count`) under Execution Notes and it holds no permission, sign-in, lock, validity, selection or
+  empty-text condition. [auto] `ng build` exits 0 and `pnpm run test:ci` exits 0 twice. [human] Card — every
+  inactive button says why: on five pages of his choice (for example the stock count, the menu builder, the
+  metadata manager, settings, the cook view signed out) hover or tap a greyed-out button; a tooltip says why, in
+  words that tell him what to do first; a button that is greyed only while it saves shows nothing.
+- Scope for the amendments (the Human's request covers every template; the Planner adds the paths): `src/app/**`,
+  `e2e/**`.
 
 ## UI/UX Notes
 - Page recipe: recipe-list — the six list pages keep the recipe; `Behaviour: column-carousel`, `sideways-row`,
@@ -435,6 +487,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] B7: Record the new default Dandan asked for and warn on new bare disabled controls — G4.5, G4.6 — _shared/product-defaults.md, scripts/lib/registry-families.mjs, _shared/debt-baseline.json
 - [ ] B8: Keep the stock count's unit column straight — G5 — src/app/pages/inventory/components/stock-count/**
 - [ ] B9: Check the four screens with scripts and write the changes into the rules — the four ui specs, the house rules, the registry, the inventory — e2e/ui/**, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] B11: Give the warning triangle its orange-yellow back and move the cook view's three hints onto the shared piece — G2b, G4.3b — src/app/pages/inventory/components/inventory-product-list/**, src/app/pages/cook-view/**
+- [ ] B12: Teach the shared piece to work on text fields, selects and shared controls that are disabled by their caller — G6.3 with spec cases — src/app/shared/tooltip/**, src/app/shared/**
+- [ ] B13: Give every inactive control in the app its reason, leaving plain only the ones that are just busy — G6.1, G6.2, G6.4, G6.5 — src/app/**, e2e/**, public/assets/data/dictionary.json, _shared/debt-baseline.json
 - [ ] B10: Run every check, push onto the run branch, serve it and hand Dandan the cards of both rounds — outputs under Execution Notes — this plan file
 
 ## Technical Considerations

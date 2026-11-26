@@ -848,6 +848,9 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] B7: Record the new default Dandan asked for and warn on new bare disabled controls — G4.5, G4.6 — _shared/product-defaults.md, scripts/lib/registry-families.mjs, _shared/debt-baseline.json
 - [ ] B8: Keep the stock count's unit column straight — G5 — src/app/pages/inventory/components/stock-count/**
 - [ ] B9: Check the four screens with scripts and write the changes into the rules — the four ui specs, the house rules, the registry, the inventory — e2e/ui/**, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] B11: Give the warning triangle its orange-yellow back and move the cook view's three hints onto the shared piece — G2b, G4.3b — src/app/pages/inventory/components/inventory-product-list/**, src/app/pages/cook-view/**
+- [ ] B12: Teach the shared piece to work on text fields, selects and shared controls that are disabled by their caller — G6.3 with spec cases — src/app/shared/tooltip/**, src/app/shared/**
+- [ ] B13: Give every inactive control in the app its reason, leaving plain only the ones that are just busy — G6.1, G6.2, G6.4, G6.5 — src/app/**, e2e/**, public/assets/data/dictionary.json, _shared/debt-baseline.json
 - [ ] B10: Run every check, push onto the run branch, serve it and hand Dandan the cards of both rounds — outputs under Execution Notes — this plan file
 
 ### Plan 748 — Restaurant menu and month sales: filters in the panel, clear columns, icons, visible month arrows
