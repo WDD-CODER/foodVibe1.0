@@ -9,18 +9,13 @@
       "nnn": "751",
       "title": "The assistant understands \"מחר\" by itself and no longer hands an opening-hours answer to the staff",
       "branch": "feat/751-assistant-date-words-and",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "build",
       "models": {
-        "builder": {
-          "model": "sonnet",
-          "tier": "build",
-          "at": "2026-11-26T16:23:41.833Z"
-        },
         "reviewer": {
           "model": "sonnet",
-          "at": "2026-11-26T18:11:14.690Z"
+          "at": "2026-11-26T19:43:49.539Z"
         }
       },
       "humanItems": [
@@ -82,6 +77,31 @@
           "at": "2026-11-26T18:11:22.758Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T19:41:55.182Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T19:43:39.510Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T19:43:49.540Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T19:44:50.030Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T19:46:57.946Z",
+          "state": "merged",
+          "round": 0
         }
       ],
       "earlier": [
@@ -123,63 +143,100 @@
             "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
             "branch": "park/rs-console-751"
           }
-        }
-      ],
-      "escalations": [
+        },
         {
-          "step": "resumed after: builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
-          "check": "(not given)"
+          "nnn": "751",
+          "title": "The assistant understands \"מחר\" by itself and no longer hands an opening-hours answer to the staff",
+          "branch": "feat/751-assistant-date-words-and",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T16:23:41.833Z"
+            },
+            "reviewer": {
+              "model": "sonnet",
+              "at": "2026-11-26T18:11:14.690Z"
+            }
+          },
+          "escalations": [
+            {
+              "step": "resumed after: builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+              "check": "(not given)"
+            }
+          ],
+          "replan": "no — (not given)",
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 13.9,
+          "sha": "fdc27b92fa4f22946bfd2b21392b5338af82c7c6",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 3321.6,
+              "tokens": {
+                "input": 914736,
+                "output": 5705
+              },
+              "exit": 0
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 4.8,
+              "tokens": {
+                "input": 0,
+                "output": 0
+              },
+              "exit": 1,
+              "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+            },
+            {
+              "stage": "reviewer",
+              "model": "sonnet",
+              "seconds": 4.9,
+              "tokens": {
+                "input": 0,
+                "output": 0
+              },
+              "exit": 1,
+              "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+            }
+          ],
+          "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
         }
       ],
-      "replan": "no — (not given)",
       "tiers": [
         "build"
       ],
-      "freeDiskGb": 13.9,
-      "sha": "fdc27b92fa4f22946bfd2b21392b5338af82c7c6",
+      "sha": "a7e0bd47056b3f3605eeeb64f19db67f7b14832b",
+      "freeDiskGb": 12.5,
+      "checkedHead": "2392be91bd306227d045396dd72a839249a8be06",
       "calls": [
         {
-          "stage": "builder",
+          "stage": "reviewer",
           "model": "sonnet",
-          "seconds": 3321.6,
+          "seconds": 58.2,
           "tokens": {
-            "input": 914736,
-            "output": 5705
+            "input": 141321,
+            "output": 7250
           },
           "exit": 0
-        },
-        {
-          "stage": "reviewer",
-          "model": "sonnet",
-          "seconds": 4.8,
-          "tokens": {
-            "input": 0,
-            "output": 0
-          },
-          "exit": 1,
-          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
-        },
-        {
-          "stage": "reviewer",
-          "model": "sonnet",
-          "seconds": 4.9,
-          "tokens": {
-            "input": 0,
-            "output": 0
-          },
-          "exit": 1,
-          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
         }
-      ],
-      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+      ]
     },
     "752": {
       "nnn": "752",
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
-      "freeDiskGb": 13.9,
+      "reason": "shares files with parked 757",
+      "freeDiskGb": 12.1,
       "history": [
         {
           "at": "2026-11-26T16:14:04.844Z",
@@ -190,6 +247,16 @@
           "at": "2026-11-26T18:11:23.766Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T20:17:55.315Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:23.425Z",
+          "state": "skipped",
+          "round": 0
         }
       ]
     },
@@ -198,8 +265,8 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
-      "freeDiskGb": 13.9,
+      "reason": "shares files with parked 757",
+      "freeDiskGb": 12.1,
       "history": [
         {
           "at": "2026-11-26T16:14:05.115Z",
@@ -210,6 +277,16 @@
           "at": "2026-11-26T18:11:24.054Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T20:17:55.527Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:23.957Z",
+          "state": "skipped",
+          "round": 0
         }
       ]
     },
@@ -218,8 +295,8 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
-      "freeDiskGb": 13.9,
+      "reason": "shares files with parked 757",
+      "freeDiskGb": 12.1,
       "history": [
         {
           "at": "2026-11-26T16:14:05.407Z",
@@ -230,6 +307,16 @@
           "at": "2026-11-26T18:11:24.381Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T20:17:55.764Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:24.197Z",
+          "state": "skipped",
+          "round": 0
         }
       ]
     },
@@ -238,8 +325,8 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
-      "freeDiskGb": 13.9,
+      "reason": "shares files with parked 757",
+      "freeDiskGb": 12.1,
       "history": [
         {
           "at": "2026-11-26T16:14:05.686Z",
@@ -250,6 +337,16 @@
           "at": "2026-11-26T18:11:24.646Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T20:17:55.975Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:24.396Z",
+          "state": "skipped",
+          "round": 0
         }
       ]
     },
@@ -258,8 +355,8 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
-      "freeDiskGb": 13.9,
+      "reason": "shares files with parked 757",
+      "freeDiskGb": 12.1,
       "history": [
         {
           "at": "2026-11-26T16:14:06.034Z",
@@ -270,16 +367,51 @@
           "at": "2026-11-26T18:11:24.937Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T20:17:56.162Z",
+          "state": "queued",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:24.591Z",
+          "state": "skipped",
+          "round": 0
         }
       ]
     },
     "757": {
       "nnn": "757",
-      "round": 0,
-      "models": {},
-      "state": "skipped",
-      "reason": "shares files with parked 751",
-      "freeDiskGb": 13.9,
+      "title": "Remove the old bottom-sheet popup rules and turn on the two popup defaults",
+      "branch": "feat/757-remove-old-sheet-rules",
+      "state": "parked",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-26T20:19:39.123Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T21:12:22.712Z"
+        },
+        "builder fix": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-26T20:36:15.594Z"
+        },
+        "judgment builder": {
+          "model": "opus",
+          "tier": "judgment",
+          "at": "2026-11-26T20:51:09.748Z"
+        }
+      },
+      "humanItems": [
+        "the equipment edit popup on a phone · window 390×844, `http://localhost:4202/inventory/equipment` → tap a row to edit it · the popup \"עריכה: <the item's name>\" opens in the middle of the screen with all four corners rounded, not stuck to the bottom",
+        "the equipment edit panel on a desktop · window 1280×800, `http://localhost:4202/inventory/equipment` → click a row, then open the dropdown inside the edit panel that opens under the row · the whole list of the dropdown shows in front of the rows below it, nothing is cut off"
+      ],
       "history": [
         {
           "at": "2026-11-26T16:14:04.569Z",
@@ -290,8 +422,272 @@
           "at": "2026-11-26T18:11:23.432Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T19:53:41.293Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T19:53:41.496Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:16:45.011Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:17:54.040Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:19:38.767Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:19:39.126Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:29:41.212Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:35:12.556Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:35:22.747Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:36:15.198Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:36:15.403Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:36:15.596Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:44:36.766Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:49:39.118Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:49:48.447Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:50:59.084Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:51:09.594Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T20:51:09.749Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:06:59.334Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:12:14.639Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:12:22.714Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:13:24.543Z",
+          "state": "checking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:13:24.789Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:15:21.323Z",
+          "state": "asking",
+          "round": 2
+        },
+        {
+          "at": "2026-11-26T21:15:23.015Z",
+          "state": "parked",
+          "round": 2
         }
-      ]
+      ],
+      "earlier": [
+        {
+          "nnn": "757",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "shares files with parked 751",
+          "freeDiskGb": 13.9
+        },
+        {
+          "nnn": "757",
+          "title": "Remove the old bottom-sheet popup rules and turn on the two popup defaults",
+          "branch": "feat/757-remove-old-sheet-rules",
+          "state": "asking",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T19:53:41.495Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 11.6,
+          "reason": "asking 757-1: ESCALATE technical: ESCALATE: technical: `node --test scripts/test/modal-guard.test.mjs scripts/test/style-720.test.mjs scripts/test/style-703.test.mjs` fails (22 tests, 2 fail; `pnpm run test:scripts` fails on the same two) because origin/orch/rs-modals and origin/orch/rs-style no longer exist, so the tests compare wi",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1382.6,
+              "tokens": {
+                "input": 3953351,
+                "output": 38850
+              },
+              "exit": 0
+            }
+          ],
+          "park": {
+            "at": "2026-11-26T20:17:42.215Z",
+            "reason": "ESCALATE technical: ESCALATE: technical: `node --test scripts/test/modal-guard.test.mjs scripts/test/style-720.test.mjs scripts/test/style-703.test.mjs` fails (22 tests, 2 fail; `pnpm run test:scripts` fails on the same two) because origin/orch/rs-modals and origin/orch/rs-style no longer exist, so the tests compare wi"
+          },
+          "parkBranch": "park/rs-console-757"
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: asking 757-1: ESCALATE technical: ESCALATE: technical: `node --test scripts/test/modal-guard.test.mjs scripts/test/style-720.test.mjs scripts/test/sty",
+          "check": "(not given)"
+        },
+        {
+          "step": "round 2",
+          "check": "review"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "tiers": [
+        "build",
+        "judgment"
+      ],
+      "freeDiskGb": 12.1,
+      "sha": "9f45331d2bc7d2d8d886f9fd4c7160d909754ac1",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "opus",
+          "seconds": 598,
+          "tokens": {
+            "input": 697705,
+            "output": 8233
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 50.1,
+          "tokens": {
+            "input": 119777,
+            "output": 5104
+          },
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "opus",
+          "seconds": 496.7,
+          "tokens": {
+            "input": 393291,
+            "output": 9241
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 67.3,
+          "tokens": {
+            "input": 434176,
+            "output": 7698
+          },
+          "exit": 0
+        },
+        {
+          "stage": "judgment builder",
+          "model": "opus",
+          "seconds": 946.3,
+          "tokens": {
+            "input": 3661693,
+            "output": 30174
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 59.7,
+          "tokens": {
+            "input": 303914,
+            "output": 7495
+          },
+          "exit": 0
+        }
+      ],
+      "roundCauses": [
+        "round 1: review STOP: major scripts/test/style-703.test.mjs:36 weakened test: the append-only check gains a new base ref that the plan forbids; major scripts/test/style-720.test.mjs:113 weakened test: the append-only check gains a new base ref that the plan forbids",
+        "round 2: review STOP: major scripts/test/style-720.test.mjs:115 A3: the base lookup of the plan 720 append-only test was changed; major scripts/test/style-703.test.mjs:38 A3: the base lookup of the plan 703 append-only test was changed",
+        "round 3: review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only tests gained a ref the plan says not to add"
+      ],
+      "resetToBase": "a7e0bd47056b3f3605eeeb64f19db67f7b14832b",
+      "resetFrom": "738214b06fd8aa2c1eebb08adf7a9645f2818577",
+      "reason": "review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only tests gained a ref the plan says not to add (fix rounds used: 2 of 2) — needs the Human — ask 757-2 answered: park (by the advisor)",
+      "park": {
+        "at": "2026-11-26T21:15:07.598Z",
+        "reason": "review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only tests gained a ref the plan says not to add (fix rounds used: 2 of 2) — needs the Human"
+      },
+      "parkBranch": "park/rs-console-757"
     }
   },
   "notes": [
@@ -323,12 +719,139 @@
       "at": "2026-11-26T16:23:41.414Z",
       "plan": "751",
       "text": "the folder foodVibe1.0-orch-rs-console-751 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T19:41:50.127Z",
+      "plan": "751",
+      "text": "resumed from the built feat/751-assistant-date-words-and: the gate runs on its existing commits (round 0, tier build)"
+    },
+    {
+      "at": "2026-11-26T19:41:59.128Z",
+      "plan": "751",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 751"
+    },
+    {
+      "at": "2026-11-26T19:41:59.318Z",
+      "plan": "751",
+      "text": "GATE: cached pnpm run test:server — passed on the same files in plan 751"
+    },
+    {
+      "at": "2026-11-26T19:45:07.323Z",
+      "plan": "751",
+      "text": "the folder foodVibe1.0-orch-merge-rs-console was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T19:53:41.112Z",
+      "plan": "757",
+      "text": "the folder foodVibe1.0-orch-rs-console-757 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T20:16:44.379Z",
+      "plan": "757",
+      "text": "builder left undone (round 0): A3: code written as specified, but the two append-only tests fail on the base lookup (not ticked); A6: all checks run and recorded, but two tests fail (not ticked); [human] equipment edit popup at 390×844: for the Human; [human] equipment edit panel dropdown at 1280×800: for the Human"
+    },
+    {
+      "at": "2026-11-26T20:17:53.834Z",
+      "plan": "757",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-26T20:17:54.243Z",
+      "plan": "757",
+      "text": "ask 757-1 (technical, the Human or the advisor answers): The base lookup of the two append-only tests (style-703, style-720) now falls through to origin/main and fails on staging's own stylesheet changes, even without plan 757; may the builder change that lookup, against A3's 'the base lookup does not change'?"
+    },
+    {
+      "at": "2026-11-26T20:17:54.762Z",
+      "plan": "757",
+      "text": "decided without the Human: advisor · technical: ask 757-1 (\"The base lookup of the two append-only tests (style-703, style-720) now falls through to origin/main and fails on staging's own stylesheet changes, even without\") answered: retry: a fresh judgment-tier builder with the hand-off and this answer"
+    },
+    {
+      "at": "2026-11-26T20:17:56.371Z",
+      "text": "plan 757 asks 757-1 — 752, 753, 754, 755, 756 wait on the answer; the rest go on"
+    },
+    {
+      "at": "2026-11-26T20:17:56.562Z",
+      "plan": "757",
+      "text": "ask 757-1 answered by the advisor: retry: a fresh judgment-tier builder with the hand-off and this answer"
+    },
+    {
+      "at": "2026-11-26T20:19:29.794Z",
+      "plan": "757",
+      "text": "resumed from park/rs-console-757: round 0, tier judgment, after: asking 757-1: ESCALATE technical: ESCALATE: technical: `node --test scripts/test/modal-guard.test.mjs scripts/test/style-720.test.mjs scripts/test/style-703.tes"
+    },
+    {
+      "at": "2026-11-26T20:19:30.043Z",
+      "plan": "757",
+      "text": "starts on the judgment tier: the answer to 757-1: retry on the judgment tier"
+    },
+    {
+      "at": "2026-11-26T20:19:38.530Z",
+      "plan": "757",
+      "text": "the folder foodVibe1.0-orch-rs-console-757 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T20:29:37.350Z",
+      "plan": "757",
+      "text": "builder left undone (round 0): A6: the two [human] equipment checks (phone popup centred at 390×844; on desktop the dropdown is not cut off at 1280×800, http://localhost:4202/inventory/equipment) are for the Human; no automated test written, because the plan tags them [human], not [ui]"
+    },
+    {
+      "at": "2026-11-26T20:44:39.161Z",
+      "plan": "757",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 757"
+    },
+    {
+      "at": "2026-11-26T20:51:09.446Z",
+      "plan": "757",
+      "text": "escalated to a fresh judgment-tier builder (round 2): review STOP: major scripts/test/style-720.test.mjs:115 A3: the base lookup of the plan 720 append-only test was changed; major scripts/test/style-703.test.mjs:38 A3: the base lookup of the plan 703 append-only test was changed"
+    },
+    {
+      "at": "2026-11-26T21:06:56.172Z",
+      "plan": "757",
+      "text": "builder left undone (round 2): [human] equipment edit popup centred on a phone (390x844): left for Dandan; [human] equipment inline-panel dropdown in front of the rows on desktop (1280x800): left for Dandan"
+    },
+    {
+      "at": "2026-11-26T21:07:01.128Z",
+      "plan": "757",
+      "text": "GATE: cached pnpm run test:ci — passed on the same files in plan 757"
+    },
+    {
+      "at": "2026-11-26T21:15:21.004Z",
+      "plan": "757",
+      "text": "parked: nothing to save (nothing uncommitted)"
+    },
+    {
+      "at": "2026-11-26T21:15:21.505Z",
+      "plan": "757",
+      "text": "ask 757-2 (technical, the Human or the advisor answers): Plan 757 used its fix rounds (2 of 2) and still fails: review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only tests gained a ref the plan says not to add. Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-26T21:15:21.906Z",
+      "plan": "757",
+      "text": "decided without the Human: advisor · technical: ask 757-2 (\"Plan 757 used its fix rounds (2 of 2) and still fails: review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only\") answered: park: leave the plan parked for the Human to replan"
+    },
+    {
+      "at": "2026-11-26T21:15:22.840Z",
+      "plan": "757",
+      "text": "ask 757-2 answered by the advisor: park: leave the plan parked for the Human to replan"
+    },
+    {
+      "at": "2026-11-26T21:15:23.212Z",
+      "plan": "757",
+      "text": "ask 757-2 answered: park (by the advisor) — plan 757 parked; the question was: Plan 757 used its fix rounds (2 of 2) and still fails: review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only tests gained a ref the plan says not to add. Leave it parked, or retry it?"
+    },
+    {
+      "at": "2026-11-26T21:15:26.690Z",
+      "text": "FINAL: same tree as plan 751's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    },
+    {
+      "at": "2026-11-26T21:19:15.054Z",
+      "text": "make this a default? per answer 757-1, the two stylesheet tests (style-703, style-720) now look for the base in origin/chore/restaurant-staging before falling back to origin/main; the two run refs and the skip stay, which (trigger: list) — reply: default yes run-list"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "stopped",
-  "freeDiskGb": 13.9,
-  "updatedAt": "2026-11-26T18:11:28.490Z",
+  "freeDiskGb": 12.1,
+  "updatedAt": "2026-11-26T21:19:17.260Z",
   "selfDecided": [
     {
       "plan": "751",
@@ -337,15 +860,35 @@
       "why": "the plan was saved after the run branch was cut",
       "undo": "nothing to undo: the same file as on main",
       "at": "2026-11-26T15:38:39.984Z"
+    },
+    {
+      "plan": "757",
+      "kind": "advisor · technical",
+      "what": "ask 757-1 (\"The base lookup of the two append-only tests (style-703, style-720) now falls through to origin/main and fails on staging's own stylesheet changes, even without\") answered: retry: a fresh judgment-tier builder with the hand-off and this answer",
+      "why": "technical: one retry on the judgment tier with the hand-off",
+      "undo": "nothing to undo: the retry is checked by the same gate and review; a second failure parks; the first attempt is kept on park/rs-console-757",
+      "at": "2026-11-26T20:17:54.557Z"
+    },
+    {
+      "plan": "757",
+      "kind": "advisor · technical",
+      "what": "ask 757-2 (\"Plan 757 used its fix rounds (2 of 2) and still fails: review STOP: major scripts/test/style-720.test.mjs:113 weakened test: the base lookup of both append-only\") answered: park: leave the plan parked for the Human to replan",
+      "why": "technical: the judgment-tier builder already failed — INV-1: no third builder, parked for the Human",
+      "undo": "replan it, or answer with a new approach and relaunch the run — the work is kept on park/rs-console-757",
+      "at": "2026-11-26T21:15:21.707Z"
     }
   ],
-  "finishedAt": "2026-11-26T18:11:28.488Z",
-  "stopReason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+  "finishedAt": "2026-11-26T21:19:17.256Z",
   "stops": [
     {
       "at": "2026-11-26T18:11:25.233Z",
       "reason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
       "attempt": 2
+    },
+    {
+      "at": "2026-11-26T21:19:14.670Z",
+      "reason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 3241 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+      "attempt": 3
     }
   ],
   "decisions": [
@@ -387,6 +930,122 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "757",
+      "type": "seen",
+      "text": "seen: scripts/test/mcp-mongo-local.test.mjs — 'the launcher starts the installed server and lists only local read tools' failed once in the full script-test run and passed on the reruns",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "757",
+      "type": "behaviour",
+      "text": "behaviour: per answer 757-1, the two stylesheet tests (style-703, style-720) now look for the base in origin/chore/restaurant-staging before falling back to origin/main; the two run refs and the skip stay, which departs from A3's 'the base lookup does not change' — reverse: remove 'origin/chore/restaurant-staging' from the ref list in both tests",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "757",
+      "type": "seen",
+      "text": "seen: the CHECKS entry runs the main checkout's copy of scope-check.mjs (C:/coding projects/Cursor/foodVibe1.0/scripts/scope-check.mjs), which reads the main checkout's tree and prints SCOPE: out with files this branch does not change; the worktree's scripts/scope-check.mjs gives SCOPE: ok",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "757",
+      "type": "behaviour",
+      "text": "behaviour: both append-only tests skip any base ref whose merge-base with HEAD is HEAD, not only the staging ref, so the file is never compared with itself; the staging ref stays before origin/main as answer 757-1 allowed — reverse: delete the headSha check in scripts/test/style-703.test.mjs and scripts/test/style-720.test.mjs",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "757",
+      "type": "seen",
+      "text": "seen: the main repo's scripts/scope-check.mjs, run from this worktree with --diff=origin/orch/rs-console, reported SCOPE: out for files this branch does not change (.claude/todo.md, .github/workflows/ci.yml and others); it seems to check the main repo's checkout, not this worktree; the worktree copy reports SCOPE: ok — steps: run both copies from this worktree with the same fla",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "757",
+      "type": "behaviour",
+      "text": "behaviour: per answer 757-1, both append-only tests try origin/chore/restaurant-staging before origin/main; the two run refs, the skip and the order stay, and no HEAD-equals-merge-base skip was added — reverse: drop 'origin/chore/restaurant-staging' from the ref list in scripts/test/style-720.test.mjs and scripts/test/style-703.test.mjs",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "757",
+      "type": "seen",
+      "text": "seen: the gate's scope-check copy, run as node \"C:/coding projects/Cursor/foodVibe1.0/scripts/scope-check.mjs\" --diff=origin/orch/rs-console from this worktree, printed SCOPE: out with ~160 files this plan never touched (.github/workflows/ci.yml, plans/700-800/740-…, Claude outputs/…). The worktree's own scripts/scope-check.mjs gives SCOPE: ok, and git diff --name-only origin/o",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "757",
+      "type": "seen",
+      "text": "seen: src/app/pages/menu-intelligence/components/event-logistics-panel/event-logistics-panel.component.spec.ts:387 — 'a read-only member sees the button and it opens the sheet' waits at most 40×25ms for a @defer block and failed once under full test:ci load; it passed on rerun",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
-  ]
+  ],
+  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 3241 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "finalGate": {
+    "ok": false,
+    "command": "pnpm run test:ci",
+    "at": "2026-11-26T21:19:17.260Z",
+    "attempt": 1,
+    "blamed": [],
+    "failing": [
+      "TOTAL: 1 FAILED, 3241 SUCCESS"
+    ],
+    "noPlanFile": true
+  }
 }
