@@ -201,3 +201,15 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: any list page with row actions · look at a row's edit and remove actions · they are the pencil and trash icon buttons used on the products list, with no text buttons
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-26
+
+### live-summary
+
+- status: on
+- rule: A summary or totals box on a screen where the user types numbers recalculates live from what is typed, before saving; saving only keeps the data.
+- applies when: custom
+- plan words: \b(summary|totals?|figures|סיכום|תמונת)\b
+- how: a computed() over the page's draft signals (not the saved record) fed to the summary component — the pattern plan 749 adds as liveMonthOf(open_, draft_) in src/app/pages/monthly-plan/month-draft.ts
+- check: card
+- card: a screen with a summary box · change one typed number without saving · the summary box shows the new result at once
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-26
