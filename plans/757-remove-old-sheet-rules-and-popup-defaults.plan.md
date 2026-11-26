@@ -124,6 +124,7 @@ docs/brain/component-families.md
 docs/brain/gotchas/angular.md
 docs/brain/inventory.md
 src/app/shared/modal-shell/modal-shell.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 `src/styles.scss`: this plan removes lines from the hotspot. The Human approved exactly this removal in chat on
