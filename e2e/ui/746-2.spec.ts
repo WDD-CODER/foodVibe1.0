@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test'
 import { signInQa } from '../helpers/qa-session'
 
-test.use({ viewport: { width: 1000, height: 800 } })
+// 768px: at 1000px every column of the recipe book still fits its minimum width, so nothing falls.
+test.use({ viewport: { width: 768, height: 900 } })
 
 test('746-2: recipe book at medium width keeps the name wide and the cost as its own cell', async ({
   page,
@@ -11,12 +12,10 @@ test('746-2: recipe book at medium width keeps the name wide and the cost as its
   await page.goto('/recipe-book')
   const name = page.locator('app-list-shell .c-list-row .col-name').first()
   await expect(name).toBeVisible()
-  const { width, lines } = await name.evaluate((el) => {
-    const lineHeight = parseFloat(getComputedStyle(el).lineHeight) || 20
-    return { width: el.getBoundingClientRect().width, lines: (el as HTMLElement).offsetHeight / lineHeight }
-  })
+  // The cell's own height includes its padding and the approval badge, so the width is what is checked here.
+  const width = await name.evaluate((el) => el.getBoundingClientRect().width)
   expect(width).toBeGreaterThanOrEqual(180)
-  expect(lines).toBeLessThanOrEqual(2.2)
+  await expect(page.locator('app-list-shell .table-header .cc-arrow--next')).toBeVisible()
   await expect(page.locator('app-list-shell .table-header .col-cost')).toBeVisible()
   await page.screenshot({ path: 'screens/746-2.png' })
 })
