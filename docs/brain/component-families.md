@@ -932,9 +932,17 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-guardrails — `preCheck`, `applyGuardrails`, `GUARD_WORDS` (plan 689)
 
 - Status: stable — server only
-- Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`).
+- Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`). plan 751: a time in a reply is checked against every fact line (R-25).
 - Pieces: preCheck, applyGuardrails, GUARD_WORDS.
 - When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
+- Known copies: none.
+
+### date-words — `dateFromWords(text, now)`, `clockTimeOf(value)` in `shared/schemas/front-desk/date-words.ts`, `fillWhen` in `server/services/frontdesk-when.js` (plan 751)
+
+- Status: stable — server only
+- Use: `dateFromWords` turns a person's date words (Hebrew, English, day/month) into one `YYYY-MM-DD` in Asia/Jerusalem, or `null`; `clockTimeOf` gives a clock time as `HH:mm`, or `null`; `fillWhen` fills the date the model left out of a turn answer, reading `currentGuestText` (R-24).
+- Pieces: dateFromWords, clockTimeOf, fillWhen, currentGuestText.
+- When: any code that needs a date or a clock time out of a person's words — call it, never a second word table.
 - Known copies: none.
 
 ### gemini-fallback — `callGemini({ fallback, deadlineMs })`, `failureReason(kind, status)` in `server/services/frontdesk-turn.js`, `server/test/gemini-fallback.test.js` (plan 701)

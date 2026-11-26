@@ -2,8 +2,8 @@
 /**
  * Plans 679 + 689 (C-AI): the one place where the assistant's blocks live. Pure (no database).
  * `preCheck(ctx)` runs before the model call; `applyGuardrails(answer, ctx)` after it → `{ ok: true, answer }` or
- * `{ ok: false, reason }`. `ctx` is `{ profile, factIds, factsText, history, aiTurns, now, mode, lastTurnLow,
- * replyWillBeSent }`. A blocked reply is never rewritten: the caller turns it into a handoff. The word lists are a
+ * `{ ok: false, reason }` (`unsupported_time` adds a `detail` of counts). `ctx` is `{ profile, factIds, factsText,
+ * history, aiTurns, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller turns it into a handoff. The word lists are a
  * second line (`constants/frontdesk-guard-words.js`); the structured answer is checked first.
  */
 const { HANDOFF, DEFERRED, COMPLETION, INTERNALS, GREETINGS, REMOVAL_WORDS } = require('../constants/frontdesk-guard-words');
@@ -19,7 +19,7 @@ const PRICE_RES = [
   /(\d+(?:[.,]\d+)?)\s*(?:₪|ש״ח|ש"ח|שח|שקל|nis)/gi,
 ];
 
-const TIME_IN_TEXT_RE = /\d{1,2}:\d{2}/g;
+const TIME_IN_TEXT_RE = /(?<!\d)(\d{1,2}):(\d{2})(?!\d)/g;
 const TABLE_NUMBER_RE = /(?:שולחן\s*\d+|table\s*\d+)/i;
 
 const norm = text => String(text ?? '').toLowerCase().replace(NIQQUD_RE, '');
@@ -73,11 +73,23 @@ function priceBlocked(reply, ctx, usedFacts) {
   return false;
 }
 
-/** Plan 680: a time in the reply passes only when the same string stands in a fact line the answer used. */
-function timeBlocked(reply, ctx, usedFacts) {
-  const lines = String(ctx.factsText ?? '').split('\n');
-  const usedText = lines.filter(l => usedFacts.some(id => l.startsWith('[' + id + ']'))).join('\n');
-  return (String(reply).match(TIME_IN_TEXT_RE) ?? []).some(t => !usedText.includes(t));
+/** Every clock time of a text, as HH:mm. */
+const timesOf = text => Array.from(
+  String(text ?? '').matchAll(TIME_IN_TEXT_RE), m => `${m[1].padStart(2, '0')}:${m[2]}`
+);
+
+/**
+ * Plans 680 + 751 (R-25): a time in the reply passes when the same time, as HH:mm, stands in any fact line sent to the
+ * model or in the open / close of the profile's hours. `{ times, unmatched }`: how many the reply holds, how many fail.
+ */
+function timeCheck(reply, ctx) {
+  const allowed = new Set(timesOf(ctx.factsText));
+  const hours = ctx.profile && ctx.profile.hours;
+  for (const row of Array.isArray(hours) ? hours : []) {
+    for (const t of [...timesOf(row?.open), ...timesOf(row?.close)]) allowed.add(t);
+  }
+  const times = timesOf(reply);
+  return { times: times.length, unmatched: times.filter(t => !allowed.has(t)).length };
 }
 
 function applyGuardrails(answer, ctx) {
@@ -103,7 +115,12 @@ function applyGuardrails(answer, ctx) {
     if (hasAny(reply, DEFERRED)) return { ok: false, reason: 'deferred' };
     if (hasAny(reply, COMPLETION)) return { ok: false, reason: 'completion_claim' };
     if (ctx.tablesOn) {
-      if (timeBlocked(reply, ctx, usedFacts)) return { ok: false, reason: 'unsupported_time' };
+      const { times, unmatched } = timeCheck(reply, ctx);
+      if (unmatched > 0) {
+        const unknownFacts = (answer.usedFacts ?? []).length - usedFacts.length;
+        const detail = { times, unmatched, usedFacts: usedFacts.length, unknownFacts };
+        return { ok: false, reason: 'unsupported_time', detail };
+      }
       if (TABLE_NUMBER_RE.test(reply)) return { ok: false, reason: 'table_number' };
     }
     if (priceBlocked(reply, ctx, usedFacts)) return { ok: false, reason: 'unsupported_price' };

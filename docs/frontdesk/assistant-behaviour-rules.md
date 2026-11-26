@@ -20,7 +20,7 @@ instructions.
 | R-06 | **No completion claim without the write.** "Booked", "confirmed", "updated" may be sent only when the server wrote it in the same turn. A table is confirmed only by the engine and the hold (INV-7). | 562 |
 | R-07 | **No invented links.** A URL is sent only if it appears verbatim in `publicFacts` or the profile. | 562 |
 | R-08 | **Three allowed sources:** the fixed prompt, `publicFacts`, this conversation. When the knowledge and an earlier assistant message disagree, the knowledge wins. Facts (address, price, hours) are quoted exactly as stored. | 562 |
-| R-09 | **Today's date is injected** into every turn (weekday, today, tomorrow, current time, `Asia/Jerusalem`) so "tomorrow" and "Sunday" resolve correctly. | 562 |
+| R-09 | **Today's date is injected** into every turn (weekday, today, tomorrow, current time, `Asia/Jerusalem`) so "tomorrow" and "Sunday" resolve correctly. Superseded in part by R-24 (plan 751): the server no longer relies on the model for this. | 562 |
 | R-10 | **A request outside opening hours or rules is answered with the allowed window**, never silently moved to the next open day. | 548 (`qualify` reasons), 562 |
 | R-11 | **Gender of address** follows the customer's own text; neutral wording when unknown; independent of the assistant's persona. | 562 |
 | R-12 | **Closed questions are sent as buttons** (WhatsApp interactive message; plain-text fallback outside the window or above the button limit). | 560 (`messages.kind: 'button'`), 562 |
@@ -35,6 +35,8 @@ instructions.
 | R-21 | **Every model call is metered** — business, feature, model, input/output tokens, audio seconds, latency, outcome, estimated cost (C-AIUSAGE). | 566 |
 | R-22 | **One holding message on a technical failure.** When the model call or the daily cap fails the turn (`assistantFailed` busy / timeout / quota / other), the guest gets the business's handoff text, else `fd_ai_holding_default`, once until the guest writes again; the conversation still moves to `human`. Not at level 0 for a real guest; guardrail blocks are unchanged. | 733 |
 | R-23 | **The simulator answers as level 1.** A test conversation is answered as at level 1 whatever the business's level, unless a member holds it; real guests keep the level. | 733 |
+| R-24 | **Date words are resolved by the server.** When a `book`, `change` or `request` answer has no valid `YYYY-MM-DD` date, the server resolves the model's own value, and for `book` and `request` else the guest's current message(s) — the ones since the last outbound message, at most 30 minutes old — for היום, הערב, הלילה, מחר, מחרתיים, a weekday name or a day/month date, in `Asia/Jerusalem`. A weekday means the next such day after today. Two different dates resolve to nothing. A valid date of the model always wins. | 751 |
+| R-25 | **A time in a reply must stand in the facts.** With table service on, every `H:mm` of a reply that is sent must equal, as `HH:mm`, a time in any fact line sent to the model or the open / close of the profile's hours; else the reply is blocked (`unsupported_time`) and a person answers. The model's `usedFacts` list no longer decides this. | 680, 751 |
 
 ## Do not build
 
