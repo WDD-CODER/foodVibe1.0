@@ -302,6 +302,19 @@
     background: var(--bg-danger-subtle);
     color: var(--color-danger);
   }
+
+  // Blocked with a reason (appDisabledWhy): the blocked icon button look (as .c-icon-btn.is-disabled), also on
+  // hover. Stays after the hover rules so it wins over them.
+  &[aria-disabled='true'],
+  &[aria-disabled='true']:hover {
+    background: transparent;
+    color: var(--color-text-muted);
+
+    cursor: not-allowed;
+
+    opacity: 0.3;
+    filter: saturate(0);
+  }
 }
 
 @media (max-width: $break-phone-max) {

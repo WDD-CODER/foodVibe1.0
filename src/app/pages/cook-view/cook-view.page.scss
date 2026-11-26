@@ -377,6 +377,11 @@
   &:is(button) {
     cursor: pointer;
   }
+
+  // Blocked with a reason (appDisabledWhy): the dimmed look comes from the global .is-disabled.
+  &:is(button)[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }
 
 .cv-chip--warn {

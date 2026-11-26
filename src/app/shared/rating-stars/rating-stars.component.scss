@@ -63,4 +63,9 @@
   &:disabled {
     pointer-events: none;
   }
+
+  // Blocked with a reason (appDisabledWhy): stays reachable for its tooltip; dimmed by the global .is-disabled.
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }
