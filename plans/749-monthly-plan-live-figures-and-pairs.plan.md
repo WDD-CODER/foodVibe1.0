@@ -126,6 +126,7 @@ server/test/month-plans.test.js
 src/app/pages/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 docs/brain/component-families.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
