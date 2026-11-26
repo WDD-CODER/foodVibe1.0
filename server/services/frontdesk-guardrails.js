@@ -3,8 +3,9 @@
  * Plans 679 + 689 (C-AI): the one place where the assistant's blocks live. Pure (no database).
  * `preCheck(ctx)` runs before the model call; `applyGuardrails(answer, ctx)` after it → `{ ok: true, answer }` or
  * `{ ok: false, reason }` (`unsupported_time` adds a `detail` of counts). `ctx` is `{ profile, factIds, factsText,
- * history, aiTurns, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller turns it into a handoff. The word lists are a
- * second line (`constants/frontdesk-guard-words.js`); the structured answer is checked first.
+ * history, aiTurns, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller turns it
+ * into a handoff. The word lists are a second line (`constants/frontdesk-guard-words.js`); the structured answer is
+ * checked first.
  */
 const { HANDOFF, DEFERRED, COMPLETION, INTERNALS, GREETINGS, REMOVAL_WORDS } = require('../constants/frontdesk-guard-words');
 const { hoursCheck } = require('../generated/schemas/front-desk/qualify');
