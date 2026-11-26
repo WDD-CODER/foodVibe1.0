@@ -14,6 +14,7 @@ import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
 import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
+import { useListControls } from 'src/app/core/utils/list-controls.util'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
@@ -64,6 +65,7 @@ export class RestaurantMenuPage {
   protected readonly showRemoved_ = signal(false)
   protected readonly hasActiveFilters_ = computed(() => this.courseFilter_().size > 0 || this.showRemoved_())
   protected readonly filterCategories = useCollapsibleCategories()
+  private readonly listControls = useListControls<never>({ search: this.searchQuery_ })
   private readonly panel_ = useResponsivePanelState('restaurant-menu')
   protected readonly isPanelOpen_ = this.panel_.isPanelOpen_
   protected readonly isLoading_ = signal(true)
@@ -162,9 +164,12 @@ export class RestaurantMenuPage {
     })
   }
 
-  protected clearAllFilters(): void {
-    this.courseFilter_.set(new Set())
-    this.showRemoved_.set(false)
+  /** «נקה סינון»: every type unpicked and the removed toggle off. */
+  protected clearFilters(): void {
+    this.listControls.clearAll(
+      () => this.courseFilter_.set(new Set()),
+      () => this.showRemoved_.set(false)
+    )
   }
 
   protected openAdd(): void {
