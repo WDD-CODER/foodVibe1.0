@@ -19,6 +19,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
 import { Equipment, EquipmentCategory } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -69,6 +70,7 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     ReactiveFormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     LoaderComponent,
     ListShellComponent,
     CustomSelectComponent,

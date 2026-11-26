@@ -147,6 +147,18 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-22
 
+### disabled-explains-why
+
+- status: on
+- rule: A button or control that cannot be used shows, on hover and on tap, a tooltip that says why.
+- applies when: custom
+- plan words: \b(?:disabled|locked|read-only|cannot be (?:pressed|used|edited)|greyed out)\b
+- how: the appDisabledWhy directive (src/app/shared/tooltip/, family tooltip), which keeps the control reachable, blocks its action and shows the reason in the shared tooltip; never a bare disabled attribute when a reason exists
+- check: card
+- card: any page with a disabled button · hover it, or tap it on a phone · a tooltip says why it cannot be used
+- exceptions: a control disabled only while its own action is running (saving, loading); declare `exception — why: <one line>`
+- turned on: the Human, 2026-11-26
+
 ### house-keyboard-focus
 
 - status: proposed

@@ -20,6 +20,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { Supplier } from '@models/supplier.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { UserService } from '@services/user.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
@@ -55,6 +56,7 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     LoaderComponent,
     ListShellComponent,
     ListRowCheckboxComponent,

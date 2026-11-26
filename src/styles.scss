@@ -3073,3 +3073,51 @@ input[type='number']::-webkit-outer-spin-button {
 .fit-no-select .col-select {
   display: none;
 }
+
+/* ── A control that cannot be used and says why (plan 747, default disabled-explains-why) ──
+   Set by the appDisabledWhy directive (src/app/shared/tooltip/) together with aria-disabled="true". The control
+   is not natively disabled (it must stay reachable to show its reason), so the native :disabled look of the
+   button engines is repeated here: the same values as .c-btn-primary:disabled and .c-icon-btn:disabled. */
+.is-disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}
+
+.c-btn-primary.is-disabled,
+.c-btn-ghost.is-disabled {
+  transform: none;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: none;
+    }
+  }
+
+  &:active {
+    transform: none;
+  }
+}
+
+.c-btn-ghost.is-disabled {
+  @media (hover: hover) {
+    &:hover {
+      background: var(--bg-glass-dense);
+    }
+  }
+}
+
+.c-icon-btn.is-disabled {
+  filter: saturate(0);
+  opacity: 0.3;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-text-muted);
+
+      background: transparent;
+      transform: none;
+      opacity: 0.3;
+    }
+  }
+}

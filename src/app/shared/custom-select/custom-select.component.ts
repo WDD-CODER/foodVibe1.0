@@ -21,6 +21,7 @@ import { TranslationService } from '../../core/services/translation.service'
 import { dedupeAndFilterOptions } from '../../core/utils/dedupe-select-options.util'
 import { InputClearComponent } from '../input-clear/input-clear.component'
 import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 import { AddOptionLabel, addOptionLabel, findOptionByLabel } from '../../core/utils/add-option.util'
 import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
 
@@ -40,7 +41,8 @@ const PICKER_KEY = 0
     ScrollableDropdownComponent,
     LucideAngularModule,
     InputClearComponent,
-    AddOptionRowComponent
+    AddOptionRowComponent,
+    DisabledWhyDirective
   ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomSelectComponent, multi: true }],
   templateUrl: './custom-select.component.html',
@@ -66,6 +68,8 @@ export class CustomSelectComponent implements ControlValueAccessor {
   addNewLabelKey = input<string>('add_new_unit')
   /** Opt in when the caller's add flow takes the typed name (via addNewChosen): shows `הוסף "<typed>"`. */
   allowTypedAdd = input<boolean>(false)
+  /** Why the select cannot be opened (translated). With a reason it is blocked and says why in a tooltip (plan 747). */
+  disabledWhy = input<string | null>(null)
 
   valueChange = output<string>()
   /** Emitted right before the add-new sentinel is selected: the typed new name, or '' for the generic add. */
@@ -75,6 +79,8 @@ export class CustomSelectComponent implements ControlValueAccessor {
   private _onChange: (value: string) => void = () => {}
   private _onTouched: () => void = () => {}
   private _isDisabled = signal(false)
+  /** Cannot be opened: disabled through the form control, or by a caller's reason. */
+  private readonly blocked_ = computed(() => this._isDisabled() || !!this.disabledWhy())
   private readonly translationService = inject(TranslationService)
   private readonly injector = inject(Injector)
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
@@ -200,12 +206,13 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return this._value()
   }
 
+  /** Natively disabled only when no reason is given; with a reason the trigger stays reachable to say why. */
   protected get disabled(): boolean {
-    return this._isDisabled()
+    return this._isDisabled() && !this.disabledWhy()
   }
 
   protected toggle(): void {
-    if (this._isDisabled()) return
+    if (this.blocked_()) return
     this.clearCloseTimeout()
     const next = !this.isOpen()
     this.isOpen.set(next)
@@ -223,7 +230,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected openDropdown(): void {
-    if (this._isDisabled() || this.isOpen()) return
+    if (this.blocked_() || this.isOpen()) return
     this.clearCloseTimeout()
     this.isOpen.set(true)
     this.searchQuery_.set('')
@@ -315,7 +322,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
       return
     }
     if (this.triggerRef()?.nativeElement.hasAttribute('data-restore-focus')) return
-    if (!this._isDisabled() && !this.isOpen()) {
+    if (!this.blocked_() && !this.isOpen()) {
       this.openDropdown()
     }
   }
@@ -337,6 +344,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   /** Button-mode keys: bound on the trigger, and on the host for keys from inside the open list. */
   protected onKeydown(e: KeyboardEvent): void {
     if (this.typeToFilter() && (e.target as HTMLElement)?.tagName === 'INPUT') return
+    if (this.blocked_() && !this.isOpen()) return
     // Keys the list uses are its own: stop them on the trigger so a page's (keydown) on this host
     // doesn't also move focus (rule K). Tab and a closed-list Escape still bubble.
     if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key) || (e.key === 'Escape' && this.isOpen())) {

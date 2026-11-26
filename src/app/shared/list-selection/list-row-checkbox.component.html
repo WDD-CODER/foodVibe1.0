@@ -1,8 +1,16 @@
-<div class="list-row-checkbox" (click)="onCheckboxClick($event)" role="button" tabindex="0" (keydown.enter)="onCheckboxClick($event)" (keydown.space)="$event.preventDefault(); onCheckboxClick($event)">
+<div
+  class="list-row-checkbox"
+  (click)="onCheckboxClick($event)"
+  role="button"
+  tabindex="0"
+  [appDisabledWhy]="disabledWhy()"
+  (keydown.enter)="onCheckboxClick($event)"
+  (keydown.space)="$event.preventDefault(); onCheckboxClick($event)"
+>
   <input
     type="checkbox"
     [checked]="checked()"
-    [disabled]="disabled()"
+    [disabled]="disabled() && !disabledWhy()"
     [attr.aria-label]="checked() ? 'Deselect row' : 'Select row'"
     tabindex="-1"
   />

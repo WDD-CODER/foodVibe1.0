@@ -351,18 +351,20 @@ describe('DashboardOverviewComponent', () => {
 
   // --- Auth ---
 
-  it('should set title attr on add-product button when not logged in', () => {
+  it('marks the add-product button aria-disabled (it says why) when not logged in', () => {
     mockIsLoggedIn.set(false)
     fixture.detectChanges()
     const btn = fixture.debugElement.query(By.css('[data-testid="btn-add-product"]'))
-    expect(btn.nativeElement.getAttribute('title')).toBeTruthy()
+    expect(btn.nativeElement.getAttribute('aria-disabled')).toBe('true')
+    expect(btn.nativeElement.classList).toContain('is-disabled')
+    expect(btn.nativeElement.disabled).toBeFalse()
   })
 
-  it('should not set title attr when logged in', () => {
+  it('does not mark the add-product button disabled when logged in', () => {
     mockIsLoggedIn.set(true)
     fixture.detectChanges()
     const btn = fixture.debugElement.query(By.css('[data-testid="btn-add-product"]'))
-    expect(btn.nativeElement.getAttribute('title')).toBeNull()
+    expect(btn.nativeElement.getAttribute('aria-disabled')).toBeNull()
   })
 
   // --- Modules (plan 620) ---

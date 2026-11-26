@@ -90,8 +90,7 @@
         type="button"
         class="c-btn-primary"
         (click)="onAddMenuType()"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+        [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
       >
         {{ 'metadata_add_menu_type' | translatePipe }}
       </button>

@@ -3,7 +3,8 @@
     type="button"
     class="ctrl-btn"
     tabindex="-1"
-    [disabled]="minusDisabled_()"
+    [disabled]="minusDisabled_() && !disabledWhy()"
+    [appDisabledWhy]="disabledWhy()"
     appStepHold
     [stepHoldStop]="minusDisabled_()"
     (stepHold)="decrement($event)"
@@ -19,6 +20,7 @@
       type="number"
       class="value-input"
       appSelectOnFocus
+      [appDisabledWhy]="disabledWhy()"
       [value]="value()"
       (input)="onInput($event)"
       (blur)="onBlur($event)"
@@ -32,7 +34,8 @@
     type="button"
     class="ctrl-btn"
     tabindex="-1"
-    [disabled]="plusDisabled_()"
+    [disabled]="plusDisabled_() && !disabledWhy()"
+    [appDisabledWhy]="disabledWhy()"
     appStepHold
     [stepHoldStop]="plusDisabled_()"
     (stepHold)="increment($event)"

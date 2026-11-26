@@ -26,8 +26,7 @@
       type="button"
       class="c-btn-primary"
       (click)="onAdd(newInput)"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       {{ addLabelKey() | translatePipe }}
     </button>

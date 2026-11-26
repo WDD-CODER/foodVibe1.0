@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
+import { DOCUMENT } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop'
 import { LucideAngularModule } from 'lucide-angular'
@@ -6,6 +7,7 @@ import { ScrollAreaComponent } from 'src/app/shared/scroll-area/scroll-area.comp
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserMsgService } from '@services/user-msg.service'
 import { MissingItem } from 'src/app/core/engine/event-plan.types'
@@ -67,6 +69,7 @@ interface SampleOption {
     CdkDragHandle,
     ReorderKeysDirective,
     TooltipDirective,
+    DisabledWhyDirective,
     LucideAngularModule
   ],
   templateUrl: './dev-catalog.page.html',
@@ -75,6 +78,7 @@ interface SampleOption {
 })
 export class DevCatalogPage {
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly document_ = inject(DOCUMENT)
 
   /** The family ids, in page order (the link bar and the section headings). */
   protected readonly families_ = [
@@ -154,6 +158,27 @@ export class DevCatalogPage {
 
   // drag-list
   protected readonly dragRows_ = signal(['first', 'second', 'third', 'fourth'])
+
+  // tooltip: disabled with a reason (plan 747) — the counter would go up if the blocked click ran.
+  protected readonly disabledClicks_ = signal(0)
+
+  protected countDisabledClick(): void {
+    this.disabledClicks_.update((n) => n + 1)
+  }
+
+  /**
+   * A top chip scrolls the page to its section and moves focus to the section's heading. It is not a link: with
+   * the app's `<base href>` a `#id` link would leave the catalog.
+   */
+  protected jumpTo(id: string): void {
+    const section = this.document_.getElementById(id)
+    if (!section) return
+    const view = this.document_.defaultView
+    const reduced =
+      !!view && typeof view.matchMedia === 'function' && view.matchMedia('(prefers-reduced-motion: reduce)').matches
+    section.scrollIntoView({ block: 'start', behavior: reduced ? 'auto' : 'smooth' })
+    section.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true })
+  }
 
   protected onDrop(event: CdkDragDrop<string[]>): void {
     this.moveRow_(event.previousIndex, event.currentIndex)

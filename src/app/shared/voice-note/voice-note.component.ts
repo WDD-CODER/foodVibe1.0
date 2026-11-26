@@ -3,6 +3,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { GeminiService, type VoicePurpose } from '@services/gemini.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -27,7 +28,7 @@ const PREFERRED_MIME = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codec
 @Component({
   selector: 'app-voice-note',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, TextareaAutoGrowDirective, LoaderComponent],
+  imports: [LucideAngularModule, TranslatePipe, TextareaAutoGrowDirective, LoaderComponent, DisabledWhyDirective],
   templateUrl: './voice-note.component.html',
   styleUrl: './voice-note.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -46,6 +47,8 @@ export class VoiceNoteComponent {
   readonly busyLabelKey = input('')
   readonly busy = input(false)
   readonly disabled = input(false)
+  /** Why the note cannot be used (translated). With a reason its controls are blocked and say why (plan 747). */
+  readonly disabledWhy = input<string | null>(null)
   readonly text = model('')
   readonly send = output<VoiceNoteSend>()
 
@@ -76,6 +79,11 @@ export class VoiceNoteComponent {
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   }
 
+  /** Cannot be used: disabled by the caller, with or without a reason. */
+  private off_(): boolean {
+    return this.disabled() || !!this.disabledWhy()
+  }
+
   protected onType(value: string): void {
     this.text.set(value)
     if (!value.trim()) this.resetSource()
@@ -83,10 +91,7 @@ export class VoiceNoteComponent {
 
   protected canSend(): boolean {
     return (
-      !!this.text().trim() &&
-      !this.busy() &&
-      !this.disabled() &&
-      (this.state_() === 'idle' || this.state_() === 'recorded')
+      !!this.text().trim() && !this.busy() && !this.off_() && (this.state_() === 'idle' || this.state_() === 'recorded')
     )
   }
 
@@ -98,7 +103,7 @@ export class VoiceNoteComponent {
   }
 
   protected async start(): Promise<void> {
-    if (this.state_() !== 'idle' || this.disabled()) return
+    if (this.state_() !== 'idle' || this.off_()) return
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const mimeType = PREFERRED_MIME.find((m) => MediaRecorder.isTypeSupported(m))
@@ -145,7 +150,7 @@ export class VoiceNoteComponent {
   }
 
   protected async transcribe(): Promise<void> {
-    if (this.state_() !== 'recorded' || !this.blob || this.disabled()) return
+    if (this.state_() !== 'recorded' || !this.blob || this.off_()) return
     this.state_.set('transcribing')
     try {
       const base = this.mime.split(';')[0].trim().toLowerCase()

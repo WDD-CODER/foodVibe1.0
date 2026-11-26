@@ -116,6 +116,15 @@ describe('StockCountComponent', () => {
     fixture.detectChanges()
   }
 
+  /**
+   * Waits two frames. The shared tooltip closes on any scroll, and opening it makes `whenStable` wait for a frame:
+   * a scroll event the test page still owes (another spec left the window scrolled, and this spec's own page changed
+   * its height) is sent in that frame and closes the tooltip the moment it opens. Let it go before the click.
+   */
+  async function pendingScrollSent(): Promise<void> {
+    for (let i = 0; i < 2; i++) await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  }
+
   it('marks a row counted when its amount changes and counts it in the header', async () => {
     await setup()
     expect(chipOf(rows()[0]).checked).toBeFalse()
@@ -805,6 +814,7 @@ describe('StockCountComponent', () => {
       instance().setAmount(withCrates('a', 'עגבניות'), 2)
       instance().setUnit(withCrates('a', 'עגבניות'), 'crate')
       await settle()
+      await pendingScrollSent()
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
       control.click()
       await settle()
@@ -944,7 +954,7 @@ describe('StockCountComponent', () => {
       expect(chipOf(rows()[0]).checked).toBeTrue()
     })
 
-    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and hover opens a popover', async () => {
+    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and a click opens the tooltip', async () => {
       narrowMode = true
       await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
       instance().setAmount(withCrates('a', 'עגבניות'), 2)
@@ -957,6 +967,7 @@ describe('StockCountComponent', () => {
       expect(control.getAttribute('aria-label')).toContain('stk_base_amount')
       expect(control.getAttribute('aria-label')).toContain('20')
       expect(document.body.querySelector('.c-tooltip')).toBeNull()
+      await pendingScrollSent()
       control.click()
       await settle()
       const box = document.body.querySelector<HTMLElement>('.c-tooltip')!
@@ -965,6 +976,18 @@ describe('StockCountComponent', () => {
       expect(rect.left).toBeGreaterThanOrEqual(0)
       expect(rect.right).toBeLessThanOrEqual(window.innerWidth)
       box.remove()
+    })
+
+    it('(c2) below 1200px every row has the fixed slot beside the unit, with or without the "i" button (plan 747)', async () => {
+      narrowMode = true
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      instance().setAmount(withCrates('a', 'עגבניות'), 2)
+      instance().setUnit(withCrates('a', 'עגבניות'), 'ארגז')
+      await settle()
+      const slots = rows().map((row) => row.querySelector<HTMLElement>('[data-testid="stk-base-slot"]'))
+      expect(slots.every((slot) => slot !== null)).toBeTrue()
+      expect(slots.filter((slot) => slot?.querySelector('[data-testid="stk-base-btn"]')).length).toBe(1)
+      expect(new Set(slots.map((slot) => Math.round(slot!.getBoundingClientRect().width))).size).toBe(1)
     })
 
     it('(d) at 1200px and above the row is as today: the counted chip and the base column, no base control', async () => {

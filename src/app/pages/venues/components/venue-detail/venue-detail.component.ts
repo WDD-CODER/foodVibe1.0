@@ -7,6 +7,7 @@ import { EquipmentDataService } from '@services/equipment-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { VenueProfile } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { formatVenueHours } from 'src/app/core/utils/venue-hours.util'
 import { videoSourceKey } from 'src/app/core/utils/video-link.util'
@@ -19,7 +20,7 @@ import { isoToLocalEpoch, todayIso } from 'src/app/core/utils/date-input.util'
 @Component({
   selector: 'app-venue-detail',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, DisabledWhyDirective],
   templateUrl: './venue-detail.component.html',
   styleUrl: './venue-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

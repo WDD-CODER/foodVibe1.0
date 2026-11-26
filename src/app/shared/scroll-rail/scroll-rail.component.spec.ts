@@ -185,6 +185,51 @@ describe('ScrollRailComponent', () => {
     })
   })
 
+  describe('the sign of more inside the container (plan 747 round two)', () => {
+    const more = (side: 'prev' | 'next'): HTMLElement =>
+      fixture.debugElement.query(By.css(`.sr-frame .sr-more--${side}`)).nativeElement
+    const setPhone = (value: boolean): void => {
+      ;(rail() as unknown as { phone_: { set(v: boolean): void } }).phone_.set(value)
+      fixture.detectChanges()
+    }
+
+    beforeEach(() => {
+      fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
+      fixture.detectChanges()
+      refresh()
+    })
+
+    it('shows no sign while the outside arrow buttons are rendered', () => {
+      expect(more('prev').classList).not.toContain('is-shown')
+      expect(more('next').classList).not.toContain('is-shown')
+    })
+
+    it('shows the sign only on the side that has more at phone width, hidden from assistive tech', () => {
+      setPhone(true)
+      expect(fixture.debugElement.query(By.css('.sr-arrow'))).toBeNull()
+      expect(more('next').classList).toContain('is-shown')
+      expect(more('prev').classList).not.toContain('is-shown')
+      expect(more('next').getAttribute('aria-hidden')).toBe('true')
+      expect(getComputedStyle(more('next')).pointerEvents).toBe('none')
+      expect(getComputedStyle(more('prev')).visibility).toBe('hidden')
+
+      const el = scroller()
+      el.scrollLeft = -(el.scrollWidth - el.clientWidth)
+      refresh()
+      expect(more('next').classList).not.toContain('is-shown')
+      expect(more('prev').classList).toContain('is-shown')
+    })
+
+    it('shows no sign when the content fits', () => {
+      fixture.componentInstance.items.set([1, 2])
+      fixture.detectChanges()
+      refresh()
+      setPhone(true)
+      expect(more('prev').classList).not.toContain('is-shown')
+      expect(more('next').classList).not.toContain('is-shown')
+    })
+  })
+
   describe('centerChild (plan 468)', () => {
     beforeEach(() => {
       fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])

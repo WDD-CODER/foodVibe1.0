@@ -148,5 +148,13 @@ export const REUSE_RULES = [
     files: ['src/app/**/*.html'],
     pattern: /\[attr\.title\]=|\[title\]=|<(?:button|a|span|div|p|i|li|td|th|label|input|img|lucide-icon)\b[^>]*\stitle="/,
     hint: 'show a hint with the shared tooltip (not the browser\'s title), so it looks the same everywhere and works on touch'
+  },
+  // Default disabled-explains-why (plan 747): a new bare [disabled] is flagged; the bindings that are there are debt.
+  {
+    id: 'house-disabled-why',
+    family: 'tooltip',
+    files: ['src/app/**/*.html'],
+    pattern: /\[disabled\]=/,
+    hint: 'a control that can be disabled says why: use [appDisabledWhy]="reason" (src/app/shared/tooltip/), or keep [disabled] only while its own action runs'
   }
 ]

@@ -110,6 +110,28 @@
     flex: 0 0 auto;
   }
 
+  // Plan 747 round two: below desktop the unit cell is two parts — the unit select (or the unit chips), then a
+  // fixed slot that holds the "i" button or is empty. The slot is on every row, so the units sit in one column.
+  .stock-count__unit-cell {
+    gap: var(--space-1);
+
+    // the first part (the select or the chips) takes the room the slot leaves
+    > :not(.stock-count__base-slot) {
+      flex-grow: 1;
+
+      min-inline-size: 0;
+    }
+  }
+
+  .stock-count__base-slot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+
+    inline-size: 2rem;
+  }
+
   // Plan 657: the counted mark per width — tokens set on the cell by the component (phone < tablet < desktop).
   // Plan 658: the compact checkbox takes its box from --row-checkbox-size, set on the cell by the component.
   .stock-count__counted {
@@ -139,4 +161,16 @@
     inline-size: 12rem;
     max-inline-size: 12rem;
   }
+}
+
+// The two-part unit cell uses its width for the unit and the slot: less padding than a plain cell.
+// Outside @layer so it wins over the unlayered .c-list-body-cell padding in styles.scss.
+:host .c-list-body-cell.stock-count__unit-cell {
+  padding-inline: var(--space-1);
+}
+
+// The "i" button fits its slot. Outside @layer so it wins over the unlayered .c-icon-btn size in styles.scss.
+:host .stock-count__base-slot .stock-count__base-btn {
+  inline-size: 2rem;
+  block-size: 2rem;
 }

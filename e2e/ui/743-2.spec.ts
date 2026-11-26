@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { signInQa } from '../helpers/qa-session'
 
-// Plans 743, 747: on a phone the rail has no arrow buttons at all (the edge fade is the sign), and the row still
+// Plans 743, 747: on a phone the rail has no arrow buttons at all (the sign of more inside the container says so: 751-2), and the row still
 // scrolls by swiping.
 test('743-2: no arrow button exists on a phone and the settings tabs still scroll', async ({ page, context }) => {
   await signInQa(context)

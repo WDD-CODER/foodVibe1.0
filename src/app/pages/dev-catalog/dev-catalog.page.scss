@@ -16,11 +16,21 @@
   background: var(--bg, #fff);
 }
 
+.dc-jump {
+  cursor: pointer;
+}
+
 .dc-section {
   margin-block: 1.5rem;
   padding-block-end: 1rem;
   border-block-end: 1px solid rgb(0 0 0 / 10%);
   min-inline-size: 0;
+  // A chip of the top bar scrolls here: keep the heading clear of the app's top bar and the chip bar.
+  scroll-margin-block-start: 10rem;
+
+  > h2:focus {
+    outline: none;
+  }
 }
 
 .dc-grid {

@@ -224,7 +224,9 @@ export class StockCountComponent implements OnInit {
   })
   protected readonly mobileGridTemplate_ = computed(() => {
     if (this.view_() !== 'sheet') return '1fr'
-    const cols = 'minmax(0, 1.5fr) auto minmax(0, 1fr) auto'
+    // The unit column keeps room for the unit and the fixed slot beside it (plan 747): never under 6rem, which
+    // leaves the unit select the width it had before the slot.
+    const cols = 'minmax(0, 1.5fr) auto minmax(6rem, 1fr) auto'
     return this.baseColumn_() ? cols + ' minmax(3.5rem, auto)' : cols
   })
 
@@ -331,7 +333,7 @@ export class StockCountComponent implements OnInit {
     })
   })
 
-  /** Plan 655: the base amount of a row, as the hover text and the popover show it. */
+  /** Plan 655: the base amount of a row, as the hover text and the tooltip show it. */
   protected baseLabel_(base: string): string {
     return `${this.translation_.translate('stk_base_amount')}: ${base}`
   }

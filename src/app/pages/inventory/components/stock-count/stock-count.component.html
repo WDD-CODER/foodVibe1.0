@@ -195,7 +195,7 @@
           <div class="c-list-body-cell" role="cell" dir="ltr">
             <app-counter [value]="row.state.amount" [min]="0" (valueChange)="setAmount(row.product, $event)" />
           </div>
-          <div class="c-list-body-cell" role="cell">
+          <div class="c-list-body-cell" [class.stock-count__unit-cell]="narrow_()" role="cell">
             @if (row.state.choose) {
               <div class="c-chip-group stock-count__unit-choice" role="radiogroup" data-testid="stk-unit-choice">
                 @for (choice of row.choices; track choice.value) {
@@ -228,20 +228,25 @@
                 [ngModel]="row.state.unit"
                 (valueChange)="setUnit(row.product, $event)"
               />
-              @if (narrow_() && row.base) {
-                <button
-                  type="button"
-                  class="c-icon-btn stock-count__base-btn"
-                  data-testid="stk-base-btn"
-                  [attr.aria-label]="baseLabel_(row.base)"
-                  [appTooltip]="baseLabel_(row.base)"
-                  [tooltipOnClick]="true"
-                  tooltipPlacement="below"
-                  (click)="$event.stopPropagation()"
-                >
-                  <lucide-icon name="info" [size]="16"></lucide-icon>
-                </button>
-              }
+            }
+            @if (narrow_()) {
+              <!-- A fixed slot on every row: the "i" button or nothing, so the unit column stays straight. -->
+              <span class="stock-count__base-slot" data-testid="stk-base-slot">
+                @if (!row.state.choose && row.base) {
+                  <button
+                    type="button"
+                    class="c-icon-btn stock-count__base-btn"
+                    data-testid="stk-base-btn"
+                    [attr.aria-label]="baseLabel_(row.base)"
+                    [appTooltip]="baseLabel_(row.base)"
+                    [tooltipOnClick]="true"
+                    tooltipPlacement="below"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <lucide-icon name="info" [size]="16"></lucide-icon>
+                  </button>
+                }
+              </span>
             }
           </div>
           <div

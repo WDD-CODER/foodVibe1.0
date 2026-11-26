@@ -27,6 +27,7 @@ import { UserService } from '@services/user.service'
 import { PermissionService } from '@services/permission.service'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
 import { Product } from '@models/product.model'
@@ -91,6 +92,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     ClickOutSideDirective,
     LoaderComponent,
     SearchComboboxComponent,

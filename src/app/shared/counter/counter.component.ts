@@ -19,11 +19,19 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from './step-hold.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-counter',
   standalone: true,
-  imports: [NumberBoxDirective, StepHoldDirective, CommonModule, SelectOnFocusDirective, TranslatePipe],
+  imports: [
+    NumberBoxDirective,
+    StepHoldDirective,
+    CommonModule,
+    SelectOnFocusDirective,
+    TranslatePipe,
+    DisabledWhyDirective
+  ],
   templateUrl: './counter.component.html',
   styleUrl: './counter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,6 +45,8 @@ export class CounterComponent {
   max = input<number | undefined>(undefined)
   stepOptions = input<QuantityStepOptions | undefined>(undefined)
   disabled = input<boolean>(false)
+  /** Why the counter cannot be changed (translated). With a reason its buttons are blocked and say why (plan 747). */
+  disabledWhy = input<string | null>(null)
 
   // OUTPUTS
   valueChange = output<number>()
@@ -60,14 +70,14 @@ export class CounterComponent {
   protected maxVal_ = computed(() => this.max())
 
   protected minusDisabled_ = computed(() => {
-    if (this.disabled()) return true
+    if (this.disabled() || this.disabledWhy()) return true
     const current = this.value()
     const minV = this.minVal_()
     return !(current > minV)
   })
 
   protected plusDisabled_ = computed(() => {
-    if (this.disabled()) return true
+    if (this.disabled() || this.disabledWhy()) return true
     const maxV = this.maxVal_()
     if (maxV == null) return false
     return this.value() >= maxV

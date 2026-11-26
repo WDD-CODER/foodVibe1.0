@@ -45,8 +45,7 @@
       type="button"
       class="c-btn-primary"
       (click)="onAddProduct()"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'add' | translatePipe }}</span>
@@ -168,43 +167,48 @@
         (keydown.space)="$event.preventDefault(); onEditProduct(row.product._id)"
       >
         <div class="col-name c-list-body-cell" role="cell">
-          @if (isLowStock(row.product)) {
-            <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{
-              'low_stock' | translatePipe
-            }}</span>
-          }
-          @if (row.statusKind) {
-            <span class="validation-badge validation-badge--{{ row.statusKind }}">
-              <button
-                type="button"
-                class="row-status"
-                [attr.aria-label]="statusLabel(row.statusFields)"
-                [appTooltip]="statusTip"
-                [tooltipOnClick]="true"
-                tooltipPlacement="below"
-                (keydown.enter)="$event.stopPropagation()"
-                (keydown.space)="$event.stopPropagation()"
-              >
-                <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
-              </button>
-              <ng-template #statusTip>
-                @for (field of row.statusFields; track field) {
-                  <span
-                    class="c-chip c-chip--tag c-chip--sm c-chip--square"
-                    [class.c-chip--red]="row.statusKind === 'invalid'"
-                    [class.c-chip--amber]="row.statusKind !== 'invalid'"
-                  >
-                    <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
-                    {{ field | translatePipe }}
-                  </span>
-                }
-              </ng-template>
-            </span>
-          }
-          {{ row.product.nameHebrew }}
-          @if (row.product.nutritionPer100g) {
-            <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
-          }
+          <!-- A fixed slot on every row: the warning triangle or nothing, so every name starts at the same place. -->
+          <span class="name-status-slot">
+            @if (row.statusKind) {
+              <span class="validation-badge validation-badge--{{ row.statusKind }}">
+                <button
+                  type="button"
+                  class="row-status"
+                  [attr.aria-label]="statusLabel(row.statusFields)"
+                  [appTooltip]="statusTip"
+                  [tooltipOnClick]="true"
+                  tooltipPlacement="below"
+                  (keydown.enter)="$event.stopPropagation()"
+                  (keydown.space)="$event.stopPropagation()"
+                >
+                  <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
+                </button>
+                <ng-template #statusTip>
+                  @for (field of row.statusFields; track field) {
+                    <span
+                      class="c-chip c-chip--tag c-chip--sm c-chip--square"
+                      [class.c-chip--red]="row.statusKind === 'invalid'"
+                      [class.c-chip--amber]="row.statusKind !== 'invalid'"
+                    >
+                      <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
+                      {{ field | translatePipe }}
+                    </span>
+                  }
+                </ng-template>
+              </span>
+            }
+          </span>
+          <span class="name-text">
+            @if (isLowStock(row.product)) {
+              <span class="low-stock-badge" [attr.title]="'low_stock' | translatePipe">{{
+                'low_stock' | translatePipe
+              }}</span>
+            }
+            {{ row.product.nameHebrew }}
+            @if (row.product.nutritionPer100g) {
+              <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
+            }
+          </span>
         </div>
         <app-column-carousel-cell>
           <div class="col-category c-list-body-cell" *appFallColumn="'category'; label: 'category' | translatePipe">
@@ -260,8 +264,7 @@
               class="c-icon-btn danger"
               (click)="onDeleteProduct(row.product._id); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
-              [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+              [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>

@@ -21,6 +21,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { Product } from '@models/product.model'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { TranslationService } from '@services/translation.service'
@@ -83,6 +84,7 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     ClickOutSideDirective,
     LoaderComponent,
     ListShellComponent,

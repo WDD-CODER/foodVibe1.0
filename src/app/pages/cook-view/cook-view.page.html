@@ -12,8 +12,7 @@
           class="cv-menu-item"
           role="menuitem"
           (click)="cookExport.closeAllExportOverlays(); enterEditMode()"
-          [disabled]="!isLoggedIn()"
-          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
         >
           <span>{{ 'edit_recipe' | translatePipe }}</span>
           <lucide-icon name="pencil" [size]="20"></lucide-icon>
@@ -206,7 +205,7 @@
             class="cv-chip"
             [class.cv-chip--warn]="!recipe.isApproved"
             (click)="onApproveStamp()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+            [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
           >
             <lucide-icon [name]="recipe.isApproved ? 'check' : 'clock'" [size]="14"></lucide-icon>
             {{ (recipe.isApproved ? 'approved' : 'awaiting_approval') | translatePipe }}
@@ -252,8 +251,7 @@
           type="button"
           class="cv-pill-btn"
           (click)="enterEditMode()"
-          [disabled]="!isLoggedIn()"
-          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
         >
           <lucide-icon name="pencil" [size]="16"></lucide-icon>
           {{ 'edit' | translatePipe }}

@@ -34,8 +34,7 @@
       type="button"
       class="c-btn-primary"
       (click)="onAdd()"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'add' | translatePipe }}</span>
@@ -162,8 +161,7 @@
               class="c-icon-btn danger"
               (click)="onDelete(item); $event.stopPropagation()"
               [attr.aria-label]="'delete' | translatePipe"
-              [disabled]="!isLoggedIn()"
-              [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+              [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             >
               <lucide-icon name="trash-2" [size]="18"></lucide-icon>
             </button>

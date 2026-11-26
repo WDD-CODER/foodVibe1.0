@@ -67,6 +67,7 @@
         <span
           class="c-input-wrapper"
           [class.invalid]="moneyForm().controls.pricePerGuest.invalid && moneyForm().controls.pricePerGuest.touched"
+          [appDisabledWhy]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
         >
           @if (!canEditMoney_()) {
             <lucide-icon name="lock" [size]="14"></lucide-icon>
@@ -79,7 +80,6 @@
             [formControl]="moneyForm().controls.pricePerGuest"
             name="pricePerGuest"
             [placeholder]="result_().revenueIsComputed ? pricePerGuest_() : ''"
-            [attr.title]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
           />
         </span>
       </label>
@@ -89,6 +89,7 @@
         <span
           class="c-input-wrapper"
           [class.invalid]="moneyForm().controls.extraCostAmount.invalid && moneyForm().controls.extraCostAmount.touched"
+          [appDisabledWhy]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
         >
           @if (!canEditMoney_()) {
             <lucide-icon name="lock" [size]="14"></lucide-icon>
@@ -100,7 +101,6 @@
             dir="ltr"
             [formControl]="moneyForm().controls.extraCostAmount"
             name="extraCostAmount"
-            [attr.title]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
           />
         </span>
         @if (moneyForm().controls.extraCostAmount.invalid && moneyForm().controls.extraCostAmount.touched) {

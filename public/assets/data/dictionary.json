@@ -2704,6 +2704,17 @@
     "video_not_video": "הקובץ שנבחר אינו סרטון",
     "video_source_upload": "הועלה",
     "drag_reorder_hint": "גרירה, או חצים למעלה ולמטה, לשינוי הסדר",
-    "dc_tooltip_sample": "זה ההסבר הקצר על הכפתור"
+    "dc_tooltip_sample": "זה ההסבר הקצר על הכפתור",
+    "dc_disabled_sample": "אי אפשר ללחוץ: זו רק הדגמה",
+    "why_nothing_to_save": "אין שינויים לשמור",
+    "why_write_first": "קודם צריך לכתוב משהו",
+    "why_choose_first": "קודם צריך לבחור",
+    "why_first_in_list": "זה כבר הראשון ברשימה",
+    "why_last_in_list": "זה כבר האחרון ברשימה",
+    "why_at_min": "זה כבר המינימום",
+    "why_at_max": "זה כבר המקסימום",
+    "why_nothing_counted": "עוד לא נספר אף פריט",
+    "why_list_empty": "אין כאן עדיין פריטים",
+    "why_demo_only": "זו רק הדגמה"
   }
 }

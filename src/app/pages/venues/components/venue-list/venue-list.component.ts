@@ -21,6 +21,7 @@ import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { VenueProfile, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { TouchRowSelection } from 'src/app/shared/list-selection/touch-row-selection'
@@ -51,6 +52,7 @@ const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     LoaderComponent,
     ListRowCheckboxComponent,
     SelectionBarComponent,

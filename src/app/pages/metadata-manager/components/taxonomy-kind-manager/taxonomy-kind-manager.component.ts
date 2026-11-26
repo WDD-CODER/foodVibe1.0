@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal, viewChild } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { UserService } from '@services/user.service'
 import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { InlineRenameFieldComponent } from 'src/app/shared/inline-rename-field/inline-rename-field.component'
@@ -26,7 +27,14 @@ export interface TaxonomyRenameEvent {
 @Component({
   selector: 'app-taxonomy-kind-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent, InlineRenameFieldComponent, TooltipDirective],
+  imports: [
+    LucideAngularModule,
+    TranslatePipe,
+    RowActionsMenuComponent,
+    InlineRenameFieldComponent,
+    TooltipDirective,
+    DisabledWhyDirective
+  ],
   templateUrl: './taxonomy-kind-manager.component.html',
   styleUrl: './taxonomy-kind-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

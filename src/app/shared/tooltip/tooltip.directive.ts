@@ -5,9 +5,11 @@ import {
   ElementRef,
   TemplateRef,
   ViewContainerRef,
+  computed,
   effect,
   inject,
-  input
+  input,
+  signal
 } from '@angular/core'
 import { DOCUMENT } from '@angular/common'
 import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
@@ -15,7 +17,7 @@ import { TooltipBoxComponent } from './tooltip-box.component'
 
 export const TOOLTIP_HOVER_DELAY_MS = 300
 
-type TooltipContent = string | TemplateRef<unknown> | null
+export type TooltipContent = string | TemplateRef<unknown> | null
 
 let nextTooltipId_ = 0
 /** Closes the tooltip that is open now; only one is open at a time. */
@@ -44,6 +46,14 @@ export class TooltipDirective {
   readonly appTooltip = input<TooltipContent>(null)
   readonly tooltipPlacement = input<'above' | 'below'>('above')
   readonly tooltipOnClick = input(false)
+
+  /** Set by a directive that composes this one (`appDisabledWhy`): its content and click rule win over the inputs. */
+  private readonly held_ = signal<{ content: TooltipContent; onClick: boolean } | null>(null)
+  private readonly content_ = computed<TooltipContent>(() => {
+    const held = this.held_()
+    return held ? held.content : this.appTooltip()
+  })
+  private readonly opensOnClick_ = computed(() => this.held_()?.onClick ?? this.tooltipOnClick())
 
   private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
   private readonly vcr_ = inject(ViewContainerRef)
@@ -76,7 +86,7 @@ export class TooltipDirective {
 
   constructor() {
     effect(() => {
-      const value = this.appTooltip()
+      const value = this.content_()
       if (!this.box_) return
       if (this.isEmpty_(value)) {
         this.close()
@@ -103,7 +113,7 @@ export class TooltipDirective {
     }
     if (event.pointerType === 'mouse') this.touchPointer_ = false
     if (this.isTouch_()) return
-    if (this.box_ || this.isEmpty_(this.appTooltip())) return
+    if (this.box_ || this.isEmpty_(this.content_())) return
     this.clearHoverTimer_()
     this.hoverTimer_ = setTimeout(() => {
       this.hoverTimer_ = null
@@ -121,7 +131,7 @@ export class TooltipDirective {
   }
 
   onFocusIn(): void {
-    if (this.box_ || this.isEmpty_(this.appTooltip())) return
+    if (this.box_ || this.isEmpty_(this.content_())) return
     let focusVisible = false
     try {
       focusVisible = this.host_.nativeElement.matches(':focus-visible')
@@ -132,13 +142,21 @@ export class TooltipDirective {
   }
 
   onClick(): void {
-    if (this.isEmpty_(this.appTooltip())) return
+    if (this.isEmpty_(this.content_())) return
     // On touch every control toggles by tap, whatever `tooltipOnClick` says; the control's own click still runs.
-    if (!this.tooltipOnClick() && !this.isTouch_()) return
+    if (!this.opensOnClick_() && !this.isTouch_()) return
     this.clearHoverTimer_()
     if (this.box_ && this.pinned_) this.close()
     else if (this.box_) this.pinned_ = true
     else this.open_(true)
+  }
+
+  /**
+   * For a directive that composes this one through `hostDirectives`: gives the tooltip its content and says
+   * whether a mouse click pins it, instead of the `appTooltip` / `tooltipOnClick` inputs.
+   */
+  hold(content: TooltipContent, onClick: boolean): void {
+    this.held_.set({ content, onClick })
   }
 
   close(): void {
@@ -173,7 +191,7 @@ export class TooltipDirective {
   }
 
   private open_(pinned: boolean): void {
-    const value = this.appTooltip()
+    const value = this.content_()
     if (this.isEmpty_(value)) return
     if (this.box_) {
       this.pinned_ = this.pinned_ || pinned
