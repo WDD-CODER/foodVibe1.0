@@ -115,6 +115,7 @@ src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts
 src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts
 src/app/pages/breadcrumbs.md
 docs/brain/component-families.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
