@@ -16,7 +16,11 @@
         "builder": {
           "model": "sonnet",
           "tier": "build",
-          "at": "2026-11-26T15:41:42.584Z"
+          "at": "2026-11-26T16:23:41.833Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T18:11:14.690Z"
         }
       },
       "humanItems": [
@@ -38,43 +42,152 @@
           "at": "2026-11-26T16:11:18.126Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T16:23:41.608Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:23:41.836Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:19:09.286Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:40:50.215Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:41:09.125Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T17:41:14.381Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:14.692Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:22.758Z",
+          "state": "parked",
+          "round": 0
         }
       ],
+      "earlier": [
+        {
+          "nnn": "751",
+          "title": "The assistant understands \"מחר\" by itself and no longer hands an opening-hours answer to the staff",
+          "branch": "feat/751-assistant-date-words-and",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T15:41:42.584Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15.4,
+          "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 1775.2,
+              "tokens": {
+                "input": 4497108,
+                "output": 48624
+              },
+              "exit": 1,
+              "error": "claude idle for 15 min (no file changed in its folder)"
+            }
+          ],
+          "parkBranch": "park/rs-console-751",
+          "park": {
+            "at": "2026-11-26T16:14:00.471Z",
+            "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+            "branch": "park/rs-console-751"
+          }
+        }
+      ],
+      "escalations": [
+        {
+          "step": "resumed after: builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+          "check": "(not given)"
+        }
+      ],
+      "replan": "no — (not given)",
       "tiers": [
         "build"
       ],
-      "freeDiskGb": 15.4,
-      "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+      "freeDiskGb": 13.9,
+      "sha": "fdc27b92fa4f22946bfd2b21392b5338af82c7c6",
       "calls": [
         {
           "stage": "builder",
           "model": "sonnet",
-          "seconds": 1775.2,
+          "seconds": 3321.6,
           "tokens": {
-            "input": 4497108,
-            "output": 48624
+            "input": 914736,
+            "output": 5705
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 4.8,
+          "tokens": {
+            "input": 0,
+            "output": 0
           },
           "exit": 1,
-          "error": "claude idle for 15 min (no file changed in its folder)"
+          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 4.9,
+          "tokens": {
+            "input": 0,
+            "output": 0
+          },
+          "exit": 1,
+          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
         }
       ],
-      "parkBranch": "park/rs-console-751",
-      "park": {
-        "at": "2026-11-26T16:14:00.471Z",
-        "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
-        "branch": "park/rs-console-751"
-      }
+      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
     },
     "752": {
       "nnn": "752",
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "depends on parked 751",
-      "freeDiskGb": 15.6,
+      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 13.9,
       "history": [
         {
           "at": "2026-11-26T16:14:04.844Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:23.766Z",
           "state": "skipped",
           "round": 0
         }
@@ -85,11 +198,16 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "depends on parked 751",
-      "freeDiskGb": 15.6,
+      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 13.9,
       "history": [
         {
           "at": "2026-11-26T16:14:05.115Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:24.054Z",
           "state": "skipped",
           "round": 0
         }
@@ -100,11 +218,16 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "depends on parked 751",
-      "freeDiskGb": 15.6,
+      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 13.9,
       "history": [
         {
           "at": "2026-11-26T16:14:05.407Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:24.381Z",
           "state": "skipped",
           "round": 0
         }
@@ -115,11 +238,16 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "depends on parked 751",
-      "freeDiskGb": 15.6,
+      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 13.9,
       "history": [
         {
           "at": "2026-11-26T16:14:05.686Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:24.646Z",
           "state": "skipped",
           "round": 0
         }
@@ -130,11 +258,16 @@
       "round": 0,
       "models": {},
       "state": "skipped",
-      "reason": "depends on parked 751",
-      "freeDiskGb": 15.6,
+      "reason": "not started: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 13.9,
       "history": [
         {
           "at": "2026-11-26T16:14:06.034Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:24.937Z",
           "state": "skipped",
           "round": 0
         }
@@ -146,10 +279,15 @@
       "models": {},
       "state": "skipped",
       "reason": "shares files with parked 751",
-      "freeDiskGb": 15.6,
+      "freeDiskGb": 13.9,
       "history": [
         {
           "at": "2026-11-26T16:14:04.569Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T18:11:23.432Z",
           "state": "skipped",
           "round": 0
         }
@@ -175,12 +313,22 @@
     {
       "at": "2026-11-26T16:14:06.288Z",
       "text": "wave 1 parked 751 — skipped 752, 753, 754, 755, 756; 0 later plan(s) go on"
+    },
+    {
+      "at": "2026-11-26T16:23:29.910Z",
+      "plan": "751",
+      "text": "resumed from park/rs-console-751: round 0, tier build, after: builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751"
+    },
+    {
+      "at": "2026-11-26T16:23:41.414Z",
+      "plan": "751",
+      "text": "the folder foodVibe1.0-orch-rs-console-751 was installed (root, scripts, server)"
     }
   ],
-  "attempts": 1,
-  "phase": "finished",
-  "freeDiskGb": 15.6,
-  "updatedAt": "2026-11-26T16:14:09.200Z",
+  "attempts": 2,
+  "phase": "stopped",
+  "freeDiskGb": 13.9,
+  "updatedAt": "2026-11-26T18:11:28.490Z",
   "selfDecided": [
     {
       "plan": "751",
@@ -191,5 +339,54 @@
       "at": "2026-11-26T15:38:39.984Z"
     }
   ],
-  "finishedAt": "2026-11-26T16:14:09.197Z"
+  "finishedAt": "2026-11-26T18:11:28.488Z",
+  "stopReason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+  "stops": [
+    {
+      "at": "2026-11-26T18:11:25.233Z",
+      "reason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "attempt": 2
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "751",
+      "type": "behaviour",
+      "text": "behaviour: a guest message stored in the same millisecond as the last outbound message counts as already answered, because their order in the history is arbitrary and the plan's 'no stale word' case needs this — reverse: drop the `m.at > answeredAt` condition in currentGuestText (server/services/frontdesk-when.js)",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "751",
+      "type": "behaviour",
+      "text": "behaviour: after ערב or בערב only the bare שבת / השבת is skipped (Friday evening); a prefixed form such as 'בערב בשבת' counts as Saturday — reverse: apply the evening-word test in hebrewDay (shared/schemas/front-desk/date-words.ts) to the prefixed forms too",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "751",
+      "type": "seen",
+      "text": "seen: src/app/shared/qr-code/qr-code.component.spec.ts:29 — settle() waits at most 1 second for a lazy import; the test failed once in test:ci and passed on the rerun",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ]
 }
