@@ -204,14 +204,23 @@
       "nnn": "749",
       "title": "Monthly plan: live figures, forecast/actual chips, a dense page and gross-only staff cost",
       "branch": "feat/749-monthly-plan-live-figures",
-      "state": "parked",
-      "round": 0,
+      "state": "merged",
+      "round": 1,
       "tier": "build",
       "models": {
         "builder": {
           "model": "sonnet",
           "tier": "build",
-          "at": "2026-11-26T18:09:57.688Z"
+          "at": "2026-11-26T19:41:30.307Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T21:10:31.512Z"
+        },
+        "builder fix": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T20:49:34.677Z"
         }
       },
       "humanItems": [
@@ -255,6 +264,71 @@
           "at": "2026-11-26T18:10:00.684Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-26T19:41:30.053Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T19:41:30.309Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:31:26.606Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:47:44.303Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:47:53.776Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:49:34.249Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T20:49:34.467Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T20:49:34.679Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T21:06:56.901Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T21:10:22.059Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T21:10:31.514Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T21:13:16.987Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-11-26T21:14:26.792Z",
+          "state": "merged",
+          "round": 1
         }
       ],
       "earlier": [
@@ -265,46 +339,122 @@
           "state": "skipped",
           "reason": "shares files with parked 748",
           "freeDiskGb": 6.1
+        },
+        {
+          "nnn": "749",
+          "title": "Monthly plan: live figures, forecast/actual chips, a dense page and gross-only staff cost",
+          "branch": "feat/749-monthly-plan-live-figures",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-26T18:09:57.688Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 14,
+          "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 957.9,
+              "tokens": {
+                "input": 3919363,
+                "output": 87976
+              },
+              "exit": 1,
+              "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+            },
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2.8,
+              "tokens": {
+                "input": 0,
+                "output": 0
+              },
+              "exit": 1,
+              "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+            }
+          ]
         }
       ],
       "tiers": [
         "build"
       ],
-      "freeDiskGb": 14,
-      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+      "freeDiskGb": 10.6,
+      "sha": "424322ccb935c457884ed80e51804792b6e37d41",
       "calls": [
         {
           "stage": "builder",
           "model": "sonnet",
-          "seconds": 957.9,
+          "seconds": 2992.9,
           "tokens": {
-            "input": 3919363,
-            "output": 87976
+            "input": 6436130,
+            "output": 42880
           },
-          "exit": 1,
-          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+          "exit": 0
         },
         {
-          "stage": "builder",
+          "stage": "reviewer",
           "model": "sonnet",
-          "seconds": 2.8,
+          "seconds": 98.4,
           "tokens": {
-            "input": 0,
-            "output": 0
+            "input": 782096,
+            "output": 11055
           },
-          "exit": 1,
-          "error": "claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+          "exit": 0
+        },
+        {
+          "stage": "builder fix",
+          "model": "sonnet",
+          "seconds": 1039.2,
+          "tokens": {
+            "input": 806129,
+            "output": 11484
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 164,
+          "tokens": {
+            "input": 1180622,
+            "output": 20445
+          },
+          "exit": 0
         }
-      ]
+      ],
+      "roundCauses": [
+        "round 1: review STOP: major src/app/pages/monthly-plan/components/month-pair/month-pair.component.ts:85 wrong result: opening a filled box does not select its value, so typing adds to the old amount instead of replacing it"
+      ],
+      "checkedHead": "1e01556d248f91e37221cc4427e2f114ddbe1569"
     },
     "750": {
       "nnn": "750",
       "title": "Signing out works from the dashboard again",
       "branch": "feat/750-dashboard-sign-out-fix",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "build",
-      "models": {},
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T21:15:51.720Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-26T21:35:49.903Z"
+        }
+      },
       "humanItems": [
         "Sign in as `demo_host`: the app opens «לוח בקרה». Without opening another page, press your name at the top",
         "On a phone (or a narrow window), sign in, stay on «לוח בקרה», open «פרופיל» in the bottom bar and press",
@@ -320,6 +470,41 @@
         {
           "at": "2026-11-26T18:11:44.306Z",
           "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:51.558Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:15:51.721Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:32:18.028Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:35:40.945Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:35:49.906Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:36:13.169Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T21:37:08.660Z",
+          "state": "merged",
           "round": 0
         }
       ],
@@ -337,13 +522,50 @@
           ],
           "reason": "worktree: C:\\coding projects\\Cursor\\foodVibe1.0-orch-biz-fixes-750 is on (no branch), not feat/750-dashboard-sign-out-fix",
           "freeDiskGb": 6
+        },
+        {
+          "nnn": "750",
+          "title": "Signing out works from the dashboard again",
+          "branch": "feat/750-dashboard-sign-out-fix",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "tiers": [
+            "build"
+          ],
+          "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
+          "freeDiskGb": 14
         }
       ],
       "tiers": [
         "build"
       ],
-      "reason": "stopped: rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)",
-      "freeDiskGb": 14
+      "freeDiskGb": 10.4,
+      "sha": "762618eabffc4e92f0a41e7812e7f52371829157",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 983.7,
+          "tokens": {
+            "input": 1609336,
+            "output": 20034
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 21.7,
+          "tokens": {
+            "input": 106089,
+            "output": 2276
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "f1aa6d88f6cfed0cca3ca92bd80d81921f9ca03e"
     }
   },
   "notes": [
@@ -416,12 +638,26 @@
       "at": "2026-11-26T17:23:58.536Z",
       "plan": "749",
       "text": "the folder foodVibe1.0-orch-biz-fixes-749 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T21:06:58.840Z",
+      "plan": "749",
+      "text": "GATE: cached pnpm run test:server — passed on the same files in plan 749"
+    },
+    {
+      "at": "2026-11-26T21:15:51.378Z",
+      "plan": "750",
+      "text": "the folder foodVibe1.0-orch-biz-fixes-750 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T21:38:22.682Z",
+      "text": "FINAL: same tree as plan 750's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
     }
   ],
-  "attempts": 2,
-  "phase": "stopped",
-  "freeDiskGb": 14,
-  "updatedAt": "2026-11-26T18:11:47.937Z",
+  "attempts": 3,
+  "phase": "finished",
+  "freeDiskGb": 10.4,
+  "updatedAt": "2026-11-26T21:38:25.401Z",
   "stops": [
     {
       "at": "2026-11-26T09:25:01.652Z",
@@ -512,8 +748,79 @@
       "confidence": null,
       "rec": "",
       "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "749",
+      "type": "behaviour",
+      "text": "behaviour: the two «הסכום כולל מע״מ» ticks sit in one row under the revenue pair, each starting with its side («תחזית: …», «בפועל: …») — reverse: put one tick inside each side of the pair.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "749",
+      "type": "behaviour",
+      "text": "behaviour: each employer-cost line starts with its side («תחזית · עלות מעביד (הערכה): …») — reverse: drop the side prefix.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "749",
+      "type": "behaviour",
+      "text": "behaviour: in the estimated mode the «הוצאות קבועות: חלקי» flag's hint says «חסר: הוצאות קבועות בפועל», as there are no lines to name — reverse: show no hint in that mode.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "749",
+      "type": "behaviour",
+      "text": "behaviour: a filled chip keeps its teal background while it is open or hovered — reverse: delete the .mpp__chip.teal rule in month-pair.component.scss.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "749",
+      "type": "seen",
+      "text": "seen: src/app/core/services/user.service.spec.ts:206 and :222 (signup specs) and the downscaleImage 'caps the longest edge' spec failed in one full test:ci run and passed in the next two, so they look order-dependent.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
     }
   ],
-  "finishedAt": "2026-11-26T18:11:47.935Z",
-  "stopReason": "rate-limit: claude exited 1: You've hit your 5-hour limit · resets 9:40pm (Asia/Jerusalem)"
+  "finishedAt": "2026-11-26T21:38:25.398Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-26T21:38:25.401Z",
+    "attempt": 1,
+    "blamed": []
+  }
 }
