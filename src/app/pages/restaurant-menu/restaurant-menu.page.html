@@ -4,8 +4,9 @@
 </p>
 } @else {
 <app-list-shell
-  [isPanelOpen]="false"
-  [gridTemplate]="'minmax(8rem, 2fr) 1fr 1fr 1fr 1.4fr 1.4fr 3rem'"
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [gridTemplate]="'minmax(8rem, 2fr) 1fr 1fr 1fr 1.2fr 1fr 1fr 6.5rem'"
   [mobileGridTemplate]="'minmax(6rem, 2fr) 1fr 1.4fr 3rem'"
   [dir]="'rtl'"
   [resultCount]="rows_().length"
@@ -39,53 +40,15 @@
   </ng-container>
 
   <ng-container shell-table-header>
-    <div class="c-grid-header-cell rm-row__filters" role="columnheader">
-      <p class="rm-row__vat-note" data-testid="restaurant-menu-vat-note">{{ vatNote_() }}</p>
-      <button
-        type="button"
-        class="c-chip c-chip--tab"
-        [class.active]="courseFilter_() === allCourses"
-        [attr.aria-pressed]="courseFilter_() === allCourses"
-        (click)="courseFilter_.set(allCourses)"
-      >
-        {{ 'all' | translatePipe }}
-      </button>
-      @for (key of courseChips_(); track key) {
-      <button
-        type="button"
-        class="c-chip c-chip--tab"
-        [class.active]="courseFilter_() === key"
-        [attr.aria-pressed]="courseFilter_() === key"
-        (click)="courseFilter_.set(key)"
-      >
-        {{ courseLabel(key) }}
-      </button>
-      }
-      <button
-        type="button"
-        class="c-chip c-chip--tab"
-        [class.active]="courseFilter_() === noCourse"
-        [attr.aria-pressed]="courseFilter_() === noCourse"
-        (click)="courseFilter_.set(noCourse)"
-      >
-        {{ 'menu_dish_no_course' | translatePipe }}
-      </button>
-      <label class="c-chip c-chip--toggle">
-        <input
-          type="checkbox"
-          data-testid="menu-dish-show-removed"
-          [checked]="showRemoved_()"
-          (change)="showRemoved_.set(!showRemoved_())"
-        />
-        <span>{{ 'menu_dish_show_removed' | translatePipe }}</span>
-      </label>
-    </div>
     <div class="c-grid-header-cell">{{ 'menu_dish_name' | translatePipe }}</div>
-    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_course' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_col_type' | translatePipe }}</div>
     <div class="c-grid-header-cell">{{ 'menu_dish_price_with_vat' | translatePipe }}</div>
-    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_net_price' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide" data-testid="restaurant-menu-net-title" [attr.title]="vatNote_()">
+      {{ 'menu_dish_col_net' | translatePipe }}
+    </div>
     <div class="c-grid-header-cell">{{ 'menu_dish_cost_per_portion' | translatePipe }}</div>
-    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_left' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_col_profit' | translatePipe }}</div>
+    <div class="c-grid-header-cell rm-row__wide">{{ 'menu_dish_col_profit_pct' | translatePipe }}</div>
     <div class="c-grid-header-cell"></div>
   </ng-container>
 
@@ -124,7 +87,7 @@
         {{ money(row.dish.priceWithVat ?? null) }}
       </div>
       <div class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide" role="cell" data-testid="menu-dish-net">
-        <span class="rm-row__ellipsis">{{ 'menu_dish_net_price' | translatePipe }} {{ money(row.net) }}</span>
+        <span class="rm-row__ellipsis">{{ money(row.net) }}</span>
       </div>
       <div class="c-list-body-cell rm-row__cell rm-row__num" role="cell" data-testid="menu-dish-cost">
         @switch (row.cost.state) { @case ('units') {
@@ -141,27 +104,118 @@
       </div>
       <div class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide" role="cell" data-testid="menu-dish-left">
         <span class="rm-row__ellipsis">
-          @if (row.left != null) { {{ money(row.left) }} @if (row.foodCostPct) {
-          <small class="rm-row__pct">({{ row.foodCostPct }})</small>
-          } } @else if (row.dish.priceWithVat == null) { — } @else { {{ 'menu_dish_left_unknown' | translatePipe }} }
+          @if (row.left != null) { {{ money(row.left) }} } @else if (row.dish.priceWithVat == null) { — } @else { {{
+          'menu_dish_left_unknown' | translatePipe }} }
+        </span>
+      </div>
+      <div
+        class="c-list-body-cell rm-row__cell rm-row__num rm-row__wide"
+        role="cell"
+        data-testid="menu-dish-profit-pct"
+      >
+        <span class="rm-row__ellipsis">
+          @if (row.profitPct) { {{ row.profitPct }} } @else if (row.left == null && row.dish.priceWithVat != null) { {{
+          'menu_dish_left_unknown' | translatePipe }} } @else { — }
         </span>
       </div>
       <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
-        <button type="button" class="c-btn-ghost--sm" data-testid="menu-dish-edit" (click)="openEdit(row.dish)">
-          {{ 'edit' | translatePipe }}
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-testid="menu-dish-edit"
+          [attr.aria-label]="'edit' | translatePipe"
+          (click)="openEdit(row.dish); $event.stopPropagation()"
+        >
+          <lucide-icon name="pencil" [size]="18"></lucide-icon>
         </button>
         @if (row.dish.active !== false) {
-        <button type="button" class="c-btn-ghost--sm" data-testid="menu-dish-remove" (click)="remove(row.dish)">
-          {{ 'menu_dish_remove' | translatePipe }}
+        <button
+          type="button"
+          class="c-icon-btn danger"
+          data-testid="menu-dish-remove"
+          [attr.aria-label]="'menu_dish_remove' | translatePipe"
+          [attr.title]="'menu_dish_remove' | translatePipe"
+          (click)="remove(row.dish); $event.stopPropagation()"
+        >
+          <lucide-icon name="trash-2" [size]="18"></lucide-icon>
         </button>
         } @else {
-        <button type="button" class="c-btn-ghost--sm" data-testid="menu-dish-restore" (click)="restore(row.dish)">
-          {{ 'menu_dish_restore' | translatePipe }}
+        <button
+          type="button"
+          class="c-icon-btn"
+          data-testid="menu-dish-restore"
+          [attr.aria-label]="'menu_dish_restore' | translatePipe"
+          [attr.title]="'menu_dish_restore' | translatePipe"
+          (click)="restore(row.dish); $event.stopPropagation()"
+        >
+          <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
         </button>
         }
       </app-row-actions-menu>
     </div>
     } }
+  </ng-container>
+
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+    <button
+      type="button"
+      class="c-btn-ghost--sm c-filter-clear"
+      data-testid="menu-dish-clear-filters"
+      (click)="clearFilters()"
+    >
+      {{ 'clear_filters' | translatePipe }}
+    </button>
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
+    <div class="c-filter-section">
+      <div class="c-filter-category">
+        <button
+          type="button"
+          class="c-filter-category-header"
+          data-testid="menu-dish-type-category"
+          [class.expanded]="filterCategories.isExpanded('type')"
+          [attr.aria-expanded]="filterCategories.isExpanded('type')"
+          (click)="filterCategories.toggle('type')"
+        >
+          <span>{{ 'menu_dish_col_type' | translatePipe }}</span>
+          @if (courseFilter_().size > 0) {
+          <span class="c-filter-category-count" aria-hidden="true">{{ courseFilter_().size }}</span>
+          }
+          <lucide-icon
+            [name]="filterCategories.isExpanded('type') ? 'chevron-down' : 'chevron-left'"
+            [size]="16"
+          ></lucide-icon>
+        </button>
+        @if (filterCategories.isExpanded('type')) {
+        <div class="c-chip-group">
+          @for (key of courseChips_(); track key) {
+          <label class="c-chip c-chip--toggle" data-testid="menu-dish-type-chip">
+            <input type="checkbox" [checked]="courseFilter_().has(key)" (change)="toggleType(key)" />
+            <span>{{ courseLabel(key) }}</span>
+          </label>
+          }
+          <label class="c-chip c-chip--toggle" data-testid="menu-dish-type-chip">
+            <input type="checkbox" [checked]="courseFilter_().has(noCourse)" (change)="toggleType(noCourse)" />
+            <span>{{ 'menu_dish_no_type' | translatePipe }}</span>
+          </label>
+        </div>
+        }
+      </div>
+      <div class="c-chip-group">
+        <label class="c-chip c-chip--toggle">
+          <input
+            type="checkbox"
+            data-testid="menu-dish-show-removed"
+            [checked]="showRemoved_()"
+            (change)="showRemoved_.set(!showRemoved_())"
+          />
+          <span>{{ 'menu_dish_show_removed' | translatePipe }}</span>
+        </label>
+      </div>
+    </div>
   </ng-container>
 
   <ng-container shell-modal>
