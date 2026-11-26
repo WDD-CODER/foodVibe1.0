@@ -827,3 +827,15 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A5: Give the invoices list a switching column for the first time — the carousel group, the header and cell wrappers, the columns list, the spec — src/app/pages/inventory/components/invoices-list/**
 - [ ] A6: Check two of the lists at a medium width with a script and record the change — the two ui specs, the column-carousel rule's gaps, the registry line, the inventory — e2e/ui/746-1.spec.ts, e2e/ui/746-2.spec.ts, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
 - [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+
+### Plan 747 — Dandan's validation feedback on the row container, the falling columns and the tooltip
+- [ ] A1: Move the row's arrows outside the container and make the container as wide as its items — F1, F2 with the rail's spec — src/app/shared/scroll-rail/**, src/app/core/components/header/**, src/app/pages/metadata-manager/metadata-manager.page.component.scss
+- [ ] A2: Let every list shrink to name, one switching column and actions, and never squeeze a one-line cell — F4, F5 in the fit rule with its spec cases — src/app/shared/list-shell/**
+- [ ] A3: Drop the label above each value in the switching column — F3 — src/app/shared/column-carousel/**
+- [ ] A4: Apply the new column rules to the six lists — stay on name and actions, the one-line minimum widths, the ellipsis with the tooltip — the six list component folders
+- [ ] A5: Make the tooltip stay inside the screen sideways and open by tap on touch — F6 with spec cases — src/app/shared/tooltip/**, src/app/core/utils/viewport-placement.util.ts, src/app/core/utils/viewport-placement.util.spec.ts
+- [ ] A6: Show one warning triangle on the product list, and its price hint and the recipe cost text the right way — F7, F8, F9 — src/app/pages/inventory/components/inventory-product-list/**, src/app/pages/recipe-book/components/recipe-book-list/**
+- [ ] A7: Make notifications reachable below desktop width from the profile menu — F10 — src/app/core/components/header/**, src/app/core/components/notification-bell/**
+- [ ] A8: Give the menu builder's stage row the app's chips, and the stock count its hints from tablet width up — F11, F12 — src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/inventory/components/stock-count/**
+- [ ] A9: Update the screen scripts, the house rules and the registry to what was built — the specs, the three rules, the proposed defaults' lines, the registry and inventory — e2e/ui/**, docs/agent/house-style.md, _shared/product-defaults.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A10: Run every check of this plan and hand Dandan the ten cards — outputs under Execution Notes — this plan file
