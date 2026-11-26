@@ -839,3 +839,29 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A8: Give the menu builder's stage row the app's chips, and the stock count its hints from tablet width up — F11, F12 — src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/inventory/components/stock-count/**
 - [ ] A9: Update the screen scripts, the house rules and the registry to what was built — the specs, the three rules, the proposed defaults' lines, the registry and inventory — e2e/ui/**, docs/agent/house-style.md, _shared/product-defaults.md, docs/brain/component-families.md, docs/brain/inventory.md
 - [ ] A10: Run every check of this plan and hand Dandan the ten cards — outputs under Execution Notes — this plan file
+
+### Plan 748 — Restaurant menu and month sales: filters in the panel, clear columns, icons, visible month arrows
+- [ ] A1: Move the menu's type chips and removed toggle into the list's filter panel, like the products list — panel state, collapsible «סוג מנה» category, set filter, clear button, VAT note as the net title's hint — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
+- [ ] A2: Rename the menu columns, show net prices as plain numbers and add a profit percent column — new keys, profitPct, grid templates — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
+- [ ] A3: Use the app's edit, remove and restore icons on each menu row instead of text buttons — c-icon-btn in app-row-actions-menu — src/app/pages/restaurant-menu/restaurant-menu.page.html
+- [ ] A4: Prove the menu fixes with unit tests — filters in the panel, multi-type and no-type filter, clear, titles, no «נטו», profit 75 and 75.0%, icon buttons — src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts
+- [ ] A5: Put the month arrows above the sales list where nothing covers them, and keep fill-zero and save visible — shell-pagination pager, one actions wrapper — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.html, .scss
+- [ ] A6: Drop the cost column from the month sales page and show reasons only on dishes that had returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.ts, .html, .scss
+- [ ] A7: Prove the sales fixes with unit tests, including one that fails while the save button covers the arrows — elementFromPoint with the real list shell, no cost cell, reasons button only after returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts
+- [ ] A8: Add the Hebrew words, update the pages map and run every automatic check — keys of UI/UX Notes; paste outputs under Execution Notes — public/assets/data/dictionary.json, src/app/pages/breadcrumbs.md
+
+### Plan 749 — Monthly plan: live figures, forecast/actual chips, a dense page and gross-only staff cost
+- [ ] A1: Move the draft mapping out of the page and add the live month and the staff-cost migration — draftOf, liveMonthOf, empty target falls back to saved; spec — src/app/pages/monthly-plan/month-draft.ts, src/app/pages/monthly-plan/month-draft.spec.ts
+- [ ] A2: Build the forecast/actual chip pair with the faded forecast in an empty actual — open/close, teal when filled, placeholder not counted; spec — src/app/pages/monthly-plan/components/month-pair/**
+- [ ] A3: Feed the month picture from what is typed and put the pair on the revenue and purchases rows — live computed, flags, targets and dish calculator from the live month; page spec cases (a)–(e) replace the saved-only case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [ ] A4: Put the pair, the trash icon and the new mode names on the fixed costs card — three-column rows, renamed modes and notes; spec — src/app/pages/monthly-plan/components/fixed-costs-card/**
+- [ ] A5: Make staff cost gross pay times the factor, always shown, and start new months that way — drop the mode radios, employer cost beside each side, default gross; card and server tests — src/app/pages/monthly-plan/components/labour-card/**, shared/schemas/month/month-rules.ts, server/test/month-rules.test.js, server/test/month-plans.test.js
+- [ ] A6: Let «חלקי» say what is missing — hint texts, the hint on the figure cells and the fixed flag; specs — src/app/pages/monthly-plan/month-hints.ts, src/app/pages/monthly-plan/month-hints.spec.ts, src/app/shared/month-figures/**
+- [ ] A7: Turn the target norms into hover hints and lay the page out as a dense grid — band title on the box, short boxes, two-side grid with the picture beside the inputs — src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.scss
+- [ ] A8: Add the Hebrew words and check the page end to end in its spec — the keys of UI/UX Notes; page spec: no inline norm, band title present — public/assets/data/dictionary.json, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [ ] A9: Record the changes in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md
+
+### Plan 750 — Signing out works from the dashboard again
+- [ ] A1: Write a failing test that signs out on the dashboard and proves nothing happens today — real authGuard routes, three cases — src/app/core/components/header/header.component.spec.ts
+- [ ] A2: Let sign-out go ahead when the user is already on the dashboard, keeping the unsaved-changes question elsewhere — skip the same-URL navigation, fix the comment — src/app/core/components/header/header.component.ts
+- [ ] A3: Run every automatic check and record the root cause — paste outputs under Execution Notes — src/app/core/components/header/header.component.ts
