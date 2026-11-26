@@ -147,11 +147,11 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] B1: Write a test that lists SCSS `:disabled` rules for converted controls and fails when the blocked state is not matched — scripts/test/disabled-why-scss.test.mjs
-- [ ] B2: Make converted controls look blocked again in every SCSS file that styles them — src/app/**/*.scss
-- [ ] B3: Dim a toggle chip whose tick is blocked and show the reason on the chip — src/app/shared/**
-- [ ] B4: Group the remaining bare `[disabled]` bindings with a script, convert the clear reasons in scope, list the rest — plans/758-house-style-finishing-pass.plan.md
-- [ ] B5: Run every automatic check and paste the outputs under Execution Notes — plans/758-house-style-finishing-pass.plan.md
+- [x] B1: Write a test that lists SCSS `:disabled` rules for converted controls and fails when the blocked state is not matched — scripts/test/disabled-why-scss.test.mjs
+- [x] B2: Make converted controls look blocked again in every SCSS file that styles them — src/app/**/*.scss
+- [x] B3: Dim a toggle chip whose tick is blocked and show the reason on the chip — src/app/shared/**
+- [x] B4: Group the remaining bare `[disabled]` bindings with a script, convert the clear reasons in scope, list the rest — plans/758-house-style-finishing-pass.plan.md
+- [x] B5: Run every automatic check and paste the outputs under Execution Notes — plans/758-house-style-finishing-pass.plan.md
 
 ## What happens when
 - A control is blocked for its own running action (saving): stays a bare `[disabled]` with no tooltip — the default's
@@ -173,3 +173,120 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+### B1 — the test
+- `scripts/test/disabled-why-scss.test.mjs` (manifest entry added). It reads every template with `[appDisabledWhy]` and
+  the component's stylesheet and fails when (1) a `:disabled` rule on such a control has no twin for
+  `[aria-disabled='true']` / `.is-disabled`, (2) a `:hover:not(:disabled)` look also reaches a blocked control,
+  (3) a rule outside `@layer` sets `cursor` or `opacity` and no blocked rule sets it again.
+- Before the fixes: `node --test scripts/test/disabled-why-scss.test.mjs` → exit 1, 12 findings in 7 stylesheets.
+  After: exit 0, `pass 4, fail 0`.
+
+### B2 — what still looked usable
+- The wip commits had already covered most `:disabled` rules. Fixed here: menu-library-list `.action-btn` (a blocked
+  edit / clone / delete button looked fully active, also on hover — it now has the `.c-icon-btn.is-disabled` values),
+  recipe-book-list favorite mark, cook-view `.cv-chip` cursor, dashboard-overview `.link-btn` cursor, rating-stars
+  cursor, date-field and time-field touch picker cursor.
+- Left as native `:disabled` (their controls are still natively disabled): product-form, menu-intelligence
+  `_paper-ui` / `_toolbar`, trash.page, ai-menu-modal textarea, export-toolbar-overlay.
+
+### B3 — blocked tick inside a toggle chip
+- Already in the branch at `a5bb9d20`, no change needed: `src/styles.scss` `.c-chip--toggle:has(> input.is-disabled)`
+  dims the chip; `disabled-why.directive.ts` `applyLabel_()` shows the reason on chip hover, and a tap passes to the
+  input, which shows it. Covered by `disabled-why.directive.spec.ts` ("a checkbox inside a label (a toggle chip)") and
+  by the last case of the new node test.
+- Page for the third [human] card: `/dashboard?tab=metadata` → «סוגי תפריט (Menu Types)», signed in as a user who is
+  not an admin, on a shared menu type (lock icon): its field chips are dimmed; hover or tap says why.
+
+### Notes for the [human] cards
+- Card 1 cannot be seen as written: the ingredients table has no edit-rights block on add / remove. The only blocked
+  controls there are the minus button at 0 («כמות») and the supplier picker without money rights.
+  `recipe-ingredients-table.component.html` (`.col-actions` trash button, `.qty-btn.plus`) and
+  `recipe-builder.page.html` `.add-row-btn` carry no reason. Not added: this plan changes no permission behaviour.
+- Card 2: for a user who cannot edit, the coefficient boxes are blocked, so nothing changes and the save button's
+  tooltip reads «אין שינויים לשמור» (`saveWhy_`), not a permission text.
+
+### B4 — the remaining bare `[disabled]` bindings
+- Script in the session scratch (not in the repo). Result: every one of the 151 is native-disabled only while an action
+  runs, or is a shared control's pass-through of its caller's flag. No binding is a clear reason, so none was converted
+  and there is nothing for the Planner to convert. The `busy` flags behind the names were checked in the `.ts` files
+  (plain signals / inputs set around a running request).
+- Groups (file paths are under `src/app/`, without the `.page.html` / `.component.html` ending):
+
+```text
+[disabled]= occurrences in src/app templates: 151; parsed on a tag: 151
+
+## running (84)
+- `isSaving_()`: pages/cook-view/cook-view:238, pages/cook-view/cook-view:835, pages/cook-view/cook-view:848 <app-approve-stamp>, pages/dashboard/components/opening-details-banner/opening-details-banner:17, pages/equipment/components/equipment-form/equipment-form:78, pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding:293, pages/frontdesk/frontdesk-settings/frontdesk-settings:322, pages/frontdesk/frontdesk-settings/frontdesk-settings:329, pages/inventory/components/product-form/product-form:428, pages/inventory/components/product-import/product-import:134 <app-invoice-header-strip>, pages/inventory/components/product-import/product-import:180 <input>, pages/inventory/components/product-import/product-import:205 <app-custom-select>, pages/inventory/components/product-import/product-import:218 <input>, pages/inventory/components/product-import/product-import:253 <input>, pages/inventory/components/product-import/product-import:265 <input>, pages/inventory/components/product-import/product-import:285 <input>, pages/inventory/components/product-import/product-import:298 <input>, pages/inventory/components/product-import/product-import:316 <app-custom-select>, pages/inventory/components/product-import/product-import:357, pages/menu-intelligence/menu-intelligence:6, pages/metadata-manager/components/ai-model-manager/ai-model-manager:87, pages/metadata-manager/components/ai-model-manager/ai-model-manager:91, pages/platform-dashboard/components/front-desk-admin-dialog/front-desk-admin-dialog:44, pages/platform-dashboard/components/grant-access-dialog/grant-access-dialog:21, pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog:57 <input>, pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog:168, pages/public-request/public-request:220, pages/recipe-builder/recipe-builder:425, pages/recipe-builder/recipe-builder:436 <app-approve-stamp>, pages/requests/components/new-request-dialog/new-request-dialog:194, pages/settings/components/baseline-tab/baseline-tab:88, pages/settings/components/team-tab/team-tab:42, pages/suppliers/components/supplier-form/supplier-form:52, pages/venues/components/venue-form/venue-form:262, shared/client-form/client-form:102, shared/new-inquiry-dialog/new-inquiry-dialog:86
+- `status_() === 'sending'`: shared/ai-menu-modal/ai-menu-modal:39 <textarea>, shared/ai-menu-modal/ai-menu-modal:119 <textarea>, shared/ai-product-modal/ai-product-modal:43 <textarea>, shared/ai-product-modal/ai-product-modal:123, shared/ai-product-modal/ai-product-modal:135, shared/ai-product-modal/ai-product-modal:151 <textarea>, shared/ai-product-modal/ai-product-modal:164 <input>, shared/ai-product-modal/ai-product-modal:190 <input>, shared/ai-recipe-modal/ai-recipe-modal:35 <textarea>
+- `isBusy_()`: pages/clients/components/client-profile/client-profile:79, pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace:18, pages/frontdesk/knowledge/knowledge:217, pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog:15, pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog:239, pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog:244, pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog:257
+- `busyId_() === b._id`: pages/bookings/bookings:78, pages/bookings/bookings:89, pages/bookings/bookings:100, pages/bookings/bookings:111
+- `busy()`: pages/requests/components/request-card/request-card:122, pages/requests/components/request-card/request-card:133, pages/requests/components/request-card/request-card:145, pages/requests/components/request-card/request-card:157
+- `busy_() !== null`: pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card:13, pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card:23, pages/frontdesk/frontdesk-settings/components/data-export-card/data-export-card:33
+- `isParsing_() || isSaving_()`: pages/inventory/components/product-import/product-import:37 <textarea>, pages/inventory/components/product-import/product-import:76, pages/inventory/components/product-import/product-import:86
+- `saving()`: pages/metadata-manager/components/logistics-item-manager/logistics-item-manager:224, pages/metadata-manager/components/staff-stages-manager/staff-stages-manager:15 <input>
+- `isSubmitting_()`: shared/quick-add-product-modal/quick-add-product-modal:187, shared/quick-edit-product-panel/quick-edit-product-panel:139
+- `isSwitching_()`: core/components/acting-banner/acting-banner:14
+- `isUploadingImage_()`: core/components/auth-modal/auth-modal:236 <input>
+- `isSubmitting() || isUploadingImage_()`: core/components/auth-modal/auth-modal:278
+- `isReading_()`: pages/diagnosis/components/diag-menu/diag-menu:43 <textarea>
+- `isCreating_()`: pages/frontdesk/frontdesk-settings/frontdesk-settings:67
+- `isImporting_()`: pages/frontdesk/knowledge/knowledge:270
+- `busy_()`: pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft:24 <app-voice-note>
+- `saving_()`: pages/inventory/components/stock-count/stock-count:154 <app-stock-ai-draft>
+- `isUploading(view.key)`: pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog:139 <input>
+- `isSaving()`: pages/metadata-manager/components/coefficient-manager/coefficient-manager:125
+- `isSaving_() || isErasing_()`: pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog:71
+- `isCancelling_()`: pages/public-request/public-request-status/public-request-status:51
+- `isLoading()`: pages/trash/trash:3
+- `isLocating_()`: pages/venues/components/venue-form/venue-form:68
+
+## running + reason already shown (44)
+- `isSaving_()`: pages/diagnosis/components/diag-menu/diag-menu:148, pages/diagnosis/diagnosis:25, pages/menu-intelligence/components/deposit-paid-dialog/deposit-paid-dialog:43, pages/menu-intelligence/components/event-logistics-panel/logistics-note-draft/logistics-note-draft:122, pages/menu-intelligence/components/not-closed-dialog/not-closed-dialog:46, pages/menu-intelligence/components/supplier-orders/supplier-orders:62, pages/menu-intelligence/components/supplier-orders/supplier-orders:80, pages/metadata-manager/components/ai-model-manager/ai-model-manager:80, pages/metadata-manager/components/unit-edit-dialog/unit-edit-dialog:52, pages/platform-dashboard/components/front-desk-admin-dialog/front-desk-admin-dialog:51, pages/platform-dashboard/components/grant-access-dialog/grant-access-dialog:28, pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog:25 <input>, pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog:175, pages/recipe-builder/components/paste-ingredients-dialog/paste-ingredients-dialog:32, pages/settings/components/baseline-tab/baseline-tab:82, pages/settings/components/business-name-form/business-name-form:31, pages/settings/components/business-settings-tab/business-settings-tab:33, shared/inline-rename-field/inline-rename-field:18, shared/unit-creator/unit-creator:76
+- `isBusy_()`: pages/clients/components/client-profile/client-profile:267, pages/frontdesk/knowledge/knowledge:59, pages/frontdesk/knowledge/knowledge:70, pages/menu-intelligence/components/event-notes-log/event-notes-log:23, pages/menu-intelligence/components/event-notes-log/event-notes-log:81
+- `isLoading_()`: shared/ai-menu-modal/ai-menu-modal:69, shared/ai-menu-modal/ai-menu-modal:149, shared/ai-product-modal/ai-product-modal:73, shared/ai-product-modal/ai-product-modal:225, shared/ai-recipe-modal/ai-recipe-modal:296
+- `busy()`: core/components/terms-modal/terms-modal:25
+- `isReading_()`: pages/diagnosis/components/diag-menu/diag-menu:52
+- `isSavingEdit_()`: pages/equipment/components/equipment-list/equipment-list:289
+- `isSendingTest_()`: pages/frontdesk/frontdesk-onboarding/frontdesk-onboarding:306
+- `isImporting_()`: pages/frontdesk/knowledge/knowledge:277
+- `isParsing_() || isSaving_()`: pages/inventory/components/product-import/product-import:96
+- `saveBusy_()`: pages/inventory/components/product-import/product-import:374
+- `saving_() || aiBusy_()`: pages/inventory/components/stock-count/stock-count:44
+- `isPending(row.key)`: pages/menu-intelligence/components/loading-list/loading-list:51 <input>
+- `isSaving()`: pages/metadata-manager/components/coefficient-manager/coefficient-manager:132
+- `isErasing_()`: pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog:94
+- `uploading_() !== null`: pages/venues/components/venue-detail/venue-detail:186
+- `status_() === 'sending'`: shared/ai-recipe-modal/ai-recipe-modal:89
+- `savingKey_() !== null`: shared/partial-cost-badge/partial-cost-badge:70
+- `isAiLoading_()`: shared/quick-add-product-modal/quick-add-product-modal:41
+
+## pass (17)
+- `disabled() && !disabledWhy()`: shared/approve-stamp/approve-stamp:6, shared/counter/counter:6, shared/counter/counter:37, shared/date-field/date-field:18 <input>, shared/date-field/date-field:34 <input>, shared/list-selection/list-row-checkbox:13 <input>, shared/time-field/time-field:17 <input>, shared/time-field/time-field:33 <input>, shared/voice-note/voice-note:8 <textarea>, shared/voice-note/voice-note:24, shared/voice-note/voice-note:52, shared/voice-note/voice-note:61
+- `!canEdit() && !disabledWhy()`: shared/supplier-picker/supplier-picker:24, shared/supplier-picker/supplier-picker:44
+- `ctaDisabled() && !ctaDisabledWhy()`: shared/empty-state/empty-state:10
+- `readonly() && !disabledWhy()`: shared/rating-stars/rating-stars:16
+- `!canSend() && !disabledWhy() && !emptyIdle_()`: shared/voice-note/voice-note:83
+
+## input (5)
+- `disabled()`: pages/inventory/components/product-import/invoice-header-strip/invoice-header-strip:11 <app-custom-select>, pages/inventory/components/product-import/invoice-header-strip/invoice-header-strip:22 <app-date-field>, pages/inventory/components/product-import/invoice-header-strip/invoice-header-strip:35 <input>
+- `disabled`: shared/custom-multi-select/custom-multi-select:30, shared/custom-select/custom-select:57
+
+## reason already shown (appDisabledWhy beside it) (1)
+- `disabled() && !open_()`: pages/inventory/components/stock-count/stock-ai-draft/stock-ai-draft:7
+```
+
+### B5 — automatic checks (on commit 049d07f2; the node checks rerun after the last commit)
+- `node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm` → `PREPARE: ok`
+- `pnpm run build` → exit 0 (budget warnings only)
+- `pnpm run lint` → exit 0, `0 errors, 69 warnings`
+- `pnpm run test:ci` → exit 0, `TOTAL: 2871 SUCCESS`
+- `kit-manifest-check` (main copy) → exit 0, `453 classified, 0 unclassified`
+- scope check (the gate's `scopeCheck`, and `scripts/scope-check.mjs --diff`) → exit 0, `SCOPE: ok`
+- `kit-checks` / `inventory --check` → first exit 1 (`inventory-stale`: two defaults added by the main merge were not in
+  `docs/brain/inventory.md`); regenerated with `node scripts/inventory.mjs`, then rerun.
+- `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check` → exit 0
+- `ci-scope-check --checkout-branch` → exit 0 (`skipped`, branch is not read in this folder)
+- `scope-check --arch` → `ARCH: ok INV-none, INV-3, INV-6`
+- `node --test scripts/test/disabled-why-scss.test.mjs` → exit 0, `pass 4, fail 0`
+- `log-query --since=plan-start --level=error` → `SKIP: no database configured`
