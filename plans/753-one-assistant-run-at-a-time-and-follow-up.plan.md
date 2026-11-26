@@ -175,6 +175,7 @@ server/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 server/test/frontdesk-eval.test.js
+docs/workflow-kit/manifest.json
 ```
 
 New files: `server/services/frontdesk-lease.js`, `server/test/frontdesk-lease.test.js`,
