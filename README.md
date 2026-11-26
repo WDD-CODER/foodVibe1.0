@@ -1,71 +1,138 @@
-# FoodVibe10
+# FoodVibe
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.20.
+[![ci](https://github.com/WDD-CODER/foodVibe1.0/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/WDD-CODER/foodVibe1.0/actions/workflows/ci.yml)
+![Angular 19](https://img.shields.io/badge/Angular-19-DD0031?logo=angular&logoColor=white)
+![TypeScript 5.7](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript&logoColor=white)
+![Node.js / Express 4](https://img.shields.io/badge/Node.js-Express%204-339933?logo=nodedotjs&logoColor=white)
+![MongoDB / Mongoose 8](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?logo=mongodb&logoColor=white)
+![Zod 4](https://img.shields.io/badge/Zod-4-3E67B1?logo=zod&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-E2E-2EAD33)
 
-## Setup (pnpm)
+FoodVibe — kitchen and food-business management: recipes and costing, events, inventory and suppliers, CRM, a front
+desk and AI helpers. Hebrew, right-to-left.
 
-FoodVibe installs with [pnpm](https://pnpm.io) (the version is pinned in `package.json` → `packageManager`). Install pnpm once, then install the app and the server:
+## Live demo
 
-```powershell
-npm install -g pnpm@10.34.6
-pnpm install
-pnpm --dir server install
+**[Open the live demo](https://foodvibe1-0-1-frankfurt.onrender.com/)**
+
+Hosted on Render's free tier: the first load can take about 50 seconds while the server wakes up. New accounts get
+100 AI calls.
+
+## Screenshots
+
+The Hebrew, right-to-left interface is best seen in the [live demo](https://foodvibe1-0-1-frankfurt.onrender.com/).
+
+<!-- Add the five files to docs/images/, then replace the sentence above with the block below (without these comment marks).
+
+![Dashboard](docs/images/dashboard.png)
+*The dashboard: the state of the business at a glance.*
+
+![Recipe costing](docs/images/recipe-costing.png)
+*A recipe with its cost, calculated while you edit.*
+
+![Event](docs/images/event.png)
+*An event with its menu.*
+
+![Inventory](docs/images/inventory.png)
+*The product inventory.*
+
+![AI helper](docs/images/ai-helper.png)
+*An AI helper turning free input into a draft to review.*
+
+-->
+
+## Features
+
+- **Recipes and dishes:** build preparations and dishes from your products and see the cost update while you edit.
+- **Events and menus:** plan an event's menu and follow it with a pricing meter, prep sheets, supplier orders and a
+  loading list.
+- **Inventory, stock counts and suppliers:** keep products, equipment, invoices and suppliers in one place and count
+  stock against them.
+- **CRM and quotes:** keep client profiles and follow each event from inquiry, through quote sent and deposit paid, to
+  closing.
+- **Front desk:** a public request page for customers, with a requests inbox, bookings and a business knowledge base
+  behind it.
+- **AI helpers:** menu drafts, invoice and stock reading and voice notes turn free input into drafts that you review.
+
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Client | Angular 19 (standalone components, signals, OnPush), right-to-left SCSS |
+| Server | Node.js, Express, Mongoose |
+| Shared | One Zod schema package used by both sides |
+| Data | MongoDB Atlas |
+| AI | Google Gemini, called only from the server |
+| Tests | Karma / Jasmine, Vitest with an in-memory MongoDB, Playwright |
+| Hosting | Render |
+
+## Architecture
+
+```mermaid
+flowchart LR
+  browser["Browser<br/>Angular app"] -->|"/api/v1"| api["Express API"]
+  api --> db[("MongoDB")]
+  api --> ai["Google Gemini"]
+  schemas["shared/schemas<br/>Zod"] -.-> browser
+  schemas -.-> api
 ```
 
-pnpm keeps one shared package store and links each `node_modules` from it. The store must be on the same drive as the project folders (`C:`); on another drive pnpm silently copies instead of linking. The `scripts/` folder (kit-managed) stays on npm: `npm ci --prefix scripts`.
+The server validates every write with the shared schemas. The AI key never leaves the server.
 
-## Development server
+## Run it locally
 
-To start a local development server, run:
+You need Node.js 22 or later, [pnpm](https://pnpm.io) and a local MongoDB.
 
-```bash
-ng serve
-```
+1. Install the app and the server:
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+   ```bash
+   pnpm install
+   pnpm --dir server install
+   ```
 
-## Code scaffolding
+2. Copy `server/.env.example` to `server/.env` and fill it in. Every setting is described in
+   [server/.env.example](server/.env.example).
+3. Start the server, and in a second terminal start the app:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+   ```bash
+   pnpm --dir server run dev:local
+   ```
 
-```bash
-ng generate component component-name
-```
+   ```bash
+   pnpm run dev:local
+   ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+4. Open `http://localhost:4200/`.
 
-```bash
-ng generate --help
-```
+## How it is tested
 
-## Building
+- **2789 unit tests** (Karma / Jasmine): the app's components, services and calculations.
+- **1983 server tests** (Vitest with an in-memory MongoDB): the API, permissions, data rules and AI routes, with
+  the AI model faked.
+- **157 end-to-end tests** (Playwright): key user flows and screen layouts in a real browser.
 
-To build the project run:
+Every pull request runs lint, build, unit, server and secret-scan checks in CI.
 
-```bash
-ng build
-```
+## How I build: an AI-assisted workflow
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+- Every change starts as a written plan with a problem statement, a scope it may touch and acceptance criteria.
+- An orchestrator builds the plans one by one on their own branches, has each one reviewed against its plan, and merges
+  it only when the checks pass.
+- CI and architecture gates run on every pull request: lint, build, unit and server tests, secret scanning, and checks
+  that no change breaks the project's written invariants.
+- What a machine cannot judge — how a screen looks and feels — goes to me as short validation cards, and nothing ships
+  until I sign them off.
+- Lessons from each run become written rules, so the next plan starts from them.
 
-## Running unit tests
+## Project status
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Active personal project, built and maintained by one developer since February 2026 (first commit 2026-02-01); in use as
+a working kitchen tool and as a portfolio.
 
-```bash
-ng test
-```
+## License
 
-## Running end-to-end tests
+All rights reserved — see [LICENSE](LICENSE). Viewing only.
 
-For end-to-end (e2e) testing, run:
+## Author
 
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Dan Weibren — [github.com/WDD-CODER](https://github.com/WDD-CODER)

@@ -9,6 +9,7 @@ process.env.GEMINI_API_KEY = 'test-key'
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
 const { captureLogs } = require('./helpers/log-capture')
 const { resetForTests } = require('../services/gemini-client')
+const { _waitForUsageWritesForTests } = require('../services/ai-usage')
 
 let app
 let fetchMock
@@ -207,6 +208,7 @@ describe('POST /ai/stock/extract', () => {
     expect(drafts[0].aiDraft.lines).toEqual([{ productId: 'flour', quantity: 4, unit: null, unitMissing: true, missing: ['unit'] }])
     // Plan 654 (d): the model's raw lines are kept next to the cleaned answer.
     expect(drafts[0].aiDraft.modelLines).toEqual([{ spoken: 'קמח', quantity: 4, unit: null }])
+    await _waitForUsageWritesForTests()
     expect(await testDb().collection('aiUsage').countDocuments({ feature: 'stock_extract' })).toBe(1)
     const logged = JSON.stringify(logs.records)
     for (const word of ['קמח', 'אורז', 'עגבניות', 'סודי']) expect(logged).not.toContain(word)
