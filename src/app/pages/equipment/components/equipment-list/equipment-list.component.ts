@@ -45,6 +45,7 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
@@ -76,7 +77,8 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     ClickOutSideDirective,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
-    InputClearComponent
+    InputClearComponent,
+    TooltipDirective
   ],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
@@ -85,12 +87,12 @@ type EquipmentBulkField = 'category' | 'isConsumable'
 export class EquipmentListComponent implements OnInit, OnDestroy, PendingChangesComponent {
   /** Declared columns (plan 746): consumable → scaling rule → category → owned quantity. */
   protected readonly columns: readonly ListColumn[] = [
-    { id: 'name', track: '2fr', min: '11rem', phoneMin: '8rem' },
+    { id: 'name', track: '2fr', min: '11rem', phoneMin: '8rem', stay: true },
     { id: 'category', track: '1fr', min: '7rem', fall: 3 },
-    { id: 'owned', track: 'minmax(48px, 0.8fr)', min: '4.5rem', fall: 4 },
+    { id: 'owned', track: '0.8fr', min: '4.5rem', fall: 4 },
     { id: 'scaling', track: '1.2fr', min: '8rem', fall: 2 },
     { id: 'consumable', track: '0.8fr', min: '5rem', fall: 1 },
-    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px' },
+    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px', stay: true },
     { id: 'select', track: 'auto', min: '1.75rem', phoneTrack: '28px', phoneMin: '28px', hideOnTouchPhone: true }
   ]
 

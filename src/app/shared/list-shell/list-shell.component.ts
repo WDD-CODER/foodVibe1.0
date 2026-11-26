@@ -114,6 +114,8 @@ export class ListShellComponent {
     effect(() => {
       host.style.setProperty('--card-min', this.cardMin())
       const fit = this.fit()
+      // Plan 747: a checkbox column dropped for lack of room has no track, so its cells are hidden too.
+      host.classList.toggle('fit-no-select', !!fit && fit.dropped.length > 0)
       if (fit) {
         // Measured: the one template is right for the current width and phone state, so the three
         // variables the CSS picks between at each width all carry it.

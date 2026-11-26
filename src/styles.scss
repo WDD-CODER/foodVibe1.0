@@ -3019,6 +3019,9 @@ input[type='number']::-webkit-outer-spin-button {
   color: var(--color-text-main);
   font-size: var(--fs-xs);
   line-height: 1.4;
+  // A line break in the text stays a line break; long text wraps inside max-inline-size.
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 
   background: var(--bg-glass-dense);
   border: 1px solid var(--border-default);
@@ -3064,4 +3067,9 @@ input[type='number']::-webkit-outer-spin-button {
     border-top-color: transparent;
     border-bottom-color: var(--bg-glass-dense);
   }
+}
+
+/* List container (plan 747): a checkbox column dropped for lack of room has no grid track, so its cells go too. */
+.fit-no-select .col-select {
+  display: none;
 }

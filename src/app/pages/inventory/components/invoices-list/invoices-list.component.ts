@@ -47,18 +47,21 @@ export class InvoicesListComponent implements OnInit {
   protected readonly isLoading_ = signal(true)
   protected readonly isOwner_ = computed(() => this.permission_.can('editMoney', { type: 'products' }))
   protected readonly invoices_ = computed(() => [...this.data_.allInvoices_()].sort(newestFirst))
-  /** Declared columns (plan 746): file → saved at → lines count → invoice number; supplier and date stay. */
+  /**
+   * Declared columns (plans 746, 747): file → saved at → lines count → invoice number → date; only the supplier
+   * stays (there is no actions column).
+   */
   protected readonly columns_ = computed<readonly ListColumn[]>(() => {
     const head: ListColumn[] = [
-      { id: 'supplier', track: '1.6fr', min: '9rem', phoneMin: '7rem' },
-      { id: 'date', track: '1fr', min: '6rem' },
-      { id: 'number', track: '1fr', min: '6rem', fall: 4 }
+      { id: 'supplier', track: '1.6fr', min: '9rem', phoneMin: '7rem', stay: true },
+      { id: 'date', track: '1fr', min: '7rem' },
+      { id: 'number', track: '1fr', min: '7rem', fall: 4 }
     ]
-    if (!this.isOwner_()) return [...head, { id: 'saved', track: '1fr', min: '6.5rem', fall: 2 }]
+    if (!this.isOwner_()) return [...head, { id: 'saved', track: '1fr', min: '7rem', fall: 2 }]
     return [
       ...head,
-      { id: 'lines', track: '0.7fr', min: '4rem', fall: 3 },
-      { id: 'saved', track: '1fr', min: '6.5rem', fall: 2 },
+      { id: 'lines', track: '0.7fr', min: '4.5rem', fall: 3 },
+      { id: 'saved', track: '1fr', min: '7rem', fall: 2 },
       { id: 'file', track: '1.2fr', min: '7rem', fall: 1 }
     ]
   })

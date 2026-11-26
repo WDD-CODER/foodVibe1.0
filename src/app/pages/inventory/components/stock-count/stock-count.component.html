@@ -234,12 +234,10 @@
                   class="c-icon-btn stock-count__base-btn"
                   data-testid="stk-base-btn"
                   [attr.aria-label]="baseLabel_(row.base)"
-                  [attr.aria-expanded]="basePopover_()?.id === row.product._id"
-                  (click)="toggleBase_(row, $event)"
-                  (mouseenter)="hoverBase_(row, $event)"
-                  (focus)="hoverBase_(row, $event)"
-                  (mouseleave)="leaveBase_()"
-                  (blur)="leaveBase_()"
+                  [appTooltip]="baseLabel_(row.base)"
+                  [tooltipOnClick]="true"
+                  tooltipPlacement="below"
+                  (click)="$event.stopPropagation()"
                 >
                   <lucide-icon name="info" [size]="16"></lucide-icon>
                 </button>
@@ -300,22 +298,6 @@
           <button type="button" class="c-btn-ghost" data-testid="stk-show-more" (click)="showMore()">
             {{ 'stk_show_more' | translatePipe }} ({{ hiddenCount_() }})
           </button>
-        </div>
-      }
-      @if (basePopover_(); as pop) {
-        <div
-          #basePop
-          popover="manual"
-          class="stock-count__base-pop"
-          role="dialog"
-          data-testid="stk-base-pop"
-          [style.top.px]="pop.top ?? 0"
-          [style.left.px]="pop.left ?? 0"
-          [style.visibility]="pop.top === null ? 'hidden' : 'visible'"
-          [attr.aria-label]="pop.text"
-          (click)="$event.stopPropagation()"
-        >
-          <span dir="auto">{{ pop.text }}</span>
         </div>
       }
     }

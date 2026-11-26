@@ -156,7 +156,6 @@ describe('Column carousel — measured mode (plan 745)', () => {
     expect(q('.v-a')?.closest('.cc-box')).toBeNull()
     expect(q('app-column-carousel-cell .cc-box .v-c')).not.toBeNull()
     expect(q('app-column-carousel-cell .v-b')).toBeNull()
-    expect(q('app-column-carousel-cell .cc-cell-label-text')?.textContent?.trim()).toBe('lc')
     expect(q('.cc-header')?.getAttribute('aria-label')).toBe('lc')
     ;(q('.cc-arrow--next') as HTMLElement).click()
     fixture.detectChanges()

@@ -100,7 +100,7 @@
         </div>
         <app-column-carousel-cell>
           <div
-            class="col-phone c-list-body-cell"
+            class="col-phone c-list-body-cell cell-nowrap"
             *appFallColumn="'phone'; label: 'client_phone' | translatePipe"
             dir="ltr"
           >
@@ -109,6 +109,7 @@
           <div
             class="col-kinds c-list-body-cell chip-cell"
             *appFallColumn="'kinds'; label: 'client_kinds' | translatePipe"
+            [appTooltip]="kindsTip(item)"
           >
             @for (kind of item.kinds ?? []; track kind) {
               <span class="c-chip--tag c-chip--sm">{{ 'client_kind_' + kind | translatePipe }}</span>
@@ -117,6 +118,7 @@
           <div
             class="col-tags c-list-body-cell chip-cell"
             *appFallColumn="'tags'; label: 'client_tags' | translatePipe"
+            [appTooltip]="tagsTip(item)"
           >
             @for (tag of item.tags ?? []; track tag) {
               <span
@@ -129,19 +131,19 @@
           </div>
           @if (isOwner_()) {
             <div
-              class="col-last c-list-body-cell"
+              class="col-last c-list-body-cell cell-nowrap"
               *appFallColumn="'last'; label: 'client_last_contact' | translatePipe"
             >
               {{ item.lastContactAt ? (item.lastContactAt | date: 'd.M.yy') : '' }}
             </div>
             <div
-              class="col-events c-list-body-cell"
+              class="col-events c-list-body-cell cell-nowrap"
               *appFallColumn="'events'; label: 'client_events_count' | translatePipe"
             >
               {{ item.counters?.events ?? 0 }}
             </div>
             <div
-              class="col-requests c-list-body-cell"
+              class="col-requests c-list-body-cell cell-nowrap"
               *appFallColumn="'requests'; label: 'client_requests_count' | translatePipe"
             >
               {{ item.counters?.requests ?? 0 }}

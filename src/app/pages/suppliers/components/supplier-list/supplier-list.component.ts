@@ -41,6 +41,7 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 const DAY_LABELS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
@@ -61,7 +62,8 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
     EmptyStateComponent,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
-    InputClearComponent
+    InputClearComponent,
+    TooltipDirective
   ],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
@@ -70,14 +72,14 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
 export class SupplierListComponent implements OnInit, OnDestroy {
   /** Declared columns (plan 746): linked products → lead time → minimum order → delivery days → contact → phone. */
   protected readonly columns: readonly ListColumn[] = [
-    { id: 'name', track: '2fr', min: '11rem', phoneMin: '8rem' },
-    { id: 'min-order', track: '0.8fr', min: '5rem', fall: 3 },
+    { id: 'name', track: '2fr', min: '11rem', phoneMin: '8rem', stay: true },
+    { id: 'min-order', track: '0.8fr', min: '6rem', fall: 3 },
     { id: 'contact', track: '1fr', min: '7rem', fall: 5 },
-    { id: 'phone', track: '1fr', min: '7rem', fall: 6 },
-    { id: 'delivery', track: 'minmax(48px, 0.8fr)', min: '6rem', fall: 4 },
-    { id: 'lead', track: '0.8fr', min: '5rem', fall: 2 },
-    { id: 'linked', track: '0.8fr', min: '5rem', fall: 1 },
-    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px' },
+    { id: 'phone', track: '1fr', min: '9rem', fall: 6 },
+    { id: 'delivery', track: '0.8fr', min: '6rem', fall: 4 },
+    { id: 'lead', track: '0.8fr', min: '4.5rem', fall: 2 },
+    { id: 'linked', track: '0.8fr', min: '4.5rem', fall: 1 },
+    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px', stay: true },
     { id: 'select', track: 'auto', min: '1.75rem', phoneTrack: '28px', phoneMin: '28px', hideOnTouchPhone: true }
   ]
 

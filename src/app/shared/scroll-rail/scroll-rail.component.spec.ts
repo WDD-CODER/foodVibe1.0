@@ -36,6 +36,9 @@ describe('ScrollRailComponent', () => {
     }).compileComponents()
     fixture = TestBed.createComponent(HostComponent)
     fixture.detectChanges()
+    // The test window may be narrower than a phone; these cases are about the computer layout.
+    ;(rail() as unknown as { phone_: { set(v: boolean): void } }).phone_.set(false)
+    fixture.detectChanges()
   })
 
   const rail = (): ScrollRailComponent =>
@@ -93,17 +96,26 @@ describe('ScrollRailComponent', () => {
     expect(host().classList).not.toContain('is-overflowing')
   })
 
-  it('marks an overflowing host, draws the frame and keeps the arrows inside it', () => {
+  it('marks an overflowing host, draws the frame and keeps the arrows outside it (plan 747)', () => {
     fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
     fixture.detectChanges()
     refresh()
     fixture.detectChanges()
+    const frame = fixture.debugElement.query(By.css('.sr-frame')).nativeElement as HTMLElement
     expect(host().classList).toContain('is-overflowing')
-    expect(host().classList).toContain('has-frame')
-    expect(parseFloat(getComputedStyle(host()).paddingInlineStart)).toBeGreaterThan(0)
-    const a = arrow('next').getBoundingClientRect()
-    const h = host().getBoundingClientRect()
-    expect(a.left >= h.left - 1 && a.right <= h.right + 1).toBeTrue()
+    expect(frame.classList).toContain('has-frame')
+    expect(parseFloat(getComputedStyle(frame).paddingInlineStart)).toBeGreaterThan(0)
+    const f = frame.getBoundingClientRect()
+    for (const side of ['prev', 'next'] as const) {
+      const a = arrow(side).getBoundingClientRect()
+      expect(a.right <= f.left + 1 || a.left >= f.right - 1).toBeTrue()
+    }
+  })
+
+  it('makes the container as wide as its items while they fit (plan 747)', () => {
+    refresh()
+    const frame = fixture.debugElement.query(By.css('.sr-frame')).nativeElement as HTMLElement
+    expect(frame.getBoundingClientRect().width).toBeLessThan(250)
   })
 
   describe('grab and drag (plan 743)', () => {
@@ -159,15 +171,14 @@ describe('ScrollRailComponent', () => {
   })
 
   describe('phone arrows (plan 743)', () => {
-    it('makes the arrows signs only when the phone query matches', () => {
+    it('does not render the arrow buttons at phone width (plan 747)', () => {
       fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
       fixture.detectChanges()
       refresh()
       const r = rail() as unknown as { phone_: { set(v: boolean): void } }
       r.phone_.set(true)
       fixture.detectChanges()
-      expect(arrow('next').getAttribute('tabindex')).toBe('-1')
-      expect(arrow('next').getAttribute('aria-hidden')).toBe('true')
+      expect(fixture.debugElement.query(By.css('.sr-arrow'))).toBeNull()
       r.phone_.set(false)
       fixture.detectChanges()
       expect(arrow('next').getAttribute('tabindex')).toBeNull()

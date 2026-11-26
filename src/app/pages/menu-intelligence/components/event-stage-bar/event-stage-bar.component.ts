@@ -34,6 +34,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import type { Client } from '@models/client.model'
 import { ClientPickerComponent } from 'src/app/shared/client-picker/client-picker.component'
@@ -59,6 +60,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     RouterLink,
     TranslatePipe,
     ScrollRailComponent,
+    TooltipDirective,
     DateFieldComponent,
     ClientPickerComponent,
     NotClosedDialogComponent,
@@ -149,7 +151,7 @@ export class EventStageBarComponent {
       if (!rail) return
       afterNextRender(
         () => {
-          const pill = this.host_.nativeElement.querySelector<HTMLElement>('.stage-pill.is-current')
+          const pill = this.host_.nativeElement.querySelector<HTMLElement>('.c-chip--tab.active')
           if (pill) rail.centerChild(pill)
         },
         { injector: this.injector }
@@ -158,6 +160,17 @@ export class EventStageBarComponent {
   }
 
   // 6. METHODS
+  /** A locked stage keeps its look and its click (which says why); `finished` has its own refusal. */
+  protected isLocked(stage: EventStage): boolean {
+    return stage === 'finished' ? this.finishRefusal_() !== null : !this.canChangeStage_()
+  }
+
+  /** The reason a locked stage is locked, for its tooltip; null when it is not locked. */
+  protected lockTip(stage: EventStage): string | null {
+    const key = stage === 'finished' ? this.finishRefusal_() : !this.canChangeStage_() ? 'stage_not_allowed' : null
+    return key ? this.translation.translate(key) : null
+  }
+
   /** Moves the event to `stage` after the checks the screen can make itself; the server has the last word. */
   protected async pick(stage: EventStage): Promise<void> {
     const event = this.event_()

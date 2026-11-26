@@ -14,7 +14,6 @@ import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 import { TooltipBoxComponent } from './tooltip-box.component'
 
 export const TOOLTIP_HOVER_DELAY_MS = 300
-export const TOOLTIP_TOUCH_HOLD_MS = 500
 
 type TooltipContent = string | TemplateRef<unknown> | null
 
@@ -23,10 +22,11 @@ let nextTooltipId_ = 0
 let closeOpenTooltip_: (() => void) | null = null
 
 /**
- * The one hint for every control (plan 744): a translated string or a template. Opens on mouse hover (after a
- * short delay), keyboard focus, a touch hold, or — with `tooltipOnClick` — a click or tap that pins it. Closes on
- * leave, blur, Escape, an outside press, scroll and destroy. The box is appended to <body> and placed with
- * `placeInViewport`.
+ * The one hint for every control (plans 744, 747): a translated string or a template. Opens on mouse hover (after
+ * a short delay), keyboard focus, or — with `tooltipOnClick` — a click that pins it. On touch (a touch pointer or a
+ * device with no hover) hover does nothing: a tap on the control toggles it and a tap elsewhere closes it; the
+ * control's own action still runs. Closes on leave, blur, Escape, an outside press, scroll and destroy. The box is
+ * appended to <body> and placed with `placeInViewport`, whole inside the viewport on both sides.
  */
 @Directive({
   selector: '[appTooltip]',
@@ -35,8 +35,6 @@ let closeOpenTooltip_: (() => void) | null = null
     '(pointerenter)': 'onPointerEnter($event)',
     '(pointerleave)': 'onPointerLeave()',
     '(pointerdown)': 'onPointerDown($event)',
-    '(pointerup)': 'clearTouchTimer_()',
-    '(pointercancel)': 'clearTouchTimer_()',
     '(focusin)': 'onFocusIn()',
     '(focusout)': 'close()',
     '(click)': 'onClick()'
@@ -55,7 +53,8 @@ export class TooltipDirective {
   private pinned_ = false
   private previousDescribedBy_: string | null = null
   private hoverTimer_: ReturnType<typeof setTimeout> | null = null
-  private touchTimer_: ReturnType<typeof setTimeout> | null = null
+  private touchPointer_ = false
+  private placeFrame_ = 0
   private readonly id_ = `app-tooltip-${++nextTooltipId_}`
 
   private readonly closeSelf_ = (): void => this.close()
@@ -90,8 +89,20 @@ export class TooltipDirective {
     inject(DestroyRef).onDestroy(() => this.close())
   }
 
+  /** Touch: the last press was a finger, or the device has no hover at all. */
+  private isTouch_(): boolean {
+    if (this.touchPointer_) return true
+    const view = this.document_.defaultView
+    return !!view && typeof view.matchMedia === 'function' && view.matchMedia('(hover: none)').matches
+  }
+
   onPointerEnter(event: PointerEvent): void {
-    if (event.pointerType === 'touch') return
+    if (event.pointerType === 'touch') {
+      this.touchPointer_ = true
+      return
+    }
+    if (event.pointerType === 'mouse') this.touchPointer_ = false
+    if (this.isTouch_()) return
     if (this.box_ || this.isEmpty_(this.appTooltip())) return
     this.clearHoverTimer_()
     this.hoverTimer_ = setTimeout(() => {
@@ -106,13 +117,7 @@ export class TooltipDirective {
   }
 
   onPointerDown(event: PointerEvent): void {
-    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return
-    if (this.box_ || this.isEmpty_(this.appTooltip())) return
-    this.clearTouchTimer_()
-    this.touchTimer_ = setTimeout(() => {
-      this.touchTimer_ = null
-      this.open_(false)
-    }, TOOLTIP_TOUCH_HOLD_MS)
+    this.touchPointer_ = event.pointerType === 'touch'
   }
 
   onFocusIn(): void {
@@ -127,9 +132,10 @@ export class TooltipDirective {
   }
 
   onClick(): void {
-    if (!this.tooltipOnClick() || this.isEmpty_(this.appTooltip())) return
+    if (this.isEmpty_(this.appTooltip())) return
+    // On touch every control toggles by tap, whatever `tooltipOnClick` says; the control's own click still runs.
+    if (!this.tooltipOnClick() && !this.isTouch_()) return
     this.clearHoverTimer_()
-    this.clearTouchTimer_()
     if (this.box_ && this.pinned_) this.close()
     else if (this.box_) this.pinned_ = true
     else this.open_(true)
@@ -137,7 +143,8 @@ export class TooltipDirective {
 
   close(): void {
     this.clearHoverTimer_()
-    this.clearTouchTimer_()
+    if (this.placeFrame_) cancelAnimationFrame(this.placeFrame_)
+    this.placeFrame_ = 0
     const box = this.box_
     if (!box) return
     this.box_ = null
@@ -154,11 +161,6 @@ export class TooltipDirective {
     const boxElement = box.location.nativeElement as HTMLElement
     box.destroy()
     boxElement.remove()
-  }
-
-  clearTouchTimer_(): void {
-    if (this.touchTimer_ !== null) clearTimeout(this.touchTimer_)
-    this.touchTimer_ = null
   }
 
   private clearHoverTimer_(): void {
@@ -197,6 +199,11 @@ export class TooltipDirective {
       // No popover support: the fixed box still shows, just not in the top layer.
     }
     this.place_()
+    // Measure again once the box has painted: its content and fonts may have changed its width.
+    this.placeFrame_ = requestAnimationFrame(() => {
+      this.placeFrame_ = 0
+      this.place_()
+    })
     this.document_.addEventListener('keydown', this.onKeydown_)
     this.document_.addEventListener('pointerdown', this.onOutsidePress_, true)
     this.document_.addEventListener('scroll', this.onScroll_, true)
@@ -208,19 +215,23 @@ export class TooltipDirective {
     const element = this.box_.location.nativeElement as HTMLElement
     const view = this.document_.defaultView
     if (!view) return
+    // Measured at the corner, where the box is as wide as its text wants (never squeezed by the room beside it).
     element.style.top = '0px'
     element.style.left = '0px'
     const size = element.getBoundingClientRect()
     const anchor = this.host_.nativeElement.getBoundingClientRect()
+    // The visible width: without the page scrollbar, which the box must not slide under.
+    const viewWidth = this.document_.documentElement.clientWidth || view.innerWidth
     const placed = placeInViewport({
       anchor: { top: anchor.top, bottom: anchor.bottom, left: anchor.left, width: anchor.width },
       panel: { width: size.width, height: size.height },
-      viewport: { width: view.innerWidth, height: view.innerHeight },
+      viewport: { width: viewWidth, height: view.innerHeight },
       prefer: this.tooltipPlacement()
     })
     element.style.top = `${placed.top}px`
     element.style.left = `${placed.left}px`
-    element.style.setProperty('--tip-arrow-x', `${placed.anchorCenterX - placed.left}px`)
+    const arrowX = Math.max(10, Math.min(size.width - 10, placed.anchorCenterX - placed.left))
+    element.style.setProperty('--tip-arrow-x', `${arrowX}px`)
     element.classList.toggle('c-tooltip--below', placed.below)
   }
 }

@@ -1,33 +1,70 @@
-@use '../../core/styles/breakpoints' as *;
-
-// Plans 350 + 743 — the one sideways row container: a visible frame, edge arrows, grab-and-drag.
+// Plans 350 + 743 + 747 — the one sideways row: arrow, framed container, arrow, grab-and-drag.
+// The arrows sit outside the container; the container is as wide as its items (and never wider than the room).
 // The frame's box values are the top bar's (written once, here).
 :host {
-  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
 
   min-inline-size: 0;
 
   --sr-arrow-size: 1.75rem;
-  --sr-pad: 0px;
 }
 
-:host(.has-frame) {
-  --sr-pad: 0.25rem;
+.sr-frame {
+  position: relative;
+  flex: 0 1 auto;
 
-  padding: var(--sr-pad);
+  inline-size: fit-content;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  overflow: hidden;
+  border-radius: var(--radius-md);
+
+  // Soft fade at an edge while that side has more (no chevron: the arrows are outside).
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    inset-block: 0;
+
+    inline-size: 1.25rem;
+    pointer-events: none;
+
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease-smooth);
+  }
+
+  &::before {
+    inset-inline-start: 0;
+    background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  &::after {
+    inset-inline-end: 0;
+    background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  &.has-prev::before,
+  &.has-next::after {
+    opacity: 1;
+  }
+}
+
+.sr-frame.has-frame {
+  padding: 0.25rem;
 
   background: var(--bg-chrome);
   border: 1px solid var(--border-chrome);
-  border-radius: var(--radius-md);
   box-shadow: inset 0 1px 0 var(--border-glass-strong);
   backdrop-filter: var(--blur-glass);
 }
 
 .sr-scroller {
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
   justify-content: var(--rail-justify, safe center);
   gap: var(--rail-gap, 0.5rem);
@@ -70,52 +107,40 @@
   scroll-snap-type: none;
 }
 
-// Edge arrows: the up-and-down scroll area's arrow (`.c-scroll-arrow`) turned sideways, laid over the
-// inline-start / inline-end edge of the scroller, inside the frame.
+// Arrows: small round buttons beside the container (outside it). They take room only while the row
+// overflows; an arrow whose side has no more keeps its room but is invisible and cannot be focused.
 .sr-arrow {
-  position: absolute;
-  z-index: 2;
-  inset-block: var(--sr-pad);
-
-  display: grid;
+  display: none;
+  flex: 0 0 auto;
   place-content: center;
 
   inline-size: var(--sr-arrow-size);
+  block-size: var(--sr-arrow-size);
   padding: 0;
 
   color: var(--color-text-muted);
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-md);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 
-  opacity: 0.8;
   transition: opacity var(--dur-base) var(--ease-smooth);
 
-  // Hidden: nothing shifts, nothing can be pressed.
   &.is-hidden {
+    visibility: hidden;
     pointer-events: none;
-    cursor: default;
     opacity: 0;
   }
 
   &:focus-visible {
     outline: 2px solid var(--border-focus);
-    outline-offset: -2px;
+    outline-offset: 2px;
   }
 }
 
-// The app is RTL: the previous arrow is on the right. The gradient fades toward the row.
-.sr-arrow--prev {
-  inset-inline-start: var(--sr-pad);
-
-  background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
-}
-
-.sr-arrow--next {
-  inset-inline-end: var(--sr-pad);
-
-  background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
+:host(.is-overflowing) .sr-arrow {
+  display: grid;
 }
 
 // The app is RTL; swap the chevrons and gradients for an LTR context.
@@ -132,11 +157,11 @@
     display: inline-flex;
   }
 
-  .sr-arrow--prev {
+  .sr-frame::before {
     background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
   }
 
-  .sr-arrow--next {
+  .sr-frame::after {
     background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
   }
 }
@@ -149,16 +174,10 @@
   }
 }
 
-// A phone: the arrows are signs only; the row is moved by swiping.
-@media (max-width: $break-phone-max) {
-  .sr-arrow {
-    pointer-events: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .sr-arrow,
-  .sr-arrow.is-hidden {
+  .sr-frame::before,
+  .sr-frame::after {
     transition: none;
   }
 }

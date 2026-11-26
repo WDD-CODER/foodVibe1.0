@@ -52,7 +52,7 @@ describe('EventStageBarComponent', () => {
 
   const stageLink = (key: string) =>
     Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-link')).find((b) => b.textContent?.includes(`T:${key}`))!
-  const pills = () => Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-pill'))
+  const pills = () => Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-row .c-chip--tab'))
   const pill = (stage: string) => pills().find((p) => p.textContent?.trim() === `T:event_stage_${stage}`)!
 
   async function setup(event: MenuEvent = base): Promise<void> {
@@ -112,8 +112,8 @@ describe('EventStageBarComponent', () => {
   it('shows the seven stages in order plus "not closed", with the current one marked', async () => {
     await setup()
     expect(pills().length).toBe(8)
-    expect(pill('inquiry').classList).toContain('is-current')
-    expect(pill('quote_sent').classList).not.toContain('is-current')
+    expect(pill('inquiry').classList).toContain('active')
+    expect(pill('quote_sent').classList).not.toContain('active')
   })
 
   it('moves the event when a stage is clicked', async () => {
@@ -414,14 +414,15 @@ describe('EventStageBarComponent', () => {
   describe('scroll rail (plan 467)', () => {
     it('puts the stage pills in the shared scroll rail', async () => {
       await setup()
-      expect(el.querySelectorAll('app-scroll-rail .stage-pill').length).toBe(8)
+      expect(el.querySelectorAll('app-scroll-rail .c-chip.c-chip--tab').length).toBe(8)
+      expect(el.querySelectorAll('app-scroll-rail .c-chip--red').length).toBe(1)
     })
 
     it('brings the current stage into view when the screen opens', async () => {
       const spy = spyOn(Element.prototype, 'scrollIntoView')
       await setup({ ...base, stage: 'ordering' })
       await fixture.whenStable()
-      const current = el.querySelector('.stage-pill.is-current')!
+      const current = el.querySelector('.c-chip--tab.active')!
       expect(spy.calls.all().some((c) => c.object === current)).toBeTrue()
     })
   })
@@ -473,7 +474,7 @@ describe('EventStageBarComponent', () => {
 
     it('marks "finished" as the current stage once the event is finished', async () => {
       await setup({ ...base, stage: 'finished' })
-      expect(pill('finished').classList).toContain('is-current')
+      expect(pill('finished').classList).toContain('active')
       expect(closingLink()).toBeTruthy()
     })
   })

@@ -162,6 +162,7 @@
               </button>
             }
           }
+          <app-notification-bell variant="menu" (picked)="isMobileAvatarOpen.set(false)" />
           @if (isOwner_()) {
             <a class="profile-menu__item" role="menuitem" routerLink="/settings" (click)="toggleMobileAvatar()">
               <lucide-icon name="sliders-vertical" size="16"></lucide-icon>

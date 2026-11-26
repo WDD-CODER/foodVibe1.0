@@ -105,7 +105,7 @@
     font-size: var(--fs-sm);
   }
 
-  // Plan 655: below desktop the base amount is a small control; its popover is fixed and kept on the screen.
+  // Plan 655: below desktop the base amount is a small control; its hint is the shared tooltip (plan 747).
   .stock-count__base-btn {
     flex: 0 0 auto;
   }
@@ -119,31 +119,6 @@
   .stock-count__counted .c-chip--toggle {
     min-block-size: var(--stock-count-mark-tap);
     font-size: var(--stock-count-mark-size);
-  }
-
-  .stock-count__base-pop {
-    position: fixed;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-
-    // A popover box brings UA margin/inset/overflow; only the top and left set by the component place it.
-    inset-block-end: auto;
-    inset-inline: auto;
-    margin: 0;
-    overflow: visible;
-    inline-size: max-content;
-    max-inline-size: calc(100vw - 1rem);
-    padding-block: var(--space-2);
-    padding-inline: var(--space-3);
-
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    background: var(--bg-card-solid);
-    box-shadow: var(--shadow-modal);
-    font-size: var(--fs-sm);
-    font-variant-numeric: tabular-nums;
   }
 
   // The unit note: a warning line under the row it belongs to.

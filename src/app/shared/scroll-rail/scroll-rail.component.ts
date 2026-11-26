@@ -49,8 +49,7 @@ export function normalizedScrollStart(scrollLeft: number, rtl: boolean): number 
   host: {
     class: 'scroll-rail',
     '[class.is-overflowing]': 'overflowing()',
-    '[class.is-dragging]': 'dragging_()',
-    '[class.has-frame]': "frame() === 'box'"
+    '[class.is-dragging]': 'dragging_()'
   }
 })
 export class ScrollRailComponent {
@@ -83,6 +82,9 @@ export class ScrollRailComponent {
   /** An arrow can be pressed or focused only while it is shown and the screen is not a phone. */
   protected readonly prevActive = computed(() => this.showPrev() && !this.phone_())
   protected readonly nextActive = computed(() => this.showNext() && !this.phone_())
+
+  /** The arrow buttons exist only on a computer (a phone swipes; the edge fade is the sign) and unless `arrows="never"`. */
+  protected readonly arrowsRendered = computed(() => this.arrows() !== 'never' && !this.phone_())
 
   protected readonly overflowing = computed(() => this.canPrev_() || this.canNext_())
 

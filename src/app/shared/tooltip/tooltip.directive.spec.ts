@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { TooltipDirective, TOOLTIP_HOVER_DELAY_MS, TOOLTIP_TOUCH_HOLD_MS } from './tooltip.directive'
+import { TooltipDirective, TOOLTIP_HOVER_DELAY_MS } from './tooltip.directive'
 
 @Component({
   standalone: true,
@@ -120,13 +120,35 @@ describe('TooltipDirective (plan 744)', () => {
     expect(box()).toBeNull()
   })
 
-  it('a touch press held opens it', fakeAsync(() => {
+  it('touch: hover does nothing, a tap toggles it (even without tooltipOnClick), a tap elsewhere closes it', fakeAsync(() => {
+    pointer(el('a'), 'pointerenter', 'touch')
+    tick(TOOLTIP_HOVER_DELAY_MS + 10)
+    expect(box()).toBeNull()
     pointer(el('a'), 'pointerdown', 'touch')
-    tick(TOOLTIP_TOUCH_HOLD_MS)
+    el('a').click()
+    expect(box()).not.toBeNull()
+    pointer(el('a'), 'pointerleave', 'touch')
     expect(box()).not.toBeNull()
     pointer(document.body, 'pointerdown', 'touch')
     expect(box()).toBeNull()
+    pointer(el('a'), 'pointerdown', 'touch')
+    el('a').click()
+    el('a').click()
+    expect(box()).toBeNull()
   }))
+
+  it('the box stays inside the viewport on both sides', () => {
+    const wrap = el('a').parentElement!
+    for (const side of ['left: 0', 'right: 0']) {
+      wrap.style.cssText = `position: fixed; top: 300px; ${side}; padding: 0`
+      el('a').focus()
+      const rect = box()!.getBoundingClientRect()
+      const width = document.documentElement.clientWidth
+      expect(rect.left).toBeGreaterThanOrEqual(7.5)
+      expect(rect.right).toBeLessThanOrEqual(width - 7.5)
+      el('a').blur()
+    }
+  })
 
   it('a second tooltip closes the first', () => {
     el('a').focus()

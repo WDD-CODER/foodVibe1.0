@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { signInQa } from '../helpers/qa-session'
 
-// 768px: at 1000px every column of the recipe book still fits its minimum width, so nothing falls.
+// 768px: a width where the recipe book's columns no longer all fit their minimum widths, so some fall.
 test.use({ viewport: { width: 768, height: 900 } })
 
 test('746-2: recipe book at medium width keeps the name wide and the cost as its own cell', async ({

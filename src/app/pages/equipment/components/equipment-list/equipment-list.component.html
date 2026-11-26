@@ -131,13 +131,18 @@
         <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
         <app-column-carousel-cell>
           <div class="col-category c-list-body-cell" *appFallColumn="'category'; label: 'category' | translatePipe">
-            {{ item.category | translatePipe }}
+            <span class="cell-line" [appTooltip]="item.category | translatePipe">{{
+              item.category | translatePipe
+            }}</span>
           </div>
-          <div class="col-owned c-list-body-cell" *appFallColumn="'owned'; label: 'owned_quantity' | translatePipe">
+          <div
+            class="col-owned c-list-body-cell cell-nowrap"
+            *appFallColumn="'owned'; label: 'owned_quantity' | translatePipe"
+          >
             {{ item.ownedQuantity }}
           </div>
           <div class="col-scaling c-list-body-cell" *appFallColumn="'scaling'; label: 'scaling_rule' | translatePipe">
-            {{ scalingSummary(item) }}
+            <span class="cell-line" [appTooltip]="scalingSummary(item)">{{ scalingSummary(item) }}</span>
           </div>
           <div
             class="col-consumable c-list-body-cell"

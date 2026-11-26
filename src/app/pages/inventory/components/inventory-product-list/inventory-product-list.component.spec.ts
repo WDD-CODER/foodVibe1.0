@@ -270,12 +270,13 @@ describe('InventoryProductListComponent', () => {
       return found
     }
 
-    it('three gaps (price, category, supplier) render one amber chip mark with three chips and no triangle', () => {
+    it('three gaps (price, category, supplier) render one triangle mark with three chips (plan 747)', () => {
       setProducts({ ...base, _id: 'a', categories: [], sources: [] })
       expect(root().querySelectorAll('.row-status').length).toBe(1)
       expect(root().querySelectorAll('.validation-badge--incomplete').length).toBe(0)
       expect(root().querySelectorAll('.validation-badge--unpriced').length).toBe(1)
-      expect(root().querySelector('.row-status .unpriced-badge')).not.toBeNull()
+      expect(root().querySelector('.row-status .unpriced-badge')).toBeNull()
+      expect(root().querySelectorAll('.row-status lucide-icon').length).toBe(1)
       expect(chips()).toEqual(['missing_price', 'missing_category', 'missing_supplier'])
     })
 

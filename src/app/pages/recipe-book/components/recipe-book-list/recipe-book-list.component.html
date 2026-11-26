@@ -82,17 +82,18 @@
     >
       {{ 'name' | translatePipe }}
     </div>
-    <div
-      class="col-type c-grid-header-cell c-sortable-header"
-      (click)="setSort('type')"
-      (keydown.enter)="setSort('type')"
-      (keydown.space)="$event.preventDefault(); setSort('type')"
-      role="button"
-      tabindex="0"
-    >
-      {{ 'type' | translatePipe }}
-    </div>
     <app-column-carousel-header>
+      <div
+        class="col-type c-grid-header-cell c-sortable-header"
+        *appFallColumn="'type'; label: 'type'"
+        (click)="setSort('type')"
+        (keydown.enter)="setSort('type')"
+        (keydown.space)="$event.preventDefault(); setSort('type')"
+        role="button"
+        tabindex="0"
+      >
+        {{ 'type' | translatePipe }}
+      </div>
       <div
         class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
         *appFallColumn="'labels'; label: 'labels'"
@@ -206,10 +207,10 @@
             </button>
           }
         </div>
-        <div class="col-type c-list-body-cell">
-          {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
-        </div>
         <app-column-carousel-cell>
+          <div class="col-type c-list-body-cell cell-nowrap" *appFallColumn="'type'; label: 'type' | translatePipe">
+            {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
+          </div>
           <div
             class="col-labels c-list-body-cell c-dense-chip-col"
             *appFallColumn="'labels'; label: 'labels' | translatePipe"
@@ -285,7 +286,7 @@
             </div>
           }
           <div
-            class="col-rating c-list-body-cell"
+            class="col-rating c-list-body-cell cell-nowrap"
             *appFallColumn="'rating'; label: 'rating' | translatePipe"
             (click)="$event.stopPropagation()"
           >
@@ -297,7 +298,7 @@
             />
           </div>
           <div
-            class="col-cost c-list-body-cell cost-cell-wrap"
+            class="col-cost c-list-body-cell cost-cell-wrap cell-nowrap"
             *appFallColumn="'cost'; label: 'cost' | translatePipe"
             [appTooltip]="costTip"
             [tooltipOnClick]="true"
@@ -305,7 +306,7 @@
           >
             ₪{{ row.cost | number: '1.2-2' }}
             <ng-template #costTip
-              >{{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(row.recipe) }}</ng-template
+              >{{ 'price_for' | translatePipe }}&nbsp;{{ getRecipeYieldDescription(row.recipe) }}</ng-template
             >
           </div>
         </app-column-carousel-cell>

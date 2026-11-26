@@ -110,15 +110,18 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
-  /** Declared columns (plan 746): they fall into the switching column rating → labels → allergens → cost. */
+  /**
+   * Declared columns (plans 746, 747): they fall into the switching column rating → labels → allergens → cost →
+   * type. Only the name and the actions stay. A one-line column's `min` is its content plus the cell padding.
+   */
   protected readonly columns: readonly ListColumn[] = [
-    { id: 'name', track: '2fr', min: '12rem', phoneMin: '8rem' },
-    { id: 'type', track: '1fr', min: '5rem', phoneTrack: '0.7fr', phoneMin: '3.5rem' },
+    { id: 'name', track: '2fr', min: '12rem', phoneMin: '8rem', stay: true },
+    { id: 'type', track: '1fr', min: '5rem' },
     { id: 'labels', track: '1fr', min: '7rem', fall: 2 },
-    { id: 'allergens', track: 'minmax(48px, 0.8fr)', min: '6rem', fall: 3 },
-    { id: 'rating', track: 'minmax(80px, 0.7fr)', min: '5.5rem', fall: 1 },
-    { id: 'cost', track: 'minmax(72px, 0.85fr)', min: '5rem', fall: 4 },
-    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px' },
+    { id: 'allergens', track: '0.8fr', min: '6rem', fall: 3 },
+    { id: 'rating', track: '0.7fr', min: '8.5rem', fall: 1 },
+    { id: 'cost', track: '0.85fr', min: '6rem', fall: 4 },
+    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px', stay: true },
     { id: 'select', track: 'auto', min: '1.75rem', phoneTrack: '28px', phoneMin: '28px', hideOnTouchPhone: true }
   ]
 

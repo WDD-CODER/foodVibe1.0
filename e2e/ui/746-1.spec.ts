@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { signInQa } from '../helpers/qa-session'
 
-// 800px: at 1000px every column of the supplier list still fits its minimum width, so nothing falls.
+// 800px: a width where the supplier list's columns no longer all fit their minimum widths, so some fall.
 test.use({ viewport: { width: 800, height: 900 } })
 
 test('746-1: suppliers at medium width keep the phone as its own cell and the arrow shows', async ({

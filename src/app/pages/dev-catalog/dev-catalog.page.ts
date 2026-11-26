@@ -113,7 +113,7 @@ export class DevCatalogPage {
 
   // falling-columns (plan 745)
   protected readonly fallColumns_: readonly ListColumn[] = [
-    { id: 'name', track: '1fr', min: '6rem' },
+    { id: 'name', track: '1fr', min: '6rem', stay: true },
     { id: 'a', track: '1fr', min: '5rem', fall: 3 },
     { id: 'b', track: '1fr', min: '5rem', fall: 2 },
     { id: 'c', track: '1fr', min: '5rem', fall: 1 },

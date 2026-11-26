@@ -2,26 +2,15 @@
   <section class="stage-bar no-print" dir="rtl">
     <app-scroll-rail snap="proximity" arrows="auto">
       <div class="stage-row" role="group" [attr.aria-label]="'stage_filter' | translatePipe">
-        @for (stage of flowStages; track stage; let i = $index) {
+        @for (stage of flowStages; track stage) {
           <button
             type="button"
-            class="stage-pill"
-            [class.is-current]="stage === current_()"
-            [class.is-past]="i < currentIndex_()"
-            [class.is-locked]="stage === 'finished' ? finishRefusal_() !== null : !canChangeStage_()"
+            class="c-chip c-chip--tab"
+            [class.active]="stage === current_()"
+            [class.is-locked]="isLocked(stage)"
             [attr.aria-current]="stage === current_() ? 'step' : null"
-            [attr.aria-disabled]="
-              (stage === 'finished' ? finishRefusal_() !== null : !canChangeStage_()) ? 'true' : null
-            "
-            [attr.title]="
-              stage === 'finished'
-                ? finishRefusal_()
-                  ? (finishRefusal_()! | translatePipe)
-                  : null
-                : !canChangeStage_()
-                  ? ('stage_not_allowed' | translatePipe)
-                  : null
-            "
+            [attr.aria-disabled]="isLocked(stage) ? 'true' : null"
+            [appTooltip]="lockTip(stage)"
             (click)="pick(stage)"
           >
             {{ stageLabelKey(stage) | translatePipe }}
@@ -29,11 +18,12 @@
         }
         <button
           type="button"
-          class="stage-pill stage-pill--danger"
-          [class.is-current]="current_() === 'not_closed'"
+          class="c-chip c-chip--tab c-chip--red"
+          [class.active]="current_() === 'not_closed'"
           [class.is-locked]="!canChangeStage_()"
           [attr.aria-current]="current_() === 'not_closed' ? 'step' : null"
           [attr.aria-disabled]="!canChangeStage_() ? 'true' : null"
+          [appTooltip]="lockTip('not_closed')"
           (click)="pick('not_closed')"
         >
           {{ stageLabelKey('not_closed') | translatePipe }}

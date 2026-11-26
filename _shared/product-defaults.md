@@ -161,32 +161,32 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 ### house-column-carousel
 
 - status: proposed
-- rule: A list shows as many columns as fit its measured width; as space runs short they fall one by one (two the first time) into one carousel column the user switches, in the order the list sets (from the end by default), the name protected first; a row never wraps and the list never scrolls sideways.
+- rule: A list shows as many columns as fit its measured width; as space runs short they fall one by one (two the first time) into one carousel column the user switches, in the order the list sets (from the end by default); only the name and the actions always stay, so on a phone a list shows the name, one switching column and the actions; a one-line cell is never narrower than its content (its column falls first); a row never wraps and the list never scrolls sideways.
 - applies when: custom
 - plan words: \b(?:list columns?|table columns?|column carousel|list-shell|list container|list page)\b
 - how: family list-page — the list declares its columns (ListColumn) and passes them as [columns] to app-list-shell; fitColumns() decides what fits; *appFallColumn inside app-column-carousel-header and app-column-carousel-cell (src/app/shared/column-carousel/)
 - check: card
-- card: any list with many columns, narrowing the window slowly · the columns fall one by one into the switching column in the list's order, the name stays readable, press its arrow and every row shows the next piece of information, no row wraps and nothing scrolls sideways
+- card: any list with many columns, narrowing the window slowly · the columns fall one by one into the switching column in the list's order, a cell is never cut (the column falls before that), on a phone you see the name, one switching column and the actions, press its arrow and every row shows the next piece of information, no row wraps and nothing scrolls sideways
 - exceptions: a list that is not drawn as a table (cards layout); declare `exception — why: <one line>`
 
 ### house-sideways-row
 
 - status: proposed
-- rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container that scrolls sideways, with the same arrow at each end while there is more.
+- rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container, as wide as its items, that scrolls sideways; on a computer a round arrow button sits outside the container at each end while there is more (none on a phone, where a fade and swiping do the job).
 - applies when: custom
 - plan words: \b(?:filter chips?|tab chips?|chip row|row of chips|tab row|tabs row|stage bar|jump navigation|nav(?:igation)? pills?|scroll(?:s|ing)? sideways|horizontal scroll)\b
-- how: family sideways-row — app-scroll-rail (src/app/shared/scroll-rail/): the visible frame (frame="box"), arrows at both ends in the look of the up-and-down scroll area (buttons on a computer, signs only on a phone), grab and drag with the mouse, snap, arrows, step; the top bar, app-tab-chips, the settings tabs, the stage bar and the metadata jump navigation use it
+- how: family sideways-row — app-scroll-rail (src/app/shared/scroll-rail/): the visible frame (frame="box") sized to its items, round arrow buttons outside it (not rendered on a phone), grab and drag with the mouse, snap, arrows, step; the top bar, app-tab-chips, the settings tabs, the stage bar and the metadata jump navigation use it
 - check: card
-- card: any page with a row of chips or tabs, on a phone · look at the row and press its arrow · the row sits in a visible rounded container, an arrow shows at the end that has more, and pressing it moves the row one step
+- card: any page with a row of chips or tabs, on a computer · look at the row and press its arrow · the row sits in a visible rounded container as wide as its chips, a round arrow shows outside it at the end that has more, and pressing it moves the row one step
 - exceptions: a data table that is wider than the screen; declare `exception — why: <one line>`
 
 ### house-tooltip
 
 - status: proposed
-- rule: Every short explanation that appears when a control is hovered, focused or tapped shows in the app's one tooltip box: the same surface, text size and arrow, opening beside the control on the side with room and never cut off by the screen.
+- rule: Every short explanation that appears when a control is hovered, focused or tapped shows in the app's one tooltip box: the same surface, text size and arrow, opening beside the control on the side with room and never cut off by the screen on either side; with a mouse it opens on hover, on a touch screen a tap shows it and a tap elsewhere hides it.
 - applies when: custom
 - plan words: \b(hint|tooltip|explanation|explain|what is this)s?\b|רמז|הסבר
 - how: the shared tooltip [appTooltip] (src/app/shared/tooltip/, family tooltip), placed by placeInViewport (src/app/core/utils/viewport-placement.util.ts) as src/app/shared/nutrition-badge/ does; a new hint uses it, never the browser title
 - check: card
-- card: any page with an icon button or an explained control · hover it with the mouse, then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen
+- card: any page with an icon button or an explained control · hover it with the mouse (near the screen's edges too), then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen; on a touch screen a tap shows it
 - exceptions: the product nutrition box (src/app/shared/nutrition-badge/) keeps the look it already has; declare `exception — why: <one line>`

@@ -8,7 +8,6 @@ import {
   inject
 } from '@angular/core'
 import { NgTemplateOutlet } from '@angular/common'
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ColumnCarouselGroupDirective } from './column-carousel-group.directive'
 import { ColumnSlideDirective } from './column-slide.directive'
 import { FallColumnDirective } from './fall-column.directive'
@@ -17,7 +16,7 @@ import { SwipeStart, isCarouselActive, isRtl, swipeDirection } from './column-ca
 
 /**
  * Row cell of the column carousel (plan 349). Slide mode: the projected `[columnSlide]` cells render as normal
- * grid cells on desktop; ≤768px one cell with a small label line above the active value.
+ * grid cells on desktop; ≤768px one cell showing the active value (the header names it).
  * Measured mode (plan 745, the children are `*appFallColumn`): each column that fits is its own cell and one
  * switching cell, at the place of the first fallen column, shows the active fallen column at any width.
  * A swipe here or the header arrows move the whole list (shared group index).
@@ -25,7 +24,7 @@ import { SwipeStart, isCarouselActive, isRtl, swipeDirection } from './column-ca
 @Component({
   selector: 'app-column-carousel-cell',
   standalone: true,
-  imports: [TranslatePipe, NgTemplateOutlet],
+  imports: [NgTemplateOutlet],
   templateUrl: './column-carousel-cell.component.html',
   styleUrl: './column-carousel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,8 +48,6 @@ export class ColumnCarouselCellComponent {
   protected readonly parts = computed(() =>
     buildFallParts(this.falls(), this.group.collapsed() ?? [], this.group.index())
   )
-
-  protected readonly activeLabel = computed(() => this.slides()[this.group.index()]?.label() ?? '')
 
   constructor() {
     effect(() => {

@@ -120,8 +120,10 @@
       <div class="col-unit c-grid-header-cell" *appFallColumn="'unit'; label: 'unit'" role="presentation">
         {{ 'unit' | translatePipe }}
       </div>
+      <div class="col-price c-grid-header-cell" *appFallColumn="'price'; label: 'price'" role="columnheader">
+        {{ 'price' | translatePipe }}
+      </div>
     </app-column-carousel-header>
-    <div class="col-price c-grid-header-cell" role="columnheader">{{ 'price' | translatePipe }}</div>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
       <app-list-row-checkbox
@@ -183,20 +185,7 @@
                 (keydown.enter)="$event.stopPropagation()"
                 (keydown.space)="$event.stopPropagation()"
               >
-                @switch (row.statusKind) {
-                  @case ('invalid') {
-                    <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
-                  }
-                  @case ('unpriced') {
-                    <span class="c-chip amber unpriced-badge">
-                      <lucide-icon name="coins" [size]="11"></lucide-icon>
-                      <span class="unpriced-badge__label">{{ 'product_unpriced' | translatePipe }}</span>
-                    </span>
-                  }
-                  @default {
-                    <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
-                  }
-                }
+                <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
               </button>
               <ng-template #statusTip>
                 @for (field of row.statusFields; track field) {
@@ -219,7 +208,7 @@
         </div>
         <app-column-carousel-cell>
           <div class="col-category c-list-body-cell" *appFallColumn="'category'; label: 'category' | translatePipe">
-            {{ row.category || '—' }}
+            <span class="cell-line" [appTooltip]="row.category">{{ row.category || '—' }}</span>
           </div>
           <div class="col-allergens c-list-body-cell" *appFallColumn="'allergens'; label: 'allergens' | translatePipe">
             @if (row.product.allergens.length) {
@@ -247,16 +236,21 @@
             }
           </div>
           <div class="col-supplier c-list-body-cell" *appFallColumn="'supplier'; label: 'supplier' | translatePipe">
-            {{ row.supplierNames || '—' }}
+            <span class="cell-line" [appTooltip]="row.supplierNames">{{ row.supplierNames || '—' }}</span>
           </div>
-          <div class="col-unit c-list-body-cell" *appFallColumn="'unit'; label: 'unit' | translatePipe">
+          <div class="col-unit c-list-body-cell cell-nowrap" *appFallColumn="'unit'; label: 'unit' | translatePipe">
             {{ row.product.baseUnit | translatePipe }}
           </div>
+          <div
+            class="col-price col-price-readonly c-list-body-cell cell-nowrap"
+            *appFallColumn="'price'; label: 'price' | translatePipe"
+            role="cell"
+            [appTooltip]="row.priceTip"
+          >
+            <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
+            <span class="price-suffix">₪</span>
+          </div>
         </app-column-carousel-cell>
-        <div class="col-price col-price-readonly c-list-body-cell" role="cell" [attr.title]="row.priceTip">
-          <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
-          <span class="price-suffix">₪</span>
-        </div>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
           @if (deletingId_() === row.product._id) {
             <app-loader size="small" [inline]="true" />

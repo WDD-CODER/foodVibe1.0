@@ -18,6 +18,16 @@ test('743-1: the top bar rail has no scrollbar and its next arrow moves the row'
 
   const next = rail.locator('.sr-arrow--next')
   await expect(next).toBeVisible()
+  // Plan 747: the arrow sits beside the container, never over the links inside it.
+  const arrowBox = await next.boundingBox()
+  const frameBox = await rail.locator('.sr-frame').boundingBox()
+  if (!arrowBox || !frameBox) throw new Error('missing boxes')
+  const overlap =
+    arrowBox.x < frameBox.x + frameBox.width &&
+    frameBox.x < arrowBox.x + arrowBox.width &&
+    arrowBox.y < frameBox.y + frameBox.height &&
+    frameBox.y < arrowBox.y + arrowBox.height
+  expect(overlap).toBe(false)
   await page.screenshot({ path: 'screens/743-1.png' })
   const before = await scroller.evaluate((el) => el.scrollLeft)
   await next.click()

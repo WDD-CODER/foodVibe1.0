@@ -72,6 +72,22 @@
     margin-block-end: 0.5rem;
   }
 
+  // Plan 747: a cell is never narrower than its one-line content. `cell-nowrap` keeps a short value (a rating, a
+  // phone number, a price) on one line; `cell-line` cuts a long text (supplier names, categories) to one line with
+  // an ellipsis, so a row stays one line at any width. The full text is in the cell's tooltip.
+  :host ::ng-deep .cell-nowrap {
+    white-space: nowrap;
+  }
+
+  :host ::ng-deep .cell-line {
+    display: block;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .list-header {
     grid-area: header;
 

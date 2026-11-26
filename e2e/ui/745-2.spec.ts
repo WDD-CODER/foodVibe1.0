@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { signInQa } from '../helpers/qa-session'
 
-// 800px: at 1000px every column of the product list still fits its minimum width, so nothing falls.
+// 800px: a width where the product list's columns no longer all fit their minimum widths, so some fall.
 test.use({ viewport: { width: 800, height: 900 } })
 
 test('745-2: a narrower list drops columns into the switching column, name stays wide, no sideways scroll', async ({
