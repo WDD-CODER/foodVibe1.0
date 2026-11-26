@@ -106,7 +106,7 @@
             messageKey="empty_suppliers"
             icon="truck"
             ctaLabelKey="add_supplier"
-            [ctaDisabled]="!isLoggedIn()"
+            [ctaDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             (ctaClick)="onAdd()"
           />
         } @else {

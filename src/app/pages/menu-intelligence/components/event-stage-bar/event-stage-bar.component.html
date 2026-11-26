@@ -110,7 +110,7 @@
             min="0"
             dir="ltr"
             [value]="event.deposit?.amount ?? ''"
-            [disabled]="!canEditMoney_()"
+            [appDisabledWhy]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
             (change)="onDepositAmountChange($any($event.target).value)"
           />
         </div>
@@ -119,7 +119,7 @@
           <app-date-field
             inputId="stage-deposit-date"
             [value]="event.deposit?.date ?? ''"
-            [disabled]="!canEditMoney_()"
+            [disabledWhy]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
             (committed)="onDepositDateChange($event)"
           />
         </div>

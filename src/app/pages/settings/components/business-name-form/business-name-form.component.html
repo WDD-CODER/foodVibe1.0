@@ -28,7 +28,8 @@
       type="submit"
       class="c-btn-primary"
       data-testid="business-name-save"
-      [disabled]="!canSave()"
+      [disabled]="isSaving_()"
+      [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
       [attr.aria-busy]="isSaving_() || null"
     >
       {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}

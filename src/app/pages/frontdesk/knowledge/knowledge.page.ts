@@ -15,6 +15,7 @@ import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.comp
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 export type KnowledgeFilter = 'all' | 'drafts' | 'approved'
 type ImportTab = 'text' | 'url'
@@ -43,7 +44,8 @@ const IMPORT_ERROR_KEYS: Record<string, string> = {
     ModalShellComponent,
     FormFieldComponent,
     CustomSelectComponent,
-    InputClearComponent
+    InputClearComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './knowledge.page.html',
   styleUrl: './knowledge.page.scss',

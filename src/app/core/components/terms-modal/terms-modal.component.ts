@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   inject,
@@ -14,6 +15,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { Terms, TermsService } from '../../services/terms.service'
 
 /** Pixels from the end of the text at which it counts as read. */
@@ -26,7 +28,7 @@ const END_TOLERANCE_PX = 8
 @Component({
   selector: 'app-terms-modal',
   standalone: true,
-  imports: [TranslatePipe, ModalShellComponent],
+  imports: [TranslatePipe, ModalShellComponent, DisabledWhyDirective],
   templateUrl: './terms-modal.component.html',
   styleUrl: './terms-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -46,6 +48,11 @@ export class TermsModalComponent implements OnInit {
   protected readonly isAtEnd_ = signal(false)
   /** True while an owner is posting the acceptance (the gate sets it through `busy`). */
   readonly busy = input(false)
+  /** Why the confirm button cannot be pressed (a dictionary key); null when it can. */
+  protected readonly acceptWhy_ = computed<string | null>(() => {
+    if (!this.terms_()) return this.hasLoadError_() ? 'terms_load_error' : 'why_terms_loading'
+    return this.isAtEnd_() ? null : 'terms_scroll_hint'
+  })
 
   private readonly body_ = viewChild<ElementRef<HTMLElement>>('body')
 

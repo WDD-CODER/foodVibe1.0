@@ -5,6 +5,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { QUESTION_TYPES, type RequestKindConfig } from '@models/front-desk-profile.model'
@@ -46,7 +47,8 @@ export function nextCustomKey(questions: readonly FrontDeskQuestion[]): string {
     TranslatePipe,
     FormFieldComponent,
     CustomSelectComponent,
-    NumberBoxDirective
+    NumberBoxDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './request-kind-card.component.html',
   styleUrl: './request-kind-card.component.scss',
@@ -58,7 +60,8 @@ export class RequestKindCardComponent {
 
   readonly kind = input.required<FrontDeskRequestKind>()
   readonly config = model.required<RequestKindConfig>()
-  readonly disabled = input(false)
+  /** Why the card cannot be edited (translated); every control inside says it. null = it can. */
+  readonly disabledWhy = input<string | null>(null)
   /** Show the field errors (after a blocked save). */
   readonly showErrors = input(false)
 

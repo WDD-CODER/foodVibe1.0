@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
@@ -19,7 +20,7 @@ import type { EventNote } from '@models/menu-event.model'
 @Component({
   selector: 'app-event-notes-log',
   standalone: true,
-  imports: [DatePipe, FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [DatePipe, FormsModule, LucideAngularModule, TranslatePipe, DisabledWhyDirective],
   templateUrl: './event-notes-log.component.html',
   styleUrl: './event-notes-log.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -79,7 +79,9 @@
   </p>
   }
 
-  <fieldset class="fs-fieldset" [disabled]="!canEdit_()">
+  <!-- Plan 747: no native disabled on the group - each control says why it is locked. -->
+  @let lockWhy = !canEdit_() ? ('fd_settings_owner_only' | translatePipe) : null;
+  <fieldset class="fs-fieldset">
     <!-- Card 1: business and link -->
     <section class="fs-card c-glass-card" data-testid="card-business">
       <h2 class="fs-card-title">{{ 'fd_card_business' | translatePipe }}</h2>
@@ -96,6 +98,7 @@
             type="text"
             maxlength="200"
             [value]="d.displayName"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ displayName: $any($event.target).value })"
           />
         </app-form-field>
@@ -113,6 +116,7 @@
             maxlength="40"
             autocomplete="off"
             [value]="d.slug"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ slug: $any($event.target).value })"
           />
           @if (d.slug !== profile_()!.slug) {
@@ -126,6 +130,7 @@
             type="tel"
             maxlength="30"
             [value]="d.phone"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ phone: $any($event.target).value })"
           />
         </app-form-field>
@@ -136,6 +141,7 @@
             type="text"
             maxlength="200"
             [value]="d.address"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ address: $any($event.target).value })"
           />
         </app-form-field>
@@ -146,6 +152,7 @@
             type="text"
             maxlength="200"
             [value]="d.serviceArea"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ serviceArea: $any($event.target).value })"
           />
         </app-form-field>
@@ -157,13 +164,20 @@
             dir="ltr"
             maxlength="500"
             [value]="d.logoUrl"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ logoUrl: $any($event.target).value })"
           />
         </app-form-field>
       </div>
       <div class="fs-link">
         <span class="fs-link-text" dir="ltr" data-testid="public-link">{{ publicLink_() }}</span>
-        <button type="button" class="c-btn-ghost" data-testid="copy-link" (click)="copyLink()">
+        <button
+          type="button"
+          class="c-btn-ghost"
+          data-testid="copy-link"
+          [appDisabledWhy]="lockWhy"
+          (click)="copyLink()"
+        >
           <lucide-icon name="copy" [size]="16"></lucide-icon>
           <span class="btn-label">{{ 'fd_copy_link' | translatePipe }}</span>
         </button>
@@ -176,7 +190,15 @@
         <lucide-icon name="clock" [size]="18"></lucide-icon>
         {{ 'fd_card_hours' | translatePipe }}
       </h2>
-      <app-hours-editor [rows]="d.hoursRows" (rowsChange)="patch({ hoursRows: $event })" [showMarks]="showErrors_()" />
+      <!-- The hours editor has no reason input: the wrapper says why and the editor inside is inert. -->
+      <div class="fs-locked-group" data-testid="hours-lock" [appDisabledWhy]="lockWhy">
+        <app-hours-editor
+          [attr.inert]="lockWhy ? '' : null"
+          [rows]="d.hoursRows"
+          (rowsChange)="patch({ hoursRows: $event })"
+          [showMarks]="showErrors_()"
+        />
+      </div>
       <div class="fs-closed">
         <h3 class="fs-sub">{{ 'fd_closed_dates' | translatePipe }}</h3>
         <div class="fs-chips">
@@ -187,6 +209,7 @@
               type="button"
               class="c-chip__remove"
               [attr.aria-label]="'remove' | translatePipe"
+              [appDisabledWhy]="lockWhy"
               (click)="removeClosedDate(date)"
             >
               ×
@@ -199,12 +222,13 @@
             ariaLabelKey="fd_closed_dates"
             [value]="newClosed_()"
             (valueChange)="newClosed_.set($event)"
+            [disabledWhy]="lockWhy"
           />
           <button
             type="button"
             class="c-btn-ghost"
             data-testid="add-closed-date"
-            [disabled]="!newClosed_()"
+            [appDisabledWhy]="lockWhy ?? (!newClosed_() ? ('why_fd_pick_date_first' | translatePipe) : null)"
             (click)="addClosedDate()"
           >
             <lucide-icon name="plus" [size]="16"></lucide-icon>
@@ -220,7 +244,7 @@
       [kind]="kind"
       [config]="d.kinds[kind]"
       (configChange)="setKind(kind, $event)"
-      [disabled]="!canEdit_()"
+      [disabledWhy]="lockWhy"
       [showErrors]="showErrors_()"
     />
     }
@@ -232,7 +256,12 @@
       <p class="fs-note">{{ 'fd_assistant_level_admin' | translatePipe }}</p>
       <div class="fs-grid">
         <app-form-field label="fd_tone">
-          <app-custom-select [options]="toneOptions" [ngModel]="d.tone" (ngModelChange)="patch({ tone: $event })" />
+          <app-custom-select
+            [options]="toneOptions"
+            [ngModel]="d.tone"
+            (ngModelChange)="patch({ tone: $event })"
+            [disabledWhy]="lockWhy"
+          />
         </app-form-field>
         <app-form-field label="fd_greeting" forId="fd-greeting" layout="full">
           <textarea
@@ -241,6 +270,7 @@
             rows="2"
             maxlength="400"
             [value]="d.greeting"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ greeting: $any($event.target).value })"
           ></textarea>
         </app-form-field>
@@ -251,20 +281,29 @@
             rows="2"
             maxlength="400"
             [value]="d.handoffText"
+            [appDisabledWhy]="lockWhy"
             (input)="patch({ handoffText: $any($event.target).value })"
           ></textarea>
         </app-form-field>
       </div>
       <label class="c-chip c-chip--toggle">
-        <input type="checkbox" [checked]="d.activeSame" (change)="patch({ activeSame: $any($event.target).checked })" />
+        <input
+          type="checkbox"
+          [checked]="d.activeSame"
+          [appDisabledWhy]="lockWhy"
+          (change)="patch({ activeSame: $any($event.target).checked })"
+        />
         <span>{{ 'fd_active_same_as_hours' | translatePipe }}</span>
       </label>
       @if (!d.activeSame) {
-      <app-hours-editor
-        [rows]="d.activeRows"
-        (rowsChange)="patch({ activeRows: $event })"
-        [showMarks]="showErrors_()"
-      />
+      <div class="fs-locked-group" [appDisabledWhy]="lockWhy">
+        <app-hours-editor
+          [attr.inert]="lockWhy ? '' : null"
+          [rows]="d.activeRows"
+          (rowsChange)="patch({ activeRows: $event })"
+          [showMarks]="showErrors_()"
+        />
+      </div>
       }
     </section>
 

@@ -139,7 +139,9 @@ describe('FrontDeskOnboardingComponent (plan 556)', () => {
     await setup()
     await pick('catering')
     const button = () => el().querySelector<HTMLButtonElement>('[data-testid="onboarding-test-request"]')!
-    expect(button().disabled).toBeTrue()
+    expect(button().getAttribute('aria-disabled')).toBe('true')
+    button().click()
+    expect(createManual).not.toHaveBeenCalled()
     profile_.set({
       _id: 'p1',
       ...templateFor('catering'),
@@ -148,7 +150,7 @@ describe('FrontDeskOnboardingComponent (plan 556)', () => {
       phone: '0501234567'
     } as unknown as FrontDeskProfile)
     await settle()
-    expect(button().disabled).toBeFalse()
+    expect(button().getAttribute('aria-disabled')).toBeNull()
     await cmp().sendTestRequest()
     const input = createManual.calls.first().args[0]
     expect(input.test).toBeTrue()

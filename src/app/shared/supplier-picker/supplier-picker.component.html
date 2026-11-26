@@ -21,7 +21,8 @@
             class="supplier-picker__row"
             role="option"
             [attr.aria-selected]="auto_()"
-            [disabled]="!canEdit()"
+            [disabled]="!canEdit() && !disabledWhy()"
+            [appDisabledWhy]="canEdit() ? null : disabledWhy()"
             (click)="pick(null)"
           >
             <lucide-icon
@@ -40,7 +41,8 @@
               class="supplier-picker__row"
               role="option"
               [attr.aria-selected]="row.checked"
-              [disabled]="!canEdit()"
+              [disabled]="!canEdit() && !disabledWhy()"
+              [appDisabledWhy]="canEdit() ? null : disabledWhy()"
               (click)="pick(row.supplierId)"
             >
               <lucide-icon

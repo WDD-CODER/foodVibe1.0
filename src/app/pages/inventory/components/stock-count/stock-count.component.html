@@ -41,7 +41,8 @@
       type="button"
       class="c-btn-primary"
       data-testid="stk-finalize"
-      [disabled]="saving_() || aiBusy_() || !dateOk_() || countedCount_() === 0"
+      [disabled]="saving_() || aiBusy_()"
+      [appDisabledWhy]="finalizeWhy_() ? (finalizeWhy_()! | translatePipe) : null"
       (click)="finalize()"
     >
       <lucide-icon name="check" [size]="18"></lucide-icon>
@@ -122,7 +123,7 @@
             type="button"
             class="stock-count__past"
             data-testid="stk-past-row"
-            [disabled]="c.status !== 'draft'"
+            [appDisabledWhy]="c.status !== 'draft' ? ('stk_count_final' | translatePipe) : null"
             (click)="openPastDraft(c)"
           >
             <span>{{ c.countedAt | date: 'dd/MM/yyyy' }}</span>
@@ -168,7 +169,7 @@
           type="button"
           class="c-btn-ghost"
           data-testid="stk-move-counted"
-          [disabled]="countedCount_() === 0"
+          [appDisabledWhy]="countedCount_() === 0 ? ('why_nothing_counted' | translatePipe) : null"
           (click)="moveCountedToTop()"
         >
           <lucide-icon name="chevron-up" [size]="18"></lucide-icon>
@@ -259,7 +260,7 @@
             @if (narrow_()) {
               <app-list-row-checkbox
                 [checked]="row.state.counted"
-                [disabled]="!!row.state.fix || !!row.state.choose"
+                [disabledWhy]="row.state.fix || row.state.choose ? ('why_count_unit_first' | translatePipe) : null"
                 (toggle)="toggleCounted(row.product)"
               />
             } @else {
@@ -267,7 +268,7 @@
                 <input
                   type="checkbox"
                   [checked]="row.state.counted"
-                  [disabled]="!!row.state.fix || !!row.state.choose"
+                  [appDisabledWhy]="row.state.fix || row.state.choose ? ('why_count_unit_first' | translatePipe) : null"
                   (change)="toggleCounted(row.product)"
                 />
                 <span>{{ 'stk_counted' | translatePipe }}</span>

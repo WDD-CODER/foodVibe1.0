@@ -30,7 +30,7 @@
           [attr.data-coef-row]="rowId('eventType', term)"
           [attr.aria-invalid]="isRowInvalid(rowId('eventType', term)) ? 'true' : null"
           [value]="formatCoefficient(term.coefficient ?? 1)"
-          [disabled]="!canEdit(term)"
+          [appDisabledWhy]="!canEdit(term) ? ('taxonomy_shared_admin_only' | translatePipe) : null"
           (input)="onDraftInput('eventType', term, coefInput.value)"
           (keyup.enter)="onSave()"
         />
@@ -108,7 +108,7 @@
           [attr.data-coef-row]="rowId('menuType', term)"
           [attr.aria-invalid]="isRowInvalid(rowId('menuType', term)) ? 'true' : null"
           [value]="formatCoefficient(term.coefficient ?? 1)"
-          [disabled]="!canEdit(term)"
+          [appDisabledWhy]="!canEdit(term) ? ('taxonomy_shared_admin_only' | translatePipe) : null"
           (input)="onDraftInput('menuType', term, servingInput.value)"
           (keyup.enter)="onSave()"
         />
@@ -129,7 +129,8 @@
     <button
       type="button"
       class="c-btn-primary"
-      [disabled]="!canSave()"
+      [disabled]="isSaving()"
+      [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
       [attr.aria-busy]="isSaving() ? 'true' : null"
       (click)="onSave()"
     >

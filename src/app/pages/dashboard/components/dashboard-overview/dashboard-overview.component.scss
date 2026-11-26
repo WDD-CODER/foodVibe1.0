@@ -192,6 +192,11 @@
       text-decoration: none;
     }
   }
+
+  // Blocked with a reason (appDisabledWhy): the dimmed look comes from the global .is-disabled.
+  &[aria-disabled='true']:hover {
+    text-decoration: none;
+  }
 }
 
 @media (max-width: $break-phone-max) {

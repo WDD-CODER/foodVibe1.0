@@ -35,9 +35,9 @@
               <button
                 class="c-icon-btn danger"
                 (click)="onDeleteUser(user)"
-                [disabled]="isOwnBusiness(user)"
+                [appDisabledWhy]="isOwnBusiness(user) ? ('why_meta_own_business_user' | translatePipe) : null"
+                [disabledWhyTip]="'remove' | translatePipe"
                 [attr.aria-label]="'remove' | translatePipe"
-                [attr.title]="'remove' | translatePipe"
               >
                 <lucide-icon name="trash-2" [size]="16"></lucide-icon>
               </button>

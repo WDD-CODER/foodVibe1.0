@@ -5,6 +5,7 @@
     data-testid="stk-ai-open"
     [attr.aria-expanded]="open_()"
     [disabled]="disabled() && !open_()"
+    [appDisabledWhy]="!open_() ? disabledWhy() : null"
     (click)="toggle_()"
   >
     <lucide-icon name="sparkles" [size]="16"></lucide-icon>
@@ -128,7 +129,7 @@
                 type="button"
                 class="c-chip c-chip--tap"
                 data-testid="stk-ai-confirm-amount"
-                [disabled]="held_(u.id) <= 0"
+                [appDisabledWhy]="held_(u.id) <= 0 ? ('why_count_amount_first' | translatePipe) : null"
                 (click)="confirm_(u.id)"
               >
                 {{ 'stk_confirm_amount' | translatePipe }}

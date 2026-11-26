@@ -49,7 +49,7 @@
         class="c-btn-primary"
         [class.c-btn-primary--danger]="modalService.variant() === 'danger'"
         [class.c-btn-primary--warning]="modalService.variant() === 'warning'"
-        [disabled]="!modalService.canConfirm()"
+        [appDisabledWhy]="!modalService.canConfirm() ? ('why_shared_confirm_type_text' | translatePipe) : null"
         (click)="modalService.choose('confirm')"
       >
         {{ modalService.saveLabel() | translatePipe }}

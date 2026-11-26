@@ -59,7 +59,7 @@ describe('BusinessSettingsTabComponent', () => {
     expect(input('safetyMarginPct').value).toBe('10')
     expect(input('overrunThresholdPct').value).toBe('10')
     expect(input('priceRiseAlertPct').value).toBe('7')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('shows the defaults when the business has no settings object yet', () => {
@@ -74,7 +74,7 @@ describe('BusinessSettingsTabComponent', () => {
     expect(el().querySelector('[data-testid="business-error-profitTargetPct"]')?.textContent).toContain(
       'pct_range_0_99'
     )
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('0 in the overrun threshold is refused with the overrun range message', () => {
@@ -82,7 +82,7 @@ describe('BusinessSettingsTabComponent', () => {
     expect(el().querySelector('[data-testid="business-error-overrunThresholdPct"]')?.textContent).toContain(
       'pct_range_overrun'
     )
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('0 in the price-rise alert is refused with the overrun range message', () => {
@@ -90,12 +90,12 @@ describe('BusinessSettingsTabComponent', () => {
     expect(el().querySelector('[data-testid="business-error-priceRiseAlertPct"]')?.textContent).toContain(
       'pct_range_overrun'
     )
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('a valid change enables save, sends all four numbers and toasts', async () => {
     type('profitTargetPct', '30')
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
     await fixture.componentInstance.save()
     expect(updateSettings).toHaveBeenCalledWith({
       profitTargetPct: 30,
@@ -105,7 +105,7 @@ describe('BusinessSettingsTabComponent', () => {
     })
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('settings_saved')
     fixture.detectChanges()
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('a server refusal shows the invalid-settings toast', async () => {

@@ -28,6 +28,10 @@ import { TOOLTIP_HOVER_DELAY_MS } from './tooltip.directive'
       </select>
       <input id="check" type="checkbox" [appDisabledWhy]="why()" />
       <span id="plain" [appDisabledWhy]="why()" (click)="pressed()">plain</span>
+      <label id="chip" class="c-chip c-chip--toggle">
+        <input id="chipInput" type="checkbox" [appDisabledWhy]="why()" />
+        <span id="chipText">chip</span>
+      </label>
     </div>
   `
 })
@@ -263,6 +267,34 @@ describe('DisabledWhyDirective (plan 747)', () => {
     enable()
     check.click()
     expect(check.checked).toBeTrue()
+  })
+
+  describe('a checkbox inside a label (a toggle chip)', () => {
+    it('shows the reason when the label is hovered and closes when the pointer leaves it', fakeAsync(() => {
+      pointer(el('chip'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      expect(box()?.textContent?.trim()).toBe('sign in first')
+      pointer(el('chip'), 'pointerleave')
+      expect(box()).toBeNull()
+    }))
+
+    it('a click or tap on the label text does not toggle the checkbox and shows the reason', () => {
+      el('chipText').click()
+      expect(el<HTMLInputElement>('chipInput').checked).toBeFalse()
+      expect(box()?.textContent?.trim()).toBe('sign in first')
+      // A press on the chip is a press on the control: the pinned reason stays until the next tap.
+      el('chipText').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+      expect(box()).not.toBeNull()
+    })
+
+    it('with no reason the label hover shows nothing and the chip toggles', fakeAsync(() => {
+      enable()
+      pointer(el('chip'), 'pointerenter')
+      tick(TOOLTIP_HOVER_DELAY_MS)
+      expect(box()).toBeNull()
+      el('chipText').click()
+      expect(el<HTMLInputElement>('chipInput').checked).toBeTrue()
+    }))
   })
 
   it('a host the keyboard cannot reach gets a tabindex only while it has a reason', () => {

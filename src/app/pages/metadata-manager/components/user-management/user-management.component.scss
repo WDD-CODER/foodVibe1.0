@@ -136,6 +136,18 @@
       cursor: not-allowed;
       pointer-events: none;
     }
+
+    // Blocked with a reason (appDisabledWhy): dimmed by the global .c-icon-btn.is-disabled, reachable for its
+    // tooltip, and no danger wiggle on hover.
+    &[aria-disabled='true'] {
+      cursor: not-allowed;
+
+      &:hover {
+        background: transparent;
+        color: var(--color-text-muted);
+        transform: none;
+      }
+    }
   }
 }
 

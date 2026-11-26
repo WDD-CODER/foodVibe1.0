@@ -83,6 +83,11 @@ export class CounterComponent {
     return this.value() >= maxV
   })
 
+  /** Minus is blocked only by the counter's own minimum (the caller did not turn the counter off): it says so. */
+  protected minusAtLimit_ = computed(() => this.minusDisabled_() && !this.disabled() && !this.disabledWhy())
+  /** Plus is blocked only by the counter's own maximum. */
+  protected plusAtLimit_ = computed(() => this.plusDisabled_() && !this.disabled() && !this.disabledWhy())
+
   protected valueWidthPx_ = computed(() => {
     const w = this.valueWidth_()
     return w > 0 ? w : undefined

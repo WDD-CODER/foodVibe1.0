@@ -21,7 +21,8 @@ type HostKind = 'press' | 'text' | 'picker'
  * - `<input>` (text-like) and `<textarea>`: also `readOnly` while the reason holds; every key but Tab / Escape is
  *   swallowed.
  * - `<select>` and inputs `readOnly` does nothing for (checkbox, radio, range, color, file): `mousedown`, `click`
- *   and every key but Tab / Escape are swallowed.
+ *   and every key but Tab / Escape are swallowed. A checkbox or radio inside a `<label>` (a toggle chip) also shows
+ *   the reason when the label is hovered, placed against the label.
  *
  * The host cannot also carry `[appTooltip]` (one tooltip per element): give its ordinary hint, shown while the
  * control works, through `[disabledWhyTip]`.
@@ -49,6 +50,11 @@ export class DisabledWhyDirective {
   private readonly kind_ = this.kindOf_(this.host_.nativeElement)
   private readOnlyBefore_: boolean | null = null
   private addedTabindex_ = false
+  /** The label around a blocked checkbox or radio: the part the user sees and hovers (a toggle chip). */
+  private label_: HTMLElement | null = null
+
+  private readonly onLabelEnter_ = (event: PointerEvent): void => this.tooltip_.onPointerEnter(event)
+  private readonly onLabelLeave_ = (): void => this.tooltip_.onPointerLeave()
 
   private readonly onClick_ = (event: Event): void => {
     if (!this.reason_()) return
@@ -83,6 +89,7 @@ export class DisabledWhyDirective {
       element.removeEventListener('click', this.onClick_, true)
       element.removeEventListener('keydown', this.onKeydown_, true)
       element.removeEventListener('mousedown', this.onMouseDown_, true)
+      this.applyLabel_(false)
     })
 
     effect(() => {
@@ -96,7 +103,26 @@ export class DisabledWhyDirective {
       this.tooltip_.close()
       this.applyReadOnly_(blocked)
       this.applyTabindex_(blocked)
+      this.applyLabel_(blocked)
     })
+  }
+
+  /**
+   * A blocked checkbox or radio inside a `<label>` (a toggle chip hides the input and shows the label): hovering
+   * the label opens the reason and the box is placed against the label. A tap needs nothing extra — the label
+   * passes its click to the input, where it is swallowed and shows the reason.
+   */
+  private applyLabel_(blocked: boolean): void {
+    const element = this.host_.nativeElement
+    const type = element.tagName === 'INPUT' ? (element.getAttribute('type') ?? '').toLowerCase() : ''
+    const label = blocked && (type === 'checkbox' || type === 'radio') ? element.closest('label') : null
+    if (label === this.label_) return
+    this.label_?.removeEventListener('pointerenter', this.onLabelEnter_)
+    this.label_?.removeEventListener('pointerleave', this.onLabelLeave_)
+    this.label_ = label
+    this.tooltip_.anchorTo(label)
+    label?.addEventListener('pointerenter', this.onLabelEnter_)
+    label?.addEventListener('pointerleave', this.onLabelLeave_)
   }
 
   private swallow_(event: Event): void {

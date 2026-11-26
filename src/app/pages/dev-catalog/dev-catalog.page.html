@@ -56,8 +56,13 @@
         <app-custom-select [options]="options_" [ngModel]="selectedValue_()" placeholder="search" />
       </div>
       <div class="dc-item">
-        <code>custom-select: disabled</code>
-        <app-custom-select [options]="options_" [ngModel]="selectedValue_()" [disabled]="true" placeholder="search" />
+        <code>custom-select: disabledWhy</code>
+        <app-custom-select
+          [options]="options_"
+          [ngModel]="selectedValue_()"
+          [disabledWhy]="'why_demo_only' | translatePipe"
+          placeholder="search"
+        />
       </div>
     </div>
   </section>
@@ -188,8 +193,8 @@
         <app-date-field inputId="dc-d3" [(value)]="dateInvalidValue_" [(invalid)]="dateInvalid_" />
       </div>
       <div class="dc-item">
-        <code>date: disabled=true</code>
-        <app-date-field inputId="dc-d4" [(value)]="dateDisabled_" [disabled]="true" />
+        <code>date: disabledWhy</code>
+        <app-date-field inputId="dc-d4" [(value)]="dateDisabled_" [disabledWhy]="'why_demo_only' | translatePipe" />
       </div>
       <div class="dc-item">
         <code>app-input-clear visible=true</code>

@@ -168,7 +168,7 @@
             messageKey="empty_recipe_book"
             icon="book-open"
             ctaLabelKey="add_first_recipe"
-            [ctaDisabled]="!isLoggedIn()"
+            [ctaDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             (ctaClick)="onAddRecipe()"
           />
         } @else {
@@ -318,7 +318,7 @@
             [attr.aria-label]="
               (isFavoritedByCurrentUser_(row.recipe) ? 'remove_from_favorites' : 'add_to_favorites') | translatePipe
             "
-            [disabled]="!isLoggedIn()"
+            [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
           >
             <lucide-icon name="heart" [size]="18"></lucide-icon>
           </button>

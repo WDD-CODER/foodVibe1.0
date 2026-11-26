@@ -7,13 +7,15 @@ test('584-1: sign-up opens the terms, the confirm unlocks at the end and checks 
 
   const accept = page.getByTestId('terms-accept')
   await expect(accept).toBeVisible()
-  await expect(accept).toBeDisabled()
+  // Plan 747: blocked with a reason (aria-disabled, it says why), not natively disabled.
+  await expect(accept).toHaveAttribute('aria-disabled', 'true')
   await page.screenshot({ path: 'screens/584-1.png' })
 
   await page.getByTestId('terms-body').evaluate((el) => {
     el.scrollTop = el.scrollHeight
     el.dispatchEvent(new Event('scroll'))
   })
+  await expect(accept).not.toHaveAttribute('aria-disabled', 'true')
   await expect(accept).toBeEnabled()
   await accept.click()
 

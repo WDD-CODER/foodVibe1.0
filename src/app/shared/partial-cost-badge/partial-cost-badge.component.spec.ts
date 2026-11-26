@@ -95,11 +95,13 @@ describe('PartialCostBadgeComponent', () => {
     openPopover(el)
     const input = el.querySelector('.partial-price-input') as HTMLInputElement
     const save = el.querySelector('.partial-save') as HTMLButtonElement
-    expect(save.disabled).toBeTrue()
+    expect(save.getAttribute('aria-disabled')).toBe('true')
+    save.click()
+    expect(updateProduct).not.toHaveBeenCalled()
     input.value = '20'
     input.dispatchEvent(new Event('input'))
     fixture.detectChanges()
-    expect(save.disabled).toBeFalse()
+    expect(save.getAttribute('aria-disabled')).toBeNull()
     save.click()
     await fixture.whenStable()
     expect(updateProduct).toHaveBeenCalledTimes(1)

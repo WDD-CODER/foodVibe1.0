@@ -5,7 +5,7 @@
       <input
         type="checkbox"
         [checked]="config().enabled"
-        [disabled]="disabled()"
+        [appDisabledWhy]="disabledWhy()"
         [attr.data-testid]="'kind-enabled-' + kind()"
         (change)="setEnabled_($any($event.target).checked)"
       />
@@ -16,7 +16,7 @@
   @if (!config().enabled) {
     <p class="rk-summary" data-testid="kind-summary">{{ summary_() }}</p>
   } @else {
-    <fieldset class="rk-body" [disabled]="disabled()">
+    <fieldset class="rk-body">
       <ol class="rk-questions">
         @for (q of config().questions; track q.key; let i = $index) {
           <li class="rk-question" data-testid="question-row">
@@ -32,6 +32,7 @@
                   maxlength="120"
                   [id]="'q-' + kind() + '-' + q.key"
                   [value]="labelText_(q)"
+                  [appDisabledWhy]="disabledWhy()"
                   (input)="setLabel_(i, $event)"
                 />
               </app-form-field>
@@ -40,6 +41,7 @@
                   [options]="typeOptions"
                   [ngModel]="q.type"
                   [ngModelOptions]="{ standalone: true }"
+                  [disabledWhy]="disabledWhy()"
                   (ngModelChange)="setType_(i, $event)"
                 />
               </app-form-field>
@@ -55,6 +57,7 @@
                         type="button"
                         class="c-chip__remove"
                         [attr.aria-label]="'remove' | translatePipe"
+                        [appDisabledWhy]="disabledWhy()"
                         (click)="removeOption_(i, oi)"
                       >
                         ×
@@ -69,6 +72,7 @@
                   [attr.aria-label]="'fd_q_options' | translatePipe"
                   [placeholder]="'fd_q_options' | translatePipe"
                   [value]="optionDraft_(q.key)"
+                  [appDisabledWhy]="disabledWhy()"
                   (input)="setOptionDraft_(q.key, $any($event.target).value)"
                   (keydown.enter)="$event.preventDefault(); addOption_(i)"
                   (keydown.escape)="setOptionDraft_(q.key, '')"
@@ -81,13 +85,18 @@
 
             <div class="rk-question-actions">
               <label class="c-chip c-chip--toggle">
-                <input type="checkbox" [checked]="q.required" (change)="setRequired_(i, $any($event.target).checked)" />
+                <input
+                  type="checkbox"
+                  [checked]="q.required"
+                  [appDisabledWhy]="disabledWhy()"
+                  (change)="setRequired_(i, $any($event.target).checked)"
+                />
                 <span>{{ 'fd_q_required' | translatePipe }}</span>
               </label>
               <button
                 type="button"
                 class="c-btn-ghost"
-                [disabled]="i === 0"
+                [appDisabledWhy]="disabledWhy() ?? (i === 0 ? ('why_first_in_list' | translatePipe) : null)"
                 [attr.aria-label]="'fd_move_up' | translatePipe"
                 (click)="move_(i, -1)"
               >
@@ -96,7 +105,9 @@
               <button
                 type="button"
                 class="c-btn-ghost"
-                [disabled]="i === config().questions.length - 1"
+                [appDisabledWhy]="
+                  disabledWhy() ?? (i === config().questions.length - 1 ? ('why_last_in_list' | translatePipe) : null)
+                "
                 [attr.aria-label]="'fd_move_down' | translatePipe"
                 (click)="move_(i, 1)"
               >
@@ -107,6 +118,7 @@
                 class="c-btn-ghost"
                 data-testid="remove-question"
                 [attr.aria-label]="'remove' | translatePipe"
+                [appDisabledWhy]="disabledWhy()"
                 (click)="remove_(i)"
               >
                 <lucide-icon name="trash-2" [size]="16"></lucide-icon>
@@ -121,7 +133,7 @@
           type="button"
           class="c-btn-ghost"
           data-testid="add-question"
-          [disabled]="atMax_()"
+          [appDisabledWhy]="disabledWhy() ?? (atMax_() ? ('fd_questions_max' | translatePipe) : null)"
           (click)="addQuestion_()"
         >
           <lucide-icon name="plus" [size]="16"></lucide-icon>
@@ -144,6 +156,7 @@
               min="0"
               step="1"
               [value]="config().rules.minPartySize ?? ''"
+              [appDisabledWhy]="disabledWhy()"
               (input)="setRule_('minPartySize', $event)"
             />
           </span>
@@ -156,6 +169,7 @@
               min="0"
               step="1"
               [value]="config().rules.maxPartySize ?? ''"
+              [appDisabledWhy]="disabledWhy()"
               (input)="setRule_('maxPartySize', $event)"
             />
           </span>
@@ -167,6 +181,7 @@
               type="number"
               min="0"
               [value]="config().rules.minLeadHours ?? ''"
+              [appDisabledWhy]="disabledWhy()"
               (input)="setRule_('minLeadHours', $event)"
             />
           </span>
@@ -178,6 +193,7 @@
               type="number"
               min="0"
               [value]="config().rules.maxLeadDays ?? ''"
+              [appDisabledWhy]="disabledWhy()"
               (input)="setRule_('maxLeadDays', $event)"
             />
           </span>
@@ -189,6 +205,7 @@
               type="number"
               min="0"
               [value]="config().rules.minBudgetPerGuest ?? ''"
+              [appDisabledWhy]="disabledWhy()"
               (input)="setRule_('minBudgetPerGuest', $event)"
             />
           </span>
@@ -203,6 +220,7 @@
                 max="1440"
                 step="1"
                 [value]="config().defaultDurationMinutes ?? ''"
+                [appDisabledWhy]="disabledWhy()"
                 (input)="setDuration_($event)"
               />
             </span>
@@ -217,6 +235,7 @@
               max="720"
               step="1"
               [value]="config().expireAfterHours"
+              [appDisabledWhy]="disabledWhy()"
               (input)="setExpire_($event)"
             />
           </span>
@@ -230,6 +249,7 @@
                   type="button"
                   class="c-chip__remove"
                   [attr.aria-label]="'remove' | translatePipe"
+                  [appDisabledWhy]="disabledWhy()"
                   (click)="removeArea_(ai)"
                 >
                   ×
@@ -242,6 +262,7 @@
             type="text"
             maxlength="80"
             [value]="areaDraft_()"
+            [appDisabledWhy]="disabledWhy()"
             (input)="areaDraft_.set($any($event.target).value)"
             (keydown.enter)="$event.preventDefault(); addArea_()"
             (keydown.escape)="areaDraft_.set('')"

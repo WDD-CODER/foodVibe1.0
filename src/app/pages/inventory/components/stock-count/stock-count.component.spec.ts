@@ -248,7 +248,8 @@ describe('StockCountComponent', () => {
       expect(choice.querySelectorAll('.c-chip--toggle').length).toBeGreaterThanOrEqual(2)
       expect(choice.querySelector('[data-testid="stk-unit-add"]')).not.toBeNull()
       expect(chipOf(rows()[0]).checked).toBeFalse()
-      expect(chipOf(rows()[0]).disabled).toBeTrue()
+      // The counted mark says why it is blocked (the chip's input, or the row checkbox on a narrow screen).
+      expect(rows()[0].querySelector('.stock-count__counted [aria-disabled="true"]')).not.toBeNull()
       choice.querySelector<HTMLInputElement>('input[value="ארגז"]')!.click()
       await settle()
       expect(el().querySelector('[data-testid="stk-unit-choice"]')).toBeNull()
@@ -406,7 +407,7 @@ describe('StockCountComponent', () => {
       expect(listed.length).toBe(2)
       expect(listed[0].textContent).toContain('stk_count_status_draft')
       expect(listed[1].textContent).toContain('stk_count_status_final')
-      expect(listed[1].disabled).toBeTrue()
+      expect(listed[1].getAttribute('aria-disabled')).toBe('true')
       listed[0].click()
       await settle()
       expect(btn('stk-tab-sheet').classList).toContain('active')
@@ -492,10 +493,13 @@ describe('StockCountComponent', () => {
 
   it('disables finalise while no row is counted', async () => {
     await setup()
-    expect(btn('stk-finalize').disabled).toBeTrue()
+    expect(btn('stk-finalize').getAttribute('aria-disabled')).toBe('true')
+    btn('stk-finalize').click()
+    await settle()
+    expect(service.finalize).not.toHaveBeenCalled()
     comp().setAmount(product('a', 'אורז'), 1)
     await settle()
-    expect(btn('stk-finalize').disabled).toBeFalse()
+    expect(btn('stk-finalize').getAttribute('aria-disabled')).toBeNull()
   })
 
   it('finalises: saves, closes, empties the sheet and switches to below minimum', async () => {

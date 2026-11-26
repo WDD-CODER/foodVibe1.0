@@ -3,6 +3,7 @@ import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList, moveItemInArray } fro
 import { LucideAngularModule } from 'lucide-angular'
 import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { GeminiService, type GeminiChainModel } from '@services/gemini.service'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -18,7 +19,15 @@ import { TranslationService } from '@services/translation.service'
 @Component({
   selector: 'app-ai-model-manager',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, CdkDragHandle, ReorderKeysDirective, LucideAngularModule, TranslatePipe],
+  imports: [
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
+    ReorderKeysDirective,
+    LucideAngularModule,
+    TranslatePipe,
+    DisabledWhyDirective
+  ],
   templateUrl: './ai-model-manager.component.html',
   styleUrl: './ai-model-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

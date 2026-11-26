@@ -11,6 +11,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop'
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { BusinessNameFormComponent } from '../business-name-form/business-name-form.component'
 import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
@@ -33,7 +34,14 @@ interface FieldDef {
 @Component({
   selector: 'app-business-settings-tab',
   standalone: true,
-  imports: [NumberBoxDirective, ReactiveFormsModule, TranslatePipe, BusinessNameFormComponent, SelectOnFocusDirective],
+  imports: [
+    NumberBoxDirective,
+    ReactiveFormsModule,
+    TranslatePipe,
+    BusinessNameFormComponent,
+    SelectOnFocusDirective,
+    DisabledWhyDirective
+  ],
   templateUrl: './business-settings-tab.component.html',
   styleUrl: './business-settings-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -112,6 +120,13 @@ export class BusinessSettingsTabComponent {
     const value = this.value_()
     const stored = this.stored()
     return !this.isSaving_() && this.form.valid && this.fields.some((field) => value[field.key] !== stored[field.key])
+  })
+  /** Why «שמור» cannot be used (a translation key), or null when it can. A running save is not a reason. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    const value = this.value_()
+    const stored = this.stored()
+    if (!this.form.valid) return 'why_settings_fix_invalid'
+    return this.fields.some((field) => value[field.key] !== stored[field.key]) ? null : 'why_nothing_to_save'
   })
 
   constructor() {

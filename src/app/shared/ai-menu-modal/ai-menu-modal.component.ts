@@ -17,6 +17,7 @@ import { matchMenuDish } from '../../core/utils/recipe-match.util'
 import { aiMenuNameOrEmpty } from '../../core/utils/menu-unlinked.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 
@@ -29,7 +30,8 @@ type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    ModalShellComponent
+    ModalShellComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './ai-menu-modal.component.html',
   styleUrl: './ai-menu-modal.component.scss',

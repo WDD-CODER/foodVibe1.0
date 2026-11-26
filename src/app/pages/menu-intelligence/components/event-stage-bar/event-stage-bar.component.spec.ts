@@ -233,7 +233,8 @@ describe('EventStageBarComponent', () => {
     stageLink('deposit_details').click()
     fixture.detectChanges()
     const amount = el.querySelector<HTMLInputElement>('#stage-deposit-amount')!
-    expect(amount.disabled).toBeTrue()
+    expect(amount.getAttribute('aria-disabled')).toBe('true')
+    expect(amount.readOnly).toBeTrue()
     expect(amount.value).toBe('2000')
   })
 

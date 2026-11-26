@@ -240,7 +240,7 @@ describe('EventLogisticsPanelComponent', () => {
     expect(header().textContent).toContain('logistics_read_only')
     const controls = el.querySelectorAll<HTMLInputElement>('.logistics-body input')
     expect(controls.length).toBeGreaterThan(0)
-    controls.forEach((c) => expect(c.disabled).toBe(true))
+    controls.forEach((c) => expect(c.getAttribute('aria-disabled')).toBe('true'))
     expect(el.querySelector('.logistics-add')).toBeNull()
   })
 

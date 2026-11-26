@@ -8,11 +8,12 @@ import { LoggingService } from '@services/logging.service'
 import { AdminUser } from '@models/admin-user.model'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, DisabledWhyDirective],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

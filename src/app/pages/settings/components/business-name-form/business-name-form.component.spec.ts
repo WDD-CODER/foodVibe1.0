@@ -54,16 +54,16 @@ describe('BusinessNameFormComponent', () => {
 
   it('shows the stored name and keeps save disabled until it changes', () => {
     expect(input().value).toBe('Stored name')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
     type('Other name')
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
     type('  Stored name ')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('refuses an empty name: error shown, save disabled', () => {
     type('   ')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
     expect(fixture.nativeElement.querySelector('.c-field-error')?.textContent).toContain('business_name_required')
   })
 
@@ -74,7 +74,7 @@ describe('BusinessNameFormComponent', () => {
     expect(updateName).toHaveBeenCalledOnceWith('Dana kitchen')
     expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('business_name_saved')
     expect(input().value).toBe('Dana kitchen')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('a failed save logs the error and shows save_failed; a 400 shows settings_invalid', async () => {

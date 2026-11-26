@@ -3,8 +3,8 @@
     type="button"
     class="ctrl-btn"
     tabindex="-1"
-    [disabled]="minusDisabled_() && !disabledWhy()"
-    [appDisabledWhy]="disabledWhy()"
+    [disabled]="disabled() && !disabledWhy()"
+    [appDisabledWhy]="disabledWhy() || (minusAtLimit_() ? ('why_at_min' | translatePipe) : null)"
     appStepHold
     [stepHoldStop]="minusDisabled_()"
     (stepHold)="decrement($event)"
@@ -34,8 +34,8 @@
     type="button"
     class="ctrl-btn"
     tabindex="-1"
-    [disabled]="plusDisabled_() && !disabledWhy()"
-    [appDisabledWhy]="disabledWhy()"
+    [disabled]="disabled() && !disabledWhy()"
+    [appDisabledWhy]="disabledWhy() || (plusAtLimit_() ? ('why_at_max' | translatePipe) : null)"
     appStepHold
     [stepHoldStop]="plusDisabled_()"
     (stepHold)="increment($event)"

@@ -5,6 +5,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { VoiceNoteComponent, type VoiceNoteSend } from 'src/app/shared/voice-note/voice-note.component'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { GeminiService, type LogisticsConfirmLine } from '@services/gemini.service'
@@ -67,7 +68,8 @@ const statusKey = (status: string): string =>
     CounterComponent,
     CustomSelectComponent,
     EmptyStateComponent,
-    VoiceNoteComponent
+    VoiceNoteComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './logistics-note-draft.component.html',
   styleUrl: './logistics-note-draft.component.scss',

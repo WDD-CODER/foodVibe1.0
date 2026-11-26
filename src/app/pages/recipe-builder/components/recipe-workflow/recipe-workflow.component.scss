@@ -346,12 +346,20 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
       border-color 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: var(--bg-glass-hover);
-      border-color: var(--border-strong);
+      background: var(--counter-btn-hover-bg, var(--bg-glass-hover));
+      border-color: var(--counter-btn-hover-border, var(--border-strong));
     }
 
     &:disabled {
       opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // Blocked with a reason (appDisabledWhy): dimmed by the global .is-disabled, and the hover keeps the resting look.
+    &[aria-disabled='true'] {
+      --counter-btn-hover-bg: var(--bg-glass);
+      --counter-btn-hover-border: var(--border-default);
+
       cursor: not-allowed;
     }
   }

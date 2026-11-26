@@ -80,8 +80,8 @@
   <button
     type="button"
     class="c-btn-primary voice-note-send"
-    [disabled]="!canSend() && !disabledWhy()"
-    [appDisabledWhy]="disabledWhy()"
+    [disabled]="!canSend() && !disabledWhy() && !emptyIdle_()"
+    [appDisabledWhy]="disabledWhy() || (emptyIdle_() ? ('why_voice_note_empty' | translatePipe) : null)"
     [attr.aria-busy]="busy()"
     (click)="emit()"
   >

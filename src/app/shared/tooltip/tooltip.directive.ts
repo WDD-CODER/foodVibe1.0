@@ -35,7 +35,7 @@ let closeOpenTooltip_: (() => void) | null = null
   standalone: true,
   host: {
     '(pointerenter)': 'onPointerEnter($event)',
-    '(pointerleave)': 'onPointerLeave()',
+    '(pointerleave)': 'onPointerLeave($event)',
     '(pointerdown)': 'onPointerDown($event)',
     '(focusin)': 'onFocusIn()',
     '(focusout)': 'close()',
@@ -65,6 +65,8 @@ export class TooltipDirective {
   private hoverTimer_: ReturnType<typeof setTimeout> | null = null
   private touchPointer_ = false
   private placeFrame_ = 0
+  /** Set by a composing directive: the element the box is placed against instead of the host (see `anchorTo`). */
+  private anchor_: HTMLElement | null = null
   private readonly id_ = `app-tooltip-${++nextTooltipId_}`
 
   private readonly closeSelf_ = (): void => this.close()
@@ -73,7 +75,7 @@ export class TooltipDirective {
   }
   private readonly onOutsidePress_ = (event: Event): void => {
     const target = event.target as Node | null
-    if (target && this.host_.nativeElement.contains(target)) return
+    if (target && (this.host_.nativeElement.contains(target) || this.anchor_?.contains(target))) return
     this.close()
   }
   private readonly onScroll_ = (event: Event): void => {
@@ -121,7 +123,10 @@ export class TooltipDirective {
     }, TOOLTIP_HOVER_DELAY_MS)
   }
 
-  onPointerLeave(): void {
+  onPointerLeave(event?: PointerEvent): void {
+    // Leaving the host into its own anchor (a checkbox into the label around it) is not leaving the control.
+    const next = event?.relatedTarget as Node | null | undefined
+    if (next && this.anchor_?.contains(next)) return
     this.clearHoverTimer_()
     if (!this.pinned_) this.close()
   }
@@ -157,6 +162,14 @@ export class TooltipDirective {
    */
   hold(content: TooltipContent, onClick: boolean): void {
     this.held_.set({ content, onClick })
+  }
+
+  /**
+   * For a directive that composes this one: places the box against another element (the visible label around a
+   * hidden input) and counts a press on it as a press on the control. `null` goes back to the host.
+   */
+  anchorTo(element: HTMLElement | null): void {
+    this.anchor_ = element
   }
 
   close(): void {
@@ -237,7 +250,7 @@ export class TooltipDirective {
     element.style.top = '0px'
     element.style.left = '0px'
     const size = element.getBoundingClientRect()
-    const anchor = this.host_.nativeElement.getBoundingClientRect()
+    const anchor = (this.anchor_ ?? this.host_.nativeElement).getBoundingClientRect()
     // The visible width: without the page scrollbar, which the box must not slide under.
     const viewWidth = this.document_.documentElement.clientWidth || view.innerWidth
     const placed = placeInViewport({

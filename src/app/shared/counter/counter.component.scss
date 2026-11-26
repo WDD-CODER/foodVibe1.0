@@ -32,15 +32,16 @@
       border-color: transparent;
       transition: background 120ms ease;
 
-      &:hover:not(:disabled) {
+      &:hover:not(:disabled):not([aria-disabled='true']) {
         background: var(--color-primary-hover);
       }
 
-      &:active:not(:disabled) {
+      &:active:not(:disabled):not([aria-disabled='true']) {
         background: var(--color-primary-hover);
       }
 
-      &:disabled {
+      &:disabled,
+      &[aria-disabled='true'] {
         background: var(--color-primary);
         opacity: 0.35;
         cursor: not-allowed;

@@ -22,7 +22,8 @@
       type="button"
       class="c-btn-primary"
       data-testid="terms-accept"
-      [disabled]="!terms_() || !isAtEnd_() || busy()"
+      [disabled]="busy()"
+      [appDisabledWhy]="acceptWhy_() ? (acceptWhy_()! | translatePipe) : null"
       (click)="onAccept()"
     >
       {{ 'terms_accept' | translatePipe }}

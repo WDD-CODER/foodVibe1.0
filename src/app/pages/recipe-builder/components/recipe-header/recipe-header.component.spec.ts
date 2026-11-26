@@ -258,7 +258,8 @@ describe('RecipeHeaderComponent', () => {
     const form = createRecipeForm({ yield_conversions: conversions })
     fixture.componentRef.setInput('form', form)
     fixture.detectChanges()
-    const minusBtn = fixture.nativeElement.querySelector('.scaling-chip--secondary .ctrl-btn[disabled]')
+    // Plan 747: at its minimum the counter's minus is blocked with a reason (aria-disabled), not natively disabled.
+    const minusBtn = fixture.nativeElement.querySelector('.scaling-chip--secondary .ctrl-btn[aria-disabled="true"]')
     expect(minusBtn).toBeTruthy()
   })
 

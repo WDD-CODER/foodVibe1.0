@@ -71,7 +71,7 @@
                 <input
                   type="checkbox"
                   [checked]="line.keep"
-                  [disabled]="!line.label.trim()"
+                  [appDisabledWhy]="!line.label.trim() ? ('why_logistics_line_needs_name' | translatePipe) : null"
                   (change)="patchLine(line.id, { keep: $any($event.target).checked })"
                 />
                 <span>{{ 'logistics_draft_keep' | translatePipe }}</span>
@@ -81,14 +81,14 @@
                 class="c-input note-draft-adhoc-label"
                 [attr.maxlength]="labelMax"
                 [value]="line.label"
-                [disabled]="!line.keep"
+                [appDisabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
                 (input)="setLabel(line, $any($event.target).value)"
               />
             </div>
             <app-custom-select
               [options]="sectionOptions_()"
               [ngModel]="line.section"
-              [disabled]="!line.keep"
+              [disabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
               (ngModelChange)="patchLine(line.id, { section: $event })"
             />
             <ng-container *ngTemplateOutlet="controls; context: { $implicit: line }"></ng-container>
@@ -119,7 +119,8 @@
       <button
         type="button"
         class="c-btn-primary"
-        [disabled]="keptCount_() === 0 || isSaving_()"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="keptCount_() === 0 ? ('why_logistics_tick_one_first' | translatePipe) : null"
         [attr.aria-busy]="isSaving_()"
         (click)="save()"
       >
@@ -136,7 +137,7 @@
       <input
         type="checkbox"
         [checked]="line.needed"
-        [disabled]="!line.keep"
+        [appDisabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
         (change)="patchLine(line.id, { needed: $any($event.target).checked })"
       />
       <span>{{ 'logistics_status_needed' | translatePipe }}</span>
@@ -153,7 +154,7 @@
           type="radio"
           [name]="'draft-payer-' + line.id"
           [checked]="line.provider === 'ours'"
-          [disabled]="!line.keep"
+          [appDisabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
           (change)="patchLine(line.id, { provider: 'ours' })"
         />
         <span>{{ 'logistics_payer_ours' | translatePipe }}</span>
@@ -163,7 +164,7 @@
           type="radio"
           [name]="'draft-payer-' + line.id"
           [checked]="line.provider === 'client'"
-          [disabled]="!line.keep"
+          [appDisabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
           (change)="patchLine(line.id, { provider: 'client' })"
         />
         <span>{{ 'logistics_payer_client_care' | translatePipe }}</span>
@@ -175,7 +176,7 @@
           [value]="line.quantity"
           [min]="0"
           [max]="100000"
-          [disabled]="!line.keep"
+          [disabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
           (valueChange)="patchLine(line.id, { quantity: $event })"
         />
       }
@@ -184,7 +185,7 @@
         class="c-input note-draft-note"
         [attr.maxlength]="textMax"
         [value]="line.text"
-        [disabled]="!line.keep"
+        [appDisabledWhy]="!line.keep ? ('why_logistics_tick_line_first' | translatePipe) : null"
         [attr.aria-label]="'logistics_note' | translatePipe"
         (input)="patchLine(line.id, { text: $any($event.target).value })"
       />

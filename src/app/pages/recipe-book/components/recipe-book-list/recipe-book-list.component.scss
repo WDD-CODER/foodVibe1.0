@@ -287,6 +287,6 @@
   opacity: 1;
 }
 
-.favorite-btn:hover:not(.is-favorited):not([disabled]) {
+.favorite-btn:hover:not(.is-favorited):not([disabled]):not([aria-disabled='true']) {
   color: var(--color-favorite);
 }

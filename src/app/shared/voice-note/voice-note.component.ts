@@ -95,6 +95,11 @@ export class VoiceNoteComponent {
     )
   }
 
+  /** Nothing recorded or written yet and nothing else in the way: the send button says so (plan 747). */
+  protected emptyIdle_(): boolean {
+    return !this.text().trim() && !this.busy() && !this.off_() && this.state_() === 'idle'
+  }
+
   protected emit(): void {
     const text = this.text().trim()
     if (!text || !this.canSend()) return

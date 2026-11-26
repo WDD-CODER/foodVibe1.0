@@ -24,6 +24,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { isValidQuickPrice, withQuickPrice } from 'src/app/core/utils/quick-price.util'
 import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
@@ -68,7 +69,8 @@ const ROW_ICONS: Record<MissingItem['kind'], string> = { deleted: 'circle-x', un
     TranslatePipe,
     ClickOutSideDirective,
     CustomSelectComponent,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './partial-cost-badge.component.html',
   styleUrl: './partial-cost-badge.component.scss',
@@ -218,8 +220,9 @@ export class PartialCostBadgeComponent {
     return raw === '' ? null : Number(raw)
   }
 
-  protected canSave(row: MissingRow): boolean {
-    return isValidQuickPrice(this.draftPrice(row)) && this.savingKey_() === null
+  /** The typed price is a real price (above 0, two decimals at most); a running save is a separate state. */
+  protected hasValidPrice(row: MissingRow): boolean {
+    return isValidQuickPrice(this.draftPrice(row))
   }
 
   protected async save(row: MissingRow): Promise<void> {

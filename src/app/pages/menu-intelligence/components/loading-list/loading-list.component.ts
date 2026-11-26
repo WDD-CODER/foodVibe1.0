@@ -6,6 +6,7 @@ import { prepSheetMetaLine } from 'src/app/core/utils/prep-sheet-groups.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { buildLoadingList, type LoadingRow } from '@schemas/logistics/loading-list'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
@@ -29,7 +30,14 @@ interface LoadingGroup {
 @Component({
   selector: 'app-loading-list',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, LoaderComponent, EmptyStateComponent, ModalShellComponent],
+  imports: [
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    EmptyStateComponent,
+    ModalShellComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './loading-list.component.html',
   styleUrl: './loading-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

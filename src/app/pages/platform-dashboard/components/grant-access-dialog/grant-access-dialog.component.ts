@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { AccessService } from '@services/access.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
@@ -13,7 +14,7 @@ import { GrantAccessDialogService } from './grant-access-dialog.service'
 @Component({
   selector: 'app-grant-access-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, ModalShellComponent, FormFieldComponent],
+  imports: [FormsModule, TranslatePipe, ModalShellComponent, FormFieldComponent, DisabledWhyDirective],
   templateUrl: './grant-access-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

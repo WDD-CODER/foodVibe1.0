@@ -13,6 +13,7 @@ import {
 import { LucideAngularModule } from 'lucide-angular'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import type { RawLine } from 'src/app/core/engine/event-plan.types'
 import { EventPlanService } from 'src/app/core/engine/event-plan.service'
@@ -48,7 +49,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 @Component({
   selector: 'app-supplier-orders',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, PartialCostBadgeComponent],
+  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, PartialCostBadgeComponent, DisabledWhyDirective],
   templateUrl: './supplier-orders.component.html',
   styleUrl: './supplier-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

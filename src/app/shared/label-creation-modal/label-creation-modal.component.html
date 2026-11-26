@@ -68,7 +68,9 @@
         type="button"
         class="c-btn-primary"
         (click)="save()"
-        [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()"
+        [appDisabledWhy]="
+          !englishKey_().trim() || !modal.hebrewLabel_().trim() ? ('fill_required_fields' | translatePipe) : null
+        "
       >
         {{ 'save_label' | translatePipe }}
       </button>

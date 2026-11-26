@@ -16,11 +16,19 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TranslationKeyModalService } from '@services/translation-key-modal.service'
 import { finalizeEnglishKey } from '@utils/english-key.util'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-translation-key-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, EnglishKeyInputDirective, TranslatePipe, ModalShellComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EnglishKeyInputDirective,
+    TranslatePipe,
+    ModalShellComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './translation-key-modal.component.html',
   styleUrl: './translation-key-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

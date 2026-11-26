@@ -71,7 +71,7 @@
           [class.input--highlight]="tier() === 'incomplete'"
           min="0"
           step="0.01"
-          [disabled]="priceLocked_()"
+          [appDisabledWhy]="priceLocked_() ? ('why_shared_pick_supplier_for_price' | translatePipe) : null"
           [ngModel]="priceLocked_() ? null : price_()"
           [placeholder]="priceLocked_() ? price_().toString() : ''"
           (ngModelChange)="onPriceInput($any($event))"

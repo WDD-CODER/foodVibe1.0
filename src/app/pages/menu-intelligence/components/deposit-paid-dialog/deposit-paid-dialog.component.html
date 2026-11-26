@@ -40,7 +40,8 @@
       <button
         type="button"
         class="c-btn-primary"
-        [disabled]="!valid_() || isSaving_()"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="!valid_() ? ('why_deposit_need_date_amount' | translatePipe) : null"
         [attr.aria-busy]="isSaving_() || null"
         (click)="onSave()"
       >

@@ -96,12 +96,14 @@ describe('DiagMenuComponent', () => {
     await paste()
     expect(all('diag-menu-row').length).toBe(2)
     expect(all('diag-menu-no-price').length).toBe(1)
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
+    saveBtn().click()
+    expect(saveMenu).not.toHaveBeenCalled()
     const prices = all('diag-menu-price') as HTMLInputElement[]
     prices[1].value = '12'
     prices[1].dispatchEvent(new Event('input'))
     fixture.detectChanges()
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
   })
 
   it('a name equal to exactly one dish is linked by code; an ambiguous or unknown name is not', async () => {

@@ -51,7 +51,7 @@ describe('FrontDeskAdminDialogComponent (plan 557)', () => {
   it('shows the save button disabled until something changed', () => {
     setup()
     const save = el.querySelector('[data-testid="fd-admin-save"]') as HTMLButtonElement
-    expect(save.disabled).toBeTrue()
+    expect(save.getAttribute('aria-disabled')).toBe('true')
   })
 
   it('does not call the server without a reason', async () => {

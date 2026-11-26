@@ -31,6 +31,7 @@ import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/d
 import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-recipe-workflow',
@@ -49,7 +50,8 @@ import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
     CdkDropList,
     CdkDragHandle,
     ReorderKeysDirective,
-    CounterComponent
+    CounterComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './recipe-workflow.component.html',
   styleUrl: './recipe-workflow.component.scss',

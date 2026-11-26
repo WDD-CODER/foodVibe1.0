@@ -28,6 +28,7 @@ import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { LoaderComponent } from '../loader/loader.component'
 import { GeminiService } from '@services/gemini.service'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
@@ -44,7 +45,8 @@ import { NumberBoxDirective } from '@directives/number-box.directive'
     TranslatePipe,
     CustomSelectComponent,
     LoaderComponent,
-    ModalShellComponent
+    ModalShellComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './quick-add-product-modal.component.html',
   styleUrl: './quick-add-product-modal.component.scss',

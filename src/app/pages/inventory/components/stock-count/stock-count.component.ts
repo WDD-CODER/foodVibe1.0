@@ -30,6 +30,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { formatQty } from 'src/app/core/engine/rounding'
 import { toBase } from 'src/app/core/engine/units'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
@@ -141,6 +142,7 @@ function todayIso(): string {
     ListRowCheckboxComponent,
     LoaderComponent,
     TooltipDirective,
+    DisabledWhyDirective,
     StockBelowMinimumComponent,
     StockAiDraftComponent
   ],
@@ -204,6 +206,11 @@ export class StockCountComponent implements OnInit {
   protected readonly dateOk_ = computed(
     () => /^\d{4}-\d{2}-\d{2}$/.test(this.countedDate_()) && this.countedDate_() <= todayIso()
   )
+  /** Plan 747: why the count cannot be closed (a dictionary key); null when it can or while it only saves. */
+  protected readonly finalizeWhy_ = computed<string | null>(() => {
+    if (!this.dateOk_()) return 'why_count_date_invalid'
+    return this.countedCount_() === 0 ? 'why_nothing_counted' : null
+  })
   /** Plan 655: true below the desktop breakpoint; set from the media query and kept in step with it. */
   protected readonly narrow_ = signal(typeof window !== 'undefined' && window.matchMedia(NARROW_QUERY).matches)
   /** Plan 657: true on a phone (≤ 767px); sizes the counted mark. */

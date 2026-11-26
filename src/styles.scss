@@ -3121,3 +3121,20 @@ input[type='number']::-webkit-outer-spin-button {
     }
   }
 }
+
+/* A toggle chip whose hidden checkbox / radio is blocked with a reason (plan 747 G6): the class sits on the
+   input, the user sees the label — so the chip itself takes the look of `.c-chip--toggle:has(> input:disabled)`
+   and keeps its resting colours on hover. */
+.c-chip--toggle:has(> input.is-disabled) {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+
+  &:not(:has(> input:checked), .is-on):hover {
+    color: var(--color-text-secondary);
+
+    background: var(--bg-glass);
+
+    border-color: var(--border-default);
+  }
+}

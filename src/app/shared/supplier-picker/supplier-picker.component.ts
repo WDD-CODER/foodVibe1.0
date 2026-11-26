@@ -15,6 +15,7 @@ import {
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { cheapestSupplier, chooseSupplier } from 'src/app/core/engine/supplier-choice'
 import { formatMoney } from 'src/app/core/engine/rounding'
 import { placeInViewport, type PlacementAnchor, type PlacementResult } from 'src/app/core/utils/viewport-placement.util'
@@ -39,7 +40,7 @@ export interface SupplierPickerRow {
 @Component({
   selector: 'app-supplier-picker',
   standalone: true,
-  imports: [LucideAngularModule, ClickOutSideDirective, TranslatePipe],
+  imports: [LucideAngularModule, ClickOutSideDirective, TranslatePipe, DisabledWhyDirective],
   templateUrl: './supplier-picker.component.html',
   styleUrl: './supplier-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,6 +54,8 @@ export class SupplierPickerComponent {
   /** The line's chosen supplier id; null = automatic (cheapest). */
   readonly value = input<string | null>(null)
   readonly canEdit = input(false)
+  /** Why the supplier cannot be changed (translated); with it the rows stay reachable and say it. */
+  readonly disabledWhy = input<string | null>(null)
   /** The picked supplier id, or null for «cheapest (automatic)». */
   readonly picked = output<string | null>()
 

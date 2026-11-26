@@ -43,7 +43,8 @@
       <button
         type="button"
         class="c-btn-primary"
-        [disabled]="!reason_() || isSaving_()"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="!reason_() ? ('why_choose_first' | translatePipe) : null"
         [attr.aria-busy]="isSaving_() || null"
         (click)="onSave()"
       >

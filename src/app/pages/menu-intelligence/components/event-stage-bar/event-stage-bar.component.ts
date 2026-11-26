@@ -35,6 +35,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import type { Client } from '@models/client.model'
 import { ClientPickerComponent } from 'src/app/shared/client-picker/client-picker.component'
@@ -61,6 +62,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     TranslatePipe,
     ScrollRailComponent,
     TooltipDirective,
+    DisabledWhyDirective,
     DateFieldComponent,
     ClientPickerComponent,
     NotClosedDialogComponent,

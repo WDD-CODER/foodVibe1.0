@@ -55,8 +55,8 @@
     background: var(--bg-glass);
     text-align: start;
 
-    &:disabled {
-      cursor: default;
+    &[aria-disabled='true'] {
+      cursor: not-allowed;
     }
 
     > :first-child {

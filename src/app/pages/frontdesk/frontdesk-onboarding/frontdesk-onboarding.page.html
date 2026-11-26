@@ -303,7 +303,8 @@
         type="button"
         class="c-btn-secondary"
         data-testid="onboarding-test-request"
-        [disabled]="!testKind_() || isSendingTest_()"
+        [disabled]="isSendingTest_()"
+        [appDisabledWhy]="!testKind_() ? ('why_onboarding_save_kind_first' | translatePipe) : null"
         (click)="sendTestRequest()"
       >
         <lucide-icon name="send" [size]="14"></lucide-icon>

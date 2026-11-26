@@ -64,7 +64,7 @@
                     step="0.01"
                     dir="ltr"
                     [value]="view.row.actualPaid ?? ''"
-                    [disabled]="locked_()"
+                    [appDisabledWhy]="locked_() ? ('why_menu_event_finished' | translatePipe) : null"
                     (change)="onPaidChange(view.key, $any($event.target).value)"
                   />
                   @if (view.remark) {
@@ -84,7 +84,7 @@
                   <input
                     type="checkbox"
                     [checked]="view.row.arrived"
-                    [disabled]="!canArrival_() || locked_()"
+                    [appDisabledWhy]="arrivalWhy_() ? (arrivalWhy_()! | translatePipe) : null"
                     (change)="onArrivedChange(view.key, $any($event.target).checked)"
                   />
                   <span>{{ 'closing_arrived' | translatePipe }}</span>
@@ -93,7 +93,7 @@
                   <input
                     type="checkbox"
                     [checked]="view.row.hasInvoice"
-                    [disabled]="!canArrival_() || locked_()"
+                    [appDisabledWhy]="arrivalWhy_() ? (arrivalWhy_()! | translatePipe) : null"
                     (change)="onInvoiceChange(view.key, $any($event.target).checked)"
                   />
                   <span>{{ 'closing_has_invoice' | translatePipe }}</span>
@@ -175,7 +175,7 @@
                   step="0.01"
                   dir="ltr"
                   [value]="closing.actualExtraCosts ?? snapshot_()?.extraCosts ?? ''"
-                  [disabled]="locked_()"
+                  [appDisabledWhy]="locked_() ? ('why_menu_event_finished' | translatePipe) : null"
                   (change)="onExtraChange($any($event.target).value)"
                 />
               </div>
@@ -189,7 +189,7 @@
                   step="0.01"
                   dir="ltr"
                   [value]="closing.actualRevenue ?? snapshot_()?.plannedRevenue ?? ''"
-                  [disabled]="locked_()"
+                  [appDisabledWhy]="locked_() ? ('why_menu_event_finished' | translatePipe) : null"
                   (change)="onRevenueChange($any($event.target).value)"
                 />
               </div>

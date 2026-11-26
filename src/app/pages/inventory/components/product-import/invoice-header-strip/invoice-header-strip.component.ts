@@ -4,12 +4,20 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 /** Plan 628: supplier, date and number of the invoice the owner is about to save, above the preview table. */
 @Component({
   selector: 'app-invoice-header-strip',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, CustomSelectComponent, DateFieldComponent, FormFieldComponent],
+  imports: [
+    FormsModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    DateFieldComponent,
+    FormFieldComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './invoice-header-strip.component.html',
   styleUrl: './invoice-header-strip.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,5 +34,8 @@ export class InvoiceHeaderStripComponent {
   readonly taxId = input<string | null>(null)
   readonly vatIncluded = input<boolean | null>(null)
   readonly isSupplierMissing = input(false)
+  /** Only while the caller's own action runs (saving); a control that is off for another reason gets `disabledWhy`. */
   readonly disabled = input(false)
+  /** Why the fields cannot be changed (translated); each of them says it. null = they can. */
+  readonly disabledWhy = input<string | null>(null)
 }

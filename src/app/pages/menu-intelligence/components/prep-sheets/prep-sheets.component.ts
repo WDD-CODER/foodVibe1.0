@@ -13,6 +13,7 @@ import {
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { EventPlanService } from 'src/app/core/engine/event-plan.service'
 import {
   buildPrepSheetGroups,
@@ -59,7 +60,7 @@ function cssString(text: string): string {
 @Component({
   selector: 'app-prep-sheets',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, DisabledWhyDirective],
   templateUrl: './prep-sheets.component.html',
   styleUrl: './prep-sheets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

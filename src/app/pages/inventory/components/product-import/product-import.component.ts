@@ -21,6 +21,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { GeminiService } from '@services/gemini.service'
 import { ProductNameMatcherService } from '@services/product-name-matcher.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
@@ -84,7 +85,8 @@ const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
     PageHeaderComponent,
     TextareaAutoGrowDirective,
     InvoiceHeaderStripComponent,
-    PriceImpactPanelComponent
+    PriceImpactPanelComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './product-import.component.html',
   styleUrl: './product-import.component.scss',
@@ -257,6 +259,13 @@ export class ProductImportComponent {
       !this.isMatching_() &&
       !this.isSupplierMissing_()
   )
+  /** Plan 747: the save's own work (a native disabled, no tooltip), apart from the reasons below. */
+  protected readonly saveBusy_ = computed(() => this.isSaving_() || this.isParsing_() || this.isMatching_())
+  /** Why the save cannot be pressed (a dictionary key); null when it can or while it is only busy. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    if (this.rows_().length === 0) return 'why_list_empty'
+    return this.isSupplierMissing_() ? 'invoice_supplier_required' : null
+  })
 
   // 6. METHODS
   /** True when there is text in the box or a preview that a save has not cleared (plan 464, leave guard). */

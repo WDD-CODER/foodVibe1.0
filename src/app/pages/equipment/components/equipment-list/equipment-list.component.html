@@ -286,7 +286,8 @@
           type="button"
           class="c-btn-primary"
           (click)="onInlineSave()"
-          [disabled]="editForm_.invalid || isSavingEdit_()"
+          [disabled]="isSavingEdit_()"
+          [appDisabledWhy]="editForm_.invalid ? ('fill_required_fields' | translatePipe) : null"
         >
           @if (isSavingEdit_()) {
             <app-loader size="small" [inline]="true" />

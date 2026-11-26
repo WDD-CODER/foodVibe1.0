@@ -41,13 +41,13 @@ describe('GrantAccessDialogComponent (plan 632)', () => {
   it('shows the business name and keeps the button disabled while the name is empty', () => {
     setup()
     expect(el.textContent).toContain('Client kitchen')
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
     api().username_.set('   ')
     detect()
-    expect(saveBtn().disabled).toBeTrue()
+    expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
     api().username_.set('cons')
     detect()
-    expect(saveBtn().disabled).toBeFalse()
+    expect(saveBtn().getAttribute('aria-disabled')).toBeNull()
   })
 
   it('sends the trimmed name with the business id, toasts and closes with true', async () => {

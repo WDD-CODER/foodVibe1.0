@@ -140,7 +140,7 @@
             messageKey="empty_inventory"
             icon="package"
             ctaLabelKey="add_first_product"
-            [ctaDisabled]="!isLoggedIn()"
+            [ctaDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             (ctaClick)="onAddProduct()"
           />
         } @else {
