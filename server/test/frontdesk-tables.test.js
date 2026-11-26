@@ -156,6 +156,85 @@ describe('plan 731: the table question of the end-to-end test', () => {
   });
 });
 
+describe('plan 751: date words', () => {
+  const offerText = fixedText('fd_ai_offer', { date: ddmm(TOMORROW), time: '20:00', party: 4 });
+  const NO_DATE = { time: '20:00', partySize: 4 };
+  const filled = () => logs.byEvent('frontdesk.turn.when_filled');
+  afterEach(() => {
+    const dump = JSON.stringify(logs.records);
+    expect(dump).not.toContain('מחר');
+    expect(dump).not.toContain('GUEST-SECRET-TEXT');
+  });
+
+  const expectOffer = async () => {
+    const offer = await lastOut();
+    expect(offer).toMatchObject({ kind: 'button', text: offerText });
+    expect(offer.buttons.map(b => b.id)).toEqual(['OK:1', 'OTHER']);
+  };
+
+  it('a date the model left out is read from the guest message and offered', async () => {
+    const { conversation } = await setup();
+    await say(conversation, BOOK(NO_DATE), { text: 'אפשר שולחן לארבעה מחר ב-20:00?' });
+    await expectOffer();
+    expect(filled()).toHaveLength(1);
+    expect(filled()[0]).toMatchObject({ intent: 'book', dateFrom: 'guest', timeFixed: false });
+  });
+
+  it('a date word of the model is resolved', async () => {
+    const { conversation } = await setup();
+    await say(conversation, BOOK({ date: 'מחר', time: '20:00', partySize: 4 }));
+    await expectOffer();
+    expect(filled()).toHaveLength(1);
+    expect(filled()[0]).toMatchObject({ intent: 'book', dateFrom: 'model', timeFixed: false });
+  });
+
+  it('a word of an earlier, answered message is not read', async () => {
+    const { conversation } = await setup();
+    await say(conversation, { reply: 'שלום', intent: 'smalltalk' }, { text: 'נדבר מחר' });
+    expect((await lastOut()).text).toBe('שלום');
+    await say(conversation, BOOK(NO_DATE));
+    expect((await lastOut()).text).toBe(fixedText('fd_ai_ask_date'));
+    expect((await conv(conversation._id)).pending.data).toEqual(NO_DATE);
+    expect(filled()).toHaveLength(0);
+  });
+
+  it('without tables the request gets the date', async () => {
+    const { conversation } = await setup({ tables: false });
+    await say(conversation, BOOK(NO_DATE, { reply: 'MODEL-REPLY' }), { text: 'שולחן לארבעה מחר ב-20:00' });
+    const reqs = await requests();
+    expect(reqs).toHaveLength(1);
+    expect(reqs[0].wanted).toEqual({ date: TOMORROW, time: '20:00', partySize: 4 });
+    expect((await lastOut()).text).toBe(fixedText('fd_ai_will_confirm'));
+  });
+});
+
+describe('plan 751: a time from the facts', () => {
+  const blocked = () => logs.byEvent('frontdesk.turn.blocked');
+
+  it('opening hours quoted with no used fact are sent to the guest', async () => {
+    const { conversation } = await setup();
+    const reply = 'אנחנו פתוחים כל יום 12:00–23:00';
+    await say(conversation, { reply, intent: 'question', usedFacts: [] }, { text: 'מתי אתם פתוחים?' });
+    const sent = await outs();
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({ text: reply, author: 'ai' });
+    expect((await conv(conversation._id)).status).toBe('bot');
+    expect(blocked()).toHaveLength(0);
+  });
+
+  it('a time the facts do not hold is blocked and the log holds the counts only', async () => {
+    const { conversation } = await setup();
+    await say(conversation, { reply: 'יש לנו מקום ב-21:15', intent: 'question' });
+    expect((await lastOut()).text).toBe(fixedText('fd_ai_handoff_default'));
+    expect((await conv(conversation._id)).status).toBe('human');
+    expect(blocked()).toHaveLength(1);
+    expect(blocked()[0]).toMatchObject({
+      reason: 'unsupported_time', stage: 'post', level: 1, times: 1, unmatched: 1, usedFacts: 0, unknownFacts: 0,
+    });
+    expect(JSON.stringify(logs.records)).not.toContain('21:15');
+  });
+});
+
 describe('book, manual and over the limit', () => {
   it('manual: a qualified request, no booking, no hold', async () => {
     const { conversation } = await setup({ mode: 'manual' });

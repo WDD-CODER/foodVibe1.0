@@ -185,12 +185,38 @@ describe('table replies (plan 680)', () => {
   const FACT_TEXT = '[f1] שעות: 12:00–23:00\n[f2] שולחן קבוע ללא שעה';
   const tables = (over = {}) => ({ tablesOn: true, factIds: ['f1', 'f2'], factsText: FACT_TEXT, ...over });
 
-  it('a time with no used fact containing it is unsupported_time', () => {
+  const passes = (reply, over, c) => applyGuardrails(answer(reply, over), ctx(tables(c))).ok;
+
+  it('plan 751: a time no fact line holds is unsupported_time, whatever the answer listed', () => {
     expect(reasonOf('נתראה ב-20:00', {}, tables())).toBe('unsupported_time');
-    expect(reasonOf('נתראה ב-20:00', { usedFacts: ['f2'] }, tables())).toBe('unsupported_time');
+    expect(reasonOf('נתראה ב-20:00', { usedFacts: ['f1'] }, tables())).toBe('unsupported_time');
+    expect(reasonOf('נתראה ב-2:00', { usedFacts: ['f1'] }, tables())).toBe('unsupported_time');
   });
-  it('a time that stands in a used fact line passes', () => {
-    expect(applyGuardrails(answer('אנחנו פתוחים 12:00–23:00', { usedFacts: ['f1'] }), ctx(tables())).ok).toBe(true);
+  it.each([
+    ['אנחנו פתוחים 12:00–23:00', []],
+    ['אנחנו פתוחים 12:00–23:00', ['[f1]']],
+    ['אנחנו פתוחים 12:00–23:00', ['f1']],
+    ['פתוחים מ-12:00 עד 23:00', []],
+  ])('plan 751: a time of any fact line passes: "%s" %j', (reply, usedFacts) => {
+    expect(passes(reply, { usedFacts })).toBe(true);
+  });
+  it('plan 751: a leading zero on either side is the same time', () => {
+    const short = { factsText: '[profile.hours] opening hours: כל יום 9:00–23:00' };
+    expect(passes('פתוחים 09:00–23:00', {}, short)).toBe(true);
+    const long = { factsText: '[profile.hours] opening hours: כל יום 09:00–23:00' };
+    expect(passes('פתוחים מ-9:00', {}, long)).toBe(true);
+  });
+  it('plan 751: the open and close of the hours row pass when the fact line is free text', () => {
+    const profile = { assistant: { level: 1 }, hours: [{ days: 'א-ה', time: 'בערב', open: '18:00', close: '23:00' }] };
+    const c = { profile, factsText: '[profile.hours] opening hours: א-ה בערב' };
+    expect(passes('פתוחים 18:00–23:00', {}, c)).toBe(true);
+    expect(reasonOf('פתוחים 17:00–23:00', {}, tables(c))).toBe('unsupported_time');
+  });
+  it('plan 751: a blocked time carries the counts', () => {
+    const res = applyGuardrails(answer('יש מקום ב-20:00 וגם ב-12:00', { usedFacts: ['f1', 'nope'] }), ctx(tables()));
+    expect(res).toEqual({
+      ok: false, reason: 'unsupported_time', detail: { times: 2, unmatched: 1, usedFacts: 1, unknownFacts: 1 },
+    });
   });
   it('a table number is table_number, in both languages', () => {
     expect(reasonOf('שולחן 12 מחכה לכם', {}, tables())).toBe('table_number');

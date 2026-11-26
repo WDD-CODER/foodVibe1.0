@@ -5,7 +5,8 @@
  * reserved level 2) answers through `sendOut`. A test conversation (the simulator) is answered as level 1 whatever the
  * business's level (`turnProfile`, plan 733, R-23). A technical failure hands the conversation to a person and sends one
  * holding message per guest message at level 1 or in a test conversation (plan 733, R-22, which supersedes R-04's
- * silence). Logs carry ids, enums and booleans only — never guest text, a name or a phone.
+ * silence). Logs carry ids, enums, booleans and counts only — never guest text, a name or a phone.
+ * Plan 751 (R-24): a date the model left out is filled by `fillWhen` before the rules run.
  * The one model call is `askTurnModel` (routes/ai/frontdesk.js, INV-6); it is required lazily because that file
  * requires this one.
  */
@@ -13,6 +14,7 @@ const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
 const { buildTurnBody, HISTORY_WINDOW } = require('./frontdesk-prompt');
 const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
+const { fillWhen } = require('./frontdesk-when');
 const { sendOut } = require('./outbound');
 const { setTurnHandler } = require('./inbound');
 const { tablesFor, handleTableIntent, deliver, cleanSuggested, turnProfile } = require('./frontdesk-tables');
@@ -135,8 +137,8 @@ async function removeGuest(db, conversation, { now, log }) {
 }
 
 /** A blocked turn: log the reason only, then a person (suggest mode: the sentence is the draft, status unchanged). */
-async function blockTurn(db, conversation, base, { reason, stage }) {
-  base.log.info({ event: 'frontdesk.turn.blocked', reason, stage, level: levelOf(base.profile) });
+async function blockTurn(db, conversation, base, { reason, stage, detail }) {
+  base.log.info({ event: 'frontdesk.turn.blocked', reason, stage, level: levelOf(base.profile), ...(detail ?? {}) });
   if (base.mode === 'suggest') return finishSuggestion(db, conversation, handoffSentence(base.profile), base.now);
   await handOff(db, conversation, { ...base, keepStatus: true });
   return { ok: true, handoff: true };
@@ -250,7 +252,13 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     return { ok: false, reason: asked.reason, group };
   }
 
-  const modelAnswer = !tables && asked.answer.intent === 'book' ? bookAsRequest(asked.answer) : asked.answer;
+  const when = fillWhen(asked.answer, { history, now, profile });
+  if (when.dateFrom || when.timeFixed) {
+    const { dateFrom, timeFixed } = when;
+    const intent = asked.answer.intent;
+    log.info({ event: 'frontdesk.turn.when_filled', conversationId: conversation._id, intent, dateFrom, timeFixed });
+  }
+  const modelAnswer = !tables && when.answer.intent === 'book' ? bookAsRequest(when.answer) : when.answer;
   const tableTurn = !!tables && TABLE_INTENTS.has(modelAnswer.intent);
   const guardCtx = {
     tablesOn: !!tables, profile, factIds: facts.factIds, factsText: facts.text, history, aiTurns, now, mode,
@@ -262,7 +270,7 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     verdict = applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: true });
   }
   if (!verdict.ok && verdict.reason !== 'model') {
-    return blockTurn(db, conversation, base, { reason: verdict.reason, stage: 'post' });
+    return blockTurn(db, conversation, base, { reason: verdict.reason, stage: 'post', detail: verdict.detail });
   }
   if (verdict.ok && mode === 'turn' && (verdict.answer.low || conversation.lowTurns)) {
     await colOf(db, 'conversations').updateOne(
@@ -289,7 +297,9 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
       // No plan to assign from: the plan 679 request path, with a reply that is checked because it may be sent.
       answer = bookAsRequest(answer);
       const again = applyGuardrails(answer, { ...guardCtx, replyWillBeSent: true });
-      if (!again.ok) return blockTurn(db, conversation, base, { reason: again.reason, stage: 'post' });
+      if (!again.ok) {
+        return blockTurn(db, conversation, base, { reason: again.reason, stage: 'post', detail: again.detail });
+      }
       answer = again.answer;
     } else if (res.handoff) {
       log.info({ event: 'frontdesk.turn.done', intent: answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });

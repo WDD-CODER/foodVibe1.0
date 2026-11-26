@@ -156,9 +156,18 @@ describe('request', () => {
     expect((await outbound())[0].text).toBe('MODEL-REPLY');
   });
 
-  it('a date that is not YYYY-MM-DD is dropped and counts as missing', async () => {
+  it('plan 751: a date word of the model is resolved', async () => {
     const { conversation } = await setup();
     fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, collected: { ...COMPLETE.collected, date: 'tomorrow' } }));
+    await turn(conversation, { now: Date.parse('2030-01-07T10:00:00+02:00') });
+    const requests = await db().collection('requests').find({}).toArray();
+    expect(requests).toHaveLength(1);
+    expect(requests[0].wanted.date).toBe('2030-01-08');
+  });
+
+  it('a date that cannot be resolved is dropped and counts as missing', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...COMPLETE, collected: { ...COMPLETE.collected, date: 'someday' } }));
     await turn(conversation);
     expect(await db().collection('requests').countDocuments({})).toBe(0);
   });
