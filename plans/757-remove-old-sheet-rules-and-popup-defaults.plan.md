@@ -243,12 +243,14 @@ Snapshot's)
   - The append-only test: import `withoutRetiredSheetRules` from `../lib/modal-guard.mjs`; the last line becomes
     `assert.equal(head(now), withoutRetiredSheetRules(head(base)))`; the title becomes
     `src/styles.scss above the plan 720 marker is the base file minus the sheet rules plan 757 removed (append-only)`.
-    The base lookup (the three refs, the skip with its printed reason) does not change.
+    The base lookup (the three refs, the skip with its printed reason) does not change. *Amended by ask 757-1
+    (advisor, 2026-11-26): `origin/chore/restaurant-staging` is tried before `origin/main` (both run refs are gone and
+    the `origin/main` merge-base fails on staging's own changes); nothing else in the lookup changes.*
 - [ ] `scripts/test/style-703.test.mjs`: the same change in its append-only test — import
   `withoutRetiredSheetRules` from `../lib/modal-guard.mjs`, last line
   `assert.equal(head(now), withoutRetiredSheetRules(head(base)))`, title
   `src/styles.scss above the marker is the base file minus the sheet rules plan 757 removed (append-only)`. Its other
-  two tests do not change.
+  two tests do not change. *Ask 757-1: the same one-ref addition to its base lookup as in style-720.*
 - [ ] Why this shape: the base is the file at the branch point. On this plan's branch it still holds the rules; on
   every branch cut after this plan is merged it does not, and then the function changes nothing. Only the base side is
   passed through it, so a retired rule that comes back in the current file fails the comparison (and the guard).
@@ -320,12 +322,12 @@ command on one line; the arguments are in single quotes and hold no apostrophe)
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
-- [ ] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
-- [ ] A3: Make the guard forbid the removed selectors and teach the two append-only checks this one approved removal — new export withoutRetiredSheetRules with three fixture cases, three allow entries deleted, the stylesheet added to the no-mention test, both append-only assertions compare with the base minus the retired rules — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs, scripts/test/style-720.test.mjs, scripts/test/style-703.test.mjs
-- [ ] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
-- [ ] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
-- [ ] A6: Run every check of this plan and hand the Human the two equipment looks — every auto item of Goals with its exact output into Execution Notes; then the two human checks as cards — no file
+- [x] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
+- [x] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
+- [x] A3: Make the guard forbid the removed selectors and teach the two append-only checks this one approved removal — new export withoutRetiredSheetRules with three fixture cases, three allow entries deleted, the stylesheet added to the no-mention test, both append-only assertions compare with the base minus the retired rules — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs, scripts/test/style-720.test.mjs, scripts/test/style-703.test.mjs
+- [x] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
+- [x] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
+- [x] A6: Run every check of this plan and hand the Human the two equipment looks — every auto item of Goals with its exact output into Execution Notes; then the two human checks as cards — no file
 
 ## Technical Considerations
 - Dependencies: already on the base branch — plans 720 and 721 (`scripts/lib/modal-guard.mjs` with `modalFindings`, `scripts/test/style-720.test.mjs` with `ALLOW` and its four tests, `scripts/test/style-703.test.mjs`, the plan 720 block in `src/styles.scss`) and plan 711's move of the equipment panel onto `app-modal-shell`.
@@ -363,3 +365,21 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: `--date 2026-11-26` is passed so `turned on:` carries the day of the Human's words, not the build day.
 - behaviour: this plan's own `## Defaults` has no row for `modal-centered` / `modal-scrollable` — they are not in the contract when the plan is saved, and a row for an unknown id fails the defaults gate.
 - behaviour: A4 comes after A2 (see Technical Considerations), although the turn-on was the first thing asked for.
+
+### Build, 2026-11-26 (orch-builder, judgment tier, fresh builder after ask 757-1, re-implemented from base a7e0bd47)
+- Step 0: `REALITY: drift` — `79d691f7` ok · `73be8a0a` ok · `711cd215` ok · `a34fc0e3` ok · `9e339e05` ok · `bbf020bf` ok · `def248b0` ok · `30626b01` ok (no symbol, line or file this plan names was removed or renamed; the A1 searches and the A2 helper match prove the pieces are intact).
+- First, the failing check at base: `node --test scripts/test/style-720.test.mjs scripts/test/style-703.test.mjs` → exit 1, both append-only tests fail without any plan 757 change: `origin/orch/rs-modals` and `origin/orch/rs-style` no longer exist, so the base is the `origin/main` merge-base (`8bc8ca9d`), which lacks staging's own stylesheet changes.
+- A1 safety check: the three files exist; `src/styles.scss:3205` holds the plan 720 marker.
+- A1 search 1 (`m-sheet|as-modal`, src): `modal-shell.component.spec.ts:128`, `:129`; `src/styles.scss:1416`, `:1855`, `:1859`, `:2654`, `:2659`. As expected.
+- A1 search 2 (`[sheet]`, src): no match. Search 3 (`sheet = input`, modal-shell): no match.
+- A1 search 4 (e2e, server, public, scripts): only `scripts/lib/modal-guard.mjs`, `scripts/test/modal-guard.test.mjs`, `scripts/test/style-720.test.mjs`. As expected.
+- A2: written by applying `withoutRetiredSheetRules` to the file, so A2 equals the function by construction; `src/styles.scss` 3243 → 3183 lines; no `m-sheet` / `as-modal` left; a second call changes nothing; the diff adds only the two lines `20 stays below the app header (z-index 100). */` and `.inline-edit-panel:has(.c-dropdown) {`.
+- A3, ask 757-1 (advisor: retry with the answer): both append-only tests try `origin/chore/restaurant-staging` (this plan's base branch) before `origin/main`; the two run refs, the order and the skip stay. No HEAD-equals-merge-base skip (the discarded attempt's fix round added one; it is not part of this build). The A3 text carries the amendment inline.
+- A4: both `add` commands printed their `DEFAULTS: on …` line and `DEBT: added default.modal-centered at 0` / `DEBT: added default.modal-scrollable at 0`.
+- A5: the registry Use line also names the export in the Reuse Check row's words ("Added by plan 757: withoutRetiredSheetRules (a new export of scripts/lib/modal-guard.mjs)"), which `kit-checks` (`reuse-registry-missing-piece`) asks for.
+- evidence: `node --test scripts/test/modal-guard.test.mjs scripts/test/style-720.test.mjs scripts/test/style-703.test.mjs` → exit 0, pass 22, fail 0, skipped 0.
+- evidence: `pnpm run test:scripts` → exit 0. `pnpm run build` → exit 0. `pnpm run lint` → exit 0.
+- evidence: `pnpm run test:ci` → first run exit 1, 1 FAILED / 3241 SUCCESS: `EventLogisticsPanelComponent loading list (plan 624) a read-only member sees the button and it opens the sheet` (a 1-second `@defer` wait, `event-logistics-panel.component.spec.ts:387`, no CSS involved) under the load of the full run; rerun once → exit 0, `TOTAL: 3242 SUCCESS`.
+- evidence: `product-defaults list` → both `on` lines, no `bad contract`; `debt-baseline --show` → `default.modal-centered 0 → 0`, `default.modal-scrollable 0 → 0`; `inventory --check` → `INVENTORY: ok`.
+- evidence: `kit-checks --base origin/orch/rs-console` → `KIT_CHECKS: ok (6 checks)` (after the registry line); `scripts/scope-check.mjs --diff=origin/orch/rs-console` → `SCOPE: ok`; kit manifest check, `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check`, `ci-scope-check`, `lint:reuse`, `reuse-lint --check-registry` → exit 0; `log-query --since=plan-start --level=error` → exit 0.
+- open for Dandan: the two `[human]` equipment checks.
