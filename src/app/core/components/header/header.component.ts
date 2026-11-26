@@ -178,10 +178,8 @@ export class HeaderComponent {
   protected async logout(): Promise<void> {
     this.isMobileAvatarOpen.set(false)
     this.closeMobileMenu()
-    if (this._isCurrentRouteProtected()) {
-      // Navigate to a public page first so Angular can run canDeactivate guards.
-      // If the user has unsaved changes, pendingChangesGuard shows the save/discard dialog.
-      // navigate() returns false if a guard cancelled the navigation — abort logout.
+    if (this._isCurrentRouteProtected() && this.router.url !== '/dashboard') {
+      // Navigating lets unsaved-changes guards ask (false = stay signed in); a same-URL navigation resolves false without running any guard, so it is skipped.
       const navigated = await this.router.navigate(['/dashboard'])
       if (navigated === false) return
     }

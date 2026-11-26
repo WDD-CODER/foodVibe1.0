@@ -2,7 +2,7 @@ import { FrontDeskBadgeService } from '@services/front-desk-badge.service'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule } from '@angular/common/http/testing'
 import { HeaderComponent } from './header.component'
-import { provideRouter, RouterLinkWithHref } from '@angular/router'
+import { provideRouter, Router, RouterLinkWithHref, RouterOutlet } from '@angular/router'
 import { By } from '@angular/platform-browser'
 import { ArrowLeftRight, Bell, LucideAngularModule, Stethoscope, Utensils } from 'lucide-angular'
 import { PermissionService } from '@services/permission.service'
@@ -17,6 +17,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import type { ModuleKey } from '@schemas/modules-pure'
 import { ModuleService } from '@services/module.service'
 import { PHONE_QUERY } from '@utils/breakpoints'
+import { authGuard } from '../../guards/auth.guard'
 
 /** Plan 646: the header now holds the bell and the diagnosis entry. */
 const HEADER_ICONS = { ...TEST_LUCIDE_ICONS, Bell, Stethoscope, Utensils }
@@ -548,5 +549,95 @@ describe('HeaderComponent above the route-loading overlay (plan 645)', () => {
     expect(hit === avatar || avatar.contains(hit)).toBeTrue()
     ;(hit as HTMLElement).click()
     expect(logout).toHaveBeenCalledTimes(1)
+  })
+})
+
+@Component({ standalone: true, template: '' })
+class StubPageComponent {}
+
+/** The outlet is needed: the router runs a reused route's canDeactivate only for an activated outlet. */
+@Component({
+  standalone: true,
+  imports: [HeaderComponent, RouterOutlet],
+  template: '<app-header /><router-outlet />'
+})
+class ShellWithOutletComponent {}
+
+describe('HeaderComponent sign-out on a protected page (plan 750)', () => {
+  let fixture: ComponentFixture<ShellWithOutletComponent>
+  let router: Router
+  let allowLeave = true
+  const logout = jasmine.createSpy('logout')
+
+  beforeEach(async () => {
+    allowLeave = true
+    logout.calls.reset()
+    logout.and.returnValue(of(null))
+    await TestBed.configureTestingModule({
+      imports: [ShellWithOutletComponent, HttpClientTestingModule, LucideAngularModule.pick(HEADER_ICONS)],
+      providers: [
+        moduleStub,
+        permissionStub,
+        provideRouter([
+          {
+            path: 'dashboard',
+            component: StubPageComponent,
+            canActivate: [authGuard],
+            canDeactivate: [() => allowLeave],
+            runGuardsAndResolvers: 'paramsOrQueryParamsChange'
+          },
+          { path: 'inventory', component: StubPageComponent, canActivate: [authGuard] }
+        ]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: signal({ _id: 'u1', name: 'dana' }),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            acting_: signal(null),
+            homeBusinessId_: signal(null),
+            consumeAccessEndedNotice: () => false,
+            logout
+          }
+        }
+      ]
+    }).compileComponents()
+    router = TestBed.inject(Router)
+    fixture = TestBed.createComponent(ShellWithOutletComponent)
+    fixture.detectChanges()
+  })
+
+  /** Presses the name button and waits for the router and the handler to settle. */
+  const pressSignOut = async () => {
+    fixture.detectChanges()
+    ;(fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.auth-username-btn')!.click()
+    await new Promise<void>((resolve) => setTimeout(resolve, 50))
+  }
+
+  it('signs out from the bare dashboard', async () => {
+    await router.navigateByUrl('/dashboard')
+    await pressSignOut()
+    expect(logout).toHaveBeenCalledTimes(1)
+  })
+
+  it('goes to the dashboard from another protected page, then signs out', async () => {
+    let urlAtLogout = ''
+    logout.and.callFake(() => {
+      urlAtLogout = router.url
+      return of(null)
+    })
+    await router.navigateByUrl('/inventory')
+    await pressSignOut()
+    expect(logout).toHaveBeenCalledTimes(1)
+    expect(urlAtLogout).toBe('/dashboard')
+  })
+
+  it('stays signed in when the dashboard tab refuses to be left', async () => {
+    await router.navigateByUrl('/dashboard?tab=metadata')
+    allowLeave = false
+    await pressSignOut()
+    expect(logout).not.toHaveBeenCalled()
+    expect(router.url).toBe('/dashboard?tab=metadata')
   })
 })
