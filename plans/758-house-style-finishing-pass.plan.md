@@ -69,6 +69,12 @@ docs/agent/house-style.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 _shared/debt-baseline.json
+src/app/pages/dashboard/dashboard.page.spec.ts
+src/app/pages/frontdesk/frontdesk-settings/frontdesk-settings.page.spec.ts
+src/app/pages/platform-dashboard/platform-dashboard.page.spec.ts
+src/app/pages/recipe-book/recipe-book.page.spec.ts
+src/app/pages/settings/settings.page.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
