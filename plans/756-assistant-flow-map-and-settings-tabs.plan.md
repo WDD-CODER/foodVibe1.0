@@ -225,6 +225,7 @@ docs/agent/standards-backend.md
 docs/restaurant/restaurant-map.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
 ```
 
 Files plans 752–755 also write (all merged before this plan, so there is no parallel edit):
