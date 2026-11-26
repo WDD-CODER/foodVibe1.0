@@ -52,4 +52,9 @@
   block-size: 100%;
   pointer-events: auto;
   cursor: pointer;
+
+  // Blocked with a reason (appDisabledWhy).
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
 }

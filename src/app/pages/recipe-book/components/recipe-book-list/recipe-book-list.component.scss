@@ -290,3 +290,8 @@
 .favorite-btn:hover:not(.is-favorited):not([disabled]):not([aria-disabled='true']) {
   color: var(--color-favorite);
 }
+
+// Blocked with a reason (appDisabledWhy): the favorite mark must not undo the blocked dimming.
+.favorite-btn.is-favorited[aria-disabled='true'] {
+  opacity: 0.3;
+}
