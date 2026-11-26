@@ -1,0 +1,195 @@
+{
+  "run": "rs-console",
+  "branch": "orch/rs-console",
+  "base": "main",
+  "startedAt": "2026-11-26T15:37:41.793Z",
+  "mainShaAtStart": "82b86b117d6b07ef2d74b37e2680ba2d02d4672e",
+  "plans": {
+    "751": {
+      "nnn": "751",
+      "title": "The assistant understands \"מחר\" by itself and no longer hands an opening-hours answer to the staff",
+      "branch": "feat/751-assistant-date-words-and",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-26T15:41:42.584Z"
+        }
+      },
+      "humanItems": [
+        "On the simulator (`http://localhost:4202/frontdesk/simulator`) of a restaurant with table booking by chat,",
+        "Same page, a new chat: the test guest writes \"מתי אתם פתוחים?\" · the assistant answers with the opening"
+      ],
+      "history": [
+        {
+          "at": "2026-11-26T15:41:41.884Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T15:41:42.589Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-26T16:11:18.126Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 15.4,
+      "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1775.2,
+          "tokens": {
+            "input": 4497108,
+            "output": 48624
+          },
+          "exit": 1,
+          "error": "claude idle for 15 min (no file changed in its folder)"
+        }
+      ],
+      "parkBranch": "park/rs-console-751",
+      "park": {
+        "at": "2026-11-26T16:14:00.471Z",
+        "reason": "builder stopped: claude idle for 15 min (no file changed in its folder) — the work is kept on park/rs-console-751",
+        "branch": "park/rs-console-751"
+      }
+    },
+    "752": {
+      "nnn": "752",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "depends on parked 751",
+      "freeDiskGb": 15.6,
+      "history": [
+        {
+          "at": "2026-11-26T16:14:04.844Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "753": {
+      "nnn": "753",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "depends on parked 751",
+      "freeDiskGb": 15.6,
+      "history": [
+        {
+          "at": "2026-11-26T16:14:05.115Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "754": {
+      "nnn": "754",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "depends on parked 751",
+      "freeDiskGb": 15.6,
+      "history": [
+        {
+          "at": "2026-11-26T16:14:05.407Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "755": {
+      "nnn": "755",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "depends on parked 751",
+      "freeDiskGb": 15.6,
+      "history": [
+        {
+          "at": "2026-11-26T16:14:05.686Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "756": {
+      "nnn": "756",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "depends on parked 751",
+      "freeDiskGb": 15.6,
+      "history": [
+        {
+          "at": "2026-11-26T16:14:06.034Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    },
+    "757": {
+      "nnn": "757",
+      "round": 0,
+      "models": {},
+      "state": "skipped",
+      "reason": "shares files with parked 751",
+      "freeDiskGb": 15.6,
+      "history": [
+        {
+          "at": "2026-11-26T16:14:04.569Z",
+          "state": "skipped",
+          "round": 0
+        }
+      ]
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-26T15:38:40.432Z",
+      "plan": "751",
+      "text": "decided without the Human: plan file copied: plans/751-assistant-date-words-and-fact-times.plan.md was on main but not on orch/rs-console: the run copied it there (one commit) instead of asking"
+    },
+    {
+      "at": "2026-11-26T15:41:41.330Z",
+      "plan": "751",
+      "text": "the folder foodVibe1.0-orch-rs-console-751 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-26T16:14:03.804Z",
+      "plan": "751",
+      "text": "parked: saved on park/rs-console-751 (7fd6e7a) and pushed"
+    },
+    {
+      "at": "2026-11-26T16:14:06.288Z",
+      "text": "wave 1 parked 751 — skipped 752, 753, 754, 755, 756; 0 later plan(s) go on"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.6,
+  "updatedAt": "2026-11-26T16:14:09.200Z",
+  "selfDecided": [
+    {
+      "plan": "751",
+      "kind": "plan file copied",
+      "what": "plans/751-assistant-date-words-and-fact-times.plan.md was on main but not on orch/rs-console: the run copied it there (one commit) instead of asking",
+      "why": "the plan was saved after the run branch was cut",
+      "undo": "nothing to undo: the same file as on main",
+      "at": "2026-11-26T15:38:39.984Z"
+    }
+  ],
+  "finishedAt": "2026-11-26T16:14:09.197Z"
+}
