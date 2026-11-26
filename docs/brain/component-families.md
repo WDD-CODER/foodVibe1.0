@@ -177,6 +177,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — plan 499 built `appNumberBox`; pricing meter, counter, product form, recipe quantity, cook view, settings, event dialogs and the AI / quick-add / unit modals are on it
 - Use: `src/app/core/directives/number-box.directive.ts` · `appNumberBox` on the container of ONE `input[type=number]` (label, suffix, padding); it focuses the number and `SelectOnFocusDirective` selects all. Buttons, chips, other fields, disabled / read-only numbers and an already-focused number are left alone.
 - When: a box whose only content is an editable number. Not for rows that mix free text and numbers.
+- Plan 749: `app-month-pair` (`src/app/pages/monthly-plan/components/month-pair/`, page-local) is a user: a forecast / actual pair as `.c-chip--tap` chips (`.teal` when filled) that each open one short `appNumberBox` box; classes `.mpp`, `.mpp__side`, `.mpp__chip`, `.mpp__box`, `.mpp__suffix` are layout only. The seven-digit width of its box, the labour factor box and the target boxes is one mixin, `seven-digit-box` (`src/app/pages/monthly-plan/_seven-digit-box.scss`).
 - Known copies: none for boxes. Left without it on purpose (outside plan 499 scope): `event-stage-bar` deposit amount, `menu-dish-row` inline prices, equipment / supplier / venue forms (`app-form-field` rows), `product-import` purchase qty (shares a row with a text field), `ai-draft-editor` ingredient rows.
 
 ### stepper — the + / − buttons around a number
@@ -244,7 +245,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### month-figures — a month's plan versus actual figures
 
 - Status: stable (plan 728)
-- Use: `src/app/shared/month-figures/` · `app-month-figures` (inputs `figures` from `monthFigures`, `targets`): «לא הוזן», «חלקי», «לפי היעד», band tags and the completeness badge.
+- Use: `src/app/shared/month-figures/` · `app-month-figures` (inputs `figures` from `monthFigures`, `targets`, optional `fixedHint`): «לא הוזן», «חלקי», «לפי היעד», band tags and the completeness badge.
+- Plan 749: the monthly plan page feeds it the month as typed (`liveMonthOf`, unsaved values included); each «חלקי» tag and the badge carry what is missing as a hover hint.
 - When: any month or dish screen that shows plan against actual money; never rebuild the table.
 - Known copies: none.
 
@@ -274,6 +276,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 725: `.rm-row__notice`, `.rm-row__state`, `.rm-row__cell`, `.rm-row__cell--name`, `.rm-row__num`, `.rm-row__ellipsis`, `.rm-row__wide`, `.rm-row__form`, `.rm-row__pair`, `.rm-row__sources`, `.rm-row__live` (page-local cell spacing and form layout of `restaurant-menu.page.scss` and the menu dish popup) sit on top of `.c-list-row`, `.c-list-body-cell` and `.c-input-wrapper`; no new `.c-*` class.
 - Plan 726: `.ds-row__notice`, `.ds-row__actions` (plan 748: the one wrapper of the header actions), `.ds-row__month`, `.ds-row__intro`, `.ds-row__progress`, `.ds-row__banner`, `.ds-row__state`, `.ds-row__cell`, `.ds-row__cell--name`, `.ds-row__ellipsis`, `.ds-row__removed`, `.ds-row__reasons--over`, `.ds-row__skipped`, `.ds-row__skipped-list`, `.ds-row__wide` (page-local spacing and column rules of `dish-sales.page.scss`, on top of `.c-list-row`; the number column uses `.c-num`) and `.rr-dialog`, `.rr-dialog__title`, `.rr-dialog__list`, `.rr-dialog__row`, `.rr-dialog__label`, `.rr-dialog__note`, `.rr-dialog__error`, `.rr-dialog__given`, `.rr-dialog__given--over` (layout inside the reasons popup); no new `.c-*` class.
 - Plan 727: `.monthly-plan-page`, `.mp-page`, `.mp-new`, `.mp-picker`, `.mp-card`, `.mp-error`, `.mp-card__title`, `.mp-grid`, `.mp-field`, `.mp-field__label`, `.mp-muted`, `.mp-suffix`, `.mp-check` (page-local layout of `monthly-plan.page.scss`, on top of `.c-glass-panel`, `.c-input-wrapper` and `.c-chip`) and `.business-group`, `.business-group__title` (the month targets group of the business settings tab); no new `.c-*` class.
+- Plan 749: `.mp-body`, `.mp-inputs`, `.mp-picture`, `.mp-field__row`, `.mp-box`, `.mp-checks` (the dense two-side grid and the short target boxes of `monthly-plan.page.scss`) and `.lc__box` (the labour card's short factor box).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ### voice-note — record or type a spoken note
@@ -347,6 +350,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - the month key (plan 726): `month-key.util` in `src/app/core/utils/month-key.util.ts` — `currentMonthKey`, `shiftMonthKey`, `isMonthKey`, `monthKeyLabel` for a `YYYY-MM` month; the monthly plan page (727) uses it too.
 - the month and target rules (plan 727): `month-rules` in `shared/schemas/month/month-rules.ts` — `MONTH_KEY_PATTERN`, `monthKeyOf` (the Asia/Jerusalem month), `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`; no zod; `month-key.util` wraps it so there is one month rule.
 - starter fixed lines and default groups (FIXED_STARTER_KEYS, defaultFixed, defaultLabour, LABOUR_FACTOR_DEFAULT) (plan 729), in the same `month-rules.ts` — `FIXED_STARTER_KEYS`, `FIXED_LINES_MAX`, `LABOUR_FACTOR_DEFAULT`, `defaultFixed()`, `defaultLabour()`; the server's new month and the browser's older month start from the same lines.
+- the monthly plan's draft and hint helpers (plan 749), beside the page in `src/app/pages/monthly-plan/`: `month-draft.ts` — `draftOf` (a stored employer total read back as gross pay), `liveMonthOf` (the month as typed, fed to `monthInputOf` / `monthFigures`); `month-hints.ts` — `missingHint`, `unenteredLinesHint` (the «חלקי» hover texts, also used by `app-month-figures`).
 - When: any pure helper (time, number, text). Never page-local.
 - Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
 - `describePlatformChange` (`src/app/pages/platform-dashboard/components/platform-business-dialog/platform-business-dialog.component.ts`): one stored platform change `{ field, from, to }` as a Hebrew line (plan 638).

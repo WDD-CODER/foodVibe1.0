@@ -20,10 +20,10 @@ describe('MonthFiguresComponent (plan 728)', () => {
   const text = (id: string) =>
     (fixture.nativeElement as HTMLElement).querySelector(`[data-testid="${id}"]`)?.textContent ?? ''
 
-  function render(i: MonthInput): void {
+  function render(i: MonthInput, words: Record<string, string> = {}): void {
     TestBed.configureTestingModule({
       imports: [MonthFiguresComponent],
-      providers: [{ provide: TranslationService, useValue: { translate: (k: string) => k } }]
+      providers: [{ provide: TranslationService, useValue: { translate: (k: string) => words[k] ?? k } }]
     })
     fixture = TestBed.createComponent(MonthFiguresComponent)
     fixture.componentRef.setInput('figures', monthFigures(i))
@@ -49,6 +49,38 @@ describe('MonthFiguresComponent (plan 728)', () => {
     const f = fixture.componentInstance.figures()
     expect(f.completeness.entered).toBe(1)
     expect(text('mf-actual-revenue')).not.toContain('mp_not_entered')
+  })
+
+  describe('plan 749: what «חלקי» is missing', () => {
+    const el = () => fixture.nativeElement as HTMLElement
+    const partial = (id: string) => el().querySelector<HTMLElement>(`[data-testid="${id}"] [data-testid="mf-partial"]`)!
+    const partly = input({
+      revenue: { plan: 100000, actual: 90000 },
+      fixed: { plan: null, actual: 300, entered: 1, lines: 2 }
+    })
+
+    it('a partial cell lists the missing inputs of its own column', () => {
+      render(partly, { mp_missing: 'חסר: {{list}}' })
+      expect(partial('mf-plan-profit').title).toBe('חסר: mp_missing_plan_labour, mp_missing_plan_fixed')
+      expect(partial('mf-actual-profit').title).toBe('חסר: mp_missing_food, mp_missing_labour')
+    })
+
+    it('adds the fixed lines hint and describes the tag with the same text', () => {
+      render(partly)
+      fixture.componentRef.setInput('fixedHint', 'לא הוזנו בפועל: חשמל, מים')
+      fixture.detectChanges()
+      const tag = partial('mf-actual-profit')
+      expect(tag.title).toContain('לא הוזנו בפועל: חשמל, מים')
+      const described = el().querySelector('#' + tag.getAttribute('aria-describedby'))!
+      expect(described.textContent).toBe(tag.title)
+    })
+
+    it('the completeness badge carries what the actual column is missing', () => {
+      render(partly)
+      const badge = el().querySelector<HTMLElement>('[data-testid="mf-badge"]')!
+      expect(badge.title).toBe('mp_missing')
+      expect(el().querySelector('#' + badge.getAttribute('aria-describedby'))!.textContent).toContain('mp_missing')
+    })
   })
 
   it('a negative profit uses the error class and an actual percent carries its band tag', () => {

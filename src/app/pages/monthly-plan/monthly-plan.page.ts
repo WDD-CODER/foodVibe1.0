@@ -20,6 +20,9 @@ import { MonthFiguresComponent } from 'src/app/shared/month-figures/month-figure
 import { DishPriceCalcComponent } from './components/dish-price-calc/dish-price-calc.component'
 import { FixedCostsCardComponent } from './components/fixed-costs-card/fixed-costs-card.component'
 import { LabourCardComponent } from './components/labour-card/labour-card.component'
+import { MonthPairComponent } from './components/month-pair/month-pair.component'
+import { draftOf, liveMonthOf, type Draft, type RevenueKey } from './month-draft'
+import { missingHint, unenteredLinesHint } from './month-hints'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { LoggingService } from '@services/logging.service'
@@ -34,24 +37,6 @@ import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.comp
 import { MONTH_TARGET_FIELDS, bandLine, isOutOfBand } from './month-target-fields'
 import { MonthPlanService } from './services/month-plan.service'
 
-type RevenueKey = 'plan' | 'actual'
-type Draft = {
-  revenue: Record<RevenueKey, number | null>
-  targets: Record<MonthTargetKey, number | null>
-  fixed: FixedGroup
-  labour: LabourGroup
-  purchases: number | null
-}
-
-/** A month stored before plan 729 shows the defaults; they are stored on its first save. */
-const draftOf = (month: MonthPlan): Draft => ({
-  revenue: { ...month.revenue },
-  targets: { ...month.targets },
-  fixed: structuredClone(month.fixed ?? defaultFixed()),
-  labour: { ...(month.labour ?? defaultLabour()) },
-  purchases: month.purchases?.actual ?? null
-})
-
 /** One typed box → a number, or `null` when empty / not a number (N-M2: 0 is a real value). */
 const toNumber = (value: number | string | null): number | null => {
   if (value === null || value === '') return null
@@ -60,8 +45,9 @@ const toNumber = (value: number | string | null): number | null => {
 }
 
 /**
- * Plan 727: the monthly plan. Opens a month (its targets and VAT copied from the business settings), shows the revenue
- * boxes and the five targets with the Israeli band beside each. All money is net of VAT, after discounts, without tips.
+ * Plan 727: the monthly plan. Opens a month (its targets and VAT copied from the business settings), shows its inputs
+ * and the five targets (the Israeli band as a hover hint) beside the month's figures, which follow what is typed
+ * (plan 749). All money is net of VAT, after discounts, without tips.
  */
 @Component({
   selector: 'app-monthly-plan-page',
@@ -78,7 +64,8 @@ const toNumber = (value: number | string | null): number | null => {
     MonthFiguresComponent,
     DishPriceCalcComponent,
     FixedCostsCardComponent,
-    LabourCardComponent
+    LabourCardComponent,
+    MonthPairComponent
   ],
   templateUrl: './monthly-plan.page.html',
   styleUrl: './monthly-plan.page.scss',
@@ -95,9 +82,10 @@ export class MonthlyPlanPage {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly targetFields = MONTH_TARGET_FIELDS
-  protected readonly revenueBoxes: readonly { key: RevenueKey; labelKey: string }[] = [
-    { key: 'plan', labelKey: 'mp_revenue_plan' },
-    { key: 'actual', labelKey: 'mp_revenue_actual' }
+  /** One «הסכום כולל מע״מ» box per revenue side, named like its chip. */
+  protected readonly vatBoxes: readonly { key: RevenueKey; labelKey: string }[] = [
+    { key: 'plan', labelKey: 'mp_chip_plan' },
+    { key: 'actual', labelKey: 'mp_actual' }
   ]
   protected readonly isLoading_ = signal(true)
   protected readonly loadFailed_ = signal(false)
@@ -149,18 +137,33 @@ export class MonthlyPlanPage {
   protected readonly sumLine_ = computed(() =>
     this.translation_.translate('mp_targets_sum').replace('{{sum}}', String(Math.round(this.targetsSum_() * 100) / 100))
   )
-  /** The month's figures from the SAVED month, never from typed-but-unsaved numbers (plan 728). */
-  protected readonly figures_ = computed(() => {
+  /** The month as typed right now (plan 749); `open_` stays the saved month. */
+  protected readonly liveMonth_ = computed(() => {
     const month = this.open_()
+    return month ? liveMonthOf(month, this.draft_()) : null
+  })
+  protected readonly figures_ = computed(() => {
+    const month = this.liveMonth_()
     return month ? monthFigures(monthInputOf(month)) : null
   })
   /** Flags beside the figures: the labour figure is an estimate (gross × factor); the fixed figure is partial. */
   protected readonly flags_ = computed(() => {
-    const month = this.open_()
+    const month = this.liveMonth_()
     if (!month) return { estimate: false, fixedPartial: false }
-    const input = monthInputOf(month)
-    return { estimate: input.labour.estimate, fixedPartial: input.fixed.entered < input.fixed.lines }
+    const { labour, fixed } = monthInputOf(month)
+    return {
+      estimate: labour.estimate && (labour.plan !== null || labour.actual !== null),
+      fixedPartial: fixed.entered < fixed.lines
+    }
   })
+  /** The fixed lines still without an actual, for the «חלקי» hints. */
+  protected readonly fixedHint_ = computed(() =>
+    unenteredLinesHint(this.draft_().fixed, (key) => this.translation_.translate(key))
+  )
+  /** The estimated mode has no lines to name, so its flag says that the actual fixed costs are missing. */
+  protected readonly fixedFlagHint_ = computed(
+    () => this.fixedHint_() || missingHint(['fixed'], 'actual', (key) => this.translation_.translate(key))
+  )
   protected readonly vatLine_ = computed(() => {
     const month = this.open_()
     if (!month) return ''
@@ -198,7 +201,7 @@ export class MonthlyPlanPage {
     return isOutOfBand(key, this.draft_().targets[key])
   }
 
-  protected setRevenue(key: RevenueKey, value: number | string | null): void {
+  protected setRevenue(key: RevenueKey, value: number | null): void {
     if (this.isClosed_()) return
     const n = toNumber(value)
     this.draft_.update((d) => ({ ...d, revenue: { ...d.revenue, [key]: n === null ? null : Math.max(0, n) } }))
@@ -214,7 +217,7 @@ export class MonthlyPlanPage {
     this.draft_.update((d) => ({ ...d, labour }))
   }
 
-  protected setPurchases(value: number | string | null): void {
+  protected setPurchases(value: number | null): void {
     if (this.isClosed_()) return
     const n = toNumber(value)
     this.draft_.update((d) => ({ ...d, purchases: n === null ? null : Math.max(0, n) }))

@@ -10,25 +10,12 @@
     gap: var(--space-3);
   }
 
-  .fc__row,
   .fc__line {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
-    align-items: end;
+    grid-template-columns: minmax(4rem, 1fr) minmax(0, max-content) 2.75rem;
+    align-items: center;
     gap: var(--space-3);
     inline-size: 100%;
-  }
-
-  .fc__field {
-    display: grid;
-    gap: var(--space-2);
-    min-inline-size: 0;
-  }
-
-  .fc__label {
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    line-height: var(--lh-snug);
   }
 
   .fc__name {
@@ -43,7 +30,6 @@
     box-sizing: border-box;
   }
 
-  .fc__suffix,
   .fc__muted {
     color: var(--color-text-muted);
     font-size: var(--fs-xs);

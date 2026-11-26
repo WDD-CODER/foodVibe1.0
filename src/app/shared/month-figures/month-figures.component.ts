@@ -10,6 +10,7 @@ import {
   type MonthTargets
 } from '../../core/engine/month-plan'
 import { formatMoney, formatPct1 } from '../../core/engine/rounding'
+import { missingHint } from '../../pages/monthly-plan/month-hints'
 
 type MoneyKey = 'revenue' | 'foodCost' | 'labour' | 'primeCost' | 'fixed' | 'profit' | 'breakEven' | 'roomForTeam'
 type PctKey = 'foodPct' | 'labourPct' | 'primePct' | 'fixedPct' | 'profitPct'
@@ -30,6 +31,8 @@ export interface FigureCell {
   text: string
   pctText: string | null
   partial: boolean
+  /** What a partial figure is missing (the «חלקי» hover hint); '' when the figure is not partial. */
+  hint: string
   fromTarget: boolean
   negative: boolean
   band: 'in' | 'out' | null
@@ -53,12 +56,8 @@ const ROWS: readonly RowDef[] = [
   { key: 'roomForTeam', labelKey: 'mp_row_room_for_team', ruleKey: 'mp_room_rule', isInput: false }
 ]
 
-const MISSING_LABEL: Record<MissingKey, string> = {
-  revenue: 'mp_missing_revenue',
-  foodCost: 'mp_missing_food',
-  labour: 'mp_missing_labour',
-  fixed: 'mp_missing_fixed'
-}
+/** Keeps the described-by ids apart when a page shows two figure tables. */
+let instances = 0
 
 /** Plan 728: the month's plan and actual figures side by side, with what is missing marked (N-M2). Presentation only. */
 @Component({
@@ -74,6 +73,10 @@ export class MonthFiguresComponent {
 
   readonly figures = input.required<MonthFigures>()
   readonly targets = input.required<MonthTargets>()
+  /** Added to every «חלקי» hint: the fixed lines still without an actual (plan 749). */
+  readonly fixedHint = input('')
+
+  protected readonly idPrefix = `mf-${++instances}`
 
   protected readonly badge_ = computed(() => {
     const { entered, of } = this.figures().completeness
@@ -82,12 +85,7 @@ export class MonthFiguresComponent {
       .replace('{{entered}}', String(entered))
       .replace('{{of}}', String(of))
   })
-  protected readonly missingLine_ = computed(() => {
-    const missing = this.figures().missing
-    if (missing.length === 0) return ''
-    const list = missing.map((k) => this.translation_.translate(MISSING_LABEL[k])).join(', ')
-    return this.translation_.translate('mp_missing').replace('{{list}}', list)
-  })
+  protected readonly missingLine_ = computed(() => this.missing_(this.figures().missing, 'actual'))
   protected readonly rows_ = computed<FigureRow[]>(() => {
     const f = this.figures()
     return ROWS.map((def) => ({
@@ -104,13 +102,22 @@ export class MonthFiguresComponent {
     const pct = def.pct ? col[def.pct] : null
     const band = isActual && def.target ? bandOf(def.target, pct) : null
     const missingText = def.isInput || col.partial ? 'mp_not_entered' : null
+    const partial = value !== null && !def.isInput && col.partial
+    const hint = partial
+      ? [this.missing_(col.missing, isActual ? 'actual' : 'plan'), this.fixedHint()].filter(Boolean).join('\n')
+      : ''
     return {
       text: value === null ? (missingText ? this.translation_.translate(missingText) : '—') : formatMoney(value),
       pctText: def.pct ? (pct === null ? '—' : formatPct1(pct)) : null,
-      partial: value !== null && !def.isInput && col.partial,
+      partial,
+      hint,
       fromTarget: !!def.food && col.fromTarget && value !== null,
       negative: (def.key === 'profit' || def.key === 'roomForTeam') && value !== null && value < 0,
       band: band === null ? null : band === 'in' ? 'in' : 'out'
     }
+  }
+
+  private missing_(missing: MissingKey[], side: 'plan' | 'actual'): string {
+    return missingHint(missing, side, (key) => this.translation_.translate(key))
   }
 }

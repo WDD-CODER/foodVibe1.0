@@ -1,3 +1,5 @@
+@use '../../seven-digit-box' as *;
+
 @layer components.labour-card {
   :host {
     display: block;
@@ -8,14 +10,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-4);
-  }
-
-  .lc__row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
-    align-items: start;
-    gap: var(--space-3);
-    inline-size: 100%;
   }
 
   .lc__field {
@@ -32,10 +26,14 @@
     letter-spacing: normal;
   }
 
-  .lc__suffix,
   .lc__muted {
+    margin: 0;
     color: var(--color-text-muted);
     font-size: var(--fs-xs);
     letter-spacing: normal;
   }
+}
+
+.lc__box {
+  @include seven-digit-box;
 }

@@ -57,101 +57,124 @@
     }
   </section>
 
-  <section class="mp-card c-glass-panel" data-testid="mp-revenue">
-    <h2 class="mp-card__title">{{ 'mp_revenue_title' | translatePipe }}</h2>
-    <p class="mp-muted">{{ 'mp_revenue_rule' | translatePipe }}</p>
-    <div class="mp-grid">
-      @for (box of revenueBoxes; track box.key) {
-      <div class="mp-field">
-        <label class="mp-field__label" [for]="'mp-revenue-' + box.key">{{ box.labelKey | translatePipe }}</label>
-        <!-- prettier-ignore -->
-        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" [id]="'mp-revenue-' + box.key" [attr.data-testid]="'mp-revenue-' + box.key" [placeholder]="'mp_not_entered' | translatePipe" [disabled]="isClosed_()" [ngModel]="draft_().revenue[box.key]" (ngModelChange)="setRevenue(box.key, $event)" (blur)="applyVat(box.key)" /><span class="mp-suffix" aria-hidden="true">₪</span></div>
+  <div class="mp-body">
+    <div class="mp-inputs">
+      <!-- Keyed on the month: every forecast / actual pair starts closed when another month opens. -->
+      @for (key of [month.month]; track key) {
+      <section class="mp-card c-glass-panel" data-testid="mp-revenue">
+        <h2 class="mp-card__title">{{ 'mp_revenue_title' | translatePipe }}</h2>
+        <p class="mp-muted">{{ 'mp_revenue_rule' | translatePipe }}</p>
+        <app-month-pair
+          labelKey="mp_revenue_title"
+          idPrefix="mp-revenue"
+          [plan]="draft_().revenue.plan"
+          [actual]="draft_().revenue.actual"
+          [disabled]="isClosed_()"
+          (planChange)="setRevenue('plan', $event)"
+          (actualChange)="setRevenue('actual', $event)"
+          (boxLeave)="applyVat($event)"
+        />
         @if (month.dealerType !== 'patur' && !isClosed_()) {
-        <label class="mp-check">
-          <input
-            type="checkbox"
-            [attr.data-testid]="'mp-incl-vat-' + box.key"
-            [ngModel]="includesVat_()[box.key]"
-            (ngModelChange)="toggleIncludesVat(box.key, $event)"
-          />
-          {{ 'mp_includes_vat' | translatePipe }}
-        </label>
-        }
-      </div>
-      }
-    </div>
-    <p class="mp-muted" data-testid="mp-vat-line">{{ vatLine_() }}</p>
-  </section>
-
-  <section class="mp-card c-glass-panel" data-testid="mp-purchases">
-    <h2 class="mp-card__title">{{ 'mp_purchases_title' | translatePipe }}</h2>
-    <div class="mp-field">
-      <label class="mp-field__label" for="mp-purchases-actual">{{ 'mp_actual' | translatePipe }}</label>
-      <!-- prettier-ignore -->
-      <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" step="any" dir="ltr" id="mp-purchases-actual" data-testid="mp-purchases-actual" [placeholder]="'mp_not_entered' | translatePipe" [disabled]="isClosed_()" [ngModel]="draft_().purchases" (ngModelChange)="setPurchases($event)" /><span class="mp-suffix" aria-hidden="true">₪</span></div>
-      <span class="mp-muted" data-testid="mp-purchases-label">{{ 'mp_purchases_label' | translatePipe }}</span>
-    </div>
-  </section>
-
-  <section class="mp-card c-glass-panel" data-testid="mp-fixed">
-    <h2 class="mp-card__title">{{ 'mp_fixed_title' | translatePipe }}</h2>
-    <app-fixed-costs-card [group]="draft_().fixed" [disabled]="isClosed_()" (groupChange)="setFixed($event)" />
-  </section>
-
-  <section class="mp-card c-glass-panel" data-testid="mp-labour">
-    <h2 class="mp-card__title">{{ 'mp_labour_title' | translatePipe }}</h2>
-    <app-labour-card [group]="draft_().labour" [disabled]="isClosed_()" (groupChange)="setLabour($event)" />
-  </section>
-
-  <section class="mp-card c-glass-panel" data-testid="mp-targets">
-    <h2 class="mp-card__title">{{ 'mp_targets_title' | translatePipe }}</h2>
-    <div class="mp-grid">
-      @for (field of targetFields; track field.key) {
-      <div class="mp-field">
-        <label class="mp-field__label" [for]="'mp-target-' + field.key">{{ field.labelKey | translatePipe }}</label>
-        <!-- prettier-ignore -->
-        <div class="c-input-wrapper" appNumberBox><input type="number" inputmode="decimal" min="0" max="100" step="any" dir="ltr" [id]="'mp-target-' + field.key" [attr.data-testid]="'mp-target-' + field.key" [disabled]="isClosed_()" [ngModel]="draft_().targets[field.key]" (ngModelChange)="setTarget(field.key, $event)" /><span class="mp-suffix" aria-hidden="true">%</span></div>
-        <span class="mp-muted" [attr.data-testid]="'mp-band-' + field.key">
-          {{ band(field.key) }} @if (outOfBand(field.key)) {
-          <span class="c-chip c-chip--tag c-chip--amber" [attr.data-testid]="'mp-out-' + field.key"
-            >{{ 'mp_out_of_band' | translatePipe }}</span
-          >
+        <div class="mp-checks">
+          @for (box of vatBoxes; track box.key) {
+          <label class="mp-check">
+            <input
+              type="checkbox"
+              [attr.data-testid]="'mp-incl-vat-' + box.key"
+              [ngModel]="includesVat_()[box.key]"
+              (ngModelChange)="toggleIncludesVat(box.key, $event)"
+            />
+            {{ box.labelKey | translatePipe }}: {{ 'mp_includes_vat' | translatePipe }}
+          </label>
           }
-        </span>
-      </div>
+        </div>
+        }
+        <p class="mp-muted" data-testid="mp-vat-line">{{ vatLine_() }}</p>
+      </section>
+
+      <section class="mp-card c-glass-panel" data-testid="mp-purchases">
+        <h2 class="mp-card__title">{{ 'mp_purchases_title' | translatePipe }}</h2>
+        <app-month-pair
+          labelKey="mp_purchases_title"
+          idPrefix="mp-purchases"
+          sides="actual"
+          [actual]="draft_().purchases"
+          [disabled]="isClosed_()"
+          (actualChange)="setPurchases($event)"
+        />
+        <span class="mp-muted" data-testid="mp-purchases-label">{{ 'mp_purchases_label' | translatePipe }}</span>
+      </section>
+
+      <section class="mp-card c-glass-panel" data-testid="mp-fixed">
+        <h2 class="mp-card__title">{{ 'mp_fixed_title' | translatePipe }}</h2>
+        <app-fixed-costs-card [group]="draft_().fixed" [disabled]="isClosed_()" (groupChange)="setFixed($event)" />
+      </section>
+
+      <section class="mp-card c-glass-panel" data-testid="mp-labour">
+        <h2 class="mp-card__title">{{ 'mp_labour_title' | translatePipe }}</h2>
+        <app-labour-card [group]="draft_().labour" [disabled]="isClosed_()" (groupChange)="setLabour($event)" />
+      </section>
+      }
+
+      <section class="mp-card c-glass-panel" data-testid="mp-targets">
+        <h2 class="mp-card__title">{{ 'mp_targets_title' | translatePipe }}</h2>
+        <div class="mp-grid">
+          @for (field of targetFields; track field.key) {
+          <div class="mp-field">
+            <label class="mp-field__label" [for]="'mp-target-' + field.key">{{ field.labelKey | translatePipe }}</label>
+            <div class="mp-field__row">
+              <!-- prettier-ignore -->
+              <div class="c-input-wrapper mp-box" appNumberBox [attr.title]="band(field.key)"><input type="number" inputmode="decimal" min="0" max="100" step="any" dir="ltr" [id]="'mp-target-' + field.key" [attr.data-testid]="'mp-target-' + field.key" [attr.aria-describedby]="'mp-band-' + field.key" [disabled]="isClosed_()" [ngModel]="draft_().targets[field.key]" (ngModelChange)="setTarget(field.key, $event)" /><span class="mp-suffix" aria-hidden="true">%</span></div>
+              @if (outOfBand(field.key)) {
+              <span class="c-chip c-chip--tag c-chip--amber" [attr.data-testid]="'mp-out-' + field.key"
+                >{{ 'mp_out_of_band' | translatePipe }}</span
+              >
+              }
+            </div>
+            <span class="visually-hidden" [id]="'mp-band-' + field.key">{{ band(field.key) }}</span>
+          </div>
+          }
+        </div>
+        @if (sumOff_()) {
+        <p class="mp-muted" data-testid="mp-sum-off">{{ sumLine_() }}</p>
+        }
+      </section>
+
+      @if (liveMonth_(); as live) {
+      <section class="mp-card c-glass-panel" data-testid="mp-dish-calc">
+        <app-dish-price-calc
+          [foodTargetPct]="live.targets.foodPct"
+          [vatRatePct]="month.vatRatePct"
+          [dealerType]="month.dealerType"
+        />
+      </section>
       }
     </div>
-    @if (sumOff_()) {
-    <p class="mp-muted" data-testid="mp-sum-off">{{ sumLine_() }}</p>
-    }
-  </section>
 
-  @if (figures_(); as figures) {
-  <section class="mp-card c-glass-panel" data-testid="mp-figures">
-    <app-month-figures [figures]="figures" [targets]="month.targets" />
-    @if (flags_().estimate || flags_().fixedPartial) {
-    <p class="mp-muted" data-testid="mp-flags">
-      @if (flags_().estimate) {
-      <span class="c-chip c-chip--tag c-chip--amber" data-testid="mp-flag-estimate"
-        >{{ 'mp_labour_title' | translatePipe }}: {{ 'mp_estimate' | translatePipe }}</span
-      >
-      } @if (flags_().fixedPartial) {
-      <span class="c-chip c-chip--tag c-chip--amber" data-testid="mp-flag-fixed-partial"
-        >{{ 'mp_fixed_title' | translatePipe }}: {{ 'mp_partial' | translatePipe }}</span
-      >
+    @if (liveMonth_(); as live) { @if (figures_(); as figures) {
+    <section class="mp-card c-glass-panel mp-picture" data-testid="mp-figures">
+      <app-month-figures [figures]="figures" [targets]="live.targets" [fixedHint]="fixedHint_()" />
+      @if (flags_().estimate || flags_().fixedPartial) {
+      <p class="mp-muted" data-testid="mp-flags">
+        @if (flags_().estimate) {
+        <span class="c-chip c-chip--tag c-chip--amber" data-testid="mp-flag-estimate"
+          >{{ 'mp_labour_title' | translatePipe }}: {{ 'mp_estimate' | translatePipe }}</span
+        >
+        } @if (flags_().fixedPartial) {
+        <span
+          class="c-chip c-chip--tag c-chip--amber"
+          data-testid="mp-flag-fixed-partial"
+          [attr.title]="fixedFlagHint_()"
+          aria-describedby="mp-flag-fixed-hint"
+          >{{ 'mp_fixed_title' | translatePipe }}: {{ 'mp_partial' | translatePipe }}</span
+        >
+        <span class="visually-hidden" id="mp-flag-fixed-hint">{{ fixedFlagHint_() }}</span>
+        }
+      </p>
       }
-    </p>
-    }
-  </section>
-  }
-
-  <section class="mp-card c-glass-panel" data-testid="mp-dish-calc">
-    <app-dish-price-calc
-      [foodTargetPct]="month.targets.foodPct"
-      [vatRatePct]="month.vatRatePct"
-      [dealerType]="month.dealerType"
-    />
-  </section>
+    </section>
+    } }
+  </div>
 
   @if (!isClosed_()) {
   <div class="c-form-actions">

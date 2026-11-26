@@ -183,8 +183,17 @@ describe('fixed, labour and purchases (plan 729)', () => {
     expect(res.body.fixed.mode).toBe('lines')
     expect(res.body.fixed.lines.map(l => l.starterKey)).toEqual(['rent', 'arnona', 'electricity', 'water', 'gas', 'insurance', 'kashrut', 'marketing'])
     expect(res.body.fixed.lines.every(l => l.plan === null && l.actual === null)).toBe(true)
-    expect(res.body.labour).toEqual({ mode: 'employer', factor: 1.25, plan: null, actual: null })
+    expect(res.body.labour).toEqual({ mode: 'gross', factor: 1.25, plan: null, actual: null })
     expect(res.body.purchases).toEqual({ actual: null })
+  })
+
+  it('still accepts a month stored with an employer total', async () => {
+    await post({ month: '2026-11' })
+    const employer = { mode: 'employer', factor: 1.25, plan: 50000, actual: 62500 }
+    await db('monthPlans').updateOne({ month: '2026-11' }, { $set: { labour: employer } })
+    expect((await get('/2026-11')).body.labour).toEqual(employer)
+    expect((await put('2026-11', { revenue: { plan: 5 } })).status).toBe(200)
+    expect((await put('2026-11', { labour: employer })).body.labour).toEqual(employer)
   })
 
   it('saves a group as sent, keeps 0 apart from null, leaves the other groups alone', async () => {

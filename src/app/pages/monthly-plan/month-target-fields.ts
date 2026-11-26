@@ -9,7 +9,7 @@ export const MONTH_TARGET_FIELDS: readonly { key: MonthTargetKey; labelKey: stri
   { key: 'profitPct', labelKey: 'mp_target_profit' }
 ]
 
-/** The band line under a target: «מקובל בישראל: 30–35%», or «עד 65%» when there is no lower bound. */
+/** The band line of a target, shown as the hover hint of its box:«מקובל בישראל: 30–35%», or «עד 65%» when there is no lower bound. */
 export function bandLine(translate: (key: string) => string, key: MonthTargetKey): string {
   const [from, to] = MONTH_TARGET_BANDS[key]
   if (from === null) return translate('mp_band_max').replace('{{to}}', String(to))
