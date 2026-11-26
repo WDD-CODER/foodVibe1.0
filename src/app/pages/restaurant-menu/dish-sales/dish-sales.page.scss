@@ -11,10 +11,9 @@
     text-align: center;
   }
 
-  .ds-row__months {
+  /* «סמן ריקים כ־0» and «שמירה» side by side, as the header's one action child. */
+  .ds-row__actions {
     display: flex;
-    align-items: center;
-    justify-content: center;
     gap: var(--space-2);
   }
 
@@ -37,16 +36,9 @@
   }
 
   .ds-row__progress,
-  .ds-row__banner,
-  .ds-row__live {
+  .ds-row__banner {
     margin: 0;
     font-weight: 400;
-  }
-
-  .ds-row__live {
-    padding-block: var(--space-2);
-    padding-inline: var(--space-4);
-    color: var(--color-text-muted);
   }
 
   .ds-row__state {

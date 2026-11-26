@@ -81,7 +81,8 @@ describe('RestaurantMenuPage (plan 725)', () => {
     const cost = {
       costOf,
       netPrice: (d: MenuDish) => (d.priceWithVat == null ? null : d.priceWithVat / 1.18),
-      leftPerDish: (d: MenuDish) => (costOf(d).state === 'costed' && d.priceWithVat != null ? 90 : null)
+      leftPerDish: (d: MenuDish) =>
+        costOf(d).state === 'costed' && d.priceWithVat != null ? d.priceWithVat / 1.18 - (d.typedCost ?? 0) : null
     }
     TestBed.configureTestingModule({
       imports: [RestaurantMenuPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
@@ -128,7 +129,7 @@ describe('RestaurantMenuPage (plan 725)', () => {
     expect(rows().length).toBe(1)
     const row = rows()[0]
     expect(row.querySelector('[data-testid="menu-dish-price"]')?.textContent).toContain('118')
-    expect(row.querySelector('[data-testid="menu-dish-net"]')?.textContent).toContain('menu_dish_net_price')
+    expect(row.querySelector('[data-testid="menu-dish-net"]')?.textContent).toContain('100')
     expect(row.querySelector('[data-testid="menu-dish-cost"]')?.textContent).toContain('10')
     expect(row.querySelector('[data-testid="menu-dish-left"]')?.textContent).toContain('90')
   })
@@ -140,6 +141,172 @@ describe('RestaurantMenuPage (plan 725)', () => {
     expect(partial.querySelector('[data-testid="menu-dish-left"]')?.textContent).toContain('menu_dish_left_unknown')
     expect(units.querySelector('[data-testid="menu-dish-cost"]')?.textContent).toContain('menu_dish_no_cost')
     expect(units.querySelector('[data-testid="menu-dish-left"]')?.textContent).toContain('menu_dish_left_unknown')
+    for (const row of [partial, units]) {
+      const pct = row.querySelector('[data-testid="menu-dish-profit-pct"]')
+      expect(pct?.textContent?.trim()).toBe('menu_dish_left_unknown')
+    }
+  })
+
+  // ── plan 748 ──────────────────────────────────────────────────────────────
+
+  const panel = () => el().querySelector('.filter-panel') as HTMLElement
+  const names = () => rows().map((r) => r.querySelector('.rm-row__cell--name')?.textContent?.trim())
+  const cellText = (row: HTMLElement, id: string) =>
+    row.querySelector(`[data-testid="menu-dish-${id}"]`)?.textContent?.trim()
+  const clearButton = () => panel().querySelector('[data-testid="menu-dish-clear-filters"]') as HTMLButtonElement | null
+  /** The type category starts closed on a narrow screen: open it before reaching for its chips. */
+  const openTypes = () => {
+    const header = panel().querySelector('[data-testid="menu-dish-type-category"]') as HTMLButtonElement
+    if (header.getAttribute('aria-expanded') !== 'true') header.click()
+    fixture.detectChanges()
+  }
+  const chipLabels = () =>
+    Array.from(panel().querySelectorAll('.c-chip--toggle span')).map((s) => s.textContent?.trim())
+  const pick = async (label: string) => {
+    const chip = Array.from(panel().querySelectorAll('.c-chip--toggle')).find(
+      (c) => c.textContent?.trim() === label
+    ) as HTMLElement
+    ;(chip.querySelector('input') as HTMLInputElement).click()
+    await flush()
+  }
+  const typedDishes = () => [
+    dish('1', { name: 'א', course: 'starter' }),
+    dish('2', { name: 'ב', course: 'main' }),
+    dish('3', { name: 'ג' })
+  ]
+
+  it('the type chips and the removed toggle sit in the filter panel, not above the column titles', async () => {
+    await setup(typedDishes())
+    openTypes()
+    expect(el().querySelector('.rm-row__filters')).toBeNull()
+    expect(el().querySelector('.table-header input[type="checkbox"]')).toBeNull()
+    expect(el().querySelector('.table-header .c-chip')).toBeNull()
+    expect(chipLabels()).toEqual(['starter', 'main', 'menu_dish_no_type', 'menu_dish_show_removed'])
+    expect(panel().querySelector('[data-testid="menu-dish-show-removed"]')).not.toBeNull()
+  })
+
+  it('picking two types lists both, «ללא סוג מנה» lists the dishes with no type, «נקה סינון» lists all', async () => {
+    await setup(typedDishes())
+    openTypes()
+    expect(clearButton()).toBeNull()
+    await pick('starter')
+    expect(names()).toEqual(['א'])
+    await pick('main')
+    expect(names()).toEqual(['א', 'ב'])
+    expect(panel().querySelector('.c-filter-category-count')?.textContent?.trim()).toBe('2')
+    await pick('starter')
+    await pick('main')
+    await pick('menu_dish_no_type')
+    expect(names()).toEqual(['ג'])
+    clearButton()!.click()
+    await flush()
+    expect(names()).toEqual(['א', 'ב', 'ג'])
+    expect(clearButton()).toBeNull()
+    expect(panel().querySelector('.c-filter-category-count')).toBeNull()
+  })
+
+  it('«נקה סינון» also turns the removed toggle off; a filter that matches nothing says so', async () => {
+    await setup(typedDishes())
+    ;(panel().querySelector('[data-testid="menu-dish-show-removed"]') as HTMLInputElement).click()
+    await flush()
+    expect(el().querySelector('[data-testid="restaurant-menu-no-match"]')).not.toBeNull()
+    clearButton()!.click()
+    await flush()
+    expect((panel().querySelector('[data-testid="menu-dish-show-removed"]') as HTMLInputElement).checked).toBeFalse()
+    expect(rows().length).toBe(3)
+  })
+
+  it('a picked type that no dish uses any more leaves the filter', async () => {
+    await setup(typedDishes())
+    openTypes()
+    await pick('main')
+    dishes_.update((list) => list.filter((d) => d.course !== 'main'))
+    await flush()
+    await flush()
+    expect(names()).toEqual(['א', 'ג'])
+    expect(clearButton()).toBeNull()
+  })
+
+  it('the sliders button opens and closes the filter panel', async () => {
+    await setup(typedDishes())
+    const wasClosed = panel().classList.contains('collapsed')
+    ;(el().querySelector('.open-panel-btn') as HTMLButtonElement).click()
+    fixture.detectChanges()
+    expect(panel().classList.contains('collapsed')).toBe(!wasClosed)
+    ;(el().querySelector('.open-panel-btn') as HTMLButtonElement).click()
+    fixture.detectChanges()
+    expect(panel().classList.contains('collapsed')).toBe(wasClosed)
+  })
+
+  it('the column titles are plain and the VAT note is the hint of the net price title', async () => {
+    await setup([dish('1')])
+    const titles = Array.from(el().querySelectorAll('.table-header .c-grid-header-cell'))
+      .map((c) => c.textContent?.trim())
+      .filter((t) => !!t)
+    expect(titles).toEqual([
+      'menu_dish_name',
+      'menu_dish_col_type',
+      'menu_dish_price_with_vat',
+      'menu_dish_col_net',
+      'menu_dish_cost_per_portion',
+      'menu_dish_col_profit',
+      'menu_dish_col_profit_pct'
+    ])
+    expect(el().querySelector('[data-testid="menu-dish-net-title"]')?.getAttribute('title')).toBe(
+      'restaurant_menu_vat_note'
+    )
+    expect(el().textContent).not.toContain('restaurant_menu_vat_note')
+  })
+
+  it('net 100 and cost 25: the net is a number only, profit 75 and 75.0% in its own column', async () => {
+    await setup([dish('1', { typedCost: 25 })])
+    const row = rows()[0]
+    expect(cellText(row, 'net')).not.toContain('menu_dish_net_price')
+    expect(cellText(row, 'net')).toMatch(/^[^a-z_]*100[^a-z_]*$/)
+    expect(cellText(row, 'left')).toContain('75')
+    expect(cellText(row, 'left')).not.toContain('%')
+    expect(cellText(row, 'profit-pct')).toBe('75.0%')
+  })
+
+  it('a dish with no price shows «—» for the profit and its percent', async () => {
+    await setup([dish('1', { priceWithVat: undefined })])
+    expect(cellText(rows()[0], 'left')).toBe('—')
+    expect(cellText(rows()[0], 'profit-pct')).toBe('—')
+  })
+
+  it('each row has icon buttons to edit and remove; a removed dish has a restore icon', async () => {
+    await setup([dish('1'), dish('2', { active: false })])
+    const button = (id: string) => rows()[0].querySelector(`[data-testid="menu-dish-${id}"]`) as HTMLButtonElement
+    const icon = (id: string) => button(id).querySelector('lucide-icon')?.getAttribute('name')
+    expect(button('edit').classList).toContain('c-icon-btn')
+    expect(icon('edit')).toBe('pencil')
+    expect(button('edit').getAttribute('aria-label')).toBe('edit')
+    expect(button('edit').textContent?.trim()).toBe('')
+    expect(button('remove').classList).toContain('danger')
+    expect(icon('remove')).toBe('trash-2')
+    expect(button('remove').getAttribute('title')).toBe('menu_dish_remove')
+    expect(button('remove').textContent?.trim()).toBe('')
+    expect(button('restore')).toBeNull()
+
+    button('edit').click()
+    fixture.detectChanges()
+    expect(el().querySelector('[data-testid="dialog-stub"]')).not.toBeNull()
+
+    ;(panel().querySelector('[data-testid="menu-dish-show-removed"]') as HTMLInputElement).click()
+    await flush()
+    expect(button('remove')).toBeNull()
+    expect(icon('restore')).toBe('rotate-ccw')
+    expect(button('restore').getAttribute('title')).toBe('menu_dish_restore')
+    expect(button('restore').textContent?.trim()).toBe('')
+  })
+
+  it('the desktop actions column is wide enough for the two row icons', async () => {
+    await setup([dish('1')])
+    const shell = el().querySelector('app-list-shell') as HTMLElement
+    const lastTrack = shell.style.getPropertyValue('--list-grid').split(' ').pop()!
+    expect(lastTrack).toMatch(/rem$/)
+    // Two 2.25rem icon buttons, their 0.25rem gap and the actions cell's 1rem padding.
+    expect(parseFloat(lastTrack)).toBeGreaterThanOrEqual(2 * 2.25 + 0.25 + 1)
   })
 
   it('rows follow the course order, then the name; the search filters by name', async () => {

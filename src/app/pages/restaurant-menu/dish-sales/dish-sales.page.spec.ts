@@ -5,9 +5,7 @@ import { BehaviorSubject } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { DishSalesPage } from './dish-sales.page'
 import { ReturnReasonsDialogComponent } from './components/return-reasons-dialog/return-reasons-dialog.component'
-import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { MenuDishDataService } from '@services/menu-dish-data.service'
-import { MenuDishCostService } from '@services/menu-dish-cost.service'
 import { DishSalesMonthDataService } from '@services/dish-sales-month-data.service'
 import { PermissionService } from '@services/permission.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -32,11 +30,6 @@ class DialogStub {
   readonly reasons = input<readonly DishReturnReasonLine[]>([])
   readonly confirmed = output<DishReturnReasonLine[]>()
   readonly closed = output<void>()
-}
-
-@Component({ selector: 'app-partial-cost-badge', standalone: true, template: '' })
-class BadgeStub {
-  readonly missing = input<unknown[]>([])
 }
 
 const TEXT: Record<string, string> = {
@@ -74,6 +67,7 @@ const row = (
 describe('DishSalesPage (plan 726)', () => {
   let fixture: ComponentFixture<DishSalesPage>
   let dishes_: WritableSignal<MenuDish[]>
+  let dishLoadFailed_: WritableSignal<boolean>
   let stored_: WritableSignal<DishSalesMonth | undefined>
   let months: jasmine.SpyObj<DishSalesMonthDataService>
   let userMsg: jasmine.SpyObj<UserMsgService>
@@ -104,9 +98,10 @@ describe('DishSalesPage (plan 726)', () => {
   ): Promise<void> {
     dishes_ = signal(list)
     stored_ = signal(opts.stored ? ({ _id: 'm1', month, rows: [], ...opts.stored } as DishSalesMonth) : undefined)
+    dishLoadFailed_ = signal(false)
     const dishData = Object.assign(jasmine.createSpyObj('MenuDishDataService', ['load']), {
       allDishes_: dishes_,
-      loadFailed_: signal(false)
+      loadFailed_: dishLoadFailed_
     }) as unknown as jasmine.SpyObj<MenuDishDataService>
     ;(dishData.load as jasmine.Spy).and.resolveTo()
     months = Object.assign(jasmine.createSpyObj('DishSalesMonthDataService', ['load', 'saveMonth', 'monthOf']), {
@@ -129,10 +124,6 @@ describe('DishSalesPage (plan 726)', () => {
         provideRouter([]),
         { provide: MenuDishDataService, useValue: dishData },
         { provide: DishSalesMonthDataService, useValue: months },
-        {
-          provide: MenuDishCostService,
-          useValue: { costOf: () => ({ state: 'costed', costPerPortion: 10, missing: [] }) }
-        },
         { provide: PermissionService, useValue: { isStaff_: signal(!!opts.staff) } },
         { provide: MetadataRegistryService, useValue: { courses_: signal([]) } },
         { provide: TaxonomyStore, useValue: { loadSafely: () => Promise.resolve() } },
@@ -146,8 +137,8 @@ describe('DishSalesPage (plan 726)', () => {
       ]
     })
     TestBed.overrideComponent(DishSalesPage, {
-      remove: { imports: [ReturnReasonsDialogComponent, PartialCostBadgeComponent] },
-      add: { imports: [DialogStub, BadgeStub] }
+      remove: { imports: [ReturnReasonsDialogComponent] },
+      add: { imports: [DialogStub] }
     })
     navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true)
     fixture = TestBed.createComponent(DishSalesPage)
@@ -213,6 +204,7 @@ describe('DishSalesPage (plan 726)', () => {
     expect(months.saveMonth).not.toHaveBeenCalled()
     const reasons = rows()[0].querySelector('[data-testid="dish-sales-reasons"]') as HTMLElement
     expect(reasons.textContent).toContain('סיבות (3/1)')
+    expect(reasons.classList).toContain('ds-row__reasons--over')
   })
 
   it('clearing the returned box drops the reasons and says so', async () => {
@@ -225,12 +217,17 @@ describe('DishSalesPage (plan 726)', () => {
     expect(sentRows()[0].returnReasons).toEqual([])
   })
 
-  it('the reasons button is off until something came back; confirming puts the reasons on the row', async () => {
+  it('there is no reasons button until something came back; confirming puts the reasons on the row', async () => {
     await setup([dish('1')])
     const button = () => rows()[0].querySelector('[data-testid="dish-sales-reasons"]') as HTMLButtonElement
-    expect(button().disabled).toBeTrue()
+    expect(button()).toBeNull()
+    await type(0, 'returned', '0')
+    expect(button()).toBeNull()
+    await type(0, 'returned', '2')
+    expect(button()).not.toBeNull()
+    await type(0, 'returned', '')
+    expect(button()).toBeNull()
     await type(0, 'returned', '3')
-    expect(button().disabled).toBeFalse()
     button().click()
     await flush()
     ;(el().querySelector('[data-testid="stub-confirm"]') as HTMLButtonElement).click()
@@ -251,7 +248,7 @@ describe('DishSalesPage (plan 726)', () => {
     expect(box(2, 'sold').placeholder).toBe('dish_sales_not_entered')
   })
 
-  it('a month with closedAt opens read-only with no save button, a banner and the frozen cost', async () => {
+  it('a month with closedAt opens read-only with no save button, a banner, the month pager and no cost', async () => {
     await setup([dish('1')], {
       stored: {
         rows: [row('1', 8, 2)],
@@ -276,7 +273,18 @@ describe('DishSalesPage (plan 726)', () => {
     expect(saveButton()).toBeNull()
     expect(box(0, 'sold').disabled).toBeTrue()
     expect(el().querySelector('[data-testid="dish-sales-closed"]')).not.toBeNull()
-    expect(el().querySelector('[data-testid="dish-sales-cost"]')?.textContent).toContain('42')
+    expect(el().querySelector('[data-testid="dish-sales-months"]')).not.toBeNull()
+    expect(el().querySelector('[data-testid="dish-sales-cost"]')).toBeNull()
+    expect(rows()[0].textContent).not.toContain('42')
+  })
+
+  it('no cost is drawn: no cost cell, no cost title and no live-cost line', async () => {
+    await setup([dish('1')])
+    expect(el().querySelector('[data-testid="dish-sales-cost"]')).toBeNull()
+    expect(el().textContent).not.toContain('menu_dish_cost_per_portion')
+    expect(el().textContent).not.toContain('dish_sales_cost_live')
+    expect(rows()[0].querySelectorAll('[role="cell"]').length).toBe(5)
+    expect(el().textContent).toContain('menu_dish_col_type')
   })
 
   it('an inactive dish stays listed only when the month has a row for it', async () => {
@@ -327,6 +335,46 @@ describe('DishSalesPage (plan 726)', () => {
     expect(navigate).toHaveBeenCalledTimes(1)
     const params = navigate.calls.mostRecent().args[1].queryParams as { month: string }
     expect(params.month < month).toBeTrue()
+  })
+
+  // Plan 748: replays the hidden arrows — the real list shell and page header, laid out in the document.
+  it('the month arrows, fill-zero and save are each the element at their own point', async () => {
+    await setup([dish('1')])
+    const host = el()
+    host.style.position = 'fixed'
+    host.style.top = '0'
+    host.style.left = '0'
+    host.style.width = `${Math.min(1200, window.innerWidth)}px`
+    host.style.zIndex = '2147483647'
+    document.body.appendChild(host)
+    try {
+      fixture.detectChanges()
+      for (const id of ['dish-sales-prev', 'dish-sales-next', 'dish-sales-zero-fill', 'dish-sales-save']) {
+        const button = host.querySelector(`[data-testid="${id}"]`) as HTMLButtonElement
+        const box = button.getBoundingClientRect()
+        expect(box.width).withContext(`${id} width`).toBeGreaterThan(0)
+        const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+        expect(!!hit && button.contains(hit))
+          .withContext(`${id} is covered`)
+          .toBeTrue()
+      }
+    } finally {
+      host.remove()
+    }
+  })
+
+  it('the month pager sits above the column titles, also on an error', async () => {
+    await setup([dish('1')])
+    const pager = () => el().querySelector('.table-pagination [data-testid="dish-sales-months"]')
+    expect(pager()).not.toBeNull()
+    const prev = el().querySelector('[data-testid="dish-sales-prev"]') as HTMLButtonElement
+    const next = el().querySelector('[data-testid="dish-sales-next"]') as HTMLButtonElement
+    expect(prev.getAttribute('title')).toBe('dish_sales_prev_month')
+    expect(next.getAttribute('title')).toBe('dish_sales_next_month')
+    dishLoadFailed_.set(true)
+    fixture.detectChanges()
+    expect(el().querySelector('[data-testid="dish-sales-error"]')).not.toBeNull()
+    expect(pager()).not.toBeNull()
   })
 
   it('no dishes shows the empty message with a link to the menu', async () => {
