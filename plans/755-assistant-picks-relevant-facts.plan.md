@@ -215,6 +215,7 @@ docs/brain/component-families.md
 docs/brain/inventory.md
 server/test/frontdesk-eval.test.js
 server/test/frontdesk-guardrails.test.js
+docs/workflow-kit/manifest.json
 ```
 
 New files: `server/utils/text-norm.js`, `server/services/fact-pick.js`, `server/test/fact-pick.test.js`. Every other
