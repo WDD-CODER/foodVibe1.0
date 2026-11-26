@@ -1,10 +1,16 @@
 <section class="mf" data-testid="mf-card">
   <header class="mf__head">
     <h2 class="mf__title">{{ 'mp_figures_title' | translatePipe }}</h2>
-    <span class="c-chip c-chip--tag" data-testid="mf-badge">{{ badge_() }}</span>
+    <span
+      class="c-chip c-chip--tag"
+      data-testid="mf-badge"
+      [attr.title]="missingLine_() || null"
+      [attr.aria-describedby]="missingLine_() ? idPrefix + '-missing' : null"
+      >{{ badge_() }}</span
+    >
   </header>
   @if (missingLine_()) {
-    <p class="mf__muted" data-testid="mf-missing">{{ missingLine_() }}</p>
+    <p class="mf__muted" data-testid="mf-missing" [id]="idPrefix + '-missing'">{{ missingLine_() }}</p>
   }
   <div class="mf__grid" role="table">
     <div class="mf__row mf__row--head" role="row">
@@ -34,9 +40,14 @@
               <span class="c-chip c-chip--tag c-chip--amber">{{ 'mp_out_of_band' | translatePipe }}</span>
             }
             @if (c.partial) {
-              <span class="c-chip c-chip--tag c-chip--amber" data-testid="mf-partial">{{
-                'mp_partial' | translatePipe
-              }}</span>
+              <span
+                class="c-chip c-chip--tag c-chip--amber"
+                data-testid="mf-partial"
+                [attr.title]="c.hint"
+                [attr.aria-describedby]="idPrefix + '-' + side + '-' + row.key"
+                >{{ 'mp_partial' | translatePipe }}</span
+              >
+              <span class="visually-hidden" [id]="idPrefix + '-' + side + '-' + row.key">{{ c.hint }}</span>
             }
             @if (c.fromTarget) {
               <span class="c-chip c-chip--tag" data-testid="mf-from-target">{{

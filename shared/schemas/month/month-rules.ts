@@ -77,7 +77,7 @@ export function defaultFixed(): FixedGroup {
   }
 }
 
-/** A new month's labour: one employer-cost total, factor 1.25 ready for gross mode. */
+/** A new month's labour: one gross-pay total; the employer cost is gross × the factor (plan 749). */
 export function defaultLabour(): LabourGroup {
-  return { mode: 'employer', factor: LABOUR_FACTOR_DEFAULT, plan: null, actual: null }
+  return { mode: 'gross', factor: LABOUR_FACTOR_DEFAULT, plan: null, actual: null }
 }

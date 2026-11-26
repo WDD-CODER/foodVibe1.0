@@ -1,20 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
+import { LucideAngularModule } from 'lucide-angular'
 import { FIXED_LINES_MAX, type FixedGroup, type FixedLine } from '@schemas/month/month-rules'
-import { NumberBoxDirective } from '@directives/number-box.directive'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { fixedInputOf } from '../../../../core/engine/month-plan'
 import { formatMoney } from '../../../../core/engine/rounding'
+import { MonthPairComponent } from '../month-pair/month-pair.component'
 
 type Side = 'plan' | 'actual'
 
-/** Plan 729: fixed costs as lines (starter + own) or as one rough total. Controlled: the page owns the group. */
+/** Plan 729: fixed costs as lines (starter + own) or as one estimated total. Controlled: the page owns the group. */
 @Component({
   selector: 'app-fixed-costs-card',
   standalone: true,
-  imports: [FormsModule, NumberBoxDirective, TranslatePipe],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe, MonthPairComponent],
   templateUrl: './fixed-costs-card.component.html',
   styleUrl: './fixed-costs-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,10 +28,6 @@ export class FixedCostsCardComponent {
   readonly disabled = input(false)
   readonly groupChange = output<FixedGroup>()
 
-  protected readonly sides: readonly { key: Side; labelKey: string }[] = [
-    { key: 'plan', labelKey: 'mp_plan' },
-    { key: 'actual', labelKey: 'mp_actual' }
-  ]
   protected readonly maxReached_ = computed(() => this.group().lines.length >= FIXED_LINES_MAX)
   private readonly sums_ = computed(() => {
     const g = this.group()
@@ -51,17 +48,22 @@ export class FixedCostsCardComponent {
     return line.starterKey ? `mp_fixed_${line.starterKey}` : ''
   }
 
+  /** The row's name for the pair's screen-reader labels. */
+  protected pairLabel(line: FixedLine): string {
+    return this.nameKey(line) || line.name || 'mp_fixed_unnamed'
+  }
+
   protected setMode(mode: FixedGroup['mode']): void {
     if (this.disabled() || mode === this.group().mode) return
     this.groupChange.emit({ ...this.group(), mode })
   }
 
-  protected setRough(side: Side, value: number | string | null): void {
+  protected setRough(side: Side, value: number | null): void {
     const g = this.group()
     this.groupChange.emit({ ...g, rough: { ...g.rough, [side]: this.num_(value) } })
   }
 
-  protected setLine(id: string, side: Side, value: number | string | null): void {
+  protected setLine(id: string, side: Side, value: number | null): void {
     const g = this.group()
     this.groupChange.emit({ ...g, lines: g.lines.map((l) => (l.id === id ? { ...l, [side]: this.num_(value) } : l)) })
   }
@@ -95,10 +97,8 @@ export class FixedCostsCardComponent {
     this.groupChange.emit({ ...g, lines: g.lines.filter((l) => l.id !== id) })
   }
 
-  private num_(value: number | string | null): number | null {
-    if (value === null || value === '') return null
-    const n = Number(value)
-    return Number.isFinite(n) ? Math.max(0, n) : null
+  private num_(value: number | null): number | null {
+    return value === null ? null : Math.max(0, value)
   }
 
   private total_(value: number | null): string {

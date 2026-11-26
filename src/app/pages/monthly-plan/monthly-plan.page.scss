@@ -8,7 +8,7 @@
     gap: var(--space-5);
     align-content: start;
 
-    max-inline-size: 52rem;
+    max-inline-size: 80rem;
     margin-inline: auto;
 
     padding: var(--space-4);
@@ -33,6 +33,31 @@
     padding: var(--space-5);
   }
 
+  /* Two sides (the inputs, the month picture) that fold to one column when there is no room. */
+  .mp-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+    align-items: start;
+    gap: var(--space-5);
+  }
+
+  .mp-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    align-items: start;
+    gap: var(--space-4);
+
+    min-inline-size: 0;
+  }
+
+  /* Stays in view under the app header while the inputs scroll. */
+  .mp-picture {
+    position: sticky;
+    inset-block-start: calc(3.875rem + var(--space-3));
+
+    min-inline-size: 0;
+  }
+
   .mp-card__title {
     margin: 0;
     color: var(--color-text-main);
@@ -42,9 +67,20 @@
 
   .mp-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
     gap: var(--space-4);
     inline-size: 100%;
+  }
+
+  .mp-field__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .mp-box {
+    inline-size: max-content;
   }
 
   .mp-field {
@@ -72,6 +108,12 @@
     color: var(--color-text-muted);
   }
 
+  .mp-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+
   .mp-check {
     display: flex;
     align-items: center;
@@ -81,4 +123,10 @@
     font-size: var(--fs-xs);
     cursor: pointer;
   }
+}
+
+/* Outside the layer so it beats the unlayered `.c-input-wrapper input` flex rule: room for seven digits. */
+.mp-box input {
+  flex: none;
+  inline-size: 9ch;
 }
