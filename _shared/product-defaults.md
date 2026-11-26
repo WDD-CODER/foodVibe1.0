@@ -190,3 +190,14 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - check: card
 - card: any page with an icon button or an explained control · hover it with the mouse, then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen
 - exceptions: the product nutrition box (src/app/shared/nutrition-badge/) keeps the look it already has; declare `exception — why: <one line>`
+
+### row-action-icons
+
+- status: on
+- rule: Every edit, remove and delete action in a list row or card uses the app's shared icon buttons (pencil to edit, trash to remove or delete), never a text button.
+- applies when: list
+- how: src/styles.scss .c-icon-btn with the Lucide icons pencil / trash-2 (danger tone for remove), inside src/app/shared/row-actions-menu/ (app-row-actions-menu) where the row already uses a row menu - as on the products list
+- check: card
+- card: any list page with row actions · look at a row's edit and remove actions · they are the pencil and trash icon buttons used on the products list, with no text buttons
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-26
