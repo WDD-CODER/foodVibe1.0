@@ -414,3 +414,15 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   background — reverse: upload logos without shrinking.
 - behaviour: a successful copy, rename or «make default» answers «העיצוב נשמר», a delete «העיצוב נמחק» — reverse: drop
   the messages.
+
+### Resume after ask 765-1 (answered by the Human, 2026-11-27)
+- Step 0 (drift): `0e9f01c7` ok, `d8a0e9df` ok, `f64e4205` ok, `9cfdb0bf` ok, `a1309926` ok — the build and the tests
+  use plan 764's pieces as they stand.
+- Trash lists deleted menu designs (closes the «Open, outside the scope» line above): `TrashService` has a `menuDesigns`
+  section, shown only with the `menu_design` module on, and a restore reloads the designs list; two specs added.
+- 765-2 expects the sample menu's title «תפריט ערב»; the plan's «תפריט לדוגמה» was a drafting slip (the Human's answer).
+  `shared/schemas/menu-design/menu-doc.ts` is not changed.
+- behaviour: the Trash section is titled «עיצובי תפריט», sits after the events section and has no History button (the type
+  keeps no version history) — reverse: move or rename the `menuDesigns` row of `TRASH_SECTIONS`.
+- `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (69 older warnings); `pnpm run test:ci` -> exit 0,
+  `TOTAL: 2883 SUCCESS`.
