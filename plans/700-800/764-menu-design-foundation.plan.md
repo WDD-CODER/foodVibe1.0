@@ -1,6 +1,6 @@
 # Plan 764 — Menu design foundation: module, design records, menu fields and the one shared template
 
-Status: draft
+Status: done
 Depends-on: none
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
