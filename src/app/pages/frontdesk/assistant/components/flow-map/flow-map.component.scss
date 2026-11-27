@@ -1,0 +1,83 @@
+@use '../../asr-step';
+@use '../../../../../core/styles/breakpoints' as *;
+
+:host {
+  display: block;
+}
+
+.asr-flow__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+
+  margin-block-end: var(--space-3);
+}
+
+.asr-flow__intro {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+  color: var(--color-text-main);
+  line-height: var(--lh-snug);
+}
+
+.asr-flow__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.asr-flow__text {
+  margin-block: 0;
+}
+
+.asr-flow__engine {
+  margin-block: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+}
+
+// In the flow map every title stands above its text.
+.asr-field {
+  flex-direction: column;
+}
+
+.asr-flow__stops {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-2);
+  }
+}
+
+// The setting names, then the way to all of them under it.
+.asr-flow__settings {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding-block-start: var(--space-1);
+}
+
+.asr-flow__code {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  overflow-wrap: anywhere;
+}
+
+// On a phone the intro takes the whole line, so the legend and the button stand under it.
+@media (max-width: $break-phone-max) {
+  .asr-flow__intro {
+    flex-basis: 100%;
+  }
+}

@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
-import type { AssistantRunRow, AssistantRunView, RunFilter } from '@models/assistant-run.model'
+import type { AssistantRunRow, AssistantRunView, AssistantSetup, RunFilter } from '@models/assistant-run.model'
 
 const runsUrl = () => `${environment.apiUrl}${API.assistantRuns}`
 
@@ -14,6 +14,7 @@ type ListAnswer = { runs: AssistantRunRow[]; more: boolean }
 /**
  * Plan 752 (C-RUNS): the client of `/api/v1/assistant-runs`. The list is filtered and paged on the server and read
  * only, so it does not extend `BaseEntityDataService`. Logs carry an event and a status — nothing from a run.
+ * Plan 756: it also reads how the assistant is set up, once, and keeps the answer.
  */
 @Injectable({ providedIn: 'root' })
 export class AssistantRunDataService {
@@ -28,6 +29,9 @@ export class AssistantRunDataService {
   private readonly runSig = signal<AssistantRunView | null>(null)
   private readonly runLoadingSig = signal(false)
   private readonly runFailedSig = signal<'not_found' | 'failed' | null>(null)
+  private readonly setupSig = signal<AssistantSetup | null>(null)
+  private readonly setupLoadedSig = signal(false)
+  private readonly setupFailedSig = signal(false)
 
   readonly runs_ = this.runsSig.asReadonly()
   /** The server has older runs than the ones shown. */
@@ -39,7 +43,13 @@ export class AssistantRunDataService {
   readonly run_ = this.runSig.asReadonly()
   readonly runLoading_ = this.runLoadingSig.asReadonly()
   readonly runFailed_ = this.runFailedSig.asReadonly()
+  readonly setup_ = this.setupSig.asReadonly()
+  /** True once the setup read has succeeded. */
+  readonly setupLoaded_ = this.setupLoadedSig.asReadonly()
+  readonly setupFailed_ = this.setupFailedSig.asReadonly()
 
+  /** The setup read on its way, so the page and its panel asking together make one call. */
+  private setupCall: Promise<void> | null = null
   private options: ListOptions = { filter: 'all', test: false }
   /** Only the answer of the newest list read, and of the newest run read, is shown. */
   private listTurn = 0
@@ -107,6 +117,26 @@ export class AssistantRunDataService {
     this.runLoadingSig.set(false)
   }
 
+  /** Reads the setup unless it is already here; `force` reads it again. */
+  loadSetup(force = false): Promise<void> {
+    if (this.setupLoadedSig() && !force) return Promise.resolve()
+    this.setupCall ??= this.readSetup().finally(() => (this.setupCall = null))
+    return this.setupCall
+  }
+
+  private async readSetup(): Promise<void> {
+    try {
+      const res = await firstValueFrom(this.http.get<AssistantSetup>(`${runsUrl()}/setup`))
+      this.setupSig.set(res)
+      this.setupFailedSig.set(false)
+      this.setupLoadedSig.set(true)
+    } catch (err) {
+      this.setupFailedSig.set(true)
+      this.setupLoadedSig.set(false)
+      this.logFailure('setup', err)
+    }
+  }
+
   private read(before?: number): Promise<ListAnswer> {
     const params: Record<string, string> = {
       filter: this.options.filter,
@@ -116,7 +146,7 @@ export class AssistantRunDataService {
     return firstValueFrom(this.http.get<ListAnswer>(runsUrl(), { params }))
   }
 
-  private logFailure(name: 'list' | 'open', err: unknown): void {
+  private logFailure(name: 'list' | 'open' | 'setup', err: unknown): void {
     const status = (err as { status?: number }).status
     const refused = status !== undefined && status >= 400 && status < 500
     this.logging[refused ? 'warn' : 'error']({

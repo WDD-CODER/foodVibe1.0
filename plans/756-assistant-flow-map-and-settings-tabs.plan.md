@@ -269,8 +269,8 @@ one-line export. Never offered, the plan needs no change there: `src/app/pages/f
 
 ## Reuse Check
 
-- `FlowMapComponent` (`app-flow-map`) — family: assistant-runs — rung: 3 — why: a second view of the same 13 steps on the page plan 752 built; built from existing pieces (`.c-chip--tag`, `c-btn-ghost`, the step row below).
-- `SettingsTableComponent` (`app-assistant-settings-table`) — family: assistant-runs — rung: 3 — why: the third tab of the same page; rows are `ul.c-list` + `li.c-list-row` with `.c-grid-header-cell` / `.c-list-body-cell`, as plan 752's runs list.
+- `FlowMapComponent` (`app-flow-map`, `flow-map.component.ts`) — family: assistant-runs — rung: 3 — why: a second view of the same 13 steps on the page plan 752 built; built from existing pieces (`.c-chip--tag`, `c-btn-ghost`, the step row below).
+- `SettingsTableComponent` (`app-assistant-settings-table`, `settings-table.component.ts`) — family: assistant-runs — rung: 3 — why: the third tab of the same page; rows are `ul.c-list` + `li.c-list-row` with `.c-grid-header-cell` / `.c-list-body-cell`, as plan 752's runs list.
 - `FLOW_STEPS` in `assistant-flow.data.ts` — family: assistant-runs — rung: 3 — why: the fixed description of each step, keyed by plan 752's `RUN_STEP_KEYS`; a test keeps the two lists equal.
 - `SETTING_ROWS` in `assistant-settings.data.ts` — family: assistant-runs — rung: 3 — why: the fixed list of settings with their steps, owner and route; nothing in the registry lists them.
 - `settingValue`, `changeBlock` in `assistant-settings-value.util.ts` — family: helpers — rung: 3 — why: pure functions that turn the setup read into one labelled value and the reason a button is blocked.
@@ -278,7 +278,10 @@ one-line export. Never offered, the plan needs no change there: `src/app/pages/f
 - `GET /api/v1/assistant-runs/setup` — family: assistant-runs — rung: 2 — why: one more read on plan 752's router, same middleware and same permission.
 - `setup_`, `setupLoaded_`, `setupFailed_`, `loadSetup()` on `AssistantRunDataService` — family: assistant-runs — rung: 2 — why: one more read on the existing service.
 - The two new tab buttons — family: chip — rung: 1 — why: two more entries in `AssistantPage.tabs`, drawn by plan 752's `button.c-chip.c-chip--tab` strip.
-- The step row that opens and closes in the flow map — family: assistant-runs — rung: 3 — why: the same `button.asr-step` with `aria-expanded` / `aria-controls` as plan 752's run detail; its rules move from `run-detail.component.scss` into the partial `_asr-step.scss` that both stylesheets `@use`, so there is one look and no second copy.
+- The step row that opens and closes in the flow map (`.asr-step`) — family: assistant-runs — rung: 3 — why: the same `button.asr-step` with `aria-expanded` / `aria-controls` as plan 752's run detail; its rules move from `run-detail.component.scss` into the partial `_asr-step.scss` that both stylesheets `@use`, so there is one look and no second copy.
+- The moved step-row classes in `_asr-step.scss`: `.asr-steps`, `.asr-step`, `.asr-step-number`, `.asr-step-name`, `.asr-step-time`, `.asr-step-chevron`, `.asr-step-panel`, `.asr-fields`, `.asr-field` — family: assistant-runs — rung: 3 — why: plan 752's classes with their rules unchanged, in a new file.
+- The flow map's page-local layout classes `.asr-flow__top`, `.asr-flow__intro`, `.asr-flow__tools`, `.asr-flow__text`, `.asr-flow__engine`, `.asr-flow__stops`, `.asr-flow__settings`, `.asr-flow__code` — family: assistant-runs — rung: 3 — why: spacing and text of this one tab; the controls and tags are engine classes.
+- The settings table's page-local layout classes `.asr-set__intro`, `.asr-set__table`, `.asr-set__head`, `.asr-set__list`, `.asr-set__row`, `.asr-set__name`, `.asr-set__line`, `.asr-set__code`, `.asr-set__change`, `.asr-set__steps`, `.asr-set__who`, `.asr-set__who--fixed`, `.asr-set__action` — family: assistant-runs — rung: 3 — why: the columns of this one table over the `.c-list` engine.
 - The kind tag (script / data / AI), the "who may change" tag and the "fixed" tag — family: chip — rung: 1 — why: `span.c-chip.c-chip--tag.c-chip--sm` with the tones `--glass`, `--teal`, `--amber`.
 - The "לשנות" button, also when blocked — family: tooltip — rung: 1 — why: `button.c-btn-ghost` with `[appTip]` and `aria-disabled="true"` plus a `.visually-hidden` reason, exactly as `zone-panel.component.html:147-161`; no new tooltip piece.
 - The links "to the runs" and "to all settings" — family: engine-classes — rung: 1 — why: `button.c-btn-ghost` / `c-btn-ghost--sm`.

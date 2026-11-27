@@ -4,7 +4,8 @@
  * consultant has the owner's rights, ADR 0032; the platform admin acting in the business too); staff do not. The
  * business always comes from the signed token; every query lives in `services/frontdesk-runs.js`. A real guest's words
  * reach the acting platform admin only by opening the run, and that leaves a trace on it. Logs carry ids, counts and
- * enums only — never text from a run.
+ * enums only — never text from a run. Plan 756 adds `GET /setup`: how the assistant is set up
+ * (`services/assistant-setup.js`), for the same readers.
  */
 const { Router } = require('express');
 const mongoose = require('mongoose');
@@ -16,6 +17,7 @@ const { assertCan } = require('../utils/permissions');
 const { logger } = require('../logger');
 const { listRuns, loadRun, markAdminView } = require('../services/frontdesk-runs');
 const { TURN_SYSTEM_PROMPT, TABLE_SYSTEM_PROMPT } = require('../services/frontdesk-prompt');
+const { assistantSetup } = require('../services/assistant-setup');
 
 const router = Router();
 const db = () => mongoose.connection.db;
@@ -67,6 +69,19 @@ router.get('/', async (req, res) => {
     return res.json({ runs, more: found.more, now: Date.now() });
   } catch (err) {
     return failed(req, res, 'assistant_runs.list.failed', err);
+  }
+});
+
+// Declared before '/:id', or "setup" would be read as a run id.
+router.get('/setup', async (req, res) => {
+  try {
+    const { businessId } = scopeFilter(req);
+    if (!assertCan(req, res, 'editFrontDesk', { type: 'assistantRuns' })) return;
+    const out = await assistantSetup(db(), businessId, { admin: isPlatformAdmin(req) });
+    logOf(req).info({ event: 'assistant_runs.setup_read', hasProfile: !!out.business });
+    return res.json(out);
+  } catch (err) {
+    return failed(req, res, 'assistant_runs.setup.failed', err);
   }
 });
 

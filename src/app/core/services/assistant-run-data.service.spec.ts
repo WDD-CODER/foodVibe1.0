@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { AssistantRunDataService } from './assistant-run-data.service'
 import { LoggingService } from './logging.service'
-import type { AssistantRunRow } from '@models/assistant-run.model'
+import type { AssistantRunRow, AssistantSetup } from '@models/assistant-run.model'
 
 const row = (id: string, startedAt: number): AssistantRunRow => ({
   _id: id,
@@ -105,5 +105,45 @@ describe('AssistantRunDataService (plan 752)', () => {
     await broken
     expect(service.runFailed_()).toBe('failed')
     expect(service.runLoading_()).toBeFalse()
+  })
+
+  const setupCall = () => http.expectOne((r) => r.url.endsWith('/api/v1/assistant-runs/setup'))
+  const setup = { engine: { quietMs: 2000 }, business: null } as unknown as AssistantSetup
+
+  it('loadSetup() (plan 756) reads once, fills setup_ and does not read again while loaded', async () => {
+    expect(service.setupLoaded_()).toBeFalse()
+    const first = service.loadSetup()
+    const together = service.loadSetup()
+    const req = setupCall()
+    expect(req.request.method).toBe('GET')
+    req.flush(setup)
+    await Promise.all([first, together])
+    expect(service.setup_()).toEqual(setup)
+    expect(service.setupLoaded_()).toBeTrue()
+    expect(service.setupFailed_()).toBeFalse()
+    await service.loadSetup()
+    http.expectNone((r) => r.url.endsWith('/api/v1/assistant-runs/setup'))
+    const again = service.loadSetup(true)
+    setupCall().flush(setup)
+    await again
+  })
+
+  it('a failed setup read (plan 756) sets setupFailed_, keeps setup_ null and logs the status only', async () => {
+    const broken = service.loadSetup()
+    setupCall().flush('x', { status: 500, statusText: 'Server error' })
+    await broken
+    expect(service.setupFailed_()).toBeTrue()
+    expect(service.setupLoaded_()).toBeFalse()
+    expect(service.setup_()).toBeNull()
+    expect(logging.error).toHaveBeenCalledOnceWith({
+      event: 'assistant_runs.setup.failed',
+      message: 'Assistant runs call failed',
+      context: { status: '500' }
+    })
+    const retry = service.loadSetup(true)
+    setupCall().flush(setup)
+    await retry
+    expect(service.setupFailed_()).toBeFalse()
+    expect(service.setupLoaded_()).toBeTrue()
   })
 })

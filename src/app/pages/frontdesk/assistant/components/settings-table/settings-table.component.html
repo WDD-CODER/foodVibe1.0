@@ -1,0 +1,90 @@
+<section class="asr-set" data-testid="asr-set">
+  @if (data.setupFailed_()) {
+    <app-empty-state
+      messageKey="asr_set_load_failed"
+      icon="settings"
+      ctaLabelKey="retry"
+      (ctaClick)="retry()"
+      data-testid="set-failed"
+    />
+  } @else if (!data.setupLoaded_()) {
+    <app-loader size="medium" />
+  } @else if (setup_()?.business === null) {
+    <app-empty-state
+      messageKey="asr_set_no_profile"
+      icon="settings"
+      ctaLabelKey="asr_set_go_settings"
+      (ctaClick)="goToSettings()"
+      data-testid="set-no-profile"
+    />
+  } @else {
+    <p class="asr-set__intro">{{ 'asr_set_intro' | translatePipe }}</p>
+    <div class="asr-set__table c-glass-panel">
+      <div class="asr-set__head" aria-hidden="true">
+        <div class="c-grid-header-cell">{{ 'asr_set_col_name' | translatePipe }}</div>
+        <div class="c-grid-header-cell">{{ 'asr_set_col_value' | translatePipe }}</div>
+        <div class="c-grid-header-cell asr-set__steps">{{ 'asr_set_col_steps' | translatePipe }}</div>
+        <div class="c-grid-header-cell">{{ 'asr_set_col_who' | translatePipe }}</div>
+        <div class="c-grid-header-cell"></div>
+      </div>
+      <ul class="c-list asr-set__list" role="list">
+        @for (item of view_(); track item.row.id) {
+          <li class="c-list-row asr-set__row" role="listitem" [attr.data-testid]="'set-row-' + item.row.id">
+            <span class="c-list-body-cell asr-set__name">
+              <span class="asr-set__line">{{ nameKey(item.row.id) | translatePipe }}</span>
+              @if (isAdmin() && item.row.code) {
+                <code class="asr-set__line asr-set__code" dir="ltr" [attr.data-testid]="'set-code-' + item.row.id">{{
+                  item.row.code
+                }}</code>
+              }
+            </span>
+            <span class="c-list-body-cell asr-set__value" [attr.data-testid]="'set-value-' + item.row.id">
+              @if (shown(item.value); as value) {
+                <span class="asr-set__line" [attr.dir]="value.dir">{{ value.text }}</span>
+              } @else {
+                <span class="asr-set__line">{{ 'asr_val_none' | translatePipe }}</span>
+              }
+            </span>
+            <span class="c-list-body-cell asr-set__steps">
+              <span class="asr-set__line">{{ stepNames(item.row) }}</span>
+            </span>
+            <span class="c-list-body-cell asr-set__who" [class.asr-set__who--fixed]="item.row.who === 'fixed'">
+              @if (item.row.who === 'fixed') {
+                <span
+                  class="c-chip c-chip--tag c-chip--sm c-chip--glass"
+                  tabindex="0"
+                  [appTip]="'asr_set_why_fixed' | translatePipe"
+                  >{{ 'asr_set_fixed' | translatePipe }}</span
+                >
+              } @else {
+                <span class="c-chip c-chip--tag c-chip--sm" [class]="who[item.row.who].tone">{{
+                  who[item.row.who].key | translatePipe
+                }}</span>
+              }
+            </span>
+            <span class="c-list-body-cell c-list-body-cell--end asr-set__action">
+              @if (item.row.route) {
+                <button
+                  type="button"
+                  class="c-btn-ghost asr-set__change"
+                  [attr.data-testid]="'set-change-' + item.row.id"
+                  [attr.aria-label]="changeLabel(item.row)"
+                  [attr.aria-disabled]="item.block ? 'true' : null"
+                  [appTip]="item.block ? (item.block | translatePipe) : null"
+                  [attr.aria-describedby]="item.block ? 'set-why-' + item.row.id : null"
+                  (click)="change(item)"
+                >
+                  <lucide-icon name="pencil" [size]="16" aria-hidden="true"></lucide-icon>
+                  <span>{{ 'asr_set_change' | translatePipe }}</span>
+                </button>
+                @if (item.block) {
+                  <span class="visually-hidden" [id]="'set-why-' + item.row.id">{{ item.block | translatePipe }}</span>
+                }
+              }
+            </span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

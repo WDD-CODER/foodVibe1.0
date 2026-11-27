@@ -32,7 +32,8 @@
 | `services/channels/` | The only place that names a channel (plan 675): `index.js` `channelFor`, `sim-channel.js`; WhatsApp joins in plan 683; plan 754: a transport may have an optional `typing` |
 | `routes/sim.js` | The simulator routes (plan 675): `POST /inbound`, `DELETE /test-data`; owner or platform admin; plan 752: clear test data also clears the test runs |
 | `services/frontdesk-runs.js` | `startRun`, `listRuns`, `loadRun`, `markAdminView` (plan 752, C-RUNS): the step-by-step record of an assistant run in `assistantRuns`, 30 days; plan 754: `quietMs`, `capped` on the first step and `answerMs` on the send step |
-| `routes/assistant-runs.js` | Mounted at `/api/v1/assistant-runs` (plan 752): list and one run; owner / consultant / acting platform admin; a real run opened by the acting admin leaves a trace |
+| `routes/assistant-runs.js` | Mounted at `/api/v1/assistant-runs` (plan 752): list and one run; owner / consultant / acting platform admin; a real run opened by the acting admin leaves a trace; plan 756: `GET /setup` |
+| `services/assistant-setup.js` | `assistantSetup` (plan 756): the engine's fixed numbers and one business's own values for the assistant page; read-only |
 | `routes/ai.js` | Gemini AI proxy at `/api/v1/ai` — generate + parse-text; plan 600: recipe examples are saved `pending` and confirmed on recipe save (`POST /shots/confirm`), prompts add the shared pool after the business's own |
 | `routes/access.js` | Mounted at `/api/v1/access` (plan 615; filled by plan 631, C-ACCESS): `GET /businesses` (where the user may go), `POST` / `DELETE` / `GET /grants` (platform admin grants, owner lists and removes); no query of its own |
 | `services/access.js` | Which business a session is in (plan 631, ADR 0032): `resolveSession`, `canEnter`, `stillActing` (the per-request re-check of an acting token), `liveGrant`, `listEnterable` and the grant helpers; the only reader and writer of `businessAccess` |

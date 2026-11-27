@@ -1,0 +1,89 @@
+@use '../../../../../core/styles/breakpoints' as *;
+
+:host {
+  display: block;
+}
+
+.asr-set__intro {
+  margin-block: 0 var(--space-3);
+  color: var(--color-text-main);
+  line-height: var(--lh-snug);
+}
+
+// One set of columns for the header row and for every setting row.
+.asr-set__table {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) minmax(0, 1.6fr) auto auto;
+}
+
+// The header cells stand in the table's own columns.
+.asr-set__head {
+  display: contents;
+}
+
+.asr-set__head > * {
+  white-space: nowrap;
+}
+
+.asr-set__list {
+  --list-cols: subgrid;
+
+  grid-column: 1 / -1;
+}
+
+// The code line of the admin stands under the name, both at the middle of the row.
+.asr-set__row > .asr-set__name {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.asr-set__line {
+  min-inline-size: 0;
+  overflow: clip;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asr-set__code {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+
+// A blocked button looks off but keeps hover, focus and tap, so its tooltip can say why.
+.asr-set__change[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.45;
+
+  &:hover,
+  &:active {
+    background: var(--bg-glass-dense);
+    transform: none;
+  }
+}
+
+@media (max-width: $break-tablet-max) {
+  .asr-set__table {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) auto auto;
+  }
+
+  .asr-set__head > .asr-set__steps,
+  .asr-set__row > .asr-set__steps {
+    display: none;
+  }
+}
+
+// Phone: name, value, then the button - or, for a fixed setting, its tag in the button's place. The value's column
+// has a ceiling, so a long value is cut instead of taking the name's room.
+@media (max-width: $break-phone-max) {
+  .asr-set__table {
+    grid-template-columns: minmax(0, 1fr) fit-content(7rem) auto;
+  }
+
+  .asr-set__head,
+  .asr-set__row > .asr-set__who:not(.asr-set__who--fixed),
+  .asr-set__row > .asr-set__who--fixed + .asr-set__action {
+    display: none;
+  }
+}
