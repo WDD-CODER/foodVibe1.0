@@ -333,8 +333,9 @@ describe('DishSalesPage (plan 726)', () => {
   for (const width of [1200, 375]) {
     it(`at ${width}px the month arrows, fill-zero and save are each what is hit at their own point`, async () => {
       await setup([dish('1')], { query: { month: '2000-01' } })
+      // Absolute, not fixed: on a short test window (CI) the page can then scroll a lower button into view.
       Object.assign(el().style, {
-        position: 'fixed',
+        position: 'absolute',
         top: '0',
         left: '0',
         width: `${Math.min(width, window.innerWidth)}px`,
@@ -343,6 +344,7 @@ describe('DishSalesPage (plan 726)', () => {
       fixture.detectChanges()
       for (const id of ['dish-sales-prev', 'dish-sales-next', 'dish-sales-zero-fill', 'dish-sales-save']) {
         const button = el().querySelector(`[data-testid="${id}"]`) as HTMLButtonElement
+        button.scrollIntoView({ block: 'center', inline: 'center' })
         const box = button.getBoundingClientRect()
         expect(box.width).withContext(id).toBeGreaterThan(0)
         const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)

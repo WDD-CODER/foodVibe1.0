@@ -116,8 +116,8 @@ describe('TooltipDirective (plan 744)', () => {
     expect(prevented).toBeFalse()
   })
 
-  it('the tap rule is the app phone breakpoint, or a pointer that cannot hover', () => {
-    expect(TOOLTIP_TAP_QUERY).toBe(`${PHONE_QUERY}, (hover: none)`)
+  it('the tap rule is the app phone breakpoint, or a touch screen that cannot hover', () => {
+    expect(TOOLTIP_TAP_QUERY).toBe(`${PHONE_QUERY}, (hover: none) and (pointer: coarse)`)
   })
 
   describe('above a phone (plan 762)', () => {

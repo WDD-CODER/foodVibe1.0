@@ -18,7 +18,8 @@ import { TooltipBoxComponent } from './tooltip-box.component'
 
 export const TOOLTIP_HOVER_DELAY_MS = 300
 /** Where a tooltip works by tap (plan 762): a phone width, or a pointer that cannot hover. Elsewhere it is hover. */
-export const TOOLTIP_TAP_QUERY = `${PHONE_QUERY}, (hover: none)`
+// A touch screen that cannot hover (a tablet) works by tap too; a browser with no pointer at all (headless) does not.
+export const TOOLTIP_TAP_QUERY = `${PHONE_QUERY}, (hover: none) and (pointer: coarse)`
 
 export type TooltipContent = string | TemplateRef<unknown> | null
 
@@ -136,9 +137,11 @@ export class TooltipDirective {
     return !!view && typeof view.matchMedia === 'function' && view.matchMedia(TOOLTIP_TAP_QUERY).matches
   }
 
-  /** A finger, or a device that cannot hover at all, never opens by hover. */
+  /** A finger, or a device that cannot hover at all, never opens by hover. A mouse always hovers, even where the
+   *  main input reports `(hover: none)` (a touch laptop, a headless test browser). */
   private canHover_(event: PointerEvent): boolean {
     if (event.pointerType === 'touch') return false
+    if (event.pointerType === 'mouse') return true
     const view = this.document_.defaultView
     return !(view && typeof view.matchMedia === 'function' && view.matchMedia('(hover: none)').matches)
   }
