@@ -1,18 +1,18 @@
-# Plan 767 — Customer menu PDF export: one complete A4 file, powered-by line, latest export kept
+# Plan 768 — Customer menu PDF export: one complete A4 file, powered-by line, latest export kept
 
 Status: draft
-Depends-on: 763, 766
+Depends-on: 764, 767
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
 ## Problem Statement
 
 A chef who has built a menu in menu intelligence must be able to hand the customer one complete, designed PDF
 (D13): logo, business name, title, subtitle, sections, dish names, bottom note and contact line, in the menu's
-design, never prices or costs (M3). Plan 763 gives the template (`renderMenuDocument`, `menuDocFromEvent`) and plan
-766 the render service (`renderPdf`). Nothing yet turns a saved menu into that file, keeps the latest one (D16),
+design, never prices or costs (M3). Plan 764 gives the template (`renderMenuDocument`, `menuDocFromEvent`) and plan
+767 the render service (`renderPdf`). Nothing yet turns a saved menu into that file, keeps the latest one (D16),
 prints the "Powered by FoodVibe" line (D15) or lets the platform admin switch that line off. This plan builds the
 export as the first function of the menu engine (C-ENGINE), so the app now and WhatsApp later call the same code.
-The button in the editor is plan 768.
+The button in the editor is plan 769.
 
 ## Goals & Success Criteria
 
@@ -46,7 +46,7 @@ as the menu's latest export, and the platform admin can hide the powered-by line
 
 ## Execution Mode
 - Parallel: yes
-- Concurrent plans: 765 (wave 2, run `md-ai`; no shared files)
+- Concurrent plans: 766 (wave 2, run `md-ai`; no shared files)
 - Isolated DB: no
 
 ## Read-Write Scope
@@ -110,14 +110,14 @@ append the path to the scope block above and retry.
 
 ## Adopt Check
 
-- menu engine (exportMenuPdf, host.js in server/services/menu-engine/) — verdict: skip — why: our own boundary between FoodVibe data and the menu template; no package knows it; the PDF package was adopted in plan 766.
+- menu engine (exportMenuPdf, host.js in server/services/menu-engine/) — verdict: skip — why: our own boundary between FoodVibe data and the menu template; no package knows it; the PDF package was adopted in plan 767.
 
 ## Defaults
 
 - one-breakpoint-set — exception — why: the only screen change is one checkbox inside the existing platform business dialog; no new @media.
 - anchored-popup — exception — why: no new popup; the dialog already exists.
 - row-action-icons — exception — why: no list rows added.
-- loading-and-error-states — exception — why: the checkbox saves through the dialog's existing save, which already shows its loading and error states; the export button and its states are plan 768.
+- loading-and-error-states — exception — why: the checkbox saves through the dialog's existing save, which already shows its loading and error states; the export button and its states are plan 769.
 - confirm-destructive-action — exception — why: replacing the previous PDF is not a user delete (the newer export supersedes it); no delete button is added.
 - empty-state-on-list — exception — why: no list is shown.
 - unsaved-changes-on-leave — exception — why: the checkbox joins the platform dialog's existing form and its existing save; no new form or route.
@@ -142,8 +142,8 @@ line or file this plan names was removed, renamed or rewritten).
 ### Must Have (P0)
 - [ ] C-ENGINE, copied from the map (frozen 2026-11-27):
   `server/services/menu-engine/` is the only code WhatsApp and the outside API will call later:
-  - `exportMenuPdf({ businessId, eventId, actor }) → { fileId, url }` (plan 767).
-  - `menuFromText({ businessId, text, actor }) → { eventId, linked: string[], plain: string[] }` (plan 769).
+  - `exportMenuPdf({ businessId, eventId, actor }) → { fileId, url }` (plan 768).
+  - `menuFromText({ businessId, text, actor }) → { eventId, linked: string[], plain: string[] }` (plan 770).
   It reaches the rest of FoodVibe only through `server/services/menu-engine/host.js`: resolve business + modules,
   read dishes/categories, `callGemini` (which records AI usage, D28), `putPrivateFile` / delete file, create a menu
   the way a hand-made one is created. Routes are thin callers.
@@ -151,18 +151,18 @@ line or file this plan names was removed, renamed or rewritten).
   are `null` when the file store is not configured.
 - [ ] `host.js` gives the engine: `loadEvent(ctx, eventId)` (scopeFilter + withEventVisibility; null when not
   visible), `loadDesign(ctx, designId)` (the menu's design, else the business default per C-SETTINGS: missing or
-  deleted default → the first live design by `createdAt`, none → `baseDesign('classic')` — computed by 763's shared `resolveMenuDesign`, map E9), `businessSettings(ctx)`
+  deleted default → the first live design by `createdAt`, none → `baseDesign('classic')` — computed by 764's shared `resolveMenuDesign`, map E9), `businessSettings(ctx)`
   (`menuDesign.hidePoweredBy`), `dishName(id)` (live `dishes` / `recipes` of the business), `sectionLabel(key)`
   (Hebrew label: `public/assets/data/dictionary.json` base, then the `DICTIONARY_OVERRIDES` global doc, then the
   actor's own — the same chain as `server/routes/generic.js:680` and `server/utils/stock-extract.js`), `storeFile`
   (`putPrivateFile` with a request-like `{ user: { businessId, userId }, log }`), `deleteFile`, `setLatestExport`.
 - [ ] `exportMenuPdf`: `menuDocFromEvent(event, { dishName, sectionLabel })` → `renderMenuDocument(design, doc,
-  { poweredBy: !hidePoweredBy, fonts: <766's decision> })` → `renderPdf(html)` → store as kind `menu_pdf`
+  { poweredBy: !hidePoweredBy, fonts: <767's decision> })` → `renderPdf(html)` → store as kind `menu_pdf`
   (`application/pdf`) → `latestExport = { fileId, at, designId }` (one `updateOne`) → delete the previous stored file
   after the new one is saved. Unlinked dish and section names print exactly as written.
 - [ ] Paging (M8): A4 portrait; a section that fits on the next page is not split (`break-inside: avoid` from the
   template); a section longer than a page continues on the next page; one file always (D13).
-- [ ] Routes on `server/routes/menu-design.js` (the router plan 766 created):
+- [ ] Routes on `server/routes/menu-design.js` (the router plan 767 created):
   `POST /export/:eventId` → the PDF bytes (`Content-Type: application/pdf`, `Content-Disposition: attachment;
   filename="<menu name or 'menu'>.pdf"`, name cleaned to letters, digits, spaces, `-`), header `X-Menu-Export-At`;
   `GET /export/:eventId/latest` → `{ url, at, designId }` (signed link, 10 minutes) or 404 `NO_EXPORT`. Both:
@@ -171,11 +171,11 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] `stored-file.schema.ts`: kind `menu_pdf`, mime `['application/pdf']`; no `deleteAfter` (kept until replaced).
 - [ ] Map extension E2: the platform business dialog gets a "hide Powered by FoodVibe" checkbox (default off) saved
   through `PlatformAdminService.updatePlatform` with the dialog's existing reason field; the admin businesses list
-  returns `hidePoweredBy` (plan 763 adds the field and the admin route's accept; add the list projection here if 763
+  returns `hidePoweredBy` (plan 764 adds the field and the admin route's accept; add the list projection here if 764
   did not).
 - [ ] Client `MenuPdfService` (`src/app/core/services/menu-pdf.service.ts`): `export(eventId): Promise<Blob>` and
   `latest(eventId): Promise<{ url: string, at: number, designId: string } | null>` through `API.menuDesign(path)`
-  added to the API map. No button (plan 768).
+  added to the API map. No button (plan 769).
 
 ### Should Have (P1)
 - [ ] `server/scripts/menu-export-sample.js`: renders the long and the short fixture with `baseDesign('classic')` to
@@ -204,9 +204,9 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - [ ] A9: Register the menu engine and the new client so later plans reuse them — menu-engine family, http family line, folder maps — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, src/app/core/services/breadcrumbs.md
 
 ## Technical Considerations
-- Dependencies: plan 763 (`shared/schemas/menu-design/` — map extension E1 — `renderMenuDocument`, `menuDocFromEvent`,
+- Dependencies: plan 764 (`shared/schemas/menu-design/` — map extension E1 — `renderMenuDocument`, `menuDocFromEvent`,
   `baseDesign`; `menuEvents.designId`, `subtitle`, `bottomNote`, server-owned `latestExport` in `EVENT_SERVER_FIELDS`;
-  `businesses.menuDesign`), plan 766 (`renderPdf`, its fonts decision, `server/routes/menu-design.js` mounted).
+  `businesses.menuDesign`), plan 767 (`renderPdf`, its fonts decision, `server/routes/menu-design.js` mounted).
   Server requires the template from `server/generated/schemas/menu-design/`.
 - New files needed: `server/services/menu-engine/{index,host,export}.js`, `server/scripts/menu-export-sample.js`,
   `src/app/core/services/menu-pdf.service.ts` + spec, two server test files, fixtures.
@@ -216,16 +216,16 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   the caller may read; `:eventId` is a plain string id (no operators).
 - Security surface: (1) the PDF carries only names and texts, never money fields — a test asserts it; (2) the stored
   PDF is a private, signed-link file (plan 619 store), link valid 10 minutes; (3) the menu HTML is built only by
-  `renderMenuDocument` (escaped text, Cloudinary-only images), printed with JavaScript off (plan 766); (4) no menu
+  `renderMenuDocument` (escaped text, Cloudinary-only images), printed with JavaScript off (plan 767); (4) no menu
   text, dish names or file links in logs — only `{ event: 'menu_export.done', ms, bytes, pages }`;
   (5) a per-business limit keeps one account from tying up the single browser.
-- Data / migration: none (new optional fields come from 763; stored files gain one kind).
+- Data / migration: none (new optional fields come from 764; stored files gain one kind).
 - Project checks: log-query `[auto]` item included; `pnpm run test:server` and `pnpm run test:ci`; no `[ui]` card —
   the only screen change is in the platform-admin dialog and the QA login is not a platform admin, so it is `[human]`.
   Hebrew key named above; `dictionary.json` is append-only.
 
 ## Out of Scope
-- The Export button and the design switcher in menu intelligence (plan 768).
+- The Export button and the design switcher in menu intelligence (plan 769).
 - Export history (D16: latest only); image export (D14).
 - Sending the PDF anywhere (WhatsApp stage).
 - Deleting a menu's stored PDF when the menu itself is purged from the Trash (it goes with the business delete).

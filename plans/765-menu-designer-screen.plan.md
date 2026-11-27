@@ -1,22 +1,22 @@
-# Plan 764 — The menu designer screen: build, preview, save and manage designs by hand
+# Plan 765 — The menu designer screen: build, preview, save and manage designs by hand
 
 Status: draft
-Depends-on: 763
+Depends-on: 764
 Track: code
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
 
 ## Problem Statement
-A food business has no way to set how its menus look. Plan 763 adds the design record (`menuDesigns`), the per-business
+A food business has no way to set how its menus look. Plan 764 adds the design record (`menuDesigns`), the per-business
 default, the curated Hebrew fonts, the built-in textures, four base designs and the one shared template
 (`renderMenuDocument`). Nobody can see or change any of it yet. This plan builds the designer: a separate, simple screen
 that sets the **look only** (Dandan, 2026-11-27, M1 in `docs/menu-design/menu-design-map.md`): page, background, frame,
 divider, fonts, colors, logo, business name and contact line. It shows sample dish names so the chef can judge the
 look. It is not where menus are written: no dishes, no prices.
 
-The designer is one self-contained component (`app-menu-designer`) so that menu intelligence (plan 768) and, in the
-last stage, a slim outside setup page can host it (brief B1 note). Plan 765 adds the AI on top of this screen.
+The designer is one self-contained component (`app-menu-designer`) so that menu intelligence (plan 769) and, in the
+last stage, a slim outside setup page can host it (brief B1 note). Plan 766 adds the AI on top of this screen.
 
-Verified on `origin/main` d34a0106 (plan 763's pieces are taken as its contracts, copied below):
+Verified on `origin/main` d34a0106 (plan 764's pieces are taken as its contracts, copied below):
 - Routes: `src/app/app.routes.ts` — `menu-library` (`:211`) and `menu-intelligence` (`:222`) use
   `canActivate: [authGuard, moduleGuard(['events'])]`; `moduleGuard(keys)` (`src/app/core/guards/module.guard.ts:8`)
   sends a missing module to `/dashboard`. `pendingChangesGuard` is the leave-page guard.
@@ -115,19 +115,19 @@ once, saves it under a name, and then renames, duplicates, deletes it or makes i
 - [auto] `src/app/shared/menu-preview/menu-preview.component.spec.ts`: the iframe has `sandbox=""` (no
   `allow-scripts`) and its `srcdoc` equals `renderMenuDocument(design, SAMPLE_MENU_DOC, { poweredBy: true, fonts: 'link' })`;
   changing the `design` input changes `srcdoc` without recreating the iframe element.
-- [auto] `node scripts/scope-check.mjs --arch --plan=plans/764-menu-designer-screen.plan.md` → `ARCH: ok`;
-  `node scripts/scope-check.mjs --reuse --plan=plans/764-menu-designer-screen.plan.md` exits 0.
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/765-menu-designer-screen.plan.md` → `ARCH: ok`;
+  `node scripts/scope-check.mjs --reuse --plan=plans/765-menu-designer-screen.plan.md` exits 0.
 - [auto] `node scripts/breadcrumbs-check.mjs` exits 0.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
-- [ui] `e2e/ui/764-1.spec.ts`: with modules `['events', 'menu_design']` set through the platform route, `/menu-library`
+- [ui] `e2e/ui/765-1.spec.ts`: with modules `['events', 'menu_design']` set through the platform route, `/menu-library`
   shows the header button «עיצובי תפריט»; with the defaults (no `menu_design`) the button is absent and `/menu-design`
-  sends the browser to `/dashboard`. Restores the defaults in `finally`. Screenshot `screens/764-1.png`.
-- [ui] `e2e/ui/764-2.spec.ts`: on `/menu-design` with no designs, the empty state says «עוד אין עיצובים לתפריט» with
-  «עיצוב חדש»; pressing it and picking «קלאסי» opens the editor whose preview frame contains «תפריט לדוגמה». Screenshot `screens/764-2.png`.
-- [ui] `e2e/ui/764-3.spec.ts`: in the editor, typing «מסעדת הים» in «שם העסק» makes the preview frame show «מסעדת הים»
-  without saving; «שמירה» with the name «ערב חתונה» returns to the list, which shows «ערב חתונה». Screenshot `screens/764-3.png`.
-- [ui] `e2e/ui/764-4.spec.ts`: with two saved designs, the row menu «קביעה כברירת מחדל» on the second moves the
-  «ברירת מחדל» chip to it; «שכפול» adds «<name> (עותק)». Screenshot `screens/764-4.png`.
+  sends the browser to `/dashboard`. Restores the defaults in `finally`. Screenshot `screens/765-1.png`.
+- [ui] `e2e/ui/765-2.spec.ts`: on `/menu-design` with no designs, the empty state says «עוד אין עיצובים לתפריט» with
+  «עיצוב חדש»; pressing it and picking «קלאסי» opens the editor whose preview frame contains «תפריט לדוגמה». Screenshot `screens/765-2.png`.
+- [ui] `e2e/ui/765-3.spec.ts`: in the editor, typing «מסעדת הים» in «שם העסק» makes the preview frame show «מסעדת הים»
+  without saving; «שמירה» with the name «ערב חתונה» returns to the list, which shows «ערב חתונה». Screenshot `screens/765-3.png`.
+- [ui] `e2e/ui/765-4.spec.ts`: with two saved designs, the row menu «קביעה כברירת מחדל» on the second moves the
+  «ברירת מחדל» chip to it; «שכפול» adds «<name> (עותק)». Screenshot `screens/765-4.png`.
 - [human] The look: on a desktop the controls and the sample menu sit side by side and the sample changes as you type
   or pick; each font in the font picker is shown in its own letters; Hebrew, English and mixed sample dishes read
   correctly; an uploaded background picture and an uploaded logo show in the sample.
@@ -141,9 +141,9 @@ once, saves it under a name, and then renames, duplicates, deletes it or makes i
 - [human] On a phone the editor shows the sample menu above the controls and every control is reachable by scrolling the page.
 
 ## Execution Mode
-- Parallel: yes — with 766 (wave 1 of the program, run `md-pdf`); no shared files.
-- Concurrent plans: 766.
-- Isolated DB: no — writes only `menuDesigns` documents through the generic API and the default through plan 763's route.
+- Parallel: yes — with 767 (wave 1 of the program, run `md-pdf`); no shared files.
+- Concurrent plans: 767.
+- Isolated DB: no — writes only `menuDesigns` documents through the generic API and the default through plan 764's route.
 
 ## Read-Write Scope
 
@@ -176,10 +176,10 @@ src/app/pages/menu-library/components/menu-library-list/menu-library-list.compon
 src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
 src/app/app.config.ts
 server/app.js
-e2e/ui/764-1.spec.ts
-e2e/ui/764-2.spec.ts
-e2e/ui/764-3.spec.ts
-e2e/ui/764-4.spec.ts
+e2e/ui/765-1.spec.ts
+e2e/ui/765-2.spec.ts
+e2e/ui/765-3.spec.ts
+e2e/ui/765-4.spec.ts
 src/app/pages/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 src/app/core/services/breadcrumbs.md
@@ -203,26 +203,26 @@ append the path to the scope block above and retry.
 
 ## Architecture Impact
 - INV-1: preserves — every design write goes through the generic API (`MenuDesignDataService` →
-  `/api/v1/data/menuDesigns`, scoped and checked by `assertCan` with the default rules plan 763 set); the default is set
-  only through plan 763's owner-only `PUT /api/v1/business/menu-design-default`. The browser only hides (module and
+  `/api/v1/data/menuDesigns`, scoped and checked by `assertCan` with the default rules plan 764 set); the default is set
+  only through plan 764's owner-only `PUT /api/v1/business/menu-design-default`. The browser only hides (module and
   owner checks); the server stays the gate. `server/app.js` is touched only for the CSP frame line (A6), no permission code.
 - INV-3: preserves — setting a default is one request on the business record; no client loop over designs
   (there is no `isDefault` flag). Duplicate is one create.
-- INV-4: preserves — the browser builds designs only through `menuDesignDraftSchema` (shared, plan 763); the server
+- INV-4: preserves — the browser builds designs only through `menuDesignDraftSchema` (shared, plan 764); the server
   validates every write against `menuDesignSchema`. No schema change here.
-- INV-6: preserves — no AI call in this plan (plan 765 adds it, through `server/routes/ai/`).
+- INV-6: preserves — no AI call in this plan (plan 766 adds it, through `server/routes/ai/`).
 
 ## Reuse Check
 - `MenuDesignListPage` (`src/app/pages/menu-design/menu-design-list.page.*`) — family: list-page — rung: 2 — why: `app-list-shell` (`layout: 'cards'`) with `app-page-header`, `app-row-actions-menu`, `app-empty-state`; no new list base
 - `MenuDesignEditPage` (`src/app/pages/menu-design/menu-design-edit.page.*`) — family: entity-form — rung: 2 — why: hosts `app-menu-designer`; `useUnsavedChanges` + `pendingChangesGuard`, `.c-form-actions` save / cancel as the form recipe says
 - base-template popup (`src/app/pages/menu-design/components/base-template-picker/`) — family: modal-shell — rung: 2 — why: `app-modal-shell`, four choice cards, centred, no sheet
-- `MenuDesignerComponent` (`src/app/shared/menu-designer/`) — family: none — rung: 4 — why: no piece edits a menu's look; it must be one self-contained component that the designer page, menu intelligence (plan 768) and the later outside setup page all host, so it lives in `shared/` and owns only the form and the preview, never saving
-- `MenuPreviewComponent` (`src/app/shared/menu-preview/`) — family: none — rung: 4 — why: no piece shows a whole HTML document safely; a sandboxed `srcdoc` iframe of `renderMenuDocument` is the one way the preview equals the PDF (C-TEMPLATE); plan 765's three variants reuse it
+- `MenuDesignerComponent` (`src/app/shared/menu-designer/`) — family: none — rung: 4 — why: no piece edits a menu's look; it must be one self-contained component that the designer page, menu intelligence (plan 769) and the later outside setup page all host, so it lives in `shared/` and owns only the form and the preview, never saving
+- `MenuPreviewComponent` (`src/app/shared/menu-preview/`) — family: none — rung: 4 — why: no piece shows a whole HTML document safely; a sandboxed `srcdoc` iframe of `renderMenuDocument` is the one way the preview equals the PDF (C-TEMPLATE); plan 766's three variants reuse it
 - font, background-kind, texture, frame, divider, size and align pickers — family: chip — rung: 2 — why: `.c-chip-group` with `role="radiogroup"`; a font chip sets `font-family` inline so each font shows in its own letters
 - frame width — family: stepper — rung: 1 — why: `app-counter` (0–6)
 - text fields (name, business name, contact line) — family: form-field — rung: 1 — why: `app-form-field` + `.c-input`
 - rename in the list — family: form-field — rung: 1 — why: `app-inline-rename-field`
-- `MenuDesignDataService` (created by plan 763) — family: entity-data-service — rung: 3 — why: adds a resolver, duplicate and `defaultDesign_` to the service 763 builds on `BaseEntityDataService<MenuDesign>`
+- `MenuDesignDataService` (created by plan 764) — family: entity-data-service — rung: 3 — why: adds a resolver, duplicate and `defaultDesign_` to the service 764 builds on `BaseEntityDataService<MenuDesign>`
 - `BusinessService.setMenuDesignDefault` — family: http — rung: 3 — why: one PUT through `API.business('menu-design-default')` beside the other business setting calls
 - `designFromForm` / `formFromDesign` (`src/app/core/utils/menu-design-form.util.ts`) — family: helpers — rung: 3 — why: pure form ↔ design mapping, one file with its spec
 - `menuFontsHref(ids)` (`src/app/core/utils/menu-fonts-link.util.ts`) — family: helpers — rung: 3 — why: one Google Fonts CSS link for the curated fonts, so the font chips can show each font; pure, with a spec
@@ -266,9 +266,9 @@ line or file this plan names was removed, renamed or rewritten).
   (a resolver exported from `menu-design-data.service.ts`, family `page-entry-loading`).
 - [ ] **Entry point**: the menu library header gets a ghost button «עיצובי תפריט» (icon `palette`) before «תפריט חדש»,
   shown when `modules.has('menu_design') && modules.has('events')` (C-MODULE), linking to `/menu-design`.
-- [ ] **Model and data**: plan 763 creates `src/app/core/models/menu-design.model.ts` and
+- [ ] **Model and data**: plan 764 creates `src/app/core/models/menu-design.model.ts` and
   `MenuDesignDataService extends BaseEntityDataService<MenuDesign>` (`'menuDesigns'`). This plan adds what the screens
-  need, keeping 763's method names: `allDesigns_`, add / update / delete if 763 left any out, `duplicateDesign(id)` = one create with
+  need, keeping 764's method names: `allDesigns_`, add / update / delete if 764 left any out, `duplicateDesign(id)` = one create with
   ` (עותק)` added to the name, cut to 60 characters).
 - [ ] **Default**: `BusinessService.setMenuDesignDefault(id)` → `PUT API.business('menu-design-default')` `{ designId }`,
   then refreshes `business_`. `MenuDesignDataService.defaultDesign_` = computed per C-SETTINGS: `business_().menuDesign.defaultDesignId`
@@ -332,37 +332,37 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Let the designs data service duplicate designs, load before a page and name the default design — extends what plan 763 created (model + MenuDesignDataService): resolver, duplicateDesign, defaultDesign_ per C-SETTINGS; setMenuDesignDefault on the business service — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts (+ spec), src/app/core/services/business.service.ts (+ spec)
+- [ ] A1: Let the designs data service duplicate designs, load before a page and name the default design — extends what plan 764 created (model + MenuDesignDataService): resolver, duplicateDesign, defaultDesign_ per C-SETTINGS; setMenuDesignDefault on the business service — src/app/core/models/menu-design.model.ts, src/app/core/services/menu-design-data.service.ts (+ spec), src/app/core/services/business.service.ts (+ spec)
 - [ ] A2: Map the designer form to a design and back, and build one font link for the curated fonts — designFromForm, formFromDesign, menuFontsHref; specs as in Done-when — src/app/core/utils/menu-design-form.util.ts, src/app/core/utils/menu-fonts-link.util.ts (+ specs)
 - [ ] A3: Show any design on the sample menu in a safe frame that scales to its box — sandboxed srcdoc iframe of renderMenuDocument, ResizeObserver scale, no element recreate on change — src/app/shared/menu-preview/**
 - [ ] A4: Build the self-contained designer with every look control and the live preview — the seven groups, uploads through CloudinaryService with downscaleImage, chip groups, counter, color fields with hex check; never saves — src/app/shared/menu-designer/**
 - [ ] A5: Add the designs list, the base-template popup and the edit page, reached from the menu library — routes (append), list page (cards, row menu, empty and error states), popup, edit page with save, cancel and leave guard, the header button with the module check, dictionary keys, icons — src/app/pages/menu-design/**, src/app/pages/menu-library/components/menu-library-list/*, src/app/app.routes.ts, public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A6: Make sure the preview frame is allowed in the served build — build, serve through the slot's server (port 300N), open the editor; if the console shows a frame-src refusal, change only `frameSrc: ["'none'"]` to `frameSrc: ["'self'"]` in server/app.js and record the line in Execution Notes; else record "no change" — server/app.js
-- [ ] A7: Prove the designer in the running app with four short UI tests — the four specs as in Done-when, each restoring the business's modules — e2e/ui/764-1.spec.ts, e2e/ui/764-2.spec.ts, e2e/ui/764-3.spec.ts, e2e/ui/764-4.spec.ts
+- [ ] A7: Prove the designer in the running app with four short UI tests — the four specs as in Done-when, each restoring the business's modules — e2e/ui/765-1.spec.ts, e2e/ui/765-2.spec.ts, e2e/ui/765-3.spec.ts, e2e/ui/765-4.spec.ts
 - [ ] A8: Record the new pieces in the folder maps and the family registry — breadcrumbs for pages, shared, services, models and utils; menu-designer and menu-preview as new families; inventory lines — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/core/utils/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
 
 ## Technical Considerations
-- Dependencies: plan 763's schema, settings route and `shared/schemas/menu-design/` template (`@schemas/menu-design/*`); `CloudinaryService`; `ModuleService`.
+- Dependencies: plan 764's schema, settings route and `shared/schemas/menu-design/` template (`@schemas/menu-design/*`); `CloudinaryService`; `ModuleService`.
 - New files needed: listed in the Reuse Check and the scope.
-- Model changes: none in the shared schema (763 owns it); the browser model only re-exports it.
-- Backend / API: none new. Uses `/api/v1/data/menuDesigns` (generic) and `PUT /api/v1/business/menu-design-default` (763).
-- Auth and validation: the generic API validates against `menuDesignSchema` and checks `assertCan`; the default route is owner-only (763). The browser checks `menuDesignDraftSchema` before saving so a bad hex never reaches the server.
+- Model changes: none in the shared schema (764 owns it); the browser model only re-exports it.
+- Backend / API: none new. Uses `/api/v1/data/menuDesigns` (generic) and `PUT /api/v1/business/menu-design-default` (764).
+- Auth and validation: the generic API validates against `menuDesignSchema` and checks `assertCan`; the default route is owner-only (764). The browser checks `menuDesignDraftSchema` before saving so a bad hex never reaches the server.
 - Security surface: the preview iframe runs no script (`sandbox=""`) and its HTML comes only from the shared renderer, which escapes every text and accepts images only from `https://res.cloudinary.com/` (C-TEMPLATE). Uploads use the existing unsigned preset (public images, M8) — no new secret. A6 may widen `frame-src` to `'self'` only.
 - Data / migration: none.
 - Project checks: log-query item (Done-when); Reuse Check present; page recipe lines in UI/UX Notes; breadcrumbs listed in scope; Hebrew strings through `translatePipe` and `dictionary.json`; icons registered; hotspots append-only.
 
 ## Out of Scope
-- AI variants and refining in words (plan 765).
-- Showing a menu in its design inside menu intelligence, the design switcher on a menu (plan 768).
-- PDF export (plans 766, 767).
-- The platform admin's «Powered by» switch (plan 763) — the preview always shows the line here.
+- AI variants and refining in words (plan 766).
+- Showing a menu in its design inside menu intelligence, the design switcher on a menu (plan 769).
+- PDF export (plans 767, 768).
+- The platform admin's «Powered by» switch (plan 764) — the preview always shows the line here.
 - A slim outside setup page hosting the designer (last stage).
 
 ## Critical Questions
-- Q: Where does the chef reach the designer? A: a button «עיצובי תפריט» in the menu library header plus a second entry inside menu intelligence (plan 768) — confirmed by Dandan 2026-11-27.
+- Q: Where does the chef reach the designer? A: a button «עיצובי תפריט» in the menu library header plus a second entry inside menu intelligence (plan 769) — confirmed by Dandan 2026-11-27.
 
 ## Execution Notes
-- behaviour: staff may create and edit designs (the default INV-1 rules plan 763 keeps); only the owner sets the default.
+- behaviour: staff may create and edit designs (the default INV-1 rules plan 764 keeps); only the owner sets the default.
 - behaviour: deleting the default design leaves no default; C-SETTINGS then uses the first live design by `createdAt`.
 - behaviour: on a phone the sample menu sits above the controls, capped at 60% of the screen height.
 - behaviour: a design's copy is named «<name> (עותק)».
