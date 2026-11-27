@@ -323,12 +323,12 @@ command on one line; the arguments are in single quotes and hold no apostrophe)
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
-- [ ] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
-- [ ] A3: Make the guard forbid the removed selectors and teach the two append-only checks this one approved removal — new export withoutRetiredSheetRules with three fixture cases, three allow entries deleted, the stylesheet added to the no-mention test, both append-only assertions compare with the base minus the retired rules — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs, scripts/test/style-720.test.mjs, scripts/test/style-703.test.mjs
-- [ ] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
-- [ ] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
-- [ ] A6: Run every check of this plan and hand the Human the two equipment looks — every auto item of Goals with its exact output into Execution Notes; then the two human checks as cards — no file
+- [x] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
+- [x] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
+- [x] A3: Make the guard forbid the removed selectors and teach the two append-only checks this one approved removal — new export withoutRetiredSheetRules with three fixture cases, three allow entries deleted, the stylesheet added to the no-mention test, both append-only assertions compare with the base minus the retired rules — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs, scripts/test/style-720.test.mjs, scripts/test/style-703.test.mjs
+- [x] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
+- [x] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
+- [x] A6: Run every check of this plan and hand the Human the two equipment looks — every auto item of Goals with its exact output into Execution Notes; then the two human checks as cards — no file
 
 ## Technical Considerations
 - Dependencies: already on the base branch — plans 720 and 721 (`scripts/lib/modal-guard.mjs` with `modalFindings`, `scripts/test/style-720.test.mjs` with `ALLOW` and its four tests, `scripts/test/style-703.test.mjs`, the plan 720 block in `src/styles.scss`) and plan 711's move of the equipment panel onto `app-modal-shell`.
@@ -366,3 +366,37 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: `--date 2026-11-26` is passed so `turned on:` carries the day of the Human's words, not the build day.
 - behaviour: this plan's own `## Defaults` has no row for `modal-centered` / `modal-scrollable` — they are not in the contract when the plan is saved, and a row for an unknown id fails the defaults gate.
 - behaviour: A4 comes after A2 (see Technical Considerations), although the turn-on was the first thing asked for.
+
+### Build (2026-11-27, branch `feat/757-remove-old-sheet-rules`)
+
+Step 0 (drift): `git merge-base --is-ancestor <commit> HEAD` answers no for each listed commit, so none of them is on this branch.
+- `79d691f7` ok · `73be8a0a` ok · `711cd215` ok · `a34fc0e3` ok · `9e339e05` ok · `bbf020bf` ok · `def248b0` ok · `30626b01` ok · `0df51a40` ok
+- Scope files changed between the Snapshot and the branch point: only `docs/brain/component-families.md` and `docs/brain/inventory.md` (added entries of plans 751 and 752); no symbol this plan names was removed or rewritten.
+
+A1 (safety check: the three files and the plan 720 marker exist):
+1. `git grep -nE "m-sheet|as-modal" -- src` → `src/app/shared/modal-shell/modal-shell.component.spec.ts:128`, `:129`; `src/styles.scss:1416`, `:1855`, `:1859`, `:2654`, `:2659`.
+2. `git grep -nF "[sheet]" -- src` → no match.
+3. `git grep -nE "\bsheet\s*=\s*input\b" -- src/app/shared/modal-shell` → no match.
+4. `git grep -nE "m-sheet|as-modal|\[sheet\]" -- e2e server public scripts` → only `scripts/lib/modal-guard.mjs`, `scripts/test/modal-guard.test.mjs`, `scripts/test/style-720.test.mjs`.
+
+A2: `wc -l src/styles.scss` → 3183 (was 3243); the append-only tests prove the file equals `withoutRetiredSheetRules` of the base.
+
+A4: both `add` commands printed their `DEFAULTS: on …` line and `DEBT: added default.<id> at 0`.
+
+A5: besides the planned Use-line addition, `modal-guard` got a `Pieces:` line: `kit-checks` failed with `reuse-registry-missing-piece` until a line held the Reuse Check piece text as written; after it `KIT_CHECKS: ok (6 checks)`.
+
+A6 evidence:
+- `node --test scripts/test/modal-guard.test.mjs scripts/test/style-720.test.mjs scripts/test/style-703.test.mjs` → exit 0, pass 22, fail 0, skipped 0
+- `pnpm run test:scripts` → exit 0, pass 269, fail 0
+- `pnpm run build` → exit 0
+- `pnpm run lint` → exit 0 (0 errors, 72 warnings)
+- `pnpm run test:ci` → exit 0, `TOTAL: 3276 SUCCESS`
+- `node scripts/product-defaults.mjs list` → exit 0, both `DEFAULTS: on` lines, `13 defaults, 12 on`, no `bad contract` line
+- `node scripts/debt-baseline.mjs --show` → exit 0, `default.modal-centered 0 → 0`, `default.modal-scrollable 0 → 0`
+- `node scripts/inventory.mjs --check` → exit 0, `INVENTORY: ok`
+- `pnpm run lint:reuse` → exit 0 · `node scripts/reuse-lint.mjs --check-registry` → exit 0 · `node scripts/breadcrumbs-check.mjs` → exit 0, `BREADCRUMBS: clean`
+- `pnpm run lint:icons`, `pnpm run lint:no-native-select`, `node scripts/plan-ledger-check.mjs`, `node scripts/override-check.mjs` → exit 0
+- `kit-manifest-check` → exit 0, `0 unclassified` · `scope-check --diff=origin/orch/rs-console` → exit 0, `SCOPE: ok` · `kit-checks` → exit 0
+- `node scripts/ci-scope-check.mjs --checkout-branch` → exit 0 (`skipped`: no branch name is passed outside CI)
+- `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured` (no entries)
+- The two `[human]` checks are not done: they are the Human's.

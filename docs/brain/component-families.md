@@ -88,6 +88,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
 - Stacking: `[zIndex]` takes a `--z-*` token (`src/styles.scss`, plan 538); `[topLayer]` puts a popup in the browser top layer (the confirm popup uses both, so a question is always in front).
 - Always centred (plan 720): no bottom sheet at any width — the shell has no `sheet` input. Height: never taller than the window (`--modal-max-block`: `dvh`, safe areas, keyboard). Put the content as title → `.c-modal-body` → `.c-modal-actions` straight inside the shell; the body scrolls and the title and actions stay. Content without a `.c-modal-body` makes the whole card scroll. A card that sizes itself through `cardClass` keeps `max-block-size` ≤ `var(--modal-max-block)` and a scrolling part. Guard: `scripts/lib/modal-guard.mjs` (`bottom-sheet`, `top-sheet`, `sheet-binding`, `modal-no-scroll`), run by `scripts/test/style-720.test.mjs`.
+- Defaults (on, the Human, 2026-11-26): `modal-centered` and `modal-scrollable` in `_shared/product-defaults.md`. The old bottom-sheet rules (`.m-sheet`, `.m-sheet-card`, `.inline-edit-panel.as-modal`) were removed from `src/styles.scss` by plan 757; the guard has no allow entry for them.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
 - Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template; rule `native-browser-dialog` warns on a new `window.confirm` / `alert` / `prompt` (use `ConfirmModalService`).
@@ -100,7 +101,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### modal-guard — the popup rules checked by a script
 
 - Status: stable (plan 720)
-- Use: `scripts/lib/modal-guard.mjs` (`modalFindings`), run by `scripts/test/style-720.test.mjs`.
+- Use: `scripts/lib/modal-guard.mjs` (`modalFindings`), run by `scripts/test/style-720.test.mjs`; `withoutRetiredSheetRules(text)` — the base text the append-only tests (`style-703`, `style-720`) compare with, minus the rules plan 757 removed.
+- Pieces: modalFindings, withoutRetiredSheetRules (a new export of scripts/lib/modal-guard.mjs).
 - When: changing a popup template or style; it flags bottom sheets, a `sheet` binding and a popup that cannot scroll.
 
 ### modal-controller — open a popup and get its answer
