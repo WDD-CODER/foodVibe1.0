@@ -123,7 +123,7 @@ once, saves it under a name, and then renames, duplicates, deletes it or makes i
   shows the header button «עיצובי תפריט»; with the defaults (no `menu_design`) the button is absent and `/menu-design`
   sends the browser to `/dashboard`. Restores the defaults in `finally`. Screenshot `screens/765-1.png`.
 - [ui] `e2e/ui/765-2.spec.ts`: on `/menu-design` with no designs, the empty state says «עוד אין עיצובים לתפריט» with
-  «עיצוב חדש»; pressing it and picking «קלאסי» opens the editor whose preview frame contains «תפריט לדוגמה». Screenshot `screens/765-2.png`.
+  «עיצוב חדש»; pressing it and picking «קלאסי» opens the editor whose preview frame contains «תפריט ערב» (the title of SAMPLE_MENU_DOC from plan 764; Planner correction 2026-11-27, ask 765-1/765-3). Screenshot `screens/765-2.png`.
 - [ui] `e2e/ui/765-3.spec.ts`: in the editor, typing «מסעדת הים» in «שם העסק» makes the preview frame show «מסעדת הים»
   without saving; «שמירה» with the name «ערב חתונה» returns to the list, which shows «ערב חתונה». Screenshot `screens/765-3.png`.
 - [ui] `e2e/ui/765-4.spec.ts`: with two saved designs, the row menu «קביעה כברירת מחדל» on the second moves the
