@@ -575,3 +575,16 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: suggest mode and the eval use the same pick as a guest turn.
 - review (draft, 2026-11-26): the expected values of the `fact-pick` cases (tokens, forms, matches, scores, the ids, counts and lengths of the 40-item set) were produced by running a throwaway copy of the algorithm as written here, not counted by hand.
 - review (draft, 2026-11-26): `scope-check --tags`, `--defaults`, `--adopt`, `--arch` (INV-2, INV-7) and `--deps` pass on the draft. `--reuse` run on `main` reports the families `assistant-guardrails`, `assistant-turn` (staging registry), `date-words` (added by plan 751) and `assistant-runs` (added by plan 752) as unknown; they are headings of the base branch once those plans are merged. `--tests` warns about `server/test/frontdesk-eval.test.js` and `server/test/frontdesk-guardrails.test.js`; both stay unchanged on purpose.
+
+### Build (2026-11-27, code commit ab699047, docs commit d9ca166e)
+- Step 0 (`scope-check --drift` → `REALITY: drift`): 711cd215 ok · a34fc0e3 ok · 9e339e05 ok · 4346fa14 ok · bbf020bf ok · def248b0 ok · 30626b01 ok; every symbol Step 0 names exists with the role described. Next free rule number: R-32.
+- `pnpm run build` → exit 0 · `pnpm run lint` → exit 0 (0 errors, 72 warnings) · `pnpm --dir server run lint` → exit 0 (0 errors) · `pnpm run lint:icons` → exit 0 · `pnpm run lint:no-native-select` → exit 0.
+- `pnpm run test:ci` → exit 0, `TOTAL: 3286 SUCCESS`.
+- `pnpm run test:server` → exit 0, `Test Files 185 passed (185)`, `Tests 2814 passed (2814)`; `server/test/frontdesk-eval.test.js` and `server/test/frontdesk-guardrails.test.js` unchanged.
+- `node scripts/inventory.mjs --check` → `INVENTORY: ok` · `node scripts/reuse-lint.mjs --check-registry` → `REUSE: registry ok (110 families, 278 paths)` · `node scripts/breadcrumbs-check.mjs` → `BREADCRUMBS: clean`.
+- `kit-manifest-check.mjs --root .` → `KIT_MANIFEST: ok` · `kit-checks.mjs --base origin/orch/rs-console` → `KIT_CHECKS: ok (6 checks)` · `override-check.mjs` → ok · `plan-ledger-check.mjs` → OK · `ci-scope-check.mjs --checkout-branch` → exit 0 (skipped).
+- Scope: `node scripts/scope-check.mjs --diff=origin/orch/rs-console` → `SCOPE: ok`. The same file run from the main folder's path exits 1, because the script reads the repository it lies in (the main checkout), not this folder; the two copies are identical.
+- `node scripts/log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured` (a builder folder has no database).
+- The suites ran on the content of d9ca166e; the later commits change only this plan.
+- seen: `server/services/knowledge.js` — `publicFacts` reads the profile with `findOne({ businessId })`, without the `deletedAt` filter the turn uses (`server/services/frontdesk-turn.js`, step `setup`). The plan keeps the two reads unchanged.
+- A6 stays open: the checks ran; the slot's server and the one [human] simulator card belong to the run and Dandan.
