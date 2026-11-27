@@ -1,0 +1,202 @@
+{
+  "run": "lineage",
+  "branch": "orch/lineage",
+  "base": "main",
+  "startedAt": "2026-11-27T20:11:46.199Z",
+  "mainShaAtStart": "48d8524cd9d56f4f41fe637092e9a7415eda3759",
+  "plans": {
+    "771": {
+      "nnn": "771",
+      "title": "Generic writes add clone lineage only to cloneable collections, so a new collection needs no route edit",
+      "branch": "feat/771-generic-writes-read-lineage",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T20:14:09.204Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T21:31:59.243Z"
+        }
+      },
+      "humanItems": [
+        "Create one knowledge item and one client in the app (any business): both save, as before."
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T20:14:08.912Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T20:14:09.206Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:20:02.976Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:31:43.776Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:31:59.246Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:33:02.172Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T21:34:45.773Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 9,
+      "sha": "ebdb6d234d9f574ad61514471ab6fd9050e3677c",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 3944,
+          "tokens": {
+            "input": 1145796,
+            "output": 6141
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 60.4,
+          "tokens": {
+            "input": 223521,
+            "output": 4554
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "0cc76a40d3e18988d98bc31066b0e0269238d059"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T20:12:03.961Z",
+      "plan": "771",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: server/test/collections.test.js, server/test/cross-business.test.js, docs/workflow-kit/manifest.json"
+    },
+    {
+      "at": "2026-11-27T20:14:08.421Z",
+      "plan": "771",
+      "text": "the folder foodVibe1.0-orch-lineage-771 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T21:19:53.863Z",
+      "plan": "771",
+      "text": "builder left undone (round 0): [human] Create one knowledge item and one client in the app: not checked, it is the Human's item"
+    },
+    {
+      "at": "2026-11-27T21:20:05.811Z",
+      "plan": "771",
+      "text": "GATE: skip pnpm run test:ci — no change under src/**, public/**, shared/**, angular.json, tsconfig*.json, karma.conf.*"
+    },
+    {
+      "at": "2026-11-27T21:33:18.672Z",
+      "plan": "771",
+      "text": "the folder foodVibe1.0-orch-merge-lineage was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T21:37:18.159Z",
+      "text": "FINAL: same tree as plan 771's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch skipped"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 9,
+  "updatedAt": "2026-11-27T21:42:16.405Z",
+  "selfDecided": [
+    {
+      "plan": "771",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: server/test/collections.test.js, server/test/cross-business.test.js, docs/workflow-kit/manifest.json",
+      "why": "scope: 3 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- server/test/collections.test.js server/test/cross-business.test.js docs/workflow-kit/manifest.json",
+      "at": "2026-11-27T20:12:03.477Z"
+    }
+  ],
+  "stopReason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2796 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+  "stops": [
+    {
+      "at": "2026-11-27T21:42:12.532Z",
+      "reason": "final gate failed: pnpm run test:ci — TOTAL: 1 FAILED, 2796 SUCCESS — no plan in this run changed the failing files — may be this machine (try the same command on the run's base commit)",
+      "attempt": 1
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "771",
+      "type": "behaviour",
+      "text": "behaviour: VERSION_HISTORY, activity_log and DICTIONARY_OVERRIDES are not cloneable and have no schema, so a generic POST or PUT on them no longer stores _masterId / _userModified (it did before); no reader of those fields on these three was found — reverse: add the three names to the LINEAGE set at server/routes/generic.js:126",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "771",
+      "type": "seen",
+      "text": "seen: docs/agent/plan-checks.md:62 still tells planners to list server/routes/generic.js and add a non-cloneable type to NO_LINEAGE, which no longer exists; the file is outside this plan's scope",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "771",
+      "type": "seen",
+      "text": "seen: server/routes/generic.js:1329 — the whole-collection replace (VERSION_HISTORY only) still writes _masterId: null and _userModified: false on a non-cloneable type; the plan names only the POST and the PUT by id",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T21:42:16.397Z",
+  "finalGate": {
+    "ok": false,
+    "command": "pnpm run test:ci",
+    "at": "2026-11-27T21:42:16.404Z",
+    "attempt": 1,
+    "blamed": [],
+    "failing": [
+      "TOTAL: 1 FAILED, 2796 SUCCESS"
+    ],
+    "noPlanFile": true
+  }
+}
