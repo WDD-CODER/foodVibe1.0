@@ -725,6 +725,26 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a screen, an export or a server path shows a designed menu; never a second menu template or design fallback rule.
 - Known copies: none.
 
+### menu-designer — every control that sets a menu's look (plan 765)
+
+- Status: stable — plan 765
+- Use: `src/app/shared/menu-designer/` · `app-menu-designer` (`[(design)]` a design draft, `sampleDoc`, `(uploading)`).
+  It holds the font, colour, background, frame, logo, layout and fixed-text controls beside the sample menu, and never
+  saves: the host does. The form to design mapping is `src/app/core/utils/menu-design-form.util.ts`; the fonts link is
+  `src/app/core/utils/menu-fonts-link.util.ts`.
+- Pieces: MenuDesignerComponent, designFromForm, formFromDesign, menuFontsHref.
+- When: a screen lets someone change how a menu looks; never a second look editor.
+- Known copies: none.
+
+### menu-preview — a designed menu shown safely on screen (plan 765)
+
+- Status: stable — plan 765
+- Use: `src/app/shared/menu-preview/` · `app-menu-preview` (`design`, `doc`, `poweredBy`): an `<iframe sandbox="">`
+  whose `srcdoc` is `renderMenuDocument`, scaled from the A4 width to the host's width.
+- Pieces: MenuPreviewComponent.
+- When: a screen shows a whole designed menu; never another way to put the template's HTML on a page.
+- Known copies: none.
+
 ### excel-export — one house style for every Excel sheet
 
 - Status: stable — plan 471 moved every recipe and menu sheet onto it

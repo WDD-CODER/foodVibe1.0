@@ -1,0 +1,30 @@
+/* Menu preview (plan 765): an A4 page scaled to the host's width. */
+
+:host {
+  display: block;
+
+  min-inline-size: 0;
+}
+
+.menu-preview {
+  position: relative;
+  /* The scale grows from the page's top-left corner, whatever the app's direction; the document sets its own. */
+  direction: ltr;
+
+  overflow: hidden;
+
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+
+.menu-preview__page {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+
+  background: var(--bg-pure);
+
+  border: 0;
+
+  transform-origin: 0 0;
+}

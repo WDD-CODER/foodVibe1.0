@@ -203,4 +203,30 @@ describe('BusinessService', () => {
     await done
     expect(service.business_()?.hiddenLogisticsKeys).toEqual([{ key: 'a', at: 5 }])
   })
+
+  it('setMenuDesignDefault PUTs the design id and puts the stored menu settings into business_', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.setMenuDesignDefault('d2')
+    const req = http.expectOne(`${URL}/menu-design-default`)
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual({ designId: 'd2' })
+    req.flush({ menuDesign: { defaultDesignId: 'd2', hidePoweredBy: false } })
+    await done
+    expect(service.business_()?.menuDesign).toEqual({ defaultDesignId: 'd2', hidePoweredBy: false })
+    expect(service.business_()?.name).toBe('x')
+  })
+
+  it('setMenuDesignDefault rejects on a refusal and leaves business_ unchanged', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.setMenuDesignDefault('gone')
+    http
+      .expectOne(`${URL}/menu-design-default`)
+      .flush({ error: 'Design not found' }, { status: 404, statusText: 'Not Found' })
+    await expectAsync(done).toBeRejected()
+    expect(service.business_()?.menuDesign).toBeUndefined()
+  })
 })

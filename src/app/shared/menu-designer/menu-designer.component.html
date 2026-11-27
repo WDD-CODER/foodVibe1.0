@@ -1,0 +1,274 @@
+<ng-template #chips let-picker>
+  <div class="menu-designer__field">
+    <span class="menu-designer__label" [id]="picker.id">{{ picker.labelKey | translatePipe }}</span>
+    <div class="c-chip-group menu-designer__chips" role="radiogroup" [attr.aria-labelledby]="picker.id">
+      @for (option of picker.options; track option.value) {
+        <label class="c-chip c-chip--toggle" [attr.data-value]="option.value">
+          <input type="radio" [name]="picker.id" [checked]="option.checked" (change)="option.pick()" />
+          <span>{{ option.labelKey | translatePipe }}</span>
+        </label>
+      }
+    </div>
+  </div>
+</ng-template>
+
+<div class="menu-designer">
+  <div class="menu-designer__preview">
+    <app-menu-preview [design]="design()" [doc]="sampleDoc()" />
+  </div>
+
+  <div class="menu-designer__controls">
+    <section class="menu-designer__group c-glass-panel" data-group="fonts">
+      <h2>{{ 'menu_design_group_fonts' | translatePipe }}</h2>
+      @for (slot of fontSlots; track slot) {
+        <div class="menu-designer__field">
+          <span class="menu-designer__label" [id]="uid + '-font-' + slot">
+            {{ 'menu_design_font_' + slot | translatePipe }}
+          </span>
+          <div
+            class="c-chip-group menu-designer__chips"
+            role="radiogroup"
+            [attr.data-font-slot]="slot"
+            [attr.aria-labelledby]="uid + '-font-' + slot"
+          >
+            @for (font of fonts; track font.id) {
+              <label class="c-chip c-chip--toggle" [style.font-family]="font.cssFamily">
+                <input
+                  type="radio"
+                  [name]="uid + '-font-' + slot"
+                  [attr.value]="font.id"
+                  [checked]="design().fonts[slot] === font.id"
+                  (change)="onFontPick(slot, font.id)"
+                />
+                <span dir="ltr">{{ font.family }}</span>
+              </label>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    <section class="menu-designer__group c-glass-panel" data-group="colors">
+      <h2>{{ 'menu_design_group_colors' | translatePipe }}</h2>
+      <div class="menu-designer__colors">
+        @for (color of colorFields(); track color.key) {
+          <app-form-field
+            [label]="color.labelKey"
+            [forId]="uid + '-color-' + color.key"
+            [error]="color.isInvalid ? 'menu_design_invalid_hex' : null"
+          >
+            <div class="menu-designer__color">
+              <input
+                type="color"
+                class="menu-designer__picker"
+                [attr.data-color]="color.key"
+                [attr.aria-label]="color.labelKey | translatePipe"
+                [value]="color.picker"
+                (input)="onColorPick(color.key, $event)"
+              />
+              <input
+                type="text"
+                class="c-input menu-designer__hex"
+                dir="ltr"
+                maxlength="7"
+                autocomplete="off"
+                spellcheck="false"
+                [id]="uid + '-color-' + color.key"
+                [class.c-input--invalid]="color.isInvalid"
+                [attr.aria-invalid]="color.isInvalid ? true : null"
+                [value]="color.text"
+                (input)="onColorType(color.key, $event)"
+              />
+            </div>
+          </app-form-field>
+        }
+      </div>
+    </section>
+
+    <section class="menu-designer__group c-glass-panel" data-group="background">
+      <h2>{{ 'menu_design_group_background' | translatePipe }}</h2>
+      <div class="menu-designer__field">
+        <span class="menu-designer__label" [id]="uid + '-kind'">{{
+          'menu_design_background_kind' | translatePipe
+        }}</span>
+        <div
+          class="c-chip-group menu-designer__chips"
+          role="radiogroup"
+          data-picker="kind"
+          [attr.aria-labelledby]="uid + '-kind'"
+        >
+          @for (option of kindOptions(); track option.value) {
+            <label
+              class="c-chip c-chip--toggle"
+              [attr.data-value]="option.value"
+              [attr.title]="option.hintKey | translatePipe"
+            >
+              <input
+                type="radio"
+                [name]="uid + '-kind'"
+                [checked]="option.checked"
+                [attr.aria-describedby]="option.hintId"
+                (change)="onKindPick(option.value)"
+              />
+              <span>{{ option.labelKey | translatePipe }}</span>
+            </label>
+          }
+        </div>
+        @for (option of kindOptions(); track option.value) {
+          <span class="visually-hidden" [id]="option.hintId">{{ option.hintKey | translatePipe }}</span>
+        }
+      </div>
+
+      @if (shownKind() === 'texture') {
+        <div class="menu-designer__field">
+          <span class="menu-designer__label" [id]="uid + '-texture'">{{ 'menu_design_texture' | translatePipe }}</span>
+          <div class="menu-designer__textures" role="radiogroup" [attr.aria-labelledby]="uid + '-texture'">
+            @for (texture of textureOptions(); track texture.id) {
+              <label class="c-chip c-chip--toggle menu-designer__texture" [attr.data-value]="texture.id">
+                <input
+                  type="radio"
+                  [name]="uid + '-texture'"
+                  [checked]="texture.checked"
+                  (change)="onTexturePick(texture.id)"
+                />
+                <span class="menu-designer__texture-body">
+                  <span class="menu-designer__swatch" aria-hidden="true" [style.background]="texture.swatch"></span>
+                  {{ texture.labelKey | translatePipe }}
+                </span>
+              </label>
+            }
+          </div>
+        </div>
+      }
+
+      @if (shownKind() === 'image') {
+        <div class="menu-designer__field">
+          <input
+            #imageFile
+            type="file"
+            accept="image/*"
+            hidden
+            data-upload="background"
+            (change)="onImagePicked('background', $event)"
+          />
+          <button
+            type="button"
+            class="c-btn-ghost menu-designer__upload"
+            [disabled]="isBackgroundUploading()"
+            (click)="imageFile.click()"
+          >
+            @if (isBackgroundUploading()) {
+              <app-loader size="small" [inline]="true" />
+            } @else {
+              <lucide-icon name="image-up" [size]="18"></lucide-icon>
+            }
+            {{ 'menu_design_upload_image' | translatePipe }}
+          </button>
+        </div>
+        <ng-container *ngTemplateOutlet="chips; context: { $implicit: fitPicker() }" />
+        <div class="menu-designer__field">
+          <label class="menu-designer__label" [attr.for]="uid + '-veil'">
+            {{ 'menu_design_veil' | translatePipe }} <span dir="ltr">{{ veilPct() }}%</span>
+          </label>
+          <input
+            type="range"
+            class="menu-designer__range"
+            min="0"
+            step="5"
+            [id]="uid + '-veil'"
+            [max]="veilMaxPct"
+            [value]="veilPct()"
+            (input)="onVeilInput($event)"
+          />
+        </div>
+      }
+    </section>
+
+    <section class="menu-designer__group c-glass-panel" data-group="frame">
+      <h2>{{ 'menu_design_group_frame' | translatePipe }}</h2>
+      <ng-container *ngTemplateOutlet="chips; context: { $implicit: frameStylePicker() }" />
+      <div class="menu-designer__field">
+        <span class="menu-designer__label">{{ 'menu_design_frame_width' | translatePipe }}</span>
+        <app-counter
+          [value]="design().frame.width"
+          [min]="0"
+          [max]="frameWidthMax"
+          [stepOptions]="{ integerOnly: true }"
+          (valueChange)="onFrameWidth($event)"
+        />
+      </div>
+      <ng-container *ngTemplateOutlet="chips; context: { $implicit: insetPicker() }" />
+      <ng-container *ngTemplateOutlet="chips; context: { $implicit: dividerPicker() }" />
+    </section>
+
+    <section class="menu-designer__group c-glass-panel" data-group="logo">
+      <h2>{{ 'menu_design_group_logo' | translatePipe }}</h2>
+      <div class="menu-designer__actions">
+        <input
+          #logoFile
+          type="file"
+          accept="image/*"
+          hidden
+          data-upload="logo"
+          (change)="onImagePicked('logo', $event)"
+        />
+        <button
+          type="button"
+          class="c-btn-ghost menu-designer__upload"
+          [disabled]="isLogoUploading()"
+          (click)="logoFile.click()"
+        >
+          @if (isLogoUploading()) {
+            <app-loader size="small" [inline]="true" />
+          } @else {
+            <lucide-icon name="image-up" [size]="18"></lucide-icon>
+          }
+          {{ 'menu_design_upload_logo' | translatePipe }}
+        </button>
+        @if (design().logo.url) {
+          <button type="button" class="c-btn-ghost menu-designer__remove-logo" (click)="onLogoRemove()">
+            <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+            {{ 'menu_design_remove_logo' | translatePipe }}
+          </button>
+        }
+      </div>
+      <ng-container *ngTemplateOutlet="chips; context: { $implicit: logoSizePicker() }" />
+      <ng-container *ngTemplateOutlet="chips; context: { $implicit: placementPicker() }" />
+    </section>
+
+    <section class="menu-designer__group c-glass-panel" data-group="layout">
+      <h2>{{ 'menu_design_group_layout' | translatePipe }}</h2>
+      @for (picker of layoutPickers(); track picker.id) {
+        <ng-container *ngTemplateOutlet="chips; context: { $implicit: picker }" />
+      }
+    </section>
+
+    <section class="menu-designer__group c-glass-panel" data-group="texts">
+      <h2>{{ 'menu_design_group_texts' | translatePipe }}</h2>
+      <app-form-field label="menu_design_business_name" [forId]="uid + '-business-name'">
+        <input
+          type="text"
+          class="c-input"
+          dir="auto"
+          autocomplete="off"
+          [id]="uid + '-business-name'"
+          [attr.maxlength]="businessNameMax"
+          [value]="design().fixedTexts.businessName ?? ''"
+          (input)="onTextInput('businessName', $event)"
+        />
+      </app-form-field>
+      <app-form-field label="menu_design_contact_line" [forId]="uid + '-contact-line'">
+        <input
+          type="text"
+          class="c-input"
+          dir="auto"
+          autocomplete="off"
+          [id]="uid + '-contact-line'"
+          [attr.maxlength]="contactLineMax"
+          [value]="design().fixedTexts.contactLine ?? ''"
+          (input)="onTextInput('contactLine', $event)"
+        />
+      </app-form-field>
+    </section>
+  </div>
+</div>

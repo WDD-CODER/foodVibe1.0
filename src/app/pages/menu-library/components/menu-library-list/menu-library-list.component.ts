@@ -12,6 +12,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { ModuleService } from '@services/module.service'
 import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
@@ -64,6 +65,10 @@ export class MenuLibraryListComponent {
   private readonly userMsg = inject(UserMsgService)
   private readonly requireAuthService = inject(RequireAuthService)
   private readonly translation = inject(TranslationService)
+  private readonly modules = inject(ModuleService)
+
+  /** Plan 765 (C-MODULE): the designs screen needs both modules; the header button shows only then. */
+  protected readonly showDesigns_ = computed(() => this.modules.has('menu_design') && this.modules.has('events'))
 
   protected readonly searchQuery_ = signal('')
   protected readonly eventTypeFilter_ = signal('all')
@@ -195,6 +200,10 @@ export class MenuLibraryListComponent {
 
   protected onCreateNew(): void {
     this.router.navigate(['/menu-intelligence'])
+  }
+
+  protected openDesigns(): void {
+    void this.router.navigate(['/menu-design'])
   }
 
   protected openInquiry(): void {
