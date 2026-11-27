@@ -202,6 +202,10 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   press «שמור»). The component is outside this plan's scope and is unchanged. The two assertions at spec `:145` and
   `:183` (`disabled` false) pass trivially and carry a note. Fix: `saveWhy_` uses `differs(value, stored)`.
 
+- Fix round 1 (rev-1): spec `101 in a month target disables save` now asserts the `max` error and the reason
+  `why_settings_fix_invalid` in the tooltip, since `aria-disabled` alone passes without the range check. With the
+  control's validators cleared for one trial run → `TOTAL: 1 FAILED, 14 SUCCESS`; restored → `TOTAL: 15 SUCCESS`.
+
 ### Check outputs (code commit `05bdba8a`)
 
 - `pnpm run build` → exit 0 (budget and CommonJS warnings only).

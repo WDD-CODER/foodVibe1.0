@@ -192,7 +192,13 @@ describe('BusinessSettingsTabComponent', () => {
     box.value = '101'
     box.dispatchEvent(new Event('input'))
     fixture.detectChanges()
+    expect(fixture.componentInstance.form.controls.monthTargets.controls.foodPct.hasError('max')).toBeTrue()
+    // aria-disabled alone stays set without the range check (nothing to save), so read the reason it gives.
+    saveBtn().click()
     expect(saveBtn().getAttribute('aria-disabled')).toBe('true')
+    const tipId = saveBtn().getAttribute('aria-describedby')!
+    expect(document.getElementById(tipId)?.textContent).toContain('why_settings_fix_invalid')
+    expect(updateSettings).not.toHaveBeenCalled()
   })
 
   it('a server refusal shows the invalid-settings toast', async () => {
