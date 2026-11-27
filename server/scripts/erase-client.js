@@ -2,8 +2,8 @@
 /**
  * erase-client.js — Plan 558 (privacy: erase one customer of one business by phone).
  *
- * Deletes every client (live, in Trash or merged into it), request, booking, conversation and message of that person,
- * and anonymises their events (unsets clientId, clientName, clientPhone; the event, its money and history stay).
+ * Deletes every client (live, in Trash or merged into it), request, booking, conversation, message and assistant run
+ * record of that person, and anonymises their events (unsets clientId, clientName, clientPhone; the event, its money and history stay).
  * decisionLog is not touched (no personal fields). Free-text event notes may still name the person: check by hand.
  * Hard deletes are irreversible. Dry run by default (counts only); add --write to apply:
  *   node server/scripts/erase-client.js --target=local --business=<businessId> --phone=<number> [--db=<scratch>] [--write]
@@ -66,6 +66,13 @@ async function runErase(db, { businessId, phone, write }) {
   const convIds = conversations.map((c) => c._id);
   const messages = convIds.length ? await db.collection('messages').find({ businessId, conversationId: { $in: convIds } }).toArray() : [];
   const plan = planErase({ key, clients, requests, bookings, events, conversations, messages });
+  // Plan 752: the assistant's run records of those conversations hold the guest's words, so they go too.
+  let runs = 0;
+  if (plan.deleteConversations.length) {
+    const theirs = { businessId, conversationId: { $in: plan.deleteConversations } };
+    const col = db.collection('assistantRuns');
+    runs = write ? (await col.deleteMany(theirs)).deletedCount : await col.countDocuments(theirs);
+  }
   if (write) {
     const del = async (name, ids) => { if (ids.length) await db.collection(name).deleteMany({ businessId, _id: { $in: ids } }); };
     await del('clients', plan.deleteClients);
@@ -87,6 +94,7 @@ async function runErase(db, { businessId, phone, write }) {
       bookings: plan.deleteBookings.length,
       conversations: plan.deleteConversations.length,
       messages: plan.deleteMessages.length,
+      runs,
       events: plan.anonymiseEvents.length,
     },
     anonymisedEventIds: plan.anonymiseEvents,
@@ -103,6 +111,7 @@ function formatResult(result, write) {
     `bookings: ${verb} ${c.bookings}`,
     `conversations: ${verb} ${c.conversations}`,
     `messages: ${verb} ${c.messages}`,
+    `assistant runs: ${verb} ${c.runs}`,
     `events: ${write ? 'anonymised' : 'would anonymise'} ${c.events}${ids}`,
     'Check by hand: free-text event notes may still name this person.',
     write ? 'Done.' : 'Dry run, nothing written; add --write to apply.',

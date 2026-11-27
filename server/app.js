@@ -30,6 +30,7 @@ const adminLearningRouter = require('./routes/admin-learning');
 const floorPlanRouter = require('./routes/floor-plan');
 const waitlistRouter = require('./routes/waitlist');
 const conversationsRouter = require('./routes/conversations');
+const assistantRunsRouter = require('./routes/assistant-runs');
 const simRouter = require('./routes/sim');
 const logRouter = require('./routes/log');
 const { redactUrl } = require('./utils/redact-url')
@@ -237,6 +238,8 @@ app.use('/api/v1/diag', diagRouter);
 app.use('/api/v1/floor-plan', floorPlanRouter);
 app.use('/api/v1/waitlist', waitlistRouter);
 app.use('/api/v1/conversations', conversationsRouter);
+// Plan 752 (C-RUNS): what the assistant did, read only.
+app.use('/api/v1/assistant-runs', assistantRunsRouter);
 app.use('/api/v1/sim', simRouter);
 // Plan 543 (ADR 0030): the public door for non-members — never behind verifyToken, so no usage is recorded.
 app.use('/api/v1/public', publicRouter);

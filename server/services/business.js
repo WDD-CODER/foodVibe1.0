@@ -105,7 +105,7 @@ async function eraseLearnedData(db, businessId) {
 /**
  * Plan 619/639 (C-LEARN): removes the server-only records of a business that is being deleted. `business` is the
  * `businesses` document read before the delete. Always: its stored files, price history, own name memory, access
- * grants, table holds, conversations and messages (plan 662). Every business alike: the shared supplier brain and promoted examples stay, drafts are reduced to numbers.
+ * grants, table holds, conversations and messages (plan 662), assistant runs (plan 752). Every business alike: the shared supplier brain and promoted examples stay, drafts are reduced to numbers.
  * To erase what was learned, call `eraseLearnedData` first. Returns counts; never logs content.
  */
 async function deleteBusinessServerData(db, business, log) {
@@ -118,7 +118,10 @@ async function deleteBusinessServerData(db, business, log) {
   const counts = { files: files.length, filesLeft }
   // Plan 662 (C-REGISTRY-R): the Restaurant program's server-only collections. Its two readable types are in
   // ALL_USER_ENTITY_TYPES, which the admin delete route clears.
-  for (const name of ['storedFiles', 'priceHistory', 'invoiceAliases', 'businessAccess', 'tableHolds', 'conversations', 'messages']) {
+  const serverOnly = [
+    'storedFiles', 'priceHistory', 'invoiceAliases', 'businessAccess', 'tableHolds', 'conversations', 'messages', 'assistantRuns',
+  ]
+  for (const name of serverOnly) {
     counts[name] = (await db.collection(name).deleteMany({ businessId })).deletedCount
   }
   if (filesLeft > 0) log?.warn?.({ event: 'business.delete.files_left', businessId, count: filesLeft })

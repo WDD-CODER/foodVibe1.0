@@ -186,6 +186,11 @@ describe('SimulatorPage (plan 678)', () => {
     expect(data['list']).not.toHaveBeenCalled()
   })
 
+  it('plan 752: links an owner to the test runs of the assistant', async () => {
+    await create()
+    expect(byId('sim-asr-link')?.getAttribute('href')).toBe('/frontdesk/assistant?scope=test')
+  })
+
   it('lists the test conversations by name and phone', async () => {
     conversations.set([row('a', 'אורח בדיקה', '0500000001'), row('b', 'דנה', '0500000002')])
     await create()

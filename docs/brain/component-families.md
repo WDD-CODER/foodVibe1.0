@@ -1023,3 +1023,12 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Classes: `.ct-dot`, `.ct-typing`, `.ct-typing-text`.
 - When: only the chat thread's own typing row; one user, so no `.c-*` class.
 - Known copies: none.
+
+### assistant-runs — the step-by-step record of an assistant run and its page (plan 752)
+
+- Status: stable — plan 752
+- Use: the recorder `server/services/frontdesk-runs.js` (`startRun` → `time`, `timeSync`, `step`, `set`, `end`, `discard`, `finish`; `NO_RUN`; the reads `listRuns`, `loadRun`, `markAdminView`), written by `runTurn` (`server/services/frontdesk-turn.js`); the route `server/routes/assistant-runs.js` at `/api/v1/assistant-runs`; the shape `assistantRunSchema` (`shared/schemas/entities/assistant-run.schema.ts`). Browser: `AssistantRunDataService`, `AssistantPage` (`src/app/pages/frontdesk/assistant/`), `app-run-detail`, `assistant-run-view.util.ts` (`verdictOf`, `stepRows`, `STEP_FIELDS`, `outcomeTone`).
+- Pieces: startRun, NO_RUN, listRuns, loadRun, markAdminView, assistantRunSchema, AssistantRunDataService, AssistantPage, RunDetailComponent, verdictOf, stepRows, STEP_FIELDS, outcomeTone.
+- Classes: page-local `.asr-*` only (the open-in-place step row is `.asr-step` with `.asr-step-panel`).
+- When: any new fact about a run is a field of an existing step, registered in `STEP_FIELDS`; a second recorder, a second runs list or a log line with run content is never added.
+- Known copies: none.

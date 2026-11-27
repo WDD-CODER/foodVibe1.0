@@ -1,0 +1,86 @@
+@use '../../../core/styles/breakpoints' as *;
+
+:host {
+  display: block;
+}
+
+.asr-tabs {
+  display: flex;
+  margin-block-end: var(--space-3);
+
+  app-scroll-rail {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+}
+
+.asr-body {
+  display: grid;
+  grid-template-columns: 22rem minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  min-block-size: 30rem;
+}
+
+.asr-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-inline-size: 0;
+}
+
+.asr-controls,
+.asr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.asr-rows {
+  --list-cols: minmax(5rem, 1fr) auto;
+}
+
+// The guest's words stay on one line; the end cell wraps its own tags when a row carries several.
+.asr-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+span.asr-meta {
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+}
+
+.asr-when {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+}
+
+.asr-more {
+  align-self: center;
+}
+
+.asr-detail {
+  min-inline-size: 0;
+  padding: var(--space-3);
+}
+
+@media (max-width: $break-tablet-max) {
+  .asr-body {
+    grid-template-columns: 18rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: $break-phone-max) {
+  .asr-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .asr--open .asr-list,
+  .asr:not(.asr--open) .asr-detail {
+    display: none;
+  }
+}

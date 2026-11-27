@@ -18,7 +18,7 @@ const ADMIN = { userId: 'boss', role: 'admin', businessId: 'b1', businessRole: '
 const OFF = { userId: 'own3', name: 'o3', businessId: 'b3', businessRole: 'owner' }
 const db = c => testDb().collection(c)
 const post = (body, who = OWNER) => request(app).post('/api/v1/sim/inbound').set(as(who)).send(body)
-const COLS = ['messages', 'conversations', 'clients', 'requests', 'bookings', 'waitlistEntries', 'tableHolds', 'businesses', 'frontDeskProfiles']
+const COLS = ['messages', 'conversations', 'clients', 'requests', 'bookings', 'waitlistEntries', 'tableHolds', 'businesses', 'frontDeskProfiles', 'assistantRuns']
 
 beforeEach(async () => {
   for (const c of COLS) await db(c).deleteMany({})
@@ -77,6 +77,7 @@ describe('DELETE /sim/test-data', () => {
       { _id: 'h1', businessId: 'b1', bookingId: 'bk1', tableKey: 't', cell: 1 },
       { _id: 'h2', businessId: 'b1', bookingId: 'bk2', tableKey: 't', cell: 2 },
     ])
+    await db('assistantRuns').insertMany([{ _id: 'run1', ...t }, { _id: 'run2', businessId: 'b1' }])
     await db('clients').insertMany([
       { _id: 'k1', businessId: 'b1', tags: ['test'] }, { _id: 'k2', businessId: 'b1' }, { _id: 'k3', businessId: 'b2', tags: ['test'] },
     ])
@@ -84,8 +85,9 @@ describe('DELETE /sim/test-data', () => {
     const res = await request(app).delete('/api/v1/sim/test-data').set(as(OWNER))
     expect(res.status).toBe(200)
     expect(res.body.deleted).toEqual({
-      tableHolds: 1, messages: 1, conversations: 1, requests: 1, bookings: 1, waitlistEntries: 1, clients: 1,
+      tableHolds: 1, messages: 1, conversations: 1, requests: 1, bookings: 1, waitlistEntries: 1, assistantRuns: 1, clients: 1,
     })
+    expect((await db('assistantRuns').find({}).toArray()).map(d => d._id)).toEqual(['run2'])
     expect((await db('conversations').find({}).toArray()).map(d => d._id)).toEqual(['cv2'])
     expect((await db('messages').find({}).toArray()).map(d => d._id).sort()).toEqual(['m2', 'm3'])
     expect((await db('bookings').find({}).toArray()).map(d => d._id)).toEqual(['bk2'])

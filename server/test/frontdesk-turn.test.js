@@ -61,7 +61,7 @@ const ledger = async () => { await _waitForUsageWritesForTests(); return db().co
 
 beforeEach(async () => {
   resetForTests(); clearCapCache(); resetInboundForTest();
-  for (const c of ['messages', 'conversations', 'clients', 'aiUsage', 'GEMINI_USAGE', 'requests', 'businesses', 'frontDeskProfiles', 'knowledgeItems']) {
+  for (const c of ['messages', 'conversations', 'clients', 'aiUsage', 'GEMINI_USAGE', 'requests', 'businesses', 'frontDeskProfiles', 'knowledgeItems', 'assistantRuns']) {
     await db().collection(c).deleteMany({});
   }
   logs.records.length = 0;
@@ -707,5 +707,224 @@ describe('plan 733: one holding message on a technical failure', () => {
     expect(out).toHaveLength(1);
     expect(out[0]).toMatchObject({ author: 'ai', text: HANDOFF_TEXT });
     expect(logs.byEvent('frontdesk.turn.holding')).toHaveLength(0);
+  });
+});
+
+describe('plan 752: every turn leaves a run record', () => {
+  const { RUN_STEP_KEYS } = require('../generated/schemas/entities');
+  const { DEFAULT_MODELS } = require('../services/gemini-client');
+  const { _setInsertForTests } = require('../services/frontdesk-runs');
+  const { HANDOFF, REMOVAL_WORDS } = require('../constants/frontdesk-guard-words');
+  const RECORDED_KEYS = ['event', 'runId', 'conversationId', 'outcome', 'reason', 'ms', 'fallbackUsed'];
+  const LOGGER_KEYS = ['level', 'time', 'service'];
+
+  beforeEach(async () => { await db().collection('assistantRuns').deleteMany({}); });
+  // Every case of this block: no log line carries run content, and the recorder's own line holds ids and enums only.
+  afterEach(() => {
+    _setInsertForTests(null);
+    const text = JSON.stringify(logs.records);
+    for (const secret of ['GUEST-SECRET-TEXT', 'שלום', 'evil.example']) expect(text).not.toContain(secret);
+    for (const record of logs.byEvent('frontdesk.run.recorded')) {
+      const expected = RECORDED_KEYS.filter(key => key !== 'reason' || record.reason !== undefined);
+      expect(Object.keys(record).filter(key => !LOGGER_KEYS.includes(key)).sort()).toEqual(expected.sort());
+    }
+  });
+
+  const runs = () => db().collection('assistantRuns').find({}).toArray();
+  const oneRun = async () => {
+    const all = await runs();
+    expect(all).toHaveLength(1);
+    return all[0];
+  };
+  const stepOf = (run, key) => run.steps.find(s => s.key === key);
+  const statusOf = (run, ...keys) => keys.map(key => stepOf(run, key).status);
+  const guestSays = text => db().collection('messages').updateOne({ _id: 'g1' }, { $set: { text } });
+
+  it('an answered turn: one record with the 13 steps', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({
+      businessId: 'b1', conversationId: conversation._id, mode: 'turn', level: 1, outcome: 'answered',
+      fallbackUsed: false, model: DEFAULT_MODELS[0], intent: 'smalltalk',
+    });
+    expect(run.trigger).toEqual({ messageIds: ['g1'], text: 'GUEST-SECRET-TEXT' });
+    expect(run.prompt).toBeUndefined();
+    expect(run.expiresAt).toBeInstanceOf(Date);
+    expect(run.expiresAt.getTime() - run.startedAt).toBe(30 * 86400000);
+    expect(run.steps.map(s => s.key)).toEqual([...RUN_STEP_KEYS]);
+    for (const step of run.steps) {
+      expect(step.status, step.key).toBe(['inbound', 'tables'].includes(step.key) ? 'skipped' : 'ok');
+    }
+    expect(stepOf(run, 'ai').out.raw).toContain('שלום');
+    const [sent] = await outbound();
+    expect(stepOf(run, 'send').out).toEqual({ action: 'sent', author: 'ai', messageId: sent._id, chars: 4 });
+    expect(stepOf(run, 'setup').out).toMatchObject({ level: 1, storedLevel: 1, simulated: false, tone: 'warm', kinds: ['table'] });
+    expect(stepOf(run, 'limit')).toMatchObject({ in: { limit: FRONTDESK_DAILY_TURNS }, out: { used: 0 } });
+    expect(stepOf(run, 'history').out).toEqual({ messages: 1, messageIds: ['g1'], aiTurns: 0 });
+    expect(stepOf(run, 'tables').out).toEqual({ why: 'tables_off' });
+    expect(stepOf(run, 'decide').out).toEqual({ why: 'reply', requestWritten: false });
+  });
+
+  it('blocked by a guardrail: handover with the stopped step, the raw answer and the data block', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ reply: 'ראו https://evil.example/x', intent: 'question' }));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'handover', reason: 'invented_link' });
+    expect(stepOf(run, 'guardrails')).toMatchObject({ status: 'stopped', out: { reason: 'invented_link' } });
+    expect(statusOf(run, 'tables', 'decide')).toEqual(['skipped', 'skipped']);
+    expect(stepOf(run, 'ai').out.raw).toContain('evil.example');
+    expect(run.prompt.lead).toContain('=== FACTS (data) ===');
+    expect(stepOf(run, 'send').out.action).toBe('sent');
+  });
+
+  it("the model's own handoff flag: handover with the reason model", async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer({ ...SMALL, handoff: true }));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'handover', reason: 'model' });
+    expect(stepOf(run, 'guardrails').status).toBe('stopped');
+  });
+
+  it('a 503 answer on every call: failed, busy, the AI step stopped and a holding message', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(jsonResponse(503, {}));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'failed', reason: 'busy' });
+    const ai = stepOf(run, 'ai');
+    expect(ai.status).toBe('stopped');
+    expect(ai.out.attempts.length).toBeGreaterThan(0);
+    expect(ai.out.attempts.every(a => a.ok === false)).toBe(true);
+    expect(stepOf(run, 'shape').status).toBe('skipped');
+    expect(stepOf(run, 'send').out.action).toBe('holding');
+  });
+
+  it('an answer that is not JSON on every call: failed, other, the shape step stopped', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer('not json at all'));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'failed', reason: 'other' });
+    expect(stepOf(run, 'ai').status).toBe('ok');
+    expect(stepOf(run, 'ai').out.raw).toBe('not json at all');
+    expect(stepOf(run, 'shape').status).toBe('stopped');
+    expect(stepOf(run, 'shape').out).toEqual({ tries: 2, ok: false, issue: 'bad_json' });
+  });
+
+  it('a good answer on the second try: the AI and shape steps are notes', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValueOnce(modelAnswer('not json at all')).mockResolvedValueOnce(modelAnswer(SMALL));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run.outcome).toBe('answered');
+    expect(statusOf(run, 'ai', 'shape')).toEqual(['note', 'note']);
+    expect(stepOf(run, 'ai').out.attempts).toHaveLength(2);
+  });
+
+  it('a pre-check keyword: no model call, the later steps skipped, no model', async () => {
+    const { conversation } = await setup();
+    await guestSays(HANDOFF[0]);
+    await turn(conversation);
+    expect(fetchMock).not.toHaveBeenCalled();
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'handover', reason: 'keyword' });
+    expect(stepOf(run, 'precheck')).toMatchObject({ status: 'stopped', out: { ok: false, reason: 'keyword' } });
+    for (const key of ['facts', 'prompt', 'ai', 'shape', 'guardrails', 'tables', 'decide']) {
+      expect(stepOf(run, key).status, key).toBe('skipped');
+    }
+    expect(run.model).toBeUndefined();
+  });
+
+  it('level 0 drafts; a suggestion skips the limit and the pre-check', async () => {
+    const { conversation } = await setup({ level: 0 });
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation);
+    const draft = await oneRun();
+    expect(draft).toMatchObject({ level: 0, outcome: 'draft' });
+    expect(stepOf(draft, 'send')).toMatchObject({ status: 'note', out: { action: 'draft', chars: 4 } });
+
+    await db().collection('assistantRuns').deleteMany({});
+    await db().collection('frontDeskProfiles').updateOne({ businessId: 'b1' }, { $set: { 'assistant.level': 1 } });
+    await turn(await conv(conversation._id), { mode: 'suggest' });
+    const suggestion = await oneRun();
+    expect(suggestion).toMatchObject({ mode: 'suggest', level: 1, outcome: 'draft' });
+    expect(statusOf(suggestion, 'limit', 'precheck')).toEqual(['skipped', 'skipped']);
+    expect(stepOf(suggestion, 'inbound').out).toEqual({ via: 'suggest' });
+  });
+
+  it('the daily cap: failed, quota, the limit step stopped', async () => {
+    const { conversation } = await setup();
+    await db().collection('aiUsage').insertMany(Array.from({ length: FRONTDESK_DAILY_TURNS }, (_, i) => ({
+      businessId: 'b1', day: jerusalemDate(Date.now()), feature: 'frontdesk_turn', ok: true, at: Date.now(), i,
+    })));
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'failed', reason: 'quota', trigger: { messageIds: [], text: '' } });
+    expect(stepOf(run, 'limit')).toMatchObject({ status: 'stopped', out: { used: 300 } });
+    expect(stepOf(run, 'send').out.action).toBe('holding');
+  });
+
+  it('a removal word: removed, with the removal notice', async () => {
+    const { conversation } = await setup();
+    await guestSays(REMOVAL_WORDS[0]);
+    await turn(conversation);
+    const run = await oneRun();
+    expect(run).toMatchObject({ outcome: 'removed', reason: 'removal' });
+    expect(stepOf(run, 'send').out.action).toBe('removal_notice');
+  });
+
+  it('the measured wait is the first step; two unanswered messages make it a note', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation, { inbound: { at: 5, waitedMs: 6000 } });
+    const first = await oneRun();
+    expect(stepOf(first, 'inbound')).toMatchObject({ status: 'ok', ms: 6000, out: { waitedMs: 6000, answers: 1 } });
+
+    await db().collection('assistantRuns').deleteMany({});
+    await db().collection('messages').deleteMany({ direction: 'out' });
+    await db().collection('messages').insertOne({
+      _id: 'g2', businessId: 'b1', conversationId: conversation._id, direction: 'in', author: 'guest', kind: 'text',
+      text: 'GUEST-SECRET-TEXT', at: Date.now() + 1000, providerMessageId: 'pm2', status: 'delivered',
+    });
+    await turn(await conv(conversation._id), { inbound: { at: 5, waitedMs: 6000 } });
+    const both = await oneRun();
+    expect(stepOf(both, 'inbound')).toMatchObject({ status: 'note', out: { answers: 2 } });
+    expect(both.trigger.messageIds).toEqual(['g1', 'g2']);
+  });
+
+  it('nothing is recorded for a held conversation, a business with no profile or the eval', async () => {
+    const { conversation } = await setup({ status: 'human' });
+    expect(await turn(await conv(conversation._id))).toEqual({ skipped: 'not_bot' });
+    await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { status: 'bot' } });
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(await conv(conversation._id), { feature: 'eval' });
+    await db().collection('frontDeskProfiles').deleteMany({});
+    expect(await turn(await conv(conversation._id))).toEqual({ skipped: 'no_profile' });
+    expect(await runs()).toHaveLength(0);
+  });
+
+  it('a failed write of the record never fails the turn', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    _setInsertForTests(async () => { throw new Error('down'); });
+    expect(await turn(conversation)).toEqual({ ok: true, sent: true });
+    expect(await outbound()).toHaveLength(1);
+    expect(await runs()).toHaveLength(0);
+    const failed = logs.byEvent('frontdesk.run.record_failed');
+    expect(failed).toHaveLength(1);
+    expect(failed[0].reason).toBe('db');
+  });
+
+  it('a turn that throws is stored as failed, error, and still throws', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    const silent = () => {};
+    const log = { info: () => { throw new Error('boom'); }, warn: silent, error: silent, debug: silent };
+    await expect(turn(conversation, { log })).rejects.toThrow('boom');
+    expect(await oneRun()).toMatchObject({ outcome: 'failed', reason: 'error' });
   });
 });

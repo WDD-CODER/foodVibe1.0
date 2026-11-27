@@ -75,6 +75,22 @@ describe('handleInbound', () => {
     expect(turn).not.toHaveBeenCalled()
   })
 
+  it('plan 752: the turn is told when the message came and how long it waited; a folded message adds no call', async () => {
+    const w = controllableWait()
+    setWaitForTest(w.wait)
+    const turn = vi.fn(async () => {})
+    setTurnHandler(turn)
+    const first = await inbound({ at: NOW })
+    const second = await inbound({ at: NOW + 2000 })
+    await new Promise(r => setTimeout(r, 20))
+    w.release()
+    await Promise.all([first.settled, second.settled])
+    expect(turn).toHaveBeenCalledTimes(1)
+    const options = turn.mock.calls[0][2]
+    expect(options.inbound).toEqual({ at: NOW + 2000, waitedMs: expect.any(Number) })
+    expect(options.inbound.waitedMs).toBeGreaterThanOrEqual(0)
+  })
+
   it('opens a bot conversation with the window; with no turn handler it ends human; closed starts a new one', async () => {
     const r = await inbound()
     await r.settled

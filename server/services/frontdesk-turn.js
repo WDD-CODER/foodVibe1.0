@@ -7,17 +7,20 @@
  * holding message per guest message at level 1 or in a test conversation (plan 733, R-22, which supersedes R-04's
  * silence). Logs carry ids, enums, booleans and counts only — never guest text, a name or a phone.
  * Plan 751 (R-24): a date the model left out is filled by `fillWhen` before the rules run.
+ * Plan 752: every run is recorded step by step (`frontdesk-runs.js`); the record holds guest text and the AI's answer,
+ * the logs still never do.
  * The one model call is `askTurnModel` (routes/ai/frontdesk.js, INV-6); it is required lazily because that file
  * requires this one.
  */
 const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
-const { buildTurnBody, HISTORY_WINDOW } = require('./frontdesk-prompt');
-const { applyGuardrails, preCheck, isRemoval } = require('./frontdesk-guardrails');
+const { buildTurnBody, todayBlock, HISTORY_WINDOW } = require('./frontdesk-prompt');
+const { applyGuardrails, preCheck, isRemoval, TURN_LIMIT } = require('./frontdesk-guardrails');
 const { fillWhen } = require('./frontdesk-when');
 const { sendOut } = require('./outbound');
 const { setTurnHandler } = require('./inbound');
 const { tablesFor, handleTableIntent, deliver, cleanSuggested, turnProfile } = require('./frontdesk-tables');
+const { startRun, NO_RUN } = require('./frontdesk-runs');
 const { createRequest, runQualify } = require('../utils/request-create');
 const { fixedText, reasonText } = require('../utils/fixed-text');
 const { jerusalemDate } = require('../middleware/usage');
@@ -30,6 +33,8 @@ const PLACEHOLDER_CLIENTS = new Set(['__test__', '__walk_in__']);
 const NUMBER_KEYS = new Set(['partySize', 'budgetPerGuest']);
 
 const TABLE_INTENTS = new Set(['book', 'change', 'cancel']);
+const SHAPE_FAILURES = new Set(['bad_json', 'bad_shape']);
+const TABLE_FIELDS = ['date', 'time', 'partySize', 'areaKey'];
 
 /** Plan 680: without table service a `book` answer is a table `request` (the `collected.table` fields mapped to the question keys). */
 function bookAsRequest(answer) {
@@ -45,6 +50,7 @@ function bookAsRequest(answer) {
 const askTurnModel = args => require('../routes/ai/frontdesk').askTurnModel(args);
 const colOf = (db, name) => db.collection(name);
 const levelOf = profile => (profile.assistant && profile.assistant.level) || 0;
+const toneOf = profile => (profile.assistant && profile.assistant.tone === 'formal' ? 'formal' : 'warm');
 
 /** The `wanted` fields and `answers` of a collected record, for one enabled kind; `missing` = required, no value. */
 function gather(kindConfig, collected) {
@@ -80,24 +86,46 @@ function gather(kindConfig, collected) {
 }
 
 /**
- * What to say and what to write. `{ text, request? }` or `{ handoff: true }`. Pure.
+ * What to say and what to write. `{ text, request? }` or `{ handoff: true }`, each with `why` for the run record. Pure.
  * Something missing → the model's reply (it asks); an unfit request → the rule sentences (R-10), no request.
  */
 function decide(answer, ctx) {
   const { profile, conversation, now } = ctx;
   const kindConfig = answer.kind ? profile.requestKinds?.[answer.kind] : null;
-  if (answer.intent !== 'request' || !kindConfig || !kindConfig.enabled) return { text: answer.reply };
-  if (conversation.requestId) return { handoff: true };
+  if (answer.intent !== 'request' || !kindConfig || !kindConfig.enabled) return { text: answer.reply, why: 'reply' };
+  if (conversation.requestId) return { handoff: true, why: 'open_request' };
   const { wanted, answers, missing } = gather(kindConfig, answer.collected);
-  if (missing.length) return { text: answer.reply };
+  if (missing.length) return { text: answer.reply, why: 'missing', missing };
   const verdict = runQualify(profile, answer.kind, wanted, answers, now);
   if (verdict.qualification.verdict === 'unfit') {
-    return { text: verdict.qualification.reasons.map(reasonText).join(' ') };
+    return { text: verdict.qualification.reasons.map(reasonText).join(' '), why: 'unfit' };
   }
-  return { text: fixedText('fd_ai_will_confirm'), request: { kind: answer.kind, wanted, answers } };
+  return { text: fixedText('fd_ai_will_confirm'), request: { kind: answer.kind, wanted, answers }, why: 'request' };
 }
 
-/** `keepStatus`: a blocked turn at level 0 only stores the handoff sentence as the suggestion; the status stays. */
+/** What step 13 stores for a message that was handed to `sendOut`: its id and length, or why it was refused. */
+function sentOut(sent, action, author, chars) {
+  if (!sent.ok) return { action, ...(author && { author }), refused: sent.reason };
+  return { action, ...(author && { author }), messageId: sent.message._id, chars: chars ?? (sent.message.text ?? '').length };
+}
+
+/** Step 13 from what left the server (`null` = nothing). A draft and a refused send are notes. */
+function recordSend(run, done) {
+  const out = done ?? { action: 'none' };
+  run.step('send', { status: out.refused || out.action === 'draft' ? 'note' : 'ok', out });
+}
+
+/** Runs a helper that sends (or drafts) as step 13 and records what it returned. */
+async function sendStep(run, fn) {
+  const done = await run.time('send', fn);
+  recordSend(run, done);
+  return done;
+}
+
+/**
+ * `keepStatus`: a blocked turn at level 0 only stores the handoff sentence as the suggestion; the status stays.
+ * Returns what step 13 records: `{ action: 'none' | 'draft' | 'sent', … }`.
+ */
 async function handOff(db, conversation, { now, silent = false, profile, mode = 'turn', log = logger, keepStatus = false, assistantFailed }) {
   if (!(keepStatus && levelOf(profile) === 0)) {
     await colOf(db, 'conversations').updateOne(
@@ -105,16 +133,17 @@ async function handOff(db, conversation, { now, silent = false, profile, mode = 
       { $set: { status: 'human', updatedAt: now, ...(assistantFailed && { assistantFailed }) } }
     );
   }
-  if (silent || mode !== 'turn') return;
+  if (silent || mode !== 'turn') return { action: 'none' };
   const text = handoffSentence(profile);
   if (levelOf(profile) === 0) {
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId: conversation.businessId }, { $set: { suggestion: text } }
     );
-    return;
+    return { action: 'draft', chars: text.length };
   }
   const sent = await sendOut(db, conversation, { kind: 'text', text }, 'ai', { now });
   if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
+  return sentOut(sent, 'sent', 'ai', text.length);
 }
 
 const handoffSentence = profile => (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_handoff_default');
@@ -122,7 +151,8 @@ const handoffSentence = profile => (profile.assistant && profile.assistant.hando
 /** R-02: the guest asked to be removed. One fixed sentence, the do-not-contact flag, then a person. */
 async function removeGuest(db, conversation, { now, log }) {
   const businessId = conversation.businessId;
-  const sent = await sendOut(db, conversation, { kind: 'text', text: fixedText('fd_ai_removed') }, 'server', { now });
+  const text = fixedText('fd_ai_removed');
+  const sent = await sendOut(db, conversation, { kind: 'text', text }, 'server', { now });
   if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
   if (conversation.clientId && !PLACEHOLDER_CLIENTS.has(conversation.clientId)) {
     await colOf(db, 'clients').updateOne(
@@ -134,13 +164,17 @@ async function removeGuest(db, conversation, { now, log }) {
     { _id: conversation._id, businessId }, { $set: { status: 'human', updatedAt: now } }
   );
   log.info({ event: 'frontdesk.turn.removal', conversationId: conversation._id });
+  return sentOut(sent, 'removal_notice', 'server', text.length);
 }
 
 /** A blocked turn: log the reason only, then a person (suggest mode: the sentence is the draft, status unchanged). */
 async function blockTurn(db, conversation, base, { reason, stage, detail }) {
   base.log.info({ event: 'frontdesk.turn.blocked', reason, stage, level: levelOf(base.profile), ...(detail ?? {}) });
-  if (base.mode === 'suggest') return finishSuggestion(db, conversation, handoffSentence(base.profile), base.now);
-  await handOff(db, conversation, { ...base, keepStatus: true });
+  base.run.end('handover', reason);
+  if (base.mode === 'suggest') {
+    return finishSuggestion(db, conversation, handoffSentence(base.profile), base.now, base.run);
+  }
+  await sendStep(base.run, () => handOff(db, conversation, { ...base, keepStatus: true }));
   return { ok: true, handoff: true };
 }
 
@@ -150,22 +184,23 @@ const handOffSilently = (db, conversation, opts) => handOff(db, conversation, { 
  * Plan 733 (R-22): after a technical failure the guest gets one holding message — the business's handoff text, else
  * `fd_ai_holding_default` — until the guest writes again (the newest message must be the guest's). Not in suggest mode
  * and not for a real guest at level 0. Called after the status change, so the staff get the conversation even when the
- * send is refused. Logs never carry the text.
+ * send is refused. Returns what step 13 records, or `null` when nothing was sent. Logs never carry the text.
  */
 async function holdGuest(db, conversation, { now, profile, mode, log = logger }, group) {
-  if (mode !== 'turn' || levelOf(profile) < 1) return;
+  if (mode !== 'turn' || levelOf(profile) < 1) return null;
   const scope = { businessId: conversation.businessId, conversationId: conversation._id };
   const [lastIn] = await colOf(db, 'messages')
     .find({ ...scope, direction: 'in' }).sort({ at: -1, _id: -1 }).limit(1).toArray();
-  if (!lastIn) return;
+  if (!lastIn) return null;
   // Something already went out at or after the guest's last message (also a holding message sent in the same
   // millisecond): the guest is not left waiting, so no second holding message.
   const answered = await colOf(db, 'messages').countDocuments({ ...scope, direction: 'out', at: { $gte: lastIn.at } });
-  if (answered > 0) return;
+  if (answered > 0) return null;
   const text = (profile.assistant && profile.assistant.handoffText) || fixedText('fd_ai_holding_default');
   const sent = await sendOut(db, conversation, { kind: 'text', text }, 'server', { now });
   if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
   log.info({ event: 'frontdesk.turn.holding', conversationId: conversation._id, group, sent: !!sent.ok });
+  return sentOut(sent, 'holding', sent.ok ? 'server' : null, text.length);
 }
 
 const BUSY_STATUSES = new Set([429, 500, 502, 503, 504]);
@@ -182,9 +217,23 @@ function failureReason(kind, status) {
   return 'other';
 }
 
-/** A turn that completes in mode `turn` removes the reason an earlier turn of this conversation failed (plan 701). */
+/**
+ * A turn that completes in mode `turn` removes the reason an earlier turn of this conversation failed (plan 701).
+ * Plan 752: the run record is started and finished here, also when the turn throws.
+ */
 async function runTurn(db, conversation, opts = {}) {
-  const result = await runTurnInner(db, conversation, opts);
+  const run = startRun(db, conversation, {
+    now: opts.now ?? Date.now(), mode: opts.mode ?? 'turn', feature: opts.feature, inbound: opts.inbound,
+  });
+  let result;
+  try {
+    result = await runTurnInner(db, conversation, { ...opts, run });
+  } catch (err) {
+    run.end('failed', 'error');
+    await run.finish({ log: opts.log });
+    throw err;
+  }
+  await run.finish({ log: opts.log });
   if (conversation.assistantFailed && (opts.mode ?? 'turn') === 'turn' && result && result.ok) {
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId: conversation.businessId }, { $unset: { assistantFailed: '' } }
@@ -193,61 +242,174 @@ async function runTurn(db, conversation, opts = {}) {
   return result;
 }
 
+/** Step 2: the settings this turn works with (`profile` may be raised to level 1 for a test conversation). */
+function setupFacts(stored, profile) {
+  const assistant = profile.assistant ?? {};
+  const level = levelOf(profile);
+  const storedLevel = levelOf(stored);
+  return {
+    level,
+    storedLevel,
+    simulated: level !== storedLevel,
+    tone: toneOf(profile),
+    kinds: Object.entries(profile.requestKinds ?? {}).filter(([, config]) => config && config.enabled).map(([key]) => key),
+    activeHours: !!(assistant.activeHours && assistant.activeHours.length),
+    handoffText: !!assistant.handoffText,
+  };
+}
+
+/** What a run answers: the guest messages after the newest outbound one, and the newest guest text. */
+function triggerOf(history) {
+  const lastOut = history.map(m => m.direction).lastIndexOf('out');
+  const waiting = history.slice(lastOut + 1).filter(m => m.author === 'guest');
+  const newest = history.filter(m => m.author === 'guest').at(-1);
+  const text = (newest && (newest.kind === 'button' ? newest.buttonId : newest.text)) || '';
+  return { messageIds: waiting.map(m => String(m._id)), text };
+}
+
+/** Step 8, from the facts `askTurnModel` returns about its calls. A malformed answer is step 9's stop, not this one's. */
+function recordModelCall(run, asked, feature) {
+  const trace = asked.trace ?? {};
+  const { model = null, firstModel = null, attempts = [], raw = '', rawChars = 0, shapeTries = 1 } = trace;
+  const shapeFailed = SHAPE_FAILURES.has(asked.reason);
+  const retried = (!!model && model !== firstModel) || attempts.length > 1;
+  let status = retried ? 'note' : 'ok';
+  if (!asked.ok) status = shapeFailed ? 'ok' : 'stopped';
+  run.step('ai', { status, in: { feature }, out: { model, firstModel, attempts, raw, rawChars } });
+  run.set({ model: model ?? undefined, firstModel: firstModel ?? undefined });
+  // Step 9 runs inside the call (step 8): it has no time of its own, and none at all when the call itself failed.
+  if (!asked.ok && !shapeFailed) return;
+  let shape = shapeTries > 1 ? 'note' : 'ok';
+  if (shapeFailed) shape = 'stopped';
+  run.step('shape', {
+    status: shape, ms: 0, out: { tries: shapeTries, ok: !!asked.ok, ...(shapeFailed && { issue: asked.reason }) },
+  });
+}
+
+/** Step 11's input: what the model collected about the table (strings and numbers only). */
+function tableInput(answer) {
+  const table = (answer.collected && answer.collected.table) || {};
+  const out = { intent: answer.intent };
+  for (const key of TABLE_FIELDS) {
+    if (typeof table[key] === 'string' || typeof table[key] === 'number') out[key] = table[key];
+  }
+  return out;
+}
+
+/** Step 11's result: what the table engine did, named from the shape of what it returned. */
+function tableOutput(res) {
+  let result = 'done';
+  if (res.handoff) result = 'handoff';
+  else if (res.request) result = 'request';
+  else if (res.pending) result = res.outbound && res.outbound.kind === 'button' ? 'offer' : 'ask';
+  return { result, outboundKind: res.outbound?.kind, pending: !!res.pending };
+}
+
 /** `feature` (plan 681) is only for the hand-run eval: its live turns are metered as `eval`, never as a business's turn. */
-async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature } = {}) {
+async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature, run = NO_RUN } = {}) {
   const businessId = conversation.businessId;
-  if (mode === 'turn' && conversation.status !== 'bot') return { skipped: 'not_bot' };
-  const stored = await colOf(db, 'frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } });
-  if (!stored) return { skipped: 'no_profile' };
+  if (mode === 'turn' && conversation.status !== 'bot') {
+    run.discard();
+    return { skipped: 'not_bot' };
+  }
+  const stored = await run.time('setup',
+    () => colOf(db, 'frontDeskProfiles').findOne({ businessId, deletedAt: { $exists: false } }));
+  if (!stored) {
+    run.discard();
+    return { skipped: 'no_profile' };
+  }
   // Plan 733 (R-23): wrapped once; every later use sees level 1 for a test conversation. Never re-read `stored` below.
   const profile = turnProfile(stored, conversation);
-  const base = { now, profile, mode, log };
+  const base = { now, profile, mode, log, run };
+  run.step('setup', { out: setupFacts(stored, profile) });
+  run.set({ level: levelOf(profile) });
 
+  const limit = { limit: FRONTDESK_DAILY_TURNS };
   if (mode === 'turn' && !conversation.test) {
-    const used = await colOf(db, 'aiUsage').countDocuments({
+    const used = await run.time('limit', () => colOf(db, 'aiUsage').countDocuments({
       businessId, day: jerusalemDate(now), feature: 'frontdesk_turn', userId: { $ne: 'sim' },
-    });
+    }));
+    run.step('limit', { in: limit, out: { used } });
     if (used >= FRONTDESK_DAILY_TURNS) {
+      run.step('limit', { status: 'stopped' });
+      run.end('failed', 'quota');
       log.info({ event: 'frontdesk.turn.cap', conversationId: conversation._id });
       await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: 'quota' } });
-      await holdGuest(db, conversation, base, 'quota');
+      await sendStep(run, () => holdGuest(db, conversation, base, 'quota'));
       return { ok: false, reason: 'cap', group: 'quota' };
     }
+  } else {
+    run.step('limit', { status: 'skipped', in: limit, out: { why: conversation.test ? 'test' : 'suggest' } });
   }
 
-  const recent = await colOf(db, 'messages')
-    .find({ businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(HISTORY_WINDOW).toArray();
-  const history = recent.reverse();
-  const aiTurns = await colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' });
-
-  if (mode === 'suggest' && isRemoval(history)) return { ok: true, handoff: 'removal' };
-  const pre = preCheck({ profile, history, aiTurns, now, mode });
-  if (!pre.ok) {
-    if (pre.reason === 'removal') {
-      await removeGuest(db, conversation, base);
-      return { ok: true, handoff: 'removal' };
-    }
-    return blockTurn(db, conversation, base, { reason: pre.reason, stage: 'pre' });
-  }
-
-  const facts = await publicFacts(db, businessId);
-  const tables = await tablesFor(db, businessId);
-  const body = buildTurnBody({ profile, facts, history, now, tablesOn: !!tables, areas: tables ? tables.plan.areas : [] });
-  const asked = await askTurnModel({
-    body,
-    usage: {
-      businessId,
-      feature: feature === 'eval' ? 'eval' : mode === 'suggest' ? 'frontdesk_suggest' : 'frontdesk_turn',
-      ...(conversation.test && { userId: 'sim' }),
-    },
-    log,
+  const { history, aiTurns } = await run.time('history', async () => {
+    const recent = await colOf(db, 'messages')
+      .find({ businessId, conversationId: conversation._id }).sort({ at: -1, _id: -1 }).limit(HISTORY_WINDOW).toArray();
+    const count = await colOf(db, 'messages').countDocuments({ businessId, conversationId: conversation._id, author: 'ai' });
+    return { history: recent.reverse(), aiTurns: count };
   });
+  run.step('history', {
+    in: { window: HISTORY_WINDOW }, out: { messages: history.length, messageIds: history.map(m => String(m._id)), aiTurns },
+  });
+  run.set({ trigger: triggerOf(history) });
+
+  const pre = run.timeSync('precheck', () => {
+    if (mode === 'suggest' && isRemoval(history)) return { ok: false, reason: 'removal' };
+    return preCheck({ profile, history, aiTurns, now, mode });
+  });
+  const preIn = { aiTurns, turnLimit: TURN_LIMIT };
+  if (pre.ok) {
+    const skipped = mode === 'suggest';
+    run.step('precheck', { status: skipped ? 'skipped' : 'ok', in: preIn, out: skipped ? { why: 'suggest' } : { ok: true } });
+  } else {
+    run.step('precheck', { status: 'stopped', in: preIn, out: { ok: false, reason: pre.reason } });
+    if (pre.reason !== 'removal') return blockTurn(db, conversation, base, { reason: pre.reason, stage: 'pre' });
+    if (mode === 'suggest') {
+      recordSend(run, null);
+      run.end('handover', 'removal');
+    } else {
+      run.end('removed', 'removal');
+      await sendStep(run, () => removeGuest(db, conversation, base));
+    }
+    return { ok: true, handoff: 'removal' };
+  }
+
+  const { facts, tables } = await run.time('facts', async () => ({
+    facts: await publicFacts(db, businessId), tables: await tablesFor(db, businessId),
+  }));
+  run.step('facts', {
+    out: {
+      factIds: facts.factIds, factsChars: facts.text.length, tablesOn: !!tables,
+      areas: tables ? (tables.plan.areas ?? []).length : 0,
+    },
+  });
+  const body = run.timeSync('prompt',
+    () => buildTurnBody({ profile, facts, history, now, tablesOn: !!tables, areas: tables ? tables.plan.areas : [] }));
+  const lead = body.contents[0].parts[0].text;
+  run.step('prompt', {
+    out: {
+      rulesChars: body.systemInstruction.parts[0].text.length, leadChars: lead.length,
+      historyMessages: body.contents.length - 1, today: todayBlock(now),
+    },
+  });
+  run.set({ lead, tone: toneOf(profile), tablesOn: !!tables });
+
+  const usage = {
+    businessId,
+    feature: feature === 'eval' ? 'eval' : mode === 'suggest' ? 'frontdesk_suggest' : 'frontdesk_turn',
+    ...(conversation.test && { userId: 'sim' }),
+  };
+  const asked = await run.time('ai', () => askTurnModel({ body, usage, log }));
+  recordModelCall(run, asked, usage.feature);
   if (!asked.ok) {
     const group = failureReason(asked.reason, asked.status);
+    run.end('failed', group);
     log.info({ event: 'frontdesk.turn.failed', reason: asked.reason, group, mode, conversationId: conversation._id });
     if (mode === 'turn') {
       await handOffSilently(db, conversation, { ...base, assistantFailed: { at: now, reason: group } });
-      await holdGuest(db, conversation, base, group);
+      await sendStep(run, () => holdGuest(db, conversation, base, group));
+    } else {
+      recordSend(run, null);
     }
     return { ok: false, reason: asked.reason, group };
   }
@@ -264,11 +426,24 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     tablesOn: !!tables, profile, factIds: facts.factIds, factsText: facts.text, history, aiTurns, now, mode,
     lastTurnLow: conversation.lowTurns === 1,
   };
+  run.set({ intent: asked.answer.intent });
   // The reply checks only matter when the model's own reply leaves the server: find out first (decide is pure).
-  let verdict = applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: false });
-  if (verdict.ok && !tableTurn && decide(verdict.answer, { profile, conversation, now }).text === verdict.answer.reply) {
-    verdict = applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: true });
-  }
+  let replyWillBeSent = false;
+  const verdict = run.timeSync('guardrails', () => {
+    const first = applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: false });
+    if (!first.ok || tableTurn || decide(first.answer, { profile, conversation, now }).text !== first.answer.reply) return first;
+    replyWillBeSent = true;
+    return applyGuardrails(modelAnswer, { ...guardCtx, replyWillBeSent: true });
+  });
+  const low = !!(verdict.ok && verdict.answer.low);
+  const changed = verdict.ok && verdict.answer.intent !== asked.answer.intent;
+  run.step('guardrails', {
+    status: !verdict.ok ? 'stopped' : low || changed ? 'note' : 'ok',
+    in: { replyWillBeSent },
+    out: verdict.ok
+      ? { ok: true, ...(low && { low: true }), usedFacts: verdict.answer.usedFacts, intentAfter: verdict.answer.intent }
+      : { ok: false, reason: verdict.reason },
+  });
   if (!verdict.ok && verdict.reason !== 'model') {
     return blockTurn(db, conversation, base, { reason: verdict.reason, stage: 'post', detail: verdict.detail });
   }
@@ -279,10 +454,11 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     );
   }
   if (!verdict.ok) {
+    run.end('handover', 'model');
     log.info({ event: 'frontdesk.turn.done', intent: asked.answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });
-    if (mode === 'turn') await handOff(db, conversation, base);
     // A suggestion is still a draft a person can use: the model's own words are kept for the member.
-    else return finishSuggestion(db, conversation, asked.answer.reply, now);
+    if (mode !== 'turn') return finishSuggestion(db, conversation, asked.answer.reply, now, run);
+    await sendStep(run, () => handOff(db, conversation, base));
     return { ok: true, handoff: true };
   }
 
@@ -290,42 +466,64 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
   let answer = verdict.answer;
   // Plan 681: the model's advice for the owner, cleaned once; it changes nothing the guest sees.
   const suggested = cleanSuggested(asked.answer.suggested, now);
-  if (tableTurn) {
+  if (!tableTurn) {
+    run.step('tables', { status: 'skipped', out: { why: tables ? 'not_a_table_intent' : 'tables_off' } });
+  } else {
     const level0 = levelOf(profile) === 0 || mode === 'suggest';
-    const res = await handleTableIntent(db, conversation, answer, { tables, now, write: !level0, log, suggested });
+    const tableIn = tableInput(answer);
+    const res = await run.time('tables',
+      () => handleTableIntent(db, conversation, answer, { tables, now, write: !level0, log, suggested }));
+    run.step('tables', { status: res.handoff ? 'stopped' : 'ok', in: tableIn, out: tableOutput(res) });
     if (res.request) {
       // No plan to assign from: the plan 679 request path, with a reply that is checked because it may be sent.
       answer = bookAsRequest(answer);
       const again = applyGuardrails(answer, { ...guardCtx, replyWillBeSent: true });
       if (!again.ok) {
+        run.step('guardrails', { status: 'stopped', in: { replyWillBeSent: true }, out: { ok: false, reason: again.reason } });
         return blockTurn(db, conversation, base, { reason: again.reason, stage: 'post', detail: again.detail });
       }
       answer = again.answer;
     } else if (res.handoff) {
+      run.step('decide', { out: { why: 'table_engine' } });
+      run.end('handover', 'table_engine');
       log.info({ event: 'frontdesk.turn.done', intent: answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });
-      if (mode === 'turn') await handOff(db, conversation, base);
-      else return finishSuggestion(db, conversation, answer.reply, now);
+      if (mode !== 'turn') return finishSuggestion(db, conversation, answer.reply, now, run);
+      await sendStep(run, () => handOff(db, conversation, base));
       return { ok: true, handoff: true };
     } else {
+      run.step('decide', { out: { why: 'table_engine' } });
       log.info({ event: 'frontdesk.turn.done', intent: answer.intent, level: levelOf(profile), mode, handoff: false, requestWritten: false });
-      if (level0) return finishSuggestion(db, conversation, res.outbound.text, now);
-      const sent = await deliver(db, conversation, res, { now, log, profile });
+      if (level0) {
+        run.end('draft');
+        return finishSuggestion(db, conversation, res.outbound.text, now, run);
+      }
+      const sent = await run.time('send', () => deliver(db, conversation, res, { now, log, profile }));
+      recordSend(run, sentOut(sent, 'sent', 'server'));
+      if (!sent.ok) run.end('failed', 'send_refused');
+      else run.end(res.pending ? 'asked' : 'answered');
       return { ok: true, sent: sent.ok };
     }
   }
 
-  const decision = decide(answer, { profile, conversation, now });
+  const decision = run.timeSync('decide', () => decide(answer, { profile, conversation, now }));
+  run.step('decide', {
+    status: decision.handoff ? 'stopped' : 'ok',
+    in: { intent: answer.intent, kind: answer.kind },
+    out: { why: decision.why, missing: decision.missing, requestWritten: false },
+  });
   if (decision.handoff) {
+    run.end('handover', 'open_request');
     log.info({ event: 'frontdesk.turn.done', intent: verdict.answer.intent, level: levelOf(profile), mode, handoff: true, requestWritten: false });
-    if (mode === 'turn') await handOff(db, conversation, base);
-    else return finishSuggestion(db, conversation, verdict.answer.reply, now);
+    if (mode !== 'turn') return finishSuggestion(db, conversation, verdict.answer.reply, now, run);
+    await sendStep(run, () => handOff(db, conversation, base));
     return { ok: true, handoff: true };
   }
 
   const level = levelOf(profile);
   if (level === 0 || mode === 'suggest') {
+    run.end('draft');
     log.info({ event: 'frontdesk.turn.done', intent: verdict.answer.intent, level, mode, handoff: false, requestWritten: false });
-    return finishSuggestion(db, conversation, decision.text, now);
+    return finishSuggestion(db, conversation, decision.text, now, run);
   }
 
   let requestWritten = false;
@@ -342,18 +540,25 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
       { _id: conversation._id, businessId }, { $set: { requestId: request._id, updatedAt: now } }
     );
     requestWritten = true;
+    run.step('decide', { out: { requestWritten } });
   }
-  const sent = await sendOut(db, conversation, { kind: 'text', text: decision.text }, 'ai', { now });
+  const sent = await run.time('send',
+    () => sendOut(db, conversation, { kind: 'text', text: decision.text }, 'ai', { now }));
+  recordSend(run, sentOut(sent, 'sent', 'ai', decision.text.length));
+  if (!sent.ok) run.end('failed', 'send_refused');
+  else run.end(decision.why === 'missing' ? 'asked' : 'answered');
   if (!sent.ok) log.info({ event: 'frontdesk.turn.send_refused', reason: sent.reason, conversationId: conversation._id });
   log.info({ event: 'frontdesk.turn.done', intent: verdict.answer.intent, level, mode, handoff: false, requestWritten });
   return { ok: true, sent: sent.ok };
 }
 
-async function finishSuggestion(db, conversation, text, now) {
+/** Stores `text` as the conversation's draft; step 13 of the run says so. */
+async function finishSuggestion(db, conversation, text, now, run = NO_RUN) {
   const suggestion = String(text ?? '').slice(0, 4000);
-  await colOf(db, 'conversations').updateOne(
+  await run.time('send', () => colOf(db, 'conversations').updateOne(
     { _id: conversation._id, businessId: conversation.businessId }, { $set: { suggestion, updatedAt: now } }
-  );
+  ));
+  recordSend(run, { action: 'draft', chars: suggestion.length });
   return { ok: true, suggestion };
 }
 

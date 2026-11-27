@@ -224,6 +224,16 @@ export const routes: Routes = [
     resolve: { knowledgeLoaded: () => inject(KnowledgeItemDataService).ensureLoaded().then(() => true) },
   },
   {
+    path: 'frontdesk/assistant',
+    loadComponent: () => import('./pages/frontdesk/assistant/assistant.page').then(m => m.AssistantPage),
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
+  },
+  {
+    path: 'frontdesk/assistant/runs/:id',
+    loadComponent: () => import('./pages/frontdesk/assistant/assistant.page').then(m => m.AssistantPage),
+    canActivate: [authGuard, moduleGuard(['frontdesk'])],
+  },
+  {
     path: 'bookings',
     loadComponent: () => import('./pages/bookings/bookings.page').then(m => m.BookingsPage),
     canActivate: [authGuard, moduleGuard(['frontdesk'])],
