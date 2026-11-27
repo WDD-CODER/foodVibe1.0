@@ -453,7 +453,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: the nine new entity schema files under `shared/schemas/entities/` (`invoice.schema.ts`, `price-history.schema.ts`,
   `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
-  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`; `shared/schemas/entities/menu-design.schema.ts`
+  (plan 764) follows the same shape.
 - When: a new stored collection needs a shape.
 - Known copies: none.
 
@@ -706,6 +707,21 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `server/scripts/repair-supplier-refs.js` — a one-off data repair beside `dedupe-business-products.js`, with the same dry-run default, `--write` and `--confirm-remote` rules; it never touches prices.
 - Pieces: repair-supplier-refs.js, planProductRepair, repairBusiness.
 - When: product sources already point at a foreign, unknown or empty supplier; the Human runs it (dry run first), never a build step.
+- Known copies: none.
+
+### menu-template — one drawing of a designed menu for browser and server (plan 764, ADR 0034)
+
+- Status: stable — plan 764
+- Use: `shared/schemas/menu-design/menu-template.ts` · `renderMenuDocument(design, doc, { poweredBy, fonts })` (a whole
+  A4 HTML document) and `designCssVars(design)` (the `--md-*` properties); the words from
+  `shared/schemas/menu-design/menu-doc.ts` (`menuDocFromEvent`, `SAMPLE_MENU_DOC`); which design a menu wears from
+  `shared/schemas/menu-design/menu-resolve.ts` (`resolveMenuDesign`); fonts, textures and the four starting designs from
+  `shared/schemas/menu-design/menu-fonts.ts`, `shared/schemas/menu-design/menu-textures.ts`,
+  `shared/schemas/menu-design/menu-base-templates.ts`. The stored shape is
+  `shared/schemas/entities/menu-design.schema.ts`; the browser loads designs with
+  `src/app/core/services/menu-design-data.service.ts`.
+- Pieces: renderMenuDocument, designCssVars, menuDocFromEvent, SAMPLE_MENU_DOC, resolveMenuDesign, baseDesign, MENU_FONTS, MENU_TEXTURES, MenuDesignDataService.
+- When: a screen, an export or a server path shows a designed menu; never a second menu template or design fallback rule.
 - Known copies: none.
 
 ### excel-export — one house style for every Excel sheet

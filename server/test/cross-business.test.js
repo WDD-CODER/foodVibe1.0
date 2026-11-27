@@ -14,6 +14,9 @@ const {
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types')
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types')
 const { SOFT_DELETE_TYPES, ROUTER_WRITE_TYPES } = require('../constants/collections')
+const { MODULE_KEYS } = require('../generated/schemas/modules')
+const { baseDesign } = require('../generated/schemas/menu-design')
+const { clearModuleCache } = require('../middleware/require-module')
 
 let app
 
@@ -28,6 +31,9 @@ afterAll(async () => {
 beforeEach(async () => {
   const db = testDb()
   for (const c of await db.listCollections().toArray()) if (c.type === 'collection') await db.collection(c.name).deleteMany({})
+  // Plan 764: menu_design is off by default, so both businesses have every module on.
+  await db.collection('businesses').insertMany(['biz_X', 'biz_Y'].map(_id => ({ _id, name: _id, ownerId: _id, createdAt: 1, internal: false, modules: [...MODULE_KEYS] })))
+  clearModuleCache()
 })
 
 const X = { userId: 'userX', role: 'user', businessId: 'biz_X', businessRole: 'owner' }
@@ -45,6 +51,7 @@ const BODY = {
   equipment: () => equipmentBody({ nameHebrew: 'סיר X' }),
   venues: () => venueBody({ nameHebrew: 'אולם X' }),
   menuEvents: () => menuEventBody({ name: 'אירוע X' }),
+  menuDesigns: () => ({ ...baseDesign('classic'), name: 'עיצוב X' }),
   taxonomyTerms: () => ({ kind: 'allergen', key: 'lupinx', sortOrder: 0 }),
   clients: () => ({ name: 'לקוח X', phone: '050-111 2222' }),
   frontDeskProfiles: () => ({ businessType: 'other', slug: 'cross-x', displayName: 'עסק X', hours: [], requestKinds: {}, assistant: { level: 0, tone: 'warm' } }),

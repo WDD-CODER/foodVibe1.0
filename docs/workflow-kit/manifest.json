@@ -4966,6 +4966,14 @@
       "notes": "FoodVibe ADR 0032 (one user, more than one business: access grants, an active business, the consultant role; INV-1 amended; plan 631)."
     },
     {
+      "path": "docs/brain/decisions/0034-one-menu-template-and-engine-boundary.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0034 (one menu template in shared/schemas/menu-design for browser and server; one menu engine boundary for outside callers; plan 764)."
+    },
+    {
       "path": "scripts/decision-log.mjs",
       "tier": "project",
       "action": "stay",

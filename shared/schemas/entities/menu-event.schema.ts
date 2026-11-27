@@ -69,6 +69,8 @@ export const menuEventSchema = z.strictObject({
   sections: z.array(z.strictObject({
     _id: z.string(),
     name: z.string(),
+    /** Plan 764 (M4): a menu-only section title; `name` is '' while it is set. */
+    unlinkedName: z.string().max(60).optional(),
     sortOrder: z.number(),
     items: z.array(z.strictObject({
       recipeId: z.string(),
@@ -118,6 +120,13 @@ export const menuEventSchema = z.strictObject({
   }).optional(),
   cuisineTags: z.array(z.string()).optional(),
   createdFromTemplateId: z.string().optional(),
+  /** Plan 764: the menu design this menu wears; absent = the business default. */
+  designId: z.string().optional(),
+  /** Plan 764 (D11): printed on the menu (`notes` stays the internal log). */
+  subtitle: z.string().max(120).optional(),
+  bottomNote: z.string().max(300).optional(),
+  /** Plan 764 (D16): the last exported file of this menu. Server-owned. */
+  latestExport: z.strictObject({ fileId: z.string(), at: z.number(), designId: z.string() }).optional(),
   logistics: eventLogisticsSchema.optional(),
   /** Plan 442: pipeline stage; optional only so events not yet migrated still validate. Server-owned. */
   stage: z.enum(EVENT_STAGES).optional(),

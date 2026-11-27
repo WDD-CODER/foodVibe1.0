@@ -34,9 +34,18 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.hasModule({ modules: ['consultant_diag'] }, 'consultant_diag')).toBe(true)
   })
 
-  it('MODULE_OF_TYPE has exactly the seven types of the C-MODULES table', () => {
-    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'frontDeskProfiles', 'knowledgeItems', 'menuEvents', 'requests', 'venues'])
+  it('MODULE_OF_TYPE has exactly the eight types of the C-MODULES table', () => {
+    expect(Object.keys(S.MODULE_OF_TYPE).sort()).toEqual(['bookings', 'clients', 'frontDeskProfiles', 'knowledgeItems', 'menuDesigns', 'menuEvents', 'requests', 'venues'])
     expect(S.MODULE_OF_TYPE.clients).toEqual(['events', 'frontdesk'])
+  })
+
+  it('menu_design is a module, not a default one, and gates menuDesigns (plan 764)', () => {
+    expect([...S.MODULE_KEYS]).toContain('menu_design')
+    expect(S.modulesOf({})).not.toContain('menu_design')
+    expect(S.hasModule({}, 'menu_design')).toBe(false)
+    expect(S.hasModule({ modules: ['menu_design'] }, 'menu_design')).toBe(true)
+    expect(S.MODULE_OF_TYPE.menuDesigns).toEqual(['menu_design'])
+    expect(S.businessSchema.safeParse({ ...biz, modules: [...S.MODULE_KEYS] }).success).toBe(true)
   })
 
   it('platformUpdateSchema needs a reason and at least one change', () => {
@@ -44,6 +53,7 @@ describe('modulesOf / hasModule / MODULE_OF_TYPE', () => {
     expect(S.platformUpdateSchema.safeParse({ reason: 'pilot' }).success).toBe(false)
     expect(S.platformUpdateSchema.safeParse({ aiPrivate: true, reason: 'x' }).success).toBe(false)
     expect(S.platformUpdateSchema.safeParse({ aiMonthlyTokenCap: null, reason: 'reset' }).success).toBe(true)
+    expect(S.platformUpdateSchema.safeParse({ hidePoweredBy: false, reason: 'pilot' }).success).toBe(true)
   })
 })
 
@@ -58,7 +68,7 @@ describe('businessSchema new optional fields', () => {
   })
 
   it.each([
-    ['a sixth module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'events'] }],
+    ['a seventh module', { modules: ['events', 'event_logistics', 'frontdesk', 'ai_create', 'consultant_diag', 'menu_design', 'events'] }],
     ['a repeated module', { modules: ['events', 'events'] }],
     ['a 51st history row', { platformHistory: Array.from({ length: 51 }, (_, i) => row(i)) }],
     ['a cap of -1', { aiMonthlyTokenCap: -1 }],
