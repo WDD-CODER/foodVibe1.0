@@ -60,6 +60,10 @@ docs/agent/house-style.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+src/app/core/engine/plan-snapshot.spec.ts
+src/app/core/services/export.service.spec.ts
+src/app/core/services/user.service.spec.ts
+src/app/pages/recipe-builder/services/recipe-builder-export.service.spec.ts
 ```
 
 ## Read Scope
