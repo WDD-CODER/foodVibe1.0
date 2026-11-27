@@ -865,7 +865,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — server only; the simulator is the first transport, WhatsApp joins in plan 683
 - Use: every inbound message goes through `handleInbound` (`server/services/inbound.js`), every outbound message through `sendOut` (`server/services/outbound.js`); never call a transport's `send`. Template names and parameters live once in `shared/schemas/front-desk/message-templates.ts` (`templateMessage`). The live-conversation rule is `findOrCreateConversation` (`server/services/conversations.js`); only `server/services/channels/index.js` (`channelFor`) names a channel.
-- Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel.
+- Pieces: handleInbound, registerButton, setTurnHandler, sendOut, templateMessage, MESSAGE_TEMPLATES, findOrCreateConversation, loadConversation, closeConversation, channelFor, sim-channel, nextStep, waitFor.
+- Plan 753: nextStep and waitFor in server/services/inbound.js decide what a guest message does next and hold the one wait before a turn (family assistant-run-lease).
 - When: any code that receives or sends a guest message; a new transport is a new file in `server/services/channels/`.
 - Known copies: none.
 
@@ -914,7 +915,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — server only
 - Use: the guest-facing assistant. The model key is resolved only by `keyFor` (`server/services/ai-key.js`). A fixed Hebrew sentence leaves the server through `fixedText` / `reasonText` (`server/utils/fixed-text.js`), never written in code. The model's answer shape is `turnAnswerSchema` (`shared/schemas/front-desk/turn-answer.schema.ts`); its request is `buildTurnBody` (`server/services/frontdesk-prompt.js`). The turn is `runTurn` (`server/services/frontdesk-turn.js`); every block lives in `applyGuardrails` (`server/services/frontdesk-guardrails.js`); the one model call is `askTurnModel` in `server/routes/ai/frontdesk.js`. plan 751: between the model's answer and the rules, `runTurn` calls `fillWhen` (`server/services/frontdesk-when.js`, with `currentGuestText`; family date-words). plan 753: `unansweredTail`, the UNANSWERED block.
-- Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, runTurn, decide, applyGuardrails, askTurnModel.
+- Plan 753: unansweredTail and the UNANSWERED data block in server/services/frontdesk-prompt.js name the guest messages one reply must answer.
+- Pieces: keyFor, fixedText, reasonText, turnAnswerSchema, TURN_SYSTEM_PROMPT, buildTurnBody, unansweredTail, runTurn, decide, applyGuardrails, askTurnModel.
 - When: any assistant reply, draft or block; a second model call for the assistant or a second place for a block is never added.
 - Known copies: none.
 
@@ -939,6 +941,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable — server only
 - Use: every rule that stops a guest conversation or a reply lives in `server/services/frontdesk-guardrails.js`: `preCheck` runs before the model call (removal request, keywords, active hours, turn count), `applyGuardrails` judges the reply. The word lists are data in `server/constants/frontdesk-guard-words.js` (`GUARD_WORDS`). The time check of applyGuardrails — plan 751: a time in a reply is checked against every fact line (R-25).
 - Pieces: preCheck, applyGuardrails, GUARD_WORDS.
+- Plan 753: The follow_up_limit stop in preCheck ends a chain of follow-up runs after FOLLOW_UP_MAX.
 - When: any new block, handoff trigger or word list for the assistant; a second place for a block is never added.
 - Known copies: none.
 
@@ -1041,6 +1044,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 ### assistant-run-lease — takeLease, noteWaiting, leaseCheck, endLease, clearLease in server/services/frontdesk-lease.js, nextStep in server/services/inbound.js (plan 753)
 
 - Status: stable — server only
+- Origin: New registry family assistant-run-lease in docs/brain/component-families.md (plan 753).
 - Use: `server/services/frontdesk-lease.js` · `takeLease` gives one run the conversation (or `null`); `noteWaiting` notes a guest message on a live lease; `leaseCheck` says whether the run may still send and write, and how many noted messages it did not read; `endLease` gives the lease back or keeps it for a follow-up; `clearLease` removes it when a person steps in; `leaseLive` says whether one holds now. `server/services/inbound.js` · `nextStep` decides what a guest message does next: start a run, wait, or leave it to the running run.
 - Pieces: takeLease, noteWaiting, leaseCheck, endLease, clearLease, leaseLive, nextStep.
 - When: anything that must not run twice for one conversation, or must stop when a person steps in, goes through these; the timing of a guest message is changed in `nextStep` only; a second lock, an in-memory map of running turns or a second wait is never added.
