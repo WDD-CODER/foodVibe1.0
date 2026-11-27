@@ -176,14 +176,14 @@ describe('SettingsTableComponent (plan 756)', () => {
     expect(navigate).not.toHaveBeenCalled()
   })
 
-  it('gives a fixed setting a tag and no button; the code shows to the admin only', async () => {
+  it('gives a fixed setting a tag and no button; no code line shows, not even to the admin', async () => {
     await create()
     expect(byId('set-change-guard_words')).toBeNull()
     expect(byId('set-row-guard_words')!.textContent).toContain('קבוע במערכת')
-    expect(byId('set-code-guard_words')).toBeNull()
     fixture.componentRef.setInput('isAdmin', true)
     fixture.detectChanges()
-    expect(byId('set-code-guard_words')!.textContent).toContain('frontdesk-guard-words.js')
+    expect(byId('set-code-guard_words')).toBeNull()
+    expect(byId('set-row-guard_words')!.textContent).not.toContain('frontdesk-guard-words.js')
   })
 
   it('keeps every row on the same columns, with each cell on one line', async () => {

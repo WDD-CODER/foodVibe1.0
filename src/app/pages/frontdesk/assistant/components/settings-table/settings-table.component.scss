@@ -45,12 +45,6 @@
   white-space: nowrap;
 }
 
-.asr-set__code {
-  color: var(--color-text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-}
-
 // A blocked button looks off but keeps hover, focus and tap, so its tooltip can say why.
 .asr-set__change[aria-disabled='true'] {
   cursor: not-allowed;

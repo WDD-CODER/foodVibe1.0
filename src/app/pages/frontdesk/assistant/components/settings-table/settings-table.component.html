@@ -32,11 +32,6 @@
           <li class="c-list-row asr-set__row" role="listitem" [attr.data-testid]="'set-row-' + item.row.id">
             <span class="c-list-body-cell asr-set__name">
               <span class="asr-set__line">{{ nameKey(item.row.id) | translatePipe }}</span>
-              @if (isAdmin() && item.row.code) {
-                <code class="asr-set__line asr-set__code" dir="ltr" [attr.data-testid]="'set-code-' + item.row.id">{{
-                  item.row.code
-                }}</code>
-              }
             </span>
             <span class="c-list-body-cell asr-set__value" [attr.data-testid]="'set-value-' + item.row.id">
               @if (shown(item.value); as value) {
