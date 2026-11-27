@@ -171,7 +171,11 @@ run md-3  768, 769   one run, in that order; starts only when 717 (house-style l
   merges, Dandan chooses: wait, or let 768 put `designCssVars` on the current classes and 717 rebase onto it.
 - Commands, one after the other, each after the previous run is merged and its cards answered:
   `/orchestrate 763 md-0` · `/orchestrate 764,766 md-1` · `/orchestrate 765,767 md-2` · `/orchestrate 768,769 md-3`.
-- Open Critical Questions block a run's dry run: 766 Q1/Q2 (before `md-1`), 768 Q1 (before `md-3`).
+- Answered 2026-11-27 (Dandan took the recommendations): 766 Q1 = a temporary free second Render service for the
+  measurement, deleted afterwards; 766 Q2 = if Chromium doesn't fit, the in-app PDF is made in the user's browser
+  (Save as PDF) and the server is revisited before the WhatsApp stage; designer entry = menu-library header button
+  plus the menu-intelligence entry (768); quick mode needs `menu_design` + `events`, not `ai_create`.
+- Still open, blocks only `md-3`: 768 Q1 (717 not merged by then → wait or build on today's classes).
 
 ## Contract extensions
 

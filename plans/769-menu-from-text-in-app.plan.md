@@ -263,7 +263,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Prices, descriptions, guests or dates from the text.
 
 ## Critical Questions
-- none
+- Q: Does quick mode also need the ai_create module? A: no — menu_design and events only, Dandan 2026-11-27
 
 ## Execution Notes
 - behaviour: the dish book is not sent to the AI; dishes are matched on the server by name only, so the AI's guesses can never link a dish below 95% (C-MATCH) and the prompt stays small.

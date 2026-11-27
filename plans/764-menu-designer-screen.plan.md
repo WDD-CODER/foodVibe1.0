@@ -353,7 +353,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - A slim outside setup page hosting the designer (last stage).
 
 ## Critical Questions
-- Q: Where does the chef reach the designer? A: a button «עיצובי תפריט» in the menu library header (plan author's choice; plan 768 adds a second entry inside menu intelligence).
+- Q: Where does the chef reach the designer? A: a button «עיצובי תפריט» in the menu library header plus a second entry inside menu intelligence (plan 768) — confirmed by Dandan 2026-11-27.
 
 ## Execution Notes
 - behaviour: staff may create and edit designs (the default INV-1 rules plan 763 keeps); only the owner sets the default.
