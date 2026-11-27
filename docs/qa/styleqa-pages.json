@@ -297,9 +297,51 @@
         "/report"
       ],
       "auth": true
+    },
+    {
+      "slug": "invoices",
+      "aliases": [
+        "חשבוניות"
+      ],
+      "title": "חשבוניות",
+      "routes": [
+        "/inventory/invoices"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "stock-count",
+      "aliases": [
+        "count",
+        "ספירת-מלאי"
+      ],
+      "title": "ספירת מלאי",
+      "routes": [
+        "/inventory/count"
+      ],
+      "auth": true
+    },
+    {
+      "slug": "diagnosis",
+      "aliases": [
+        "אבחון"
+      ],
+      "title": "אבחון",
+      "routes": [
+        "/diagnosis"
+      ],
+      "auth": true
     }
   ],
   "excluded": [
+    {
+      "route": "/diagnosis/:id",
+      "why": "needs a saved diagnosis of a consultant account; the diagnosis list page is measured"
+    },
+    {
+      "route": "/command-center",
+      "why": "a redirect to /dashboard?tab=metadata, measured as the dashboard"
+    },
     {
       "route": "/book/:slug",
       "why": "public booking page needs a business slug, not a record id"

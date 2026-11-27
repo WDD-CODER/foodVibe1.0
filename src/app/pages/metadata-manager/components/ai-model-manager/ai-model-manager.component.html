@@ -13,21 +13,25 @@
   } @else if (isLoading_()) {
     <div class="empty-state">{{ 'ai_model_loading' | translatePipe }}</div>
   } @else {
-    <ol class="model-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="onDrop($event)">
-      @for (model of models_(); track model.name) {
+    <ol class="model-list c-drag-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="onDrop($event)">
+      @for (model of models_(); track model.name; let i = $index) {
         <li
-          class="model-row"
+          class="model-row c-drag-item"
           [class.is-off]="!model.enabled"
           [class.is-just-moved]="justMoved_() === model.name"
           cdkDrag
           [cdkDragData]="model.name"
         >
-          <div class="model-placeholder" *cdkDragPlaceholder></div>
           <span
-            class="model-grip"
+            class="model-grip c-drag-handle"
             cdkDragHandle
-            [attr.aria-label]="'ai_model_drag' | translatePipe"
-            [attr.title]="'ai_model_drag' | translatePipe"
+            appReorderKeys
+            [reorderIndex]="i"
+            [reorderCount]="models_().length"
+            [reorderKey]="model.name"
+            (reorder)="onReorder(i, $event)"
+            [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+            [attr.title]="'drag_reorder_hint' | translatePipe"
           >
             <lucide-icon name="grip-vertical" [size]="16"></lucide-icon>
           </span>
@@ -70,7 +74,13 @@
     }
 
     <div class="model-actions">
-      <button type="button" class="c-btn-primary" [disabled]="!isDirty_() || isSaving_()" (click)="onSave()">
+      <button
+        type="button"
+        class="c-btn-primary"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="!isDirty_() ? ('why_nothing_to_save' | translatePipe) : null"
+        (click)="onSave()"
+      >
         {{ 'save' | translatePipe }}
       </button>
       @if (isDirty_()) {

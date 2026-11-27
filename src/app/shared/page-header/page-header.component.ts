@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
 import { RouterLink } from '@angular/router'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
@@ -17,7 +18,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 @Component({
   selector: 'app-page-header',
   standalone: true,
-  imports: [RouterLink, LucideAngularModule, TranslatePipe],
+  imports: [RouterLink, LucideAngularModule, TranslatePipe, TooltipDirective],
   templateUrl: './page-header.component.html',
   styleUrl: './page-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

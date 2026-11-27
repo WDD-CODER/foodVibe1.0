@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -31,7 +32,8 @@ interface FieldDef {
     ReactiveFormsModule,
     TranslatePipe,
     DatePipe,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './baseline-tab.component.html',
   styleUrl: './baseline-tab.component.scss',
@@ -115,6 +117,13 @@ export class BaselineTabComponent {
       this.form.valid &&
       (this.form.dirty || this.allFields.some((field) => value[field.key] != null))
     )
+  })
+  /** Why «שמור» cannot be used (a translation key), or null when it can. A running save is not a reason. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    const value = this.value_()
+    if (!this.form.valid) return 'why_settings_fix_invalid'
+    const hasNumber = this.allFields.some((field) => value[field.key] != null)
+    return this.form.dirty || hasNumber ? null : 'why_settings_fill_one_number'
   })
 
   constructor() {

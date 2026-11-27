@@ -8,11 +8,19 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { LABEL_COLOR_PALETTE } from '@models/label.model'
 import { finalizeEnglishKey } from '@utils/english-key.util'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-label-creation-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, EnglishKeyInputDirective, TranslatePipe, ModalShellComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EnglishKeyInputDirective,
+    TranslatePipe,
+    ModalShellComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './label-creation-modal.component.html',
   styleUrl: './label-creation-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

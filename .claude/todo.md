@@ -752,3 +752,374 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] A2: Show the dots in the simulator while the assistant is still working on the guest's message — typing_ computed with the 45 s cap, the input on app-chat-thread, fast reads while typing, spec cases — src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.spec.ts
 - [ ] A3: Record the new typing bubble where the next builder looks for it — the chat-thread and simulator-page family lines and the shared folder map — docs/brain/component-families.md, src/app/shared/breadcrumbs.md
 - [ ] A4: Run every check of this plan and hand Dandan the simulator check — test:ci, build, lint, inventory check, log-query; evidence into Execution Notes
+
+### Plan 736 — Every user gets 100 AI calls; after that each AI request says the budget is over and whom to contact
+- [ ] A1: Give every user a lifetime AI allowance of 100 that the server and browser both know — `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`, `aiAllowanceUpdateSchema`; two optional user fields; export from the schema index — shared/schemas/ai-allowance.schema.ts, shared/schemas/index.ts, server/models/user.model.js
+- [ ] A2: Count one AI request per user and refuse the next one before the model is called — `server/services/ai-allowance.js` (atomic reserve, refund, `allowanceOf`, `trackAiAllowance`), the reserve in `callGemini`, `usageOf` and the router mount, the 402 answer; tests: counts one per success, retries count once, a 502/504 is refunded, the 101st request is 402 with no fetch, missing fields read as 100, five parallel requests at allowance 2 reach the model exactly twice, a platform admin is never counted, a database error lets the call through, the vitest guard throws without `allowance` — server/services/ai-allowance.js, server/services/gemini-client.js, server/routes/ai.js, server/test/ai-allowance.test.js
+- [ ] A3: Keep the existing AI tests green with the new gate — any direct `callGemini` test that passes a `userId` adds an `allowance` holder; the cap tests still pass — server/test/gemini-client.test.js, server/test/ai-cap.test.js, server/test/helpers/app.js
+- [ ] A4: Let the platform admin see and raise one user's AI allowance — the two fields in `GET /admin/users`, the PUT with schema, 404, history row and log line; tests: admin raises, owner gets 403, bad body 400, unknown user 404, the raised user can call again — server/routes/admin.js, server/test/ai-allowance.test.js
+- [ ] A5: Show the budget-over message with the email on every AI attempt, on every screen — the interceptor toast and info log, `refusalShownToUser`, `aiCapErrorKey` short key, the email constant; specs: a 402 `AI_BUDGET_EXHAUSTED` toasts the email once per answer, another 402 does not, the helper returns the short key — src/app/core/interceptors/auth.interceptor.ts, src/app/core/utils/ai-error.util.ts, src/app/core/utils/server-refusal.util.ts and their specs
+- [ ] A6: Add the allowance number and save button to each row of the admin user list — model fields, `setAiAllowance`, row field with validation; specs: the PUT is sent with the number, a bad number never sends, a failed save keeps the old number — src/app/core/models/admin-user.model.ts, src/app/core/services/user-admin.service.ts, src/app/pages/metadata-manager/components/user-management/**
+- [ ] A7: Show each user how many AI calls are left in the AI windows — `optionalToken` and `mine` on `/ai/usage`, `GeminiUsage.mine`, the line in the three AI windows; a server case and a util spec case — server/routes/ai.js, src/app/core/utils/gemini-usage.util.ts, src/app/shared/ai-recipe-modal/**, src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**
+- [ ] A8: Make the four screens with their own cap check show the same short line — read `aiCapErrorKey` first — diag-menu.component.ts, invoice-import.util.ts, logistics-note-draft.component.ts, voice-note.component.ts
+- [ ] A9: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [ ] A10: Record the allowance in the maps and docs and run every check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/core/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/agent/standards-backend.md, docs/brain/component-families.md
+
+### Plan 737 — Make Dan the platform admin on the live app with a safe one-off script
+- [ ] A1: Add a one-off script that makes one existing user the platform admin, dry run first — argument parsing, the one-user rule, the plan and the guarded write with the history row, the output lines; reuse `parseTarget` and `connect` — server/scripts/set-platform-admin.js
+- [ ] A2: Prove the script on a test database — parse: missing target, missing email, unknown argument, `--db` with Atlas refused; plan: 0, 2 and removed users refused, already-set is "nothing to do", the email is matched lower-cased; apply against the in-memory database: a dry run writes nothing, `--write` sets the flag and one history row, `--off` clears it, a user changed meanwhile is refused — server/test/set-platform-admin.test.js
+- [ ] A3: Write the live runbook for Dandan and list the script in the server map — the section of P0 with the exact commands — docs/security-go-live.md, server/breadcrumbs.md
+- [ ] A4: Run every check and paste the outputs — the `[auto]` items, under Execution Notes — this plan file
+
+### Plan 738 — Make the repository look professional to a recruiter
+- [ ] A1: Stop the server test that sometimes fails on main — wait for the usage writes before reading them, in both tests; run `pnpm run test:server` three times — server/test/ai-logistics-extract.test.js, server/test/ai-stock-extract.test.js
+- [ ] A2: Count the tests for the README — unit: the `Executed N of N` line of `pnpm run test:ci`; server: the `Tests N passed` line of `pnpm run test:server`; end-to-end: the `Total: N tests` line of `pnpm exec playwright test --list`; paste the three lines under Execution Notes — (no file)
+- [ ] A3: Take the screenshots from the running app — in the slot (`node scripts/slot-serve.mjs`), with gstack `/browse`, signed in as the QA user (the `ORCH_QA_USER` / `QA_USER` login the e2e `signInQa` helper uses; never print it), take the dashboard, the recipe or dish page with costing, an event, inventory, and one AI helper screen; check each image shows no real person's name, phone or email (blur or skip it); if the app cannot be signed into or the data is empty, take none and list the names for the Human's card — docs/images/**
+- [ ] A4: Write the new README — the twelve sections of P0 with A2's counts and A3's images — README.md
+- [ ] A5: Add the license, the contributing note and the security note — LICENSE, CONTRIBUTING.md, SECURITY.md
+- [ ] A6: Tidy the root folder — the moves and removal of P0 with `git mv` / `git rm`, the `.gitignore` additions, the package name — ROUTE_INVENTORY.md, .qa-reports/**, .clone/**, docs/archive/**, .gitignore, package.json
+- [ ] A7: Run every automatic check and paste the outputs under Execution Notes — all `[auto]` items
+
+### Plan 741 — Move the proven house-rules mechanism into the workflow kit so every project gets it
+- [ ] A1: Check that the rules really worked on three new pages before anything moves to the kit — count the Pilot log rows with no fix-up; stop when fewer than three — docs/agent/house-style.md
+- [ ] A2: Sort what the pilot built into what every project needs and what is only FoodVibe's — the mechanism / content list under Execution Notes — this plan file
+- [ ] A3: Write the kit's own plan for the mechanism in the kit repository — the seven items of P0, through a kit branch and pull request — ../ai-workflow-kit/plans (the kit's next number)
+- [ ] A4: Get Dandan's approval of the kit plan, then build and release it the kit's way — the kit plan card; the release tag under Execution Notes — this plan file
+- [ ] A5: Bring the released kit version into FoodVibe and drop the pilot text the kit now owns — kit-sync with the release tag, the plan-checks pointer line, the config key — docs/agent/plan-checks.md, kit.config.json, docs/workflow-kit/**
+- [ ] A6: Record the decision so the next project knows how the rules got into the kit — the ADR and its index line — docs/brain/decisions/**, docs/brain/index.md
+- [ ] A7: Run every check and hand Dandan the gate card — outputs under Execution Notes — this plan file
+
+
+### Plan 743 — One sideways row container everywhere: a visible frame, edge arrows, grab-and-drag
+- [ ] A1: Give the sideways scroller a visible container and edge arrows that look like the scroll area turned sideways — the frame input, the new arrows, the removed mask and offset variables — src/app/shared/scroll-rail/**
+- [ ] A2: Let the row be grabbed and dragged with the mouse without pressing what is under it, and make the arrows signs only on a phone — the drag tracking, the swallowed click, the phone signal, the instant centring option, the spec cases — src/app/shared/scroll-rail/**
+- [ ] A3: Put the top bar's navigation in the container so it stops scrolling on its own with a scrollbar — the rail in the header, the removed box and overflow rules, the active link kept in view — src/app/core/components/header/**
+- [ ] A4: Fix the metadata row so its arrows sit inside the container and a chip press scrolls once — the removed offset and pill rules, the jumpTo order — src/app/pages/metadata-manager/metadata-manager.page.component.html, src/app/pages/metadata-manager/metadata-manager.page.component.scss, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
+- [ ] A5: Give the tab chips, the settings tabs, the diagnosis tabs, the stage row and the dish row's field strip the same container — the default frame, the removed fighting rules — src/app/core/components/tab-chips/**, src/app/pages/settings/settings.page.html, src/app/pages/settings/settings.page.scss, src/app/pages/diagnosis/components/diagnosis-workspace/**, src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [ ] A6: Show the container in the dev catalog and check the two screens a script can check — the catalog entry and its count spec, the two ui specs — src/app/pages/dev-catalog/**, e2e/ui/743-1.spec.ts, e2e/ui/743-2.spec.ts
+- [ ] A7: Record the container where builders look and name it in the house rules — the sideways-row rule, the new registry family, the inventory, the proposed default's how line, the design system rows — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
+- [ ] A8: Run every check of this plan and hand Dandan the five cards — outputs under Execution Notes — this plan file
+
+### Plan 744 — One tooltip box for every hint: a shared piece, the two hand-made tooltips moved onto it
+- [ ] A1: Build the one tooltip box every hint will use — the engine block, the directive, the box component and their spec — src/styles.scss, src/app/shared/tooltip/**
+- [ ] A2: Move the product list's warning hint onto the shared tooltip and delete its own copy — the template, the removed state and CSS, the spec — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] A3: Move the recipe book's cost and date hints onto the shared tooltip and delete their own boxes — the triggers, the removed boxes, CSS and service, the spec — src/app/pages/recipe-book/**
+- [ ] A4: Use the shared tooltip on three hints people meet every day — the bell, the page header's count, the taxonomy icon buttons — src/app/core/components/notification-bell/**, src/app/shared/page-header/**, src/app/pages/metadata-manager/components/taxonomy-kind-manager/**
+- [ ] A5: Show the tooltip in the dev catalog and check it with a script — the catalog entry, the dictionary key, the count spec, the ui spec — src/app/pages/dev-catalog/**, public/assets/data/dictionary.json, e2e/ui/744-1.spec.ts
+- [ ] A6: Warn when new code uses the browser's own title for a hint, and record the hints that still do — the house-tooltip lint rule with its round-trip proof, the debt baseline kind — scripts/lib/registry-families.mjs, _shared/debt-baseline.json
+- [ ] A7: Reword the default and the house rule to name the shared tooltip, and record the piece where builders look — the two how lines, the tooltip rule, the registry family, the inventory, the design system row, the folder maps — _shared/product-defaults.md, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, .interface-design/system.md, src/app/shared/breadcrumbs.md, src/app/pages/breadcrumbs.md
+- [ ] A8: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+
+### Plan 745 — List columns fall into the carousel one by one as the list gets narrower (mechanism + the product list)
+- [ ] A1: Work out which columns fit a given width, as a tested rule with no browser — the column type, the fit function and its spec — src/app/shared/list-shell/list-columns.util.ts, src/app/shared/list-shell/list-columns.util.spec.ts
+- [ ] A2: Let the list container measure itself and lay its columns out from the rule — the columns input, the resize and phone watchers, the grid variables, the collapsed ids handed to the carousel group — src/app/shared/list-shell/**, src/app/shared/column-carousel/column-carousel-group.directive.ts
+- [ ] A3: Let a column be shown either as its own cell or inside the switching column — the fall-column directive, the header and cell rendering, the carousel look and keys freed from the phone width — src/app/shared/column-carousel/**, src/styles.scss
+- [ ] A4: Make the product list declare its columns and their fall order instead of typing layouts — the columns list, the template, the spec — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] A5: Show falling columns in the dev catalog and check three widths with a script — the catalog entry and its count spec, the three ui specs — src/app/pages/dev-catalog/**, e2e/ui/745-1.spec.ts, e2e/ui/745-2.spec.ts, e2e/ui/745-3.spec.ts
+- [ ] A6: Write the new behaviour into the house rules and where builders look — the column-carousel and recipe-list rules, the registry, the inventory, the proposed default's lines, the design system line — docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md, _shared/product-defaults.md, .interface-design/system.md
+- [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+
+### Plan 746 — The other five lists get falling columns: recipe book, suppliers, equipment, clients, invoices
+- [ ] A1: Move the recipe book onto falling columns so recipe names stop being squeezed — the columns list, the header and row cells, the spec — src/app/pages/recipe-book/components/recipe-book-list/**
+- [ ] A2: Move the supplier list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/suppliers/components/supplier-list/**
+- [ ] A3: Move the equipment list onto falling columns — the columns list, the header and row cells, the spec — src/app/pages/equipment/components/equipment-list/**
+- [ ] A4: Move the client list onto falling columns for owner and staff — the computed columns list, the removed grid constants, the header and row cells, the spec — src/app/pages/clients/components/client-list/**
+- [ ] A5: Give the invoices list a switching column for the first time — the carousel group, the header and cell wrappers, the columns list, the spec — src/app/pages/inventory/components/invoices-list/**
+- [ ] A6: Check two of the lists at a medium width with a script and record the change — the two ui specs, the column-carousel rule's gaps, the registry line, the inventory — e2e/ui/746-1.spec.ts, e2e/ui/746-2.spec.ts, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A7: Run every check of this plan and hand Dandan the six cards — outputs under Execution Notes — this plan file
+
+### Plan 747 — Dandan's validation feedback on the row container, the falling columns and the tooltip
+- [ ] A1: Move the row's arrows outside the container and make the container as wide as its items — F1, F2 with the rail's spec — src/app/shared/scroll-rail/**, src/app/core/components/header/**, src/app/pages/metadata-manager/metadata-manager.page.component.scss
+- [ ] A2: Let every list shrink to name, one switching column and actions, and never squeeze a one-line cell — F4, F5 in the fit rule with its spec cases — src/app/shared/list-shell/**
+- [ ] A3: Drop the label above each value in the switching column — F3 — src/app/shared/column-carousel/**
+- [ ] A4: Apply the new column rules to the six lists — stay on name and actions, the one-line minimum widths, the ellipsis with the tooltip — the six list component folders
+- [ ] A5: Make the tooltip stay inside the screen sideways and open by tap on touch — F6 with spec cases — src/app/shared/tooltip/**, src/app/core/utils/viewport-placement.util.ts, src/app/core/utils/viewport-placement.util.spec.ts
+- [ ] A6: Show one warning triangle on the product list, and its price hint and the recipe cost text the right way — F7, F8, F9 — src/app/pages/inventory/components/inventory-product-list/**, src/app/pages/recipe-book/components/recipe-book-list/**
+- [ ] A7: Make notifications reachable below desktop width from the profile menu — F10 — src/app/core/components/header/**, src/app/core/components/notification-bell/**
+- [ ] A8: Give the menu builder's stage row the app's chips, and the stock count its hints from tablet width up — F11, F12 — src/app/pages/menu-intelligence/components/event-stage-bar/**, src/app/pages/inventory/components/stock-count/**
+- [ ] A9: Update the screen scripts, the house rules and the registry to what was built — the specs, the three rules, the proposed defaults' lines, the registry and inventory — e2e/ui/**, docs/agent/house-style.md, _shared/product-defaults.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A10: Run every check of this plan and hand Dandan the ten cards — outputs under Execution Notes — this plan file
+- [ ] B1: Settle what the first round left unverified before changing anything — G0: the failing top-bar script, the dish row's two tests, the stock count leftovers — e2e/ui/651-1.spec.ts, src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [ ] B2: Make the catalog's top chips scroll to their section instead of leaving the page — G1 — src/app/pages/dev-catalog/**
+- [ ] B3: Put the product list's warning triangle in one straight column — G2 — src/app/pages/inventory/components/inventory-product-list/**
+- [ ] B4: Show a small arrow inside the row's container when there is more and no outside button — G3 with the rail's spec — src/app/shared/scroll-rail/**
+- [ ] B5: Build the way a disabled control says why — G4.1, G4.2: the directive with its spec, the is-disabled look — src/app/shared/tooltip/**, src/styles.scss
+- [ ] B6: Use it on every button that already had a reason, and show it in the catalog — G4.3, G4.4 — the twelve listed component folders, src/app/pages/dev-catalog/**, public/assets/data/dictionary.json
+- [ ] B7: Record the new default Dandan asked for and warn on new bare disabled controls — G4.5, G4.6 — _shared/product-defaults.md, scripts/lib/registry-families.mjs, _shared/debt-baseline.json
+- [ ] B8: Keep the stock count's unit column straight — G5 — src/app/pages/inventory/components/stock-count/**
+- [ ] B9: Check the four screens with scripts and write the changes into the rules — the four ui specs, the house rules, the registry, the inventory — e2e/ui/**, docs/agent/house-style.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] B11: Give the warning triangle its orange-yellow back and move the cook view's three hints onto the shared piece — G2b, G4.3b — src/app/pages/inventory/components/inventory-product-list/**, src/app/pages/cook-view/**
+- [ ] B12: Teach the shared piece to work on text fields, selects and shared controls that are disabled by their caller — G6.3 with spec cases — src/app/shared/tooltip/**, src/app/shared/**
+- [ ] B13: Give every inactive control in the app its reason, leaving plain only the ones that are just busy — G6.1, G6.2, G6.4, G6.5 — src/app/**, e2e/**, public/assets/data/dictionary.json, _shared/debt-baseline.json
+- [ ] B10: Run every check, push onto the run branch, serve it and hand Dandan the cards of both rounds — outputs under Execution Notes — this plan file
+
+### Plan 748 — Restaurant menu and month sales: filters in the panel, clear columns, icons, visible month arrows
+- [ ] A1: Move the menu's type chips and removed toggle into the list's filter panel, like the products list — panel state, collapsible «סוג מנה» category, set filter, clear button, VAT note as the net title's hint — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
+- [ ] A2: Rename the menu columns, show net prices as plain numbers and add a profit percent column — new keys, profitPct, grid templates — src/app/pages/restaurant-menu/restaurant-menu.page.ts, .html, .scss
+- [ ] A3: Use the app's edit, remove and restore icons on each menu row instead of text buttons — c-icon-btn in app-row-actions-menu — src/app/pages/restaurant-menu/restaurant-menu.page.html
+- [ ] A4: Prove the menu fixes with unit tests — filters in the panel, multi-type and no-type filter, clear, titles, no «נטו», profit 75 and 75.0%, icon buttons — src/app/pages/restaurant-menu/restaurant-menu.page.spec.ts
+- [ ] A5: Put the month arrows above the sales list where nothing covers them, and keep fill-zero and save visible — shell-pagination pager, one actions wrapper — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.html, .scss
+- [ ] A6: Drop the cost column from the month sales page and show reasons only on dishes that had returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.ts, .html, .scss
+- [ ] A7: Prove the sales fixes with unit tests, including one that fails while the save button covers the arrows — elementFromPoint with the real list shell, no cost cell, reasons button only after returns — src/app/pages/restaurant-menu/dish-sales/dish-sales.page.spec.ts
+- [ ] A8: Add the Hebrew words, update the pages map and run every automatic check — keys of UI/UX Notes; paste outputs under Execution Notes — public/assets/data/dictionary.json, src/app/pages/breadcrumbs.md
+
+### Plan 749 — Monthly plan: live figures, forecast/actual chips, a dense page and gross-only staff cost
+- [ ] A1: Move the draft mapping out of the page and add the live month and the staff-cost migration — draftOf, liveMonthOf, empty target falls back to saved; spec — src/app/pages/monthly-plan/month-draft.ts, src/app/pages/monthly-plan/month-draft.spec.ts
+- [ ] A2: Build the forecast/actual chip pair with the faded forecast in an empty actual — open/close, teal when filled, placeholder not counted; spec — src/app/pages/monthly-plan/components/month-pair/**
+- [ ] A3: Feed the month picture from what is typed and put the pair on the revenue and purchases rows — live computed, flags, targets and dish calculator from the live month; page spec cases (a)–(e) replace the saved-only case — src/app/pages/monthly-plan/monthly-plan.page.ts, src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [ ] A4: Put the pair, the trash icon and the new mode names on the fixed costs card — three-column rows, renamed modes and notes; spec — src/app/pages/monthly-plan/components/fixed-costs-card/**
+- [ ] A5: Make staff cost gross pay times the factor, always shown, and start new months that way — drop the mode radios, employer cost beside each side, default gross; card and server tests — src/app/pages/monthly-plan/components/labour-card/**, shared/schemas/month/month-rules.ts, server/test/month-rules.test.js, server/test/month-plans.test.js
+- [ ] A6: Let «חלקי» say what is missing — hint texts, the hint on the figure cells and the fixed flag; specs — src/app/pages/monthly-plan/month-hints.ts, src/app/pages/monthly-plan/month-hints.spec.ts, src/app/shared/month-figures/**
+- [ ] A7: Turn the target norms into hover hints and lay the page out as a dense grid — band title on the box, short boxes, two-side grid with the picture beside the inputs — src/app/pages/monthly-plan/monthly-plan.page.html, src/app/pages/monthly-plan/monthly-plan.page.scss
+- [ ] A8: Add the Hebrew words and check the page end to end in its spec — the keys of UI/UX Notes; page spec: no inline norm, band title present — public/assets/data/dictionary.json, src/app/pages/monthly-plan/monthly-plan.page.spec.ts
+- [ ] A9: Record the changes in the maps and run every automatic check — paste outputs under Execution Notes — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/brain/component-families.md
+
+### Plan 750 — Signing out works from the dashboard again
+- [ ] A1: Write a failing test that signs out on the dashboard and proves nothing happens today — real authGuard routes, three cases — src/app/core/components/header/header.component.spec.ts
+- [ ] A2: Let sign-out go ahead when the user is already on the dashboard, keeping the unsaved-changes question elsewhere — skip the same-URL navigation, fix the comment — src/app/core/components/header/header.component.ts
+- [ ] A3: Run every automatic check and record the root cause — paste outputs under Execution Notes — src/app/core/components/header/header.component.ts
+
+### Plan 751 — The assistant understands "מחר" by itself and no longer hands an opening-hours answer to the staff
+- [ ] A1: Turn a guest's date words into a real date with one tested helper, because the model often leaves the date out — dateFromWords and clockTimeOf with the word table of the requirements, and every listed case of the new test file — shared/schemas/front-desk/date-words.ts, server/test/date-words.test.js
+- [ ] A2: Fill the missing date before the table engine and the request path see the answer — fillWhen and currentGuestText, the call and the when_filled log line in the turn, the new unit test file, the two turn-test cases and the date-words block of the table tests — server/services/frontdesk-when.js, server/services/frontdesk-turn.js, server/test/frontdesk-when.test.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-tables.test.js
+- [ ] A3: Let a time that stands in any of the business's facts through, so an opening-hours answer reaches the guest — timesOf and timeCheck, the padded comparison, the hours row's open and close, the detail on the block, the guardrail cases — server/services/frontdesk-guardrails.js, server/test/frontdesk-guardrails.test.js
+- [ ] A4: Write the counts of a blocked time into the log so the next wrong block can be understood — blockTurn takes the detail, the two post-model calls pass it, the facts-time block of the table tests — server/services/frontdesk-turn.js, server/test/frontdesk-tables.test.js
+- [ ] A5: Write down the two changed rules and where the new pieces live — R-09 note, R-24 and R-25, the map's Contract line, breadcrumbs, the family entry and the inventory — docs/frontdesk/assistant-behaviour-rules.md, docs/restaurant/restaurant-map.md, server/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A6: Run every check of this plan and hand Dandan the two simulator checks — test:server, both lints, build, inventory check, log-query; evidence into Execution Notes
+
+### Plan 757 — Remove the old bottom-sheet popup rules and turn on the two popup defaults
+- [ ] A1: Prove that nothing uses the old bottom-sheet rules any more, and stop if something does — the safety check and the four searches of section A1; results into Execution Notes; writes no file — reads src/, e2e/, server/, public/, scripts/
+- [ ] A2: Remove the three dead bottom-sheet pieces from the shared stylesheet, as the Human approved — the block inside the inline edit panel, the two phone helpers with their comment, the plan 459 comment sentence and selector — src/styles.scss
+- [ ] A3: Make the guard forbid the removed selectors and teach the two append-only checks this one approved removal — new export withoutRetiredSheetRules with three fixture cases, three allow entries deleted, the stylesheet added to the no-mention test, both append-only assertions compare with the base minus the retired rules — scripts/lib/modal-guard.mjs, scripts/test/modal-guard.test.mjs, scripts/test/style-720.test.mjs, scripts/test/style-703.test.mjs
+- [ ] A4: Turn on the two popup defaults the Human asked for and prove their checks with a test — the two add commands of section A4, expected baseline zero for both, the contract test — _shared/product-defaults.md, _shared/debt-baseline.json, scripts/test/style-720.test.mjs
+- [ ] A5: Record the removal and the defaults in the registry, correct the gotcha note, regenerate the inventory — docs/brain/component-families.md, docs/brain/gotchas/angular.md, docs/brain/inventory.md
+- [ ] A6: Run every check of this plan and hand the Human the two equipment looks — every auto item of Goals with its exact output into Execution Notes; then the two human checks as cards — no file
+
+### Plan 752 — Every run of the front-desk assistant is recorded step by step, kept 30 days, and shown to the owner in a "what the assistant did" page
+- [ ] A1: Add the stored shape and the collection for assistant runs, deleted by themselves after 30 days — the Zod schema with its constants, the registry entries, the collection row, the three indexes with the TTL one — shared/schemas/entities/assistant-run.schema.ts, shared/schemas/entities/index.ts, server/constants/collections.js, server/db.js
+- [ ] A2: Build the recorder that collects the steps of a run and saves it once at the end — startRun with time, step, set, end, discard, finish, the clipping, NO_RUN, listRuns, loadRun, markAdminView, the unit tests a to k — server/services/frontdesk-runs.js, server/test/frontdesk-runs.test.js
+- [ ] A3: Let the AI call report which model answered, each try and the raw answer — the trace field on both results of askTurnModel, no change to its other fields or to the model client — server/routes/ai/frontdesk.js
+- [ ] A4: Record every step of the assistant's turn and the wait before it — runTurn starts and finishes the run, the recording table, the three helper return values, decide's why, the measured wait, the turn, table and inbound tests — server/services/frontdesk-turn.js, server/services/inbound.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-tables.test.js, server/test/inbound.test.js
+- [ ] A5: Delete runs together with their business, their guest and the test data — the business delete loop, the erase script with its count, clear test data, their tests — server/services/business.js, server/scripts/erase-client.js, server/routes/sim.js, server/test/erase-client.test.js, server/test/sim-router.test.js
+- [ ] A6: Add the two read routes with the owner-only rule and the trace of an admin's look — list with filters and paging, one run, hidden guest text and the trace for the acting platform admin, the prompt for the admin only, route tests — server/routes/assistant-runs.js, server/app.js, server/test/assistant-runs-router.test.js
+- [ ] A7: Add the browser's model, data service and the helpers that turn a run into plain lines — the types, the API address, the signals and methods, verdictOf, stepRows and STEP_FIELDS, their specs — src/app/core/models/assistant-run.model.ts, src/app/core/services/http-storage.adapter.ts, src/app/core/services/assistant-run-data.service.ts, src/app/core/services/assistant-run-data.service.spec.ts, src/app/pages/frontdesk/assistant/assistant-run-view.util.ts, src/app/pages/frontdesk/assistant/assistant-run-view.util.spec.ts
+- [ ] A8: Build the page with its tab strip, the list of runs and the open run step by step — the page, the run detail component, every state, the words in the dictionary, the specs — src/app/pages/frontdesk/assistant/**, public/assets/data/dictionary.json
+- [ ] A9: Make the page reachable: its route and the links from the inbox and the simulator — two routes, the two header links, the two spec cases — src/app/app.routes.ts, src/app/pages/inbox/inbox.page.html, src/app/pages/inbox/inbox.page.spec.ts, src/app/pages/frontdesk/simulator/simulator.page.html, src/app/pages/frontdesk/simulator/simulator.page.ts, src/app/pages/frontdesk/simulator/simulator.page.spec.ts
+- [ ] A10: Write down where the new pieces live — folder maps, the backend standards rows, the restaurant map's Contract line, the new registry family and the inventory — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/agent/standards-backend.md, docs/restaurant/restaurant-map.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A11: Run every check of this plan and hand Dandan the three page checks — test:server, test:ci, build, both lints, the icon lint, the inventory check, log-query; evidence into Execution Notes; the slot's servers up before the cards
+
+### Plan 755 — The assistant gets the facts that fit the guest's question: the business's basics always, the rest picked by a script, and what was left out is written down
+- [ ] A1: Build the script that ranks knowledge items by the guest's words, so the right item is found without another AI call — the shared norm helper moved out of the guardrails, the tokens, the word forms, the match, the score, the pick inside the budget, the query from the conversation, and every listed case of the new test file — server/utils/text-norm.js, server/services/frontdesk-guardrails.js, server/services/fact-pick.js, server/services/frontdesk-when.js, server/test/fact-pick.test.js, server/test/frontdesk-when.test.js
+- [ ] A2: Make the one fact source use the pick and say what it left out, with the business's basics always sent — the new options and return value of publicFacts, the profile lines as the core, the changed and new knowledge cases, the demo restaurant case — server/services/knowledge.js, server/test/knowledge.test.js, server/test/seed-demo-restaurant.test.js
+- [ ] A3: Give the turn the guest's question, and write the numbers to the log and the left-out items to the run record — the call with the query, the two log lines, the added fields and the note status of the facts step, the turn block and the table block of tests — server/services/frontdesk-turn.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-tables.test.js
+- [ ] A4: Show the owner how many facts were left out and which — three rows in the step fields, six dictionary keys, the spec cases — src/app/pages/frontdesk/assistant/assistant-run-view.util.ts, src/app/pages/frontdesk/assistant/assistant-run-view.util.spec.ts, public/assets/data/dictionary.json
+- [ ] A5: Write down the new rule and where the new pieces live — the rule row with the next free number, the map's Contract line, breadcrumbs, the new family and the inventory — docs/frontdesk/assistant-behaviour-rules.md, docs/restaurant/restaurant-map.md, server/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A6: Run every check of this plan and hand Dandan the one simulator check — test:server, test:ci, build, both lints, the inventory check, log-query; evidence into Execution Notes; the slot's servers up before the card
+
+### Plan 753 — The assistant works on one guest conversation at a time: messages that arrive meanwhile get one follow-up answer, a team member who steps in stops the answer, and every unanswered message is answered
+- [ ] A1: Give a conversation a lease so only one assistant run can work on it, and let the lease end by itself — the run field on the conversation shape, the six lease functions, the exported model budget, the lease unit tests a to m — shared/schemas/entities/conversation.schema.ts, server/services/frontdesk-lease.js, server/routes/ai/frontdesk.js, server/test/frontdesk-lease.test.js
+- [ ] A2: Put the decision of what a guest message does next in one function, so a message during a run starts no second run — nextStep and waitFor, afterStored and answerWaiting pass the message id and note a waiting message, the nextStep cases — server/services/inbound.js, server/test/inbound.test.js
+- [ ] A3: Tell the model to answer every unanswered guest message and show it how many there are — the prompt line, unansweredTail, the UNANSWERED data block, the prompt cases — server/services/frontdesk-prompt.js, server/test/frontdesk-prompt.test.js
+- [ ] A4: Stop a guest who never stops writing from looping the assistant — the follow-up limit in the pre-check with its reason, the guardrail cases — server/services/frontdesk-guardrails.js, server/test/frontdesk-guardrails.test.js
+- [ ] A5: Add the new results of a run to its record — the two outcomes and five reasons, followsRunId through the recorder, the handover filter, the recorder cases — shared/schemas/entities/assistant-run.schema.ts, server/services/frontdesk-runs.js, server/test/frontdesk-runs.test.js
+- [ ] A6: Run one turn at a time with a follow-up for what arrived meanwhile, and re-check after the model call — runOnce, the lease loop of runTurn, the re-check and the two early exits in runTurnInner, the trigger from unansweredTail, the added turn case — server/services/frontdesk-turn.js, server/test/frontdesk-turn.test.js, server/test/frontdesk-tables.test.js
+- [ ] A7: Let take over and a member reply cancel the run that is working — the unset in take over, clearLease before the reply is sent, the router and simulator cases — server/routes/conversations.js, server/test/conversations-router.test.js, server/test/sim-router.test.js
+- [ ] A8: Prove the whole behaviour end to end with a held model call — every case of the new one-run test file — server/test/frontdesk-one-run.test.js
+- [ ] A9: Show the new results and the follow-up link in the page of runs — the tones, the overtaken field, the link in the run detail, the twelve dictionary keys, the two specs — src/app/pages/frontdesk/assistant/assistant-run-view.util.ts, src/app/pages/frontdesk/assistant/assistant-run-view.util.spec.ts, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.html, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.ts, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.spec.ts, public/assets/data/dictionary.json
+- [ ] A10: Write down the three new rules and where the new pieces live — R-03 note, R-26 to R-28, the map's Contract line, the backend registry row, breadcrumbs, the new family and the inventory — docs/frontdesk/assistant-behaviour-rules.md, docs/restaurant/restaurant-map.md, docs/agent/standards-backend.md, server/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A11: Run every check of this plan and hand Dandan the two simulator checks — test:server, test:ci, build, both lints, the icon lint, the inventory check, log-query; evidence into Execution Notes; the slot's servers up before the cards
+
+### Plan 754 — The assistant answers faster: it waits 2 quiet seconds instead of a fixed 6, gives the first AI model 6 seconds before the next one is tried, and can show "typing…" on a channel that supports it
+- [ ] A1: Start a run two quiet seconds after the guest stops writing, and six seconds after the first message at the latest — the two constants with the old name kept, burstAtOf and burstStart, the new rule of nextStep, afterStored passes the wait numbers, the changed and new inbound cases — server/services/inbound.js, server/test/inbound.test.js
+- [ ] A2: Let the follow-up run wait by the same quiet rule and carry its wait numbers — the follow-up's inbound option in the lease loop, the new one-run case — server/services/frontdesk-turn.js, server/test/frontdesk-one-run.test.js
+- [ ] A3: Cut a slow first model call and move to the next large-bucket model without marking anything — firstLimitMs and onCall, slowTarget with the two budget rules, the slow result and its ledger and log lines, the back-to-first rule, cases a to i — server/services/gemini-client.js, server/test/gemini-fallback.test.js
+- [ ] A4: Make the assistant's turn use the six second limit and report every call it made — FIRST_MODEL_LIMIT_MS exported, the two options on the one model call, attempts per call with the try number, the speed cases of the turn tests — server/routes/ai/frontdesk.js, server/test/frontdesk-turn.test.js
+- [ ] A5: Give a channel a typing sign the run asks for once, safely — the optional typing member, showTyping with its five checks, the call after the pre-check, the outbound and turn cases — server/services/outbound.js, server/services/channels/index.js, server/services/frontdesk-turn.js, server/test/outbound.test.js, server/test/frontdesk-turn.test.js
+- [ ] A6: Write the wait numbers and the time to answer into the run record — quietMs and capped on the first step, answerMs on the send step, the recorder and turn cases — server/services/frontdesk-runs.js, server/test/frontdesk-runs.test.js, server/test/frontdesk-turn.test.js
+- [ ] A7: Read the history with its count and the facts with the tables at the same time, keeping the order of the steps — two Promise.all pairs inside the existing timed steps, every turn and table test green — server/services/frontdesk-turn.js
+- [ ] A8: Show the wait, each AI try with its time and the time to answer in the page of runs — the tries kind, tryResultKey, four field rows, the try lines in the run detail, ten dictionary keys, the two specs — src/app/pages/frontdesk/assistant/assistant-run-view.util.ts, src/app/pages/frontdesk/assistant/assistant-run-view.util.spec.ts, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.html, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.ts, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.spec.ts, public/assets/data/dictionary.json
+- [ ] A9: Write down the three new rules and where the changed pieces live — R-03 note, R-29 to R-31, the map's Contract line, breadcrumbs, the four family entries and the inventory — docs/frontdesk/assistant-behaviour-rules.md, docs/restaurant/restaurant-map.md, server/breadcrumbs.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A10: Run every check of this plan and hand Dandan the two simulator checks — test:server, test:ci, build, both lints, the icon lint, the inventory check, log-query; evidence into Execution Notes; the slot's servers up before the cards
+
+### Plan 756 — The assistant page gets two more tabs: "how it works" (the 13 steps in plain words) and "what you can change" (every setting, where it is changed and by whom)
+- [ ] A1: Add one read that tells the page the engine's real numbers and this business's own values — assistantSetup with the engine constants, the business values, the model order for the admin only; the setup route before the run route; the router test cases — server/services/assistant-setup.js, server/routes/assistant-runs.js, server/test/assistant-runs-router.test.js
+- [ ] A2: Let the browser read that setup once and keep it — the three types, the three signals and loadSetup on the service, its spec cases — src/app/core/models/assistant-run.model.ts, src/app/core/services/assistant-run-data.service.ts, src/app/core/services/assistant-run-data.service.spec.ts
+- [ ] A3: Write down the 13 steps as data, so a step added later cannot be forgotten — FLOW_STEPS with kind, stops, engine facts and code path; the coverage spec against the run step keys and reasons — src/app/pages/frontdesk/assistant/assistant-flow.data.ts, src/app/pages/frontdesk/assistant/assistant-flow.data.spec.ts
+- [ ] A4: Write down every setting as data with where it is changed and by whom — SETTING_ROWS, settingValue and changeBlock, the spec that every route exists and the value spec — src/app/pages/frontdesk/assistant/assistant-settings.data.ts, src/app/pages/frontdesk/assistant/assistant-settings.data.spec.ts, src/app/pages/frontdesk/assistant/assistant-settings-value.util.ts, src/app/pages/frontdesk/assistant/assistant-settings-value.util.spec.ts
+- [ ] A5: Add every new word to the dictionary and test that no step text carries a typed number — all keys of the UI/UX tables; the dictionary test — public/assets/data/dictionary.json, server/test/assistant-flow-dictionary.test.js
+- [ ] A6: Give the step row one shared look for the run detail and the flow map — move the step row rules into a partial that both stylesheets use, no rule text changed — src/app/pages/frontdesk/assistant/_asr-step.scss, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.scss
+- [ ] A7: Build the tab that explains the 13 steps in plain words — the flow map component, one open row at a time, the admin-only code lines, the current-value lines, its spec — src/app/pages/frontdesk/assistant/components/flow-map/**
+- [ ] A8: Build the tab that lists every setting with its value and a button to the real screen — the settings table component, the blocked button with its reason, loading, error and no-profile states, its spec — src/app/pages/frontdesk/assistant/components/settings-table/**
+- [ ] A9: Put the two tabs on the assistant page and keep the open tab in the address — three tabs, activeTab from the address, setTab, the runs list loads only on its tab, the refresh button only there, the page spec cases — src/app/pages/frontdesk/assistant/assistant.page.ts, src/app/pages/frontdesk/assistant/assistant.page.html, src/app/pages/frontdesk/assistant/assistant.page.scss, src/app/pages/frontdesk/assistant/assistant.page.spec.ts
+- [ ] A10: Write down where the new pieces live — folder maps, the API table row, the registry family lines and the inventory — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/agent/standards-backend.md, docs/restaurant/restaurant-map.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [ ] A11: Run every check of this plan and hand Dandan the three page checks — test:server, test:ci, build, both lints, the icon lint, the inventory check, log-query; evidence into Execution Notes; the slot's servers up before the cards
+
+# Plan 758 — House style: the finishing pass of plan 747 (inactive controls look and read right)
+
+Status: draft
+Depends-on: none
+Track: code
+Snapshot: a5bb9d20
+
+## Problem Statement
+Plan 747 round two (branch `fix/house-style-ui-feedback`, now `a5bb9d20` with main merged in) changed 113 bindings from
+`[disabled]` to the `appDisabledWhy` directive (`src/app/shared/tooltip/disabled-why.directive.ts`). That directive
+keeps a control reachable so its tooltip can show why it cannot be used, which means the control is **no longer natively
+`:disabled`**. The finishing pass that should have cleaned up after the swap was stopped half-way on 2026-11-26 (the
+day's usage ran out), and its report never arrived. Checked on `a5bb9d20` by the Planner: `ng build` exit 0, `pnpm run
+lint` 0 errors, `pnpm run test:ci` 2871/2871, `kit-checks --base origin/orch/house-style-ui` ok; the product, recipe
+and supplier lists already use `[ctaDisabledWhy]`; `why_at_min`, `why_at_max`, `why_voice_note_empty` exist in
+`dictionary.json`; `node scripts/inventory.mjs --check` ok.
+
+Left, and the subject of this plan:
+1. SCSS rules that style a blocked control through `:disabled` no longer match the converted controls, so a blocked
+   button may look active. Files with `:disabled` rules today: coefficient-manager, user-management,
+   recipe-ingredients-table, recipe-workflow, recipe-builder.page, cook-view.page, dashboard-overview, product-form,
+   menu-intelligence `_paper-ui` / `_toolbar`, trash.page, ai-menu-modal (and supplier-picker, recipe-book-list,
+   stock-count if they style converted controls).
+2. A blocked tick (checkbox) inside a toggle chip: the chip must look dimmed, and hovering or tapping the chip shows
+   the reason.
+3. The 151 `[disabled]=` bindings still in `src/app/**/*.html` are either a control greyed only while its own action
+   runs (the default's exception) or not yet classified; nobody has listed which.
+
+## Goals & Success Criteria
+**Primary:** every control the swap converted still looks blocked when it is blocked, and the remaining bare
+`[disabled]` bindings are listed and justified.
+
+- [auto] `pnpm run build` exits 0; `pnpm run lint` exits 0.
+- [auto] `pnpm run test:ci` exits 0.
+- [auto] `node scripts/kit-checks.mjs --base origin/orch/house-style-finish --plan plans/758-house-style-finishing-pass.plan.md` exits 0.
+- [auto] `node scripts/inventory.mjs --check` exits 0; `node scripts/breadcrumbs-check.mjs` exits 0.
+- [auto] `node scripts/scope-check.mjs --arch --plan=plans/758-house-style-finishing-pass.plan.md` → `ARCH: ok`.
+- [auto] `node --test scripts/test/disabled-why-scss.test.mjs` exits 0: for every SCSS file in scope that has a
+  `:disabled` selector for a control the swap converted, the same block also matches the directive's blocked state
+  (its class or `aria-disabled="true"`, whichever the directive sets).
+- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `SKIP: no database configured`).
+- [human] On «מתכונים» → a recipe → the ingredients table, signed in as a staff user without edit rights: the add and
+  remove buttons look grey (not like active buttons), and hovering one shows a tooltip in Hebrew saying why.
+- [human] On «ניהול» → coefficients, as a user who cannot edit: the save button looks grey and its tooltip says why.
+- [human] On a page with a toggle chip whose tick is blocked (the builder names the page in Execution Notes): the chip
+  looks dimmed, and hovering the chip (or tapping it on a phone) shows why.
+
+## Execution Mode
+- Parallel: no — one plan.
+- Concurrent plans: none in this run.
+- Isolated DB: no — nothing is stored.
+
+## Read-Write Scope
+
+Always allowed regardless of the list below: this plan file itself, its own
+`.claude/sessions/**`, `.worktree-*`, and the append-only
+hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
+— add to them, never rewrite or remove an existing entry without escalating).
+
+```scope
+src/app/**/*.scss
+src/app/shared/**
+src/app/pages/**/*.html
+src/app/pages/**/*.component.ts
+src/app/pages/**/*.component.spec.ts
+src/app/**/breadcrumbs.md
+scripts/test/disabled-why-scss.test.mjs
+docs/agent/house-style.md
+docs/brain/component-families.md
+docs/brain/inventory.md
+_shared/debt-baseline.json
+```
+
+## Read Scope
+
+Entire repo.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the `## Read-Write Scope` above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; offer `approved: <path>`; then
+append the path to the scope block above and retry.
+
+## Architecture Impact
+- INV-none: preserves — styling and template classes only; no route, guard, permission, stored data, AI call or CSP
+  change. Blocked actions stay blocked by the directive exactly as plan 747 built it.
+- INV-3: preserves — the scope reaches metadata-manager templates and styles only; no write path or cross-document
+  logic changes.
+- INV-6: preserves — the scope reaches `*ai*` component styles and templates (ai-menu-modal) only; no AI call changes.
+
+## Reuse Check
+- none — styles follow the existing `appDisabledWhy` directive and `.is-disabled` engine class in `src/styles.scss`; no
+  new component, util, service or `.c-*` class.
+
+## Defaults
+
+- disabled-explains-why — applies — how: the appDisabledWhy directive (src/app/shared/tooltip/); this plan makes the
+  converted controls look blocked again and lists the remaining bare `[disabled]` bindings.
+- confirm-destructive-action — exception — why: no new action.
+- empty-state-on-list — exception — why: no list.
+- loading-and-error-states — exception — why: no data request.
+- unsaved-changes-on-leave — exception — why: no form behaviour changes.
+- hints-in-tooltips — applies — how: the reason shows in the shared tooltip (`.c-tooltip`).
+- leave-and-return — exception — why: no navigation.
+- app-list-container — exception — why: no list.
+- one-breakpoint-set — exception — why: no new breakpoint.
+- anchored-popup — exception — why: no popup.
+- unit-dropdown-add — exception — why: no dropdown.
+- row-action-icons — exception — why: no row action added.
+- live-summary — exception — why: no summary box.
+
+## Step 0 — Reality Check
+
+Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits
+by symbol (do not re-run the whole reality check from scratch) and print one line per commit:
+`ok` or `conflict: <what>`. All `ok` → continue. STOP for a go only on a `conflict` (a symbol,
+line or file this plan names was removed, renamed or rewritten).
+
+## User Stories
+- As a staff member, I want a button I cannot use to look unusable and tell me why, so I do not keep pressing it.
+
+## Functional Requirements
+- Read `src/app/shared/tooltip/disabled-why.directive.ts` first to see exactly which class or attribute it sets on a
+  blocked control; style against that, never against `:disabled` alone.
+- For each SCSS `:disabled` rule in scope: when its control was converted to `appDisabledWhy`, extend the selector so
+  the blocked state matches too (for example `&:disabled, &.is-disabled`). Leave rules for controls that are still
+  natively disabled.
+- Toggle chip with a blocked tick: dim the chip itself (the existing `.is-disabled` look) and put the reason on the
+  chip so hovering or tapping the chip shows it.
+- Classify the 151 remaining `[disabled]=` bindings **with a script, not by reading every file**: a short node script
+  (write it to the session scratch, not the repo) greps the templates, groups each condition (own action running:
+  `saving`, `sending`, `loading`, `busy`, `isSubmitting`…, versus a reason), and prints the groups. Paste the grouped
+  list under Execution Notes. Convert only bindings the script marks as a clear reason **and** that are in files
+  already in scope; list the rest for the Planner.
+
+## UI/UX Notes
+- Blocked look: the same dimming the app uses today for `.is-disabled` (`src/styles.scss`); no new colour.
+
+## Atomic Sub-tasks
+
+These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
+
+- [ ] B1: Write a test that lists SCSS `:disabled` rules for converted controls and fails when the blocked state is not matched — scripts/test/disabled-why-scss.test.mjs
+- [ ] B2: Make converted controls look blocked again in every SCSS file that styles them — src/app/**/*.scss
+- [ ] B3: Dim a toggle chip whose tick is blocked and show the reason on the chip — src/app/shared/**
+- [ ] B4: Group the remaining bare `[disabled]` bindings with a script, convert the clear reasons in scope, list the rest — plans/758-house-style-finishing-pass.plan.md
+- [ ] B5: Run every automatic check and paste the outputs under Execution Notes — plans/758-house-style-finishing-pass.plan.md
+
+## What happens when
+- A control is blocked for its own running action (saving): stays a bare `[disabled]` with no tooltip — the default's
+  exception.
+- A control's SCSS rule is shared by converted and native controls: the extended selector covers both.
+
+## Technical Considerations
+- The run branch `orch/house-style-finish` is `fix/house-style-ui-feedback` at `a5bb9d20` (plans 743–747 + main).
+  When this plan lands, the Planner fast-forwards `orch/house-style-ui` to it.
+- Do not run browser checks; the Human checks the cards.
+- Model changes: none. Backend / API: none. Data / migration: none. Security: none.
+
+## Out of Scope
+- Giving reasons to the new biz-numbers pages (`/restaurant-menu`, `/restaurant-menu/sales`, `/monthly-plan`); they
+  reach main later and get their own pass.
+- Any change to the directive's behaviour.
+
+## Critical Questions
+- none
+
+## Execution Notes

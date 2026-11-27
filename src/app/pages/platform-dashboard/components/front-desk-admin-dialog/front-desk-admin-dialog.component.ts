@@ -5,6 +5,7 @@ import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { PlatformAdminService, type FrontDeskAdminBody } from '@services/platform-admin.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -18,7 +19,14 @@ const REASON_MAX = 200
 @Component({
   selector: 'app-front-desk-admin-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, ModalShellComponent, FormFieldComponent, CustomSelectComponent],
+  imports: [
+    FormsModule,
+    TranslatePipe,
+    ModalShellComponent,
+    FormFieldComponent,
+    CustomSelectComponent,
+    DisabledWhyDirective
+  ],
   templateUrl: './front-desk-admin-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

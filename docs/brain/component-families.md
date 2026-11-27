@@ -7,6 +7,8 @@ find its family here and follow the decision ladder in `docs/agent/standards-reu
 
 See every UI family live at `/dev/catalog` (dev builds only, plan 535).
 
+Which pieces make a whole page, and how pages behave: `docs/agent/house-style.md` (page recipes and behaviour rules).
+
 Reuse enforced from plan: 459
 
 How this file is checked:
@@ -101,6 +103,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/equipment/components/equipment-list/` (side panel).
   Not engine-based (own `role="dialog"` + Escape, kept off the shell to keep their look):
   `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`.
+- Recipes: recipe-detail
 
 ### modal-controller — open a popup and get its answer
 
@@ -127,11 +130,18 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 651 page-local pieces of the stock count page: the move-counted button row (`.stock-count__toolbar`), the one-line name cut (`.stock-count__name`), the unit warning line (`.stock-count__unit-note`), the phone base-column head (`.stock-count__base-head`), the past-counts row (`.stock-count__past`).
 - Plan 655 page-local pieces of the stock count page: the draft line's question row (`.stock-ai__question`), the base-amount control (`.stock-count__base-btn`) and its popover (`.stock-count__base-pop`).
 - Plan 658: the stock count shows a unit by its saved Hebrew name (`unitName_` → `TranslationService.translate`, the key when none). `.stock-count__base-pop` is one measured `popover="manual"` box at every width: `max-content` wide, placed by `placeInViewport` below its control (above when no room), re-placed on resize, closed by an outside tap, a scroll or a second tap. `app-modal-shell [light]` (plan 657) is removed. `app-list-row-checkbox` reads `--row-checkbox-size` (default unchanged); the count page sets it per breakpoint.
+- Plan 747: the stock count's base hint now uses the shared tooltip (family `tooltip`: `[appTooltip]` on `.stock-count__base-btn`, hover and keyboard focus above a phone, a tap on touch); the custom `.stock-count__base-pop` box and its placement code are removed.
 - Plan 651: the past-counts list on the stock count page reads `GET /api/v1/stock/counts?status=all` through `PastCountsService` (`src/app/pages/inventory/components/stock-count/past-counts.service.ts`).
 - Users today (6): client list, equipment, inventory products, recipe book, suppliers, the knowledge page (`src/app/pages/frontdesk/knowledge/`, plan 554).
 - Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
   `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
   (card grids need a `layout: 'cards'` first).
+- Plan 745: `app-list-shell` takes `[columns]` (`ListColumn[]`, `src/app/shared/list-shell/list-columns.util.ts`); it measures its own width with a ResizeObserver and `fitColumns()` decides which columns still fit as their own cell and which fall into the carousel column (two the first time, then one by one, in each column's `fall` order). The column carousel renders a fall column either way through `*appFallColumn` (`fall-column.directive.ts`); `ColumnCarouselGroupDirective.collapsed` carries the fallen ids. Lists without `columns` keep `gridTemplate` / `mobileGridTemplate` and the phone-only carousel.
+- Plan 747: `ListColumn.stay` (the name and the actions never fall; a column with no `fall` falls after the ranked ones, from the end), `fitColumns()` writes a plain `fr` track as `minmax(<min>, <fr>)` so a cell is never narrower than its `min` (one-line cells set it to their content: rating 8.5rem, phone 9rem, cost and price 6rem, date 7rem, count 4.5rem) and reports `dropped` (the checkbox column, dropped when there is no room; the host then gets `.fit-no-select`). Shared cell helpers: `.cell-nowrap` and `.cell-line` (one line with an ellipsis) from `app-list-shell`. The switching cell no longer draws a label above its value.
+- Plan 745 pieces: `.column-carousel--measured`, `.cc-box`, `.cc-box--cell`, `.cc-box--header`, `.cc-fall` (the switching column inside a measured carousel host) and `.dc-resizable` (the dev catalog box the reader resizes).
+- Design changes: 2026-11-25 plan 745 — columns fall into the carousel by measured width — base — re-checked: products (the other lists keep the old mode)
+- Design changes: 2026-11-26 plan 746 — the five other lists declare columns that fall — base — re-checked: recipe book, suppliers, equipment, clients, invoices
+- Recipes: recipe-list, recipe-detail, recipe-form, recipe-settings, recipe-board
 
 ### list-logic — search / sort / filter state of a list
 
@@ -149,6 +159,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.ts`,
   `src/app/pages/suppliers/components/supplier-list/supplier-list.component.ts`,
   `src/app/pages/venues/components/venue-list/venue-list.component.ts`.
+- Recipes: recipe-list
 
 ### empty-state — nothing here / no results
 
@@ -157,6 +168,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: an empty list or a search with no results.
 - Also used by `PlatformLogisticsItemsComponent` (plan 532) and `PlatformAiShotsComponent` (plan 600, the two example lists).
 - Known copies: not counted.
+- Recipes: recipe-list, recipe-detail, recipe-settings, recipe-board
 
 ### form-field — label, input, error
 
@@ -171,6 +183,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
 - Times (plan 537): every time of day is `app-time-field` (`src/app/shared/time-field/`); the only `type="time"` left is its hidden picker. Styled only from inside its component; reuse-lint `family-styled-from-outside` warns on outside rules.
 - Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
+- Recipes: recipe-form, recipe-settings
 
 ### number-box — tap anywhere on a number box to edit the number
 
@@ -195,6 +208,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
 - Known copies: none.
+- Recipes: recipe-form
 
 ### chip — chips, badges, pills
 
@@ -210,6 +224,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Tight group (plan 579): `.c-chip-group.c-chip-group--tight` — no block padding, `--space-1` gap, small chips; user: `event-logistics-panel` (one "נדרש" toggle + the two provider radios); plan 581 uses it too.
 - Users (plan 600): `ai-examples-share` — one toggle chip in the owner's settings card (same card shape as `staff-stages-manager`).
 - Users (plans 523, 581): `logistics-item-manager` — phase tabs (`--tab`), every question row a `--tag` (shared + lock), environment chips and the admin's scope radios (`--toggle` in `--tight` groups).
+- Recipes: recipe-board
 - Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
   (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
   header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
@@ -234,6 +249,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   (`PermissionService`). The server still decides every write (`server/utils/permissions.js`).
 - When: a page offers save/edit on a business item.
 - Known copies: none.
+- Recipes: recipe-settings
 
 ### cost-badge — partial / missing cost warning
 
@@ -265,6 +281,44 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a line may be bought from one of several priced suppliers and the owner chooses.
 - Known copies: none.
 
+### drag-reorder — drag a row to reorder, or move it with the arrow keys
+
+- Status: stable (plan 742)
+- Use: engines `.c-drag-list` (on `cdkDropList`), `.c-drag-item` (on `cdkDrag`), `.c-drag-handle` (on `cdkDragHandle`) in `src/styles.scss`; keyboard: `src/app/core/directives/reorder-keys.directive.ts` · `appReorderKeys` on the grip. Users: `src/app/pages/recipe-builder/components/recipe-ingredients-table/`, `src/app/pages/recipe-builder/components/recipe-workflow/`, `src/app/shared/ai-recipe-modal/ai-draft-editor/`, `src/app/pages/metadata-manager/components/ai-model-manager/`.
+- When: a list whose rows the user can put in another order.
+- Inputs / variants: `appReorderKeys` — `reorderIndex`, `reorderCount`, `reorderKey` (the row's track value); output `reorder` = `-1 | 1`. The list has one move method that both its drop handler and `(reorder)` call. The grip's label is the key `drag_reorder_hint`.
+- Design changes: 2026-11-25 plan 742 — AI model row takes the shared drag look — base — re-checked: metadata manager
+- Known copies: none.
+
+### scroll-area — a block that scrolls with arrows and no scrollbar
+
+- Status: stable (plan 742)
+- Use: `src/app/shared/scroll-area/` · `app-scroll-area`; engines `.c-scroll-area`, `.c-scroll-arrow` in `src/styles.scss`; the arrows follow `appScrollIndicators` (`src/app/core/directives/scroll-indicators.directive.ts`).
+- When: a block outside the list container scrolls on its own and must show there is more above or below.
+- Inputs / variants: `maxBlockSize` (a CSS length; empty = fills its parent).
+- Known copies: `src/app/shared/list-shell/` keeps its own arrows (same look); 9 page `.scss` files still make their own `overflow: auto` area (see `docs/agent/house-style.md`, rule `scroll`).
+
+### sideways-row — one framed, draggable row of chips, tabs or buttons that scrolls sideways
+
+- Status: stable (plan 743)
+- Use: `src/app/shared/scroll-rail/` · `app-scroll-rail` (the visible frame as wide as its items, round arrow buttons outside it, grab and drag; `centerChild(el, { instant? })` slides a child to the middle). Users: `src/app/core/components/header/header.component.html` (the top bar), `src/app/core/components/tab-chips/tab-chips.component.html`, `src/app/pages/settings/settings.page.html`, `src/app/pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace.component.html`, `src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`, `src/app/pages/metadata-manager/metadata-manager.page.component.html`, `src/app/pages/dev-catalog/dev-catalog.page.html`.
+- When: a row of several chips, tabs or buttons that can outgrow its width. Not a data table that scrolls sideways.
+- Inputs / variants: `frame` (`'box'` default draws the container, `'none'` draws no surface), `snap` (`none` / `proximity` / `mandatory`), `arrows` (`auto` / `always` / `never`), `step` (px or `'page'`). Arrows are round buttons outside the container on a computer; on a phone (≤767px) or with `arrows="never"` they are not rendered and the sign of more inside the container shows instead (plan 747 round two): a fade and a 16px chevron over the edge of the side that has more, not pressable, hidden from assistive tech. Every user of the rail gets it with no change of its own.
+- Page-local state classes (plans 743, 747): `.is-dragging` is a host class of `app-scroll-rail`, beside `is-overflowing`; `.sr-frame` (with `.has-frame`, `.has-prev`, `.has-next`) is the container inside it; `.sr-more` (`.sr-more--prev`, `.sr-more--next`, shown with `.is-shown`) is the sign of more inside the frame; `.dc-rail-box` is the dev catalog's 20rem demo box.
+- Known copies: none.
+
+### tooltip — one small box for every hint
+
+- Status: stable (plan 744)
+- Use: `src/app/shared/tooltip/` · `[appTooltip]` (`TooltipDirective`; the box is `TooltipBoxComponent`); engine `.c-tooltip` in `src/styles.scss`; placed by `placeInViewport`. Users: the product list's warning badge, the recipe book list's cost and date, the notification bell, the page header's count, the taxonomy kind manager's icon buttons, the dev catalog.
+- When: a short explanation of a control, shown on hover, keyboard focus or tap — never the browser's `title`.
+- Inputs / variants: `appTooltip` (an already translated string, or a template for rich content; empty = no tooltip), `tooltipPlacement` (`'above'` default / `'below'`), `tooltipOnClick` (a click pins it open). Plan 747: on a touch device (a touch pointer or no hover) hover does nothing and a tap on the control toggles it, whatever `tooltipOnClick` says; the box is clamped inside the viewport with a margin on both sides. Put no `[appTooltip]` on a natively disabled control (it gets no hover or focus): a control that is disabled for a reason uses `[appDisabledWhy]` below. Users added in plan 747: the product list's price and cut-off text cells, the stage row's lock reasons, the six lists' one-line cells.
+- A disabled control says why (plan 747 round two, default `disabled-explains-why`): `src/app/shared/tooltip/disabled-why.directive.ts` · `[appDisabledWhy]="reason"` (`DisabledWhyDirective`; it composes `TooltipDirective` through `hostDirectives`, so the host must not also carry `[appTooltip]`). The reason is an already translated string; `null` or empty = the control works. With a reason: `aria-disabled="true"` and the class `.is-disabled` (the disabled look, in `src/styles.scss`), never the native `disabled`; the control stays focusable; `click` and Enter / Space are swallowed in the capture phase, so its action never runs; the reason shows on hover, keyboard focus, click and tap. On an `<input>` / `<textarea>` it also sets `readOnly` and swallows every key but Tab / Escape (copy stays); on a `<select>`, a checkbox, a radio, a range, a colour or a file input it swallows `mousedown` and the keys. Other inputs: `disabledWhyTip` (the control's ordinary hint, shown while it works), `tooltipPlacement`. Keep `[disabled]` only for "its own action is running" (saving, loading), next to `[appDisabledWhy]` when both apply. Reason keys: `sign_in_to_use`, `no_permission`, `money_locked_hint`, `fill_required_fields`, and the generic `why_*` keys in `public/assets/data/dictionary.json` (`why_nothing_to_save`, `why_write_first`, `why_choose_first`, `why_first_in_list`, `why_last_in_list`, `why_at_min`, `why_at_max`, `why_nothing_counted`, `why_list_empty`, `why_demo_only`).
+- Shared controls that are disabled by their caller take the reason as `disabledWhy` (a translated string or `null`) and hand it to their inner control; a non-empty `disabledWhy` blocks the control by itself, `disabled` with no reason stays native: `app-counter` (both buttons and the value field), `app-date-field`, `app-time-field`, `app-custom-select`, `app-custom-multi-select`, `app-approve-stamp`, `app-rating-stars`, `app-list-row-checkbox`, `app-voice-note`, `app-supplier-picker`; `app-empty-state` takes it as `ctaDisabledWhy` for its call-to-action button. A shared control's own inner limit gives its own reason when the caller gave none: `app-counter` minus at the minimum (`why_at_min`) and plus at the maximum (`why_at_max`), `app-voice-note` send with nothing recorded or written (`why_voice_note_empty`).
+- A blocked checkbox or radio inside a `<label>` (a `.c-chip--toggle` chip hides the input): the directive also opens the reason when the label is hovered and places the box against the label (`TooltipDirective.anchorTo`); the chip's dimmed look is the engine rule `.c-chip--toggle:has(> input.is-disabled)` in `src/styles.scss`. A component stylesheet that styles its own blocked control keys on `[aria-disabled='true']` next to `:disabled`, never on a second `.is-disabled` definition.
+- Users of `[appDisabledWhy]` (plan 747): the signed-out actions of the product, recipe, supplier, equipment, venue and menu lists, the dashboard's add-product link, the metadata manager's add buttons, the venue page's edit and upload buttons, the cook view's edit and approve controls, the pricing meter's locked money fields (on their wrapper: the fields themselves stay disabled by the form), the dev catalog's sample.
+- Known copies: the browser `title` hints that remain (51 in 27 templates, the `house-tooltip` lint) and the `[disabled]` bindings that stay (151 in 72 templates, the `house-disabled-why` lint: own-action ones and the shared controls' `disabled() && !disabledWhy()` pass-through) — both counted by the `reuse-copy.tooltip` debt baseline (202); the nutrition box (`src/app/shared/nutrition-badge/`) keeps its own look.
+
 ### engine-classes — shared `.c-*` CSS engines
 
 - Status: stable (plan 458 sweeps the copies)
@@ -277,7 +331,16 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Plan 726: `.ds-row__notice`, `.ds-row__actions` (plan 748: the one wrapper of the header actions), `.ds-row__month`, `.ds-row__intro`, `.ds-row__progress`, `.ds-row__banner`, `.ds-row__state`, `.ds-row__cell`, `.ds-row__cell--name`, `.ds-row__ellipsis`, `.ds-row__removed`, `.ds-row__reasons--over`, `.ds-row__skipped`, `.ds-row__skipped-list`, `.ds-row__wide` (page-local spacing and column rules of `dish-sales.page.scss`, on top of `.c-list-row`; the number column uses `.c-num`) and `.rr-dialog`, `.rr-dialog__title`, `.rr-dialog__list`, `.rr-dialog__row`, `.rr-dialog__label`, `.rr-dialog__note`, `.rr-dialog__error`, `.rr-dialog__given`, `.rr-dialog__given--over` (layout inside the reasons popup); no new `.c-*` class.
 - Plan 727: `.monthly-plan-page`, `.mp-page`, `.mp-new`, `.mp-picker`, `.mp-card`, `.mp-error`, `.mp-card__title`, `.mp-grid`, `.mp-field`, `.mp-field__label`, `.mp-muted`, `.mp-suffix`, `.mp-check` (page-local layout of `monthly-plan.page.scss`, on top of `.c-glass-panel`, `.c-input-wrapper` and `.c-chip`) and `.business-group`, `.business-group__title` (the month targets group of the business settings tab); no new `.c-*` class.
 - Plan 749: `.mp-body`, `.mp-inputs`, `.mp-picture`, `.mp-field__row`, `.mp-box`, `.mp-checks` (the dense two-side grid and the short target boxes of `monthly-plan.page.scss`) and `.lc__box` (the labour card's short factor box).
+- Plan 742: `.c-drag-list`, `.c-drag-item`, `.c-drag-handle` (the shared drag look, family `drag-reorder`); `.c-scroll-area`, `.c-scroll-arrow` (family `scroll-area`); plus one zero-specificity `:where(…):focus-visible` keyboard ring for every button, link and `role` / `tabindex` control.
+- Plan 744: `.c-tooltip`, `.c-tooltip--below` (the shared tooltip box, family `tooltip`).
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
+
+### motion-tokens — how long things move and with which curve
+
+- Status: converging — plan 740 added the lint; the alignment plans move the typed times onto the tokens
+- Use: the tokens in `src/styles.scss` `:root` — `--dur-fast` (0.15s), `--dur-base` (0.2s), `--dur-slow` (0.25s), `--ease-spring`, `--ease-smooth` (house rule `motion` in `docs/agent/house-style.md`).
+- When: any `transition` or `animation`.
+- Known copies: a typed time in a component stylesheet (counted in `_shared/debt-baseline.json` as `reuse-copy.motion-tokens`).
 
 ### voice-note — record or type a spoken note
 
@@ -329,6 +392,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - When: a route needs its collection loaded first, or a screen opens only for the consultant's own module.
 - Known copies: none.
 - `monthlyPlanGuard` (`src/app/pages/monthly-plan/monthly-plan.guard.ts`, plan 727): staff go to `/dashboard`, everyone else passes `moduleGuard(['monthly_plan'])`; the server stays the real gate.
+- Recipes: recipe-form
 - Plan 651 (leave-and-return): `ReturnToService` in `src/app/core/services/return-to.service.ts` — a page that sends the person away passes `?returnUrl=` (an in-app path, checked by `safeUrl`) and keeps the line it came from with `setPending`; the product form returns there with `?addedProduct=<id>`; the stock count takes the line back with `takePending`.
 
 ### helpers — pure functions

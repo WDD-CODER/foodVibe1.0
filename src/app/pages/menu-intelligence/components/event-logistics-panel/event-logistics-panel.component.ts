@@ -6,6 +6,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { LoadingListComponent } from '../loading-list/loading-list.component'
 import { LogisticsNoteDraftComponent } from './logistics-note-draft/logistics-note-draft.component'
 import { ModuleService } from '@services/module.service'
@@ -71,7 +72,8 @@ const ENVIRONMENTS: EnvironmentType[] = ['professional_kitchen', 'outdoor_field'
     CounterComponent,
     DateFieldComponent,
     LogisticsNoteDraftComponent,
-    LoadingListComponent
+    LoadingListComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './event-logistics-panel.component.html',
   styleUrl: './event-logistics-panel.component.scss',
@@ -123,6 +125,11 @@ export class EventLogisticsPanelComponent {
     return (
       !!event && event.stage !== 'finished' && this.permission.can('editLogistics', { type: 'menuEvents', doc: event })
     )
+  })
+  /** Why the panel cannot be edited (a translation key), or null when it can. */
+  protected readonly editWhy_ = computed<string | null>(() => {
+    if (this.canEdit_()) return null
+    return this.event_()?.stage === 'finished' ? 'why_menu_event_finished' : 'no_permission'
   })
   /** Stored answers with the unsaved drafts laid over them. */
   private readonly answers_ = computed<LogisticsAnswer[]>(() => {
@@ -247,6 +254,11 @@ export class EventLogisticsPanelComponent {
       else next.add(key)
       return next
     })
+  }
+
+  /** Why one row's ticks cannot be changed (a translation key), or null when they can. */
+  protected rowWhy(row: LogisticsRow): string | null {
+    return this.editWhy_() ?? (row.hidden ? 'why_logistics_row_removed' : null)
   }
 
   protected showNote(row: LogisticsRow): boolean {

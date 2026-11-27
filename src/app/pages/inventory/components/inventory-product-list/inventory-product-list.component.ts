@@ -21,6 +21,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { Product } from '@models/product.model'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { TranslationService } from '@services/translation.service'
@@ -59,6 +60,7 @@ import {
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from '@utils/filter-category-counts.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { ProductDataService } from '@services/product-data.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -66,6 +68,7 @@ import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-produc
 import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
@@ -81,6 +84,7 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    DisabledWhyDirective,
     ClickOutSideDirective,
     LoaderComponent,
     ListShellComponent,
@@ -88,6 +92,7 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
+    TooltipDirective,
     RowActionsMenuComponent,
     ...COLUMN_CAROUSEL,
     InputClearComponent
@@ -97,6 +102,22 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InventoryProductListComponent implements OnInit, OnDestroy {
+  /**
+   * Declared columns (plan 745): the list container measures its width and drops columns into the switching
+   * column in `fall` order — unit → supplier → allergens → category, then the price (plan 747). Only the name and
+   * the actions always stay. A one-line column's `min` is its content plus the cell padding.
+   */
+  protected readonly columns: readonly ListColumn[] = [
+    { id: 'name', track: '2fr', min: '12rem', phoneMin: '8rem', stay: true },
+    { id: 'category', track: '1fr', min: '7rem', fall: 4 },
+    { id: 'allergens', track: '1fr', min: '7rem', fall: 3 },
+    { id: 'supplier', track: '1fr', min: '8rem', fall: 2 },
+    { id: 'unit', track: '0.8fr', min: '4.5rem', fall: 1 },
+    { id: 'price', track: '0.8fr', min: '6rem' },
+    { id: 'actions', track: '80px', min: '80px', phoneTrack: '40px', phoneMin: '40px', stay: true },
+    { id: 'select', track: 'auto', min: '1.75rem', phoneTrack: '28px', phoneMin: '28px', hideOnTouchPhone: true }
+  ]
+
   protected readonly kitchenStateService = inject(KitchenStateService)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
@@ -132,8 +153,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
   protected readonly filterCategories = useCollapsibleCategories()
   protected allergenPopoverProductId_ = signal<string | null>(null)
-  /** Product whose status tooltip is pinned open by a tap (touch devices; hover opens it by CSS). */
-  protected openStatusId_ = signal<string | null>(null)
   protected isAllergenAllExpanded_ = signal<boolean>(false)
   protected isLowStockOnly_ = signal<boolean>(false)
   protected shouldShowInvalidOnly_ = signal<boolean>(false)
@@ -521,17 +540,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     if (status === 'invalid') return 'invalid'
     if (unpriced) return 'unpriced'
     return status === 'incomplete' ? 'incomplete' : null
-  }
-
-  protected toggleStatus(productId: string | undefined): void {
-    const id = productId ?? ''
-    this.openStatusId_.update((open) => (open === id ? null : id))
-  }
-
-  /** Closes only this product's box, so a tap on another row's mark is not undone by the document click. */
-  protected closeStatus(productId?: string): void {
-    if (productId !== undefined && this.openStatusId_() !== productId) return
-    this.openStatusId_.set(null)
   }
 
   protected statusLabel(fields: string[]): string {

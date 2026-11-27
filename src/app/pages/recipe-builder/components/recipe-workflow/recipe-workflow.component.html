@@ -9,13 +9,27 @@
         <div class="col-actions"></div>
       </div>
 
-      <div class="grid-body" cdkDropList (cdkDropListDropped)="onDropStep($event)">
+      <div class="grid-body c-drag-list" cdkDropList (cdkDropListDropped)="onDropStep($event)">
         @for (group of workflowGroups_(); track group; let i = $index) {
-          <div [formGroupName]="i" class="grid-row" [class.timer-open]="isTimerOpen(i)" cdkDrag>
-            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-
+          <div
+            [formGroupName]="i"
+            class="grid-row c-drag-item"
+            [class.timer-open]="isTimerOpen(i)"
+            cdkDrag
+            cdkDragPreviewClass="is-lifted"
+          >
             <!-- Right: drag handle + step badge -->
-            <div class="col-drag-id" cdkDragHandle>
+            <div
+              class="col-drag-id c-drag-handle"
+              cdkDragHandle
+              appReorderKeys
+              [reorderIndex]="i"
+              [reorderCount]="workflowGroups_().length"
+              [reorderKey]="i"
+              (reorder)="onReorderStep(i, $event)"
+              [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+              [attr.title]="'drag_reorder_hint' | translatePipe"
+            >
               <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
               <span class="step-badge">{{ i + 1 }}</span>
             </div>
@@ -72,7 +86,9 @@
                   <button
                     type="button"
                     class="counter-btn minus"
-                    [disabled]="(group.get('labor_time')?.value ?? 0) <= 0"
+                    [appDisabledWhy]="
+                      (group.get('labor_time')?.value ?? 0) <= 0 ? ('why_at_min' | translatePipe) : null
+                    "
                     appStepHold
                     [stepHoldStop]="(group.get('labor_time')?.value ?? 0) <= 0"
                     (stepHold)="decrementLaborTime(group)"
@@ -127,7 +143,9 @@
                   <button
                     type="button"
                     class="counter-btn minus"
-                    [disabled]="(group.get('cooking_time')?.value ?? 0) <= 0"
+                    [appDisabledWhy]="
+                      (group.get('cooking_time')?.value ?? 0) <= 0 ? ('why_at_min' | translatePipe) : null
+                    "
                     appStepHold
                     [stepHoldStop]="(group.get('cooking_time')?.value ?? 0) <= 0"
                     (stepHold)="decrementCookTime(group)"
@@ -195,11 +213,20 @@
         <div class="col-prep-actions"></div>
       </div>
 
-      <div class="grid-body" cdkDropList (cdkDropListDropped)="onDropStep($event)">
+      <div class="grid-body c-drag-list" cdkDropList (cdkDropListDropped)="onDropStep($event)">
         @for (group of workflowGroups_(); track group; let i = $index) {
-          <div [formGroupName]="i" class="prep-grid-row" cdkDrag>
-            <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-            <div class="col-drag" cdkDragHandle>
+          <div [formGroupName]="i" class="prep-grid-row c-drag-item" cdkDrag cdkDragPreviewClass="is-lifted">
+            <div
+              class="col-drag c-drag-handle"
+              cdkDragHandle
+              appReorderKeys
+              [reorderIndex]="i"
+              [reorderCount]="workflowGroups_().length"
+              [reorderKey]="i"
+              (reorder)="onReorderStep(i, $event)"
+              [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+              [attr.title]="'drag_reorder_hint' | translatePipe"
+            >
               <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
             </div>
             <div class="col-prep-name">

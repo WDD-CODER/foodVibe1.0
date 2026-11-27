@@ -70,7 +70,8 @@
               type="button"
               class="c-btn-primary"
               (click)="onEdit()"
-              [disabled]="isLoading_() || !instruction().trim()"
+              [disabled]="isLoading_()"
+              [appDisabledWhy]="!instruction().trim() ? ('why_write_first' | translatePipe) : null"
             >
               @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
@@ -221,7 +222,8 @@
               type="button"
               class="c-btn-primary"
               (click)="onGenerate()"
-              [disabled]="isLoading_() || !canGenerate_()"
+              [disabled]="isLoading_()"
+              [appDisabledWhy]="generateWhy_() ? (generateWhy_()! | translatePipe) : null"
             >
               @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
@@ -332,7 +334,12 @@
                   autocapitalize="off"
                   spellcheck="false"
                 />
-                <button type="button" class="c-icon-btn" (click)="addCategory()" [disabled]="!newCategory_().trim()">
+                <button
+                  type="button"
+                  class="c-icon-btn"
+                  (click)="addCategory()"
+                  [appDisabledWhy]="!newCategory_().trim() ? ('why_write_first' | translatePipe) : null"
+                >
                   <lucide-icon name="plus" [size]="14"></lucide-icon>
                 </button>
               </div>
@@ -369,7 +376,12 @@
                   autocapitalize="off"
                   spellcheck="false"
                 />
-                <button type="button" class="c-icon-btn" (click)="addAllergen()" [disabled]="!newAllergen_().trim()">
+                <button
+                  type="button"
+                  class="c-icon-btn"
+                  (click)="addAllergen()"
+                  [appDisabledWhy]="!newAllergen_().trim() ? ('why_write_first' | translatePipe) : null"
+                >
                   <lucide-icon name="plus" [size]="14"></lucide-icon>
                 </button>
               </div>

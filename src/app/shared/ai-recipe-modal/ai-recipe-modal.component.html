@@ -86,7 +86,8 @@
               <button
                 type="button"
                 class="c-btn-primary"
-                [disabled]="!instruction().trim() || status_() === 'sending'"
+                [disabled]="status_() === 'sending'"
+                [appDisabledWhy]="!instruction().trim() ? ('why_write_first' | translatePipe) : null"
                 (click)="onEdit()"
               >
                 @if (status_() === 'sending') {
@@ -292,12 +293,8 @@
             <button
               type="button"
               class="c-btn-primary"
-              [disabled]="
-                isLoading_() ||
-                ((inputMode_() === 'text' || inputMode_() === 'paste') && !prompt_().trim()) ||
-                (inputMode_() === 'image' && !imageFile_()) ||
-                (inputMode_() === 'url' && !urlInput_().trim())
-              "
+              [disabled]="isLoading_()"
+              [appDisabledWhy]="generateWhy_() ? (generateWhy_()! | translatePipe) : null"
               (click)="
                 inputMode_() === 'image'
                   ? onGenerateFromImage()

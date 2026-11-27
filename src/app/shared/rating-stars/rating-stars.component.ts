@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, output, signal, computed } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 export type RatingSize = 'sm' | 'md' | 'lg'
 
@@ -15,7 +16,7 @@ export interface StarState {
   selector: 'app-rating-stars',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, DisabledWhyDirective],
   templateUrl: './rating-stars.component.html',
   styleUrl: './rating-stars.component.scss'
 })
@@ -25,6 +26,8 @@ export class RatingStarsComponent {
   max = input<number>(5)
   readonly = input<boolean>(true)
   size = input<RatingSize>('md')
+  /** Why the rating cannot be changed (translated). With a reason the stars are blocked and say why (plan 747). */
+  disabledWhy = input<string | null>(null)
 
   // OUTPUTS
   ratingChange = output<number>()
@@ -52,12 +55,12 @@ export class RatingStarsComponent {
 
   // CRDUL methods
   protected onStarClick(index: number): void {
-    if (this.readonly()) return
+    if (this.readonly() || this.disabledWhy()) return
     this.ratingChange.emit(index + 1)
   }
 
   protected onStarHover(index: number): void {
-    if (this.readonly()) return
+    if (this.readonly() || this.disabledWhy()) return
     this.hoveredIndex_.set(index)
   }
 

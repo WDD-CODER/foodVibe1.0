@@ -100,5 +100,61 @@ export const REUSE_RULES = [
     files: ['src/app/**/*.html'],
     pattern: /\.toFixed\(/,
     hint: 'show numbers through core/engine/rounding.ts (formatPct1, formatPctInt, formatMoney) or the formatQuantity pipe, not toFixed in a template'
+  },
+  // House rules (plan 740): one lint rule per `check: lint` rule of docs/agent/house-style.md.
+  {
+    id: 'house-scroll',
+    family: 'scroll-area',
+    files: ['src/app/pages/**/*.scss'],
+    exclude: ['**/*.spec.ts'],
+    pattern: /overflow(-y)?:\s*(auto|scroll)/,
+    hint: 'a page does not make its own scroll area: use app-list-shell, app-scroll-rail or app-scroll-area'
+  },
+  {
+    id: 'house-drag',
+    family: 'drag-reorder',
+    files: ['src/app/**/*.scss'],
+    exclude: ['**/*.spec.ts'],
+    pattern: /\.cdk-drag-(preview|placeholder|animating)/,
+    hint: 'drag looks come from the shared drag style in src/styles.scss, not from the component'
+  },
+  {
+    id: 'house-motion',
+    family: 'motion-tokens',
+    files: ['src/app/**/*.scss'],
+    exclude: ['**/*.spec.ts'],
+    pattern: /(?:transition|animation)(?:-duration)?\s*:[^;]*\b\d*\.?\d+m?s\b/,
+    hint: 'use the motion tokens (--dur-fast, --dur-base, --dur-slow with --ease-spring or --ease-smooth) instead of a typed time'
+  },
+  {
+    id: 'house-loading',
+    family: 'feedback',
+    files: ['src/app/pages/**/*.html'],
+    exclude: ['src/app/pages/menu-intelligence/components/loading-list/**', '**/*.spec.ts'],
+    pattern: /class="(?:[^"]*\s)?[a-z][a-z0-9]*(?:(?:-|__)[a-z0-9]+)*(?:-|__)loading(?:\s[^"]*)?"/,
+    hint: 'show waiting with app-loader (src/app/shared/loader/), not a text block'
+  },
+  {
+    id: 'house-empty',
+    family: 'empty-state',
+    files: ['src/app/pages/**/*.html'],
+    exclude: ['**/*.spec.ts'],
+    pattern: /class="(?:[^"]*\s)?(?:[a-z][a-z0-9]*(?:(?:-|__)[a-z0-9]+)*(?:-|__)empty|empty-state[\w-]*|no-results)(?:\s[^"]*)?"/,
+    hint: 'show "nothing here" with app-empty-state (src/app/shared/empty-state/), not a hand-made block'
+  },
+  {
+    id: 'house-tooltip',
+    family: 'tooltip',
+    files: ['src/app/**/*.html'],
+    pattern: /\[attr\.title\]=|\[title\]=|<(?:button|a|span|div|p|i|li|td|th|label|input|img|lucide-icon)\b[^>]*\stitle="/,
+    hint: 'show a hint with the shared tooltip (not the browser\'s title), so it looks the same everywhere and works on touch'
+  },
+  // Default disabled-explains-why (plan 747): a new bare [disabled] is flagged; the bindings that are there are debt.
+  {
+    id: 'house-disabled-why',
+    family: 'tooltip',
+    files: ['src/app/**/*.html'],
+    pattern: /\[disabled\]=/,
+    hint: 'a control that can be disabled says why: use [appDisabledWhy]="reason" (src/app/shared/tooltip/), or keep [disabled] only while its own action runs'
   }
 ]

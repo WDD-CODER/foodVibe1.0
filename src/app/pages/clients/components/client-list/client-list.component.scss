@@ -22,10 +22,12 @@
   }
 
   .chip-cell {
+    // One line: chips that do not fit are cut off; the cell's tooltip lists them all (plan 747).
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0.25rem;
     align-items: center;
+    overflow: hidden;
   }
 
   .col-phone {

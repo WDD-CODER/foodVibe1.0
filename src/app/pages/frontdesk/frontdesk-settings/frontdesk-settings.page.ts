@@ -9,6 +9,7 @@ import { FormFieldComponent } from 'src/app/shared/form-field/form-field.compone
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { HoursEditorComponent } from 'src/app/shared/hours-editor/hours-editor.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { FrontDeskProfileDataService } from '@services/front-desk-profile-data.service'
@@ -90,7 +91,8 @@ const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
     TextareaAutoGrowDirective,
     RequestKindCardComponent,
     DataExportCardComponent,
-    FrontDeskStatusBannerComponent
+    FrontDeskStatusBannerComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './frontdesk-settings.page.html',
   styleUrl: './frontdesk-settings.page.scss',

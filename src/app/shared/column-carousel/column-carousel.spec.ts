@@ -101,3 +101,66 @@ describe('swipeDirection', () => {
     expect(swipeDirection({ x: 100, y: 100 }, 40, 105, false)).toBe('next')
   })
 })
+
+@Component({
+  standalone: true,
+  imports: [...COLUMN_CAROUSEL],
+  template: `
+    <div appColumnCarouselGroup #group="columnCarouselGroup" dir="rtl">
+      <app-column-carousel-header>
+        <div class="h-a" *appFallColumn="'a'; label: 'la'">HA</div>
+        <div class="h-b" *appFallColumn="'b'; label: 'lb'">HB</div>
+        <div class="h-c" *appFallColumn="'c'; label: 'lc'">HC</div>
+      </app-column-carousel-header>
+      <app-column-carousel-cell>
+        <div class="v-a" *appFallColumn="'a'; label: 'la'">VA</div>
+        <div class="v-b" *appFallColumn="'b'; label: 'lb'">VB</div>
+        <div class="v-c" *appFallColumn="'c'; label: 'lc'">VC</div>
+      </app-column-carousel-cell>
+    </div>
+  `
+})
+class MeasuredHostComponent {
+  readonly group = viewChild.required<ColumnCarouselGroupDirective>('group')
+}
+
+describe('Column carousel — measured mode (plan 745)', () => {
+  let fixture: ComponentFixture<MeasuredHostComponent>
+
+  beforeEach(async () => {
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    await TestBed.configureTestingModule({
+      imports: [MeasuredHostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [{ provide: TranslationService, useValue: translation }]
+    }).compileComponents()
+    fixture = TestBed.createComponent(MeasuredHostComponent)
+    fixture.componentInstance.group().collapsed.set([])
+    fixture.detectChanges()
+  })
+
+  const q = (css: string): HTMLElement | null => fixture.nativeElement.querySelector(css)
+
+  it('nothing collapsed → every column is its own cell, no arrows', () => {
+    expect(q('.v-a')).not.toBeNull()
+    expect(q('.v-b')).not.toBeNull()
+    expect(q('.v-c')).not.toBeNull()
+    expect(q('.cc-arrow')).toBeNull()
+    expect(q('.cc-box')).toBeNull()
+  })
+
+  it('collapsed columns share one switching cell, in list order, and the arrow cycles them', () => {
+    const group = fixture.componentInstance.group()
+    group.collapsed.set(['c', 'b'])
+    fixture.detectChanges()
+    expect(q('.v-a')?.closest('.cc-box')).toBeNull()
+    expect(q('app-column-carousel-cell .cc-box .v-c')).not.toBeNull()
+    expect(q('app-column-carousel-cell .v-b')).toBeNull()
+    expect(q('.cc-header')?.getAttribute('aria-label')).toBe('lc')
+    ;(q('.cc-arrow--next') as HTMLElement).click()
+    fixture.detectChanges()
+    expect(q('app-column-carousel-cell .cc-box .v-b')).not.toBeNull()
+    expect(q('.cc-header')?.getAttribute('aria-label')).toBe('lb')
+    expect(group.count()).toBe(2)
+  })
+})

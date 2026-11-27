@@ -125,23 +125,23 @@ describe('CoefficientManagerComponent', () => {
     )!
 
   it('does not save on input or change; «שמור» turns on only for a changed valid value', () => {
-    expect(saveButton().disabled).toBeTrue()
+    expect(saveButton().getAttribute('aria-disabled')).toBe('true')
     typeInto(2, '1.35')
     expect(store.updateByKey).not.toHaveBeenCalled()
-    expect(saveButton().disabled).toBeFalse()
+    expect(saveButton().getAttribute('aria-disabled')).toBeNull()
     expect(component.hasRealChanges()).toBeTrue()
     typeInto(2, '1.3')
-    expect(saveButton().disabled).toBeTrue()
+    expect(saveButton().getAttribute('aria-disabled')).toBe('true')
     expect(component.hasRealChanges()).toBeFalse()
   })
 
   it('keeps «שמור» off and shows the error for 0 or 3 decimals', () => {
     typeInto(2, '0')
-    expect(saveButton().disabled).toBeTrue()
+    expect(saveButton().getAttribute('aria-disabled')).toBe('true')
     expect(component.hasRealChanges()).toBeTrue()
     expect((fixture.nativeElement as HTMLElement).querySelector('.c-field-error')).not.toBeNull()
     typeInto(2, '1.255')
-    expect(saveButton().disabled).toBeTrue()
+    expect(saveButton().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('«שמור» saves every changed value, one updateByKey each, and shows one success message', async () => {
@@ -227,13 +227,14 @@ describe('CoefficientManagerComponent', () => {
 
   it('disables a shared term input for a non-admin and enables it for an admin', () => {
     const [privateInput, , ownInput] = inputs()
-    expect(privateInput.disabled).toBeTrue()
-    expect(ownInput.disabled).toBeFalse()
+    expect(privateInput.getAttribute('aria-disabled')).toBe('true')
+    expect(privateInput.readOnly).toBeTrue()
+    expect(ownInput.getAttribute('aria-disabled')).toBeNull()
     isAdmin = true
     fixture.componentRef.changeDetectorRef.markForCheck()
     fixture = TestBed.createComponent(CoefficientManagerComponent)
     fixture.detectChanges()
-    expect(inputs()[0].disabled).toBeFalse()
+    expect(inputs()[0].getAttribute('aria-disabled')).toBeNull()
   })
 
   it('deletes an own event type after the confirm', async () => {

@@ -20,16 +20,10 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { FormsModule } from '@angular/forms'
 import { AiRecipeDraft } from '@services/ai-recipe-draft.service'
-import {
-  CdkDragDrop,
-  moveItemInArray,
-  CdkDrag,
-  CdkDropList,
-  CdkDragHandle,
-  CdkDragPlaceholder
-} from '@angular/cdk/drag-drop'
+import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { ReorderKeysDirective } from 'src/app/core/directives/reorder-keys.directive'
 
 export interface DraftIngredient {
   id: number
@@ -61,7 +55,7 @@ export interface DraftWorkflowItem {
     CdkDrag,
     CdkDropList,
     CdkDragHandle,
-    CdkDragPlaceholder
+    ReorderKeysDirective
   ],
   templateUrl: './ai-draft-editor.component.html',
   styleUrl: './ai-draft-editor.component.scss',
@@ -166,10 +160,19 @@ export class AiDraftEditorComponent {
   }
 
   protected onDropIngredient(event: CdkDragDrop<DraftIngredient[]>): void {
-    if (event.previousIndex === event.currentIndex) return
+    this.moveIngredient(event.previousIndex, event.currentIndex)
+  }
+
+  /** The arrow keys on a row's grip: one step up (-1) or down (1), the same move a drop makes. */
+  protected onReorderIngredient(index: number, step: -1 | 1): void {
+    this.moveIngredient(index, index + step)
+  }
+
+  private moveIngredient(from: number, to: number): void {
+    if (from === to) return
     this.ingredients.update((list) => {
       const copy = [...list]
-      moveItemInArray(copy, event.previousIndex, event.currentIndex)
+      moveItemInArray(copy, from, to)
       return copy
     })
   }
@@ -214,10 +217,19 @@ export class AiDraftEditorComponent {
   }
 
   protected onDropWorkflow(event: CdkDragDrop<DraftWorkflowItem[]>): void {
-    if (event.previousIndex === event.currentIndex) return
+    this.moveWorkflowItem(event.previousIndex, event.currentIndex)
+  }
+
+  /** The arrow keys on a row's grip: one step up (-1) or down (1), the same move a drop makes. */
+  protected onReorderWorkflow(index: number, step: -1 | 1): void {
+    this.moveWorkflowItem(index, index + step)
+  }
+
+  private moveWorkflowItem(from: number, to: number): void {
+    if (from === to) return
     this.workflowItems_.update((list) => {
       const copy = [...list]
-      moveItemInArray(copy, event.previousIndex, event.currentIndex)
+      moveItemInArray(copy, from, to)
       return copy
     })
   }

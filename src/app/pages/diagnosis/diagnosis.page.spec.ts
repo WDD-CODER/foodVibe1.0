@@ -61,12 +61,12 @@ describe('DiagnosisPage', () => {
   it('create is disabled while the name is empty, then creates and opens the workspace', async () => {
     await setup(jasmine.createSpy('list').and.resolveTo([]))
     const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true)
-    expect(byId<HTMLButtonElement>('diagnosis-create')!.disabled).toBeTrue()
+    expect(byId<HTMLButtonElement>('diagnosis-create')!.getAttribute('aria-disabled')).toBe('true')
     const input = byId<HTMLInputElement>('diagnosis-name')!
     input.value = '  Client A '
     input.dispatchEvent(new Event('input'))
     fixture.detectChanges()
-    expect(byId<HTMLButtonElement>('diagnosis-create')!.disabled).toBeFalse()
+    expect(byId<HTMLButtonElement>('diagnosis-create')!.getAttribute('aria-disabled')).toBeNull()
     byId<HTMLButtonElement>('diagnosis-create')!.click()
     await fixture.whenStable()
     expect(create).toHaveBeenCalledWith({ name: 'Client A', periodDays: 60 })

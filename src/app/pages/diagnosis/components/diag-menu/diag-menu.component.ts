@@ -23,6 +23,7 @@ import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { DiagnosisService } from '../../services/diagnosis.service'
 
 interface MenuEditRow {
@@ -52,7 +53,8 @@ interface DishOption {
     TranslatePipe,
     CounterComponent,
     LoaderComponent,
-    SearchComboboxComponent
+    SearchComboboxComponent,
+    DisabledWhyDirective
   ],
   templateUrl: './diag-menu.component.html',
   styleUrl: './diag-menu.component.scss',
@@ -95,6 +97,12 @@ export class DiagMenuComponent {
       !this.locked() &&
       this.rows_().every((row) => row.name.trim() !== '' && row.sellPrice !== null && row.sellPrice >= 0)
   )
+  /** Why the save button cannot be pressed (a dictionary key); null when it can, or while it only saves. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    if (this.canSave_() || this.isSaving_()) return null
+    if (this.locked()) return 'diag_done_locked'
+    return this.isDirty_() ? 'why_diag_rows_incomplete' : 'why_nothing_to_save'
+  })
 
   protected readonly labelOf = (option: DishOption): string => option.name
   protected readonly keyOf = (option: DishOption): string => option.id

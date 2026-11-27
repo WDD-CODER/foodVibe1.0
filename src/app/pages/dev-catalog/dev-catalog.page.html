@@ -1,12 +1,14 @@
 <main class="dc" dir="rtl">
   <nav class="dc-bar" aria-label="catalog">
     @for (id of families_; track id) {
-    <a class="c-chip c-chip--tag" [href]="'#' + id">{{ id }}</a>
+    <button type="button" class="c-chip c-chip--tag dc-jump" [attr.data-jump]="id" (click)="jumpTo(id)">
+      {{ id }}
+    </button>
     }
   </nav>
 
   <section id="search-combobox" class="dc-section">
-    <h2>search-combobox</h2>
+    <h2 tabindex="-1">search-combobox</h2>
     <div class="dc-grid">
       <div class="dc-item">
         <code>query='', open=false</code>
@@ -54,14 +56,19 @@
         <app-custom-select [options]="options_" [ngModel]="selectedValue_()" placeholder="search" />
       </div>
       <div class="dc-item">
-        <code>custom-select: disabled</code>
-        <app-custom-select [options]="options_" [ngModel]="selectedValue_()" [disabled]="true" placeholder="search" />
+        <code>custom-select: disabledWhy</code>
+        <app-custom-select
+          [options]="options_"
+          [ngModel]="selectedValue_()"
+          [disabledWhy]="'why_demo_only' | translatePipe"
+          placeholder="search"
+        />
       </div>
     </div>
   </section>
 
   <section id="multi-pick" class="dc-section">
-    <h2>multi-pick</h2>
+    <h2 tabindex="-1">multi-pick</h2>
     <div class="dc-grid">
       <div class="dc-item">
         <code>none picked</code>
@@ -80,7 +87,7 @@
   </section>
 
   <section id="modal-shell" class="dc-section">
-    <h2>modal-shell</h2>
+    <h2 tabindex="-1">modal-shell</h2>
     <button type="button" class="c-btn-primary" (click)="isModalOpen_.set(true)">
       {{ 'recipes' | translatePipe }}
     </button>
@@ -97,7 +104,7 @@
   </section>
 
   <section id="list-page" class="dc-section">
-    <h2>list-page</h2>
+    <h2 tabindex="-1">list-page</h2>
     <app-page-header titleKey="recipes" [count]="3" />
     <app-list-shell gridTemplate="1fr" mobileGridTemplate="1fr">
       <div shell-table-body>
@@ -108,13 +115,52 @@
     </app-list-shell>
   </section>
 
+  <section id="falling-columns" class="dc-section">
+    <h2 tabindex="-1">falling-columns</h2>
+    <div class="dc-resizable">
+      <app-list-shell appColumnCarouselGroup [columns]="fallColumns_">
+        <ng-container shell-table-header>
+          <div class="c-grid-header-cell">name</div>
+          <app-column-carousel-header>
+            <div class="c-grid-header-cell" *appFallColumn="'a'; label: 'a'">a</div>
+            <div class="c-grid-header-cell" *appFallColumn="'b'; label: 'b'">b</div>
+            <div class="c-grid-header-cell" *appFallColumn="'c'; label: 'c'">c</div>
+          </app-column-carousel-header>
+          <div class="c-grid-header-cell">price</div>
+        </ng-container>
+        <ng-container shell-table-body>
+          @for (row of rows_; track row) {
+          <div class="c-list-row">
+            <div class="c-list-body-cell">{{ row | translatePipe }}</div>
+            <app-column-carousel-cell>
+              <div class="c-list-body-cell" *appFallColumn="'a'; label: 'a'">{{ row }} a</div>
+              <div class="c-list-body-cell" *appFallColumn="'b'; label: 'b'">{{ row }} b</div>
+              <div class="c-list-body-cell" *appFallColumn="'c'; label: 'c'">{{ row }} c</div>
+            </app-column-carousel-cell>
+            <div class="c-list-body-cell">1.00</div>
+          </div>
+          }
+          <div class="c-list-row">
+            <div class="c-list-body-cell">fourth</div>
+            <app-column-carousel-cell>
+              <div class="c-list-body-cell" *appFallColumn="'a'; label: 'a'">fourth a</div>
+              <div class="c-list-body-cell" *appFallColumn="'b'; label: 'b'">fourth b</div>
+              <div class="c-list-body-cell" *appFallColumn="'c'; label: 'c'">fourth c</div>
+            </app-column-carousel-cell>
+            <div class="c-list-body-cell">1.00</div>
+          </div>
+        </ng-container>
+      </app-list-shell>
+    </div>
+  </section>
+
   <section id="empty-state" class="dc-section">
-    <h2>empty-state</h2>
+    <h2 tabindex="-1">empty-state</h2>
     <app-empty-state messageKey="empty_inventory" />
   </section>
 
   <section id="form-field" class="dc-section">
-    <h2>form-field</h2>
+    <h2 tabindex="-1">form-field</h2>
     <div class="dc-grid">
       <div class="dc-item">
         <code>plain</code>
@@ -147,8 +193,8 @@
         <app-date-field inputId="dc-d3" [(value)]="dateInvalidValue_" [(invalid)]="dateInvalid_" />
       </div>
       <div class="dc-item">
-        <code>date: disabled=true</code>
-        <app-date-field inputId="dc-d4" [(value)]="dateDisabled_" [disabled]="true" />
+        <code>date: disabledWhy</code>
+        <app-date-field inputId="dc-d4" [(value)]="dateDisabled_" [disabledWhy]="'why_demo_only' | translatePipe" />
       </div>
       <div class="dc-item">
         <code>app-input-clear visible=true</code>
@@ -161,14 +207,14 @@
   </section>
 
   <section id="number-box" class="dc-section">
-    <h2>number-box</h2>
+    <h2 tabindex="-1">number-box</h2>
     <div class="c-input-wrapper" appNumberBox>
       <input class="c-input" type="number" value="12" />
     </div>
   </section>
 
   <section id="stepper" class="dc-section">
-    <h2>stepper</h2>
+    <h2 tabindex="-1">stepper</h2>
     <div class="dc-grid">
       <div class="dc-item">
         <code>min=0, value=5</code>
@@ -182,7 +228,7 @@
   </section>
 
   <section id="chip" class="dc-section">
-    <h2>chip</h2>
+    <h2 tabindex="-1">chip</h2>
     <div class="c-chip-group">
       <span class="c-chip">c-chip</span>
       <span class="c-chip teal">teal</span>
@@ -203,7 +249,7 @@
   </section>
 
   <section id="feedback" class="dc-section">
-    <h2>feedback</h2>
+    <h2 tabindex="-1">feedback</h2>
     <div class="dc-row">
       <app-loader size="small" />
       <app-loader size="medium" />
@@ -218,7 +264,7 @@
   </section>
 
   <section id="edit-gate" class="dc-section">
-    <h2>edit-gate</h2>
+    <h2 tabindex="-1">edit-gate</h2>
     <code>type='recipes'</code>
     <app-edit-gate type="recipes">
       <button type="button" class="c-btn-primary">{{ 'save' | translatePipe }}</button>
@@ -226,13 +272,115 @@
   </section>
 
   <section id="cost-badge" class="dc-section">
-    <h2>cost-badge</h2>
+    <h2 tabindex="-1">cost-badge</h2>
     <code>missing=2 items</code>
     <app-partial-cost-badge [missing]="missing_" />
   </section>
 
+  <section id="scroll-area" class="dc-section">
+    <h2 tabindex="-1">scroll-area</h2>
+    <code>maxBlockSize='10rem', twenty lines</code>
+    <app-scroll-area maxBlockSize="10rem">
+      @for (line of lines_; track line) {
+      <p class="dc-line">{{ line }}</p>
+      }
+    </app-scroll-area>
+  </section>
+
+  <section id="sideways-row" class="dc-section">
+    <h2 tabindex="-1">sideways-row</h2>
+    <code>app-scroll-rail (frame, edge arrows, grab and drag), twelve c-chip--tab chips in 20rem</code>
+    <div class="dc-rail-box">
+      <app-scroll-rail>
+        @for (chip of chips_; track chip) {
+        <button type="button" class="c-chip c-chip--tab">{{ chip }}</button>
+        }
+      </app-scroll-rail>
+    </div>
+  </section>
+
+  <section id="drag-list" class="dc-section">
+    <h2 tabindex="-1">drag-list</h2>
+    <code>c-drag-list, c-drag-item, c-drag-handle, appReorderKeys (grip: drag, or arrow up / down)</code>
+    <div class="dc-drag-list c-drag-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+      @for (row of dragRows_(); track row; let i = $index) {
+      <div class="dc-drag-row c-drag-item" cdkDrag>
+        <span
+          class="dc-drag-grip c-drag-handle"
+          cdkDragHandle
+          appReorderKeys
+          [reorderIndex]="i"
+          [reorderCount]="dragRows_().length"
+          [reorderKey]="row"
+          (reorder)="onReorder(i, $event)"
+          [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+          [attr.title]="'drag_reorder_hint' | translatePipe"
+        >
+          <lucide-icon name="grip-vertical" [size]="16"></lucide-icon>
+        </span>
+        <span>{{ row }}</span>
+      </div>
+      }
+    </div>
+  </section>
+
+  <section id="tooltip" class="dc-section">
+    <h2 tabindex="-1">tooltip</h2>
+    <code>appTooltip, tooltipPlacement, tooltipOnClick, c-tooltip (hover, focus, tap; Escape closes)</code>
+    <div class="dc-row">
+      <button type="button" class="c-btn-ghost" id="dc-tooltip-text" [appTooltip]="'dc_tooltip_sample' | translatePipe">
+        text
+      </button>
+      <button
+        type="button"
+        class="c-btn-ghost"
+        id="dc-tooltip-template"
+        [appTooltip]="chipsTip"
+        tooltipPlacement="below"
+      >
+        template
+      </button>
+      <ng-template #chipsTip>
+        <span class="c-chip c-chip--tag c-chip--sm">chip</span>
+        <span class="c-chip c-chip--tag c-chip--sm">chip</span>
+      </ng-template>
+    </div>
+    <code
+      >disabled with a reason: appDisabledWhy (aria-disabled, is-disabled; hover, focus or tap says why; the click never
+      runs)</code
+    >
+    <div class="dc-row" id="dc-disabled-why">
+      <button
+        type="button"
+        class="c-btn-primary"
+        id="dc-disabled-btn"
+        [appDisabledWhy]="'dc_disabled_sample' | translatePipe"
+        (click)="countDisabledClick()"
+      >
+        save
+      </button>
+      <button type="button" class="c-btn-ghost" [appDisabledWhy]="'dc_disabled_sample' | translatePipe">ghost</button>
+      <button
+        type="button"
+        class="c-icon-btn"
+        aria-label="delete"
+        [appDisabledWhy]="'dc_disabled_sample' | translatePipe"
+      >
+        <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+      </button>
+      <input
+        class="c-input"
+        type="text"
+        value="text"
+        aria-label="text"
+        [appDisabledWhy]="'dc_disabled_sample' | translatePipe"
+      />
+      <span>clicks: <span id="dc-disabled-count">{{ disabledClicks_() }}</span></span>
+    </div>
+  </section>
+
   <section id="engine-classes" class="dc-section">
-    <h2>engine-classes</h2>
+    <h2 tabindex="-1">engine-classes</h2>
     <div class="dc-row">
       <button type="button" class="c-btn-primary">c-btn-primary</button>
       <button type="button" class="c-btn-primary c-btn-primary--danger">--danger</button>

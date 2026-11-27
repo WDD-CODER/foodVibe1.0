@@ -22,7 +22,8 @@
       type="button"
       class="c-btn-primary"
       data-testid="diagnosis-create"
-      [disabled]="!canCreate_()"
+      [disabled]="isSaving_()"
+      [appDisabledWhy]="name_().trim() === '' ? ('why_diag_name_first' | translatePipe) : null"
       (click)="create()"
     >
       <lucide-icon name="plus" [size]="16" />

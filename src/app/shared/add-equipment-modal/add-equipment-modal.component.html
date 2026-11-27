@@ -35,7 +35,12 @@
 
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
-      <button type="button" class="c-btn-primary" (click)="save()" [disabled]="!name().trim()">
+      <button
+        type="button"
+        class="c-btn-primary"
+        (click)="save()"
+        [appDisabledWhy]="!name().trim() ? ('why_shared_name_first' | translatePipe) : null"
+      >
         {{ 'save' | translatePipe }}
       </button>
     </div>

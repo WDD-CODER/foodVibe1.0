@@ -12,7 +12,7 @@
             [id]="'supplier-price-' + id"
             [value]="prices()[id] ?? ''"
             [placeholder]="'waiting_for_price' | translatePipe"
-            [disabled]="locked_()"
+            [appDisabledWhy]="lockWhy_() ? (lockWhy_()! | translatePipe) : null"
             (change)="setPrice_(id, $event)"
           />
           <span class="prefix">₪</span>

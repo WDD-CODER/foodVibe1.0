@@ -8,7 +8,8 @@ test('603-3: supplier column header reads between its arrows', async ({ page, co
   await page.goto('/suppliers')
   const header = page.locator('app-column-carousel-header').first()
   await expect(header).toBeVisible()
-  const slide = header.locator('.column-slide--active')
+  // Plan 746: the supplier list declares falling columns; the shown column sits in the switching cell.
+  const slide = header.locator('.cc-fall > *').first()
   const s = await slide.boundingBox()
   const p = await header.locator('.cc-arrow--prev').boundingBox()
   const n = await header.locator('.cc-arrow--next').boundingBox()

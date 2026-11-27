@@ -370,13 +370,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: grab;
-  color: var(--color-text-muted);
   flex-shrink: 0;
-
-  &:active {
-    cursor: grabbing;
-  }
 }
 
 .drag-handle-icon {
@@ -390,33 +384,15 @@
   }
 }
 
-// ── CDK drag styles ────────────────────────────────────────────────
-
-.cdk-drag-preview {
-  box-shadow: var(--shadow-card);
-  background: var(--bg-glass-strong, var(--color-surface));
-  border: 1px solid var(--border-accent, var(--color-primary-glow));
-  border-radius: var(--radius-md);
-  opacity: 0.95;
+// The lifted row's look is the shared .c-drag-item engine (src/styles.scss). The CDK moves it to <body>, where the
+// subgrid layout of the rows collapses, so it is laid out as one flex row here.
+.editor-ing-row.is-lifted,
+.editor-step-row.is-lifted,
+.editor-prep-row.is-lifted {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   padding: 0.35rem 0.5rem;
-  box-sizing: border-box;
-}
-
-.cdk-drag-placeholder {
-  opacity: 0;
-}
-
-.cdk-drag-animating {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.editor-ing-table.cdk-drop-list-dragging .editor-ing-row:not(.cdk-drag-placeholder),
-.editor-steps-list.cdk-drop-list-dragging .editor-step-row:not(.cdk-drag-placeholder),
-.editor-prep-table.cdk-drop-list-dragging .editor-prep-row:not(.cdk-drag-placeholder) {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 // ── Footer ─────────────────────────────────────────────────────────

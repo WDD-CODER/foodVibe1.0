@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -13,7 +14,7 @@ import { NAME_MAX_LENGTH } from '@schemas/base.schema'
 @Component({
   selector: 'app-business-name-form',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, FormFieldComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, FormFieldComponent, DisabledWhyDirective],
   templateUrl: './business-name-form.component.html',
   styleUrl: './business-name-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -49,6 +50,13 @@ export class BusinessNameFormComponent {
   protected readonly canSave = computed(() => {
     const name = this.trimmed_()
     return !this.isSaving_() && !!name && name.length <= NAME_MAX_LENGTH && name !== this.stored_()
+  })
+  /** Why «שמור» cannot be used (a translation key), or null when it can. A running save is not a reason. */
+  protected readonly saveWhy_ = computed<string | null>(() => {
+    const name = this.trimmed_()
+    if (!name) return 'business_name_required'
+    if (name.length > NAME_MAX_LENGTH) return 'business_name_too_long'
+    return name === this.stored_() ? 'why_nothing_to_save' : null
   })
 
   constructor() {

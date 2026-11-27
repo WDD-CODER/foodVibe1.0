@@ -75,7 +75,13 @@
       }
     </p>
     <div class="c-form-actions">
-      <button type="submit" class="c-btn-primary" data-testid="baseline-save" [disabled]="!canSave()">
+      <button
+        type="submit"
+        class="c-btn-primary"
+        data-testid="baseline-save"
+        [disabled]="isSaving_()"
+        [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
+      >
         {{ 'save' | translatePipe }}
       </button>
       @if (first()) {

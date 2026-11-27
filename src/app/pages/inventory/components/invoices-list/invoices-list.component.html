@@ -1,7 +1,7 @@
 <app-list-shell
+  appColumnCarouselGroup
   [isPanelOpen]="false"
-  [gridTemplate]="gridTemplate_()"
-  [mobileGridTemplate]="gridTemplate_()"
+  [columns]="columns_()"
   [resultCount]="invoices_().length"
   [resultTotal]="invoices_().length"
 >
@@ -18,15 +18,31 @@
 
   <ng-container shell-table-header>
     <div class="c-grid-header-cell" role="columnheader">{{ 'supplier' | translatePipe }}</div>
-    <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_date' | translatePipe }}</div>
-    <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_number' | translatePipe }}</div>
-    @if (isOwner_()) {
-      <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_lines_count' | translatePipe }}</div>
-    }
-    <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_saved_at' | translatePipe }}</div>
-    @if (isOwner_()) {
-      <div class="c-grid-header-cell" role="columnheader">{{ 'invoice_file' | translatePipe }}</div>
-    }
+    <app-column-carousel-header>
+      <div class="col-date c-grid-header-cell" *appFallColumn="'date'; label: 'invoice_date'" role="presentation">
+        {{ 'invoice_date' | translatePipe }}
+      </div>
+      <div class="col-number c-grid-header-cell" *appFallColumn="'number'; label: 'invoice_number'" role="presentation">
+        {{ 'invoice_number' | translatePipe }}
+      </div>
+      @if (isOwner_()) {
+        <div
+          class="col-lines c-grid-header-cell"
+          *appFallColumn="'lines'; label: 'invoice_lines_count'"
+          role="presentation"
+        >
+          {{ 'invoice_lines_count' | translatePipe }}
+        </div>
+      }
+      <div class="col-saved c-grid-header-cell" *appFallColumn="'saved'; label: 'invoice_saved_at'" role="presentation">
+        {{ 'invoice_saved_at' | translatePipe }}
+      </div>
+      @if (isOwner_()) {
+        <div class="col-file c-grid-header-cell" *appFallColumn="'file'; label: 'invoice_file'" role="presentation">
+          {{ 'invoice_file' | translatePipe }}
+        </div>
+      }
+    </app-column-carousel-header>
   </ng-container>
 
   <ng-container shell-table-body>
@@ -45,35 +61,58 @@
       @for (item of invoices_(); track item._id) {
         <div class="invoices-list__row c-list-row" data-testid="invoice-row">
           <div class="c-list-body-cell" role="cell">{{ item.supplierName }}</div>
-          <div class="c-list-body-cell" role="cell" dir="ltr">
-            {{ item.invoiceDate ? (item.invoiceDate | date: 'dd/MM/yy') : '—' }}
-          </div>
-          <div class="c-list-body-cell" role="cell" dir="auto">{{ item.invoiceNumber ?? '—' }}</div>
-          @if (isOwner_()) {
-            <div class="c-list-body-cell" role="cell" dir="ltr" data-testid="invoice-lines">
-              {{ item.lines.length }}
+          <app-column-carousel-cell>
+            <div
+              class="col-date c-list-body-cell cell-nowrap"
+              *appFallColumn="'date'; label: 'invoice_date' | translatePipe"
+              dir="ltr"
+            >
+              {{ item.invoiceDate ? (item.invoiceDate | date: 'dd/MM/yy') : '—' }}
             </div>
-          }
-          <div class="c-list-body-cell" role="cell" dir="ltr">{{ item.createdAt | date: 'dd/MM/yy' }}</div>
-          @if (isOwner_()) {
-            <div class="c-list-body-cell" role="cell">
-              @if (item.fileId) {
-                <button
-                  type="button"
-                  class="c-btn-ghost--sm"
-                  data-testid="invoice-open-file"
-                  (click)="openFile(item.fileId)"
-                >
-                  <lucide-icon name="eye" [size]="16"></lucide-icon>
-                  {{ 'invoice_open_file' | translatePipe }}
-                </button>
-              } @else {
-                <span class="invoices-list__muted" data-testid="invoice-no-file">
-                  {{ 'invoice_no_file' | translatePipe }}
-                </span>
-              }
+            <div
+              class="col-number c-list-body-cell cell-nowrap"
+              *appFallColumn="'number'; label: 'invoice_number' | translatePipe"
+              dir="auto"
+            >
+              {{ item.invoiceNumber ?? '—' }}
             </div>
-          }
+            @if (isOwner_()) {
+              <div
+                class="col-lines c-list-body-cell cell-nowrap"
+                *appFallColumn="'lines'; label: 'invoice_lines_count' | translatePipe"
+                dir="ltr"
+                data-testid="invoice-lines"
+              >
+                {{ item.lines.length }}
+              </div>
+            }
+            <div
+              class="col-saved c-list-body-cell cell-nowrap"
+              *appFallColumn="'saved'; label: 'invoice_saved_at' | translatePipe"
+              dir="ltr"
+            >
+              {{ item.createdAt | date: 'dd/MM/yy' }}
+            </div>
+            @if (isOwner_()) {
+              <div class="col-file c-list-body-cell" *appFallColumn="'file'; label: 'invoice_file' | translatePipe">
+                @if (item.fileId) {
+                  <button
+                    type="button"
+                    class="c-btn-ghost--sm"
+                    data-testid="invoice-open-file"
+                    (click)="openFile(item.fileId)"
+                  >
+                    <lucide-icon name="eye" [size]="16"></lucide-icon>
+                    {{ 'invoice_open_file' | translatePipe }}
+                  </button>
+                } @else {
+                  <span class="invoices-list__muted" data-testid="invoice-no-file">
+                    {{ 'invoice_no_file' | translatePipe }}
+                  </span>
+                }
+              </div>
+            }
+          </app-column-carousel-cell>
         </div>
       }
     }

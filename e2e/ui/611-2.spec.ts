@@ -22,7 +22,7 @@ test('611-2: on a phone the grid has no sideways scroll and the carousel swaps t
   const before = await header.getAttribute('aria-label')
   await page.locator('.platform-grid app-column-carousel-header .cc-arrow--next').click()
   await expect(header).not.toHaveAttribute('aria-label', before ?? '')
-  const after = await header.getAttribute('aria-label')
-  await expect(rows.first().locator('.cc-cell-label-text')).toHaveText(after ?? '')
+  // Plan 747: the label above each value is gone; the header names the column that is shown.
+  await expect(rows.first().locator('.cc-cell-label-text')).toHaveCount(0)
   await page.screenshot({ path: 'screens/611-2.png', fullPage: false })
 })

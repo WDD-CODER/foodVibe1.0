@@ -3,20 +3,20 @@ import { signInQa } from '../helpers/qa-session'
 
 test.use({ viewport: { width: 375, height: 812 } })
 
-test('601-1: the dashboard chip row keeps its arrow beside the chips', async ({ page, context }) => {
+// Plan 747: on a phone the row has no arrow buttons; the soft fade at the edge shows that there is more.
+test('601-1: the dashboard chip row shows more to the side by its fade, with no arrow button', async ({
+  page,
+  context
+}) => {
   await signInQa(context)
   await page.goto('/dashboard')
-  const arrow = page.locator('.c-tab-chips .sr-arrow--next')
-  const scroller = page.locator('.c-tab-chips .sr-scroller')
-  await expect(arrow).toBeVisible()
-  const a = await arrow.boundingBox()
-  const s = await scroller.boundingBox()
-  if (!a || !s) throw new Error('missing box')
-  const overlap = a.x < s.x + s.width && a.x + a.width > s.x
-  expect(overlap).toBe(false)
-  for (const b of [a, s]) {
-    expect(b.x).toBeGreaterThanOrEqual(0)
-    expect(b.x + b.width).toBeLessThanOrEqual(375)
-  }
+  const frame = page.locator('.c-tab-chips .sr-frame')
+  await expect(frame).toBeVisible()
+  await expect(page.locator('.c-tab-chips .sr-arrow')).toHaveCount(0)
+  await expect(frame).toHaveClass(/has-next/)
+  const s = await frame.boundingBox()
+  if (!s) throw new Error('missing box')
+  expect(s.x).toBeGreaterThanOrEqual(0)
+  expect(s.x + s.width).toBeLessThanOrEqual(375)
   await page.screenshot({ path: 'screens/601-1.png' })
 })

@@ -216,7 +216,10 @@ describe('EventClosingDialogComponent', () => {
     await setup({ ...base, stage: 'finished', closing: { suppliers: [], finishedAt: 5 } })
     expect(el.querySelector('.locked-note')).toBeTruthy()
     expect(el.querySelectorAll<HTMLInputElement>('input:not(.visually-hidden)').length).toBeGreaterThan(0)
-    for (const input of Array.from(el.querySelectorAll<HTMLInputElement>('input'))) expect(input.disabled).toBeTrue()
+    for (const input of Array.from(el.querySelectorAll<HTMLInputElement>('input'))) {
+      expect(input.getAttribute('aria-disabled')).toBe('true')
+    }
+    expect(el.querySelector<HTMLInputElement>('input[type="number"]')!.readOnly).toBeTrue()
     expect(button('closing_finish')).toBeUndefined()
     button('closing_reopen')!.click()
     expect(pipeline.reopen).toHaveBeenCalledWith('e1')
@@ -263,8 +266,8 @@ describe('EventClosingDialogComponent', () => {
     expect(button('closing_refresh_plan')).toBeUndefined()
 
     const [arrived, invoice] = Array.from(rows()[0].querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
-    expect(arrived.disabled).toBeFalse()
-    expect(invoice.disabled).toBeFalse()
+    expect(arrived.getAttribute('aria-disabled')).toBeNull()
+    expect(invoice.getAttribute('aria-disabled')).toBeNull()
     arrived.checked = true
     arrived.dispatchEvent(new Event('change'))
     await fixture.whenStable()

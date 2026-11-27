@@ -1,0 +1,744 @@
+{
+  "run": "house-style-ui",
+  "branch": "orch/house-style-ui",
+  "base": "main",
+  "startedAt": "2026-11-25T21:00:54.474Z",
+  "mainShaAtStart": "cef191e674e05376f0d7b3ce3a9af402f15ea872",
+  "plans": {
+    "743": {
+      "nnn": "743",
+      "title": "One sideways row container everywhere: a visible frame, edge arrows, grab-and-drag",
+      "branch": "feat/743-sideways-row-container",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T21:03:19.846Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T21:24:02.981Z"
+        }
+      },
+      "humanItems": [
+        "Card — the top bar on a narrow computer window: narrow the browser window until the top navigation no longer fits; the links sit in the same white rounded container as before, an arrow appears at the edge that has more, pressing it moves the row, and you can grab the row with the mouse and drag it.",
+        "Card — the metadata row: open the dashboard's metadata tab on a tablet-width window; the row of section chips sits in the same container as the top bar, its arrows are inside the container at the edges, pressing a chip scrolls the page to that section smoothly and keeps that chip in view.",
+        "Card — the stage row in the menu builder: open an event in the menu builder on a narrow window; the stage row sits in the same container, the arrows and the drag work as in the top bar, and pressing a stage still changes the stage (a drag does not press it).",
+        "Card — a phone: open the settings page and a page with tab chips on a phone (or a 375px window); the rows sit in the container, there are no arrow buttons to press, and swiping moves the row.",
+        "Card — the dev catalog: open `/dev/catalog`; the \"sideways row\" entry shows the container with twelve chips; it looks like the up-and-down scroll area turned sideways."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T21:03:19.630Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:03:19.848Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:21:36.466Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:21:36.760Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:23:56.852Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:24:02.983Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:24:16.038Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:25:09.639Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3.9,
+      "sha": "1b4923a349592c721ca86456ede87bbda8d7ded3",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 1093.8,
+          "tokens": {
+            "input": 3585404,
+            "output": 37361
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 11.8,
+          "tokens": {
+            "input": 104558,
+            "output": 854
+          },
+          "exit": 0
+        }
+      ],
+      "uiCards": [
+        {
+          "card": "Top bar at tablet width: open `/dashboard` at 900×800 signed in; the element `app-scroll-rail.nav-pills` exists, its scroller has no horizontal scrollbar (`scro",
+          "status": "unchecked",
+          "via": "none",
+          "page": "",
+          "screenshots": [],
+          "round": 0
+        }
+      ],
+      "checkedHead": "78f714b5f408d2a2c1cfd6f1cc721c1b258f057c"
+    },
+    "744": {
+      "nnn": "744",
+      "title": "One tooltip box for every hint: a shared piece, the two hand-made tooltips moved onto it",
+      "branch": "feat/744-shared-tooltip-box",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T21:27:02.435Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T21:41:28.448Z"
+        }
+      },
+      "humanItems": [
+        "Card — the bell: on any signed-in page hover the notification bell, then reach it with Tab; the same small box appears beside it both times and disappears when you move away or press Escape.",
+        "Card — the product list status: open the product list and hover (or tap) a row's warning badge; its reasons show in the same box, placed fully inside the screen, also on the first and the last visible row.",
+        "Card — the recipe book cost: open the recipe book and hover a recipe's cost; the breakdown shows in the same box; on a phone-width window tapping the cost opens it and tapping elsewhere closes it.",
+        "Card — an explanation of a control in a dialog shows as a tooltip (default `hints-in-tooltips`): a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal. Use the taxonomy manager's edit icon in the dashboard's metadata tab.",
+        "Card — a small floating box stays inside the screen (default `anchored-popup`): any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off. Use the product list's warning badge.",
+        "Card — the nutrition box did not change: open a product that has nutrition data and hover its nutrition badge; the box looks exactly as before."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T21:27:02.304Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:27:02.436Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:39:00.456Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:41:22.271Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:41:28.449Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:41:45.446Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:42:20.818Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3.9,
+      "sha": "fc2e536a903cef4ecf83d4bb4d7b35c63de3d0c9",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 715.2,
+          "tokens": {
+            "input": 5923599,
+            "output": 49497
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.9,
+          "tokens": {
+            "input": 112688,
+            "output": 1301
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "634f0b2a3bb7832e92681de9e1ae05bc56c6552f"
+    },
+    "745": {
+      "nnn": "745",
+      "title": "List columns fall into the carousel one by one as the list gets narrower (mechanism + the product list)",
+      "branch": "feat/745-list-columns-fall-into",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T21:44:13.024Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T21:59:56.182Z"
+        }
+      },
+      "humanItems": [
+        "Card — columns fall one by one: open the product list on a wide window with the filters closed, then narrow the window slowly; first the unit and the supplier go into one switching column together, then the allergens, then the category; the name stays readable the whole time and nothing wraps or scrolls sideways.",
+        "Card — they come back: widen the window again; the columns return in the opposite order.",
+        "Card — the filter panel counts: on a medium window open the filter panel; more columns fall because the list got narrower; close it and they return.",
+        "Card — switching works: when some columns are inside the switching column, press its arrow; every row shows the next piece of information, and the small label above the value says which one it is.",
+        "Card — the other lists did not change: open the recipe book, suppliers, equipment, clients and the stock count on a wide window and on a phone-width window; they look and behave as before this change.",
+        "Card — every row of a list stays on one line (default `app-list-container`): any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line. Use the product list."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T21:44:12.883Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:44:13.025Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:57:26.759Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:59:49.897Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T21:59:56.184Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:00:13.149Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:00:48.087Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3.3,
+      "sha": "b795b9afe65dabc6c0a3deec86e80d46fab49b18",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 791,
+          "tokens": {
+            "input": 5771553,
+            "output": 59686
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 15.8,
+          "tokens": {
+            "input": 114204,
+            "output": 1445
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "db726f8a915374c8cbd6f68cee469365b1cf5125"
+    },
+    "746": {
+      "nnn": "746",
+      "title": "The other five lists get falling columns: recipe book, suppliers, equipment, clients, invoices",
+      "branch": "feat/746-other-lists-on-falling",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-25T22:02:42.115Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-25T22:11:49.797Z"
+        }
+      },
+      "humanItems": [
+        "Card — the recipe book: narrow the window slowly; the rating and the labels fall first (together), then the allergens, then the cost; the recipe name stays readable.",
+        "Card — suppliers: narrow the window slowly; linked products and lead time fall first, the phone falls last.",
+        "Card — equipment: narrow the window slowly; consumable and scaling rule fall first, the owned quantity falls last.",
+        "Card — clients: narrow the window slowly; the two counts fall first, the phone falls last.",
+        "Card — invoices: narrow the window slowly; the file and \"saved at\" fall first into a switching column, the supplier and the date always stay.",
+        "Card — every row of a list stays on one line (default `app-list-container`): any list page on a phone and on a desktop · look at the rows · the page header matches the other list pages and every row stays on one line. Use the recipe book."
+      ],
+      "history": [
+        {
+          "at": "2026-11-25T22:02:41.982Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:02:42.117Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:09:22.663Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:11:43.920Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:11:49.798Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:11:58.332Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-25T22:12:32.970Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 3.8,
+      "sha": "3df5b2ba8106c1ff512a0d59de90c1988ef6eaba",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 397.8,
+          "tokens": {
+            "input": 1858757,
+            "output": 23417
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 7.4,
+          "tokens": {
+            "input": 46969,
+            "output": 579
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "45c8874f87f33162e1a60a26c255db3f94159798"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-25T21:01:33.591Z",
+      "plan": "743",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: src/app/appRoot/app.component.spec.ts, src/app/pages/dashboard/dashboard.page.spec.ts"
+    },
+    {
+      "at": "2026-11-25T21:01:34.107Z",
+      "plan": "744",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: src/app/pages/metadata-manager/components/station-manager/station-manager.component.spec.ts"
+    },
+    {
+      "at": "2026-11-25T21:01:34.515Z",
+      "plan": "746",
+      "text": "decided without the Human: advisor · readiness: the question up front (tests and manifest the plan needs) answered: approved: src/app/pages/recipe-book/recipe-book.page.spec.ts"
+    },
+    {
+      "at": "2026-11-25T21:03:19.415Z",
+      "plan": "743",
+      "text": "the folder foodVibe1.0-orch-house-style-ui-743 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T21:21:33.818Z",
+      "plan": "743",
+      "text": "builder left undone (round 0): [ui] item 1 (top bar at 900×800, /dashboard): written, not run; [ui] item 2 (settings at 375×812): written, not run; [human] cards for the top bar, metadata row, stage row, phone and dev catalog are left for Dandan"
+    },
+    {
+      "at": "2026-11-25T21:21:36.636Z",
+      "plan": "743",
+      "text": "[ui] Top bar at tablet width: open `/dashboard` at 900×800 signed in; the element `app-scroll-rail.nav-pills` exists, its scroller has no horizontal scrollbar (: written, not run — checked by the run's [ui] step / the Human"
+    },
+    {
+      "at": "2026-11-25T21:24:24.207Z",
+      "plan": "743",
+      "text": "the folder foodVibe1.0-orch-merge-house-style-ui was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T21:27:02.159Z",
+      "plan": "744",
+      "text": "the folder foodVibe1.0-orch-house-style-ui-744 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T21:38:57.749Z",
+      "plan": "744",
+      "text": "builder left undone (round 0): [ui] The catalog sample (744-1): written, not run; [human] Cards: bell, product list status, recipe book cost, dialog hint, anchored popup, nutrition box unchanged — for the Human"
+    },
+    {
+      "at": "2026-11-25T21:44:12.752Z",
+      "plan": "745",
+      "text": "the folder foodVibe1.0-orch-house-style-ui-745 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T21:57:24.127Z",
+      "plan": "745",
+      "text": "builder left undone (round 0): [ui] Wide (1600×900): written, not run (e2e/ui/745-1.spec.ts); [ui] Narrower (1000×800): written, not run (e2e/ui/745-2.spec.ts); [ui] Phone (375×812): written, not run (e2e/ui/745-3.spec.ts); The five existing product-list e2e specs at 375px (598-2, 599-2, 603-1, 603-2, 609-2) were not run: no app"
+    },
+    {
+      "at": "2026-11-25T22:02:41.847Z",
+      "plan": "746",
+      "text": "the folder foodVibe1.0-orch-house-style-ui-746 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-25T22:09:20.040Z",
+      "plan": "746",
+      "text": "builder left undone (round 0): Card 746-1 (suppliers at 1000x800): written, not run; Card 746-2 (recipe book at 1000x800): written, not run; e2e 586-1, 603-3, 609-1 not run (no running app in the worktree)"
+    },
+    {
+      "at": "2026-11-25T22:12:33.374Z",
+      "plan": "746",
+      "text": "decided without the Human: test changed — fewer checks?: src/app/pages/clients/components/client-list/client-list.component.spec.ts: 32 → 31 checks"
+    },
+    {
+      "at": "2026-11-25T22:13:10.886Z",
+      "text": "FINAL: same tree as plan 746's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-25T22:13:11.504Z",
+      "text": "make this a default? the header brings the active link into view with a setTimeout(0) after NavigationEnd, so routerLinkActive has set `.active` first (the simplest option) — reverse: delete the router.events subscription (trigger: destructive-action) — reply: default yes run-destructive-action"
+    },
+    {
+      "at": "2026-11-25T22:13:11.627Z",
+      "text": "make this a default? the cost and date tooltips are templates inside their cells, with the same text as before — reverse: restore recipe-book-list.component.html from origin/main (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 3.8,
+  "updatedAt": "2026-11-25T22:13:13.405Z",
+  "selfDecided": [
+    {
+      "plan": "743",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: src/app/appRoot/app.component.spec.ts, src/app/pages/dashboard/dashboard.page.spec.ts",
+      "why": "scope: 2 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- src/app/appRoot/app.component.spec.ts src/app/pages/dashboard/dashboard.page.spec.ts",
+      "at": "2026-11-25T21:01:33.206Z"
+    },
+    {
+      "plan": "744",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: src/app/pages/metadata-manager/components/station-manager/station-manager.component.spec.ts",
+      "why": "scope: 1 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- src/app/pages/metadata-manager/components/station-manager/station-manager.component.spec.ts",
+      "at": "2026-11-25T21:01:33.890Z"
+    },
+    {
+      "plan": "746",
+      "kind": "advisor · readiness",
+      "what": "the question up front (tests and manifest the plan needs) answered: approved: src/app/pages/recipe-book/recipe-book.page.spec.ts",
+      "why": "scope: 1 named file(s), none sensitive — the same rule as a scope ask",
+      "undo": "before merge it: on the run branch, drop those lines from the plan's scope block and git checkout origin/main -- src/app/pages/recipe-book/recipe-book.page.spec.ts",
+      "at": "2026-11-25T21:01:34.316Z"
+    },
+    {
+      "plan": "746",
+      "kind": "test changed — fewer checks?",
+      "what": "src/app/pages/clients/components/client-list/client-list.component.spec.ts: 32 → 31 checks",
+      "why": "an existing test the plan changed now checks less; it may be right (an old check removed on purpose) or a test bent to pass",
+      "undo": "read the diff: git diff 3df5b2ba^1 3df5b2ba -- src/app/pages/clients/components/client-list/client-list.component.spec.ts",
+      "at": "2026-11-25T22:12:33.246Z"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "743",
+      "type": "behaviour",
+      "text": "behaviour: the header brings the active link into view with a setTimeout(0) after NavigationEnd, so routerLinkActive has set `.active` first (the simplest option) — reverse: delete the router.events subscription in header.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "743",
+      "type": "behaviour",
+      "text": "behaviour: while dragging, scroll-snap-type is set to none directly on the scroller as well as through the is-dragging class, because the class only updates on the next render and snapping pulled the first moves back — reverse: remove the el.style.scrollSnapType lines in the drag handlers",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "743",
+      "type": "behaviour",
+      "text": "behaviour: the swallowed click is cleared by a setTimeout(0) after a drag, so a drag released off the chip does not swallow a later real click — reverse: drop that setTimeout in onPointerEnd",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "743",
+      "type": "behaviour",
+      "text": "behaviour: the top bar's .nav-pills sets --rail-padding-block: 0 so its height stays as before the rail — reverse: remove that line in header.component.scss",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "744",
+      "type": "removes",
+      "text": "removes: the product list badge's own open/close state (replaced by the shared tooltip, which opens on hover, focus and tap as before) — reverse: restore inventory-product-list.component.{html,ts,scss} from origin/main",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "744",
+      "type": "removes",
+      "text": "removes: the recipe book's own cost and date tooltip state and recipe-list-tooltips.service.ts (replaced by the shared tooltip) — reverse: restore recipe-book-list.component.{html,ts,scss} and services/recipe-list-tooltips.service.ts from origin/main",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "744",
+      "type": "behaviour",
+      "text": "behaviour: the 'reworded' stamp of hints-in-tooltips is on its 'turned on' line, because the defaults contract (scripts/lib/product-defaults.mjs FIELDS) refuses a 'reworded' field — reverse: edit that line",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "744",
+      "type": "behaviour",
+      "text": "behaviour: the cost and date tooltips are templates inside their cells, with the same text as before — reverse: restore recipe-book-list.component.html from origin/main",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "744",
+      "type": "behaviour",
+      "text": "behaviour: a touch or pen press held 500 ms opens the tooltip unpinned; it closes on an outside press, scroll, blur or Escape — reverse: drop onPointerDown in tooltip.directive.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "745",
+      "type": "behaviour",
+      "text": "behaviour: the measured mode keeps the carousel's swipe and left/right keys active only on the switching cell, not on the columns that still fit — reverse: drop the .cc-box check in onPointerDown/onArrowKey",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "745",
+      "type": "behaviour",
+      "text": "behaviour: I did not tune any column's min width from the plan's starting values, because the [ui] checks could not be run here — reverse: change the min values in the columns list in inventory-product-list.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "745",
+      "type": "behaviour",
+      "text": "behaviour: the swipe and arrow-key helper isCarouselActive() takes an optional group argument, so the other carousel lists keep today's phone-only behaviour — reverse: remove the argument",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "745",
+      "type": "seen",
+      "text": "seen: node scripts/kit-checks.mjs --base origin/main fails with 12 findings, such as reuse-undeclared src/styles.scss:3052 .c-tooltip--below. These come from plan 744, which is on the run branch but not on main. Against origin/orch/house-style-ui the check passes.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "745",
+      "type": "seen",
+      "text": "seen: node scripts/ci-scope-check.mjs --checkout-branch printed 'skipped (branch \"\" is not feat/NNN-*)' because it read an empty branch name here. I could not confirm it.",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "746",
+      "type": "behaviour",
+      "text": "behaviour: kept every `min` at the plan's starting values, no tuning — reverse: edit the `columns` arrays in each list's .ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "746",
+      "type": "behaviour",
+      "text": "behaviour: the hidden recipe-book date column is converted to `*appFallColumn='date'` but not declared in `columns` (it stays hidden as today) — reverse: declare a `date` column before un-hiding it",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "746",
+      "type": "behaviour",
+      "text": "behaviour: the clients spec now checks the declared fall order through `columns()` instead of the old slide markup, because the measured mode renders no slides in a zero-width test — reverse: restore the markup assertions once a width is set in the test",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-25T22:13:13.403Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-25T22:13:13.405Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

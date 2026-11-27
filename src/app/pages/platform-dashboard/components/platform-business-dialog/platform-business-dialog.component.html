@@ -22,7 +22,8 @@
               type="checkbox"
               [attr.data-testid]="'biz-module-' + key"
               [checked]="isOn(key)"
-              [disabled]="isDisabled(key) || isSaving_()"
+              [disabled]="isSaving_()"
+              [appDisabledWhy]="isDisabled(key) ? ('why_platform_logistics_needs_events' | translatePipe) : null"
               (change)="toggleModule(key, $any($event.target).checked)"
             />
             <span>{{ 'module_' + key | translatePipe }}</span>
@@ -90,7 +91,8 @@
           type="button"
           class="c-btn-primary c-btn-primary--danger"
           data-testid="biz-erase-confirm"
-          [disabled]="isErasing_() || eraseReasonMissing_()"
+          [disabled]="isErasing_()"
+          [appDisabledWhy]="eraseReasonMissing_() ? ('why_platform_reason_first' | translatePipe) : null"
           [attr.aria-busy]="isErasing_()"
           (click)="confirmErase()"
         >
@@ -170,7 +172,8 @@
       type="button"
       class="c-btn-primary"
       data-testid="biz-save"
-      [disabled]="isSaving_() || !hasChange_()"
+      [disabled]="isSaving_()"
+      [appDisabledWhy]="!hasChange_() ? ('why_nothing_to_save' | translatePipe) : null"
       [attr.aria-busy]="isSaving_()"
       (click)="save()"
     >

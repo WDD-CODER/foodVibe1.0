@@ -4,7 +4,13 @@
   }
   <p class="c-empty-state__msg">{{ messageKey() | translatePipe }}</p>
   @if (ctaLabelKey()) {
-    <button type="button" class="c-btn-primary" [disabled]="ctaDisabled()" (click)="ctaClick.emit()">
+    <button
+      type="button"
+      class="c-btn-primary"
+      [disabled]="ctaDisabled() && !ctaDisabledWhy()"
+      [appDisabledWhy]="ctaDisabledWhy()"
+      (click)="ctaClick.emit()"
+    >
       {{ ctaLabelKey()! | translatePipe }}
     </button>
   }

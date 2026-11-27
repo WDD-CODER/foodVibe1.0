@@ -12,7 +12,7 @@ describe('RequestKindCardComponent (plan 553)', () => {
   let fixture: ComponentFixture<RequestKindCardComponent>
   let confirmAnswer: boolean
 
-  function setup(config: RequestKindConfig, disabled = false): void {
+  function setup(config: RequestKindConfig, disabledWhy: string | null = null): void {
     confirmAnswer = true
     TestBed.configureTestingModule({
       imports: [RequestKindCardComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
@@ -27,7 +27,7 @@ describe('RequestKindCardComponent (plan 553)', () => {
     fixture = TestBed.createComponent(RequestKindCardComponent)
     fixture.componentRef.setInput('kind', 'event')
     fixture.componentRef.setInput('config', config)
-    fixture.componentRef.setInput('disabled', disabled)
+    fixture.componentRef.setInput('disabledWhy', disabledWhy)
     fixture.detectChanges()
   }
 
@@ -42,12 +42,12 @@ describe('RequestKindCardComponent (plan 553)', () => {
 
   it('adds a question and disables the add button at 12', () => {
     setup({ ...emptyKindConfig(), enabled: true, questions: Array.from({ length: 11 }, (_, i) => q('k' + i)) })
-    expect(addBtn().disabled).toBeFalse()
+    expect(addBtn().getAttribute('aria-disabled')).toBeNull()
     addBtn().click()
     fixture.detectChanges()
     expect(cfg().questions.length).toBe(12)
     expect(cfg().questions[11].key).toBe('custom_1')
-    expect(addBtn().disabled).toBeTrue()
+    expect(addBtn().getAttribute('aria-disabled')).toBe('true')
     addBtn().click()
     expect(cfg().questions.length).toBe(12)
   })
@@ -71,9 +71,17 @@ describe('RequestKindCardComponent (plan 553)', () => {
     expect(cfg().questions.length).toBe(1)
   })
 
-  it('locks every control for a disabled card', () => {
-    setup({ ...emptyKindConfig(), enabled: true, questions: [q('a')] }, true)
-    expect(el().querySelector('fieldset')?.disabled).toBeTrue()
-    expect((el().querySelector('[data-testid="kind-enabled-event"]') as HTMLInputElement).disabled).toBeTrue()
+  it('a card that cannot be edited: every control says why and none of them acts (plan 747)', async () => {
+    setup({ ...emptyKindConfig(), enabled: true, questions: [q('a'), q('b')] }, 'owner only')
+    const controls = Array.from(el().querySelectorAll<HTMLElement>('input, button'))
+    expect(controls.length).toBeGreaterThan(10)
+    expect(controls.every((c) => c.getAttribute('aria-disabled') === 'true')).toBeTrue()
+    const before = cfg()
+    ;(el().querySelector('[data-testid="kind-enabled-event"]') as HTMLInputElement).click()
+    ;(el().querySelector('[data-testid="remove-question"]') as HTMLButtonElement).click()
+    addBtn().click()
+    await fixture.whenStable()
+    expect(cfg()).toEqual(before)
+    expect((el().querySelector('.rk-question input[type="text"]') as HTMLInputElement).readOnly).toBeTrue()
   })
 })

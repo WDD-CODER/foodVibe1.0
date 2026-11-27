@@ -1,4 +1,5 @@
 <div class="diag-menu" dir="rtl">
+  @let lockWhy = locked() ? ('diag_done_locked' | translatePipe) : null;
   @if (locked()) {
     <p class="diag-menu__locked" role="status" data-testid="diag-locked">{{ 'diag_done_locked' | translatePipe }}</p>
   }
@@ -8,7 +9,7 @@
       <input
         type="checkbox"
         data-testid="diag-vat-switch"
-        [disabled]="locked()"
+        [appDisabledWhy]="lockWhy"
         [checked]="pricesIncludeVat_()"
         (change)="setVat($any($event.target).checked)"
       />
@@ -21,7 +22,7 @@
           [value]="vatPct_()"
           [min]="0"
           [max]="100"
-          [disabled]="locked()"
+          [disabledWhy]="lockWhy"
           (valueChange)="setVatPct($event)"
         />
       </div>
@@ -48,7 +49,8 @@
         type="button"
         class="c-btn-primary"
         data-testid="diag-menu-read"
-        [disabled]="!text_().trim() || isReading_()"
+        [disabled]="isReading_()"
+        [appDisabledWhy]="!text_().trim() ? ('why_diag_paste_menu_first' | translatePipe) : null"
         (click)="read()"
       >
         @if (isReading_()) {
@@ -70,7 +72,7 @@
           class="c-input"
           maxlength="200"
           data-testid="diag-menu-name"
-          [disabled]="locked()"
+          [appDisabledWhy]="lockWhy"
           [attr.aria-label]="'diag_col_dish' | translatePipe"
           [ngModel]="row.name"
           (ngModelChange)="updateRow(row.id, { name: $event })"
@@ -84,7 +86,7 @@
             step="any"
             appSelectOnFocus
             data-testid="diag-menu-price"
-            [disabled]="locked()"
+            [appDisabledWhy]="lockWhy"
             [attr.aria-label]="'diag_col_sell_price' | translatePipe"
             [ngModel]="row.sellPrice"
             (ngModelChange)="setPrice(row.id, $event)"
@@ -143,7 +145,8 @@
           type="button"
           class="c-btn-primary"
           data-testid="diag-menu-save"
-          [disabled]="!canSave_()"
+          [disabled]="isSaving_()"
+          [appDisabledWhy]="saveWhy_() ? (saveWhy_()! | translatePipe) : null"
           (click)="save()"
         >
           <lucide-icon name="check" [size]="16" />

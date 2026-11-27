@@ -1,26 +1,83 @@
-// Plan 350 — shared horizontal scroll strip.
+// Plans 350 + 743 + 747 — the one sideways row: arrow, framed container, arrow, grab-and-drag.
+// The arrows sit outside the container; the container is as wide as its items (and never wider than the room).
+// The frame's box values are the top bar's (written once, here).
 :host {
-  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
 
   min-inline-size: 0;
 
   --sr-arrow-size: 1.75rem;
-  --sr-arrow-room: max(
-    0px,
-    calc(var(--sr-arrow-size) + var(--rail-arrow-gap, 0.25rem) - var(--rail-arrow-offset, 0px))
-  );
 }
 
-// Overflowing rail: keep one arrow's width free on both sides so no chip sits under an arrow.
-:host(.is-overflowing) {
-  padding-inline: var(--sr-arrow-room);
+.sr-frame {
+  position: relative;
+  flex: 0 1 auto;
+
+  inline-size: fit-content;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+// The sign of more inside the container (plan 747 round two): a fade and a small chevron laid over an edge
+// while that side has more and no outside arrow button says so. The look of .c-scroll-arrow, turned sideways.
+.sr-more {
+  position: absolute;
+  z-index: 1;
+  inset-block: 0;
+  display: flex;
+  align-items: center;
+
+  inline-size: 2rem;
+
+  color: var(--color-text-muted);
+
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition:
+    opacity var(--dur-base) var(--ease-smooth),
+    visibility 0s linear var(--dur-base);
+
+  &.is-shown {
+    visibility: visible;
+    opacity: 0.8;
+    transition:
+      opacity var(--dur-base) var(--ease-smooth),
+      visibility 0s;
+  }
+}
+
+.sr-more--prev {
+  inset-inline-start: 0;
+  justify-content: flex-start;
+
+  background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+.sr-more--next {
+  inset-inline-end: 0;
+  justify-content: flex-end;
+
+  background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+.sr-frame.has-frame {
+  padding: 0.25rem;
+
+  background: var(--bg-chrome);
+  border: 1px solid var(--border-chrome);
+  box-shadow: inset 0 1px 0 var(--border-glass-strong);
+  backdrop-filter: var(--blur-glass);
 }
 
 .sr-scroller {
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
   justify-content: var(--rail-justify, safe center);
   gap: var(--rail-gap, 0.5rem);
@@ -33,22 +90,6 @@
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-
-  // Fade only the edge(s) that can scroll (widths set from the component, physical sides).
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--sr-fade-left, 0px),
-    #000 calc(100% - var(--sr-fade-right, 0px)),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--sr-fade-left, 0px),
-    #000 calc(100% - var(--sr-fade-right, 0px)),
-    transparent 100%
-  );
 
   &::-webkit-scrollbar {
     display: none;
@@ -68,60 +109,54 @@
   }
 }
 
-.sr-arrow {
-  position: absolute;
-  z-index: 2;
-  inset-block-start: 50%;
+// A row that can be dragged shows a hand; while it is dragged it grabs and does not snap.
+:host(.is-overflowing) .sr-scroller {
+  cursor: grab;
+}
 
-  display: grid;
+:host(.is-dragging) .sr-scroller {
+  cursor: grabbing;
+  user-select: none;
+  scroll-snap-type: none;
+}
+
+// Arrows: small round buttons beside the container (outside it). They take room only while the row
+// overflows; an arrow whose side has no more keeps its room but is invisible and cannot be focused.
+.sr-arrow {
+  display: none;
+  flex: 0 0 auto;
   place-content: center;
 
   inline-size: var(--sr-arrow-size);
   block-size: var(--sr-arrow-size);
   padding: 0;
 
-  color: var(--color-text-main);
+  color: var(--color-text-muted);
   background: var(--bg-glass-strong);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-card);
-  backdrop-filter: var(--blur-glass);
   cursor: pointer;
 
-  transform: translateY(-50%);
-  transition:
-    opacity 0.15s ease,
-    visibility 0s linear 0s;
+  transition: opacity var(--dur-base) var(--ease-smooth);
 
-  &:hover {
-    background: var(--bg-glass-hover);
+  &.is-hidden {
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
   }
 
   &:focus-visible {
     outline: 2px solid var(--border-focus);
     outline-offset: 2px;
   }
-
-  // Hidden with visibility, so nothing shifts when an arrow appears.
-  &.is-hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition:
-      opacity 0.15s ease,
-      visibility 0s linear 0.15s;
-  }
 }
 
-.sr-arrow--prev {
-  inset-inline-start: calc(-1 * var(--rail-arrow-offset, 0px));
+:host(.is-overflowing) .sr-arrow {
+  display: grid;
 }
 
-.sr-arrow--next {
-  inset-inline-end: calc(-1 * var(--rail-arrow-offset, 0px));
-}
-
-// The app is RTL; swap the chevrons for an LTR context.
+// The app is RTL; swap the chevrons and gradients for an LTR context.
 .sr-icon-ltr {
   display: none;
 }
@@ -133,6 +168,14 @@
 
   .sr-icon-ltr {
     display: inline-flex;
+  }
+
+  .sr-more--prev {
+    background: linear-gradient(to right, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  .sr-more--next {
+    background: linear-gradient(to left, var(--bg-glass-strong) 0%, transparent 100%);
   }
 }
 
@@ -146,7 +189,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sr-arrow,
-  .sr-arrow.is-hidden {
+  .sr-more,
+  .sr-more.is-shown {
     transition: none;
   }
 }

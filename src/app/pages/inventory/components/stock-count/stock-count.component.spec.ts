@@ -116,6 +116,15 @@ describe('StockCountComponent', () => {
     fixture.detectChanges()
   }
 
+  /**
+   * Waits two frames. The shared tooltip closes on any scroll, and opening it makes `whenStable` wait for a frame:
+   * a scroll event the test page still owes (another spec left the window scrolled, and this spec's own page changed
+   * its height) is sent in that frame and closes the tooltip the moment it opens. Let it go before the click.
+   */
+  async function pendingScrollSent(): Promise<void> {
+    for (let i = 0; i < 2; i++) await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  }
+
   it('marks a row counted when its amount changes and counts it in the header', async () => {
     await setup()
     expect(chipOf(rows()[0]).checked).toBeFalse()
@@ -239,7 +248,8 @@ describe('StockCountComponent', () => {
       expect(choice.querySelectorAll('.c-chip--toggle').length).toBeGreaterThanOrEqual(2)
       expect(choice.querySelector('[data-testid="stk-unit-add"]')).not.toBeNull()
       expect(chipOf(rows()[0]).checked).toBeFalse()
-      expect(chipOf(rows()[0]).disabled).toBeTrue()
+      // The counted mark says why it is blocked (the chip's input, or the row checkbox on a narrow screen).
+      expect(rows()[0].querySelector('.stock-count__counted [aria-disabled="true"]')).not.toBeNull()
       choice.querySelector<HTMLInputElement>('input[value="ארגז"]')!.click()
       await settle()
       expect(el().querySelector('[data-testid="stk-unit-choice"]')).toBeNull()
@@ -397,7 +407,7 @@ describe('StockCountComponent', () => {
       expect(listed.length).toBe(2)
       expect(listed[0].textContent).toContain('stk_count_status_draft')
       expect(listed[1].textContent).toContain('stk_count_status_final')
-      expect(listed[1].disabled).toBeTrue()
+      expect(listed[1].getAttribute('aria-disabled')).toBe('true')
       listed[0].click()
       await settle()
       expect(btn('stk-tab-sheet').classList).toContain('active')
@@ -483,10 +493,13 @@ describe('StockCountComponent', () => {
 
   it('disables finalise while no row is counted', async () => {
     await setup()
-    expect(btn('stk-finalize').disabled).toBeTrue()
+    expect(btn('stk-finalize').getAttribute('aria-disabled')).toBe('true')
+    btn('stk-finalize').click()
+    await settle()
+    expect(service.finalize).not.toHaveBeenCalled()
     comp().setAmount(product('a', 'אורז'), 1)
     await settle()
-    expect(btn('stk-finalize').disabled).toBeFalse()
+    expect(btn('stk-finalize').getAttribute('aria-disabled')).toBeNull()
   })
 
   it('finalises: saves, closes, empties the sheet and switches to below minimum', async () => {
@@ -794,7 +807,10 @@ describe('StockCountComponent', () => {
     const emit = (answer: Partial<StockExtractResponse>): void => {
       child().extracted.emit({ answer: { draftId: null, lines: [], unmatched: [], ...answer }, source: 'text' })
     }
-    const openBase = async (width: 'phone' | 'tablet' | 'desktop', rect?: Partial<DOMRect>): Promise<HTMLElement> => {
+    const tip = (): HTMLElement | null => document.body.querySelector<HTMLElement>('.c-tooltip')
+    afterEach(() => document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove()))
+    /** Plan 747: the base hint is the shared tooltip; a click on its control pins it open. */
+    const openBase = async (width: 'phone' | 'tablet' | 'desktop'): Promise<HTMLElement> => {
       narrowMode = width !== 'desktop'
       await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
       instance().phone_.set(width === 'phone')
@@ -802,11 +818,9 @@ describe('StockCountComponent', () => {
       instance().setAmount(withCrates('a', 'עגבניות'), 2)
       instance().setUnit(withCrates('a', 'עגבניות'), 'crate')
       await settle()
+      await pendingScrollSent()
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
-      if (rect) spyOn(control, 'getBoundingClientRect').and.returnValue({ width: 24, left: 100, ...rect } as DOMRect)
-      if (width === 'phone') control.click()
-      else control.dispatchEvent(new MouseEvent('mouseenter'))
-      await settle()
+      control.click()
       await settle()
       return control
     }
@@ -842,68 +856,29 @@ describe('StockCountComponent', () => {
     it('(b) the base amount shows the unit name', async () => {
       unitNames = { gram: 'גרם', kg: 'קילו' }
       await openBase('tablet')
-      expect(q('stk-base-pop')!.textContent).toMatch(/20\s*קילו/)
+      expect(tip()!.textContent).toMatch(/20\s*קילו/)
     })
 
     for (const width of ['phone', 'tablet', 'desktop'] as const) {
-      it(`(c) at ${width} width the base amount opens the same popover (tap on phone, hover above), below its control, with no modal shell`, async () => {
+      it(`(c) at ${width} width the base amount is the shared tooltip of the info button (none at desktop)`, async () => {
         // Below desktop the control is the info button; at desktop the column is printed and the control is absent.
         if (width === 'desktop') {
           await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
           expect(rows()[0].querySelector('[data-testid="stk-base-btn"]')).toBeNull()
           return
         }
-        const control = await openBase(width, { top: 100, bottom: 124 })
-        const pop = q('stk-base-pop')!
-        expect(pop.textContent).toContain('20')
+        const control = await openBase(width)
+        expect(tip()!.textContent).toContain('20')
+        expect(tip()!.getAttribute('role')).toBe('tooltip')
+        expect(control.getAttribute('aria-describedby')).toBe(tip()!.id)
         expect(fixture.debugElement.query(By.css('app-modal-shell'))).toBeNull()
-        expect(pop.style.visibility).toBe('visible')
-        expect(control.isConnected).toBeTrue()
-        const box = pop.getBoundingClientRect()
-        expect(box.top).toBeGreaterThanOrEqual(124)
-        expect(box.right).toBeLessThanOrEqual(document.documentElement.clientWidth)
-        expect(box.width).toBeLessThan(document.documentElement.clientWidth)
       })
     }
 
-    it('(659a) in an RTL page the box has right auto and its left is the placed value', async () => {
-      const host = document.documentElement
-      const before = host.getAttribute('dir')
-      host.setAttribute('dir', 'rtl')
-      try {
-        await openBase('tablet', { top: 100, bottom: 124 })
-        const pop = q('stk-base-pop')!
-        // A used `right` is never "auto" for a placed box, so prove the inset is cleared by where the box lands:
-        // its left edge is the placed left, not the right edge of the page.
-        const cs = getComputedStyle(pop)
-        expect(pop.style.left).toMatch(/px$/)
-        expect(cs.left).toBe(pop.style.left)
-        expect(parseFloat(cs.right)).toBeCloseTo(
-          document.documentElement.clientWidth - parseFloat(cs.left) - parseFloat(cs.width),
-          0
-        )
-      } finally {
-        if (before === null) host.removeAttribute('dir')
-        else host.setAttribute('dir', before)
-      }
-    })
-
-    it('(659b) at tablet and desktop width hover and focus open the box, leave and blur close it, a click does not toggle', async () => {
-      await openBase('tablet')
-      const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
-      expect(q('stk-base-pop')).not.toBeNull()
-      control.dispatchEvent(new MouseEvent('mouseleave'))
-      await settle()
-      expect(q('stk-base-pop')).toBeNull()
-      control.dispatchEvent(new FocusEvent('focus'))
-      await settle()
-      expect(q('stk-base-pop')).not.toBeNull()
-      control.dispatchEvent(new FocusEvent('blur'))
-      await settle()
-      expect(q('stk-base-pop')).toBeNull()
-      control.click()
-      await settle()
-      expect(q('stk-base-pop')).toBeNull()
+    it('(747) a row with no base amount has no info button', async () => {
+      narrowMode = true
+      await setup([product('b', 'קמח')])
+      expect(rows()[0].querySelector('[data-testid="stk-base-btn"]')).toBeNull()
     })
 
     it('(659d) the control has no title attribute, its aria-label stays', async () => {
@@ -911,40 +886,6 @@ describe('StockCountComponent', () => {
       const control = rows()[0].querySelector<HTMLButtonElement>('[data-testid="stk-base-btn"]')!
       expect(control.hasAttribute('title')).toBeFalse()
       expect(control.getAttribute('aria-label')).toContain('stk_base_amount')
-    })
-
-    it('(c) it opens above the control when there is no room below', async () => {
-      const bottomEdge = document.documentElement.clientHeight
-      await openBase('phone', { top: bottomEdge - 40, bottom: bottomEdge - 16 })
-      const pop = q('stk-base-pop')!
-      const box = pop.getBoundingClientRect()
-      expect(box.bottom).toBeLessThanOrEqual(bottomEdge - 40)
-    })
-
-    it('(d) a tap outside closes it; a scroll closes it; a second tap on the control closes it', async () => {
-      const control = await openBase('phone')
-      document.body.click()
-      await settle()
-      expect(q('stk-base-pop')).toBeNull()
-      control.click()
-      await settle()
-      expect(q('stk-base-pop')).not.toBeNull()
-      document.dispatchEvent(new Event('scroll'))
-      await settle()
-      expect(q('stk-base-pop')).toBeNull()
-      control.click()
-      await settle()
-      expect(q('stk-base-pop')).not.toBeNull()
-      control.click()
-      await settle()
-      expect(q('stk-base-pop')).toBeNull()
-    })
-
-    it('(d) a tap inside the popover keeps it open', async () => {
-      await openBase('phone')
-      q('stk-base-pop')!.click()
-      await settle()
-      expect(q('stk-base-pop')).not.toBeNull()
     })
 
     it('the counted checkbox box size comes from --row-checkbox-size on its cell', async () => {
@@ -970,7 +911,6 @@ describe('StockCountComponent', () => {
       fixture.componentInstance as unknown as {
         setAmount(p: Product, n: number): void
         setUnit(p: Product, u: string): void
-        basePopover_(): { text: string } | null
       }
     const emit = (unmatched: NonNullable<StockExtractResponse['unmatched']>): void => {
       child().extracted.emit({ answer: { draftId: null, lines: [], unmatched }, source: 'text' })
@@ -1018,7 +958,7 @@ describe('StockCountComponent', () => {
       expect(chipOf(rows()[0]).checked).toBeTrue()
     })
 
-    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and hover opens a popover', async () => {
+    it('(c) below 1200px the base amount is not printed; its control has the label and no title, and a click opens the tooltip', async () => {
       narrowMode = true
       await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
       instance().setAmount(withCrates('a', 'עגבניות'), 2)
@@ -1030,13 +970,28 @@ describe('StockCountComponent', () => {
       expect(control.hasAttribute('title')).toBeFalse()
       expect(control.getAttribute('aria-label')).toContain('stk_base_amount')
       expect(control.getAttribute('aria-label')).toContain('20')
-      expect(q('stk-base-pop')).toBeNull()
-      control.dispatchEvent(new MouseEvent('mouseenter'))
+      expect(document.body.querySelector('.c-tooltip')).toBeNull()
+      await pendingScrollSent()
+      control.click()
       await settle()
-      expect(q('stk-base-pop')!.textContent).toContain('20')
-      const box = q('stk-base-pop')!.getBoundingClientRect()
-      expect(box.left).toBeGreaterThanOrEqual(0)
-      expect(box.right).toBeLessThanOrEqual(window.innerWidth)
+      const box = document.body.querySelector<HTMLElement>('.c-tooltip')!
+      expect(box.textContent).toContain('20')
+      const rect = box.getBoundingClientRect()
+      expect(rect.left).toBeGreaterThanOrEqual(0)
+      expect(rect.right).toBeLessThanOrEqual(window.innerWidth)
+      box.remove()
+    })
+
+    it('(c2) below 1200px every row has the fixed slot beside the unit, with or without the "i" button (plan 747)', async () => {
+      narrowMode = true
+      await setup([withCrates('a', 'עגבניות'), product('b', 'קמח')])
+      instance().setAmount(withCrates('a', 'עגבניות'), 2)
+      instance().setUnit(withCrates('a', 'עגבניות'), 'ארגז')
+      await settle()
+      const slots = rows().map((row) => row.querySelector<HTMLElement>('[data-testid="stk-base-slot"]'))
+      expect(slots.every((slot) => slot !== null)).toBeTrue()
+      expect(slots.filter((slot) => slot?.querySelector('[data-testid="stk-base-btn"]')).length).toBe(1)
+      expect(new Set(slots.map((slot) => Math.round(slot!.getBoundingClientRect().width))).size).toBe(1)
     })
 
     it('(d) at 1200px and above the row is as today: the counted chip and the base column, no base control', async () => {

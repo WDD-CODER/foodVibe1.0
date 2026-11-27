@@ -62,7 +62,7 @@
     <lucide-icon name="menu" size="24"></lucide-icon>
   </button>
 
-  <div class="nav-pills">
+  <app-scroll-rail class="nav-pills" snap="none">
     @for (link of navLinks_(); track link.path) {
       <a class="nav-pill" [routerLink]="link.path" routerLinkActive="active" (click)="closeMobileMenu()">
         {{ link.key | translatePipe }}
@@ -74,7 +74,7 @@
         <lucide-icon [name]="link.icon" size="16"></lucide-icon>
       </a>
     }
-  </div>
+  </app-scroll-rail>
 
   <!-- Opposite end from the user chip — matches the design's header layout
        (brand mark on the far side from the avatar, nav pills centered between). -->
@@ -162,6 +162,7 @@
               </button>
             }
           }
+          <app-notification-bell variant="menu" (picked)="isMobileAvatarOpen.set(false)" />
           @if (isOwner_()) {
             <a class="profile-menu__item" role="menuitem" routerLink="/settings" (click)="toggleMobileAvatar()">
               <lucide-icon name="sliders-vertical" size="16"></lucide-icon>

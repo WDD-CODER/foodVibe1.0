@@ -9,11 +9,20 @@
     <!-- <div class="col-actions">{{ 'actions' | translatePipe }}</div> -->
   </div>
 
-  <div class="ingredients-grid-body" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
-    @for (group of ingredientGroups; track $index) {
-      <div [formGroup]="group" class="ingredient-grid-row" cdkDrag>
-        <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-        <div class="col-drag" cdkDragHandle>
+  <div class="ingredients-grid-body c-drag-list" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
+    @for (group of ingredientGroups; track group) {
+      <div [formGroup]="group" class="ingredient-grid-row c-drag-item" cdkDrag cdkDragPreviewClass="is-lifted">
+        <div
+          class="col-drag c-drag-handle"
+          cdkDragHandle
+          appReorderKeys
+          [reorderIndex]="$index"
+          [reorderCount]="ingredientGroups.length"
+          [reorderKey]="$index"
+          (reorder)="onReorderIngredient($index, $event)"
+          [attr.aria-label]="'drag_reorder_hint' | translatePipe"
+          [attr.title]="'drag_reorder_hint' | translatePipe"
+        >
           <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
         </div>
 
@@ -139,7 +148,7 @@
               type="button"
               class="qty-btn minus"
               tabindex="-1"
-              [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
+              [appDisabledWhy]="(group.get('amount_net')?.value ?? 0) <= 0 ? ('why_at_min' | translatePipe) : null"
               appStepHold
               (stepHold)="decrementAmount(group, $index, $event)"
               [stepHoldStop]="(group.get('amount_net')?.value ?? 0) <= 0"
@@ -188,6 +197,7 @@
               [product]="getProductForGroup(group)"
               [value]="group.get('supplierId')?.value ?? null"
               [canEdit]="canPickSupplier_()"
+              [disabledWhy]="canPickSupplier_() ? null : ('money_locked_hint' | translatePipe)"
               (picked)="onSupplierPicked(group, $event)"
             />
           }

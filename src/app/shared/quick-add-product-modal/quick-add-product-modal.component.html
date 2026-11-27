@@ -38,7 +38,8 @@
                   type="button"
                   class="c-icon-btn"
                   (click)="onAiFill()"
-                  [disabled]="!name().trim() || isAiLoading_()"
+                  [disabled]="isAiLoading_()"
+                  [appDisabledWhy]="!name().trim() ? ('why_shared_name_first' | translatePipe) : null"
                 >
                   @if (isAiLoading_()) {
                     <app-loader size="small" [inline]="true" />

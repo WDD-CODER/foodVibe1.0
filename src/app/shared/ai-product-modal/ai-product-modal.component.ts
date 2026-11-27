@@ -22,6 +22,7 @@ import {
 } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
@@ -55,7 +56,8 @@ const CANONICAL_UNITS = [
     TranslatePipe,
     LoaderComponent,
     ModalShellComponent,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    DisabledWhyDirective
   ],
   templateUrl: './ai-product-modal.component.html',
   styleUrl: './ai-product-modal.component.scss',
@@ -119,6 +121,11 @@ export class AiProductModalComponent implements OnInit {
   protected readonly canGenerate_ = computed(() =>
     this.inputMode_() === 'image' ? !!this.imageFile_() : !!this.prompt_().trim()
   )
+  /** Why the create button cannot be used (a translation key), or null when it can. */
+  protected readonly generateWhy_ = computed<string | null>(() => {
+    if (this.canGenerate_()) return null
+    return this.inputMode_() === 'image' ? 'why_ai_photo_first' : 'why_write_first'
+  })
 
   protected readonly diffEntries_ = computed(() => {
     const patch = this.patch_()

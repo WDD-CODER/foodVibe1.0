@@ -133,7 +133,7 @@ describe('PrepSheetsComponent', () => {
     expect(printSpy).toHaveBeenCalledTimes(1)
     el().querySelector<HTMLInputElement>('.prep-choose-item input')?.click()
     fixture.detectChanges()
-    expect(print.disabled).toBeTrue()
+    expect(print.getAttribute('aria-disabled')).toBe('true')
   })
 
   it('adds the body class and one @page rule per printed group with the footer text, and removes both on destroy', () => {

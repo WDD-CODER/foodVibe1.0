@@ -13,6 +13,7 @@ import {
 } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { formatDateDigits, isoToDmy, parseDmy } from 'src/app/core/utils/date-input.util'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 const FULL_LENGTH = 10
 
@@ -26,7 +27,7 @@ const FULL_LENGTH = 10
 @Component({
   selector: 'app-date-field',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, DisabledWhyDirective],
   templateUrl: './date-field.component.html',
   styleUrl: './date-field.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,6 +41,8 @@ export class DateFieldComponent {
   /** Translation key of the aria-label for the text input (use when there is no visible label). */
   readonly ariaLabelKey = input<string | null>(null)
   readonly disabled = input<boolean>(false)
+  /** Why the date cannot be changed (translated). With a reason the field is blocked and says why (plan 747). */
+  readonly disabledWhy = input<string | null>(null)
   /** `outline` gives the text input the bordered look of the dropdowns (filter rows); `filled` is the default grey box. */
   readonly variant = input<'filled' | 'outline'>('filled')
   /** Fires when the user finishes: leaves the field with an empty or real date, or picks a day. Not on every key. */
@@ -83,7 +86,7 @@ export class DateFieldComponent {
 
   /** Desktop: a click on the field opens the browser's picker; typing still works. Touch is handled by the overlay. */
   protected onTextClick(): void {
-    if (this.coarse_() || this.disabled()) return
+    if (this.coarse_() || this.disabled() || this.disabledWhy()) return
     const el = this.picker().nativeElement
     if (typeof el.showPicker !== 'function') return
     try {

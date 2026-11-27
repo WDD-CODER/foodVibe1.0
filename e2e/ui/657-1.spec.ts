@@ -12,10 +12,9 @@ test('657-1: the base amount opens lightly on a phone and a scroll closes it', a
   const control = page.locator('[data-testid="stk-base-btn"]').first()
   if ((await control.count()) === 0) test.skip(true, 'no row with a base amount in this data')
   await control.click()
-  const light = page.locator('app-modal-shell [data-testid="stk-base-light"]')
+  // Plan 747: the hint is the shared tooltip; a tap shows it and a scroll hides it.
+  const light = page.locator('.c-tooltip')
   await expect(light).toBeVisible()
-  const overlay = page.locator('.c-modal-overlay--light')
-  expect(await overlay.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('none')
   await page.screenshot({ path: 'screens/657-1-light-375.png' })
 
   await page.mouse.wheel(0, 300)

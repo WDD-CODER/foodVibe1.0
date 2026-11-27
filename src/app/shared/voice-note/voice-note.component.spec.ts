@@ -109,6 +109,28 @@ describe('VoiceNoteComponent', () => {
     expect(el.querySelectorAll('button').length).toBe(1)
   })
 
+  it('with nothing recorded or written the send button says why, and works once there is text (plan 747)', () => {
+    create(false)
+    const send = el.querySelector<HTMLButtonElement>('.voice-note-send')!
+    expect(send.disabled).toBeFalse()
+    expect(send.getAttribute('aria-disabled')).toBe('true')
+    click('.voice-note-send')
+    expect(sent).toEqual([])
+    expect(document.body.querySelector('.c-tooltip')?.textContent?.trim()).toBe('why_voice_note_empty')
+    type('hello')
+    expect(send.hasAttribute('aria-disabled')).toBeFalse()
+    expect(document.body.querySelector('.c-tooltip')).toBeNull()
+  })
+
+  it('while the caller is busy the empty send button is natively disabled, with no reason', () => {
+    create(false)
+    fixture.componentRef.setInput('busy', true)
+    fixture.detectChanges()
+    const send = el.querySelector<HTMLButtonElement>('.voice-note-send')!
+    expect(send.disabled).toBeTrue()
+    expect(send.hasAttribute('aria-disabled')).toBeFalse()
+  })
+
   it('emits typed text as source text with no file id', () => {
     create(false)
     type('  hello  ')

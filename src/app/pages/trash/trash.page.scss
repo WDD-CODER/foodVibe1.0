@@ -207,11 +207,6 @@
   z-index: 1000;
 }
 
-.history-overlay-panel {
-  max-height: 90dvh;
-  overflow: auto;
-}
-
 @media (max-width: $break-phone-max) {
   .trash-page {
     padding: 1rem;

@@ -12,8 +12,8 @@
     min-inline-size: 0;
   }
 
-  /* Plan 467: the pills sit in the shared scroll rail (edge fade + arrows). The row is as wide as its pills and
-     at least as wide as the rail, so on desktop «לא נסגר» keeps its place at the far end. */
+  /* Plans 467, 747: the stages are the app's chips (`c-chip--tab`, the metadata row's look) in the shared scroll
+     rail (container, arrows outside). The group is as wide as its chips; «לא נסגר» is the red chip at the end. */
   .stage-row {
     display: flex;
     align-items: center;
@@ -22,76 +22,17 @@
     flex: 0 0 auto;
 
     inline-size: max-content;
-    min-inline-size: 100%;
-    padding-block: var(--space-1);
-
-    /* The wrapper is wider than the rail: only the pills are snap targets, like the metadata chips. */
     scroll-snap-align: none;
-  }
-}
 
-/* Plan 479: the pills are <button>s. Outside the layer so they beat the unlayered button reset in src/styles.scss
-   (unlayered rules win over every @layer rule), same as .header-btn there. */
-.stage-pill {
-  flex: 0 0 auto;
-  scroll-snap-align: center;
-
-  min-block-size: 2.25rem;
-  padding-inline: var(--space-4);
-
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-full);
-
-  background: transparent;
-  color: var(--color-primary-hover);
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-medium);
-  white-space: nowrap;
-  cursor: pointer;
-
-  transition: background var(--ease-smooth);
-
-  &:hover:not(.is-locked) {
-    background: var(--color-primary-soft);
-  }
-
-  &.is-current {
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-  }
-
-  &.is-past {
-    background: var(--color-primary-soft);
-  }
-
-  &.is-locked {
-    border-color: var(--border-strong);
-
-    color: var(--color-text-muted);
-    cursor: default;
-
-    &.is-current {
-      border-color: var(--color-primary);
-
-      background: var(--color-primary);
-      color: var(--color-text-on-primary);
-    }
-  }
-
-  &.stage-pill--danger {
-    margin-inline-start: auto;
-
-    border-color: var(--color-danger);
-
-    color: var(--color-danger);
-
-    &.is-current {
-      background: var(--color-danger);
-      color: var(--color-text-on-primary);
+    /* Only the chips are snap targets, like the metadata chips. */
+    > button {
+      scroll-snap-align: center;
     }
 
-    &:hover:not(.is-locked) {
-      background: var(--bg-danger-subtle);
+    /* A locked stage keeps its click (it says why) but reads as unavailable. */
+    > button.is-locked:not(.active) {
+      opacity: 0.6;
+      cursor: default;
     }
   }
 }

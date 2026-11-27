@@ -30,9 +30,33 @@ export function withApiAuth(request, apiOrigin, token) {
   return request
 }
 
+/**
+ * Answers the app's session refresh on the page itself. The sweep installs its read-only guard on the context after
+ * this sign-in, and the newest context route runs first: the guard aborts the refresh POST before seedQaContext's
+ * stand-in answer is reached, the app then clears the session and every page is measured as /welcome (plan 739).
+ * A page route runs before any context route, so the refresh is answered here and the guard still blocks every
+ * other write.
+ */
+function answerRefreshOnPages(context, session, appOrigin) {
+  const headers = {
+    'access-control-allow-origin': appOrigin,
+    'access-control-allow-credentials': 'true',
+    'access-control-allow-headers': 'content-type, authorization',
+    'access-control-allow-methods': 'POST, OPTIONS'
+  }
+  const answer = (route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers })
+    return route.fulfill({ status: 200, headers, contentType: 'application/json', body: JSON.stringify({ token: session.token }) })
+  }
+  const attach = (page) => page.route('**/api/v1/auth/refresh', answer)
+  for (const page of context.pages()) void attach(page)
+  context.on('page', (page) => void attach(page))
+}
+
 export async function signIn(context, { appOrigin, apiOrigin }) {
   pending ??= login(apiOrigin)
   const session = await pending
   await seedQaContext(context, session, appOrigin)
+  answerRefreshOnPages(context, session, appOrigin)
   withApiAuth(context.request, apiOrigin, session.token)
 }

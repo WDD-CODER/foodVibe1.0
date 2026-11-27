@@ -159,11 +159,36 @@ describe('FrontdeskSettingsPage (plan 553)', () => {
     expect(data.save).not.toHaveBeenCalled()
   })
 
-  it('a staff member sees every control disabled and no save button', async () => {
+  it('a staff member sees every control locked with its reason and no save button (plan 747)', async () => {
     await setup(profile(), false)
     expect(el().querySelector('[data-testid="save"]')).toBeNull()
     expect(el().querySelector('[data-testid="owner-only"]')).not.toBeNull()
-    expect(el().querySelector('fieldset.fs-fieldset')?.hasAttribute('disabled')).toBeTrue()
+    const group = el().querySelector('fieldset.fs-fieldset') as HTMLElement
+    // Every control outside the hours editor says why itself; the editor is inert inside a wrapper that says why.
+    const controls = Array.from(group.querySelectorAll<HTMLElement>('input, textarea, button')).filter(
+      (c) => !c.closest('app-hours-editor')
+    )
+    expect(controls.length).toBeGreaterThan(10)
+    const open = controls.filter(
+      (c) => c.getAttribute('aria-disabled') !== 'true' && !(c as HTMLButtonElement).disabled
+    )
+    expect(open.map((c) => c.outerHTML.slice(0, 80))).toEqual([])
+    const hours = group.querySelector('app-hours-editor') as HTMLElement
+    expect(hours.hasAttribute('inert')).toBeTrue()
+    expect(hours.parentElement?.getAttribute('aria-disabled')).toBe('true')
+    const name = group.querySelector('#fd-name') as HTMLInputElement
+    expect(name.readOnly).toBeTrue()
+    expect(cmp().hasRealChanges()).toBeFalse()
+    ;(group.querySelector('.c-chip--toggle input[type="checkbox"]') as HTMLInputElement).click()
+    fixture.detectChanges()
+    expect(cmp().hasRealChanges()).toBeFalse()
+  })
+
+  it('the owner sees no locked control', async () => {
+    await setup(profile())
+    expect(el().querySelector('#fd-name')?.getAttribute('aria-disabled')).toBeNull()
+    expect(el().querySelector('[data-testid="copy-link"]')?.getAttribute('aria-disabled')).toBeNull()
+    expect(el().querySelector('app-hours-editor')?.hasAttribute('inert')).toBeFalse()
   })
 
   it('a staff member without a profile sees the empty state', async () => {

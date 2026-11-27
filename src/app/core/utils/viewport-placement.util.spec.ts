@@ -43,6 +43,15 @@ describe('placeInViewport', () => {
     expect(r.left).toBe(400 - 8 - 200)
   })
 
+  it('a panel wider than half the viewport stays whole at either edge (plan 747)', () => {
+    const wide = { width: 260, height: 60 }
+    const atLeft = placeInViewport({ anchor: anchorAt(400, 0), panel: wide, viewport })
+    expect(atLeft.left).toBe(8)
+    const atRight = placeInViewport({ anchor: anchorAt(400, 385), panel: wide, viewport })
+    expect(atRight.left + wide.width).toBeLessThanOrEqual(400 - 8)
+    expect(atRight.left).toBeGreaterThanOrEqual(8)
+  })
+
   it('clamps to the top and bottom edges', () => {
     const top = placeInViewport({
       anchor: anchorAt(0, 190),

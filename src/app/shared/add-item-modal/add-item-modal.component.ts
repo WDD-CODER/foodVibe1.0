@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-add-item-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, ModalShellComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, ModalShellComponent, DisabledWhyDirective],
   templateUrl: './add-item-modal.component.html',
   styleUrl: './add-item-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

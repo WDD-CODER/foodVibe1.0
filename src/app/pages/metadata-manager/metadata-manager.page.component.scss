@@ -25,23 +25,11 @@
 
       display: block;
       margin-block-end: 1.5rem;
-      padding: 0.375rem 0.25rem;
-
-      background: var(--bg-glass-strong);
-      border: 1px solid var(--border-default);
-      border-radius: var(--radius-full);
-      backdrop-filter: var(--blur-glass);
-      -webkit-backdrop-filter: var(--blur-glass);
     }
 
+    // The container (frame, arrows, drag) is the shared sideways row (plan 743).
     .mm-jump-nav {
       --rail-gap: 0.375rem;
-      --rail-arrow-offset: 2.25rem;
-
-      // No room outside the bar on a small phone: the arrows sit inside it (no sideways scroll).
-      @media (max-width: $break-phone-max) {
-        --rail-arrow-offset: 0;
-      }
     }
 
     // A jumped-to section stops below the app header, the sticky chip bar and a small gap.

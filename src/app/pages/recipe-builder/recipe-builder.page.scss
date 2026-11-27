@@ -370,12 +370,17 @@
     cursor: pointer;
     transition: filter 0.2s ease;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled):not([aria-disabled='true']) {
       filter: brightness(1.08);
     }
 
     &:disabled {
       opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // Blocked with a reason (appDisabledWhy): the dimmed look comes from the global .is-disabled.
+    &[aria-disabled='true'] {
       cursor: not-allowed;
     }
   }

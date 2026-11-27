@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, effect, input, output, signal, viewChild, ElementRef } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-paste-ingredients-dialog',
   standalone: true,
-  imports: [TranslatePipe, TextareaAutoGrowDirective],
+  imports: [TranslatePipe, TextareaAutoGrowDirective, DisabledWhyDirective],
   templateUrl: './paste-ingredients-dialog.component.html',
   styleUrl: './paste-ingredients-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

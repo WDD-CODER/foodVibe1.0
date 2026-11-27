@@ -4178,6 +4178,17 @@
       "notes": "Plan 656 (default one-breakpoint-set): the three copies of the breakpoint names stay equal; no typed width in any @media or .ts file."
     },
     {
+      "path": "scripts/test/disabled-why-scss.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "src/styles.scss",
+        "src/app/shared/tooltip/disabled-why.directive.ts"
+      ],
+      "notes": "Plan 758 (default disabled-explains-why): a stylesheet that styles a control carrying appDisabledWhy gives the blocked state the same look as :disabled."
+    },
+    {
       "path": "scripts/test/plan-close.test.mjs",
       "tier": "project",
       "action": "stay",
@@ -4684,6 +4695,14 @@
       "tier": "project",
       "action": "stay",
       "notes": "FoodVibe planning checks (kit paths.planChecks) that /plan's Architect + PM review adds; the FoodVibe-only lines of the PRD/HLD templates moved here at the kit 1.2.0 sync."
+    },
+    {
+      "path": "docs/agent/house-style.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe house rules (plan 739): page recipes and behaviour rules every page is built to. Project-owned content; the mechanism moves to the kit with plan 741."
     },
     {
       "params": [],

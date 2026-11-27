@@ -4,7 +4,9 @@ import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import type { Invoice } from '@schemas/entities'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { InvoiceDataService } from '@services/invoice-data.service'
@@ -22,7 +24,15 @@ function newestFirst(a: Invoice, b: Invoice): number {
 @Component({
   selector: 'app-invoices-list',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, EmptyStateComponent, ListShellComponent, LoaderComponent],
+  imports: [
+    DatePipe,
+    LucideAngularModule,
+    TranslatePipe,
+    EmptyStateComponent,
+    ListShellComponent,
+    LoaderComponent,
+    ...COLUMN_CAROUSEL
+  ],
   templateUrl: './invoices-list.component.html',
   styleUrl: './invoices-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,9 +47,24 @@ export class InvoicesListComponent implements OnInit {
   protected readonly isLoading_ = signal(true)
   protected readonly isOwner_ = computed(() => this.permission_.can('editMoney', { type: 'products' }))
   protected readonly invoices_ = computed(() => [...this.data_.allInvoices_()].sort(newestFirst))
-  protected readonly gridTemplate_ = computed(() =>
-    this.isOwner_() ? '1.6fr 1fr 1fr 0.7fr 1fr 1.2fr' : '1.6fr 1fr 1fr 1fr'
-  )
+  /**
+   * Declared columns (plans 746, 747): file → saved at → lines count → invoice number → date; only the supplier
+   * stays (there is no actions column).
+   */
+  protected readonly columns_ = computed<readonly ListColumn[]>(() => {
+    const head: ListColumn[] = [
+      { id: 'supplier', track: '1.6fr', min: '9rem', phoneMin: '7rem', stay: true },
+      { id: 'date', track: '1fr', min: '7rem' },
+      { id: 'number', track: '1fr', min: '7rem', fall: 4 }
+    ]
+    if (!this.isOwner_()) return [...head, { id: 'saved', track: '1fr', min: '7rem', fall: 2 }]
+    return [
+      ...head,
+      { id: 'lines', track: '0.7fr', min: '4.5rem', fall: 3 },
+      { id: 'saved', track: '1fr', min: '7rem', fall: 2 },
+      { id: 'file', track: '1.2fr', min: '7rem', fall: 1 }
+    ]
+  })
 
   async ngOnInit(): Promise<void> {
     // An apply writes on the server, so a list cached from an earlier visit is stale.

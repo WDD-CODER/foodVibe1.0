@@ -4,11 +4,12 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { FormFieldComponent } from '../form-field/form-field.component'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { DisabledWhyDirective } from '../tooltip/disabled-why.directive'
 
 @Component({
   selector: 'app-confirm-modal',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, ModalShellComponent, FormFieldComponent],
+  imports: [CommonModule, TranslatePipe, ModalShellComponent, FormFieldComponent, DisabledWhyDirective],
   templateUrl: './confirm-modal.component.html',
   styleUrl: './confirm-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

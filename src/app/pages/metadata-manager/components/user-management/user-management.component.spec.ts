@@ -155,7 +155,10 @@ describe('UserManagementComponent', () => {
     const buttons = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.c-icon-btn.danger')
     )
-    expect(buttons.map((b) => b.disabled)).toEqual([true, false, false])
+    expect(buttons.map((b) => b.getAttribute('aria-disabled'))).toEqual(['true', null, null])
+    buttons[0].click()
+    expect(confirm.open).not.toHaveBeenCalled()
+    document.body.querySelectorAll('.c-tooltip').forEach((n) => n.remove())
   })
 
   // Plan 468 - the trash icon sits under the email, inside the card, never over it.

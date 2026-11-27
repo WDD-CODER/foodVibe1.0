@@ -184,6 +184,9 @@ Sharper = more technical. Rounder = more approachable. Mix within this scale onl
 |---|---|---|
 | `--ease-spring` | `cubic-bezier(0.22,1,0.36,1)` | Transforms, hover lifts |
 | `--ease-smooth` | `cubic-bezier(0.4,0,0.2,1)` | Color, opacity transitions |
+| `--dur-fast` | `0.15s` | Hover, press, colour |
+| `--dur-base` | `0.2s` | Fades, small moves |
+| `--dur-slow` | `0.25s` | Panels, lifts, drag settle |
 
 - Micro-interactions: 150–200ms
 - Component transitions: 250ms
@@ -197,7 +200,7 @@ Sharper = more technical. Rounder = more approachable. Mix within this scale onl
 
 **Tablet (768–1023px):** Same top bar, tighter padding, no hamburger.
 
-**Mobile (≤620px):** Minimal top bar (auth only) + fixed bottom tab bar `height: 3.5rem`. Bottom bar: `--bg-glass-strong` + `--blur-glass` + `--border-glass` top edge. Active tab: teal text + `translateY(-1px)` on icon.
+**Phone (≤767px, the shared phone breakpoint):** Minimal top bar (auth only) + fixed bottom tab bar `height: 3.5rem`. Bottom bar: `--bg-glass-strong` + `--blur-glass` + `--border-glass` top edge. Active tab: teal text + `translateY(-1px)` on icon.
 
 RTL-aware: `margin-inline-start: auto` for auth section pushes correctly in RTL.
 
@@ -216,10 +219,15 @@ Pre-built surface + behavior combos. Use these before writing one-off styles.
 | `.c-input` | Form input (see cssLayer skill) |
 | `.c-input-wrapper` | Input container with icon slot |
 | `.c-select` | Custom select trigger |
+| `app-scroll-rail` | The sideways row container (family `sideways-row`): one visible frame (the top bar's box), edge arrows like `.c-scroll-arrow` turned sideways, grab and drag; arrows are signs only on a phone |
 | `.c-modal-*` | Modal surface classes |
 | `.c-dropdown` | Dropdown panel |
 | `.c-chip` | Pill chip |
 | `.c-table-wrap` | Table container |
+| `.c-drag-list` / `.c-drag-item` / `.c-drag-handle` | Drag to reorder: the drop list, the lifted row (shadow, accent border, gap that settles) and the grip |
+| `.c-scroll-area` | A block that scrolls with no scrollbar (used by `app-scroll-area`) |
+| `.c-tooltip` | The shared tooltip box of `[appTooltip]` (family `tooltip`): small text, glass surface, 5px arrow, `--below` flips the arrow |
+| `.c-scroll-arrow` | The "more to scroll" arrow, `--top` / `--bottom` (shown while there is more) |
 
 Full engine source: `src/styles.scss`. New patterns must extend these — no divergent one-off surfaces.
 
@@ -286,3 +294,5 @@ Chosen by the Human on 2026-11-11 from the design canvas ("ליטוש 2 · עו�
 - A status is a white tag with a dot (a colour chip on a `span`); colour never carries meaning alone. Pressable chips keep their own look.
 - Spacing only from the `--space-*` scale.
 - The dark kitchen theme and the paper tokens are untouched.
+
+- Lists show as many columns as fit their measured width; the rest fall one by one into one switching (carousel) column, in the order each list sets, name protected first (plan 745, `[columns]` on `app-list-shell`).

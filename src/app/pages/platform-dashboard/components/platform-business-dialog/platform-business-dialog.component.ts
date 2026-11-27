@@ -18,6 +18,7 @@ import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.comp
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { LucideAngularModule } from 'lucide-angular'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { BusinessService } from '@services/business.service'
@@ -72,7 +73,8 @@ export function describePlatformChange(change: PlatformChange, translate: (key: 
     NumberBoxDirective,
     LoaderComponent,
     EmptyStateComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    DisabledWhyDirective
   ],
   templateUrl: './platform-business-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush

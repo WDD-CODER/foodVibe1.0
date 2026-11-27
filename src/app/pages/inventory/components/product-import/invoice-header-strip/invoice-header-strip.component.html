@@ -9,6 +9,7 @@
         placeholder="import_no_supplier"
         [typeToFilter]="true"
         [disabled]="disabled()"
+        [disabledWhy]="disabledWhy()"
         data-testid="invoice-supplier"
       />
     </app-form-field>
@@ -19,6 +20,7 @@
         [value]="invoiceDate()"
         (valueChange)="invoiceDate.set($event)"
         [disabled]="disabled()"
+        [disabledWhy]="disabledWhy()"
         data-testid="invoice-date"
       />
     </app-form-field>
@@ -31,6 +33,7 @@
         dir="auto"
         data-testid="invoice-number"
         [disabled]="disabled()"
+        [appDisabledWhy]="disabledWhy()"
         [ngModel]="invoiceNumber()"
         (ngModelChange)="invoiceNumber.set($event)"
       />

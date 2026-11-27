@@ -25,6 +25,44 @@
   border-radius: var(--radius-full);
 }
 
+// Plan 747: the bell as one entry of the phone's profile menu — a full-width row with its count inline; the panel
+// opens above the menu (the bottom bar is below it).
+.bell--menu {
+  display: flex;
+
+  .bell__menu-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    inline-size: 100%;
+    padding: var(--space-2);
+
+    color: var(--color-text-main);
+    font-family: inherit;
+    font-size: var(--fs-xs);
+
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-align: start;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+    }
+  }
+
+  .bell__count {
+    position: static;
+    margin-inline-start: auto;
+  }
+
+  .bell__panel {
+    top: auto;
+    inset-block-end: calc(100% + 0.5rem);
+  }
+}
+
 .bell__panel {
   position: absolute;
   top: calc(100% + 0.5rem);

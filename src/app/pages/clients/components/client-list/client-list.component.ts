@@ -10,11 +10,13 @@ import { UserMsgService } from '@services/user-msg.service'
 import { CLIENT_KINDS, CLIENT_LIFECYCLES, RESERVED_CLIENT_TAGS, type Client } from '@models/client.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import type { ListColumn } from 'src/app/shared/list-shell/list-columns.util'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { ClientFormComponent } from 'src/app/shared/client-form/client-form.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { StringParam, StringSetParam, useListState } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
@@ -25,8 +27,6 @@ import { clientLifecycle } from '../../client-lifecycle.util'
 type ClientSort = 'last_contact' | 'name'
 type ClientTone = 'amber' | 'red' | null
 
-const OWNER_GRID = 'minmax(8rem, 1.6fr) minmax(7rem, 1fr) 1.2fr 1.4fr minmax(5rem, 0.8fr) 0.6fr 0.6fr'
-const STAFF_GRID = 'minmax(8rem, 1.6fr) minmax(7rem, 1fr) 1.2fr 1.6fr'
 const RESERVED_TAGS: readonly string[] = RESERVED_CLIENT_TAGS
 
 /** Plan 547: the Front Desk client list — search, kind/tag/lifecycle filters, sort, owner-only add. */
@@ -44,7 +44,8 @@ const RESERVED_TAGS: readonly string[] = RESERVED_CLIENT_TAGS
     EmptyStateComponent,
     ModalShellComponent,
     ClientFormComponent,
-    InputClearComponent
+    InputClearComponent,
+    TooltipDirective
   ],
   templateUrl: './client-list.component.html',
   styleUrl: './client-list.component.scss',
@@ -75,7 +76,22 @@ export class ClientListComponent {
   /** The moment the list was opened; the lifecycle is worked out against it. */
   private readonly now_ = Date.now()
 
-  protected readonly gridTemplate_ = computed(() => (this.isOwner_() ? OWNER_GRID : STAFF_GRID))
+  /** Declared columns (plan 746): the two counts → tags → kinds → last contact → phone; the owner sees all. */
+  protected readonly columns = computed<readonly ListColumn[]>(() => {
+    const shared: ListColumn[] = [
+      { id: 'name', track: 'minmax(8rem, 1.6fr)', min: '10rem', phoneMin: '7rem', stay: true },
+      { id: 'phone', track: '1fr', min: '9rem', fall: 6 },
+      { id: 'kinds', track: '1.2fr', min: '7rem', fall: 4 },
+      { id: 'tags', track: '1.4fr', min: '7rem', fall: 3 }
+    ]
+    if (!this.isOwner_()) return shared
+    return [
+      ...shared,
+      { id: 'last', track: '0.8fr', min: '7rem', fall: 5 },
+      { id: 'events', track: '0.6fr', min: '4.5rem', fall: 2 },
+      { id: 'requests', track: '0.6fr', min: '4.5rem', fall: 1 }
+    ]
+  })
 
   constructor() {
     const panel = useResponsivePanelState('clients')
@@ -171,6 +187,15 @@ export class ClientListComponent {
   protected tagLabel(tag: string): string {
     if (!RESERVED_TAGS.includes(tag)) return tag
     return this.translation.translate('client_tag_' + tag) || tag
+  }
+
+  /** The full text of a chip cell, for its tooltip (the cell shows one line). */
+  protected kindsTip(item: Client): string {
+    return (item.kinds ?? []).map((kind) => this.translation.translate('client_kind_' + kind)).join(', ')
+  }
+
+  protected tagsTip(item: Client): string {
+    return (item.tags ?? []).map((tag) => this.tagLabel(tag)).join(', ')
   }
 
   protected tagTone(tag: string): ClientTone {

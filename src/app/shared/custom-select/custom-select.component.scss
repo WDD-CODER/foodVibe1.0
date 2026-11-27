@@ -37,9 +37,12 @@
   border-radius: var(--radius-md);
 
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
-  &:hover:not(:disabled) {
+  // The typeahead variant's blocked control is the inner input, so the wrapper checks for it too.
+  &:hover:not(:disabled):not([aria-disabled='true']):not(:has(> [aria-disabled='true'])) {
     border-color: var(--border-strong);
   }
 
@@ -47,6 +50,12 @@
     outline: none;
     border-color: var(--border-focus);
     box-shadow: var(--shadow-focus);
+  }
+
+  // Blocked with a reason (appDisabledWhy): the dimmed look comes from the global .is-disabled.
+  &[aria-disabled='true'],
+  &:has(> [aria-disabled='true']) {
+    cursor: not-allowed;
   }
 
   &:disabled {

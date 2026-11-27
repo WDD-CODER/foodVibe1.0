@@ -31,8 +31,8 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - how: src/app/core/guards/pending-changes.guard.ts (canDeactivate in app.routes.ts; the entity-form family)
 - check: card
 - card: the form's page · change one field, then follow a link out of the page · a question asks whether to leave or stay
-- check: files: **/*.component.ts; trigger: \b(?:FormGroup|FormBuilder|FormControl|NgForm|ngModel)\b; evidence: {stem}[\s\S]{0,300}canDeactivate\s*:; in: src/app/app.routes.ts
-- exceptions: a read-only form, a search box or a filter bar; declare `exception — why: <one line>`
+- check: files: **/*.component.ts; trigger: \b(?:FormGroup|FormBuilder|FormControl|NgForm|ngModel)\b; evidence: {stem}[\s\S]{0,300}canDeactivate\s*:; in: src/app/app.routes.ts; exclude: src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/components/recipe-workflow/**
+- exceptions: a read-only form, a search box or a filter bar; declare `exception — why: <one line>`. A part of a page whose route already has the guard (the recipe builder's ingredients table and steps: the page asks, not its parts) is listed in the rule's `exclude` (Human, 2026-11-25, plan 742).
 - turned on: the Human, 2026-11-22
 
 ### activity-log-on-write
@@ -84,11 +84,11 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - rule: An explanation of a control in a dialog shows as a hover tooltip on that control (a title plus an accessible description), not as text on the modal.
 - applies when: custom
 - plan words: \b(hint|tooltip|explanation|explain)s?\b|רמז|הסבר
-- how: native [attr.title] plus [attr.aria-label] or aria-describedby on the control, as the history button of platform-business-dialog does (plan 638); no new tooltip piece
+- how: the shared tooltip [appTooltip] (src/app/shared/tooltip/, family tooltip) on the control, with an aria-label on the control when it has no visible name; never the browser title
 - check: card
 - card: a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal
 - exceptions: (say where it does not apply)
-- turned on: the Human, 2026-11-19
+- turned on: the Human, 2026-11-19; reworded: the Human, 2026-11-25 (plan 744)
 
 ### unit-dropdown-add
 
@@ -146,3 +146,82 @@ Each default is one `### <id>` section with these fields, one `- field: value` l
 - card: any page with a small floating box · open it on a row near the top and on a row near the bottom of the screen · it is as wide as its text, sits right above or below the row, and is never cut off
 - exceptions: (say where it does not apply)
 - turned on: the Human, 2026-11-22
+
+### disabled-explains-why
+
+- status: on
+- rule: A button or control that cannot be used shows, on hover and on tap, a tooltip that says why.
+- applies when: custom
+- plan words: \b(?:disabled|locked|read-only|cannot be (?:pressed|used|edited)|greyed out)\b
+- how: the appDisabledWhy directive (src/app/shared/tooltip/, family tooltip), which keeps the control reachable, blocks its action and shows the reason in the shared tooltip; never a bare disabled attribute when a reason exists
+- check: card
+- card: any page with a disabled button · hover it, or tap it on a phone · a tooltip says why it cannot be used
+- exceptions: a control disabled only while its own action is running (saving, loading); declare `exception — why: <one line>`
+- turned on: the Human, 2026-11-26
+
+### house-keyboard-focus
+
+- status: proposed
+- rule: Every control shows the same ring when reached with the keyboard; Escape always goes one step back, Enter confirms, and when a popup closes the focus returns to what opened it.
+- applies when: custom
+- plan words: \b(?:popups?|dialogs?|modals?|keyboard|escape|shortcuts?|focus trap|focus ring)\b
+- how: the one `:where(…):focus-visible` ring in src/styles.scss (`outline: 2px solid var(--border-focus)`, fields `--shadow-focus`); family modal-shell (app-modal-shell owns Escape, the Tab trap and the return of focus); src/app/core/utils/list-controls.util.ts for search fields; app-row-actions-menu closes on Escape
+- check: card
+- card: any page · press Tab through the buttons, open a popup and press Escape · every control shows the same ring, Escape closes only the popup, and the focus is back on the button that opened it
+- exceptions: (say where it does not apply)
+
+### house-column-carousel
+
+- status: proposed
+- rule: A list shows as many columns as fit its measured width; as space runs short they fall one by one (two the first time) into one carousel column the user switches, in the order the list sets (from the end by default); only the name and the actions always stay, so on a phone a list shows the name, one switching column and the actions; a one-line cell is never narrower than its content (its column falls first); a row never wraps and the list never scrolls sideways.
+- applies when: custom
+- plan words: \b(?:list columns?|table columns?|column carousel|list-shell|list container|list page)\b
+- how: family list-page — the list declares its columns (ListColumn) and passes them as [columns] to app-list-shell; fitColumns() decides what fits; *appFallColumn inside app-column-carousel-header and app-column-carousel-cell (src/app/shared/column-carousel/)
+- check: card
+- card: any list with many columns, narrowing the window slowly · the columns fall one by one into the switching column in the list's order, a cell is never cut (the column falls before that), on a phone you see the name, one switching column and the actions, press its arrow and every row shows the next piece of information, no row wraps and nothing scrolls sideways
+- exceptions: a list that is not drawn as a table (cards layout); declare `exception — why: <one line>`
+
+### house-sideways-row
+
+- status: proposed
+- rule: A row of chips, tabs or buttons that is wider than the screen sits in one visible container, as wide as its items, that scrolls sideways; on a computer a round arrow button sits outside the container at each end while there is more (none on a phone, where a fade and swiping do the job).
+- applies when: custom
+- plan words: \b(?:filter chips?|tab chips?|chip row|row of chips|tab row|tabs row|stage bar|jump navigation|nav(?:igation)? pills?|scroll(?:s|ing)? sideways|horizontal scroll)\b
+- how: family sideways-row — app-scroll-rail (src/app/shared/scroll-rail/): the visible frame (frame="box") sized to its items, round arrow buttons outside it (not rendered on a phone), grab and drag with the mouse, snap, arrows, step; the top bar, app-tab-chips, the settings tabs, the stage bar and the metadata jump navigation use it
+- check: card
+- card: any page with a row of chips or tabs, on a computer · look at the row and press its arrow · the row sits in a visible rounded container as wide as its chips, a round arrow shows outside it at the end that has more, and pressing it moves the row one step
+- exceptions: a data table that is wider than the screen; declare `exception — why: <one line>`
+
+### house-tooltip
+
+- status: proposed
+- rule: Every short explanation that appears when a control is hovered, focused or tapped shows in the app's one tooltip box: the same surface, text size and arrow, opening beside the control on the side with room and never cut off by the screen on either side; with a mouse it opens on hover, on a touch screen a tap shows it and a tap elsewhere hides it.
+- applies when: custom
+- plan words: \b(hint|tooltip|explanation|explain|what is this)s?\b|רמז|הסבר
+- how: the shared tooltip [appTooltip] (src/app/shared/tooltip/, family tooltip), placed by placeInViewport (src/app/core/utils/viewport-placement.util.ts) as src/app/shared/nutrition-badge/ does; a new hint uses it, never the browser title
+- check: card
+- card: any page with an icon button or an explained control · hover it with the mouse (near the screen's edges too), then reach it with Tab · the same tooltip box appears beside it both times, fully inside the screen; on a touch screen a tap shows it
+- exceptions: the product nutrition box (src/app/shared/nutrition-badge/) keeps the look it already has; declare `exception — why: <one line>`
+
+### row-action-icons
+
+- status: on
+- rule: Every edit, remove and delete action in a list row or card uses the app's shared icon buttons (pencil to edit, trash to remove or delete), never a text button.
+- applies when: list
+- how: src/styles.scss .c-icon-btn with the Lucide icons pencil / trash-2 (danger tone for remove), inside src/app/shared/row-actions-menu/ (app-row-actions-menu) where the row already uses a row menu - as on the products list
+- check: card
+- card: any list page with row actions · look at a row's edit and remove actions · they are the pencil and trash icon buttons used on the products list, with no text buttons
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-26
+
+### live-summary
+
+- status: on
+- rule: A summary or totals box on a screen where the user types numbers recalculates live from what is typed, before saving; saving only keeps the data.
+- applies when: custom
+- plan words: \b(summary|totals?|figures|סיכום|תמונת)\b
+- how: a computed() over the page's draft signals (not the saved record) fed to the summary component — the pattern plan 749 adds as liveMonthOf(open_, draft_) in src/app/pages/monthly-plan/month-draft.ts
+- check: card
+- card: a screen with a summary box · change one typed number without saving · the summary box shows the new result at once
+- exceptions: (say where it does not apply)
+- turned on: the Human, 2026-11-26

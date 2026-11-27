@@ -1,0 +1,9 @@
+<div class="c-scroll-area scroll-area" appScrollIndicators [style.max-block-size]="maxBlockSize() || null">
+  <ng-content></ng-content>
+</div>
+<div class="c-scroll-arrow c-scroll-arrow--top scroll-arrow scroll-arrow--top" aria-hidden="true">
+  <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+</div>
+<div class="c-scroll-arrow c-scroll-arrow--bottom scroll-arrow scroll-arrow--bottom" aria-hidden="true">
+  <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+</div>

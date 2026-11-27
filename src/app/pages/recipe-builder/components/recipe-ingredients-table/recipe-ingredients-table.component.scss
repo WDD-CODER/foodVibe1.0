@@ -11,39 +11,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 .col-drag {
-  cursor: grab;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-muted);
-  &:active {
-    cursor: grabbing;
-  }
-}
-
-.cdk-drag-preview {
-  box-shadow: var(--shadow-card);
-  background: var(--bg-glass-strong);
-  border: 1px solid var(--border-accent);
-  border-radius: var(--radius-md);
-  opacity: 0.95;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 0.75rem;
-  box-sizing: border-box;
-}
-
-.cdk-drag-placeholder {
-  opacity: 0;
-}
-
-.cdk-drag-animating {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.ingredients-grid-body.cdk-drop-list-dragging .ingredient-grid-row:not(.cdk-drag-placeholder) {
-  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 .ingredients-grid-header,
@@ -153,12 +123,20 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
       border-color 0.2s ease;
 
     &:hover:not(:disabled) {
-      background: var(--bg-glass-hover);
-      border-color: var(--border-strong);
+      background: var(--qty-btn-hover-bg, var(--bg-glass-hover));
+      border-color: var(--qty-btn-hover-border, var(--border-strong));
     }
 
     &:disabled {
       opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    // Blocked with a reason (appDisabledWhy): dimmed by the global .is-disabled, and the hover keeps the resting look.
+    &[aria-disabled='true'] {
+      --qty-btn-hover-bg: var(--bg-glass);
+      --qty-btn-hover-border: var(--border-default);
+
       cursor: not-allowed;
     }
   }

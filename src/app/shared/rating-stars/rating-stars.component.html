@@ -12,9 +12,10 @@
       [class.rating-stars__star--full]="star.full"
       [class.rating-stars__star--half]="star.half"
       [class.rating-stars__star--empty]="star.empty"
-      [class.rating-stars__star--interactive]="!readonly()"
-      [disabled]="readonly()"
-      [attr.aria-label]="(star.index + 1) + ' star'"
+      [class.rating-stars__star--interactive]="!readonly() && !disabledWhy()"
+      [disabled]="readonly() && !disabledWhy()"
+      [appDisabledWhy]="disabledWhy()"
+      [attr.aria-label]="star.index + 1 + ' star'"
       (click)="onStarClick(star.index)"
       (mouseenter)="onStarHover(star.index)"
     >

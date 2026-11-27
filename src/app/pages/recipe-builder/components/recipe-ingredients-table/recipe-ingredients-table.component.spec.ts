@@ -63,6 +63,26 @@ describe('RecipeIngredientsTableComponent', () => {
     expect(count()).toBe(1)
   })
 
+  it('the down arrow on the first row grip moves it to the second place (plan 742)', () => {
+    const arr = component.ingredientsFormArray()
+    arr.at(0).patchValue({ nameHebrew: 'first', referenceId: 'r1' })
+    arr.push(
+      fb.group({
+        amount_net: [0],
+        nameHebrew: ['second'],
+        referenceId: ['r2'],
+        item_type_: ['product'],
+        unit: ['gram'],
+        priceOverride: [null]
+      })
+    )
+    fixture.detectChanges()
+    const grip = fixture.nativeElement.querySelector('.ingredient-grid-row .col-drag') as HTMLElement
+    grip.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }))
+    expect(arr.at(0).get('nameHebrew')?.value).toBe('second')
+    expect(arr.at(1).get('nameHebrew')?.value).toBe('first')
+  })
+
   it('Enter inside the unit picker asks for the next row instead of picking a unit (plan 511)', () => {
     let added = 0
     component.addIngredient.subscribe(() => added++)

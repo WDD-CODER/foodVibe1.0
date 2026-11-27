@@ -1169,6 +1169,15 @@ textarea.c-input {
   }
 }
 
+/* Measured columns (plan 745): the cells of a carousel host are one level down at every width, the
+   switching cell included. */
+.c-list-row.is-selected > .column-carousel--measured > .c-list-body-cell {
+  background: color-mix(in srgb, var(--color-primary) 14%, white);
+  box-shadow:
+    inset 0 2px 0 var(--mark-line),
+    inset 0 -2px 0 var(--mark-line);
+}
+
 /* ---- Engine: Pagination controls (plan 304 M3) — row-count reduction for large
    .c-list-row/.c-list-body-cell grids where cdk-virtual-scroll's item wrapper would
    break the flat display:contents column layout. Spans the full table-body grid. ---- */
@@ -2878,4 +2887,254 @@ input[type='number']::-webkit-outer-spin-button {
 /* Plan 645: a confirm message that lists items (one per line, joined by a line break) keeps its lines. */
 .confirm-modal-message {
   white-space: pre-line;
+}
+
+/* ── Drag & drop — shared look (plan 742) ──
+   .c-drag-list on the cdkDropList, .c-drag-item on the cdkDrag row, .c-drag-handle on the cdkDragHandle.
+   The CDK moves the lifted preview to <body>, so its look must be a global rule keyed on .c-drag-item.
+   The lifted row's own layout (display, gap, padding) stays in each component on its row class. */
+.c-drag-list.cdk-drop-list-dragging .c-drag-item:not(.cdk-drag-placeholder) {
+  transition: transform var(--dur-slow) var(--ease-smooth);
+}
+
+.c-drag-item.cdk-drag-preview {
+  box-sizing: border-box;
+
+  cursor: grabbing;
+
+  background: var(--bg-glass-strong);
+
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md);
+
+  box-shadow: var(--shadow-card);
+  opacity: 0.95;
+}
+
+.c-drag-item.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.c-drag-item.cdk-drag-animating {
+  transition: transform var(--dur-slow) var(--ease-smooth);
+}
+
+/* The lifted row is moved to <body>, where a layout that depends on its list (a nested selector, a subgrid) is
+   gone: a row whose cdkDrag sets cdkDragPreviewClass="is-lifted" is laid out here as one flex row. */
+.c-drag-item.is-lifted {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  padding: 0.625rem 0.75rem;
+}
+
+.c-drag-handle {
+  display: grid;
+  place-content: center;
+
+  cursor: grab;
+  touch-action: none;
+
+  color: var(--color-text-muted);
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* ── Scroll area — shared look (plan 742) ──
+   Used by app-scroll-area: a block that scrolls with no scrollbar and shows an arrow while there is more. */
+.c-scroll-area {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* The user of this engine sets `opacity: 0.8` when its scroll area can scroll in that direction. */
+.c-scroll-arrow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-block-size: 1.5rem;
+
+  color: var(--color-text-muted);
+
+  padding-block: 0.2rem;
+
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-smooth);
+}
+
+.c-scroll-arrow--top {
+  align-self: start;
+
+  background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+.c-scroll-arrow--bottom {
+  align-self: end;
+
+  background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+}
+
+/* ── Keyboard focus ring (plan 742) ──
+   One ring for every control reached with the keyboard. :where() keeps specificity at zero, so a component
+   rule that styles its own focus still wins. Fields are not listed: they keep --shadow-focus. */
+:where(
+    button,
+    a[href],
+    summary,
+    [role='button'],
+    [role='tab'],
+    [role='menuitem'],
+    [role='option'],
+    [tabindex]:not([tabindex='-1'])
+  ):focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* ── Tooltip — shared look (plan 744) ──
+   The box of the appTooltip directive (src/app/shared/tooltip/). It lives in the browser top layer
+   (popover), appended to <body>, so its look is global. `left` is physical on purpose: --tip-arrow-x is a
+   geometric distance from the box's left edge. */
+.c-tooltip {
+  position: fixed;
+  inset: auto;
+  inline-size: max-content;
+  max-inline-size: min(20rem, calc(100vw - 1rem));
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  overflow: visible;
+
+  color: var(--color-text-main);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  // A line break in the text stays a line break; long text wraps inside max-inline-size.
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+
+  background: var(--bg-glass-dense);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: var(--tip-arrow-x, 50%);
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--border-default);
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    top: calc(100% - 1px);
+    left: var(--tip-arrow-x, 50%);
+    z-index: 1;
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--bg-glass-dense);
+  }
+}
+
+.c-tooltip--below {
+  &::after {
+    top: auto;
+    bottom: 100%;
+
+    border-top-color: transparent;
+    border-bottom-color: var(--border-default);
+  }
+  &::before {
+    top: auto;
+    bottom: calc(100% - 1px);
+
+    border-top-color: transparent;
+    border-bottom-color: var(--bg-glass-dense);
+  }
+}
+
+/* List container (plan 747): a checkbox column dropped for lack of room has no grid track, so its cells go too. */
+.fit-no-select .col-select {
+  display: none;
+}
+
+/* ── A control that cannot be used and says why (plan 747, default disabled-explains-why) ──
+   Set by the appDisabledWhy directive (src/app/shared/tooltip/) together with aria-disabled="true". The control
+   is not natively disabled (it must stay reachable to show its reason), so the native :disabled look of the
+   button engines is repeated here: the same values as .c-btn-primary:disabled and .c-icon-btn:disabled. */
+.is-disabled {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+}
+
+.c-btn-primary.is-disabled,
+.c-btn-ghost.is-disabled {
+  transform: none;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: none;
+    }
+  }
+
+  &:active {
+    transform: none;
+  }
+}
+
+.c-btn-ghost.is-disabled {
+  @media (hover: hover) {
+    &:hover {
+      background: var(--bg-glass-dense);
+    }
+  }
+}
+
+.c-icon-btn.is-disabled {
+  filter: saturate(0);
+  opacity: 0.3;
+
+  @media (hover: hover) {
+    &:hover {
+      color: var(--color-text-muted);
+
+      background: transparent;
+      transform: none;
+      opacity: 0.3;
+    }
+  }
+}
+
+/* A toggle chip whose hidden checkbox / radio is blocked with a reason (plan 747 G6): the class sits on the
+   input, the user sees the label — so the chip itself takes the look of `.c-chip--toggle:has(> input:disabled)`
+   and keeps its resting colours on hover. */
+.c-chip--toggle:has(> input.is-disabled) {
+  cursor: not-allowed;
+
+  opacity: 0.5;
+
+  &:not(:has(> input:checked), .is-on):hover {
+    color: var(--color-text-secondary);
+
+    background: var(--bg-glass);
+
+    border-color: var(--border-default);
+  }
 }

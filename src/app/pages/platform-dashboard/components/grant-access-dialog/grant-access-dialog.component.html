@@ -25,7 +25,8 @@
       type="button"
       class="c-btn-primary"
       data-testid="grant-save"
-      [disabled]="!canSave_()"
+      [disabled]="isSaving_()"
+      [appDisabledWhy]="!username_().trim() ? ('why_platform_username_first' | translatePipe) : null"
       [attr.aria-busy]="isSaving_()"
       (click)="save()"
     >

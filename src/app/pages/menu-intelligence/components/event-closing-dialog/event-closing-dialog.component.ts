@@ -3,6 +3,7 @@ import { firstValueFrom } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
 import { BusinessService } from '@services/business.service'
 import { CloudinaryService } from '@services/cloudinary.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -45,7 +46,14 @@ export interface ClosingRowView {
 @Component({
   selector: 'app-event-closing-dialog',
   standalone: true,
-  imports: [NumberBoxDirective, LucideAngularModule, TranslatePipe, CustomSelectComponent, SelectOnFocusDirective],
+  imports: [
+    NumberBoxDirective,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    SelectOnFocusDirective,
+    DisabledWhyDirective
+  ],
   templateUrl: './event-closing-dialog.component.html',
   styleUrl: './event-closing-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,6 +102,11 @@ export class EventClosingDialogComponent {
   })
   protected readonly canMoney_ = computed(() => this.can('editMoney'))
   protected readonly canArrival_ = computed(() => this.can('markArrival'))
+  /** Why the arrival and invoice ticks cannot be changed (a translation key), or null when they can. */
+  protected readonly arrivalWhy_ = computed<string | null>(() => {
+    if (this.locked_()) return 'why_menu_event_finished'
+    return this.canArrival_() ? null : 'no_permission'
+  })
   protected readonly closing_ = computed<EventClosing | null>(() => {
     const snapshot = this.snapshot_()
     return this.draft_() ?? this.event_()?.closing ?? (snapshot ? initClosing(snapshot) : null)

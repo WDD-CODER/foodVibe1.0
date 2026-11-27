@@ -26,7 +26,7 @@
         type="button"
         class="c-btn-ghost c-btn-ghost--sm"
         data-testid="bk-today"
-        [disabled]="isToday_()"
+        [appDisabledWhy]="isToday_() ? ('why_bookings_already_today' | translatePipe) : null"
         (click)="go({ date: today() })"
       >
         {{ 'bk_today' | translatePipe }}

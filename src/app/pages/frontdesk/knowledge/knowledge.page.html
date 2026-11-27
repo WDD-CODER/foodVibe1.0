@@ -56,7 +56,8 @@
         type="button"
         class="c-btn-ghost--sm"
         data-testid="knowledge-approve-selected"
-        [disabled]="selected_().size === 0 || isBusy_()"
+        [disabled]="isBusy_()"
+        [appDisabledWhy]="selected_().size === 0 ? ('why_knowledge_select_first' | translatePipe) : null"
         (click)="approveSelected()"
       >
         <lucide-icon name="check" [size]="16"></lucide-icon>
@@ -66,7 +67,8 @@
         type="button"
         class="c-btn-ghost--sm"
         data-testid="knowledge-approve-all"
-        [disabled]="draftsInView_().length === 0 || isBusy_()"
+        [disabled]="isBusy_()"
+        [appDisabledWhy]="draftsInView_().length === 0 ? ('why_knowledge_no_drafts' | translatePipe) : null"
         (click)="approveAllDrafts()"
       >
         <lucide-icon name="check" [size]="16"></lucide-icon>
@@ -272,7 +274,10 @@
             type="button"
             class="c-btn-primary"
             data-testid="knowledge-import-submit"
-            [disabled]="!canImport()"
+            [disabled]="isImporting_()"
+            [appDisabledWhy]="
+              !isImporting_() && !canImport() ? ('why_knowledge_import_empty' | translatePipe) : null
+            "
             (click)="submitImport()"
           >
             <lucide-icon name="sparkles" [size]="16"></lucide-icon>

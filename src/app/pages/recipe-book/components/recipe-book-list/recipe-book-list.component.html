@@ -2,12 +2,7 @@
   appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="
-    shouldHideDateColumn_()
-      ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto'
-      : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'
-  "
-  [mobileGridTemplate]="'2fr 0.7fr 1.8fr 40px 28px'"
+  [columns]="columns"
   [resultCount]="filteredRecipes_().length"
   [resultTotal]="kitchenState.recipes_().length"
 >
@@ -49,8 +44,7 @@
       type="button"
       class="c-btn-primary"
       (click)="onAddRecipe()"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+      [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'add' | translatePipe }}</span>
@@ -87,21 +81,21 @@
     >
       {{ 'name' | translatePipe }}
     </div>
-    <div
-      class="col-type c-grid-header-cell c-sortable-header"
-      (click)="setSort('type')"
-      (keydown.enter)="setSort('type')"
-      (keydown.space)="$event.preventDefault(); setSort('type')"
-      role="button"
-      tabindex="0"
-    >
-      {{ 'type' | translatePipe }}
-    </div>
     <app-column-carousel-header>
       <div
+        class="col-type c-grid-header-cell c-sortable-header"
+        *appFallColumn="'type'; label: 'type'"
+        (click)="setSort('type')"
+        (keydown.enter)="setSort('type')"
+        (keydown.space)="$event.preventDefault(); setSort('type')"
+        role="button"
+        tabindex="0"
+      >
+        {{ 'type' | translatePipe }}
+      </div>
+      <div
         class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
-        appColumnSlide
-        label="labels"
+        *appFallColumn="'labels'; label: 'labels'"
         (click)="labelsExpand.toggleAll()"
         (keydown.enter)="labelsExpand.toggleAll()"
         (keydown.space)="$event.preventDefault(); labelsExpand.toggleAll()"
@@ -112,8 +106,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col"
-        appColumnSlide
-        label="allergens"
+        *appFallColumn="'allergens'; label: 'allergens'"
         (click)="allergenExpand.toggleAll()"
         (keydown.enter)="allergenExpand.toggleAll()"
         (keydown.space)="$event.preventDefault(); allergenExpand.toggleAll()"
@@ -125,8 +118,7 @@
       @if (!shouldHideDateColumn_()) {
         <div
           class="col-date c-grid-header-cell c-sortable-header"
-          appColumnSlide
-          label="date_added"
+          *appFallColumn="'date'; label: 'date_added'"
           (click)="setSort('dateAdded')"
           (keydown.enter)="setSort('dateAdded')"
           (keydown.space)="$event.preventDefault(); setSort('dateAdded')"
@@ -138,8 +130,7 @@
       }
       <div
         class="col-rating c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="rating"
+        *appFallColumn="'rating'; label: 'rating'"
         (click)="setSort('rating')"
         (keydown.enter)="setSort('rating')"
         (keydown.space)="$event.preventDefault(); setSort('rating')"
@@ -150,8 +141,7 @@
       </div>
       <div
         class="col-cost c-grid-header-cell c-sortable-header"
-        appColumnSlide
-        label="cost"
+        *appFallColumn="'cost'; label: 'cost'"
         (click)="setSort('cost')"
         (keydown.enter)="setSort('cost')"
         (keydown.space)="$event.preventDefault(); setSort('cost')"
@@ -178,7 +168,7 @@
             messageKey="empty_recipe_book"
             icon="book-open"
             ctaLabelKey="add_first_recipe"
-            [ctaDisabled]="!isLoggedIn()"
+            [ctaDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
             (ctaClick)="onAddRecipe()"
           />
         } @else {
@@ -216,11 +206,14 @@
             </button>
           }
         </div>
-        <div class="col-type c-list-body-cell">
-          {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
-        </div>
         <app-column-carousel-cell>
-          <div class="col-labels c-list-body-cell c-dense-chip-col" appColumnSlide [label]="'labels' | translatePipe">
+          <div class="col-type c-list-body-cell cell-nowrap" *appFallColumn="'type'; label: 'type' | translatePipe">
+            {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
+          </div>
+          <div
+            class="col-labels c-list-body-cell c-dense-chip-col"
+            *appFallColumn="'labels'; label: 'labels' | translatePipe"
+          >
             @if (row.labels.length) {
               <div
                 class="labels-btn-wrapper"
@@ -254,8 +247,7 @@
           </div>
           <div
             class="col-allergens c-list-body-cell c-dense-chip-col"
-            appColumnSlide
-            [label]="'allergens' | translatePipe"
+            *appFallColumn="'allergens'; label: 'allergens' | translatePipe"
           >
             @if (row.allergens.length) {
               <div
@@ -282,21 +274,19 @@
           @if (!shouldHideDateColumn_()) {
             <div
               class="col-date c-list-body-cell date-cell-wrap"
-              appColumnSlide
-              [label]="'date_added' | translatePipe"
-              (mouseenter)="tooltips.showDate(row.recipe._id, $event)"
-              (mouseleave)="tooltips.hideDate()"
-              [attr.aria-describedby]="
-                tooltips.dateHoveredId() === row.recipe._id ? 'date-tooltip-' + row.recipe._id : null
-              "
+              *appFallColumn="'date'; label: 'date_added' | translatePipe"
+              [appTooltip]="dateTip"
+              tooltipPlacement="below"
             >
               {{ formatAddedAt(row.recipe.createdAt) }}
+              <ng-template #dateTip
+                >{{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(row.recipe.updatedAt) }}</ng-template
+              >
             </div>
           }
           <div
-            class="col-rating c-list-body-cell"
-            appColumnSlide
-            [label]="'rating' | translatePipe"
+            class="col-rating c-list-body-cell cell-nowrap"
+            *appFallColumn="'rating'; label: 'rating' | translatePipe"
             (click)="$event.stopPropagation()"
           >
             <app-rating-stars
@@ -307,19 +297,16 @@
             />
           </div>
           <div
-            class="col-cost c-list-body-cell cost-cell-wrap"
-            appColumnSlide
-            [label]="'cost' | translatePipe"
-            (mouseenter)="tooltips.showCost(row.recipe._id, $event)"
-            (mouseleave)="tooltips.hideCost()"
-            (click)="tooltips.toggleCostTap(row.recipe._id, $event)"
-            [attr.aria-describedby]="
-              tooltips.costHoveredId() === row.recipe._id || tooltips.costTappedId() === row.recipe._id
-                ? 'cost-tooltip-' + row.recipe._id
-                : null
-            "
+            class="col-cost c-list-body-cell cost-cell-wrap cell-nowrap"
+            *appFallColumn="'cost'; label: 'cost' | translatePipe"
+            [appTooltip]="costTip"
+            [tooltipOnClick]="true"
+            tooltipPlacement="below"
           >
             ₪{{ row.cost | number: '1.2-2' }}
+            <ng-template #costTip
+              >{{ 'price_for' | translatePipe }}&nbsp;{{ getRecipeYieldDescription(row.recipe) }}</ng-template
+            >
           </div>
         </app-column-carousel-cell>
         <app-row-actions-menu class="c-col-actions c-list-body-cell">
@@ -331,7 +318,7 @@
             [attr.aria-label]="
               (isFavoritedByCurrentUser_(row.recipe) ? 'remove_from_favorites' : 'add_to_favorites') | translatePipe
             "
-            [disabled]="!isLoggedIn()"
+            [appDisabledWhy]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
           >
             <lucide-icon name="heart" [size]="18"></lucide-icon>
           </button>
@@ -516,30 +503,3 @@
     </div>
   </ng-container>
 </app-list-shell>
-
-@if (activeCostTooltipRecipe_(); as recipe) {
-  @if (tooltips.costAnchor(); as anchor) {
-    <div
-      class="cost-tooltip cost-tooltip-fixed"
-      [id]="'cost-tooltip-' + recipe._id"
-      (appClickOutside)="tooltips.closeCostTap()"
-      [style.top.px]="anchor.bottom + 4"
-      [style.left.px]="anchor.left + anchor.width / 2"
-    >
-      {{ 'price_for' | translatePipe }}{{ getRecipeYieldDescription(recipe) }}
-    </div>
-  }
-}
-
-@if (activeDateTooltipRecipe_(); as recipe) {
-  @if (tooltips.dateAnchor(); as anchor) {
-    <div
-      class="date-tooltip date-tooltip-fixed"
-      [id]="'date-tooltip-' + recipe._id"
-      [style.top.px]="anchor.bottom + 4"
-      [style.left.px]="anchor.left + anchor.width / 2"
-    >
-      {{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(recipe.updatedAt) }}
-    </div>
-  }
-}
