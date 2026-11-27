@@ -57,6 +57,12 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/test/admin-business-delete.test.js
+server/test/admin-platform.test.js
+server/test/ai-usage.test.js
+server/test/collections.test.js
+server/test/invoice-memory.test.js
+docs/workflow-kit/manifest.json
 shared/schemas/menu-design/**
 shared/schemas/modules-pure.ts
 shared/schemas/modules.ts

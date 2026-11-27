@@ -204,15 +204,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Any paid Render tier or paid PDF service.
 
 ## Critical Questions
-- Q: Where is the measurement run? `render.yaml` now names `foodvibe1-0-1-frankfurt` as the live service, so there
-  may be no separate test instance. Choices: (a, recommended) a temporary second **free** Render web service from
-  the plan branch, same build and start commands and the same env vars except `MONGO_URI` pointing at the local-style
-  test database, deleted after the measurement; (b) deploy the branch to the live Frankfurt service for one
-  measurement window. A: (a) a temporary free second Render service built from the plan branch, deleted after the measurement — Dandan 2026-11-27
-- Q: Free fallback if Chromium does not fit next to the server on 512 MB. Choices: (a, recommended) PDF made in the
-  user's own browser from the same `renderMenuDocument` HTML (hidden frame + print to "Save as PDF") for the in-app
-  stage, and the server render revisited before the WhatsApp stage; (b) `playwright-core` with the same small
-  Chromium and `--single-process`, measured once more. A: (a) the PDF is made in the user's own browser (print to Save as PDF) for the in-app stage; the server is revisited before the WhatsApp stage — Dandan 2026-11-27
+- Q: Where is the measurement run? A: (a) a temporary second free Render web service from the plan branch, same build and start commands and env vars except `MONGO_URI` pointing at a test database, deleted after the measurement (Dandan 2026-11-27). `render.yaml` names `foodvibe1-0-1-frankfurt` as the live service, so the live service is not used.
+- Q: Free fallback if Chromium does not fit next to the server on 512 MB? A: (a) the PDF is made in the user's own browser from the same `renderMenuDocument` HTML (hidden frame + print to "Save as PDF") for the in-app stage; the server render is revisited before the WhatsApp stage (Dandan 2026-11-27).
 - Q: Where does the server read the shared template from? A: map extension E1 — `shared/schemas/menu-design/`,
   required on the server from `server/generated/schemas/menu-design/` after `pnpm build:schemas`.
 

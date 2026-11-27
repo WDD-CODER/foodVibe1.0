@@ -153,6 +153,12 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/test/helpers/app.js
+src/app/core/services/logistics-item-registry.service.spec.ts
+src/app/core/services/logistics-visible-items.parity.spec.ts
+src/app/core/services/module.service.spec.ts
+src/app/core/services/plan-snapshot.service.spec.ts
+docs/workflow-kit/manifest.json
 src/app/pages/menu-design/**
 src/app/shared/menu-designer/**
 src/app/shared/menu-preview/**

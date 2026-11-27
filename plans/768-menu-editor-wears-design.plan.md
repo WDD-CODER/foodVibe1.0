@@ -226,7 +226,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - Unlinked sections from text menus (plan 769).
 
 ## Critical Questions
-- Q: If plan 717 is not merged when 767 merges, wait for it or build on today's classes? A: open — Dandan decides at that point (map, run order); the plan waits by default.
+- Q: If plan 717 is not merged when 767 merges, wait for it or build on today's classes? A: wait for 717 (the default, Planner 2026-11-27); Dandan may switch to "build on today's classes" before `md-3` starts.
 
 ## Execution Notes
 - behaviour: the subtitle and bottom note show only when the module is on; a menu that has them keeps them stored when the module is switched off (hidden, not deleted).

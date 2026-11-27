@@ -102,6 +102,12 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/test/ai-known-metadata.test.js
+server/test/modules-registry.test.js
+server/test/price-list-prompt.test.js
+src/app/core/services/async-storage.service.spec.ts
+src/app/core/services/product-name-matcher.service.spec.ts
+docs/workflow-kit/manifest.json
 shared/schemas/menu-match/**
 shared/schemas/menu-design/menu-name.ts
 src/app/core/utils/recipe-match.util.ts

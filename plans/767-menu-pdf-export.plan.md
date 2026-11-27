@@ -233,10 +233,7 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 ## Critical Questions
 - Q: Who may export a menu? A: any member who may read it (owner, consultant, staff for the stages the owner
   allows), because exporting changes nothing the chef typed — logged below as a behaviour decision for Dandan to grade.
-- Q: C-ENGINE says `exportMenuPdf → { fileId, url }`, but without a configured file store (local development, a
-  business before Cloudinary is set) nothing can be kept. A: extension — it also returns `buffer`, and `fileId`/`url`
-  are `null` when nothing was kept; the route always answers with the PDF itself. The Planner copies this into the
-  map's "Contract extensions".
+- Q: What does exportMenuPdf return when no file store is configured? A: map extension E3 — it also returns `buffer`, and `fileId`/`url` are `null` when nothing was kept; the route always answers with the PDF itself.
 
 ## Execution Notes
 
