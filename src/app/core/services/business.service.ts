@@ -99,6 +99,19 @@ export class BusinessService {
     return this._put('logistics-hidden', { keys })
   }
 
+  /**
+   * Owner only (plan 765): the design menus wear when they have none of their own. One write, then the stored result
+   * goes into `business_`. Throws on any refusal.
+   */
+  async setMenuDesignDefault(designId: string): Promise<void> {
+    const res = await firstValueFrom(
+      this.http.put<Pick<Business, 'menuDesign'>>(`${environment.apiUrl}${API.business('menu-design-default')}`, {
+        designId
+      })
+    )
+    this._business_.update((business) => (business ? { ...business, ...res } : business))
+  }
+
   /** Owner only: which setup steps are done. Not cached: the setup card asks every time it is created. */
   loadSetupStatus(): Promise<SetupStatus> {
     return firstValueFrom(this.http.get<SetupStatus>(`${environment.apiUrl}${API.business('setup-status')}`))

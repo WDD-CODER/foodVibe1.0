@@ -1,0 +1,11 @@
+<div class="menu-preview" [style.block-size.px]="pageHeight * scale()">
+  <iframe
+    class="menu-preview__page"
+    sandbox=""
+    [srcdoc]="html()"
+    [attr.title]="'menu_design_preview_title' | translatePipe"
+    [style.width.px]="pageWidth"
+    [style.height.px]="pageHeight"
+    [style.transform]="'scale(' + scale() + ')'"
+  ></iframe>
+</div>
