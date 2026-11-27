@@ -1,6 +1,6 @@
 # Plan 765 — The menu designer screen: build, preview, save and manage designs by hand
 
-Status: draft
+Status: done
 Depends-on: 764
 Track: code
 Snapshot: d34a01068fe2f1b28efd33b753b8a3f69aa8762b
