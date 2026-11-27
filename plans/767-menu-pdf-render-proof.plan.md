@@ -93,6 +93,7 @@ append the path to the scope block above and retry.
 ## Reuse Check
 
 - menu-pdf render service: renderPdf and screenshotUrl in server/services/menu-pdf.js — family: none — rung: 4 — why: nothing in the server renders HTML to PDF or takes a page screenshot today (all print is window.print() in the browser); one wrapper so the adopted browser package is imported in one place only; registered as the new `menu-pdf` family.
+- menu-pdf private helpers browser, errors, fonts, guard and memory in server/services/menu-pdf/ — family: none — rung: 4 — why: the service passed ~250 lines (sub-task A2 puts helpers there); they are part of the new `menu-pdf` family and nothing outside the service builds on them; the nearest names the check offers (module-gate, feedback, invoice-memory, product-name-guard, menu-fonts-link) do other jobs.
 - pdf-smoke route in server/routes/menu-design.js — family: server-auth — rung: 1 — why: verifyToken + requirePlatformAdmin from server/middleware/auth.js as is.
 
 ## Adopt Check
@@ -167,13 +168,13 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add the small Chromium and its driver to the server without any install step — puppeteer-core and @sparticuz/chromium pinned exact — server/package.json, server/pnpm-lock.yaml
-- [ ] A2: Build the one render service that turns menu HTML into a PDF and a page into a picture — renderPdf, screenshotUrl, one browser, idle close, queue of 3, navigation allow-list, private-address guard, launch-failure log — server/services/menu-pdf.js (helpers in server/services/menu-pdf/ if it grows past ~250 lines)
-- [ ] A3: Prove the guards and the queue with the browser faked — server/test/menu-pdf.test.js
-- [ ] A4: Render the sample menu for real when a browser exists, and skip cleanly when not — server/test/menu-pdf-real.test.js
-- [ ] A5: Give the platform admin one address that renders the sample menu and reports time and memory — pdf-smoke route, mount — server/routes/menu-design.js, server/app.js, server/test/menu-design-route.test.js
-- [ ] A6: Keep two fonts on the server to compare against loading them from Google — fetch script, woff2 files — server/scripts/menu-fonts-fetch.js, server/assets/menu-fonts/**
-- [ ] A7: Register the new render service so later plans reuse it — family `menu-pdf` entry, inventory line, server folder map, render.yaml comment — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, render.yaml
+- [x] A1: Add the small Chromium and its driver to the server without any install step — puppeteer-core and @sparticuz/chromium pinned exact — server/package.json, server/pnpm-lock.yaml
+- [x] A2: Build the one render service that turns menu HTML into a PDF and a page into a picture — renderPdf, screenshotUrl, one browser, idle close, queue of 3, navigation allow-list, private-address guard, launch-failure log — server/services/menu-pdf.js (helpers in server/services/menu-pdf/ if it grows past ~250 lines)
+- [x] A3: Prove the guards and the queue with the browser faked — server/test/menu-pdf.test.js
+- [x] A4: Render the sample menu for real when a browser exists, and skip cleanly when not — server/test/menu-pdf-real.test.js
+- [x] A5: Give the platform admin one address that renders the sample menu and reports time and memory — pdf-smoke route, mount — server/routes/menu-design.js, server/app.js, server/test/menu-design-route.test.js
+- [x] A6: Keep two fonts on the server to compare against loading them from Google — fetch script, woff2 files — server/scripts/menu-fonts-fetch.js, server/assets/menu-fonts/**
+- [x] A7: Register the new render service so later plans reuse it — family `menu-pdf` entry, inventory line, server folder map, render.yaml comment — docs/brain/component-families.md, docs/brain/inventory.md, server/breadcrumbs.md, render.yaml
 - [ ] A8: Measure on a real free Render instance and write the numbers and the decision — the human step in Done-when; the builder writes the decision line template in Execution Notes — this plan file
 
 ## Technical Considerations
@@ -220,3 +221,56 @@ Decision line to fill after the human measurement (the Planner copies it into th
   so plan 768 extends one file; it is platform-admin only.
 - behaviour: the browser is closed after 60 s idle rather than kept warm, trading a slower next PDF for memory on
   the 512 MB host.
+- behaviour: fonts that do not settle within 10 s fail the render (`PDF_FAILED`) instead of printing fallback fonts.
+  Reverse: catch the `TimeoutError` of `setContent` in `printPage` and print.
+- behaviour: `coldStartMs` is the browser's launch time for that call (0 when it was open; Render waking the instance
+  is not in it); `browserRssMb` and `peakTotalMb` are null off Linux; on Linux the two memory figures are the parts of
+  the highest sample. Reverse: change `startMemorySampler` / `printJob`.
+- behaviour: `?fonts=embedded` keeps the `classic` design, so its dish font (David Libre, not one of the two kept) falls
+  back. Reverse: set `design.fonts.dish` to `frank-ruhl-libre` for that mode in `server/routes/menu-design.js`.
+- behaviour: `--disable-web-security` and `--allow-running-insecure-content` are removed from the small Chromium's
+  flags. Reverse: drop them from `REFUSED_FLAGS` in `server/services/menu-pdf/browser.js`.
+- behaviour: a photographed page gets no WebSocket, WebTransport, WebRTC, workers, service worker or `window.open`
+  (the request check cannot see them) and its dialogs are dismissed. Reverse: remove `sealPage`.
+- behaviour: the guard also refuses 0/8, 192.0.0/24, 198.18/15, 240/4 and every IPv6 address outside 2000::/3 (plus
+  Teredo, 6to4, documentation). Reverse: trim the lists in `server/services/menu-pdf/guard.js`.
+- behaviour: screenshot width is kept within 320 to 1920; errors are `URL_REFUSED` 400, `SCREENSHOT_FAILED` 502,
+  `SCREENSHOT_TOO_LARGE` 413, `PDF_FAILED` 500. Reverse: edit the constants and `errors.js`.
+- behaviour: `menu_pdf.launch_failed` is logged once until a browser starts again, with the error's name and first line
+  (addresses stripped). Reverse: edit `openBrowser`.
+- seen: `shared/schemas/menu-design/menu-template.ts:144` the `.md-content p { margin: 0 }` rule outranks the margins of
+  `.md-subtitle`, `.md-note`, `.md-contact` and `.md-powered`, so "Powered by FoodVibe" sits tight under the note.
+- seen: `shared/schemas/menu-design/menu-template.ts:156` the ✦ ornament comes from a system font (Segoe UI Symbol on
+  Windows); the small Chromium carries few fonts, so check it on Render.
+
+### Evidence (builder, 2026-11-27, Windows with local Chrome)
+
+- `pnpm --dir server install --frozen-lockfile` -> exit 0; `node -e "require('./server/services/menu-pdf.js')"` -> exit 0.
+- `pnpm run test:server` -> exit 0, 155 files, 2083 tests passed. `menu-pdf-real.test.js` rendered a real PDF (no SKIP).
+- `pnpm run build`, `npm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors); `pnpm run test:ci` -> 2883 SUCCESS.
+- `node scripts/reuse-lint.mjs --check-registry` -> `REUSE: registry ok (72 families, 227 paths)`.
+- `node scripts/log-query.mjs --since=plan-start --level=error` -> exit 0, `SKIP: no database configured`.
+- Local, not Render: link fonts cold start 2579 ms, render 2494 / 2850 ms; embedded render 2556 ms; PDF about 270 KB,
+  one page; Hebrew right-to-left and mixed names in order. Linux memory reading is tested on a fake `/proc` only.
+
+### Human step (A8)
+
+1. Create the temporary free Render service from this branch (Q1): build and start commands of `render.yaml`, the live
+   env vars except a test `MONGO_URI`, and `ALLOWED_ORIGIN` = the test service's own address. Node must be 22.17 or
+   newer. Sign in there as a platform admin.
+2. After 15 minutes without traffic, in that tab's DevTools console (the route needs the sign-in token, so the address
+   bar alone answers 401):
+
+   ```js
+   const { token } = await (await fetch('/api/v1/auth/refresh', { method: 'POST' })).json()
+   const smoke = q => fetch('/api/v1/menu-design/pdf-smoke' + q, { headers: { Authorization: 'Bearer ' + token } })
+   console.log(await (await smoke('')).json())
+   console.log(await (await smoke('')).json())
+   console.log(await (await smoke('?fonts=embedded')).json())
+   const a = document.createElement('a')
+   a.href = URL.createObjectURL(await (await smoke('?download=1')).blob())
+   a.download = 'menu-sample.pdf'
+   a.click()
+   ```
+
+3. Write the numbers here, check the PDF (fonts, direction, ✦), fill the decision line, delete the test service.
