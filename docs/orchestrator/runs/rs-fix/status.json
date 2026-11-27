@@ -1,0 +1,509 @@
+{
+  "run": "rs-fix",
+  "branch": "orch/rs-fix",
+  "base": "main",
+  "startedAt": "2026-11-27T08:26:10.431Z",
+  "mainShaAtStart": "f0615be77179a53d740f00f2e4ebaf5e9e771b5d",
+  "plans": {
+    "760": {
+      "nnn": "760",
+      "title": "The platform admin changes every assistant number; a longer quiet wait; one field less on the flow map",
+      "branch": "feat/760-assistant-admin-edits-engine",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T09:40:00.484Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T11:27:26.881Z"
+        }
+      },
+      "humanItems": [
+        "As the platform admin, on `/frontdesk/assistant?tab=settings`, change «זמן המתנה להודעה נוספת» from 3 to 4",
+        "Signed in as `demo_host` (owner, not admin), the same rows show the lock and the tooltip, with no «לשנות».",
+        "On the simulator, write a question and a second one about 2 seconds later (default settings): one answer",
+        "a dialog with an explained control · hover the control · its explanation shows as a tooltip and no explanation text sits on the modal — here: as `demo_host` on `/frontdesk/assistant?tab=settings`, hover the lock of an engine row: the tooltip says why it is locked, and no such text sits in the row.",
+        "the screen's page with the data request failing · open the page · a readable error with a retry appears, not a blank page — here: as the platform admin, save a new engine number while the slot's API server is stopped (the agent stops it for this check and starts it again after): a readable error toast appears and the row keeps its old value.",
+        "On `/frontdesk/assistant?tab=flow` open any step: it shows what can stop it, and no «what this step reads»"
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T08:28:14.127Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:28:14.258Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:14:31.057Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:16:36.715Z",
+          "state": "asking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:26:13.807Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:39:59.949Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T09:40:00.487Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T11:15:47.826Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T11:27:17.931Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T11:27:26.883Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T11:29:20.561Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T11:30:25.043Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "760",
+          "title": "The platform admin changes every assistant number; a longer quiet wait; one field less on the flow map",
+          "branch": "feat/760-assistant-admin-edits-engine",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {
+            "builder": {
+              "model": "sonnet",
+              "tier": "build",
+              "at": "2026-11-27T08:28:14.256Z"
+            }
+          },
+          "tiers": [
+            "build"
+          ],
+          "freeDiskGb": 15,
+          "reason": "replan needed: ESCALATE: scope — `pnpm run test:server` fails 11 tests only in server/test/inbound.test.js and server/test/frontdesk-one-run.test.js (outside the scope, they assert the old 2000 ms wait), and `git commit` exits 1 because the hook's `node scripts/plan-ledger-check.mjs` cannot find plans 758, 759 and — ask 760-1 answered, but the scope could not be extended: git c",
+          "calls": [
+            {
+              "stage": "builder",
+              "model": "sonnet",
+              "seconds": 2776.4,
+              "tokens": {
+                "input": 13650929,
+                "output": 99015
+              },
+              "exit": 0
+            }
+          ],
+          "parkBranch": "park/rs-fix-760",
+          "park": {
+            "at": "2026-11-27T09:16:33.339Z",
+            "reason": "replan needed: ESCALATE: scope — `pnpm run test:server` fails 11 tests only in server/test/inbound.test.js and server/test/frontdesk-one-run.test.js (outside the scope, they assert the old 2000 ms wait), and `git commit` exits 1 because the hook's `node scripts/plan-ledger-check.mjs` cannot find plans 758, 759 and",
+            "branch": "park/rs-fix-760"
+          }
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.6,
+      "sha": "1b09ff078deb5bd3e9a0b9e434680a98e971fb5e",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 5744.6,
+          "tokens": {
+            "input": 19946289,
+            "output": 129490
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 112.4,
+          "tokens": {
+            "input": 1194486,
+            "output": 14391
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "bd70f2835c2cca70bfefa3f40916101691341e53"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T08:28:13.990Z",
+      "plan": "760",
+      "text": "the folder foodVibe1.0-orch-rs-fix-760 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T09:14:30.805Z",
+      "plan": "760",
+      "text": "builder left undone (round 0): D6: not every automatic check passes (test:server and plan-ledger-check fail); Commit and push: blocked by the pre-commit hook; Update the old 2000 ms assertions: the waits become 3000; the five-message burst becomes [500, 1500, 3000, 3000, 3000]; server/test/frontdesk-one-run.test.js:188 expects 30"
+    },
+    {
+      "at": "2026-11-27T09:16:36.551Z",
+      "plan": "760",
+      "text": "parked: saved on park/rs-fix-760 (2eb4c88) and pushed"
+    },
+    {
+      "at": "2026-11-27T09:16:37.039Z",
+      "plan": "760",
+      "text": "ask 760-1 (scope, the Human or the advisor answers): May plan 760 update the two old quiet-wait test files, and copy plan files 758, 759 and 761 from origin/main so the pre-commit hook passes?"
+    },
+    {
+      "at": "2026-11-27T09:26:08.022Z",
+      "plan": "760",
+      "text": "ask 760-1 answered by the human: approved: server/test/inbound.test.js, server/test/frontdesk-one-run.test.js, plans/758-house-style-finishing-pass.plan.md, plans/759-biz-numbers-grading-round-two.plan.md, plans/761-ai-daily-budget-bar-admin-only.plan.md"
+    },
+    {
+      "at": "2026-11-27T09:26:13.938Z",
+      "plan": "760",
+      "text": "ask 760-1 answered, but the scope could not be extended: git commit: husky - pre-commit script failed (code 1) — plan 760 parked; the question was: May plan 760 update the two old quiet-wait test files, and copy plan files 758, 759 and 761 from origin/main so the pre-commit hook passes?"
+    },
+    {
+      "at": "2026-11-27T09:26:14.213Z",
+      "text": "make this a default? for the platform admin an engine row shows the FoodVibe chip instead of the locked «קבוע במערכת» chip — reverse: remove the who.foodvibe swap in settings-table.component.html (trigger: list) — reply: default yes run-list"
+    },
+    {
+      "at": "2026-11-27T09:39:59.388Z",
+      "plan": "760",
+      "text": "the folder foodVibe1.0-orch-rs-fix-760 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T11:29:30.356Z",
+      "plan": "760",
+      "text": "the folder foodVibe1.0-orch-merge-rs-fix was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T11:30:25.629Z",
+      "plan": "760",
+      "text": "decided without the Human: test changed — fewer checks?: server/test/inbound.test.js: 105 → 104 checks"
+    },
+    {
+      "at": "2026-11-27T11:30:25.952Z",
+      "plan": "760",
+      "text": "decided without the Human: test changed — fewer checks?: src/app/pages/frontdesk/assistant/assistant-flow.data.spec.ts: 11 → 10 checks"
+    },
+    {
+      "at": "2026-11-27T11:31:44.344Z",
+      "text": "FINAL: same tree as plan 760's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    },
+    {
+      "at": "2026-11-27T11:31:45.111Z",
+      "text": "make this a default? for the admin an editable row shows the FoodVibe chip instead of the 'fixed in the system' lock — reverse: use item.row.who for the chip in settings-table.component.html. (trigger: list) — reply: default yes run-list"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 12.6,
+  "updatedAt": "2026-11-27T11:31:46.744Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: allowed ranges are quiet wait 1-10 s, longest wait 2-30 s, daily answers 1-2000, turn limit 1-50, follow-ups 0-10, history 2-40, glued messages 1-10, fact characters 1000-20000, first model 2-14 s, whole turn 10-60 s — reverse: edit ENGINE_SETTINGS in server/services/assistant-engine-settings.js",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: saving a longest wait under quiet wait + 1 s is refused with 400, and raising the quiet wait lifts the longest wait in effect — reverse: drop the gap rule in limitsOf and accept lower saves",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: for the platform admin an engine row shows the FoodVibe chip instead of the locked «קבוע במערכת» chip — reverse: remove the who.foodvibe swap in settings-table.component.html",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D4",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: the number box opens on a line under its row, one at a time; it closes on a successful save and stays open after a failed one; opening another row drops the typed value — reverse: change startEdit and save in settings-table.component.ts",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D5",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: «שמירה» is blocked for an empty or out-of-range number, with a tooltip saying why — reverse: remove aria-disabled and appTip from the save button and rely on the server's 400",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D6",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: the save is PUT /api/v1/assistant-runs/engine-settings with one {field, value}; the history is not capped and the read cache lasts 5 s — reverse: change the route body, add a $slice, or change CACHE_MS",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D7",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: the flow map's current-value lines also show seconds with one decimal — reverse: return a rounded number from engineAmount",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D8",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: the model order row is unchanged because it already links the admin to the AI models manager — reverse: add the order as one more editable value",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D9",
+      "plan": "760",
+      "type": "seen",
+      "text": "seen: public/assets/data/dictionary.json asr_set_intro still says «לשנות» opens another screen, which is not true for the admin's engine rows (the dictionary is append-only)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D10",
+      "plan": "760",
+      "type": "seen",
+      "text": "seen: docs/agent/standards-backend.md:63 area — the collections table has no row for the new platformSettings collection (outside this plan's scope)",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D11",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: allowed ranges are quiet wait 1-15 s, longest wait 2-30 s, daily answers 1-2000, answers per conversation 1-50, follow-ups 0-10, history 2-40 messages, grouped messages 1-15, facts 1000-20000 characters, first model 2-15 s, whole answer 10-60 s (60 s stays 30 s under the conversation lease) — reverse: edit ENGINE_RULES in server/services/assistant-engine-settings.js.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D12",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: the save route is PUT /api/v1/assistant-runs/engine-settings, on the router that already serves GET /setup (server/app.js is outside the scope) — reverse: mount the handler under another path in app.js and change the URL in assistant-engine.service.ts.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D13",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: saving a longest wait less than 1 s above the quiet wait is refused; raising the quiet wait raises the longest wait in force without refusing — reverse: remove the maxWaitMs floor in effective() and engineRanges().",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D14",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: for the admin an editable row shows the FoodVibe chip instead of the 'fixed in the system' lock — reverse: use item.row.who for the chip in settings-table.component.html.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D15",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: one number box is open at a time; Cancel or opening another row drops the typed text; there is no success message; a failed save keeps the box open; an out-of-range value blocks Save with a tooltip — reverse: change openBox() and save() in settings-table.component.ts.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D16",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: a time is typed in seconds and saved to a tenth of a second — reverse: change fromShown() in assistant-engine.util.ts.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D17",
+      "plan": "760",
+      "type": "behaviour",
+      "text": "behaviour: the history keeps the newest 500 saves, and another server process sees a save within 5 seconds — reverse: change HISTORY_MAX or CACHE_MS in assistant-engine-settings.js.",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D18",
+      "plan": "760",
+      "type": "seen",
+      "text": "seen: public/assets/data/dictionary.json:3330 — asr_set_intro still says the change button opens the screen where the setting is changed; on the admin's engine rows it now opens a box in the row (existing dictionary entries are append-only for a builder).",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D19",
+      "plan": "760",
+      "type": "seen",
+      "text": "seen: values still fixed in code and not editable by the admin: server/services/inbound.js:25 HUMAN_IDLE_MS (2 h), server/routes/ai/frontdesk.js:58 the 15 s per-call timeout, server/services/frontdesk-runs.js:16 RUN_TTL_DAYS (30); the guard words, prompt rules and answer checks rows (src/app/pages/frontdesk/assistant/assistant-settings.data.ts:105) also stay locked for the admi",
+      "alsoFrom": [],
+      "attempt": 2,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T11:31:46.742Z",
+  "selfDecided": [
+    {
+      "plan": "760",
+      "kind": "test changed — fewer checks?",
+      "what": "server/test/inbound.test.js: 105 → 104 checks",
+      "why": "an existing test the plan changed now checks less; it may be right (an old check removed on purpose) or a test bent to pass",
+      "undo": "read the diff: git diff 1b09ff07^1 1b09ff07 -- server/test/inbound.test.js",
+      "at": "2026-11-27T11:30:25.493Z"
+    },
+    {
+      "plan": "760",
+      "kind": "test changed — fewer checks?",
+      "what": "src/app/pages/frontdesk/assistant/assistant-flow.data.spec.ts: 11 → 10 checks",
+      "why": "an existing test the plan changed now checks less; it may be right (an old check removed on purpose) or a test bent to pass",
+      "undo": "read the diff: git diff 1b09ff07^1 1b09ff07 -- src/app/pages/frontdesk/assistant/assistant-flow.data.spec.ts",
+      "at": "2026-11-27T11:30:25.833Z"
+    }
+  ],
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T11:31:46.744Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

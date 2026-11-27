@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (96 runs): plans 248 · merged 225 · parked 20 · fix rounds 108 · escalations 52 · gate fails 36 · ✗ 14 · checker misses 0 — per run: plans 2.58 · parked 0.21 · fix rounds 1.13 · ✗ per plan 0.06
+Earlier (97 runs): plans 250 · merged 227 · parked 20 · fix rounds 108 · escalations 52 · gate fails 36 · ✗ 14 · checker misses 0 — per run: plans 2.58 · parked 0.21 · fix rounds 1.11 · ✗ per plan 0.06
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-23 | rs-conv-srv | 675,687 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-jobs | 676 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-book-ui-3 | 670 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-23 | rs-conv-ui | 677,678 | 2 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (96 runs): plans 248 · merged 225 · parked 20 · fix rounds 108 · esc
 | 2026-11-25 | rs-sim | 733 | 1 | 0 | - | 2 | 2 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-25 | rs-level | 734 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-25 | rs-typing | 735 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-27 | rs-console | 751,752,753,754,755,756,757 | 7 | 0 | - | 1 | 0 | 0 | ok | - | - | - |
+| 2026-11-27 | rs-console | 751,752,753,754,755,756,757 | 7 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-27 | rs-fix | 760 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
