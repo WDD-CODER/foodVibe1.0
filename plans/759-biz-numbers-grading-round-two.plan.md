@@ -75,6 +75,7 @@ src/app/core/engine/month-plan.spec.ts
 src/app/**/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
