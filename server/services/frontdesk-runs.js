@@ -125,13 +125,15 @@ function createRun(db, conversation, { now, mode, inbound }) {
   function discard() { discarded = true; }
 
   function inboundStep(answers) {
+    // Plan 753: a follow-up says how it started; a `via` a caller put on the step is kept.
+    const via = steps.get('inbound')?.out?.via;
     if (!inbound) {
-      return { key: 'inbound', status: 'skipped', ms: 0, out: { via: mode === 'suggest' ? 'suggest' : 'direct' } };
+      return { key: 'inbound', status: 'skipped', ms: 0, out: { via: via ?? (mode === 'suggest' ? 'suggest' : 'direct') } };
     }
     const waitedMs = inbound.waitedMs ?? 0;
     return {
       key: 'inbound', status: answers > 1 ? 'note' : 'ok', ms: waitedMs,
-      in: { at: inbound.at }, out: { waitedMs, answers },
+      in: { at: inbound.at }, out: { waitedMs, answers, ...(via && { via }) },
     };
   }
 
@@ -144,7 +146,7 @@ function createRun(db, conversation, { now, mode, inbound }) {
       text: String(facts.trigger?.text ?? '').slice(0, TRIGGER_TEXT_MAX),
     };
     const { outcome, reason } = result ?? { outcome: 'failed', reason: 'error' };
-    const { model, firstModel, intent, lead, tone, tablesOn } = facts;
+    const { model, firstModel, intent, lead, tone, tablesOn, followsRunId } = facts;
     const keepPrompt = typeof lead === 'string' && (outcome === 'handover' || outcome === 'failed');
     return {
       _id: id,
@@ -163,6 +165,7 @@ function createRun(db, conversation, { now, mode, inbound }) {
       fallbackUsed: !!model && !!firstModel && model !== firstModel,
       ...(model && { model }),
       ...(intent && { intent }),
+      ...(followsRunId && { followsRunId }),
       steps: RUN_STEP_KEYS.map(key => {
         if (key === 'inbound') return inboundStep(trigger.messageIds.length);
         const entry = steps.get(key);
@@ -227,7 +230,7 @@ function startRun(db, conversation, { now = Date.now(), mode = 'turn', feature, 
 
 const GROUPS = {
   answered: { outcome: { $in: ['answered', 'asked'] } },
-  handover: { outcome: { $in: ['handover', 'failed', 'removed'] } },
+  handover: { outcome: { $in: ['handover', 'failed', 'removed', 'dropped'] } },
   fallback: { fallbackUsed: true },
 };
 

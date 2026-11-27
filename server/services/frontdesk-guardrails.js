@@ -3,8 +3,8 @@
  * Plans 679 + 689 (C-AI): the one place where the assistant's blocks live. Pure (no database).
  * `preCheck(ctx)` runs before the model call; `applyGuardrails(answer, ctx)` after it → `{ ok: true, answer }` or
  * `{ ok: false, reason }` (`unsupported_time` adds a `detail` of counts). `ctx` is `{ profile, factIds, factsText,
- * history, aiTurns, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller turns it
- * into a handoff. The word lists are a second line (`constants/frontdesk-guard-words.js`); the structured answer is
+ * history, aiTurns, chain, now, mode, lastTurnLow, replyWillBeSent }`. A blocked reply is never rewritten: the caller
+ * turns it into a handoff. The pre-checks end with the turn limit and the follow-up limit (plan 753). The word lists are a second line (`constants/frontdesk-guard-words.js`); the structured answer is
  * checked first.
  */
 const { HANDOFF, DEFERRED, COMPLETION, INTERNALS, GREETINGS, REMOVAL_WORDS } = require('../constants/frontdesk-guard-words');
@@ -12,6 +12,8 @@ const { hoursCheck } = require('../generated/schemas/front-desk/qualify');
 const { jerusalemDateTime } = require('../generated/schemas/front-desk/local-time');
 
 const TURN_LIMIT = 8;
+/** Plan 753 (R-26): how many follow-up runs in a row may call the model. */
+const FOLLOW_UP_MAX = 3;
 const NIQQUD_RE = /[֑-ׇ]/g;
 const PUNCT_RE = /^[\s.,!?;:"'()\-–—…״׳]+|[\s.,!?;:"'()\-–—…״׳]+$/g;
 const LINK_RE = /(?:https?:\/\/|www\.)[^\s)<>"'،]+/gi;
@@ -36,7 +38,7 @@ function isRemoval(history) {
   return REMOVAL_WORDS.some(w => (w.includes(' ') ? t.includes(w) : t === w));
 }
 
-/** Before the model call: removal, keyword, active hours, turn limit. Skipped in `suggest` mode. */
+/** Before the model call: removal, keyword, active hours, turn limit, follow-up limit. Skipped in `suggest` mode. */
 function preCheck(ctx) {
   if (ctx.mode === 'suggest') return { ok: true };
   if (isRemoval(ctx.history)) return { ok: false, reason: 'removal' };
@@ -47,6 +49,7 @@ function preCheck(ctx) {
     if (!hoursCheck(rows, date, time).ok) return { ok: false, reason: 'outside_hours' };
   }
   if ((ctx.aiTurns ?? 0) >= TURN_LIMIT) return { ok: false, reason: 'turn_limit' };
+  if ((ctx.chain ?? 0) > FOLLOW_UP_MAX) return { ok: false, reason: 'follow_up_limit' };
   return { ok: true };
 }
 
@@ -129,4 +132,4 @@ function applyGuardrails(answer, ctx) {
   return { ok: true, answer: { ...out, usedFacts } };
 }
 
-module.exports = { applyGuardrails, preCheck, isRemoval, TURN_LIMIT };
+module.exports = { applyGuardrails, preCheck, isRemoval, TURN_LIMIT, FOLLOW_UP_MAX };

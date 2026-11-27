@@ -17,7 +17,9 @@ const TONES: Record<RunOutcome, OutcomeTone> = {
   draft: 'amber',
   handover: 'red',
   failed: 'red',
-  removed: 'red'
+  removed: 'red',
+  dropped: 'amber',
+  superseded: 'amber'
 }
 
 export const outcomeTone = (outcome: RunOutcome): OutcomeTone => TONES[outcome]
@@ -137,7 +139,8 @@ export const STEP_FIELDS: Record<RunStepKey, { in: FieldDef[]; out: FieldDef[] }
     out: [
       field('action', 'enum', 'asr_f_action', 'asr_send_'),
       field('refused', 'text', 'asr_f_refused'),
-      field('chars', 'number', 'asr_f_chars')
+      field('chars', 'number', 'asr_f_chars'),
+      field('overtaken', 'number', 'asr_f_overtaken')
     ]
   }
 }

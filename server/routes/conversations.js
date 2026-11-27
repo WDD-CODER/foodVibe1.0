@@ -16,6 +16,7 @@ const { logger } = require('../logger');
 const { listConversations, loadConversation, closeConversation } = require('../services/conversations');
 const { sendOut } = require('../services/outbound');
 const { answerWaiting } = require('../services/inbound');
+const { clearLease } = require('../services/frontdesk-lease');
 const { MESSAGE_TEMPLATES, MESSAGE_TEMPLATE_NAMES, templateMessage } = require('../generated/schemas/front-desk/message-templates');
 
 const router = Router();
@@ -129,6 +130,10 @@ router.post('/:id/messages', async (req, res) => {
     if (built.error) return res.status(400).json({ error: built.error });
     if (conversation.status === 'closed') return badStatus(res);
     const actor = actorOf(req);
+    // Plan 753 (R-27): before the send, so a working assistant run cannot answer while the member's message is on its way.
+    if (conversation.status === 'bot' && await clearLease(db(), conversation)) {
+      logOf(req).info({ event: 'conversations.run_cancelled', by: 'reply' });
+    }
     const result = await sendOut(db(), conversation, built.outbound, 'member', { memberId: actor.userId });
     if (!result.ok) return res.status(REFUSAL_STATUS[result.reason] || 409).json({ error: result.reason });
     const heldAt = Date.now();
@@ -179,7 +184,8 @@ async function move(req, res, allowedFrom, to, apply, after) {
 }
 
 router.put('/:id/takeover', (req, res) => move(req, res, ['bot', 'human'], 'human',
-  (r, now) => ({ $set: { status: 'human', assignedTo: actorOf(r).userId, heldAt: now, updatedAt: now } })));
+  // Plan 753 (R-27): a take over removes the lease of a working run.
+  (r, now) => ({ $set: { status: 'human', assignedTo: actorOf(r).userId, heldAt: now, updatedAt: now }, $unset: { run: '' } })));
 router.put('/:id/release', (req, res) => move(req, res, ['human'], 'bot',
   (_r, now) => ({ $set: { status: 'bot', updatedAt: now }, $unset: { assignedTo: '', heldAt: '', suggestion: '' } }),
   (r, updated) => {

@@ -30,6 +30,15 @@
   <a class="c-row-link asr-conversation" [routerLink]="['/inbox', run().conversationId]">{{
     'asr_open_conversation' | translatePipe
   }}</a>
+  @if (run().followsRunId) {
+    <a
+      class="c-btn-ghost--sm"
+      [routerLink]="['/frontdesk/assistant/runs', run().followsRunId]"
+      queryParamsHandling="preserve"
+      data-testid="asr-follows"
+      >{{ 'asr_follows' | translatePipe }}</a
+    >
+  }
   <p class="asr-muted" data-testid="asr-expires">{{ expires_() }}</p>
   @if (adminViewed_(); as viewed) {
     <p class="asr-muted" data-testid="asr-admin-viewed">{{ viewed }}</p>

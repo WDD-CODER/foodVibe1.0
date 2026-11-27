@@ -47,6 +47,12 @@ describe('preCheck', () => {
   it('is skipped in suggest mode', () => {
     expect(preCheck(ctx({ mode: 'suggest', aiTurns: 9, history: [guest('יש לי תלונה')] }))).toEqual({ ok: true });
   });
+  it('plan 753: a fourth follow-up → follow_up_limit; three, none and suggest pass', () => {
+    expect(preCheck(ctx({ chain: 4 }))).toEqual({ ok: false, reason: 'follow_up_limit' });
+    expect(preCheck(ctx({ chain: 3 }))).toEqual({ ok: true });
+    expect(preCheck(ctx())).toEqual({ ok: true });
+    expect(preCheck(ctx({ mode: 'suggest', chain: 4 }))).toEqual({ ok: true });
+  });
   it('a removal phrase is its own reason; "לא עכשיו" is not one', () => {
     expect(preCheck(ctx({ history: [guest('הסירו אותי בבקשה')] }))).toEqual({ ok: false, reason: 'removal' });
     expect(preCheck(ctx({ history: [guest('stop')] }))).toEqual({ ok: false, reason: 'removal' });

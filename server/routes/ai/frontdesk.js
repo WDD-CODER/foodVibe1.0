@@ -180,3 +180,4 @@ router.post('/fix', verifyToken, requireModule('frontdesk'), fixLimiter, async (
 
 module.exports = router;
 module.exports.askTurnModel = askTurnModel;
+module.exports.TURN_BUDGET_MS = TURN_BUDGET_MS;

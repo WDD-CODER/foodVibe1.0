@@ -11,14 +11,18 @@
  * the logs still never do.
  * The one model call is `askTurnModel` (routes/ai/frontdesk.js, INV-6); it is required lazily because that file
  * requires this one.
+ * Plan 753 (R-26, R-27): `runTurn` holds the conversation's lease (`frontdesk-lease.js`) for a run and its follow-ups;
+ * after the model call the turn reads the conversation again and sends and writes nothing when a person stepped in.
  */
 const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
-const { buildTurnBody, todayBlock, HISTORY_WINDOW } = require('./frontdesk-prompt');
-const { applyGuardrails, preCheck, isRemoval, TURN_LIMIT } = require('./frontdesk-guardrails');
+const { buildTurnBody, unansweredTail, todayBlock, HISTORY_WINDOW } = require('./frontdesk-prompt');
+const { applyGuardrails, preCheck, isRemoval, TURN_LIMIT, FOLLOW_UP_MAX } = require('./frontdesk-guardrails');
 const { fillWhen } = require('./frontdesk-when');
 const { sendOut } = require('./outbound');
-const { setTurnHandler } = require('./inbound');
+const { setTurnHandler, nextStep, waitFor, COALESCE_MS } = require('./inbound');
+const { loadConversation } = require('./conversations');
+const { takeLease, noteWaiting, leaseCheck, endLease } = require('./frontdesk-lease');
 const { tablesFor, handleTableIntent, deliver, cleanSuggested, turnProfile } = require('./frontdesk-tables');
 const { startRun, NO_RUN } = require('./frontdesk-runs');
 const { createRequest, runQualify } = require('../utils/request-create');
@@ -218,28 +222,106 @@ function failureReason(kind, status) {
 }
 
 /**
- * A turn that completes in mode `turn` removes the reason an earlier turn of this conversation failed (plan 701).
- * Plan 752: the run record is started and finished here, also when the turn throws.
+ * One turn: `{ result, runId, seen }` (`seen`: the guest messages the turn read). A turn that completes in mode `turn`
+ * removes the reason an earlier turn of this conversation failed (plan 701). Plan 752: the run record is started and
+ * finished here, also when the turn throws. Plan 753: a follow-up names the run it continues.
  */
-async function runTurn(db, conversation, opts = {}) {
+async function runOnce(db, conversation, opts) {
   const run = startRun(db, conversation, {
     now: opts.now ?? Date.now(), mode: opts.mode ?? 'turn', feature: opts.feature, inbound: opts.inbound,
   });
+  if (opts.followsRunId) {
+    run.set({ followsRunId: opts.followsRunId });
+    run.step('inbound', { out: { via: 'follow_up' } });
+  }
+  const track = { seen: [] };
   let result;
   try {
-    result = await runTurnInner(db, conversation, { ...opts, run });
+    result = await runTurnInner(db, conversation, { ...opts, run, track });
   } catch (err) {
     run.end('failed', 'error');
     await run.finish({ log: opts.log });
     throw err;
   }
   await run.finish({ log: opts.log });
+  // A skipped, dropped or superseded turn has no `ok`: it did not complete.
   if (conversation.assistantFailed && (opts.mode ?? 'turn') === 'turn' && result && result.ok) {
     await colOf(db, 'conversations').updateOne(
       { _id: conversation._id, businessId: conversation.businessId }, { $unset: { assistantFailed: '' } }
     );
   }
-  return result;
+  return { result, runId: run.id, seen: track.seen };
+}
+
+/** The lease of this turn, or what the caller is answered when another run (or a person) has the conversation. */
+async function claimTurn(db, conversation, { messageId, log = logger }) {
+  let lease = await takeLease(db, conversation, { log });
+  if (lease) return { lease };
+  const current = await loadConversation(db, conversation.businessId, conversation._id);
+  if (!current || current.status !== 'bot') return { skipped: 'not_bot' };
+  const noted = await noteWaiting(db, conversation, messageId, Date.now());
+  // No live lease took the note: the other run ended in between.
+  if (!noted) lease = await takeLease(db, conversation, { log });
+  if (lease) return { lease };
+  log.info({ event: 'frontdesk.turn.busy', conversationId: conversation._id, noted });
+  return { skipped: 'busy' };
+}
+
+/**
+ * Plan 753: the first run of a held lease and the follow-ups for the messages that arrived meanwhile. Answers with the
+ * first run's result. `endLease` gives the lease back when there is nothing left to answer.
+ */
+async function runLeased(db, conversation, lease, opts) {
+  const { log = logger } = opts;
+  const startedReal = Date.now();
+  let conv = conversation;
+  let turnOpts = opts;
+  let chain = 0;
+  let follows;
+  let first;
+  for (;;) {
+    const now = opts.now === undefined || chain === 0 ? opts.now : opts.now + (Date.now() - startedReal);
+    const one = await runOnce(db, conv, { ...turnOpts, now, lease, chain, followsRunId: follows });
+    if (chain === 0) first = one.result;
+    // A superseded run wrote and sent nothing on purpose: its follow-up answers everything.
+    const goesOn = !one.result?.skipped || one.result.skipped === 'superseded';
+    const next = await endLease(db, conv, lease, {
+      seen: one.seen, follow: goesOn && chain <= FOLLOW_UP_MAX, graceMs: COALESCE_MS,
+    });
+    if (!next.follow) return first;
+    const at = next.conversation.lastInboundAt;
+    const step = nextStep({ conversation: next.conversation, at, now: Date.now(), waited: false, holder: true });
+    const waitStarted = Date.now();
+    await waitFor(step.ms);
+    const waitedMs = Date.now() - waitStarted;
+    conv = await loadConversation(db, next.conversation.businessId, next.conversation._id);
+    if (nextStep({ conversation: conv, at, now: Date.now(), waited: true, holder: true }).do !== 'run') {
+      await endLease(db, next.conversation, lease, { follow: false });
+      return first;
+    }
+    log.info({ event: 'frontdesk.turn.follow_up', conversationId: conv._id, chain: next.chain, waitMs: waitedMs });
+    chain = next.chain;
+    follows = one.runId;
+    turnOpts = { ...turnOpts, inbound: { at: conv.lastInboundAt, waitedMs }, messageId: undefined };
+  }
+}
+
+/**
+ * Plan 753 (R-26): one run per conversation. A suggestion sends nothing and may be made beside a run, so it takes no
+ * lease. A turn that finds a live lease answers `{ skipped: 'busy' }` and notes its message on it.
+ */
+async function runTurn(db, conversation, opts = {}) {
+  if (opts.mode === 'suggest') return (await runOnce(db, conversation, opts)).result;
+  if (conversation.status !== 'bot') return { skipped: 'not_bot' };
+  const claim = await claimTurn(db, conversation, opts);
+  if (!claim.lease) return { skipped: claim.skipped };
+  try {
+    return await runLeased(db, conversation, claim.lease, opts);
+  } catch (err) {
+    // The lease is given back on every path; the turn's own error is the one the caller gets.
+    await endLease(db, conversation, claim.lease, { follow: false }).catch(() => {});
+    throw err;
+  }
 }
 
 /** Step 2: the settings this turn works with (`profile` may be raised to level 1 for a test conversation). */
@@ -258,13 +340,31 @@ function setupFacts(stored, profile) {
   };
 }
 
-/** What a run answers: the guest messages after the newest outbound one, and the newest guest text. */
+/** What a run answers: the unanswered guest messages (the newest few), and the newest guest text. */
 function triggerOf(history) {
-  const lastOut = history.map(m => m.direction).lastIndexOf('out');
-  const waiting = history.slice(lastOut + 1).filter(m => m.author === 'guest');
   const newest = history.filter(m => m.author === 'guest').at(-1);
   const text = (newest && (newest.kind === 'button' ? newest.buttonId : newest.text)) || '';
-  return { messageIds: waiting.map(m => String(m._id)), text };
+  return { messageIds: unansweredTail(history).map(m => String(m._id)), text };
+}
+
+/** Step 13 of a run that stops after the model call: nothing is written and nothing is sent. */
+function stopUnsent(run, outcome, reason) {
+  run.step('send', { status: 'stopped', out: { action: 'none' } });
+  run.end(outcome, reason);
+}
+
+/** Plan 753 (R-27): a person stepped in, the conversation closed or the lease is another's. */
+function dropTurn(conversation, { reason, run, log }) {
+  log.info({ event: 'frontdesk.turn.dropped', conversationId: conversation._id, reason });
+  stopUnsent(run, 'dropped', reason);
+  return { skipped: 'dropped', reason };
+}
+
+/** Plan 753 (R-26): the run was about to write while newer messages wait; the follow-up answers them all. */
+function supersedeTurn(conversation, { waiting, run, log }) {
+  log.info({ event: 'frontdesk.turn.superseded', conversationId: conversation._id, waiting });
+  stopUnsent(run, 'superseded', 'overtaken');
+  return { skipped: 'superseded' };
 }
 
 /** Step 8, from the facts `askTurnModel` returns about its calls. A malformed answer is step 9's stop, not this one's. */
@@ -306,7 +406,8 @@ function tableOutput(res) {
 }
 
 /** `feature` (plan 681) is only for the hand-run eval: its live turns are metered as `eval`, never as a business's turn. */
-async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now = Date.now(), feature, run = NO_RUN } = {}) {
+async function runTurnInner(db, conversation, opts = {}) {
+  const { log = logger, mode = 'turn', now = Date.now(), feature, run = NO_RUN, lease, chain = 0, track } = opts;
   const businessId = conversation.businessId;
   if (mode === 'turn' && conversation.status !== 'bot') {
     run.discard();
@@ -352,10 +453,11 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     in: { window: HISTORY_WINDOW }, out: { messages: history.length, messageIds: history.map(m => String(m._id)), aiTurns },
   });
   run.set({ trigger: triggerOf(history) });
+  if (track) track.seen = history.filter(m => m.author === 'guest').map(m => m._id);
 
   const pre = run.timeSync('precheck', () => {
     if (mode === 'suggest' && isRemoval(history)) return { ok: false, reason: 'removal' };
-    return preCheck({ profile, history, aiTurns, now, mode });
+    return preCheck({ profile, history, aiTurns, chain, now, mode });
   });
   const preIn = { aiTurns, turnLimit: TURN_LIMIT };
   if (pre.ok) {
@@ -401,6 +503,14 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
   };
   const asked = await run.time('ai', () => askTurnModel({ body, usage, log }));
   recordModelCall(run, asked, usage.feature);
+  // Plan 753 (R-27): the model call takes seconds; read the conversation again before anything is written or sent.
+  let overtaken = 0;
+  if (lease) {
+    const gate = await leaseCheck(db, conversation, lease, track?.seen);
+    if (!gate.ok) return dropTurn(conversation, { reason: gate.reason, run, log });
+    overtaken = gate.overtaken;
+    if (overtaken > 0) run.step('send', { out: { overtaken } });
+  }
   if (!asked.ok) {
     const group = failureReason(asked.reason, asked.status);
     run.end('failed', group);
@@ -470,6 +580,9 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
     run.step('tables', { status: 'skipped', out: { why: tables ? 'not_a_table_intent' : 'tables_off' } });
   } else {
     const level0 = levelOf(profile) === 0 || mode === 'suggest';
+    if (overtaken > 0 && !level0 && (answer.intent === 'change' || answer.intent === 'cancel')) {
+      return supersedeTurn(conversation, { waiting: overtaken, run, log });
+    }
     const tableIn = tableInput(answer);
     const res = await run.time('tables',
       () => handleTableIntent(db, conversation, answer, { tables, now, write: !level0, log, suggested }));
@@ -527,6 +640,7 @@ async function runTurnInner(db, conversation, { log = logger, mode = 'turn', now
   }
 
   let requestWritten = false;
+  if (decision.request && overtaken > 0) return supersedeTurn(conversation, { waiting: overtaken, run, log });
   if (decision.request) {
     const { request } = await createRequest(db, businessId, profile, {
       ...decision.request,

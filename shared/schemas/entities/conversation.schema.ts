@@ -41,6 +41,17 @@ export const conversationSchema = z.strictObject({
   lowTurns: z.literal(1).optional(),
   /** Plan 701: set when a guest turn failed and the chat went to a person; removed by the next completed turn. */
   assistantFailed: z.strictObject({ at: z.number(), reason: z.enum(ASSISTANT_FAILURE_REASONS) }).optional(),
+  /** Plan 753 (R-26): the lease of the assistant run that works on this conversation now. `until` is
+   *  when it stops counting; `waiting` are the guest messages that arrived meanwhile; `chain` counts follow-up runs. */
+  run: z
+    .strictObject({
+      id: z.string().min(1),
+      since: z.number(),
+      until: z.number(),
+      chain: z.number().int().min(0).max(10),
+      waiting: z.array(z.string().min(1)).max(20)
+    })
+    .optional(),
   liveKey: z.string().min(1).optional(),
   test: z.literal(true).optional()
 })

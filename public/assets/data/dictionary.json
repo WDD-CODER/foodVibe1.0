@@ -3239,6 +3239,18 @@
     "asr_send_removal_notice": "נשלחה הודעת אישור הסרה",
     "asr_send_none": "לא נשלח דבר",
     "asr_yes": "כן",
-    "asr_no": "לא"
+    "asr_no": "לא",
+    "asr_outcome_dropped": "התשובה לא נשלחה",
+    "asr_outcome_superseded": "הוחלף בתשובת המשך",
+    "asr_verdict_dropped": "העוזר לא שלח את התשובה ולא שמר דבר: {reason}.",
+    "asr_verdict_superseded": "האורח כתב שוב בזמן שהעוזר עבד, ולכן העוזר לא שלח תשובה ולא פתח בקשה. תשובת ההמשך עונה על כל ההודעות יחד.",
+    "asr_reason_taken_over": "איש צוות לקח את השיחה בזמן שהעוזר עבד",
+    "asr_reason_closed": "השיחה נסגרה בזמן שהעוזר עבד",
+    "asr_reason_lease_lost": "איש צוות נכנס לשיחה, או שהעוזר כבר טיפל בה מחדש",
+    "asr_reason_overtaken": "האורח כתב שוב בזמן שהעוזר עבד",
+    "asr_reason_follow_up_limit": "האורח המשיך לכתוב בזמן שהעוזר ענה, יותר מדי פעמים ברצף",
+    "asr_follows": "המשך לטיפול קודם",
+    "asr_via_follow_up": "המשך: הודעות שהגיעו בזמן שהעוזר עבד",
+    "asr_f_overtaken": "הודעות חדשות שהגיעו בזמן העבודה"
   }
 }

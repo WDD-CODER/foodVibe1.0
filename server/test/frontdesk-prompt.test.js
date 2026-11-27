@@ -82,6 +82,37 @@ describe('table section (plan 680)', () => {
   });
 });
 
+describe('plan 753: unanswered guest messages', () => {
+  const { unansweredTail } = require('../services/frontdesk-prompt');
+  const leadOf = history => buildTurnBody({ profile, facts, history, now: NOW }).contents[0].parts[0].text;
+  const guests = (n, from = 1) => Array.from({ length: n }, (_, i) => msg(from + i, 'guest'));
+
+  it('the rules say to answer every one of them', () => {
+    expect(TURN_SYSTEM_PROMPT).toContain('answer every one of them in a single reply');
+  });
+
+  it('with 0 or 1 guest message at the end there is no block, and the data block is what it was', () => {
+    const none = leadOf([msg(1, 'guest'), msg(2, 'ai')]);
+    expect(none).not.toContain('UNANSWERED');
+    expect(leadOf([...guests(3), msg(4, 'ai'), msg(5, 'guest')])).toBe(none);
+    expect(leadOf([])).toBe(none);
+  });
+
+  it('with 2 it says 2, with 7 it says 5, before the conversation', () => {
+    const two = leadOf([msg(1, 'ai'), ...guests(2, 2)]);
+    expect(two).toContain('=== UNANSWERED (data) ===\nGuest messages at the end of the conversation with no answer yet: 2\n=== CONVERSATION FOLLOWS ===');
+    expect(leadOf(guests(7))).toContain('no answer yet: 5\n=== CONVERSATION FOLLOWS ===');
+  });
+
+  it('unansweredTail gives the messages after the newest one that is not the guest\'s, at most 5, oldest first', () => {
+    const ids = history => unansweredTail(history).map(m => m._id);
+    expect(ids([])).toEqual([]);
+    expect(ids([msg(1, 'guest'), msg(2, 'member')])).toEqual([]);
+    expect(ids([msg(1, 'guest'), msg(2, 'server'), msg(3, 'guest'), msg(4, 'guest')])).toEqual(['m3', 'm4']);
+    expect(ids(guests(7))).toEqual(['m3', 'm4', 'm5', 'm6', 'm7']);
+  });
+});
+
 describe('plan 731', () => {
   const { withShapeReminder, SHAPE_RETRY_LINE } = require('../services/frontdesk-prompt');
   it('the rules name a guest who asks to talk to a person as a handoff reason', () => {
