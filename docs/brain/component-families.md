@@ -312,6 +312,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
   `src/app/core/services/dish-data.service.ts`, `src/app/core/services/product-data.service.ts`,
   `src/app/core/services/menu-event-data.service.ts`). A service's own log event and "empty the list on
   reload" go in `EntityLoadOptions`; a legacy-field migration goes in a `normalizeRow` override.
+- Plan 765: MenuDesignDataService (created by plan 764) overrides `ensureLoaded` so a failed load is remembered
+  (`loadFailed_`) and tried again; it adds `duplicateDesign`, `defaultDesign_` and `menuDesignsEnsureLoadedResolver`.
 - When: a new entity type needs a client data service.
 - Known copies: none.
 
@@ -351,6 +353,8 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
   formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
   `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- Plan 765: `designFromForm` / `formFromDesign` in `src/app/core/utils/menu-design-form.util.ts` (menu-design-form) — the menu designer's form to a design the shared schema accepts, and back.
+- Plan 765: `menuFontsHref` in `src/app/core/utils/menu-fonts-link.util.ts` (menu-fonts-link) — one Google Fonts stylesheet address for the curated menu fonts.
 - the unit mapping after a pick (plan 653): `unitForSpoken` in `src/app/pages/inventory/components/stock-count/spoken-unit.ts` — the spoken unit mapped to
   the picked product's own units, same table as the server `resolveUnit`; none fits → flagged, not counted.
 - reading the unit word from the text (plan 654): `unitWordFromText` in `server/utils/stock-extract.js` — when the model
@@ -381,6 +385,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
 - When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- Plan 765: `BusinessService.setMenuDesignDefault` (`src/app/core/services/business.service.ts`) — one owner-only PUT through `API.business('menu-design-default')`; the stored menu settings go into `business_`.
 - `PlatformAdminService.updatePlatform` (`src/app/core/services/platform-admin.service.ts`): one PUT of a business's modules, monthly AI cap and private mode with a reason, then reloads the table (plan 620).
 - `PlatformAdminService.eraseLearnedData(businessId, reason)` (same file): one POST that erases what the platform learned from a business, returns the counts; `UserAdminService.deleteUser(userId, eraseLearned)` adds `?eraseLearned=true` (plan 639).
 - `PlatformAdminService.getPlatformHistory(businessId)` (same file): one GET of a business's change history, newest first, read each time the dialog's history panel opens (plan 638).

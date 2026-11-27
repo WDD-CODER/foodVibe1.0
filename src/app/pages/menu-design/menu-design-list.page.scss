@@ -35,18 +35,16 @@
   }
 }
 
+/* The name, or the rename field in its place, takes the room the rest leaves. */
+.design-card__name,
 .design-card__rename {
   flex: 1;
 
   min-inline-size: 0;
+  margin: 0;
 }
 
 .design-card__name {
-  flex: 1;
-
-  min-inline-size: 0;
-  margin: 0;
-
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
