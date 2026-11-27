@@ -102,6 +102,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable (plan 720)
 - Use: `scripts/lib/modal-guard.mjs` (`modalFindings`), run by `scripts/test/style-720.test.mjs`; `withoutRetiredSheetRules(text)` — the base text the append-only tests (`style-703`, `style-720`) compare with, minus the rules plan 757 removed.
+- Pieces: modalFindings, withoutRetiredSheetRules (a new export of scripts/lib/modal-guard.mjs).
 - When: changing a popup template or style; it flags bottom sheets, a `sheet` binding and a popup that cannot scroll.
 
 ### modal-controller — open a popup and get its answer
