@@ -1,0 +1,99 @@
+<section class="asr-flow" data-testid="asr-flow">
+  <div class="asr-flow__top">
+    <p class="asr-flow__intro">{{ intro() }}</p>
+    <div class="asr-flow__tools">
+      <span class="c-chip-group">
+        @for (kind of kinds; track kind) {
+          <span class="c-chip c-chip--tag c-chip--sm" [class]="kindTone[kind]">{{
+            'asr_kind_' + kind | translatePipe
+          }}</span>
+        }
+      </span>
+      <button type="button" class="c-btn-ghost" data-testid="flow-to-runs" (click)="openRuns.emit()">
+        <lucide-icon name="activity" [size]="16" aria-hidden="true"></lucide-icon>
+        <span>{{ 'asr_flow_to_runs' | translatePipe }}</span>
+      </button>
+    </div>
+  </div>
+
+  <ol class="asr-steps">
+    @for (step of steps; track step.key) {
+      <li>
+        <button
+          type="button"
+          class="asr-step"
+          [attr.aria-expanded]="open_() === step.key"
+          [attr.aria-controls]="'flow-panel-' + step.key"
+          [attr.data-testid]="'flow-step-' + step.key"
+          (click)="toggle(step.key)"
+        >
+          <span class="asr-step-number">{{ $index + 1 }}</span>
+          <span class="asr-step-name">{{ 'asr_step_' + step.key | translatePipe }}</span>
+          <span class="c-chip c-chip--tag c-chip--sm" [class]="kindTone[step.kind]" data-testid="flow-kind">{{
+            'asr_kind_' + step.kind | translatePipe
+          }}</span>
+          <lucide-icon class="asr-step-chevron" name="chevron-down" [size]="16" aria-hidden="true"></lucide-icon>
+        </button>
+        @if (open_() === step.key) {
+          <div class="asr-step-panel" [id]="'flow-panel-' + step.key">
+            <p class="asr-flow__text">{{ whatKey(step.key) | translatePipe }}</p>
+            @for (fact of step.facts; track fact) {
+              @if (engineLine(fact); as line) {
+                <p class="asr-flow__engine" data-testid="flow-engine">{{ engineText(line) }}</p>
+              }
+            }
+            <dl class="asr-fields">
+              <div class="asr-field">
+                <dt>{{ 'asr_flow_reads' | translatePipe }}</dt>
+                <dd>{{ readsKey(step.key) | translatePipe }}</dd>
+              </div>
+              <div class="asr-field">
+                <dt>{{ 'asr_flow_stops' | translatePipe }}</dt>
+                <dd>
+                  @if (step.stops.length === 0) {
+                    {{ 'asr_flow_stops_none' | translatePipe }}
+                  } @else {
+                    <ul class="asr-flow__stops">
+                      @for (reason of step.stops; track reason) {
+                        <li>
+                          <span>{{ reasonKey(reason) | translatePipe }}</span>
+                          @if (isAdmin()) {
+                            <code class="asr-flow__code" dir="ltr" data-testid="flow-reason-code">{{ reason }}</code>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </dd>
+              </div>
+              @if (settingsOf(step.key).length) {
+                <div class="asr-field">
+                  <dt>{{ 'asr_flow_settings' | translatePipe }}</dt>
+                  <dd class="asr-flow__settings">
+                    <span>{{ settingNames(step.key) }}</span>
+                    <button
+                      type="button"
+                      class="c-btn-ghost--sm"
+                      data-testid="flow-to-settings"
+                      (click)="openSettings.emit()"
+                    >
+                      {{ 'asr_flow_to_settings' | translatePipe }}
+                    </button>
+                  </dd>
+                </div>
+              }
+              @if (isAdmin()) {
+                <div class="asr-field">
+                  <dt>{{ 'asr_flow_code' | translatePipe }}</dt>
+                  <dd>
+                    <code class="asr-flow__code" dir="ltr" data-testid="flow-code">{{ step.code }}</code>
+                  </dd>
+                </div>
+              }
+            </dl>
+          </div>
+        }
+      </li>
+    }
+  </ol>
+</section>

@@ -1,6 +1,6 @@
 <section class="c-page asr" dir="rtl" [class.asr--open]="id_()" data-testid="assistant-page">
   <app-page-header titleKey="asr_title">
-    @if (allowed_()) {
+    @if (allowed_() && activeTab_() === 'runs') {
     <button header-actions type="button" class="c-btn-ghost" data-testid="asr-refresh" (click)="refresh()">
       <lucide-icon name="refresh-cw" [size]="18" aria-hidden="true"></lucide-icon>
       <span class="btn-label">{{ 'asr_refresh' | translatePipe }}</span>
@@ -21,7 +21,7 @@
         [class.active]="activeTab_() === tab.key"
         [attr.aria-selected]="activeTab_() === tab.key"
         [attr.data-testid]="'asr-tab-' + tab.key"
-        (click)="activeTab_.set(tab.key)"
+        (click)="setTab(tab.key)"
       >
         <lucide-icon [name]="tab.icon" [size]="16" />
         {{ tab.labelKey | translatePipe }}
@@ -30,6 +30,20 @@
     </app-scroll-rail>
   </div>
 
+  @switch (activeTab_()) { @case ('flow') {
+  <div role="tabpanel">
+    <app-flow-map
+      [engine]="setup_()?.engine ?? null"
+      [isAdmin]="isAdmin_()"
+      (openRuns)="setTab('runs')"
+      (openSettings)="setTab('settings')"
+    />
+  </div>
+  } @case ('settings') {
+  <div role="tabpanel">
+    <app-assistant-settings-table [isAdmin]="isAdmin_()" />
+  </div>
+  } @case ('runs') {
   <div class="asr-body" role="tabpanel">
     <aside class="asr-list" data-testid="asr-list">
       <div class="c-chip-group" role="radiogroup">
@@ -126,5 +140,5 @@
       } }
     </div>
   </div>
-  }
+  } } }
 </section>

@@ -207,3 +207,102 @@ describe('the platform admin', () => {
     expect(answered.body.run.promptRules).toBeUndefined();
   });
 });
+
+describe('plan 756: the setup read', () => {
+  const profileOf = (businessId, over = {}) => db('frontDeskProfiles').updateOne({ businessId }, { $set: over });
+  const item = (id, businessId, status, visibility, over = {}) => ({
+    _id: id, businessId, status, visibility, topic: 'other', question: 'q', answer: 'a', createdAt: 1, ...over,
+  });
+  const PROFILE = {
+    displayName: '', phone: '03-1234567', address: 'Secret Street 5', serviceArea: 'Secret Town',
+    hours: [{ days: 'sun', time: '10-22' }, { days: 'fri', time: '10-14' }],
+    assistant: { level: 1, tone: 'formal', handoffText: 'secret handoff sentence' },
+    requestKinds: { event: { enabled: true }, table: { enabled: false } },
+    tableService: { confirmMode: 'auto' },
+  };
+
+  beforeEach(async () => {
+    await db('knowledgeItems').deleteMany({});
+    await profileOf('b1', PROFILE);
+    await db('knowledgeItems').insertMany([
+      item('k1', 'b1', 'approved', 'public'),
+      item('k2', 'b1', 'approved', 'public'),
+      item('k3', 'b1', 'approved', 'internal'),
+      item('k4', 'b1', 'draft', 'public'),
+      item('k5', 'b1', 'approved', 'public', { deletedAt: 5 }),
+      item('k6', 'b2', 'approved', 'public'),
+    ]);
+  });
+
+  it('401 without a token, 403 for staff', async () => {
+    expect((await request(app).get(BASE + '/setup')).status).toBe(401);
+    const staff = await get('/setup', STAFF);
+    expect(staff.status).toBe(403);
+    expect(staff.body.error).toBe('FORBIDDEN');
+  });
+
+  it('gives the owner every engine number from the constant the turn uses', async () => {
+    const res = await get('/setup');
+    expect(res.status).toBe(200);
+    const inbound = require('../services/inbound');
+    const guardrails = require('../services/frontdesk-guardrails');
+    const prompt = require('../services/frontdesk-prompt');
+    const route = require('../routes/ai/frontdesk');
+    const { engine } = res.body;
+    expect(engine.quietMs).toBe(inbound.QUIET_MS);
+    expect(engine.maxWaitMs).toBe(inbound.MAX_WAIT_MS);
+    expect(engine.dailyTurns).toBe(require('../services/frontdesk-turn').FRONTDESK_DAILY_TURNS);
+    expect(engine.turnLimit).toBe(guardrails.TURN_LIMIT);
+    expect(engine.followUpMax).toBe(guardrails.FOLLOW_UP_MAX);
+    expect(engine.historyWindow).toBe(prompt.HISTORY_WINDOW);
+    expect(engine.glueMax).toBe(prompt.GLUE_MAX);
+    expect(engine.factsMaxChars).toBe(require('../services/knowledge').MAX_FACTS_CHARS);
+    expect(engine.firstModelMs).toBe(route.FIRST_MODEL_LIMIT_MS);
+    expect(engine.turnBudgetMs).toBe(route.TURN_BUDGET_MS);
+    expect(Object.keys(engine)).toHaveLength(10);
+  });
+
+  it("answers this business's own values, counting no other business's items", async () => {
+    const res = await get('/setup');
+    expect(res.body.business).toEqual({
+      level: 1, status: 'active', tone: 'formal', handoffTextSet: true, activeHoursSet: false, hoursSet: true,
+      profileFieldsFilled: 3, profileFieldsTotal: 4, kindsOn: 1, knowledgeApproved: 3, knowledgePublic: 2,
+      tablesOn: false, confirmMode: 'auto',
+    });
+    expect(res.body.models).toBeUndefined();
+  });
+
+  it('answers business null for a business without a profile', async () => {
+    await db('frontDeskProfiles').deleteMany({ businessId: 'b1' });
+    const res = await get('/setup');
+    expect(res.status).toBe(200);
+    expect(res.body.business).toBeNull();
+    expect(Object.keys(res.body.engine)).toHaveLength(10);
+  });
+
+  it('adds the model order for the platform admin only, and never reads "setup" as a run id', async () => {
+    const { modelChain } = require('../services/gemini-client');
+    for (const who of [PLATFORM, HOME_ADMIN]) {
+      const res = await get('/setup', who);
+      expect(res.status).toBe(200);
+      expect(res.body.models).toEqual(modelChain());
+    }
+    for (const who of [OWNER, CONSULTANT]) {
+      const res = await get('/setup', who);
+      expect(res.status).toBe(200);
+      expect(res.body).not.toHaveProperty('models');
+      expect(res.body.error).toBeUndefined();
+    }
+  });
+
+  it('logs the read with no value of the profile', async () => {
+    await get('/setup');
+    const lines = logs.byEvent('assistant_runs.setup_read');
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).toMatchObject({ hasProfile: true });
+    const text = JSON.stringify(logs.records);
+    for (const value of ['03-1234567', 'Secret Street', 'Secret Town', 'secret handoff']) {
+      expect(text).not.toContain(value);
+    }
+  });
+});

@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { signal, WritableSignal } from '@angular/core'
-import { ActivatedRoute, convertToParamMap, provideRouter, Router } from '@angular/router'
+import { ActivatedRoute, convertToParamMap, ParamMap, provideRouter, Router } from '@angular/router'
 import { BehaviorSubject } from 'rxjs'
-import { LucideAngularModule } from 'lucide-angular'
+import { ListChecks, LucideAngularModule, Settings } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { AssistantRunDataService } from '@services/assistant-run-data.service'
+import { ModuleService } from '@services/module.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
@@ -70,21 +71,28 @@ describe('AssistantPage (plan 752)', () => {
   let data: Record<string, jasmine.Spy | WritableSignal<unknown>>
   let list: jasmine.Spy
   let open: jasmine.Spy
+  let loadSetup: jasmine.Spy
+  let query: BehaviorSubject<ParamMap>
+  let signedIn: WritableSignal<{ _id: string }>
 
   async function create(options: { id?: string; query?: Record<string, string> } = {}) {
     const params = convertToParamMap(options.id ? { id: options.id } : {})
+    const queryParams = convertToParamMap(options.query ?? {})
+    query = new BehaviorSubject(queryParams)
     const route = {
       paramMap: new BehaviorSubject(params),
-      snapshot: { paramMap: params, queryParamMap: convertToParamMap(options.query ?? {}) }
+      queryParamMap: query,
+      snapshot: { paramMap: params, queryParamMap: queryParams }
     }
     await TestBed.configureTestingModule({
-      imports: [AssistantPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [AssistantPage, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, ListChecks, Settings })],
       providers: [
         provideRouter([]),
         { provide: ActivatedRoute, useValue: route },
         { provide: AssistantRunDataService, useValue: data },
         { provide: PermissionService, useValue: { isOwner_: owner } },
-        { provide: UserService, useValue: { isPlatformAdmin_: admin } },
+        { provide: UserService, useValue: { isPlatformAdmin_: admin, user_: signedIn } },
+        { provide: ModuleService, useValue: { has: () => true } },
         { provide: TranslationService, useValue: { translate: (k: string) => DICT[k] ?? k } }
       ]
     }).compileComponents()
@@ -96,6 +104,7 @@ describe('AssistantPage (plan 752)', () => {
   beforeEach(() => {
     owner = signal(true)
     admin = signal(false)
+    signedIn = signal({ _id: 'u1' })
     runs = signal<AssistantRunRow[]>([])
     loaded = signal(true)
     listFailed = signal(false)
@@ -105,7 +114,12 @@ describe('AssistantPage (plan 752)', () => {
     runFailed = signal<'not_found' | 'failed' | null>(null)
     list = jasmine.createSpy('list').and.resolveTo()
     open = jasmine.createSpy('open').and.resolveTo()
+    loadSetup = jasmine.createSpy('loadSetup').and.resolveTo()
     data = {
+      setup_: signal(null),
+      setupLoaded_: signal(false),
+      setupFailed_: signal(false),
+      loadSetup,
       runs_: runs,
       more_: more,
       listLoaded_: loaded,
@@ -257,5 +271,86 @@ describe('AssistantPage (plan 752)', () => {
     open.calls.reset()
     byId('asr-detail')!.querySelector('button')!.click()
     expect(open).toHaveBeenCalledOnceWith('r1')
+  })
+
+  describe('the three tabs (plan 756)', () => {
+    const tabIds = () => Array.from(el().querySelectorAll('[role="tab"]')).map((t) => t.getAttribute('data-testid'))
+    const selected = (id: string) => byId(id)!.getAttribute('aria-selected')
+
+    it('shows them in order, with the runs open when the address names no tab', async () => {
+      await create()
+      expect(tabIds()).toEqual(['asr-tab-flow', 'asr-tab-runs', 'asr-tab-settings'])
+      expect(selected('asr-tab-runs')).toBe('true')
+      expect(byId('asr-list')).not.toBeNull()
+      expect(byId('asr-refresh')).not.toBeNull()
+      expect(el().querySelector('app-flow-map')).toBeNull()
+      expect(loadSetup).not.toHaveBeenCalled()
+    })
+
+    it('?tab=flow shows the flow map, reads the setup and makes no runs request', async () => {
+      await create({ query: { tab: 'flow' } })
+      expect(selected('asr-tab-flow')).toBe('true')
+      expect(el().querySelector('app-flow-map')).not.toBeNull()
+      expect(byId('asr-list')).toBeNull()
+      expect(byId('asr-refresh')).toBeNull()
+      expect(loadSetup).toHaveBeenCalled()
+      expect(list).not.toHaveBeenCalled()
+    })
+
+    it('?tab=settings shows the settings table', async () => {
+      await create({ query: { tab: 'settings' } })
+      expect(el().querySelector('app-assistant-settings-table')).not.toBeNull()
+      expect(byId('asr-list')).toBeNull()
+      expect(byId('asr-refresh')).toBeNull()
+      expect(loadSetup).toHaveBeenCalled()
+    })
+
+    it('reads the setup again when another user signs in while the tab is open', async () => {
+      await create({ query: { tab: 'flow' } })
+      loadSetup.calls.reset()
+      signedIn.set({ _id: 'u2' })
+      await settle()
+      expect(loadSetup).toHaveBeenCalledOnceWith()
+    })
+
+    it('loads the list when the address moves to the runs', async () => {
+      await create({ query: { tab: 'flow' } })
+      query.next(convertToParamMap({}))
+      await settle()
+      expect(byId('asr-list')).not.toBeNull()
+      expect(list).toHaveBeenCalledOnceWith({ filter: 'all', test: false })
+    })
+
+    it('keeps the tab in the address, and nothing for the runs', async () => {
+      await create()
+      const navigate = TestBed.inject(Router).navigate
+      byId('asr-tab-settings')!.click()
+      expect(navigate).toHaveBeenCalledWith(['/frontdesk/assistant'], {
+        queryParams: { tab: 'settings' },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      })
+      byId('asr-tab-runs')!.click()
+      expect(navigate).toHaveBeenCalledWith(
+        ['/frontdesk/assistant'],
+        jasmine.objectContaining({ queryParams: { tab: null } })
+      )
+    })
+
+    it("a run's address shows the runs whatever tab it carries", async () => {
+      await create({ id: 'r1', query: { tab: 'settings' } })
+      expect(selected('asr-tab-runs')).toBe('true')
+      expect(byId('asr-list')).not.toBeNull()
+      expect(el().querySelector('app-assistant-settings-table')).toBeNull()
+    })
+
+    it('staff get no tab strip and no setup read', async () => {
+      owner.set(false)
+      await create({ query: { tab: 'flow' } })
+      expect(el().textContent).toContain('הדף פתוח לבעל העסק בלבד')
+      expect(tabIds()).toEqual([])
+      expect(el().querySelector('app-flow-map')).toBeNull()
+      expect(loadSetup).not.toHaveBeenCalled()
+    })
   })
 })

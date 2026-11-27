@@ -12,8 +12,17 @@ import { PermissionService } from '@services/permission.service'
 import { UserService } from '@services/user.service'
 import type { RunFilter } from '@models/assistant-run.model'
 import { outcomeTone } from './assistant-run-view.util'
+import { FlowMapComponent } from './components/flow-map/flow-map.component'
 import { RunDetailComponent } from './components/run-detail/run-detail.component'
+import { SettingsTableComponent } from './components/settings-table/settings-table.component'
 
+export type AssistantTab = 'flow' | 'runs' | 'settings'
+
+const TABS: readonly { key: AssistantTab; labelKey: string; icon: string }[] = [
+  { key: 'flow', labelKey: 'asr_tab_flow', icon: 'list-checks' },
+  { key: 'runs', labelKey: 'asr_tab_runs', icon: 'activity' },
+  { key: 'settings', labelKey: 'asr_tab_settings', icon: 'pencil' }
+]
 const FILTERS: readonly RunFilter[] = ['all', 'answered', 'handover', 'fallback']
 const TIME_ZONE = 'Asia/Jerusalem'
 const dayKey = (ms: number): string => new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE }).format(new Date(ms))
@@ -32,8 +41,9 @@ const rowTime = (ms: number): string => {
 const seconds = (ms: number): string => (ms / 1000).toFixed(1)
 
 /**
- * Plan 752: what the assistant did — a tab strip (one tab, the runs), the list with its filter chips and the test
- * switch, and the open run step by step. For the owner and the platform admin.
+ * Plan 752: what the assistant did — the list with its filter chips and the test switch, and the open run step by step.
+ * Plan 756 adds two tabs beside it, "how it works" and "what you can change"; the open tab is in the address
+ * (`?tab=`). For the owner and the platform admin.
  */
 @Component({
   selector: 'app-assistant-page',
@@ -46,7 +56,9 @@ const seconds = (ms: number): string => (ms / 1000).toFixed(1)
     EmptyStateComponent,
     LoaderComponent,
     ScrollRailComponent,
-    RunDetailComponent
+    RunDetailComponent,
+    FlowMapComponent,
+    SettingsTableComponent
   ],
   templateUrl: './assistant.page.html',
   styleUrl: './assistant.page.scss',
@@ -61,14 +73,22 @@ export class AssistantPage {
 
   protected readonly allowed_ = computed(() => this.permission.isOwner_() || this.user.isPlatformAdmin_())
   protected readonly isAdmin_ = computed(() => this.user.isPlatformAdmin_())
-  protected readonly tabs = [{ key: 'runs', labelKey: 'asr_tab_runs', icon: 'activity' }] as const
-  protected readonly activeTab_ = signal<'runs'>('runs')
+  protected readonly tabs = TABS
   protected readonly filters = FILTERS
   protected readonly filter_ = signal<RunFilter>(this.filterOnEntry())
   protected readonly testScope_ = signal(this.route.snapshot.queryParamMap.get('scope') === 'test')
 
   private readonly params_ = toSignal(this.route.paramMap, { initialValue: this.route.snapshot.paramMap })
   protected readonly id_ = computed(() => this.params_().get('id'))
+
+  private readonly query_ = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap })
+  /** A run's address always shows the runs; else the tab the address names, and the runs without one. */
+  protected readonly activeTab_ = computed<AssistantTab>(() => {
+    if (this.id_()) return 'runs'
+    const asked = this.query_().get('tab')
+    return asked === 'flow' || asked === 'settings' ? asked : 'runs'
+  })
+  protected readonly setup_ = this.data.setup_
 
   protected readonly listLoaded_ = this.data.listLoaded_
   protected readonly listFailed_ = this.data.listFailed_
@@ -96,8 +116,13 @@ export class AssistantPage {
   constructor() {
     effect(() => {
       const options = { filter: this.filter_(), test: this.testScope_() }
-      if (!this.allowed_()) return
+      if (!this.allowed_() || this.activeTab_() !== 'runs') return
       untracked(() => void this.data.list(options))
+    })
+    effect(() => {
+      this.user.user_() // a user who signs in while the tab is open has no setup read yet
+      if (!this.allowed_() || this.activeTab_() === 'runs') return
+      untracked(() => void this.data.loadSetup())
     })
     effect(() => {
       const id = this.id_()
@@ -106,6 +131,15 @@ export class AssistantPage {
         if (id && allowed) void this.data.open(id)
         else this.data.closeRun()
       })
+    })
+  }
+
+  /** The tab travels in the address, so the browser's Back from another screen returns to it. */
+  protected setTab(tab: AssistantTab): void {
+    void this.router.navigate(['/frontdesk/assistant'], {
+      queryParams: { tab: tab === 'runs' ? null : tab },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
     })
   }
 

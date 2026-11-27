@@ -25,3 +25,41 @@ export type AssistantRunRow = {
 }
 
 export type RunFilter = 'all' | 'answered' | 'handover' | 'fallback'
+
+/** Plan 756: the engine's fixed numbers, read by the server from the constants the turn itself uses. */
+export interface AssistantEngine {
+  quietMs: number
+  maxWaitMs: number
+  dailyTurns: number
+  turnLimit: number
+  followUpMax: number
+  historyWindow: number
+  glueMax: number
+  factsMaxChars: number
+  firstModelMs: number
+  turnBudgetMs: number
+}
+
+/** Plan 756: this business's own values that shape the assistant's answers. */
+export interface AssistantBusinessSetup {
+  level: 0 | 1 | 2
+  status: string
+  tone: 'warm' | 'formal'
+  handoffTextSet: boolean
+  activeHoursSet: boolean
+  hoursSet: boolean
+  profileFieldsFilled: number
+  profileFieldsTotal: number
+  kindsOn: number
+  knowledgeApproved: number
+  knowledgePublic: number
+  tablesOn: boolean
+  confirmMode: 'auto' | 'manual'
+}
+
+/** The answer of GET /assistant-runs/setup; `models` (the order they are tried) reaches the platform admin only. */
+export interface AssistantSetup {
+  engine: AssistantEngine
+  business: AssistantBusinessSetup | null
+  models?: string[]
+}
