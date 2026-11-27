@@ -820,16 +820,16 @@ these two tabs, which describe the rule, not a run. `retry`,
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Add one read that tells the page the engine's real numbers and this business's own values — assistantSetup with the engine constants, the business values, the model order for the admin only; the setup route before the run route; the router test cases — server/services/assistant-setup.js, server/routes/assistant-runs.js, server/test/assistant-runs-router.test.js
-- [ ] A2: Let the browser read that setup once and keep it — the three types, the three signals and loadSetup on the service, its spec cases — src/app/core/models/assistant-run.model.ts, src/app/core/services/assistant-run-data.service.ts, src/app/core/services/assistant-run-data.service.spec.ts
-- [ ] A3: Write down the 13 steps as data, so a step added later cannot be forgotten — FLOW_STEPS with kind, stops, engine facts and code path; the coverage spec against the run step keys and reasons — src/app/pages/frontdesk/assistant/assistant-flow.data.ts, src/app/pages/frontdesk/assistant/assistant-flow.data.spec.ts
-- [ ] A4: Write down every setting as data with where it is changed and by whom — SETTING_ROWS, settingValue and changeBlock, the spec that every route exists and the value spec — src/app/pages/frontdesk/assistant/assistant-settings.data.ts, src/app/pages/frontdesk/assistant/assistant-settings.data.spec.ts, src/app/pages/frontdesk/assistant/assistant-settings-value.util.ts, src/app/pages/frontdesk/assistant/assistant-settings-value.util.spec.ts
-- [ ] A5: Add every new word to the dictionary and test that no step text carries a typed number — all keys of the UI/UX tables; the dictionary test — public/assets/data/dictionary.json, server/test/assistant-flow-dictionary.test.js
-- [ ] A6: Give the step row one shared look for the run detail and the flow map — move the step row rules into a partial that both stylesheets use, no rule text changed — src/app/pages/frontdesk/assistant/_asr-step.scss, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.scss
-- [ ] A7: Build the tab that explains the 13 steps in plain words — the flow map component, one open row at a time, the admin-only code lines, the current-value lines, its spec — src/app/pages/frontdesk/assistant/components/flow-map/**
-- [ ] A8: Build the tab that lists every setting with its value and a button to the real screen — the settings table component, the blocked button with its reason, loading, error and no-profile states, its spec — src/app/pages/frontdesk/assistant/components/settings-table/**
-- [ ] A9: Put the two tabs on the assistant page and keep the open tab in the address — three tabs, activeTab from the address, setTab, the runs list loads only on its tab, the refresh button only there, the page spec cases — src/app/pages/frontdesk/assistant/assistant.page.ts, src/app/pages/frontdesk/assistant/assistant.page.html, src/app/pages/frontdesk/assistant/assistant.page.scss, src/app/pages/frontdesk/assistant/assistant.page.spec.ts
-- [ ] A10: Write down where the new pieces live — folder maps, the API table row, the registry family lines and the inventory — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/agent/standards-backend.md, docs/restaurant/restaurant-map.md, docs/brain/component-families.md, docs/brain/inventory.md
+- [x] A1: Add one read that tells the page the engine's real numbers and this business's own values — assistantSetup with the engine constants, the business values, the model order for the admin only; the setup route before the run route; the router test cases — server/services/assistant-setup.js, server/routes/assistant-runs.js, server/test/assistant-runs-router.test.js
+- [x] A2: Let the browser read that setup once and keep it — the three types, the three signals and loadSetup on the service, its spec cases — src/app/core/models/assistant-run.model.ts, src/app/core/services/assistant-run-data.service.ts, src/app/core/services/assistant-run-data.service.spec.ts
+- [x] A3: Write down the 13 steps as data, so a step added later cannot be forgotten — FLOW_STEPS with kind, stops, engine facts and code path; the coverage spec against the run step keys and reasons — src/app/pages/frontdesk/assistant/assistant-flow.data.ts, src/app/pages/frontdesk/assistant/assistant-flow.data.spec.ts
+- [x] A4: Write down every setting as data with where it is changed and by whom — SETTING_ROWS, settingValue and changeBlock, the spec that every route exists and the value spec — src/app/pages/frontdesk/assistant/assistant-settings.data.ts, src/app/pages/frontdesk/assistant/assistant-settings.data.spec.ts, src/app/pages/frontdesk/assistant/assistant-settings-value.util.ts, src/app/pages/frontdesk/assistant/assistant-settings-value.util.spec.ts
+- [x] A5: Add every new word to the dictionary and test that no step text carries a typed number — all keys of the UI/UX tables; the dictionary test — public/assets/data/dictionary.json, server/test/assistant-flow-dictionary.test.js
+- [x] A6: Give the step row one shared look for the run detail and the flow map — move the step row rules into a partial that both stylesheets use, no rule text changed — src/app/pages/frontdesk/assistant/_asr-step.scss, src/app/pages/frontdesk/assistant/components/run-detail/run-detail.component.scss
+- [x] A7: Build the tab that explains the 13 steps in plain words — the flow map component, one open row at a time, the admin-only code lines, the current-value lines, its spec — src/app/pages/frontdesk/assistant/components/flow-map/**
+- [x] A8: Build the tab that lists every setting with its value and a button to the real screen — the settings table component, the blocked button with its reason, loading, error and no-profile states, its spec — src/app/pages/frontdesk/assistant/components/settings-table/**
+- [x] A9: Put the two tabs on the assistant page and keep the open tab in the address — three tabs, activeTab from the address, setTab, the runs list loads only on its tab, the refresh button only there, the page spec cases — src/app/pages/frontdesk/assistant/assistant.page.ts, src/app/pages/frontdesk/assistant/assistant.page.html, src/app/pages/frontdesk/assistant/assistant.page.scss, src/app/pages/frontdesk/assistant/assistant.page.spec.ts
+- [x] A10: Write down where the new pieces live — folder maps, the API table row, the registry family lines and the inventory — server/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, docs/agent/standards-backend.md, docs/restaurant/restaurant-map.md, docs/brain/component-families.md, docs/brain/inventory.md
 - [ ] A11: Run every check of this plan and hand Dandan the three page checks — test:server, test:ci, build, both lints, the icon lint, the inventory check, log-query; evidence into Execution Notes; the slot's servers up before the cards
 
 ## Technical Considerations
@@ -919,3 +919,27 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the mock-up's rows "JSON shape" and "guardrail rules" are one fixed row ("מבנה התשובה ובדיקות הבטיחות"); "daily AI allowance" became two rows — the fixed daily cap of the assistant and the monthly cap FoodVibe sets per business.
 - behaviour: on a phone a settings row shows the name, the value and the button; "משפיע על שלב" and "מי משנה" are dropped there — the same link is shown the other way round inside each step of the flow map ("מה אפשר לשנות בשלב הזה").
 - behaviour: opening the page on the flow or settings tab makes no runs request; the runs list loads when its tab is opened.
+
+Build (2026-11-27):
+- Step 0 (`scope-check.mjs --drift` → `REALITY: drift`): 711cd215 ok · a34fc0e3 ok · 9e339e05 ok · 5fb6fb8c ok · 4346fa14 ok · bbf020bf ok · def248b0 ok · 30626b01 ok. All ten engine constants are exported under the plan's names; `RUN_REASONS` has 26 entries.
+- The `asr_engine_<field>` and `asr_engine_val_<field>` dictionary keys are stored in lower case (`asr_engine_quietms`), because `TranslationService.translate` looks every key up in lower case; the dictionary test holds every `asr_*` key to it.
+- `request_kinds` counts the values of the `requestKinds` record (the stored shape is a record, not a list).
+- behaviour: the setup read is kept for the browser session as the plan says (`loadSetup` returns at once when loaded): after a setting is changed, the table shows the earlier value until the page is reloaded, and a sign-in as another user without a reload keeps it too. Reverse: call `loadSetup(true)` from the settings table.
+- behaviour: pressing the runs tab while a run is open goes back to the runs list (`setTab` navigates to `/frontdesk/assistant`). Reverse: do nothing in `setTab` when the asked tab is already active.
+- behaviour: two calls of `loadSetup` that overlap (the page and the settings table) share one request. Reverse: drop `setupCall`.
+- Reuse Check: rows added for the new page-local classes and file names (`kit-checks` asks for them); no piece changed.
+- seen: public/assets/data/dictionary.json:2549-2550 — the keys `platform_history_field_aiMonthlyTokenCap` and `platform_history_field_aiPrivate` have capital letters, so `translate` never finds them.
+
+Evidence (on commit 18c2281e):
+- `pnpm run build` → exit 0
+- `pnpm run lint` → exit 0 (0 errors); `pnpm --dir server run lint` → exit 0 (0 errors)
+- `pnpm run test:ci` → exit 0, `TOTAL: 3334 SUCCESS`
+- `pnpm run test:server` → exit 0, 186 files, 2824 tests passed
+- `kit-manifest-check.mjs --root .` → exit 0, `KIT_MANIFEST: ok`
+- `node scripts/scope-check.mjs --diff=origin/orch/rs-console --plan=<this plan>` → exit 0, `SCOPE: ok`
+- `kit-checks.mjs --base origin/orch/rs-console --plan <this plan>` → exit 0, `KIT_CHECKS: ok (6 checks)`
+- `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check` → exit 0
+- `ci-scope-check.mjs --checkout-branch` → exit 0 (it prints `skipped`)
+- `inventory.mjs --check` → exit 0, `INVENTORY: ok`
+- `log-query.mjs --since=plan-start --level=error` → exit 0, `SKIP: no database configured`
+- A11 stays open: the three `[human]` page checks need the slot's servers and the Human; this builder folder starts none.
