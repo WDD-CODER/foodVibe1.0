@@ -718,6 +718,11 @@ Every batch's plans depend only on plans in earlier batches, so the batches are 
 - [ ] F3: Stock count rows: name container above a controls container on phones — src/app/pages/inventory/components/stock-count/stock-count.component.html
 - [ ] F4: Run every automatic check and paste the outputs under Execution Notes — plans/762-house-style-grading-round-three.plan.md
 
+### Plan 763 — The stock count's two-line rows only on narrow phones; the leaf's nutrition box always in the same place
+- [ ] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
+- [ ] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
+- [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
+
 ### Plan 764 — Menu design foundation: module, design records, menu fields and the one shared template
 - [ ] A1: Decide in one shared place which design a menu wears, so the editor and the PDF never disagree — pure resolveMenuDesign(menu, designs, business): the menu's own live design, else the business default, else the first live design by createdAt, else baseDesign('classic'); unit test covers all four (the map's E1 path note is already recorded by the Planner) — shared/schemas/menu-design/menu-resolve.ts, shared/schemas/menu-design/index.ts, server/test/menu-design-template.test.js
 - [ ] A2: Add the menu design module so the platform admin can switch it on per business, off by default — MODULE_KEYS + MODULE_OF_TYPE.menuDesigns, dictionary label module_menu_design, update the module tests that list the keys — shared/schemas/modules-pure.ts, public/assets/data/dictionary.json, server/test/modules-schema.test.js, server/test/modules-registry.test.js, server/test/modules-gate.test.js, src/app/core/services/module.service.spec.ts
