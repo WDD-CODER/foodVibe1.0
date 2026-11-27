@@ -243,8 +243,9 @@ describe('static checks', () => {
     for (const m of DEFAULT_MODELS) expect(AI_PRICES[m], m).toBeTruthy();
   });
 
-  it('AI_FEATURES has 23 keys', () => {
-    expect(AI_FEATURES).toHaveLength(23);
+  it('AI_FEATURES has 26 keys', () => {
+    expect(AI_FEATURES).toHaveLength(26);
+    for (const key of ['menu_design_variants', 'menu_design_refine', 'menu_from_text']) expect(isAiFeature(key)).toBe(true);
     expect(isAiFeature('recipe_generate')).toBe(true);
     expect(isAiFeature('nope')).toBe(false);
   });
