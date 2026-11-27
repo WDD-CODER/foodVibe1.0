@@ -2,11 +2,10 @@
 
 One row per orchestrator run, written by `node scripts/orch-state.mjs finish` from the run's `status.json` — never by hand. `orch-readiness` reads the last three rows (a reason that parked a plan in two of them is asked about before the run starts), and the run report ends with a trend line from them (`node scripts/orch-state.mjs trend`). The `✗` columns of a run are filled by the next `finish`, from `decision-log.md` (a log row belongs to the run whose plan list holds its plan number); the newest run's stay `-` until then. The table keeps the 20 newest rows; older ones are rolled into one `Earlier (N runs): …` line above it.
 
-Earlier (74 runs): plans 216 · merged 194 · parked 19 · fix rounds 95 · escalations 41 · gate fails 25 · ✗ 14 · checker misses 0 — per run: plans 2.92 · parked 0.26 · fix rounds 1.28 · ✗ per plan 0.06
+Earlier (75 runs): plans 217 · merged 195 · parked 19 · fix rounds 96 · escalations 42 · gate fails 25 · ✗ 14 · checker misses 0 — per run: plans 2.89 · parked 0.25 · fix rounds 1.28 · ✗ per plan 0.06
 
 | Date | Run | Plans | Merged | Parked | Parked reasons | Fix rounds | Escalations | Gate fails | Final gate | ✗ | Checker misses | ✗ per plan |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11-19 | mod-fixes-2 | 645 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-alerts | 646 | 1 | 0 | - | 1 | 0 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-learning | 647 | 1 | 0 | - | 1 | 1 | 1 | ok | 0 | 0 | 0 |
 | 2026-11-19 | mod-data-fix | 648,649 | 2 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
@@ -25,4 +24,5 @@ Earlier (74 runs): plans 216 · merged 194 · parked 19 · fix rounds 95 · esca
 | 2026-11-26 | biz-fixes | 748,749,750 | 3 | 0 | - | 1 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-25 | house-style-ui | 743,744,745,746 | 4 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
 | 2026-11-26 | house-style-finish | 758 | 1 | 0 | - | 0 | 0 | 0 | ok | 0 | 0 | 0 |
-| 2026-11-27 | biz-house | 759 | 1 | 0 | - | 1 | 1 | 0 | ok | - | - | - |
+| 2026-11-27 | biz-house | 759 | 1 | 0 | - | 1 | 1 | 0 | ok | 0 | 0 | 0 |
+| 2026-11-27 | biz-house2 | 762 | 1 | 0 | - | 0 | 0 | 0 | ok | - | - | - |
