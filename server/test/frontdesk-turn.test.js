@@ -41,7 +41,7 @@ const COMPLETE = {
   reply: 'MODEL-REPLY', intent: 'request', kind: 'table', collected: { date: DATE, time: '19:00', party_size: '4' },
 };
 
-async function setup({ level = 1, test, status, hours = ALL_DAYS, assistant = {} } = {}) {
+async function setup({ level = 1, test, status, hours = ALL_DAYS, assistant = {}, text = 'GUEST-SECRET-TEXT' } = {}) {
   await seedBusiness(db());
   await db().collection('frontDeskProfiles').updateOne({ businessId: 'b1' }, {
     $set: { assistant: { level, tone: 'warm', ...assistant }, requestKinds: { table: TABLE }, hours, slug: 'one-one' },
@@ -50,7 +50,7 @@ async function setup({ level = 1, test, status, hours = ALL_DAYS, assistant = {}
   if (status) await db().collection('conversations').updateOne({ _id: conversation._id }, { $set: { status } });
   await db().collection('messages').insertOne({
     _id: 'g1', businessId: 'b1', conversationId: conversation._id, direction: 'in', author: 'guest', kind: 'text',
-    text: 'GUEST-SECRET-TEXT', at: Date.now(), providerMessageId: 'pm1', status: 'delivered',
+    text, at: Date.now(), providerMessageId: 'pm1', status: 'delivered',
   });
   return { conversation: await db().collection('conversations').findOne({ _id: conversation._id }), clientId };
 }
@@ -1116,5 +1116,119 @@ describe('plan 752: every turn leaves a run record', () => {
     const log = { info: () => { throw new Error('boom'); }, warn: silent, error: silent, debug: silent };
     await expect(turn(conversation, { log })).rejects.toThrow('boom');
     expect(await oneRun()).toMatchObject({ outcome: 'failed', reason: 'error' });
+  });
+});
+
+describe('plan 755: the facts are picked', () => {
+  const LOGGER_KEYS = ['level', 'time', 'service'];
+  const PARKING = 'יש לכם חניה?';
+  const nn = i => String(i).padStart(2, '0');
+  const item = (i, topic, question, answer) => ({
+    _id: 'k' + nn(i), businessId: 'b1', createdAt: i, topic, question, answer, status: 'approved', visibility: 'public',
+  });
+  const BIG = [
+    ...Array.from({ length: 38 }, (_, i) => item(i + 1, 'faq', 'שאלה כללית ' + nn(i + 1), 'א'.repeat(300))),
+    item(39, 'other', 'יש חניה ליד המסעדה?', 'יש חניון ציבורי במרחק 100 מטר, פתוח עד 23:30. ' + 'ג'.repeat(300)),
+    item(40, 'other', 'אפשר להביא כלב?', 'ב'.repeat(300)),
+  ];
+
+  const askWith = async (options = {}) => {
+    const made = await setup(options);
+    await db().collection('knowledgeItems').insertMany(BIG);
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    return made;
+  };
+  const factsText = () => JSON.parse(fetchMock.mock.calls[0][1].body).contents[0].parts[0].text;
+  const factsStep = async () => {
+    const all = await db().collection('assistantRuns').find({}).toArray();
+    expect(all).toHaveLength(1);
+    return all[0].steps.find(s => s.key === 'facts');
+  };
+  const ownKeys = record => Object.keys(record).filter(key => !LOGGER_KEYS.includes(key)).sort();
+
+  // Every case: one numbers-only line per turn, and no log line carries a fact's or the guest's words.
+  afterEach(() => {
+    const records = logs.byEvent('frontdesk.turn.facts');
+    expect(records).toHaveLength(1);
+    expect(ownKeys(records[0])).toEqual(['chars', 'conversationId', 'core', 'event', 'leftOut', 'pick', 'sent']);
+    const dump = JSON.stringify(logs.records);
+    for (const secret of ['חניה', 'שאלה כללית', 'GUEST-SECRET-TEXT']) expect(dump).not.toContain(secret);
+  });
+  const noCoreOver = () => expect(logs.byEvent('frontdesk.turn.facts_core_over')).toHaveLength(0);
+
+  it('the item the guest asks about is sent, and the record names what was left out', async () => {
+    const { conversation } = await askWith({ text: PARKING });
+    await turn(conversation);
+    const sent = factsText();
+    expect(sent).toContain('[k39]');
+    expect(sent).toContain('[profile.hours]');
+    expect(sent).not.toContain('[k40]');
+    expect(sent).not.toContain('[k38]');
+    const step = await factsStep();
+    expect(step.status).toBe('note');
+    expect(step.out).toMatchObject({ pick: 'matched', core: 1, sent: 17, leftOut: 23, matchedLeftOut: 0, queryTokens: 1 });
+    expect(step.out.factIds).toHaveLength(18);
+    expect(step.out.leftOutIds).toHaveLength(23);
+    expect(step.out.leftOutIds[0]).toBe('k17');
+    expect(step.out.leftOutIds).toContain('k40');
+    expect(step.out.leftOutTitles).toHaveLength(12);
+    expect(step.out.leftOutTitles[0]).toBe('שאלה כללית 17');
+    noCoreOver();
+  });
+
+  it('a question nothing matches gets the fixed order', async () => {
+    const { conversation } = await askWith();
+    await turn(conversation);
+    expect(factsText()).toContain('[k17]');
+    expect(factsText()).not.toContain('[k39]');
+    const step = await factsStep();
+    expect(step.out.pick).toBe('general');
+    expect(step.out.leftOutIds).toContain('k39');
+    noCoreOver();
+  });
+
+  it('a follow-up question is picked by the messages before it', async () => {
+    const { conversation } = await askWith({ text: PARKING });
+    const now = Date.now();
+    const messages = db().collection('messages');
+    const base = { businessId: 'b1', conversationId: conversation._id, kind: 'text', status: 'delivered' };
+    await messages.updateOne({ _id: 'g1' }, { $set: { at: now - 2000 } });
+    await messages.insertMany([
+      { ...base, _id: 'o1', direction: 'out', author: 'ai', text: 'יש חניון ציבורי במרחק 100 מטר', at: now - 1000 },
+      { ...base, _id: 'g2', direction: 'in', author: 'guest', text: 'וכמה זה עולה?', at: now, providerMessageId: 'pm2' },
+    ]);
+    await turn(conversation);
+    expect(factsText()).toContain('[k39]');
+    noCoreOver();
+  });
+
+  it("a member's suggestion picks the same way", async () => {
+    const { conversation } = await askWith({ text: PARKING });
+    await turn(conversation, { mode: 'suggest' });
+    expect(factsText()).toContain('[k39]');
+    noCoreOver();
+  });
+
+  it('knowledge that fits is recorded with no list of what was left out', async () => {
+    const { conversation } = await setup();
+    fetchMock.mockResolvedValue(modelAnswer(SMALL));
+    await turn(conversation);
+    const step = await factsStep();
+    expect(step.status).toBe('ok');
+    expect(step.out).toMatchObject({ pick: 'all', core: 1, sent: 0, leftOut: 0 });
+    expect(step.out).not.toHaveProperty('leftOutIds');
+    expect(step.out).not.toHaveProperty('leftOutTitles');
+    noCoreOver();
+  });
+
+  it('profile lines longer than the budget are warned about and the turn still answers', async () => {
+    const { conversation } = await askWith({ hours: [{ ...ALL_DAYS[0], time: 'x'.repeat(6100) }] });
+    await turn(conversation);
+    expect(await outbound()).toHaveLength(1);
+    const warned = logs.byEvent('frontdesk.turn.facts_core_over');
+    expect(warned).toHaveLength(1);
+    expect(warned[0]).toMatchObject({ level: 40, budget: 6000 });
+    expect(ownKeys(warned[0])).toEqual(['budget', 'conversationId', 'coreChars', 'event']);
+    expect((await factsStep()).out.sent).toBe(0);
   });
 });

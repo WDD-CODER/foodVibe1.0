@@ -15,9 +15,12 @@
  * after the model call the turn reads the conversation again and sends and writes nothing when a person stepped in.
  * Plan 754: the run asks the channel to show 'typing…' (`showTyping`) before it reads the facts; a run cut for a slow
  * first model is recorded per HTTP call.
+ * Plan 755 (R-32): the facts are picked for the guest's current message (`factQueryOf`, `publicFacts`); the rules
+ * judge the reply against the lines that were sent.
  */
 const { logger } = require('../logger');
 const { publicFacts } = require('./knowledge');
+const { factQueryOf } = require('./fact-pick');
 const { buildTurnBody, unansweredTail, todayBlock, HISTORY_WINDOW } = require('./frontdesk-prompt');
 const { applyGuardrails, preCheck, isRemoval, TURN_LIMIT, FOLLOW_UP_MAX } = require('./frontdesk-guardrails');
 const { fillWhen } = require('./frontdesk-when');
@@ -33,6 +36,9 @@ const { jerusalemDate } = require('../middleware/usage');
 const { WANTED_QUESTION_KEYS } = require('../generated/schemas/front-desk-templates');
 
 const FRONTDESK_DAILY_TURNS = 300;
+/** Plan 755: how much of what was left out a run record keeps. */
+const LEFT_OUT_IDS_MAX = 40;
+const LEFT_OUT_TITLES_MAX = 12;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 const PLACEHOLDER_CLIENTS = new Set(['__test__', '__walk_in__']);
@@ -391,6 +397,31 @@ function recordModelCall(run, asked, feature) {
   });
 }
 
+/** Plan 755 (R-32): what the pick sent and left out, as counts: no id, title or text of a fact. */
+function logFacts(log, conversation, stats) {
+  const { pick, sent, leftOut, core, chars, coreChars, budget, coreOver } = stats;
+  const conversationId = conversation._id;
+  log.info({ event: 'frontdesk.turn.facts', conversationId, pick, sent, leftOut, core, chars });
+  if (coreOver) log.warn({ event: 'frontdesk.turn.facts_core_over', conversationId, coreChars, budget });
+}
+
+/** Step 6: the lines that were sent and, when something was left out, a note with the most relevant of the rest. */
+function recordFacts(run, facts, tables) {
+  const { pick, core, sent, leftOut, matchedLeftOut, queryTokens } = facts.stats;
+  run.step('facts', {
+    ...(leftOut > 0 && { status: 'note' }),
+    out: {
+      factIds: facts.factIds, factsChars: facts.text.length, tablesOn: !!tables,
+      areas: tables ? (tables.plan.areas ?? []).length : 0,
+      pick, core, sent, leftOut, matchedLeftOut, queryTokens,
+      ...(leftOut > 0 && {
+        leftOutIds: facts.leftOutIds.slice(0, LEFT_OUT_IDS_MAX),
+        leftOutTitles: facts.leftOutTitles.slice(0, LEFT_OUT_TITLES_MAX),
+      }),
+    },
+  });
+}
+
 /** Step 11's input: what the model collected about the table (strings and numbers only). */
 function tableInput(answer) {
   const table = (answer.collected && answer.collected.table) || {};
@@ -487,15 +518,13 @@ async function runTurnInner(db, conversation, opts = {}) {
   if (mode === 'turn' && lease && feature !== 'eval' && levelOf(profile) >= 1) void showTyping(db, conversation, { log });
 
   const { facts, tables } = await run.time('facts', async () => {
-    const [found, room] = await Promise.all([publicFacts(db, businessId), tablesFor(db, businessId)]);
+    const [found, room] = await Promise.all([
+      publicFacts(db, businessId, factQueryOf(history)), tablesFor(db, businessId),
+    ]);
     return { facts: found, tables: room };
   });
-  run.step('facts', {
-    out: {
-      factIds: facts.factIds, factsChars: facts.text.length, tablesOn: !!tables,
-      areas: tables ? (tables.plan.areas ?? []).length : 0,
-    },
-  });
+  logFacts(log, conversation, facts.stats);
+  recordFacts(run, facts, tables);
   const body = run.timeSync('prompt',
     () => buildTurnBody({ profile, facts, history, now, tablesOn: !!tables, areas: tables ? tables.plan.areas : [] }));
   const lead = body.contents[0].parts[0].text;

@@ -10,11 +10,11 @@
 const { HANDOFF, DEFERRED, COMPLETION, INTERNALS, GREETINGS, REMOVAL_WORDS } = require('../constants/frontdesk-guard-words');
 const { hoursCheck } = require('../generated/schemas/front-desk/qualify');
 const { jerusalemDateTime } = require('../generated/schemas/front-desk/local-time');
+const { norm } = require('../utils/text-norm');
 
 const TURN_LIMIT = 8;
 /** Plan 753 (R-26): how many follow-up runs in a row may call the model. */
 const FOLLOW_UP_MAX = 3;
-const NIQQUD_RE = /[֑-ׇ]/g;
 const PUNCT_RE = /^[\s.,!?;:"'()\-–—…״׳]+|[\s.,!?;:"'()\-–—…״׳]+$/g;
 const LINK_RE = /(?:https?:\/\/|www\.)[^\s)<>"'،]+/gi;
 const PRICE_RES = [
@@ -25,7 +25,6 @@ const PRICE_RES = [
 const TIME_IN_TEXT_RE = /(?<!\d)(\d{1,2}):(\d{2})(?!\d)/g;
 const TABLE_NUMBER_RE = /(?:שולחן\s*\d+|table\s*\d+)/i;
 
-const norm = text => String(text ?? '').toLowerCase().replace(NIQQUD_RE, '');
 const hasAny = (text, list) => { const t = norm(text); return list.some(w => t.includes(w)); };
 const trimmed = text => norm(text).replace(PUNCT_RE, '').trim();
 const guestMessages = history => (history ?? []).filter(m => m && m.author === 'guest');
