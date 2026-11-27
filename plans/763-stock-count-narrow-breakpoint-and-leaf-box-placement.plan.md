@@ -168,7 +168,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ### Decisions
 - behaviour: the leaf sits at the end of the name cell (after the name), not beside the warning triangle — reverse:
-  move `.name-nutrition-slot` before `.name-text` and widen the header's start padding.
+  move the `name-nutrition-slot` span (it reuses `.name-status-slot`) before `.name-text` and widen the header's start
+  padding.
 
 ### G3 — checks
 - `pnpm run build` -> exit 0

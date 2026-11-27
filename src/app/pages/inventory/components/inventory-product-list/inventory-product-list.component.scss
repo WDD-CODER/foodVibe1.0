@@ -230,8 +230,7 @@
   // The fixed slot before every name (plan 747 round two): it holds the triangle or is empty, so the names
   // of all rows start at the same place. Plan 763: the same slot after every name holds the nutrition leaf or
   // is empty, so every leaf sits at the same place.
-  .name-status-slot,
-  .name-nutrition-slot {
+  .name-status-slot {
     display: inline-flex;
     align-items: center;
     justify-content: center;

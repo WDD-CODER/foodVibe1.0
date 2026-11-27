@@ -265,7 +265,9 @@ describe('InventoryProductListComponent', () => {
       const root = fixture.nativeElement as HTMLElement
       const cells = Array.from(root.querySelectorAll<HTMLElement>('.col-name.c-list-body-cell'))
       expect(cells.length).toBe(3)
-      const slots = cells.map((cell) => cell.querySelector<HTMLElement>(':scope > .name-nutrition-slot')!)
+      const slots = cells.map((cell) =>
+        cell.querySelector<HTMLElement>(':scope > [data-testid="name-nutrition-slot"]')!
+      )
       expect(slots.every((slot) => !!slot)).toBeTrue()
       expect(new Set(slots.map((slot) => Math.round(slot.getBoundingClientRect().width))).size).toBe(1)
       expect(root.querySelector('.name-text app-nutrition-badge')).toBeNull()

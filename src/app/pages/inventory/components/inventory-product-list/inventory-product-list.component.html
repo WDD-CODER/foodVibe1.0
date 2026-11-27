@@ -207,7 +207,7 @@
             {{ row.product.nameHebrew }}
           </span>
           <!-- A fixed slot on every row: the nutrition leaf or nothing, so every leaf sits at the same place. -->
-          <span class="name-nutrition-slot">
+          <span class="name-status-slot" data-testid="name-nutrition-slot">
             @if (row.product.nutritionPer100g) {
               <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
             }
