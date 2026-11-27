@@ -432,6 +432,7 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: `shared/schemas/modules-pure.ts` (the helpers, no zod; the browser imports this) and `shared/schemas/modules.ts`
   (re-exports them and adds the zod schemas) — `MODULE_KEYS`, `DEFAULT_MODULES`, `modulesOf`, `hasModule`, `MODULE_OF_TYPE`,
   `platformUpdateSchema`.
+- Plan 764 added the menu_design module key and MODULE_OF_TYPE.menuDesigns: off by default, it gates the designs type.
 - When: the server gate or the browser service asks whether a business has a module. One shared file, so both use the
   same rule.
 - Known copies: none.
