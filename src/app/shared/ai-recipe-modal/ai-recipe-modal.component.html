@@ -61,18 +61,23 @@
             </div>
           }
 
-          <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-            <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-            <span class="ai-usage-count">
-              {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-              @if (modelsAvailableLabel_()) {
-                · {{ modelsAvailableLabel_() }}
+          @if (callsLeftLine_()) {
+            <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+              @if (isPlatformAdmin_()) {
+                <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+                <span class="ai-usage-count">
+                  {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+                  @if (modelsAvailableLabel_()) {
+                    · {{ modelsAvailableLabel_() }}
+                  }
+                </span>
+                <div class="ai-usage-track">
+                  <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+                </div>
               }
-            </span>
-            <div class="ai-usage-track">
-              <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+              <span class="ai-usage-label" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
             </div>
-          </div>
+          }
 
           <div class="ai-modal-footer">
             <button type="button" class="c-btn-ghost" (click)="onClose()">
@@ -276,18 +281,23 @@
             </div>
           }
 
-          <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-            <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-            <span class="ai-usage-count">
-              {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-              @if (modelsAvailableLabel_()) {
-                · {{ modelsAvailableLabel_() }}
+          @if (callsLeftLine_()) {
+            <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+              @if (isPlatformAdmin_()) {
+                <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+                <span class="ai-usage-count">
+                  {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+                  @if (modelsAvailableLabel_()) {
+                    · {{ modelsAvailableLabel_() }}
+                  }
+                </span>
+                <div class="ai-usage-track">
+                  <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+                </div>
               }
-            </span>
-            <div class="ai-usage-track">
-              <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+              <span class="ai-usage-label" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
             </div>
-          </div>
+          }
 
           <div class="ai-modal-footer">
             <button

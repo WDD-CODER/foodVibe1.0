@@ -12,7 +12,12 @@ import { GeminiService } from '@services/gemini.service'
 import { DishDataService } from '@services/dish-data.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
-import { getGeminiUsage, geminiUsageStatus, geminiBudgetUsedPercent } from '../../core/utils/gemini-usage.util'
+import {
+  getGeminiUsage,
+  geminiUsageStatus,
+  geminiBudgetUsedPercent,
+  aiCallsLeftLine
+} from '../../core/utils/gemini-usage.util'
 import { matchMenuDish } from '../../core/utils/recipe-match.util'
 import { aiMenuNameOrEmpty } from '../../core/utils/menu-unlinked.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
@@ -74,6 +79,8 @@ export class AiMenuModalComponent implements OnInit {
     const offer = this.gemini_.modelSwitch()
     return offer ? this.translation_.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
   })
+  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) under the daily bar; '' when signed out. */
+  protected readonly callsLeftLine_ = computed(() => aiCallsLeftLine(this.geminiUsage_(), this.translation_))
   /** "נותרו N שימושים היום" - calls left today across the model chain (shared by all users). */
   protected readonly usesLeftLabel_ = computed(() =>
     this.translation_.translate('ai_uses_left_today').replace('{n}', String(this.geminiUsage_().remaining))

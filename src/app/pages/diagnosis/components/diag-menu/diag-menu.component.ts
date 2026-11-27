@@ -20,6 +20,7 @@ import { DishDataService } from '@services/dish-data.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { normalizeHebrew } from 'src/app/core/utils/recipe-match.util'
+import { aiCapErrorKey } from 'src/app/core/utils/ai-error.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
@@ -158,8 +159,9 @@ export class DiagMenuComponent {
       this.isDirty_.set(true)
     } catch (err) {
       const status = err instanceof HttpErrorResponse ? err.status : 0
-      const code = err instanceof HttpErrorResponse ? String(err.error?.error ?? '') : ''
-      if (code === 'ai_monthly_cap_reached') this.errorKey_.set('ai_monthly_cap_reached')
+      // Plan 736: the monthly cap and the user's own AI allowance read through the shared helper first.
+      const capKey = aiCapErrorKey(err)
+      if (capKey) this.errorKey_.set(capKey)
       else if (status === 429) this.errorKey_.set('ai_daily_limit_reached_all')
       else this.errorKey_.set('diag_menu_read_failed')
     } finally {

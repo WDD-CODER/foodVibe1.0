@@ -45,6 +45,10 @@ describe('server-refusal.util', () => {
       expect(refusalShownToUser(makeErr(403, { messageKey: 'no_permission' }))).toBe(true)
       expect(refusalShownToUser(makeErr(429))).toBe(true)
     })
+    it('plan 736: is true for the AI budget 402 and false for another 402', () => {
+      expect(refusalShownToUser(makeErr(402, { code: 'AI_BUDGET_EXHAUSTED' }, '/api/v1/ai/generate'))).toBe(true)
+      expect(refusalShownToUser(makeErr(402, { code: 'OTHER' }, '/api/v1/ai/generate'))).toBe(false)
+    })
     it('is false for 409, 500, plain 403, non-data 400 and non-http errors', () => {
       expect(refusalShownToUser(makeErr(409))).toBe(false)
       expect(refusalShownToUser(makeErr(500))).toBe(false)

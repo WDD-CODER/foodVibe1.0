@@ -13,7 +13,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `add-equipment-modal/` | Add equipment dialog | AddEquipmentModalComponent |
 | `ai-menu-modal/` | AI-drafted menu modal + service | AiMenuModalComponent, AiMenuModalService |
 | `ai-product-modal/` | AI-drafted product modal + service | AiProductModalComponent, AiProductModalService |
-| `ai-recipe-modal/` | AI-drafted recipe modal + service | AiRecipeModalComponent, AiRecipeModalService |
+| `ai-recipe-modal/` | AI-drafted recipe modal + service (plan 736: the recipe, menu and product AI windows show the user's AI calls left under the daily bar) | AiRecipeModalComponent, AiRecipeModalService |
 | `approve-stamp/` | Approval stamp UI | ApproveStampComponent |
 | `column-carousel/` | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective, FallColumnDirective (columns that fall into the carousel by measured width, plan 745) |
 | `chip-search-dropdown/` | Searchable chip-select dropdown | ChipSearchDropdownComponent |

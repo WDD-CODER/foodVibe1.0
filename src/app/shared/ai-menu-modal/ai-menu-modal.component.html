@@ -24,6 +24,11 @@
         <div class="ai-menu-usage-fill" [style.width.%]="usageFillPercent_()"></div>
       </div>
     </div>
+    @if (callsLeftLine_()) {
+      <div class="ai-menu-usage-bar">
+        <span class="ai-menu-usage-count" data-testid="ai-calls-left">{{ callsLeftLine_() }}</span>
+      </div>
+    }
 
     @if (modalService.mode() === 'edit') {
       <!-- ── Edit mode ── -->

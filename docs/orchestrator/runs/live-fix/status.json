@@ -1,0 +1,166 @@
+{
+  "run": "live-fix",
+  "branch": "orch/live-fix",
+  "base": "main",
+  "startedAt": "2026-11-27T08:23:10.997Z",
+  "mainShaAtStart": "f0615be77179a53d740f00f2e4ebaf5e9e771b5d",
+  "plans": {
+    "761": {
+      "nnn": "761",
+      "title": "The all-users AI budget bar shows only to the platform admin",
+      "branch": "feat/761-ai-daily-budget-bar",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "builder": {
+          "model": "sonnet",
+          "tier": "build",
+          "at": "2026-11-27T08:26:32.776Z"
+        },
+        "reviewer": {
+          "model": "sonnet",
+          "at": "2026-11-27T08:45:31.760Z"
+        }
+      },
+      "humanItems": [
+        "Signed in as a regular user, open the AI recipe window: only «נשארו לך … מתוך … קריאות AI» shows, with no",
+        "Signed in as the platform admin, the same window shows the all-users bar and «קריאות AI ללא הגבלה (מנהל"
+      ],
+      "history": [
+        {
+          "at": "2026-11-27T08:26:32.574Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:26:32.777Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:38:21.782Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:44:53.148Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:45:31.763Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:46:43.211Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-27T08:49:55.833Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "tiers": [
+        "build"
+      ],
+      "freeDiskGb": 12.8,
+      "sha": "584661596cc7657fb011ce3e56948ff33c746bbc",
+      "calls": [
+        {
+          "stage": "builder",
+          "model": "sonnet",
+          "seconds": 704.9,
+          "tokens": {
+            "input": 2085975,
+            "output": 23181
+          },
+          "exit": 0
+        },
+        {
+          "stage": "reviewer",
+          "model": "sonnet",
+          "seconds": 67.2,
+          "tokens": {
+            "input": 188400,
+            "output": 3594
+          },
+          "exit": 0
+        }
+      ],
+      "checkedHead": "165163d54248def5091b8d3b8873cf9199ee2cbf"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-27T08:26:32.351Z",
+      "plan": "761",
+      "text": "the folder foodVibe1.0-orch-live-fix-761 was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T08:47:16.050Z",
+      "plan": "761",
+      "text": "the folder foodVibe1.0-orch-merge-live-fix was installed (root, scripts, server)"
+    },
+    {
+      "at": "2026-11-27T08:52:00.819Z",
+      "text": "FINAL: same tree as plan 761's gate — node scripts/orch-state.mjs prepare --missing server/generated/schemas --script build:schemas --pm pnpm, pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/override-check.mjs, pnpm run lint:icons, pnpm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/breadcrumbs-check.mjs, node scripts/ci-scope-check.mjs --checkout-branch"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 12.8,
+  "updatedAt": "2026-11-27T08:52:05.850Z",
+  "decisions": [
+    {
+      "id": "D1",
+      "plan": "761",
+      "type": "behaviour",
+      "text": "behaviour: the admin condition is the usage answer's mine.unlimited (the server's platform-admin flag, already read for plan 736), so the admin's bar appears once that answer arrives and not without it — reverse: read UserService.isPlatformAdmin_ instead",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D2",
+      "plan": "761",
+      "type": "seen",
+      "text": "seen: src/app/shared/ai-product-modal/ai-product-modal.component.html:20 still shows the all-users daily budget label, count and track to every user",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    },
+    {
+      "id": "D3",
+      "plan": "761",
+      "type": "seen",
+      "text": "seen: src/app/shared/ai-menu-modal/ai-menu-modal.component.html:19 still shows its budget-based uses-left label and track to every user",
+      "alsoFrom": [],
+      "attempt": 1,
+      "verdict": "none",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": ""
+    }
+  ],
+  "finishedAt": "2026-11-27T08:52:05.846Z",
+  "finalGate": {
+    "ok": true,
+    "command": null,
+    "at": "2026-11-27T08:52:05.849Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}

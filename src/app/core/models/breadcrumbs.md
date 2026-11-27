@@ -27,7 +27,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `user.model.ts` | User/session | User |
 | `msg.model.ts` | User message / toast | Msg |
 | `label.model.ts` | Label definitions for UI | LabelDefinition, LABEL_COLOR_PALETTE |
-| `admin-user.model.ts` | Admin user entity | AdminUser |
+| `admin-user.model.ts` | Admin user entity (plan 736: with the AI allowance and used count) | AdminUser, AiAllowanceSaved |
 | `ai-menu-draft.model.ts` | AI-drafted menu + match types | AiMenuDraft, AiMenuSectionDraft, AiMenuDishDraft, AiMenuPatch, MatchedMenu, MatchedSection, MatchedDish |
 | `ai-product-draft.model.ts` | AI-drafted product | AiProductDraft, AiProductPatch |
 | `business-stats.model.ts` | Dashboard read model of the business stats route (plan 447) | StatsPeriod, BusinessStats, BusinessStatsCards, CountCard, FunnelStage, UpcomingEvent |

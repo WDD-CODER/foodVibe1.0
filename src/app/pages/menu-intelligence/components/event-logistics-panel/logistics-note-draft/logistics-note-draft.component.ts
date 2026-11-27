@@ -14,6 +14,8 @@ import { LogisticsItemRegistryService } from '@services/logistics-item-registry.
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { aiCapErrorKey } from '@utils/ai-error.util'
+import { refusalShownToUser } from '@utils/server-refusal.util'
 import {
   LOGISTICS_LABEL_MAX,
   LOGISTICS_TEXT_MAX,
@@ -133,10 +135,11 @@ export class LogisticsNoteDraftComponent {
       this.draftPhase = phase
       this.open(draft)
     } catch (err) {
+      // Plan 736: the interceptor already toasted the AI-allowance refusal with the contact email; no second toast.
+      if (refusalShownToUser(err)) return
       const e = err as { status?: number; error?: { error?: string } }
-      let key = 'logistics_notes_failed'
-      if (e.error?.error === 'ai_monthly_cap_reached') key = 'ai_monthly_cap_reached'
-      else if (e.status === 429) key = 'ai_daily_limit_reached_all'
+      let key = aiCapErrorKey(err) ?? 'logistics_notes_failed'
+      if (key === 'logistics_notes_failed' && e.status === 429) key = 'ai_daily_limit_reached_all'
       this.userMsg.onSetErrorMsg(this.translation.translate(key))
       this.logging.error({
         event: 'logistics_notes.extract_failed',

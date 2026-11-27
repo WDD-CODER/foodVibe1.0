@@ -11,7 +11,8 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 | `components/` | Header, footer, hero FAB, auth modal, user-msg | → see components/breadcrumbs.md |
 | `services/` | Data, state, modals, logging, export, backup | → see services/breadcrumbs.md |
 | `models/` | Domain types and interfaces | → see models/breadcrumbs.md |
-| `interceptors/` | HTTP auth header injection | authInterceptor |
+| `interceptors/` | HTTP auth header injection; the shared refusal toasts (data 429, 403 `no_permission`, plan 736: the 402 `AI_BUDGET_EXHAUSTED` with the contact email) | authInterceptor |
+| `utils/ai-error.util.ts` | AI refusals the screens read: the monthly cap and (plan 736) the user's own AI allowance — short inline key, toast text with the email | aiCapErrorKey, isAiBudgetExhausted, aiBudgetMessage, AI_BUDGET_CONTACT_EMAIL |
 | `guards/` | Route activation and pending changes | authGuard, pendingChangesGuard |
 | `guards/welcome.guard.ts` | Sends a signed-in user from `/welcome` to `/dashboard` | welcomeGuard |
 | `resolvers/` | Entity fetch for edit routes | productResolver, recipeResolver, equipmentResolver, venueResolver, supplierResolver |

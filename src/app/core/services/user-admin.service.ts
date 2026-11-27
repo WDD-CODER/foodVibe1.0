@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
-import { AdminUser } from '../models/admin-user.model'
+import { AdminUser, AiAllowanceSaved } from '../models/admin-user.model'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 
@@ -23,5 +23,12 @@ export class UserAdminService {
     return this.http.delete<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }>(
       `${this.base}${API.admin(`users/${userId}`)}${suffix}`
     )
+  }
+
+  /** Plan 736: sets one user's lifetime AI allowance (platform admin only); the used count is kept. */
+  setAiAllowance(userId: string, aiAllowance: number): Observable<AiAllowanceSaved> {
+    return this.http.put<AiAllowanceSaved>(`${this.base}${API.admin(`users/${userId}/ai-allowance`)}`, {
+      aiAllowance
+    })
   }
 }

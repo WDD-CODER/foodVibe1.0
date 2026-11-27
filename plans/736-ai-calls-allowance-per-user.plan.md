@@ -115,6 +115,26 @@ src/app/pages/breadcrumbs.md
 src/app/shared/breadcrumbs.md
 docs/agent/standards-backend.md
 docs/brain/component-families.md
+server/test/ai-diag-menu.test.js
+server/test/ai-invoice-read.test.js
+server/test/ai-known-metadata.test.js
+server/test/ai-logistics-extract.test.js
+server/test/ai-match-product-names.test.js
+server/test/ai-menu.test.js
+server/test/ai-receipt-photo.test.js
+server/test/ai-shots-saved.test.js
+server/test/ai-shots-shared.test.js
+server/test/ai-shots.test.js
+server/test/ai-stock-extract.test.js
+server/test/ai-usage.test.js
+server/test/ai-voice-transcribe.test.js
+server/test/generate-from-url.test.js
+server/test/knowledge-import.test.js
+server/test/modules-registry.test.js
+server/test/price-list-prompt.test.js
+server/test/product-import-route.test.js
+src/app/pages/diagnosis/components/diagnosis-workspace/diagnosis-workspace.component.spec.ts
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -206,16 +226,16 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] A1: Give every user a lifetime AI allowance of 100 that the server and browser both know — `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`, `aiAllowanceUpdateSchema`; two optional user fields; export from the schema index — shared/schemas/ai-allowance.schema.ts, shared/schemas/index.ts, server/models/user.model.js
-- [ ] A2: Count one AI request per user and refuse the next one before the model is called — `server/services/ai-allowance.js` (atomic reserve, refund, `allowanceOf`, `trackAiAllowance`), the reserve in `callGemini`, `usageOf` and the router mount, the 402 answer; tests: counts one per success, retries count once, a 502/504 is refunded, the 101st request is 402 with no fetch, missing fields read as 100, five parallel requests at allowance 2 reach the model exactly twice, a platform admin is never counted, a database error lets the call through, the vitest guard throws without `allowance` — server/services/ai-allowance.js, server/services/gemini-client.js, server/routes/ai.js, server/test/ai-allowance.test.js
-- [ ] A3: Keep the existing AI tests green with the new gate — any direct `callGemini` test that passes a `userId` adds an `allowance` holder; the cap tests still pass — server/test/gemini-client.test.js, server/test/ai-cap.test.js, server/test/helpers/app.js
-- [ ] A4: Let the platform admin see and raise one user's AI allowance — the two fields in `GET /admin/users`, the PUT with schema, 404, history row and log line; tests: admin raises, owner gets 403, bad body 400, unknown user 404, the raised user can call again — server/routes/admin.js, server/test/ai-allowance.test.js
-- [ ] A5: Show the budget-over message with the email on every AI attempt, on every screen — the interceptor toast and info log, `refusalShownToUser`, `aiCapErrorKey` short key, the email constant; specs: a 402 `AI_BUDGET_EXHAUSTED` toasts the email once per answer, another 402 does not, the helper returns the short key — src/app/core/interceptors/auth.interceptor.ts, src/app/core/utils/ai-error.util.ts, src/app/core/utils/server-refusal.util.ts and their specs
-- [ ] A6: Add the allowance number and save button to each row of the admin user list — model fields, `setAiAllowance`, row field with validation; specs: the PUT is sent with the number, a bad number never sends, a failed save keeps the old number — src/app/core/models/admin-user.model.ts, src/app/core/services/user-admin.service.ts, src/app/pages/metadata-manager/components/user-management/**
-- [ ] A7: Show each user how many AI calls are left in the AI windows — `optionalToken` and `mine` on `/ai/usage`, `GeminiUsage.mine`, the line in the three AI windows; a server case and a util spec case — server/routes/ai.js, src/app/core/utils/gemini-usage.util.ts, src/app/shared/ai-recipe-modal/**, src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**
-- [ ] A8: Make the four screens with their own cap check show the same short line — read `aiCapErrorKey` first — diag-menu.component.ts, invoice-import.util.ts, logistics-note-draft.component.ts, voice-note.component.ts
-- [ ] A9: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
-- [ ] A10: Record the allowance in the maps and docs and run every check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/core/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/agent/standards-backend.md, docs/brain/component-families.md
+- [x] A1: Give every user a lifetime AI allowance of 100 that the server and browser both know — `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`, `aiAllowanceUpdateSchema`; two optional user fields; export from the schema index — shared/schemas/ai-allowance.schema.ts, shared/schemas/index.ts, server/models/user.model.js
+- [x] A2: Count one AI request per user and refuse the next one before the model is called — `server/services/ai-allowance.js` (atomic reserve, refund, `allowanceOf`, `trackAiAllowance`), the reserve in `callGemini`, `usageOf` and the router mount, the 402 answer; tests: counts one per success, retries count once, a 502/504 is refunded, the 101st request is 402 with no fetch, missing fields read as 100, five parallel requests at allowance 2 reach the model exactly twice, a platform admin is never counted, a database error lets the call through, the vitest guard throws without `allowance` — server/services/ai-allowance.js, server/services/gemini-client.js, server/routes/ai.js, server/test/ai-allowance.test.js
+- [x] A3: Keep the existing AI tests green with the new gate — any direct `callGemini` test that passes a `userId` adds an `allowance` holder; the cap tests still pass — server/test/gemini-client.test.js, server/test/ai-cap.test.js, server/test/helpers/app.js
+- [x] A4: Let the platform admin see and raise one user's AI allowance — the two fields in `GET /admin/users`, the PUT with schema, 404, history row and log line; tests: admin raises, owner gets 403, bad body 400, unknown user 404, the raised user can call again — server/routes/admin.js, server/test/ai-allowance.test.js
+- [x] A5: Show the budget-over message with the email on every AI attempt, on every screen — the interceptor toast and info log, `refusalShownToUser`, `aiCapErrorKey` short key, the email constant; specs: a 402 `AI_BUDGET_EXHAUSTED` toasts the email once per answer, another 402 does not, the helper returns the short key — src/app/core/interceptors/auth.interceptor.ts, src/app/core/utils/ai-error.util.ts, src/app/core/utils/server-refusal.util.ts and their specs
+- [x] A6: Add the allowance number and save button to each row of the admin user list — model fields, `setAiAllowance`, row field with validation; specs: the PUT is sent with the number, a bad number never sends, a failed save keeps the old number — src/app/core/models/admin-user.model.ts, src/app/core/services/user-admin.service.ts, src/app/pages/metadata-manager/components/user-management/**
+- [x] A7: Show each user how many AI calls are left in the AI windows — `optionalToken` and `mine` on `/ai/usage`, `GeminiUsage.mine`, the line in the three AI windows; a server case and a util spec case — server/routes/ai.js, src/app/core/utils/gemini-usage.util.ts, src/app/shared/ai-recipe-modal/**, src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**
+- [x] A8: Make the four screens with their own cap check show the same short line — read `aiCapErrorKey` first — diag-menu.component.ts, invoice-import.util.ts, logistics-note-draft.component.ts, voice-note.component.ts
+- [x] A9: Add the Hebrew words — the keys of UI/UX Notes — public/assets/data/dictionary.json
+- [x] A10: Record the allowance in the maps and docs and run every check — paste outputs under Execution Notes — server/breadcrumbs.md, src/app/core/breadcrumbs.md, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, docs/agent/standards-backend.md, docs/brain/component-families.md
 
 ## What happens when
 - Two tabs fire AI requests together with one call left: the atomic update lets exactly one reserve; the other gets
@@ -267,3 +287,30 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 
 ## Execution Notes
 - Planner 2026-11-25: written from Dandan's requests of 2026-11-25
+- Builder round 2 (fresh judgment builder, re-implemented from base 9cb4bcf3):
+  - Rerun of the failing check first, on the base: `pnpm run test:server` → exit 1, `Test Files 2 failed | 147 passed`
+    (ai-receipt-photo 500s, ai-shots-saved 30 s timeout) with no plan change in the tree; the same two files alone →
+    exit 0, `27 passed`. Load flake under the full suite, not a code fault.
+  - A user with no `users` record (the tests' fake ids, a token of a removed user) is not counted: `reserveAiCall`
+    reads the record once after a no-match and answers `no_user`, so the call goes on. Existing test files therefore
+    needed no seeded users; only `server/test/ai-usage.test.js` (direct `callGemini` with a `userId`) got an
+    `allowance` holder. `gemini-client.test.js` and `ai-cap.test.js` pass no `userId` and are unchanged.
+  - The vitest guard sits at the top of `callGemini`, beside the `usage.feature` guard, so it fires on every path.
+  - Logistics note and voice note: when the interceptor already toasted the budget refusal (`refusalShownToUser`) they
+    add no second toast and no error log; otherwise they read `aiCapErrorKey` first.
+  - `server/test/ai-allowance.test.js` → `npx vitest run test/ai-allowance.test.js` exit 0, `30 passed`.
+  - Neighbours not in scope run alone: admin-business, auth-business, gemini-client, admin-platform, modules-gate,
+    ai-product-from-image, usage-days → exit 0, `148 passed`.
+  - `pnpm run build` → exit 0 (budget warnings only, as before). `pnpm run lint` → exit 0, `0 errors`.
+  - `node scripts/scope-check.mjs --arch` → `ARCH: ok INV-6, INV-4, INV-1, INV-3, INV-2`; `--reuse` → `REUSE: ok`.
+  - `node scripts/breadcrumbs-check.mjs` → `BREADCRUMBS: clean`. kit-manifest-check → `KIT_MANIFEST: ok`.
+  - `pnpm run test:ci` → exit 0, `TOTAL: 2794 SUCCESS`.
+  - override-check, lint:icons, lint:no-native-select, plan-ledger-check → exit 0.
+  - kit-checks against `origin/orch/live-ready` first → `KIT_CHECKS: fail` (new classes `.ai-calls-left` /
+    `.ai-allowance__*`, a number input not on the `appNumberBox` line, no `entity-schemas` registry line). Fixed by
+    reusing the existing classes (`.user-chips`, `.user-email`, the windows' own usage-bar label classes), the number
+    input on the `appNumberBox` line (as in diag-menu) and a registry line → `KIT_CHECKS: ok (6 checks)`.
+  - `pnpm run test:server` (whole suite, 2 workers) → exit 0, `Test Files 150 passed (150)`, `Tests 2013 passed`.
+  - After the class fix: build exit 0, lint exit 0, focused karma (user-management + three AI windows) `TOTAL: 33 SUCCESS`;
+    full `pnpm run test:ci` → exit 0, `TOTAL: 2794 SUCCESS`.
+  - `node scripts/log-query.mjs --since=plan-start --level=error` → `SKIP: no database configured`.

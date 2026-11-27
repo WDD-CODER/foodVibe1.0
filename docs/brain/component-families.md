@@ -514,7 +514,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Use: the nine new entity schema files under `shared/schemas/entities/` (`invoice.schema.ts`, `price-history.schema.ts`,
   `invoice-alias.schema.ts`, `supplier-profile.schema.ts`, `ai-draft.schema.ts`, `stored-file.schema.ts`,
   `business-access.schema.ts`, `diagnosis.schema.ts`, `stock-count.schema.ts`), each one `z.strictObject` registered in
-  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`.
+  `SCHEMA_BY_COLLECTION` in `shared/schemas/entities/index.ts`. A request body that is not an entity sits beside them
+  in `shared/schemas/` — e.g. plan 736's `shared/schemas/ai-allowance.schema.ts` (`aiAllowanceUpdateSchema`,
+  `AI_DEFAULT_ALLOWANCE`, `AI_ALLOWANCE_MAX`), read by the admin route and the user list.
 - plan 724 adds `menu-dish.schema.ts`, `dish-sales-month.schema.ts` and `dish-sales-alias.schema.ts` (dish analysis store).
 - plan 727 adds `month-plan.schema.ts` (`monthPlans`, server-only; `null` = not entered, 0 = a real zero) and the pure month and target rules in `shared/schemas/month/month-rules.ts` (`MONTH_KEY_PATTERN`, `monthKeyOf` in Asia/Jerusalem, `shiftMonth`, `monthLabel`, `MONTH_TARGET_KEYS`, `MONTH_TARGET_DEFAULTS`, `MONTH_TARGET_BANDS`); `src/app/core/utils/month-key.util.ts` is a thin wrapper over them, so there is one month rule. The chip flag `TabChip.money` (tab-chips) hides a chip from a role that cannot `editMoney`.
 - When: a new stored collection needs a shape.
@@ -524,7 +526,9 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 
 - Status: stable — plan 617
 - Use: `server/services/ai-cap.js` — `capState`, `monthTokensByBusiness`, `clearCapCache`; checked before the model call
-  in `server/services/gemini-client.js`.
+  in `server/services/gemini-client.js`. Plan 736: its per-user twin `server/services/ai-allowance.js` (`reserveAiCall`,
+  `refundAiCall`, `allowanceOf`, `trackAiAllowance`) counts each user's lifetime AI requests at the same point; the
+  browser reads the 402 `AI_BUDGET_EXHAUSTED` through `aiCapErrorKey` / `isAiBudgetExhausted` (`src/app/core/utils/ai-error.util.ts`).
 - When: a server path calls the model and must refuse once the business has used its monthly cap.
 - Known copies: none.
 
@@ -778,3 +782,11 @@ Optional field `Design changes`, written by `/design-port` Step 6 when a family'
 - Pieces: addStyledTableSheet, uniqueSheetName, addRecipeInfoSheet, HOUSE_PAGE_SETUP, buildRecipeInfoWorkbook, buildShoppingListWorkbook, buildMenuInfoWorkbook, buildAllTogetherMenuWorkbook.
 - When: any new Excel sheet. Sheet names, headers and fallbacks come from `dictionary.json` through `TranslationService`, never an English literal.
 - Known copies: none (no other file in `src/app` calls `addWorksheet`, checked 2026-11-22).
+
+### platform-admin-script — the one-off script that sets `isPlatformAdmin` (plan 737)
+
+- Status: stable — plan 737
+- Use: `server/scripts/set-platform-admin.js` — an operator script beside `set-front-desk-status.js`: `--target` required, Atlas only with `--confirm-host`, dry run by default and `--write` to apply; it changes one `users` document by `_id` and `--off` undoes it.
+- Pieces: set-platform-admin.js, parseArgs, planChange, applyChange.
+- When: the Human sets or clears the platform admin on a live database (runbook in `docs/security-go-live.md`); never a build step, never a route.
+- Known copies: none.

@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
+const { verifyToken, optionalToken, requirePlatformAdmin } = require('../middleware/auth');
 const { requireModule } = require('../middleware/require-module')
 const { createRateLimiter, userOrIpKey } = require('../middleware/rate-limit');
 const { badRequest, requireFields } = require('../middleware/validate');
@@ -102,9 +102,12 @@ const {
   todayKey,
 } = require('../services/gemini-client');
 const { trackAiOutcome } = require('../services/ai-usage');
+const { trackAiAllowance, allowanceOf } = require('../services/ai-allowance');
 
 const router = Router();
 router.use(trackAiOutcome);
+// Plan 736: one lifetime-allowance holder per request; it covers the sub-routers below too.
+router.use(trackAiAllowance);
 
 // Plan 615 (C-REGISTRY): empty sub-routers filled by plans 621, 622, 626, 633, 637. They sit after trackAiOutcome so the
 // outcome tracker covers them. This file requires each one before it sets its own module.exports, so a sub-router must
@@ -118,7 +121,19 @@ router.use('/stock', require('./ai/stock'));
 
 /** Plan 580: usage context for callGemini; `ids` lets the outcome tracker mark refused answers. */
 function usageOf(req) {
-  return { businessId: req.user.businessId, userId: req.user.userId, ids: req.aiUsageIds };
+  return {
+    businessId: req.user.businessId,
+    userId: req.user.userId,
+    ids: req.aiUsageIds,
+    // Plan 736: the user's lifetime AI allowance; a platform admin is never counted.
+    allowance: req.aiAllowance,
+    unlimited: req.user.isPlatformAdmin === true,
+  };
+}
+
+/** Plan 736: where a user whose AI allowance is over is told to write; public by design. */
+function aiBudgetContactEmail() {
+  return process.env.AI_BUDGET_CONTACT_EMAIL || 'dan.weibren@gmail.com';
 }
 
 // Cap on model output copied into a parse/validation failure log line (Plan 383).
@@ -128,11 +143,28 @@ const RAW_LOG_CHARS = 2000;
 // GET /api/v1/ai/usage
 // Public endpoint — today's dispatched-call count, the chain's daily budget
 // (budget / used / remaining) and each model's quota state (plan 395). Used by the Angular frontend to show a live usage indicator.
+// Plan 736: with a token it adds `mine: { allowance, used, remaining, unlimited }`, the user's lifetime AI allowance.
 // ---------------------------------------------------------------------------
-router.get('/usage', async (_req, res) => {
-  const [count, models] = await Promise.all([getUsageCount(), getModelStatus()]);
-  res.json({ date: todayKey(), count, ...summarizeBudget(models), models });
+router.get('/usage', optionalToken, async (req, res) => {
+  const [count, models, mine] = await Promise.all([getUsageCount(), getModelStatus(), myAllowance(req)]);
+  res.json({ date: todayKey(), count, ...summarizeBudget(models), models, ...(mine ? { mine } : {}) });
 });
+
+/** Plan 736: the signed-in user's allowance for GET /usage, or null (no token, or the read failed). */
+async function myAllowance(req) {
+  if (!req.user?.userId) return null;
+  const unlimited = req.user.isPlatformAdmin === true;
+  try {
+    const user = mongoose.connection.readyState === 1
+      ? await mongoose.connection.db.collection('users').findOne(
+        { _id: req.user.userId }, { projection: { aiAllowance: 1, aiCallsUsed: 1 } })
+      : null;
+    return { ...allowanceOf(user), unlimited };
+  } catch {
+    req.log.warn({ event: 'ai.allowance.read_failed', userId: req.user.userId });
+    return null;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // GET / PUT / DELETE /api/v1/ai/models — admin only (plan 395 G8).
@@ -347,6 +379,9 @@ function respondFromGeminiFailure(res, result) {
       return res.status(429).json({ error: 'daily_limit_reached', code: 'daily_limit_reached', resetAt: result.resetAt });
     case 'business_cap':
       return res.status(429).json({ error: 'ai_monthly_cap_reached', code: 'ai_monthly_cap_reached' });
+    case 'ai_budget_exhausted':
+      // Plan 736: 402, not 429, so the screens that read every 429 as the daily model limit do not show that message.
+      return res.status(402).json({ error: 'AI_BUDGET_EXHAUSTED', code: 'AI_BUDGET_EXHAUSTED', contactEmail: aiBudgetContactEmail() });
     case 'model_removed':
       return badRequest(res, 'model_removed', { model: result.model });
     case 'gemini_error':

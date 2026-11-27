@@ -10,6 +10,7 @@ import { TranslationService } from '@services/translation.service'
 import { environment } from '../../../environments/environment'
 import { API } from '@services/http-storage.adapter'
 import { readServerRefusal, saveRefusalMessage } from '@utils/server-refusal.util'
+import { aiBudgetMessage, isAiBudgetExhausted } from '@utils/ai-error.util'
 
 const REFRESH_URL = API.auth('refresh')
 const LOGIN_URL = API.auth('login')
@@ -129,6 +130,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             return next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }))
           })
         )
+      }
+
+      // Plan 736: the user's lifetime AI allowance is over. One toast with the contact email on every refused
+      // attempt, and an info line: an expected refusal, not an app error.
+      if (isAiBudgetExhausted(err)) {
+        injector.get(UserMsgService).onSetErrorMsg(aiBudgetMessage(err, injector.get(TranslationService)))
+        logging.info({ event: 'ai.budget_exhausted', message: req.url.split('?')[0] })
+        return throwError(() => err)
       }
 
       if (err.status === 429 && req.url.includes(DATA_API_PATH)) {

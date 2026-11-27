@@ -14,6 +14,8 @@ const { monthTokensByBusiness, clearCapCache } = require('../services/ai-cap')
 const { frontDeskAdminUpdateSchema } = require('../generated/schemas/front-desk-admin.schema')
 const { aggregateAiUsage } = require('../services/ai-usage')
 const { PRICES_AS_OF } = require('../constants/ai-prices')
+const { aiAllowanceUpdateSchema } = require('../generated/schemas/ai-allowance.schema')
+const { allowanceOf } = require('../services/ai-allowance')
 
 const { frontDeskStats, parseRange } = require('../services/frontdesk-stats')
 
@@ -32,7 +34,7 @@ router.get('/users', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const users = await User.find(
       { _id: { $ne: '__master__' } },
-      '_id name email role businessId businessRole isPlatformAdmin'
+      '_id name email role businessId businessRole isPlatformAdmin aiAllowance aiCallsUsed'
     ).lean()
     const businessIds = [...new Set(users.map(u => u.businessId).filter(Boolean))]
     const businesses = businessIds.length
@@ -45,10 +47,44 @@ router.get('/users', verifyToken, requirePlatformAdmin, async (req, res) => {
       businessRole: u.businessRole ?? null,
       isPlatformAdmin: u.isPlatformAdmin === true,
       businessName: nameById.get(u.businessId) ?? null,
+      aiAllowance: allowanceOf(u).allowance,
+      aiCallsUsed: allowanceOf(u).used,
     })))
   } catch (err) {
     req.log.error({ err, event: 'admin.users_list.failed' })
     res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// Plan 736: the platform admin sets one user's lifetime AI allowance. `aiCallsUsed` is never reset here.
+router.put('/users/:userId/ai-allowance', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const parsed = aiAllowanceUpdateSchema.safeParse(req.body ?? {})
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: 'Validation failed',
+      issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message }))
+    })
+  }
+  const { userId } = req.params
+  const to = parsed.data.aiAllowance
+  try {
+    const target = await col('users').findOne({ _id: userId }, { projection: { aiAllowance: 1, aiCallsUsed: 1 } })
+    if (!target) return res.status(404).json({ error: 'User not found' })
+    const from = allowanceOf(target).allowance
+    const actor = actorOf(req)
+    const row = { at: Date.now(), by: actor.userId, byName: String(actor.name).slice(0, 80), from, to }
+    const updated = await col('users').findOneAndUpdate(
+      { _id: userId },
+      { $set: { aiAllowance: to }, $push: { aiAllowanceHistory: { $each: [row], $slice: -20 } } },
+      { returnDocument: 'after', projection: { aiAllowance: 1, aiCallsUsed: 1 } }
+    )
+    if (!updated) return res.status(404).json({ error: 'User not found' })
+    req.log.info({ event: 'admin.ai_allowance.updated', userId, from, to })
+    const now = allowanceOf(updated)
+    return res.json({ ok: true, aiAllowance: now.allowance, aiCallsUsed: now.used })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.ai_allowance.failed', userId })
+    return res.status(500).json({ error: 'Server error' })
   }
 })
 

@@ -20,7 +20,7 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `cook-view/` | `/cook/:id` — step-by-step cook workflow |
 | `menu-library/` | `/menu-library` — menu list and filters |
 | `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views; the event-logistics-panel component = collapsed phone-intake / site-visit checklist under the notes log (plan 522; plan 579: questions by event date, hide on one event, one "נדרש" toggle + "עלינו" / "באחריות הלקוח") |
-| `metadata-manager/` | (plan 600: owner card ai-examples-share, opt-in to the shared AI example pool) Categories, allergens, units, preparations, event-logistics questions (`metadata-manager/components/logistics-item-manager/`, plans 523, 581: edit, remove/restore, own sections) (`metadata-manager/metadata-manager.page.component.ts`) |
+| `metadata-manager/` | (plan 600: owner card ai-examples-share, opt-in to the shared AI example pool; plan 736: the platform admin's user list sets each user's AI allowance) Categories, allergens, units, preparations, event-logistics questions (`metadata-manager/components/logistics-item-manager/`, plans 523, 581: edit, remove/restore, own sections) (`metadata-manager/metadata-manager.page.component.ts`) |
 | `clients/` | Front Desk: the client list (plan 547), profile (`/clients/:id`) from plan 551 |
 | `requests/` | `/requests` — Front Desk work queue: one card per request with fit verdict, approve / ask / decline, phone request dialog, day load strip (plan 552) |
 | `bookings/` | `/bookings` — Front Desk agenda: day / week bookings with arrival actions (plan 552) |

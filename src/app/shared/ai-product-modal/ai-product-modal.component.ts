@@ -18,7 +18,8 @@ import {
   getGeminiUsage,
   geminiModelAvailability,
   geminiUsageStatus,
-  geminiBudgetUsedPercent
+  geminiBudgetUsedPercent,
+  aiCallsLeftLine
 } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
@@ -104,6 +105,8 @@ export class AiProductModalComponent implements OnInit {
     const offer = this.gemini_.modelSwitch()
     return offer ? this.translation_.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
   })
+  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) under the daily bar; '' when signed out. */
+  protected readonly callsLeftLine_ = computed(() => aiCallsLeftLine(this.geminiUsage_(), this.translation_))
   /** "נותרו X" — calls left today across the model chain (shared by all users). */
   protected readonly budgetLeftLabel_ = computed(() =>
     this.translation_.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))

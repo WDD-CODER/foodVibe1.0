@@ -15,7 +15,8 @@ import {
   getGeminiUsage,
   geminiModelAvailability,
   geminiUsageStatus,
-  geminiBudgetUsedPercent
+  geminiBudgetUsedPercent,
+  aiCallsLeftLine
 } from '../../core/utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
@@ -101,6 +102,10 @@ export class AiRecipeModalComponent implements OnInit {
     if (mode === 'text' || mode === 'paste') return this.prompt_().trim() ? null : 'why_write_first'
     return null
   })
+  /** Plan 736: «נשארו לך X מתוך Y קריאות AI» (or the unlimited line) in the usage bar; '' when signed out. */
+  protected readonly callsLeftLine_ = computed(() => aiCallsLeftLine(this.geminiUsage_(), this.translation))
+  /** Plan 761: the all-users daily budget is the platform admin's only (the server's `unlimited` flag). */
+  protected readonly isPlatformAdmin_ = computed(() => this.geminiUsage_().mine?.unlimited === true)
   /** "נותרו X" — calls left today across the model chain (shared by all users). */
   protected readonly budgetLeftLabel_ = computed(() =>
     this.translation.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))
