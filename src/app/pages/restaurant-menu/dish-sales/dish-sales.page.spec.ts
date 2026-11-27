@@ -348,7 +348,14 @@ describe('DishSalesPage (plan 726)', () => {
         const box = button.getBoundingClientRect()
         expect(box.width).withContext(id).toBeGreaterThan(0)
         const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
-        expect(button.contains(hit)).withContext(id).toBeTrue()
+        // Names what sits on the button when it is not hit, so a failure on another browser says what covers it.
+        const what = (n: Element | null): string =>
+          n
+            ? `${n.tagName.toLowerCase()}.${String(n.className).trim().replace(/\s+/g, '.')}[${n.getAttribute('data-testid') ?? ''}]`
+            : 'nothing'
+        const chain = [hit, hit?.parentElement ?? null, hit?.parentElement?.parentElement ?? null].map(what).join(' < ')
+        const at = `box ${Math.round(box.left)},${Math.round(box.top)} ${Math.round(box.width)}x${Math.round(box.height)} in ${window.innerWidth}x${window.innerHeight}`
+        expect(button.contains(hit)).withContext(`${id}: hit ${chain}; ${at}`).toBeTrue()
       }
     })
   }
