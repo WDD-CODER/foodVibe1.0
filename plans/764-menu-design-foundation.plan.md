@@ -99,6 +99,7 @@ docs/brain/decisions/0034-one-menu-template-and-engine-boundary.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/menu-design/menu-design-map.md
+server/routes/generic.js
 ```
 
 ## Read Scope
