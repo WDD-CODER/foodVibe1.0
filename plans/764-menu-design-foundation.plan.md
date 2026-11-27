@@ -329,7 +329,14 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - behaviour: the document is `dir="rtl"` and each text sits in its own `dir="auto"` span, so a start-aligned English line lines up on the right too. Reverse: set the document direction from the menu's texts.
 - behaviour: a design value outside its closed list falls back inside the template (classic colors, first font, normal size) instead of throwing. Reverse: validate with `menuDesignDraftSchema` and throw.
 - A4 stopped round 0: `server/routes/generic.js` (then outside the scope) added `_masterId` and `_userModified` to every type not in `NO_LINEAGE`, and the strict design schema (C-DESIGN, INV-2 "no `_masterId`") refused them, so `POST /api/v1/data/menuDesigns` answered 400. The plan's "generic data route untouched" did not hold.
-- scope extended: server/routes/generic.js — `'menuDesigns'` joins `NO_LINEAGE`; the Human approved it (ask 764-1, run md-0, `approved: server/routes/generic.js`). `origin/main` holds the scope line; `origin/orch/md-0` does not yet (the run could not add it), so the run's scope check fails until it does.
+- scope extended: server/routes/generic.js — `'menuDesigns'` joins `NO_LINEAGE`; the Human approved it (ask 764-1, run md-0, `approved: server/routes/generic.js`). the run branch holds the scope line since 9c71235f (ask 764-2, `approved: server/routes/generic.js`).
+
+Evidence (2026-11-27, resume after ask 764-2, tree of merge commit 025327c5):
+- Trusted scope check (`scopeCheck` of the kit copy's `lib/plan-gate.mjs`, this folder, plan text from `origin/orch/md-0`) → exit 0: 44 changed files inside the scope; `node scripts/scope-check.mjs --diff=origin/orch/md-0` → `SCOPE: ok`.
+- `pnpm run build` → exit 0; `npm run build` → exit 0; `pnpm run lint` → exit 0 (0 errors, 69 warnings).
+- `pnpm run test:ci` → exit 0, TOTAL: 2797 SUCCESS.
+- `pnpm run test:server` → exit 0: Test Files 152 passed (152), Tests 2041 passed (2041).
+- orch-state prepare, kit-manifest-check, kit-checks (6 checks), override-check, lint:icons, lint:no-native-select, plan-ledger-check, breadcrumbs-check, reuse-lint `--check-registry` → exit 0; ci-scope-check → exit 0 (skipped locally: it reads the branch name from CI); log-query `--level=error` → exit 0 (SKIP: no database configured).
 
 Evidence (2026-11-27, resume, commit 16675a4a):
 - `pnpm run test:server` → exit 0: Test Files 152 passed (152), Tests 2041 passed (2041).
