@@ -9,6 +9,7 @@ import { AdminUser } from '@models/admin-user.model'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { DisabledWhyDirective } from 'src/app/shared/tooltip/disabled-why.directive'
+import { TooltipDirective } from 'src/app/shared/tooltip/tooltip.directive'
 import { NumberBoxDirective } from 'src/app/core/directives/number-box.directive'
 import { SelectOnFocusDirective } from 'src/app/core/directives/select-on-focus.directive'
 import { AI_ALLOWANCE_MAX, AI_DEFAULT_ALLOWANCE } from '@schemas/ai-allowance.schema'
@@ -16,7 +17,14 @@ import { AI_ALLOWANCE_MAX, AI_DEFAULT_ALLOWANCE } from '@schemas/ai-allowance.sc
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, DisabledWhyDirective, NumberBoxDirective, SelectOnFocusDirective],
+  imports: [
+    LucideAngularModule,
+    TranslatePipe,
+    DisabledWhyDirective,
+    TooltipDirective,
+    NumberBoxDirective,
+    SelectOnFocusDirective
+  ],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

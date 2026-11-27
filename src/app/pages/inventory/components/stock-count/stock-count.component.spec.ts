@@ -20,7 +20,7 @@ import { PastCountsService } from './past-counts.service'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { ReturnToService } from '@services/return-to.service'
 import { TOOLTIP_TAP_QUERY } from 'src/app/shared/tooltip/tooltip.directive'
-import { PHONE_QUERY } from '@utils/breakpoints'
+import { PHONE_MAX, PHONE_NARROW_MAX, PHONE_NARROW_QUERY, TABLET_MAX } from '@utils/breakpoints'
 
 const product = (id: string, name: string, min = 0): Product =>
   ({ _id: id, nameHebrew: name, baseUnit: 'kg', purchaseOptions: [], minStockLevel: min }) as unknown as Product
@@ -89,6 +89,7 @@ describe('StockCountComponent', () => {
     // Plan 655: the width is the test's choice, not the test browser's window: desktop unless a case asks for narrow.
     ;(fixture.componentInstance as unknown as { narrow_: { set(v: boolean): void } }).narrow_.set(narrowMode)
     ;(fixture.componentInstance as unknown as { phone_: { set(v: boolean): void } }).phone_.set(false)
+    ;(fixture.componentInstance as unknown as { narrowPhone_: { set(v: boolean): void } }).narrowPhone_.set(false)
     fixture.detectChanges()
     await fixture.whenStable()
     fixture.detectChanges()
@@ -810,29 +811,102 @@ describe('StockCountComponent', () => {
       })
     }
 
-    it('in a phone-width test window each row is two lines: the name on top, the controls together under it', async () => {
-      // The layout is a media query, so it can be measured only when the test browser's window is a phone's.
-      if (!window.matchMedia(PHONE_QUERY).matches) {
-        pending('the test window is wider than a phone')
-        return
-      }
-      narrowMode = true
+    it('the narrow-phone grid has columns for the controls only: the name takes a line of its own', async () => {
       await setup()
-      for (const row of rows()) {
-        const name = row.querySelector<HTMLElement>('.stock-count__name')!.getBoundingClientRect()
-        const cells = children(row.querySelector('.stock-count__controls')!).map((c) => c.getBoundingClientRect())
+      const c = fixture.componentInstance as unknown as {
+        mobileGridTemplate_(): string
+        narrowPhone_: { set(v: boolean): void }
+      }
+      expect(c.mobileGridTemplate_()).toBe('minmax(0, 1.5fr) auto minmax(6rem, 1fr) auto')
+      c.narrowPhone_.set(true)
+      expect(c.mobileGridTemplate_()).toBe('auto minmax(6rem, 1fr) auto')
+      expect(el().querySelector('.c-grid-header-cell.stock-count__head-name')).not.toBeNull()
+    })
+  })
+
+  describe('plan 763 — two-line rows only on a narrow phone', () => {
+    let frame: HTMLIFrameElement | null = null
+
+    afterEach(() => {
+      frame?.remove()
+      frame = null
+    })
+
+    /**
+     * Draws the sheet as a window `width` px wide shows it. The layout is media queries and the test browser's
+     * own window cannot be resized, so the drawn page and its styles are copied into a frame of that width.
+     */
+    async function layoutAt(width: number): Promise<Document> {
+      narrowMode = width <= TABLET_MAX
+      await setup([product('a', 'אורז'), product('b', 'קמח')])
+      const c = fixture.componentInstance as unknown as {
+        phone_: { set(v: boolean): void }
+        narrowPhone_: { set(v: boolean): void }
+      }
+      c.phone_.set(width <= PHONE_MAX)
+      c.narrowPhone_.set(width <= PHONE_NARROW_MAX)
+      await settle()
+      frame = document.createElement('iframe')
+      frame.style.cssText = `inline-size: ${width}px; block-size: 800px; border: 0`
+      document.body.appendChild(frame)
+      const doc = frame.contentDocument!
+      doc.open()
+      doc.write('<!doctype html><html dir="rtl"><head></head><body></body></html>')
+      doc.close()
+      // The rules the page has loaded, copied as text: nothing to fetch and nothing to wait for. A sheet from
+      // another origin cannot be read, and none of the app's layout lives in one.
+      for (const sheet of Array.from(document.styleSheets)) {
+        let rules: CSSRule[]
+        try {
+          rules = Array.from(sheet.cssRules)
+        } catch {
+          continue
+        }
+        const style = doc.createElement('style')
+        style.textContent =
+          sheet.ownerNode instanceof HTMLStyleElement
+            ? sheet.ownerNode.textContent
+            : rules.map((rule) => rule.cssText).join('\n')
+        doc.head.appendChild(style)
+      }
+      doc.body.appendChild(doc.importNode(el(), true))
+      expect(frame.contentWindow!.innerWidth).toBe(width)
+      expect(frame.contentWindow!.matchMedia(PHONE_NARROW_QUERY).matches).toBe(width <= PHONE_NARROW_MAX)
+      return doc
+    }
+
+    const boxes = (doc: Document): { name: DOMRect; cells: DOMRect[] }[] =>
+      Array.from(doc.querySelectorAll('[data-testid="stk-row"]')).map((row) => ({
+        name: row.querySelector('.stock-count__name')!.getBoundingClientRect(),
+        cells: Array.from(row.querySelector('.stock-count__controls')!.children)
+          .slice(0, 3)
+          .map((cell) => cell.getBoundingClientRect())
+      }))
+
+    it('at 400px each row is two lines: the name above the controls', async () => {
+      const rowBoxes = boxes(await layoutAt(400))
+      expect(rowBoxes.length).toBe(2)
+      for (const { name, cells } of rowBoxes) {
+        expect(name.height).toBeGreaterThan(0)
         expect(cells.every((c) => c.top >= name.bottom - 1)).toBeTrue()
         expect(new Set(cells.map((c) => Math.round(c.top))).size).toBe(1)
         expect(name.width).toBeGreaterThan(Math.max(...cells.map((c) => c.width)))
       }
     })
 
-    it('the phone grid has columns for the controls only: the name takes a line of its own', async () => {
-      await setup()
-      const grid = (fixture.componentInstance as unknown as { mobileGridTemplate_(): string }).mobileGridTemplate_()
-      expect(grid).toBe('auto minmax(6rem, 1fr) auto')
-      expect(el().querySelector('.c-grid-header-cell.stock-count__head-name')).not.toBeNull()
-    })
+    for (const width of [420, 500, 800]) {
+      it(`at ${width}px each row is one line: the name beside the controls`, async () => {
+        const rowBoxes = boxes(await layoutAt(width))
+        expect(rowBoxes.length).toBe(2)
+        for (const { name, cells } of rowBoxes) {
+          expect(name.width).toBeGreaterThan(0)
+          expect(new Set([name, ...cells].map((c) => Math.round(c.top))).size).toBe(1)
+          // Side by side, no cell over the name, and every cell inside the window.
+          expect(cells.every((c) => c.right <= name.left + 1 || c.left >= name.right - 1)).toBeTrue()
+          expect(cells.every((c) => c.width > 0 && c.left >= -1 && c.right <= width + 1)).toBeTrue()
+        }
+      })
+    }
   })
 
   describe('plan 657 — the counted mark sizes per width', () => {

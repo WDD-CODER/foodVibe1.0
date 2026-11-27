@@ -2,6 +2,8 @@
  * desktop from 1024px. Every @media uses these four names; never a typed width. Component styles get the same
  * names from src/app/core/styles/_breakpoints.scss, the browser code from src/app/core/utils/breakpoints.ts;
  * scripts/test/breakpoints-no-literals.test.mjs keeps the three equal. */
+/* Plan 763: one narrower step inside the phone range, up to 419px, for a row that needs two lines only there. */
+$break-phone-narrow-max: 419px;
 $break-phone-max: 767px;
 $break-tablet-min: 768px;
 $break-tablet-max: 1023px;
@@ -169,6 +171,7 @@ $break-desktop-min: 1024px;
   --topnav-h: 3.5rem;      /* 56 — top nav bar */
 
   /* ---- Breakpoints (CSS): the four names above, for scripts and specs that read them (plan 656) ---- */
+  --bp-phone-narrow-max: #{$break-phone-narrow-max};
   --bp-phone-max: #{$break-phone-max};
   --bp-tablet-min: #{$break-tablet-min};
   --bp-tablet-max: #{$break-tablet-max};

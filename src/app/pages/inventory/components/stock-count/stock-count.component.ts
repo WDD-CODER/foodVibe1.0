@@ -56,7 +56,7 @@ import {
   type StockAiUnmatched
 } from './stock-ai-draft/stock-ai-draft.component'
 import type { StockExtractLine } from '@schemas/ai-stock-extract.schema'
-import { PHONE_QUERY, TABLET_DOWN_QUERY } from '@utils/breakpoints'
+import { PHONE_NARROW_QUERY, PHONE_QUERY, TABLET_DOWN_QUERY } from '@utils/breakpoints'
 
 interface RowState {
   counted: boolean
@@ -215,6 +215,10 @@ export class StockCountComponent implements OnInit {
   protected readonly narrow_ = signal(typeof window !== 'undefined' && window.matchMedia(NARROW_QUERY).matches)
   /** Plan 657: true on a phone (≤ 767px); sizes the counted mark. */
   protected readonly phone_ = signal(typeof window !== 'undefined' && window.matchMedia(PHONE_QUERY).matches)
+  /** Plan 763: true on a narrow phone (≤ 419px), where a row is two lines. */
+  protected readonly narrowPhone_ = signal(
+    typeof window !== 'undefined' && window.matchMedia(PHONE_NARROW_QUERY).matches
+  )
   /** Plan 657: the counted mark's size tokens for the current width. */
   protected readonly mark_ = computed(() => {
     const size: MarkSize = this.phone_() ? 'phone' : this.narrow_() ? 'tablet' : 'desktop'
@@ -230,13 +234,15 @@ export class StockCountComponent implements OnInit {
     return this.baseColumn_() ? '2fr 1.2fr 1.2fr 0.9fr 1fr' : '2fr 1.2fr 1.2fr 0.9fr'
   })
   /**
-   * The phone's columns: the controls only — amount, unit, counted. The name has a line of its own above them
-   * (plan 762), and the base column does not exist below desktop. The unit column keeps room for the unit and the
-   * fixed slot beside it (plan 747): never under 6rem.
+   * The phone's columns — the base column does not exist below desktop. One line: name, amount, unit, counted. On a
+   * narrow phone (≤ 419px, plans 762/763) the controls only: the name has a line of its own above them. The unit
+   * column keeps room for the unit and the fixed slot beside it (plan 747): never under 6rem.
    */
-  protected readonly mobileGridTemplate_ = computed(() =>
-    this.view_() !== 'sheet' ? '1fr' : 'auto minmax(6rem, 1fr) auto'
-  )
+  protected readonly mobileGridTemplate_ = computed(() => {
+    if (this.view_() !== 'sheet') return '1fr'
+    const controls = 'auto minmax(6rem, 1fr) auto'
+    return this.narrowPhone_() ? controls : `minmax(0, 1.5fr) ${controls}`
+  })
 
   /** Plan 645: built once per product list, not per row per check. */
   private readonly searchNames_ = computed(
@@ -335,9 +341,13 @@ export class StockCountComponent implements OnInit {
     const phoneQuery = window.matchMedia(PHONE_QUERY)
     const onPhoneChange = (e: MediaQueryListEvent): void => this.phone_.set(e.matches)
     phoneQuery.addEventListener('change', onPhoneChange)
+    const narrowPhoneQuery = window.matchMedia(PHONE_NARROW_QUERY)
+    const onNarrowPhoneChange = (e: MediaQueryListEvent): void => this.narrowPhone_.set(e.matches)
+    narrowPhoneQuery.addEventListener('change', onNarrowPhoneChange)
     this.destroyRef_.onDestroy(() => {
       query.removeEventListener('change', onChange)
       phoneQuery.removeEventListener('change', onPhoneChange)
+      narrowPhoneQuery.removeEventListener('change', onNarrowPhoneChange)
     })
   })
 
