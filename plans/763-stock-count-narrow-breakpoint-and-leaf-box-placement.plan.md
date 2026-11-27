@@ -129,8 +129,8 @@ line or file this plan names was removed, renamed or rewritten).
 
 These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
 
-- [ ] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
-- [ ] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
+- [x] G1: Add the narrow-phone breakpoint and move the stock count's two-line rule to it — src/app/pages/inventory/components/stock-count/stock-count.component.scss
+- [x] G2: The leaf's box opens in the same place every time, like the triangle's — src/app/shared/nutrition-badge/nutrition-badge.component.ts
 - [ ] G3: Run every automatic check and paste the outputs under Execution Notes — plans/763-stock-count-narrow-breakpoint-and-leaf-box-placement.plan.md
 
 ## What happens when
@@ -147,3 +147,40 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
 - none
 
 ## Execution Notes
+
+### G1 — narrow-phone step
+- `$break-phone-narrow-max: 419px` in `_breakpoints.scss` and `src/styles.scss` (plus `--bp-phone-narrow-max`);
+  `PHONE_NARROW_MAX` / `PHONE_NARROW_QUERY` in `breakpoints.ts`.
+- The two-line media rule uses the new name. The stock count's phone column template follows the same step
+  (`narrowPhone_`): 420–767px has the name column again (`minmax(0, 1.5fr) auto minmax(6rem, 1fr) auto`, the template
+  from before plan 762); without it a one-line row has four cells in three columns.
+- Spec: the drawn sheet is copied into a frame 400 / 420 / 500 / 800px wide; two lines at 400, one line at the others.
+  It replaces the old phone test, which was always `pending` in a wide test window.
+
+### G2 — the leaf and its box
+- Cause check: the new placement tests (side, gap, centring, same place twice, screen edges) passed on the unchanged
+  badge (14 run, 13 pass, 1 fail), so placing before the content had its final size was **not** reproduced.
+  The one failure: the box was a fixed 164px and cut row labels off. In the list, the leaf sat after the name text, so
+  its spot (and the box's) moved with each name's length.
+- Fix: the leaf has its own 1.5rem slot at the name cell's inline-end on every row; the box is `max-content` wide
+  (capped by the screen); placed again one frame after opening, as the shared tooltip does; the arrow offset takes
+  the 1px border off. Preferred side stays above, flipping below when there is no room (`## What happens when`).
+
+### Decisions
+- behaviour: the leaf sits at the end of the name cell (after the name), not beside the warning triangle — reverse:
+  move `.name-nutrition-slot` before `.name-text` and widen the header's start padding.
+
+### G3 — checks
+- `pnpm run build` -> exit 0
+- `pnpm run lint` -> exit 0 (0 errors, 71 warnings)
+- `pnpm run test:ci` -> exit 0, `TOTAL: 3137 SUCCESS` (one earlier run: the 800px layout test timed out waiting for a
+  stylesheet to load; the test now copies the loaded rules and waits for nothing)
+- `kit-manifest-check.mjs --root .` -> `KIT_MANIFEST: ok`
+- `override-check`, `lint:icons`, `lint:no-native-select`, `plan-ledger-check`, `breadcrumbs-check`,
+  `inventory.mjs --check` -> exit 0
+- `scope-check.mjs --arch` -> `ARCH: ok INV-none, INV-6`
+- `log-query.mjs --since=plan-start --level=error` -> `SKIP: no database configured`
+- **FAIL** `pnpm run test:scripts` (a CI step) -> 156 of 157: `scripts/test/breakpoints-no-literals.test.mjs`
+  "no @media under src types a width" allows only the four old names, so it rejects
+  `@media (max-width: $break-phone-narrow-max)`. The file is outside the scope; asked to add it.
+  Change needed there: add `phone-narrow-max` to the allowed-name pattern (line 59), and to `NAMES` / `EXPECTED`.
