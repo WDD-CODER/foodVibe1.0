@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { modalFindings, withoutRetiredSheetRules } from '../lib/modal-guard.mjs'
 import { parseStylesheet } from '../styleqa/static-checks.mjs'
+import { readContract } from '../lib/product-defaults.mjs'
 
 const MARKER = '/* ==== Plan 720 — centred popups that scroll ==== */'
 
@@ -73,6 +74,32 @@ test('no file under src/app and not src/styles.scss mentions m-sheet or as-modal
   assert.ok(!/m-sheet|as-modal/.test(readFileSync('src/styles.scss', 'utf8')), 'src/styles.scss still has a retired sheet rule')
   const shell = readFileSync('src/app/shared/modal-shell/modal-shell.component.ts', 'utf8')
   assert.ok(!/\bsheet\s*=\s*input\b/.test(shell))
+})
+
+test('the contract holds modal-centered and modal-scrollable on, with rule checks that catch a sheet and a card that cannot scroll', () => {
+  const { entries, errors } = readContract(process.cwd())
+  assert.deepEqual(errors, [])
+  assert.ok(!entries.some((e) => e.id === 'centred-scrolling-popup'))
+  const fixtures = {
+    'modal-centered': {
+      hit: ['<app-modal-shell [sheet]="true">', '<div class="x m-sheet">', '.panel.as-modal {', '.my-backdrop {\n  align-items: flex-end;\n}'],
+      miss: ['.c-modal-overlay { align-items: center; }', '.prep-sheets { align-items: flex-end }']
+    },
+    'modal-scrollable': {
+      hit: [':host ::ng-deep .c-modal-card {\n  overflow: hidden;\n}', '.c-modal-body {\n  max-block-size: none;\n}'],
+      miss: ['/* .c-modal-card */\n.y { overflow: hidden; }', '.c-modal-body {\n  overflow-y: auto;\n}']
+    }
+  }
+  for (const [id, { hit, miss }] of Object.entries(fixtures)) {
+    const entry = entries.find((e) => e.id === id)
+    assert.equal(entry?.status, 'on', id)
+    assert.equal(entry.onBy, 'the Human, 2026-11-26', id)
+    assert.notEqual(entry.diff, null, id)
+    assert.equal(entry.diff.evidence, '(?!x)x', id)
+    const trigger = new RegExp(entry.diff.trigger, 'm')
+    for (const text of hit) assert.ok(trigger.test(text), `${id} should match: ${text}`)
+    for (const text of miss) assert.ok(!trigger.test(text), `${id} should not match: ${text}`)
+  }
 })
 
 test('src/styles.scss above the plan 720 marker is the base file minus the sheet rules plan 757 removed (append-only)', (t) => {
