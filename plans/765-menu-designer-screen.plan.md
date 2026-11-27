@@ -432,3 +432,8 @@ These are the plan's milestones: a Worker does them in order and ticks each one 
   keeps no version history) — reverse: move or rename the `menuDesigns` row of `TRASH_SECTIONS`.
 - `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (69 older warnings); `pnpm run test:ci` -> exit 0,
   `TOTAL: 2883 SUCCESS`.
+
+### Resume after ask 765-3 (answered by the Human, 2026-11-27)
+- The 765-2 criterion change («תפריט ערב») is committed in `plans/765-menu-designer-screen.plan.md` on this branch
+  (`743a05d4`); it reaches `orch/md-1` when the run merges this branch. A builder never writes the run branch itself, so
+  the review of this branch is rerun by the run. No code changed.
