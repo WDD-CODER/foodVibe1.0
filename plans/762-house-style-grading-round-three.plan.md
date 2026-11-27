@@ -94,7 +94,7 @@ append the path to the scope block above and retry.
 - disabled-explains-why — applies — how: `appDisabledWhy`; only how its tooltip opens and closes changes.
 - anchored-popup — applies — how: the shared tooltip keeps its placement inside the screen.
 - one-breakpoint-set — applies — how: the phone breakpoint from the app's breakpoint tokens, no new one.
-- app-list-container — applies — how: the stock count rows stay in the list container; only the phone layout stacks.
+- app-list-container — exception — why: Dandan asked (2026-11-27) for the stock count's phone rows to be two lines, name above the controls; the rows stay in the list container.
 - row-action-icons — exception — why: no row action added.
 - live-summary — exception — why: no summary box.
 - confirm-destructive-action — exception — why: nothing deleted.
