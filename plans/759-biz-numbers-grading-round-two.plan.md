@@ -76,6 +76,8 @@ src/app/**/breadcrumbs.md
 docs/brain/component-families.md
 docs/brain/inventory.md
 docs/workflow-kit/manifest.json
+src/app/pages/settings/components/business-settings-tab/business-settings-tab.component.spec.ts
+_shared/debt-baseline.json
 ```
 
 ## Read Scope
